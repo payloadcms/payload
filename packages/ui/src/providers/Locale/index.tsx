@@ -87,17 +87,6 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
 
   const fetchURL = `${serverURL}${apiRoute}`
 
-  // If the search params does not specify a locale, set preference to default locale
-  useEffect(() => {
-    async function updatePreference() {
-      if ((!localeFromParams || localeFromParams === null) && user?.id) {
-        await setPreference('locale', defaultLocale, false)
-      }
-    }
-
-    void updatePreference()
-  }, [localeFromParams, setPreference, defaultLocale, user?.id])
-
   useEffect(() => {
     /**
      * This effect should only run when `localeFromParams` changes, i.e. when the user clicks an anchor link

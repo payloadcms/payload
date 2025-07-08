@@ -30,74 +30,86 @@ export const Localizer: React.FC<{
   const { i18n } = useTranslation()
   const locale = useLocale()
 
-  if (localization) {
-    const { locales } = localization
+  const updateLocaleInURL = React.useCallback(
+    (newLocaleCode: string) => {
+      const searchParams = new URLSearchParams(window.location.search)
 
-    return (
-      <div className={[baseClass, className].filter(Boolean).join(' ')}>
-        <Popup
-          button={<LocalizerLabel />}
-          horizontalAlign="right"
-          render={({ close }) => (
-            <PopupList.ButtonGroup>
-              {locales.map((localeOption) => {
-                const localeOptionLabel = getTranslation(localeOption.label, i18n)
+      const url = qs.stringify(
+        {
+          ...qs.parse(searchParams.toString(), {
+            depth: 10,
+            ignoreQueryPrefix: true,
+          }),
+          locale: newLocaleCode,
+        },
+        { addQueryPrefix: true },
+      )
 
-                return (
-                  <PopupList.Button
-                    active={locale.code === localeOption.code}
-                    disabled={locale.code === localeOption.code}
-                    key={localeOption.code}
-                    onClick={() => {
-                      setLocaleIsLoading(true)
-                      close()
+      startRouteTransition(() => {
+        router.push(url)
+      })
+    },
+    [router, startRouteTransition],
+  )
 
-                      // can't use `useSearchParams` here because it is stale due to `window.history.pushState` in `ListQueryProvider`
-                      const searchParams = new URLSearchParams(window.location.search)
+  React.useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search)
+    const hasLocale = searchParams.has('locale')
 
-                      const url = qs.stringify(
-                        {
-                          ...qs.parse(searchParams.toString(), {
-                            depth: 10,
-                            ignoreQueryPrefix: true,
-                          }),
-                          locale: localeOption.code,
-                        },
-                        { addQueryPrefix: true },
-                      )
+    if (!hasLocale) {
+      updateLocaleInURL(locale.code)
+    }
+  }, [locale.code, updateLocaleInURL])
 
-                      startRouteTransition(() => {
-                        router.push(url)
-                      })
-                    }}
-                  >
-                    {localeOptionLabel !== localeOption.code ? (
-                      <Fragment>
-                        {localeOptionLabel}
-                        &nbsp;
-                        <span
-                          className={`${baseClass}__locale-code`}
-                          data-locale={localeOption.code}
-                        >
-                          {`(${localeOption.code})`}
-                        </span>
-                      </Fragment>
-                    ) : (
-                      <span className={`${baseClass}__locale-code`} data-locale={localeOption.code}>
-                        {localeOptionLabel}
-                      </span>
-                    )}
-                  </PopupList.Button>
-                )
-              })}
-            </PopupList.ButtonGroup>
-          )}
-          showScrollbar
-          size="large"
-        />
-      </div>
-    )
+  if (!localization) {
+    return null
   }
 
-  return null
+  const { locales } = localization
+
+  return (
+    <div className={[baseClass, className].filter(Boolean).join(' ')}>
+      <Popup
+        button={<LocalizerLabel />}
+        horizontalAlign="right"
+        render={({ close }) => (
+          <PopupList.ButtonGroup>
+            {locales.map((localeOption) => {
+              const localeOptionLabel = getTranslation(localeOption.label, i18n)
+              const isActive = locale.code === localeOption.code
+
+              return (
+                <PopupList.Button
+                  active={isActive}
+                  disabled={isActive}
+                  key={localeOption.code}
+                  onClick={() => {
+                    setLocaleIsLoading(true)
+                    close()
+                    updateLocaleInURL(localeOption.code)
+                  }}
+                >
+                  {localeOptionLabel !== localeOption.code ? (
+                    <Fragment>
+                      {localeOptionLabel}
+                      &nbsp;
+                      <span className={`${baseClass}__locale-code`} data-locale={localeOption.code}>
+                        {`(${localeOption.code})`}
+                      </span>
+                    </Fragment>
+                  ) : (
+                    <span className={`${baseClass}__locale-code`} data-locale={localeOption.code}>
+                      {localeOptionLabel}
+                    </span>
+                  )}
+                </PopupList.Button>
+              )
+            })}
+          </PopupList.ButtonGroup>
+        )}
+        showScrollbar
+        size="large"
+      />
+    </div>
+  )
 }
