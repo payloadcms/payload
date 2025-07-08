@@ -32,6 +32,7 @@ export type ClipboardCopyActionArgs = {
 export type ClipboardPasteData = {
   data: FormStateWithoutComponents
   path: string
+  rowIndex?: number
 } & (ClipboardCopyBlocksData | ClipboardCopyFieldsData)
 
 export type OnPasteFn = (data: ClipboardPasteData) => void

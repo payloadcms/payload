@@ -1,5 +1,7 @@
 import type { FieldState, FormState } from 'payload'
 
+import type { ClipboardPasteData } from './types.js'
+
 export function reduceFormStateByPath({
   formState,
   path,
@@ -35,31 +37,29 @@ export function reduceFormStateByPath({
   return filteredState
 }
 
-export function getFormStateFromClipboard({
+export function mergeFormStateFromClipboard({
   dataFromClipboard: clipboardData,
-  formState: formStateFromArgs,
+  formState,
   path,
   rowIndex,
 }: {
-  dataFromClipboard: {
-    data: FormState
-    path: string
-    rowIndex?: number
-  }
+  dataFromClipboard: ClipboardPasteData
   formState: FormState
   path: string
   rowIndex?: number
 }) {
   const {
+    type: typeFromClipboard,
     data: dataFromClipboard,
     path: pathFromClipboard,
     rowIndex: rowIndexFromClipboard,
   } = clipboardData
 
-  const formState = { ...formStateFromArgs }
   const copyFromField = typeof rowIndexFromClipboard !== 'number'
   const pasteIntoField = typeof rowIndex !== 'number'
   const fromRowToField = !copyFromField && pasteIntoField
+  const fromRowToRow = !copyFromField && !pasteIntoField
+  const isArray = typeFromClipboard === 'array'
 
   let pathToReplace: string
   if (copyFromField && pasteIntoField) {
@@ -83,14 +83,11 @@ export function getFormStateFromClipboard({
     const lastRenderedPath = `${path}.0`
     const rowIDFromClipboard = dataFromClipboard[`${pathToReplace}.id`].value as string
     const hasRows = formState[path].rows?.length
-    const rowID = hasRows
-      ? (formState[`${lastRenderedPath}.id`].value as string)
-      : rowIDFromClipboard
 
     formState[path].rows = [
       {
-        ...(hasRows ? formState[path].rows[0] : {}),
-        id: rowID,
+        ...(hasRows && isArray ? formState[path].rows[0] : {}),
+        id: rowIDFromClipboard,
         isLoading: false,
         lastRenderedPath,
       },
@@ -110,6 +107,10 @@ export function getFormStateFromClipboard({
     }
   }
 
+  if (!isArray && fromRowToRow) {
+    delete formState[path].rows[rowIndex].customComponents
+  }
+
   for (const clipboardPath in dataFromClipboard) {
     // Pasting a row id, skip overwriting
     if (
@@ -121,8 +122,8 @@ export function getFormStateFromClipboard({
 
     const newPath = clipboardPath.replace(pathToReplace, targetSegment)
 
-    const customComponents = formState[newPath]?.customComponents
-    const validate = formState[newPath]?.validate
+    const customComponents = isArray ? formState[newPath]?.customComponents : undefined
+    const validate = isArray ? formState[newPath]?.validate : undefined
 
     formState[newPath] = {
       customComponents,

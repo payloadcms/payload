@@ -10,11 +10,11 @@ import type { ClipboardPasteData } from '../../elements/ClipboardAction/types.js
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
-import {
-  getFormStateFromClipboard,
-  reduceFormStateByPath,
-} from '../../elements/ClipboardAction/getFormStateFromClipboard.js'
 import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
+import {
+  mergeFormStateFromClipboard,
+  reduceFormStateByPath,
+} from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
@@ -249,7 +249,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       const pasteArgs = {
         onPaste: (dataFromClipboard: ClipboardPasteData) => {
           const formState = { ...getFields() }
-          const newState = getFormStateFromClipboard({
+          const newState = mergeFormStateFromClipboard({
             dataFromClipboard,
             formState,
             path,
@@ -275,7 +275,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const pasteBlocks = useCallback(
     (dataFromClipboard: ClipboardPasteData) => {
       const formState = { ...getFields() }
-      const newState = getFormStateFromClipboard({
+      const newState = mergeFormStateFromClipboard({
         dataFromClipboard,
         formState,
         path,
