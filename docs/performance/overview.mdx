@@ -18,35 +18,9 @@ The proximity of your database to your server can significantly impact performan
 
 ## Indexing your fields
 
-If a particular field is queried often, build an [Index](../database/overview) for that field to produce faster queries.
+If a particular field is queried often, build an [Index](../database/indexes) for that field to produce faster queries.
 
 When your query runs, the database will not search the entire document to find that one field, but will instead use the index to quickly locate the data.
-
-This is done on the field level by setting the `index` option to `true` in your field's config:
-
-```ts
-import type { CollectionConfig } from 'payload'
-
-export MyCollection: CollectionConfig = {
-  // ...
-  fields: [
-    // ...
-    {
-      name: 'title',
-      type: 'text',
-      // highlight-start
-      index: true,
-      // highlight-end
-    },
-  ]
-}
-```
-
-<Banner type="success">
-  **Tip:** If you're using MongoDB, you can use [MongoDB
-  Compass](https://www.mongodb.com/products/compass) to visualize and manage
-  your indexes.
-</Banner>
 
 ## Querying your data
 
@@ -54,145 +28,40 @@ There are several ways to optimize your [Queries](../queries/overview). Many of 
 
 When building queries, combine as many of these options together as possible. This will ensure your queries are as efficient as they can be.
 
-### Depth
+To learn more, see the [Query Performance](../queries/overview#performance) docs.
 
-Use [Depth](../queries/depth) to only populate the necessary levels of relationships. This will skip any unnecessary population of nested relationships.
+## Optimizing your APIs
 
-For example, a depth of `0` means no relationships are populated. Only the IDs of those related documents are returned. Those relationships are not queried, processed, or returned in the response.
+When querying data through Payload APIs, the request lifecycle includes running hooks, access control, validations, and other operations that can add significant overhead to the request.
 
-To do this, set `depth: 0` in your query:
+To optimize your APIs, any custom logic should be as efficient as possible. This includes writing lightweight hooks, preventing memory leaks, offloading long-running tasks, and optimizing custom validations.
+
+### Optimize hooks
+
+To learn more, see the [Hooks Performance](../hooks/overview#performance) docs.
+
+### Optimize custom validations
+
+If your validation functions are asynchronous or computationally expensive, [ensure they only run when necessary](../field/overview#async-field-validations).
+
+For example, if your validation needs to query the database or some external API, ensure it only runs when the document is saved, not on every change in the Admin.
+
+To do this, use the `event` arg in your validation function:
 
 ```ts
-await payload.find({
-  collection: 'posts',
-  // highlight-start
-  depth: 0,
-  // highlight-end
-})
-```
-
-This will return:
-
-```json
 {
-  "docs": [
-    {
-      "id": "123",
-      "title": "My Post",
-      "author": "456" // only the ID of the related document is returned
+  name: 'title',
+  type: 'text',
+  validate: async (value, { event }) => {
+    if (event === 'submit') {
+      // perform expensive validation
     }
-  ]
-}
-```
-
-Similarly, you can set `defaultDepth` in your root config to set the default depth for all queries.
-
-```ts
-import { buildConfig } from 'payload'
-
-const config = buildConfig({
-  // ...
-  // highlight-start
-  defaultDepth: 0,
-  // highlight-end
-})
-```
-
-### Select
-
-Use the [Select API](../queries/select) to limit the fields returned in your queries. This will skip the processing of any unspecified fields, e.g. running field hooks, and will significantly reduce the size of the response by returning only specified fields.
-
-To do this, set the `select` option in your query:
-
-```ts
-await payload.find({
-  collection: 'posts',
-  // highlight-start
-  select: {
-    title: true,
+    return true;
   },
-  // highlight-end
-})
-```
-
-This will return:
-
-```json
-{
-  "docs": [
-    {
-      "id": "123", // The ID is always returned
-      "title": "My Post" // only the title field is returned
-    }
-  ]
 }
 ```
 
-### Populate
-
-// populate on the request
-// per-collection: `defaultPopulate`
-
-### Pagination
-
-For queries that do not require pagination, you can [disable it to improve performance](../queries/pagination##disabling-pagination-within-local-api). This will reduce the overhead of pagination calculations.
-
-For example, if you are querying for a specific document by an exact slug, you might want to disable pagination as you can reliably expect only one document to match.
-
-To do this, set `pagination: false` in your query:
-
-```ts
-import type { Payload } from 'payload'
-
-const getPost = async (payload: Payload) => {
-  const posts = await payload.find({
-    collection: 'posts',
-    where: {
-      slug: {
-        equals: 'post-1',
-      },
-    },
-    // highlight-start
-    pagination: false,
-    // highlight-end
-  })
-
-  return posts
-}
-```
-
-<Banner type="warning">
-  **Note:** This only applies to `find` operations within the Local API.
-</Banner>
-
-### Limit
-
-Use the `limit` option in your queries to restrict the number of documents returned. This will reduce the number database lookups.
-
-Similar to disabling pagination, if you are querying for a specific document and can reliably expect only one document to match, you can set a limit of `1`.
-
-To do this, set the `limit` option in your query:
-
-```ts
-await payload.find({
-  collection: 'posts',
-  where: {
-    slug: {
-      equals: 'post-1',
-    },
-  },
-  // highlight-start
-  limit: 1,
-  // highlight-end
-})
-```
-
-<Banner type="success">
-  **Tip:** Combine `limit` with `pagination: false` to further optimize your
-  queries.
-</Banner>
-
-### Make direct database calls
+## Make direct-to-db calls
 
 <Banner type="warning">
   **Warning:** Direct database calls bypass all hooks and validations. Only use
@@ -241,107 +110,7 @@ await payload.db.updateOne({
   E.g. those on the `payload.db` object. It is not exposed to the Local API.
 </Banner>
 
-## Optimizing your APIs
-
-When querying data through Payload APIs, the request lifecycle includes running hooks, access control, validations, and other operations that can add significant overhead to the request.
-
-To optimize your APIs, any custom logic should be as efficient as possible. This includes writing lightweight hooks, preventing memory leaks, offloading long-running tasks, and optimizing custom validations.
-
-### Write lightweight hooks
-
-[Hooks](../hooks/overview) are a powerful way to customize the behavior of your APIs, but some hooks are run very often and can add significant overhead to your requests if not optimized.
-
-For example, the `read` operation runs on every read request, so avoid putting expensive logic in a `beforeRead` or `afterRead` hook.
-
-```ts
-{
-  hooks: {
-    beforeRead: [
-      async () => {
-        // avoid expensive logic here
-      },
-    ],
-  },
-}
-```
-
-Instead, you could defer some expensive operations to a `beforeChange` or `afterChange` hook, which only run on write operations.
-
-```ts
-{
-  hooks: {
-    beforeChange: [
-      async () => {
-        // expensive logic is "better" here, but should still be avoided if possible
-      },
-    ],
-  },
-}
-```
-
-To take this one step further, if your hook executes a long-running task that doesn't affect the response in any way, consider [offloading it to the job queue](#offloading-long-running-tasks). That will free up the request to continue processing without waiting for the task to complete.
-
-### Prevent memory leaks
-
-Use [Hook Context](../hooks/context) to prevent hooks from calling themselves recursively, which can lead to memory leaks and potentially crash your server.
-
-For example, if you make a Payload API call within a hook that queries the same collection, it could trigger that same hook again.
-
-To prevent this, use the `context` object to track the state of your hooks:
-
-```ts
-{
-  hooks: {
-    beforeChange: [
-      async ({ context }) => {
-        if (context.myHookRan) {
-          return
-        }
-
-        context.myHookRan = true
-
-        // your hook logic here
-      },
-    ],
-  },
-}
-```
-
-### Offload long-running tasks
-
-For long running tasks that don't directly affect the API responses, you can offload them to the [Job Queue](../jobs-queue/overview).
-
-For example, if you need to send an email or process a large file, you can queue a job to handle that task instead of doing it in the hook.
-
-This will allow the request to continue processing without waiting for the task to complete.
-
-<Banner type="success">
-  **Tip:** To go even further, run your jobs on another server. This will free
-  up your main server to handle requests without being bogged down by jobs.
-</Banner>
-
-### Optimize custom validations
-
-If your validation functions are asynchronous or computationally expensive, [ensure they only run when necessary](../field/overview#async-field-validations).
-
-For example, if your validation needs to query the database or some external API, ensure it only runs when the document is saved, not on every change in the Admin.
-
-To do this, use the `event` arg in your validation function:
-
-```ts
-{
-  name: 'title',
-  type: 'text',
-  validate: async (value, { event }) => {
-    if (event === 'submit') {
-      // perform expensive validation
-    }
-    return true;
-  },
-}
-```
-
-## Use a cached Payload instance
+## Using the cached Payload instance
 
 Ensure that you do not instantiate Payload unnecessarily. Instead, Payload provides a caching mechanism to reuse the same instance across your app.
 

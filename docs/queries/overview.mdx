@@ -192,3 +192,13 @@ const getPosts = async () => {
   // Continue to handle the response below...
 }
 ```
+
+## Performance
+
+When querying data through Payload APIs, there are a few strategies you can use to optimize performance.
+
+- **Depth**: Set the [Depth](./depth) to avoid populating unnecessary relational data
+- **Limit**: Set the [Limit](./pagination#limit) when you can reliably predict the number of matched documents
+- **Select**: Use the [Select API](./select) to skip unnecessary fields
+- **Pagination**: [Disable Pagination](./pagination#disabling-pagination) for queries that do not require it
+- **Indexes**: Use [Indexes](../configuration/fields#index) on fields that are queried often

@@ -1,0 +1,37 @@
+---
+title: Indexes
+label: Indexes
+order: 70
+keywords: database, indexes, ddl, sql, mongodb, postgres, documentation, Content Management System, cms, headless, typescript, node, react, nextjs
+desc: Payload features first-party database indexes all done in TypeScript.
+---
+
+Database indexes are a way to optimize the performance of your database by allowing it to quickly locate and retrieve data. If you have a field that you frequently query or sort by, adding an index to that field can significantly improve the speed of those operations.
+
+When your query runs, the database will not scan the entire document to find that one field, but will instead use the index to quickly locate the data.
+
+To index a field, set the `index` option to `true` in your field's config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export MyCollection: CollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    {
+      name: 'title',
+      type: 'text',
+      // highlight-start
+      index: true,
+      // highlight-end
+    },
+  ]
+}
+```
+
+<Banner type="success">
+  **Tip:** If you're using MongoDB, you can use [MongoDB
+  Compass](https://www.mongodb.com/products/compass) to visualize and manage
+  your indexes.
+</Banner>

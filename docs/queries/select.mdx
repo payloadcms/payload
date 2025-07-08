@@ -6,6 +6,12 @@ desc: Payload select determines which fields are selected to the result.
 keywords: query, documents, pagination, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
+<Banner type="success">
+  The Select API can significantly optimize the performance of your application
+  by limiting the amount of processing made on the server and reducing the
+  amount of data returned.
+</Banner>
+
 By default, Payload's APIs will return _all fields_ for a given collection or global. But, you may not need all of that data for all of your queries. Sometimes, you might want just a few fields from the response, which can speed up the Payload API and reduce the amount of JSON that is sent to you from the API.
 
 This is where Payload's `select` feature comes in. Here, you can define exactly which fields you'd like to retrieve from the API.
@@ -149,7 +155,7 @@ export const Pages: CollectionConfig<'pages'> = {
   not be able to construct the correct file URL, instead returning `url: null`.
 </Banner>
 
-## populate
+## Populate
 
 Setting `defaultPopulate` will enforce that each time Payload performs a "population" of a related document, only the fields specified will be queried and returned. However, you can override `defaultPopulate` with the `populate` property in the Local and REST API:
 

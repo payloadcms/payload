@@ -93,12 +93,37 @@ All Hooks can be written as either synchronous or asynchronous functions. Choosi
 
 #### Asynchronous
 
-If the Hook should modify data before a Document is updated or created, and it relies on asynchronous actions such as fetching data from a third party, it might make sense to define your Hook as an asynchronous function. This way you can be sure that your Hook completes before the operation's lifecycle continues. Async hooks are run in series - so if you have two async hooks defined, the second hook will wait for the first to complete before it starts.
+If the Hook should modify data before a Document is updated or created, and it relies on asynchronous actions such as fetching data from a third party, it might make sense to define your Hook as an asynchronous function. This way you can be sure that your Hook completes before the operation's lifecycle continues.
+
+Async hooks are run in series - so if you have two async hooks defined, the second hook will wait for the first to complete before it starts.
+
+<Banner type="success">
+  **Tip:** If your hook executes a long-running task that doesn't affect the
+  response in any way, consider [offloading it to the job
+  queue](#offloading-long-running-tasks). That will free up the request to
+  continue processing without waiting for the task to complete.
+</Banner>
 
 #### Synchronous
 
-If your Hook simply performs a side-effect, such as updating a CRM, it might be okay to define it synchronously, so the Payload operation does not have to wait for your hook to complete.
+If your Hook simply performs a side-effect, such as mutating document data, it might be okay to define it synchronously, so the Payload operation does not have to wait for your hook to complete.
 
 ## Server-only Execution
 
 Hooks are only triggered on the server and are automatically excluded from the client-side bundle. This means that you can safely use sensitive business logic in your Hooks without worrying about exposing it to the client.
+
+## Performance
+
+Hooks are a powerful way to customize the behavior of your APIs, but some hooks are run very often and can add significant overhead to your requests if not optimized.
+
+### Write efficient hooks
+
+The `read` operation runs on every read request, so avoid putting expensive logic in a `beforeRead` or `afterRead` hook.
+
+### Offloading to the job queue
+
+Use the [Job Queue](#offloading-long-running-tasks) to offload any long-running tasks that don't affect the response.
+
+### Use Hook Context
+
+Use [Hook Context](./context) avoid prevent infinite loops or avoid repeating expensive operations across multiple hooks in the same request.
