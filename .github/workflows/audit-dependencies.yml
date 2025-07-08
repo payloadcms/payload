@@ -36,10 +36,11 @@ jobs:
       - name: Failure output
         if: failure()
         run: |
+          set -ex
           echo "Vulnerabilities found."
           cat audit_output.json
           # echo audit_dependencies.outputs.audit_output
-          echo ${{ steps.audit_dependencies.outputs.audit_output }}
+          echo audit_output: ${{ steps.audit_dependencies.outputs.audit_output }}
 
       - name: Slack notification on failure
         if: failure()
