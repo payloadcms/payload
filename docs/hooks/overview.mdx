@@ -116,14 +116,81 @@ Hooks are only triggered on the server and are automatically excluded from the c
 
 Hooks are a powerful way to customize the behavior of your APIs, but some hooks are run very often and can add significant overhead to your requests if not optimized.
 
-### Write efficient hooks
+### Writing efficient hooks
 
-The `read` operation runs on every read request, so avoid putting expensive logic in a `beforeRead` or `afterRead` hook.
+Consider when hooks are run. One common pitfall is putting expensive logic in hooks that run very often.
 
-### Offloading to the job queue
+For example, the `read` operation runs on every read request, so avoid putting expensive logic in a `beforeRead` or `afterRead` hook.
 
-Use the [Job Queue](#offloading-long-running-tasks) to offload any long-running tasks that don't affect the response.
+```ts
+{
+  hooks: {
+    beforeRead: [
+      async () => {
+        // This runs on every read request - avoid expensive logic here
+        await doSomethingExpensive()
+        return data
+      },
+    ],
+  },
+}
+```
 
-### Use Hook Context
+Instead, you might want to use a `beforeChange` or `afterChange` hook, which only runs when a document is created or updated.
+
+```ts
+{
+  hooks: {
+    beforeChange: [
+      async ({ context }) => {
+        // This is more acceptable here, although still should be mindful of performance
+        await doSomethingExpensive()
+
+        // ...
+      },
+    ]
+  },
+}
+```
+
+### Using Hook Context
 
 Use [Hook Context](./context) avoid prevent infinite loops or avoid repeating expensive operations across multiple hooks in the same request.
+
+```ts
+{
+  hooks: {
+    beforeChange: [
+      async ({ context }) => {
+        const somethingExpensive = await doSomethingExpensive()
+        context.somethingExpensive = somethingExpensive
+
+        // ...
+      },
+    ],
+  },
+}
+```
+
+To learn more, see the [Hook Context documentation](./context).
+
+### Offloading to the jobs queue
+
+If your hooks perform any long-running tasks that don't direct affect request lifecycle, consider offloading them to the [jobs queue](../jobs-queue/overview). This will free up the request to continue processing without waiting for the task to complete.
+
+```ts
+{
+  hooks: {
+    afterChange: [
+      async ({ doc, req }) => {
+        // Offload to job queue
+        await req.payload.jobs.queue(...)
+
+        // ...
+      },
+    ],
+  },
+}
+```
+
+To learn more, see the [Job Queue documentation](../jobs-queue/overview).
