@@ -49,7 +49,8 @@ const ssrfFilterInterceptor: Dispatcher.DispatcherComposeInterceptor = (dispatch
   }
 }
 
-const safeDispatcher = new Agent().compose(ssrfFilterInterceptor)
+// const safeDispatcher = new Agent().compose(ssrfFilterInterceptor)
+let safeDispatcher ;
 
 /**
  * A "safe" version of undici's fetch that prevents SSRF attacks.
@@ -59,6 +60,9 @@ const safeDispatcher = new Agent().compose(ssrfFilterInterceptor)
  * - Undici was used because it supported interceptors as well as "credentials: include". Native fetch
  */
 export const safeFetch = async (...args: Parameters<typeof undiciFetch>) => {
+  if(!safeDispatcher){
+        safeDispatcher = new Agent().compose(ssrfFilterInterceptor);
+    }
   const [unverifiedUrl, options] = args
 
   try {
