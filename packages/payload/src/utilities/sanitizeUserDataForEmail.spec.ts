@@ -84,4 +84,73 @@ describe('sanitizeUserDataForEmail', () => {
     const result = sanitizeUserDataForEmail(input)
     expect(result).toBe(`Hello "world" - it's safe!`)
   })
+
+  it('should return empty string for non-string input', () => {
+    expect(sanitizeUserDataForEmail(null)).toBe('')
+    expect(sanitizeUserDataForEmail(undefined)).toBe('')
+    expect(sanitizeUserDataForEmail(123)).toBe('')
+    expect(sanitizeUserDataForEmail({})).toBe('')
+  })
+
+  it('should return empty string for an empty string', () => {
+    expect(sanitizeUserDataForEmail('')).toBe('')
+  })
+
+  it('should collapse excessive whitespace', () => {
+    const input = 'This    is \n\n a    test'
+    expect(sanitizeUserDataForEmail(input)).toBe('This is a test')
+  })
+
+  it('should truncate to maxLength characters', () => {
+    const input = 'a'.repeat(200)
+    const result = sanitizeUserDataForEmail(input, 50)
+    expect(result.length).toBe(50)
+  })
+
+  it('should remove characters outside allowed punctuation', () => {
+    const input = 'Hello @#$%^*()_+=[]{}|\\~`'
+    const result = sanitizeUserDataForEmail(input)
+    expect(result).toBe('Hello')
+  })
+  it('should sanitize syntax in regex-like input', () => {
+    const input = '(?=XSS)(?:abc)'
+    const result = sanitizeUserDataForEmail(input)
+    expect(result).toBe('XSSabc')
+  })
+
+  it('should handle string of only control characters', () => {
+    const input = '\x01\x02\x03\x04'
+    const result = sanitizeUserDataForEmail(input)
+    expect(result).toBe('')
+  })
+
+  it('should sanitize complex script attempt with mixed encoding', () => {
+    const input = '&#x3C;script&#x3E;alert(String.fromCharCode(88,83,83))&#x3C;/script&#x3E;'
+    const result = sanitizeUserDataForEmail(input)
+    expect(result).toBe('alertString.fromCharCode88,83,83')
+  })
+
+  it('should handle deeply nested HTML tags correctly', () => {
+    const input = `<div><section><article><p>Hello <strong>world <em>from <span>deep <a href="#">tags</a></span></em></strong></p></article></section></div>`
+    const result = sanitizeUserDataForEmail(input)
+    expect(result).toBe('Hello world from deep tags')
+  })
+
+  it('should preserve accented Spanish characters', () => {
+    const input = '¡Hola! ¿Cómo estás? ÁÉÍÓÚ ÜÑ ñáéíóú ü'
+    const result = sanitizeUserDataForEmail(input)
+    expect(result).toBe('¡Hola! ¿Cómo estás? ÁÉÍÓÚ ÜÑ ñáéíóú ü')
+  })
+
+  it('should preserve Arabic characters with diacritics', () => {
+    const input = 'مَرْحَبًا بِكَ فِي الْمَوْقِعِ'
+    const result = sanitizeUserDataForEmail(input)
+    expect(result).toBe('مَرْحَبًا بِكَ فِي الْمَوْقِعِ')
+  })
+
+  it('should preserve Japanese characters', () => {
+    const input = 'こんにちゎ、世界！！〆'
+    const result = sanitizeUserDataForEmail(input)
+    expect(result).toBe('こんにちゎ、世界！！〆')
+  })
 })

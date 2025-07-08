@@ -25,12 +25,14 @@ export function sanitizeUserDataForEmail(data: unknown, maxLength = 100): string
   // Remove HTML tags
   const noTags = decodedEntities.replace(/<[^>]+>/g, '')
 
+  const noInvisible = noTags.replace(/[\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g, '')
+
   // Remove control characters except common whitespace
-  const noControls = [...noTags]
+  const noControls = [...noInvisible]
     .filter((char) => {
       const code = char.charCodeAt(0)
       return (
-        (code >= 32 && code <= 126) || // standard characters
+        code >= 32 || // printable and above
         code === 9 || // tab
         code === 10 || // new line
         code === 13 // return
@@ -38,17 +40,35 @@ export function sanitizeUserDataForEmail(data: unknown, maxLength = 100): string
     })
     .join('')
 
-  // Normalize whitespace (spaces, tabs, new lines) to single spaces
-  const normalizedWhitespace = noControls.replace(/\s+/g, ' ')
+  // Remove '(?' and backticks `
+  let noInjectionSyntax = noControls.replace(/\(\?/g, '').replace(/`/g, '')
+
+  // {{...}} remove braces but keep inner content
+  noInjectionSyntax = noInjectionSyntax.replace(/\{\{(.*?)\}\}/g, '$1')
 
   // Escape special HTML characters
-  const escaped = normalizedWhitespace
+  const escaped = noInjectionSyntax
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
 
-  // Allow only letters, numbers, spaces, and common punctuation
-  const cleaned = escaped.replace(/[^a-z0-9 .,!?'"-]/gi, '')
+  // Normalize whitespace to single space
+  const normalizedWhitespace = escaped.replace(/\s+/g, ' ')
+
+  // Allow:
+  // - Unicode letters (\p{L})
+  // - Unicode numbers (\p{N})
+  // - Unicode marks (\p{M}, e.g. accents)
+  // - Unicode spaces (\p{Zs})
+  // - Punctuation: common ascii + inverted ! and ?
+  const allowedPunctuation = " .,!?'" + '"¡¿、！（）〆-'
+
+  // Escape regex special characters
+  const escapedPunct = allowedPunctuation.replace(/[[\]\\^$*+?.()|{}]/g, '\\$&')
+
+  const pattern = `[^\\p{L}\\p{N}\\p{M}\\p{Zs}${escapedPunct}]`
+
+  const cleaned = normalizedWhitespace.replace(new RegExp(pattern, 'gu'), '')
 
   // Trim and limit length, trim again to remove trailing spaces
   return cleaned.slice(0, maxLength).trim()
