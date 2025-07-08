@@ -1,6 +1,9 @@
 name: audit-dependencies
 
 on:
+  # Sundays at 2am EST
+  schedule:
+    - cron: '0 7 * * 0'
   workflow_dispatch:
     inputs:
       audit-level:
@@ -16,7 +19,6 @@ env:
 
 jobs:
   audit:
-    name: audit-${{ github.ref_name }}-${{ github.sha }}
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
