@@ -10,6 +10,10 @@ on:
         description: The level of audit to run (low, moderate, high, critical)
         required: false
         default: critical
+      debug:
+        description: Enable debug logging
+        required: false
+        default: false
 
 env:
   NODE_VERSION: 23.11.0
@@ -47,17 +51,17 @@ jobs:
         if: failure()
         uses: slackapi/slack-github-action@v2.1.0
         with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook: ${{ inputs.debug == 'true' && secrets.SLACK_TEST_WEBHOOK_URL || secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
             {
-              "text": "🚨 *Dependency Vulnerabilities Found*",
+              "username": "GitHub Actions Bot",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Actionable vulnerabilities found: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>"
+                    "text": "🚨 Actionable vulnerabilities found: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>"
                   }
                 },
               ]
