@@ -34,13 +34,12 @@ jobs:
         run: ./.github/workflows/audit-dependencies.sh ${{ inputs.audit-level }}
 
       - name: Failure output
-        id: failure_output
         if: failure()
         run: |
           echo "Vulnerabilities found."
           cat audit_output.json
-          # Output json content to GitHub Actions output
-          echo "audit_output=$(cat audit_output.json)" >> $GITHUB_OUTPUT
+          # echo audit_dependencies.outputs.audit_output
+          echo ${{ steps.audit_dependencies.outputs.audit_output }}
 
       - name: Slack notification on failure
         if: failure()
@@ -54,7 +53,7 @@ jobs:
               - type: "section"
                 text:
                   type: "mrkdwn"
-                  text: "Actionable vulnerabilities found: ${{ steps.failure_output.outputs.audit_output }}"
+                  text: "Actionable vulnerabilities found: ${{ steps.audit_dependencies.outputs.audit_output }}"
               - type: "section"
                 text:
                   type: "mrkdwn"
