@@ -380,9 +380,12 @@ describe('Block fields', () => {
 
       // Important: do _not_ poll here, use `textContent()` instead of `toHaveText()`
       // This will prevent Playwright from polling for the change to the DOM
-      expect(
-        await page.locator('#field-blocks #blocks-row-1 .blocks-field__block-header').textContent(),
-      ).toMatch(/^Custom Block Label: Content/)
+      await expect(async () => {
+        const text = await page
+          .locator('#field-blocks #blocks-row-1 .blocks-field__block-header')
+          .textContent()
+        expect(text).toMatch(/^Custom Block Label: Content/)
+      }).toPass()
     })
 
     describe('react hooks', () => {
