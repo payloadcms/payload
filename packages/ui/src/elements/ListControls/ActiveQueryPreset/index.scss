@@ -2,7 +2,7 @@
 
 @layer payload-default {
   .active-query-preset {
-    .pill__label {
+    &__label {
       display: flex;
       gap: calc(var(--base) / 4);
       display: flex;

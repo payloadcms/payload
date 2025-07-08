@@ -7,7 +7,7 @@ import React, { Fragment, useEffect, useRef, useState } from 'react'
 
 import type { ListControlsProps } from './types.js'
 
-import { Popup, PopupList } from '../../elements/Popup/index.js'
+import { Popup } from '../../elements/Popup/index.js'
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { Dots } from '../../icons/Dots/index.js'
@@ -150,7 +150,11 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 openPresetListDrawer={openPresetListDrawer}
                 resetPreset={resetPreset}
               />
-              <div className={`${baseClass}__preset-controls`}>{queryPresetMenuItems}</div>
+              <div className={`${baseClass}__preset-controls`}>
+                {queryPresetMenuItems.map((item, i) => (
+                  <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
+                ))}
+              </div>
             </div>
           )}
           <div

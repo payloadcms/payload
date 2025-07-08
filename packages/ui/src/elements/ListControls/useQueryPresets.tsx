@@ -199,6 +199,7 @@ export const useQueryPresets = ({
     if (hasModifiedPreset) {
       items.push(
         <button
+          id="reset-preset"
           key="reset"
           onClick={async () => {
             await refineListData(
@@ -219,6 +220,7 @@ export const useQueryPresets = ({
     if (hasModifiedPreset && queryPresetPermissions.update) {
       items.push(
         <button
+          id="save-preset"
           key="save"
           onClick={async () => {
             await saveCurrentChanges()
@@ -232,6 +234,7 @@ export const useQueryPresets = ({
 
     items.push(
       <button
+        id="create-new-preset"
         onClick={() => {
           openCreateNewDrawer()
         }}
@@ -243,13 +246,18 @@ export const useQueryPresets = ({
 
     if (activePreset && queryPresetPermissions?.delete) {
       items.push(
-        <button onClick={() => openModal(confirmDeletePresetModalSlug)} type="button">
+        <button
+          id="delete-preset"
+          onClick={() => openModal(confirmDeletePresetModalSlug)}
+          type="button"
+        >
           {t('general:delete')}
         </button>,
       )
 
       items.push(
         <button
+          id="edit-preset"
           onClick={() => {
             openDocumentDrawer()
           }}
