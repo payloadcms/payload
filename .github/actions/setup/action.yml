@@ -82,7 +82,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: ${{ env.STORE_PATH }}
-        key: ${{ inputs.pnpm-install-cache-key || 'pnpm-store-' + hashFiles('**/pnpm-lock.yaml') }}
+        key: ${{ inputs.pnpm-install-cache-key || 'pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}' }}
         restore-keys: |
           pnpm-store-${{ env.PNPM_VERSION }}-
           pnpm-store-
@@ -94,5 +94,5 @@ runs:
 
       # Set the cache key output
     - run: |
-        echo "pnpm-install-cache-key=${{ inputs.pnpm-install-cache-key || 'pnpm-store-' + hashFiles('**/pnpm-lock.yaml') }}" >> $GITHUB_ENV
+        echo "pnpm-install-cache-key=${{ inputs.pnpm-install-cache-key || 'pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}' }}" >> $GITHUB_ENV
       shell: bash
