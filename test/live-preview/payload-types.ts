@@ -75,6 +75,7 @@ export interface Config {
     tenants: Tenant;
     categories: Category;
     media: Media;
+    'collection-level-config': CollectionLevelConfig;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -89,6 +90,7 @@ export interface Config {
     tenants: TenantsSelect<false> | TenantsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'collection-level-config': CollectionLevelConfigSelect<false> | CollectionLevelConfigSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -843,6 +845,18 @@ export interface SsrAutosave {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Live Preview is enabled on this collection's own config, not the root config.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-level-config".
+ */
+export interface CollectionLevelConfig {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
@@ -880,6 +894,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'collection-level-config';
+        value: string | CollectionLevelConfig;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1410,6 +1428,15 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-level-config_select".
+ */
+export interface CollectionLevelConfigSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

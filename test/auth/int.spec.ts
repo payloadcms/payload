@@ -8,6 +8,7 @@ import type {
   User,
 } from 'payload'
 
+import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
 import { email as emailValidation } from 'payload/shared'
@@ -15,6 +16,7 @@ import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { ApiKey } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -827,6 +829,37 @@ describe('Auth', () => {
       })
 
       expect(fail.status).toStrictEqual(404)
+    })
+
+    it('should allow authentication with an API key saved with sha1', async () => {
+      const usersQuery = await payload.find({
+        collection: apiKeysSlug,
+      })
+
+      const [user] = usersQuery.docs as [ApiKey]
+
+      const sha1Index = crypto
+        .createHmac('sha256', payload.secret)
+        .update(user.apiKey as string)
+        .digest('hex')
+
+      await payload.db.updateOne({
+        collection: apiKeysSlug,
+        data: {
+          apiKeyIndex: sha1Index,
+        },
+        id: user.id,
+      })
+
+      const response = await restClient
+        .GET(`/${apiKeysSlug}/${user?.id}`, {
+          headers: {
+            Authorization: `${apiKeysSlug} API-Key ${user?.apiKey}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(response.id).toStrictEqual(user.id)
     })
 
     it('should not remove an API key from a user when updating other fields', async () => {

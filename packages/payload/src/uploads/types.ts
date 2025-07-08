@@ -1,6 +1,6 @@
 import type { ResizeOptions, Sharp, SharpOptions } from 'sharp'
 
-import type { TypeWithID } from '../collections/config/types.js'
+import type { CollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { PayloadComponent } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { WithMetadata } from './optionallyAppendMetadata.js'
@@ -102,6 +102,11 @@ export type AllowList = Array<{
   search?: string
 }>
 
+export type FileAllowList = Array<{
+  extensions: string[]
+  mimeType: string
+}>
+
 type Admin = {
   components?: {
     /**
@@ -127,6 +132,14 @@ export type UploadConfig = {
    * - A function that generates a fully qualified URL for the thumbnail, receives the doc as the only argument.
    **/
   adminThumbnail?: GetAdminThumbnail | string
+  /**
+   * Allow restricted file types known to be problematic.
+   * - If set to `true`, it will allow all file types.
+   * - If set to `false`, it will not allow file types and extensions known to be problematic.
+   * - This setting is overriden by the `mimeTypes` option.
+   * @default false
+   */
+  allowRestrictedFileTypes?: boolean
   /**
    * Enables bulk upload of files from the list view.
    * @default true
@@ -221,7 +234,6 @@ export type UploadConfig = {
    * @default undefined
    */
   modifyResponseHeaders?: ({ headers }: { headers: Headers }) => Headers
-
   /**
    * Controls the behavior of pasting/uploading files from URLs.
    * If set to `false`, fetching from remote URLs is disabled.
@@ -262,6 +274,11 @@ export type UploadConfig = {
    * @default false
    */
   withMetadata?: WithMetadata
+}
+export type checkFileRestrictionsParams = {
+  collection: CollectionConfig
+  file: File
+  req: PayloadRequest
 }
 
 export type SanitizedUploadConfig = {
