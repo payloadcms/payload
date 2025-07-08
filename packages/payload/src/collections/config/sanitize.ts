@@ -27,27 +27,32 @@ import {
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
-export const sanitizeCollection = async (
-  config: Config,
-  collection: CollectionConfig,
+export const sanitizeCollection = async ({
+  collectionConfig,
+  config,
+  richTextSanitizationPromises,
+  validRelationships: _validRelationships,
+}: {
+  collectionConfig: CollectionConfig
+  config: Config
   /**
    * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
    * so that you can sanitize them together, after the config has been sanitized.
    */
-  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
-  _validRelationships?: string[],
-): Promise<SanitizedCollectionConfig> => {
-  if (collection._sanitized) {
-    return collection as SanitizedCollectionConfig
+  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>
+  validRelationships?: string[]
+}): Promise<SanitizedCollectionConfig> => {
+  if (collectionConfig._sanitized) {
+    return collectionConfig as SanitizedCollectionConfig
   }
 
-  collection._sanitized = true
+  collectionConfig._sanitized = true
 
   // /////////////////////////////////
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitized: CollectionConfig = addDefaultsToCollectionConfig(collection)
+  const sanitized: CollectionConfig = addDefaultsToCollectionConfig(collectionConfig)
 
   // /////////////////////////////////
   // Sanitize fields
@@ -148,7 +153,7 @@ export const sanitizeCollection = async (
     }
 
     if (sanitized.timestamps === false) {
-      throw new TimestampsRequired(collection)
+      throw new TimestampsRequired(collectionConfig)
     }
 
     sanitized.versions.maxPerDoc =
@@ -231,15 +236,15 @@ export const sanitizeCollection = async (
       sanitized.auth.loginWithUsername = false
     }
 
-    if (!collection?.admin?.useAsTitle) {
+    if (!collectionConfig?.admin?.useAsTitle) {
       sanitized.admin!.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
     }
 
     sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
   }
 
-  if (collection?.admin?.pagination?.limits?.length) {
-    sanitized.admin!.pagination!.limits = collection.admin.pagination.limits
+  if (collectionConfig?.admin?.pagination?.limits?.length) {
+    sanitized.admin!.pagination!.limits = collectionConfig.admin.pagination.limits
   }
 
   validateUseAsTitle(sanitized)

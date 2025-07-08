@@ -11,113 +11,128 @@ import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultGlobalEndpoints } from '../endpoints/index.js'
 
-export const sanitizeGlobal = async (
-  config: Config,
-  global: GlobalConfig,
+export const sanitizeGlobal = async ({
+  config,
+  globalConfig,
+  richTextSanitizationPromises,
+  validRelationships: _validRelationships,
+}: {
+  config: Config
+  globalConfig: GlobalConfig
   /**
    * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
    * so that you can sanitize them together, after the config has been sanitized.
    */
-  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
-  _validRelationships?: string[],
-): Promise<SanitizedGlobalConfig> => {
-  if (global._sanitized) {
-    return global as SanitizedGlobalConfig
+  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>
+  validRelationships?: string[]
+}): Promise<SanitizedGlobalConfig> => {
+  if (globalConfig._sanitized) {
+    return globalConfig as SanitizedGlobalConfig
   }
-  global._sanitized = true
 
-  global.label = global.label || toWords(global.slug)
+  globalConfig._sanitized = true
+
+  globalConfig.label = globalConfig.label || toWords(globalConfig.slug)
 
   // /////////////////////////////////
   // Ensure that collection has required object structure
   // /////////////////////////////////
 
-  global.endpoints = global.endpoints ?? []
-  if (!global.hooks) {
-    global.hooks = {}
-  }
-  if (!global.access) {
-    global.access = {}
-  }
-  if (!global.admin) {
-    global.admin = {}
+  globalConfig.endpoints = globalConfig.endpoints ?? []
+
+  if (!globalConfig.hooks) {
+    globalConfig.hooks = {}
   }
 
-  if (!global.access.read) {
-    global.access.read = defaultAccess
-  }
-  if (!global.access.update) {
-    global.access.update = defaultAccess
+  if (!globalConfig.access) {
+    globalConfig.access = {}
   }
 
-  if (!global.hooks.beforeValidate) {
-    global.hooks.beforeValidate = []
+  if (!globalConfig.admin) {
+    globalConfig.admin = {}
   }
-  if (!global.hooks.beforeChange) {
-    global.hooks.beforeChange = []
+
+  if (!globalConfig.access.read) {
+    globalConfig.access.read = defaultAccess
   }
-  if (!global.hooks.afterChange) {
-    global.hooks.afterChange = []
+
+  if (!globalConfig.access.update) {
+    globalConfig.access.update = defaultAccess
   }
-  if (!global.hooks.beforeRead) {
-    global.hooks.beforeRead = []
+
+  if (!globalConfig.hooks.beforeValidate) {
+    globalConfig.hooks.beforeValidate = []
   }
-  if (!global.hooks.afterRead) {
-    global.hooks.afterRead = []
+
+  if (!globalConfig.hooks.beforeChange) {
+    globalConfig.hooks.beforeChange = []
+  }
+
+  if (!globalConfig.hooks.afterChange) {
+    globalConfig.hooks.afterChange = []
+  }
+
+  if (!globalConfig.hooks.beforeRead) {
+    globalConfig.hooks.beforeRead = []
+  }
+
+  if (!globalConfig.hooks.afterRead) {
+    globalConfig.hooks.afterRead = []
   }
 
   // Sanitize fields
   const validRelationships = _validRelationships ?? config.collections?.map((c) => c.slug) ?? []
 
-  global.fields = await sanitizeFields({
+  globalConfig.fields = await sanitizeFields({
     config,
-    fields: global.fields,
+    fields: globalConfig.fields,
     parentIsLocalized: false,
     richTextSanitizationPromises,
     validRelationships,
   })
 
-  if (global.endpoints !== false) {
-    if (!global.endpoints) {
-      global.endpoints = []
+  if (globalConfig.endpoints !== false) {
+    if (!globalConfig.endpoints) {
+      globalConfig.endpoints = []
     }
 
     for (const endpoint of defaultGlobalEndpoints) {
-      global.endpoints.push(endpoint)
+      globalConfig.endpoints.push(endpoint)
     }
   }
 
-  if (global.versions) {
-    if (global.versions === true) {
-      global.versions = { drafts: false, max: 100 }
+  if (globalConfig.versions) {
+    if (globalConfig.versions === true) {
+      globalConfig.versions = { drafts: false, max: 100 }
     }
 
-    global.versions.max = typeof global.versions.max === 'number' ? global.versions.max : 100
+    globalConfig.versions.max =
+      typeof globalConfig.versions.max === 'number' ? globalConfig.versions.max : 100
 
-    if (global.versions.drafts) {
-      if (global.versions.drafts === true) {
-        global.versions.drafts = {
+    if (globalConfig.versions.drafts) {
+      if (globalConfig.versions.drafts === true) {
+        globalConfig.versions.drafts = {
           autosave: false,
           validate: false,
         }
       }
 
-      if (global.versions.drafts.autosave === true) {
-        global.versions.drafts.autosave = {
+      if (globalConfig.versions.drafts.autosave === true) {
+        globalConfig.versions.drafts.autosave = {
           interval: versionDefaults.autosaveInterval,
         }
       }
 
-      if (global.versions.drafts.validate === undefined) {
-        global.versions.drafts.validate = false
+      if (globalConfig.versions.drafts.validate === undefined) {
+        globalConfig.versions.drafts.validate = false
       }
 
-      global.fields = mergeBaseFields(global.fields, baseVersionFields)
+      globalConfig.fields = mergeBaseFields(globalConfig.fields, baseVersionFields)
     }
   }
 
-  if (!global.custom) {
-    global.custom = {}
+  if (!globalConfig.custom) {
+    globalConfig.custom = {}
   }
 
   // /////////////////////////////////
@@ -125,7 +140,8 @@ export const sanitizeGlobal = async (
   // /////////////////////////////////
   let hasUpdatedAt: boolean | null = null
   let hasCreatedAt: boolean | null = null
-  global.fields.some((field) => {
+
+  globalConfig.fields.some((field) => {
     if (fieldAffectsData(field)) {
       if (field.name === 'updatedAt') {
         hasUpdatedAt = true
@@ -136,8 +152,9 @@ export const sanitizeGlobal = async (
     }
     return hasCreatedAt && hasUpdatedAt
   })
+
   if (!hasUpdatedAt) {
-    global.fields.push({
+    globalConfig.fields.push({
       name: 'updatedAt',
       type: 'date',
       admin: {
@@ -147,8 +164,9 @@ export const sanitizeGlobal = async (
       label: ({ t }) => t('general:updatedAt'),
     })
   }
+
   if (!hasCreatedAt) {
-    global.fields.push({
+    globalConfig.fields.push({
       name: 'createdAt',
       type: 'date',
       admin: {
@@ -159,7 +177,9 @@ export const sanitizeGlobal = async (
     })
   }
 
-  ;(global as SanitizedGlobalConfig).flattenedFields = flattenAllFields({ fields: global.fields })
+  ;(globalConfig as SanitizedGlobalConfig).flattenedFields = flattenAllFields({
+    fields: globalConfig.fields,
+  })
 
-  return global as SanitizedGlobalConfig
+  return globalConfig as SanitizedGlobalConfig
 }
