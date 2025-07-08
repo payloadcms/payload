@@ -2815,6 +2815,7 @@ describe('database', () => {
         title: 'hello',
         group: { text: 'in group' },
         tab: { text: 'in tab' },
+        arrayWithIDs: [{ text: 'some text' }],
       },
     })
     const res = await payload.db.updateOne({
@@ -2831,6 +2832,8 @@ describe('database', () => {
     expect(res.text).toBe('other text (should not be nuked)')
     expect(res.group.text).toBe('in group updated')
     expect(res.tab.text).toBe('in tab updated')
+    expect(res.arrayWithIDs).toHaveLength(1)
+    expect(res.arrayWithIDs[0].text).toBe('some text')
   })
 
   it('should support x3 nesting blocks', async () => {
