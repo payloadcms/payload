@@ -41,6 +41,7 @@ jobs:
           cat audit_output.json
           # echo audit_dependencies.outputs.audit_output
           echo "${{ steps.audit_dependencies.outputs.audit_output }}"
+          echo "All outputs: ${{ toJson(steps.audit_dependencies.outputs) }}"
 
       - name: Slack notification on failure
         if: failure()
