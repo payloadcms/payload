@@ -355,6 +355,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                 blocks={clientBlocks}
                 className={`${baseClass}__header-action`}
                 disableCopy={!(rows?.length > 0)}
+                disablePaste={readOnly}
                 getDataToCopy={() =>
                   reduceFormStateByPath({
                     formState: { ...getFields() },
