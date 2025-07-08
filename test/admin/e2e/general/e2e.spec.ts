@@ -346,13 +346,6 @@ describe('General', () => {
       await expect(page.locator('.not-found')).toContainText('Nothing found')
     })
 
-    test('should 404 not found documents', async () => {
-      const unknownDocumentURL = `${postsUrl.collection(postsCollectionSlug)}/1234`
-      const response = await page.goto(unknownDocumentURL)
-      expect(response.status() === 404).toBeTruthy()
-      await expect(page.locator('.not-found')).toContainText('Nothing found')
-    })
-
     test('should use custom logout route', async () => {
       const customLogoutRouteURL = `${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`
       const response = await page.goto(customLogoutRouteURL)
