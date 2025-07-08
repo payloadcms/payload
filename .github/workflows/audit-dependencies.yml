@@ -1,0 +1,11 @@
+name: audit-dependencies
+
+on:
+  workflow_dispatch:
+
+jobs:
+  dummy:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Dummy step
+        run: echo "This is a dummy step"

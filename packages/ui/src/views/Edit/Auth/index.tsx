@@ -69,12 +69,13 @@ export const Auth: React.FC<Props> = (props) => {
     })
 
     if (operation === 'create') {
-      showPasswordFields = typeof passwordPermissions === 'object' && passwordPermissions.create
+      showPasswordFields =
+        passwordPermissions === true ||
+        (typeof passwordPermissions === 'object' && passwordPermissions.create)
     } else {
       showPasswordFields =
-        typeof passwordPermissions === 'object' &&
-        passwordPermissions.read &&
-        passwordPermissions.update
+        passwordPermissions === true ||
+        (typeof passwordPermissions === 'object' && passwordPermissions.update)
     }
   }
 

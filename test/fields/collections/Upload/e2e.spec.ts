@@ -82,8 +82,6 @@ describe('Upload', () => {
   })
 
   test('should upload files from remote URL', async () => {
-    await uploadImage()
-
     await page.goto(url.create)
 
     const pasteURLButton = page.locator('.file-field__upload button', {
@@ -91,7 +89,8 @@ describe('Upload', () => {
     })
     await pasteURLButton.click()
 
-    const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
+    const remoteImage =
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg'
 
     const inputField = page.locator('.file-field__upload .file-field__remote-file')
     await inputField.fill(remoteImage)
@@ -117,14 +116,15 @@ describe('Upload', () => {
     })
     await pasteURLButton.click()
 
-    const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
+    const remoteImage =
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg'
 
     const inputField = page.locator('.file-field__upload .file-field__remote-file')
     await inputField.fill(remoteImage)
 
     // Intercept the upload request
     await page.route(
-      'https://payloadcms.com/images/og-image.jpg',
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg',
       (route) => setTimeout(() => route.continue(), 2000), // Artificial 2-second delay
     )
 
@@ -135,7 +135,9 @@ describe('Upload', () => {
     await expect(submitButton).toBeDisabled()
 
     // Wait for the upload to complete
-    await page.waitForResponse('https://payloadcms.com/images/og-image.jpg')
+    await page.waitForResponse(
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg',
+    )
 
     // Assert the submit button is re-enabled after upload
     await expect(submitButton).toBeEnabled()

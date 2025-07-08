@@ -2068,6 +2068,21 @@ describe('Fields', () => {
         }),
       ).rejects.toThrow('The following field is invalid: Items 1 > Sub Array 1 > Text In Row')
     })
+
+    it('should not have multiple instances of the id field in an array with a nested custom id field', () => {
+      const arraysCollection = payload.config.collections.find(
+        (collection) => collection.slug === arrayFieldsSlug,
+      )
+
+      const arrayWithNestedCustomIDField = arraysCollection?.fields.find(
+        (f) => f.name === 'arrayWithCustomID',
+      )
+
+      const idFields = arrayWithNestedCustomIDField?.fields.filter((f) => f.name === 'id')
+
+      expect(idFields).toHaveLength(1)
+      expect(idFields[0].admin?.disableListFilter).toBe(true)
+    })
   })
 
   describe('group', () => {
