@@ -110,7 +110,6 @@ export const importExportPlugin =
 
         const toCSVFunctions = getCustomFieldFunctions({
           fields: collection.config.fields as FlattenedField[],
-          select,
         })
 
         const possibleKeys = getFlattenedFieldKeys(collection.config.fields as FlattenedField[])

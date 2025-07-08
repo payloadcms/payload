@@ -106,7 +106,6 @@ export const createExport = async (args: CreateExportArgs) => {
 
   const toCSVFunctions = getCustomFieldFunctions({
     fields: collectionConfig.flattenedFields,
-    select,
   })
 
   if (download) {

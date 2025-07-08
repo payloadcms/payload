@@ -24,6 +24,18 @@ export const flattenObject = ({
       if (Array.isArray(value)) {
         value.forEach((item, index) => {
           if (typeof item === 'object' && item !== null) {
+            // Case: hasMany polymorphic relationships
+            if (
+              'relationTo' in item &&
+              'value' in item &&
+              typeof item.value === 'object' &&
+              item.value !== null
+            ) {
+              row[`${`${newKey}_${index}`}_relationTo`] = item.relationTo
+              row[`${`${newKey}_${index}`}_id`] = item.value.id
+              return
+            }
+
             flatten(item, `${newKey}_${index}`)
           } else {
             if (toCSVFunctions?.[newKey]) {
