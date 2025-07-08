@@ -48,12 +48,12 @@ export const DefaultNavClient: React.FC<{
               let id: string
 
               if (type === EntityType.collection) {
-                href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
+                href = `${formatAdminURL({ adminRoute, path: `/collections/${slug}` })}?locale=en`
                 id = `nav-${slug}`
               }
 
               if (type === EntityType.global) {
-                href = formatAdminURL({ adminRoute, path: `/globals/${slug}` })
+                href = `${formatAdminURL({ adminRoute, path: `/globals/${slug}` })}?locale=en`
                 id = `nav-global-${slug}`
               }
 

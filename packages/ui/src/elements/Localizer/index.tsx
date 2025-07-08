@@ -52,14 +52,14 @@ export const Localizer: React.FC<{
     [router, startRouteTransition],
   )
 
-  React.useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search)
-    const hasLocale = searchParams.has('locale')
+  // React.useEffect(() => {
+  //   const searchParams = new URLSearchParams(window.location.search)
+  //   const hasLocale = searchParams.has('locale')
 
-    if (!hasLocale) {
-      updateLocaleInURL(locale.code)
-    }
-  }, [locale.code, updateLocaleInURL])
+  //   if (!hasLocale) {
+  //     updateLocaleInURL(locale.code)
+  //   }
+  // }, [locale.code, updateLocaleInURL])
 
   if (!localization) {
     return null
