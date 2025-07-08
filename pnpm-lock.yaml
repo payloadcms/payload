@@ -1709,8 +1709,8 @@ importers:
         specifier: 19.1.0
         version: 19.1.0
       sharp:
-        specifier: 0.32.6
-        version: 0.32.6
+        specifier: 0.34.2
+        version: 0.34.2
     devDependencies:
       '@playwright/test':
         specifier: 1.50.0
