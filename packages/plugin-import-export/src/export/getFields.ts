@@ -139,7 +139,23 @@ export const getFields = (config: Config): Field[] => {
               Field: '@payloadcms/plugin-import-export/rsc#SelectionToUseField',
             },
           },
-          options: [],
+          options: [
+            {
+              // @ts-expect-error - this is not correctly typed in plugins right now
+              label: ({ t }) => t('plugin-import-export:selectionToUse-currentSelection'),
+              value: 'currentSelection',
+            },
+            {
+              // @ts-expect-error - this is not correctly typed in plugins right now
+              label: ({ t }) => t('plugin-import-export:selectionToUse-currentFilters'),
+              value: 'currentFilters',
+            },
+            {
+              // @ts-expect-error - this is not correctly typed in plugins right now
+              label: ({ t }) => t('plugin-import-export:selectionToUse-allDocuments'),
+              value: 'all',
+            },
+          ],
         },
         {
           name: 'fields',
@@ -167,8 +183,17 @@ export const getFields = (config: Config): Field[] => {
         {
           name: 'where',
           type: 'json',
+          admin: {
+            hidden: true,
+          },
           defaultValue: {},
-          hidden: true,
+          hooks: {
+            beforeValidate: [
+              ({ value }) => {
+                return value ?? {}
+              },
+            ],
+          },
         },
       ],
       // @ts-expect-error - this is not correctly typed in plugins right now
