@@ -12,6 +12,7 @@ export const SetStepNav: React.FC<{
   readonly collectionConfig?: ClientCollectionConfig
   readonly globalConfig?: ClientGlobalConfig
   readonly id?: number | string
+  readonly isTrashed?: boolean
   versionToCreatedAtFormatted?: string
   versionToID?: string
   versionToUseAsTitle?: string
@@ -19,6 +20,7 @@ export const SetStepNav: React.FC<{
   id,
   collectionConfig,
   globalConfig,
+  isTrashed,
   versionToCreatedAtFormatted,
   versionToID,
   versionToUseAsTitle,
@@ -55,7 +57,11 @@ export const SetStepNav: React.FC<{
         docLabel = versionToID
       }
 
-      setStepNav([
+      const docBasePath: `/${string}` = isTrashed
+        ? `/collections/${collectionSlug}/trash/${id}`
+        : `/collections/${collectionSlug}/${id}`
+
+      const nav = [
         {
           label: getTranslation(pluralLabel, i18n),
           url: formatAdminURL({
@@ -63,24 +69,40 @@ export const SetStepNav: React.FC<{
             path: `/collections/${collectionSlug}`,
           }),
         },
+      ]
+
+      if (isTrashed) {
+        nav.push({
+          label: t('general:trash'),
+          url: formatAdminURL({
+            adminRoute,
+            path: `/collections/${collectionSlug}/trash`,
+          }),
+        })
+      }
+
+      nav.push(
         {
           label: docLabel,
           url: formatAdminURL({
             adminRoute,
-            path: `/collections/${collectionSlug}/${id}`,
+            path: docBasePath,
           }),
         },
         {
           label: 'Versions',
           url: formatAdminURL({
             adminRoute,
-            path: `/collections/${collectionSlug}/${id}/versions`,
+            path: `${docBasePath}/versions`,
           }),
         },
         {
           label: versionToCreatedAtFormatted,
+          url: undefined,
         },
-      ])
+      )
+
+      setStepNav(nav)
       return
     }
 
@@ -111,6 +133,7 @@ export const SetStepNav: React.FC<{
     config,
     setStepNav,
     id,
+    isTrashed,
     locale,
     t,
     i18n,

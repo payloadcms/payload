@@ -58,6 +58,7 @@ export const DocumentControls: React.FC<{
   readonly isAccountView?: boolean
   readonly isEditing?: boolean
   readonly isInDrawer?: boolean
+  readonly isTrashed?: boolean
   readonly onDelete?: DocumentDrawerContextType['onDelete']
   readonly onDrawerCreateNew?: () => void
   /* Only available if `redirectAfterDuplicate` is `false` */
@@ -89,6 +90,7 @@ export const DocumentControls: React.FC<{
     isAccountView,
     isEditing,
     isInDrawer,
+    isTrashed,
     onDelete,
     onDrawerCreateNew,
     onDuplicate,
@@ -177,7 +179,7 @@ export const DocumentControls: React.FC<{
               {showLockedMetaIcon && (
                 <Locked className={`${baseClass}__locked-controls`} user={user} />
               )}
-              {showFolderMetaIcon && config.folders && (
+              {showFolderMetaIcon && config.folders && !isTrashed && (
                 <MoveDocToFolder
                   folderCollectionSlug={config.folders.slug}
                   folderFieldName={config.folders.fieldName}
@@ -199,29 +201,30 @@ export const DocumentControls: React.FC<{
               </li>
             )}
 
-            {(collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) && (
-              <Fragment>
-                {(globalConfig || (collectionConfig && isEditing)) && (
-                  <li
-                    className={[`${baseClass}__status`, `${baseClass}__list-item`]
-                      .filter(Boolean)
-                      .join(' ')}
-                  >
-                    <Status />
-                  </li>
-                )}
-                {hasSavePermission && autosaveEnabled && !unsavedDraftWithValidations && (
-                  <li className={`${baseClass}__list-item`}>
-                    <Autosave
-                      collection={collectionConfig}
-                      global={globalConfig}
-                      id={id}
-                      publishedDocUpdatedAt={data?.createdAt}
-                    />
-                  </li>
-                )}
-              </Fragment>
-            )}
+            {!isTrashed &&
+              (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) && (
+                <Fragment>
+                  {(globalConfig || (collectionConfig && isEditing)) && (
+                    <li
+                      className={[`${baseClass}__status`, `${baseClass}__list-item`]
+                        .filter(Boolean)
+                        .join(' ')}
+                    >
+                      <Status />
+                    </li>
+                  )}
+                  {hasSavePermission && autosaveEnabled && !unsavedDraftWithValidations && (
+                    <li className={`${baseClass}__list-item`}>
+                      <Autosave
+                        collection={collectionConfig}
+                        global={globalConfig}
+                        id={id}
+                        publishedDocUpdatedAt={data?.createdAt}
+                      />
+                    </li>
+                  )}
+                </Fragment>
+              )}
             {collectionConfig?.timestamps && (isEditing || isAccountView) && (
               <Fragment>
                 <li

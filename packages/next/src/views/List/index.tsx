@@ -64,6 +64,7 @@ export const renderListView = async (
     params,
     query: queryFromArgs,
     searchParams,
+    viewType,
   } = args
 
   const {
@@ -132,6 +133,19 @@ export const renderListView = async (
       where: (query?.where as Where) || undefined,
     })
 
+    if (query?.trash === true) {
+      where = {
+        and: [
+          where,
+          {
+            deletedAt: {
+              exists: true,
+            },
+          },
+        ],
+      }
+    }
+
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
       const baseListFilter = await collectionConfig.admin.baseListFilter({
         limit,
@@ -185,6 +199,7 @@ export const renderListView = async (
       page,
       req,
       sort,
+      trash: query?.trash === true,
       user,
       where: where || {},
     })
@@ -204,6 +219,7 @@ export const renderListView = async (
       orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
       payload,
       useAsTitle: collectionConfig.admin.useAsTitle,
+      viewType,
     })
 
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
@@ -224,6 +240,7 @@ export const renderListView = async (
     })
 
     const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
+    const hasDeletePermission = permissions?.collections?.[collectionSlug]?.delete
 
     const serverProps: ListViewServerPropsOnly = {
       collectionConfig,
@@ -244,6 +261,7 @@ export const renderListView = async (
       clientProps: {
         collectionSlug,
         hasCreatePermission,
+        hasDeletePermission,
         newDocumentURL,
       },
       collectionConfig,
@@ -278,6 +296,7 @@ export const renderListView = async (
                 disableQueryPresets,
                 enableRowSelections,
                 hasCreatePermission,
+                hasDeletePermission,
                 listPreferences: collectionPreferences,
                 newDocumentURL,
                 queryPreset,
@@ -285,6 +304,7 @@ export const renderListView = async (
                 renderedFilters,
                 resolvedFilterOptions,
                 Table,
+                viewType,
               } satisfies ListViewClientProps,
               Component: collectionConfig?.admin?.components?.views?.list?.Component,
               Fallback: DefaultListView,

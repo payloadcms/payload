@@ -17,3 +17,11 @@ export const navigateToDoc = async (page: Page, urlUtil: AdminUrlUtil) => {
   await page.waitForURL(regex)
   await goToFirstCell(page, urlUtil)
 }
+
+export const navigateToTrashedDoc = async (page: Page, urlUtil: AdminUrlUtil) => {
+  await page.goto(urlUtil.trash)
+  // wait for query params to arrive
+  const regex = new RegExp(`^${urlUtil.trash}(?:\\?.*)?$`)
+  await page.waitForURL(regex)
+  await goToFirstCell(page, urlUtil)
+}

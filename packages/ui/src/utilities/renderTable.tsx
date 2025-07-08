@@ -11,6 +11,7 @@ import type {
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
+  ViewTypes,
 } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
@@ -75,6 +76,7 @@ export const renderTable = ({
   renderRowTypes,
   tableAppearance,
   useAsTitle,
+  viewType,
 }: {
   clientCollectionConfig?: ClientCollectionConfig
   clientConfig?: ClientConfig
@@ -92,6 +94,7 @@ export const renderTable = ({
   renderRowTypes?: boolean
   tableAppearance?: 'condensed' | 'default'
   useAsTitle: CollectionConfig['admin']['useAsTitle']
+  viewType?: ViewTypes
 }): {
   columnState: Column[]
   Table: React.ReactNode
@@ -162,6 +165,7 @@ export const renderTable = ({
     | 'payload'
     | 'serverFields'
     | 'useAsTitle'
+    | 'viewType'
   > = {
     clientFields,
     columnPreferences,
@@ -173,6 +177,7 @@ export const renderTable = ({
     payload,
     serverFields,
     useAsTitle,
+    viewType,
   }
 
   if (isPolymorphic) {
