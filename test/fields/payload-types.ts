@@ -355,6 +355,12 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
+  arrayWithCustomID?:
+    | {
+        id?: string | null;
+        text?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1976,6 +1982,12 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
     | {
         text?: T;
         id?: T;
+      };
+  arrayWithCustomID?:
+    | T
+    | {
+        id?: T;
+        text?: T;
       };
   updatedAt?: T;
   createdAt?: T;
