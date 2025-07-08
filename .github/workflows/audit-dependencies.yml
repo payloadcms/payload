@@ -1,0 +1,31 @@
+name: audit-dependencies
+
+on:
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: 23.11.0
+  PNPM_VERSION: 9.7.1
+  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+
+jobs:
+  audit:
+    name: audit-${{ github.ref_name }}-${{ github.sha }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      - name: Run audit dependencies script
+        id: audit_dependencies
+        run: ./.github/workflows/audit-dependencies.sh
+
+      - name: Echo output
+        run: |
+          echo "Vulnerabilities found: ${{ steps.audit_dependencies.outputs.vulnerabilities }}"
