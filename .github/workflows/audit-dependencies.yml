@@ -2,6 +2,11 @@ name: audit-dependencies
 
 on:
   workflow_dispatch:
+    inputs:
+      audit-level:
+        description: The level of audit to run (low, moderate, high, critical)
+        required: false
+        default: critical
 
 env:
   NODE_VERSION: 23.11.0
@@ -24,7 +29,7 @@ jobs:
 
       - name: Run audit dependencies script
         id: audit_dependencies
-        run: ./.github/workflows/audit-dependencies.sh
+        run: ./.github/workflows/audit-dependencies.sh ${{ inputs.audit-level }}
 
       - name: Echo output
         run: |
