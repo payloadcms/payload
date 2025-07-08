@@ -58,7 +58,6 @@ export function mergeFormStateFromClipboard({
   const copyFromField = typeof rowIndexFromClipboard !== 'number'
   const pasteIntoField = typeof rowIndex !== 'number'
   const fromRowToField = !copyFromField && pasteIntoField
-  const fromRowToRow = !copyFromField && !pasteIntoField
   const isArray = typeFromClipboard === 'array'
 
   let pathToReplace: string
@@ -105,10 +104,6 @@ export function mergeFormStateFromClipboard({
         delete formState[fieldPath]
       }
     }
-  }
-
-  if (!isArray && fromRowToRow) {
-    delete formState[path].rows[rowIndex].customComponents
   }
 
   for (const clipboardPath in dataFromClipboard) {
