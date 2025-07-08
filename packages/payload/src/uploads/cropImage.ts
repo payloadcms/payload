@@ -57,7 +57,7 @@ export async function cropImage({
           file.tempFilePath || file.data,
           sharpOptions,
         ).metadata()
-        adjustedHeight = animatedMetadata.pages ? animatedMetadata.height : originalHeight
+        adjustedHeight = animatedMetadata.pages ? animatedMetadata.height! : originalHeight
       }
 
       return {

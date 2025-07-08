@@ -234,9 +234,9 @@ const sanitizeResizeConfig = (resizeConfig: ImageSize): ImageSize => {
  */
 function extractHeightFromImage(sharpMetadata: SharpMetadata): number {
   if (sharpMetadata?.pages) {
-    return sharpMetadata.height / sharpMetadata.pages
+    return sharpMetadata.height! / sharpMetadata.pages
   }
-  return sharpMetadata.height
+  return sharpMetadata.height!
 }
 
 /**
@@ -354,7 +354,7 @@ export async function resizeAndTransformImageSizes({
           resizeWidth = resizeImageMeta.width
         }
 
-        const resizeAspectRatio = resizeWidth / resizeHeight
+        const resizeAspectRatio = resizeWidth! / resizeHeight
         const prioritizeHeight = resizeAspectRatio < originalAspectRatio
         // Scales the image before extracting from it
         resized = imageToResize.resize({
@@ -378,7 +378,7 @@ export async function resizeAndTransformImageSizes({
         })
         resizeImageMeta.width = info.width
 
-        const halfResizeX = resizeWidth / 2
+        const halfResizeX = resizeWidth! / 2
         const xFocalCenter = resizeImageMeta.width * (incomingFocalPoint!.x / 100)
         const calculatedRightPixelBound = xFocalCenter + halfResizeX
         let leftBound = xFocalCenter - halfResizeX
@@ -386,7 +386,7 @@ export async function resizeAndTransformImageSizes({
         // if the right bound is greater than the image width, adjust the left bound
         // keeping focus on the right
         if (calculatedRightPixelBound > resizeImageMeta.width) {
-          leftBound = resizeImageMeta.width - resizeWidth
+          leftBound = resizeImageMeta.width - resizeWidth!
         }
 
         // if the left bound is less than 0, adjust the left bound to 0
@@ -416,7 +416,7 @@ export async function resizeAndTransformImageSizes({
           height: resizeHeight,
           left: Math.floor(leftBound),
           top: Math.floor(topBound),
-          width: resizeWidth,
+          width: resizeWidth!,
         })
       } else {
         resized = imageToResize.resize(imageResizeConfig)
