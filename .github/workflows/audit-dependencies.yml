@@ -34,4 +34,5 @@ jobs:
       - name: Failure output
         if: failure()
         run: |
-          echo "Vulnerabilities found: ${{ steps.audit_dependencies.outputs.vulnerabilities }}"
+          echo "Vulnerabilities found."
+          cat audit_output.json

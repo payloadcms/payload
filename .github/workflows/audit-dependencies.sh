@@ -23,8 +23,6 @@ if [[ "${audit_length}" -gt "0" ]]; then
   echo "Actionable vulnerabilities found in the following packages:"
   jq -r '.[] | "\u001b[1m\(.package)\u001b[0m vulnerable in \u001b[31m\(.vulnerable)\u001b[0m fixed in \u001b[32m\(.fixed_in)\u001b[0m"' $output_file | while read -r line; do echo -e "$line"; done
   echo "Output written to ${output_file}"
-  vuln_output=$(jq -c '.' $output_file)
-  echo "{vulnerabilities}={$vuln_output}" >>$GITHUB_OUTPUT
   exit 1
 else
   echo "No actionable vulnerabilities"
