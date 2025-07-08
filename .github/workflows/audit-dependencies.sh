@@ -21,13 +21,8 @@ audit_length=$(jq 'length' $output_file)
 
 if [[ "${audit_length}" -gt "0" ]]; then
   echo "Actionable vulnerabilities found in the following packages:"
-  # audit_output=$(jq -r '.[] | "\u001b[1m\(.package)\u001b[0m vulnerable in \u001b[31m\(.vulnerable)\u001b[0m fixed in \u001b[32m\(.fixed_in)\u001b[0m"' $output_file | while read -r line; do echo -e "$line"; done)
-  unstyled_output=$(jq -r '.[] | "\(.package) vulnerable in \(.vulnerable) fixed in \(.fixed_in)"' $output_file | while read -r line; do echo -e "$line"; done)
-  # echo "${audit_output}"
-  echo "${unstyled_output}"
+  jq -r '.[] | "\u001b[1m\(.package)\u001b[0m vulnerable in \u001b[31m\(.vulnerable)\u001b[0m fixed in \u001b[32m\(.fixed_in)\u001b[0m"' $output_file | while read -r line; do echo -e "$line"; done
   echo "Output written to ${output_file}"
-  # echo "audit_output=$audit_output" >>$GITHUB_OUTPUT
-  echo "audit_output=$unstyled_output" >>$GITHUB_OUTPUT
   exit 1
 else
   echo "No actionable vulnerabilities"
