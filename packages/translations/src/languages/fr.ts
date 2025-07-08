@@ -321,6 +321,7 @@ export const frTranslations: DefaultTranslationsObject = {
     moveUp: 'Déplacer vers le haut',
     moving: 'Déménagement',
     movingCount: 'Déplacement de {{count}} {{label}}',
+    newLabel: 'Nouveau {{label}}',
     newPassword: 'Nouveau mot de passe',
     next: 'Prochain',
     no: 'Non',

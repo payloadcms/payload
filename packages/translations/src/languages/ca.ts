@@ -314,6 +314,7 @@ export const caTranslations: DefaultTranslationsObject = {
     moveUp: 'Move amunt',
     moving: 'En moviment',
     movingCount: 'Moure {{count}} {{label}}',
+    newLabel: 'Nou {{label}}',
     newPassword: 'Nova contrasenya',
     next: 'Seguent',
     no: 'No',

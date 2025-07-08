@@ -308,6 +308,7 @@ export const thTranslations: DefaultTranslationsObject = {
     moveUp: 'ขยับลง',
     moving: 'การย้ายที่อยู่',
     movingCount: 'ย้าย {{count}} {{label}}',
+    newLabel: 'ใหม่ {{label}}',
     newPassword: 'รหัสผ่านใหม่',
     next: 'ถัดไป',
     no: 'ไม่',

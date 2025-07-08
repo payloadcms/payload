@@ -36,7 +36,7 @@ export function ActiveQueryPreset({
         openPresetListDrawer()
       }}
       pillStyle={activePreset ? 'always-white' : 'light'}
-      size="small"
+      size="medium"
     >
       {activePreset?.isShared && <PeopleIcon className={`${baseClass}__shared`} />}
       <div className={`${baseClass}__label-text-max-width`}>

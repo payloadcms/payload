@@ -313,6 +313,7 @@ export const slTranslations: DefaultTranslationsObject = {
     moveUp: 'Premakni gor',
     moving: 'Premikanje',
     movingCount: 'Premikanje {{count}} {{label}}',
+    newLabel: 'Nov {{label}}',
     newPassword: 'Novo geslo',
     next: 'Naprej',
     no: 'Ne',

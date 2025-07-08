@@ -313,6 +313,7 @@ export const viTranslations: DefaultTranslationsObject = {
     moveUp: 'Di chuyển lên',
     moving: 'Di chuyển',
     movingCount: 'Di chuyển {{count}} {{label}}',
+    newLabel: 'Mới {{label}}',
     newPassword: 'Mật khảu mới',
     next: 'Tiếp theo',
     no: 'Không',

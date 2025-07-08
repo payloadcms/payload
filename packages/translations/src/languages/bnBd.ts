@@ -315,6 +315,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     moveUp: 'উপরে সরান',
     moving: 'স্থানান্তর করা হচ্ছে',
     movingCount: '{{count}} {{label}} স্থানান্তর করা হচ্ছে',
+    newLabel: 'নতুন {{label}}',
     newPassword: 'নতুন পাসওয়ার্ড',
     next: 'পরবর্তী',
     no: 'না',

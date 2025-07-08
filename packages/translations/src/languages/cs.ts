@@ -312,6 +312,7 @@ export const csTranslations: DefaultTranslationsObject = {
     moveUp: 'Posunout nahoru',
     moving: 'Přesun',
     movingCount: 'Přesunout {{count}} {{label}}',
+    newLabel: 'Nový {{label}}',
     newPassword: 'Nové heslo',
     next: 'Další',
     no: 'Ne',

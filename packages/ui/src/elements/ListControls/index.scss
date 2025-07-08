@@ -2,13 +2,47 @@
 
 @layer payload-default {
   .list-controls {
+    &__outer-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: base(0.5);
+    }
+
     &__wrap {
+      flex-grow: 1;
       display: flex;
       align-items: center;
       background-color: var(--theme-elevation-50);
       border-radius: var(--style-radius-m);
       padding: base(0.6);
       gap: base(0.6);
+    }
+
+    &__wrap--with-presets {
+      max-width: 50%;
+    }
+
+    &__presets {
+      display: flex;
+      gap: base(0.6);
+      align-items: center;
+    }
+
+    &__preset-controls {
+      display: flex;
+      gap: base(0.6);
+
+      button {
+        background-color: transparent;
+        font-size: inherit;
+        line-height: inherit;
+        color: inherit;
+        border: none;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+      }
     }
 
     .search-filter {
@@ -41,7 +75,14 @@
     }
 
     @include small-break {
+      &__outer-wrap {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
       &__wrap {
+        max-width: unset;
+        width: 100%;
         flex-wrap: wrap;
         background-color: unset;
         padding: 0;

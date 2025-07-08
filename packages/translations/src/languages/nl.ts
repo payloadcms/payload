@@ -317,6 +317,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     moveUp: 'Verplaats naar boven',
     moving: 'Verhuizen',
     movingCount: 'Verplaatsen {{count}} {{label}}',
+    newLabel: 'Nieuw {{label}}',
     newPassword: 'Nieuw wachtwoord',
     next: 'Volgende',
     no: 'Nee',

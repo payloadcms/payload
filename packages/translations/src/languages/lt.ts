@@ -316,6 +316,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     moveUp: 'Pakilti',
     moving: 'Keliauja',
     movingCount: 'Perkeliama {{count}} {{label}}',
+    newLabel: 'Naujas {{label}}',
     newPassword: 'Naujas slaptažodis',
     next: 'Toliau',
     no: 'Ne',

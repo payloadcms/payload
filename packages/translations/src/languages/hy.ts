@@ -314,6 +314,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     moveUp: 'Տեղափոխել վերև',
     moving: 'Տեղափոխվում',
     movingCount: 'Տեղափոխվում է {{count}} {{label}}',
+    newLabel: 'Նոր {{label}}',
     newPassword: 'Նոր գաղտնաբառ',
     next: 'Հաջորդ',
     no: 'Ոչ',

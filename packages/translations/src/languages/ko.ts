@@ -311,6 +311,7 @@ export const koTranslations: DefaultTranslationsObject = {
     moveUp: '위로 이동',
     moving: '이동하는',
     movingCount: '{{count}} {{label}}을(를) 이동시킵니다.',
+    newLabel: '새로운 {{label}}',
     newPassword: '새 비밀번호',
     next: '다음',
     no: '아니요',

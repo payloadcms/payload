@@ -315,6 +315,7 @@ export const huTranslations: DefaultTranslationsObject = {
     moveUp: 'Mozgatás felfelé',
     moving: 'Költözés',
     movingCount: '{{Count}} {{label}} mozgatása',
+    newLabel: 'Új {{label}}',
     newPassword: 'Új jelszó',
     next: 'Következő',
     no: 'Nem',

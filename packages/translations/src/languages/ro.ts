@@ -318,6 +318,7 @@ export const roTranslations: DefaultTranslationsObject = {
     moveUp: 'Mutați în sus',
     moving: 'În mișcare',
     movingCount: 'Mutarea {{count}} {{eticheta}}',
+    newLabel: 'Nou {{label}}',
     newPassword: 'Parolă nouă',
     next: 'Următorul',
     no: 'Nu',

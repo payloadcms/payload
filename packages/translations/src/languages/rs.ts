@@ -314,6 +314,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     moveUp: 'Помери горе',
     moving: 'Pomeranje',
     movingCount: 'Pomeranje {{count}} {{label}}',
+    newLabel: 'Novi {{label}}',
     newPassword: 'Нова лозинка',
     next: 'Следећи',
     no: 'Не',

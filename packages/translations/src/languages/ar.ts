@@ -308,6 +308,7 @@ export const arTranslations: DefaultTranslationsObject = {
     moveUp: 'التّحريك إلى الأعلى',
     moving: 'التحرك',
     movingCount: 'نقل {{count}} {{label}}',
+    newLabel: 'جديد {{label}}',
     newPassword: 'كلمة مرور جديدة',
     next: 'التالي',
     no: 'لا',

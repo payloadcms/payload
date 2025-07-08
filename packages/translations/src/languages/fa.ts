@@ -312,6 +312,7 @@ export const faTranslations: DefaultTranslationsObject = {
     moveUp: 'حرکت به بالا',
     moving: 'در حال حرکت',
     movingCount: 'انتقال {{count}} {{label}}',
+    newLabel: 'جدید {{label}}',
     newPassword: 'گذرواژه تازه',
     next: 'بعدی',
     no: 'نه',

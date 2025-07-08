@@ -3,7 +3,7 @@ import type { CollectionSlug, QueryPreset, SanitizedCollectionPermission } from 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { transformColumnsToPreferences, transformColumnsToSearchParams } from 'payload/shared'
-import React, { Fragment, useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import { useConfig } from '../../providers/Config/index.js'
@@ -12,8 +12,6 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { useListDrawer } from '../ListDrawer/index.js'
-import { PopupList } from '../Popup/index.js'
-import { PopupListGroupLabel } from '../Popup/PopupGroupLabel/index.js'
 import { Translation } from '../Translation/index.js'
 
 const confirmDeletePresetModalSlug = 'confirm-delete-preset'
@@ -196,60 +194,73 @@ export const useQueryPresets = ({
   // Memoize so that components aren't re-rendered on query and column changes
   const queryPresetMenuItems = useMemo(() => {
     const hasModifiedPreset = activePreset && modified
+    const items: React.ReactNode[] = []
 
-    return [
-      <PopupListGroupLabel
-        key="preset-group-label"
-        label={getTranslation(presetConfig?.labels?.plural, i18n)}
-      />,
-      <PopupList.ButtonGroup key="preset-group-buttons">
-        {hasModifiedPreset && (
-          <PopupList.Button
-            onClick={async () => {
-              await refineListData(
-                {
-                  columns: transformColumnsToSearchParams(activePreset.columns),
-                  where: activePreset.where,
-                },
-                false,
-              )
-            }}
-          >
-            {t('general:reset')}
-          </PopupList.Button>
-        )}
-        {hasModifiedPreset && queryPresetPermissions.update && (
-          <PopupList.Button
-            onClick={async () => {
-              await saveCurrentChanges()
-            }}
-          >
-            {activePreset?.isShared ? t('general:updateForEveryone') : t('general:save')}
-          </PopupList.Button>
-        )}
-        <PopupList.Button
-          onClick={() => {
-            openCreateNewDrawer()
+    if (hasModifiedPreset) {
+      items.push(
+        <button
+          key="reset"
+          onClick={async () => {
+            await refineListData(
+              {
+                columns: transformColumnsToSearchParams(activePreset.columns),
+                where: activePreset.where,
+              },
+              false,
+            )
           }}
+          type="button"
         >
-          {t('general:createNew')}
-        </PopupList.Button>
-        {activePreset && queryPresetPermissions?.delete && (
-          <>
-            <PopupList.Button onClick={() => openModal(confirmDeletePresetModalSlug)}>
-              {t('general:delete')}
-            </PopupList.Button>
-            <PopupList.Button
-              onClick={() => {
-                openDocumentDrawer()
-              }}
-            >
-              {t('general:edit')}
-            </PopupList.Button>
-          </>
-        )}
-      </PopupList.ButtonGroup>,
-    ]
+          {t('general:reset')}
+        </button>,
+      )
+    }
+
+    if (hasModifiedPreset && queryPresetPermissions.update) {
+      items.push(
+        <button
+          key="save"
+          onClick={async () => {
+            await saveCurrentChanges()
+          }}
+          type="button"
+        >
+          {activePreset?.isShared ? t('general:updateForEveryone') : t('general:save')}
+        </button>,
+      )
+    }
+
+    items.push(
+      <button
+        onClick={() => {
+          openCreateNewDrawer()
+        }}
+        type="button"
+      >
+        {t('general:newLabel', { label: presetConfig?.labels?.singular })}
+      </button>,
+    )
+
+    if (activePreset && queryPresetPermissions?.delete) {
+      items.push(
+        <button onClick={() => openModal(confirmDeletePresetModalSlug)} type="button">
+          {t('general:delete')}
+        </button>,
+      )
+
+      items.push(
+        <button
+          onClick={() => {
+            openDocumentDrawer()
+          }}
+          type="button"
+        >
+          {t('general:edit')}
+        </button>,
+      )
+    }
+
+    return items
   }, [
     activePreset,
     queryPresetPermissions?.delete,
@@ -261,8 +272,7 @@ export const useQueryPresets = ({
     t,
     refineListData,
     modified,
-    presetConfig?.labels?.plural,
-    i18n,
+    presetConfig?.labels?.singular,
   ])
 
   return {

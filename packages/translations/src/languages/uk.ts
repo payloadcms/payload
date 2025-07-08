@@ -313,6 +313,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     moveUp: 'Перемістити вище',
     moving: 'Переїзд',
     movingCount: 'Переміщення {{count}} {{label}}',
+    newLabel: 'Новий {{label}}',
     newPassword: 'Новий пароль',
     next: 'Наступний',
     no: 'Ні',

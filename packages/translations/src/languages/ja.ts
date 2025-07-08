@@ -314,6 +314,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     moveUp: '上へ移動',
     moving: '移動中',
     movingCount: '{{count}} {{label}}を移動します',
+    newLabel: '新しい {{label}}',
     newPassword: '新しいパスワード',
     next: '次',
     no: 'いいえ',

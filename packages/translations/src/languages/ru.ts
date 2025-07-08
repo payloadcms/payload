@@ -316,6 +316,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     moveUp: 'Сдвинуть вверх',
     moving: 'Переезд',
     movingCount: 'Перемещение {{count}} {{label}}',
+    newLabel: 'Новый {{label}}',
     newPassword: 'Новый пароль',
     next: 'Следующий',
     no: 'Нет',

@@ -310,6 +310,7 @@ export const etTranslations: DefaultTranslationsObject = {
     moveUp: 'Liiguta üles',
     moving: 'Liikumine',
     movingCount: 'Liigutan {{count}} {{label}}',
+    newLabel: 'Uus {{label}}',
     newPassword: 'Uus parool',
     next: 'Järgmine',
     no: 'Ei',

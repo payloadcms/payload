@@ -313,6 +313,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     moveUp: 'Нагоре',
     moving: 'Преместване',
     movingCount: 'Преместване на {{count}} {{label}}',
+    newLabel: 'Нов {{label}}',
     newPassword: 'Нова парола',
     next: 'Следващ',
     no: 'Не',

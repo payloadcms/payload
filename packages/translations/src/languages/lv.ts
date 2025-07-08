@@ -313,6 +313,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     moveUp: 'Pārvietot uz augšu',
     moving: 'Pārvietojas',
     movingCount: 'Pārvietojot {{count}} {{label}}',
+    newLabel: 'Jauns {{label}}',
     newPassword: 'Jauna parole',
     next: 'Nākamais',
     no: 'Nē',

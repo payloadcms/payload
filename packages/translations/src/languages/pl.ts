@@ -314,6 +314,7 @@ export const plTranslations: DefaultTranslationsObject = {
     moveUp: 'Przesuń wyżej',
     moving: 'Przeprowadzka',
     movingCount: 'Przenoszenie {{count}} {{label}}',
+    newLabel: 'Nowy {{label}}',
     newPassword: 'Nowe hasło',
     next: 'Następny',
     no: 'Nie',

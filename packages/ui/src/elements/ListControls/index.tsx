@@ -40,7 +40,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     enableColumns = true,
     enableFilters = true,
     enableSort = false,
-    listMenuItems: listMenuItemsFromProps,
+    listMenuItems,
     queryPreset: activePreset,
     queryPresetPermissions,
     renderedFilters,
@@ -137,101 +137,101 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     }
   }, [t, listSearchableFields, i18n, searchLabel])
 
-  let listMenuItems: React.ReactNode[] = listMenuItemsFromProps
-
-  if (
-    collectionConfig?.enableQueryPresets &&
-    !disableQueryPresets &&
-    queryPresetMenuItems?.length > 0
-  ) {
-    // Cannot push or unshift into `listMenuItemsFromProps` as it will mutate the original array
-    listMenuItems = [
-      ...queryPresetMenuItems,
-      listMenuItemsFromProps?.length > 0 ? <PopupList.Divider key="divider" /> : null,
-      ...(listMenuItemsFromProps || []),
-    ]
-  }
+  const isQueryPresetsEnabled = collectionConfig?.enableQueryPresets && !disableQueryPresets
 
   return (
     <Fragment>
       <div className={baseClass}>
-        <div className={`${baseClass}__wrap`}>
-          <SearchIcon />
-          <SearchFilter
-            handleChange={handleSearchChange}
-            key={collectionSlug}
-            // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
-            label={searchLabelTranslated.current}
-            searchQueryParam={query?.search}
-          />
-          {activePreset && hasModifiedPreset ? (
-            <div className={`${baseClass}__modified`}>Modified</div>
-          ) : null}
-          <div className={`${baseClass}__buttons`}>
-            <div className={`${baseClass}__buttons-wrap`}>
-              {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
-              {enableColumns && (
-                <Pill
-                  aria-controls={`${baseClass}-columns`}
-                  aria-expanded={visibleDrawer === 'columns'}
-                  className={`${baseClass}__toggle-columns`}
-                  icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
-                  onClick={() =>
-                    setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
-                  }
-                  pillStyle="light"
-                  size="small"
-                >
-                  {t('general:columns')}
-                </Pill>
-              )}
-              {enableFilters && (
-                <Pill
-                  aria-controls={`${baseClass}-where`}
-                  aria-expanded={visibleDrawer === 'where'}
-                  className={`${baseClass}__toggle-where`}
-                  icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
-                  onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
-                  pillStyle="light"
-                  size="small"
-                >
-                  {t('general:filters')}
-                </Pill>
-              )}
-              {enableSort && (
-                <Pill
-                  aria-controls={`${baseClass}-sort`}
-                  aria-expanded={visibleDrawer === 'sort'}
-                  className={`${baseClass}__toggle-sort`}
-                  icon={<ChevronIcon />}
-                  onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
-                  pillStyle="light"
-                  size="small"
-                >
-                  {t('general:sort')}
-                </Pill>
-              )}
-              {!disableQueryPresets && (
-                <ActiveQueryPreset
-                  activePreset={activePreset}
-                  openPresetListDrawer={openPresetListDrawer}
-                  resetPreset={resetPreset}
-                />
-              )}
-              {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
-                <Popup
-                  button={<Dots ariaLabel={t('general:moreOptions')} />}
-                  className={`${baseClass}__popup`}
-                  horizontalAlign="right"
-                  id="list-menu"
-                  size="medium"
-                  verticalAlign="bottom"
-                >
-                  {listMenuItems.map((item, i) => (
-                    <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
-                  ))}
-                </Popup>
-              )}
+        <div className={`${baseClass}__outer-wrap`}>
+          {isQueryPresetsEnabled && (
+            <div className={`${baseClass}__presets`}>
+              <ActiveQueryPreset
+                activePreset={activePreset}
+                openPresetListDrawer={openPresetListDrawer}
+                resetPreset={resetPreset}
+              />
+              <div className={`${baseClass}__preset-controls`}>{queryPresetMenuItems}</div>
+            </div>
+          )}
+          <div
+            className={[
+              `${baseClass}__wrap`,
+              isQueryPresetsEnabled && `${baseClass}__wrap--with-presets`,
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            <SearchIcon />
+            <SearchFilter
+              handleChange={handleSearchChange}
+              key={collectionSlug}
+              label={searchLabelTranslated.current}
+              searchQueryParam={query?.search}
+            />
+            {activePreset && hasModifiedPreset ? (
+              <div className={`${baseClass}__modified`}>Modified</div>
+            ) : null}
+            <div className={`${baseClass}__buttons`}>
+              <div className={`${baseClass}__buttons-wrap`}>
+                {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
+                {enableColumns && (
+                  <Pill
+                    aria-controls={`${baseClass}-columns`}
+                    aria-expanded={visibleDrawer === 'columns'}
+                    className={`${baseClass}__toggle-columns`}
+                    icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
+                    onClick={() =>
+                      setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
+                    }
+                    pillStyle="light"
+                    size="small"
+                  >
+                    {t('general:columns')}
+                  </Pill>
+                )}
+                {enableFilters && (
+                  <Pill
+                    aria-controls={`${baseClass}-where`}
+                    aria-expanded={visibleDrawer === 'where'}
+                    className={`${baseClass}__toggle-where`}
+                    icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
+                    onClick={() =>
+                      setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)
+                    }
+                    pillStyle="light"
+                    size="small"
+                  >
+                    {t('general:filters')}
+                  </Pill>
+                )}
+                {enableSort && (
+                  <Pill
+                    aria-controls={`${baseClass}-sort`}
+                    aria-expanded={visibleDrawer === 'sort'}
+                    className={`${baseClass}__toggle-sort`}
+                    icon={<ChevronIcon />}
+                    onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
+                    pillStyle="light"
+                    size="small"
+                  >
+                    {t('general:sort')}
+                  </Pill>
+                )}
+                {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
+                  <Popup
+                    button={<Dots ariaLabel={t('general:moreOptions')} />}
+                    className={`${baseClass}__popup`}
+                    horizontalAlign="right"
+                    id="list-menu"
+                    size="medium"
+                    verticalAlign="bottom"
+                  >
+                    {listMenuItems.map((item, i) => (
+                      <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
+                    ))}
+                  </Popup>
+                )}
+              </div>
             </div>
           </div>
         </div>

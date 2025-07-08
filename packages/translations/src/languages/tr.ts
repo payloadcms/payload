@@ -317,6 +317,7 @@ export const trTranslations: DefaultTranslationsObject = {
     moveUp: 'Yukarı taşı',
     moving: 'Taşınma',
     movingCount: '{{count}} {{label}} taşıma',
+    newLabel: 'Yeni {{label}}',
     newPassword: 'Yeni parola',
     next: 'Sonraki',
     no: 'Hayır',

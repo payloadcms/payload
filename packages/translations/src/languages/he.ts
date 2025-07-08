@@ -306,6 +306,7 @@ export const heTranslations: DefaultTranslationsObject = {
     moveUp: 'הזז למעלה',
     moving: 'מזיז',
     movingCount: 'מזיז {{count}} {{label}}',
+    newLabel: 'חדש {{label}}',
     newPassword: 'סיסמה חדשה',
     next: 'הבא',
     no: 'לא',

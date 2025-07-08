@@ -300,6 +300,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     moveUp: '向上移动',
     moving: '移动',
     movingCount: '移动 {{count}}个{{label}}',
+    newLabel: '新的 {{label}}',
     newPassword: '新密码',
     next: '下一个',
     no: '否',

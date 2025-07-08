@@ -316,6 +316,7 @@ export const itTranslations: DefaultTranslationsObject = {
     moveUp: 'Sposta sopra',
     moving: 'In movimento',
     movingCount: 'Spostando {{count}} {{label}}',
+    newLabel: 'Nuovo {{label}}',
     newPassword: 'Nuova Password',
     next: 'Successivo',
     no: 'No',
