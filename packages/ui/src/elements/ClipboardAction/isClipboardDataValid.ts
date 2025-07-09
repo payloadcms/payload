@@ -29,13 +29,13 @@ export function isClipboardDataValid({ data, path, ...args }: ClipboardPasteActi
   }
 }
 
-export function isClipboardFieldsValid({
+function isClipboardFieldsValid({
   fieldsFromClipboard,
   fieldsFromConfig,
 }: {
   fieldsFromClipboard: ClientField[]
   fieldsFromConfig?: ClientField[]
-}) {
+}): boolean {
   if (!fieldsFromConfig || fieldsFromClipboard.length !== fieldsFromConfig?.length) {
     return false
   }
@@ -69,7 +69,7 @@ export function isClipboardFieldsValid({
   })
 }
 
-export function isClipboardBlocksValid({
+function isClipboardBlocksValid({
   blocksFromClipboard,
   blocksFromConfig,
 }: {
@@ -106,10 +106,4 @@ export function isClipboardBlocksValid({
     }
   }
   return true
-}
-
-export function arePathsEquivalent(pathA: string, pathB: string) {
-  const regex = /\.\d+/g
-  const replacement = '.*'
-  return pathA.replace(regex, replacement) === pathB.replace(regex, replacement)
 }
