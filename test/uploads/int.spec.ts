@@ -3,7 +3,7 @@ import type { CollectionSlug, Payload } from 'payload'
 import { randomUUID } from 'crypto'
 import fs from 'fs'
 import path from 'path'
-import { getFileByPath } from 'payload'
+import { _internal_safeFetchGlobal, getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 
@@ -575,6 +575,46 @@ describe('Collections - Uploads', () => {
       `(
         'should block or filter uploading from $collection with URL: $url',
         async ({ url, collection, errorContains }) => {
+          const globalCachedFn = _internal_safeFetchGlobal.lookup
+
+          let hostname = new URL(url).hostname
+
+          const isIPV6 = hostname.includes('::')
+
+          // Strip brackets from IPv6 addresses
+          // eslint-disable-next-line jest/no-conditional-in-test
+          if (isIPV6) {
+            hostname = hostname.slice(1, -1)
+          }
+
+          // Here we're essentially mocking our own DNS provider, to get 'https://www.payloadcms.com/test.png' to resolve to the IP
+          // we'd like to test for
+          // @ts-expect-error this does not need to be mocked 100% correctly
+          _internal_safeFetchGlobal.lookup = (_hostname, _options, callback) => {
+            // eslint-disable-next-line jest/no-conditional-in-test
+            callback(null, hostname as any, isIPV6 ? 6 : 4)
+          }
+
+          await expect(
+            payload.create({
+              collection,
+              data: {
+                filename: 'test.png',
+                // Need to pass a domain for lookup to be called. We monkey patch the IP lookup function above
+                // to return the IP address we want to test.
+                url: 'https://www.payloadcms.com/test.png',
+              },
+            }),
+          ).rejects.toThrow(
+            expect.objectContaining({
+              name: 'FileRetrievalError',
+              message: expect.stringContaining(errorContains),
+            }),
+          )
+
+          _internal_safeFetchGlobal.lookup = globalCachedFn
+
+          // Now ensure this throws if we pass the IP address directly, without the mock
           await expect(
             payload.create({
               collection,
