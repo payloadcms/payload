@@ -86,6 +86,8 @@ export const myTranslations: DefaultTranslationsObject = {
     deletingFile: 'ဖိုင်ကိုဖျက်ရာတွင် အမှားအယွင်းရှိနေသည်။',
     deletingTitle:
       '{{title}} ကို ဖျက်ရာတွင် အမှားအယွင်းရှိခဲ့သည်။ သင့် အင်တာနက်လိုင်းအား စစ်ဆေးပြီး ထပ်မံကြို့စားကြည့်ပါ။',
+    documentNotFound:
+      'Dokumen dengan ID {{id}} tidak dapat ditemui. Ia mungkin telah dipadam atau tidak pernah wujud, atau anda mungkin tidak mempunyai akses kepadanya.',
     emailOrPasswordIncorrect: 'ထည့်သွင်းထားသော အီးမေးလ် သို့မဟုတ် စကားဝှက်သည် မမှန်ပါ။',
     followingFieldsInvalid_one: 'ထည့်သွင်းထားသော အချက်အလက်သည် မမှန်ကန်ပါ။',
     followingFieldsInvalid_other: 'ထည့်သွင်းထားသော အချက်အလက်များသည် မမှန်ကန်ပါ။',

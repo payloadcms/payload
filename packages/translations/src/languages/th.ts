@@ -84,6 +84,8 @@ export const thTranslations: DefaultTranslationsObject = {
     correctInvalidFields: 'โปรดแก้ไขช่องที่ไม่ถูกต้อง',
     deletingFile: 'เกิดปัญหาระหว่างการลบไฟล์',
     deletingTitle: 'เกิดปัญหาระหว่างการลบ {{title}} โปรดตรวจสอบการเชื่อมต่อของคุณแล้วลองอีกครั้ง',
+    documentNotFound:
+      'ไม่พบเอกสารที่มี ID {{id}} อาจจะถูกลบหรือไม่เคยมีอยู่ หรือคุณอาจไม่มีสิทธิ์เข้าถึง',
     emailOrPasswordIncorrect: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
     followingFieldsInvalid_one: 'ช่องต่อไปนี้ไม่ถูกต้อง:',
     followingFieldsInvalid_other: 'ช่องต่อไปนี้ไม่ถูกต้อง:',

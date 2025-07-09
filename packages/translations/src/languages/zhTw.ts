@@ -82,6 +82,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     correctInvalidFields: '請更正無效區塊。',
     deletingFile: '刪除文件時出現了錯誤。',
     deletingTitle: '刪除{{title}}時出現了錯誤。請檢查您的網路連線並重試。',
+    documentNotFound: '找不到具有ID {{id}}的文件。可能已被刪除或從未存在，或者您可能無法訪問它。',
     emailOrPasswordIncorrect: '提供的電子郵件或密碼不正確。',
     followingFieldsInvalid_one: '下面的字串是無效的：',
     followingFieldsInvalid_other: '以下字串是無效的：',

@@ -88,6 +88,8 @@ export const roTranslations: DefaultTranslationsObject = {
     deletingFile: 'S-a produs o eroare la ștergerea fișierului.',
     deletingTitle:
       'S-a produs o eroare în timpul ștergerii {{title}}. Vă rugăm să verificați conexiunea și să încercați din nou.',
+    documentNotFound:
+      'Documentul cu ID-ul {{id}} nu a putut fi găsit. S-ar putea să fi fost șters sau să nu fi existat niciodată, sau s-ar putea să nu aveți acces la acesta.',
     emailOrPasswordIncorrect: 'Adresa de e-mail sau parola este incorectă.',
     followingFieldsInvalid_one: 'Următorul câmp nu este valid:',
     followingFieldsInvalid_other: 'Următoarele câmpuri nu sunt valabile:',

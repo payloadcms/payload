@@ -87,6 +87,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     deletingFile: 'Įvyko klaida trinant failą.',
     deletingTitle:
       'Įvyko klaida bandant ištrinti {{title}}. Patikrinkite savo ryšį ir bandykite dar kartą.',
+    documentNotFound:
+      'Dokumentas su ID {{id}} nerastas. Gali būti, kad jis buvo ištrintas arba niekada neegzistavo, arba jūs neturite prieigos prie jo.',
     emailOrPasswordIncorrect: 'Pateiktas el. pašto adresas arba slaptažodis yra neteisingi.',
     followingFieldsInvalid_one: 'Šis laukas yra netinkamas:',
     followingFieldsInvalid_other: 'Šie laukai yra neteisingi:',

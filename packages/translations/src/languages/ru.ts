@@ -87,6 +87,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     deletingFile: 'Произошла ошибка при удалении файла.',
     deletingTitle:
       'При удалении {{title}} произошла ошибка. Пожалуйста, проверьте соединение и повторите попытку.',
+    documentNotFound:
+      'Документ с ID {{id}} не удалось найти. Возможно, он был удален или никогда не существовал, или у вас нет доступа к нему.',
     emailOrPasswordIncorrect: 'Указанный email или пароль неверен.',
     followingFieldsInvalid_one: 'Следующее поле недействительно:',
     followingFieldsInvalid_other: 'Следующие поля недействительны:',

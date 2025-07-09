@@ -87,6 +87,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     deletingFile: 'ファイルの削除中にエラーが発生しました。',
     deletingTitle:
       '{{title}} を削除する際にエラーが発生しました。接続を確認してからもう一度お試しください。',
+    documentNotFound:
+      'ID {{id}}のドキュメントが見つかりませんでした。削除されたか、存在しなかったか、またはアクセス権限がない可能性があります。',
     emailOrPasswordIncorrect: 'メールアドレス、または、パスワードが正しくありません。',
     followingFieldsInvalid_one: '次のフィールドは無効です:',
     followingFieldsInvalid_other: '次のフィールドは無効です:',

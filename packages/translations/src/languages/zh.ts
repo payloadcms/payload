@@ -82,6 +82,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     correctInvalidFields: '请更正无效字段。',
     deletingFile: '删除文件时出现了错误。',
     deletingTitle: '删除{{title}}时出现了错误。请检查您的连接并重试。',
+    documentNotFound:
+      '无法找到ID为{{id}}的文档。可能是已经被删除，或者从未存在，或者您可能无法访问它。',
     emailOrPasswordIncorrect: '提供的电子邮件或密码不正确。',
     followingFieldsInvalid_one: '下面的字段是无效的：',
     followingFieldsInvalid_other: '以下字段是无效的：',

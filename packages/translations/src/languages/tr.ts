@@ -87,6 +87,8 @@ export const trTranslations: DefaultTranslationsObject = {
     deletingFile: 'Dosya silinirken bir hatayla karşılaşıldı.',
     deletingTitle:
       '{{title}} silinirken bir sorun yaşandı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.',
+    documentNotFound:
+      "ID'si {{id}} olan belge bulunamadı. Silinmiş olabilir, hiç var olmamış olabilir veya belgeye erişiminiz olmayabilir.",
     emailOrPasswordIncorrect: 'Girilen e-posta veya parola hatalı',
     followingFieldsInvalid_one: 'Lütfen geçersiz alanı düzeltin:',
     followingFieldsInvalid_other: 'Lütfen geçersiz alanları düzeltin:',

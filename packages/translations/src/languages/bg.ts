@@ -86,6 +86,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     deletingFile: 'Имаше грешка при изтриването на файла.',
     deletingTitle:
       'Имаше проблем при изтриването на {{title}}. Моля провери връзката си и опитай отново.',
+    documentNotFound:
+      'Документът с ID {{id}} не можа да бъде намерен. Възможно е да е бил изтрит или никога да не е съществувал или може би нямате достъп до него.',
     emailOrPasswordIncorrect: 'Имейлът или паролата не са правилни.',
     followingFieldsInvalid_one: 'Следното поле е некоректно:',
     followingFieldsInvalid_other: 'Следните полета са некоректни:',

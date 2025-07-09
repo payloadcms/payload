@@ -86,6 +86,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     deletingFile: 'Radās kļūda, dzēšot failu.',
     deletingTitle:
       'Radās kļūda, dzēšot {{title}}. Lūdzu, pārbaudiet savienojumu un mēģiniet vēlreiz.',
+    documentNotFound:
+      'Dokuments ar ID {{id}} netika atrasts. Iespējams, tas ir izdzēsts vai nekad nav eksistējis, vai arī jums nav pieejas tam.',
     emailOrPasswordIncorrect: 'Norādītais e-pasts vai parole nav pareiza.',
     followingFieldsInvalid_one: 'Šis lauks nav derīgs:',
     followingFieldsInvalid_other: 'Šie lauki nav derīgi:',

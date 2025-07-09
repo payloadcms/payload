@@ -86,6 +86,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     deletingFile: 'Det oppstod en feil under sletting av filen.',
     deletingTitle:
       'Det oppstod en feil under sletting av {{title}}. Sjekk tilkoblingen og prøv igjen.',
+    documentNotFound:
+      'Dokumentet med ID {{id}} kunne ikke bli funnet. Det kan ha blitt slettet eller aldri eksistert, eller du har kanskje ikke tilgang til det.',
     emailOrPasswordIncorrect: 'E-postadressen eller passordet er feil.',
     followingFieldsInvalid_one: 'Følgende felt er ugyldig:',
     followingFieldsInvalid_other: 'Følgende felter er ugyldige:',
