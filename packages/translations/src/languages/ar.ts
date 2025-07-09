@@ -286,6 +286,7 @@ export const arTranslations: DefaultTranslationsObject = {
     filterWhere: 'تصفية {{label}} حيث',
     globals: 'عامة',
     goBack: 'العودة',
+    groupByLabel: 'التجميع حسب {{label}}',
     import: 'استيراد',
     isEditing: 'يحرر',
     item: 'عنصر',

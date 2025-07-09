@@ -288,6 +288,7 @@ jobs:
           - lexical__collections__Lexical__e2e__blocks
           - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts
           - lexical__collections__RichText
+          - query-builder
           - query-presets
           - form-state
           - live-preview

@@ -290,6 +290,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     filterWhere: 'Де фільтрувати {{label}}',
     globals: 'Глобальні',
     goBack: 'Повернутися',
+    groupByLabel: 'Групувати за {{label}}',
     import: 'Імпорт',
     isEditing: 'редагує',
     item: 'предмет',

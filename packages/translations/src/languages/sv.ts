@@ -291,6 +291,7 @@ export const svTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrera {{label}} där',
     globals: 'Globala',
     goBack: 'Gå tillbaka',
+    groupByLabel: 'Gruppera efter {{label}}',
     import: 'Importera',
     isEditing: 'redigerar',
     item: 'artikel',

@@ -293,6 +293,7 @@ export const myTranslations: DefaultTranslationsObject = {
     filterWhere: 'နေရာတွင် စစ်ထုတ်ပါ။',
     globals: 'Globals',
     goBack: 'နောက်သို့',
+    groupByLabel: 'Berkumpulkan mengikut {{label}}',
     import: 'သွင်းကုန်',
     isEditing: 'ပြင်ဆင်နေသည်',
     item: 'barang',

@@ -293,6 +293,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtruoti {{label}}, kur',
     globals: 'Globalai',
     goBack: 'Grįžkite',
+    groupByLabel: 'Grupuoti pagal {{label}}',
     import: 'Importas',
     isEditing: 'redaguoja',
     item: 'daiktas',

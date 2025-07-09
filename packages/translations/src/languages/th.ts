@@ -286,6 +286,7 @@ export const thTranslations: DefaultTranslationsObject = {
     filterWhere: 'กรอง {{label}} เฉพาะ',
     globals: 'Globals',
     goBack: 'กลับไป',
+    groupByLabel: 'จัดกลุ่มตาม {{label}}',
     import: 'นำเข้า',
     isEditing: 'กำลังแก้ไข',
     item: 'รายการ',

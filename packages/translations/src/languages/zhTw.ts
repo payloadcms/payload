@@ -278,6 +278,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     filterWhere: '過濾{{label}}',
     globals: '全域',
     goBack: '返回',
+    groupByLabel: '按照 {{label}} 分類',
     import: '進口',
     isEditing: '正在編輯',
     item: '物品',

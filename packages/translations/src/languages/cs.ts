@@ -289,6 +289,7 @@ export const csTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrovat {{label}} kde',
     globals: 'Globální',
     goBack: 'Vrátit se',
+    groupByLabel: 'Seskupit podle {{label}}',
     import: 'Import',
     isEditing: 'upravuje',
     item: 'položka',

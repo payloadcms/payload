@@ -225,6 +225,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:filterWhere',
   'general:globals',
   'general:goBack',
+  'general:groupByLabel',
   'general:isEditing',
   'general:item',
   'general:items',

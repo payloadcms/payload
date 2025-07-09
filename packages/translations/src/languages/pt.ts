@@ -291,6 +291,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrar {{label}} em que',
     globals: 'Globais',
     goBack: 'Voltar',
+    groupByLabel: 'Agrupar por {{label}}',
     import: 'Importar',
     isEditing: 'está editando',
     item: 'item',

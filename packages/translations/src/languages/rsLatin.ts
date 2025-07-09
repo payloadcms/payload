@@ -291,6 +291,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filter {{label}} gde',
     globals: 'Globali',
     goBack: 'Vrati se',
+    groupByLabel: 'Grupiši po {{label}}',
     import: 'Uvoz',
     isEditing: 'uređuje',
     item: 'stavka',

@@ -293,6 +293,7 @@ export const huTranslations: DefaultTranslationsObject = {
     filterWhere: 'Szűrő {{label}} ahol',
     globals: 'Globálisok',
     goBack: 'Vissza',
+    groupByLabel: 'Csoportosítás {{label}} szerint',
     import: 'Behozatal',
     isEditing: 'szerkeszt',
     item: 'tétel',

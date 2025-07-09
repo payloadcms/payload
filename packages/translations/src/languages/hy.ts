@@ -291,6 +291,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     filterWhere: 'Ֆիլտրել {{label}}-ը, որտեղ',
     globals: 'Համընդհանուրներ',
     goBack: 'Հետ գնալ',
+    groupByLabel: 'Խմբավորել {{label}}-ով',
     import: 'Ներմուծում',
     isEditing: 'խմբագրում է',
     item: 'տարր',

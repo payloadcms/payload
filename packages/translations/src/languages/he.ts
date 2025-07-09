@@ -284,6 +284,7 @@ export const heTranslations: DefaultTranslationsObject = {
     filterWhere: 'סנן {{label}} בהם',
     globals: 'גלובלים',
     goBack: 'חזור',
+    groupByLabel: 'קבץ לפי {{label}}',
     import: 'יבוא',
     isEditing: 'עורך',
     item: 'פריט',

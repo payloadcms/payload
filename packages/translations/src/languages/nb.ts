@@ -291,6 +291,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrer {{label}} der',
     globals: 'Globale variabler',
     goBack: 'Gå tilbake',
+    groupByLabel: 'Grupper etter {{label}}',
     import: 'Import',
     isEditing: 'redigerer',
     item: 'vare',

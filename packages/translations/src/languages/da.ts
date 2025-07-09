@@ -288,6 +288,7 @@ export const daTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filter {{label}} hvor',
     globals: 'Globale',
     goBack: 'Gå tilbage',
+    groupByLabel: 'Gruppér efter {{label}}',
     import: 'Import',
     isEditing: 'redigerer',
     item: 'vare',

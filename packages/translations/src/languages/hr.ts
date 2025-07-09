@@ -291,6 +291,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filter {{label}} gdje',
     globals: 'Globali',
     goBack: 'Vrati se',
+    groupByLabel: 'Grupiraj po {{label}}',
     import: 'Uvoz',
     isEditing: 'uređuje',
     item: 'stavka',

@@ -292,6 +292,7 @@ export const skTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrovat kde je {{label}}',
     globals: 'Globalné',
     goBack: 'Vrátiť sa',
+    groupByLabel: 'Zoskupiť podľa {{label}}',
     import: 'Dovoz',
     isEditing: 'upravuje',
     item: 'položka',
