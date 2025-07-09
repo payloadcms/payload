@@ -21,6 +21,10 @@ export const initPage = async ({
   useLayoutReq,
 }: Args): Promise<InitPageResult> => {
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
+  const query = qs.parse(queryString, {
+    depth: 10,
+    ignoreQueryPrefix: true,
+  })
 
   const {
     cookies,
@@ -35,10 +39,7 @@ export const initPage = async ({
     overrides: {
       fallbackLocale: false,
       req: {
-        query: qs.parse(queryString, {
-          depth: 10,
-          ignoreQueryPrefix: true,
-        }),
+        query,
         routeParams,
       },
       urlSuffix: `${route}${searchParams ? queryString : ''}`,
@@ -79,6 +80,10 @@ export const initPage = async ({
   }
 
   let redirectTo = null
+
+  if (req?.user && payload.config?.localization && !query.locale) {
+    redirectTo = `${req.pathname}${queryString ? '&' : '?'}locale=${locale.code}`
+  }
 
   if (
     !permissions.canAccessAdmin &&
