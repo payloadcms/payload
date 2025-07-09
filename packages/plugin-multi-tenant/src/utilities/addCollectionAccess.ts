@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 
-import { withTenantAccess } from './withTenantAccess.js'
+import { withTenantAccess, withUserTenantAccess } from './withTenantAccess.js'
 
 type AllAccessKeys<T extends readonly string[]> = T[number] extends keyof Omit<
   Required<CollectionConfig>['access'],
@@ -45,6 +45,31 @@ export const addCollectionAccess = <ConfigType>({
       collection.access = {}
     }
     collection.access[key] = withTenantAccess<ConfigType>({
+      accessFunction: collection.access?.[key],
+      adminUsersSlug,
+      collection,
+      fieldName: key === 'readVersions' ? `version.${fieldName}` : fieldName,
+      operation: key,
+      tenantsArrayFieldName,
+      tenantsArrayTenantFieldName,
+      userHasAccessToAllTenants,
+    })
+  })
+}
+
+export const addUserCollectionAccess = <ConfigType>({
+  adminUsersSlug,
+  collection,
+  fieldName,
+  tenantsArrayFieldName,
+  tenantsArrayTenantFieldName,
+  userHasAccessToAllTenants,
+}: Args<ConfigType>): void => {
+  collectionAccessKeys.forEach((key) => {
+    if (!collection.access) {
+      collection.access = {}
+    }
+    collection.access[key] = withUserTenantAccess<ConfigType>({
       accessFunction: collection.access?.[key],
       adminUsersSlug,
       collection,

@@ -1,33 +1,44 @@
-import type { PayloadRequest, Where } from 'payload'
+import type { PayloadRequest, TypeWithID, Where } from 'payload'
+
+import { extractID } from 'payload/shared'
 
 import { getCollectionIDType } from '../utilities/getCollectionIDType.js'
 import { getTenantFromCookie } from '../utilities/getTenantFromCookie.js'
 
 type Args = {
   req: PayloadRequest
-  tenantsArrayFieldName: string
-  tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
 }
 /**
  * Filter the list of users by the selected tenant
  */
-export const filterUsersBySelectedTenant = ({
+export const filterUsersBySelectedTenant = async ({
   req,
-  tenantsArrayFieldName,
-  tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
-}: Args): null | Where => {
+}: Args): Promise<null | Where> => {
   const idType = getCollectionIDType({
     collectionSlug: tenantsCollectionSlug,
     payload: req.payload,
   })
   const selectedTenant = getTenantFromCookie(req.headers, idType)
 
-  if (selectedTenant) {
+  if (req.user && selectedTenant) {
+    const doc = await req.payload.findByID({
+      id: selectedTenant,
+      collection: tenantsCollectionSlug,
+      depth: 0,
+      req,
+      select: {
+        assignedUsers: true,
+      },
+      user: req.user,
+    })
+
     return {
-      [`${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`]: {
-        in: [selectedTenant],
+      id: {
+        in: (Array.isArray(doc?.assignedUsers) ? doc.assignedUsers : []).map(
+          ({ user: tenantUser }: { user: TypeWithID }) => extractID(tenantUser),
+        ),
       },
     }
   }

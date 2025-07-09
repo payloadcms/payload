@@ -14,7 +14,7 @@ import { filterDocumentsBySelectedTenant } from './list-filters/filterDocumentsB
 import { filterTenantsBySelectedTenant } from './list-filters/filterTenantsBySelectedTenant.js'
 import { filterUsersBySelectedTenant } from './list-filters/filterUsersBySelectedTenant.js'
 import { translations } from './translations/index.js'
-import { addCollectionAccess } from './utilities/addCollectionAccess.js'
+import { addCollectionAccess, addUserCollectionAccess } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
 import { combineListFilters } from './utilities/combineListFilters.js'
 
@@ -130,10 +130,23 @@ export const multiTenantPlugin =
       )
     }
 
-    addCollectionAccess({
+    /**
+     * 🚨 V2
+     */
+    adminUsersCollection.fields.push({
+      name: 'joinedTenants',
+      type: 'join',
+      admin: {
+        allowCreate: false,
+      },
+      collection: tenantsCollectionSlug,
+      on: 'assignedUsers.user',
+    })
+
+    addUserCollectionAccess({
       adminUsersSlug: adminUsersCollection.slug,
       collection: adminUsersCollection,
-      fieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
+      fieldName: `joinedTenants`,
       tenantsArrayFieldName,
       tenantsArrayTenantFieldName,
       userHasAccessToAllTenants,
@@ -146,11 +159,9 @@ export const multiTenantPlugin =
 
       adminUsersCollection.admin.baseListFilter = combineListFilters({
         baseListFilter: adminUsersCollection.admin?.baseListFilter,
-        customFilter: (args) =>
-          filterUsersBySelectedTenant({
+        customFilter: async (args) =>
+          await filterUsersBySelectedTenant({
             req: args.req,
-            tenantsArrayFieldName,
-            tenantsArrayTenantFieldName,
             tenantsCollectionSlug,
           }),
       })
@@ -233,6 +244,23 @@ export const multiTenantPlugin =
             usersTenantsArrayTenantFieldName: tenantsArrayTenantFieldName,
           })
         }
+
+        /**
+         * 🚨 V2
+         */
+        collection.fields.push({
+          name: 'assignedUsers',
+          type: 'array',
+          fields: [
+            {
+              name: 'user',
+              type: 'relationship',
+              hasMany: false,
+              relationTo: adminUsersCollection.slug,
+              required: true,
+            },
+          ],
+        })
 
         /**
          * Add custom tenant field that watches and dispatches updates to the selector

@@ -76,8 +76,8 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {
-    tenants: {
-      users: 'users';
+    users: {
+      joinedTenants: 'tenants';
     };
   };
   collectionsSelect: {
@@ -129,11 +129,12 @@ export interface Tenant {
   id: string;
   name: string;
   domain: string;
-  users?: {
-    docs?: (string | User)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
+  assignedUsers?:
+    | {
+        user: string | User;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -150,6 +151,11 @@ export interface User {
         id?: string | null;
       }[]
     | null;
+  joinedTenants?: {
+    docs?: (string | Tenant)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -273,7 +279,12 @@ export interface PayloadMigration {
 export interface TenantsSelect<T extends boolean = true> {
   name?: T;
   domain?: T;
-  users?: T;
+  assignedUsers?:
+    | T
+    | {
+        user?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -289,6 +300,7 @@ export interface UsersSelect<T extends boolean = true> {
         tenant?: T;
         id?: T;
       };
+  joinedTenants?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

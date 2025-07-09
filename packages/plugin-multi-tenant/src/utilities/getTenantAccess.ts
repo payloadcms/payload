@@ -1,4 +1,4 @@
-import type { Where } from 'payload'
+import type { TypeWithID, Where } from 'payload'
 
 import type { UserWithTenantsField } from '../types.js'
 
@@ -22,9 +22,14 @@ export function getTenantAccess({
     tenantsArrayTenantFieldName,
   })
 
+  /**
+   * 🚨 V2
+   */
+  const joinedTenants = user.joinedTenants?.docs.map((doc: TypeWithID) => doc.id) || []
+
   return {
     [fieldName]: {
-      in: userAssignedTenantIDs || [],
+      in: joinedTenants || [],
     },
   }
 }

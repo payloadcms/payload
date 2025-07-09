@@ -24,11 +24,5 @@ export const Tenants: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    {
-      type: 'join',
-      name: 'users',
-      collection: 'users',
-      on: 'tenants.tenant',
-    },
   ],
 }
