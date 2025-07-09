@@ -6,7 +6,6 @@ import { text } from 'payload/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-import { Button } from '../../../elements/Button/index.js'
 import { CopyToClipboard } from '../../../elements/CopyToClipboard/index.js'
 import { GenerateConfirmation } from '../../../elements/GenerateConfirmation/index.js'
 import { useFormFields } from '../../../forms/Form/context.js'
