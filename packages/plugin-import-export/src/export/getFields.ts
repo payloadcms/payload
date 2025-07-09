@@ -132,12 +132,13 @@ export const getFields = (config: Config): Field[] => {
           ],
         },
         {
-          // virtual field for the UI component to modify the hidden `where` field
           name: 'selectionToUse',
           type: 'radio',
-          defaultValue: 'all',
-          // @ts-expect-error - this is not correctly typed in plugins right now
-          label: ({ t }) => t('plugin-import-export:field-selectionToUse-label'),
+          admin: {
+            components: {
+              Field: '@payloadcms/plugin-import-export/rsc#SelectionToUseField',
+            },
+          },
           options: [
             {
               // @ts-expect-error - this is not correctly typed in plugins right now
@@ -155,7 +156,6 @@ export const getFields = (config: Config): Field[] => {
               value: 'all',
             },
           ],
-          virtual: true,
         },
         {
           name: 'fields',
@@ -184,11 +184,16 @@ export const getFields = (config: Config): Field[] => {
           name: 'where',
           type: 'json',
           admin: {
-            components: {
-              Field: '@payloadcms/plugin-import-export/rsc#WhereField',
-            },
+            hidden: true,
           },
           defaultValue: {},
+          hooks: {
+            beforeValidate: [
+              ({ value }) => {
+                return value ?? {}
+              },
+            ],
+          },
         },
       ],
       // @ts-expect-error - this is not correctly typed in plugins right now
