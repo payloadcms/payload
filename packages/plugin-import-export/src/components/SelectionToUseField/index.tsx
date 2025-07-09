@@ -86,6 +86,11 @@ export const SelectionToUseField: React.FC = () => {
     }
   }, [id, selectionToUseValue, query?.where, selected, setWhere])
 
+  // Hide component if no other options besides "all" are available
+  if (availableOptions.length <= 1) {
+    return null
+  }
+
   return (
     <RadioGroupField
       field={{
