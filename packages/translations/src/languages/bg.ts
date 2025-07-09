@@ -90,6 +90,9 @@ export const bgTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'Следното поле е некоректно:',
     followingFieldsInvalid_other: 'Следните полета са некоректни:',
     incorrectCollection: 'Грешна колекция',
+    insufficientClipboardPermissions:
+      'Достъпът до клипборда е отказан. Моля, проверете вашите разрешения за клипборда.',
+    invalidClipboardData: 'Невалидни данни в клипборда.',
     invalidFileType: 'Невалиден тип на файл',
     invalidFileTypeValue: 'Невалиден тип на файл: {{value}}',
     invalidRequestArgs: 'Невалидни аргументи в заявката: {{args}}',
@@ -111,6 +114,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Имаше проблем при качването на файла.',
     tokenInvalidOrExpired: 'Ключът е невалиден или изтекъл.',
     tokenNotProvided: 'Токенът не е предоставен.',
+    unableToCopy: 'Неуспешно копиране.',
     unableToDeleteCount: 'Не беше възможно да се изтрият {{count}} от {{total}} {{label}}.',
     unableToReindexCollection:
       'Грешка при преиндексиране на колекцията {{collection}}. Операцията е прекратена.',
@@ -240,7 +244,9 @@ export const bgTranslations: DefaultTranslationsObject = {
       'Това ще премахне съществуващите индекси и ще преиндексира документите във всички колекции.',
     copied: 'Копирано',
     copy: 'Копирай',
+    copyField: 'Копирай поле',
     copying: 'Копиране',
+    copyRow: 'Копирай ред',
     copyWarning:
       'Предстои да презапишете {{to}} с {{from}} за {{label}} {{title}}. Сигурни ли сте?',
     create: 'Създай',
@@ -335,6 +341,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Презапишете съществуващите данни в полето',
     pageNotFound: 'Страницата не беше открита',
     password: 'Парола',
+    pasteField: 'Постави поле',
+    pasteRow: 'Постави ред',
     payloadSettings: 'Настройки на Payload',
     perPage: 'На страница: {{limit}}',
     previous: 'Предишен',

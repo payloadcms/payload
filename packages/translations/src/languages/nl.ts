@@ -91,6 +91,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'Het volgende veld is ongeldig:',
     followingFieldsInvalid_other: 'De volgende velden zijn ongeldig:',
     incorrectCollection: 'Ongeldige collectie',
+    insufficientClipboardPermissions:
+      'Toegang tot het klembord geweigerd. Controleer je klembordmachtigingen.',
+    invalidClipboardData: 'Ongeldige klembordgegevens.',
     invalidFileType: 'Ongeldig bestandstype',
     invalidFileTypeValue: 'Ongeldig bestandstype: {{value}}',
     invalidRequestArgs: 'Ongeldige argumenten in verzoek: {{args}}',
@@ -112,6 +115,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Er was een probleem bij het uploaden van het bestand.',
     tokenInvalidOrExpired: 'Token is ongeldig of verlopen.',
     tokenNotProvided: 'Token niet verstrekt.',
+    unableToCopy: 'Kan niet kopiëren.',
     unableToDeleteCount: 'Kan {{count}} van {{total}} {{label}} niet verwijderen.',
     unableToReindexCollection:
       'Fout bij het herindexeren van de collectie {{collection}}. De operatie is afgebroken.',
@@ -244,7 +248,9 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Dit verwijdert bestaande indexen en indexeert de documenten in alle collecties opnieuw.',
     copied: 'Gekopieerd',
     copy: 'Kopiëren',
+    copyField: 'Veld kopiëren',
     copying: 'Kopiëren',
+    copyRow: 'Rij kopiëren',
     copyWarning:
       'U staat op het punt om {{to}} te overschrijven met {{from}} voor {{label}} {{title}}. Bent u zeker?',
     create: 'Aanmaken',
@@ -339,6 +345,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Overschrijf bestaande veldgegevens',
     pageNotFound: 'Pagina niet gevonden',
     password: 'Wachtwoord',
+    pasteField: 'Veld plakken',
+    pasteRow: 'Rij plakken',
     payloadSettings: 'Payload Instellingen',
     perPage: 'Per pagina: {{limit}}',
     previous: 'Vorige',

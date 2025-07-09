@@ -7,8 +7,6 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: 23.11.0
-  PNPM_VERSION: 9.7.1
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
@@ -60,9 +58,6 @@ jobs:
 
       - name: Setup
         uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
 
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2

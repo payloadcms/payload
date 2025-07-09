@@ -92,6 +92,9 @@ export const huTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'A következő mező érvénytelen:',
     followingFieldsInvalid_other: 'A következő mezők érvénytelenek:',
     incorrectCollection: 'Helytelen gyűjtemény',
+    insufficientClipboardPermissions:
+      'A vágólaphoz való hozzáférés elutasítva. Kérjük, ellenőrizze a vágólap engedélyeit.',
+    invalidClipboardData: 'Érvénytelen vágólap adat.',
     invalidFileType: 'Érvénytelen fájltípus',
     invalidFileTypeValue: 'Érvénytelen fájltípus: {{value}}',
     invalidRequestArgs: 'Érvénytelen argumentumok a kérésben: {{args}}',
@@ -113,6 +116,7 @@ export const huTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Hiba történt a fájl feltöltése közben.',
     tokenInvalidOrExpired: 'A token érvénytelen vagy lejárt.',
     tokenNotProvided: 'Token nem biztosított.',
+    unableToCopy: 'Másolás nem lehetséges.',
     unableToDeleteCount: 'Nem sikerült törölni {{count}}/{{total}} {{label}}.',
     unableToReindexCollection:
       'Hiba a(z) {{collection}} gyűjtemény újraindexelésekor. A művelet megszakítva.',
@@ -243,7 +247,9 @@ export const huTranslations: DefaultTranslationsObject = {
       'Ez eltávolítja a meglévő indexeket, és újraindexálja a dokumentumokat az összes gyűjteményben.',
     copied: 'Másolva',
     copy: 'Másolás',
+    copyField: 'Mező másolása',
     copying: 'Másolás',
+    copyRow: 'Sor másolása',
     copyWarning:
       'Ön azzal készül felülírni {{to}} -t {{from}} -mal a {{label}} {{title}} számára. Biztos benne?',
     create: 'Létrehozás',
@@ -337,6 +343,8 @@ export const huTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Írja felül a meglévő mezőadatokat',
     pageNotFound: 'Az oldal nem található',
     password: 'Jelszó',
+    pasteField: 'Mező beillesztése',
+    pasteRow: 'Sor beillesztése',
     payloadSettings: 'Payload beállítások',
     perPage: 'Oldalanként: {{limit}}',
     previous: 'Előző',

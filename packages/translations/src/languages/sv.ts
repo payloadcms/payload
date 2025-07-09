@@ -90,6 +90,9 @@ export const svTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'Följande fält är ogiltigt:',
     followingFieldsInvalid_other: 'Följande fält är ogiltiga:',
     incorrectCollection: 'Felaktig samling',
+    insufficientClipboardPermissions:
+      'Åtkomst till urklipp nekades. Kontrollera dina behörigheter för urklipp.',
+    invalidClipboardData: 'Ogiltiga urklippsdata.',
     invalidFileType: 'Ogiltig filtyp',
     invalidFileTypeValue: 'Ogiltig filtyp: {{value}}',
     invalidRequestArgs: 'Ogiltiga argument har skickats i begäran: {{args}}',
@@ -111,6 +114,7 @@ export const svTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Det uppstod ett problem när filen laddades upp.',
     tokenInvalidOrExpired: 'Token är antingen ogiltig eller har löpt ut.',
     tokenNotProvided: 'Token inte tillhandahållet.',
+    unableToCopy: 'Kan inte kopiera.',
     unableToDeleteCount: 'Det gick inte att ta bort {{count}} av {{total}} {{label}}.',
     unableToReindexCollection:
       'Fel vid omindexering av samlingen {{collection}}. Operationen avbröts.',
@@ -241,7 +245,9 @@ export const svTranslations: DefaultTranslationsObject = {
       'Detta kommer att ta bort befintliga index och omindexera dokumenten i alla samlingar.',
     copied: 'Kopierad',
     copy: 'Kopiera',
+    copyField: 'Kopiera fält',
     copying: 'Kopierar...',
+    copyRow: 'Kopiera rad',
     copyWarning:
       'Du håller på att skriva över {{to}} med {{from}} för {{label}} {{title}}. Är du säker?',
     create: 'Skapa',
@@ -336,6 +342,8 @@ export const svTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Skriv över befintlig fältdatabas',
     pageNotFound: 'Sidan hittas inte',
     password: 'Lösenord',
+    pasteField: 'Klistra in fält',
+    pasteRow: 'Klistra in rad',
     payloadSettings: 'Programinställningar',
     perPage: 'Per Sida: {{limit}}',
     previous: 'Föregående',

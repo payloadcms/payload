@@ -90,6 +90,9 @@ export const esTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'El siguiente campo es inválido:',
     followingFieldsInvalid_other: 'Los siguientes campos son inválidos:',
     incorrectCollection: 'Colección Incorrecta',
+    insufficientClipboardPermissions:
+      'Acceso al portapapeles denegado. Verifique los permisos del portapapeles.',
+    invalidClipboardData: 'Datos del portapapeles no válidos.',
     invalidFileType: 'Tipo de archivo inválido',
     invalidFileTypeValue: 'Tipo de archivo inválido: {{value}}',
     invalidRequestArgs: 'Argumentos inválidos en la solicitud: {{args}}',
@@ -111,6 +114,7 @@ export const esTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Ocurrió un problema al subir el archivo.',
     tokenInvalidOrExpired: 'El token es inválido o ya expiró.',
     tokenNotProvided: 'Token no proporcionado.',
+    unableToCopy: 'No se puede copiar.',
     unableToDeleteCount: 'No se pudo eliminar {{count}} de {{total}} {{label}}.',
     unableToReindexCollection:
       'Error al reindexar la colección {{collection}}. Operación abortada.',
@@ -245,7 +249,9 @@ export const esTranslations: DefaultTranslationsObject = {
       'Esto eliminará los índices existentes y volverá a indexar los documentos en todas las colecciones.',
     copied: 'Copiado',
     copy: 'Copiar',
+    copyField: 'Copiar campo',
     copying: 'Copiando',
+    copyRow: 'Copiar fila',
     copyWarning:
       'Estás a punto de sobrescribir {{to}} con {{from}} para {{label}} {{title}}. ¿Estás seguro?',
     create: 'Crear',
@@ -340,6 +346,8 @@ export const esTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Sobrescribir los datos existentes del campo',
     pageNotFound: 'Página no encontrada',
     password: 'Contraseña',
+    pasteField: 'Pegar campo',
+    pasteRow: 'Pegar fila',
     payloadSettings: 'Configuración de Payload',
     perPage: 'Por página: {{limit}}',
     previous: 'Anterior',
