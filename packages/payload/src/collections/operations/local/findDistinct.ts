@@ -1,15 +1,16 @@
+import type {
+  CollectionSlug,
+  Document,
+  PaginatedDistinctDocs,
+  Payload,
+  PayloadRequest,
+  RequestContext,
+  TypedLocale,
+  Where,
+} from '../../../index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 
-import {
-  APIError,
-  type CollectionSlug,
-  createLocalReq,
-  type PaginatedDistinctDocs,
-  type Payload,
-  type PayloadRequest,
-  type TypedLocale,
-  type Where,
-} from '../../../index.js'
+import { APIError, createLocalReq } from '../../../index.js'
 import { findDistinctOperation } from '../findDistinct.js'
 
 export type Options = {
@@ -17,6 +18,13 @@ export type Options = {
    * the Collection slug to operate against.
    */
   collection: CollectionSlug
+  /**
+   * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
+   * which can be read by hooks. Useful if you want to pass additional information to the hooks which
+   * shouldn't be necessarily part of the document, for example a `triggerBeforeChange` option which can be read by the BeforeChange hook
+   * to determine if it should run or not.
+   */
+  context?: RequestContext
   /**
    * When set to `true`, errors will not be thrown.
    */
@@ -55,6 +63,10 @@ export type Options = {
    * @default 'desc'
    */
   sortOrder?: 'asc' | 'desc'
+  /**
+   * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
+   */
+  user?: Document
   /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
