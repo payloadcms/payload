@@ -5,6 +5,7 @@ import './index.scss'
 import { Link } from '../../elements/Link/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { sanitizeID } from '../../utilities/sanitizeID.js'
 import { useDrawerDepth } from '../Drawer/index.js'
@@ -18,17 +19,21 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
 }) => {
   const {
     config: {
+      localization,
       routes: { admin: adminRoute },
     },
   } = useConfig()
 
   const { collectionSlug, globalSlug } = useDocumentInfo()
   const drawerDepth = useDrawerDepth()
+  const locale = useLocale()
 
-  const docPath = formatAdminURL({
-    adminRoute,
-    path: `/${collectionSlug ? `collections/${collectionSlug}` : `globals/${globalSlug}`}/${id}`,
-  })
+  const addLocaleToURL = localization && locale.code ? `?locale=${locale.code}` : ''
+  const docPath =
+    formatAdminURL({
+      adminRoute,
+      path: `/${collectionSlug ? `collections/${collectionSlug}` : `globals/${globalSlug}`}/${id}`,
+    }) + addLocaleToURL
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')} title={id}>
