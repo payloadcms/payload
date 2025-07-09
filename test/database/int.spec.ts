@@ -2777,6 +2777,13 @@ describe('database', () => {
 
     expect(res.values).toStrictEqual(titles)
 
+    const resREST = await restClient
+      .GET('/posts/distinct', {
+        query: { sortOrder: 'asc', field: 'title' },
+      })
+      .then((res) => res.json())
+    expect(resREST.values).toStrictEqual(titles)
+
     const resLimit = await payload.findDistinct({
       collection: 'posts',
       sortOrder: 'asc',

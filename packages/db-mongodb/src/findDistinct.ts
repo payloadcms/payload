@@ -60,7 +60,6 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     })
     pipeline.push({ $limit: args.limit })
   }
-  // pipeline.push({ $project: { _id: 0, value: '$_id' } })
 
   const values = await Model.aggregate(pipeline).then((res) => res.map((each) => each._id))
 
