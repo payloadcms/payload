@@ -2748,6 +2748,7 @@ describe('database', () => {
   })
 
   it('should find distinct field values of the collection', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
     const titles = [
       'title-1',
       'title-2',
@@ -2770,7 +2771,7 @@ describe('database', () => {
 
     const res = await payload.findDistinct({
       collection: 'posts',
-      sortOrder: 'desc',
+      sortOrder: 'asc',
       field: 'title',
     })
 
@@ -2778,12 +2779,27 @@ describe('database', () => {
 
     const resLimit = await payload.findDistinct({
       collection: 'posts',
-      sortOrder: 'desc',
+      sortOrder: 'asc',
       field: 'title',
       limit: 3,
     })
 
     expect(resLimit.values).toStrictEqual(['title-1', 'title-2', 'title-3'])
+
+    const resDesc = await payload.findDistinct({
+      collection: 'posts',
+      sortOrder: 'desc',
+      field: 'title',
+    })
+
+    expect(resDesc.values).toStrictEqual(titles.toReversed())
+
+    const resDescDefault = await payload.findDistinct({
+      collection: 'posts',
+      field: 'title',
+    })
+
+    expect(resDescDefault.values).toStrictEqual(titles.toReversed())
   })
 
   it('can have localized and non localized blocks', async () => {

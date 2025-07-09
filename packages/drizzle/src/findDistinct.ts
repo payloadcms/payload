@@ -11,7 +11,7 @@ import { DistinctSymbol } from './utilities/rawConstraint.js'
 
 export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, args) {
   const db = await getTransaction(this, args.req)
-  const sort = args.sortOrder === 'desc' ? args.field : `-${args.field}`
+  const sort = args.sortOrder === 'asc' ? args.field : `-${args.field}`
   const collectionConfig: SanitizedCollectionConfig =
     this.payload.collections[args.collection].config
   const page = args.page ?? 1
