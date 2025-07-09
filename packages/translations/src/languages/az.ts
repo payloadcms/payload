@@ -86,6 +86,8 @@ export const azTranslations: DefaultTranslationsObject = {
     deletingFile: 'Faylın silinməsində xəta baş verdi.',
     deletingTitle:
       '{{title}} silinərkən xəta baş verdi. Zəhmət olmasa, bağlantınızı yoxlayın və yenidən cəhd edin.',
+    documentNotFound:
+      'ID ilə sənəd tapıla bilmədi. O silinmiş və ya heç vaxt mövcud olmamış ola bilər.',
     emailOrPasswordIncorrect: 'Təqdim olunan e-poçt və ya şifrə yanlışdır.',
     followingFieldsInvalid_one: 'Aşağıdakı sahə yanlışdır:',
     followingFieldsInvalid_other: 'Aşağıdaki sahələr yanlışdır:',

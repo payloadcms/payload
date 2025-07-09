@@ -86,6 +86,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     deletingFile: 'ফাইল মুছতে একটি ত্রুটি হয়েছে।',
     deletingTitle:
       '{{title}} মুছতে একটি ত্রুটি হয়েছে। আপনার সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।',
+    documentNotFound:
+      'আইডি {{id}} সহ ডকুমেন্টটি খুঁজে পাওয়া যায়নি। এটি সরিয়ে ফেলা হয়েছে বা কখনও বিদ্যমান হয়নি।',
     emailOrPasswordIncorrect: 'প্রদত্ত ইমেইল বা পাসওয়ার্ড ভুল।',
     followingFieldsInvalid_one: 'নিম্নলিখিত ক্ষেত্রটি অবৈধ:',
     followingFieldsInvalid_other: 'নিম্নলিখিত ক্ষেত্রগুলি অবৈধ:',

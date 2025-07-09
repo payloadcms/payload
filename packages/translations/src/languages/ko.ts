@@ -86,6 +86,8 @@ export const koTranslations: DefaultTranslationsObject = {
     deletingFile: '파일을 삭제하는 중에 오류가 발생했습니다.',
     deletingTitle:
       '{{title}} 삭제하는 중에 오류가 발생했습니다. 인터넷 연결을 확인하고 다시 시도하세요.',
+    documentNotFound:
+      'ID가 {{id}}인 문서를 찾을 수 없습니다. 삭제되었거나 처음부터 존재하지 않았을 수 있습니다.',
     emailOrPasswordIncorrect: '입력한 이메일 또는 비밀번호가 올바르지 않습니다.',
     followingFieldsInvalid_one: '다음 입력란이 유효하지 않습니다:',
     followingFieldsInvalid_other: '다음 입력란이 유효하지 않습니다:',

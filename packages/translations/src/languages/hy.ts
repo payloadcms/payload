@@ -86,6 +86,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     deletingFile: 'Ֆայլը ջնջելու ժամանակ սխալ է տեղի ունեցել։',
     deletingTitle:
       '{{title}}-ը ջնջելու ժամանակ սխալ է տեղի ունեցել։ Խնդրում ենք ստուգել Ձեր կապը և կրկին փորձել։',
+    documentNotFound:
+      'Գրառումը ID-ով {{id}} չգտնվեց։ Հնարավոր է, որ այն ջնջվել է կամ երբեք գոյություն չունեցել։',
     emailOrPasswordIncorrect: 'Տրամադրված էլ. փոստը կամ գաղտնաբառը սխալ է։',
     followingFieldsInvalid_one: 'Հետևյալ դաշտն անվավեր է։',
     followingFieldsInvalid_other: 'Հետևյալ դաշտերն անվավեր են։',

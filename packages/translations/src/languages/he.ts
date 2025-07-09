@@ -84,6 +84,7 @@ export const heTranslations: DefaultTranslationsObject = {
     correctInvalidFields: 'נא לתקן שדות לא תקינים.',
     deletingFile: 'אירעה שגיאה במחיקת הקובץ.',
     deletingTitle: 'אירעה שגיאה במחיקת {{title}}. נא בדוק את החיבור שלך ונסה שנית.',
+    documentNotFound: 'המסמך עם המזהה {{id}} לא נמצא. יתכן והוא הוסר או שלעולם לא היה קיים.',
     emailOrPasswordIncorrect: 'כתובת הדוא"ל או הסיסמה שסופקו אינם נכונים.',
     followingFieldsInvalid_one: 'השדה הבא אינו תקין:',
     followingFieldsInvalid_other: 'השדות הבאים אינם תקינים:',

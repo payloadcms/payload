@@ -85,6 +85,8 @@ export const etTranslations: DefaultTranslationsObject = {
     deletingFile: 'Faili kustutamisel tekkis viga.',
     deletingTitle:
       '{{title}} kustutamisel tekkis viga. Palun kontrollige ühendust ja proovige uuesti.',
+    documentNotFound:
+      'Dokumenti ID-ga {{id}} ei suudetud leida. See võib olla eemaldatud või seda ei ole kunagi olnud.',
     emailOrPasswordIncorrect: 'Sisestatud e-post või parool on vale.',
     followingFieldsInvalid_one: 'Järgmine väli on vigane:',
     followingFieldsInvalid_other: 'Järgmised väljad on vigased:',

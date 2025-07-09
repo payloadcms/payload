@@ -86,6 +86,8 @@ export const csTranslations: DefaultTranslationsObject = {
     deletingFile: 'Při mazání souboru došlo k chybě.',
     deletingTitle:
       'Při mazání {{title}} došlo k chybě. Zkontrolujte své připojení a zkuste to znovu.',
+    documentNotFound:
+      'Dokument s ID {{id}} nebyl nalezen. Mohl být odebrán nebo nikdy neexistoval.',
     emailOrPasswordIncorrect: 'Zadaný email nebo heslo není správné.',
     followingFieldsInvalid_one: 'Následující pole je neplatné:',
     followingFieldsInvalid_other: 'Následující pole jsou neplatná:',

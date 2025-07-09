@@ -86,6 +86,8 @@ export const slTranslations: DefaultTranslationsObject = {
     deletingFile: 'Pri brisanju datoteke je prišlo do napake.',
     deletingTitle:
       'Pri brisanju {{title}} je prišlo do napake. Prosimo, preverite povezavo in poskusite znova.',
+    documentNotFound:
+      'Dokumenta z ID-jem {{id}} ni bilo mogoče najti. Morda je bil odstranjen ali pa nikoli ni obstajal.',
     emailOrPasswordIncorrect: 'Vnesena e-pošta ali geslo je napačno.',
     followingFieldsInvalid_one: 'Naslednje polje je neveljavno:',
     followingFieldsInvalid_other: 'Naslednja polja so neveljavna:',
