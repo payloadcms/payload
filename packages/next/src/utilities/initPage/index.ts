@@ -47,6 +47,7 @@ export const initPage = async ({
   })
 
   const {
+    admin: { routes },
     collections,
     globals,
     routes: { admin: adminRoute },
@@ -81,7 +82,9 @@ export const initPage = async ({
 
   let redirectTo = null
 
-  if (req?.user && payload.config?.localization && !query.locale) {
+  const logoutPath = `${adminRoute || '/admin'}${routes.logout || '/logout'}`
+
+  if (req?.user && payload.config?.localization && !query.locale && req.pathname !== logoutPath) {
     redirectTo = `${req.pathname}${queryString ? '&' : '?'}locale=${locale.code}`
   }
 
