@@ -2801,12 +2801,12 @@ describe('database', () => {
 
     expect(resDesc.values).toStrictEqual(titles.toReversed())
 
-    const resDescDefault = await payload.findDistinct({
+    const resAscDefault = await payload.findDistinct({
       collection: 'posts',
       field: 'title',
     })
 
-    expect(resDescDefault.values).toStrictEqual(titles.toReversed())
+    expect(resAscDefault.values).toStrictEqual(titles)
   })
 
   it('can have localized and non localized blocks', async () => {

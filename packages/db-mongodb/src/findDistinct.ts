@@ -36,7 +36,6 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
   }
 
   const page = args.page ?? 1
-  const offset = args.limit ? (page - 1) * args.limit : undefined
 
   const pipeline: PipelineStage[] = [
     {
@@ -49,7 +48,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     },
     {
       $sort: {
-        _id: args.sortOrder === 'asc' ? 1 : -1,
+        _id: args.sortOrder === 'desc' ? -1 : 1,
       },
     },
   ]
