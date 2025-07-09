@@ -92,6 +92,9 @@ export const roTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'Următorul câmp nu este valid:',
     followingFieldsInvalid_other: 'Următoarele câmpuri nu sunt valabile:',
     incorrectCollection: 'Colecție incorectă',
+    insufficientClipboardPermissions:
+      'Accesul la clipboard a fost refuzat. Verificați permisiunile clipboard-ului.',
+    invalidClipboardData: 'Date invalide în clipboard.',
     invalidFileType: 'Tip de fișier invalid',
     invalidFileTypeValue: 'Tip de fișier invalid: {{value}}',
     invalidRequestArgs: 'Argumente invalide transmise în cerere: {{args}}',
@@ -113,6 +116,7 @@ export const roTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'A existat o problemă în timpul încărcării fișierului.',
     tokenInvalidOrExpired: 'Tokenul este invalid sau a expirat.',
     tokenNotProvided: 'Tokenul nu a fost furnizat.',
+    unableToCopy: 'Imposibil de copiat.',
     unableToDeleteCount: 'Nu se poate șterge {{count}} din {{total}} {{label}}.',
     unableToReindexCollection:
       'Eroare la reindexarea colecției {{collection}}. Operațiune anulată.',
@@ -245,7 +249,9 @@ export const roTranslations: DefaultTranslationsObject = {
       'Aceasta va elimina indexurile existente și va reindexa documentele din toate colecțiile.',
     copied: 'Copiat',
     copy: 'Copiați',
+    copyField: 'Copiază câmpul',
     copying: 'Copiere',
+    copyRow: 'Copiază rândul',
     copyWarning:
       'Sunteți pe cale să suprascrieți {{to}} cu {{from}} pentru {{label}} {{title}}. Sunteți sigur?',
     create: 'Creează',
@@ -340,6 +346,8 @@ export const roTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Suprascrieți datele existente din câmp',
     pageNotFound: 'Pagina nu a fost găsită',
     password: 'Parola',
+    pasteField: 'Lipește câmpul',
+    pasteRow: 'Lipește rândul',
     payloadSettings: 'Setări de Payload',
     perPage: 'Pe pagină: {{limit}}',
     previous: 'Anterior',

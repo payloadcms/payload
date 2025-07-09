@@ -91,6 +91,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'Следующее поле недействительно:',
     followingFieldsInvalid_other: 'Следующие поля недействительны:',
     incorrectCollection: 'Неправильная Коллекция',
+    insufficientClipboardPermissions:
+      'Доступ к буферу обмена отклонен. Проверьте разрешения буфера обмена.',
+    invalidClipboardData: 'Неверные данные в буфере обмена.',
     invalidFileType: 'Недопустимый тип файла',
     invalidFileTypeValue: 'Недопустимый тип файла: {{value}}',
     invalidRequestArgs: 'В запрос переданы недопустимые аргументы: {{args}}',
@@ -112,6 +115,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Возникла проблема при загрузке файла.',
     tokenInvalidOrExpired: 'Токен либо недействителен, либо срок его действия истек.',
     tokenNotProvided: 'Токен не предоставлен.',
+    unableToCopy: 'Не удалось скопировать.',
     unableToDeleteCount: 'Не удалось удалить {{count}} из {{total}} {{label}}.',
     unableToReindexCollection:
       'Ошибка при переиндексации коллекции {{collection}}. Операция прервана.',
@@ -243,7 +247,9 @@ export const ruTranslations: DefaultTranslationsObject = {
       'Это удалит существующие индексы и переиндексирует документы во всех коллекциях.',
     copied: 'Скопировано',
     copy: 'Скопировать',
+    copyField: 'Копировать поле',
     copying: 'Копирование',
+    copyRow: 'Копировать строку',
     copyWarning:
       'Вы собираетесь перезаписать {{to}} на {{from}} для {{label}} {{title}}. Вы уверены?',
     create: 'Создать',
@@ -338,6 +344,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Перезаписать существующие данные поля',
     pageNotFound: 'Страница не найдена',
     password: 'Пароль',
+    pasteField: 'Вставить поле',
+    pasteRow: 'Вставить строку',
     payloadSettings: 'Настройки Payload',
     perPage: 'На странице: {{limit}}',
     previous: 'Предыдущий',

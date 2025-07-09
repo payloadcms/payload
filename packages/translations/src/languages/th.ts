@@ -88,6 +88,9 @@ export const thTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'ช่องต่อไปนี้ไม่ถูกต้อง:',
     followingFieldsInvalid_other: 'ช่องต่อไปนี้ไม่ถูกต้อง:',
     incorrectCollection: 'Collection ไม่ถูกต้อง',
+    insufficientClipboardPermissions:
+      'การเข้าถึงคลิปบอร์ดถูกปฏิเสธ กรุณาตรวจสอบสิทธิ์การเข้าถึงคลิปบอร์ดของคุณ',
+    invalidClipboardData: 'ข้อมูลคลิปบอร์ดไม่ถูกต้อง',
     invalidFileType: 'ประเภทของไฟล์ไม่ถูกต้อง',
     invalidFileTypeValue: 'ประเภทของไฟล์ไม่ถูกต้อง: {{value}}',
     invalidRequestArgs: 'มีการส่งอาร์กิวเมนต์ที่ไม่ถูกต้องในคำขอ: {{args}}',
@@ -109,6 +112,7 @@ export const thTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'เกิดปัญหาระหว่างการอัปโหลดไฟล์',
     tokenInvalidOrExpired: 'Token ไม่ถูกต้องหรือหมดอายุ',
     tokenNotProvided: 'ไม่ได้รับโทเค็น',
+    unableToCopy: 'ไม่สามารถคัดลอกได้',
     unableToDeleteCount: 'ไม่สามารถลบ {{count}} จาก {{total}} {{label}}',
     unableToReindexCollection:
       'เกิดข้อผิดพลาดในการจัดทำดัชนีใหม่ของคอลเลกชัน {{collection}}. การดำเนินการถูกยกเลิก',
@@ -236,7 +240,9 @@ export const thTranslations: DefaultTranslationsObject = {
       'การดำเนินการนี้จะลบดัชนีที่มีอยู่และทำการจัดทำดัชนีใหม่ในเอกสารของทุกคอลเลกชัน.',
     copied: 'คัดลอกแล้ว',
     copy: 'คัดลอก',
+    copyField: 'คัดลอกฟิลด์',
     copying: 'การคัดลอก',
+    copyRow: 'คัดลอกแถว',
     copyWarning:
       'คุณกำลังจะเขียนทับ {{to}} ด้วย {{from}} สำหรับ {{label}} {{title}}. คุณแน่ใจหรือไม่?',
     create: 'สร้าง',
@@ -330,6 +336,8 @@ export const thTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'เขียนทับข้อมูลในฟิลด์ที่มีอยู่แล้ว',
     pageNotFound: 'ไม่พบหน้าที่ต้องการ',
     password: 'รหัสผ่าน',
+    pasteField: 'วางฟิลด์',
+    pasteRow: 'วางแถว',
     payloadSettings: 'การตั้งค่า Payload',
     perPage: 'จำนวนต่อหน้า: {{limit}}',
     previous: 'ก่อนหน้านี้',

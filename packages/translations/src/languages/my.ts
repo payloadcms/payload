@@ -90,6 +90,9 @@ export const myTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'ထည့်သွင်းထားသော အချက်အလက်သည် မမှန်ကန်ပါ။',
     followingFieldsInvalid_other: 'ထည့်သွင်းထားသော အချက်အလက်များသည် မမှန်ကန်ပါ။',
     incorrectCollection: 'မှားယွင်းသော စုစည်းမှု',
+    insufficientClipboardPermissions:
+      'ကလစ်ဘုတ်ဝင်ရောက်ခွင့်ပြုချက်မရှိပါ။ ကလစ်ဘုတ်ပြုချက်များကိုစစ်ဆေးပါ။',
+    invalidClipboardData: 'မမှန်ကန်သောကလစ်ဘုတ်ဒေတာ။',
     invalidFileType: 'မမှန်ကန်သော ဖိုင်အမျိုးအစား',
     invalidFileTypeValue: 'မမှန်ကန်သော ဖိုင်အမျိုးအစား: {{value}}',
     invalidRequestArgs: 'တောင်းဆိုမှုတွင် မှားယွင်းသော အကြောင်းပြချက်များ ပေးပို့ထားသည်: {{args}}',
@@ -111,6 +114,7 @@ export const myTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'ဖိုင်ကို အပ်လုဒ်တင်ရာတွင် ပြဿနာရှိနေသည်။',
     tokenInvalidOrExpired: 'တိုကင်သည် မမှန်ကန်ပါ သို့မဟုတ် သက်တမ်းကုန်သွားပါပြီ။',
     tokenNotProvided: 'Token မပေးထားပါ။',
+    unableToCopy: 'ကူးရန်မဖြစ်နိုင်ပါ။',
     unableToDeleteCount: '{{total}} {{label}} မှ {{count}} ကို ဖျက်၍မရပါ။',
     unableToReindexCollection:
       '{{collection}} စုစည်းမှုကို ပြန်လည်အညွှန်းပြုလုပ်ခြင်း အမှားရှိနေသည်။ လုပ်ဆောင်မှုကို ဖျက်သိမ်းခဲ့သည်။',
@@ -243,7 +247,9 @@ export const myTranslations: DefaultTranslationsObject = {
       'ဤသည်သည် ရှိပြီးသား အညွှန်းများကို ဖျက်ပစ်ပြီး အားလုံးသော ကော်လက်ရှင်းများတွင် စာရွက်များကို ထပ်လိပ်ပါလိမ့်မည်။',
     copied: 'ကူးယူပြီးပြီ။',
     copy: 'ကူးယူမည်။',
+    copyField: 'ကွက်လပ်ကိုကူးပါ',
     copying: 'ကူးယူခြင်း',
+    copyRow: 'တန်းကိုကူးပါ',
     copyWarning:
       'Anda akan menulis ganti {{to}} dengan {{from}} untuk {{label}} {{title}}. Adakah anda pasti?',
     create: 'ဖန်တီးမည်။',
@@ -338,6 +344,8 @@ export const myTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Menulis semula data bidang yang sedia ada',
     pageNotFound: 'ရောက်ရှိနေသော စာမျက်နှာသည် မရှိပါ။',
     password: 'စကားဝှက်',
+    pasteField: 'ကွက်လပ်ကိုတင်ပါ',
+    pasteRow: 'တန်းကိုတင်ပါ',
     payloadSettings: 'ရွေးချယ်စရာများ',
     perPage: 'စာမျက်နှာ အလိုက်: {{limit}}',
     previous: 'ယခင်',

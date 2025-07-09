@@ -17,6 +17,7 @@ import React from 'react'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { initPage } from '../../utilities/initPage/index.js'
+import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getRouteData } from './getRouteData.js'
 
 export type GenerateViewMetadata = (args: {
@@ -61,6 +62,32 @@ export const RootPage = async ({
   const segments = Array.isArray(params.segments) ? params.segments : []
 
   const searchParams = await searchParamsPromise
+
+  // Redirect `${adminRoute}/collections` to `${adminRoute}`
+  if (segments.length === 1 && segments[0] === 'collections') {
+    const { viewKey } = getCustomViewByRoute({
+      config,
+      currentRoute: '/collections',
+    })
+
+    // Only redirect if there's NO custom view configured for /collections
+    if (!viewKey) {
+      redirect(adminRoute)
+    }
+  }
+
+  // Redirect `${adminRoute}/globals` to `${adminRoute}`
+  if (segments.length === 1 && segments[0] === 'globals') {
+    const { viewKey } = getCustomViewByRoute({
+      config,
+      currentRoute: '/globals',
+    })
+
+    // Only redirect if there's NO custom view configured for /globals
+    if (!viewKey) {
+      redirect(adminRoute)
+    }
+  }
 
   const {
     browseByFolderSlugs,
