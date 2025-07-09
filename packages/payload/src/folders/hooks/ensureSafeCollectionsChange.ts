@@ -65,6 +65,7 @@ export const ensureSafeCollectionsChange =
           const childFoldersResult = await req.payload.find({
             collection: foldersSlug,
             limit: 1,
+            req,
             where: {
               and: [
                 {
