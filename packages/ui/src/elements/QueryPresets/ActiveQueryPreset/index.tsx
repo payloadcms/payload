@@ -36,7 +36,7 @@ export function ActiveQueryPreset({
         openPresetListDrawer()
       }}
       pillStyle="light"
-      size="medium"
+      size="small"
     >
       <div className={`${baseClass}__label`}>
         {activePreset?.isShared && <PeopleIcon className={`${baseClass}__shared`} />}
