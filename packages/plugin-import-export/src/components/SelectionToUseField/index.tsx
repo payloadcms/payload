@@ -1,5 +1,7 @@
 'use client'
 
+import type { Where } from 'payload'
+
 import {
   RadioGroupField,
   useDocumentInfo,
@@ -9,6 +11,22 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import React, { useEffect, useMemo } from 'react'
+
+const isWhereEmpty = (where: Where): boolean => {
+  if (!where || typeof where !== 'object') {
+    return true
+  }
+
+  // Flatten one level of OR/AND wrappers
+  if (Array.isArray(where.and)) {
+    return where.and.length === 0
+  }
+  if (Array.isArray(where.or)) {
+    return where.or.length === 0
+  }
+
+  return Object.keys(where).length === 0
+}
 
 export const SelectionToUseField: React.FC = () => {
   const { id } = useDocumentInfo()
@@ -24,6 +42,8 @@ export const SelectionToUseField: React.FC = () => {
     path: 'where',
   })
 
+  const hasMeaningfulFilters = query?.where && !isWhereEmpty(query.where)
+
   const availableOptions = useMemo(() => {
     const options = [
       {
@@ -33,7 +53,7 @@ export const SelectionToUseField: React.FC = () => {
       },
     ]
 
-    if (query?.where) {
+    if (hasMeaningfulFilters) {
       options.unshift({
         // @ts-expect-error - this is not correctly typed in plugins right now
         label: t('plugin-import-export:selectionToUse-currentFilters'),
@@ -50,7 +70,7 @@ export const SelectionToUseField: React.FC = () => {
     }
 
     return options
-  }, [query?.where, selectAll, t])
+  }, [hasMeaningfulFilters, selectAll, t])
 
   // Auto-set default
   useEffect(() => {
