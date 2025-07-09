@@ -88,8 +88,6 @@ export const huTranslations: DefaultTranslationsObject = {
     deletingFile: 'Hiba történt a fájl törlésekor.',
     deletingTitle:
       'Hiba történt a {{title}} törlése közben. Kérjük, ellenőrizze a kapcsolatot, és próbálja meg újra.',
-    documentNotFound:
-      'A dokumentum azonosítóval {{id}} nem található. Lehet, hogy el lett távolítva, vagy soha nem is létezett.',
     emailOrPasswordIncorrect: 'A megadott e-mail-cím vagy jelszó helytelen.',
     followingFieldsInvalid_one: 'A következő mező érvénytelen:',
     followingFieldsInvalid_other: 'A következő mezők érvénytelenek:',

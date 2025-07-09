@@ -87,8 +87,6 @@ export const skTranslations: DefaultTranslationsObject = {
     deletingFile: 'Pri mazaní súboru došlo k chybe.',
     deletingTitle:
       'Pri mazaní {{title}} došlo k chybe. Skontrolujte svoje pripojenie a skúste to znova.',
-    documentNotFound:
-      'Dokument s ID {{id}} sa nenašiel. Mohol byť odstránený alebo nikdy neexistoval.',
     emailOrPasswordIncorrect: 'Zadaný email alebo heslo nie je správne.',
     followingFieldsInvalid_one: 'Nasledujúce pole je neplatné:',
     followingFieldsInvalid_other: 'Nasledujúce polia sú neplatné:',

@@ -92,7 +92,7 @@ export const renderListViewSlots = ({
   // Create banner for document not found
   const notFoundBanner = notFoundDocId ? (
     <Banner type="error">
-      {serverProps.i18n.t('error:documentNotFound', { id: notFoundDocId })}
+      {serverProps.i18n.t('error:loadingDocument', { id: notFoundDocId })}
     </Banner>
   ) : null
 

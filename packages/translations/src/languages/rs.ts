@@ -87,8 +87,6 @@ export const rsTranslations: DefaultTranslationsObject = {
     deletingFile: 'Догодила се грешка при брисању датотеке.',
     deletingTitle:
       'Догодила се грешка при брисању {{title}}. Проверите интернет конекцију и покушајте поново.',
-    documentNotFound:
-      'Dokument sa ID-em {{id}} nije mogao biti pronađen. Moguće je da je uklonjen ili nikad nije postojao.',
     emailOrPasswordIncorrect: 'Емаил или лозинка су неисправни.',
     followingFieldsInvalid_one: 'Ово поље је невалидно:',
     followingFieldsInvalid_other: 'Ова поља су невалидна:',

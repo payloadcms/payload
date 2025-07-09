@@ -85,8 +85,6 @@ export const daTranslations: DefaultTranslationsObject = {
     deletingFile: 'Der opstod en fejl under sletning af filen.',
     deletingTitle:
       'Der opstod en fejl under sletningen {{title}}. Tjek din forbindelse eller prøv igen.',
-    documentNotFound:
-      'Dokumentet med ID {{id}} kunne ikke findes. Det kan være blevet fjernet eller har aldrig eksisteret.',
     emailOrPasswordIncorrect: 'Email eller adgangskode er forkert.',
     followingFieldsInvalid_one: 'Feltet er ugyldigt:',
     followingFieldsInvalid_other: 'Felterne er ugyldige:',

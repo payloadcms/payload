@@ -87,8 +87,6 @@ export const itTranslations: DefaultTranslationsObject = {
     deletingFile: "Si è verificato un errore durante l'eleminazione del file.",
     deletingTitle:
       "Si è verificato un errore durante l'eliminazione di {{title}}. Per favore controlla la tua connessione e riprova.",
-    documentNotFound:
-      'Il documento con ID {{id}} non è stato trovato. Potrebbe essere stato rimosso o mai esistito.',
     emailOrPasswordIncorrect: "L'email o la password fornita non è corretta.",
     followingFieldsInvalid_one: 'Il seguente campo non è valido:',
     followingFieldsInvalid_other: 'I seguenti campi non sono validi:',

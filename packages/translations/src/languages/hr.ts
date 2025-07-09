@@ -87,8 +87,6 @@ export const hrTranslations: DefaultTranslationsObject = {
     deletingFile: 'Dogodila se pogreška pri brisanju datoteke.',
     deletingTitle:
       'Dogodila se pogreška pri brisanju {{title}}. Molimo provjerite svoju internet vezu i pokušajte ponovno.',
-    documentNotFound:
-      'Dokument s ID {{id}} nije mogao biti pronađen. Možda je uklonjen ili nikada nije postojao.',
     emailOrPasswordIncorrect: 'E-mail adresa ili lozinka netočni.',
     followingFieldsInvalid_one: 'Ovo polje je neispravno:',
     followingFieldsInvalid_other: 'Ova polja su neispravna:',

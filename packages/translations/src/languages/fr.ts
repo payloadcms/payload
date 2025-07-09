@@ -88,8 +88,6 @@ export const frTranslations: DefaultTranslationsObject = {
     deletingFile: 'Une erreur s’est produite lors de la suppression du fichier.',
     deletingTitle:
       'Une erreur s’est produite lors de la suppression de {{title}}. Veuillez vérifier votre connexion puis réessayer.',
-    documentNotFound:
-      "Le document avec l'ID {{id}} n'a pas pu être trouvé. Il a peut-être été supprimé ou n'a jamais existé.",
     emailOrPasswordIncorrect: 'L’adresse e-mail ou le mot de passe fourni est incorrect.',
     followingFieldsInvalid_one: 'Le champ suivant n’est pas valide :',
     followingFieldsInvalid_other: 'Les champs suivants ne sont pas valides :',

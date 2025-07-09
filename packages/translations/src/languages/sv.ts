@@ -86,8 +86,6 @@ export const svTranslations: DefaultTranslationsObject = {
     deletingFile: 'Det gick inte att ta bort filen',
     deletingTitle:
       'Det uppstod ett fel vid borttagningen av {{title}}. Vänligen kontrollera din anslutning och försök igen.',
-    documentNotFound:
-      'Dokumentet med ID {{id}} kunde inte hittas. Det kan ha tagits bort eller aldrig funnits.',
     emailOrPasswordIncorrect: 'E-postadressen eller lösenordet som angivits är felaktigt.',
     followingFieldsInvalid_one: 'Följande fält är ogiltigt:',
     followingFieldsInvalid_other: 'Följande fält är ogiltiga:',

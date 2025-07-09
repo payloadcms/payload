@@ -86,8 +86,6 @@ export const viTranslations: DefaultTranslationsObject = {
     deletingFile: 'Lỗi - Đã xảy ra vấn đề khi xóa tệp này.',
     deletingTitle:
       'Lỗi - Đã xảy ra vấn đề khi xóa {{title}}. Hãy kiểm tra kết nối mạng và thử lại.',
-    documentNotFound:
-      'Tài liệu có ID {{id}} không thể tìm thấy. Nó có thể đã bị xóa hoặc chưa bao giờ tồn tại.',
     emailOrPasswordIncorrect: 'Lỗi - Email hoặc mật khẩu không chính xác.',
     followingFieldsInvalid_one: 'Lỗi - Field sau không hợp lệ:',
     followingFieldsInvalid_other: 'Lỗi - Những fields sau không hợp lệ:',
