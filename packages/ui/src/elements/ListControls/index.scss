@@ -9,35 +9,22 @@
       gap: base(0.5);
     }
 
-    &__outer-wrap--with-presets {
-      background-color: transparent;
-      border-radius: 0;
-      padding: 0;
-    }
-
     &__wrap {
       display: flex;
       align-items: center;
       gap: base(0.5);
       flex-grow: 1;
+      background-color: var(--theme-elevation-50);
+      border-radius: var(--style-radius-m);
     }
 
     &__wrap--with-presets {
       justify-content: flex-end;
+      max-width: 50%;
 
       .list-controls__search {
-        max-width: 400px;
         flex-grow: 1;
       }
-    }
-
-    &__search {
-      display: flex;
-      background-color: var(--theme-elevation-50);
-      border-radius: var(--style-radius-m);
-      padding: base(0.3) base(0.4);
-      gap: base(0.4);
-      flex-grow: 1;
     }
 
     &__preset-controls {
@@ -63,10 +50,35 @@
       }
     }
 
+    &__search {
+      display: flex;
+      background-color: var(--theme-elevation-50);
+      border-radius: var(--style-radius-m);
+      gap: base(0.4);
+      flex-grow: 1;
+      position: relative;
+
+      .icon {
+        flex-shrink: 0;
+      }
+    }
+
+    .icon--search {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translate3d(0, -50%, 0);
+      inset-inline-start: base(0.4);
+      z-index: 1;
+      pointer-events: none;
+    }
+
     .search-filter {
       flex-grow: 1;
 
       input {
+        height: 44px;
+        padding-left: 36px;
         margin: 0;
       }
     }
@@ -76,10 +88,11 @@
       border-radius: 0;
     }
 
-    &__buttons-wrap {
+    &__buttons {
       display: flex;
       align-items: center;
       gap: calc(var(--base) / 4);
+      padding-right: 10px;
     }
 
     .pill-selector,
@@ -92,6 +105,8 @@
       &__outer-wrap {
         flex-direction: column;
         align-items: stretch;
+        background-color: transparent;
+        border-radius: 0;
       }
 
       &__wrap {
@@ -103,21 +118,8 @@
         position: relative;
       }
 
-      &__wrap--with-presets {
-        .list-controls__search {
-          max-width: unset;
-        }
-      }
-
       &__preset-menu-items {
         display: none;
-      }
-
-      .icon--search {
-        position: absolute;
-        top: base(0.4);
-        inset-inline-start: base(0.4);
-        z-index: 1;
       }
 
       .search-filter {
@@ -127,24 +129,15 @@
         }
       }
 
-      &__buttons-wrap {
-        [dir='ltr'] & {
-          margin-right: 0;
-        }
-
-        [dir='rtl'] & {
-          margin-left: 0;
-        }
+      &__buttons {
+        padding-right: 0;
+        margin: 0;
+        width: 100%;
 
         .pill {
           padding: base(0.2) base(0.2) base(0.2) base(0.4);
           justify-content: space-between;
         }
-      }
-
-      &__buttons {
-        margin: 0;
-        width: 100%;
       }
 
       .pill-selector,

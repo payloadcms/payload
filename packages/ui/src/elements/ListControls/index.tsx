@@ -181,66 +181,62 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               />
             </div>
             <div className={`${baseClass}__buttons`}>
-              <div className={`${baseClass}__buttons-wrap`}>
-                {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
-                {enableColumns && (
-                  <Pill
-                    aria-controls={`${baseClass}-columns`}
-                    aria-expanded={visibleDrawer === 'columns'}
-                    className={`${baseClass}__toggle-columns`}
-                    icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
-                    onClick={() =>
-                      setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
-                    }
-                    pillStyle="light"
-                    size="medium"
-                  >
-                    {t('general:columns')}
-                  </Pill>
-                )}
-                {enableFilters && (
-                  <Pill
-                    aria-controls={`${baseClass}-where`}
-                    aria-expanded={visibleDrawer === 'where'}
-                    className={`${baseClass}__toggle-where`}
-                    icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
-                    onClick={() =>
-                      setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)
-                    }
-                    pillStyle="light"
-                    size="medium"
-                  >
-                    {t('general:filters')}
-                  </Pill>
-                )}
-                {enableSort && (
-                  <Pill
-                    aria-controls={`${baseClass}-sort`}
-                    aria-expanded={visibleDrawer === 'sort'}
-                    className={`${baseClass}__toggle-sort`}
-                    icon={<ChevronIcon />}
-                    onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
-                    pillStyle="light"
-                    size="medium"
-                  >
-                    {t('general:sort')}
-                  </Pill>
-                )}
-                {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
-                  <Popup
-                    button={<Dots ariaLabel={t('general:moreOptions')} />}
-                    className={`${baseClass}__popup`}
-                    horizontalAlign="right"
-                    id="list-menu"
-                    size="medium"
-                    verticalAlign="bottom"
-                  >
-                    {listMenuItems.map((item, i) => (
-                      <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
-                    ))}
-                  </Popup>
-                )}
-              </div>
+              {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
+              {enableColumns && (
+                <Pill
+                  aria-controls={`${baseClass}-columns`}
+                  aria-expanded={visibleDrawer === 'columns'}
+                  className={`${baseClass}__toggle-columns`}
+                  icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
+                  onClick={() =>
+                    setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
+                  }
+                  pillStyle="light"
+                  size="small"
+                >
+                  {t('general:columns')}
+                </Pill>
+              )}
+              {enableFilters && (
+                <Pill
+                  aria-controls={`${baseClass}-where`}
+                  aria-expanded={visibleDrawer === 'where'}
+                  className={`${baseClass}__toggle-where`}
+                  icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
+                  onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
+                  pillStyle="light"
+                  size="small"
+                >
+                  {t('general:filters')}
+                </Pill>
+              )}
+              {enableSort && (
+                <Pill
+                  aria-controls={`${baseClass}-sort`}
+                  aria-expanded={visibleDrawer === 'sort'}
+                  className={`${baseClass}__toggle-sort`}
+                  icon={<ChevronIcon />}
+                  onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
+                  pillStyle="light"
+                  size="small"
+                >
+                  {t('general:sort')}
+                </Pill>
+              )}
+              {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
+                <Popup
+                  button={<Dots ariaLabel={t('general:moreOptions')} />}
+                  className={`${baseClass}__popup`}
+                  horizontalAlign="right"
+                  id="list-menu"
+                  size="small"
+                  verticalAlign="bottom"
+                >
+                  {listMenuItems.map((item, i) => (
+                    <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
+                  ))}
+                </Popup>
+              )}
             </div>
           </div>
         </div>
