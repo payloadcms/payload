@@ -329,27 +329,36 @@ export const renderDocument = async ({
     viewType,
   }
 
+  const isLivePreviewEnabled = Boolean(
+    config.admin?.livePreview?.collections?.includes(collectionSlug) ||
+      config.admin?.livePreview?.globals?.includes(globalSlug) ||
+      collectionConfig?.admin?.livePreview ||
+      globalConfig?.admin?.livePreview,
+  )
+
   const livePreviewConfig: LivePreviewConfig = {
-    ...(config.admin.livePreview || {}),
+    ...(isLivePreviewEnabled ? config.admin.livePreview : {}),
     ...(collectionConfig?.admin?.livePreview || {}),
     ...(globalConfig?.admin?.livePreview || {}),
   }
 
   const livePreviewURL =
-    typeof livePreviewConfig?.url === 'function'
-      ? await livePreviewConfig.url({
-          collectionConfig,
-          data: doc,
-          globalConfig,
-          locale,
-          req,
-          /**
-           * @deprecated
-           * Use `req.payload` instead. This will be removed in the next major version.
-           */
-          payload: initPageResult.req.payload,
-        })
-      : livePreviewConfig?.url
+    operation !== 'create'
+      ? typeof livePreviewConfig?.url === 'function'
+        ? await livePreviewConfig.url({
+            collectionConfig,
+            data: doc,
+            globalConfig,
+            locale,
+            req,
+            /**
+             * @deprecated
+             * Use `req.payload` instead. This will be removed in the next major version.
+             */
+            payload: initPageResult.req.payload,
+          })
+        : livePreviewConfig?.url
+      : ''
 
   return {
     data: doc,
@@ -380,8 +389,8 @@ export const renderDocument = async ({
       >
         <LivePreviewProvider
           breakpoints={livePreviewConfig?.breakpoints}
+          isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
           isLivePreviewing={entityPreferences?.value?.editViewType === 'live-preview'}
-          operation={operation}
           url={livePreviewURL}
         >
           {showHeader && !drawerSlug && (

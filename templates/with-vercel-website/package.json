@@ -7,6 +7,7 @@
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
     "postbuild": "next-sitemap --config next-sitemap.config.cjs",
+    "ci": "payload migrate && pnpm build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build && pnpm start",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
@@ -19,8 +20,7 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test --config=playwright.config.ts",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
-    "ci": "payload migrate && pnpm build"
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
     "@payloadcms/admin-bar": "3.46.0",
@@ -54,7 +54,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "7.45.4",
-    "sharp": "0.32.6",
+    "sharp": "0.34.2",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7"
   },
@@ -82,6 +82,7 @@
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.3"
   },
+  "packageManager": "pnpm@10.12.4",
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
   },
@@ -91,6 +92,5 @@
       "esbuild",
       "unrs-resolver"
     ]
-  },
-  "packageManager": "pnpm@10.12.4"
+  }
 }

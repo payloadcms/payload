@@ -91,6 +91,10 @@
     "reinstall": "pnpm clean:all && pnpm install",
     "release": "pnpm --filter releaser release --tag latest",
     "runts": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" node --no-deprecation --no-experimental-strip-types --import @swc-node/register/esm-register",
+    "script:audit": "pnpm audit -P",
+    "script:audit:critical": "pnpm audit -P --audit-level critical",
+    "script:audit:high": "pnpm audit -P --audit-level high",
+    "script:audit:moderate": "pnpm audit -P --audit-level moderate",
     "script:build-template-with-local-pkgs": "pnpm --filter scripts build-template-with-local-pkgs",
     "script:gen-templates": "pnpm --filter scripts gen-templates",
     "script:gen-templates:build": "pnpm --filter scripts gen-templates --build",
@@ -121,7 +125,6 @@
       "prettier --write",
       "eslint --cache --fix"
     ],
-    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --no-frozen-lockfile --ignore-workspace; pnpm run lint --fix\"",
     "templates/**/pnpm-lock.yaml": "pnpm runts scripts/remove-template-lock-files.ts",
     "tsconfig.base.json": "node scripts/reset-tsconfig.js"
   },

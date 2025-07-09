@@ -27,6 +27,8 @@ packages/ui/esbuild
 packages/next/esbuild
 packages/richtext-lexical/esbuild
 
+audit_output.json
+
 .turbo
 
 # Ignore test directory media folder/files
