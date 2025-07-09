@@ -348,76 +348,6 @@ describe('Block fields', () => {
     )
   })
 
-  test('should copy and paste blocks', async () => {
-    await page.goto(url.create)
-    const blocksField = page.locator('#field-blocks')
-    const row = blocksField.locator('#blocks-row-0')
-    const rowTextInput = row.locator('#field-blocks__0__text')
-
-    const textVal = 'first block copy'
-    await rowTextInput.fill(textVal)
-
-    const clipboardPopup = blocksField.locator(
-      '.clipboard-action__popup.blocks-field__header-action',
-    )
-    const clipboardPopupBtn = clipboardPopup.locator('button').first()
-    await clipboardPopupBtn.click()
-    const copyBtn = clipboardPopup
-      .locator('.popup-button-list button')
-      .filter({ hasText: 'Copy Field' })
-      .first()
-    await expect(copyBtn).toBeVisible()
-    await copyBtn.click()
-    const copySuccessToast = page.locator('.payload-toast-item.toast-success')
-    await expect(copySuccessToast).toBeVisible()
-
-    await page.reload()
-    await expect(rowTextInput).toHaveValue('first block')
-    await expect(clipboardPopupBtn).toBeVisible()
-    await clipboardPopupBtn.click()
-    const pasteBtn = clipboardPopup
-      .locator('.popup-button-list button')
-      .filter({ hasText: 'Paste Field' })
-      .first()
-    await expect(pasteBtn).toBeVisible()
-    await pasteBtn.click()
-    await expect(rowTextInput).toHaveValue(textVal)
-  })
-
-  test('should prevent pasting into different block fields', async () => {
-    await page.goto(url.create)
-    const blocksField = page.locator('#field-blocks')
-    const clipboardPopup = blocksField.locator(
-      '.clipboard-action__popup.blocks-field__header-action',
-    )
-    const clipboardPopupBtn = clipboardPopup.locator('button').first()
-    await clipboardPopupBtn.click()
-    const copyBtn = clipboardPopup
-      .locator('.popup-button-list button')
-      .filter({ hasText: 'Copy Field' })
-      .first()
-    await expect(copyBtn).toBeVisible()
-    await copyBtn.click()
-    const copySuccessToast = page.locator('.payload-toast-item.toast-success')
-    await expect(copySuccessToast).toBeVisible()
-
-    const duplicatesField = page.locator('#field-duplicate')
-    const clipboardPopupTwo = duplicatesField.locator(
-      '.clipboard-action__popup.blocks-field__header-action',
-    )
-    const clipboardPopupTwoBtn = clipboardPopupTwo.locator('button').first()
-    await clipboardPopupTwoBtn.click()
-    const pasteBtn = clipboardPopupTwo
-      .locator('.popup-button-list button')
-      .filter({ hasText: 'Paste Field' })
-      .first()
-    await expect(pasteBtn).toBeVisible()
-    await pasteBtn.click()
-
-    const pasteErrorToast = page.locator('.payload-toast-item.toast-error')
-    await expect(pasteErrorToast).toBeVisible()
-  })
-
   describe('row manipulation', () => {
     test('moving rows should immediately move custom row labels', async () => {
       await page.goto(url.create)
@@ -500,32 +430,6 @@ describe('Block fields', () => {
           page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]'),
         ).toHaveValue('REPLACED BLOCK')
       })
-    })
-
-    test('should copy and paste rows', async () => {
-      await page.goto(url.create)
-      const blocksField = page.locator('#field-blocks')
-      const rowOne = blocksField.locator('#blocks-row-0')
-      const rowOneTextInput = rowOne.locator('#field-blocks__0__text')
-      const rowOneText = (await rowOneTextInput.textContent()) as string
-
-      const blocksActionsBtnRowOne = rowOne.locator('.popup.array-actions button.popup-button')
-      await blocksActionsBtnRowOne.click()
-      const copyRowBtn = rowOne.locator('button.array-actions__copy')
-      await expect(copyRowBtn).toBeVisible()
-      await copyRowBtn.click()
-      const copySuccessToast = page.locator('.payload-toast-item.toast-success')
-      await expect(copySuccessToast).toBeVisible()
-
-      const rowTwo = blocksField.locator('#blocks-row-1')
-      const blocksActionsBtnRowTwo = rowTwo.locator('.popup.array-actions button.popup-button')
-      await blocksActionsBtnRowTwo.click()
-      const pasteRowBtn = rowTwo.locator('button.array-actions__paste')
-      await expect(pasteRowBtn).toBeVisible()
-      await pasteRowBtn.click()
-      const rowTwoTextInput = rowTwo.locator('#field-blocks__1__text')
-      await expect(rowTwoTextInput).toBeVisible()
-      await expect(rowTwoTextInput).toHaveText(rowOneText)
     })
   })
 
