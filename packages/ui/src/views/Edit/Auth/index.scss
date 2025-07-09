@@ -44,6 +44,35 @@
 
     input {
       @include formInput;
+      width: 100%;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+
+  .api-key {
+    &__button-wrap {
+      display: flex;
+      align-self: stretch;
+
+      button {
+        @include formInput;
+        background: var(--theme-elevation-100);
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        position: relative;
+        height: 100%;
+        margin: 0 0 0 -1px;
+        padding: 0 base(0.5);
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+      }
+    }
+
+    &__input-wrap {
+      display: flex;
+      align-items: center;
     }
   }
 
