@@ -4,17 +4,17 @@ import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatFilesize, isNumber } from 'payload/shared'
+import { formatFilesize } from 'payload/shared'
 import React, { Fragment, useEffect, useState } from 'react'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
+import { FloatingToolbar } from '../../elements/FloatingToolbar/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { useModal } from '../../elements/Modal/index.js'
-import { Pagination } from '../../elements/Pagination/index.js'
-import { PerPage } from '../../elements/PerPage/index.js'
+import { PageControls } from '../../elements/PageControls/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
@@ -27,8 +27,8 @@ import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
+import { ListSelection } from '../../views/List/ListSelection/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
-import { ListSelection } from './ListSelection/index.js'
 import './index.scss'
 
 const baseClass = 'collection-list'
@@ -77,13 +77,7 @@ export function DefaultListView(props: ListViewClientProps) {
   const { getEntityConfig } = useConfig()
   const router = useRouter()
 
-  const {
-    data,
-    defaultLimit: initialLimit,
-    handlePageChange,
-    handlePerPageChange,
-    query,
-  } = useListQuery()
+  const { data, query } = useListQuery()
 
   const { openModal } = useModal()
   const { drawerSlug: bulkUploadDrawerSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
@@ -212,62 +206,42 @@ export function DefaultListView(props: ListViewClientProps) {
               )}
               {AfterListTable}
               {docs.length > 0 && (
-                <div className={`${baseClass}__page-controls`}>
-                  <Pagination
-                    hasNextPage={data.hasNextPage}
-                    hasPrevPage={data.hasPrevPage}
-                    limit={data.limit}
-                    nextPage={data.nextPage}
-                    numberOfNeighbors={1}
-                    onChange={(page) => void handlePageChange(page)}
-                    page={data.page}
-                    prevPage={data.prevPage}
-                    totalPages={data.totalPages}
-                  />
-                  {data.totalDocs > 0 && (
-                    <Fragment>
-                      <div className={`${baseClass}__page-info`}>
-                        {data.page * data.limit - (data.limit - 1)}-
-                        {data.totalPages > 1 && data.totalPages !== data.page
-                          ? data.limit * data.page
-                          : data.totalDocs}{' '}
-                        {i18n.t('general:of')} {data.totalDocs}
-                      </div>
-                      <PerPage
-                        handleChange={(limit) => void handlePerPageChange(limit)}
-                        limit={isNumber(query?.limit) ? Number(query.limit) : initialLimit}
-                        limits={collectionConfig?.admin?.pagination?.limits}
-                        resetPage={data.totalDocs <= data.pagingCounter}
-                      />
-                      {smallBreak && (
-                        <div className={`${baseClass}__list-selection`}>
-                          <ListSelection
-                            collectionConfig={collectionConfig}
-                            disableBulkDelete={disableBulkDelete}
-                            disableBulkEdit={disableBulkEdit}
-                            label={getTranslation(collectionConfig.labels.plural, i18n)}
-                          />
-                          <div className={`${baseClass}__list-selection-actions`}>
-                            {enableRowSelections && typeof onBulkSelect === 'function'
-                              ? beforeActions
-                                ? [
-                                    ...beforeActions,
-                                    <SelectMany key="select-many" onClick={onBulkSelect} />,
-                                  ]
-                                : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                              : beforeActions}
-                          </div>
+                <PageControls
+                  AfterPageControls={
+                    smallBreak ? (
+                      <div className={`${baseClass}__list-selection`}>
+                        <ListSelection
+                          collectionConfig={collectionConfig}
+                          disableBulkDelete={disableBulkDelete}
+                          disableBulkEdit={disableBulkEdit}
+                          label={getTranslation(collectionConfig.labels.plural, i18n)}
+                        />
+                        <div className={`${baseClass}__list-selection-actions`}>
+                          {enableRowSelections && typeof onBulkSelect === 'function'
+                            ? beforeActions
+                              ? [
+                                  ...beforeActions,
+                                  <SelectMany key="select-many" onClick={onBulkSelect} />,
+                                ]
+                              : [<SelectMany key="select-many" onClick={onBulkSelect} />]
+                            : beforeActions}
                         </div>
-                      )}
-                    </Fragment>
-                  )}
-                </div>
+                      </div>
+                    ) : null
+                  }
+                  collectionConfig={collectionConfig}
+                />
               )}
             </Gutter>
             {AfterList}
           </SelectionProvider>
         </div>
       </TableColumnsProvider>
+      {/* {query.groupBy && ( */}
+      <FloatingToolbar>
+        <PageControls collectionConfig={collectionConfig} />
+      </FloatingToolbar>
+      {/* )} */}
     </Fragment>
   )
 }
