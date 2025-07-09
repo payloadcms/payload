@@ -2747,6 +2747,45 @@ describe('database', () => {
     expect(result_2.totalDocs).toBe(0)
   })
 
+  it('should find distinct field values of the collection', async () => {
+    const titles = [
+      'title-1',
+      'title-2',
+      'title-3',
+      'title-4',
+      'title-5',
+      'title-6',
+      'title-7',
+      'title-8',
+      'title-9',
+    ]
+
+    for (const title of titles) {
+      // eslint-disable-next-line jest/no-conditional-in-test
+      const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
+      for (let i = 0; i < docsCount; i++) {
+        await payload.create({ collection: 'posts', data: { title } })
+      }
+    }
+
+    const res = await payload.findDistinct({
+      collection: 'posts',
+      sortOrder: 'desc',
+      field: 'title',
+    })
+
+    expect(res.values).toStrictEqual(titles)
+
+    const resLimit = await payload.findDistinct({
+      collection: 'posts',
+      sortOrder: 'desc',
+      field: 'title',
+      limit: 3,
+    })
+
+    expect(resLimit.values).toStrictEqual(['title-1', 'title-2', 'title-3'])
+  })
+
   it('can have localized and non localized blocks', async () => {
     const res = await payload.create({
       collection: 'blocks-docs',

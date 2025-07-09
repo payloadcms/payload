@@ -17,6 +17,7 @@ import {
   deleteVersions,
   destroy,
   find,
+  findDistinct,
   findGlobal,
   findGlobalVersions,
   findMigrationDir,
@@ -140,6 +141,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       poolOptions: args.pool,
       prodMigrations: args.prodMigrations,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      findDistinct,
       push: args.push,
       readReplicaOptions: args.readReplicas,
       relations: {},
