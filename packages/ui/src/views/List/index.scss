@@ -62,27 +62,6 @@
       }
     }
 
-    &__page-controls {
-      width: 100%;
-      display: flex;
-      align-items: center;
-    }
-
-    .paginator {
-      margin-bottom: 0;
-    }
-
-    &__page-info {
-      [dir='ltr'] & {
-        margin-right: base(1);
-        margin-left: auto;
-      }
-      [dir='rtl'] & {
-        margin-left: base(1);
-        margin-right: auto;
-      }
-    }
-
     &__list-selection {
       position: fixed;
       bottom: 0;
@@ -156,23 +135,10 @@
           padding-right: var(--gutter-h);
         }
       }
-
-      &__page-controls {
-        flex-wrap: wrap;
-      }
-
-      &__page-info {
-        margin-left: 0;
-      }
-
-      .paginator {
-        width: 100%;
-        margin-bottom: $baseline;
-      }
     }
 
     @include small-break {
-      margin-bottom: base(2.4);
+      margin-bottom: base(4);
     }
   }
 }
