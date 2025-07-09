@@ -36,15 +36,15 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     },
   })
 
+  orderBy.pop()
+
   const selectDistinctResult = await selectDistinct({
     adapter: this,
     db,
     forceRun: true,
     joins,
     query: ({ query }) => {
-      if (orderBy) {
-        query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
-      }
+      query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
 
       if (args.limit) {
         if (offset) {
