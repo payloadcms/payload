@@ -1,6 +1,7 @@
-import type { ResizeOptions, Sharp } from 'sharp'
+import type { ResizeOptions, Sharp, SharpOptions } from 'sharp'
 
-import type { TypeWithID } from '../collections/config/types.js'
+import type { CollectionConfig, TypeWithID } from '../collections/config/types.js'
+import type { PayloadComponent } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { WithMetadata } from './optionallyAppendMetadata.js'
 
@@ -101,6 +102,20 @@ export type AllowList = Array<{
   search?: string
 }>
 
+export type FileAllowList = Array<{
+  extensions: string[]
+  mimeType: string
+}>
+
+type Admin = {
+  components?: {
+    /**
+     * The Controls component to extend the upload controls in the admin panel.
+     */
+    controls?: PayloadComponent[]
+  }
+}
+
 export type UploadConfig = {
   /**
    * The adapter name to use for uploads. Used for storage adapter telemetry.
@@ -108,11 +123,23 @@ export type UploadConfig = {
    */
   adapter?: string
   /**
+   * The admin configuration for the upload field.
+   */
+  admin?: Admin
+  /**
    * Represents an admin thumbnail, which can be either a React component or a string.
    * - If a string, it should be one of the image size names.
    * - A function that generates a fully qualified URL for the thumbnail, receives the doc as the only argument.
    **/
   adminThumbnail?: GetAdminThumbnail | string
+  /**
+   * Allow restricted file types known to be problematic.
+   * - If set to `true`, it will allow all file types.
+   * - If set to `false`, it will not allow file types and extensions known to be problematic.
+   * - This setting is overriden by the `mimeTypes` option.
+   * @default false
+   */
+  allowRestrictedFileTypes?: boolean
   /**
    * Enables bulk upload of files from the list view.
    * @default true
@@ -124,6 +151,11 @@ export type UploadConfig = {
    * @default true
    */
   cacheTags?: boolean
+  /**
+   * Sharp constructor options to be passed to the uploaded file.
+   * @link https://sharp.pixelplumbing.com/api-constructor/#sharp
+   */
+  constructorOptions?: SharpOptions
   /**
    * Enables cropping of images.
    * @default true
@@ -172,6 +204,7 @@ export type UploadConfig = {
    * - If a handler returns null, the next handler will be run.
    * - If no handlers return a response the file will be returned by default.
    *
+   * @link https://sharp.pixelplumbing.com/api-output/#toformat
    * @default undefined
    */
   handlers?: ((
@@ -205,7 +238,8 @@ export type UploadConfig = {
   /**
    * Controls the behavior of pasting/uploading files from URLs.
    * If set to `false`, fetching from remote URLs is disabled.
-   * If an allowList is provided, server-side fetching will be enabled for specified URLs.
+   * If an `allowList` is provided, server-side fetching will be enabled for specified URLs.
+   *
    * @default true (client-side fetching enabled)
    */
   pasteURL?:
@@ -219,6 +253,11 @@ export type UploadConfig = {
    * @default undefined
    */
   resizeOptions?: ResizeOptions
+  /**
+   *  Skip safe fetch when using server-side fetching for external files from these URLs.
+   *  @default false
+   */
+  skipSafeFetch?: AllowList | boolean
   /**
    * The directory to serve static files from. Defaults to collection slug.
    * @default undefined
@@ -236,6 +275,11 @@ export type UploadConfig = {
    * @default false
    */
   withMetadata?: WithMetadata
+}
+export type checkFileRestrictionsParams = {
+  collection: CollectionConfig
+  file: File
+  req: PayloadRequest
 }
 
 export type SanitizedUploadConfig = {

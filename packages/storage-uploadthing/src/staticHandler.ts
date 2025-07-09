@@ -36,7 +36,7 @@ export const getHandler = ({ utApi }: Args): StaticHandler => {
             },
           ]
 
-          if (collectionConfig.upload.imageSizes) {
+          if (collectionConfig?.upload.imageSizes) {
             collectionConfig.upload.imageSizes.forEach(({ name }) => {
               or.push({
                 [`sizes.${name}.filename`]: {
@@ -61,7 +61,7 @@ export const getHandler = ({ utApi }: Args): StaticHandler => {
           return new Response(null, { status: 404, statusText: 'Not Found' })
         }
 
-        key = getKeyFromFilename(retrievedDoc, filename)
+        key = getKeyFromFilename(retrievedDoc, filename)!
       }
 
       if (!key) {
@@ -89,10 +89,13 @@ export const getHandler = ({ utApi }: Args): StaticHandler => {
 
       headers.append('Content-Length', String(blob.size))
       headers.append('Content-Type', blob.type)
-      headers.append('ETag', objectEtag)
+
+      if (objectEtag) {
+        headers.append('ETag', objectEtag)
+      }
 
       if (
-        collectionConfig.upload &&
+        collectionConfig?.upload &&
         typeof collectionConfig.upload === 'object' &&
         typeof collectionConfig.upload.modifyResponseHeaders === 'function'
       ) {

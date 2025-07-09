@@ -38,6 +38,7 @@ import {
   updateMany,
   updateOne,
   updateVersion,
+  upsert,
 } from '@payloadcms/drizzle'
 import {
   columnToCodeConverter,
@@ -95,6 +96,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       afterSchemaInit: args.afterSchemaInit ?? [],
       allowIDOnCreate,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
+      blocksAsJSON: args.blocksAsJSON ?? false,
       createDatabase,
       createExtensions,
       defaultDrizzleSnapshot,
@@ -174,6 +176,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       find,
       findGlobal,
       findGlobalVersions,
+      readReplicaOptions: args.readReplicas,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
@@ -200,7 +203,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       updateMany,
       updateOne,
       updateVersion,
-      upsert: updateOne,
+      upsert,
     })
   }
 

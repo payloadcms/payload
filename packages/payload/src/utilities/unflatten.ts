@@ -1,4 +1,4 @@
-// @ts-strict-ignore
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2014, Hugh Kennedy
  * All rights reserved.
@@ -16,7 +16,7 @@
  * Reference: https://www.npmjs.com/package/is-buffer
  * All rights reserved.
  */
-function isBuffer(obj) {
+function isBuffer(obj: any) {
   return (
     obj != null &&
     obj.constructor != null &&
@@ -32,7 +32,7 @@ interface Opts {
   recursive?: boolean
 }
 
-export const unflatten = (target, opts?: Opts) => {
+export const unflatten = (target: any, opts?: Opts) => {
   opts = opts || {}
 
   const delimiter = opts.delimiter || '.'
@@ -47,7 +47,7 @@ export const unflatten = (target, opts?: Opts) => {
   }
 
   // safely ensure that the key is an integer.
-  const getkey = (key) => {
+  const getkey = (key: any) => {
     const parsedKey = Number(key)
     return isNaN(parsedKey) || key.indexOf('.') !== -1 || opts.object ? key : parsedKey
   }
@@ -58,7 +58,7 @@ export const unflatten = (target, opts?: Opts) => {
     const split = key.split(delimiter)
     let key1 = getkey(split.shift())
     let key2 = getkey(split[0])
-    let recipient = result
+    let recipient = result as Record<string, any>
 
     while (key2 !== undefined) {
       if (key1 === '__proto__') {

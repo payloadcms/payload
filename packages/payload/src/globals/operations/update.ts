@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GlobalSlug, JsonObject } from '../../index.js'
@@ -16,7 +15,7 @@ import type {
   SelectFromGlobalSlug,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -100,7 +99,7 @@ export const updateOperation = async <
     // Retrieve document
     // /////////////////////////////////////
 
-    const query: Where = overrideAccess ? undefined : (accessResults as Where)
+    const query: Where = overrideAccess ? undefined! : (accessResults as Where)
 
     // /////////////////////////////////////
     // 2. Retrieve document
@@ -108,7 +107,7 @@ export const updateOperation = async <
     const globalVersion = await getLatestGlobalVersion({
       slug,
       config: globalConfig,
-      locale,
+      locale: locale!,
       payload,
       req,
       where: query,
@@ -130,13 +129,13 @@ export const updateOperation = async <
       context: req.context,
       depth: 0,
       doc: deepCopyObjectSimple(globalJSON),
-      draft: draftArg,
-      fallbackLocale,
+      draft: draftArg!,
+      fallbackLocale: fallbackLocale!,
       global: globalConfig,
-      locale,
+      locale: locale!,
       overrideAccess: true,
       req,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // ///////////////////////////////////////////
@@ -161,7 +160,7 @@ export const updateOperation = async <
       doc: originalDoc,
       global: globalConfig,
       operation: 'update',
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
     })
 
@@ -246,6 +245,7 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     const select = sanitizeSelect({
+      fields: globalConfig.flattenedFields,
       forceSelect: globalConfig.forceSelect,
       select: incomingSelect,
     })
@@ -315,17 +315,17 @@ export const updateOperation = async <
     result = await afterRead({
       collection: null,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: result,
-      draft: draftArg,
+      draft: draftArg!,
       fallbackLocale: null,
       global: globalConfig,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////
@@ -368,6 +368,7 @@ export const updateOperation = async <
         result =
           (await hook({
             context: req.context,
+            data,
             doc: result,
             global: globalConfig,
             previousDoc: originalDoc,

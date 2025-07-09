@@ -7,7 +7,7 @@
     white-space: nowrap;
     display: flex;
     padding-inline-start: base(0.4);
-    padding-inline-end: base(0.4);
+    padding-inline-end: base(0.2);
     background-color: var(--theme-elevation-100);
     border-radius: var(--style-radius-s);
 
@@ -24,7 +24,6 @@
     &__current {
       display: flex;
       align-items: center;
-      gap: base(0.3);
     }
 
     button {

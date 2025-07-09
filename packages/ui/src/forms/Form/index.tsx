@@ -110,6 +110,7 @@ export const Form: React.FC<FormProps> = (props) => {
    */
   const [isValid, setIsValid] = useState(true)
   const [initializing, setInitializing] = useState(initializingFromProps)
+
   const [processing, setProcessing] = useState(false)
   const [backgroundProcessing, setBackgroundProcessing] = useState(false)
 

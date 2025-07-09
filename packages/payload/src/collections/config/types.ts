@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
@@ -32,6 +33,7 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
+import type { CollectionFoldersConfiguration } from '../../folders/types.js'
 import type {
   CollectionSlug,
   JsonObject,
@@ -81,6 +83,7 @@ export type HookOperationType =
   | 'login'
   | 'read'
   | 'refresh'
+  | 'resetPassword'
   | 'update'
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
@@ -137,6 +140,7 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
+  data: Partial<T>
   doc: T
   /**
    * Hook operation being performed
@@ -211,6 +215,7 @@ export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   user: T
 }) => any
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -218,6 +223,7 @@ export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest
 }) => any
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -236,6 +242,7 @@ export type MeHook<T extends TypeWithID = any> = (args: {
   user: T
 }) => ({ exp: number; user: T } | void) | Promise<{ exp: number; user: T } | void>
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -255,6 +262,11 @@ export type AfterForgotPasswordHook = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
 }) => any
+
+export type EnableFoldersOptions = {
+  // Displays the folder collection and parentFolder field in the document view
+  debug?: boolean
+}
 
 export type BaseListFilter = (args: {
   limit: number
@@ -279,6 +291,14 @@ export type CollectionAdminOptions = {
      * Components within the edit view
      */
     edit?: {
+      /**
+       * Inject custom components before the document controls
+       */
+      beforeDocumentControls?: CustomComponent[]
+      /**
+       * Inject custom components within the 3-dot menu dropdown
+       */
+      editMenuItems?: CustomComponent[]
       /**
        * Replaces the "Preview" button
        */
@@ -308,10 +328,14 @@ export type CollectionAdminOptions = {
     listMenuItems?: CustomComponent[]
     views?: {
       /**
-       * Set to a React component to replace the entire Edit View, including all nested routes.
-       * Set to an object to replace or modify individual nested routes, or to add new ones.
+       * Replace, modify, or add new "document" views.
+       * @link https://payloadcms.com/docs/custom-components/document-views
        */
       edit?: EditConfig
+      /**
+       * Replace or modify the "list" view.
+       * @link https://payloadcms.com/docs/custom-components/list-view
+       */
       list?: {
         actions?: CustomComponent[]
         Component?: PayloadComponent
@@ -417,6 +441,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   defaultSort?: Sort
   /**
+   * Disable the bulk edit operation for the collection in the admin panel and the API
+   */
+  disableBulkEdit?: boolean
+  /**
    * When true, do not show the "Duplicate" button while editing documents within this collection and prevent `duplicate` from all APIs
    */
   disableDuplicate?: boolean
@@ -430,6 +458,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
+  /**
+   * Enables folders for this collection
+   */
+  folders?: boolean | CollectionFoldersConfiguration
   /**
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
    */
@@ -579,8 +611,9 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
+    'admin' | 'auth' | 'endpoints' | 'fields' | 'folders' | 'slug' | 'upload' | 'versions'
   > {
+  admin: CollectionAdminOptions
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
@@ -592,6 +625,7 @@ export interface SanitizedCollectionConfig
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
+  folders: CollectionFoldersConfiguration | false
   joins: SanitizedJoins
 
   /**

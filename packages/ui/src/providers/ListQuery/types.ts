@@ -1,10 +1,9 @@
 import type {
   ClientCollectionConfig,
+  CollectionPreferences,
   ColumnPreference,
-  ListPreferences,
   ListQuery,
   PaginatedDocs,
-  QueryPreset,
   Sort,
   Where,
 } from 'payload'
@@ -26,7 +25,7 @@ export type ListQueryProps = {
   readonly data: PaginatedDocs
   readonly defaultLimit?: number
   readonly defaultSort?: Sort
-  readonly listPreferences?: ListPreferences
+  readonly listPreferences?: CollectionPreferences
   readonly modifySearchParams?: boolean
   readonly onQueryChange?: OnListQueryChange
   readonly orderableFieldName?: string

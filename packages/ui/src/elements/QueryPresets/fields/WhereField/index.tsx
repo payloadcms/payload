@@ -44,7 +44,7 @@ const transformWhereToNaturalLanguage = (
     }
 
     return (
-      <Pill pillStyle="always-white">
+      <Pill pillStyle="always-white" size="small">
         <b>{toWords(key)}</b> {operator} <b>{toWords(value)}</b>
       </Pill>
     )
@@ -88,9 +88,8 @@ const transformWhereToNaturalLanguage = (
 
 export const QueryPresetsWhereField: JSONFieldClientComponent = ({
   field: { label, required },
-  path,
 }) => {
-  const { value } = useField({ path })
+  const { path, value } = useField()
   const { collectionSlug } = useListQuery()
   const { getEntityConfig } = useConfig()
 
@@ -105,7 +104,7 @@ export const QueryPresetsWhereField: JSONFieldClientComponent = ({
         {value
           ? transformWhereToNaturalLanguage(
               value as Where,
-              getTranslation(collectionConfig.labels.plural, i18n),
+              getTranslation(collectionConfig?.labels?.plural, i18n),
             )
           : 'No where query'}
       </div>

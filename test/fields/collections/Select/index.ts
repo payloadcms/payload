@@ -243,6 +243,36 @@ const SelectFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'disallowOption1',
+      type: 'checkbox',
+    },
+    {
+      name: 'selectWithFilteredOptions',
+      label: 'Select with filtered options',
+      type: 'select',
+      defaultValue: 'one',
+      options: [
+        {
+          label: 'Value One',
+          value: 'one',
+        },
+        {
+          label: 'Value Two',
+          value: 'two',
+        },
+        {
+          label: 'Value Three',
+          value: 'three',
+        },
+      ],
+      filterOptions: ({ options, data }) =>
+        data.disallowOption1
+          ? options.filter(
+              (option) => (typeof option === 'string' ? options : option.value) !== 'one',
+            )
+          : options,
+    },
   ],
 }
 

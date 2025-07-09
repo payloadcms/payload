@@ -54,9 +54,7 @@ describe('Access Control', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('Fields', () => {
@@ -232,6 +230,26 @@ describe('Access Control', () => {
       // should fallback to original data and not throw validation error
       expect(updatedDoc.cannotMutateRequired).toBe('cannotMutateRequired')
       expect(updatedDoc.cannotMutateNotRequired).toBe('cannotMutateNotRequired')
+    })
+
+    it('should not return default values for hidden fields with values', async () => {
+      const doc = await payload.create({
+        collection: hiddenFieldsSlug,
+        data: {
+          title: 'Test Title',
+        },
+        showHiddenFields: true,
+      })
+
+      expect(doc.hiddenWithDefault).toBe('default value')
+
+      const findDoc2 = await payload.findByID({
+        id: doc.id,
+        collection: hiddenFieldsSlug,
+        overrideAccess: false,
+      })
+
+      expect(findDoc2.hiddenWithDefault).toBeUndefined()
     })
   })
   describe('Collections', () => {

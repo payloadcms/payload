@@ -1,6 +1,6 @@
 'use client'
 
-import type { ListPreferences, SelectFieldClientComponent } from 'payload'
+import type { CollectionPreferences, SelectFieldClientComponent } from 'payload'
 import type { ReactNode } from 'react'
 
 import {
@@ -20,8 +20,7 @@ const baseClass = 'fields-to-export'
 
 export const FieldsToExport: SelectFieldClientComponent = (props) => {
   const { id } = useDocumentInfo()
-  const { path } = props
-  const { setValue, value } = useField<string[]>({ path })
+  const { setValue, value } = useField<string[]>()
   const { value: collectionSlug } = useField<string>({ path: 'collectionSlug' })
   const { getEntityConfig } = useConfig()
   const { collection } = useImportExport()
@@ -52,10 +51,11 @@ export const FieldsToExport: SelectFieldClientComponent = (props) => {
     if (id || !collectionSlug) {
       return
     }
+
     const doAsync = async () => {
       const currentPreferences = await getPreference<{
-        columns: ListPreferences['columns']
-      }>(`${collectionSlug}-list`)
+        columns: CollectionPreferences['columns']
+      }>(`collection-${collectionSlug}`)
 
       const columns = currentPreferences?.columns?.filter((a) => a.active).map((b) => b.accessor)
       setValue(columns ?? collectionConfig?.admin?.defaultColumns ?? [])
@@ -84,11 +84,12 @@ export const FieldsToExport: SelectFieldClientComponent = (props) => {
 
   return (
     <div className={baseClass}>
-      <FieldLabel label="Columns to Export" />
+      <FieldLabel label={props.field.label} path={props.path} />
       <ReactSelect
         className={baseClass}
         disabled={props.readOnly}
         getOptionValue={(option) => String(option.value)}
+        inputId={`field-${props.path.replace(/\./g, '__')}`}
         isClearable={true}
         isMulti={true}
         isSortable={true}

@@ -26,6 +26,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { blocksCollectionSlug } from './collections/Blocks/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
 import { richTextSlug } from './collections/RichText/index.js'
 import {
@@ -121,11 +122,14 @@ describe('Localization', () => {
       await page.locator('#action-save').click()
 
       await page.locator('text=Versions').click()
-      const firstVersion = findTableRow(page, 'Current Published Version')
+      const firstVersion = await findTableRow(page, 'Currently Published')
       await firstVersion.locator('a').click()
 
-      await expect(page.locator('.select-version-locales__label')).toBeVisible()
-      await expect(page.locator('.select-version-locales .react-select')).not.toContainText(
+      await expect(page.locator('.view-version__toggle-locales')).toBeVisible()
+      await page.locator('.view-version__toggle-locales').click()
+
+      await expect(page.locator('.select-version-locales .pill-selector')).toBeVisible()
+      await expect(page.locator('.select-version-locales .pill-selector')).not.toContainText(
         'FILTERED',
       )
     })
@@ -425,6 +429,30 @@ describe('Localization', () => {
       await runCopy(page)
 
       await expect(arrayField).toHaveValue(sampleText)
+    })
+
+    test('should copy block to locale', async () => {
+      const sampleText = 'Copy this text'
+      const blocksCollection = new AdminUrlUtil(serverURL, blocksCollectionSlug)
+      await page.goto(blocksCollection.create)
+      await changeLocale(page, 'pt')
+      const addBlock = page.locator('.blocks-field__drawer-toggler')
+      await addBlock.click()
+      const selectBlock = page.locator('.blocks-drawer__block button')
+      await selectBlock.click()
+      const addContentButton = page.locator('#field-content__0__content button')
+      await addContentButton.click()
+      await selectBlock.click()
+      const textField = page.locator('#field-content__0__content__0__text')
+      await expect(textField).toBeVisible()
+      await textField.fill(sampleText)
+      await saveDocAndAssert(page)
+
+      await openCopyToLocaleDrawer(page)
+      await setToLocale(page, 'English')
+      await runCopy(page)
+
+      await expect(textField).toHaveValue(sampleText)
     })
 
     test('should default source locale to current locale', async () => {

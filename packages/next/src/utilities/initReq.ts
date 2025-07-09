@@ -6,7 +6,7 @@ import type {
   PayloadRequest,
   SanitizedConfig,
   SanitizedPermissions,
-  User,
+  TypedUser,
 } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
@@ -37,7 +37,7 @@ type PartialResult = {
   languageCode: AcceptedLanguages
   payload: Payload
   responseHeaders: Headers
-  user: null | User
+  user: null | TypedUser
 }
 
 // Create cache instances for different parts of our application
@@ -49,11 +49,13 @@ const reqCache = selectiveCache<Result>('req')
  * As access control and getting the request locale is dependent on the current URL and
  */
 export const initReq = async function ({
+  canSetHeaders,
   configPromise,
   importMap,
   key,
   overrides,
 }: {
+  canSetHeaders?: boolean
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
   key: string
@@ -77,6 +79,7 @@ export const initReq = async function ({
     })
 
     const { responseHeaders, user } = await executeAuthStrategies({
+      canSetHeaders,
       headers,
       payload,
     })

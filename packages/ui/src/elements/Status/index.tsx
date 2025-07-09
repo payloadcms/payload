@@ -28,13 +28,16 @@ export const Status: React.FC = () => {
     setUnpublishedVersionCount,
     unpublishedVersionCount,
   } = useDocumentInfo()
+
   const { toggleModal } = useModal()
+
   const {
     config: {
       routes: { api },
       serverURL,
     },
   } = useConfig()
+
   const { reset: resetForm } = useForm()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -117,7 +120,19 @@ export const Status: React.FC = () => {
           setUnpublishedVersionCount(0)
         }
       } else {
-        toast.error(t('error:unPublishingDocument'))
+        try {
+          const json = await res.json()
+          if (json.errors?.[0]?.message) {
+            toast.error(json.errors[0].message)
+          } else if (json.error) {
+            toast.error(json.error)
+          } else {
+            toast.error(t('error:unPublishingDocument'))
+          }
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (err) {
+          toast.error(t('error:unPublishingDocument'))
+        }
       }
     },
     [
@@ -154,6 +169,7 @@ export const Status: React.FC = () => {
               <Button
                 buttonStyle="none"
                 className={`${baseClass}__action`}
+                id={`action-unpublish`}
                 onClick={() => toggleModal(unPublishModalSlug)}
               >
                 {t('version:unpublish')}

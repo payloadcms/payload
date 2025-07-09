@@ -28,9 +28,11 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const newRow: Row = {
         id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
-        blockType: blockType || undefined,
-        collapsed: false,
         isLoading: true,
+      }
+
+      if (blockType) {
+        newRow.blockType = blockType
       }
 
       withNewRow.splice(rowIndex, 0, newRow)
@@ -141,6 +143,12 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       if (duplicateRowMetadata.id) {
         duplicateRowMetadata.id = new ObjectId().toHexString()
+      }
+
+      if (rowsMetadata[rowIndex]?.customComponents?.RowLabel) {
+        duplicateRowMetadata.customComponents = {
+          RowLabel: rowsMetadata[rowIndex].customComponents.RowLabel,
+        }
       }
 
       const duplicateRowState = deepCopyObjectSimpleWithoutReactComponents(rows[rowIndex])

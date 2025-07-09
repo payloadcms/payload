@@ -1,5 +1,6 @@
-import type { Payload } from 'payload'
+import type { CollectionSlug, Payload } from 'payload'
 
+import { randomUUID } from 'crypto'
 import fs from 'fs'
 import path from 'path'
 import { getFileByPath } from 'payload'
@@ -12,12 +13,18 @@ import type { Enlarge, Media } from './payload-types.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
+  allowListMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
   focalOnlySlug,
   mediaSlug,
+  noRestrictFileMimeTypesSlug,
+  noRestrictFileTypesSlug,
   reduceSlug,
   relationSlug,
+  restrictFileTypesSlug,
+  skipAllowListSafeFetchMediaSlug,
+  skipSafeFetchMediaSlug,
   unstoredMediaSlug,
   usersSlug,
 } from './shared.js'
@@ -37,9 +44,7 @@ describe('Collections - Uploads', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('REST API', () => {
@@ -543,6 +548,126 @@ describe('Collections - Uploads', () => {
         })
 
         expect(doc.docs[0].image).toBeFalsy()
+      })
+    })
+
+    describe('filters', () => {
+      it.each`
+        url                                  | collection            | errorContains
+        ${'http://127.0.0.1/file.png'}       | ${mediaSlug}          | ${'unsafe'}
+        ${'http://[::1]/file.png'}           | ${mediaSlug}          | ${'unsafe'}
+        ${'http://10.0.0.1/file.png'}        | ${mediaSlug}          | ${'unsafe'}
+        ${'http://192.168.1.1/file.png'}     | ${mediaSlug}          | ${'unsafe'}
+        ${'http://172.16.0.1/file.png'}      | ${mediaSlug}          | ${'unsafe'}
+        ${'http://169.254.1.1/file.png'}     | ${mediaSlug}          | ${'unsafe'}
+        ${'http://224.0.0.1/file.png'}       | ${mediaSlug}          | ${'unsafe'}
+        ${'http://0.0.0.0/file.png'}         | ${mediaSlug}          | ${'unsafe'}
+        ${'http://255.255.255.255/file.png'} | ${mediaSlug}          | ${'unsafe'}
+        ${'http://127.0.0.1/file.png'}       | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://[::1]/file.png'}           | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://10.0.0.1/file.png'}        | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://192.168.1.1/file.png'}     | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://172.16.0.1/file.png'}      | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://169.254.1.1/file.png'}     | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://224.0.0.1/file.png'}       | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://0.0.0.0/file.png'}         | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://255.255.255.255/file.png'} | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+      `(
+        'should block or filter uploading from $collection with URL: $url',
+        async ({ url, collection, errorContains }) => {
+          await expect(
+            payload.create({
+              collection,
+              data: {
+                filename: 'test.png',
+                url,
+              },
+            }),
+          ).rejects.toThrow(
+            expect.objectContaining({
+              name: 'FileRetrievalError',
+              message: expect.stringContaining(errorContains),
+            }),
+          )
+        },
+      )
+      it('should fetch when skipSafeFetch is set with a boolean', async () => {
+        await expect(
+          payload.create({
+            collection: skipSafeFetchMediaSlug as CollectionSlug,
+            data: {
+              filename: 'test.png',
+              url: 'http://127.0.0.1/file.png',
+            },
+          }),
+          // We're expecting this to throw because the file doesn't exist -- not because the url is unsafe
+        ).rejects.toThrow(
+          expect.objectContaining({
+            name: 'FileRetrievalError',
+            message: expect.not.stringContaining('unsafe'),
+          }),
+        )
+      })
+
+      it('should fetch when skipSafeFetch is set with an AllowList', async () => {
+        await expect(
+          payload.create({
+            collection: skipAllowListSafeFetchMediaSlug as CollectionSlug,
+            data: {
+              filename: 'test.png',
+              url: 'http://127.0.0.1/file.png',
+            },
+          }),
+          // We're expecting this to throw because the file doesn't exist -- not because the url is unsafe
+        ).rejects.toThrow(
+          expect.objectContaining({
+            name: 'FileRetrievalError',
+            message: expect.not.stringContaining('unsafe'),
+          }),
+        )
+      })
+    })
+
+    describe('file restrictions', () => {
+      const file: File = {
+        name: `test-${randomUUID()}.html`,
+        data: Buffer.from('<html><script>alert("test")</script></html>'),
+        mimetype: 'text/html',
+        size: 100,
+      }
+      it('should not allow files with restricted file types', async () => {
+        await expect(async () =>
+          payload.create({
+            collection: restrictFileTypesSlug as CollectionSlug,
+            data: {},
+            file,
+          }),
+        ).rejects.toThrow(
+          expect.objectContaining({
+            name: 'APIError',
+            message: `File type 'text/html' not allowed ${file.name}: Restricted file type detected -- set 'allowRestrictedFileTypes' to true to skip this check for this Collection.`,
+          }),
+        )
+      })
+
+      it('should allow files with restricted file types when allowRestrictedFileTypes is true', async () => {
+        await expect(
+          payload.create({
+            collection: noRestrictFileTypesSlug as CollectionSlug,
+            data: {},
+            file,
+          }),
+        ).resolves.not.toThrow()
+      })
+
+      it('should allow files with restricted file types when mimeTypes are set', async () => {
+        await expect(
+          payload.create({
+            collection: noRestrictFileMimeTypesSlug as CollectionSlug,
+            data: {},
+            file,
+          }),
+        ).resolves.not.toThrow()
       })
     })
   })

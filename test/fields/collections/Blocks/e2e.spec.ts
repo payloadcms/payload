@@ -5,6 +5,7 @@ import { addBlock } from 'helpers/e2e/addBlock.js'
 import { openBlocksDrawer } from 'helpers/e2e/openBlocksDrawer.js'
 import { reorderBlocks } from 'helpers/e2e/reorderBlocks.js'
 import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
+import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -13,6 +14,7 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  // throttleTest,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { assertToastErrors } from '../../../helpers/assertToastErrors.js'
@@ -51,6 +53,11 @@ describe('Block fields', () => {
   })
 
   beforeEach(async () => {
+    /*await throttleTest({
+      page,
+      context,
+      delay: 'Slow 4G',
+    })*/
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsTest',
@@ -78,7 +85,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocks',
-      blockLabel: 'Content',
+      blockToSelect: 'Content',
     })
 
     // ensure the block was appended to the rows
@@ -180,6 +187,53 @@ describe('Block fields', () => {
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
+  test('should initialize block rows with collapsed state', async () => {
+    await page.goto(url.create)
+
+    await addBlock({
+      page,
+      fieldName: 'collapsedByDefaultBlocks',
+      blockToSelect: 'Localized Content',
+    })
+
+    const row = page.locator(`#collapsedByDefaultBlocks-row-4`)
+    const toggler = row.locator('button.collapsible__toggle')
+
+    await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
+    await expect(page.locator(`#field-collapsedByDefaultBlocks__4__text`)).toBeHidden()
+  })
+
+  test('should not collapse block rows on input change', async () => {
+    await page.goto(url.create)
+
+    await addBlock({
+      page,
+      fieldName: 'collapsedByDefaultBlocks',
+      blockToSelect: 'Localized Content',
+    })
+
+    const row = page.locator(`#collapsedByDefaultBlocks-row-4`)
+    const toggler = row.locator('button.collapsible__toggle')
+
+    await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
+    await expect(page.locator(`#field-collapsedByDefaultBlocks__4__text`)).toBeHidden()
+
+    await toggleBlockOrArrayRow({
+      page,
+      fieldName: 'collapsedByDefaultBlocks',
+      targetState: 'open',
+      rowIndex: 4,
+    })
+
+    await page.locator('input#field-collapsedByDefaultBlocks__4__text').fill('Hello, world!')
+
+    // wait for form state to return, in the future can wire this into watch network requests (if needed)
+    await wait(1000)
+
+    await expect(toggler).toHaveClass(/collapsible__toggle--open/)
+    await expect(page.locator(`#field-collapsedByDefaultBlocks__4__text`)).toBeVisible()
+  })
+
   test('should use i18n block labels', async () => {
     await page.goto(url.create)
     await expect(page.locator('#field-i18nBlocks .blocks-field__header')).toContainText('Block en')
@@ -187,7 +241,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'i18nBlocks',
-      blockLabel: 'Text en',
+      blockToSelect: 'Text en',
     })
 
     // ensure the block was appended to the rows
@@ -204,7 +258,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocks',
-      blockLabel: 'Content',
+      blockToSelect: 'Content',
     })
 
     await expect(
@@ -220,7 +274,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocksWithSimilarConfigs',
-      blockLabel: 'Block A',
+      blockToSelect: 'Block A',
     })
 
     await page
@@ -239,7 +293,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocksWithSimilarConfigs',
-      blockLabel: 'Block B',
+      blockToSelect: 'Block B',
     })
 
     await page
@@ -268,7 +322,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocksWithMinRows',
-      blockLabel: 'Block With Min Row',
+      blockToSelect: 'Block With Min Row',
     })
 
     const firstRow = page.locator('input[name="blocksWithMinRows.0.blockTitle"]')
@@ -296,6 +350,8 @@ describe('Block fields', () => {
   describe('row manipulation', () => {
     test('moving rows should immediately move custom row labels', async () => {
       await page.goto(url.create)
+      // Ensure blocks are loaded
+      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
       // first ensure that the first block has the custom header, and that the second block doesn't
 
@@ -324,14 +380,19 @@ describe('Block fields', () => {
 
       // Important: do _not_ poll here, use `textContent()` instead of `toHaveText()`
       // This will prevent Playwright from polling for the change to the DOM
-      expect(
-        await page.locator('#field-blocks #blocks-row-1 .blocks-field__block-header').textContent(),
-      ).toMatch(/^Custom Block Label: Content/)
+      await expect(async () => {
+        const text = await page
+          .locator('#field-blocks #blocks-row-1 .blocks-field__block-header')
+          .textContent()
+        expect(text).toMatch(/^Custom Block Label: Content/)
+      }).toPass()
     })
 
     describe('react hooks', () => {
       test('should add 2 new block rows', async () => {
         await page.goto(url.create)
+        // Ensure blocks are loaded
+        await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
         await scrollEntirePage(page)
 
@@ -339,6 +400,8 @@ describe('Block fields', () => {
           .locator('.custom-blocks-field-management')
           .getByRole('button', { name: 'Add Block 1' })
           .click()
+        // Ensure blocks are loaded
+        await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
         await expect(
           page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]'),
@@ -348,6 +411,8 @@ describe('Block fields', () => {
           .locator('.custom-blocks-field-management')
           .getByRole('button', { name: 'Add Block 2' })
           .click()
+        // Ensure blocks are loaded
+        await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
         await expect(
           page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]'),
@@ -357,6 +422,8 @@ describe('Block fields', () => {
           .locator('.custom-blocks-field-management')
           .getByRole('button', { name: 'Replace Block 2' })
           .click()
+        // Ensure blocks are loaded
+        await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
         await expect(
           page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]'),

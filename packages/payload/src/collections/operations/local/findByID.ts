@@ -1,5 +1,3 @@
-// @ts-strict-ignore
-/* eslint-disable no-restricted-exports */
 import type {
   CollectionSlug,
   JoinQuery,
@@ -15,6 +13,7 @@ import type {
   PopulateType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -106,7 +105,7 @@ export type Options<
   user?: Document
 }
 
-export default async function findByIDLocal<
+export async function findByIDLocal<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<TSlug>,
@@ -148,7 +147,7 @@ export default async function findByIDLocal<
     joins,
     overrideAccess,
     populate,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
   })

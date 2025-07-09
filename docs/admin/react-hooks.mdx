@@ -605,7 +605,7 @@ return (
         textField: {
           initialValue: 'Updated text',
           valid: true,
-          value: 'Upddated text',
+          value: 'Updated text',
         },
       },
       // blockType: "yourBlockSlug",
@@ -875,7 +875,7 @@ Useful to retrieve info about the currently logged in user as well as methods fo
 | **`refreshCookie`**      | A method to trigger the silent refreshing of a user's auth token                        |
 | **`setToken`**           | Set the token of the user, to be decoded and used to reset the user and token in memory |
 | **`token`**              | The logged in user's token (useful for creating preview links, etc.)                    |
-| **`refreshPermissions`** | Load new permissions (useful when content that effects permissions has been changed)    |
+| **`refreshPermissions`** | Load new permissions (useful when content that affects permissions has been changed)    |
 | **`permissions`**        | The permissions of the current user                                                     |
 
 ```tsx
@@ -981,7 +981,15 @@ const MyComponent: React.FC = () => {
 
 ## useTableColumns
 
-Returns methods to manipulate table columns
+Returns properties and methods to manipulate table columns:
+| Property | Description |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| **`columns`** | The current state of columns including their active status and configuration |
+| **`LinkedCellOverride`** | A component override for linked cells in the table |
+| **`moveColumn`** | A method to reorder columns. Accepts `{ fromIndex: number, toIndex: number }` as arguments |
+| **`resetColumnsState`** | A method to reset columns back to their default configuration as defined in the collection config |
+| **`setActiveColumns`** | A method to set specific columns to active state while preserving the existing column order. Accepts an array of column names to activate |
+| **`toggleColumn`** | A method to toggle a single column's visibility. Accepts a column name as string |
 
 ```tsx
 'use client'
@@ -989,17 +997,30 @@ import { useTableColumns } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
-  const { setActiveColumns } = useTableColumns()
+  const { setActiveColumns, resetColumnsState } = useTableColumns()
 
-  const resetColumns = () => {
-    setActiveColumns(['id', 'createdAt', 'updatedAt'])
+  const activateSpecificColumns = () => {
+    // Only activates the id and createdAt columns
+    // Other columns retain their current active/inactive state
+    // The original column order is preserved
+    setActiveColumns(['id', 'createdAt'])
+  }
+
+  const resetToDefaults = () => {
+    // Resets to the default columns defined in the collection config
+    resetColumnsState()
   }
   // highlight-end
 
   return (
-    <button type="button" onClick={resetColumns}>
-      Reset columns
-    </button>
+    <div>
+      <button type="button" onClick={activateSpecificColumns}>
+        Activate Specific Columns
+      </button>
+      <button type="button" onClick={resetToDefaults}>
+        Reset To Defaults
+      </button>
+    </div>
   )
 }
 ```
@@ -1143,7 +1164,7 @@ This is useful for scenarios where you need to trigger another fetch regardless 
 
 Route transitions are useful in showing immediate visual feedback to the user when navigating between pages. This is especially useful on slow networks when navigating to data heavy or process intensive pages.
 
-By default, any instances of `Link` from `@payloadcms/ui` will trigger route transitions dy default.
+By default, any instances of `Link` from `@payloadcms/ui` will trigger route transitions by default.
 
 ```tsx
 import { Link } from '@payloadcms/ui'

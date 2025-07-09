@@ -88,7 +88,7 @@ test.describe('Form State', () => {
       async () => {
         await addBlock({
           page,
-          blockLabel: 'Text',
+          blockToSelect: 'Text',
           fieldName: 'blocks',
         })
       },
@@ -213,12 +213,87 @@ test.describe('Form State', () => {
     })
   })
 
-  test('new rows should contain default values', async () => {
+  test('should not render stale values for server components while form state is in flight', async () => {
     await page.goto(postsUrl.create)
+
     await page.locator('#field-array .array-field__add-row').click()
+    await page.locator('#field-array #array-row-0 #field-array__0__customTextField').fill('1')
+
+    await page.locator('#field-array .array-field__add-row').click()
+    await page.locator('#field-array #array-row-1 #field-array__1__customTextField').fill('2')
+
+    // block the next form state request from firing to ensure the field remains in stale state
+    await page.route(postsUrl.create, async (route) => {
+      if (route.request().method() === 'POST' && route.request().url() === postsUrl.create) {
+        await route.abort()
+      }
+
+      await route.continue()
+    })
+
+    // remove the first row
+    await page.locator('#field-array #array-row-0 .array-actions__button').click()
+
+    await page
+      .locator('#field-array #array-row-0 .array-actions__action.array-actions__remove')
+      .click()
+
     await expect(
       page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
-    ).toHaveValue('This is a default value')
+    ).toHaveValue('2')
+
+    await page.unroute(postsUrl.create)
+  })
+
+  // TODO: This test is not very reliable but would be really nice to have
+  test.skip('should not lag on slow CPUs', async () => {
+    await page.goto(postsUrl.create)
+
+    await expect(page.locator('#field-title')).toBeEnabled()
+
+    const cdpSession = await context.newCDPSession(page)
+
+    await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 25 })
+
+    // Start measuring input and render times
+    await page.evaluate(() => {
+      const inputField = document.querySelector('#field-title') as HTMLInputElement
+      const logs: Record<string, { elapsedTime: number }> = {}
+
+      inputField.addEventListener('input', (event) => {
+        const startTime = performance.now()
+
+        requestAnimationFrame(() => {
+          const endTime = performance.now()
+          const elapsedTime = endTime - startTime
+          logs[event.target?.value] = { elapsedTime }
+        })
+      })
+
+      window.getLogs = () => logs
+    })
+
+    const text = 'This is a test string to measure input lag.'
+
+    await page.locator('#field-title').pressSequentially(text, { delay: 0 })
+
+    const logs: Record<string, { elapsedTime: number }> = await page.evaluate(() =>
+      window.getLogs(),
+    )
+    console.log('Logs:', logs)
+
+    const lagTimes = Object.values(logs).map((log) => log.elapsedTime || 0)
+
+    console.log('Lag times:', lagTimes)
+
+    const maxInputLag = Math.max(...lagTimes)
+    const allowedThreshold = 50
+
+    expect(maxInputLag).toBeLessThanOrEqual(allowedThreshold)
+
+    // Reset CPU throttling
+    await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+    await cdpSession.detach()
   })
 
   describe('Throttled tests', () => {
@@ -297,6 +372,8 @@ test.describe('Form State', () => {
       })
 
       await assertElementStaysVisible(page, '#field-array #array-row-1')
+
+      await page.unroute(postsUrl.create)
     })
 
     test('should queue onChange functions', async () => {

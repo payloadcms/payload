@@ -1,23 +1,112 @@
-export const flattenObject = (obj: any, prefix: string = ''): Record<string, unknown> => {
-  const result: Record<string, unknown> = {}
+import type { Document } from 'payload'
 
-  Object.entries(obj).forEach(([key, value]) => {
-    const newKey = prefix ? `${prefix}_${key}` : key
+import type { ToCSVFunction } from '../types.js'
 
-    if (Array.isArray(value)) {
-      value.forEach((item, index) => {
-        if (typeof item === 'object' && item !== null) {
-          Object.assign(result, flattenObject(item, `${newKey}_${index}`))
+type Args = {
+  doc: Document
+  fields?: string[]
+  prefix?: string
+  toCSVFunctions: Record<string, ToCSVFunction>
+}
+
+export const flattenObject = ({
+  doc,
+  fields,
+  prefix,
+  toCSVFunctions,
+}: Args): Record<string, unknown> => {
+  const row: Record<string, unknown> = {}
+
+  const flatten = (siblingDoc: Document, prefix?: string) => {
+    Object.entries(siblingDoc).forEach(([key, value]) => {
+      const newKey = prefix ? `${prefix}_${key}` : key
+
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          if (typeof item === 'object' && item !== null) {
+            flatten(item, `${newKey}_${index}`)
+          } else {
+            if (toCSVFunctions?.[newKey]) {
+              const columnName = `${newKey}_${index}`
+              const result = toCSVFunctions[newKey]({
+                columnName,
+                data: row,
+                doc,
+                row,
+                siblingDoc,
+                value: item,
+              })
+              if (typeof result !== 'undefined') {
+                row[columnName] = result
+              }
+            } else {
+              row[`${newKey}_${index}`] = item
+            }
+          }
+        })
+      } else if (typeof value === 'object' && value !== null) {
+        if (!toCSVFunctions?.[newKey]) {
+          flatten(value, newKey)
         } else {
-          result[`${newKey}_${index}`] = item
+          const result = toCSVFunctions[newKey]({
+            columnName: newKey,
+            data: row,
+            doc,
+            row,
+            siblingDoc,
+            value,
+          })
+          if (typeof result !== 'undefined') {
+            row[newKey] = result
+          }
         }
-      })
-    } else if (typeof value === 'object' && value !== null) {
-      Object.assign(result, flattenObject(value, newKey))
-    } else {
-      result[newKey] = value
-    }
-  })
+      } else {
+        if (toCSVFunctions?.[newKey]) {
+          const result = toCSVFunctions[newKey]({
+            columnName: newKey,
+            data: row,
+            doc,
+            row,
+            siblingDoc,
+            value,
+          })
+          if (typeof result !== 'undefined') {
+            row[newKey] = result
+          }
+        } else {
+          row[newKey] = value
+        }
+      }
+    })
+  }
 
-  return result
+  flatten(doc, prefix)
+
+  if (Array.isArray(fields) && fields.length > 0) {
+    const orderedResult: Record<string, unknown> = {}
+
+    const fieldToRegex = (field: string): RegExp => {
+      const parts = field.split('.').map((part) => `${part}(?:_\\d+)?`)
+      const pattern = `^${parts.join('_')}`
+      return new RegExp(pattern)
+    }
+
+    fields.forEach((field) => {
+      if (row[field.replace(/\./g, '_')]) {
+        const sanitizedField = field.replace(/\./g, '_')
+        orderedResult[sanitizedField] = row[sanitizedField]
+      } else {
+        const regex = fieldToRegex(field)
+        Object.keys(row).forEach((key) => {
+          if (regex.test(key)) {
+            orderedResult[key] = row[key]
+          }
+        })
+      }
+    })
+
+    return orderedResult
+  }
+
+  return row
 }

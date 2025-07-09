@@ -6,6 +6,13 @@ export type Autosave = {
    * @default 800
    */
   interval?: number
+  /**
+   * When set to `true`, the "Save as draft" button will be displayed even while autosave is enabled.
+   * By default, this button is hidden to avoid redundancy with autosave behavior.
+   *
+   * @default false
+   */
+  showSaveDraftButton?: boolean
 }
 
 export type SchedulePublish = {

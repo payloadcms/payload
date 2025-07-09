@@ -1,9 +1,9 @@
-// @ts-strict-ignore
 import { decodeJwt } from 'jose'
 
 import type { Collection } from '../../collections/config/types.js'
+import type { TypedUser } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
-import type { ClientUser, User } from '../types.js'
+import type { ClientUser } from '../types.js'
 
 export type MeOperationResult = {
   collection?: string
@@ -29,7 +29,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
   const { collection, currentToken, req } = args
 
   let result: MeOperationResult = {
-    user: null,
+    user: null!,
   }
 
   if (req.user) {
@@ -43,7 +43,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
       overrideAccess: false,
       req,
       showHiddenFields: false,
-    })) as User
+    })) as TypedUser
 
     if (user) {
       user.collection = collection.config.slug
@@ -52,7 +52,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
 
     if (req.user.collection !== collection.config.slug) {
       return {
-        user: null,
+        user: null!,
       }
     }
 
