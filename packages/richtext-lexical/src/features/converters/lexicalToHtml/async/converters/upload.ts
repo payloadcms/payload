@@ -82,6 +82,6 @@ export const UploadHTMLConverterAsync: HTMLConvertersAsync<SerializedUploadNode>
       />
     `
 
-    return `<picture${providedStyleTag}>${pictureHTML}</picture$>`
+    return `<picture${providedStyleTag}>${pictureHTML}</picture>`
   },
 }
