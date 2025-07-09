@@ -358,6 +358,19 @@ describe('General', () => {
       const response = await page.goto(customLogoutRouteURL)
       expect(response.status() !== 404).toBeTruthy()
     })
+
+    test('should not redirect `${adminRoute}/collections` to `${adminRoute} if there is a custom view', async () => {
+      const collectionsURL = `${serverURL}/admin/collections`
+      await page.goto(collectionsURL)
+      await expect(page.getByText('Custom View').first()).toBeVisible()
+    })
+
+    test('should redirect `${adminRoute}/globals` to `${adminRoute}', async () => {
+      const globalsURL = `${serverURL}/admin/globals`
+      await page.goto(globalsURL)
+      // Should redirect to dashboard
+      await expect.poll(() => page.url()).toBe(`${serverURL}/admin`)
+    })
   })
 
   describe('navigation', () => {
