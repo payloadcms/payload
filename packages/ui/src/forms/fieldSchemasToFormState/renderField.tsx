@@ -1,4 +1,8 @@
 import type {
+  ArrayRowLabelClientProps,
+  ArrayRowLabelServerProps,
+  BlockRowLabelClientProps,
+  BlockRowLabelServerProps,
   ClientComponentProps,
   ClientField,
   FieldPaths,
@@ -13,7 +17,6 @@ import { fieldIsHiddenOrDisabled } from 'payload/shared'
 import type { RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 import { FieldDescription, WatchCondition } from '../../exports/client/index.js'
 
@@ -126,17 +129,18 @@ export const renderField: RenderFieldMethod = ({
 
           row.customComponents.RowLabel = !mockRSCs
             ? RenderServerComponent({
-                clientProps,
-                Component: fieldConfig.admin.components.RowLabel,
-                importMap: req.payload.importMap,
-                key: `${rowIndex}`,
-                serverProps: {
-                  ...serverProps,
+                clientProps: {
+                  ...(clientProps as Partial<ArrayRowLabelClientProps> satisfies Partial<ArrayRowLabelClientProps>),
                   rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
                     rowIndex + 1,
                   ).padStart(2, '0')}`,
                   rowNumber: rowIndex + 1,
-                },
+                } satisfies Partial<ArrayRowLabelClientProps>,
+                Component: fieldConfig.admin.components.RowLabel,
+                importMap: req.payload.importMap,
+                key: `${rowIndex}`,
+                serverProps:
+                  serverProps as Partial<ArrayRowLabelServerProps> satisfies Partial<ArrayRowLabelServerProps>,
               })
             : 'Mock'
         }
@@ -175,18 +179,20 @@ export const renderField: RenderFieldMethod = ({
 
           fieldState.rows[rowIndex].customComponents.RowLabel = !mockRSCs
             ? RenderServerComponent({
-                clientProps,
-                Component: blockConfig.admin.components.Label,
-                importMap: req.payload.importMap,
-                key: `${rowIndex}`,
-                serverProps: {
-                  ...serverProps,
+                clientProps: {
+                  ...(clientProps as Partial<BlockRowLabelClientProps>),
                   blockType: row.blockType,
+                  readOnly: Boolean(fieldConfig.admin.readOnly),
                   rowLabel: `${getTranslation(blockConfig.labels.singular, req.i18n)} ${String(
                     rowIndex + 1,
                   ).padStart(2, '0')}`,
                   rowNumber: rowIndex + 1,
-                },
+                } satisfies Partial<BlockRowLabelClientProps>,
+                Component: blockConfig.admin.components.Label,
+                importMap: req.payload.importMap,
+                key: `${rowIndex}`,
+                serverProps:
+                  serverProps as Partial<BlockRowLabelServerProps> satisfies Partial<BlockRowLabelServerProps>,
               })
             : 'Mock'
         }

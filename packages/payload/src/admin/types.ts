@@ -102,11 +102,17 @@ export type {
   ArrayFieldLabelServerComponent,
   ArrayFieldServerComponent,
   ArrayFieldServerProps,
+  ArrayRowLabelClientComponent,
+  ArrayRowLabelClientProps,
+  ArrayRowLabelServerComponent,
+  ArrayRowLabelServerProps,
 } from './fields/Array.js'
 
 export type {
   BlockRowLabelClientComponent,
+  BlockRowLabelClientProps,
   BlockRowLabelServerComponent,
+  BlockRowLabelServerProps,
   BlocksFieldClientComponent,
   BlocksFieldClientProps,
   BlocksFieldDescriptionClientComponent,
