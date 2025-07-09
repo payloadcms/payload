@@ -26,6 +26,10 @@ type Props = {
   pasteClassName?: string
 } & ClipboardCopyData
 
+/**
+ * Menu actions for copying and pasting fields. Currently, this is only used in Arrays and Blocks.
+ * @note This component doesn't use the Clipboard API, but localStorage. See rationale in #11513
+ */
 export const ClipboardAction: FC<Props> = ({
   className,
   copyClassName,

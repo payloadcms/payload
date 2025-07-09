@@ -9,6 +9,9 @@ import { isClipboardDataValid } from './isClipboardDataValid.js'
 
 const localStorageClipboardKey = '_payloadClipboard'
 
+/**
+ * @note This function doesn't use the Clipboard API, but localStorage. See rationale in #11513
+ */
 export function clipboardCopy(args: ClipboardCopyActionArgs): string | true {
   const { getDataToCopy, t, ...rest } = args
 
@@ -25,6 +28,9 @@ export function clipboardCopy(args: ClipboardCopyActionArgs): string | true {
   }
 }
 
+/**
+ * @note This function doesn't use the Clipboard API, but localStorage. See rationale in #11513
+ */
 export function clipboardPaste({
   onPaste,
   path: fieldPath,
