@@ -53,7 +53,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     CreateNewPresetDrawer,
     DeletePresetModal,
     EditPresetDrawer,
-    hasModifiedPreset,
     openPresetListDrawer,
     PresetListDrawer,
     queryPresetMenuItems,
@@ -194,7 +193,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                       setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
                     }
                     pillStyle="light"
-                    size={isQueryPresetsEnabled ? 'medium' : 'small'}
+                    size="medium"
                   >
                     {t('general:columns')}
                   </Pill>
@@ -209,7 +208,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                       setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)
                     }
                     pillStyle="light"
-                    size={isQueryPresetsEnabled ? 'medium' : 'small'}
+                    size="medium"
                   >
                     {t('general:filters')}
                   </Pill>
@@ -222,7 +221,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                     icon={<ChevronIcon />}
                     onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
                     pillStyle="light"
-                    size={isQueryPresetsEnabled ? 'medium' : 'small'}
+                    size="medium"
                   >
                     {t('general:sort')}
                   </Pill>

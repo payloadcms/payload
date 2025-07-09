@@ -7,9 +7,6 @@
       align-items: center;
       justify-content: space-between;
       gap: base(0.5);
-      background-color: var(--theme-elevation-50);
-      border-radius: var(--style-radius-m);
-      padding: base(0.4) base(0.6) base(0.4) base(0.3);
     }
 
     &__outer-wrap--with-presets {
@@ -39,7 +36,7 @@
       background-color: var(--theme-elevation-50);
       border-radius: var(--style-radius-m);
       padding: base(0.3) base(0.4);
-      gap: base(0.6);
+      gap: base(0.4);
       flex-grow: 1;
     }
 
@@ -95,9 +92,6 @@
       &__outer-wrap {
         flex-direction: column;
         align-items: stretch;
-        background-color: transparent;
-        border-radius: 0;
-        padding: 0;
       }
 
       &__wrap {
