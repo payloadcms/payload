@@ -92,6 +92,9 @@ export const frTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'Le champ suivant n’est pas valide :',
     followingFieldsInvalid_other: 'Les champs suivants ne sont pas valides :',
     incorrectCollection: 'Collection incorrecte',
+    insufficientClipboardPermissions:
+      'Accès au presse-papiers refusé. Veuillez vérifier vos autorisations pour le presse-papiers.',
+    invalidClipboardData: 'Données invalides dans le presse-papiers.',
     invalidFileType: 'Type de fichier invalide',
     invalidFileTypeValue: 'Type de fichier invalide : {{value}}',
     invalidRequestArgs: 'Arguments non valides dans la requête : {{args}}',
@@ -114,6 +117,7 @@ export const frTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Il y a eu un problème lors du téléversement du fichier.',
     tokenInvalidOrExpired: 'Le jeton n’est soit pas valide ou a expiré.',
     tokenNotProvided: 'Jeton non fourni.',
+    unableToCopy: 'Impossible de copier.',
     unableToDeleteCount: 'Impossible de supprimer {{count}} sur {{total}} {{label}}.',
     unableToReindexCollection:
       'Erreur lors de la réindexation de la collection {{collection}}. Opération annulée.',
@@ -248,7 +252,9 @@ export const frTranslations: DefaultTranslationsObject = {
       'Cela supprimera les index existants et réindexera les documents dans toutes les collections.',
     copied: 'Copié',
     copy: 'Copie',
+    copyField: 'Copier le champ',
     copying: 'Copie',
+    copyRow: 'Copier la ligne',
     copyWarning:
       "Vous êtes sur le point d'écraser {{to}} avec {{from}} pour {{label}} {{title}}. Êtes-vous sûr ?",
     create: 'Créer',
@@ -343,6 +349,8 @@ export const frTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Écraser les données existantes du champ',
     pageNotFound: 'Page non trouvée',
     password: 'Mot de passe',
+    pasteField: 'Coller le champ',
+    pasteRow: 'Coller la ligne',
     payloadSettings: 'Paramètres de Payload',
     perPage: 'Par Page: {{limit}}',
     previous: 'Précédent',

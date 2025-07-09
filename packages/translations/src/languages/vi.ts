@@ -90,6 +90,9 @@ export const viTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'Lỗi - Field sau không hợp lệ:',
     followingFieldsInvalid_other: 'Lỗi - Những fields sau không hợp lệ:',
     incorrectCollection: 'Lỗi - Collection không hợp lệ.',
+    insufficientClipboardPermissions:
+      'Truy cập vào bộ nhớ tạm bị từ chối. Vui lòng kiểm tra quyền truy cập bộ nhớ tạm của bạn.',
+    invalidClipboardData: 'Dữ liệu bộ nhớ tạm không hợp lệ.',
     invalidFileType: 'Lỗi - Định dạng tệp không hợp lệ.',
     invalidFileTypeValue: 'Lỗi - Định dạng tệp không hợp lệ: {{value}}.',
     invalidRequestArgs: 'Các đối số không hợp lệ đã được truyền trong yêu cầu: {{args}}',
@@ -111,6 +114,7 @@ export const viTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Lỗi - Đã xảy ra vấn để khi tải lên file sau.',
     tokenInvalidOrExpired: 'Lỗi - Token không hợp lệ hoặc đã hết hạn.',
     tokenNotProvided: 'Không cung cấp mã thông báo.',
+    unableToCopy: 'Không thể sao chép.',
     unableToDeleteCount: 'Không thể xóa {{count}} trong số {{total}} {{label}}.',
     unableToReindexCollection:
       'Lỗi khi tái lập chỉ mục bộ sưu tập {{collection}}. Quá trình bị hủy.',
@@ -240,7 +244,9 @@ export const viTranslations: DefaultTranslationsObject = {
       'Điều này sẽ xóa các chỉ mục hiện tại và tái lập chỉ mục các tài liệu trong tất cả các bộ sưu tập.',
     copied: 'Đâ sao chép',
     copy: 'Sao chép',
+    copyField: 'Sao chép trường',
     copying: 'Sao chép',
+    copyRow: 'Sao chép dòng',
     copyWarning:
       'Bạn đang chuẩn bị ghi đè {{to}} bằng {{from}} cho {{label}} {{title}}. Bạn có chắc chắn không?',
     create: 'Tạo',
@@ -335,6 +341,8 @@ export const viTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Ghi đè dữ liệu trường hiện tại',
     pageNotFound: 'Không tìm thấy trang',
     password: 'Mật khẩu',
+    pasteField: 'Dán trường',
+    pasteRow: 'Dán dòng',
     payloadSettings: 'Cài đặt',
     perPage: 'Hiển thị mỗi trang: {{limit}}',
     previous: 'Trước đó',
