@@ -226,6 +226,7 @@ export const esTranslations: DefaultTranslationsObject = {
     cancel: 'Cancelar',
     changesNotSaved:
       'Tus cambios no han sido guardados. Si te sales ahora, se perderán tus cambios.',
+    clear: 'Claro',
     clearAll: 'Limpiar todo',
     close: 'Cerrar',
     collapse: 'Contraer',

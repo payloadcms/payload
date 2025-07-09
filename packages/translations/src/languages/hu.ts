@@ -224,6 +224,7 @@ export const huTranslations: DefaultTranslationsObject = {
     cancel: 'Mégsem',
     changesNotSaved:
       'A módosítások nem lettek mentve. Ha most távozik, elveszíti a változtatásokat.',
+    clear: 'Tiszta',
     clearAll: 'Törölj mindent',
     close: 'Bezárás',
     collapse: 'Összecsukás',

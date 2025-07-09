@@ -238,10 +238,11 @@ export function DefaultListView(props: ListViewClientProps) {
         </div>
       </TableColumnsProvider>
       {/* {query.groupBy && ( */}
-      <FloatingToolbar>
-        <PageControls collectionConfig={collectionConfig} />
-      </FloatingToolbar>
-      {/* )} */}
+      {Number(query.totalPages) > 0 && (
+        <FloatingToolbar>
+          <PageControls collectionConfig={collectionConfig} />
+        </FloatingToolbar>
+      )}
     </Fragment>
   )
 }

@@ -222,6 +222,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     cancel: 'Չեղարկել',
     changesNotSaved:
       'Ձեր փոփոխությունները չեն պահպանվել։ Եթե հիմա հեռանաք, կկորցնեք չպահպանված փոփոխությունները։',
+    clear:
+      'Հիմնական տեքստի իմաստը պետք է պահպանվի Payload կոնտեքստի մեջ: Այս այս այստեղ են հաճախակի',
     clearAll: 'Մաքրել բոլորը',
     close: 'Փակել',
     collapse: 'Փակել',

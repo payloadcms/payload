@@ -221,6 +221,7 @@ export const csTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Zpět na nástěnku',
     cancel: 'Zrušit',
     changesNotSaved: 'Vaše změny nebyly uloženy. Pokud teď odejdete, ztratíte své změny.',
+    clear: 'Jasný',
     clearAll: 'Vymazat vše',
     close: 'Zavřít',
     collapse: 'Sbalit',
