@@ -40,16 +40,22 @@ export const flattenObject = ({
           } else {
             if (toCSVFunctions?.[newKey]) {
               const columnName = `${newKey}_${index}`
-              const result = toCSVFunctions[newKey]({
-                columnName,
-                data: row,
-                doc,
-                row,
-                siblingDoc,
-                value: item,
-              })
-              if (typeof result !== 'undefined') {
-                row[columnName] = result
+              try {
+                const result = toCSVFunctions[newKey]({
+                  columnName,
+                  data: row,
+                  doc,
+                  row,
+                  siblingDoc,
+                  value: item,
+                })
+                if (typeof result !== 'undefined') {
+                  row[columnName] = result
+                }
+              } catch (error) {
+                throw new Error(
+                  `Error in toCSVFunction for array item "${columnName}": ${JSON.stringify(item)}\n${(error as Error).message}`,
+                )
               }
             } else {
               row[`${newKey}_${index}`] = item
@@ -60,30 +66,42 @@ export const flattenObject = ({
         if (!toCSVFunctions?.[newKey]) {
           flatten(value, newKey)
         } else {
-          const result = toCSVFunctions[newKey]({
-            columnName: newKey,
-            data: row,
-            doc,
-            row,
-            siblingDoc,
-            value,
-          })
-          if (typeof result !== 'undefined') {
-            row[newKey] = result
+          try {
+            const result = toCSVFunctions[newKey]({
+              columnName: newKey,
+              data: row,
+              doc,
+              row,
+              siblingDoc,
+              value,
+            })
+            if (typeof result !== 'undefined') {
+              row[newKey] = result
+            }
+          } catch (error) {
+            throw new Error(
+              `Error in toCSVFunction for nested object "${newKey}": ${JSON.stringify(value)}\n${(error as Error).message}`,
+            )
           }
         }
       } else {
         if (toCSVFunctions?.[newKey]) {
-          const result = toCSVFunctions[newKey]({
-            columnName: newKey,
-            data: row,
-            doc,
-            row,
-            siblingDoc,
-            value,
-          })
-          if (typeof result !== 'undefined') {
-            row[newKey] = result
+          try {
+            const result = toCSVFunctions[newKey]({
+              columnName: newKey,
+              data: row,
+              doc,
+              row,
+              siblingDoc,
+              value,
+            })
+            if (typeof result !== 'undefined') {
+              row[newKey] = result
+            }
+          } catch (error) {
+            throw new Error(
+              `Error in toCSVFunction for field "${newKey}": ${JSON.stringify(value)}\n${(error as Error).message}`,
+            )
           }
         } else {
           row[newKey] = value
