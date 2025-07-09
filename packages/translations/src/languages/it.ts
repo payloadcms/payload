@@ -302,6 +302,7 @@ export const itTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtra {{label}} se',
     globals: 'Globali',
     goBack: 'Torna indietro',
+    groupByLabel: 'Raggruppa per {{label}}',
     import: 'Importare',
     isEditing: 'sta modificando',
     item: 'articolo',

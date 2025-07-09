@@ -296,6 +296,7 @@ export const koTranslations: DefaultTranslationsObject = {
     filterWhere: '{{label}} 필터링 조건',
     globals: '글로벌',
     goBack: '돌아가기',
+    groupByLabel: '{{label}}로 그룹화',
     import: '수입',
     isEditing: '편집 중',
     item: '항목',

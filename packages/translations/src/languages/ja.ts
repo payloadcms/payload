@@ -299,6 +299,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     filterWhere: '{{label}} の絞り込み',
     globals: 'グローバル',
     goBack: '戻る',
+    groupByLabel: '{{label}}でグループ化する',
     import: '輸入',
     isEditing: '編集中',
     item: 'アイテム',

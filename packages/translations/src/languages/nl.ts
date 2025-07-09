@@ -302,6 +302,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filter {{label}} waar',
     globals: 'Globalen',
     goBack: 'Ga terug',
+    groupByLabel: 'Groepeer op {{label}}',
     import: 'Importeren',
     isEditing: 'is aan het bewerken',
     item: 'artikel',

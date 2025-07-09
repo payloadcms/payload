@@ -298,6 +298,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrēt {{label}} kur',
     globals: 'Globālie',
     goBack: 'Doties atpakaļ',
+    groupByLabel: 'Grupēt pēc {{label}}',
     import: 'Imports',
     isEditing: 'redzē',
     item: 'vienība',

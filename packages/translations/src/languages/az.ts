@@ -299,6 +299,7 @@ export const azTranslations: DefaultTranslationsObject = {
     filterWhere: '{{label}} filtrlə',
     globals: 'Qloballar',
     goBack: 'Geri qayıt',
+    groupByLabel: '{{label}} ilə qruplaşdırın',
     import: 'İdxal',
     isEditing: 'redaktə edir',
     item: 'əşya',

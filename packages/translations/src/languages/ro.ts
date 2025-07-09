@@ -303,6 +303,7 @@ export const roTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrează {{label}} unde',
     globals: 'Globale',
     goBack: 'Înapoi',
+    groupByLabel: 'Grupare după {{label}}',
     import: 'Import',
     isEditing: 'editează',
     item: 'articol',

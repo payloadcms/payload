@@ -298,6 +298,7 @@ export const viTranslations: DefaultTranslationsObject = {
     filterWhere: 'Lọc {{label}} với điều kiện:',
     globals: 'Toàn thể (globals)',
     goBack: 'Quay lại',
+    groupByLabel: 'Nhóm theo {{label}}',
     import: 'Nhập khẩu',
     isEditing: 'đang chỉnh sửa',
     item: 'mặt hàng',

@@ -303,6 +303,7 @@ export const esTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrar {{label}} donde',
     globals: 'Globales',
     goBack: 'Volver',
+    groupByLabel: 'Agrupar por {{label}}',
     import: 'Importar',
     isEditing: 'está editando',
     item: 'artículo',

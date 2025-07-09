@@ -285,6 +285,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     filterWhere: '过滤{{label}}',
     globals: '全局',
     goBack: '返回',
+    groupByLabel: '按{{label}}分组',
     import: '导入',
     isEditing: '正在编辑',
     item: '条目',

@@ -299,6 +299,7 @@ export const caTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtra {{label}} on',
     globals: 'Globals',
     goBack: 'Torna enrere',
+    groupByLabel: 'Agrupa per {{label}}',
     import: 'Importar',
     isEditing: 'esta editant',
     item: 'element',

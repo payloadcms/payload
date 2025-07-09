@@ -45,6 +45,11 @@ export type ListQuery = {
    * Use `transformColumnsToPreferences` and `transformColumnsToSearchParams` to convert it back and forth
    */
   columns?: ColumnsFromURL
+  groupBy?: {
+    field: string
+    label: string
+    order: 'asc' | 'desc'
+  }
   limit?: string
   page?: string
   preset?: number | string

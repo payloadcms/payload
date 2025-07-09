@@ -297,6 +297,7 @@ export const faTranslations: DefaultTranslationsObject = {
     filterWhere: 'علامت گذاری کردن {{label}} جایی که',
     globals: 'سراسری',
     goBack: 'برگشت',
+    groupByLabel: 'گروه بندی بر اساس {{label}}',
     import: 'واردات',
     isEditing: 'در حال ویرایش است',
     item: 'مورد',

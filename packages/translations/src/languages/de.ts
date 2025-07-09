@@ -304,6 +304,7 @@ export const deTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filter {{label}}, wo',
     globals: 'Globale Dokumente',
     goBack: 'Zurück',
+    groupByLabel: 'Gruppieren nach {{label}}',
     import: 'Importieren',
     isEditing: 'bearbeitet gerade',
     item: 'Artikel',

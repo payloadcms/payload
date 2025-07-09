@@ -298,6 +298,7 @@ export const plTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtruj gdzie',
     globals: 'Globalne',
     goBack: 'Wróć',
+    groupByLabel: 'Grupuj według {{label}}',
     import: 'Import',
     isEditing: 'edytuje',
     item: 'przedmiot',

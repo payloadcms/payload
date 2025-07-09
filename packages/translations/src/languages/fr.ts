@@ -306,6 +306,7 @@ export const frTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrer {{label}} où',
     globals: 'Globals(es)',
     goBack: 'Retourner',
+    groupByLabel: 'Regrouper par {{label}}',
     import: 'Importation',
     isEditing: 'est en train de modifier',
     item: 'article',

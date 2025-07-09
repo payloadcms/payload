@@ -298,6 +298,7 @@ export const slTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtriraj {{label}} kjer',
     globals: 'Globalne nastavitve',
     goBack: 'Nazaj',
+    groupByLabel: 'Razvrsti po {{label}}',
     import: 'Uvoz',
     isEditing: 'ureja',
     item: 'predmet',

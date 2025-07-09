@@ -302,6 +302,7 @@ export const trTranslations: DefaultTranslationsObject = {
     filterWhere: '{{label}} filtrele:',
     globals: 'Globaller',
     goBack: 'Geri dön',
+    groupByLabel: "{{label}}'ye göre grupla",
     import: 'İthalat',
     isEditing: 'düzenliyor',
     item: 'öğe',

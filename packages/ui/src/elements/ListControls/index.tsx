@@ -16,6 +16,7 @@ import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
+import { GroupBySelector } from '../GroupBySelector/index.js'
 import { Pill } from '../Pill/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
@@ -97,7 +98,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   const hasWhereParam = useRef(Boolean(query?.where))
 
   const shouldInitializeWhereOpened = validateWhereQuery(query?.where)
-  const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
+
+  const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'group-by' | 'sort' | 'where'>(
     shouldInitializeWhereOpened ? 'where' : undefined,
   )
 
@@ -160,7 +162,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           <SearchFilter
             handleChange={handleSearchChange}
             key={collectionSlug}
-            // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
             label={searchLabelTranslated.current}
             searchQueryParam={query?.search}
           />
@@ -218,6 +219,21 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   resetPreset={resetPreset}
                 />
               )}
+              <Pill
+                aria-controls={`${baseClass}-group-by`}
+                aria-expanded={visibleDrawer === 'group-by'}
+                className={`${baseClass}__toggle-group-by`}
+                icon={<ChevronIcon />}
+                onClick={() =>
+                  setVisibleDrawer(visibleDrawer !== 'group-by' ? 'group-by' : undefined)
+                }
+                pillStyle="light"
+                size="small"
+              >
+                {t('general:groupByLabel', {
+                  label: query?.groupBy?.label || '',
+                })}
+              </Pill>
               {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
                 <Popup
                   button={<Dots ariaLabel={t('general:moreOptions')} />}
@@ -256,6 +272,13 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             renderedFilters={renderedFilters}
             resolvedFilterOptions={resolvedFilterOptions}
           />
+        </AnimateHeight>
+        <AnimateHeight
+          className={`${baseClass}__group-by`}
+          height={visibleDrawer === 'group-by' ? 'auto' : 0}
+          id={`${baseClass}-group-by`}
+        >
+          <GroupBySelector collectionSlug={collectionConfig.slug} />
         </AnimateHeight>
       </div>
       {PresetListDrawer}

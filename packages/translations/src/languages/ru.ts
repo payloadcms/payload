@@ -301,6 +301,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     filterWhere: 'Где фильтровать',
     globals: 'Глобальные',
     goBack: 'Назад',
+    groupByLabel: 'Группировать по {{label}}',
     import: 'Импорт',
     isEditing: 'редактирует',
     item: 'предмет',

@@ -299,6 +299,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     filterWhere: 'Филтер {{label}} где',
     globals: 'Глобали',
     goBack: 'Врати се',
+    groupByLabel: 'Grupiši po {{label}}',
     import: 'Uvoz',
     isEditing: 'уређује',
     item: 'artikal',

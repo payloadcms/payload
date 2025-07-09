@@ -299,6 +299,7 @@ export const enTranslations = {
     filterWhere: 'Filter {{label}} where',
     globals: 'Globals',
     goBack: 'Go back',
+    groupByLabel: 'Group by {{label}}',
     import: 'Import',
     isEditing: 'is editing',
     item: 'item',

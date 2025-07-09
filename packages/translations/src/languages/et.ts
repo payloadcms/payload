@@ -296,6 +296,7 @@ export const etTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtreeri {{label}} kus',
     globals: 'Globaalsed',
     goBack: 'Mine tagasi',
+    groupByLabel: 'Rühmita {{label}} järgi',
     import: 'Importimine',
     isEditing: 'muudab',
     item: 'üksus',

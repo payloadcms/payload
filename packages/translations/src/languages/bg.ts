@@ -298,6 +298,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     filterWhere: 'Филтрирай {{label}} където',
     globals: 'Глобални',
     goBack: 'Върни се',
+    groupByLabel: 'Групирай по {{label}}',
     import: 'Внос',
     isEditing: 'редактира',
     item: 'артикул',
