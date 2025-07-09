@@ -230,6 +230,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     cancel: 'Atšaukti',
     changesNotSaved:
       'Jūsų pakeitimai nebuvo išsaugoti. Jei dabar išeisite, prarasite savo pakeitimus.',
+    clear: 'Aišku',
     clearAll: 'Išvalyti viską',
     close: 'Uždaryti',
     collapse: 'Susikolimas',

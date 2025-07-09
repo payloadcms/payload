@@ -278,7 +278,10 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           height={visibleDrawer === 'group-by' ? 'auto' : 0}
           id={`${baseClass}-group-by`}
         >
-          <GroupBySelector collectionSlug={collectionConfig.slug} />
+          <GroupBySelector
+            collectionSlug={collectionConfig.slug}
+            fields={collectionConfig?.fields}
+          />
         </AnimateHeight>
       </div>
       {PresetListDrawer}

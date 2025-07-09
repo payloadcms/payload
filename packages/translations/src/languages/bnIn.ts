@@ -229,6 +229,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     cancel: 'বাতিল করুন',
     changesNotSaved:
       'আপনার পরিবর্তনগুলি সংরক্ষণ করা হয়নি। আপনি যদি এখন চলে যান, তাহলে আপনার পরিবর্তনগুলি হারিয়ে যাবে।',
+    clear: 'স্পষ্ট',
     clearAll: 'সমস্ত সাফ করুন',
     close: 'বন্ধ করুন',
     collapse: 'সংকুচিত করুন',

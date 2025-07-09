@@ -231,6 +231,7 @@ export const trTranslations: DefaultTranslationsObject = {
     cancel: 'İptal',
     changesNotSaved:
       'Değişiklikleriniz henüz kaydedilmedi. Eğer bu sayfayı terk ederseniz değişiklikleri kaybedeceksiniz.',
+    clear: 'Temiz',
     clearAll: 'Hepsini Temizle',
     close: 'Kapat',
     collapse: 'Daralt',

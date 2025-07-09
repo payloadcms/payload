@@ -230,6 +230,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     cancel: 'Отмена',
     changesNotSaved:
       'Ваши изменения не были сохранены. Если вы сейчас уйдете, то потеряете свои изменения.',
+    clear: 'Четкий',
     clearAll: 'Очистить все',
     close: 'Закрыть',
     collapse: 'Свернуть',

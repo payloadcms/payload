@@ -232,6 +232,7 @@ export const itTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Torna alla Dashboard',
     cancel: 'Cancella',
     changesNotSaved: 'Le tue modifiche non sono state salvate. Se esci ora, verranno perse.',
+    clear: 'Chiara',
     clearAll: 'Cancella Tutto',
     close: 'Chiudere',
     collapse: 'Comprimi',

@@ -228,6 +228,7 @@ export const svTranslations: DefaultTranslationsObject = {
     cancel: 'Avbryt',
     changesNotSaved:
       'Dina ändringar har inte sparats. Om du lämnar nu kommer du att förlora dina ändringar.',
+    clear: 'Tydlig',
     clearAll: 'Rensa alla',
     close: 'Stänga',
     collapse: 'Kollapsa',

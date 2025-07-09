@@ -226,6 +226,7 @@ export const etTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Tagasi töölaua juurde',
     cancel: 'Tühista',
     changesNotSaved: 'Teie muudatusi pole salvestatud. Kui lahkute praegu, kaotate oma muudatused.',
+    clear: 'Selge',
     clearAll: 'Tühjenda kõik',
     close: 'Sulge',
     collapse: 'Ahenda',

@@ -216,6 +216,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     backToDashboard: '返回到控制面板',
     cancel: '取消',
     changesNotSaved: '您還有尚未儲存的變更。您確定要離開嗎？',
+    clear: '清晰',
     clearAll: '清除全部',
     close: '關閉',
     collapse: '折疊',

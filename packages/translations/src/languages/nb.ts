@@ -228,6 +228,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     cancel: 'Avbryt',
     changesNotSaved:
       'Endringene dine er ikke lagret. Hvis du forlater nå, vil du miste endringene dine.',
+    clear: 'Tydelig',
     clearAll: 'Tøm alt',
     close: 'Lukk',
     collapse: 'Skjul',

@@ -184,6 +184,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:confirmReindexDescription',
   'general:confirmReindexDescriptionAll',
   'general:copied',
+  'general:clear',
   'general:clearAll',
   'general:copy',
   'general:copyField',

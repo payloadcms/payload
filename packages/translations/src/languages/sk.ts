@@ -230,6 +230,7 @@ export const skTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Späť na nástenku',
     cancel: 'Zrušiť',
     changesNotSaved: 'Vaše zmeny neboli uložené. Ak teraz odídete, stratíte svoje zmeny.',
+    clear: 'Jasný',
     clearAll: 'Vymazať všetko',
     close: 'Zavrieť',
     collapse: 'Zbaliť',

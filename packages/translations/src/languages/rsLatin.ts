@@ -228,6 +228,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Nazad na kontrolni panel',
     cancel: 'Otkaži',
     changesNotSaved: 'Vaše promene nisu sačuvane. Ako izađete sada, izgubićete promene.',
+    clear: 'Jasno',
     clearAll: 'Očisti sve',
     close: 'Zatvori',
     collapse: 'Skupi',

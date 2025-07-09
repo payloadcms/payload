@@ -227,6 +227,7 @@ export const plTranslations: DefaultTranslationsObject = {
     cancel: 'Anuluj',
     changesNotSaved:
       'Twoje zmiany nie zostały zapisane. Jeśli teraz wyjdziesz, stracisz swoje zmiany.',
+    clear: 'Jasne',
     clearAll: 'Wyczyść wszystko',
     close: 'Zamknij',
     collapse: 'Zwiń',

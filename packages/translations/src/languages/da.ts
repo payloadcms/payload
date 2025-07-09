@@ -226,6 +226,7 @@ export const daTranslations: DefaultTranslationsObject = {
     cancel: 'Anuller',
     changesNotSaved:
       'Dine ændringer er ikke blevet gemt. Hvis du forlader siden, vil din ændringer gå tabt.',
+    clear: 'Klar',
     clearAll: 'Ryd alt',
     close: 'Luk',
     collapse: 'Skjul',

@@ -228,6 +228,7 @@ export const slTranslations: DefaultTranslationsObject = {
     cancel: 'Prekliči',
     changesNotSaved:
       'Vaše spremembe niso shranjene. Če zapustite zdaj, boste izgubili svoje spremembe.',
+    clear: 'Čisto',
     clearAll: 'Počisti vse',
     close: 'Zapri',
     collapse: 'Strni',

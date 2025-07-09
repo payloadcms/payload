@@ -223,6 +223,8 @@ export const thTranslations: DefaultTranslationsObject = {
     backToDashboard: 'กลับไปหน้าแดชบอร์ด',
     cancel: 'ยกเลิก',
     changesNotSaved: 'การเปลี่ยนแปลงยังไม่ได้ถูกบันทึก ถ้าคุณออกตอนนี้ สิ่งที่แก้ไขไว้จะหายไป',
+    clear:
+      'ให้เคารพความหมายของข้อความต้นฉบับภายในบริบทของ Payload นี่คือรายการของคำที่มักใช้ใน Payload ที่มีความหมายที่เฉพาะเจาะจงมาก:\n    - Collection: Collection คือกลุ่มของเอกสารที่มีโครงสร้างและจุดประสงค์ท',
     clearAll: 'ล้างทั้งหมด',
     close: 'ปิด',
     collapse: 'ยุบ',

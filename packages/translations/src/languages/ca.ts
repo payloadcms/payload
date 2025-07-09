@@ -228,6 +228,7 @@ export const caTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Torna al tauler',
     cancel: 'Cancel·la',
     changesNotSaved: 'El teu document té canvis no desats. Si continues, els canvis es perdran.',
+    clear: 'Clar',
     clearAll: 'Esborra-ho tot',
     close: 'Tanca',
     collapse: 'Replegar',

@@ -228,6 +228,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     cancel: 'Cancelar',
     changesNotSaved:
       'Suas alterações não foram salvas. Se você sair agora, essas alterações serão perdidas.',
+    clear: 'Claro',
     clearAll: 'Limpar Tudo',
     close: 'Fechar',
     collapse: 'Recolher',

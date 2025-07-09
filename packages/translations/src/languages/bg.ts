@@ -227,6 +227,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Обратно към таблото',
     cancel: 'Отмени',
     changesNotSaved: 'Промените ти не са запазени. Ако напуснеш сега, ще ги загубиш.',
+    clear: 'Ясно',
     clearAll: 'Изчисти всичко',
     close: 'Затвори',
     collapse: 'Свий',
