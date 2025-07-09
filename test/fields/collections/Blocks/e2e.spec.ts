@@ -2,6 +2,7 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
+import { copyPasteField } from 'helpers/e2e/copyPasteField.js'
 import { openBlocksDrawer } from 'helpers/e2e/openBlocksDrawer.js'
 import { reorderBlocks } from 'helpers/e2e/reorderBlocks.js'
 import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
@@ -500,6 +501,225 @@ describe('Block fields', () => {
       const groupLabel = blocksDrawer.locator('.blocks-drawer__block-group-label').nth(1)
       await expect(groupLabel).toBeVisible()
       await expect(groupLabel).toHaveText('Group in en')
+    })
+  })
+
+  describe('copy paste', () => {
+    test('should prevent copying an empty block field', async () => {
+      await page.goto(url.create)
+      const popupBtn = page.locator(
+        '#field-i18nBlocks .popup.clipboard-action__popup button.popup-button',
+      )
+      await popupBtn.click()
+      const disabledCopyBtn = page.locator(
+        '#field-i18nBlocks .popup.clipboard-action__popup .popup__content div.popup-button-list__disabled:has-text("Copy Field")',
+      )
+      await expect(disabledCopyBtn).toBeVisible()
+    })
+
+    test('should prevent pasting into readonly block field', async () => {
+      await page.goto(url.create)
+      await copyPasteField({
+        fieldName: 'readOnly',
+        page,
+      })
+      const popupBtn = page.locator(
+        '#field-readOnly .popup.clipboard-action__popup button.popup-button',
+      )
+      await expect(popupBtn).toBeVisible()
+      await popupBtn.click()
+      const disabledPasteBtn = page.locator(
+        '#field-readOnly .popup.clipboard-action__popup .popup__content div.popup-button-list__disabled:has-text("Paste Field")',
+      )
+      await expect(disabledPasteBtn).toBeVisible()
+    })
+
+    test('should prevent pasting into block field with different schema', async () => {
+      await page.goto(url.create)
+      await copyPasteField({
+        fieldName: 'readOnly',
+        page,
+      })
+      await copyPasteField({
+        fieldName: 'groupedBlocks',
+        page,
+        action: 'paste',
+      })
+      const pasteErrorToast = page
+        .locator('.payload-toast-item.toast-error')
+        .filter({ hasText: 'Invalid clipboard data.' })
+      await expect(pasteErrorToast).toBeVisible()
+    })
+
+    test('should copy and paste block fields', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-blocks')
+      const row = field.locator('#blocks-row-0')
+      const rowTextInput = row.locator('#field-blocks__0__text')
+
+      const textVal = 'row one copy'
+      await rowTextInput.fill(textVal)
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks',
+      })
+
+      await page.reload()
+
+      await expect(rowTextInput).toHaveValue('first block')
+
+      await copyPasteField({
+        page,
+        action: 'paste',
+        fieldName: 'blocks',
+      })
+
+      await expect(rowTextInput).toHaveValue(textVal)
+    })
+
+    test('should copy and paste block rows', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-blocks')
+      const row = field.locator('#blocks-row-0')
+      const rowTextInput = row.locator('#field-blocks__0__text')
+
+      const textVal = 'row one copy'
+      await rowTextInput.fill(textVal)
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks',
+        rowIndex: 0,
+      })
+
+      await page.reload()
+
+      await expect(rowTextInput).toHaveValue('first block')
+
+      await copyPasteField({
+        page,
+        action: 'paste',
+        fieldName: 'blocks',
+        rowIndex: 0,
+      })
+
+      await expect(rowTextInput).toHaveValue(textVal)
+    })
+
+    test('should copy a block row and paste into a field with the same schema', async () => {
+      await page.goto(url.create)
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks',
+        rowIndex: 1,
+      })
+
+      await copyPasteField({
+        page,
+        fieldName: 'duplicate',
+        action: 'paste',
+      })
+
+      const rowsContainer = page.locator('#field-duplicate > div.blocks-field__rows').first()
+      await expect(rowsContainer).toBeVisible()
+      const rowTextInput = rowsContainer.locator('#field-duplicate__0__number')
+      await expect(rowTextInput).toHaveValue('342')
+    })
+
+    test('should copy a block field and paste into a row with the same schema', async () => {
+      await page.goto(url.create)
+
+      const originalField = page.locator('#field-blocks')
+      const originalRow = originalField.locator('#blocks-row-0')
+      const originalInput = originalRow.locator('#field-blocks__0__text')
+
+      const textVal = 'row one copy'
+      await originalInput.fill(textVal)
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks',
+      })
+
+      const field = page.locator('#field-duplicate')
+      const fieldInput = field.locator('#field-duplicate__0__text')
+      await expect(fieldInput).toHaveValue('first block')
+
+      await copyPasteField({ page, action: 'paste', fieldName: 'duplicate', rowIndex: 0 })
+
+      const rowsContainer = page.locator('#field-duplicate > div.blocks-field__rows').first()
+      await expect(rowsContainer).toBeVisible()
+      const rowTextInput = rowsContainer.locator('#field-duplicate__0__text')
+      await expect(rowTextInput).toHaveValue('row one copy')
+    })
+
+    test('should correctly paste a row with nested blocks into a row with no children', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-blocks')
+      await addBlock({ page, fieldName: 'blocks', blockToSelect: 'Sub Block' })
+
+      const textInputRowOne = field.locator('#field-blocks__2__subBlocks__1__text')
+      await expect(textInputRowOne).toBeVisible()
+
+      const textInputRowOneValue = 'copied second sub block'
+      await textInputRowOne.fill(textInputRowOneValue)
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks',
+        rowIndex: 2,
+      })
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks',
+        rowIndex: 4,
+        action: 'paste',
+      })
+
+      const textInputRowTwo = field.locator('#field-blocks__4__subBlocks__1__text')
+      await expect(textInputRowTwo).toBeVisible()
+      await expect(textInputRowTwo).toHaveValue(textInputRowOneValue)
+    })
+
+    test('should replace the rows of a nested block field with those of its paste counterpart', async () => {
+      await page.goto(url.create)
+
+      await addBlock({
+        page,
+        fieldName: 'blocks',
+        blockToSelect: 'Sub Block',
+      })
+
+      const field = page.locator('#field-blocks')
+
+      const subArrayContainer = field.locator(
+        '#field-blocks__2__subBlocks > div.blocks-field__rows > div',
+      )
+      const subArrayContainer2 = field.locator(
+        '#field-blocks__4__subBlocks > div.blocks-field__rows > div',
+      )
+      await expect(subArrayContainer).toHaveCount(2)
+      await expect(subArrayContainer2).toHaveCount(0)
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks',
+        rowIndex: 4,
+      })
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks',
+        rowIndex: 2,
+        action: 'paste',
+      })
+
+      await expect(subArrayContainer).toHaveCount(0)
+      await expect(subArrayContainer2).toHaveCount(0)
     })
   })
 })

@@ -92,6 +92,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'Følgende felt er ugyldig:',
     followingFieldsInvalid_other: 'Følgende felter er ugyldige:',
     incorrectCollection: 'Ugyldig samling',
+    insufficientClipboardPermissions:
+      'Tilgang til utklippstavlen ble nektet. Sjekk utklippstavle-tillatelsene dine.',
+    invalidClipboardData: 'Ugyldige utklippstavldata.',
     invalidFileType: 'Ugyldig filtype',
     invalidFileTypeValue: 'Ugyldig filtype: {{value}}',
     invalidRequestArgs: 'Ugyldige argumenter i forespørselen: {{args}}',
@@ -113,6 +116,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Det oppstod et problem under opplasting av filen.',
     tokenInvalidOrExpired: 'Token er enten ugyldig eller har utløpt.',
     tokenNotProvided: 'Token ikke angitt.',
+    unableToCopy: 'Kan ikke kopiere.',
     unableToDeleteCount: 'Kan ikke slette {{count}} av {{total}} {{label}}.',
     unableToReindexCollection:
       'Feil ved reindeksering av samlingen {{collection}}. Operasjonen ble avbrutt.',
@@ -243,7 +247,9 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Dette vil fjerne eksisterende indekser og reindeksere dokumentene i alle samlinger.',
     copied: 'Kopiert',
     copy: 'Kopiér',
+    copyField: 'Kopier felt',
     copying: 'Kopiering',
+    copyRow: 'Kopier rad',
     copyWarning:
       'Du er i ferd med å overskrive {{to}} med {{from}} for {{label}} {{title}}. Er du sikker?',
     create: 'Opprett',
@@ -338,6 +344,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Overskriv eksisterende feltdata',
     pageNotFound: 'Siden ble ikke funnet',
     password: 'Passord',
+    pasteField: 'Lim inn felt',
+    pasteRow: 'Lim inn rad',
     payloadSettings: 'Payload-innstillinger',
     perPage: 'Per side: {{limit}}',
     previous: 'Forrige',

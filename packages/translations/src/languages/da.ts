@@ -91,6 +91,9 @@ export const daTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'Feltet er ugyldigt:',
     followingFieldsInvalid_other: 'Felterne er ugyldige:',
     incorrectCollection: 'Forkert samling',
+    insufficientClipboardPermissions:
+      'Adgang til udklipsholder nægtet. Kontroller dine udklipsholderrettigheder.',
+    invalidClipboardData: 'Ugyldige data i udklipsholderen.',
     invalidFileType: 'Ugyldig filtype',
     invalidFileTypeValue: 'Ugyldig filtype: {{value}}',
     invalidRequestArgs: 'Ugyldige argumenter i anmodningen: {{args}}',
@@ -112,6 +115,7 @@ export const daTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Der opstod et problem under uploadingen af filen.',
     tokenInvalidOrExpired: 'Token er enten ugyldig eller udløbet.',
     tokenNotProvided: 'Token ikke angivet.',
+    unableToCopy: 'Kan ikke kopiere.',
     unableToDeleteCount: 'Kunne ikke slette {{count}} mangler {{total}} {{label}}.',
     unableToReindexCollection:
       'Fejl ved genindeksering af samling {{collection}}. Operationen blev afbrudt.',
@@ -241,7 +245,9 @@ export const daTranslations: DefaultTranslationsObject = {
       'Dette vil fjerne eksisterende indekser og genindeksere dokumenter i alle samlinger.',
     copied: 'Kopieret',
     copy: 'Kopier',
+    copyField: 'Kopiér felt',
     copying: 'Kopiering',
+    copyRow: 'Kopiér række',
     copyWarning:
       'Du er lige ved at overskrive {{to}} med {{from}} for {{label}} {{title}}. Er du sikker?',
     create: 'Opret',
@@ -335,6 +341,8 @@ export const daTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Overskriv eksisterende feltdata',
     pageNotFound: 'Siden blev ikke fundet',
     password: 'Adgangskode',
+    pasteField: 'Indsæt felt',
+    pasteRow: 'Indsæt række',
     payloadSettings: 'Payload-indstillinger',
     perPage: 'Per side: {{limit}}',
     previous: 'Tidligere',

@@ -93,6 +93,9 @@ export const trTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'Lütfen geçersiz alanı düzeltin:',
     followingFieldsInvalid_other: 'Lütfen geçersiz alanları düzeltin:',
     incorrectCollection: 'Hatalı koleksiyon',
+    insufficientClipboardPermissions:
+      'Pano erişim reddedildi. Lütfen pano izinlerinizi kontrol edin.',
+    invalidClipboardData: 'Geçersiz pano verisi.',
     invalidFileType: 'Geçersiz dosya türü',
     invalidFileTypeValue: 'Geçersiz dosya türü: {{value}}',
     invalidRequestArgs: 'İstek içerisinde geçersiz argümanlar iletildi: {{args}}',
@@ -114,6 +117,7 @@ export const trTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Dosya yüklenirken bir sorun oluştu.',
     tokenInvalidOrExpired: 'Geçersiz veya süresi dolmuş token.',
     tokenNotProvided: 'Jeton sağlanmadı.',
+    unableToCopy: 'Kopyalanamıyor.',
     unableToDeleteCount: '{{total}} {{label}} içinden {{count}} silinemiyor.',
     unableToReindexCollection:
       '{{collection}} koleksiyonunun yeniden indekslenmesinde hata oluştu. İşlem durduruldu.',
@@ -246,7 +250,9 @@ export const trTranslations: DefaultTranslationsObject = {
       'Bu işlem mevcut dizinleri kaldıracak ve tüm koleksiyonlardaki belgeleri yeniden dizine alacaktır.',
     copied: 'Kopyalandı',
     copy: 'Kopyala',
+    copyField: 'Alanı kopyala',
     copying: 'Kopyalama',
+    copyRow: 'Satırı kopyala',
     copyWarning:
       "{{to}}'yu {{from}} ile {{label}} {{title}} için üstüne yazmak üzeresiniz. Emin misiniz?",
     create: 'Oluştur',
@@ -341,6 +347,8 @@ export const trTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Mevcut alan verilerinin üzerine yazın',
     pageNotFound: 'Sayfa bulunamadı',
     password: 'Parola',
+    pasteField: 'Alanı yapıştır',
+    pasteRow: 'Satırı yapıştır',
     payloadSettings: 'Ayarlar',
     perPage: 'Sayfa başına: {{limit}}',
     previous: 'Önceki',

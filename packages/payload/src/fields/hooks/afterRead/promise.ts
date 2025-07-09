@@ -114,6 +114,7 @@ export const promise = async ({
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
+  let removedFieldValue = false
 
   if (
     fieldAffectsData(field) &&
@@ -121,6 +122,7 @@ export const promise = async ({
     typeof siblingDoc[field.name!] !== 'undefined' &&
     !showHiddenFields
   ) {
+    removedFieldValue = true
     delete siblingDoc[field.name!]
   }
 
@@ -331,7 +333,7 @@ export const promise = async ({
     // Execute access control
     let allowDefaultValue = true
     if (triggerAccessControl && field.access && field.access.read) {
-      const result = overrideAccess
+      const canReadField = overrideAccess
         ? true
         : await field.access.read({
             id: doc.id as number | string,
@@ -342,7 +344,7 @@ export const promise = async ({
             siblingData: siblingDoc,
           })
 
-      if (!result) {
+      if (!canReadField) {
         allowDefaultValue = false
         delete siblingDoc[field.name!]
       }
@@ -351,6 +353,7 @@ export const promise = async ({
     // Set defaultValue on the field for globals being returned without being first created
     // or collection documents created prior to having a default
     if (
+      !removedFieldValue &&
       allowDefaultValue &&
       typeof siblingDoc[field.name!] === 'undefined' &&
       typeof field.defaultValue !== 'undefined'

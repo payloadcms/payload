@@ -92,6 +92,9 @@ export const lvTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'Šis lauks nav derīgs:',
     followingFieldsInvalid_other: 'Šie lauki nav derīgi:',
     incorrectCollection: 'Nepareiza kolekcija',
+    insufficientClipboardPermissions:
+      'Piekļuve starpliktuvei liegta. Lūdzu, pārbaudiet savas starpliktuves atļaujas.',
+    invalidClipboardData: 'Nederīgi starpliktuves dati.',
     invalidFileType: 'Nederīgs faila tips',
     invalidFileTypeValue: 'Nederīgs faila tips: {{value}}',
     invalidRequestArgs: 'Pieprasījumā nodoti nederīgi argumenti: {{args}}',
@@ -113,6 +116,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Radās problēma, augšupielādējot failu.',
     tokenInvalidOrExpired: 'Tokens ir nederīgs vai beidzies.',
     tokenNotProvided: 'Tokens nav norādīts.',
+    unableToCopy: 'Neizdevās kopēt.',
     unableToDeleteCount: 'Neizdevās izdzēst {{count}} no {{total}} {{label}}.',
     unableToReindexCollection:
       'Radās kļūda, pārindeksējot kolekciju {{collection}}. Operācija pārtraukta.',
@@ -242,7 +246,9 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Tas noņems esošos indeksus un pārindeksēs dokumentus visās kolekcijās.',
     copied: 'Nokopēts',
     copy: 'Kopēt',
+    copyField: 'Kopēt lauku',
     copying: 'Kopē...',
+    copyRow: 'Kopēt rindu',
     copyWarning:
       'Jūs grasāties pārrakstīt {{to}} ar {{from}} priekš {{label}} {{title}}. Vai esat pārliecināts?',
     create: 'Izveidot',
@@ -337,6 +343,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Pārrakstīt esošos datus',
     pageNotFound: 'Lapa nav atrasta',
     password: 'Parole',
+    pasteField: 'Ielīmēt lauku',
+    pasteRow: 'Ielīmēt rindu',
     payloadSettings: 'Payload iestatījumi',
     perPage: 'Lapas ieraksti: {{limit}}',
     previous: 'Iepriekšējais',
