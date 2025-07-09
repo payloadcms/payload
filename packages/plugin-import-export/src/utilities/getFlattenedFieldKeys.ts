@@ -16,7 +16,13 @@ export const getFlattenedFieldKeys = (fields: FieldWithPresentational[], prefix 
   const keys: string[] = []
 
   fields.forEach((field) => {
-    if (!('name' in field) || typeof field.name !== 'string') {
+    const fieldHasToCSVFunction =
+      'custom' in field &&
+      typeof field.custom === 'object' &&
+      'plugin-import-export' in field.custom &&
+      field.custom['plugin-import-export']?.toCSV
+
+    if (!('name' in field) || typeof field.name !== 'string' || fieldHasToCSVFunction) {
       return
     }
 
