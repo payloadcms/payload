@@ -1,0 +1,25 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .export-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    background-color: var(--theme-elevation-100);
+    border-radius: var(--style-radius-s);
+    padding: 0 base(0.4);
+
+    &:hover,
+    &:focus-visible,
+    &:focus-within {
+      background-color: var(--theme-elevation-100);
+    }
+
+    .doc-drawer__toggler {
+      height: 100%;
+      width: 100%;
+      text-align: left;
+    }
+  }
+}

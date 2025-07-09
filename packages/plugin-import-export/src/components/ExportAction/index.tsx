@@ -18,9 +18,9 @@ import type {
 import { useImportExport } from '../ImportExportProvider/index.js'
 import './index.scss'
 
-const baseClass = 'export-list-menu-item'
+const baseClass = 'export-action'
 
-export const ExportListMenuItem: React.FC<{
+export const ExportAction: React.FC<{
   collectionSlug: string
   exportCollectionSlug: string
 }> = ({ collectionSlug, exportCollectionSlug }) => {
