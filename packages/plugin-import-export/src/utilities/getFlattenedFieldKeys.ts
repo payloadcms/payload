@@ -16,7 +16,13 @@ export const getFlattenedFieldKeys = (fields: FieldWithPresentational[], prefix 
   const keys: string[] = []
 
   fields.forEach((field) => {
-    if (!('name' in field) || typeof field.name !== 'string') {
+    const fieldHasToCSVFunction =
+      'custom' in field &&
+      typeof field.custom === 'object' &&
+      'plugin-import-export' in field.custom &&
+      field.custom['plugin-import-export']?.toCSV
+
+    if (!('name' in field) || typeof field.name !== 'string' || fieldHasToCSVFunction) {
       return
     }
 
@@ -41,11 +47,21 @@ export const getFlattenedFieldKeys = (fields: FieldWithPresentational[], prefix 
         break
       case 'relationship':
         if (field.hasMany) {
-          // e.g. hasManyPolymorphic_0_value_id
-          keys.push(`${name}_0_relationTo`, `${name}_0_value_id`)
+          if (Array.isArray(field.relationTo)) {
+            // hasMany polymorphic
+            keys.push(`${name}_0_relationTo`, `${name}_0_id`)
+          } else {
+            // hasMany monomorphic
+            keys.push(`${name}_0`)
+          }
         } else {
-          // e.g. hasOnePolymorphic_id
-          keys.push(`${name}_id`, `${name}_relationTo`)
+          if (Array.isArray(field.relationTo)) {
+            // hasOne polymorphic
+            keys.push(`${name}_relationTo`, `${name}_id`)
+          } else {
+            // hasOne monomorphic
+            keys.push(name)
+          }
         }
         break
       case 'tabs':
