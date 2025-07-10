@@ -348,6 +348,11 @@ export type CollectionAdminOptions = {
    * Default columns to show in list view
    */
   defaultColumns?: string[]
+  /*
+   * Name of a field used to group results in the list view, e.g. `category`
+   * A leading hyphen represents descending order, e.g. `-category`
+   */
+  defaultGroupBy?: string
   /**
    * Custom description for collection. This will also be used as JSDoc for the generated types
    */

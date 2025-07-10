@@ -13,7 +13,7 @@ import type {
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
+import { renderFilters, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
 import {
   formatAdminURL,
@@ -24,6 +24,7 @@ import {
 import React, { Fragment } from 'react'
 
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
+import { getDataAndRenderTables } from './getDataAndRenderTables.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
@@ -74,7 +75,6 @@ export const renderListView = async (
     req,
     req: {
       i18n,
-      locale,
       payload,
       payload: { config },
       query: queryFromReq,
@@ -103,6 +103,7 @@ export const renderListView = async (
     req,
     value: {
       columns,
+      groupBy: query?.groupBy as string,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       preset: (query?.preset as DefaultDocumentIDType) || null,
       sort: query?.sort as string,
@@ -121,6 +122,8 @@ export const renderListView = async (
     const page = isNumber(query?.page) ? Number(query.page) : 0
 
     const limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+
+    const groupBy = collectionPreferences?.groupBy || collectionConfig.admin.defaultGroupBy
 
     const sort =
       collectionPreferences?.sort ||
@@ -172,49 +175,21 @@ export const renderListView = async (
         req.payload.logger.error(`Error fetching query preset or preset permissions: ${err}`)
       }
     }
-
-    const data = await payload.find({
-      collection: collectionSlug,
-      depth: 0,
-      draft: true,
-      fallbackLocale: false,
-      includeLockStatus: true,
-      limit,
-      locale,
-      overrideAccess: false,
-      page,
-      req,
-      sort,
-      user,
-      where: where || {},
-    })
-
-    // if groupBy, then we need to fetch the data differently
-
-    const distinct = await payload.findDistinct({
-      collection: collectionSlug,
-      field: 'team',
-      locale,
-      overrideAccess: false,
-      req,
-      // where: where || {},
-    })
-
-    const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
-
-    const { columnState, Table } = renderTable({
-      clientCollectionConfig,
+    const { columnState, data, Tables } = await getDataAndRenderTables({
+      clientConfig,
       collectionConfig,
-      columnPreferences: collectionPreferences?.columns,
+      collectionPreferences,
+      collectionSlug,
       columns,
       customCellProps,
-      docs: data.docs,
       drawerSlug,
       enableRowSelections,
-      i18n: req.i18n,
-      orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
-      payload,
-      useAsTitle: collectionConfig.admin.useAsTitle,
+      groupBy,
+      limit,
+      page,
+      req,
+      user,
+      where,
     })
 
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
@@ -277,6 +252,7 @@ export const renderListView = async (
             collectionSlug={collectionSlug}
             columns={transformColumnsToPreferences(columnState)}
             data={data}
+            defaultGroupBy={groupBy}
             defaultLimit={limit}
             defaultSort={sort}
             listPreferences={collectionPreferences}
@@ -299,7 +275,7 @@ export const renderListView = async (
                 queryPresetPermissions,
                 renderedFilters,
                 resolvedFilterOptions,
-                Table,
+                Tables,
               } satisfies ListViewClientProps,
               Component: collectionConfig?.admin?.components?.views?.list?.Component,
               Fallback: DefaultListView,

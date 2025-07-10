@@ -69,6 +69,7 @@ export const renderTable = ({
   customCellProps,
   docs,
   enableRowSelections,
+  heading,
   i18n,
   orderableFieldName,
   payload,
@@ -86,6 +87,7 @@ export const renderTable = ({
   docs: PaginatedDocs['docs']
   drawerSlug?: string
   enableRowSelections: boolean
+  heading?: React.ReactNode
   i18n: I18nClient
   orderableFieldName: string
   payload: Payload
@@ -236,7 +238,15 @@ export const renderTable = ({
     return {
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
-      Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} key="table" />,
+      Table: (
+        <Table
+          appearance={tableAppearance}
+          columns={columnsToUse}
+          data={docs}
+          heading={heading}
+          key="table"
+        />
+      ),
     }
   }
 
@@ -262,6 +272,7 @@ export const renderTable = ({
         collection={clientCollectionConfig}
         columns={columnsToUse}
         data={docs}
+        heading={heading}
         key="table"
       />
     ),

@@ -20,6 +20,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   collectionSlug,
   columns,
   data,
+  defaultGroupBy,
   defaultLimit,
   defaultSort,
   listPreferences,
@@ -51,6 +52,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       return searchParams
     } else {
       return {
+        groupBy: defaultGroupBy,
         limit: String(defaultLimit),
         sort: defaultSort,
       }
@@ -69,6 +71,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         ...currentQuery,
         ...newQuery,
         columns: 'columns' in newQuery ? newQuery.columns : currentQuery.columns,
+        groupBy:
+          'groupBy' in newQuery ? newQuery.groupBy : (currentQuery?.groupBy ?? defaultGroupBy),
         limit: 'limit' in newQuery ? newQuery.limit : (currentQuery?.limit ?? String(defaultLimit)),
         page,
         preset: 'preset' in newQuery ? newQuery.preset : currentQuery?.preset,
@@ -79,7 +83,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
       return mergedQuery
     },
-    [currentQuery, defaultLimit, defaultSort],
+    [currentQuery, defaultLimit, defaultSort, defaultGroupBy],
   )
 
   const refineListData = useCallback(
@@ -120,15 +124,15 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   )
 
   const handlePageChange = useCallback(
-    async (arg: number) => {
-      await refineListData({ page: String(arg) })
+    async (page: number) => {
+      await refineListData({ page: String(page) })
     },
     [refineListData],
   )
 
   const handlePerPageChange = React.useCallback(
-    async (arg: number) => {
-      await refineListData({ limit: String(arg), page: '1' })
+    async (limit: number) => {
+      await refineListData({ limit: String(limit), page: '1' })
     },
     [refineListData],
   )
@@ -142,15 +146,15 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   )
 
   const handleSortChange = useCallback(
-    async (arg: string) => {
-      await refineListData({ sort: arg })
+    async (sort: string) => {
+      await refineListData({ sort })
     },
     [refineListData],
   )
 
   const handleWhereChange = useCallback(
-    async (arg: Where) => {
-      await refineListData({ where: arg })
+    async (where: Where) => {
+      await refineListData({ where })
     },
     [refineListData],
   )

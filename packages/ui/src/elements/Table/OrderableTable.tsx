@@ -22,6 +22,7 @@ export type Props = {
   readonly collection: ClientCollectionConfig
   readonly columns?: Column[]
   readonly data: Record<string, unknown>[]
+  readonly heading?: React.ReactNode
 }
 
 export const OrderableTable: React.FC<Props> = ({
@@ -29,6 +30,7 @@ export const OrderableTable: React.FC<Props> = ({
   collection,
   columns,
   data: initialData,
+  heading,
 }) => {
   const { config } = useConfig()
   const { data: listQueryData, orderableFieldName, query } = useListQuery()
@@ -163,6 +165,15 @@ export const OrderableTable: React.FC<Props> = ({
         .filter(Boolean)
         .join(' ')}
     >
+      {typeof heading === 'string' ? (
+        <h3 className={`${baseClass}__heading`} id="table-heading">
+          {heading}
+        </h3>
+      ) : (
+        <div className={`${baseClass}__heading`} id="table-heading">
+          {heading}
+        </div>
+      )}
       <DraggableSortable ids={rowIds} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
         <table cellPadding="0" cellSpacing="0">
           <thead>

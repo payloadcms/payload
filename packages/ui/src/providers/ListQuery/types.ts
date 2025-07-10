@@ -23,6 +23,7 @@ export type ListQueryProps = {
   readonly collectionSlug?: ClientCollectionConfig['slug']
   readonly columns?: ColumnPreference[]
   readonly data: PaginatedDocs
+  readonly defaultGroupBy?: string
   readonly defaultLimit?: number
   readonly defaultSort?: Sort
   readonly listPreferences?: CollectionPreferences
