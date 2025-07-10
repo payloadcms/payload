@@ -86,6 +86,8 @@ export const plTranslations: DefaultTranslationsObject = {
     deletingFile: '',
     deletingTitle:
       'Wystąpił błąd podczas usuwania {{title}}. Proszę, sprawdź swoje połączenie i spróbuj ponownie.',
+    documentNotFound:
+      'Dokument o ID {{id}} nie mógł zostać znaleziony. Mogło zostać usunięte lub nigdy nie istniało, lub może nie masz do niego dostępu.',
     emailOrPasswordIncorrect: 'Podany adres e-mail lub hasło jest nieprawidłowe.',
     followingFieldsInvalid_one: 'To pole jest nieprawidłowe:',
     followingFieldsInvalid_other: 'Następujące pola są nieprawidłowe:',

@@ -87,6 +87,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     deletingFile: 'Виникла помилка під час видалення файлу',
     deletingTitle:
       "Виникла помилка під час видалення {{title}}. Будь ласка, перевірте ваше з'єднання та спробуйте ще раз.",
+    documentNotFound:
+      'Документ з ID {{id}} не вдалося знайти. Можливо, він був видалений або ніколи не існував, або у вас немає доступу до нього.',
     emailOrPasswordIncorrect: 'Вказана адреса електронної пошти або пароль є невірними',
     followingFieldsInvalid_one: 'Наступне поле невірне:',
     followingFieldsInvalid_other: 'Наступні поля невірні',
