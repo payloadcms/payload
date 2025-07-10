@@ -86,6 +86,8 @@ export const arTranslations: DefaultTranslationsObject = {
     deletingFile: 'حدث خطأ أثناء حذف الملف.',
     deletingTitle:
       'حدث خطأ أثناء حذف {{title}}. يرجى التحقق من الاتصال الخاص بك والمحاولة مرة أخرى.',
+    documentNotFound:
+      'لم يتم العثور على المستند بالمعرف {{id}}. قد يكون قد تم حذفه أو لم يكن موجودًا أصلاً ، أو قد لا يكون لديك الوصول إليه.',
     emailOrPasswordIncorrect: 'البريد الإلكتروني أو كلمة المرور المقدمة غير صحيحة.',
     followingFieldsInvalid_one: 'الحقل التالي غير صالح:',
     followingFieldsInvalid_other: 'الحقول التالية غير صالحة:',

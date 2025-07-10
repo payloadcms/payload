@@ -85,6 +85,8 @@ export const faTranslations: DefaultTranslationsObject = {
     correctInvalidFields: 'لطفا کادرهای نامعتبر را تصحیح کنید.',
     deletingFile: 'هنگام حذف فایل خطایی روی داد.',
     deletingTitle: 'هنگام حذف {{title}} خطایی رخ داد. لطفاً وضعیت اتصال اینترنت خود را بررسی کنید.',
+    documentNotFound:
+      'سند با شناسه {{id}} پیدا نشد. ممکن است حذف شده باشد یا هرگز وجود نداشته باشد، یا شاید شما به آن دسترسی نداشته باشید.',
     emailOrPasswordIncorrect: 'رایانامه یا گذرواژه ارائه شده نادرست است.',
     followingFieldsInvalid_one: 'کادر زیر نامعتبر است:',
     followingFieldsInvalid_other: 'کادرهای زیر نامعتبر هستند:',

@@ -87,6 +87,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     deletingFile: 'Ocorreu um erro ao excluir o arquivo.',
     deletingTitle:
       'Ocorreu um erro ao excluir {{title}}. Por favor, verifique sua conexão e tente novamente.',
+    documentNotFound:
+      'O documento com o ID {{id}} não pôde ser encontrado. Ele pode ter sido deletado ou nunca ter existido, ou você pode não ter acesso a ele.',
     emailOrPasswordIncorrect: 'O email ou senha fornecido está incorreto.',
     followingFieldsInvalid_one: 'O campo a seguir está inválido:',
     followingFieldsInvalid_other: 'Os campos a seguir estão inválidos:',

@@ -86,6 +86,8 @@ export const esTranslations: DefaultTranslationsObject = {
     deletingFile: 'Ocurrió un error al eliminar el archivo.',
     deletingTitle:
       'Ocurrió un error al eliminar {{title}}. Por favor, revisa tu conexión y vuelve a intentarlo.',
+    documentNotFound:
+      'No se pudo encontrar el documento con ID {{id}}. Puede haber sido eliminado o nunca existió, o puede que no tenga acceso a él.',
     emailOrPasswordIncorrect: 'El correo o la contraseña son incorrectos.',
     followingFieldsInvalid_one: 'El siguiente campo es inválido:',
     followingFieldsInvalid_other: 'Los siguientes campos son inválidos:',
