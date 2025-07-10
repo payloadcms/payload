@@ -112,6 +112,9 @@ describe('Auth', () => {
       const data = await response.json()
 
       expect(response.status).toBe(200)
+      expect(data.user).toBeDefined()
+      expect(data.user.collection).toBe(slug)
+      expect(data.user._strategy).toBeDefined()
       expect(data.token).toBeDefined()
     })
 
