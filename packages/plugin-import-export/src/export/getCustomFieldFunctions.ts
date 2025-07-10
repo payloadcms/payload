@@ -1,21 +1,12 @@
-import {
-  type FlattenedField,
-  type SelectIncludeType,
-  traverseFields,
-  type TraverseFieldsCallback,
-} from 'payload'
+import { type FlattenedField, traverseFields, type TraverseFieldsCallback } from 'payload'
 
 import type { ToCSVFunction } from '../types.js'
 
 type Args = {
   fields: FlattenedField[]
-  select: SelectIncludeType | undefined
 }
 
-export const getCustomFieldFunctions = ({
-  fields,
-  select,
-}: Args): Record<string, ToCSVFunction> => {
+export const getCustomFieldFunctions = ({ fields }: Args): Record<string, ToCSVFunction> => {
   const result: Record<string, ToCSVFunction> = {}
 
   const buildCustomFunctions: TraverseFieldsCallback = ({ field, parentRef, ref }) => {
@@ -54,7 +45,7 @@ export const getCustomFieldFunctions = ({
                 data[`${ref.prefix}${field.name}_relationTo`] = relationTo
               }
             }
-            return undefined
+            return undefined // prevents further flattening
           }
         }
       } else {
@@ -98,10 +89,6 @@ export const getCustomFieldFunctions = ({
         }
       }
     }
-
-    // TODO: do this so we only return the functions needed based on the select used
-    ////@ts-expect-error ref is untyped
-    // ref.select = typeof select !== 'undefined' || select[field.name] ? select : {}
   }
 
   traverseFields({ callback: buildCustomFunctions, fields })

@@ -86,6 +86,8 @@ export const caTranslations: DefaultTranslationsObject = {
     deletingFile: "Hi ha hagut un error en eliminar l'arxiu.",
     deletingTitle:
       "Hi ha hagut un error mentre s'eliminava {{title}}. Si us plau, comprova la teva connexió i torna-ho a intentar.",
+    documentNotFound:
+      "El document amb ID {{id}} no s'ha pogut trobar. Pot haver estat esborrat o mai haver existit, o potser no tens accés a aquest.",
     emailOrPasswordIncorrect:
       'El correu electrònic o la contrasenya proporcionats no són correctes.',
     followingFieldsInvalid_one: 'El següent camp no és vàlid:',

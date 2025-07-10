@@ -65,6 +65,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'error:autosaving',
   'error:correctInvalidFields',
   'error:deletingTitle',
+  'error:documentNotFound',
   'error:emailOrPasswordIncorrect',
   'error:usernameOrPasswordIncorrect',
   'error:loadingDocument',
