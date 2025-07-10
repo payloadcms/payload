@@ -8,37 +8,6 @@ title: Official Features
 
 Below are all the Rich Text Features Payload offers. Everything is customizable; you can [create your own features](/docs/rich-text/custom-features), modify ours and share them with the community.
 
-## How to Use Features
-
-All features are imported from `@payloadcms/richtext-lexical` and added to your editor configuration:
-
-```typescript
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import {
-  BoldFeature,
-  ItalicFeature,
-  HeadingFeature,
-  LinkFeature,
-  FixedToolbarFeature,
-} from '@payloadcms/richtext-lexical'
-
-const editor = lexicalEditor({
-  features: [
-    // Text formatting (included by default)
-    BoldFeature(),
-    ItalicFeature(),
-
-    // With custom configuration
-    HeadingFeature({
-      enabledHeadingSizes: ['h1', 'h2', 'h3'],
-    }),
-
-    // Optional features
-    FixedToolbarFeature(),
-  ],
-})
-```
-
 ## Features Overview
 
 | Feature Name                        | Included by default | Description                                                                                                                                                                         |
