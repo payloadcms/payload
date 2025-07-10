@@ -8,37 +8,38 @@ title: Official Features
 
 Below are all the Rich Text Features Payload offers. Everything is customizable; you can [create your own features](/docs/rich-text/custom-features), modify ours and share them with the community.
 
+## How to Use Features
+
+All features are imported from `@payloadcms/richtext-lexical` and added to your editor configuration:
+
+```typescript
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import {
+  BoldFeature,
+  ItalicFeature,
+  HeadingFeature,
+  LinkFeature,
+  FixedToolbarFeature,
+} from '@payloadcms/richtext-lexical'
+
+const editor = lexicalEditor({
+  features: [
+    // Text formatting (included by default)
+    BoldFeature(),
+    ItalicFeature(),
+
+    // With custom configuration
+    HeadingFeature({
+      enabledHeadingSizes: ['h1', 'h2', 'h3'],
+    }),
+
+    // Optional features
+    FixedToolbarFeature(),
+  ],
+})
+```
+
 ## Features Overview
-
-Adding these features to the editor will also cause the corresponding buttons to appear in the inline and fixed toolbars.
-
-| Feature                             | Included by default | Markdown Support                          | Keyboard Shortcut | Args                                        |
-| ----------------------------------- | ------------------- | ----------------------------------------- | ----------------- | ------------------------------------------- |
-| **`BoldFeature`**                   | Yes                 | `**bold**` or `__bold__`                  | Ctrl/Cmd + B      | ‐                                           |
-| **`ItalicFeature`**                 | Yes                 | `*italic*` or `_italic_`                  | Ctrl/Cmd + I      | ‐                                           |
-| **`UnderlineFeature`**              | Yes                 | ‐                                         | Ctrl/Cmd + U      | ‐                                           |
-| **`StrikethroughFeature`**          | Yes                 | `~~strikethrough~~`                       | ‐                 | ‐                                           |
-| **`SubscriptFeature`**              | Yes                 | ‐                                         | ‐                 | ‐                                           |
-| **`SuperscriptFeature`**            | Yes                 | ‐                                         | ‐                 | ‐                                           |
-| **`InlineCodeFeature`**             | Yes                 | \`code\`                                  | ‐                 | ‐                                           |
-| **`ParagraphFeature`**              | Yes                 | ‐                                         | ‐                 | ‐                                           |
-| **`HeadingFeature`**                | Yes                 | start with `#`, `##`, `###`, ... + space. | ‐                 | [see below](#headingfeature)                |
-| **`AlignFeature`**                  | Yes                 | ‐                                         | ‐                 | ‐                                           |
-| **`IndentFeature`**                 | Yes                 | ‐                                         | Tab/Shift+Tab     | [see below](#indentfeature)                 |
-| **`UnorderedListFeature`**          | Yes                 | start with `-` or `*`                     | ‐                 | ‐                                           |
-| **`OrderedListFeature`**            | Yes                 | start with `1.`                           | ‐                 | ‐                                           |
-| **`ChecklistFeature`**              | Yes                 | start with `- [ ]` or `- [x]`             | ‐                 | ‐                                           |
-| **`LinkFeature`**                   | Yes                 | `[anchor](url)`                           | ‐                 | [see below](#linkfeature)                   |
-| **`RelationshipFeature`**           | Yes                 | ‐                                         | ‐                 | [see below](#relationshipfeature)           |
-| **`BlockquoteFeature`**             | Yes                 | ‐                                         | ‐                 | [see below](#blockquotefeature)             |
-| **`UploadFeature`**                 | Yes                 | ‐                                         | ‐                 | [see below](#uploadfeature)                 |
-| **`HorizontalRuleFeature`**         | Yes                 | ‐                                         | ‐                 | [see below](#horizontalrulefeature)         |
-| **`InlineToolbarFeature`**          | Yes                 | ‐                                         | ‐                 | [see below](#inlinetoolbarfeature)          |
-| **`FixedToolbarFeature`**           | No                  | ‐                                         | ‐                 | [see below](#fixedtoolbarfeature)           |
-| **`BlocksFeature`**                 | No                  | ‐                                         | ‐                 | [see below](#blocksfeature)                 |
-| **`TreeViewFeature`**               | No                  | ‐                                         | ‐                 | [see below](#treeviewfeature)               |
-| **`EXPERIMENTAL_TableFeature`**     | No                  | ‐                                         | ‐                 | [see below](#experimental_tablefeature)     |
-| **`EXPERIMENTAL_TextStateFeature`** | No                  | ‐                                         | ‐                 | [see below](#experimental_textstatefeature) |
 
 | Feature Name                        | Included by default | Description                                                                                                                                                                         |
 | ----------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -51,20 +52,20 @@ Adding these features to the editor will also cause the corresponding buttons to
 | **`InlineCodeFeature`**             | Yes                 | Adds support for inline code formatting.                                                                                                                                            |
 | **`ParagraphFeature`**              | Yes                 | Provides entries in both the slash menu and toolbar dropdown for explicit paragraph creation or conversion.                                                                         |
 | **`HeadingFeature`**                | Yes                 | Adds Heading Nodes (by default, H1 - H6, but that can be customized)                                                                                                                |
-| **`AlignFeature`**                  | Yes                 | Allows you to align text left, centered and right                                                                                                                                   |
-| **`IndentFeature`**                 | Yes                 | Allows you to indent text with the tab key                                                                                                                                          |
-| **`UnorderedListFeature`**          | Yes                 | Adds unordered lists (ul)                                                                                                                                                           |
-| **`OrderedListFeature`**            | Yes                 | Adds ordered lists (ol)                                                                                                                                                             |
-| **`ChecklistFeature`**              | Yes                 | Adds checklists                                                                                                                                                                     |
+| **`AlignFeature`**                  | Yes                 | Adds support for text alignment (left, center, right, justify)                                                                                                                      |
+| **`IndentFeature`**                 | Yes                 | Adds support for text indentation with toolbar buttons                                                                                                                              |
+| **`UnorderedListFeature`**          | Yes                 | Adds support for unordered lists (ul)                                                                                                                                               |
+| **`OrderedListFeature`**            | Yes                 | Adds support for ordered lists (ol)                                                                                                                                                 |
+| **`ChecklistFeature`**              | Yes                 | Adds support for interactive checklists                                                                                                                                             |
 | **`LinkFeature`**                   | Yes                 | Allows you to create internal and external links                                                                                                                                    |
 | **`RelationshipFeature`**           | Yes                 | Allows you to create block-level (not inline) relationships to other documents                                                                                                      |
 | **`BlockquoteFeature`**             | Yes                 | Allows you to create block-level quotes                                                                                                                                             |
 | **`UploadFeature`**                 | Yes                 | Allows you to create block-level upload nodes - this supports all kinds of uploads, not just images                                                                                 |
-| **`HorizontalRuleFeature`**         | Yes                 | Horizontal rules / separators. Basically displays an `<hr>` element                                                                                                                 |
-| **`InlineToolbarFeature`**          | Yes                 | The inline toolbar is the floating toolbar which appears when you select text. This toolbar only contains actions relevant for selected text                                        |
-| **`FixedToolbarFeature`**           | No                  | This classic toolbar is pinned to the top and always visible. Both inline and fixed toolbars can be enabled at the same time.                                                       |
+| **`HorizontalRuleFeature`**         | Yes                 | Adds support for horizontal rules / separators. Basically displays an `<hr>` element                                                                                                |
+| **`InlineToolbarFeature`**          | Yes                 | Provides a floating toolbar which appears when you select text. This toolbar only contains actions relevant for selected text                                                       |
+| **`FixedToolbarFeature`**           | No                  | Provides a persistent toolbar pinned to the top and always visible. Both inline and fixed toolbars can be enabled at the same time.                                                 |
 | **`BlocksFeature`**                 | No                  | Allows you to use Payload's [Blocks Field](../fields/blocks) directly inside your editor. In the feature props, you can specify the allowed blocks - just like in the Blocks field. |
-| **`TreeViewFeature`**               | No                  | Adds a debug box under the editor, which allows you to see the current editor state live, the dom, as well as time travel. Very useful for debugging                                |
+| **`TreeViewFeature`**               | No                  | Provides a debug box under the editor, which allows you to see the current editor state live, the dom, as well as time travel. Very useful for debugging                            |
 | **`EXPERIMENTAL_TableFeature`**     | No                  | Adds support for tables. This feature may be removed or receive breaking changes in the future - even within a stable lexical release, without needing a major release.             |
 | **`EXPERIMENTAL_TextStateFeature`** | No                  | Allows you to store key-value attributes within TextNodes and assign them inline styles.                                                                                            |
 
@@ -146,7 +147,7 @@ HeadingFeature({
 
 ### IndentFeature
 
-- Description: Allows text indentation with toolbar buttons for increase/decrease indent, available in both fixed and inline toolbars.
+- Description: Adds support for text indentation, along with buttons to apply it in both fixed and inline toolbars.
 - Included by default: Yes
 - Keyboard Shortcut: Tab (increase), Shift + Tab (decrease)
 - Types:
@@ -178,19 +179,19 @@ IndentFeature({
 
 ### UnorderedListFeature
 
-- Description: Adds unordered lists (bullet points) with toolbar dropdown and slash menu entries for creation.
+- Description: Adds support for unordered lists (bullet points) with toolbar dropdown and slash menu entries.
 - Included by default: Yes
 - Markdown Support: `-`, `*`, or `+` at start of line
 
 ### OrderedListFeature
 
-- Description: Adds ordered lists (numbered lists) with toolbar dropdown and slash menu entries for creation.
+- Description: Adds support for ordered lists (numbered lists) with toolbar dropdown and slash menu entries.
 - Included by default: Yes
 - Markdown Support: `1.` at start of line
 
 ### ChecklistFeature
 
-- Description: Adds interactive checklists with toolbar dropdown and slash menu entries for creation.
+- Description: Adds support for interactive checklists with toolbar dropdown and slash menu entries.
 - Included by default: Yes
 - Markdown Support: `- [ ]` (unchecked) or `- [x]` (checked)
 
@@ -292,7 +293,7 @@ RelationshipFeature({
 
 ### UploadFeature
 
-- Description: Allows insertion of upload/media nodes with toolbar button and slash menu entry, supports all file types.
+- Description: Allows creation of upload/media nodes with toolbar button and slash menu entry, supports all file types.
 - Included by default: Yes
 - Types:
 
@@ -342,18 +343,18 @@ UploadFeature({
 
 ### HorizontalRuleFeature
 
-- Description: Adds horizontal rules/separators with toolbar button and slash menu entry.
+- Description: Adds support for horizontal rules/separators with toolbar button and slash menu entry.
 - Included by default: Yes
 - Markdown Support: `---`
 
 ### InlineToolbarFeature
 
-- Description: Adds a floating toolbar that appears when text is selected, containing formatting options relevant to selected text.
+- Description: Provides a floating toolbar that appears when text is selected, containing formatting options relevant to selected text.
 - Included by default: Yes
 
 ### FixedToolbarFeature
 
-- Description: A persistent toolbar pinned to the top of the editor that's always visible.
+- Description: Provides a persistent toolbar pinned to the top of the editor that's always visible.
 - Included by default: No
 - Types:
 
@@ -441,7 +442,7 @@ BlocksFeature({
 
 ### TreeViewFeature
 
-- Description: Adds a debug panel below the editor showing the editor's internal state, DOM tree, and time travel debugging.
+- Description: Provides a debug panel below the editor showing the editor's internal state, DOM tree, and time travel debugging.
 - Included by default: No
 
 ### EXPERIMENTAL_TableFeature
