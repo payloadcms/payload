@@ -1,6 +1,8 @@
+import type { Payload } from 'payload'
+
 import { randomUUID } from 'crypto'
 import path from 'path'
-import { deepCopyObject, type Payload } from 'payload'
+import { deepCopyObject } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 
@@ -13,9 +15,11 @@ import type {
   Page,
   Point,
   Post,
+  User,
   VersionedPost,
 } from './payload-types.js'
 
+import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
 let payload: Payload
@@ -1967,6 +1971,64 @@ describe('Select', () => {
 
         expect(res).toMatchObject(expected)
       })
+    })
+  })
+
+  describe('REST API - Logged in', () => {
+    let token: string | undefined
+    let loggedInUser: undefined | User
+
+    beforeAll(async () => {
+      const response = await restClient.POST(`/users/login`, {
+        body: JSON.stringify({
+          email: devUser.email,
+          password: devUser.password,
+        }),
+      })
+
+      const data = await response.json()
+
+      token = data.token
+      loggedInUser = data.user
+    })
+
+    it('should return only select fields in user from /me', async () => {
+      const response = await restClient.GET(`/users/me`, {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+        query: {
+          depth: 0,
+          select: {
+            name: true,
+          } satisfies Config['collectionsSelect']['users'],
+        },
+      })
+
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.user.name).toBeDefined()
+      expect(data.user.email).not.toBeDefined()
+      expect(data.user.number).not.toBeDefined()
+    })
+
+    it('should return all fields by default in user from /me', async () => {
+      const response = await restClient.GET(`/users/me`, {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+        query: {
+          depth: 0,
+        },
+      })
+
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.user.email).toBeDefined()
+      expect(data.user.name).toBeDefined()
+      expect(data.user.number).toBeDefined()
     })
   })
 
