@@ -11,6 +11,7 @@ import {
 import { jobsCollectionSlug } from './config/index.js'
 import { runJobs } from './operations/runJobs/index.js'
 
+console.log('test')
 export const getJobsLocalAPI = (payload: Payload) => ({
   queue: async <
     // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
