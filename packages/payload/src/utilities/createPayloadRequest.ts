@@ -27,7 +27,7 @@ export const createPayloadRequest = async ({
   request,
 }: Args): Promise<PayloadRequest> => {
   const cookies = parseCookies(request.headers)
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayload({ config: configPromise, cron: true })
 
   const { config } = payload
   const localization = config.localization
@@ -67,8 +67,8 @@ export const createPayloadRequest = async ({
 
   if (localization) {
     const locales = sanitizeLocales({
-      fallbackLocale: fallbackLocale!,
-      locale: locale!,
+      fallbackLocale,
+      locale,
       localization,
     })
 
@@ -78,7 +78,7 @@ export const createPayloadRequest = async ({
 
   const customRequest: CustomPayloadRequestProperties = {
     context: {},
-    fallbackLocale: fallbackLocale!,
+    fallbackLocale,
     hash: urlProperties.hash,
     host: urlProperties.host,
     href: urlProperties.href,

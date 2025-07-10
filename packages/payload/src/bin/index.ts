@@ -46,7 +46,7 @@ export const bin = async () => {
 
     // Modify process.argv to remove 'run' and the script path
     const originalArgv = process.argv
-    process.argv = [process.argv[0]!, process.argv[1]!, ...args._.slice(2)]
+    process.argv = [process.argv[0], process.argv[1], ...args._.slice(2)]
 
     try {
       await import(pathToFileURL(absoluteScriptPath).toString())
@@ -107,7 +107,7 @@ export const bin = async () => {
   }
 
   if (script === 'jobs:run') {
-    const payload = await getPayload({ config })
+    const payload = await getPayload({ config }) // Do not setup crons here - this bin script can set up its own crons
     const limit = args.limit ? parseInt(args.limit, 10) : undefined
     const queue = args.queue ? args.queue : undefined
     const allQueues = !!args.allQueues
