@@ -214,7 +214,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     user._strategy = 'local-jwt'
 
     const authResult = await authenticateLocalStrategy({ doc: user, password })
-
     user = sanitizeInternalFields(user)
 
     const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0
@@ -261,7 +260,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       await payload.db.updateOne({
         id: user.id,
         collection: collectionConfig.slug,
-        data: user,
+        data: { ...user },
         req,
         returning: false,
       })

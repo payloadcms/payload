@@ -4,6 +4,7 @@ import type { SanitizedConfig } from 'payload'
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import path from 'path'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -18,6 +19,7 @@ import {
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { openNav } from '../helpers/e2e/toggleNav.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -195,6 +197,20 @@ describe('Auth', () => {
       await saveDocAndAssert(page)
       await expect(page.locator('#users-api-result')).toHaveText('Goodbye, world!')
       await expect(page.locator('#use-auth-result')).toHaveText('Goodbye, world!')
+    })
+
+    test('should allow log out after login', async () => {
+      const logoutRoute = formatAdminURL({
+        serverURL,
+        adminRoute: '/admin',
+        path: '/logout',
+      })
+      await page.goto(logoutRoute)
+      await expect(page.locator('.login')).toBeVisible()
+      await page.locator('.login .form-submit > button').click()
+      await openNav(page)
+      await page.locator('.nav__controls [aria-label="Log out"]').click()
+      await expect(page.locator('.login')).toBeVisible()
     })
   })
 
