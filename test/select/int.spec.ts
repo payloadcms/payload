@@ -1987,11 +1987,12 @@ describe('Select', () => {
       })
 
       const data = await response.json()
+
       token = data.token
       loggedInUser = data.user
     })
 
-    it('should return a logged in user from /me', async () => {
+    it('should return only select fields in user from /me', async () => {
       const response = await restClient.GET(`/users/me`, {
         headers: {
           Authorization: `JWT ${token}`,
@@ -2005,8 +2006,6 @@ describe('Select', () => {
       })
 
       const data = await response.json()
-
-      console.log({ data })
 
       expect(response.status).toBe(200)
       expect(data.user.name).toBeDefined()
