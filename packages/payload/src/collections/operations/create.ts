@@ -47,6 +47,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
+  publishSpecificLocale?: string
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -88,6 +89,10 @@ export const createOperation = async <
       }
     }
 
+    if (args.publishSpecificLocale) {
+      args.req.locale = args.publishSpecificLocale
+    }
+
     const {
       autosave = false,
       collection: { config: collectionConfig },
@@ -99,6 +104,7 @@ export const createOperation = async <
       overrideAccess,
       overwriteExistingFiles = false,
       populate,
+      publishSpecificLocale,
       req: {
         fallbackLocale,
         locale,
@@ -267,6 +273,7 @@ export const createOperation = async <
       doc = await payload.db.create({
         collection: collectionConfig.slug,
         data: resultWithLocales,
+        locale: publishSpecificLocale ?? locale ?? undefined,
         req,
         select,
       })
@@ -286,6 +293,7 @@ export const createOperation = async <
         collection: collectionConfig,
         docWithLocales: result,
         payload,
+        publishSpecificLocale,
         req,
       })
     }
