@@ -104,7 +104,6 @@ export const createOperation = async <
       overrideAccess,
       overwriteExistingFiles = false,
       populate,
-      publishSpecificLocale,
       req: {
         fallbackLocale,
         locale,
@@ -273,7 +272,6 @@ export const createOperation = async <
       doc = await payload.db.create({
         collection: collectionConfig.slug,
         data: resultWithLocales,
-        locale: publishSpecificLocale ?? locale ?? undefined,
         req,
         select,
       })
@@ -293,7 +291,6 @@ export const createOperation = async <
         collection: collectionConfig,
         docWithLocales: result,
         payload,
-        publishSpecificLocale,
         req,
       })
     }
