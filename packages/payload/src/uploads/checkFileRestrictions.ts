@@ -67,15 +67,18 @@ export const checkFileRestrictions = async ({
   }
 
   // Secondary mimetype check to assess file type from buffer
-  const detected = await fileTypeFromBuffer(file.data)
-  if (!detected) {
-    errors.push(`Could not detect file type for ${file.name}.`)
-  }
+  if (configMimeTypes.length > 0) {
+    const cleanedMimeTypes = configMimeTypes.map((v) => v.replace('*', ''))
+    const detected = await fileTypeFromBuffer(file.data)
+    if (!detected) {
+      errors.push(`Could not detect file type for ${file.name}.`)
+    }
 
-  const passesMimeTypeCheck = detected?.mime && configMimeTypes.includes(detected.mime)
+    const passesMimeTypeCheck = detected?.mime && cleanedMimeTypes.includes(detected.mime)
 
-  if (detected && !passesMimeTypeCheck) {
-    errors.push(`Detected invalid MIME type: ${detected.mime}.`)
+    if (detected && !passesMimeTypeCheck) {
+      errors.push(`Detected invalid MIME type: ${detected.mime}.`)
+    }
   }
 
   const isRestricted = RESTRICTED_FILE_EXT_AND_TYPES.some((type) => {
@@ -90,8 +93,8 @@ export const checkFileRestrictions = async ({
     )
   }
 
-  if (errors) {
-    req.payload.logger.error(errors)
+  if (errors.length > 0) {
+    req.payload.logger.error(errors.join(', '))
     throw new ValidationError({
       errors: [{ message: errors.join(', '), path: 'file' }],
     })
