@@ -190,7 +190,7 @@ export type UploadConfig = {
   filesRequiredOnCreate?: boolean
   /**
    * Enables focal point positioning for image manipulation.
-   * @default false
+   * @default true
    */
   focalPoint?: boolean
   /**
