@@ -68,7 +68,7 @@
         margin: 0 0 0 -1px;
         padding: 0 calc(var(--base) / 2);
         box-shadow: none;
-        --btn-icon-size: calc(var(--base));
+        --btn-icon-size: var(--base);
       }
     }
   }
