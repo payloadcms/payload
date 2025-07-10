@@ -12,9 +12,10 @@ export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
   readonly data: Record<string, unknown>[]
+  readonly heading?: React.ReactNode
 }
 
-export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
+export const Table: React.FC<Props> = ({ appearance, columns, data, heading }) => {
   const activeColumns = columns?.filter((col) => col?.active)
 
   if (!activeColumns || activeColumns.length === 0) {
@@ -27,6 +28,15 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
         .filter(Boolean)
         .join(' ')}
     >
+      {typeof heading === 'string' ? (
+        <h3 className={`${baseClass}__heading`} id="table-heading">
+          {heading}
+        </h3>
+      ) : (
+        <div className={`${baseClass}__heading`} id="table-heading">
+          {heading}
+        </div>
+      )}
       <table cellPadding="0" cellSpacing="0">
         <thead>
           <tr>

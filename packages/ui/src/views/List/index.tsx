@@ -5,7 +5,7 @@ import type { ListViewClientProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import { formatFilesize } from 'payload/shared'
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useEffect } from 'react'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -20,6 +20,7 @@ import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
+import { useControllableState } from '../../hooks/useControllableState.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
@@ -54,10 +55,10 @@ export function DefaultListView(props: ListViewClientProps) {
     queryPresetPermissions,
     renderedFilters,
     resolvedFilterOptions,
-    Table: InitialTable,
+    Tables: InitialTables,
   } = props
 
-  const [Table, setTable] = useState(InitialTable)
+  const [Tables] = useControllableState(InitialTables)
 
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
 
@@ -65,12 +66,6 @@ export function DefaultListView(props: ListViewClientProps) {
     allowCreate !== undefined
       ? allowCreate && hasCreatePermissionFromProps
       : hasCreatePermissionFromProps
-
-  useEffect(() => {
-    if (InitialTable) {
-      setTable(InitialTable)
-    }
-  }, [InitialTable])
 
   const { user } = useAuth()
 
@@ -179,7 +174,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 resolvedFilterOptions={resolvedFilterOptions}
               />
               {BeforeListTable}
-              {docs.length > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}
+              {docs.length > 0 && <RelationshipProvider>{Tables}</RelationshipProvider>}
               {docs.length === 0 && (
                 <div className={`${baseClass}__no-results`}>
                   <p>
@@ -238,7 +233,7 @@ export function DefaultListView(props: ListViewClientProps) {
         </div>
       </TableColumnsProvider>
       {/* {query.groupBy && ( */}
-      {Number(query.totalPages) > 0 && (
+      {docs.length > 0 && Number(query.totalPages) > 0 && (
         <FloatingToolbar>
           <PageControls collectionConfig={collectionConfig} />
         </FloatingToolbar>

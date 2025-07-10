@@ -16,7 +16,7 @@ import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
-import { GroupBySelector } from '../GroupBySelector/index.js'
+import { GroupByBuilder } from '../GroupByBuilder/index.js'
 import { Pill } from '../Pill/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
@@ -231,7 +231,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 size="small"
               >
                 {t('general:groupByLabel', {
-                  label: query?.groupBy?.label || '',
+                  label: query?.groupBy || '',
                 })}
               </Pill>
               {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
@@ -278,7 +278,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           height={visibleDrawer === 'group-by' ? 'auto' : 0}
           id={`${baseClass}-group-by`}
         >
-          <GroupBySelector
+          <GroupByBuilder
             collectionSlug={collectionConfig.slug}
             fields={collectionConfig?.fields}
           />
