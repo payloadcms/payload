@@ -9,6 +9,7 @@ import { docAccessHandler } from './docAccess.js'
 import { duplicateHandler } from './duplicate.js'
 import { findHandler } from './find.js'
 import { findByIDHandler } from './findByID.js'
+import { findDistinctHandler } from './findDistinct.js'
 import { findVersionByIDHandler } from './findVersionByID.js'
 import { findVersionsHandler } from './findVersions.js'
 import { previewHandler } from './preview.js'
@@ -47,6 +48,11 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       handler: findVersionsHandler,
       method: 'get',
       path: '/versions',
+    },
+    {
+      handler: findDistinctHandler,
+      method: 'get',
+      path: '/distinct',
     },
     {
       handler: duplicateHandler,

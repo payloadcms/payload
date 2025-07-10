@@ -82,6 +82,7 @@ export type HookOperationType =
   | 'forgotPassword'
   | 'login'
   | 'read'
+  | 'readDistinct'
   | 'refresh'
   | 'resetPassword'
   | 'update'
