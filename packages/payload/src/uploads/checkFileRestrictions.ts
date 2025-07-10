@@ -1,6 +1,8 @@
+import { fileTypeFromBuffer } from 'file-type'
+
 import type { checkFileRestrictionsParams, FileAllowList } from './types.js'
 
-import { APIError } from '../errors/index.js'
+import { ValidationError } from '../errors/index.js'
 
 /**
  * Restricted file types and their extensions.
@@ -39,11 +41,12 @@ export const RESTRICTED_FILE_EXT_AND_TYPES: FileAllowList = [
   { extensions: ['command'], mimeType: 'application/x-command' },
 ]
 
-export const checkFileRestrictions = ({
+export const checkFileRestrictions = async ({
   collection,
   file,
   req,
-}: checkFileRestrictionsParams): void => {
+}: checkFileRestrictionsParams): Promise<void> => {
+  const errors: string[] = []
   const { upload: uploadConfig } = collection
   const configMimeTypes =
     uploadConfig &&
@@ -58,9 +61,21 @@ export const checkFileRestrictions = ({
       ? (uploadConfig as { allowRestrictedFileTypes?: boolean }).allowRestrictedFileTypes
       : false
 
-  // Skip validation if `mimeTypes` are defined in the upload config, or `allowRestrictedFileTypes` are allowed
-  if (allowRestrictedFileTypes || configMimeTypes.length) {
+  // Skip validation if `allowRestrictedFileTypes` is true
+  if (allowRestrictedFileTypes) {
     return
+  }
+
+  // Secondary mimetype check to assess file type from buffer
+  const detected = await fileTypeFromBuffer(file.data)
+  if (!detected) {
+    errors.push(`Could not detect file type for ${file.name}.`)
+  }
+
+  const passesMimeTypeCheck = detected?.mime && configMimeTypes.includes(detected.mime)
+
+  if (detected && !passesMimeTypeCheck) {
+    errors.push(`Detected invalid MIME type: ${detected.mime}.`)
   }
 
   const isRestricted = RESTRICTED_FILE_EXT_AND_TYPES.some((type) => {
@@ -70,8 +85,15 @@ export const checkFileRestrictions = ({
   })
 
   if (isRestricted) {
-    const errorMessage = `File type '${file.mimetype}' not allowed ${file.name}: Restricted file type detected -- set 'allowRestrictedFileTypes' to true to skip this check for this Collection.`
-    req.payload.logger.error(errorMessage)
-    throw new APIError(errorMessage)
+    errors.push(
+      `File type '${file.mimetype}' not allowed ${file.name}: Restricted file type detected -- set 'allowRestrictedFileTypes' to true to skip this check for this Collection.`,
+    )
+  }
+
+  if (errors) {
+    req.payload.logger.error(errors)
+    throw new ValidationError({
+      errors: [{ message: errors.join(', '), path: 'file' }],
+    })
   }
 }
