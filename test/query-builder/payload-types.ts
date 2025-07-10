@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     posts: Post;
+    categories: Category;
     media: Media;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -77,6 +78,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -122,6 +124,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
+  category?: (string | null) | Category;
   content?: {
     root: {
       type: string;
@@ -137,6 +140,16 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -220,6 +233,10 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | null)
+    | ({
         relationTo: 'media';
         value: string | Media;
       } | null)
@@ -275,7 +292,17 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  category?: T;
   content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
 }
