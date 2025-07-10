@@ -256,14 +256,17 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         user.sessions = removeExpiredSessions(user.sessions)
         user.sessions.push(session)
       }
-
+      const userCollection = user.collection
+      const userStrategy = user._strategy
       await payload.db.updateOne({
         id: user.id,
         collection: collectionConfig.slug,
-        data: { ...user },
+        data: user,
         req,
         returning: false,
       })
+      user.collection = userCollection
+      user._strategy = userStrategy
 
       fieldsToSignArgs.sid = newSessionID
     }
