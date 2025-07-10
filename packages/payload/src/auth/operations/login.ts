@@ -214,7 +214,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     user._strategy = 'local-jwt'
 
     const authResult = await authenticateLocalStrategy({ doc: user, password })
-
     user = sanitizeInternalFields(user)
 
     const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0
@@ -265,6 +264,9 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         req,
         returning: false,
       })
+
+      user.collection = collectionConfig.slug
+      user._strategy = 'local-jwt'
 
       fieldsToSignArgs.sid = newSessionID
     }
