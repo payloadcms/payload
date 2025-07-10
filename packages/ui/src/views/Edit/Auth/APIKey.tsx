@@ -6,6 +6,7 @@ import { text } from 'payload/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
+import { Button } from '../../../elements/Button/index.js'
 import { CopyToClipboard } from '../../../elements/CopyToClipboard/index.js'
 import { GenerateConfirmation } from '../../../elements/GenerateConfirmation/index.js'
 import { useFormFields } from '../../../forms/Form/context.js'
@@ -129,10 +130,13 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
             type={showKey ? 'text' : 'password'}
             value={(value as string) || ''}
           />
-          <div className={`${baseClass}__button-wrap`}>
-            <button onClick={() => setShowKey(!showKey)} type="button">
-              <EyeIcon active={showKey} />
-            </button>
+          <div className={`${baseClass}__toggle-button-wrap`}>
+            <Button
+              buttonStyle="none"
+              className={`${baseClass}__toggle-button`}
+              icon={<EyeIcon active={showKey} />}
+              onClick={() => setShowKey((prev) => !prev)}
+            />
           </div>
         </div>
       </div>
