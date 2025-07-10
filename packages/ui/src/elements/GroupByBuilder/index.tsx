@@ -25,10 +25,6 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
 
   const { query, refineListData } = useListQuery()
 
-  const groupByWithoutLeadingHyphen = query.groupBy?.startsWith('-')
-    ? query.groupBy.slice(1)
-    : query.groupBy
-
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
@@ -37,7 +33,16 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
             label: '',
           })}
         </p>
-        <button className={`${baseClass}__clear-button`} onClick={() => {}} type="button">
+        <button
+          className={`${baseClass}__clear-button`}
+          onClick={async () => {
+            await refineListData({
+              groupBy: undefined,
+              sort: undefined,
+            })
+          }}
+          type="button"
+        >
           {t('general:clear')}
         </button>
       </div>
@@ -52,13 +57,13 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           isMulti={false}
           // disabled={disabled}
           onChange={async ({ value }: { value: string }) => {
-            await refineListData({ groupBy: query.groupBy?.startsWith('-') ? `-${value}` : value })
+            await refineListData({ groupBy: value, sort: undefined })
           }}
           options={reducedFields.filter((field) => !field.field.admin.disableListFilter)}
           value={{
             label:
-              reducedFields.find((field) => field.value === groupByWithoutLeadingHyphen)?.label ||
-              '',
+              reducedFields.find((field) => field.value === query.groupBy)?.label ||
+              t('general:selectValue'),
             value: query.groupBy || '',
           }}
         />
@@ -66,8 +71,10 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           name="direction"
           onChange={async ({ value }: { value: string }) => {
             await refineListData({
-              groupBy:
-                value === 'asc' ? groupByWithoutLeadingHyphen : `-${groupByWithoutLeadingHyphen}`,
+              sort:
+                value === 'asc'
+                  ? query.groupBy?.replace(/^-/, '')
+                  : `-${query.groupBy?.replace(/^-/, '')}`,
             })
           }}
           options={[
@@ -75,7 +82,13 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
             { label: t('general:descending'), value: 'desc' },
           ]}
           path="direction"
-          value={query.groupBy?.startsWith('-') ? 'desc' : 'asc'}
+          value={
+            !query.sort
+              ? 'asc'
+              : typeof query.sort === 'string'
+                ? `${query.sort.startsWith('-') ? 'desc' : 'asc'}`
+                : ''
+          }
         />
       </div>
     </div>

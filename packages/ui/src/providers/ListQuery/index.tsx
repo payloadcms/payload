@@ -175,6 +175,12 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       shouldUpdateQueryString = true
     }
 
+    // Allow the URL to override the default groupBy
+    if (defaultGroupBy && !('groupBy' in currentQuery)) {
+      newQuery.groupBy = defaultGroupBy
+      shouldUpdateQueryString = true
+    }
+
     // Only modify columns if they originated from preferences
     // We can assume they did if `listPreferences.columns` is defined
     if (columns && listPreferences?.columns && !('columns' in currentQuery)) {
@@ -215,7 +221,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         query: currentQuery,
         refineListData,
         setModified,
-
         ...contextRef.current,
       }}
     >
