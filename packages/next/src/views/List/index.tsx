@@ -103,10 +103,10 @@ export const renderListView = async (
     req,
     value: {
       columns,
-      groupBy: query?.groupBy as string,
+      groupBy: (query?.groupBy as string) || '',
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       preset: (query?.preset as DefaultDocumentIDType) || null,
-      sort: query?.sort as string,
+      sort: (query?.sort as string) || '',
     },
   })
 
@@ -175,6 +175,7 @@ export const renderListView = async (
         req.payload.logger.error(`Error fetching query preset or preset permissions: ${err}`)
       }
     }
+
     const { columnState, data, Tables } = await getDataAndRenderTables({
       clientConfig,
       collectionConfig,

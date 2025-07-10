@@ -55,7 +55,7 @@ export const getDataAndRenderTables = async ({
 
     const distinct = await req.payload.findDistinct({
       collection: collectionSlug,
-      field: 'category', // TODO
+      field: groupBy,
       locale: req.locale,
       overrideAccess: false,
       req,
@@ -70,28 +70,29 @@ export const getDataAndRenderTables = async ({
 
     if (distinct.values) {
       // lookup the distinct config to discover the useAsTitle
-      const distinctCollectionConfig = req.payload.config.collections.find(
-        (c) => c.slug === 'categories',
-      ) // TODO: replace with dynamic slug
+      // const distinctCollectionConfig = req.payload.config.collections.find(
+      //   (c) => c.slug === 'categories',
+      // )
+      // TODO: replace with dynamic slug
 
-      const fullDistincts = await req.payload
-        .find({
-          collection: 'categories', // TODO
-          depth: 0,
-          draft: true,
-          where: {
-            id: {
-              in: distinct.values,
-            },
-          },
-        })
-        ?.then((res) => res.docs)
+      // const fullDistincts = await req.payload
+      //   .find({
+      //     collection: 'categories', // TODO
+      //     depth: 0,
+      //     draft: true,
+      //     where: {
+      //       id: {
+      //         in: distinct.values,
+      //       },
+      //     },
+      //   })
+      //   ?.then((res) => res.docs)
 
       let allDocs = []
 
       await Promise.all(
-        fullDistincts.map(async (fullDistinct) => {
-          const distinctRes = await req.payload.find({
+        distinct.values.map(async (distinctValue) => {
+          const groupedByDistinct = await req.payload.find({
             collection: collectionSlug,
             depth: 0,
             draft: true,
@@ -106,8 +107,8 @@ export const getDataAndRenderTables = async ({
             user,
             where: {
               ...where,
-              category: {
-                equals: fullDistinct.id,
+              [groupBy]: {
+                equals: distinctValue,
               },
             },
           })
@@ -118,11 +119,14 @@ export const getDataAndRenderTables = async ({
             columnPreferences: collectionPreferences?.columns,
             columns,
             customCellProps,
-            docs: distinctRes.docs,
+            docs: groupedByDistinct.docs,
             drawerSlug,
             enableRowSelections,
-            heading:
-              fullDistinct?.[distinctCollectionConfig?.admin?.useAsTitle || 'id'] || 'No Category',
+            // TODO: return something different depending on field type, e.g. format dates, handle rich text, etc.
+            heading: `${distinctValue || 'Untitled'}`,
+            // TODO: for relationship fields, need to get the dynamic values
+            // heading:
+            //   fullDistinct?.[distinctCollectionConfig?.admin?.useAsTitle || 'id'] || 'No Category',
             i18n: req.i18n,
             orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
             payload: req.payload,
@@ -130,7 +134,7 @@ export const getDataAndRenderTables = async ({
           })
 
           Tables.push(Table)
-          allDocs = allDocs.concat(distinctRes.docs)
+          allDocs = allDocs.concat(groupedByDistinct.docs)
         }),
       )
 
