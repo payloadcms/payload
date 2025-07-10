@@ -39,112 +39,188 @@ Adding these features to the editor will also cause the corresponding buttons to
 | **`TreeViewFeature`**               | No                  | ‐                                         | ‐                 | [see below](#treeviewfeature)               |
 | **`EXPERIMENTAL_TableFeature`**     | No                  | ‐                                         | ‐                 | [see below](#experimental_tablefeature)     |
 | **`EXPERIMENTAL_TextStateFeature`** | No                  | ‐                                         | ‐                 | [see below](#experimental_textstatefeature) |
-| **`SlateToLexicalFeature`**         | No                  | ‐                                         | ‐                 | [see below](#slatetolexicalfeature)         |
-| **`LexicalPluginToLexicalFeature`** | No                  | ‐                                         | ‐                 | [see below](#lexicalplugintolexicalfeature) |
 
-## Link and Relationship Features
+| Feature Name                        | Included by default | Description                                                                                                                                                                         |
+| ----------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`BoldFeature`**                   | Yes                 | Adds support for bold text formatting.                                                                                                                                              |
+| **`ItalicFeature`**                 | Yes                 | Adds support for italic text formatting.                                                                                                                                            |
+| **`UnderlineFeature`**              | Yes                 | Adds support for underlined text formatting.                                                                                                                                        |
+| **`StrikethroughFeature`**          | Yes                 | Adds support for strikethrough text formatting.                                                                                                                                     |
+| **`SubscriptFeature`**              | Yes                 | Adds support for subscript text formatting.                                                                                                                                         |
+| **`SuperscriptFeature`**            | Yes                 | Adds support for superscript text formatting.                                                                                                                                       |
+| **`InlineCodeFeature`**             | Yes                 | Adds support for inline code formatting.                                                                                                                                            |
+| **`ParagraphFeature`**              | Yes                 | Provides entries in both the slash menu and toolbar dropdown for explicit paragraph creation or conversion.                                                                         |
+| **`HeadingFeature`**                | Yes                 | Adds Heading Nodes (by default, H1 - H6, but that can be customized)                                                                                                                |
+| **`AlignFeature`**                  | Yes                 | Allows you to align text left, centered and right                                                                                                                                   |
+| **`IndentFeature`**                 | Yes                 | Allows you to indent text with the tab key                                                                                                                                          |
+| **`UnorderedListFeature`**          | Yes                 | Adds unordered lists (ul)                                                                                                                                                           |
+| **`OrderedListFeature`**            | Yes                 | Adds ordered lists (ol)                                                                                                                                                             |
+| **`ChecklistFeature`**              | Yes                 | Adds checklists                                                                                                                                                                     |
+| **`LinkFeature`**                   | Yes                 | Allows you to create internal and external links                                                                                                                                    |
+| **`RelationshipFeature`**           | Yes                 | Allows you to create block-level (not inline) relationships to other documents                                                                                                      |
+| **`BlockquoteFeature`**             | Yes                 | Allows you to create block-level quotes                                                                                                                                             |
+| **`UploadFeature`**                 | Yes                 | Allows you to create block-level upload nodes - this supports all kinds of uploads, not just images                                                                                 |
+| **`HorizontalRuleFeature`**         | Yes                 | Horizontal rules / separators. Basically displays an `<hr>` element                                                                                                                 |
+| **`InlineToolbarFeature`**          | Yes                 | The inline toolbar is the floating toolbar which appears when you select text. This toolbar only contains actions relevant for selected text                                        |
+| **`FixedToolbarFeature`**           | No                  | This classic toolbar is pinned to the top and always visible. Both inline and fixed toolbars can be enabled at the same time.                                                       |
+| **`BlocksFeature`**                 | No                  | Allows you to use Payload's [Blocks Field](../fields/blocks) directly inside your editor. In the feature props, you can specify the allowed blocks - just like in the Blocks field. |
+| **`TreeViewFeature`**               | No                  | Adds a debug box under the editor, which allows you to see the current editor state live, the dom, as well as time travel. Very useful for debugging                                |
+| **`EXPERIMENTAL_TableFeature`**     | No                  | Adds support for tables. This feature may be removed or receive breaking changes in the future - even within a stable lexical release, without needing a major release.             |
+| **`EXPERIMENTAL_TextStateFeature`** | No                  | Allows you to store key-value attributes within TextNodes and assign them inline styles.                                                                                            |
+
+## In depth
+
+### BoldFeature
+
+- Description: Adds support for bold text formatting, along with buttons to apply it in both fixed and inline toolbars.
+- Included by default: Yes
+- Markdown Support: `**bold**` or `__bold__`
+- Keyboard Shortcut: Ctrl/Cmd + B
+
+### ItalicFeature
+
+- Description: Adds support for italic text formatting, along with buttons to apply it in both fixed and inline toolbars.
+- Included by default: Yes
+- Markdown Support: `*italic*` or `_italic_`
+- Keyboard Shortcut: Ctrl/Cmd + I
+
+### UnderlineFeature
+
+- Description: Adds support for underlined text formatting, along with buttons to apply it in both fixed and inline toolbars.
+- Included by default: Yes
+- Keyboard Shortcut: Ctrl/Cmd + U
+
+### StrikethroughFeature
+
+- Description: Adds support for strikethrough text formatting, along with buttons to apply it in both fixed and inline toolbars.
+- Included by default: Yes
+- Markdown Support: `~~strikethrough~~`
+
+### SubscriptFeature
+
+- Description: Adds support for subscript text formatting, along with buttons to apply it in both fixed and inline toolbars.
+- Included by default: Yes
+
+### SuperscriptFeature
+
+- Description: Adds support for superscript text formatting, along with buttons to apply it in both fixed and inline toolbars.
+- Included by default: Yes
+
+### InlineCodeFeature
+
+- Description: Adds support for inline code formatting with distinct styling, along with buttons to apply it in both fixed and inline toolbars.
+- Included by default: Yes
+- Markdown Support: \`code\`
+
+### ParagraphFeature
+
+- Description: Provides entries in both the slash menu and toolbar dropdown for explicit paragraph creation or conversion.
+- Included by default: Yes
+
+### HeadingFeature
+
+- Description: Adds support for heading nodes (H1-H6) with toolbar dropdown and slash menu entries for each enabled heading size.
+- Included by default: Yes
+- Markdown Support: `# H1`, `## H2`, `### H3`, etc.
+- Options:
+
+```typescript
+HeadingFeature({
+  enabledHeadingSizes: ['h1', 'h2', 'h3'], // Default: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+})
+```
+
+### AlignFeature
+
+- Description: Allows text alignment (left, center, right, justify), along with buttons to apply it in both fixed and inline toolbars.
+- Included by default: Yes
+- Keyboard Shortcut: Ctrl/Cmd + Shift + L/E/R/J (left/center/right/justify)
+
+### IndentFeature
+
+- Description: Allows text indentation with toolbar buttons for increase/decrease indent, available in both fixed and inline toolbars.
+- Included by default: Yes
+- Keyboard Shortcut: Tab (increase), Shift + Tab (decrease)
+- Options:
+
+```typescript
+IndentFeature({
+  disabledNodes: ['paragraph'], // Nodes that should not be indented
+  disableTabNode: false, // If true, Tab only does block-level indentation
+})
+```
+
+### UnorderedListFeature
+
+- Description: Adds unordered lists (bullet points) with toolbar dropdown and slash menu entries for creation.
+- Included by default: Yes
+- Markdown Support: `-`, `*`, or `+` at start of line
+
+### OrderedListFeature
+
+- Description: Adds ordered lists (numbered lists) with toolbar dropdown and slash menu entries for creation.
+- Included by default: Yes
+- Markdown Support: `1.` at start of line
+
+### ChecklistFeature
+
+- Description: Adds interactive checklists with toolbar dropdown and slash menu entries for creation.
+- Included by default: Yes
+- Markdown Support: `- [ ]` (unchecked) or `- [x]` (checked)
 
 ### LinkFeature
 
-Allows creation of internal and external links with extensive customization.
+- Description: Allows creation of internal and external links with toolbar buttons and automatic URL conversion.
+- Included by default: Yes
+- Markdown Support: `[anchor](url)`
+- Options:
 
 ```typescript
-import { LinkFeature } from '@payloadcms/richtext-lexical'
-
-// Basic configuration
-LinkFeature()
-
-// Advanced configuration with custom fields
 LinkFeature({
   fields: ({ defaultFields }) => [
     ...defaultFields,
     {
       name: 'rel',
       type: 'select',
-      hasMany: true,
       options: ['noopener', 'noreferrer', 'nofollow'],
-      label: 'Rel Attribute',
-    },
-    {
-      name: 'customClass',
-      type: 'text',
-      label: 'CSS Class',
     },
   ],
-  enabledCollections: ['pages', 'posts'], // Only these collections for internal links
+  enabledCollections: ['pages', 'posts'], // Collections for internal links
+  disabledCollections: ['users'], // Collections to exclude
   maxDepth: 2, // Population depth for internal links
   disableAutoLinks: false, // Allow auto-conversion of URLs
 })
 ```
 
-**Configuration Options:**
-
-- `fields`: Function or array to customize link fields
-- `enabledCollections`: Collections available for internal linking
-- `disabledCollections`: Collections to exclude from internal linking
-- `maxDepth`: Maximum population depth for internal links
-- `disableAutoLinks`: Disable automatic URL conversion
-
-**Key Features:**
-
-- Toolbar button and floating link editor
-- Support for both internal and external links
-- Custom fields for additional link metadata
-- Auto-conversion of pasted URLs (unless disabled)
-- Validation for URL formats
-
 ### RelationshipFeature
 
-Allows creation of block-level relationships to other documents.
+- Description: Allows creation of block-level relationships to other documents with toolbar button and slash menu entry.
+- Included by default: Yes
+- Options:
 
 ```typescript
-import { RelationshipFeature } from '@payloadcms/richtext-lexical'
-
-// Basic configuration
-RelationshipFeature()
-
-// Advanced configuration
 RelationshipFeature({
-  enabledCollections: ['pages', 'posts'], // Only these collections
-  maxDepth: 2, // Population depth
+  enabledCollections: ['pages', 'posts'], // Collections available for relationships
+  disabledCollections: ['users'], // Collections to exclude
+  maxDepth: 2, // Population depth for relationships
 })
 ```
 
-**Configuration Options:**
-
-- `enabledCollections`: Collections available for relationships
-- `disabledCollections`: Collections to exclude
-- `maxDepth`: Maximum population depth
-
-**Key Features:**
-
-- Toolbar button and slash menu entry
-- Document picker drawer
-- Block-level relationship display
-- Automatic population of related documents
-- GraphQL support
-
-## Media Features
-
 ### UploadFeature
 
-Allows insertion of upload/media nodes with support for additional fields.
+- Description: Allows insertion of upload/media nodes with toolbar button and slash menu entry, supports all file types.
+- Included by default: Yes
+- Options:
 
 ```typescript
-import { UploadFeature } from '@payloadcms/richtext-lexical'
-
-// Basic configuration
-UploadFeature()
-
-// Advanced configuration with custom fields
 UploadFeature({
   collections: {
     uploads: {
       fields: [
         {
           name: 'caption',
-          type: 'richText',
-          editor: lexicalEditor(),
+          type: 'text',
+          label: 'Caption',
         },
         {
           name: 'alt',
@@ -154,87 +230,34 @@ UploadFeature({
       ],
     },
   },
-  maxDepth: 1, // Population depth
+  maxDepth: 1, // Population depth for uploads
 })
 ```
 
-**Configuration Options:**
-
-- `collections`: Object defining additional fields for each upload collection
-- `maxDepth`: Maximum population depth for uploads
-
-**Key Features:**
-
-- Toolbar button and slash menu entry
-- Support for all file types (images, documents, etc.)
-- Custom fields for additional metadata
-- Automatic HTML conversion (responsive images, links for non-images)
-- Upload drawer integration
-
 ### BlockquoteFeature
 
-Allows creation of blockquotes.
-
-```typescript
-import { BlockquoteFeature } from '@payloadcms/richtext-lexical'
-
-// Included by default - no configuration needed
-```
-
-**Key Features:**
-
-- Toolbar button in both fixed and inline toolbars
-- Slash menu entry
-- Markdown transformer for `> quote`
-- Proper semantic HTML output
+- Description: Allows creation of blockquotes with toolbar button and slash menu entry.
+- Included by default: Yes
+- Markdown Support: `> quote text`
 
 ### HorizontalRuleFeature
 
-Adds horizontal rules/separators.
-
-```typescript
-import { HorizontalRuleFeature } from '@payloadcms/richtext-lexical'
-
-// Included by default - no configuration needed
-```
-
-**Key Features:**
-
-- Toolbar button and slash menu entry
-- Markdown transformer for `---`
-- Renders as `<hr>` element
-- Keyboard shortcuts for insertion
-
-## Toolbar Features
+- Description: Adds horizontal rules/separators with toolbar button and slash menu entry.
+- Included by default: Yes
+- Markdown Support: `---`
 
 ### InlineToolbarFeature
 
-The floating toolbar that appears when text is selected.
-
-```typescript
-import { InlineToolbarFeature } from '@payloadcms/richtext-lexical'
-
-// Included by default - no configuration needed
-```
-
-**Key Features:**
-
-- Appears when text is selected
-- Contains formatting options relevant to selected text
-- Automatically positioned to avoid viewport edges
-- Customizable through toolbar groups
+- Description: The floating toolbar that appears when text is selected, containing formatting options relevant to selected text.
+- Included by default: Yes
 
 ### FixedToolbarFeature
 
-A persistent toolbar pinned to the top of the editor.
+- Description: A persistent toolbar pinned to the top of the editor that's always visible.
+- Included by default: No
+- Options:
 
 ```typescript
-import { FixedToolbarFeature } from '@payloadcms/richtext-lexical'
-
-// Basic configuration
-FixedToolbarFeature()
-
-// Advanced configuration
 FixedToolbarFeature({
   applyToFocusedEditor: false, // Apply to current editor vs focused editor
   disableIfParentHasFixedToolbar: false, // Disable if parent has fixed toolbar
@@ -246,28 +269,13 @@ FixedToolbarFeature({
 })
 ```
 
-**Configuration Options:**
-
-- `applyToFocusedEditor`: Whether to apply to focused editor or current editor
-- `disableIfParentHasFixedToolbar`: Disable if parent editor has fixed toolbar
-- `customGroups`: Custom configuration for toolbar groups
-
-**Key Features:**
-
-- Always visible at the top of the editor
-- Sticky positioning
-- Can coexist with inline toolbar
-- Customizable groups and items
-
-## Advanced Features
-
 ### BlocksFeature
 
-Allows use of Payload's Blocks Field directly in the editor.
+- Description: Allows use of Payload's Blocks Field directly in the editor with slash menu entries for each block type.
+- Included by default: No
+- Options:
 
 ```typescript
-import { BlocksFeature } from '@payloadcms/richtext-lexical'
-
 BlocksFeature({
   blocks: [
     {
@@ -277,12 +285,6 @@ BlocksFeature({
           name: 'text',
           type: 'text',
           required: true,
-        },
-        {
-          name: 'type',
-          type: 'select',
-          options: ['info', 'warning', 'error'],
-          defaultValue: 'info',
         },
       ],
     },
@@ -302,83 +304,32 @@ BlocksFeature({
 })
 ```
 
-**Configuration Options:**
-
-- `blocks`: Array of block configurations (block-level)
-- `inlineBlocks`: Array of inline block configurations
-
-**Key Features:**
-
-- Full Payload Blocks Field integration
-- Support for both block-level and inline blocks
-- Custom components for block rendering
-- Validation and field schemas
-- GraphQL support
-
 ### TreeViewFeature
 
-Adds a debug panel showing the editor's internal state.
-
-```typescript
-import { TreeViewFeature } from '@payloadcms/richtext-lexical'
-
-// Simple configuration
-TreeViewFeature()
-```
-
-**Key Features:**
-
-- Live view of editor state
-- DOM tree visualization
-- Time travel debugging
-- Toggle between different view modes
-- Useful for development and debugging
-
-## Experimental Features
+- Description: Adds a debug panel below the editor showing the editor's internal state, DOM tree, and time travel debugging.
+- Included by default: No
 
 ### EXPERIMENTAL_TableFeature
 
-Adds support for tables (experimental).
-
-```typescript
-import { EXPERIMENTAL_TableFeature } from '@payloadcms/richtext-lexical'
-
-// Basic configuration
-EXPERIMENTAL_TableFeature()
-```
-
-**⚠️ Warning:** This feature is experimental and may receive breaking changes in future releases.
-
-**Key Features:**
-
-- Table creation and editing
-- Row and column manipulation
-- Cell merging and splitting
-- Keyboard navigation
+- Description: Adds support for tables with toolbar button and slash menu entry for creation and editing.
+- Included by default: No
 
 ### EXPERIMENTAL_TextStateFeature
 
-Allows storing key-value attributes in text nodes with inline styles.
+- Description: Allows storing key-value attributes in text nodes with inline styles and toolbar dropdown for style selection.
+- Included by default: No
+- Options:
 
 ```typescript
-import {
-  EXPERIMENTAL_TextStateFeature,
-  defaultColors,
-} from '@payloadcms/richtext-lexical'
-
 EXPERIMENTAL_TextStateFeature({
   state: {
     color: {
-      ...defaultColors.text,
-      // Custom colors
       brand: {
         label: 'Brand Blue',
         css: { color: '#0066cc' },
       },
     },
     backgroundColor: {
-      ...defaultColors.background,
-      // Custom backgrounds
       highlight: {
         label: 'Highlight',
         css: { backgroundColor: '#ffff00' },
@@ -387,85 +338,3 @@ EXPERIMENTAL_TextStateFeature({
   },
 })
 ```
-
-**⚠️ Warning:** This feature is experimental and may receive breaking changes in future releases.
-
-**Configuration Options:**
-
-- `state`: Object defining available state keys and their values
-
-**Key Features:**
-
-- Custom text styling with CSS
-- Predefined color palettes
-- Inline style application
-- Extensible state system
-
-## Migration Features
-
-### SlateToLexicalFeature
-
-Converts Slate editor data to Lexical format.
-
-```typescript
-import { SlateToLexicalFeature } from '@payloadcms/richtext-lexical/migrate'
-
-SlateToLexicalFeature({
-  converters: ({ defaultConverters }) => [
-    ...defaultConverters,
-    // Custom converters
-  ],
-  disableHooks: false, // Disable afterRead hooks
-})
-```
-
-### LexicalPluginToLexicalFeature
-
-Converts legacy Lexical Plugin data to new format.
-
-```typescript
-import { LexicalPluginToLexicalFeature } from '@payloadcms/richtext-lexical/migrate'
-
-LexicalPluginToLexicalFeature({
-  converters: ({ defaultConverters }) => [
-    ...defaultConverters,
-    // Custom converters
-  ],
-  quiet: true, // Suppress conversion warnings
-})
-```
-
-## Creating Custom Features
-
-Features follow a consistent pattern with both server and client components:
-
-```typescript
-// server/index.ts
-import { createServerFeature } from '@payloadcms/richtext-lexical'
-
-export const MyCustomFeature = createServerFeature<MyProps>({
-  key: 'myCustomFeature',
-  feature: ({ props }) => ({
-    ClientFeature: '@my-package/client#MyCustomFeatureClient',
-    // Server-side configuration
-    nodes: [MyCustomNode],
-    markdownTransformers: [MyMarkdownTransformer],
-    i18n: myTranslations,
-  }),
-})
-```
-
-```typescript
-// client/index.ts
-import { createClientFeature } from '@payloadcms/richtext-lexical'
-
-export const MyCustomFeatureClient = createClientFeature<MyProps>({
-  // Client-side configuration
-  nodes: [MyCustomNode],
-  plugins: [MyCustomPlugin],
-  toolbarFixed: { groups: myToolbarGroups },
-  slashMenu: { groups: mySlashMenuGroups },
-})
-```
-
-This documentation provides a comprehensive overview of all official Lexical features. Each feature is designed to be modular, configurable, and extensible to meet your specific needs.
