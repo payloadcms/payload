@@ -121,8 +121,16 @@ Adding these features to the editor will also cause the corresponding buttons to
 
 - Description: Adds support for heading nodes (H1-H6) with toolbar dropdown and slash menu entries for each enabled heading size.
 - Included by default: Yes
-- Markdown Support: `# H1`, `## H2`, `### H3`, etc.
-- Options:
+- Markdown Support: `#`, `##`, `###`, ..., at start of line.
+- Types:
+
+```typescript
+type HeadingFeatureProps = {
+  enabledHeadingSizes?: HeadingTagType[] // ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+}
+```
+
+- Usage example:
 
 ```typescript
 HeadingFeature({
@@ -141,12 +149,30 @@ HeadingFeature({
 - Description: Allows text indentation with toolbar buttons for increase/decrease indent, available in both fixed and inline toolbars.
 - Included by default: Yes
 - Keyboard Shortcut: Tab (increase), Shift + Tab (decrease)
-- Options:
+- Types:
 
 ```typescript
+type IndentFeatureProps = {
+  /**
+   * The nodes that should not be indented. "type" property of the nodes you don't want to be indented.
+   * These can be: "paragraph", "heading", "listitem", "quote" or other indentable nodes if they exist.
+   */
+  disabledNodes?: string[]
+  /**
+   * If true, pressing Tab in the middle of a block such as a paragraph or heading will not insert a tabNode.
+   * Instead, Tab will only be used for block-level indentation.
+   * @default false
+   */
+  disableTabNode?: boolean
+}
+```
+
+- Usage example:
+
+```typescript
+// Allow block-level indentation only
 IndentFeature({
-  disabledNodes: ['paragraph'], // Nodes that should not be indented
-  disableTabNode: false, // If true, Tab only does block-level indentation
+  disableTabNode: true,
 })
 ```
 
@@ -173,7 +199,46 @@ IndentFeature({
 - Description: Allows creation of internal and external links with toolbar buttons and automatic URL conversion.
 - Included by default: Yes
 - Markdown Support: `[anchor](url)`
-- Options:
+- Types:
+
+```typescript
+type LinkFeatureServerProps = {
+  /**
+   * Disables the automatic creation of links
+   * from URLs typed or pasted into the editor,
+   * @default false
+   */
+  disableAutoLinks?: 'creationOnly' | true
+  /**
+   * A function or array defining additional fields for the link feature.
+   * These will be displayed in the link editor drawer.
+   */
+  fields?:
+    | ((args: {
+        config: SanitizedConfig
+        defaultFields: FieldAffectingData[]
+      }) => (Field | FieldAffectingData)[])
+    | Field[]
+  /**
+   * Sets a maximum population depth for the internal
+   * doc default field of link, regardless of the
+   * remaining depth when the field is reached.
+   */
+  maxDepth?: number
+} & ExclusiveLinkCollectionsProps
+
+type ExclusiveLinkCollectionsProps =
+  | {
+      disabledCollections?: CollectionSlug[]
+      enabledCollections?: never
+    }
+  | {
+      disabledCollections?: never
+      enabledCollections?: CollectionSlug[]
+    }
+```
+
+- Usage example:
 
 ```typescript
 LinkFeature({
@@ -186,7 +251,6 @@ LinkFeature({
     },
   ],
   enabledCollections: ['pages', 'posts'], // Collections for internal links
-  disabledCollections: ['users'], // Collections to exclude
   maxDepth: 2, // Population depth for internal links
   disableAutoLinks: false, // Allow auto-conversion of URLs
 })
@@ -196,11 +260,31 @@ LinkFeature({
 
 - Description: Allows creation of block-level relationships to other documents with toolbar button and slash menu entry.
 - Included by default: Yes
-- Options:
+- Types:
+
+```typescript
+type RelationshipFeatureProps = {
+  /**
+   * Sets a maximum population depth for this relationship, regardless of the remaining depth when the respective field is reached.
+   */
+  maxDepth?: number
+} & ExclusiveRelationshipFeatureProps
+
+type ExclusiveRelationshipFeatureProps =
+  | {
+      disabledCollections?: CollectionSlug[]
+      enabledCollections?: never
+    }
+  | {
+      disabledCollections?: never
+      enabledCollections?: CollectionSlug[]
+    }
+```
+
+- Usage example:
 
 ```typescript
 RelationshipFeature({
-  enabledCollections: ['pages', 'posts'], // Collections available for relationships
   disabledCollections: ['users'], // Collections to exclude
   maxDepth: 2, // Population depth for relationships
 })
@@ -210,7 +294,23 @@ RelationshipFeature({
 
 - Description: Allows insertion of upload/media nodes with toolbar button and slash menu entry, supports all file types.
 - Included by default: Yes
-- Options:
+- Types:
+
+```typescript
+type UploadFeatureProps = {
+  collections?: {
+    [collection: CollectionSlug]: {
+      fields: Field[]
+    }
+  }
+  /**
+   * Sets a maximum population depth for this upload (not the fields for this upload), regardless of the remaining depth when the respective field is reached.
+   */
+  maxDepth?: number
+}
+```
+
+- Usage example:
 
 ```typescript
 UploadFeature({
@@ -248,19 +348,45 @@ UploadFeature({
 
 ### InlineToolbarFeature
 
-- Description: The floating toolbar that appears when text is selected, containing formatting options relevant to selected text.
+- Description: Adds a floating toolbar that appears when text is selected, containing formatting options relevant to selected text.
 - Included by default: Yes
 
 ### FixedToolbarFeature
 
 - Description: A persistent toolbar pinned to the top of the editor that's always visible.
 - Included by default: No
-- Options:
+- Types:
+
+```typescript
+type FixedToolbarFeatureProps = {
+  /**
+   * @default false
+   * If this is enabled, the toolbar will apply
+   * to the focused editor, not the editor with
+   * the FixedToolbarFeature.
+   */
+  applyToFocusedEditor?: boolean
+  /**
+   * Custom configurations for toolbar groups
+   * Key is the group key (e.g. 'format', 'indent', 'align')
+   * Value is a partial ToolbarGroup object that will
+   * be merged with the default configuration
+   */
+  customGroups?: CustomGroups
+  /**
+   * @default false
+   * If there is a parent editor with a fixed toolbar,
+   * this will disable the toolbar for this editor.
+   */
+  disableIfParentHasFixedToolbar?: boolean
+}
+```
+
+- Usage example:
 
 ```typescript
 FixedToolbarFeature({
-  applyToFocusedEditor: false, // Apply to current editor vs focused editor
-  disableIfParentHasFixedToolbar: false, // Disable if parent has fixed toolbar
+  applyToFocusedEditor: false, // Apply to focused editor
   customGroups: {
     format: {
       // Custom configuration for format group
@@ -271,9 +397,18 @@ FixedToolbarFeature({
 
 ### BlocksFeature
 
-- Description: Allows use of Payload's Blocks Field directly in the editor with slash menu entries for each block type.
+- Description: Allows use of Payload's Blocks Field directly in the editor with toolbar buttons and slash menu entries for each block type.
 - Included by default: No
-- Options:
+- Types:
+
+```typescript
+type BlocksFeatureProps = {
+  blocks?: (Block | BlockSlug)[] | Block[]
+  inlineBlocks?: (Block | BlockSlug)[] | Block[]
+}
+```
+
+- Usage example:
 
 ```typescript
 BlocksFeature({
@@ -318,23 +453,55 @@ BlocksFeature({
 
 - Description: Allows storing key-value attributes in text nodes with inline styles and toolbar dropdown for style selection.
 - Included by default: No
-- Options:
+- Types:
 
 ```typescript
-EXPERIMENTAL_TextStateFeature({
+type TextStateFeatureProps = {
+  /**
+   * The keys of the top-level object (stateKeys) represent the attributes that the textNode can have (e.g., color).
+   * The values of the top-level object (stateValues) represent the values that the attribute can have (e.g., red, blue, etc.).
+   * Within the stateValue, you can define inline styles and labels.
+   */
+  state: { [stateKey: string]: StateValues }
+}
+
+type StateValues = {
+  [stateValue: string]: {
+    css: StyleObject
+    label: string
+  }
+}
+
+type StyleObject = {
+  [K in keyof PropertiesHyphenFallback]?:
+    | Extract<PropertiesHyphenFallback[K], string>
+    | undefined
+}
+```
+
+- Usage example:
+
+```typescript
+// We offer default colors that have good contrast and look good in dark and light mode.
+import { defaultColors, TextStateFeature } from '@payloadcms/richtext-lexical'
+
+TextStateFeature({
+  // prettier-ignore
   state: {
     color: {
-      brand: {
-        label: 'Brand Blue',
-        css: { color: '#0066cc' },
-      },
+      ...defaultColors,
+      // fancy gradients!
+      galaxy: { label: 'Galaxy', css: { background: 'linear-gradient(to right, #0000ff, #ff0000)', color: 'white' } },
+      sunset: { label: 'Sunset', css: { background: 'linear-gradient(to top, #ff5f6d, #6a3093)' } },
     },
-    backgroundColor: {
-      highlight: {
-        label: 'Highlight',
-        css: { backgroundColor: '#ffff00' },
-      },
+    // You can have both colored and underlined text at the same time.
+    // If you don't want that, you should group them within the same key.
+    // (just like I did with defaultColors and my fancy gradients)
+    underline: {
+      'solid': { label: 'Solid', css: { 'text-decoration': 'underline', 'text-underline-offset': '4px' } },
+       // You'll probably want to use the CSS light-dark() utility.
+      'yellow-dashed': { label: 'Yellow Dashed', css: { 'text-decoration': 'underline dashed', 'text-decoration-color': 'light-dark(#EAB308,yellow)', 'text-underline-offset': '4px' } },
     },
   },
-})
+}),
 ```
