@@ -1,3 +1,5 @@
+import type { Equal } from 'drizzle-orm'
+
 import { randomUUID } from 'crypto'
 import path from 'path'
 import { deepCopyObject, type Payload } from 'payload'
@@ -13,6 +15,8 @@ import type {
   Page,
   Point,
   Post,
+  Rel,
+  Upload,
   VersionedPost,
 } from './payload-types.js'
 
@@ -171,6 +175,10 @@ describe('Select', () => {
           number: post.number,
           text: post.text,
         })
+
+        // this will fail if types are not the same
+        const _enforce_1: Equal<(typeof res)['number'], null | number | undefined> = true
+        const _enforce_2: Equal<(typeof res)['text'], null | string | undefined> = true
       })
 
       it('should select relationships', async () => {
@@ -188,6 +196,10 @@ describe('Select', () => {
           hasManyUpload: post.hasManyUpload,
         })
 
+        // this will fail if types are not the same
+        const _enforce_1: Equal<(typeof res_1)['hasManyUpload'], Array<Upload> | null | undefined> =
+          true
+
         const res_2 = await payload.findByID({
           collection: 'posts',
           id: postId,
@@ -201,6 +213,9 @@ describe('Select', () => {
           id: postId,
           hasOne: post.hasOne,
         })
+
+        // this will fail if types are not the same
+        const _enforce_2: Equal<(typeof res_2)['hasOne'], null | Rel | undefined> = true
 
         const res_3 = await payload.findByID({
           collection: 'posts',
