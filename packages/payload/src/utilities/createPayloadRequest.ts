@@ -67,8 +67,8 @@ export const createPayloadRequest = async ({
 
   if (localization) {
     const locales = sanitizeLocales({
-      fallbackLocale,
-      locale,
+      fallbackLocale: fallbackLocale!,
+      locale: locale!,
       localization,
     })
 
@@ -78,7 +78,7 @@ export const createPayloadRequest = async ({
 
   const customRequest: CustomPayloadRequestProperties = {
     context: {},
-    fallbackLocale,
+    fallbackLocale: fallbackLocale!,
     hash: urlProperties.hash,
     host: urlProperties.host,
     href: urlProperties.href,
