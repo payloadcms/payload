@@ -3,6 +3,7 @@ import { fileTypeFromBuffer } from 'file-type'
 import type { checkFileRestrictionsParams, FileAllowList } from './types.js'
 
 import { ValidationError } from '../errors/index.js'
+import { validateMimeType } from '../utilities/validateMimeType.js'
 
 /**
  * Restricted file types and their extensions.
@@ -74,7 +75,7 @@ export const checkFileRestrictions = async ({
       errors.push(`Could not detect file type for ${file.name}.`)
     }
 
-    const passesMimeTypeCheck = detected?.mime && cleanedMimeTypes.includes(detected.mime)
+    const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, cleanedMimeTypes)
 
     if (detected && !passesMimeTypeCheck) {
       errors.push(`Detected invalid MIME type: ${detected.mime}.`)
