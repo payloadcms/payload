@@ -297,6 +297,7 @@ $cal-icon-width: 18px;
       font-weight: bold;
       color: var(--theme-elevation-800);
       border-radius: 0;
+      color: red;
     }
 
     .react-datepicker__time-container
@@ -343,6 +344,13 @@ $cal-icon-width: 18px;
       li.react-datepicker__time-list-item {
       line-height: 20px;
       font-size: base(0.5);
+
+      &.react-datepicker__time-list-item--disabled {
+        color: var(--theme-elevation-200);
+        &:hover {
+          background: none;
+        }
+      }
     }
 
     &__appearance--dayOnly,
