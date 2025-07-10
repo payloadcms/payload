@@ -4,6 +4,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { CategoriesCollection } from './collections/Categories/index.js'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 
@@ -11,7 +12,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  collections: [PostsCollection, MediaCollection],
+  collections: [PostsCollection, CategoriesCollection, MediaCollection],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),

@@ -189,6 +189,17 @@ export const renderListView = async (
       where: where || {},
     })
 
+    // if groupBy, then we need to fetch the data differently
+
+    const distinct = await payload.findDistinct({
+      collection: collectionSlug,
+      field: 'team',
+      locale,
+      overrideAccess: false,
+      req,
+      // where: where || {},
+    })
+
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
     const { columnState, Table } = renderTable({
