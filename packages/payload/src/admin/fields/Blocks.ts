@@ -58,16 +58,17 @@ type BlockRowLabelBase = {
   blockType: string
   rowLabel: string
   rowNumber: number
-}
+} & FieldPaths
 
 export type BlockRowLabelClientProps = BlockRowLabelBase &
-  ClientFieldBase<BlocksFieldClientWithoutType> &
-  FieldPaths
+  ClientFieldBase<BlocksFieldClientWithoutType>
 export type BlockRowLabelClientComponent = React.ComponentType<BlockRowLabelClientProps>
 
-export type BlockRowLabelServerProps = BlockRowLabelBase &
-  FieldPaths &
-  ServerFieldBase<BlocksField, BlocksFieldClientWithoutType>
+export type BlockRowLabelServerPropsOnly = ServerFieldBase<
+  BlocksField,
+  BlocksFieldClientWithoutType
+>
+export type BlockRowLabelServerProps = BlockRowLabelBase & BlockRowLabelServerPropsOnly
 export type BlockRowLabelServerComponent = React.ComponentType<BlockRowLabelServerProps>
 
 export type BlocksFieldDescriptionServerComponent = FieldDescriptionServerComponent<

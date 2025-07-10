@@ -70,13 +70,10 @@ export type ArrayFieldDiffClientComponent = FieldDiffClientComponent<ArrayFieldC
 type ArrayRowLabelBase = {
   rowLabel: string
   rowNumber: number
-}
-export type ArrayRowLabelClientProps = ArrayRowLabelBase &
-  ClientFieldBase<ArrayFieldClientWithoutType> &
-  FieldPaths
+} & FieldPaths
+export type ArrayRowLabelClientProps = ArrayRowLabelBase & ClientFieldBase<ArrayFieldClient>
 export type ArrayRowLabelClientComponent = React.ComponentType<ArrayRowLabelClientProps>
 
-export type ArrayRowLabelServerProps = ArrayRowLabelBase &
-  FieldPaths &
-  ServerFieldBase<ArrayField, ArrayFieldClientWithoutType>
+export type ArrayRowLabelServerPropsOnly = ServerFieldBase<ArrayField, ArrayFieldClientWithoutType>
+export type ArrayRowLabelServerProps = ArrayRowLabelBase & ArrayRowLabelServerPropsOnly
 export type ArrayRowLabelServerComponent = React.ComponentType<ArrayRowLabelServerProps>
