@@ -484,6 +484,12 @@ export default buildConfigWithDefaults(
             type: 'checkbox',
             hidden: true,
           },
+          {
+            name: 'hiddenWithDefault',
+            type: 'text',
+            hidden: true,
+            defaultValue: 'default value',
+          },
         ],
       },
       {

@@ -729,7 +729,7 @@ describe('Access Control', () => {
       await page.locator('#field-unnamedTab').fill('unnamed tab')
 
       // array field
-      await page.locator('#field-array button').click()
+      await page.locator('#field-array > button').click()
       await page.locator('#field-array__0__text').fill('array row 0')
 
       await saveDocAndAssert(page)

@@ -87,10 +87,15 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     deletingFile: 'Dogodila se greška pri brisanju datoteke.',
     deletingTitle:
       'Dogodila se greška pri brisanju {{title}}. Proverite internet konekciju i pokušajte ponovo.',
+    documentNotFound:
+      'Dokument sa ID {{id}} nije mogao biti pronađen. Moguće je da je obrisan ili nikad nije postojao, ili možda nemate pristup njemu.',
     emailOrPasswordIncorrect: 'Adresa e-pošte ili lozinka su neispravni.',
     followingFieldsInvalid_one: 'Ovo polje je nevalidno:',
     followingFieldsInvalid_other: 'Ova polja su nevalidna:',
     incorrectCollection: 'Nevalidna kolekcija',
+    insufficientClipboardPermissions:
+      'Pristup clipboard-u odbijen. Proverite svoja dopuštenja za clipboard.',
+    invalidClipboardData: 'Nevažeći podaci u clipboard-u.',
     invalidFileType: 'Nevalidan tip datoteke',
     invalidFileTypeValue: 'Nevalidan tip datoteke: {{value}}',
     invalidRequestArgs: 'Nevažeći argumenti prosleđeni u zahtevu: {{args}}',
@@ -112,6 +117,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Postoji problem pri učitavanju datoteke.',
     tokenInvalidOrExpired: 'Token je nevalidan ili je istekao.',
     tokenNotProvided: 'Token nije obezbeđen.',
+    unableToCopy: 'Kopiranje nije moguće.',
     unableToDeleteCount: 'Nije moguće izbrisati {{count}} od {{total}} {{label}}.',
     unableToReindexCollection:
       'Greška pri reindeksiranju kolekcije {{collection}}. Operacija je prekinuta.',
@@ -241,7 +247,9 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Ovo će ukloniti postojeće indekse i ponovo indeksirati dokumente u svim kolekcijama.',
     copied: 'Kopirano',
     copy: 'Kopiraj',
+    copyField: 'Kopiraj polje',
     copying: 'Kopiranje',
+    copyRow: 'Kopiraj red',
     copyWarning:
       'Na korak ste da prepišete {{to}} sa {{from}} za {{label}} {{title}}. Da li ste sigurni?',
     create: 'Kreiraj',
@@ -336,6 +344,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Prepiši postojeće podatke iz polja',
     pageNotFound: 'Stranica nije pronađena',
     password: 'Lozinka',
+    pasteField: 'Zalepi polje',
+    pasteRow: 'Zalepi red',
     payloadSettings: 'Payload postavke',
     perPage: 'Po stranici: {{limit}}',
     previous: 'Prethodni',

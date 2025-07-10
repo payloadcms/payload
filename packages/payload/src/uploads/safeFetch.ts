@@ -1,8 +1,15 @@
-import type { Dispatcher } from 'undici'
+import type { LookupFunction } from 'net'
 
-import { lookup } from 'dns/promises'
+import { lookup } from 'dns'
 import ipaddr from 'ipaddr.js'
 import { Agent, fetch as undiciFetch } from 'undici'
+
+/**
+ * @internal this is used to mock the IP `lookup` function in integration tests
+ */
+export const _internal_safeFetchGlobal = {
+  lookup,
+}
 
 const isSafeIp = (ip: string) => {
   try {
@@ -25,32 +32,31 @@ const isSafeIp = (ip: string) => {
   return true
 }
 
-/**
- * Checks if a hostname or IP address is safe to fetch from.
- * @param hostname a hostname or IP address
- * @returns
- */
-const isSafe = async (hostname: string) => {
-  try {
-    if (ipaddr.isValid(hostname)) {
-      return isSafeIp(hostname)
+const ssrfFilterInterceptor: LookupFunction = (hostname, options, callback) => {
+  _internal_safeFetchGlobal.lookup(hostname, options, (err, address, family) => {
+    if (err) {
+      callback(err, address, family)
+    } else {
+      let ips = [] as string[]
+      if (Array.isArray(address)) {
+        ips = address.map((a) => a.address)
+      } else {
+        ips = [address]
+      }
+
+      if (ips.some((ip) => !isSafeIp(ip))) {
+        callback(new Error(`Blocked unsafe attempt to ${hostname}`), address, family)
+        return
+      }
+
+      callback(null, address, family)
     }
-
-    const { address } = await lookup(hostname)
-    return isSafeIp(address)
-  } catch (_ignore) {
-    return false
-  }
+  })
 }
 
-const ssrfFilterInterceptor: Dispatcher.DispatcherComposeInterceptor = (dispatch) => {
-  return (opts, handler) => {
-    return dispatch(opts, handler)
-  }
-}
-
-const safeDispatcher = new Agent().compose(ssrfFilterInterceptor)
-
+const safeDispatcher = new Agent({
+  connect: { lookup: ssrfFilterInterceptor },
+})
 /**
  * A "safe" version of undici's fetch that prevents SSRF attacks.
  *
@@ -64,11 +70,18 @@ export const safeFetch = async (...args: Parameters<typeof undiciFetch>) => {
   try {
     const url = new URL(unverifiedUrl)
 
-    const isHostnameSafe = await isSafe(url.hostname)
-    if (!isHostnameSafe) {
-      throw new Error(`Blocked unsafe attempt to ${url.toString()}`)
+    let hostname = url.hostname
+
+    // Strip brackets from IPv6 addresses (e.g., "[::1]" => "::1")
+    if (hostname.startsWith('[') && hostname.endsWith(']')) {
+      hostname = hostname.slice(1, -1)
     }
 
+    if (ipaddr.isValid(hostname)) {
+      if (!isSafeIp(hostname)) {
+        throw new Error(`Blocked unsafe attempt to ${hostname}`)
+      }
+    }
     return await undiciFetch(url, {
       ...options,
       dispatcher: safeDispatcher,
