@@ -32,16 +32,16 @@ export const ExportSaveButton: React.FC = () => {
   const label = t('general:save')
 
   const handleDownload = async () => {
-    let timeoutId: null | ReturnType<typeof setTimeout> = null
-    let toastId: null | number | string = null
+    let timeoutID: null | ReturnType<typeof setTimeout> = null
+    let toastID: null | number | string = null
 
     try {
       setModified(false) // Reset modified state
       const data = getData()
 
       // Set a timeout to show toast if the request takes longer than 200ms
-      timeoutId = setTimeout(() => {
-        toastId = toast.success('Your export is being processed...')
+      timeoutID = setTimeout(() => {
+        toastID = toast.success('Your export is being processed...')
       }, 200)
 
       const response = await fetch(`${serverURL}${api}/exports/download`, {
@@ -56,13 +56,13 @@ export const ExportSaveButton: React.FC = () => {
       })
 
       // Clear the timeout if fetch completes quickly
-      if (timeoutId) {
-        clearTimeout(timeoutId)
+      if (timeoutID) {
+        clearTimeout(timeoutID)
       }
 
       // Dismiss the toast if it was shown
-      if (toastId) {
-        toast.dismiss(toastId)
+      if (toastID) {
+        toast.dismiss(toastID)
       }
 
       if (!response.ok) {
@@ -93,6 +93,7 @@ export const ExportSaveButton: React.FC = () => {
       URL.revokeObjectURL(url)
     } catch (error) {
       console.error('Error downloading file:', error)
+      toast.error('Error downloading file')
     }
   }
 
