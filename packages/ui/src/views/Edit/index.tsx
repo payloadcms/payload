@@ -270,7 +270,7 @@ export function DefaultEditView({
       if ((id || globalSlug) && !autosaveEnabled) {
         const docPreferences = await getDocPreferences()
 
-        const { state } = await getFormState({
+        const result = await getFormState({
           id,
           collectionSlug,
           data: document,
@@ -284,6 +284,12 @@ export function DefaultEditView({
           signal: controller.signal,
           skipValidation: true,
         })
+
+        if (!result) {
+          return
+        }
+
+        const { state } = result
 
         // Unlock the document after save
         if (isLockingEnabled) {
@@ -342,7 +348,7 @@ export function DefaultEditView({
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = await getFormState({
+      const result = await getFormState({
         id,
         collectionSlug,
         docPermissions,
@@ -359,6 +365,12 @@ export function DefaultEditView({
         signal: controller.signal,
         updateLastEdited,
       })
+
+      if (!result) {
+        return
+      }
+
+      const { lockedState, state } = result
 
       if (isLockingEnabled) {
         handleDocumentLocking(lockedState)
