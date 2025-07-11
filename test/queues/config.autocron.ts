@@ -8,6 +8,12 @@ export default buildConfigWithDefaults({
   ...config,
   jobs: {
     ...config.jobs,
-    scheduler: 'cron',
+    autoRun: [
+      {
+        // @ts-expect-error not undefined
+        ...config.jobs.autoRun[0],
+        disableScheduling: false,
+      },
+    ],
   },
 })

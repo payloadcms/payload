@@ -114,7 +114,7 @@ export const getConfig: () => Partial<Config> = () => ({
         cron: '* * * * * *',
         limit: 100,
         queue: 'autorunSecond',
-        disableScheduling: false,
+        disableScheduling: true,
       },
       // add as many cron jobs as you want
     ],

@@ -1507,15 +1507,13 @@ describe('Queues', () => {
       expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
     })
 
-    it('can auto-schedule through run?handleSchedules=true REST API and autorun jobs', async () => {
+    it('can auto-schedule through run REST API and autorun jobs', async () => {
       // Do not call payload.jobs.queue() - the `EverySecond` task should be scheduled here
-      await restClient.GET('/payload-jobs/run&silent=true', {
+      await restClient.GET('/payload-jobs/run?silent=true', {
         headers: {
           Authorization: `JWT ${token}`,
         },
       })
-
-      // Do not call payload.jobs.run({silent: true})
 
       await waitUntilAutorunIsDone({
         payload,
@@ -1530,6 +1528,28 @@ describe('Queues', () => {
 
       expect(allSimples.totalDocs).toBe(1)
       expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
+    })
+
+    it('do not auto-schedule through run REST API when passing disableScheduling=true', async () => {
+      // Do not call payload.jobs.queue() - the `EverySecond` task should be scheduled here
+      await restClient.GET('/payload-jobs/run?silent=true&disableScheduling=true', {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+      })
+
+      await waitUntilAutorunIsDone({
+        payload,
+        queue: 'autorunSecond',
+        onlyScheduled: true,
+      })
+
+      const allSimples = await payload.find({
+        collection: 'simple',
+        limit: 100,
+      })
+
+      expect(allSimples.totalDocs).toBe(0)
     })
 
     it('ensure scheduler does not schedule more jobs than needed if executed sequentially', async () => {
