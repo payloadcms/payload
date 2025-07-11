@@ -1,7 +1,9 @@
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, PaginatedDocs } from 'payload'
 
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
+
+import type { IListQueryContext } from '../../providers/ListQuery/types.js'
 
 import { Pagination } from '../../elements/Pagination/index.js'
 import { PerPage } from '../../elements/PerPage/index.js'
@@ -11,18 +13,21 @@ import './index.scss'
 
 const baseClass = 'page-controls'
 
-export const PageControls: React.FC<{
+export const PageControlsOnly: React.FC<{
   AfterPageControls?: React.ReactNode
   collectionConfig: ClientCollectionConfig
-}> = ({ AfterPageControls, collectionConfig }) => {
-  const {
-    data,
-    defaultLimit: initialLimit,
-    handlePageChange,
-    handlePerPageChange,
-    query,
-  } = useListQuery()
-
+  data: PaginatedDocs
+  handlePageChange?: IListQueryContext['handlePageChange']
+  handlePerPageChange?: IListQueryContext['handlePerPageChange']
+  limit?: number
+}> = ({
+  AfterPageControls,
+  collectionConfig,
+  data,
+  handlePageChange,
+  handlePerPageChange,
+  limit,
+}) => {
   const { i18n } = useTranslation()
 
   return (
@@ -33,7 +38,7 @@ export const PageControls: React.FC<{
         limit={data.limit}
         nextPage={data.nextPage}
         numberOfNeighbors={1}
-        onChange={(page) => void handlePageChange(page)}
+        onChange={handlePageChange}
         page={data.page}
         prevPage={data.prevPage}
         totalPages={data.totalPages}
@@ -48,8 +53,8 @@ export const PageControls: React.FC<{
             {i18n.t('general:of')} {data.totalDocs}
           </div>
           <PerPage
-            handleChange={(limit) => void handlePerPageChange(limit)}
-            limit={isNumber(query?.limit) ? Number(query.limit) : initialLimit}
+            handleChange={handlePerPageChange}
+            limit={limit}
             limits={collectionConfig?.admin?.pagination?.limits}
             resetPage={data.totalDocs <= data.pagingCounter}
           />
@@ -57,5 +62,33 @@ export const PageControls: React.FC<{
         </Fragment>
       )}
     </div>
+  )
+}
+
+/*
+ * These page controls are controlled by the global ListQuery state.
+ * To override thi behavior, build your own wrapper around PageControlsOnly.
+ */
+export const PageControls: React.FC<{
+  AfterPageControls?: React.ReactNode
+  collectionConfig: ClientCollectionConfig
+}> = ({ AfterPageControls, collectionConfig }) => {
+  const {
+    data,
+    defaultLimit: initialLimit,
+    handlePageChange,
+    handlePerPageChange,
+    query,
+  } = useListQuery()
+
+  return (
+    <PageControlsOnly
+      AfterPageControls={AfterPageControls}
+      collectionConfig={collectionConfig}
+      data={data}
+      handlePageChange={handlePageChange}
+      handlePerPageChange={handlePerPageChange}
+      limit={isNumber(query.limit) ? query.limit : initialLimit}
+    />
   )
 }
