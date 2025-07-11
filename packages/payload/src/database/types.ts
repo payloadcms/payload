@@ -493,14 +493,21 @@ export type FindDistinctArgs = {
   where?: Where
 }
 
-export type PaginatedDistinctDocs = {
-  field: string
-  perPage: number
+export type PaginatedDistinctDocs<T extends Record<string, unknown>> = {
+  hasNextPage: boolean
+  hasPrevPage: boolean
+  limit: number
+  nextPage?: null | number | undefined
+  pagingCounter: number
+  prevPage?: null | number | undefined
   totalDocs: number
-  values: any[]
+  totalPages: number
+  values: T[]
 }
 
-export type FindDistinct = (args: FindDistinctArgs) => Promise<PaginatedDistinctDocs>
+export type FindDistinct = (
+  args: FindDistinctArgs,
+) => Promise<PaginatedDistinctDocs<Record<string, any>>>
 
 export type Create = (args: CreateArgs) => Promise<Document>
 

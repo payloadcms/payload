@@ -392,9 +392,9 @@ describe('database', () => {
       'title-7',
       'title-8',
       'title-9',
-    ]
+    ].map((title) => ({ title }))
 
-    for (const title of titles) {
+    for (const { title } of titles) {
       // eslint-disable-next-line jest/no-conditional-in-test
       const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
       for (let i = 0; i < docsCount; i++) {
@@ -419,7 +419,7 @@ describe('database', () => {
       })
       .then((res) => res.json())
 
-    expect(resREST.values).toStrictEqual(titles)
+    expect(resREST.values).toEqual(titles)
 
     const resLimit = await payload.findDistinct({
       collection: 'posts',
@@ -428,7 +428,11 @@ describe('database', () => {
       limit: 3,
     })
 
-    expect(resLimit.values).toStrictEqual(['title-1', 'title-2', 'title-3'])
+    expect(resLimit.values).toStrictEqual(
+      ['title-1', 'title-2', 'title-3'].map((title) => ({ title })),
+    )
+    // count is still 9
+    expect(resLimit.totalDocs).toBe(9)
 
     const resDesc = await payload.findDistinct({
       collection: 'posts',

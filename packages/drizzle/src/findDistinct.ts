@@ -63,10 +63,44 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     where,
   })
 
+  const values = selectDistinctResult.map((each) => ({
+    [args.field]: (each as Record<string, any>)._selected,
+  }))
+
+  if (args.limit) {
+    const totalDocs = await this.countDistinct({
+      column: selectFields['_selected'],
+      db,
+      joins,
+      tableName,
+      where,
+    })
+
+    const totalPages = Math.ceil(totalDocs / args.limit)
+    const hasPrevPage = page > 1
+    const hasNextPage = totalPages > page
+    const pagingCounter = (page - 1) * args.limit + 1
+
+    return {
+      hasNextPage,
+      hasPrevPage,
+      limit: args.limit,
+      nextPage: hasNextPage ? page + 1 : null,
+      pagingCounter,
+      prevPage: hasPrevPage ? page - 1 : null,
+      totalDocs,
+      totalPages,
+      values,
+    }
+  }
+
   return {
-    field: args.field,
-    perPage: args.limit || selectDistinctResult.length,
-    totalDocs: selectDistinctResult.length,
-    values: selectDistinctResult.map((each) => (each as Record<string, unknown>)._selected),
+    hasNextPage: false,
+    hasPrevPage: false,
+    limit: 0,
+    pagingCounter: 1,
+    totalDocs: values.length,
+    totalPages: 1,
+    values,
   }
 }

@@ -474,7 +474,9 @@ export class BasePayload {
    * @param options
    * @returns result with distinct field values
    */
-  findDistinct = async (options: FindDistinctOptions): Promise<PaginatedDistinctDocs> => {
+  findDistinct = async (
+    options: FindDistinctOptions,
+  ): Promise<PaginatedDistinctDocs<Record<string, unknown>>> => {
     return findDistinctLocal(this, options)
   }
 

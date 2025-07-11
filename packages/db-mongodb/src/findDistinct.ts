@@ -37,7 +37,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
 
   const page = args.page ?? 1
 
-  const pipeline: PipelineStage[] = [
+  const basePipeline: PipelineStage[] = [
     {
       $match: query,
     },
@@ -46,6 +46,10 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
         _id: `$${fieldPath}`,
       },
     },
+  ]
+
+  const pipeline: PipelineStage[] = [
+    ...basePipeline,
     {
       $sort: {
         _id: args.sortOrder === 'desc' ? -1 : 1,
@@ -53,19 +57,49 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     },
   ]
 
+  const getValues = () => {
+    return Model.aggregate(pipeline, { session }).then((res) =>
+      res.map((each) => ({
+        [args.field]: each._id,
+      })),
+    )
+  }
+
   if (args.limit) {
     pipeline.push({
       $skip: (page - 1) * args.limit,
     })
     pipeline.push({ $limit: args.limit })
+    const totalDocs = await Model.aggregate([...basePipeline, { $count: 'count' }], {
+      session,
+    }).then((res) => res[0]?.count ?? 0)
+    const totalPages = Math.ceil(totalDocs / args.limit)
+    const hasPrevPage = page > 1
+    const hasNextPage = totalPages > page
+    const pagingCounter = (page - 1) * args.limit + 1
+
+    return {
+      hasNextPage,
+      hasPrevPage,
+      limit: args.limit,
+      nextPage: hasNextPage ? page + 1 : null,
+      pagingCounter,
+      prevPage: hasPrevPage ? page - 1 : null,
+      totalDocs,
+      totalPages,
+      values: await getValues(),
+    }
   }
 
-  const values = await Model.aggregate(pipeline).then((res) => res.map((each) => each._id))
+  const values = await getValues()
 
   return {
-    field: args.field,
-    perPage: args.limit ?? values.length,
-    totalDocs: args.limit ?? values.length,
+    hasNextPage: false,
+    hasPrevPage: false,
+    limit: 0,
+    pagingCounter: 1,
+    totalDocs: values.length,
+    totalPages: 1,
     values,
   }
 }
