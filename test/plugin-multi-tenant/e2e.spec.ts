@@ -10,7 +10,7 @@ import type { Config } from './payload-types.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
-  login,
+  loginClientSide,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -62,7 +62,27 @@ test.describe('Multi Tenant', () => {
 
   test.describe('tenant selector', () => {
     test('should populate tenant selector on login', async () => {
-      await login({
+      await loginClientSide({
+        page,
+        serverURL,
+        data: credentials.admin,
+      })
+
+      await expect
+        .poll(async () => {
+          return (await getTenantOptions({ page })).sort()
+        })
+        .toEqual(['Blue Dog', 'Steel Cat', 'Anchor Bar'].sort())
+    })
+
+    test('should populate the tenant selector after logout with 1 tenant user', async () => {
+      await loginClientSide({
+        page,
+        serverURL,
+        data: credentials.blueDog,
+      })
+
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
@@ -76,7 +96,7 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should show all tenants for userHasAccessToAllTenants users', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
@@ -90,7 +110,7 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should only show users assigned tenants', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.owner,
@@ -106,7 +126,7 @@ test.describe('Multi Tenant', () => {
 
   test.describe('Base List Filter', () => {
     test('should show all tenant items when tenant selector is empty', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
@@ -127,7 +147,7 @@ test.describe('Multi Tenant', () => {
       ).toBeVisible()
     })
     test('should show filtered tenant items when tenant selector is set', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
@@ -154,7 +174,7 @@ test.describe('Multi Tenant', () => {
 
   test.describe('globals', () => {
     test('should redirect list view to edit view', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
@@ -164,7 +184,7 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should redirect from create to edit view when tenant already has content', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
@@ -179,7 +199,7 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should prompt leave without saving changes modal when switching tenants', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
@@ -206,12 +226,16 @@ test.describe('Multi Tenant', () => {
           'Your changes have not been saved. If you leave now, you will lose your changes.',
         ),
       ).toBeVisible()
+
+      await confirmationModal.locator('#confirm-action').click()
+      await expect(page.locator('#confirm-leave-without-saving')).toBeHidden()
+      await page.locator('#nav-food-items').click()
     })
   })
 
   test.describe('documents', () => {
     test('should set tenant upon entering', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
@@ -238,7 +262,7 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should prompt for confirmation upon tenant switching', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
@@ -268,7 +292,7 @@ test.describe('Multi Tenant', () => {
 
   test.describe('tenants', () => {
     test('should update the tenant name in the selector when editing a tenant', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
@@ -303,7 +327,7 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should add tenant to the selector when creating a new tenant', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
