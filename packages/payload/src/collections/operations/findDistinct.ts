@@ -126,7 +126,7 @@ export const findDistinctOperation = async (
             currentDepth: 0,
             depth: args.depth,
             draft: false,
-            fallbackLocale: null,
+            fallbackLocale: req.fallbackLocale || null,
             field: fieldResult.field,
             locale: req.locale || null,
             overrideAccess: args.overrideAccess ?? true,
