@@ -19,7 +19,6 @@ import {
   useForm,
   useFormFields,
   useFormInitializing,
-  useFormModified,
   useFormProcessing,
   useFormSubmitted,
 } from '../Form/context.js'
@@ -60,7 +59,6 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
 
   const { getData, getDataByPath, getSiblingData, setModified } = useForm()
   const documentForm = useDocumentForm()
-  const modified = useFormModified()
 
   const filterOptions = field?.filterOptions
   const value = field?.value as TValue
