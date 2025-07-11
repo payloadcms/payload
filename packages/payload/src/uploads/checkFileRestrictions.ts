@@ -69,29 +69,28 @@ export const checkFileRestrictions = async ({
 
   // Secondary mimetype check to assess file type from buffer
   if (configMimeTypes.length > 0) {
-    const cleanedMimeTypes = configMimeTypes.map((v) => v.replace('*', ''))
     const detected = await fileTypeFromBuffer(file.data)
     if (!detected) {
       errors.push(`Could not detect file type for ${file.name}.`)
     }
 
-    const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, cleanedMimeTypes)
+    const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)
 
     if (detected && !passesMimeTypeCheck) {
       errors.push(`Detected invalid MIME type: ${detected.mime}.`)
     }
-  }
-
-  const isRestricted = RESTRICTED_FILE_EXT_AND_TYPES.some((type) => {
-    const hasRestrictedExt = type.extensions.some((ext) => file.name.toLowerCase().endsWith(ext))
-    const hasRestrictedMime = type.mimeType === file.mimetype
-    return hasRestrictedExt || hasRestrictedMime
-  })
-
-  if (isRestricted) {
-    errors.push(
-      `File type '${file.mimetype}' not allowed ${file.name}: Restricted file type detected -- set 'allowRestrictedFileTypes' to true to skip this check for this Collection.`,
-    )
+  } else {
+    const isRestricted = RESTRICTED_FILE_EXT_AND_TYPES.some((type) => {
+      const hasRestrictedExt = type.extensions.some((ext) => file.name.toLowerCase().endsWith(ext))
+      const hasRestrictedMime = type.mimeType === file.mimetype
+      return hasRestrictedExt || hasRestrictedMime
+    })
+  
+    if (isRestricted) {
+      errors.push(
+        `File type '${file.mimetype}' not allowed ${file.name}: Restricted file type detected -- set 'allowRestrictedFileTypes' to true to skip this check for this Collection.`,
+      )
+    }
   }
 
   if (errors.length > 0) {
