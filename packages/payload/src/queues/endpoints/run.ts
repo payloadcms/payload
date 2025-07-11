@@ -1,7 +1,6 @@
 import type { Endpoint } from '../../config/types.js'
 import type { SanitizedJobsConfig } from '../config/types/index.js'
 
-import { handleSchedules } from '../operations/handleSchedules/index.js'
 import { runJobs, type RunJobsArgs } from '../operations/runJobs/index.js'
 
 /**
@@ -37,13 +36,13 @@ export const runJobsEndpoint: Endpoint = {
 
     const {
       allQueues,
-      handleSchedules: handleSchedulesParam,
+      disableScheduling: disableSchedulingParam,
       limit,
       queue,
       silent: silentParam,
     } = req.query as {
       allQueues?: 'false' | 'true'
-      handleSchedules?: 'false' | 'true'
+      disableScheduling?: 'false' | 'true'
       limit?: number
       queue?: string
       silent?: string
@@ -51,9 +50,9 @@ export const runJobsEndpoint: Endpoint = {
 
     const silent = silentParam === 'true'
 
-    const shouldHandleSchedules =
-      handleSchedulesParam &&
-      !(typeof handleSchedulesParam === 'string' && handleSchedulesParam === 'false')
+    const shouldHandleSchedules = disableSchedulingParam !== 'true'
+
+    const runAllQueues = allQueues && !(typeof allQueues === 'string' && allQueues === 'false')
 
     if (shouldHandleSchedules) {
       if (!jobsConfig.stats) {
@@ -61,13 +60,15 @@ export const runJobsEndpoint: Endpoint = {
           'The jobs stats global is not enabled, but is required to use the run endpoint with schedules.',
         )
       }
-      await handleSchedules({ req })
+
+      await req.payload.jobs.handleSchedules({ queue: runAllQueues ? undefined : queue, req })
     }
 
     const runJobsArgs: RunJobsArgs = {
       queue,
       req,
       // Access is validated above, so it's safe to override here
+      allQueues: runAllQueues,
       overrideAccess: true,
       silent,
     }
@@ -79,10 +80,6 @@ export const runJobsEndpoint: Endpoint = {
     const parsedLimit = Number(limit)
     if (!isNaN(parsedLimit)) {
       runJobsArgs.limit = parsedLimit
-    }
-
-    if (allQueues && !(typeof allQueues === 'string' && allQueues === 'false')) {
-      runJobsArgs.allQueues = true
     }
 
     let noJobsRemaining = false

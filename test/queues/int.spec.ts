@@ -1509,7 +1509,7 @@ describe('Queues', () => {
 
     it('can auto-schedule through run?handleSchedules=true REST API and autorun jobs', async () => {
       // Do not call payload.jobs.queue() - the `EverySecond` task should be scheduled here
-      await restClient.GET('/payload-jobs/run?handleSchedules=true&silent=true', {
+      await restClient.GET('/payload-jobs/run&silent=true', {
         headers: {
           Authorization: `JWT ${token}`,
         },

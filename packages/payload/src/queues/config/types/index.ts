@@ -29,6 +29,15 @@ export type AutorunCronConfig = {
    */
   cron?: string
   /**
+   * By default, the autorun will attempt to schedule jobs for tasks and workflows that have a `schedule` property, given
+   * the queue name is the same.
+   *
+   * Set this to `true` to disable the scheduling of jobs automatically.
+   *
+   * @default false
+   */
+  disableScheduling?: boolean
+  /**
    * The limit for the job. This can be overridden by the user. Defaults to 10.
    */
   limit?: number
@@ -136,19 +145,6 @@ export type JobsConfig = {
    * @default false
    */
   runHooks?: boolean
-  /**
-   * Determines how task / workflow schedules should be handled. This
-   * property needs to be set in order for the `schedule` property to work.
-   *
-   * If set to `cron`, the job system will use cron jobs to run scheduled tasks.
-   * If set to `manual`, you are responsible for handling schedules yourself, for example by calling the `/api/payload-jobs/handle-schedules` endpoints
-   *
-   * @remark On serverless platforms like Vercel, you should use `manual` to avoid issues with cron jobs not running as expected.
-   * You can then use Vercel Cron to call the `/api/payload-jobs/handle-schedules` endpoint at specified intervals
-   *
-   * @default 'manual'
-   */
-  scheduler?: 'cron' | 'manual'
   /**
    * A function that will be executed before Payload picks up jobs which are configured by the `jobs.autorun` function.
    * If this function returns true, jobs will be queried and picked up. If it returns false, jobs will not be run.

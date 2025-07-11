@@ -132,15 +132,8 @@ import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import { countVersionsLocal } from './collections/operations/local/countVersions.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
-import { type JobStats, jobStatsGlobalSlug } from './queues/config/global.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
-import { getQueuesWithSchedules } from './queues/operations/handleSchedules/getQueuesWithSchedules.js'
-import {
-  checkQueueableTimeConstraints,
-  scheduleQueueable,
-} from './queues/operations/handleSchedules/index.js'
 import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
-import { createLocalReq } from './utilities/createLocalReq.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
@@ -857,6 +850,18 @@ export class BasePayload {
         await Promise.all(
           cronJobs.map((cronConfig) => {
             const jobAutorunCron = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+              if (_internal_jobSystemGlobals.shouldAutoSchedule && !cronConfig.disableScheduling) {
+                // First, schedule schedulable jobs
+                if (!this.config.jobs.stats) {
+                  throw new Error(
+                    'The jobs stats global is not enabled, but is required to use autorun with scheduling.',
+                  )
+                }
+                await this.jobs.handleSchedules({
+                  queue: cronConfig.queue,
+                })
+              }
+
               if (!_internal_jobSystemGlobals.shouldAutoRun) {
                 return
               }
@@ -880,45 +885,6 @@ export class BasePayload {
             this.crons.push(jobAutorunCron)
           }),
         )
-      }
-
-      if (this.config.jobs.scheduler === 'cron') {
-        const queuesWithSchedules = getQueuesWithSchedules({
-          jobsConfig: this.config.jobs,
-        })
-
-        for (const [queueName, { schedules }] of Object.entries(queuesWithSchedules)) {
-          for (const schedulable of schedules) {
-            const jobScheduleCron = new Cron(schedulable.scheduleConfig.cron, async () => {
-              if (!_internal_jobSystemGlobals.shouldAutoSchedule) {
-                return
-              }
-
-              const stats: JobStats = await this.db.findGlobal({
-                slug: jobStatsGlobalSlug,
-              })
-
-              const queueable = checkQueueableTimeConstraints({
-                queue: queueName,
-                scheduleConfig: schedulable.scheduleConfig,
-                stats,
-                taskConfig: schedulable.taskConfig,
-                workflowConfig: schedulable.workflowConfig,
-              })
-              if (!queueable) {
-                return
-              }
-
-              await scheduleQueueable({
-                queueable,
-                req: await createLocalReq({}, this),
-                stats,
-              })
-            })
-
-            this.crons.push(jobScheduleCron)
-          }
-        }
       }
     }
 
