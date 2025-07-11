@@ -223,6 +223,20 @@ export default buildConfigWithDefaults({
             },
           ],
         },
+        {
+          type: 'group',
+          name: 'group',
+          fields: [{ name: 'text', type: 'text' }],
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'tab',
+              fields: [{ name: 'text', type: 'text' }],
+            },
+          ],
+        },
       ],
       hooks: {
         beforeOperation: [

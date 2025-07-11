@@ -88,6 +88,8 @@ export const deTranslations: DefaultTranslationsObject = {
     deletingFile: 'Beim Löschen der Datei ist ein Fehler aufgetreten.',
     deletingTitle:
       'Es gab ein Problem während der Löschung von {{title}}. Bitte überprüfe deine Verbindung und versuche es erneut.',
+    documentNotFound:
+      'Das Dokument mit der ID {{id}} konnte nicht gefunden werden. Es könnte gelöscht oder niemals existiert haben, oder Sie haben möglicherweise keinen Zugang dazu.',
     emailOrPasswordIncorrect: 'Die E-Mail-Adresse oder das Passwort sind nicht korrekt.',
     followingFieldsInvalid_one: 'Das folgende Feld ist nicht korrekt:',
     followingFieldsInvalid_other: 'Die folgenden Felder sind nicht korrekt:',

@@ -225,6 +225,9 @@ export const renderListView = async (
 
     const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
 
+    // Check if there's a notFound query parameter (document ID that wasn't found)
+    const notFoundDocId = typeof searchParams?.notFound === 'string' ? searchParams.notFound : null
+
     const serverProps: ListViewServerPropsOnly = {
       collectionConfig,
       data,
@@ -248,6 +251,7 @@ export const renderListView = async (
       },
       collectionConfig,
       description: staticDescription,
+      notFoundDocId,
       payload,
       serverProps,
     })
