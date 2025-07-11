@@ -51,7 +51,6 @@ export const findDistinctOperation = async (
     const {
       collection: { config: collectionConfig },
       disableErrors,
-      limit,
       overrideAccess,
       where,
     } = args

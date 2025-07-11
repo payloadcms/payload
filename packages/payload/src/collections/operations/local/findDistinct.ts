@@ -1,5 +1,6 @@
 import type {
   CollectionSlug,
+  DataFromCollectionSlug,
   Document,
   PaginatedDistinctDocs,
   Payload,
@@ -13,11 +14,14 @@ import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js
 import { APIError, createLocalReq } from '../../../index.js'
 import { findDistinctOperation } from '../findDistinct.js'
 
-export type Options = {
+export type Options<
+  TSlug extends CollectionSlug,
+  TField extends keyof DataFromCollectionSlug<TSlug>,
+> = {
   /**
    * the Collection slug to operate against.
    */
-  collection: CollectionSlug
+  collection: TSlug
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -36,7 +40,7 @@ export type Options = {
   /**
    * The field to get distinct values for
    */
-  field: string
+  field: TField
   /**
    * The maximum distinct field values to be returned.
    * By default the operation returns all the values.
@@ -77,10 +81,13 @@ export type Options = {
   where?: Where
 }
 
-export async function findDistinct(
+export async function findDistinct<
+  TSlug extends CollectionSlug,
+  TField extends keyof DataFromCollectionSlug<TSlug> & string,
+>(
   payload: Payload,
-  options: Options,
-): Promise<PaginatedDistinctDocs<Record<string, unknown>>> {
+  options: Options<TSlug, TField>,
+): Promise<PaginatedDistinctDocs<Record<TField, DataFromCollectionSlug<TSlug>[TField]>>> {
   const {
     collection: collectionSlug,
     depth = 0,
@@ -111,5 +118,5 @@ export async function findDistinct(
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
     sortOrder,
     where,
-  })
+  }) as Promise<PaginatedDistinctDocs<Record<TField, DataFromCollectionSlug<TSlug>[TField]>>>
 }

@@ -474,9 +474,12 @@ export class BasePayload {
    * @param options
    * @returns result with distinct field values
    */
-  findDistinct = async (
-    options: FindDistinctOptions,
-  ): Promise<PaginatedDistinctDocs<Record<string, unknown>>> => {
+  findDistinct = async <
+    TSlug extends CollectionSlug,
+    TField extends keyof DataFromCollectionSlug<TSlug> & string,
+  >(
+    options: FindDistinctOptions<TSlug, TField>,
+  ): Promise<PaginatedDistinctDocs<Record<TField, DataFromCollectionSlug<TSlug>[TField]>>> => {
     return findDistinctLocal(this, options)
   }
 
