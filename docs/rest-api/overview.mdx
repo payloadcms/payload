@@ -100,6 +100,22 @@ The \`find\` endpoint supports the following additional query parameters:
   },
   },
   {
+  operation: "FindDistinct",
+  method: "GET",
+  path: "/api/{collection-slug}/distinct",
+  description: "Get distinct values of a field for the collection",
+  example: {
+  slug: "distinct",
+  req: true,
+  res: {
+  values: ['value-1', 'value-2'],
+  field: "title",
+  totalDocs: 10,
+  perPage: 10
+  },
+  },
+  },
+  {
   operation: "Create",
   method: "POST",
   path: "/api/{collection-slug}",
