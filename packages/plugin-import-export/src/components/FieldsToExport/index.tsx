@@ -1,6 +1,6 @@
 'use client'
 
-import type { CollectionPreferences, SelectFieldClientComponent } from 'payload'
+import type { SelectFieldClientComponent } from 'payload'
 import type { ReactNode } from 'react'
 
 import {
@@ -9,7 +9,7 @@ import {
   useConfig,
   useDocumentInfo,
   useField,
-  usePreferences,
+  useListQuery,
 } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
@@ -24,7 +24,7 @@ export const FieldsToExport: SelectFieldClientComponent = (props) => {
   const { value: collectionSlug } = useField<string>({ path: 'collectionSlug' })
   const { getEntityConfig } = useConfig()
   const { collection } = useImportExport()
-  const { getPreference } = usePreferences()
+  const { query } = useListQuery()
 
   const collectionConfig = getEntityConfig({ collectionSlug: collectionSlug ?? collection })
   const fieldOptions = reduceFields({ fields: collectionConfig?.fields })
@@ -34,24 +34,19 @@ export const FieldsToExport: SelectFieldClientComponent = (props) => {
       return
     }
 
-    const doAsync = async () => {
-      const currentPreferences = await getPreference<{
-        columns: CollectionPreferences['columns']
-      }>(`collection-${collectionSlug}`)
+    const queryColumns = query?.columns
 
-      const columns = currentPreferences?.columns?.filter((a) => a.active).map((b) => b.accessor)
-      setValue(columns ?? collectionConfig?.admin?.defaultColumns ?? [])
+    if (Array.isArray(queryColumns)) {
+      const cleanColumns = queryColumns.filter(
+        (col): col is string => typeof col === 'string' && !col.startsWith('-'),
+      )
+      // If columns are specified in the query, use them
+      setValue(cleanColumns)
+    } else {
+      // Fallback if no columns in query
+      setValue(collectionConfig?.admin?.defaultColumns ?? [])
     }
-
-    void doAsync()
-  }, [
-    getPreference,
-    collection,
-    setValue,
-    collectionSlug,
-    id,
-    collectionConfig?.admin?.defaultColumns,
-  ])
+  }, [id, collectionSlug, query?.columns, collectionConfig?.admin?.defaultColumns, setValue])
 
   const onChange = (options: { id: string; label: ReactNode; value: string }[]) => {
     if (!options) {
