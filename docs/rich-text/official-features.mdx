@@ -10,33 +10,33 @@ Below are all the Rich Text Features Payload offers. Everything is customizable;
 
 ## Features Overview
 
-| Feature Name                        | Included by default | Description                                                                                                                                                                         |
-| ----------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`BoldFeature`**                   | Yes                 | Adds support for bold text formatting.                                                                                                                                              |
-| **`ItalicFeature`**                 | Yes                 | Adds support for italic text formatting.                                                                                                                                            |
-| **`UnderlineFeature`**              | Yes                 | Adds support for underlined text formatting.                                                                                                                                        |
-| **`StrikethroughFeature`**          | Yes                 | Adds support for strikethrough text formatting.                                                                                                                                     |
-| **`SubscriptFeature`**              | Yes                 | Adds support for subscript text formatting.                                                                                                                                         |
-| **`SuperscriptFeature`**            | Yes                 | Adds support for superscript text formatting.                                                                                                                                       |
-| **`InlineCodeFeature`**             | Yes                 | Adds support for inline code formatting.                                                                                                                                            |
-| **`ParagraphFeature`**              | Yes                 | Provides entries in both the slash menu and toolbar dropdown for explicit paragraph creation or conversion.                                                                         |
-| **`HeadingFeature`**                | Yes                 | Adds Heading Nodes (by default, H1 - H6, but that can be customized)                                                                                                                |
-| **`AlignFeature`**                  | Yes                 | Adds support for text alignment (left, center, right, justify)                                                                                                                      |
-| **`IndentFeature`**                 | Yes                 | Adds support for text indentation with toolbar buttons                                                                                                                              |
-| **`UnorderedListFeature`**          | Yes                 | Adds support for unordered lists (ul)                                                                                                                                               |
-| **`OrderedListFeature`**            | Yes                 | Adds support for ordered lists (ol)                                                                                                                                                 |
-| **`ChecklistFeature`**              | Yes                 | Adds support for interactive checklists                                                                                                                                             |
-| **`LinkFeature`**                   | Yes                 | Allows you to create internal and external links                                                                                                                                    |
-| **`RelationshipFeature`**           | Yes                 | Allows you to create block-level (not inline) relationships to other documents                                                                                                      |
-| **`BlockquoteFeature`**             | Yes                 | Allows you to create block-level quotes                                                                                                                                             |
-| **`UploadFeature`**                 | Yes                 | Allows you to create block-level upload nodes - this supports all kinds of uploads, not just images                                                                                 |
-| **`HorizontalRuleFeature`**         | Yes                 | Adds support for horizontal rules / separators. Basically displays an `<hr>` element                                                                                                |
-| **`InlineToolbarFeature`**          | Yes                 | Provides a floating toolbar which appears when you select text. This toolbar only contains actions relevant for selected text                                                       |
-| **`FixedToolbarFeature`**           | No                  | Provides a persistent toolbar pinned to the top and always visible. Both inline and fixed toolbars can be enabled at the same time.                                                 |
-| **`BlocksFeature`**                 | No                  | Allows you to use Payload's [Blocks Field](../fields/blocks) directly inside your editor. In the feature props, you can specify the allowed blocks - just like in the Blocks field. |
-| **`TreeViewFeature`**               | No                  | Provides a debug box under the editor, which allows you to see the current editor state live, the dom, as well as time travel. Very useful for debugging                            |
-| **`EXPERIMENTAL_TableFeature`**     | No                  | Adds support for tables. This feature may be removed or receive breaking changes in the future - even within a stable lexical release, without needing a major release.             |
-| **`EXPERIMENTAL_TextStateFeature`** | No                  | Allows you to store key-value attributes within TextNodes and assign them inline styles.                                                                                            |
+| Feature Name                    | Included by default | Description                                                                                                                                                                         |
+| ------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`BoldFeature`**               | Yes                 | Adds support for bold text formatting.                                                                                                                                              |
+| **`ItalicFeature`**             | Yes                 | Adds support for italic text formatting.                                                                                                                                            |
+| **`UnderlineFeature`**          | Yes                 | Adds support for underlined text formatting.                                                                                                                                        |
+| **`StrikethroughFeature`**      | Yes                 | Adds support for strikethrough text formatting.                                                                                                                                     |
+| **`SubscriptFeature`**          | Yes                 | Adds support for subscript text formatting.                                                                                                                                         |
+| **`SuperscriptFeature`**        | Yes                 | Adds support for superscript text formatting.                                                                                                                                       |
+| **`InlineCodeFeature`**         | Yes                 | Adds support for inline code formatting.                                                                                                                                            |
+| **`ParagraphFeature`**          | Yes                 | Provides entries in both the slash menu and toolbar dropdown for explicit paragraph creation or conversion.                                                                         |
+| **`HeadingFeature`**            | Yes                 | Adds Heading Nodes (by default, H1 - H6, but that can be customized)                                                                                                                |
+| **`AlignFeature`**              | Yes                 | Adds support for text alignment (left, center, right, justify)                                                                                                                      |
+| **`IndentFeature`**             | Yes                 | Adds support for text indentation with toolbar buttons                                                                                                                              |
+| **`UnorderedListFeature`**      | Yes                 | Adds support for unordered lists (ul)                                                                                                                                               |
+| **`OrderedListFeature`**        | Yes                 | Adds support for ordered lists (ol)                                                                                                                                                 |
+| **`ChecklistFeature`**          | Yes                 | Adds support for interactive checklists                                                                                                                                             |
+| **`LinkFeature`**               | Yes                 | Allows you to create internal and external links                                                                                                                                    |
+| **`RelationshipFeature`**       | Yes                 | Allows you to create block-level (not inline) relationships to other documents                                                                                                      |
+| **`BlockquoteFeature`**         | Yes                 | Allows you to create block-level quotes                                                                                                                                             |
+| **`UploadFeature`**             | Yes                 | Allows you to create block-level upload nodes - this supports all kinds of uploads, not just images                                                                                 |
+| **`HorizontalRuleFeature`**     | Yes                 | Adds support for horizontal rules / separators. Basically displays an `<hr>` element                                                                                                |
+| **`InlineToolbarFeature`**      | Yes                 | Provides a floating toolbar which appears when you select text. This toolbar only contains actions relevant for selected text                                                       |
+| **`FixedToolbarFeature`**       | No                  | Provides a persistent toolbar pinned to the top and always visible. Both inline and fixed toolbars can be enabled at the same time.                                                 |
+| **`BlocksFeature`**             | No                  | Allows you to use Payload's [Blocks Field](../fields/blocks) directly inside your editor. In the feature props, you can specify the allowed blocks - just like in the Blocks field. |
+| **`TreeViewFeature`**           | No                  | Provides a debug box under the editor, which allows you to see the current editor state live, the dom, as well as time travel. Very useful for debugging                            |
+| **`EXPERIMENTAL_TableFeature`** | No                  | Adds support for tables. This feature may be removed or receive breaking changes in the future - even within a stable lexical release, without needing a major release.             |
+| **`TextStateFeature`**          | No                  | Allows you to store key-value attributes within TextNodes and assign them inline styles.                                                                                            |
 
 ## In depth
 
@@ -419,7 +419,7 @@ BlocksFeature({
 - Description: Adds support for tables with toolbar button and slash menu entry for creation and editing.
 - Included by default: No
 
-### EXPERIMENTAL_TextStateFeature
+### TextStateFeature
 
 - Description: Allows storing key-value attributes in text nodes with inline styles and toolbar dropdown for style selection.
 - Included by default: No
