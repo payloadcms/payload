@@ -49,7 +49,7 @@ export default buildConfigWithDefaults({
           collection: postsSlug,
           data: {
             title: `Post ${index + 1}`,
-            category: index < 15 ? 'Engineering' : 'Design',
+            category: index < 15 ? category1.id : category2.id,
           },
         }),
       ),
