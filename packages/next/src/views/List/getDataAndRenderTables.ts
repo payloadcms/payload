@@ -61,12 +61,12 @@ export const getDataAndRenderTables = async ({
   if (groupBy) {
     const distinct = await req.payload.findDistinct({
       collection: collectionSlug,
+      depth: 1,
       field: groupBy,
       limit,
       locale: req.locale,
       overrideAccess: false,
-      // page,
-      depth: 1,
+      page,
       req,
       // where: where || {},
     })
@@ -78,8 +78,6 @@ export const getDataAndRenderTables = async ({
     }
 
     if (distinct.values) {
-      let allDocs = []
-
       // NOTE: is there a faster/better way to do this?
       const flattenedFields = flattenAllFields({ fields: collectionConfig.fields })
       const groupByField = flattenedFields.find((f) => f.name === groupBy)
@@ -128,7 +126,7 @@ export const getDataAndRenderTables = async ({
             columnPreferences: collectionPreferences?.columns,
             columns,
             customCellProps,
-            docs: distinctGroup.docs,
+            data: distinctGroup,
             drawerSlug,
             enableRowSelections,
             heading:
@@ -149,7 +147,6 @@ export const getDataAndRenderTables = async ({
 
           dataByGroup[valueOrRelationshipID] = distinctGroup
           ;(Table as Array<React.ReactNode>)[i] = NewTable
-          allDocs = allDocs.concat(distinctGroup.docs)
         }),
       )
 
@@ -163,7 +160,7 @@ export const getDataAndRenderTables = async ({
         columnPreferences: collectionPreferences?.columns,
         columns,
         customCellProps,
-        docs: allDocs,
+        data,
         drawerSlug,
         enableRowSelections,
         i18n: req.i18n,
@@ -194,7 +191,7 @@ export const getDataAndRenderTables = async ({
       columnPreferences: collectionPreferences?.columns,
       columns,
       customCellProps,
-      docs: data.docs,
+      data,
       drawerSlug,
       enableRowSelections,
       i18n: req.i18n,

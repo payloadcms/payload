@@ -64,6 +64,10 @@ export type ListQuery = {
 export type BuildTableStateArgs = {
   collectionSlug: string | string[]
   columns?: ColumnPreference[]
+  data?: PaginatedDocs
+  /**
+   * @deprecated Use `data` instead
+   */
   docs?: PaginatedDocs['docs']
   enableRowSelections?: boolean
   orderableFieldName: string
