@@ -26,6 +26,10 @@ export type Options = {
    */
   context?: RequestContext
   /**
+   * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
+   */
+  depth?: number
+  /**
    * When set to `true`, errors will not be thrown.
    */
   disableErrors?: boolean
@@ -76,9 +80,10 @@ export type Options = {
 export async function findDistinct(
   payload: Payload,
   options: Options,
-): Promise<PaginatedDistinctDocs> {
+): Promise<PaginatedDistinctDocs<Record<string, unknown>>> {
   const {
     collection: collectionSlug,
+    depth = 0,
     disableErrors,
     field,
     limit,
@@ -97,6 +102,7 @@ export async function findDistinct(
 
   return findDistinctOperation({
     collection,
+    depth,
     disableErrors,
     field,
     limit,

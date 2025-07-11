@@ -450,6 +450,45 @@ describe('database', () => {
     expect(resAscDefault.values).toStrictEqual(titles)
   })
 
+  it('should populate distinct relationships when depth>0', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+
+    const categories = ['category-1', 'category-2', 'category-3', 'category-4'].map((title) => ({
+      title,
+    }))
+
+    const categoriesIDS: { category: string }[] = []
+
+    for (const { title } of categories) {
+      const doc = await payload.create({ collection: 'categories', data: { title } })
+      categoriesIDS.push({ category: doc.id })
+    }
+
+    for (const { category } of categoriesIDS) {
+      // eslint-disable-next-line jest/no-conditional-in-test
+      const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
+      for (let i = 0; i < docsCount; i++) {
+        await payload.create({ collection: 'posts', data: { title: randomUUID(), category } })
+      }
+    }
+
+    const resultDepth0 = await payload.findDistinct({ collection: 'posts', field: 'category' })
+    expect(resultDepth0.values).toStrictEqual(categoriesIDS)
+    const resultDepth1 = await payload.findDistinct({
+      depth: 1,
+      collection: 'posts',
+      field: 'category',
+    })
+
+    for (let i = 0; i < resultDepth1.values.length; i++) {
+      const fromRes = resultDepth1.values[i] as any
+      const id = categoriesIDS[i].category as any
+      const title = categories[i]?.title
+      expect(fromRes.category.title).toBe(title)
+      expect(fromRes.category.id).toBe(id)
+    }
+  })
+
   describe('Compound Indexes', () => {
     beforeEach(async () => {
       await payload.delete({ collection: 'compound-indexes', where: {} })

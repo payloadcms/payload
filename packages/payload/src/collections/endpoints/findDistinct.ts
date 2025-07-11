@@ -11,7 +11,8 @@ import { findDistinctOperation } from '../operations/findDistinct.js'
 
 export const findDistinctHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { field, limit, page, sortOrder, where } = req.query as {
+  const { depth, field, limit, page, sortOrder, where } = req.query as {
+    depth?: string
     field?: string
     limit?: string
     page?: string
@@ -25,6 +26,7 @@ export const findDistinctHandler: PayloadHandler = async (req) => {
 
   const result = await findDistinctOperation({
     collection,
+    depth: isNumber(depth) ? Number(depth) : undefined,
     field,
     limit: isNumber(limit) ? Number(limit) : undefined,
     page: isNumber(page) ? Number(page) : undefined,

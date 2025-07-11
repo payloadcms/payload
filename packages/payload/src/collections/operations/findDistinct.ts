@@ -7,11 +7,14 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
+import { relationshipPopulationPromise } from '../../fields/hooks/afterRead/relationshipPopulationPromise.js'
+import { getFieldByPath } from '../../utilities/getFieldByPath.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
   collection: Collection
+  depth?: number
   disableErrors?: boolean
   field: string
   limit?: number
@@ -24,7 +27,7 @@ export type Arguments = {
 }
 export const findDistinctOperation = async (
   incomingArgs: Arguments,
-): Promise<PaginatedDistinctDocs> => {
+): Promise<PaginatedDistinctDocs<Record<string, unknown>>> => {
   let args = incomingArgs
 
   try {
@@ -68,9 +71,14 @@ export const findDistinctOperation = async (
       // If errors are disabled, and access returns false, return empty results
       if (accessResult === false) {
         return {
-          field: args.field,
-          perPage: limit || 0,
+          hasNextPage: false,
+          hasPrevPage: false,
+          limit: args.limit || 0,
+          nextPage: null,
+          pagingCounter: 1,
+          prevPage: null,
           totalDocs: 0,
+          totalPages: 0,
           values: [],
         }
       }
@@ -100,6 +108,37 @@ export const findDistinctOperation = async (
       sortOrder: args.sortOrder,
       where: fullWhere,
     })
+
+    const fieldResult = getFieldByPath({
+      fields: collectionConfig.flattenedFields,
+      path: args.field,
+    })
+
+    if (
+      fieldResult &&
+      (fieldResult.field.type === 'relationship' || fieldResult.field.type === 'upload') &&
+      args.depth
+    ) {
+      const populationPromises: Promise<void>[] = []
+      for (const doc of result.values) {
+        populationPromises.push(
+          relationshipPopulationPromise({
+            currentDepth: 0,
+            depth: args.depth,
+            draft: false,
+            fallbackLocale: null,
+            field: fieldResult.field,
+            locale: req.locale || null,
+            overrideAccess: args.overrideAccess ?? true,
+            parentIsLocalized: false,
+            req,
+            showHiddenFields: false,
+            siblingDoc: doc,
+          }),
+        )
+      }
+      await Promise.all(populationPromises)
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection
