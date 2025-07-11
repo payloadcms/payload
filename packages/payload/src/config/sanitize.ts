@@ -314,11 +314,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
 
     if (hasScheduleProperty) {
-      if (!config.jobs?.scheduler) {
-        throw new InvalidConfiguration(
-          'The jobs.scheduler property must be set when using scheduled tasks or workflows. Otherwise, the schedule property has no effect.',
-        )
-      }
       // Add payload-jobs-stats global for tracking when a job of a specific slug was last run
       ;(config.globals ??= []).push(
         await sanitizeGlobal(
