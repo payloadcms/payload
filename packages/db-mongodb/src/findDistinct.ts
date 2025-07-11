@@ -60,7 +60,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
   const getValues = () => {
     return Model.aggregate(pipeline, { session }).then((res) =>
       res.map((each) => ({
-        [args.field]: each._id,
+        [args.field]: JSON.parse(JSON.stringify(each._id)),
       })),
     )
   }
