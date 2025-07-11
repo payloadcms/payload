@@ -153,6 +153,7 @@ jobs:
       matrix:
         database:
           - mongodb
+          - firestore
           - postgres
           - postgres-custom-schema
           - postgres-uuid
