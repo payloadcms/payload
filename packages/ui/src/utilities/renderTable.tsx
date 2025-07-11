@@ -68,7 +68,7 @@ export const renderTable = ({
   columnPreferences,
   columns: columnsFromArgs,
   customCellProps,
-  docs,
+  data,
   enableRowSelections,
   heading,
   i18n,
@@ -86,7 +86,7 @@ export const renderTable = ({
   columnPreferences: CollectionPreferences['columns']
   columns?: CollectionPreferences['columns']
   customCellProps?: Record<string, unknown>
-  docs: PaginatedDocs['docs']
+  data: PaginatedDocs
   drawerSlug?: string
   enableRowSelections: boolean
   heading?: React.ReactNode
@@ -185,14 +185,14 @@ export const renderTable = ({
       ...sharedArgs,
       collectionSlug: undefined,
       dataType: 'polymorphic',
-      docs,
+      docs: data.docs,
     })
   } else {
     columnState = buildColumnState({
       ...sharedArgs,
       collectionSlug: clientCollectionConfig.slug,
       dataType: 'monomorphic',
-      docs,
+      docs: data.docs,
     })
   }
 
@@ -209,7 +209,7 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: i18n.t('version:type'),
-      renderedCells: docs.map((doc, i) => (
+      renderedCells: data.docs.map((doc, i) => (
         <Pill key={i} size="small">
           {getTranslation(
             collections
@@ -233,7 +233,7 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: <SelectAll />,
-      renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
+      renderedCells: data.docs.map((_, i) => <SelectRow key={i} rowData={data.docs[i]} />),
     } as Column)
   }
 
@@ -246,24 +246,10 @@ export const renderTable = ({
           <Table
             appearance={tableAppearance}
             columns={columnsToUse}
-            data={docs}
+            data={data.docs}
             heading={heading}
           />
-          <GroupByPageControls
-            collectionConfig={clientCollectionConfig}
-            data={{
-              docs: [],
-              hasNextPage: false,
-              hasPrevPage: false,
-              limit: 0,
-              nextPage: 0,
-              page: 0,
-              pagingCounter: 0,
-              prevPage: 0,
-              totalDocs: 0,
-              totalPages: 0,
-            }}
-          />
+          <GroupByPageControls collectionConfig={clientCollectionConfig} data={data} />
         </Fragment>
       ),
     }
@@ -279,7 +265,7 @@ export const renderTable = ({
       hidden: true,
     },
     Heading: <SortHeader />,
-    renderedCells: docs.map((_, i) => <SortRow key={i} />),
+    renderedCells: data.docs.map((_, i) => <SortRow key={i} />),
   } as Column)
 
   return {
@@ -291,24 +277,10 @@ export const renderTable = ({
           appearance={tableAppearance}
           collection={clientCollectionConfig}
           columns={columnsToUse}
-          data={docs}
+          data={data.docs}
           heading={heading}
         />
-        <GroupByPageControls
-          collectionConfig={clientCollectionConfig}
-          data={{
-            docs: [],
-            hasNextPage: false,
-            hasPrevPage: false,
-            limit: 0,
-            nextPage: 0,
-            page: 0,
-            pagingCounter: 0,
-            prevPage: 0,
-            totalDocs: 0,
-            totalPages: 0,
-          }}
-        />
+        <GroupByPageControls collectionConfig={clientCollectionConfig} data={data} />
       </Fragment>
     ),
   }
