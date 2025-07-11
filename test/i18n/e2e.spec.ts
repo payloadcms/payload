@@ -83,10 +83,10 @@ describe('i18n', () => {
   }
 
   test('ensure i18n labels and useTranslation hooks display correct translation', async () => {
-    await page.goto(serverURL + '/admin')
-
     // set language to English
     await setUserLanguage('en')
+
+    await page.goto(serverURL + '/admin')
 
     await expect(
       page.locator('.componentWithDefaultI18n .componentWithDefaultI18nValidT'),
