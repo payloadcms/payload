@@ -10,6 +10,7 @@ type Props = {
  */
 export const getCollectionSlugMap = ({ sanitizedPluginConfig }: Props): CollectionSlugMap => {
   const defaultSlugMap: CollectionSlugMap = {
+    carts: 'carts',
     customers: 'users',
     orders: 'orders',
     products: 'products',
@@ -62,6 +63,13 @@ export const getCollectionSlugMap = ({ sanitizedPluginConfig }: Props): Collecti
     sanitizedPluginConfig.transactions.transactionsCollection?.slug
   ) {
     collectionSlugsMap.transactions = sanitizedPluginConfig.transactions.transactionsCollection.slug
+  }
+
+  if (
+    typeof sanitizedPluginConfig.carts === 'object' &&
+    sanitizedPluginConfig.carts.cartsCollection?.slug
+  ) {
+    collectionSlugsMap.carts = sanitizedPluginConfig.carts.cartsCollection.slug
   }
 
   return collectionSlugsMap

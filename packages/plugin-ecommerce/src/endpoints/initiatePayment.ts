@@ -1,4 +1,4 @@
-import { addDataAndFileToRequest, type Endpoint } from 'payload'
+import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from 'payload'
 
 import type {
   Cart,
@@ -8,6 +8,10 @@ import type {
 } from '../types.js'
 
 type Args = {
+  /**
+   * The slug of the carts collection, defaults to 'carts'.
+   */
+  cartsSlug?: string
   currenciesConfig: CurrenciesConfig
   /**
    * Track inventory stock for the products and variants.
@@ -37,6 +41,7 @@ type InitiatePayment = (args: Args) => Endpoint['handler']
  */
 export const initiatePaymentHandler: InitiatePayment =
   ({
+    cartsSlug = 'carts',
     currenciesConfig,
     paymentMethod,
     productsSlug = 'products',
@@ -49,27 +54,23 @@ export const initiatePaymentHandler: InitiatePayment =
     const payload = req.payload
     const user = req.user
 
-    const currency = (data?.currency as string) || currenciesConfig.defaultCurrency
-    let cart = data?.cart
+    let currency: string = currenciesConfig.defaultCurrency
+    let cartID: DefaultDocumentIDType = data?.cartID
+    let cart = undefined
 
     let customerEmail: string = user?.email ?? ''
 
     if (user) {
-      if (user.cart && Array.isArray(user.cart) && user.cart.length > 0) {
-        // If the user has a cart, use it
-        if (cart && Array.isArray(cart) && cart.length > 0) {
-          return Response.json(
-            {
-              message: 'You cannot initiate a payment with both a user cart and a provided cart.',
-            },
-            {
-              status: 400,
-            },
-          )
+      if (user.cart?.docs && Array.isArray(user.cart.docs) && user.cart.docs.length > 0) {
+        if (!cartID && user.cart.docs[0]) {
+          // Use the user's cart instead
+          if (typeof user.cart.docs[0] === 'object') {
+            cartID = user.cart.docs[0].id
+            cart = user.cart.docs[0]
+          } else {
+            cartID = user.cart.docs[0]
+          }
         }
-
-        // Use the user's cart instead
-        cart = user.cart
       }
     } else {
       // Get the email from the data if user is not available
@@ -87,10 +88,54 @@ export const initiatePaymentHandler: InitiatePayment =
       }
     }
 
+    if (!cart) {
+      if (cartID) {
+        cart = await payload.findByID({
+          id: cartID,
+          collection: cartsSlug,
+          depth: 2,
+          overrideAccess: false,
+          select: {
+            id: true,
+            currency: true,
+            customerEmail: true,
+            items: true,
+            subtotal: true,
+          },
+          user,
+        })
+
+        if (!cart) {
+          return Response.json(
+            {
+              message: `Cart with ID ${cartID} not found.`,
+            },
+            {
+              status: 404,
+            },
+          )
+        }
+      } else {
+        return Response.json(
+          {
+            message: 'Cart ID is required.',
+          },
+          {
+            status: 400,
+          },
+        )
+      }
+    }
+
+    if (cart.currency && typeof cart.currency === 'string') {
+      currency = cart.currency
+    }
+
+    // Ensure the currency is provided or inferred in some way
     if (!currency) {
       return Response.json(
         {
-          message: 'Currency is required',
+          message: 'Currency is required.',
         },
         {
           status: 400,
@@ -98,6 +143,7 @@ export const initiatePaymentHandler: InitiatePayment =
       )
     }
 
+    // Ensure the selected currency is supported
     if (
       !currenciesConfig.supportedCurrencies.find(
         (c) => c.code.toLocaleLowerCase() === currency.toLocaleLowerCase(),
@@ -105,7 +151,7 @@ export const initiatePaymentHandler: InitiatePayment =
     ) {
       return Response.json(
         {
-          message: `Currency ${currency} is not supported`,
+          message: `Currency ${currency} is not supported.`,
         },
         {
           status: 400,
@@ -113,10 +159,11 @@ export const initiatePaymentHandler: InitiatePayment =
       )
     }
 
-    if (!cart || !Array.isArray(cart) || cart.length === 0) {
+    // Verify the cart is available and items are present in an array
+    if (!cart || !cart.items || !Array.isArray(cart.items) || cart.items.length === 0) {
       return Response.json(
         {
-          message: 'Cart is required and must be an array with at least one item',
+          message: 'Cart is required and must contain at least one item.',
         },
         {
           status: 400,
@@ -124,10 +171,7 @@ export const initiatePaymentHandler: InitiatePayment =
       )
     }
 
-    let internalTotal = 0
-    const sanitizedCart: Cart = []
-
-    for (const item of cart) {
+    for (const item of cart.items) {
       // Target field to check the price based on the currency so we can validate the total
       const priceField = `priceIn${currency.toUpperCase()}`
       const quantity = item.quantity || 1
@@ -148,7 +192,7 @@ export const initiatePaymentHandler: InitiatePayment =
         if (!variant) {
           return Response.json(
             {
-              message: `Variant with ID ${item.variant} not found`,
+              message: `Variant with ID ${item.variant} not found.`,
             },
             {
               status: 404,
@@ -159,7 +203,7 @@ export const initiatePaymentHandler: InitiatePayment =
         if (!variant[priceField]) {
           return Response.json(
             {
-              message: `Variant with ID ${item.variant} does not have a price in ${currency}`,
+              message: `Variant with ID ${item.variant} does not have a price in ${currency}.`,
             },
             {
               status: 400,
@@ -170,25 +214,13 @@ export const initiatePaymentHandler: InitiatePayment =
         if (variant.inventory === 0 || (variant.inventory && variant.inventory < quantity)) {
           return Response.json(
             {
-              message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory`,
+              message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory.`,
             },
             {
               status: 400,
             },
           )
         }
-
-        sanitizedCart.push({
-          productID: item.product
-            ? typeof item.product === 'object'
-              ? item.product.id
-              : item.product
-            : null,
-          quantity,
-          variantID: id,
-        })
-
-        internalTotal += variant[priceField] * quantity
       }
 
       // If the item has a product but no variant, we assume the product has a price in the specified currency
@@ -207,7 +239,7 @@ export const initiatePaymentHandler: InitiatePayment =
         if (!product) {
           return Response.json(
             {
-              message: `Product with ID ${item.product} not found`,
+              message: `Product with ID ${item.product} not found.`,
             },
             {
               status: 404,
@@ -217,7 +249,7 @@ export const initiatePaymentHandler: InitiatePayment =
         if (!product[priceField]) {
           return Response.json(
             {
-              message: `Product with ID ${item.product} does not have a price in ${currency}`,
+              message: `Product with ID ${item.product} does not have a price in ${currency}.`,
             },
             {
               status: 400,
@@ -228,30 +260,22 @@ export const initiatePaymentHandler: InitiatePayment =
         if (product.inventory === 0 || (product.inventory && product.inventory < quantity)) {
           return Response.json(
             {
-              message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory`,
+              message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory.`,
             },
             {
               status: 400,
             },
           )
         }
-
-        sanitizedCart.push({
-          productID: id,
-          quantity,
-        })
-
-        internalTotal += product[priceField] * quantity
       }
     }
 
     try {
       const paymentResponse = await paymentMethod.initiatePayment({
         data: {
-          cart: sanitizedCart,
+          cart,
           currency,
           customerEmail,
-          total: internalTotal,
         },
         req,
         transactionsSlug,
@@ -259,11 +283,11 @@ export const initiatePaymentHandler: InitiatePayment =
 
       return Response.json(paymentResponse)
     } catch (error) {
-      payload.logger.error(error, 'Error initiating payment')
+      payload.logger.error(error, 'Error initiating payment.')
 
       return Response.json(
         {
-          message: 'Error initiating payment',
+          message: 'Error initiating payment.',
         },
         {
           status: 500,

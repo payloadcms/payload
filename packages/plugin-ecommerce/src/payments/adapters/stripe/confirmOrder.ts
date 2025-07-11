@@ -1,6 +1,6 @@
 import Stripe from 'stripe'
 
-import type { Cart, PaymentAdapter } from '../../../types.js'
+import type { PaymentAdapter } from '../../../types.js'
 import type { StripeAdapterArgs } from './index.js'
 
 type Props = {
@@ -11,12 +11,18 @@ type Props = {
 
 export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confirmOrder'] =
   (props) =>
-  async ({ data, ordersSlug, req, transactionsSlug }) => {
+  async ({
+    cartsSlug = 'carts',
+    data,
+    ordersSlug = 'orders',
+    req,
+    transactionsSlug = 'transactions',
+  }) => {
     const payload = req.payload
     const { apiVersion, appInfo, secretKey } = props || {}
 
     const customerEmail = data.customerEmail
-    const cart = data.cart
+    const user = req.user
 
     const paymentIntentID = data.paymentIntentID as string
 
@@ -71,7 +77,26 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
       // Verify the payment intent exists and retrieve it
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentID)
 
-      const cartToUse = (JSON.parse(paymentIntent.metadata.cart || '[]') as Cart) || cart
+      const cartToUse = paymentIntent.metadata.cartID
+
+      if (!cartToUse) {
+        throw new Error('Cart ID not found in the PaymentIntent metadata')
+      }
+
+      const cart = await payload.findByID({
+        id: cartToUse,
+        collection: cartsSlug,
+        depth: 2,
+        overrideAccess: false,
+        select: {
+          id: true,
+          currency: true,
+          customerEmail: true,
+          items: true,
+          subtotal: true,
+        },
+        user,
+      })
 
       const order = await payload.create({
         collection: ordersSlug,
@@ -80,6 +105,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
           cart: cartToUse,
           currency: paymentIntent.currency.toUpperCase(),
           ...(req.user ? { customer: req.user.id } : { customerEmail }),
+          items: cart.items,
           status: 'processing',
           transactions: [transaction.id],
         },

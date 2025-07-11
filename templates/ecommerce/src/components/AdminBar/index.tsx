@@ -33,7 +33,12 @@ export const AdminBar: React.FC<{
   const collection = collectionLabels?.[segments?.[1]] ? segments?.[1] : 'pages'
 
   const onAuthChange = React.useCallback((user) => {
-    setShow(user?.id)
+    const canSeeAdmin =
+      user?.roles &&
+      Array.isArray(user?.roles) &&
+      (user?.roles?.includes('admin') || user?.roles?.includes('editor'))
+
+    setShow(canSeeAdmin)
   }, [])
 
   return (
@@ -53,7 +58,6 @@ export const AdminBar: React.FC<{
             user: 'text-white',
           }}
           cmsURL={process.env.NEXT_PUBLIC_SERVER_URL}
-          collection={collection}
           collectionLabels={{
             plural: collectionLabels[collection]?.plural || 'Pages',
             singular: collectionLabels[collection]?.singular || 'Page',

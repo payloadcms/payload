@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import React, { Fragment } from 'react'
 
-import { CheckoutPage } from './CheckoutPage'
+import { CheckoutPage } from '@/components/checkout/CheckoutPage'
 
 export default function Checkout() {
   return (

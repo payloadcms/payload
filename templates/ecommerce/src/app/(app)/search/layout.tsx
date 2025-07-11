@@ -9,7 +9,7 @@ export default function SearchLayout({ children }: { children: React.ReactNode }
     <React.Fragment>
       <div className="container flex flex-col gap-8 my-16 pb-4 ">
         <Search />
-        <div className="w-full flex-none">
+        <div className="w-full flex-none flex gap-4">
           <Categories />
           <FilterList list={sorting} title="Sort by" />
         </div>

@@ -3,6 +3,7 @@ import type {
   DefaultDocumentIDType,
   Endpoint,
   Field,
+  GeneratedTypes,
   GroupField,
   PayloadRequest,
   TypedCollection,
@@ -14,22 +15,21 @@ export type CollectionOverride = { fields?: FieldsOverride } & Partial<
 >
 
 export type CartItem = {
-  productID: DefaultDocumentIDType
+  id: DefaultDocumentIDType
+  product: DefaultDocumentIDType | TypedCollection['products']
   quantity: number
-  variantID?: DefaultDocumentIDType
+  variant?: DefaultDocumentIDType | TypedCollection['variants']
 }
 
-export type Cart = CartItem[]
-
-export type CartItemClient = {
-  product: TypedCollection['products']
-  productID: DefaultDocumentIDType
-  quantity: number
-  variant?: TypedCollection['variants']
-  variantID?: DefaultDocumentIDType
+type DefaultCartType = {
+  currency?: string
+  customer?: DefaultDocumentIDType | TypedCollection['customers']
+  id: DefaultDocumentIDType
+  items: CartItem[]
+  subtotal?: number
 }
 
-export type CartClient = CartItemClient[]
+export type Cart = DefaultCartType
 
 /**
  * The full payment adapter config expected as part of the config for the Ecommerce plugin.
@@ -38,22 +38,27 @@ export type CartClient = CartItemClient[]
  */
 export type PaymentAdapter = {
   confirmOrder: (args: {
+    /**
+     * The slug of the carts collection, defaults to 'carts'.
+     * For example, this is used to retrieve the cart for the order.
+     */
+    cartsSlug?: string
     data: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       [key: string]: any // Allows for additional data to be passed through, such as payment method specific data
       cart: Cart
-      customerEmail: string
+      customerEmail?: string
     }
     /**
      * The slug of the orders collection, defaults to 'orders'.
      */
-    ordersSlug: string
+    ordersSlug?: string
     req: PayloadRequest
     /**
      * The slug of the transactions collection, defaults to 'transactions'.
      * For example, this is used to create a record of the payment intent in the transactions collection.
      */
-    transactionsSlug: string
+    transactionsSlug?: string
   }) => Promise<Record<string, unknown>> | Record<string, unknown>
   /**
    * An array of endpoints to be bootstrapped to Payload's API in order to support the payment method. All API paths are relative to `/api/payments/{provider_name}`.
@@ -100,8 +105,7 @@ export type PaymentAdapter = {
     data: {
       cart: Cart
       currency: string
-      customerEmail: string
-      total: number
+      customerEmail?: string
     }
     req: PayloadRequest
     /**
@@ -234,6 +238,7 @@ export type CurrenciesConfig = {
  * Provides an easy way to track the slugs of collections even when they are overridden.
  */
 export type CollectionSlugMap = {
+  carts: string
   customers: string
   orders: string
   products: string

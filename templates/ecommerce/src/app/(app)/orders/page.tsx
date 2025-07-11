@@ -3,48 +3,38 @@ import type { Metadata } from 'next'
 
 import { RenderParams } from '@/components/RenderParams'
 
-import { getMeUser } from '@/utilities/getMeUser'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 
-import { notFound } from 'next/navigation'
 import React from 'react'
 import { AccountNav } from '@/components/AccountNav'
 import { OrderItem } from '@/components/OrderItem'
+import { headers as getHeaders } from 'next/headers'
+import configPromise from '@payload-config'
+import { getPayload } from 'payload'
 
 export default async function Orders() {
-  const { token } = await getMeUser({
-    nullUserRedirect: `/login?error=${encodeURIComponent(
-      'You must be logged in to view your orders.',
-    )}&redirect=${encodeURIComponent('/orders')}`,
-  })
+  const headers = await getHeaders()
+  const payload = await getPayload({ config: configPromise })
+  const { user } = await payload.auth({ headers })
 
   let orders: Order[] | null = null
 
   try {
-    orders = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders?depth=0&sort=-createdAt`,
-      {
-        cache: 'no-store',
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
+    const ordersResult = await payload.find({
+      collection: 'orders',
+      limit: 0,
+      pagination: false,
+      user,
+      overrideAccess: false,
+      where: {
+        customer: {
+          equals: user?.id,
         },
       },
-    )
-      ?.then(async (res) => {
-        if (!res.ok) notFound()
-        const json = await res.json()
-        if ('error' in json && json.error) notFound()
-        if ('errors' in json && json.errors) notFound()
-        return json
-      })
-      ?.then((json) => json.docs)
-  } catch (error) {
-    // when deploying this template on Payload Cloud, this page needs to build before the APIs are live
-    // so swallow the error here and simply render the page with fallback data where necessary
-    // in production you may want to redirect to a 404  page or at least log the error somewhere
-    // console.error(error)
-  }
+    })
+
+    orders = ordersResult?.docs || []
+  } catch (error) {}
 
   return (
     <div className="container my-16">

@@ -1,13 +1,13 @@
-import type { DefaultDocumentIDType, TypedCollection } from 'payload'
+import type {
+  DefaultDocumentIDType,
+  PopulateType,
+  SelectType,
+  TypedCollection,
+  Where,
+} from 'payload'
 import type React from 'react'
 
-import type {
-  CartClient,
-  CartItemClient,
-  CurrenciesConfig,
-  Currency,
-  PaymentAdapterClient,
-} from '../../types.js'
+import type { CurrenciesConfig, Currency, PaymentAdapterClient } from '../../types.js'
 
 export type SyncLocalStorageConfig = {
   /**
@@ -17,7 +17,35 @@ export type SyncLocalStorageConfig = {
   key?: string
 }
 
+type APIProps = {
+  /**
+   * The route for the Payload API, defaults to `/api`.
+   */
+  apiRoute?: string
+  /**
+   * Customise the query used to fetch carts. Use this when you need to fetch additional data and optimise queries using depth, select and populate.
+   *
+   * Defaults to `{ depth: 0 }`.
+   */
+  cartsFetchQuery?: {
+    depth?: number
+    populate?: PopulateType
+    select?: SelectType
+  }
+  /**
+   * The route for the Payload API, defaults to ``. Eg for a Payload app running on `http://localhost:3000`, the default serverURL would be `http://localhost:3000`.
+   */
+  serverURL?: string
+}
+
 export type ContextProps = {
+  api?: APIProps
+  /**
+   * The slug for the carts collection.
+   * This is used in fetch requests to identify the carts collection.
+   * Defaults to 'carts'.
+   */
+  cartsSlug?: string
   children?: React.ReactNode
   /**
    * The configuration for currencies used in the ecommerce context.
@@ -32,6 +60,17 @@ export type ContextProps = {
    */
   customersSlug?: string
   /**
+   * Enable debug mode for the ecommerce context.
+   * Defaults to false.
+   */
+  debug?: boolean
+  /**
+   * Whether to enable support for variants in the cart.
+   * This allows adding products with specific variants to the cart.
+   * Defaults to false.
+   */
+  enableVariants?: boolean
+  /**
    * Supported payment methods for the ecommerce context.
    */
   paymentMethods?: PaymentAdapterClient[]
@@ -42,6 +81,9 @@ export type ContextProps = {
   syncLocalStorage?: boolean | SyncLocalStorageConfig
 }
 
+/**
+ * Type used internally to represent the cart item to be added.
+ */
 type CartItemArgument = {
   /**
    * The ID of the product to add to the cart. Always required.
@@ -53,7 +95,7 @@ type CartItemArgument = {
   variant?: DefaultDocumentIDType
 }
 
-export type EcommerceContext<TCart = TypedCollection['carts']> = {
+export type EcommerceContext = {
   /**
    * Add an item to the cart.
    */
@@ -80,19 +122,20 @@ export type EcommerceContext<TCart = TypedCollection['carts']> = {
     options?: { additionalData: Record<string, unknown> },
   ) => Promise<unknown>
   /**
-   * The currently selected currency for the cart.
-   * This is used for calculations and price formatting.
+   * The configuration for the currencies used in the ecommerce context.
+   */
+  currenciesConfig: CurrenciesConfig
+  /**
+   * The currently selected currency used for the cart and price formatting automatically.
    */
   currency: Currency
   /**
-   * Decrement an item in the cart by its variant ID or product ID.
-   * If the item has a variantID, it will be used; otherwise, productID will be used.
+   * Decrement an item in the cart by its index ID.
    * If quantity reaches 0, the item will be removed from the cart.
    */
   decrementItem: (item: DefaultDocumentIDType) => Promise<void>
   /**
-   * Increment an item in the cart by its variant ID or product ID.
-   * If the item has a variantID, it will be used; otherwise, productID will be used.
+   * Increment an item in the cart by its index ID.
    */
   incrementItem: (item: DefaultDocumentIDType) => Promise<void>
   /**
@@ -108,9 +151,9 @@ export type EcommerceContext<TCart = TypedCollection['carts']> = {
    *
    */
   paymentData?: Record<string, unknown>
+  paymentMethods: PaymentAdapterClient[]
   /**
-   * Remove an item from the cart by its variant ID or product ID.
-   * If the item has a variantID, it will be used; otherwise, productID will be used.
+   * Remove an item from the cart by its index ID.
    */
   removeItem: (item: DefaultDocumentIDType) => Promise<void>
   /**
@@ -124,32 +167,3 @@ export type EcommerceContext<TCart = TypedCollection['carts']> = {
    */
   setCurrency: (currency: string) => void
 }
-
-export type CartAction =
-  | {
-      payload: CartClient
-      type: 'MERGE_CART'
-    }
-  | {
-      payload: CartClient
-      type: 'SET_CART'
-    }
-  | {
-      payload: CartItemClient
-      type: 'ADD_ITEM'
-    }
-  | {
-      payload: DefaultDocumentIDType
-      type: 'DECREMENT_QUANTITY'
-    }
-  | {
-      payload: DefaultDocumentIDType
-      type: 'INCREMENT_QUANTITY'
-    }
-  | {
-      payload: DefaultDocumentIDType
-      type: 'REMOVE_ITEM'
-    }
-  | {
-      type: 'CLEAR_CART'
-    }

@@ -1,44 +1,39 @@
 'use client'
-import type { DefaultDocumentIDType, TypedCollection, TypedUser } from 'payload'
-
+import { type DefaultDocumentIDType, type TypedCollection, type TypedUser } from 'payload'
+import { deepMergeSimple } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, {
-  createContext,
-  use,
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from 'react'
+import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { CartClient, CartItemClient, Currency } from '../../types.js'
+import type { CartItem, Currency } from '../../types.js'
 import type { ContextProps, EcommerceContext as EcommerceContextType } from './types.js'
 
-import { cartReducer } from './reducer.js'
-
-const initialCart = ''
-
 const defaultContext: EcommerceContextType = {
-  addItem: () => new Promise((resolve) => resolve()),
-  cart: initialCart,
-  clearCart: () => {},
+  addItem: async () => {},
+  clearCart: async () => {},
   confirmOrder: async () => {},
+  currenciesConfig: {
+    defaultCurrency: 'USD',
+    supportedCurrencies: [
+      {
+        code: 'USD',
+        decimals: 2,
+        label: 'US Dollar',
+        symbol: '$',
+      },
+    ],
+  },
   currency: {
     code: 'USD',
     decimals: 2,
     label: 'US Dollar',
     symbol: '$',
   },
-  decrementItem: () => {},
-  incrementItem: () => {},
+  decrementItem: async () => {},
+  incrementItem: async () => {},
   initiatePayment: async () => {},
-  paymentData: {},
-  removeItem: () => {},
-  selectedPaymentMethod: undefined,
+  paymentMethods: [],
+  removeItem: async () => {},
   setCurrency: () => {},
-  subTotal: 0,
 }
 
 const EcommerceContext = createContext<EcommerceContextType>(defaultContext)
@@ -48,6 +43,8 @@ const defaultLocalStorage = {
 }
 
 export const EcommerceProvider: React.FC<ContextProps> = ({
+  api,
+  cartsSlug = 'carts',
   children,
   currenciesConfig = {
     defaultCurrency: 'USD',
@@ -72,11 +69,13 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         }
       : defaultLocalStorage
 
+  const { apiRoute = '/api', cartsFetchQuery = {}, serverURL = '' } = api || {}
+
   /**
    * The payment data received from the payment initiation process, this is then threaded through to the payment confirmation process.
    * Useful for storing things like payment intent IDs, session IDs, etc.
    */
-  const [paymentData, setPaymentData] = useState<EcommerceContextType['paymentData']>({})
+  const [paymentData, setPaymentData] = useState<EcommerceContextType['paymentData']>()
 
   const [user, setUser] = useState<null | TypedUser>(null)
 
@@ -102,17 +101,15 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
   const cartQuery = useMemo(() => {
     const priceField = `priceIn${selectedCurrency.code}`
 
-    return {
-      depth: 2,
+    const baseQuery = {
+      depth: 0,
       populate: {
         products: {
-          slug: true,
           [priceField]: true,
-          title: true,
         },
         variants: {
+          options: true,
           [priceField]: true,
-          title: true,
         },
       },
       select: {
@@ -120,13 +117,15 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         subtotal: true,
       },
     }
-  }, [selectedCurrency.code])
+
+    return deepMergeSimple(baseQuery, cartsFetchQuery)
+  }, [selectedCurrency.code, cartsFetchQuery])
 
   const createCart = useCallback(
     async (initialData: Record<string, unknown>) => {
       const query = qs.stringify(cartQuery)
 
-      const response = await fetch(`/api/carts?${query}`, {
+      const response = await fetch(`/api/${cartsSlug}?${query}`, {
         body: JSON.stringify({
           ...initialData,
           currency: selectedCurrency.code,
@@ -152,14 +151,14 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
       return data.doc as TypedCollection['carts']
     },
-    [cartQuery, selectedCurrency.code, user?.id],
+    [cartQuery, cartsSlug, selectedCurrency.code, user?.id],
   )
 
   const getCart = useCallback(
     async (cartID: DefaultDocumentIDType) => {
       const query = qs.stringify(cartQuery)
 
-      const response = await fetch(`/api/carts/${cartID}?${query}`, {
+      const response = await fetch(`/api/${cartsSlug}/${cartID}?${query}`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -177,14 +176,14 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
       return data as TypedCollection['carts']
     },
-    [cartQuery],
+    [cartQuery, cartsSlug],
   )
 
   const updateCart = useCallback(
     async (cartID: DefaultDocumentIDType, data: Partial<TypedCollection['carts']>) => {
       const query = qs.stringify(cartQuery)
 
-      const response = await fetch(`/api/carts/${cartID}?${query}`, {
+      const response = await fetch(`/api/${cartsSlug}/${cartID}?${query}`, {
         body: JSON.stringify(data),
         credentials: 'include',
         headers: {
@@ -201,7 +200,28 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       const updatedCart = await response.json()
       setCart(updatedCart.doc as TypedCollection['carts'])
     },
-    [cartQuery],
+    [cartQuery, cartsSlug],
+  )
+
+  const deleteCart = useCallback(
+    async (cartID: DefaultDocumentIDType) => {
+      const response = await fetch(`/api/${cartsSlug}/${cartID}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to update cart: ${errorText}`)
+      }
+
+      setCart(undefined)
+      setCartID(undefined)
+    },
+    [cartsSlug],
   )
 
   useEffect(() => {
@@ -226,7 +246,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         }
 
         // Check if the item already exists in the cart
-        const existingItemIndex = existingCart.items.findIndex((cartItem) => {
+        const existingItemIndex = existingCart.items.findIndex((cartItem: CartItem) => {
           const productID =
             typeof cartItem.product === 'object' ? cartItem.product.id : item.product
           const variantID =
@@ -286,7 +306,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       }
 
       // Check if the item already exists in the cart
-      const existingItemIndex = existingCart.items.findIndex((cartItem) => cartItem.id === targetID)
+      const existingItemIndex = existingCart.items.findIndex(
+        (cartItem: CartItem) => cartItem.id === targetID,
+      )
 
       if (existingItemIndex !== -1) {
         // If the item exists, remove it from the cart
@@ -318,7 +340,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       }
 
       // Check if the item already exists in the cart
-      const existingItemIndex = existingCart.items.findIndex((cartItem) => cartItem.id === targetID)
+      const existingItemIndex = existingCart.items.findIndex(
+        (cartItem: CartItem) => cartItem.id === targetID,
+      )
 
       let updatedItems = [...existingCart.items]
 
@@ -357,7 +381,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       }
 
       // Check if the item already exists in the cart
-      const existingItemIndex = existingCart.items.findIndex((cartItem) => cartItem.id === targetID)
+      const existingItemIndex = existingCart.items.findIndex(
+        (cartItem: CartItem) => cartItem.id === targetID,
+      )
 
       const updatedItems = [...existingCart.items]
 
@@ -380,8 +406,10 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
   )
 
   const clearCart: EcommerceContextType['clearCart'] = useCallback(async () => {
-    // dispatchCart({ type: 'CLEAR_CART' })
-  }, [])
+    if (cartID) {
+      await deleteCart(cartID)
+    }
+  }, [cartID, deleteCart])
 
   const setCurrency: EcommerceContextType['setCurrency'] = useCallback(
     (currency) => {
@@ -401,10 +429,14 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
   const initiatePayment = useCallback<EcommerceContextType['initiatePayment']>(
     async (paymentMethodID, options) => {
-      const paymentMethod = paymentMethods.find((pm) => pm.name === paymentMethodID)
+      const paymentMethod = paymentMethods.find((method) => method.name === paymentMethodID)
 
       if (!paymentMethod) {
         throw new Error(`Payment method with ID "${paymentMethodID}" not found`)
+      }
+
+      if (!cartID) {
+        throw new Error(`No cart is provided.`)
       }
 
       setSelectedPaymentMethod(paymentMethodID)
@@ -413,7 +445,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         const fetchURL = `/api/payments/${paymentMethodID}/initiate`
 
         const data = {
-          cart: Array.from(cart.values()),
+          cartID,
           currency: selectedCurrency.code,
         }
 
@@ -447,12 +479,12 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         throw new Error(`Payment method "${paymentMethodID}" does not support payment initiation`)
       }
     },
-    [cart, paymentMethods, selectedCurrency.code],
+    [cartID, paymentMethods, selectedCurrency.code],
   )
 
   const confirmOrder = useCallback<EcommerceContextType['initiatePayment']>(
     async (paymentMethodID, options) => {
-      if (!cart || cart.size === 0) {
+      if (!cartID) {
         throw new Error(`Cart is empty.`)
       }
 
@@ -466,7 +498,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         const fetchURL = `/api/payments/${paymentMethodID}/confirm-order`
 
         const data = {
-          cart: Array.from(cart.values()),
+          cartID,
           currency: selectedCurrency.code,
           ...paymentData,
         }
@@ -502,7 +534,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         throw new Error(`Payment method "${paymentMethodID}" does not support order confirmation`)
       }
     },
-    [cart, paymentData, paymentMethods, selectedCurrency.code],
+    [cartID, paymentData, paymentMethods, selectedCurrency.code],
   )
 
   const getUser = useCallback(async () => {
@@ -511,10 +543,11 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         depth: 0,
         select: {
           id: true,
+          carts: true,
         },
       })
 
-      const response = await fetch(`/api/users/me?${query}`, {
+      const response = await fetch(`/api/${customersSlug}/me?${query}`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -526,19 +559,22 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         const errorText = await response.text()
         throw new Error(`Failed to fetch user: ${errorText}`)
       }
+
       const userData = await response.json()
+
       if (userData.error) {
         throw new Error(`User fetch error: ${userData.error}`)
       }
 
       if (userData.user) {
-        setUser(userData.user)
+        setUser(userData.user as TypedUser)
+        return userData.user as TypedUser
       }
     } catch (error) {
       console.error('Error fetching user:', error)
       setUser(null)
     }
-  }, [])
+  }, [customersSlug])
 
   // If localStorage is enabled, we can add logic to persist the cart state
   useEffect(() => {
@@ -548,7 +584,6 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         if (storedCart) {
           getCart(storedCart)
             .then((fetchedCart) => {
-              console.log('Fetched cart from localStorage:', fetchedCart)
               setCart(fetchedCart)
               setCartID(storedCart as DefaultDocumentIDType)
             })
@@ -556,15 +591,34 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
               // console.error('Error fetching cart from localStorage:', error)
               // If there's an error fetching the cart, we can clear it from localStorage
               localStorage.removeItem(localStorageConfig.key)
-              // setCartID(undefined)
-              // setCart(undefined)
+              setCartID(undefined)
+              setCart(undefined)
             })
         }
       }
 
-      void getUser()
-
       hasRendered.current = true
+
+      void getUser().then((user) => {
+        if (user && user.cart?.docs && user.cart.docs.length > 0) {
+          // If the user has carts, we can set the cartID to the first cart
+          const cartID =
+            typeof user.cart.docs[0] === 'object' ? user.cart.docs[0].id : user.cart.docs[0]
+
+          if (cartID) {
+            getCart(cartID)
+              .then((fetchedCart) => {
+                setCart(fetchedCart)
+                setCartID(cartID)
+              })
+              .catch((error) => {
+                // console.error('Error fetching user cart:', error)
+                setCart(undefined)
+                setCartID(undefined)
+              })
+          }
+        }
+      })
     }
   }, [getCart, getUser, localStorageConfig.key, syncLocalStorage])
 
@@ -575,11 +629,13 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         cart,
         clearCart,
         confirmOrder,
+        currenciesConfig,
         currency: selectedCurrency,
         decrementItem,
         incrementItem,
         initiatePayment,
         paymentData,
+        paymentMethods,
         removeItem,
         selectedPaymentMethod,
         setCurrency,
@@ -591,7 +647,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 }
 
 export const useEcommerce = () => {
-  const context = use<EcommerceContextType<any>>(EcommerceContext)
+  const context = use(EcommerceContext)
 
   if (!context) {
     throw new Error('useEcommerce must be used within an EcommerceProvider')
@@ -601,7 +657,7 @@ export const useEcommerce = () => {
 }
 
 export const useCurrency = () => {
-  const { currency, setCurrency } = useEcommerce()
+  const { currenciesConfig, currency, setCurrency } = useEcommerce()
 
   const formatCurrency = useCallback(
     (value?: null | number, options?: { currency?: Currency }): string => {
@@ -628,7 +684,12 @@ export const useCurrency = () => {
     throw new Error('useCurrency must be used within an EcommerceProvider')
   }
 
-  return { currency, formatCurrency, setCurrency }
+  return {
+    currency,
+    formatCurrency,
+    setCurrency,
+    supportedCurrencies: currenciesConfig.supportedCurrencies,
+  }
 }
 
 export const useCart = () => {
@@ -642,11 +703,12 @@ export const useCart = () => {
 }
 
 export const usePayments = () => {
-  const { confirmOrder, initiatePayment, paymentData, selectedPaymentMethod } = useEcommerce()
+  const { confirmOrder, initiatePayment, paymentData, paymentMethods, selectedPaymentMethod } =
+    useEcommerce()
 
   if (!initiatePayment) {
     throw new Error('usePayments must be used within an EcommerceProvider')
   }
 
-  return { confirmOrder, initiatePayment, paymentData, selectedPaymentMethod }
+  return { confirmOrder, initiatePayment, paymentData, paymentMethods, selectedPaymentMethod }
 }

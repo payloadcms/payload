@@ -1,4 +1,5 @@
 import { OrderStatus } from '@/components/OrderStatus'
+import { Price } from '@/components/Price'
 import { Button } from '@/components/ui/button'
 import { Order } from '@/payload-types'
 import { formatDateTime } from '@/utilities/formatDateTime'
@@ -21,13 +22,17 @@ export const OrderItem: React.FC<Props> = ({ order }) => {
             </time>
           </p>
 
-          <OrderStatus status={order.status} />
+          {order.status && <OrderStatus status={order.status} />}
         </div>
 
         <p className="flex gap-2 text-xs text-primary/80">
           <span>{order.items?.length} Items</span>
-          <span>•</span>
-          <span>{order.total}</span>
+          {order.amount && (
+            <>
+              <span>•</span>
+              <Price amount={order.amount} currencyCode={order.currency ?? undefined} />
+            </>
+          )}
         </p>
       </div>
 

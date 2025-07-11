@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Product } from '@/payload-types'
 
 export function CartModal() {
-  const { cart } = useCart()
+  const { cart, clearCart } = useCart()
   const [isOpen, setIsOpen] = useState(false)
   const quantityRef = useRef(
     cart?.items?.length
@@ -64,9 +64,9 @@ export function CartModal() {
         </SheetHeader>
 
         {!cart || cart?.items?.length === 0 ? (
-          <div>
+          <div className="text-center flex flex-col items-center gap-2">
             <ShoppingCart className="h-16" />
-            <p className="mt-6 text-center text-2xl font-bold">Your cart is empty.</p>
+            <p className="text-center text-2xl font-bold">Your cart is empty.</p>
           </div>
         ) : (
           <div className="grow flex px-4">
@@ -124,7 +124,8 @@ export function CartModal() {
                               <p className="text-sm text-neutral-500 dark:text-neutral-400 capitalize">
                                 {variant.options
                                   ?.map((option) => {
-                                    return option.slug
+                                    if (typeof option === 'object') return option.label
+                                    return null
                                   })
                                   .join(', ')}
                               </p>
@@ -151,6 +152,7 @@ export function CartModal() {
                   )
                 })}
               </ul>
+
               <div className="px-4">
                 <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
                   {cart?.subtotal && (

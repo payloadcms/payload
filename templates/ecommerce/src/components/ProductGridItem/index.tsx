@@ -4,9 +4,10 @@ import Link from 'next/link'
 import React from 'react'
 import clsx from 'clsx'
 import { Media } from '@/components/Media'
+import { Price } from '@/components/Price'
 
 export function ProductGridItem({ product }: { product: Partial<Product> }) {
-  const { gallery, price, title } = product
+  const { gallery, priceInUSD, title } = product
 
   const image = gallery?.[0] && typeof gallery[0] !== 'string' ? gallery[0] : false
 
@@ -29,7 +30,11 @@ export function ProductGridItem({ product }: { product: Partial<Product> }) {
       <div className="font-mono text-primary/50 group-hover:text-primary/100 flex justify-between items-center mt-4">
         <div>{title}</div>
 
-        {price && <div className="">{price}</div>}
+        {priceInUSD && (
+          <div className="">
+            <Price amount={priceInUSD} />
+          </div>
+        )}
       </div>
     </Link>
   )

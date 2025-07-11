@@ -63,8 +63,6 @@ export default async function ProductPage({ params }: Args) {
 
   if (!product) return notFound()
 
-  console.log({ product })
-
   const metaImage = typeof product.meta?.image !== 'string' ? product.meta?.image : undefined
   const hasStock = product.enableVariants
     ? product?.variants?.docs?.some((variant) => {
@@ -163,8 +161,7 @@ function RelatedProducts({ products }: { products: Product[] }) {
             <Link className="relative h-full w-full" href={`/product/${product.slug}`}>
               <GridTileImage
                 label={{
-                  amount: product.price!,
-                  currencyCode: 'usd',
+                  amount: product.priceInUSD,
                   title: product.title,
                 }}
                 media={product.meta?.image as Media}

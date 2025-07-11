@@ -14,6 +14,23 @@ export const Providers: React.FC<{
       <AuthProvider>
         <HeaderThemeProvider>
           <EcommerceProvider
+            enableVariants={true}
+            api={{
+              cartsFetchQuery: {
+                depth: 2,
+                populate: {
+                  products: {
+                    slug: true,
+                    title: true,
+                    gallery: true,
+                  },
+                  variants: {
+                    title: true,
+                    gallery: true,
+                  },
+                },
+              },
+            }}
             paymentMethods={[
               stripeAdapterClient({
                 publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',

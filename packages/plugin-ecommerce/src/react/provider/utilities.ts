@@ -1,17 +1,4 @@
-import type { DefaultDocumentIDType } from 'payload'
-
-import type { CartClient, CartItemClient, Currency } from '../../types.js'
-
-export function cartArrayToMap(cart: CartClient): Map<DefaultDocumentIDType, CartItemClient> {
-  const map = new Map<DefaultDocumentIDType, CartItemClient>()
-
-  for (const item of cart) {
-    const key = item.variantID || item.productID
-    map.set(key, item)
-  }
-
-  return map
-}
+import type { Currency } from '../../types.js'
 
 /**
  * Convert base value to display value with decimal point (e.g., 2500 to $25.00)

@@ -15,13 +15,29 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
     const payload = req.payload
     const { apiVersion, appInfo, secretKey } = props || {}
 
-    const amount = data.total
     const customerEmail = data.customerEmail
     const currency = data.currency
     const cart = data.cart
+    const amount = cart.subtotal
 
     if (!secretKey) {
-      throw new Error('Stripe secret key is required')
+      throw new Error('Stripe secret key is required.')
+    }
+
+    if (!currency) {
+      throw new Error('Currency is required.')
+    }
+
+    if (!cart || !cart.items || cart.items.length === 0) {
+      throw new Error('Cart is empty or not provided.')
+    }
+
+    if (!customerEmail || typeof customerEmail !== 'string') {
+      throw new Error('A valid customer email is required to make a purchase.')
+    }
+
+    if (!amount || typeof amount !== 'number' || amount <= 0) {
+      throw new Error('A valid amount is required to initiate a payment.')
     }
 
     const stripe = new Stripe(secretKey, {
@@ -53,7 +69,7 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
         currency,
         customer: customer.id,
         metadata: {
-          cart: JSON.stringify(cart),
+          cartID: cart.id,
         },
       })
 

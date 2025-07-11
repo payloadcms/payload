@@ -7,7 +7,6 @@ import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from './ty
 import { cartsCollection } from './carts/cartsCollection.js'
 import { confirmOrderHandler } from './endpoints/confirmOrder.js'
 import { initiatePaymentHandler } from './endpoints/initiatePayment.js'
-import { cartItemsField } from './fields/cartItemsField.js'
 import { ordersCollection } from './orders/ordersCollection.js'
 import { productsCollection } from './products/productsCollection.js'
 import { transactionsCollection } from './transactions/transactionsCollection.js'
@@ -36,6 +35,9 @@ export const ecommercePlugin =
       incomingConfig.collections = []
     }
 
+    // Controls whether variants are enabled in the plugin. This is toggled to true under products config
+    let enableVariants = false
+
     const currenciesConfig: Required<SanitizedEcommercePluginConfig['currencies']> =
       sanitizedPluginConfig.currencies
 
@@ -46,6 +48,8 @@ export const ecommercePlugin =
               variants: true,
             }
           : sanitizedPluginConfig.products
+
+      enableVariants = Boolean(productsConfig.variants)
 
       if (productsConfig.variants) {
         const overrides =
@@ -74,7 +78,7 @@ export const ecommercePlugin =
 
       const products = productsCollection({
         currenciesConfig,
-        enableVariants: Boolean(productsConfig.variants),
+        enableVariants,
         inventory: sanitizedPluginConfig.inventory,
         variantsSlug: collectionSlugMap.variants,
         variantTypesSlug: collectionSlugMap.variantTypes,
@@ -106,6 +110,11 @@ export const ecommercePlugin =
       const orders = ordersCollection({
         currenciesConfig,
         customersSlug: collectionSlugMap.customers,
+        enableVariants,
+        overrides:
+          sanitizedPluginConfig.orders === true
+            ? undefined
+            : sanitizedPluginConfig.orders.ordersCollection,
         productsSlug: collectionSlugMap.products,
         variantsSlug: collectionSlugMap.variants,
       })
@@ -139,6 +148,8 @@ export const ecommercePlugin =
 
           const confirmOrder: Endpoint = {
             handler: confirmOrderHandler({
+              cartsSlug: collectionSlugMap.carts,
+              currenciesConfig,
               ordersSlug: collectionSlugMap.orders,
               paymentMethod,
               transactionsSlug: collectionSlugMap.transactions,
@@ -195,14 +206,6 @@ export const ecommercePlugin =
     if (!incomingConfig.endpoints) {
       incomingConfig.endpoints = []
     }
-
-    // incomingConfig.collections.map((collection) => {
-    //   if (collection.slug === collectionSlugMap.customers) {
-    //     collection.fields.push(cartItemsField({ overrides: { name: 'cart' } }))
-    //   }
-
-    //   return collection
-    // })
 
     // incomingConfig.typescript = {
     //   ...incomingConfig.typescript,

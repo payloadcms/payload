@@ -12,6 +12,7 @@ type Props = {
    * Slug of the customers collection, defaults to 'users'.
    */
   customersSlug?: string
+  enableVariants?: boolean
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   /**
    * Slug of the products collection, defaults to 'products'.
@@ -31,6 +32,7 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
   const {
     currenciesConfig,
     customersSlug = 'users',
+    enableVariants = false,
     overrides,
     productsSlug = 'products',
     transactionsSlug = 'transactions',
@@ -98,8 +100,7 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
       ? [amountField({ currenciesConfig }), currencyField({ currenciesConfig })]
       : []),
     cartItemsField({
-      currenciesConfig,
-      individualPrices: true,
+      enableVariants,
       overrides: {
         name: 'items',
         label: ({ t }) =>

@@ -1,52 +1,99 @@
 import type { Order } from '@/payload-types'
 import type { Metadata } from 'next'
 
-import { ItemsList } from '@/components/ItemsList'
-import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
 import { Button } from '@/components/ui/button'
 import { formatDateTime } from '@/utilities/formatDateTime'
-import { getMeUser } from '@/utilities/getMeUser'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import React, { Fragment } from 'react'
 import { ChevronLeftIcon } from 'lucide-react'
 import { ProductItem } from '@/components/ProductItem'
+import { headers as getHeaders } from 'next/headers.js'
+import configPromise from '@payload-config'
+import { getPayload } from 'payload'
+
+export const dynamic = 'force-dynamic'
 
 type PageProps = {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ paymentId?: string }>
+  searchParams: Promise<{ email?: string }>
 }
 
 export default async function Order({ params, searchParams }: PageProps) {
-  const { token } = await getMeUser()
+  const headers = await getHeaders()
+  const payload = await getPayload({ config: configPromise })
+  const { user } = await payload.auth({ headers })
 
   const { id } = await params
-  const { paymentId = '' } = await searchParams
+  const { email = '' } = await searchParams
 
   let order: Order | null = null
 
   try {
-    order = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders/${id}?where=[stripePaymentIntentID][equals]=${paymentId}&depth=2`,
-      {
-        headers: {
-          ...(token
-            ? {
-                Authorization: `JWT ${token}`,
-              }
-            : {}),
-          'Content-Type': 'application/json',
-        },
+    const {
+      docs: [orderResult],
+    } = await payload.find({
+      collection: 'orders',
+      user,
+      overrideAccess: !Boolean(user),
+      depth: 2,
+      where: {
+        and: [
+          {
+            id: {
+              equals: id,
+            },
+          },
+          ...(user
+            ? [
+                {
+                  customer: {
+                    equals: user.id,
+                  },
+                },
+              ]
+            : []),
+          ...(email
+            ? [
+                {
+                  customerEmail: {
+                    equals: email,
+                  },
+                },
+              ]
+            : []),
+        ],
       },
-    )?.then(async (res) => {
-      if (!res.ok) notFound()
-      const json = await res.json()
-      if ('error' in json && json.error) notFound()
-      if ('errors' in json && json.errors) notFound()
-      return json
+      select: {
+        amount: true,
+        currency: true,
+        items: true,
+        customerEmail: true,
+        customer: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     })
+
+    const canAccessAsGuest =
+      !user &&
+      email &&
+      orderResult &&
+      orderResult.customerEmail &&
+      orderResult.customerEmail === email
+    const canAccessAsUser =
+      user &&
+      orderResult &&
+      orderResult.customer &&
+      (typeof orderResult.customer === 'object'
+        ? orderResult.customer.id
+        : orderResult.customer) === user.id
+
+    if (orderResult && (canAccessAsGuest || canAccessAsUser)) {
+      order = orderResult
+    }
   } catch (error) {
     console.error(error)
   }
@@ -55,12 +102,10 @@ export default async function Order({ params, searchParams }: PageProps) {
     notFound()
   }
 
-  console.log({ order })
-
   return (
     <div className="container my-12">
       <div className="flex gap-8 justify-between items-center mb-6">
-        {token ? (
+        {user ? (
           <div className="flex gap-4">
             <Button asChild variant="ghost">
               <Link href="/orders">
@@ -91,7 +136,7 @@ export default async function Order({ params, searchParams }: PageProps) {
 
           <div className="">
             <p className="font-mono uppercase text-primary/50 mb-1 text-sm">Total</p>
-            <p className="text-lg">{order.total}</p>
+            {order.amount && <Price className="text-lg" amount={order.amount} />}
           </div>
 
           <div className="grow max-w-1/3">
@@ -109,12 +154,19 @@ export default async function Order({ params, searchParams }: PageProps) {
                   return null
                 }
 
+                if (!item.product || typeof item.product !== 'object') {
+                  return <div>This item is no longer available.</div>
+                }
+
+                const variant =
+                  item.variant && typeof item.variant === 'object' ? item.variant : undefined
+
                 return (
                   <ProductItem
                     key={item.id}
                     product={item.product}
-                    quantity={item.quantity ?? undefined}
-                    selectedVariant={item.variant ?? undefined}
+                    quantity={item.quantity}
+                    variant={variant}
                   />
                 )
               })}

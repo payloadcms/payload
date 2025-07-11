@@ -16,7 +16,7 @@ type Props = {
 }
 
 export default async function SearchPage({ searchParams }: Props) {
-  const { q: searchValue, sort } = await searchParams
+  const { q: searchValue, sort, category } = await searchParams
   const payload = await getPayload({ config: configPromise })
 
   const products = await payload.find({
@@ -26,24 +26,40 @@ export default async function SearchPage({ searchParams }: Props) {
       slug: true,
       gallery: true,
       categories: true,
-      currency: true,
-      price: true,
+      priceInUSD: true,
     },
     ...(sort ? { sort } : { sort: 'title' }),
-    ...(searchValue
+    ...(searchValue || category
       ? {
           where: {
-            or: [
-              {
-                title: {
-                  like: searchValue,
-                },
-              },
-              {
-                description: {
-                  like: searchValue,
-                },
-              },
+            and: [
+              ...(searchValue
+                ? [
+                    {
+                      or: [
+                        {
+                          title: {
+                            like: searchValue,
+                          },
+                        },
+                        {
+                          description: {
+                            like: searchValue,
+                          },
+                        },
+                      ],
+                    },
+                  ]
+                : []),
+              ...(category
+                ? [
+                    {
+                      categories: {
+                        contains: category,
+                      },
+                    },
+                  ]
+                : []),
             ],
           },
         }

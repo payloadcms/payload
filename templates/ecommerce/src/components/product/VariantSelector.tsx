@@ -1,13 +1,12 @@
 'use client'
 
-// import { generateCombinations } from '@/collections/Products/ui/Variants/VariantSelect/buildCombinations'
 import { Button } from '@/components/ui/button'
 import type { Product } from '@/payload-types'
 
 import { createUrl } from '@/utilities/createUrl'
 import clsx from 'clsx'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import React, { useMemo } from 'react'
+import React from 'react'
 
 export function VariantSelector({ product }: { product: Product }) {
   const router = useRouter()
@@ -20,43 +19,6 @@ export function VariantSelector({ product }: { product: Product }) {
   if (!hasVariants) {
     return null
   }
-
-  /**
-   * Flattened array of all possible variant combinations.
-   */
-  const combinations = useMemo(() => {
-    if (!variantTypes) return []
-
-    return []
-  }, [variants])
-
-  const isAvailableForSale = useMemo(() => {
-    if (!variants || !variantTypes) return false
-
-    const optionSearchParams = new URLSearchParams(searchParams.toString())
-
-    // Remove image and variant ID from this search params so we can loop over it safely.
-    optionSearchParams.delete('variant')
-    optionSearchParams.delete('image')
-
-    // Parse the current options from the search params
-    const currentOptions = Object.fromEntries(optionSearchParams.entries())
-
-    // Find a matching variant
-    const matchingVariant = variants.find((variant) => {
-      if (!variant.options || !Array.isArray(variant.options)) return false
-
-      // Check if all variant options match the current options in the URL
-      return variant.options.every((variantOption) => {
-        const variantType = variantTypes.find((type) => type.id === variantOption.variantType)
-        if (!variantType) return false
-
-        return currentOptions[variantType.name] === variantOption.value
-      })
-    })
-
-    return Boolean(matchingVariant)
-  }, [searchParams, variants, variantTypes])
 
   return variantTypes?.map((type) => {
     if (!type || typeof type !== 'object') {
@@ -71,7 +33,6 @@ export function VariantSelector({ product }: { product: Product }) {
 
     return (
       <dl className="" key={type.id}>
-        isAvailableForSale: {isAvailableForSale ? 'true' : 'false'}
         <dt className="mb-4 text-sm">{type.label}</dt>
         <dd className="flex flex-wrap gap-3">
           <React.Fragment>
@@ -80,7 +41,7 @@ export function VariantSelector({ product }: { product: Product }) {
                 return <></>
               }
 
-              const optionID = option.value
+              const optionID = option.id
               const optionKeyLowerCase = type.name
 
               // Base option params on current params so we can preserve any other param state in the url.
@@ -94,16 +55,43 @@ export function VariantSelector({ product }: { product: Product }) {
               // if the option was clicked.
               optionSearchParams.set(optionKeyLowerCase, optionID)
 
+              const currentOptions = Array.from(optionSearchParams.values())
+
+              let isAvailableForSale = true
+
+              // Find a matching variant
+              if (variants) {
+                const matchingVariant = variants
+                  .filter((variant) => typeof variant === 'object')
+                  .find((variant) => {
+                    if (!variant.options || !Array.isArray(variant.options)) return false
+
+                    // Check if all variant options match the current options in the URL
+                    return variant.options.every((variantOption) => {
+                      if (typeof variantOption !== 'object')
+                        return currentOptions.includes(variantOption)
+
+                      return currentOptions.includes(variantOption.id)
+                    })
+                  })
+
+                if (matchingVariant) {
+                  // If we found a matching variant, set the variant ID in the search params.
+                  optionSearchParams.set('variant', matchingVariant.id)
+
+                  if (matchingVariant.inventory && matchingVariant.inventory > 0) {
+                    isAvailableForSale = true
+                  } else {
+                    isAvailableForSale = false
+                  }
+                }
+              }
+
               const optionUrl = createUrl(pathname, optionSearchParams)
-
-              // Read the previous options from the search params and find the existing variant that matches the current options.
-              // This is used to determine if the option is available for sale.
-
-              const isAvailableForSale = true
 
               // The option is active if it's in the url params.
               const isActive =
-                Boolean(isAvailableForSale) && searchParams.get(optionKeyLowerCase) === option.value
+                Boolean(isAvailableForSale) && searchParams.get(optionKeyLowerCase) === optionID
 
               return (
                 <Button

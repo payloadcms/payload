@@ -8,16 +8,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/providers/Auth'
-import { useCart } from '@/providers/Cart'
 import { useTheme } from '@/providers/Theme'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import React, { Fragment, Suspense, useEffect, useRef, useState } from 'react'
+import React, { Fragment, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 
 import { cssVariables } from '@/cssVariables'
 import { CheckoutForm } from '../CheckoutForm'
+import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/react'
 
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
 const stripe = loadStripe(apiKey)
@@ -25,68 +25,28 @@ const stripe = loadStripe(apiKey)
 export const CheckoutPage: React.FC = () => {
   const { user } = useAuth()
   const router = useRouter()
+  const { cart } = useCart()
   const [error, setError] = useState<null | string>(null)
-  const [clientSecret, setClientSecret] = useState()
-  const hasRequestedPaymentIntent = useRef(false)
   const { theme } = useTheme()
+  /**
+   * State to manage the email input for guest checkout.
+   */
   const [email, setEmail] = useState('')
   const [emailEditable, setEmailEditable] = useState(true)
+  const { paymentData, initiatePayment, selectedPaymentMethod, paymentMethods } = usePayments()
 
-  const { cart, cartIsEmpty, cartTotal } = useCart()
+  const cartIsEmpty = !cart || !cart.items || !cart.items.length
 
-  useEffect(() => {
-    if (
-      cartTotal.amount &&
-      cartTotal.amount > 0 &&
-      (user || (Boolean(email) && !emailEditable)) &&
-      hasRequestedPaymentIntent.current === false
-    ) {
-      hasRequestedPaymentIntent.current = true
+  const initiatePaymentIntent = async (paymentID: string) => {
+    console.log('initiating payment intent', paymentID)
+    const paymentIntent = await initiatePayment(paymentID, {
+      additionalData: {
+        ...(email ? { customerEmail: email } : {}),
+      },
+    })
 
-      const makeIntent = async () => {
-        try {
-          const body = !user
-            ? {
-                amount: cartTotal.amount,
-                email,
-              }
-            : {
-                amount: cartTotal.amount,
-              }
-
-          const paymentReq = await fetch(
-            `${process.env.NEXT_PUBLIC_SERVER_URL}/api/create-payment-intent`,
-            {
-              ...(body
-                ? {
-                    body: JSON.stringify(body),
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                  }
-                : {}),
-              credentials: 'include',
-              method: 'POST',
-            },
-          )
-
-          const res = await paymentReq.json()
-
-          if (res.error) {
-            setError(res.error)
-          } else if (res.client_secret) {
-            setError(null)
-
-            setClientSecret(res.client_secret)
-          }
-        } catch (e) {
-          setError('Something went wrong.')
-        }
-      }
-
-      void makeIntent()
-    }
-  }, [cartTotal, user, emailEditable, email])
+    console.log({ paymentIntent })
+  }
 
   if (!stripe) return null
 
@@ -130,7 +90,7 @@ export const CheckoutPage: React.FC = () => {
                 />
               </div>
               <Button
-                disabled={!email}
+                disabled={!email || !emailEditable}
                 onClick={() => {
                   setEmailEditable(false)
                 }}
@@ -152,12 +112,12 @@ export const CheckoutPage: React.FC = () => {
             </p>
           </div>
         )}
-        {!clientSecret && !error && (
+        {!paymentData?.['clientSecret'] && !error && (
           <div className="my-8">
-            <LoadingShimmer number={2} />
+            <LoadingShimmer number={1} />
           </div>
         )}
-        {!clientSecret && error && (
+        {!paymentData?.['clientSecret'] && error && (
           <div className="my-8">
             <Message error={error} />
 
@@ -166,8 +126,12 @@ export const CheckoutPage: React.FC = () => {
             </Button>
           </div>
         )}
+
+        <Button onClick={() => void initiatePaymentIntent('stripe')}>Confirm address</Button>
+
         <Suspense fallback={<React.Fragment />}>
-          {clientSecret && (
+          {/* @ts-ignore */}
+          {paymentData && paymentData?.['clientSecret'] && (
             <Fragment>
               {error && <p>{`Error: ${error}`}</p>}
               <Elements
@@ -193,11 +157,11 @@ export const CheckoutPage: React.FC = () => {
                       spacingUnit: '4px',
                     },
                   },
-                  clientSecret,
+                  clientSecret: paymentData['clientSecret'] as string,
                 }}
                 stripe={stripe}
               >
-                <CheckoutForm />
+                <CheckoutForm customerEmail={email} />
               </Elements>
             </Fragment>
           )}
@@ -213,7 +177,7 @@ export const CheckoutPage: React.FC = () => {
                 product,
                 product: { id, meta, title, gallery },
                 quantity,
-                variant: variantId,
+                variant,
               } = item
 
               if (!quantity) return null
@@ -232,21 +196,21 @@ export const CheckoutPage: React.FC = () => {
                   <div className="flex grow justify-between items-center">
                     <div className="flex flex-col gap-1">
                       <p className="font-medium text-lg">{title}</p>
-                      {variantId && (
+                      {/* {variant && (
                         <p className="text-sm font-mono text-primary/50 tracking-[0.1em]">
                           {product.variants
                             ?.find((v) => v.id === variantId)
                             ?.options.map((option) => option.value)
                             .join(', ')}
                         </p>
-                      )}
+                      )} */}
                       <div>
                         {'x'}
                         {quantity}
                       </div>
                     </div>
 
-                    {product.price && <Price amount={product.price} currencyCode="usd" />}
+                    {product.priceInUSD && <Price amount={product.priceInUSD} />}
                   </div>
                 </div>
               )
@@ -256,7 +220,7 @@ export const CheckoutPage: React.FC = () => {
           <hr />
           <div className="flex justify-between items-center gap-2">
             <span className="uppercase">Total</span>{' '}
-            <Price className="text-3xl font-medium" amount={cartTotal.amount} currencyCode="usd" />
+            <Price className="text-3xl font-medium" amount={cart.subtotal || 0} />
           </div>
         </div>
       )}

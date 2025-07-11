@@ -35,6 +35,7 @@
     "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
+    "@radix-ui/react-accordion": "1.2.11",
     "@radix-ui/react-checkbox": "^1.1.4",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-label": "^2.1.2",

@@ -1,8 +1,13 @@
-import { addDataAndFileToRequest, type Endpoint } from 'payload'
+import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from 'payload'
 
-import type { Cart, PaymentAdapter } from '../types.js'
+import type { Cart, CurrenciesConfig, PaymentAdapter } from '../types.js'
 
 type Args = {
+  /**
+   * The slug of the carts collection, defaults to 'carts'.
+   */
+  cartsSlug?: string
+  currenciesConfig: CurrenciesConfig
   /**
    * The slug of the orders collection, defaults to 'orders'.
    */
@@ -30,6 +35,8 @@ type ConfirmOrder = (args: Args) => Endpoint['handler']
  */
 export const confirmOrderHandler: ConfirmOrder =
   ({
+    cartsSlug = 'carts',
+    currenciesConfig,
     ordersSlug = 'orders',
     paymentMethod,
     productsSlug = 'products',
@@ -43,26 +50,22 @@ export const confirmOrderHandler: ConfirmOrder =
     const payload = req.payload
     const user = req.user
 
-    let cart = data?.cart
-
+    let currency: string = currenciesConfig.defaultCurrency
+    let cartID: DefaultDocumentIDType = data?.cartID
+    let cart = undefined
     let customerEmail: string = user?.email ?? ''
 
     if (user) {
-      if (user.cart && Array.isArray(user.cart) && user.cart.length > 0) {
-        // If the user has a cart, use it
-        if (cart && Array.isArray(cart) && cart.length > 0) {
-          return Response.json(
-            {
-              message: 'You cannot initiate a payment with both a user cart and a provided cart.',
-            },
-            {
-              status: 400,
-            },
-          )
+      if (user.cart?.docs && Array.isArray(user.cart.docs) && user.cart.docs.length > 0) {
+        if (!cartID && user.cart.docs[0]) {
+          // Use the user's cart instead
+          if (typeof user.cart.docs[0] === 'object') {
+            cartID = user.cart.docs[0].id
+            cart = user.cart.docs[0]
+          } else {
+            cartID = user.cart.docs[0]
+          }
         }
-
-        // Use the user's cart instead
-        cart = user.cart
       }
     } else {
       // Get the email from the data if user is not available
@@ -80,10 +83,54 @@ export const confirmOrderHandler: ConfirmOrder =
       }
     }
 
-    if (!cart || !Array.isArray(cart) || cart.length === 0) {
+    if (!cart) {
+      if (cartID) {
+        cart = await payload.findByID({
+          id: cartID,
+          collection: cartsSlug,
+          depth: 2,
+          overrideAccess: false,
+          select: {
+            id: true,
+            currency: true,
+            customerEmail: true,
+            items: true,
+            subtotal: true,
+          },
+          user,
+        })
+
+        if (!cart) {
+          return Response.json(
+            {
+              message: `Cart with ID ${cartID} not found.`,
+            },
+            {
+              status: 404,
+            },
+          )
+        }
+      } else {
+        return Response.json(
+          {
+            message: 'Cart ID is required.',
+          },
+          {
+            status: 400,
+          },
+        )
+      }
+    }
+
+    if (cart.currency && typeof cart.currency === 'string') {
+      currency = cart.currency
+    }
+
+    // Ensure the currency is provided or inferred in some way
+    if (!currency) {
       return Response.json(
         {
-          message: 'Cart is required and must be an array with at least one item',
+          message: 'Currency is required.',
         },
         {
           status: 400,
@@ -91,11 +138,11 @@ export const confirmOrderHandler: ConfirmOrder =
       )
     }
 
-    const sanitizedCart: Cart = []
-
     try {
-      if (Array.isArray(cart) && cart.length > 0) {
-        for (const item of cart) {
+      if (Array.isArray(cart.items) && cart.items.length > 0) {
+        for (const item of cart.items) {
+          // Target field to check the price based on the currency so we can validate the total
+          const priceField = `priceIn${currency.toUpperCase()}`
           const quantity = item.quantity || 1
 
           if (item.variant) {
@@ -107,13 +154,14 @@ export const confirmOrderHandler: ConfirmOrder =
               depth: 0,
               select: {
                 inventory: true,
+                [priceField]: true,
               },
             })
 
             if (!variant) {
               return Response.json(
                 {
-                  message: `Variant with ID ${item.variant} not found`,
+                  message: `Variant with ID ${item.variant} not found.`,
                 },
                 {
                   status: 404,
@@ -121,40 +169,26 @@ export const confirmOrderHandler: ConfirmOrder =
               )
             }
 
-            if (variant.inventory && typeof variant.inventory === 'number') {
-              if (
-                variant.inventory === 0 ||
-                (variant.inventory &&
-                  typeof variant.inventory === 'number' &&
-                  variant.inventory < quantity)
-              ) {
-                return Response.json(
-                  {
-                    message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory`,
-                  },
-                  {
-                    status: 400,
-                  },
-                )
-              }
-
-              await payload.update({
-                id: item.variant,
-                collection: variantsSlug,
-                data: {
-                  inventory: variant.inventory - quantity,
+            if (!variant[priceField]) {
+              return Response.json(
+                {
+                  message: `Variant with ID ${item.variant} does not have a price in ${currency}.`,
                 },
-              })
+                {
+                  status: 400,
+                },
+              )
+            }
 
-              sanitizedCart.push({
-                productID: item.product
-                  ? typeof item.product === 'object'
-                    ? item.product.id
-                    : item.product
-                  : null,
-                quantity,
-                variantID: id,
-              })
+            if (variant.inventory === 0 || (variant.inventory && variant.inventory < quantity)) {
+              return Response.json(
+                {
+                  message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory.`,
+                },
+                {
+                  status: 400,
+                },
+              )
             }
           }
 
@@ -167,44 +201,40 @@ export const confirmOrderHandler: ConfirmOrder =
               collection: productsSlug,
               depth: 0,
               select: {
-                inventory: true,
+                [priceField]: true,
               },
             })
+
             if (!product) {
               return Response.json(
                 {
-                  message: `Product with ID ${item.product} not found`,
+                  message: `Product with ID ${item.product} not found.`,
                 },
                 {
                   status: 404,
                 },
               )
             }
-
-            if (product.inventory && typeof product.inventory === 'number') {
-              if (product.inventory === 0 || product.inventory < quantity) {
-                return Response.json(
-                  {
-                    message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory`,
-                  },
-                  {
-                    status: 400,
-                  },
-                )
-              }
-
-              await payload.update({
-                id: item.product,
-                collection: productsSlug,
-                data: {
-                  inventory: product.inventory - quantity,
+            if (!product[priceField]) {
+              return Response.json(
+                {
+                  message: `Product with ID ${item.product} does not have a price in ${currency}.`,
                 },
-              })
+                {
+                  status: 400,
+                },
+              )
+            }
 
-              sanitizedCart.push({
-                productID: id,
-                quantity,
-              })
+            if (product.inventory === 0 || (product.inventory && product.inventory < quantity)) {
+              return Response.json(
+                {
+                  message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory.`,
+                },
+                {
+                  status: 400,
+                },
+              )
             }
           }
         }
@@ -213,7 +243,7 @@ export const confirmOrderHandler: ConfirmOrder =
       const paymentResponse = await paymentMethod.confirmOrder({
         data: {
           ...data,
-          cart: sanitizedCart,
+          cart,
           customerEmail,
         },
         ordersSlug,

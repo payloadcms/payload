@@ -16,7 +16,6 @@ type Props = {
 }
 
 export default async function SearchPage({ searchParams }: Props) {
-  const { q: searchValue, sort } = await searchParams
   const payload = await getPayload({ config: configPromise })
 
   const products = await payload.find({
@@ -26,42 +25,22 @@ export default async function SearchPage({ searchParams }: Props) {
       slug: true,
       gallery: true,
       categories: true,
-      currency: true,
-      price: true,
+      priceInUSD: true,
     },
-    ...(sort ? { sort } : { sort: 'title' }),
-    ...(searchValue
-      ? {
-          where: {
-            or: [
-              {
-                title: {
-                  like: searchValue,
-                },
-              },
-              {
-                description: {
-                  like: searchValue,
-                },
-              },
-            ],
-          },
-        }
-      : {}),
   })
 
   const resultsText = products.docs.length > 1 ? 'results' : 'result'
 
   return (
     <div>
-      {searchValue ? (
+      {/* {searchValue ? (
         <p className="mb-4">
           {products.docs?.length === 0
             ? 'There are no products that match '
             : `Showing ${products.docs.length} ${resultsText} for `}
           <span className="font-bold">&quot;{searchValue}&quot;</span>
         </p>
-      ) : null}
+      ) : null} */}
       {products?.docs.length > 0 ? (
         <Grid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.docs.map((product) => {

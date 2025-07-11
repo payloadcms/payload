@@ -4,23 +4,31 @@ import clsx from 'clsx'
 import React, { Suspense } from 'react'
 
 import { FilterList } from './filter'
+import { CategoryItem } from './Categories.client'
 
 async function CategoryList() {
   const payload = await getPayload({ config: configPromise })
 
-  const categories = (
-    await payload.find({
-      collection: 'categories',
-      sort: 'title',
-    })
-  ).docs?.map((category) => {
-    return {
-      path: `/shop/${category.slug}`,
-      title: category.title,
-    }
+  const categories = await payload.find({
+    collection: 'categories',
+    sort: 'title',
   })
 
-  return <FilterList list={categories} title="Categories" />
+  return (
+    <div>
+      <h3 className="hidden text-xs text-neutral-500 md:block dark:text-neutral-400">Category</h3>
+
+      <ul>
+        {categories.docs.map((category) => {
+          return (
+            <li key={category.id}>
+              <CategoryItem category={category} />
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
 }
 
 const skeleton = 'mb-3 h-4 w-5/6 animate-pulse rounded'

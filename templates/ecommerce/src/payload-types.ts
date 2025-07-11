@@ -188,13 +188,6 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
   password?: string | null;
 }
 /**
@@ -212,9 +205,8 @@ export interface Order {
   items?:
     | {
         product?: (string | null) | Product;
+        variant?: (string | null) | Variant;
         quantity: number;
-        amount?: number | null;
-        currency?: 'USD' | null;
         id?: string | null;
       }[]
     | null;
@@ -834,6 +826,7 @@ export interface VariantType {
  */
 export interface VariantOption {
   id: string;
+  _variantOptions_options_order?: string | null;
   variantType: string | VariantType;
   label: string;
   /**
@@ -863,6 +856,7 @@ export interface Variant {
   priceInUSD?: number | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1084,13 +1078,6 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1505,6 +1492,7 @@ export interface VariantsSelect<T extends boolean = true> {
   priceInUSD?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1522,6 +1510,7 @@ export interface VariantTypesSelect<T extends boolean = true> {
  * via the `definition` "variantOptions_select".
  */
 export interface VariantOptionsSelect<T extends boolean = true> {
+  _variantOptions_options_order?: T;
   variantType?: T;
   label?: T;
   value?: T;
@@ -1597,9 +1586,8 @@ export interface OrdersSelect<T extends boolean = true> {
     | T
     | {
         product?: T;
+        variant?: T;
         quantity?: T;
-        amount?: T;
-        currency?: T;
         id?: T;
       };
   updatedAt?: T;
