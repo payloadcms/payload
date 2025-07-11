@@ -55,10 +55,10 @@ export function DefaultListView(props: ListViewClientProps) {
     queryPresetPermissions,
     renderedFilters,
     resolvedFilterOptions,
-    Tables: InitialTables,
+    Table: InitialTable,
   } = props
 
-  const [Tables] = useControllableState(InitialTables)
+  const [Table] = useControllableState(InitialTable)
 
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
 
@@ -174,7 +174,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 resolvedFilterOptions={resolvedFilterOptions}
               />
               {BeforeListTable}
-              {docs.length > 0 && <RelationshipProvider>{Tables}</RelationshipProvider>}
+              {docs.length > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}
               {docs.length === 0 && (
                 <div className={`${baseClass}__no-results`}>
                   <p>

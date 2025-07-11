@@ -1,6 +1,8 @@
 import type {
   ClientConfig,
   CollectionPreferences,
+  Column,
+  PaginatedDocs,
   PayloadRequest,
   SanitizedCollectionConfig,
 } from 'payload'
@@ -41,30 +43,35 @@ export const getDataAndRenderTables = async ({
   where?: Record<string, any>
 }): Promise<{
   columnState: any[]
-  data: any
-  Tables: React.ReactNode[]
+  data: PaginatedDocs
+  /**
+   * Data by group is returned when `groupBy` is defined.
+   */
+  dataByGroup?: Record<string, PaginatedDocs>
+  Table: React.ReactNode | React.ReactNode[]
 }> => {
   let data
-  let Tables = []
-  let columnState = []
+  let Table: React.ReactNode | React.ReactNode[] = null
+  let columnState: Column[] = []
 
   const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
   if (groupBy) {
-    // if groupBy, then we need to fetch the data differently
-
     const distinct = await req.payload.findDistinct({
       collection: collectionSlug,
       field: groupBy,
+      limit,
       locale: req.locale,
       overrideAccess: false,
+      // page,
       req,
-      // depth: 1,
       // where: where || {},
     })
 
     data = {
+      distinct: {} as Record<string, PaginatedDocs>,
       docs: Array.from({ length: distinct.totalDocs }).map(() => ({})),
+      page: distinct,
       totalPages: distinct.totalDocs,
     }
 
@@ -92,7 +99,7 @@ export const getDataAndRenderTables = async ({
 
       await Promise.all(
         distinct.values.map(async (distinctValue) => {
-          const groupedByDistinct = await req.payload.find({
+          const distinctGroup = await req.payload.find({
             collection: collectionSlug,
             depth: 0,
             draft: true,
@@ -113,15 +120,16 @@ export const getDataAndRenderTables = async ({
             },
           })
 
-          const { columnState: newColumnState, Table } = renderTable({
+          const { columnState: newColumnState, Table: NewTable } = renderTable({
             clientCollectionConfig,
             collectionConfig,
             columnPreferences: collectionPreferences?.columns,
             columns,
             customCellProps,
-            docs: groupedByDistinct.docs,
+            docs: distinctGroup.docs,
             drawerSlug,
             enableRowSelections,
+            key: `table-${distinctValue}`,
             // TODO: return something different depending on field type, e.g. format dates, handle rich text, etc.
             heading: `${distinctValue || 'Untitled'}`,
             // TODO: for relationship fields, need to get the dynamic values
@@ -133,14 +141,20 @@ export const getDataAndRenderTables = async ({
             useAsTitle: collectionConfig.admin.useAsTitle,
           })
 
-          Tables.push(Table)
-          allDocs = allDocs.concat(groupedByDistinct.docs)
+          if (!Table) {
+            Table = []
+          }
+
+          data.distinct[distinctValue] = distinctGroup
+          ;(Table as Array<React.ReactNode>).push(NewTable)
+          allDocs = allDocs.concat(distinctGroup.docs)
         }),
       )
 
       // Need to run an initial `buildColumnState` here because we need column state for _all_ tables
       // This will build the columns that apply to _all_ tables, like which are available, which are on/off, and their orders
       // For now, just call `renderTable` and don't use the returned `Table`, only the `columnState`
+      // TODO: can we just use the first columnState for this?
       ;({ columnState } = renderTable({
         clientCollectionConfig,
         collectionConfig,
@@ -172,8 +186,7 @@ export const getDataAndRenderTables = async ({
       user,
       where: where || {},
     })
-
-    const { columnState: newColumnState, Table } = renderTable({
+    ;({ columnState, Table } = renderTable({
       clientCollectionConfig,
       collectionConfig,
       columnPreferences: collectionPreferences?.columns,
@@ -186,16 +199,12 @@ export const getDataAndRenderTables = async ({
       orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
       payload: req.payload,
       useAsTitle: collectionConfig.admin.useAsTitle,
-    })
-
-    Tables = [Table]
-
-    columnState = newColumnState
+    }))
   }
 
   return {
     columnState,
     data,
-    Tables,
+    Table,
   }
 }

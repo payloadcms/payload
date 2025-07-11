@@ -44,12 +44,12 @@ export default buildConfigWithDefaults({
     ])
 
     await Promise.all(
-      Array.from({ length: 10 }).map(async (_, index) =>
+      Array.from({ length: 30 }).map(async (_, index) =>
         payload.create({
           collection: postsSlug,
           data: {
             title: `Post ${index + 1}`,
-            category: index < 5 ? category1.id : category2.id,
+            category: index < 15 ? 'Engineering' : 'Design',
           },
         }),
       ),

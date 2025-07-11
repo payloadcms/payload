@@ -78,6 +78,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         preset: 'preset' in newQuery ? newQuery.preset : currentQuery?.preset,
         search: 'search' in newQuery ? newQuery.search : currentQuery?.search,
         sort: 'sort' in newQuery ? newQuery.sort : ((currentQuery?.sort as string) ?? defaultSort),
+        sortByGroup: 'sortByGroup' in newQuery ? newQuery.sortByGroup : currentQuery.sortByGroup,
         where: 'where' in newQuery ? newQuery.where : currentQuery?.where,
       }
 
@@ -125,6 +126,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const handlePageChange = useCallback(
     async (page: number) => {
+      // same thing here
       await refineListData({ page: String(page) })
     },
     [refineListData],
@@ -132,6 +134,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const handlePerPageChange = React.useCallback(
     async (limit: number) => {
+      // Same thing here
       await refineListData({ limit: String(limit), page: '1' })
     },
     [refineListData],

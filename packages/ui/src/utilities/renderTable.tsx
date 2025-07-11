@@ -15,10 +15,11 @@ import type {
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumnState/index.js'
 
+import { GroupByPageControls } from '../elements/PageControls/GroupByPageControls.js'
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import {
   OrderableTable,
@@ -71,6 +72,7 @@ export const renderTable = ({
   enableRowSelections,
   heading,
   i18n,
+  key = 'table',
   orderableFieldName,
   payload,
   renderRowTypes,
@@ -89,6 +91,7 @@ export const renderTable = ({
   enableRowSelections: boolean
   heading?: React.ReactNode
   i18n: I18nClient
+  key?: string
   orderableFieldName: string
   payload: Payload
   renderRowTypes?: boolean
@@ -239,13 +242,29 @@ export const renderTable = ({
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
       Table: (
-        <Table
-          appearance={tableAppearance}
-          columns={columnsToUse}
-          data={docs}
-          heading={heading}
-          key="table"
-        />
+        <Fragment key={key}>
+          <Table
+            appearance={tableAppearance}
+            columns={columnsToUse}
+            data={docs}
+            heading={heading}
+          />
+          <GroupByPageControls
+            collectionConfig={clientCollectionConfig}
+            data={{
+              docs: [],
+              hasNextPage: false,
+              hasPrevPage: false,
+              limit: 0,
+              nextPage: 0,
+              page: 0,
+              pagingCounter: 0,
+              prevPage: 0,
+              totalDocs: 0,
+              totalPages: 0,
+            }}
+          />
+        </Fragment>
       ),
     }
   }
@@ -267,14 +286,30 @@ export const renderTable = ({
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
     Table: (
-      <OrderableTable
-        appearance={tableAppearance}
-        collection={clientCollectionConfig}
-        columns={columnsToUse}
-        data={docs}
-        heading={heading}
-        key="table"
-      />
+      <Fragment key={key}>
+        <OrderableTable
+          appearance={tableAppearance}
+          collection={clientCollectionConfig}
+          columns={columnsToUse}
+          data={docs}
+          heading={heading}
+        />
+        <GroupByPageControls
+          collectionConfig={clientCollectionConfig}
+          data={{
+            docs: [],
+            hasNextPage: false,
+            hasPrevPage: false,
+            limit: 0,
+            nextPage: 0,
+            page: 0,
+            pagingCounter: 0,
+            prevPage: 0,
+            totalDocs: 0,
+            totalPages: 0,
+          }}
+        />
+      </Fragment>
     ),
   }
 }

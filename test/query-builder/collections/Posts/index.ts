@@ -18,8 +18,17 @@ export const PostsCollection: CollectionConfig = {
     },
     {
       name: 'category',
-      type: 'relationship',
-      relationTo: categoriesSlug,
+      type: 'select',
+      options: [
+        {
+          label: 'Engineering',
+          value: 'Engineering',
+        },
+        {
+          label: 'Design',
+          value: 'Design',
+        },
+      ],
     },
     {
       name: 'content',

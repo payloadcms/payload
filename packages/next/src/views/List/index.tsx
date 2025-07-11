@@ -176,7 +176,7 @@ export const renderListView = async (
       }
     }
 
-    const { columnState, data, Tables } = await getDataAndRenderTables({
+    const { columnState, data, Table } = await getDataAndRenderTables({
       clientConfig,
       collectionConfig,
       collectionPreferences,
@@ -276,7 +276,7 @@ export const renderListView = async (
                 queryPresetPermissions,
                 renderedFilters,
                 resolvedFilterOptions,
-                Tables,
+                Table,
               } satisfies ListViewClientProps,
               Component: collectionConfig?.admin?.components?.views?.list?.Component,
               Fallback: DefaultListView,
