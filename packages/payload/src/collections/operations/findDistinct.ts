@@ -74,6 +74,7 @@ export const findDistinctOperation = async (
           hasPrevPage: false,
           limit: args.limit || 0,
           nextPage: null,
+          page: 1,
           pagingCounter: 1,
           prevPage: null,
           totalDocs: 0,
