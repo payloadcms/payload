@@ -32,6 +32,7 @@ import {
   constructorOptionsSlug,
   customFileNameMediaSlug,
   customUploadFieldSlug,
+  fileMimeTypeSlug,
   focalOnlySlug,
   hideFileInputOnCreateSlug,
   imageSizesOnlySlug,
@@ -84,6 +85,7 @@ let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
 let bulkUploadsURL: AdminUrlUtil
+let fileMimeTypeURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -122,6 +124,7 @@ describe('Uploads', () => {
     threeDimensionalURL = new AdminUrlUtil(serverURL, threeDimensionalSlug)
     constructorOptionsURL = new AdminUrlUtil(serverURL, constructorOptionsSlug)
     bulkUploadsURL = new AdminUrlUtil(serverURL, bulkUploadsSlug)
+    fileMimeTypeURL = new AdminUrlUtil(serverURL, fileMimeTypeSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -583,7 +586,7 @@ describe('Uploads', () => {
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
     await expect(genericUploadImage).toHaveAttribute(
       'src',
-      'https://payloadcms.com/images/universal-truth.jpg',
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
     )
   })
 
@@ -1510,7 +1513,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-withAdminThumbnail div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        'https://payloadcms.com/images/universal-truth.jpg',
+        'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
       )
     })
 
@@ -1576,6 +1579,16 @@ describe('Uploads', () => {
     const filename = page.locator('.file-field__filename')
 
     await expect(filename).toHaveValue('animated.webp')
+    await saveDocAndAssert(page, '#action-save', 'error')
+  })
+
+  test('should prevent invalid mimetype disguised as valid mimetype', async () => {
+    await page.goto(fileMimeTypeURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image-as-pdf.pdf'))
+
+    const filename = page.locator('.file-field__filename')
+    await expect(filename).toHaveValue('image-as-pdf.pdf')
+
     await saveDocAndAssert(page, '#action-save', 'error')
   })
 })

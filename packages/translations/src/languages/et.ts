@@ -85,10 +85,15 @@ export const etTranslations: DefaultTranslationsObject = {
     deletingFile: 'Faili kustutamisel tekkis viga.',
     deletingTitle:
       '{{title}} kustutamisel tekkis viga. Palun kontrollige ühendust ja proovige uuesti.',
+    documentNotFound:
+      'Dokumenti ID-ga {{id}} ei leitud. Võimalik, et see on kustutatud või pole seda kunagi olnud, või ei pruugi teil sellele juurdepääsu olla.',
     emailOrPasswordIncorrect: 'Sisestatud e-post või parool on vale.',
     followingFieldsInvalid_one: 'Järgmine väli on vigane:',
     followingFieldsInvalid_other: 'Järgmised väljad on vigased:',
     incorrectCollection: 'Vale kollektsioon',
+    insufficientClipboardPermissions:
+      'Lõikelaua juurdepääs keelatud. Palun kontrollige oma lõikelaua õigusi.',
+    invalidClipboardData: 'Kehtetu lõikelaua andmed.',
     invalidFileType: 'Vale failitüüp',
     invalidFileTypeValue: 'Vale failitüüp: {{value}}',
     invalidRequestArgs: 'Päringule edastati vigased argumendid: {{args}}',
@@ -110,6 +115,7 @@ export const etTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Faili üleslaadimisel tekkis probleem.',
     tokenInvalidOrExpired: 'Võti on kas vigane või aegunud.',
     tokenNotProvided: 'Võtit ei esitatud.',
+    unableToCopy: 'Kopeerimine ebaõnnestus.',
     unableToDeleteCount: 'Ei õnnestunud kustutada {{count}} {{total}}-st {{label}}.',
     unableToReindexCollection:
       'Viga kollektsiooni {{collection}} taasindekseerimisel. Toiming katkestatud.',
@@ -239,7 +245,9 @@ export const etTranslations: DefaultTranslationsObject = {
       'See eemaldab olemasolevad indeksid ja indekseerib uuesti dokumendid kõigis kollektsioonides.',
     copied: 'Kopeeritud',
     copy: 'Kopeeri',
+    copyField: 'Kopeeri väli',
     copying: 'Kopeerimine',
+    copyRow: 'Kopeeri rida',
     copyWarning: 'Olete üle kirjutamas {{to}} {{from}}-ga {{label}} {{title}} jaoks. Olete kindel?',
     create: 'Loo',
     created: 'Loodud',
@@ -332,6 +340,8 @@ export const etTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Kirjuta olemasolevad välja andmed üle',
     pageNotFound: 'Lehte ei leitud',
     password: 'Parool',
+    pasteField: 'Kleebi väli',
+    pasteRow: 'Kleebi rida',
     payloadSettings: 'Payload seaded',
     perPage: 'Lehel: {{limit}}',
     previous: 'Eelmine',

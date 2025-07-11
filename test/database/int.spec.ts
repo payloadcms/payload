@@ -7,9 +7,7 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
-import { objectToFrontmatter } from '@payloadcms/richtext-lexical'
 import { randomUUID } from 'crypto'
-import { type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
@@ -1586,6 +1584,66 @@ describe('database', () => {
       expect(docs?.[0]?.title).toBe('updated')
       expect(docs?.[4]?.title).toBe('updated')
     })
+
+    it('ensure updateOne does not create new document if `where` query has no results', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      await payload.db.updateOne({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        where: {
+          title: {
+            equals: 'does not exist',
+          },
+        },
+      })
+
+      const allPosts = await payload.db.find({
+        collection: postsSlug,
+        pagination: false,
+      })
+
+      expect(allPosts.docs).toHaveLength(0)
+    })
+
+    it('ensure updateMany does not create new document if `where` query has no results', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        where: {
+          title: {
+            equals: 'does not exist',
+          },
+        },
+      })
+
+      const allPosts = await payload.db.find({
+        collection: postsSlug,
+        pagination: false,
+      })
+
+      expect(allPosts.docs).toHaveLength(0)
+    })
   })
 
   describe('Error Handler', () => {
@@ -2255,6 +2313,52 @@ describe('database', () => {
       expect(globalData.postTitle).toBe('post')
     })
 
+    it('should allow to sort by a virtual field with a reference to an ID', async () => {
+      await payload.delete({ collection: 'virtual-relations', where: {} })
+      const category_1 = await payload.create({
+        collection: 'categories-custom-id',
+        data: { id: 1 },
+      })
+      const category_2 = await payload.create({
+        collection: 'categories-custom-id',
+        data: { id: 2 },
+      })
+      const post_1 = await payload.create({
+        collection: 'posts',
+        data: { categoryCustomID: category_1.id, title: 'p-1' },
+      })
+      const post_2 = await payload.create({
+        collection: 'posts',
+        data: { categoryCustomID: category_2.id, title: 'p-2' },
+      })
+      const virtual_1 = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post_1.id },
+      })
+      const virtual_2 = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post_2.id },
+      })
+
+      const res = (
+        await payload.find({
+          collection: 'virtual-relations',
+          sort: 'postCategoryCustomID',
+        })
+      ).docs
+      expect(res[0].id).toBe(virtual_1.id)
+      expect(res[1].id).toBe(virtual_2.id)
+
+      const res2 = (
+        await payload.find({
+          collection: 'virtual-relations',
+          sort: '-postCategoryCustomID',
+        })
+      ).docs
+      expect(res2[1].id).toBe(virtual_1.id)
+      expect(res2[0].id).toBe(virtual_2.id)
+    })
+
     it('should allow to sort by a virtual field with a refence, Local / GraphQL', async () => {
       const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
       const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
@@ -2701,6 +2805,35 @@ describe('database', () => {
     } catch (e) {
       expect((e as ValidationError).message).toEqual('The following field is invalid: slugField')
     }
+  })
+
+  it('should update simple', async () => {
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        text: 'other text (should not be nuked)',
+        title: 'hello',
+        group: { text: 'in group' },
+        tab: { text: 'in tab' },
+        arrayWithIDs: [{ text: 'some text' }],
+      },
+    })
+    const res = await payload.db.updateOne({
+      where: { id: { equals: post.id } },
+      data: {
+        title: 'hello updated',
+        group: { text: 'in group updated' },
+        tab: { text: 'in tab updated' },
+      },
+      collection: 'posts',
+    })
+
+    expect(res.title).toBe('hello updated')
+    expect(res.text).toBe('other text (should not be nuked)')
+    expect(res.group.text).toBe('in group updated')
+    expect(res.tab.text).toBe('in tab updated')
+    expect(res.arrayWithIDs).toHaveLength(1)
+    expect(res.arrayWithIDs[0].text).toBe('some text')
   })
 
   it('should support x3 nesting blocks', async () => {

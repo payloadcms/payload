@@ -38,6 +38,7 @@ import {
   updateMany,
   updateOne,
   updateVersion,
+  upsert,
 } from '@payloadcms/drizzle'
 import { like, notLike } from 'drizzle-orm'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
@@ -189,7 +190,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       updateGlobalVersion,
       updateOne,
       updateVersion,
-      upsert: updateOne,
+      upsert,
     })
   }
 

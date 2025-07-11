@@ -47,6 +47,16 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: 'categories-custom-id',
+      versions: { drafts: true },
+      fields: [
+        {
+          type: 'number',
+          name: 'id',
+        },
+      ],
+    },
+    {
       slug: postsSlug,
       fields: [
         {
@@ -59,6 +69,11 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: 'categories',
           name: 'category',
+        },
+        {
+          type: 'relationship',
+          relationTo: 'categories-custom-id',
+          name: 'categoryCustomID',
         },
         {
           name: 'localized',
@@ -205,6 +220,20 @@ export default buildConfigWithDefaults({
                   type: 'text',
                 },
               ],
+            },
+          ],
+        },
+        {
+          type: 'group',
+          name: 'group',
+          fields: [{ name: 'text', type: 'text' }],
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'tab',
+              fields: [{ name: 'text', type: 'text' }],
             },
           ],
         },
@@ -515,6 +544,11 @@ export default buildConfigWithDefaults({
           name: 'postCategoryID',
           type: 'json',
           virtual: 'post.category.id',
+        },
+        {
+          name: 'postCategoryCustomID',
+          type: 'number',
+          virtual: 'post.categoryCustomID.id',
         },
         {
           name: 'postID',
