@@ -1,3 +1,4 @@
+import type { ServerSideEncryption } from '@aws-sdk/client-s3'
 import type {
   Adapter,
   ClientUploadsConfig,
@@ -89,6 +90,26 @@ export type S3StorageOptions = {
    * Default: true
    */
   enabled?: boolean
+
+  /**
+   * Server-side encryption configuration for S3 objects.
+   */
+  encryption?: {
+    /**
+     * Specifies the AWS KMS key ID to use for object encryption.
+     * Required when serverSideEncryption is 'aws:kms' or 'aws:kms:dsse'.
+     * Can be the key ID, key ARN, alias name, or alias ARN.
+     */
+    kmsKeyId?: string
+
+    /**
+     * The server-side encryption algorithm used when storing this object in Amazon S3.
+     *
+     * @default 'AES256'
+     */
+    serverSideEncryption?: ServerSideEncryption
+  }
+
   /**
    * Use pre-signed URLs for files downloading. Can be overriden per-collection.
    */
@@ -146,6 +167,7 @@ export const s3Storage: S3StoragePlugin =
         acl: s3StorageOptions.acl,
         bucket: s3StorageOptions.bucket,
         collections: s3StorageOptions.collections,
+        encryption: s3StorageOptions.encryption,
         getStorageClient,
       }),
       serverHandlerPath: '/storage-s3-generate-signed-url',
@@ -226,6 +248,7 @@ function s3StorageInternal(
     clientUploads,
     collections,
     config = {},
+    encryption,
     signedDownloads: topLevelSignedDownloads,
   }: S3StorageOptions,
 ): Adapter {
@@ -250,6 +273,7 @@ function s3StorageInternal(
         acl,
         bucket,
         collection,
+        encryption,
         getStorageClient,
         prefix,
       }),

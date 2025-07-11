@@ -6,7 +6,10 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import path from 'path'
 import { APIError, Forbidden, ValidationError } from 'payload'
 
+import type { EncryptionConfig } from './encryptionParams.js'
 import type { S3StorageOptions } from './index.js'
+
+import { getEncryptionParams } from './encryptionParams.js'
 
 const bytesToMB = (bytes: number) => {
   return bytes / 1024 / 1024
@@ -17,6 +20,7 @@ interface Args {
   acl?: 'private' | 'public-read'
   bucket: string
   collections: S3StorageOptions['collections']
+  encryption?: EncryptionConfig
   getStorageClient: () => AWS.S3
 }
 
@@ -27,6 +31,7 @@ export const getGenerateSignedURLHandler = ({
   acl,
   bucket,
   collections,
+  encryption,
   getStorageClient,
 }: Args): PayloadHandler => {
   return async (req) => {
@@ -74,6 +79,8 @@ export const getGenerateSignedURLHandler = ({
       signableHeaders.add('content-length')
     }
 
+    const encryptionParams = getEncryptionParams(encryption)
+
     const url = await getSignedUrl(
       getStorageClient(),
       new AWS.PutObjectCommand({
@@ -82,6 +89,7 @@ export const getGenerateSignedURLHandler = ({
         ContentLength: filesizeLimit ? Math.min(filesize, filesizeLimit) : undefined,
         ContentType: mimeType,
         Key: fileKey,
+        ...encryptionParams,
       }),
       {
         expiresIn: 600,
