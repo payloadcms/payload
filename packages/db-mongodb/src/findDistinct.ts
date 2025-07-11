@@ -35,7 +35,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     fieldPath = fieldPathResult.localizedPath.replace('<locale>', args.locale)
   }
 
-  const page = args.page ?? 1
+  const page = args.page || 1
 
   const basePipeline: PipelineStage[] = [
     {
@@ -83,6 +83,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
       hasPrevPage,
       limit: args.limit,
       nextPage: hasNextPage ? page + 1 : null,
+      page,
       pagingCounter,
       prevPage: hasPrevPage ? page - 1 : null,
       totalDocs,
@@ -97,6 +98,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     hasNextPage: false,
     hasPrevPage: false,
     limit: 0,
+    page: 1,
     pagingCounter: 1,
     totalDocs: values.length,
     totalPages: 1,

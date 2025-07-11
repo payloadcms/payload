@@ -14,7 +14,7 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
   const sort = args.sortOrder === 'desc' ? `-${args.field}` : args.field
   const collectionConfig: SanitizedCollectionConfig =
     this.payload.collections[args.collection].config
-  const page = args.page ?? 1
+  const page = args.page || 1
   const offset = args.limit ? (page - 1) * args.limit : undefined
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
@@ -86,6 +86,7 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
       hasPrevPage,
       limit: args.limit,
       nextPage: hasNextPage ? page + 1 : null,
+      page,
       pagingCounter,
       prevPage: hasPrevPage ? page - 1 : null,
       totalDocs,
@@ -98,6 +99,7 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     hasNextPage: false,
     hasPrevPage: false,
     limit: 0,
+    page: 1,
     pagingCounter: 1,
     totalDocs: values.length,
     totalPages: 1,
