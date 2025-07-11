@@ -189,10 +189,6 @@ export const TenantSelectionProviderClient = ({
   )
 
   React.useEffect(() => {
-    console.log({
-      prevUserID: prevUserID.current,
-      userID,
-    })
     if (userChanged) {
       if (userID) {
         // user logging in

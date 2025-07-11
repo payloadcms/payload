@@ -94,7 +94,7 @@ export const buildFormStateHandler: ServerFunction<
     }
 
     if (err.message === 'Unauthorized') {
-      throw new Error('Unauthorized')
+      return null
     }
 
     return formatErrors(err)
