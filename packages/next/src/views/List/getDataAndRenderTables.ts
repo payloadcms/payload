@@ -8,6 +8,7 @@ import type {
 } from 'payload'
 
 import { renderTable } from '@payloadcms/ui/rsc'
+import { flattenAllFields } from 'payload'
 
 export const getDataAndRenderTables = async ({
   clientConfig,
@@ -51,6 +52,7 @@ export const getDataAndRenderTables = async ({
   Table: React.ReactNode | React.ReactNode[]
 }> => {
   let data
+  const dataByGroup: Record<string, PaginatedDocs> = {}
   let Table: React.ReactNode | React.ReactNode[] = null
   let columnState: Column[] = []
 
@@ -64,41 +66,41 @@ export const getDataAndRenderTables = async ({
       locale: req.locale,
       overrideAccess: false,
       // page,
+      depth: 1,
       req,
       // where: where || {},
     })
 
     data = {
-      distinct: {} as Record<string, PaginatedDocs>,
-      docs: Array.from({ length: distinct.totalDocs }).map(() => ({})),
-      page: distinct,
-      totalPages: distinct.totalDocs,
+      ...distinct,
+      docs: distinct.values?.map(() => ({})) || [],
+      values: undefined,
     }
 
     if (distinct.values) {
-      // lookup the distinct config to discover the useAsTitle
-      // const distinctCollectionConfig = req.payload.config.collections.find(
-      //   (c) => c.slug === 'categories',
-      // )
-      // TODO: replace with dynamic slug
-
-      // const fullDistincts = await req.payload
-      //   .find({
-      //     collection: 'categories', // TODO
-      //     depth: 0,
-      //     draft: true,
-      //     where: {
-      //       id: {
-      //         in: distinct.values,
-      //       },
-      //     },
-      //   })
-      //   ?.then((res) => res.docs)
-
       let allDocs = []
+
+      // NOTE: is there a faster/better way to do this?
+      const flattenedFields = flattenAllFields({ fields: collectionConfig.fields })
+      const groupByField = flattenedFields.find((f) => f.name === groupBy)
+      const isRelationship = groupByField?.type === 'relationship'
+
+      const relationshipConfig = isRelationship
+        ? clientConfig.collections.find((c) => c.slug === groupByField.relationTo)
+        : undefined
 
       await Promise.all(
         distinct.values.map(async (distinctValue) => {
+          const potentiallyPopulatedRelationship = distinctValue[groupBy]
+
+          const valueOrRelationshipID =
+            isRelationship &&
+            potentiallyPopulatedRelationship &&
+            typeof potentiallyPopulatedRelationship === 'object' &&
+            'id' in potentiallyPopulatedRelationship
+              ? potentiallyPopulatedRelationship.id
+              : potentiallyPopulatedRelationship
+
           const distinctGroup = await req.payload.find({
             collection: collectionSlug,
             depth: 0,
@@ -115,7 +117,7 @@ export const getDataAndRenderTables = async ({
             where: {
               ...where,
               [groupBy]: {
-                equals: distinctValue,
+                equals: valueOrRelationshipID,
               },
             },
           })
@@ -129,13 +131,13 @@ export const getDataAndRenderTables = async ({
             docs: distinctGroup.docs,
             drawerSlug,
             enableRowSelections,
-            key: `table-${distinctValue}`,
-            // TODO: return something different depending on field type, e.g. format dates, handle rich text, etc.
-            heading: `${distinctValue || 'Untitled'}`,
-            // TODO: for relationship fields, need to get the dynamic values
-            // heading:
-            //   fullDistinct?.[distinctCollectionConfig?.admin?.useAsTitle || 'id'] || 'No Category',
+            heading:
+              isRelationship && typeof potentiallyPopulatedRelationship === 'object'
+                ? potentiallyPopulatedRelationship[relationshipConfig.admin.useAsTitle || 'id'] ||
+                  valueOrRelationshipID
+                : potentiallyPopulatedRelationship || 'Untitled',
             i18n: req.i18n,
+            key: `table-${valueOrRelationshipID}`,
             orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
             payload: req.payload,
             useAsTitle: collectionConfig.admin.useAsTitle,
@@ -145,7 +147,7 @@ export const getDataAndRenderTables = async ({
             Table = []
           }
 
-          data.distinct[distinctValue] = distinctGroup
+          dataByGroup[valueOrRelationshipID] = distinctGroup
           ;(Table as Array<React.ReactNode>).push(NewTable)
           allDocs = allDocs.concat(distinctGroup.docs)
         }),

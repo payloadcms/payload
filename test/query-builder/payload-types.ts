@@ -124,7 +124,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
-  category?: ('Engineering' | 'Design') | null;
+  category?: (string | null) | Category;
   content?: {
     root: {
       type: string;
