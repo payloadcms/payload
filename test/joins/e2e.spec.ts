@@ -22,7 +22,14 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
 import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { categoriesJoinRestrictedSlug, categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
+import {
+  categoriesJoinRestrictedSlug,
+  categoriesSlug,
+  categoriesVersionsSlug,
+  postsSlug,
+  uploadsSlug,
+  versionsSlug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -39,6 +46,8 @@ describe('Join Field', () => {
   let foldersURL: AdminUrlUtil
   let uploadsURL: AdminUrlUtil
   let categoriesJoinRestrictedURL: AdminUrlUtil
+  let categoriesVersionsURL: AdminUrlUtil
+  let versionsURL: AdminUrlUtil
   let categoryID: number | string
   let rootFolderID: number | string
 
@@ -53,6 +62,8 @@ describe('Join Field', () => {
     uploadsURL = new AdminUrlUtil(serverURL, uploadsSlug)
     categoriesJoinRestrictedURL = new AdminUrlUtil(serverURL, categoriesJoinRestrictedSlug)
     foldersURL = new AdminUrlUtil(serverURL, 'folders')
+    categoriesVersionsURL = new AdminUrlUtil(serverURL, categoriesVersionsSlug)
+    versionsURL = new AdminUrlUtil(serverURL, versionsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -542,5 +553,43 @@ describe('Join Field', () => {
 
     await changeLocale(page, 'es')
     await expect(localizedTextCell).toHaveText('Text in es')
+  })
+
+  test('should fetch draft documents in joins', async () => {
+    // create category-versions document
+    const categoryVersionsDoc = await payload.create({
+      collection: categoriesVersionsSlug,
+      data: {
+        title: 'Category Versions',
+      },
+    })
+
+    // create versions document
+    const versionDoc = await payload.create({
+      collection: versionsSlug,
+      data: {
+        title: 'Version 1',
+        categoryVersion: categoryVersionsDoc.id,
+      },
+    })
+
+    // update versions document with draft data
+    await payload.update({
+      id: versionDoc.id,
+      collection: versionsSlug,
+      data: {
+        title: 'Version 1 - Draft',
+      },
+      draft: true,
+    })
+
+    await page.goto(categoriesVersionsURL.edit(categoryVersionsDoc.id))
+    const joinField = page.locator('#field-relatedVersions.field-type.join')
+    await expect(joinField).toBeVisible()
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
+    const row = joinField.locator('.relationship-table tbody tr.row-1')
+    await expect(row).toBeVisible()
+    const versionsRowTitle = row.locator('.cell-title span')
+    await expect(versionsRowTitle).toHaveText('Version 1 - Draft')
   })
 })

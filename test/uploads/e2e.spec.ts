@@ -32,6 +32,7 @@ import {
   constructorOptionsSlug,
   customFileNameMediaSlug,
   customUploadFieldSlug,
+  fileMimeTypeSlug,
   focalOnlySlug,
   hideFileInputOnCreateSlug,
   imageSizesOnlySlug,
@@ -84,6 +85,7 @@ let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
 let bulkUploadsURL: AdminUrlUtil
+let fileMimeTypeURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -122,6 +124,7 @@ describe('Uploads', () => {
     threeDimensionalURL = new AdminUrlUtil(serverURL, threeDimensionalSlug)
     constructorOptionsURL = new AdminUrlUtil(serverURL, constructorOptionsSlug)
     bulkUploadsURL = new AdminUrlUtil(serverURL, bulkUploadsSlug)
+    fileMimeTypeURL = new AdminUrlUtil(serverURL, fileMimeTypeSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -1576,6 +1579,16 @@ describe('Uploads', () => {
     const filename = page.locator('.file-field__filename')
 
     await expect(filename).toHaveValue('animated.webp')
+    await saveDocAndAssert(page, '#action-save', 'error')
+  })
+
+  test('should prevent invalid mimetype disguised as valid mimetype', async () => {
+    await page.goto(fileMimeTypeURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image-as-pdf.pdf'))
+
+    const filename = page.locator('.file-field__filename')
+    await expect(filename).toHaveValue('image-as-pdf.pdf')
+
     await saveDocAndAssert(page, '#action-save', 'error')
   })
 })
