@@ -90,7 +90,7 @@ export const getDataAndRenderTables = async ({
         : undefined
 
       await Promise.all(
-        distinct.values.map(async (distinctValue) => {
+        distinct.values.map(async (distinctValue, i) => {
           const potentiallyPopulatedRelationship = distinctValue[groupBy]
 
           const valueOrRelationshipID =
@@ -148,7 +148,7 @@ export const getDataAndRenderTables = async ({
           }
 
           dataByGroup[valueOrRelationshipID] = distinctGroup
-          ;(Table as Array<React.ReactNode>).push(NewTable)
+          ;(Table as Array<React.ReactNode>)[i] = NewTable
           allDocs = allDocs.concat(distinctGroup.docs)
         }),
       )
