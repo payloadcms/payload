@@ -134,8 +134,6 @@ export const promise = async ({
           )
         })
         await Promise.all(promises)
-      } else {
-        siblingDoc[field.name] = []
       }
 
       break
@@ -182,8 +180,6 @@ export const promise = async ({
         })
 
         await Promise.all(promises)
-      } else {
-        siblingDoc[field.name] = []
       }
 
       break
