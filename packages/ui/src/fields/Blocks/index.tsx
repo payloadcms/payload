@@ -352,10 +352,11 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             )}
             <li>
               <ClipboardAction
+                allowCopy={rows?.length > 0}
+                allowPaste={!readOnly}
                 blocks={clientBlocks}
                 className={`${baseClass}__header-action`}
-                disableCopy={!(rows?.length > 0)}
-                disablePaste={readOnly}
+                disabled={disabled}
                 getDataToCopy={() =>
                   reduceFormStateByPath({
                     formState: { ...getFields() },
