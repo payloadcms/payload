@@ -30,7 +30,6 @@ import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 import { useField } from '../../forms/useField/index.js'
-import './index.scss'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -39,6 +38,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { ArrayRow } from './ArrayRow.js'
+import './index.scss'
 
 const baseClass = 'array-field'
 
@@ -365,7 +365,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
               <ClipboardAction
                 className={`${baseClass}__header-action`}
                 disableCopy={!(rows?.length > 0)}
-                disablePaste={readOnly}
+                disablePaste={readOnly || disabled}
                 fields={fields}
                 getDataToCopy={getDataToCopy}
                 onPaste={pasteField}
@@ -459,6 +459,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__add-row`}
+          disabled={disabled}
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"
