@@ -684,8 +684,8 @@ describe('Collections - Uploads', () => {
           }),
         ).rejects.toThrow(
           expect.objectContaining({
-            name: 'APIError',
-            message: `File type 'text/html' not allowed ${file.name}: Restricted file type detected -- set 'allowRestrictedFileTypes' to true to skip this check for this Collection.`,
+            name: 'ValidationError',
+            message: `The following field is invalid: file`,
           }),
         )
       })
