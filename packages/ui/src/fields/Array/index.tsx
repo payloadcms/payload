@@ -363,9 +363,10 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
             )}
             <li>
               <ClipboardAction
+                allowCopy={rows?.length > 0}
+                allowPaste={!readOnly}
                 className={`${baseClass}__header-action`}
-                disableCopy={!(rows?.length > 0)}
-                disablePaste={readOnly || disabled}
+                disabled={disabled}
                 fields={fields}
                 getDataToCopy={getDataToCopy}
                 onPaste={pasteField}
