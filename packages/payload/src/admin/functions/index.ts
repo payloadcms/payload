@@ -53,6 +53,7 @@ export type ListQuery = {
   limit?: string
   page?: string
   preset?: number | string
+  queryByGroup?: Record<string, ListQuery>
   /*
     When provided, is automatically injected into the `where` object
   */

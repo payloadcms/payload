@@ -19,19 +19,36 @@ export const GroupByPageControls: React.FC<{
   AfterPageControls?: React.ReactNode
   collectionConfig: ClientCollectionConfig
   data: PaginatedDocs
-}> = ({ AfterPageControls, collectionConfig, data }) => {
-  const { query } = useListQuery()
+  groupByValue?: number | string
+}> = ({ AfterPageControls, collectionConfig, data, groupByValue }) => {
+  const { query, refineListData } = useListQuery()
   const { groupBy } = query
 
-  const handlePageChange: IListQueryContext['handlePageChange'] = useCallback(async (page) => {
-    console.log('Page changed to:', page)
-  }, [])
+  const handlePageChange: IListQueryContext['handlePageChange'] = useCallback(
+    async (page) => {
+      await refineListData({
+        queryByGroup: {
+          [groupByValue]: {
+            page: String(page),
+          },
+        },
+      })
+    },
+    [refineListData, groupByValue],
+  )
 
   const handlePerPageChange: IListQueryContext['handlePerPageChange'] = useCallback(
     async (limit) => {
-      console.log('Per page changed to:', limit)
+      await refineListData({
+        queryByGroup: {
+          [groupByValue]: {
+            limit: String(limit),
+            page: '1',
+          },
+        },
+      })
     },
-    [],
+    [refineListData, groupByValue],
   )
 
   if (!groupBy) {
