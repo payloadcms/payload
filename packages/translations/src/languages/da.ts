@@ -185,6 +185,8 @@ export const daTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Slet mappe',
     folderName: 'Mappenavn',
     folders: 'Mapper',
+    folderTypeDescription:
+      'Vælg hvilken type samling af dokumenter der bør være tilladt i denne mappe.',
     itemHasBeenMoved: '{{title}} er blevet flyttet til {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} er blevet flyttet til rodmappen',
     itemsMovedToFolder: '{{title}} flyttet til {{folderName}}',

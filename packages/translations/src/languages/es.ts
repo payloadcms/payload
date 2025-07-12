@@ -190,6 +190,8 @@ export const esTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Eliminar Carpeta',
     folderName: 'Nombre de la Carpeta',
     folders: 'Carpetas',
+    folderTypeDescription:
+      'Seleccione qué tipo de documentos de la colección se deben permitir en esta carpeta.',
     itemHasBeenMoved: '{{title}} se ha movido a {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} se ha movido a la carpeta raíz',
     itemsMovedToFolder: '{{title}} movido a {{folderName}}',

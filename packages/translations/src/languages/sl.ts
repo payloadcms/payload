@@ -186,6 +186,8 @@ export const slTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Izbriši mapo',
     folderName: 'Ime mape',
     folders: 'Mape',
+    folderTypeDescription:
+      'Izberite, katere vrste dokumentov zbirke naj bodo dovoljene v tej mapi.',
     itemHasBeenMoved: '{{title}} je bil premaknjen v {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} je bil premaknjen v korensko mapo.',
     itemsMovedToFolder: '{{title}} premaknjeno v {{folderName}}',

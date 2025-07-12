@@ -179,6 +179,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     deleteFolder: '删除文件夹',
     folderName: '文件夹名称',
     folders: '文件夹',
+    folderTypeDescription: '在此文件夹中选择应允许哪种类型的集合文档。',
     itemHasBeenMoved: '{{title}}已被移至{{folderName}}',
     itemHasBeenMovedToRoot: '{{title}}已被移至根文件夹',
     itemsMovedToFolder: '{{title}}已移至{{folderName}}',

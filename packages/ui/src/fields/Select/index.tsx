@@ -16,7 +16,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { SelectInput } from './Input.js'
 
-const formatOptions = (options: Option[]): OptionObject[] =>
+export const formatOptions = (options: Option[]): OptionObject[] =>
   options.map((option) => {
     if (typeof option === 'object' && (option.value || option.value === '')) {
       return option

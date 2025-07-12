@@ -187,6 +187,8 @@ export const caTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Esborra la carpeta',
     folderName: 'Nom de la Carpeta',
     folders: 'Carpetes',
+    folderTypeDescription:
+      'Seleccioneu quin tipus de documents de la col·lecció haurien de ser permesos en aquesta carpeta.',
     itemHasBeenMoved: "{{title}} s'ha traslladat a {{folderName}}",
     itemHasBeenMovedToRoot: "{{title}} s'ha mogut a la carpeta arrel",
     itemsMovedToFolder: "{{title}} s'ha traslladat a {{folderName}}",

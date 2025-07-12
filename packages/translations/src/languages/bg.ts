@@ -186,6 +186,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Изтрий папка',
     folderName: 'Име на папка',
     folders: 'Папки',
+    folderTypeDescription:
+      'Изберете кой тип документи от колекциите трябва да се допускат в тази папка.',
     itemHasBeenMoved: '{{title}} е преместен в {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} беше преместено в основната папка',
     itemsMovedToFolder: '{{title}} беше преместен в {{folderName}}',

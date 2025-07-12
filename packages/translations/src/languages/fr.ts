@@ -192,6 +192,8 @@ export const frTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Supprimer le dossier',
     folderName: 'Nom du dossier',
     folders: 'Dossiers',
+    folderTypeDescription:
+      'Sélectionnez le type de documents de collection qui devraient être autorisés dans ce dossier.',
     itemHasBeenMoved: '{{title}} a été déplacé vers {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} a été déplacé dans le dossier racine',
     itemsMovedToFolder: '{{title}} déplacé vers {{folderName}}',

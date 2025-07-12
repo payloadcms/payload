@@ -191,6 +191,8 @@ export const deTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Ordner löschen',
     folderName: 'Ordnername',
     folders: 'Ordner',
+    folderTypeDescription:
+      'Wählen Sie aus, welche Art von Sammlungsdokumenten in diesem Ordner zugelassen sein sollte.',
     itemHasBeenMoved: '{{title}} wurde in {{folderName}} verschoben.',
     itemHasBeenMovedToRoot: '{{title}} wurde in den Hauptordner verschoben',
     itemsMovedToFolder: '{{title}} wurde in {{folderName}} verschoben.',

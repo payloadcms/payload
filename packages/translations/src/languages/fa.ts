@@ -184,6 +184,7 @@ export const faTranslations: DefaultTranslationsObject = {
     deleteFolder: 'حذف پوشه',
     folderName: 'نام پوشه',
     folders: 'پوشه‌ها',
+    folderTypeDescription: 'انتخاب کنید که کدام نوع اسناد مجموعه باید در این پوشه مجاز باشند.',
     itemHasBeenMoved: '{{title}} به {{folderName}} منتقل شده است.',
     itemHasBeenMovedToRoot: '{{title}} به پوشه اصلی انتقال یافته است.',
     itemsMovedToFolder: '{{title}} به {{folderName}} منتقل شد.',

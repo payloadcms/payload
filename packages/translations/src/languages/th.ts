@@ -183,6 +183,7 @@ export const thTranslations: DefaultTranslationsObject = {
     deleteFolder: 'ลบโฟลเดอร์',
     folderName: 'ชื่อโฟลเดอร์',
     folders: 'โฟลเดอร์',
+    folderTypeDescription: 'เลือกประเภทของเอกสารคอลเลกชันที่ควรอนุญาตในโฟลเดอร์นี้',
     itemHasBeenMoved: '{{title}} ได้ถูกย้ายไปที่ {{folderName}}',
     itemHasBeenMovedToRoot: '"{{title}}" ได้ถูกย้ายไปยังโฟลเดอร์ราก',
     itemsMovedToFolder: '{{title}} ถูกย้ายไปยัง {{folderName}}',

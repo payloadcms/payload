@@ -186,6 +186,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Slett mappe',
     folderName: 'Mappenavn',
     folders: 'Mapper',
+    folderTypeDescription: 'Velg hvilken type samling dokumenter som skal tillates i denne mappen.',
     itemHasBeenMoved: '{{title}} er flyttet til {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} er flyttet til rotmappen',
     itemsMovedToFolder: '{{title}} flyttet til {{folderName}}',

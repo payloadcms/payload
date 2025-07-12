@@ -186,6 +186,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Ջնջել թղթապանակը',
     folderName: 'Տեսակավորման անվանում',
     folders: 'Պատուհաններ',
+    folderTypeDescription:
+      'Ընտրեք, թե որն է հավաքածուի փաստաթղթերը, որոնք պետք է թույլատրվեն այս պանակում:',
     itemHasBeenMoved: '{{title}}-ը տեղափոխվել է {{folderName}}-ում',
     itemHasBeenMovedToRoot: '«{{title}}» տեղափոխվել է արմատային պանակ։',
     itemsMovedToFolder: '{{title}} տեղափոխվեց {{folderName}}',

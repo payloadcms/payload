@@ -190,6 +190,8 @@ export const itTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Elimina cartella',
     folderName: 'Nome Cartella',
     folders: 'Cartelle',
+    folderTypeDescription:
+      'Seleziona quale tipo di documenti della collezione dovrebbero essere consentiti in questa cartella.',
     itemHasBeenMoved: '{{title}} è stato spostato in {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} è stato spostato nella cartella principale',
     itemsMovedToFolder: '{{title}} spostato in {{folderName}}',

@@ -187,6 +187,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Obriši fasciklu',
     folderName: 'Ime fascikle',
     folders: 'Fascikle',
+    folderTypeDescription:
+      'Odaberite koja vrsta dokumenata iz kolekcije treba biti dozvoljena u ovom folderu.',
     itemHasBeenMoved: '{{title}} je premješten u {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} je premešten u osnovni direktorijum.',
     itemsMovedToFolder: '{{title}} premešten u {{folderName}}',

@@ -186,6 +186,7 @@ export const azTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Qovluğu Sil',
     folderName: 'Qovluq Adı',
     folders: 'Qovluqlar',
+    folderTypeDescription: 'Bu qovluqda hangi tip kolleksiya sənədlərinə icazə verilməlidir seçin.',
     itemHasBeenMoved: '{{title}} {{folderName}} qovluğuna köçürüldü.',
     itemHasBeenMovedToRoot: '{{title}} kök qovluğa köçürüldü.',
     itemsMovedToFolder: '{{title}} {{folderName}} qovluğuna köçürüldü',

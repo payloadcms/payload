@@ -189,6 +189,8 @@ export const skTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Odstrániť priečinok',
     folderName: 'Názov priečinka',
     folders: 'Priečinky',
+    folderTypeDescription:
+      'Vyberte, ktorý typ dokumentov z kolekcie by mal byť povolený v tejto zložke.',
     itemHasBeenMoved: '{{title}} bol presunutý do {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} bol presunutý do koreňového priečinka',
     itemsMovedToFolder: '{{title}} presunuté do {{folderName}}',

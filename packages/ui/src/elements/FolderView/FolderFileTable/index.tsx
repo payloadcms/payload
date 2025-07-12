@@ -22,9 +22,9 @@ type Props = {
 
 export function FolderFileTable({ showRelationCell = true }: Props) {
   const {
+    checkIfItemIsDisabled,
     documents,
     focusedRowIndex,
-    isDragging,
     onItemClick,
     onItemKeyPress,
     selectedItemKeys,
@@ -34,9 +34,12 @@ export function FolderFileTable({ showRelationCell = true }: Props) {
   const { i18n, t } = useTranslation()
 
   const [relationToMap] = React.useState(() => {
-    const map: Record<string, string> = {}
+    const map: Record<string, { plural: string; singular: string }> = {}
     config.collections.forEach((collection) => {
-      map[collection.slug] = getTranslation(collection.labels?.singular, i18n)
+      map[collection.slug] = {
+        plural: getTranslation(collection.labels?.plural, i18n),
+        singular: getTranslation(collection.labels?.singular, i18n),
+      }
     })
     return map
   })
@@ -94,7 +97,22 @@ export function FolderFileTable({ showRelationCell = true }: Props) {
                 }
 
                 if (name === 'type') {
-                  cellValue = relationToMap[relationTo] || relationTo
+                  cellValue = (
+                    <>
+                      {relationToMap[relationTo]?.singular || relationTo}
+                      {Array.isArray(subfolder.value?.folderType)
+                        ? subfolder.value?.folderType.reduce((acc, slug, index) => {
+                            if (index === 0) {
+                              return ` — ${relationToMap[slug]?.plural || slug}`
+                            }
+                            if (index > 0) {
+                              return `${acc}, ${relationToMap[slug]?.plural || slug}`
+                            }
+                            return acc
+                          }, '')
+                        : ''}
+                    </>
+                  )
                 }
 
                 if (index === 0) {
@@ -108,7 +126,7 @@ export function FolderFileTable({ showRelationCell = true }: Props) {
                   return cellValue
                 }
               })}
-              disabled={isDragging && selectedItemKeys?.has(itemKey)}
+              disabled={checkIfItemIsDisabled(subfolder)}
               dragData={{
                 id: subfolderID,
                 type: 'folder',
@@ -160,7 +178,7 @@ export function FolderFileTable({ showRelationCell = true }: Props) {
                 }
 
                 if (name === 'type') {
-                  cellValue = relationToMap[relationTo] || relationTo
+                  cellValue = relationToMap[relationTo]?.singular || relationTo
                 }
 
                 if (index === 0) {
@@ -174,7 +192,7 @@ export function FolderFileTable({ showRelationCell = true }: Props) {
                   return cellValue
                 }
               })}
-              disabled={isDragging || selectedItemKeys?.has(itemKey)}
+              disabled={checkIfItemIsDisabled(document)}
               dragData={{
                 id: documentID,
                 type: 'document',

@@ -187,6 +187,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     deleteFolder: 'ফোল্ডার মুছুন',
     folderName: 'ফোল্ডারের নাম',
     folders: 'ফোল্ডারগুলি',
+    folderTypeDescription:
+      'এই ফোল্ডারে কোন ধরণের কালেকশন ডকুমেন্টস অনুমতি দেওয়া উচিত তা নির্বাচন করুন।',
     itemHasBeenMoved: '{{title}} কে {{folderName}} এ সরানো হয়েছে',
     itemHasBeenMovedToRoot: '{{title}} কে মূল ফোল্ডারে সরানো হয়েছে',
     itemsMovedToFolder: '{{title}} কে {{folderName}} এ সরানো হয়েছে',
