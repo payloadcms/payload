@@ -44,6 +44,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   const rowToInsert = transformForWrite({
     adapter,
     data,
+    enableAtomicWrites: false,
     fields,
     path,
     tableName,

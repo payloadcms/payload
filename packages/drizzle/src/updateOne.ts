@@ -151,6 +151,7 @@ export const updateOne: UpdateOne = async function updateOne(
   const { row } = transformForWrite({
     adapter: this,
     data,
+    enableAtomicWrites: true,
     fields: collection.flattenedFields,
     tableName,
   })
