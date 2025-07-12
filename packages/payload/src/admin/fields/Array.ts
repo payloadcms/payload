@@ -66,3 +66,14 @@ export type ArrayFieldErrorClientComponent = FieldErrorClientComponent<ArrayFiel
 
 export type ArrayFieldDiffServerComponent = FieldDiffServerComponent<ArrayField, ArrayFieldClient>
 export type ArrayFieldDiffClientComponent = FieldDiffClientComponent<ArrayFieldClient>
+
+type ArrayRowLabelBase = {
+  rowLabel: string
+  rowNumber: number
+} & FieldPaths
+export type ArrayRowLabelClientProps = ArrayRowLabelBase & ClientFieldBase<ArrayFieldClient>
+export type ArrayRowLabelClientComponent = React.ComponentType<ArrayRowLabelClientProps>
+
+export type ArrayRowLabelServerPropsOnly = ServerFieldBase<ArrayField, ArrayFieldClientWithoutType>
+export type ArrayRowLabelServerProps = ArrayRowLabelBase & ArrayRowLabelServerPropsOnly
+export type ArrayRowLabelServerComponent = React.ComponentType<ArrayRowLabelServerProps>

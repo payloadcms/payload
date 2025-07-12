@@ -170,7 +170,7 @@ export const createClientBlocks = ({
   return clientBlocks
 }
 
-export const createClientField = ({
+export const createClientField = <ClientFieldT extends ClientField = ClientField>({
   defaultIDType,
   field: incomingField,
   i18n,
@@ -180,8 +180,8 @@ export const createClientField = ({
   field: Field
   i18n: I18nClient
   importMap: ImportMap
-}): ClientField => {
-  const clientField: ClientField = {} as ClientField
+}): ClientFieldT => {
+  const clientField: ClientFieldT = {} as ClientFieldT
 
   for (const key in incomingField) {
     if (serverOnlyFieldProperties.includes(key as any)) {
