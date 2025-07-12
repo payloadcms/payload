@@ -92,6 +92,7 @@ export type ViewTypes =
   | 'folders'
   | 'list'
   | 'reset'
+  | 'trash'
   | 'verify'
   | 'version'
 

@@ -64,6 +64,7 @@ type Args = {
   permissions: SanitizedFieldsPermissions
   preferences?: DocumentPreferences
   previousFormState: FormState
+  readOnly?: boolean
   renderAllFields: boolean
   renderFieldFn: RenderFieldMethod
   req: PayloadRequest
@@ -107,6 +108,7 @@ export const iterateFields = async ({
   permissions,
   preferences,
   previousFormState,
+  readOnly,
   renderAllFields,
   renderFieldFn: renderFieldFn,
   req,
@@ -196,6 +198,7 @@ export const iterateFields = async ({
         path,
         preferences,
         previousFormState,
+        readOnly,
         renderAllFields,
         renderFieldFn,
         req,
