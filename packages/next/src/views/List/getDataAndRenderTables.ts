@@ -2,6 +2,7 @@ import type {
   ClientConfig,
   CollectionPreferences,
   Column,
+  ListQuery,
   PaginatedDocs,
   PayloadRequest,
   SanitizedCollectionConfig,
@@ -19,13 +20,9 @@ export const getDataAndRenderTables = async ({
   customCellProps,
   drawerSlug,
   enableRowSelections,
-  groupBy,
-  limit = 25,
-  page = 1,
+  query,
   req,
-  sort = [],
   user,
-  where = {},
 }: {
   clientConfig: ClientConfig
   collectionConfig: SanitizedCollectionConfig
@@ -35,13 +32,9 @@ export const getDataAndRenderTables = async ({
   customCellProps?: Record<string, any>
   drawerSlug?: string
   enableRowSelections?: boolean
-  groupBy?: string
-  limit?: number
-  page?: number
+  query?: ListQuery
   req: PayloadRequest
-  sort?: any[]
   user: any
-  where?: Record<string, any>
 }): Promise<{
   columnState: any[]
   data: PaginatedDocs
@@ -58,15 +51,15 @@ export const getDataAndRenderTables = async ({
 
   const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
-  if (groupBy) {
+  if (query.groupBy) {
     const distinct = await req.payload.findDistinct({
       collection: collectionSlug,
       depth: 1,
-      field: groupBy,
-      limit,
+      field: query.groupBy,
+      limit: query?.limit ? Number(query.limit) : undefined,
       locale: req.locale,
       overrideAccess: false,
-      page,
+      page: query?.page ? Number(query.page) : undefined,
       req,
       // where: where || {},
     })
@@ -80,7 +73,7 @@ export const getDataAndRenderTables = async ({
     if (distinct.values) {
       // NOTE: is there a faster/better way to do this?
       const flattenedFields = flattenAllFields({ fields: collectionConfig.fields })
-      const groupByField = flattenedFields.find((f) => f.name === groupBy)
+      const groupByField = flattenedFields.find((f) => f.name === query.groupBy)
       const isRelationship = groupByField?.type === 'relationship'
 
       const relationshipConfig = isRelationship
@@ -89,7 +82,7 @@ export const getDataAndRenderTables = async ({
 
       await Promise.all(
         distinct.values.map(async (distinctValue, i) => {
-          const potentiallyPopulatedRelationship = distinctValue[groupBy]
+          const potentiallyPopulatedRelationship = distinctValue[query.groupBy]
 
           const valueOrRelationshipID =
             isRelationship &&
@@ -99,22 +92,26 @@ export const getDataAndRenderTables = async ({
               ? potentiallyPopulatedRelationship.id
               : potentiallyPopulatedRelationship
 
-          const distinctGroup = await req.payload.find({
+          const groupData = await req.payload.find({
             collection: collectionSlug,
             depth: 0,
             draft: true,
             fallbackLocale: false,
             includeLockStatus: true,
-            limit,
+            limit: query?.queryByGroup?.[valueOrRelationshipID]?.limit
+              ? Number(query.queryByGroup[valueOrRelationshipID].limit)
+              : undefined,
             locale: req.locale,
             overrideAccess: false,
-            page,
+            page: query?.queryByGroup?.[valueOrRelationshipID]?.page
+              ? Number(query.queryByGroup[valueOrRelationshipID].page)
+              : undefined,
             req,
-            sort,
+            sort: query?.queryByGroup?.[valueOrRelationshipID]?.sort,
             user,
             where: {
-              ...where,
-              [groupBy]: {
+              ...(query?.where || {}),
+              [query.groupBy]: {
                 equals: valueOrRelationshipID,
               },
             },
@@ -126,9 +123,10 @@ export const getDataAndRenderTables = async ({
             columnPreferences: collectionPreferences?.columns,
             columns,
             customCellProps,
-            data: distinctGroup,
+            data: groupData,
             drawerSlug,
             enableRowSelections,
+            groupByValue: valueOrRelationshipID,
             heading:
               isRelationship && typeof potentiallyPopulatedRelationship === 'object'
                 ? potentiallyPopulatedRelationship[relationshipConfig.admin.useAsTitle || 'id'] ||
@@ -145,7 +143,7 @@ export const getDataAndRenderTables = async ({
             Table = []
           }
 
-          dataByGroup[valueOrRelationshipID] = distinctGroup
+          dataByGroup[valueOrRelationshipID] = groupData
           ;(Table as Array<React.ReactNode>)[i] = NewTable
         }),
       )
@@ -176,14 +174,14 @@ export const getDataAndRenderTables = async ({
       draft: true,
       fallbackLocale: false,
       includeLockStatus: true,
-      limit,
+      limit: query?.limit ? Number(query.limit) : undefined,
       locale: req.locale,
       overrideAccess: false,
-      page,
+      page: query?.page ? Number(query.page) : undefined,
       req,
-      sort,
+      sort: query?.sort,
       user,
-      where: where || {},
+      where: query?.where || {},
     })
     ;({ columnState, Table } = renderTable({
       clientCollectionConfig,

@@ -12,6 +12,7 @@ import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ListQueryContext, ListQueryModifiedContext } from './context.js'
+import { mergeQuery } from './mergeQuery.js'
 
 export { useListQuery } from './context.js'
 
@@ -28,9 +29,10 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   onQueryChange: onQueryChangeFromProps,
   orderableFieldName,
 }) => {
-  // TODO: Investigate if this is still needed
   // eslint-disable-next-line react-compiler/react-compiler
   'use no memo'
+  // TODO: Investigate if this is still needed
+
   const router = useRouter()
   const rawSearchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
@@ -59,34 +61,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     }
   })
 
-  const mergeQuery = useCallback(
-    (newQuery: ListQuery = {}): ListQuery => {
-      let page = 'page' in newQuery ? newQuery.page : currentQuery?.page
-
-      if ('where' in newQuery || 'search' in newQuery) {
-        page = '1'
-      }
-
-      const mergedQuery: ListQuery = {
-        ...currentQuery,
-        ...newQuery,
-        columns: 'columns' in newQuery ? newQuery.columns : currentQuery.columns,
-        groupBy:
-          'groupBy' in newQuery ? newQuery.groupBy : (currentQuery?.groupBy ?? defaultGroupBy),
-        limit: 'limit' in newQuery ? newQuery.limit : (currentQuery?.limit ?? String(defaultLimit)),
-        page,
-        preset: 'preset' in newQuery ? newQuery.preset : currentQuery?.preset,
-        search: 'search' in newQuery ? newQuery.search : currentQuery?.search,
-        sort: 'sort' in newQuery ? newQuery.sort : ((currentQuery?.sort as string) ?? defaultSort),
-        sortByGroup: 'sortByGroup' in newQuery ? newQuery.sortByGroup : currentQuery.sortByGroup,
-        where: 'where' in newQuery ? newQuery.where : currentQuery?.where,
-      }
-
-      return mergedQuery
-    },
-    [currentQuery, defaultLimit, defaultSort, defaultGroupBy],
-  )
-
   const refineListData = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await
     async (incomingQuery: ListQuery, modified?: boolean) => {
@@ -96,7 +70,13 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         setModified(true)
       }
 
-      const newQuery = mergeQuery(incomingQuery)
+      const newQuery = mergeQuery(currentQuery, incomingQuery, {
+        defaults: {
+          groupBy: defaultGroupBy,
+          limit: defaultLimit?.toString(),
+          sort: defaultSort,
+        },
+      })
 
       if (modifySearchParams) {
         startRouteTransition(() =>
@@ -115,7 +95,10 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       setCurrentQuery(newQuery)
     },
     [
-      mergeQuery,
+      currentQuery,
+      defaultGroupBy,
+      defaultLimit,
+      defaultSort,
       modifySearchParams,
       onQueryChange,
       onQueryChangeFromProps,

@@ -70,6 +70,7 @@ export const renderTable = ({
   customCellProps,
   data,
   enableRowSelections,
+  groupByValue,
   heading,
   i18n,
   key = 'table',
@@ -89,6 +90,7 @@ export const renderTable = ({
   data: PaginatedDocs
   drawerSlug?: string
   enableRowSelections: boolean
+  groupByValue?: string
   heading?: React.ReactNode
   i18n: I18nClient
   key?: string
@@ -249,7 +251,11 @@ export const renderTable = ({
             data={data.docs}
             heading={heading}
           />
-          <GroupByPageControls collectionConfig={clientCollectionConfig} data={data} />
+          <GroupByPageControls
+            collectionConfig={clientCollectionConfig}
+            data={data}
+            groupByValue={groupByValue}
+          />
         </Fragment>
       ),
     }
@@ -280,7 +286,11 @@ export const renderTable = ({
           data={data.docs}
           heading={heading}
         />
-        <GroupByPageControls collectionConfig={clientCollectionConfig} data={data} />
+        <GroupByPageControls
+          collectionConfig={clientCollectionConfig}
+          data={data}
+          groupByValue={groupByValue}
+        />
       </Fragment>
     ),
   }

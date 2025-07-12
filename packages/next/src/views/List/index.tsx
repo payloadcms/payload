@@ -2,13 +2,11 @@ import type {
   AdminViewServerProps,
   CollectionPreferences,
   ColumnPreference,
-  DefaultDocumentIDType,
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
   QueryPreset,
   SanitizedCollectionPermission,
-  Where,
 } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
@@ -87,11 +85,9 @@ export const renderListView = async (
     throw new Error('not-found')
   }
 
-  const query = queryFromArgs || queryFromReq
+  const query = queryFromArgs || (queryFromReq as ListQuery) || {}
 
-  const columns: ColumnPreference[] = transformColumnsToPreferences(
-    query?.columns as ColumnPreference[] | string,
-  )
+  const columns: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
   /**
    * @todo: find a pattern to avoid setting preferences on hard navigation, i.e. direct links, page refresh, etc.
@@ -103,9 +99,9 @@ export const renderListView = async (
     req,
     value: {
       columns,
-      groupBy: (query?.groupBy as string) || '',
+      groupBy: query?.groupBy || '',
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-      preset: (query?.preset as DefaultDocumentIDType) || null,
+      preset: query?.preset || null,
       sort: (query?.sort as string) || '',
     },
   })
@@ -119,11 +115,12 @@ export const renderListView = async (
       throw new Error('not-found')
     }
 
-    const page = isNumber(query?.page) ? Number(query.page) : 0
+    // TODO: don't stringify this...
+    query.limit = (
+      collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+    ).toString()
 
-    const limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
-
-    const groupBy = collectionPreferences?.groupBy || collectionConfig.admin.defaultGroupBy
+    query.groupBy = collectionPreferences?.groupBy || collectionConfig.admin.defaultGroupBy
 
     const sort =
       collectionPreferences?.sort ||
@@ -132,13 +129,13 @@ export const renderListView = async (
     let where = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
-      where: (query?.where as Where) || undefined,
+      where: query?.where || undefined,
     })
 
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
       const baseListFilter = await collectionConfig.admin.baseListFilter({
-        limit,
-        page,
+        limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+        page: isNumber(query?.page) ? Number(query.page) : 0,
         req,
         sort,
       })
@@ -185,12 +182,9 @@ export const renderListView = async (
       customCellProps,
       drawerSlug,
       enableRowSelections,
-      groupBy,
-      limit,
-      page,
+      query,
       req,
       user,
-      where,
     })
 
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
@@ -219,7 +213,7 @@ export const renderListView = async (
       collectionConfig,
       data,
       i18n,
-      limit,
+      limit: isNumber(query.limit) ? Number(query.limit) : undefined,
       listPreferences: collectionPreferences,
       listSearchableFields: collectionConfig.admin.listSearchableFields,
       locale: fullLocale,
@@ -253,8 +247,8 @@ export const renderListView = async (
             collectionSlug={collectionSlug}
             columns={transformColumnsToPreferences(columnState)}
             data={data}
-            defaultGroupBy={groupBy}
-            defaultLimit={limit}
+            defaultGroupBy={query.groupBy}
+            defaultLimit={isNumber(query.limit) ? Number(query.limit) : undefined}
             defaultSort={sort}
             listPreferences={collectionPreferences}
             modifySearchParams={!isInDrawer}
