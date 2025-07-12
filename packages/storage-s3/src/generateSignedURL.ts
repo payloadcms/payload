@@ -13,6 +13,10 @@ interface Args {
   acl?: 'private' | 'public-read'
   bucket: string
   collections: S3StorageOptions['collections']
+  encryption?: {
+    kmsKeyId?: string
+    serverSideEncryption?: AWS.ServerSideEncryption
+  }
   getStorageClient: () => AWS.S3
 }
 
@@ -23,6 +27,7 @@ export const getGenerateSignedURLHandler = ({
   acl,
   bucket,
   collections,
+  encryption,
   getStorageClient,
 }: Args): PayloadHandler => {
   return async (req) => {
@@ -49,10 +54,33 @@ export const getGenerateSignedURLHandler = ({
 
     const fileKey = path.posix.join(prefix, filename)
 
+    const encryptionParams: {
+      ServerSideEncryption?: AWS.ServerSideEncryption
+      SSEKMSKeyId?: string
+    } = {}
+
+    if (encryption?.serverSideEncryption) {
+      encryptionParams.ServerSideEncryption = encryption.serverSideEncryption
+
+      if (
+        encryption.kmsKeyId &&
+        (encryption.serverSideEncryption === AWS.ServerSideEncryption.aws_kms ||
+          encryption.serverSideEncryption === AWS.ServerSideEncryption.aws_kms_dsse)
+      ) {
+        encryptionParams.SSEKMSKeyId = encryption.kmsKeyId
+      }
+    }
+
     const url = await getSignedUrl(
       // @ts-expect-error mismatch versions or something
       getStorageClient(),
-      new AWS.PutObjectCommand({ ACL: acl, Bucket: bucket, ContentType: mimeType, Key: fileKey }),
+      new AWS.PutObjectCommand({
+        ACL: acl,
+        Bucket: bucket,
+        ContentType: mimeType,
+        Key: fileKey,
+        ...encryptionParams,
+      }),
       {
         expiresIn: 600,
       },

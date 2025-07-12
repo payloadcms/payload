@@ -2,6 +2,7 @@ import type * as AWS from '@aws-sdk/client-s3'
 import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig } from 'payload'
 
+import { ServerSideEncryption } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import fs from 'fs'
 import path from 'path'
@@ -10,6 +11,10 @@ interface Args {
   acl?: 'private' | 'public-read'
   bucket: string
   collection: CollectionConfig
+  encryption?: {
+    kmsKeyId?: string
+    serverSideEncryption?: ServerSideEncryption
+  }
   getStorageClient: () => AWS.S3
   prefix?: string
 }
@@ -19,6 +24,7 @@ const multipartThreshold = 1024 * 1024 * 50 // 50MB
 export const getHandleUpload = ({
   acl,
   bucket,
+  encryption,
   getStorageClient,
   prefix = '',
 }: Args): HandleUpload => {
@@ -29,6 +35,23 @@ export const getHandleUpload = ({
       ? fs.createReadStream(file.tempFilePath)
       : file.buffer
 
+    const encryptionParams: {
+      ServerSideEncryption?: ServerSideEncryption
+      SSEKMSKeyId?: string
+    } = {}
+
+    if (encryption?.serverSideEncryption) {
+      encryptionParams.ServerSideEncryption = encryption.serverSideEncryption
+
+      if (
+        encryption.kmsKeyId &&
+        (encryption.serverSideEncryption === ServerSideEncryption.aws_kms ||
+          encryption.serverSideEncryption === ServerSideEncryption.aws_kms_dsse)
+      ) {
+        encryptionParams.SSEKMSKeyId = encryption.kmsKeyId
+      }
+    }
+
     if (file.buffer.length > 0 && file.buffer.length < multipartThreshold) {
       await getStorageClient().putObject({
         ACL: acl,
@@ -36,6 +59,7 @@ export const getHandleUpload = ({
         Bucket: bucket,
         ContentType: file.mimeType,
         Key: fileKey,
+        ...encryptionParams,
       })
 
       return data
@@ -49,6 +73,7 @@ export const getHandleUpload = ({
         Bucket: bucket,
         ContentType: file.mimeType,
         Key: fileKey,
+        ...encryptionParams,
       },
       partSize: multipartThreshold,
       queueSize: 4,
