@@ -31,13 +31,15 @@ export const getCustomViewByRoute = ({
     (views &&
       typeof views === 'object' &&
       Object.entries(views).find(([key, view]) => {
-        const isMatching = isPathMatchingRoute({
-          currentRoute,
-          exact: view.exact,
-          path: view.path,
-          sensitive: view.sensitive,
-          strict: view.strict,
-        })
+        const isMatching =
+          view.path &&
+          isPathMatchingRoute({
+            currentRoute,
+            exact: view.exact,
+            path: view.path,
+            sensitive: view.sensitive,
+            strict: view.strict,
+          })
 
         if (isMatching) {
           viewKey = key
