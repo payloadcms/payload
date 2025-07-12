@@ -121,6 +121,7 @@ export type JobsConfig = {
   /**
    * A function that will be executed before Payload picks up jobs which are configured by the `jobs.autorun` function.
    * If this function returns true, jobs will be queried and picked up. If it returns false, jobs will not be run.
+   * @default undefined - if this function is not defined, jobs will be run - as if () => true was passed.
    * @param payload
    * @returns boolean
    */

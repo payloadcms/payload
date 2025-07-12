@@ -66,7 +66,7 @@ export const initReq = async function ({
 
   const partialResult = await partialReqCache.get(async () => {
     const config = await configPromise
-    const payload = await getPayload({ config, importMap })
+    const payload = await getPayload({ config, cron: true, importMap })
     const languageCode = getRequestLanguage({
       config,
       cookies,

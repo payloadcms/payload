@@ -29,7 +29,7 @@ export async function initPayloadInt<TInitializePayload extends boolean | undefi
 
   console.log('starting payload')
 
-  const payload = await getPayload({ config })
+  const payload = await getPayload({ config, cron: true })
   console.log('initializing rest client')
   const restClient = new NextRESTClient(payload.config)
   console.log('initPayloadInt done')

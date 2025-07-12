@@ -39,7 +39,7 @@ export const routeError = async ({
 
   if (!payload) {
     try {
-      payload = await getPayload({ config: configArg })
+      payload = await getPayload({ config: configArg, cron: true })
     } catch (ignore) {
       return Response.json(
         {
