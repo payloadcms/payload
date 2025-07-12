@@ -327,6 +327,7 @@ export const deTranslations: DefaultTranslationsObject = {
     moveUp: 'Nach oben bewegen',
     moving: 'Umziehen',
     movingCount: 'Verschieben {{count}} {{label}}',
+    newLabel: 'Neu {{label}}',
     newPassword: 'Neues Passwort',
     next: 'Nächste',
     no: 'Nein',

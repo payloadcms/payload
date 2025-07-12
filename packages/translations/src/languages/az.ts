@@ -322,6 +322,7 @@ export const azTranslations: DefaultTranslationsObject = {
     moveUp: 'Yuxarı hərəkət et',
     moving: 'Hərəkət edir',
     movingCount: '{{count}} {{label}} köçürülür',
+    newLabel: 'Yeni {{label}}',
     newPassword: 'Yeni şifrə',
     next: 'Növbəti',
     no: 'Xeyr',

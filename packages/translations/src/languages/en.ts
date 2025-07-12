@@ -322,6 +322,7 @@ export const enTranslations = {
     moveUp: 'Move Up',
     moving: 'Moving',
     movingCount: 'Moving {{count}} {{label}}',
+    newLabel: 'New {{label}}',
     newPassword: 'New Password',
     next: 'Next',
     no: 'No',

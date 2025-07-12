@@ -322,6 +322,7 @@ export const svTranslations: DefaultTranslationsObject = {
     moveUp: 'Flytta upp',
     moving: 'Flyttar',
     movingCount: 'Flyttar {{count}} {{label}}',
+    newLabel: 'Ny {{label}}',
     newPassword: 'Nytt lösenord',
     next: 'Nästa',
     no: 'Nej',

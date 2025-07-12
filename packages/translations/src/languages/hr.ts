@@ -322,6 +322,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     moveUp: 'Pomakni gore',
     moving: 'Pomicanje',
     movingCount: 'Pomicanje {{count}} {{label}}',
+    newLabel: 'Novi {{label}}',
     newPassword: 'Nova lozinka',
     next: 'Sljedeće',
     no: 'Ne',

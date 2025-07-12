@@ -255,6 +255,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:movingCount',
   'general:name',
   'general:next',
+  'general:newLabel',
   'general:noDateSelected',
   'general:noFiltersSet',
   'general:noLabel',

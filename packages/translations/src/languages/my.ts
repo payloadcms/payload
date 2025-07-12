@@ -324,6 +324,7 @@ export const myTranslations: DefaultTranslationsObject = {
     moveUp: 'Move Up',
     moving: 'ရွှေ့ပြောင်းခြင်း',
     movingCount: 'Memindahkan {{count}} {{label}}',
+    newLabel: 'Baru {{label}}',
     newPassword: 'စကားဝှက် အသစ်',
     next: 'Seterusnya',
     no: 'Tidak',

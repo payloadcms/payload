@@ -322,6 +322,7 @@ export const skTranslations: DefaultTranslationsObject = {
     moveUp: 'Presunúť hore',
     moving: 'Pohybujúci sa',
     movingCount: 'Presunutie {{count}} {{label}}',
+    newLabel: 'Nový {{label}}',
     newPassword: 'Nové heslo',
     next: 'Ďalej',
     no: 'Nie',
