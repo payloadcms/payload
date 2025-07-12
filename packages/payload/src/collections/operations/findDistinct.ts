@@ -1,6 +1,6 @@
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDistinctDocs } from '../../database/types.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequest, PopulateType, Where } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -21,6 +21,7 @@ export type Arguments = {
   locale?: string
   overrideAccess?: boolean
   page?: number
+  populate?: PopulateType
   req?: PayloadRequest
   sortOrder?: 'asc' | 'desc'
   where?: Where
@@ -52,6 +53,7 @@ export const findDistinctOperation = async (
       collection: { config: collectionConfig },
       disableErrors,
       overrideAccess,
+      populate,
       where,
     } = args
 
@@ -131,6 +133,7 @@ export const findDistinctOperation = async (
             locale: req.locale || null,
             overrideAccess: args.overrideAccess ?? true,
             parentIsLocalized: false,
+            populate,
             req,
             showHiddenFields: false,
             siblingDoc: doc,
