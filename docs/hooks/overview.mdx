@@ -102,3 +102,23 @@ If your Hook simply performs a side-effect, such as updating a CRM, it might be 
 ## Server-only Execution
 
 Hooks are only triggered on the server and are automatically excluded from the client-side bundle. This means that you can safely use sensitive business logic in your Hooks without worrying about exposing it to the client.
+
+## Custom Error Messages
+
+You might want to return custom error messages in the API or admin panel in your hooks, if an operation cannot be performed - e.g. if a rate limit was exceeded. For this you can leverage the `APIError` class like this:
+
+```ts
+import { APIError, type CollectionBeforeChangeHook } from 'payload'
+
+const beforeChangeHook: CollectionBeforeChangeHook = async ({ data }) => {
+  ...
+  if (rateLimitExceeded) {    
+     throw new APIError('You have sent too many requests', 429)
+  }
+  return data
+}
+```
+
+Of course you can use any suitable HTTP error code here.
+
+
