@@ -138,6 +138,12 @@ export type ClientUser = {
 } & BaseUser
 
 export type UserSession = { createdAt: Date | string; expiresAt: Date | string; id: string }
+
+export type GenerateVerificationToken<TUser = any> = (args: {
+  req: PayloadRequest
+  user: TUser
+}) => Promise<string> | string
+
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
   req: PayloadRequest
   token: string
@@ -297,6 +303,7 @@ export interface IncomingAuthType {
     | {
         generateEmailHTML?: GenerateVerifyEmailHTML
         generateEmailSubject?: GenerateVerifyEmailSubject
+        generateVerificationToken?: GenerateVerificationToken
       }
     | boolean
 }
@@ -304,6 +311,7 @@ export interface IncomingAuthType {
 export type VerifyConfig = {
   generateEmailHTML?: GenerateVerifyEmailHTML
   generateEmailSubject?: GenerateVerifyEmailSubject
+  generateVerificationToken?: GenerateVerificationToken
 }
 
 export interface Auth
