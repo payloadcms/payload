@@ -769,6 +769,42 @@ export const traverseFields = ({
 
       case 'radio':
       case 'select': {
+        // Check if this is a soft select field - store as text instead of enum
+        if (field.type === 'select' && field.soft) {
+          if (field.hasMany) {
+            const isLocalized =
+              Boolean(isFieldLocalized && adapter.payload.config.localization) ||
+              withinLocalizedArrayOrBlock ||
+              forceLocalized
+
+            if (isLocalized) {
+              hasLocalizedManyTextField = true
+            }
+
+            if (field.index) {
+              hasManyTextField = 'index'
+            } else if (!hasManyTextField) {
+              hasManyTextField = true
+            }
+
+            if (field.unique) {
+              throw new InvalidConfiguration(
+                'Unique is not supported in Postgres for hasMany soft select fields.',
+              )
+            }
+          } else {
+            // Single soft select field - store as text
+            targetTable[fieldName] = withDefault(
+              {
+                name: columnName,
+                type: 'varchar',
+              },
+              field,
+            )
+          }
+          break
+        }
+
         const enumName = createTableName({
           adapter,
           config: field,

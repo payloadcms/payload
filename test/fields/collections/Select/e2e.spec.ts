@@ -110,4 +110,29 @@ describe('Select', () => {
     await field.click({ delay: 100 })
     await expect(options.locator('text=One')).toBeHidden()
   })
+
+  test('should work with soft select fields', async () => {
+    await page.goto(url.create)
+
+    // Test single soft select field
+    const softField = page.locator('#field-selectSoft')
+    await softField.click({ delay: 100 })
+    const softOptions = page.locator('.rs__option')
+    await softOptions.locator('text=Country Two').click()
+
+    // Test hasMany soft select field
+    const softHasManyField = page.locator('#field-selectSoftHasMany')
+    await softHasManyField.click({ delay: 100 })
+    const softHasManyOptions = page.locator('.rs__option')
+    await softHasManyOptions.locator('text=Language One').click()
+    await softHasManyField.click({ delay: 100 })
+    await softHasManyOptions.locator('text=Language Three').click()
+
+    await saveDocAndAssert(page)
+
+    // Verify values are saved correctly
+    await expect(softField.locator('.rs__value-container')).toContainText('Country Two')
+    await expect(softHasManyField.locator('.rs__value-container')).toContainText('Language One')
+    await expect(softHasManyField.locator('.rs__value-container')).toContainText('Language Three')
+  })
 })

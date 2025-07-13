@@ -1124,6 +1124,12 @@ export type SelectField = {
    */
   interfaceName?: string
   options: Option[]
+  /**
+   * Store select field values as text instead of database enums.
+   * Useful for large option sets (e.g., countries) to avoid database enum limitations.
+   * When true, values are validated against options but stored as plain text.
+   */
+  soft?: boolean
   type: 'select'
 } & (
   | {
@@ -1141,7 +1147,7 @@ export type SelectFieldClient = {
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<SelectField['admin'], 'isClearable' | 'isSortable' | 'placeholder'>
 } & FieldBaseClient &
-  Pick<SelectField, 'hasMany' | 'interfaceName' | 'options' | 'type'>
+  Pick<SelectField, 'hasMany' | 'interfaceName' | 'options' | 'soft' | 'type'>
 
 type SharedRelationshipProperties = {
   filterOptions?: FilterOptions
