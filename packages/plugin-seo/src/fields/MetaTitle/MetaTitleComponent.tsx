@@ -32,7 +32,13 @@ type MetaTitleProps = {
 
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
-    field: { label, maxLength: maxLengthFromProps, minLength: minLengthFromProps, required },
+    field: {
+      label,
+      localized,
+      maxLength: maxLengthFromProps,
+      minLength: minLengthFromProps,
+      required,
+    },
     hasGenerateTitleFn,
     readOnly,
   } = props
@@ -128,7 +134,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          {Label ?? <FieldLabel label={label} path={path} required={required} />}
+          {Label ?? (
+            <FieldLabel label={label} localized={localized} path={path} required={required} />
+          )}
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
