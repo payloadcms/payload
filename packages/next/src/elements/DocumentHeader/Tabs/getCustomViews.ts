@@ -1,14 +1,14 @@
-import type { EditViewConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type { DocumentViewConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import { documentViewKeys } from './tabs/index.js'
 
 export const getCustomViews = (args: {
   collectionConfig: SanitizedCollectionConfig
   globalConfig: SanitizedGlobalConfig
-}): EditViewConfig[] => {
+}): DocumentViewConfig[] => {
   const { collectionConfig, globalConfig } = args
 
-  let customViews: EditViewConfig[]
+  let customViews: DocumentViewConfig[]
 
   if (collectionConfig) {
     const collectionViewsConfig =

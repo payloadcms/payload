@@ -10,7 +10,7 @@ import { generateLivePreviewViewMetadata } from '../LivePreview/metadata.js'
 import { generateNotFoundViewMetadata } from '../NotFound/metadata.js'
 import { generateVersionViewMetadata } from '../Version/metadata.js'
 import { generateVersionsViewMetadata } from '../Versions/metadata.js'
-import { getViewsFromConfig } from './getViewsFromConfig.js'
+import { getViewsFromConfig } from './getDocumentView.js'
 
 export type GenerateEditViewMetadata = (
   args: {
