@@ -63,7 +63,7 @@ describe('Queues', () => {
   })
 
   it('will run access control on jobs runner', async () => {
-    const response = await restClient.GET('/payload-jobs/run?silent=true', {
+    const response = await restClient.GET('/payload-jobs/run?silent=true&disableScheduling=true', {
       headers: {
         // Authorization: `JWT ${token}`,
       },
@@ -72,7 +72,7 @@ describe('Queues', () => {
   })
 
   it('will return 200 from jobs runner', async () => {
-    const response = await restClient.GET('/payload-jobs/run?silent=true', {
+    const response = await restClient.GET('/payload-jobs/run?silent=true&disableScheduling=true', {
       headers: {
         Authorization: `JWT ${token}`,
       },
@@ -736,7 +736,7 @@ describe('Queues', () => {
       },
     })
 
-    await restClient.GET('/payload-jobs/run?silent=true', {
+    await restClient.GET('/payload-jobs/run?silent=true&disableScheduling=true', {
       headers: {
         Authorization: `JWT ${token}`,
       },
