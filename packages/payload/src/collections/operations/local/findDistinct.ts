@@ -101,6 +101,7 @@ export async function findDistinct<
     limit,
     overrideAccess = true,
     page,
+    populate,
     sortOrder,
     where,
   } = options
@@ -120,6 +121,7 @@ export async function findDistinct<
     limit,
     overrideAccess,
     page,
+    populate,
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
     sortOrder,
     where,
