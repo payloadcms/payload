@@ -53,6 +53,7 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
               .toLowerCase()
               .includes(inputValue.toLowerCase())
           }
+          id="group-by--field-select"
           isClearable={false}
           isMulti={false}
           // disabled={disabled}
@@ -68,6 +69,7 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           }}
         />
         <SelectInput
+          id="group-by--direction-select"
           name="direction"
           onChange={async ({ value }: { value: string }) => {
             await refineListData({

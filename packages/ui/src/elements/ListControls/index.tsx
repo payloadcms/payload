@@ -177,6 +177,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   aria-expanded={visibleDrawer === 'columns'}
                   className={`${baseClass}__toggle-columns`}
                   icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
+                  id="toggle-columns"
                   onClick={() =>
                     setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
                   }
@@ -192,6 +193,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   aria-expanded={visibleDrawer === 'where'}
                   className={`${baseClass}__toggle-where`}
                   icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
+                  id="toggle-list-filters"
                   onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
                   pillStyle="light"
                   size="small"
@@ -224,6 +226,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 aria-expanded={visibleDrawer === 'group-by'}
                 className={`${baseClass}__toggle-group-by`}
                 icon={<ChevronIcon />}
+                id="toggle-group-by"
                 onClick={() =>
                   setVisibleDrawer(visibleDrawer !== 'group-by' ? 'group-by' : undefined)
                 }

@@ -3,14 +3,14 @@ import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 
 /**
- * Opens the list filters drawer in the list view. If it's already open, does nothing.
+ * Opens the group-by drawer in the list view. If it's already open, does nothing.
  * Return the filter container locator for further interactions.
  */
-export const openListFilters = async (
+export const openGroupBy = async (
   page: Page,
   {
-    togglerSelector = '#toggle-list-filters',
-    filterContainerSelector = '#list-controls-where',
+    togglerSelector = '#toggle-group-by',
+    filterContainerSelector = '#list-controls-group-by',
   }: {
     filterContainerSelector?: string
     togglerSelector?: string
