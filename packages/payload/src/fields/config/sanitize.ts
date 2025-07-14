@@ -200,7 +200,10 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'array' && field.fields) {
-      field.fields.push(baseIDField)
+      const hasCustomID = field.fields.some((f) => 'name' in f && f.name === 'id')
+      if (!hasCustomID) {
+        field.fields.push(baseIDField)
+      }
     }
 
     if ((field.type === 'blocks' || field.type === 'array') && field.label) {

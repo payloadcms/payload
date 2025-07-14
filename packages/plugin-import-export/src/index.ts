@@ -11,6 +11,7 @@ import { getCustomFieldFunctions } from './export/getCustomFieldFunctions.js'
 import { getSelect } from './export/getSelect.js'
 import { getExportCollection } from './getExportCollection.js'
 import { translations } from './translations/index.js'
+import { getFlattenedFieldKeys } from './utilities/getFlattenedFieldKeys.js'
 
 export const importExportPlugin =
   (pluginConfig: ImportExportPluginConfig) =>
@@ -109,16 +110,25 @@ export const importExportPlugin =
 
         const toCSVFunctions = getCustomFieldFunctions({
           fields: collection.config.fields as FlattenedField[],
-          select,
         })
 
-        const transformed = docs.map((doc) =>
-          flattenObject({
+        const possibleKeys = getFlattenedFieldKeys(collection.config.fields as FlattenedField[])
+
+        const transformed = docs.map((doc) => {
+          const row = flattenObject({
             doc,
             fields,
             toCSVFunctions,
-          }),
-        )
+          })
+
+          for (const key of possibleKeys) {
+            if (!(key in row)) {
+              row[key] = null
+            }
+          }
+
+          return row
+        })
 
         return Response.json({
           docs: transformed,

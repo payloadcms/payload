@@ -86,10 +86,14 @@ export const plTranslations: DefaultTranslationsObject = {
     deletingFile: '',
     deletingTitle:
       'Wystąpił błąd podczas usuwania {{title}}. Proszę, sprawdź swoje połączenie i spróbuj ponownie.',
+    documentNotFound:
+      'Dokument o ID {{id}} nie mógł zostać znaleziony. Mogło zostać usunięte lub nigdy nie istniało, lub może nie masz do niego dostępu.',
     emailOrPasswordIncorrect: 'Podany adres e-mail lub hasło jest nieprawidłowe.',
     followingFieldsInvalid_one: 'To pole jest nieprawidłowe:',
     followingFieldsInvalid_other: 'Następujące pola są nieprawidłowe:',
     incorrectCollection: 'Nieprawidłowa kolekcja',
+    insufficientClipboardPermissions: 'Odmowa dostępu do schowka. Sprawdź uprawnienia schowka.',
+    invalidClipboardData: 'Nieprawidłowe dane schowka.',
     invalidFileType: 'Nieprawidłowy typ pliku',
     invalidFileTypeValue: 'Nieprawidłowy typ pliku: {{value}}',
     invalidRequestArgs: 'Nieprawidłowe argumenty w żądaniu: {{args}}',
@@ -111,6 +115,7 @@ export const plTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Wystąpił problem podczas przesyłania pliku.',
     tokenInvalidOrExpired: 'Token jest nieprawidłowy lub wygasł.',
     tokenNotProvided: 'Token nie został dostarczony.',
+    unableToCopy: 'Nie można skopiować.',
     unableToDeleteCount: 'Nie można usunąć {{count}} z {{total}} {{label}}.',
     unableToReindexCollection:
       'Błąd podczas ponownego indeksowania kolekcji {{collection}}. Operacja została przerwana.',
@@ -241,7 +246,9 @@ export const plTranslations: DefaultTranslationsObject = {
       'Spowoduje to usunięcie istniejących indeksów i ponowne zaindeksowanie dokumentów we wszystkich kolekcjach.',
     copied: 'Skopiowano',
     copy: 'Skopiuj',
+    copyField: 'Kopiuj pole',
     copying: 'Kopiowanie',
+    copyRow: 'Kopiuj wiersz',
     copyWarning:
       'Zamierzasz nadpisać {{to}} na {{from}} dla {{label}} {{title}}. Czy jesteś pewny?',
     create: 'Stwórz',
@@ -336,6 +343,8 @@ export const plTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Nadpisz istniejące dane pola',
     pageNotFound: 'Strona nie znaleziona',
     password: 'Hasło',
+    pasteField: 'Wklej pole',
+    pasteRow: 'Wklej wiersz',
     payloadSettings: 'Ustawienia Payload',
     perPage: 'Na stronę: {{limit}}',
     previous: 'Poprzedni',

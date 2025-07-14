@@ -50,7 +50,7 @@ export const apiKeyFields = [
           }
           if (data?.apiKey) {
             return crypto
-              .createHmac('sha1', req.payload.secret)
+              .createHmac('sha256', req.payload.secret)
               .update(data.apiKey as string)
               .digest('hex')
           }

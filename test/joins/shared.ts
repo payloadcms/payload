@@ -19,6 +19,8 @@ export const categoriesJoinRestrictedSlug = 'categories-join-restricted'
 export const collectionRestrictedSlug = 'collection-restricted'
 
 export const restrictedCategoriesSlug = 'restricted-categories'
+export const categoriesVersionsSlug = 'categories-versions'
+export const versionsSlug = 'versions'
 
 export const collectionSlugs = [
   categoriesSlug,

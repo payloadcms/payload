@@ -17,8 +17,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 23.11.0
-  PNPM_VERSION: 9.7.1
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
@@ -71,10 +69,6 @@ jobs:
 
       - name: Node setup
         uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Lint
         run: pnpm lint -- --quiet
@@ -89,10 +83,6 @@ jobs:
 
       - name: Node setup
         uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - run: pnpm run build:all
         env:
@@ -114,11 +104,8 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -141,11 +128,8 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -187,7 +171,8 @@ jobs:
 
     services:
       postgres:
-        image: ${{ (startsWith(matrix.database, 'postgres') ) && 'postgis/postgis:16-3.4' || '' }}
+        # Custom postgres 17 docker image that supports both pg-vector and postgis: https://github.com/payloadcms/postgis-vector
+        image: ${{ (startsWith(matrix.database, 'postgres') ) && 'ghcr.io/payloadcms/postgis-vector:latest' || '' }}
         env:
           # must specify password for PG Docker container image, see: https://registry.hub.docker.com/_/postgres?tab=description&page=1&name=10
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
@@ -204,11 +189,8 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -329,11 +311,8 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -466,11 +445,8 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -572,11 +548,8 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -672,11 +645,8 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -720,3 +690,34 @@ jobs:
       - run: |
           echo github.ref: ${{ github.ref }}
           echo isV3: ${{ github.ref == 'refs/heads/main' }}
+  analyze:
+    runs-on: ubuntu-latest
+    needs: [changes, build]
+    timeout-minutes: 5
+    permissions:
+      contents: read # for checkout repository
+      actions: read # for fetching base branch bundle stats
+      pull-requests: write # for comments
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - run: pnpm run build:bundle-for-analysis # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
+        env:
+          DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+
+      - name: Analyze esbuild bundle size
+        uses: exoego/esbuild-bundle-analyzer@v1
+        with:
+          metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'
