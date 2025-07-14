@@ -113,6 +113,7 @@ export type BuildFormStateArgs = {
    */
   mockRSCs?: boolean
   operation?: 'create' | 'update'
+  readOnly?: boolean
   /*
     If true, will render field components within their state object
   */

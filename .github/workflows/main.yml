@@ -301,6 +301,7 @@ jobs:
           - plugin-nested-docs
           - plugin-seo
           - sort
+          - trash
           - versions
           - uploads
     env:
@@ -435,6 +436,7 @@ jobs:
           - plugin-nested-docs
           - plugin-seo
           - sort
+          - trash
           - versions
           - uploads
     env:

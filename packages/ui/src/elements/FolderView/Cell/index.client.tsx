@@ -1,6 +1,6 @@
 'use client'
 
-import type { Data } from 'payload'
+import type { Data, ViewTypes } from 'payload'
 import type { FolderOrDocument } from 'payload/shared'
 
 import React, { useEffect } from 'react'
@@ -14,6 +14,7 @@ type Props = {
   readonly docTitle: string
   readonly folderCollectionSlug: string
   readonly folderFieldName: string
+  readonly viewType?: ViewTypes
 }
 
 export const FolderTableCellClient = ({
@@ -22,6 +23,7 @@ export const FolderTableCellClient = ({
   docTitle,
   folderCollectionSlug,
   folderFieldName,
+  viewType,
 }: Props) => {
   const docID = data.id
   const intialFolderID = data?.[folderFieldName]
@@ -90,6 +92,7 @@ export const FolderTableCellClient = ({
   return (
     <MoveDocToFolderButton
       buttonProps={{
+        disabled: viewType === 'trash',
         size: 'small',
       }}
       collectionSlug={collectionSlug}

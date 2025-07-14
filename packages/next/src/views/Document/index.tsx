@@ -116,6 +116,7 @@ export const renderDocument = async ({
       locale,
       payload,
       req,
+      segments,
       user,
     }))
 
@@ -133,6 +134,8 @@ export const renderDocument = async ({
       throw new Error('not-found')
     }
   }
+
+  const isTrashedDoc = typeof doc?.deletedAt === 'string'
 
   const [
     docPreferences,
@@ -202,6 +205,7 @@ export const renderDocument = async ({
       globalSlug,
       locale: locale?.code,
       operation,
+      readOnly: isTrashedDoc,
       renderAllFields: true,
       req,
       schemaPath: collectionSlug || globalSlug,
@@ -389,6 +393,7 @@ export const renderDocument = async ({
         initialState={formState}
         isEditing={isEditing}
         isLocked={isLocked}
+        isTrashed={isTrashedDoc}
         key={locale?.code}
         lastUpdateTime={lastUpdateTime}
         mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}

@@ -22,6 +22,7 @@ import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
@@ -48,6 +49,7 @@ export type Arguments = {
   select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
+  trash?: boolean
   where?: Where
 }
 
@@ -96,6 +98,7 @@ export const findOperation = async <
       select: incomingSelect,
       showHiddenFields,
       sort: incomingSort,
+      trash = false,
       where,
     } = args
 
@@ -146,6 +149,13 @@ export const findOperation = async <
 
     let fullWhere = combineQueries(where!, accessResult!)
     sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
+
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
 
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,
