@@ -235,7 +235,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   size="small"
                 >
                   {t('general:groupByLabel', {
-                    label: query?.groupBy || '',
+                    label: '',
                   })}
                 </Pill>
               )}

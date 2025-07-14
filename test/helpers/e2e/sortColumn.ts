@@ -4,7 +4,7 @@ import { expect } from '@playwright/test'
 
 /**
  * Sort by columns within the list view.
- * Will search for that field's heading in the table, and click the appropriate sort button.
+ * Will search for that field's heading in the selector, and click the appropriate sort button.
  */
 export const sortColumn = async (
   page: Page,
@@ -12,14 +12,14 @@ export const sortColumn = async (
     fieldLabel: string
     fieldPath: string
     /**
-     * Scope the sorting to a specific table. If not provided, will search the whole page for the column heading.
+     * Scope the sorting to a specific scope. If not provided, will search the whole page for the column heading.
      */
-    table?: Locator
+    scope?: Locator
     targetState: 'asc' | 'desc'
   },
 ) => {
   const pathAsClassName = options.fieldPath.replace(/\./g, '__')
-  const field = (options.table || page).locator(`#heading-${pathAsClassName}`)
+  const field = (options.scope || page).locator(`#heading-${pathAsClassName}`)
 
   const upChevron = field.locator('button.sort-column__asc')
   const downChevron = field.locator('button.sort-column__desc')

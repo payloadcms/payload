@@ -9,7 +9,6 @@ import React, { Fragment, useEffect } from 'react'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
-import { FloatingToolbar } from '../../elements/FloatingToolbar/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
@@ -18,6 +17,7 @@ import { PageControls } from '../../elements/PageControls/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
+import { StickyToolbar } from '../../elements/StickyToolbar/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
@@ -200,7 +200,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 </div>
               )}
               {AfterListTable}
-              {docs.length > 0 && (
+              {docs.length > 0 && !query.groupBy && (
                 <PageControls
                   AfterPageControls={
                     smallBreak ? (
@@ -232,11 +232,10 @@ export function DefaultListView(props: ListViewClientProps) {
           </SelectionProvider>
         </div>
       </TableColumnsProvider>
-      {/* {query.groupBy && ( */}
-      {docs.length > 0 && Number(query.totalPages) > 0 && (
-        <FloatingToolbar>
+      {docs.length > 0 && query.groupBy && data.totalPages > 1 && (
+        <StickyToolbar>
           <PageControls collectionConfig={collectionConfig} />
-        </FloatingToolbar>
+        </StickyToolbar>
       )}
     </Fragment>
   )

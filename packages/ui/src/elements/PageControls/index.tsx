@@ -13,7 +13,7 @@ import './index.scss'
 
 const baseClass = 'page-controls'
 
-export const PageControlsOnly: React.FC<{
+export const PageControlsComponent: React.FC<{
   AfterPageControls?: React.ReactNode
   collectionConfig: ClientCollectionConfig
   data: PaginatedDocs
@@ -67,7 +67,7 @@ export const PageControlsOnly: React.FC<{
 
 /*
  * These page controls are controlled by the global ListQuery state.
- * To override thi behavior, build your own wrapper around PageControlsOnly.
+ * To override thi behavior, build your own wrapper around PageControlsComponent.
  */
 export const PageControls: React.FC<{
   AfterPageControls?: React.ReactNode
@@ -82,7 +82,7 @@ export const PageControls: React.FC<{
   } = useListQuery()
 
   return (
-    <PageControlsOnly
+    <PageControlsComponent
       AfterPageControls={AfterPageControls}
       collectionConfig={collectionConfig}
       data={data}

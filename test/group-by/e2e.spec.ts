@@ -3,6 +3,7 @@ import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
 import { addGroupBy, openGroupBy } from 'helpers/e2e/groupBy.js'
 import { sortColumn } from 'helpers/e2e/sortColumn.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
@@ -233,7 +234,7 @@ test.describe('Group By', () => {
     const table1 = page.locator('.table-wrap').first()
 
     await sortColumn(page, {
-      table: table1,
+      scope: table1,
       fieldLabel: 'Title',
       fieldPath: 'title',
       targetState: 'asc',
@@ -255,7 +256,7 @@ test.describe('Group By', () => {
     await expect(table2Titles.nth(1)).toHaveText(table2AscOrder[1] || '')
 
     await sortColumn(page, {
-      table: table1,
+      scope: table1,
       fieldLabel: 'Title',
       fieldPath: 'title',
       targetState: 'desc',
@@ -271,14 +272,30 @@ test.describe('Group By', () => {
     await expect(table2Titles.nth(1)).toHaveText(table2DescOrder[1] || '')
   })
 
-  test.skip('should render pagination controls per table when table results exceed page size', async () => {
+  test('should paginate per table', async () => {
     await page.goto(url.list)
-    expect(true).toBe(true)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+
+    const table1 = page.locator('.table-wrap').first()
+    const table2 = page.locator('.table-wrap').nth(1)
+
+    await expect(table1.locator('.page-controls')).toBeVisible()
+    await expect(table2.locator('.page-controls')).toBeVisible()
+
+    await goToNextPage(page, {
+      scope: table1,
+      // TODO: this actually does affect the URL, but not in the same way as traditional pagination
+      affectsURL: false,
+    })
   })
 
-  test.skip('should render global pagination controls when total results exceed page size', async () => {
+  test('should paginate globally (all tables)', async () => {
     await page.goto(url.list)
-    expect(true).toBe(true)
+
+    await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
+
+    await expect(page.locator('.sticky-toolbar')).toBeVisible()
   })
 
   test.skip('should group by within a document drawer', async () => {

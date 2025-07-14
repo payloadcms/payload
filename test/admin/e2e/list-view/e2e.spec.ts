@@ -35,6 +35,7 @@ let payload: PayloadTestSDK<Config>
 
 import { devUser } from 'credentials.js'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
 import { openListFilters } from 'helpers/e2e/openListFilters.js'
@@ -1358,11 +1359,11 @@ describe('List View', () => {
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
       await expect(page.locator('.collection-list__page-info')).toHaveText('1-5 of 6')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
-      await page.locator('.paginator button').nth(1).click()
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
+
+      await goToNextPage(page)
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
-      await page.locator('.paginator button').nth(0).click()
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=1')
+
+      await goToPreviousPage(page)
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
     })
 
@@ -1388,8 +1389,8 @@ describe('List View', () => {
 
       await expect(tableItems).toHaveCount(15)
       await expect(page.locator('.per-page .per-page__base-button')).toContainText('Per Page: 15')
-      await page.locator('.paginator button').nth(1).click()
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
+
+      await goToNextPage(page)
       await expect(tableItems).toHaveCount(1)
       await expect(page.locator('.per-page')).toContainText('Per Page: 15') // ensure this hasn't changed
       await expect(page.locator('.collection-list__page-info')).toHaveText('16-16 of 16')

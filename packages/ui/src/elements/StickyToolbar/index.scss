@@ -1,14 +1,13 @@
 @import '../../scss/styles.scss';
 
 @layer payload-default {
-  .floating-toolbar {
-    padding: base(0.25);
+  .sticky-toolbar {
+    padding: base(0.5);
     position: sticky;
     bottom: var(--base);
     background-color: var(--theme-bg);
     border: 1px solid var(--theme-elevation-100);
     max-width: 500px;
-    width: 100%;
     z-index: 1;
     margin-left: 50%;
     transform: translate3d(-50%, 0, 0);
