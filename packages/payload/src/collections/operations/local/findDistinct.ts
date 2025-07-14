@@ -5,6 +5,7 @@ import type {
   PaginatedDistinctDocs,
   Payload,
   PayloadRequest,
+  PopulateType,
   RequestContext,
   TypedLocale,
   Where,
@@ -61,6 +62,10 @@ export type Options<
    * @default 1
    */
   page?: number
+  /**
+   * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
+   */
+  populate?: PopulateType
   /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
