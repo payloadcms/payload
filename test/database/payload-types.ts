@@ -232,6 +232,12 @@ export interface Post {
         blockType: 'block-first';
       }[]
     | null;
+  group?: {
+    text?: string | null;
+  };
+  tab?: {
+    text?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -803,6 +809,16 @@ export interface PostsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  group?:
+    | T
+    | {
+        text?: T;
+      };
+  tab?:
+    | T
+    | {
+        text?: T;
       };
   updatedAt?: T;
   createdAt?: T;

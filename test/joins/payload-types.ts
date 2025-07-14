@@ -519,6 +519,7 @@ export interface Version {
  */
 export interface CategoriesVersion {
   id: string;
+  title?: string | null;
   relatedVersions?: {
     docs?: (string | Version)[];
     hasNextPage?: boolean;
@@ -1142,6 +1143,7 @@ export interface VersionsSelect<T extends boolean = true> {
  * via the `definition` "categories-versions_select".
  */
 export interface CategoriesVersionsSelect<T extends boolean = true> {
+  title?: T;
   relatedVersions?: T;
   relatedVersionsMany?: T;
   updatedAt?: T;

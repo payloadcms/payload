@@ -87,10 +87,15 @@ export const ltTranslations: DefaultTranslationsObject = {
     deletingFile: 'Įvyko klaida trinant failą.',
     deletingTitle:
       'Įvyko klaida bandant ištrinti {{title}}. Patikrinkite savo ryšį ir bandykite dar kartą.',
+    documentNotFound:
+      'Dokumentas su ID {{id}} nerastas. Gali būti, kad jis buvo ištrintas arba niekada neegzistavo, arba jūs neturite prieigos prie jo.',
     emailOrPasswordIncorrect: 'Pateiktas el. pašto adresas arba slaptažodis yra neteisingi.',
     followingFieldsInvalid_one: 'Šis laukas yra netinkamas:',
     followingFieldsInvalid_other: 'Šie laukai yra neteisingi:',
     incorrectCollection: 'Neteisinga kolekcija',
+    insufficientClipboardPermissions:
+      'Prieiga prie iškarpinės atmesta. Patikrinkite savo iškarpinės teises.',
+    invalidClipboardData: 'Neteisingi iškarpinės duomenys.',
     invalidFileType: 'Netinkamas failo tipas',
     invalidFileTypeValue: 'Neteisingas failo tipas: {{value}}',
     invalidRequestArgs: 'Netinkami argumentai perduoti užklausoje: {{args}}',
@@ -112,6 +117,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Failo įkelti nepavyko dėl problemos.',
     tokenInvalidOrExpired: 'Žetonas yra neteisingas arba jo galiojimas pasibaigė.',
     tokenNotProvided: 'Žetonas nesuteiktas.',
+    unableToCopy: 'Nepavyko nukopijuoti.',
     unableToDeleteCount: 'Negalima ištrinti {{count}} iš {{total}} {{label}}.',
     unableToReindexCollection:
       'Klaida perindeksuojant rinkinį {{collection}}. Operacija nutraukta.',
@@ -243,7 +249,9 @@ export const ltTranslations: DefaultTranslationsObject = {
       'Tai pašalins esamas indeksus ir perindeksuos dokumentus visose kolekcijose.',
     copied: 'Nukopijuota',
     copy: 'Kopijuoti',
+    copyField: 'Kopijuoti lauką',
     copying: 'Kopijavimas',
+    copyRow: 'Kopijuoti eilutę',
     copyWarning:
       'Jūs ketinate perrašyti {{to}} į {{from}} šildymui {{label}} {{title}}. Ar esate tikri?',
     create: 'Sukurti',
@@ -338,6 +346,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Perrašyti esamus lauko duomenis',
     pageNotFound: 'Puslapis nerastas',
     password: 'Slaptažodis',
+    pasteField: 'Įklijuoti lauką',
+    pasteRow: 'Įklijuoti eilutę',
     payloadSettings: 'Payload nustatymai',
     perPage: 'Puslapyje: {{limit}}',
     previous: 'Ankstesnis',

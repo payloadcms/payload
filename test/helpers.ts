@@ -15,16 +15,10 @@ import shelljs from 'shelljs'
 import { setTimeout } from 'timers/promises'
 
 import { devUser } from './credentials.js'
+import { openNav } from './helpers/e2e/toggleNav.js'
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
 type AdminRoutes = NonNullable<Config['admin']>['routes']
-
-type FirstRegisterArgs = {
-  customAdminRoutes?: AdminRoutes
-  customRoutes?: Config['routes']
-  page: Page
-  serverURL: string
-}
 
 type LoginArgs = {
   customAdminRoutes?: AdminRoutes
@@ -167,18 +161,55 @@ export async function throttleTest({
   return client
 }
 
-export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
-  const { customAdminRoutes, customRoutes, page, serverURL } = args
+/**
+ * Logs a user in by navigating via click-ops instead of using page.goto()
+ */
+export async function loginClientSide(args: LoginArgs): Promise<void> {
+  const { customAdminRoutes, customRoutes, data = devUser, page, serverURL } = args
+  const {
+    routes: { admin: incomingAdminRoute } = {},
+    admin: { routes: { login: incomingLoginRoute, createFirstUser } = {} },
+  } = getRoutes({ customAdminRoutes, customRoutes })
 
-  const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
+  const adminRoute = formatAdminURL({ serverURL, adminRoute: incomingAdminRoute, path: '' })
+  const loginRoute = formatAdminURL({
+    serverURL,
+    adminRoute: incomingAdminRoute,
+    path: incomingLoginRoute,
+  })
+  const createFirstUserRoute = formatAdminURL({
+    serverURL,
+    adminRoute: incomingAdminRoute,
+    path: createFirstUser,
+  })
 
-  await page.goto(`${serverURL}${adminRoute}`)
-  await page.fill('#field-email', devUser.email)
-  await page.fill('#field-password', devUser.password)
-  await page.fill('#field-confirm-password', devUser.password)
+  if ((await page.locator('#nav-toggler').count()) > 0) {
+    // a user is already logged in - log them out
+    await openNav(page)
+    await expect(page.locator('.nav__controls [aria-label="Log out"]')).toBeVisible()
+    await page.locator('.nav__controls [aria-label="Log out"]').click()
+    await page.waitForURL(loginRoute)
+  }
+
+  await wait(500)
+  await page.fill('#field-email', data.email)
+  await page.fill('#field-password', data.password)
   await wait(500)
   await page.click('[type=submit]')
-  await page.waitForURL(`${serverURL}${adminRoute}`)
+
+  await expect(page.locator('.step-nav__home')).toBeVisible()
+  if ((await page.locator('a.step-nav__home').count()) > 0) {
+    await page.locator('a.step-nav__home').click()
+  }
+
+  await page.waitForURL(adminRoute)
+
+  await expect(() => expect(page.url()).not.toContain(loginRoute)).toPass({
+    timeout: POLL_TOPASS_TIMEOUT,
+  })
+  await expect(() => expect(page.url()).not.toContain(createFirstUserRoute)).toPass({
+    timeout: POLL_TOPASS_TIMEOUT,
+  })
 }
 
 export async function login(args: LoginArgs): Promise<void> {

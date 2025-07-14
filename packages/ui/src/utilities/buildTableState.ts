@@ -214,6 +214,7 @@ const buildTableState = async (
       data = await payload.find({
         collection: collectionSlug,
         depth: 0,
+        draft: true,
         limit: query?.limit ? parseInt(query.limit, 10) : undefined,
         locale: req.locale,
         overrideAccess: false,

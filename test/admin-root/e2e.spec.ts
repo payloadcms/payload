@@ -64,6 +64,13 @@ test.describe('Admin Panel (Root)', () => {
   //   })
   // })
 
+  test('should redirect `${adminRoute}/collections` to `${adminRoute}', async () => {
+    const collectionsURL = `${url.admin}/collections`
+    await page.goto(collectionsURL)
+    // Should redirect to dashboard
+    await expect.poll(() => page.url()).toBe(`${url.admin}`)
+  })
+
   test('renders admin panel at root', async () => {
     await page.goto(url.admin)
     const pageURL = page.url()

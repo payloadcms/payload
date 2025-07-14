@@ -440,7 +440,9 @@ describe('Localization', () => {
       await addBlock.click()
       const selectBlock = page.locator('.blocks-drawer__block button')
       await selectBlock.click()
-      const addContentButton = page.locator('#field-content__0__content button')
+      const addContentButton = page
+        .locator('#field-content__0__content')
+        .getByRole('button', { name: 'Add Content' })
       await addContentButton.click()
       await selectBlock.click()
       const textField = page.locator('#field-content__0__content__0__text')
