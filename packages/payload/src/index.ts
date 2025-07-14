@@ -850,13 +850,11 @@ export class BasePayload {
         await Promise.all(
           cronJobs.map((cronConfig) => {
             const jobAutorunCron = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
-              if (_internal_jobSystemGlobals.shouldAutoSchedule && !cronConfig.disableScheduling) {
-                // First, schedule schedulable jobs
-                if (!this.config.jobs.stats) {
-                  throw new Error(
-                    'The jobs stats global is not enabled, but is required to use autorun with scheduling.',
-                  )
-                }
+              if (
+                _internal_jobSystemGlobals.shouldAutoSchedule &&
+                !cronConfig.disableScheduling &&
+                this.config.jobs.scheduling
+              ) {
                 await this.jobs.handleSchedules({
                   queue: cronConfig.queue,
                 })

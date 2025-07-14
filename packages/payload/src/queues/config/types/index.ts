@@ -69,6 +69,11 @@ export type SanitizedJobsConfig = {
    */
   enabled?: boolean
   /**
+   * If set to `true`, at least one task or workflow has scheduling enabled.
+   * This property is automatically set during sanitization.
+   */
+  scheduling?: boolean
+  /**
    * If set to `true`, a payload-job-stats global exists.
    * This property is automatically set during sanitization.
    */

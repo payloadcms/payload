@@ -54,13 +54,8 @@ export const runJobsEndpoint: Endpoint = {
 
     const runAllQueues = allQueues && !(typeof allQueues === 'string' && allQueues === 'false')
 
-    if (shouldHandleSchedules) {
-      if (!jobsConfig.stats) {
-        throw new Error(
-          'The jobs stats global is not enabled, but is required to use the run endpoint with schedules.',
-        )
-      }
-
+    if (shouldHandleSchedules && jobsConfig.scheduling) {
+      // If should handle schedules and schedules are defined
       await req.payload.jobs.handleSchedules({ queue: runAllQueues ? undefined : queue, req })
     }
 

@@ -34,11 +34,12 @@ export const handleSchedulesJobsEndpoint: Endpoint = {
       )
     }
 
-    if (!jobsConfig.stats) {
+    if (!jobsConfig.scheduling) {
+      // There is no reason to call the handleSchedules endpoint if the stats global is not enabled (= no schedules defined)
       return Response.json(
         {
           message:
-            'The jobs stats global is not enabled, but is required to use the run endpoint with schedules.',
+            'Cannot handle schedules because no tasks or workflows with schedules are defined.',
         },
         { status: 500 },
       )
