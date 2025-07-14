@@ -16,9 +16,19 @@ export type ImportExportPluginConfig = {
    */
   debug?: boolean
   /**
+   * If true, disables the download button in the export preview UI
+   * @default false
+   */
+  disableDownload?: boolean
+  /**
    * Enable to force the export to run synchronously
    */
   disableJobsQueue?: boolean
+  /**
+   * If true, disables the save button in the export preview UI
+   * @default false
+   */
+  disableSave?: boolean
   /**
    * Forces a specific export format (`csv` or `json`) and hides the format dropdown from the UI.
    *
