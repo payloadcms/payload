@@ -25,6 +25,8 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
 
   const { query, refineListData } = useListQuery()
 
+  const groupByFieldName = query.groupBy?.replace(/^-/, '')
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
@@ -40,7 +42,6 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
             onClick={async () => {
               await refineListData({
                 groupBy: undefined,
-                sort: undefined,
               })
             }}
             type="button"
@@ -61,14 +62,17 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           isMulti={false}
           // disabled={disabled}
           onChange={async ({ value }: { value: string }) => {
-            await refineListData({ groupBy: value, sort: undefined })
+            await refineListData({
+              groupBy: query.groupBy?.startsWith('-') ? `-${value}` : value,
+              page: '1',
+            })
           }}
           options={reducedFields.filter((field) => !field.field.admin.disableListFilter)}
           value={{
             label:
-              reducedFields.find((field) => field.value === query.groupBy)?.label ||
+              reducedFields.find((field) => field.value === groupByFieldName)?.label ||
               t('general:selectValue'),
-            value: query.groupBy || '',
+            value: groupByFieldName || '',
           }}
         />
         <SelectInput
@@ -76,10 +80,8 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           name="direction"
           onChange={async ({ value }: { value: string }) => {
             await refineListData({
-              sort:
-                value === 'asc'
-                  ? query.groupBy?.replace(/^-/, '')
-                  : `-${query.groupBy?.replace(/^-/, '')}`,
+              groupBy: value === 'asc' ? groupByFieldName : `-${groupByFieldName}`,
+              page: '1',
             })
           }}
           options={[
@@ -88,10 +90,10 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           ]}
           path="direction"
           value={
-            !query.sort
+            !query.groupBy
               ? 'asc'
-              : typeof query.sort === 'string'
-                ? `${query.sort.startsWith('-') ? 'desc' : 'asc'}`
+              : typeof query.groupBy === 'string'
+                ? `${query.groupBy.startsWith('-') ? 'desc' : 'asc'}`
                 : ''
           }
         />

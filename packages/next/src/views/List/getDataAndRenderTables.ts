@@ -54,7 +54,10 @@ export const getDataAndRenderTables = async ({
   if (collectionConfig.admin.groupBy && query.groupBy) {
     // NOTE: is there a faster/better way to do this?
     const flattenedFields = flattenAllFields({ fields: collectionConfig.fields })
-    const groupByField = flattenedFields.find((f) => f.name === query.groupBy)
+
+    const groupByFieldName = query.groupBy.replace(/^-/, '')
+
+    const groupByField = flattenedFields.find((f) => f.name === groupByFieldName)
     const isRelationship = groupByField?.type === 'relationship'
 
     const relationshipConfig = isRelationship
@@ -82,13 +85,14 @@ export const getDataAndRenderTables = async ({
     const distinct = await req.payload.findDistinct({
       collection: collectionSlug,
       depth: 1,
-      field: query.groupBy,
+      field: groupByFieldName,
       limit: query?.limit ? Number(query.limit) : undefined,
       locale: req.locale,
       overrideAccess: false,
       page: query?.page ? Number(query.page) : undefined,
       populate,
       req,
+      sortOrder: query.groupBy?.startsWith('-') ? 'desc' : 'asc',
     })
 
     data = {
@@ -100,7 +104,7 @@ export const getDataAndRenderTables = async ({
     if (distinct.values) {
       await Promise.all(
         distinct.values.map(async (distinctValue, i) => {
-          const potentiallyPopulatedRelationship = distinctValue[query.groupBy]
+          const potentiallyPopulatedRelationship = distinctValue[groupByFieldName]
 
           const valueOrRelationshipID =
             isRelationship &&
@@ -129,7 +133,7 @@ export const getDataAndRenderTables = async ({
             user,
             where: {
               ...(query?.where || {}),
-              [query.groupBy]: {
+              [groupByFieldName]: {
                 equals: valueOrRelationshipID,
               },
             },
