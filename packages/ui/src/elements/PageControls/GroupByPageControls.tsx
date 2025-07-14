@@ -22,7 +22,6 @@ export const GroupByPageControls: React.FC<{
   groupByValue?: number | string
 }> = ({ AfterPageControls, collectionConfig, data, groupByValue }) => {
   const { query, refineListData } = useListQuery()
-  const { groupBy } = query
 
   const handlePageChange: IListQueryContext['handlePageChange'] = useCallback(
     async (page) => {
@@ -51,7 +50,7 @@ export const GroupByPageControls: React.FC<{
     [refineListData, groupByValue],
   )
 
-  if (!groupBy) {
+  if (!collectionConfig.admin.groupBy || !query.groupBy) {
     return null
   }
 

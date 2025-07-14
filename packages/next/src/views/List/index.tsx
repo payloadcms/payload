@@ -120,7 +120,7 @@ export const renderListView = async (
       collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
     ).toString()
 
-    query.groupBy = collectionPreferences?.groupBy || collectionConfig.admin.defaultGroupBy
+    query.groupBy = collectionPreferences?.groupBy
 
     const sort =
       collectionPreferences?.sort ||
@@ -247,7 +247,6 @@ export const renderListView = async (
             collectionSlug={collectionSlug}
             columns={transformColumnsToPreferences(columnState)}
             data={data}
-            defaultGroupBy={query.groupBy}
             defaultLimit={isNumber(query.limit) ? Number(query.limit) : undefined}
             defaultSort={sort}
             listPreferences={collectionPreferences}

@@ -349,11 +349,6 @@ export type CollectionAdminOptions = {
    * Default columns to show in list view
    */
   defaultColumns?: string[]
-  /*
-   * Name of a field used to group results in the list view, e.g. `category`
-   * A leading hyphen represents descending order, e.g. `-category`
-   */
-  defaultGroupBy?: string
   /**
    * Custom description for collection. This will also be used as JSDoc for the generated types
    */
@@ -372,6 +367,12 @@ export type CollectionAdminOptions = {
    * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
    */
   group?: false | Record<string, string> | string
+  /**
+   * @experimental This option is experimental and may change in future releases and/or contain bugs.
+   * Enable grouping by a field in the list view.
+   * Uses `payload.findDistinct` under the hood to populate the group-by options.
+   */
+  groupBy?: boolean
   /**
    * Exclude the collection from the admin nav and routes
    */

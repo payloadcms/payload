@@ -51,7 +51,7 @@ export const getDataAndRenderTables = async ({
 
   const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
-  if (query.groupBy) {
+  if (collectionConfig.admin.groupBy && query.groupBy) {
     // NOTE: is there a faster/better way to do this?
     const flattenedFields = flattenAllFields({ fields: collectionConfig.fields })
     const groupByField = flattenedFields.find((f) => f.name === query.groupBy)

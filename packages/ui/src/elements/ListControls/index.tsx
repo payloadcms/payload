@@ -142,7 +142,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   let listMenuItems: React.ReactNode[] = listMenuItemsFromProps
 
   if (
-    collectionConfig?.enableQueryPresets &&
+    collectionConfig.enableQueryPresets &&
     !disableQueryPresets &&
     queryPresetMenuItems?.length > 0
   ) {
@@ -221,22 +221,24 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   resetPreset={resetPreset}
                 />
               )}
-              <Pill
-                aria-controls={`${baseClass}-group-by`}
-                aria-expanded={visibleDrawer === 'group-by'}
-                className={`${baseClass}__toggle-group-by`}
-                icon={<ChevronIcon />}
-                id="toggle-group-by"
-                onClick={() =>
-                  setVisibleDrawer(visibleDrawer !== 'group-by' ? 'group-by' : undefined)
-                }
-                pillStyle="light"
-                size="small"
-              >
-                {t('general:groupByLabel', {
-                  label: query?.groupBy || '',
-                })}
-              </Pill>
+              {collectionConfig.admin.groupBy && (
+                <Pill
+                  aria-controls={`${baseClass}-group-by`}
+                  aria-expanded={visibleDrawer === 'group-by'}
+                  className={`${baseClass}__toggle-group-by`}
+                  icon={<ChevronIcon />}
+                  id="toggle-group-by"
+                  onClick={() =>
+                    setVisibleDrawer(visibleDrawer !== 'group-by' ? 'group-by' : undefined)
+                  }
+                  pillStyle="light"
+                  size="small"
+                >
+                  {t('general:groupByLabel', {
+                    label: query?.groupBy || '',
+                  })}
+                </Pill>
+              )}
               {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
                 <Popup
                   button={<Dots ariaLabel={t('general:moreOptions')} />}
@@ -269,23 +271,25 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           id={`${baseClass}-where`}
         >
           <WhereBuilder
-            collectionPluralLabel={collectionConfig?.labels?.plural}
+            collectionPluralLabel={collectionConfig.labels?.plural}
             collectionSlug={collectionConfig.slug}
-            fields={collectionConfig?.fields}
+            fields={collectionConfig.fields}
             renderedFilters={renderedFilters}
             resolvedFilterOptions={resolvedFilterOptions}
           />
         </AnimateHeight>
-        <AnimateHeight
-          className={`${baseClass}__group-by`}
-          height={visibleDrawer === 'group-by' ? 'auto' : 0}
-          id={`${baseClass}-group-by`}
-        >
-          <GroupByBuilder
-            collectionSlug={collectionConfig.slug}
-            fields={collectionConfig?.fields}
-          />
-        </AnimateHeight>
+        {collectionConfig.admin.groupBy && (
+          <AnimateHeight
+            className={`${baseClass}__group-by`}
+            height={visibleDrawer === 'group-by' ? 'auto' : 0}
+            id={`${baseClass}-group-by`}
+          >
+            <GroupByBuilder
+              collectionSlug={collectionConfig.slug}
+              fields={collectionConfig.fields}
+            />
+          </AnimateHeight>
+        )}
       </div>
       {PresetListDrawer}
       {EditPresetDrawer}

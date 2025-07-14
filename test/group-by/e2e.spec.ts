@@ -53,9 +53,12 @@ test.describe('Group By', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('should display group-by button', async () => {
+  test('should display group-by button only when `admin.groupBy` is enabled', async () => {
     await page.goto(url.list)
     await expect(page.locator('#toggle-group-by')).toBeVisible()
+
+    await page.goto(new AdminUrlUtil(serverURL, 'users').list)
+    await expect(page.locator('#toggle-group-by')).toBeHidden()
   })
 
   test('should open group-by drawer', async () => {

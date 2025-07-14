@@ -21,7 +21,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   collectionSlug,
   columns,
   data,
-  defaultGroupBy,
   defaultLimit,
   defaultSort,
   listPreferences,
@@ -54,7 +53,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       return searchParams
     } else {
       return {
-        groupBy: defaultGroupBy,
         limit: String(defaultLimit),
         sort: defaultSort,
       }
@@ -72,7 +70,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
       const newQuery = mergeQuery(currentQuery, incomingQuery, {
         defaults: {
-          groupBy: defaultGroupBy,
           limit: defaultLimit?.toString(),
           sort: defaultSort,
         },
@@ -96,7 +93,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     },
     [
       currentQuery,
-      defaultGroupBy,
       defaultLimit,
       defaultSort,
       modifySearchParams,
@@ -158,12 +154,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     // Allow the URL to override the default sort
     if (defaultSort && !('sort' in currentQuery)) {
       newQuery.sort = defaultSort
-      shouldUpdateQueryString = true
-    }
-
-    // Allow the URL to override the default groupBy
-    if (defaultGroupBy && !('groupBy' in currentQuery)) {
-      newQuery.groupBy = defaultGroupBy
       shouldUpdateQueryString = true
     }
 
