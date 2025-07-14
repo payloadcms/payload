@@ -32,7 +32,7 @@ export const importExportPlugin =
     )
 
     // inject the createExport job into the config
-    ;((config.jobs ??= {}).tasks ??= []).push(getCreateCollectionExportTask(config))
+    ;((config.jobs ??= {}).tasks ??= []).push(getCreateCollectionExportTask(config, pluginConfig))
 
     let collectionsToUpdate = config.collections
 

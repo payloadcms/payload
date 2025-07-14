@@ -47,7 +47,7 @@ export const getExportCollection = ({
         path: '/download',
       },
     ],
-    fields: getFields(config),
+    fields: getFields(config, pluginConfig),
     hooks: {
       afterChange,
       beforeOperation,
