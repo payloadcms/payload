@@ -7,6 +7,7 @@ import path from 'path'
 
 import { findConfig } from '../config/find.js'
 import payload, { getPayload } from '../index.js'
+import { drizzleStudio } from './drizzleStudio.js'
 import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
 import { info } from './info.js'
@@ -15,6 +16,7 @@ import { migrate, availableCommands as migrateCommands } from './migrate.js'
 
 // Note: this does not account for any user bin scripts
 const availableScripts = [
+  'drizzle:studio',
   'generate:db-schema',
   'generate:importmap',
   'generate:types',
@@ -98,6 +100,10 @@ export const bin = async () => {
     return migrate({ config, parsedArgs: args }).then(() => process.exit(0))
   }
 
+  if (script === 'drizzle:studio') {
+    return drizzleStudio(config)
+  }
+
   if (script === 'generate:types') {
     return generateTypes(config)
   }
@@ -165,4 +171,26 @@ export const bin = async () => {
   console.log(`\nAvailable commands:\n${availableScripts.map((c) => `  - ${c}`).join('\n')}`)
 
   process.exit(1)
+}
+
+/**
+ * Auto-execute CLI handler when this file is run directly
+ *
+ * This block is essential for CLI functionality. When users run:
+ * - `npx payload drizzle:studio` (after build)
+ * - `npx tsx packages/payload/src/bin/index.ts drizzle:studio` (development)
+ *
+ * Without this auto-execution:
+ * - The file would load and define the bin() function
+ * - But never actually execute it, resulting in silent failure
+ *
+ * The check `process.argv[1].includes('index.ts')` detects when this file
+ * is being executed directly (not imported as a module) and automatically
+ * calls bin() to process the command-line arguments.
+ */
+if (process.argv[1] && process.argv[1].includes('index.ts')) {
+  bin().catch((error) => {
+    console.error('Error executing command:', error)
+    process.exit(1)
+  })
 }
