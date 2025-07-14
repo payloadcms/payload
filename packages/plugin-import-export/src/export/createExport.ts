@@ -108,6 +108,17 @@ export const createExport = async (args: CreateExportArgs) => {
     fields: collectionConfig.flattenedFields,
   })
 
+  const disabledFieldsDot =
+    collectionConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
+  const disabledFields = disabledFieldsDot.map((f: string) => f.replace(/\./g, '_'))
+
+  const filterDisabled = (row: Record<string, unknown>): Record<string, unknown> => {
+    for (const key of disabledFields) {
+      delete row[key]
+    }
+    return row
+  }
+
   if (download) {
     if (debug) {
       req.payload.logger.info('Pre-scanning all columns before streaming')
@@ -122,7 +133,7 @@ export const createExport = async (args: CreateExportArgs) => {
       const result = await payload.find({ ...findArgs, page: scanPage })
 
       result.docs.forEach((doc) => {
-        const flat = flattenObject({ doc, fields, toCSVFunctions })
+        const flat = filterDisabled(flattenObject({ doc, fields, toCSVFunctions }))
         Object.keys(flat).forEach((key) => {
           if (!allColumnsSet.has(key)) {
             allColumnsSet.add(key)
@@ -156,7 +167,9 @@ export const createExport = async (args: CreateExportArgs) => {
           return
         }
 
-        const batchRows = result.docs.map((doc) => flattenObject({ doc, fields, toCSVFunctions }))
+        const batchRows = result.docs.map((doc) =>
+          filterDisabled(flattenObject({ doc, fields, toCSVFunctions })),
+        )
 
         const paddedRows = batchRows.map((row) => {
           const fullRow: Record<string, unknown> = {}
@@ -217,7 +230,9 @@ export const createExport = async (args: CreateExportArgs) => {
     }
 
     if (isCSV) {
-      const batchRows = result.docs.map((doc) => flattenObject({ doc, fields, toCSVFunctions }))
+      const batchRows = result.docs.map((doc) =>
+        filterDisabled(flattenObject({ doc, fields, toCSVFunctions })),
+      )
 
       // Track discovered column keys
       batchRows.forEach((row) => {
