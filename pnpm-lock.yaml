@@ -145,11 +145,11 @@ importers:
         specifier: 8.16.3
         version: 8.16.3
       playwright:
-        specifier: 1.50.0
-        version: 1.50.0
+        specifier: 1.54.1
+        version: 1.54.1
       playwright-core:
-        specifier: 1.50.0
-        version: 1.50.0
+        specifier: 1.54.1
+        version: 1.54.1
       prettier:
         specifier: 3.5.3
         version: 3.5.3
