@@ -1,3 +1,5 @@
+import type { Locator, Page } from '@playwright/test'
+
 import { expect } from '@playwright/test'
 
 /**
@@ -5,22 +7,30 @@ import { expect } from '@playwright/test'
  * Will search for that field's heading in the table, and click the appropriate sort button.
  */
 export const sortColumn = async (
-  page: any,
-  options: { fieldLabel: string; fieldPath: string; targetState: 'asc' | 'desc' },
+  page: Page,
+  options: {
+    fieldLabel: string
+    fieldPath: string
+    /**
+     * Scope the sorting to a specific table. If not provided, will search the whole page for the column heading.
+     */
+    table?: Locator
+    targetState: 'asc' | 'desc'
+  },
 ) => {
   const pathAsClassName = options.fieldPath.replace(/\./g, '__')
-  const field = page.locator(`#heading-${pathAsClassName}`)
+  const field = (options.table || page).locator(`#heading-${pathAsClassName}`)
 
   const upChevron = field.locator('button.sort-column__asc')
   const downChevron = field.locator('button.sort-column__desc')
 
   if (options.targetState === 'asc') {
-    await downChevron.click()
-    await expect(field.locator('button.sort-column__asc.sort-column--active')).toBeVisible()
-    await page.waitForURL((url: string) => url.includes(`sort=${options.fieldPath}`))
-  } else if (options.targetState === 'desc') {
     await upChevron.click()
+    await expect(field.locator('button.sort-column__asc.sort-column--active')).toBeVisible()
+    await page.waitForURL(() => page.url().includes(`sort=${options.fieldPath}`))
+  } else if (options.targetState === 'desc') {
+    await downChevron.click()
     await expect(field.locator('button.sort-column__desc.sort-column--active')).toBeVisible()
-    await page.waitForURL((url: string) => url.includes(`sort=-${options.fieldPath}`))
+    await page.waitForURL(() => page.url().includes(`sort=-${options.fieldPath}`))
   }
 }

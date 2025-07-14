@@ -3,8 +3,9 @@ import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import { addGroupBy, openGroupBy } from 'helpers/e2e/groupBy.js'
+import { sortColumn } from 'helpers/e2e/sortColumn.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
-import { openGroupBy, selectGroupByField } from 'helpers/e2e/toggleGroupBy.js'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
@@ -108,7 +109,7 @@ test.describe('Group By', () => {
   test('should group by field', async () => {
     await page.goto(url.list)
 
-    await selectGroupByField(page, { fieldLabel: 'Category', fieldPath: 'category' })
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
 
     await expect(page.locator('.table-wrap')).toHaveCount(2)
 
@@ -120,37 +121,37 @@ test.describe('Group By', () => {
 
     await expect(page.locator('.table-wrap').first().locator('tbody tr')).toHaveCount(10)
 
-    const group1CategoryCells = page
+    const table1CategoryCells = page
       .locator('.table-wrap')
       .first()
       .locator('tbody tr td.cell-category')
 
     // TODO: is there a way to iterate over all cells and check they all match? I could not get this to work.
-    await expect(group1CategoryCells.first()).toHaveText(/Category 1/)
+    await expect(table1CategoryCells.first()).toHaveText(/Category 1/)
 
     await expect(
       page.locator('.table__heading', { hasText: exactText('Category 2') }),
     ).toBeVisible()
 
-    const group2 = page.locator('.table-wrap').nth(1)
-    await expect(group2).toBeVisible()
-    await group2.scrollIntoViewIfNeeded()
+    const table2 = page.locator('.table-wrap').nth(1)
+    await expect(table2).toBeVisible()
+    await table2.scrollIntoViewIfNeeded()
 
     await expect(page.locator('.table-wrap').nth(1).locator('tbody tr')).toHaveCount(10)
 
-    const group2CategoryCells = page
+    const table2CategoryCells = page
       .locator('.table-wrap')
       .nth(1)
       .locator('tbody tr td.cell-category')
 
     // TODO: is there a way to iterate over all cells and check they all match? I could not get this to work.
-    await expect(group2CategoryCells.first()).toHaveText(/Category 2/)
+    await expect(table2CategoryCells.first()).toHaveText(/Category 2/)
   })
 
-  test('should sort groups', async () => {
+  test('should sort by group', async () => {
     await page.goto(url.list)
 
-    const { groupByContainer } = await selectGroupByField(page, {
+    const { groupByContainer } = await addGroupBy(page, {
       fieldLabel: 'Category',
       fieldPath: 'category',
     })
@@ -170,33 +171,33 @@ test.describe('Group By', () => {
   test('should apply columns to all tables', async () => {
     await page.goto(url.list)
 
-    await selectGroupByField(page, {
+    await addGroupBy(page, {
       fieldLabel: 'Category',
       fieldPath: 'category',
     })
 
-    const group1ColumnHeadings = page.locator('.table-wrap').nth(0).locator('thead tr th')
-    await expect(group1ColumnHeadings.nth(1)).toHaveText('Title')
-    await expect(group1ColumnHeadings.nth(2)).toHaveText('Category')
+    const table1ColumnHeadings = page.locator('.table-wrap').nth(0).locator('thead tr th')
+    await expect(table1ColumnHeadings.nth(1)).toHaveText('Title')
+    await expect(table1ColumnHeadings.nth(2)).toHaveText('Category')
 
     // scroll second table into view
-    const group2ColumnHeadings = page.locator('.table-wrap').nth(1).locator('thead tr th')
-    await expect(group2ColumnHeadings.nth(1)).toHaveText('Title')
-    await expect(group2ColumnHeadings.nth(2)).toHaveText('Category')
+    const table2ColumnHeadings = page.locator('.table-wrap').nth(1).locator('thead tr th')
+    await expect(table2ColumnHeadings.nth(1)).toHaveText('Title')
+    await expect(table2ColumnHeadings.nth(2)).toHaveText('Category')
 
     await toggleColumn(page, { columnLabel: 'Title', targetState: 'off' })
 
-    await expect(group1ColumnHeadings.locator('text=Title')).toHaveCount(0)
-    await expect(group1ColumnHeadings.nth(1)).toHaveText('Category')
+    await expect(table1ColumnHeadings.locator('text=Title')).toHaveCount(0)
+    await expect(table1ColumnHeadings.nth(1)).toHaveText('Category')
 
-    await expect(group2ColumnHeadings.locator('text=Title')).toHaveCount(0)
-    await expect(group2ColumnHeadings.nth(1)).toHaveText('Category')
+    await expect(table2ColumnHeadings.locator('text=Title')).toHaveCount(0)
+    await expect(table2ColumnHeadings.nth(1)).toHaveText('Category')
   })
 
   test('should apply filters to all tables', async () => {
     await page.goto(url.list)
 
-    await selectGroupByField(page, {
+    await addGroupBy(page, {
       fieldLabel: 'Category',
       fieldPath: 'category',
     })
@@ -208,22 +209,66 @@ test.describe('Group By', () => {
       value: 'Find me',
     })
 
-    const group1 = page.locator('.table-wrap').first()
-    await expect(group1).toBeVisible()
-    const group1Rows = group1.locator('tbody tr')
-    await expect(group1Rows).toHaveCount(1)
-    await expect(group1Rows.first().locator('td.cell-title')).toHaveText('Find me')
+    const table1 = page.locator('.table-wrap').first()
+    await expect(table1).toBeVisible()
+    const table1Rows = table1.locator('tbody tr')
+    await expect(table1Rows).toHaveCount(1)
+    await expect(table1Rows.first().locator('td.cell-title')).toHaveText('Find me')
 
-    const group2 = page.locator('.table-wrap').nth(1)
-    await expect(group2).toBeVisible()
-    const group2Rows = group2.locator('tbody tr')
-    await expect(group2Rows).toHaveCount(1)
-    await expect(group2Rows.first().locator('td.cell-title')).toHaveText('Find me')
+    const table2 = page.locator('.table-wrap').nth(1)
+    await expect(table2).toBeVisible()
+    const table2Rows = table2.locator('tbody tr')
+    await expect(table2Rows).toHaveCount(1)
+    await expect(table2Rows.first().locator('td.cell-title')).toHaveText('Find me')
   })
 
-  test.skip('should sort within groups (will affect all groups)', async () => {
+  test('should sort tables (will affect all groups)', async () => {
     await page.goto(url.list)
-    expect(true).toBe(true)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Category',
+      fieldPath: 'category',
+    })
+
+    const table1 = page.locator('.table-wrap').first()
+
+    await sortColumn(page, {
+      table: table1,
+      fieldLabel: 'Title',
+      fieldPath: 'title',
+      targetState: 'asc',
+    })
+
+    const table1AscOrder = ['Find me', 'Post 1', 'Post 10', 'Post 11']
+    const table2AscOrder = ['Find me', 'Post 16', 'Post 17', 'Post 18']
+
+    const table1Titles = table1.locator('tbody tr td.cell-title')
+    const table2Titles = page.locator('.table-wrap').nth(1).locator('tbody tr td.cell-title')
+
+    await expect(table1Titles).toHaveCount(10)
+    await expect(table2Titles).toHaveCount(10)
+
+    // Note: it would be nice to put this in a loop, but this was flaky
+    await expect(table1Titles.nth(0)).toHaveText(table1AscOrder[0] || '')
+    await expect(table1Titles.nth(1)).toHaveText(table1AscOrder[1] || '')
+    await expect(table2Titles.nth(0)).toHaveText(table2AscOrder[0] || '')
+    await expect(table2Titles.nth(1)).toHaveText(table2AscOrder[1] || '')
+
+    await sortColumn(page, {
+      table: table1,
+      fieldLabel: 'Title',
+      fieldPath: 'title',
+      targetState: 'desc',
+    })
+
+    const table1DescOrder = ['Post 9', 'Post 8', 'Post 7', 'Post 6']
+    const table2DescOrder = ['Post 30', 'Post 29', 'Post 28', 'Post 27']
+
+    // Note: it would be nice to put this in a loop, but this was flaky
+    await expect(table1Titles.nth(0)).toHaveText(table1DescOrder[0] || '')
+    await expect(table1Titles.nth(1)).toHaveText(table1DescOrder[1] || '')
+    await expect(table2Titles.nth(0)).toHaveText(table2DescOrder[0] || '')
+    await expect(table2Titles.nth(1)).toHaveText(table2DescOrder[1] || '')
   })
 
   test.skip('should render pagination controls per table when table results exceed page size', async () => {

@@ -129,7 +129,9 @@ export const getDataAndRenderTables = async ({
               ? Number(query.queryByGroup[valueOrRelationshipID].page)
               : undefined,
             req,
-            sort: query?.queryByGroup?.[valueOrRelationshipID]?.sort,
+            // Note: if we wanted to enable table-by-table sorting, we could use this:
+            // sort: query?.queryByGroup?.[valueOrRelationshipID]?.sort,
+            sort: query?.sort,
             user,
             where: {
               ...(query?.where || {}),
