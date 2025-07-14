@@ -33,18 +33,21 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
             label: '',
           })}
         </p>
-        <button
-          className={`${baseClass}__clear-button`}
-          onClick={async () => {
-            await refineListData({
-              groupBy: undefined,
-              sort: undefined,
-            })
-          }}
-          type="button"
-        >
-          {t('general:clear')}
-        </button>
+        {query.groupBy && (
+          <button
+            className={`${baseClass}__clear-button`}
+            id="group-by--reset"
+            onClick={async () => {
+              await refineListData({
+                groupBy: undefined,
+                sort: undefined,
+              })
+            }}
+            type="button"
+          >
+            {t('general:clear')}
+          </button>
+        )}
       </div>
       <div className={`${baseClass}__inputs`}>
         <ReactSelect
@@ -69,7 +72,7 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           }}
         />
         <SelectInput
-          id="group-by--direction-select"
+          id="group-by--sort"
           name="direction"
           onChange={async ({ value }: { value: string }) => {
             await refineListData({

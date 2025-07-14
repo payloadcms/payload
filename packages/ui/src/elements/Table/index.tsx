@@ -29,13 +29,9 @@ export const Table: React.FC<Props> = ({ appearance, columns, data, heading }) =
         .join(' ')}
     >
       {typeof heading === 'string' ? (
-        <h3 className={`${baseClass}__heading`} id="table-heading">
-          {heading}
-        </h3>
+        <h3 className={`${baseClass}__heading`}>{heading}</h3>
       ) : (
-        <div className={`${baseClass}__heading`} id="table-heading">
-          {heading}
-        </div>
+        <div className={`${baseClass}__heading`}>{heading}</div>
       )}
       <table cellPadding="0" cellSpacing="0">
         <thead>

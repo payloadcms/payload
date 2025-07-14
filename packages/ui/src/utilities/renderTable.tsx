@@ -244,7 +244,7 @@ export const renderTable = ({
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
       Table: (
-        <Fragment key={key}>
+        <div className="table-wrap" key={key}>
           <Table
             appearance={tableAppearance}
             columns={columnsToUse}
@@ -256,7 +256,7 @@ export const renderTable = ({
             data={data}
             groupByValue={groupByValue}
           />
-        </Fragment>
+        </div>
       ),
     }
   }
@@ -278,7 +278,7 @@ export const renderTable = ({
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
     Table: (
-      <Fragment key={key}>
+      <div className="table-wrap" key={key}>
         <OrderableTable
           appearance={tableAppearance}
           collection={clientCollectionConfig}
@@ -291,7 +291,7 @@ export const renderTable = ({
           data={data}
           groupByValue={groupByValue}
         />
-      </Fragment>
+      </div>
     ),
   }
 }

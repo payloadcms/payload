@@ -51,6 +51,22 @@ export const seed = async (_payload: Payload) => {
             }),
           ),
         )
+
+        await _payload.create({
+          collection: 'posts',
+          data: {
+            title: 'Find me',
+            category: category1.id,
+          },
+        })
+
+        await _payload.create({
+          collection: 'posts',
+          data: {
+            title: 'Find me',
+            category: category2.id,
+          },
+        })
       },
     ],
     false,
