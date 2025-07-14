@@ -52,6 +52,33 @@ export const getDataAndRenderTables = async ({
   const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
   if (query.groupBy) {
+    // NOTE: is there a faster/better way to do this?
+    const flattenedFields = flattenAllFields({ fields: collectionConfig.fields })
+    const groupByField = flattenedFields.find((f) => f.name === query.groupBy)
+    const isRelationship = groupByField?.type === 'relationship'
+
+    const relationshipConfig = isRelationship
+      ? clientConfig.collections.find((c) => c.slug === groupByField.relationTo)
+      : undefined
+
+    let populate
+
+    if (isRelationship && groupByField.relationTo) {
+      const relationTo =
+        typeof groupByField.relationTo === 'string'
+          ? [groupByField.relationTo]
+          : groupByField.relationTo
+
+      if (Array.isArray(relationTo)) {
+        relationTo.forEach((rel) => {
+          if (!populate) {
+            populate = {}
+          }
+          populate[rel] = { [relationshipConfig?.admin.useAsTitle || 'id']: true }
+        })
+      }
+    }
+
     const distinct = await req.payload.findDistinct({
       collection: collectionSlug,
       depth: 1,
@@ -60,8 +87,8 @@ export const getDataAndRenderTables = async ({
       locale: req.locale,
       overrideAccess: false,
       page: query?.page ? Number(query.page) : undefined,
+      populate,
       req,
-      // where: where || {},
     })
 
     data = {
@@ -71,15 +98,6 @@ export const getDataAndRenderTables = async ({
     }
 
     if (distinct.values) {
-      // NOTE: is there a faster/better way to do this?
-      const flattenedFields = flattenAllFields({ fields: collectionConfig.fields })
-      const groupByField = flattenedFields.find((f) => f.name === query.groupBy)
-      const isRelationship = groupByField?.type === 'relationship'
-
-      const relationshipConfig = isRelationship
-        ? clientConfig.collections.find((c) => c.slug === groupByField.relationTo)
-        : undefined
-
       await Promise.all(
         distinct.values.map(async (distinctValue, i) => {
           const potentiallyPopulatedRelationship = distinctValue[query.groupBy]
