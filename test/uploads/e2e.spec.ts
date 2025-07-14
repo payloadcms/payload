@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -1424,23 +1425,10 @@ describe('Uploads', () => {
   test('should see upload previews in relation list if allowed in config', async () => {
     await page.goto(relationPreviewURL.list)
 
-    await wait(110)
-
     // Show all columns with relations
-    await page.locator('.list-controls__toggle-columns').click()
-    await expect(page.locator('.pill-selector')).toBeVisible()
-    const imageWithoutPreview2Button = page.locator(`.pill-selector .pill-selector__pill`, {
-      hasText: exactText('Image Without Preview2'),
-    })
-    const imageWithPreview3Button = page.locator(`.pill-selector .pill-selector__pill`, {
-      hasText: exactText('Image With Preview3'),
-    })
-    const imageWithoutPreview3Button = page.locator(`.pill-selector .pill-selector__pill`, {
-      hasText: exactText('Image Without Preview3'),
-    })
-    await imageWithoutPreview2Button.click()
-    await imageWithPreview3Button.click()
-    await imageWithoutPreview3Button.click()
+    await toggleColumn(page, { columnLabel: 'Image Without Preview2', targetState: 'on' })
+    await toggleColumn(page, { columnLabel: 'Image With Preview3', targetState: 'on' })
+    await toggleColumn(page, { columnLabel: 'Image Without Preview3', targetState: 'on' })
 
     // Wait for the columns to be displayed
     await expect(page.locator('.cell-imageWithoutPreview3')).toBeVisible()
