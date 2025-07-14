@@ -16,7 +16,10 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "reinstall": "cross-env NODE_OPTIONS=--no-deprecation rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
-    "stripe-webhooks": "stripe listen --forward-to localhost:3000/api/stripe/webhooks"
+    "stripe-webhooks": "stripe listen --forward-to localhost:3000/api/stripe/webhooks",
+    "test": "pnpm run test:int && pnpm run test:e2e",
+    "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
     "@payloadcms/admin-bar": "workspace:*",
@@ -67,22 +70,30 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
+    "@playwright/test": "1.50.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/postcss": "4.0.12",
     "@tailwindcss/typography": "^0.5.12",
+    "@testing-library/react": "16.3.0",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "22.5.4",
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.1",
     "@vercel/git-hooks": "^1.0.0",
+    "@vitejs/plugin-react": "4.5.2",
     "eslint": "^9.16.0",
     "eslint-config-next": "15.1.0",
+    "jsdom": "26.1.0",
     "lint-staged": "^15.2.2",
+    "playwright": "1.50.0",
+    "playwright-core": "1.50.0",
     "postcss": "^8.4.38",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^4.0.12",
-    "typescript": "5.7.2"
+    "typescript": "5.7.2",
+    "vite-tsconfig-paths": "5.1.4",
+    "vitest": "3.2.3"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
