@@ -32,7 +32,7 @@ export const openGroupBy = async (
   return { groupByContainer }
 }
 
-export const selectGroupByField = async (
+export const addGroupBy = async (
   page: Page,
   { fieldLabel, fieldPath }: { fieldLabel: string; fieldPath: string },
 ): Promise<{ field: Locator; groupByContainer: Locator }> => {
