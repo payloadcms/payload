@@ -17,14 +17,14 @@ const { email, password } = devUser
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('Queues with autorun cron scheduling enabled', () => {
+describe('Queues - scheduling, with automatic scheduling handling', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(
       dirname,
       undefined,
       undefined,
-      'config.autocron.ts',
+      'config.schedules-autocron.ts',
     ))
   })
 
@@ -45,6 +45,10 @@ describe('Queues with autorun cron scheduling enabled', () => {
   })
 
   beforeEach(async () => {
+    // Set autorun to false during seed process to ensure no crons are scheduled, which may affect the tests
+    _internal_jobSystemGlobals.shouldAutoRun = false
+    _internal_jobSystemGlobals.shouldAutoSchedule = false
+
     await clearAndSeedEverything(payload)
     const data = await restClient
       .POST('/users/login', {
@@ -59,6 +63,8 @@ describe('Queues with autorun cron scheduling enabled', () => {
       token = data.token
     }
     payload.config.jobs.deleteJobOnComplete = true
+    _internal_jobSystemGlobals.shouldAutoRun = true
+    _internal_jobSystemGlobals.shouldAutoSchedule = true
   })
 
   it('can auto-schedule through automatic crons and autorun jobs', async () => {

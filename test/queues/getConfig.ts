@@ -10,8 +10,6 @@ import { CreateSimpleRetries0Task } from './tasks/CreateSimpleRetries0Task.js'
 import { CreateSimpleRetriesUndefinedTask } from './tasks/CreateSimpleRetriesUndefinedTask.js'
 import { CreateSimpleTask } from './tasks/CreateSimpleTask.js'
 import { CreateSimpleWithDuplicateMessageTask } from './tasks/CreateSimpleWithDuplicateMessageTask.js'
-import { EverySecondMax2Task } from './tasks/EverySecondMax2Task.js'
-import { EverySecondTask } from './tasks/EverySecondTask.js'
 import { ExternalTask } from './tasks/ExternalTask.js'
 import { ReturnCustomErrorTask } from './tasks/ReturnCustomErrorTask.js'
 import { ReturnErrorTask } from './tasks/ReturnErrorTask.js'
@@ -114,7 +112,6 @@ export const getConfig: () => Partial<Config> = () => ({
         cron: '* * * * * *',
         limit: 100,
         queue: 'autorunSecond',
-        disableScheduling: true,
       },
       // add as many cron jobs as you want
     ],
@@ -134,8 +131,6 @@ export const getConfig: () => Partial<Config> = () => ({
       },
     },
     tasks: [
-      EverySecondTask,
-      EverySecondMax2Task,
       UpdatePostTask,
       UpdatePostStep2Task,
       CreateSimpleTask,
