@@ -302,18 +302,13 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   // Need to add default jobs collection before locked documents collections
   if (config.jobs.enabled) {
     // Check for schedule property in both tasks and workflows
-    let hasScheduleProperty =
-      config?.jobs?.tasks?.length && config.jobs.tasks.some((task) => task.schedule)
-
-    if (
-      !hasScheduleProperty &&
-      config?.jobs?.workflows?.length &&
-      config.jobs.workflows.some((workflow) => workflow.schedule)
-    ) {
-      hasScheduleProperty = true
-    }
+    const hasScheduleProperty =
+      (config?.jobs?.tasks?.length && config.jobs.tasks.some((task) => task.schedule)) ||
+      (config?.jobs?.workflows?.length &&
+        config.jobs.workflows.some((workflow) => workflow.schedule))
 
     if (hasScheduleProperty) {
+      config.jobs.scheduling = true
       // Add payload-jobs-stats global for tracking when a job of a specific slug was last run
       ;(config.globals ??= []).push(
         await sanitizeGlobal(
