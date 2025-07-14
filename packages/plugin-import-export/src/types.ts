@@ -30,6 +30,16 @@ export type ImportExportPluginConfig = {
    */
   disableSave?: boolean
   /**
+   * Forces a specific export format (`csv` or `json`) and hides the format dropdown from the UI.
+   *
+   * When defined, this overrides the user's ability to choose a format manually. The export will
+   * always use the specified format, and the format selection field will be hidden.
+   *
+   * If not set, the user can choose between CSV and JSON in the export UI.
+   * @default undefined
+   */
+  format?: 'csv' | 'json'
+  /**
    * This function takes the default export collection configured in the plugin and allows you to override it by modifying and returning it
    * @param collection
    * @returns collection
