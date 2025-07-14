@@ -117,7 +117,7 @@
     "@babel/preset-env": "7.27.2",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@next/eslint-plugin-next": "15.3.2",
+    "@next/eslint-plugin-next": "15.4.1",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
     "@types/react": "19.1.0",
