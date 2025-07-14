@@ -46,6 +46,14 @@ export const Preview = () => {
     (collection) => collection.slug === collectionSlug,
   )
 
+  const disabledFieldsUnderscored = React.useMemo(() => {
+    return (
+      collectionConfig?.admin?.custom?.['plugin-import-export']?.disabledFields?.map((f: string) =>
+        f.replace(/\./g, '_'),
+      ) ?? []
+    )
+  }, [collectionConfig])
+
   const isCSV = format === 'csv'
 
   React.useEffect(() => {
@@ -95,7 +103,10 @@ export const Preview = () => {
                 const regex = fieldToRegex(field)
                 return allKeys.filter((key) => regex.test(key))
               })
-            : allKeys.filter((key) => !defaultMetaFields.includes(key))
+            : allKeys.filter(
+                (key) =>
+                  !defaultMetaFields.includes(key) && !disabledFieldsUnderscored.includes(key),
+              )
 
         const fieldKeys =
           Array.isArray(fields) && fields.length > 0
@@ -136,7 +147,18 @@ export const Preview = () => {
     }
 
     void fetchData()
-  }, [collectionConfig, collectionSlug, draft, fields, i18n, limit, locale, sort, where])
+  }, [
+    collectionConfig,
+    collectionSlug,
+    disabledFieldsUnderscored,
+    draft,
+    fields,
+    i18n,
+    limit,
+    locale,
+    sort,
+    where,
+  ])
 
   return (
     <div className={baseClass}>

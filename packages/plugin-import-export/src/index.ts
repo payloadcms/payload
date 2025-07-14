@@ -1,6 +1,6 @@
 import type { Config, FlattenedField } from 'payload'
 
-import { addDataAndFileToRequest, deepMergeSimple } from 'payload'
+import { addDataAndFileToRequest, deepMergeSimple, flattenTopLevelFields } from 'payload'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { ImportExportPluginConfig, ToCSVFunction } from './types.js'
@@ -58,6 +58,26 @@ export const importExportPlugin =
         },
         path: '@payloadcms/plugin-import-export/rsc#ExportListMenuItem',
       })
+
+      // Flatten top-level fields to expose nested fields for export config
+      const flattenedFields = flattenTopLevelFields(collection.fields, {
+        moveSubFieldsToTop: true,
+      })
+
+      // Find fields explicitly marked as disabled for import/export
+      const disabledFieldAccessors = flattenedFields
+        .filter((field) => field.custom?.['plugin-import-export']?.disabled)
+        .map((field) => field.accessor || field.name)
+
+      // Store disabled field accessors in the admin config for use in the UI
+      collection.admin.custom = {
+        ...(collection.admin.custom || {}),
+        'plugin-import-export': {
+          ...(collection.admin.custom?.['plugin-import-export'] || {}),
+          disabledFields: disabledFieldAccessors,
+        },
+      }
+
       collection.admin.components = components
     })
 
@@ -161,6 +181,14 @@ export const importExportPlugin =
 declare module 'payload' {
   export interface FieldCustom {
     'plugin-import-export'?: {
+      /**
+       * When `true` the field is **completely excluded** from the import-export plugin:
+       * - It will not appear in the “Fields to export” selector.
+       * - It is hidden from the preview list when no specific fields are chosen.
+       * - Its data is omitted from the final CSV / JSON export.
+       * @default false
+       */
+      disabled?: boolean
       toCSV?: ToCSVFunction
     }
   }
