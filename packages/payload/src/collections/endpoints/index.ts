@@ -49,11 +49,12 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       method: 'get',
       path: '/versions',
     },
-    {
-      handler: findDistinctHandler,
-      method: 'get',
-      path: '/distinct',
-    },
+    // Might be uncommented in the future
+    // {
+    //   handler: findDistinctHandler,
+    //   method: 'get',
+    //   path: '/distinct',
+    // },
     {
       handler: duplicateHandler,
       method: 'post',

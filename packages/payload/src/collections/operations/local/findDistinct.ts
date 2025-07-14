@@ -72,6 +72,11 @@ export type Options<
    */
   req?: Partial<PayloadRequest>
   /**
+   * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
+   * @default false
+   */
+  showHiddenFields?: boolean
+  /**
    * Sorting order
    * @default 'desc'
    */
@@ -102,6 +107,7 @@ export async function findDistinct<
     overrideAccess = true,
     page,
     populate,
+    showHiddenFields,
     sortOrder,
     where,
   } = options
@@ -123,6 +129,7 @@ export async function findDistinct<
     page,
     populate,
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    showHiddenFields,
     sortOrder,
     where,
   }) as Promise<PaginatedDistinctDocs<Record<TField, DataFromCollectionSlug<TSlug>[TField]>>>

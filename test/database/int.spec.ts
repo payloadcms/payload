@@ -410,16 +410,16 @@ describe('database', () => {
 
     expect(res.values).toStrictEqual(titles)
 
-    const resREST = await restClient
-      .GET('/posts/distinct', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        query: { sortOrder: 'asc', field: 'title' },
-      })
-      .then((res) => res.json())
+    // const resREST = await restClient
+    //   .GET('/posts/distinct', {
+    //     headers: {
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //     query: { sortOrder: 'asc', field: 'title' },
+    //   })
+    //   .then((res) => res.json())
 
-    expect(resREST.values).toEqual(titles)
+    // expect(resREST.values).toEqual(titles)
 
     const resLimit = await payload.findDistinct({
       collection: 'posts',

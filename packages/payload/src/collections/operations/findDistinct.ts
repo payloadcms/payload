@@ -1,3 +1,5 @@
+import httpStatus from 'http-status'
+
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDistinctDocs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, Where } from '../../types/index.js'
@@ -7,6 +9,8 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
+import { APIError } from '../../errors/APIError.js'
+import { Forbidden } from '../../errors/Forbidden.js'
 import { relationshipPopulationPromise } from '../../fields/hooks/afterRead/relationshipPopulationPromise.js'
 import { getFieldByPath } from '../../utilities/getFieldByPath.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -23,6 +27,7 @@ export type Arguments = {
   page?: number
   populate?: PopulateType
   req?: PayloadRequest
+  showHiddenFields?: boolean
   sortOrder?: 'asc' | 'desc'
   where?: Where
 }
@@ -54,6 +59,7 @@ export const findDistinctOperation = async (
       disableErrors,
       overrideAccess,
       populate,
+      showHiddenFields = false,
       where,
     } = args
 
@@ -97,8 +103,31 @@ export const findDistinctOperation = async (
       collectionConfig,
       overrideAccess: overrideAccess!,
       req,
-      where: where!,
+      where: where ?? {},
     })
+
+    const fieldResult = getFieldByPath({
+      fields: collectionConfig.flattenedFields,
+      path: args.field,
+    })
+
+    if (!fieldResult) {
+      throw new APIError(
+        `Field ${args.field} was not found in the collection ${collectionConfig.slug}`,
+        httpStatus.BAD_REQUEST,
+      )
+    }
+
+    if (fieldResult.field.hidden && !showHiddenFields) {
+      throw new Forbidden(req.t)
+    }
+
+    if (fieldResult.field.access?.read) {
+      const hasAccess = await fieldResult.field.access.read({ req })
+      if (!hasAccess) {
+        throw new Forbidden(req.t)
+      }
+    }
 
     let result = await payload.db.findDistinct({
       collection: collectionConfig.slug,
@@ -111,13 +140,7 @@ export const findDistinctOperation = async (
       where: fullWhere,
     })
 
-    const fieldResult = getFieldByPath({
-      fields: collectionConfig.flattenedFields,
-      path: args.field,
-    })
-
     if (
-      fieldResult &&
       (fieldResult.field.type === 'relationship' || fieldResult.field.type === 'upload') &&
       args.depth
     ) {
