@@ -16,9 +16,19 @@ export type ImportExportPluginConfig = {
    */
   debug?: boolean
   /**
+   * If true, disables the download button in the export preview UI
+   * @default false
+   */
+  disableDownload?: boolean
+  /**
    * Enable to force the export to run synchronously
    */
   disableJobsQueue?: boolean
+  /**
+   * If true, disables the save button in the export preview UI
+   * @default false
+   */
+  disableSave?: boolean
   /**
    * This function takes the default export collection configured in the plugin and allows you to override it by modifying and returning it
    * @param collection
