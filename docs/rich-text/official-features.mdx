@@ -94,7 +94,7 @@ Below are all the Rich Text Features Payload offers. Everything is customizable;
 - Markdown Support: `#`, `##`, `###`, ..., at start of line.
 - Types:
 
-```typescript
+```ts
 type HeadingFeatureProps = {
   enabledHeadingSizes?: HeadingTagType[] // ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
 }
@@ -102,7 +102,7 @@ type HeadingFeatureProps = {
 
 - Usage example:
 
-```typescript
+```ts
 HeadingFeature({
   enabledHeadingSizes: ['h1', 'h2', 'h3'], // Default: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
 })
@@ -121,7 +121,7 @@ HeadingFeature({
 - Keyboard Shortcut: Tab (increase), Shift + Tab (decrease)
 - Types:
 
-```typescript
+```ts
 type IndentFeatureProps = {
   /**
    * The nodes that should not be indented. "type" property of the nodes you don't want to be indented.
@@ -139,7 +139,7 @@ type IndentFeatureProps = {
 
 - Usage example:
 
-```typescript
+```ts
 // Allow block-level indentation only
 IndentFeature({
   disableTabNode: true,
@@ -171,7 +171,7 @@ IndentFeature({
 - Markdown Support: `[anchor](url)`
 - Types:
 
-```typescript
+```ts
 type LinkFeatureServerProps = {
   /**
    * Disables the automatic creation of links
@@ -210,7 +210,7 @@ type ExclusiveLinkCollectionsProps =
 
 - Usage example:
 
-```typescript
+```ts
 LinkFeature({
   fields: ({ defaultFields }) => [
     ...defaultFields,
@@ -232,7 +232,7 @@ LinkFeature({
 - Included by default: Yes
 - Types:
 
-```typescript
+```ts
 type RelationshipFeatureProps = {
   /**
    * Sets a maximum population depth for this relationship, regardless of the remaining depth when the respective field is reached.
@@ -253,7 +253,7 @@ type ExclusiveRelationshipFeatureProps =
 
 - Usage example:
 
-```typescript
+```ts
 RelationshipFeature({
   disabledCollections: ['users'], // Collections to exclude
   maxDepth: 2, // Population depth for relationships
@@ -266,7 +266,7 @@ RelationshipFeature({
 - Included by default: Yes
 - Types:
 
-```typescript
+```ts
 type UploadFeatureProps = {
   collections?: {
     [collection: CollectionSlug]: {
@@ -282,7 +282,7 @@ type UploadFeatureProps = {
 
 - Usage example:
 
-```typescript
+```ts
 UploadFeature({
   collections: {
     uploads: {
@@ -327,7 +327,7 @@ UploadFeature({
 - Included by default: No
 - Types:
 
-```typescript
+```ts
 type FixedToolbarFeatureProps = {
   /**
    * @default false
@@ -354,7 +354,7 @@ type FixedToolbarFeatureProps = {
 
 - Usage example:
 
-```typescript
+```ts
 FixedToolbarFeature({
   applyToFocusedEditor: false, // Apply to focused editor
   customGroups: {
@@ -371,7 +371,7 @@ FixedToolbarFeature({
 - Included by default: No
 - Types:
 
-```typescript
+```ts
 type BlocksFeatureProps = {
   blocks?: (Block | BlockSlug)[] | Block[]
   inlineBlocks?: (Block | BlockSlug)[] | Block[]
@@ -380,7 +380,7 @@ type BlocksFeatureProps = {
 
 - Usage example:
 
-```typescript
+```ts
 BlocksFeature({
   blocks: [
     {
@@ -425,7 +425,7 @@ BlocksFeature({
 - Included by default: No
 - Types:
 
-```typescript
+```ts
 type TextStateFeatureProps = {
   /**
    * The keys of the top-level object (stateKeys) represent the attributes that the textNode can have (e.g., color).
@@ -451,7 +451,7 @@ type StyleObject = {
 
 - Usage example:
 
-```typescript
+```ts
 // We offer default colors that have good contrast and look good in dark and light mode.
 import { defaultColors, TextStateFeature } from '@payloadcms/richtext-lexical'
 

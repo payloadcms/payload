@@ -16,10 +16,11 @@ import { clipboardCopy, clipboardPaste } from './clipboardUtilities.js'
 const baseClass = 'clipboard-action'
 
 type Props = {
+  allowCopy?: boolean
+  allowPaste?: boolean
   className?: string
   copyClassName?: string
-  disableCopy?: boolean
-  disablePaste?: boolean
+  disabled?: boolean
   getDataToCopy: () => FormStateWithoutComponents
   isRow?: boolean
   onPaste: OnPasteFn
@@ -31,10 +32,11 @@ type Props = {
  * @note This component doesn't use the Clipboard API, but localStorage. See rationale in #11513
  */
 export const ClipboardAction: FC<Props> = ({
+  allowCopy,
+  allowPaste,
   className,
   copyClassName,
-  disableCopy,
-  disablePaste,
+  disabled,
   isRow,
   onPaste,
   pasteClassName,
@@ -81,16 +83,21 @@ export const ClipboardAction: FC<Props> = ({
     }
   }, [onPaste, rest, path, t])
 
+  if (!allowPaste && !allowCopy) {
+    return null
+  }
+
   return (
     <Popup
       button={<MoreIcon />}
       className={classes}
+      disabled={disabled}
       horizontalAlign="center"
       render={({ close }) => (
         <PopupList.ButtonGroup>
           <PopupList.Button
             className={copyClassName}
-            disabled={disableCopy}
+            disabled={!allowCopy}
             onClick={() => {
               void handleCopy()
               close()
@@ -100,7 +107,7 @@ export const ClipboardAction: FC<Props> = ({
           </PopupList.Button>
           <PopupList.Button
             className={pasteClassName}
-            disabled={disablePaste}
+            disabled={!allowPaste}
             onClick={() => {
               void handlePaste()
               close()

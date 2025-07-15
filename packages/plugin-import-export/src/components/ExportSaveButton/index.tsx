@@ -24,10 +24,17 @@ export const ExportSaveButton: React.FC = () => {
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
   const { getData, setModified } = useForm()
   const modified = useFormModified()
+
+  const exportsCollectionConfig = getEntityConfig({ collectionSlug: 'exports' })
+
+  const disableSave = exportsCollectionConfig?.admin?.custom?.disableSave === true
+
+  const disableDownload = exportsCollectionConfig?.admin?.custom?.disableDownload === true
 
   const label = t('general:save')
 
@@ -99,10 +106,12 @@ export const ExportSaveButton: React.FC = () => {
 
   return (
     <React.Fragment>
-      <SaveButton label={label}></SaveButton>
-      <Button disabled={!modified} onClick={handleDownload} size="medium" type="button">
-        <Translation i18nKey="upload:download" t={t} />
-      </Button>
+      {!disableSave && <SaveButton label={label} />}
+      {!disableDownload && (
+        <Button disabled={!modified} onClick={handleDownload} size="medium" type="button">
+          <Translation i18nKey="upload:download" t={t} />
+        </Button>
+      )}
     </React.Fragment>
   )
 }
