@@ -27,6 +27,8 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
 
   const groupByFieldName = query.groupBy?.replace(/^-/, '')
 
+  const groupByField = reducedFields.find((field) => field.value === groupByFieldName)
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
@@ -58,25 +60,27 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
               .includes(inputValue.toLowerCase())
           }
           id="group-by--field-select"
-          isClearable={false}
+          isClearable
           isMulti={false}
-          // disabled={disabled}
-          onChange={async ({ value }: { value: string }) => {
+          onChange={async (v: { value: string } | null) => {
+            const value = v === null ? undefined : v.value
+
             await refineListData({
               groupBy: query.groupBy?.startsWith('-') ? `-${value}` : value,
               page: '1',
             })
           }}
-          options={reducedFields.filter((field) => !field.field.admin.disableListFilter)}
+          options={reducedFields.filter(
+            (field) => !field.field.admin.disableListFilter && field.value !== 'id',
+          )}
           value={{
-            label:
-              reducedFields.find((field) => field.value === groupByFieldName)?.label ||
-              t('general:selectValue'),
+            label: groupByField?.label || t('general:selectValue'),
             value: groupByFieldName || '',
           }}
         />
         <SelectInput
           id="group-by--sort"
+          isClearable={false}
           name="direction"
           onChange={async ({ value }: { value: string }) => {
             await refineListData({

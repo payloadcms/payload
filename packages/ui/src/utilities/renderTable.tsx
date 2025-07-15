@@ -244,7 +244,12 @@ export const renderTable = ({
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
       Table: (
-        <div className="table-wrap" key={key}>
+        <div
+          className={['table-wrap', groupByValue && `table-wrap--group-by`]
+            .filter(Boolean)
+            .join(' ')}
+          key={key}
+        >
           <Table
             appearance={tableAppearance}
             columns={columnsToUse}
@@ -278,7 +283,12 @@ export const renderTable = ({
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
     Table: (
-      <div className="table-wrap" key={key}>
+      <div
+        className={['table-wrap', groupByValue && `table-wrap__tables--group-by`]
+          .filter(Boolean)
+          .join(' ')}
+        key={key}
+      >
         <OrderableTable
           appearance={tableAppearance}
           collection={clientCollectionConfig}

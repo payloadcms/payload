@@ -174,7 +174,11 @@ export function DefaultListView(props: ListViewClientProps) {
                 resolvedFilterOptions={resolvedFilterOptions}
               />
               {BeforeListTable}
-              {docs.length > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}
+              {docs.length > 0 && (
+                <div className={`${baseClass}__tables`}>
+                  <RelationshipProvider>{Table}</RelationshipProvider>
+                </div>
+              )}
               {docs.length === 0 && (
                 <div className={`${baseClass}__no-results`}>
                   <p>
