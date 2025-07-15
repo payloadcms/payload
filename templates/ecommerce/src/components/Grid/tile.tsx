@@ -15,7 +15,6 @@ export function GridTileImage({
   isInteractive?: boolean
   label?: {
     amount: number
-    currencyCode: string
     position?: 'bottom' | 'center'
     title: string
   }
@@ -44,14 +43,7 @@ export function GridTileImage({
           width={80}
         />
       ) : null}
-      {label ? (
-        <Label
-          amount={label.amount}
-          currencyCode={label.currencyCode}
-          position={label.position}
-          title={label.title}
-        />
-      ) : null}
+      {label ? <Label amount={label.amount} position={label.position} title={label.title} /> : null}
     </div>
   )
 }

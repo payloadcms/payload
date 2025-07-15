@@ -5,12 +5,10 @@ import { Price } from '@/components/Price'
 
 export const Label = ({
   amount,
-  currencyCode,
   position = 'bottom',
   title,
 }: {
   amount: number
-  currencyCode: string
   position?: 'bottom' | 'center'
   title: string
 }) => {
@@ -25,7 +23,6 @@ export const Label = ({
         <Price
           amount={amount}
           className="flex-none rounded-full bg-blue-600 p-2 text-white"
-          currencyCode={currencyCode}
           currencyCodeClassName="hidden @[275px]/label:inline"
         />
       </div>

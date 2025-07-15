@@ -14,7 +14,7 @@ import { ShoppingCart } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { DeleteItemButton } from './DeleteItemButton'
 import { EditItemQuantityButton } from './EditItemQuantityButton'
@@ -50,10 +50,15 @@ export function CartModal() {
     setIsOpen(false)
   }, [pathname])
 
+  const totalQuantity = useMemo(() => {
+    if (!cart || !cart.items || !cart.items.length) return undefined
+    return cart.items.reduce((quantity, item) => (item.quantity || 0) + quantity, 0)
+  }, [cart])
+
   return (
     <Sheet onOpenChange={setIsOpen} open={isOpen}>
       <SheetTrigger asChild>
-        <OpenCartButton quantity={cart?.items?.length} />
+        <OpenCartButton quantity={totalQuantity} />
       </SheetTrigger>
 
       <SheetContent className="flex flex-col">
@@ -94,6 +99,10 @@ export function CartModal() {
 
                   if (isVariant) {
                     price = variant?.priceInUSD
+
+                    if (variant && variant.gallery?.[0] && typeof variant.gallery[0] === 'object') {
+                      image = variant.gallery[0]
+                    }
                   }
 
                   return (

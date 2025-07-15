@@ -26,6 +26,7 @@ import { OrdersCollection } from '@/collections/Orders'
 import { VariantOptionsCollection } from '@/collections/VariantOptions'
 import { VariantTypesCollection } from '@/collections/VariantTypes'
 import { VariantsCollection } from '@/collections/Variants'
+import { Addresses } from '@/collections/Addresses'
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Ecommerce Template` : 'Payload Ecommerce Template'
@@ -106,6 +107,7 @@ export const plugins: Plugin[] = [
   ecommercePlugin({
     customers: {
       slug: 'users',
+      addresses: Addresses,
     },
     payments: {
       paymentMethods: [

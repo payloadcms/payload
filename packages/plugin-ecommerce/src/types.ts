@@ -3,10 +3,11 @@ import type {
   DefaultDocumentIDType,
   Endpoint,
   Field,
-  GeneratedTypes,
   GroupField,
   PayloadRequest,
+  SelectType,
   TypedCollection,
+  Where,
 } from 'payload'
 
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
@@ -190,6 +191,10 @@ export type VariantsConfig = {
 
 export type ProductsConfig = {
   productsCollection?: CollectionOverride
+  /**
+   * Customise the validation used for checking products or variants before a transaction is created.
+   */
+  validation?: ProductsValidation
   variants?: true | VariantsConfig
 }
 
@@ -201,11 +206,29 @@ export type TransactionsConfig = {
   transactionsCollection?: CollectionOverride
 }
 
+export type CustomQuery = {
+  depth?: number
+  select?: SelectType
+  where?: Where
+}
+
 export type PaymentsConfig = {
   paymentMethods?: PaymentAdapter[]
+  productsQuery?: CustomQuery
+  variantsQuery?: CustomQuery
 }
 
 export type CustomersConfig = {
+  /**
+   * Enable the addresses collection for customers.
+   * This allows customers to have multiple addresses for shipping and billing. Accepts an override to customise the addresses collection.
+   * Defaults to true.
+   */
+  addresses?: boolean | CollectionOverride
+  /**
+   * Slug of the customers collection, defaults to 'users'.
+   * This is used to link carts and orders to customers.
+   */
   slug: string
 }
 
@@ -234,10 +257,26 @@ export type CurrenciesConfig = {
 }
 
 /**
+ * A function that validates a product or variant before a transaction is created or completed.
+ * This should throw an error if validation fails as it will be caught by the function calling it.
+ */
+export type ProductsValidation = (args: {
+  currenciesConfig?: CurrenciesConfig
+  currency?: string
+  product: TypedCollection['products']
+  /**
+   * Quantity to check the inventory amount against.
+   */
+  quantity: number
+  variant?: TypedCollection['variants']
+}) => Promise<void> | void
+
+/**
  * A map of collection slugs used by the Ecommerce plugin.
  * Provides an easy way to track the slugs of collections even when they are overridden.
  */
 export type CollectionSlugMap = {
+  addresses: string
   carts: string
   customers: string
   orders: string

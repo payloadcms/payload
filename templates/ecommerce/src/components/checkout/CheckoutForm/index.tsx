@@ -17,8 +17,8 @@ export const CheckoutForm: React.FC<Props> = ({ customerEmail }) => {
   const [error, setError] = React.useState<null | string>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const router = useRouter()
-  const { cart, clearCart } = useCart()
-  const { initiatePayment, confirmOrder } = usePayments()
+  const { clearCart } = useCart()
+  const { confirmOrder } = usePayments()
 
   const handleSubmit = useCallback(
     async (e) => {
@@ -27,9 +27,11 @@ export const CheckoutForm: React.FC<Props> = ({ customerEmail }) => {
 
       if (stripe && elements) {
         try {
+          const returnUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}/checkout/confirm-order${customerEmail ? `?email=${customerEmail}` : ''}`
+
           const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
             confirmParams: {
-              return_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/checkout/confirm-order?email=${customerEmail}`,
+              return_url: returnUrl,
             },
             elements,
             redirect: 'if_required',
@@ -51,8 +53,11 @@ export const CheckoutForm: React.FC<Props> = ({ customerEmail }) => {
             ) {
               // Clear the cart after successful payment
               clearCart()
+
+              const redirectUrl = `/orders/${confirmResult.orderID}${customerEmail ? `?email=${customerEmail}` : ''}`
+
               // Redirect to order confirmation page
-              router.push(`/orders/${confirmResult.orderID}?email=${customerEmail}`)
+              router.push(redirectUrl)
             }
           }
           if (stripeError?.message) {
