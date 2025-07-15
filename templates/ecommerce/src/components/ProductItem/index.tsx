@@ -2,7 +2,7 @@ import { Media } from '@/components/Media'
 import { OrderStatus } from '@/components/OrderStatus'
 import { Price } from '@/components/Price'
 import { Button } from '@/components/ui/button'
-import { Order, Product, Variant } from '@/payload-types'
+import { Media as MediaType, Order, Product, Variant } from '@/payload-types'
 import { formatDateTime } from '@/utilities/formatDateTime'
 import Link from 'next/link'
 
@@ -26,13 +26,13 @@ export const ProductItem: React.FC<Props> = ({
 }) => {
   const { title } = product
 
-  let image = null
+  let image: MediaType | null = null
 
-  if (variant && variant.gallery && variant.gallery.length > 0) {
+  if (variant && variant.gallery?.[0] && typeof variant.gallery[0] === 'object') {
     image = variant.gallery[0]
-  } else if (product.gallery && product.gallery.length > 0) {
+  } else if (product.gallery?.[0] && typeof product.gallery[0] === 'object') {
     image = product.gallery[0]
-  } else if (product.meta && product.meta.image) {
+  } else if (product.meta?.image && typeof product.meta.image === 'object') {
     image = product.meta.image
   }
 

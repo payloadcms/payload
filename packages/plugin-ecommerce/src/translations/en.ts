@@ -3,6 +3,17 @@ import type { GenericTranslationsObject } from '@payloadcms/translations'
 export const en: GenericTranslationsObject = {
   $schema: './translation-schema.json',
   'plugin-ecommerce': {
+    addressCity: 'City',
+    addressCompany: 'Company',
+    addressCountry: 'Country',
+    addressFirstName: 'First name',
+    addressLastName: 'Last name',
+    addressLine1: 'Address 1',
+    addressLine2: 'Address 2',
+    addressPhone: 'Phone',
+    addressPostalCode: 'Postal code',
+    addressState: 'State',
+    addressTitle: 'Title',
     amount: 'Amount',
     availableVariants: 'Available variants',
     cancelled: 'Cancelled',

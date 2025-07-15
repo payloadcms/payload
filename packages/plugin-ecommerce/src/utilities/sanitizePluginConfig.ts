@@ -14,6 +14,11 @@ export const sanitizePluginConfig = ({ pluginConfig }: Props): SanitizedEcommerc
   if (typeof config.customers === 'undefined') {
     config.customers = {
       slug: 'users',
+      addresses: true,
+    }
+  } else {
+    if (typeof config.customers.addresses === 'undefined') {
+      config.customers.addresses = true
     }
   }
 

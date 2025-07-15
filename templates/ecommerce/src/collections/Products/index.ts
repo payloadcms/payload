@@ -160,7 +160,11 @@ export const ProductsCollection: CollectionOverride = {
         hasMany: true,
         relationTo: 'categories',
       },
-      slugField(),
+      ...slugField('title', {
+        slugOverrides: {
+          required: true,
+        },
+      }),
     ]
 
     return fields

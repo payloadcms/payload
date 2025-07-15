@@ -63,7 +63,9 @@ export default async function ProductPage({ params }: Args) {
 
   if (!product) return notFound()
 
-  const metaImage = typeof product.meta?.image !== 'string' ? product.meta?.image : undefined
+  const gallery = product.gallery?.filter((image) => typeof image === 'object')
+
+  const metaImage = typeof product.meta?.image === 'object' ? product.meta?.image : undefined
   const hasStock = product.enableVariants
     ? product?.variants?.docs?.some((variant) => {
         if (typeof variant !== 'object') return false
@@ -80,6 +82,16 @@ export default async function ProductPage({ params }: Args) {
       }
       return acc
     }, product.priceInUSD || 0)
+
+    for (const variant of product.variants.docs) {
+      if (typeof variant !== 'object') continue
+
+      if (variant.gallery && variant.gallery.length > 0) {
+        const variantGallery = variant.gallery.filter((image) => typeof image === 'object')
+
+        gallery.push(...variantGallery)
+      }
+    }
   }
 
   const productJsonLd = {
@@ -97,9 +109,7 @@ export default async function ProductPage({ params }: Args) {
   }
 
   const relatedProducts =
-    product.relatedProducts?.filter((relatedProduct) => typeof relatedProduct !== 'string') ?? []
-
-  const gallery = product.gallery?.filter((image) => typeof image !== 'string')
+    product.relatedProducts?.filter((relatedProduct) => typeof relatedProduct === 'object') ?? []
 
   return (
     <React.Fragment>
@@ -161,7 +171,7 @@ function RelatedProducts({ products }: { products: Product[] }) {
             <Link className="relative h-full w-full" href={`/product/${product.slug}`}>
               <GridTileImage
                 label={{
-                  amount: product.priceInUSD,
+                  amount: product.priceInUSD!,
                   title: product.title,
                 }}
                 media={product.meta?.image as Media}
@@ -189,6 +199,7 @@ const queryProductBySlug = async ({ slug }: { slug: string }) => {
       slug: {
         equals: slug,
       },
+      ...(draft ? {} : { _status: { equals: 'published' } }),
     },
     populate: {
       variants: {
@@ -196,6 +207,7 @@ const queryProductBySlug = async ({ slug }: { slug: string }) => {
         priceInUSD: true,
         inventory: true,
         options: true,
+        gallery: true,
       },
     },
   })

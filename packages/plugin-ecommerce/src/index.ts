@@ -4,6 +4,7 @@ import { deepMergeSimple } from 'payload/shared'
 
 import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from './types.js'
 
+import { addressesCollection } from './addresses/addressesCollection.js'
 import { cartsCollection } from './carts/cartsCollection.js'
 import { confirmOrderHandler } from './endpoints/confirmOrder.js'
 import { initiatePaymentHandler } from './endpoints/initiatePayment.js'
@@ -40,6 +41,20 @@ export const ecommercePlugin =
 
     const currenciesConfig: Required<SanitizedEcommercePluginConfig['currencies']> =
       sanitizedPluginConfig.currencies
+
+    if (sanitizedPluginConfig.customers.addresses) {
+      const overrides =
+        typeof sanitizedPluginConfig.customers.addresses === 'boolean'
+          ? undefined
+          : sanitizedPluginConfig.customers.addresses
+
+      const addresses = addressesCollection({
+        customersSlug: collectionSlugMap.customers,
+        overrides,
+      })
+
+      incomingConfig.collections.push(addresses)
+    }
 
     if (sanitizedPluginConfig.products) {
       const productsConfig =
@@ -129,6 +144,11 @@ export const ecommercePlugin =
           incomingConfig.endpoints = []
         }
 
+        const productsValidation =
+          (typeof sanitizedPluginConfig.products === 'object' &&
+            sanitizedPluginConfig.products.validation) ||
+          undefined
+
         paymentMethods.forEach((paymentMethod) => {
           const methodPath = `/payments/${paymentMethod.name}`
           const endpoints: Endpoint[] = []
@@ -139,6 +159,7 @@ export const ecommercePlugin =
               inventory: sanitizedPluginConfig.inventory,
               paymentMethod,
               productsSlug: collectionSlugMap.products,
+              productsValidation,
               transactionsSlug: collectionSlugMap.transactions,
               variantsSlug: collectionSlugMap.variants,
             }),
@@ -152,6 +173,7 @@ export const ecommercePlugin =
               currenciesConfig,
               ordersSlug: collectionSlugMap.orders,
               paymentMethod,
+              productsValidation,
               transactionsSlug: collectionSlugMap.transactions,
             }),
             method: 'post',

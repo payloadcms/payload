@@ -5,6 +5,7 @@ import React, { useMemo } from 'react'
 type BaseProps = {
   className?: string
   currencyCodeClassName?: string
+  as?: 'span' | 'p'
 }
 
 type PriceFixed = {
@@ -29,8 +30,11 @@ export const Price = ({
   highestAmount,
   lowestAmount,
   currencyCode: currencyCodeFromProps,
+  as = 'p',
 }: Props & React.ComponentProps<'p'>) => {
   const { formatCurrency, supportedCurrencies } = useCurrency()
+
+  const Element = as
 
   const currencyToUse = useMemo(() => {
     if (currencyCodeFromProps) {
@@ -41,25 +45,25 @@ export const Price = ({
 
   if (amount) {
     return (
-      <p className={className} suppressHydrationWarning>
+      <Element className={className} suppressHydrationWarning>
         {formatCurrency(amount, { currency: currencyToUse })}
-      </p>
+      </Element>
     )
   }
 
   if (highestAmount && highestAmount !== lowestAmount) {
     return (
-      <p className={className} suppressHydrationWarning>
+      <Element className={className} suppressHydrationWarning>
         {`${formatCurrency(lowestAmount, { currency: currencyToUse })} - ${formatCurrency(highestAmount, { currency: currencyToUse })}`}
-      </p>
+      </Element>
     )
   }
 
   if (lowestAmount) {
     return (
-      <p className={className} suppressHydrationWarning>
+      <Element className={className} suppressHydrationWarning>
         {`${formatCurrency(lowestAmount, { currency: currencyToUse })}`}
-      </p>
+      </Element>
     )
   }
 

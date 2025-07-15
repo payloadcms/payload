@@ -103,7 +103,7 @@ export default async function Order({ params, searchParams }: PageProps) {
   }
 
   return (
-    <div className="container my-12">
+    <div className="">
       <div className="flex gap-8 justify-between items-center mb-6">
         {user ? (
           <div className="flex gap-4">
@@ -148,7 +148,7 @@ export default async function Order({ params, searchParams }: PageProps) {
         {order.items && (
           <div>
             <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">Items</h2>
-            <div className="">
+            <ul className="flex flex-col gap-6">
               {order.items?.map((item) => {
                 if (typeof item.product === 'string') {
                   return null
@@ -162,15 +162,16 @@ export default async function Order({ params, searchParams }: PageProps) {
                   item.variant && typeof item.variant === 'object' ? item.variant : undefined
 
                 return (
-                  <ProductItem
-                    key={item.id}
-                    product={item.product}
-                    quantity={item.quantity}
-                    variant={variant}
-                  />
+                  <li key={item.id}>
+                    <ProductItem
+                      product={item.product}
+                      quantity={item.quantity}
+                      variant={variant}
+                    />
+                  </li>
                 )
               })}
-            </div>
+            </ul>
           </div>
         )}
       </div>

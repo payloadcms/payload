@@ -4,24 +4,13 @@ import type { CollectionConfig } from 'payload'
 import { admins } from '@/access/admins'
 import { anyone } from '@/access/anyone'
 import { adminsAndUser } from '@/access/adminsAndUser'
+import { CollectionOverride } from '@payloadcms/plugin-ecommerce/types'
 
-export const Addresses: CollectionConfig = {
-  slug: 'addresses',
+export const Addresses: CollectionOverride = {
   access: {
     create: adminsAndUser,
     delete: adminsAndUser,
     read: adminsAndUser,
     update: adminsAndUser,
   },
-  admin: {
-    defaultColumns: ['customer'],
-  },
-  fields: [
-    {
-      name: 'customer',
-      required: true,
-      type: 'relationship',
-      relationTo: 'users',
-    },
-  ],
 }

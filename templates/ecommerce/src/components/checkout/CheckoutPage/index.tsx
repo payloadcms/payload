@@ -196,14 +196,16 @@ export const CheckoutPage: React.FC = () => {
                   <div className="flex grow justify-between items-center">
                     <div className="flex flex-col gap-1">
                       <p className="font-medium text-lg">{title}</p>
-                      {/* {variant && (
+                      {variant && typeof variant === 'object' && (
                         <p className="text-sm font-mono text-primary/50 tracking-[0.1em]">
-                          {product.variants
-                            ?.find((v) => v.id === variantId)
-                            ?.options.map((option) => option.value)
+                          {variant.options
+                            ?.map((option) => {
+                              if (typeof option === 'object') return option.label
+                              return null
+                            })
                             .join(', ')}
                         </p>
-                      )} */}
+                      )}
                       <div>
                         {'x'}
                         {quantity}

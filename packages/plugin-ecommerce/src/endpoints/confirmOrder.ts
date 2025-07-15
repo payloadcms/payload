@@ -1,6 +1,8 @@
 import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from 'payload'
 
-import type { Cart, CurrenciesConfig, PaymentAdapter } from '../types.js'
+import type { CurrenciesConfig, PaymentAdapter, ProductsValidation } from '../types.js'
+
+import { defaultProductsValidation } from '../utilities/defaultProductsValidation.js'
 
 type Args = {
   /**
@@ -17,6 +19,10 @@ type Args = {
    * The slug of the products collection, defaults to 'products'.
    */
   productsSlug?: string
+  /**
+   * Customise the validation used for checking products or variants before a transaction is created.
+   */
+  productsValidation?: ProductsValidation
   /**
    * The slug of the transactions collection, defaults to 'transactions'.
    */
@@ -40,6 +46,7 @@ export const confirmOrderHandler: ConfirmOrder =
     ordersSlug = 'orders',
     paymentMethod,
     productsSlug = 'products',
+    productsValidation,
     transactionsSlug = 'transactions',
     variantsSlug = 'variants',
   }) =>
@@ -145,55 +152,8 @@ export const confirmOrderHandler: ConfirmOrder =
           const priceField = `priceIn${currency.toUpperCase()}`
           const quantity = item.quantity || 1
 
-          if (item.variant) {
-            const id = typeof item.variant === 'object' ? item.variant.id : item.variant
-
-            const variant = await payload.findByID({
-              id,
-              collection: variantsSlug,
-              depth: 0,
-              select: {
-                inventory: true,
-                [priceField]: true,
-              },
-            })
-
-            if (!variant) {
-              return Response.json(
-                {
-                  message: `Variant with ID ${item.variant} not found.`,
-                },
-                {
-                  status: 404,
-                },
-              )
-            }
-
-            if (!variant[priceField]) {
-              return Response.json(
-                {
-                  message: `Variant with ID ${item.variant} does not have a price in ${currency}.`,
-                },
-                {
-                  status: 400,
-                },
-              )
-            }
-
-            if (variant.inventory === 0 || (variant.inventory && variant.inventory < quantity)) {
-              return Response.json(
-                {
-                  message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory.`,
-                },
-                {
-                  status: 400,
-                },
-              )
-            }
-          }
-
           // If the item has a product but no variant, we assume the product has a price in the specified currency
-          if (item.product && !item.variant) {
+          if (item.product) {
             const id = typeof item.product === 'object' ? item.product.id : item.product
 
             const product = await payload.findByID({
@@ -215,26 +175,89 @@ export const confirmOrderHandler: ConfirmOrder =
                 },
               )
             }
-            if (!product[priceField]) {
-              return Response.json(
-                {
-                  message: `Product with ID ${item.product} does not have a price in ${currency}.`,
-                },
-                {
-                  status: 400,
-                },
-              )
+
+            // Run product validation only if the item does not have a variant, each variant will have its own inventory and price
+            if (!item.variant) {
+              try {
+                if (productsValidation) {
+                  await productsValidation({
+                    currenciesConfig,
+                    currency,
+                    product,
+                    quantity,
+                  })
+                } else {
+                  await defaultProductsValidation({
+                    currenciesConfig,
+                    currency,
+                    product,
+                    quantity,
+                  })
+                }
+              } catch (error) {
+                return Response.json(
+                  {
+                    message: error,
+                  },
+                  {
+                    status: 400,
+                  },
+                )
+              }
             }
 
-            if (product.inventory === 0 || (product.inventory && product.inventory < quantity)) {
-              return Response.json(
-                {
-                  message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory.`,
+            if (item.variant) {
+              const id = typeof item.variant === 'object' ? item.variant.id : item.variant
+
+              const variant = await payload.findByID({
+                id,
+                collection: variantsSlug,
+                depth: 0,
+                select: {
+                  inventory: true,
+                  [priceField]: true,
                 },
-                {
-                  status: 400,
-                },
-              )
+              })
+
+              if (!variant) {
+                return Response.json(
+                  {
+                    message: `Variant with ID ${item.variant} not found.`,
+                  },
+                  {
+                    status: 404,
+                  },
+                )
+              }
+
+              try {
+                if (productsValidation) {
+                  await productsValidation({
+                    currenciesConfig,
+                    currency,
+                    product,
+                    quantity,
+                    variant,
+                  })
+                } else {
+                  await defaultProductsValidation({
+                    currenciesConfig,
+                    currency,
+                    product,
+                    quantity,
+                    variant,
+                  })
+                }
+              } catch (error) {
+                return Response.json(
+                  {
+                    message: error,
+                  },
+                  {
+                    status: 400,
+                  },
+                )
+              }
             }
           }
         }
