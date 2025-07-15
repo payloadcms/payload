@@ -7,7 +7,7 @@ import { headers as getHeaders } from 'next/headers'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
-import { CreateAccountForm } from './CreateAccountForm'
+import { CreateAccountForm } from '@/components/forms/CreateAccountForm'
 import { redirect } from 'next/navigation'
 
 export default async function CreateAccount() {
@@ -20,7 +20,7 @@ export default async function CreateAccount() {
   }
 
   return (
-    <div className="container">
+    <div className="container py-16">
       <h1 className="text-xl mb-4">Create Account</h1>
       <RenderParams />
       <CreateAccountForm />

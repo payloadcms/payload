@@ -80,12 +80,16 @@ export const CreateAccountForm: React.FC = () => {
       <Message className="classes.message" error={error} />
 
       <div className="mb-4">
-        <Label htmlFor="email">Email Address</Label>
+        <Label htmlFor="email" className="mb-2">
+          Email Address
+        </Label>
         <Input id="email" {...register('email', { required: true })} required type="email" />
       </div>
 
       <div className="mb-4">
-        <Label htmlFor="password">New password</Label>
+        <Label htmlFor="password" className="mb-2">
+          New password
+        </Label>
         <Input
           id="password"
           {...register('password', { required: true })}
@@ -95,7 +99,9 @@ export const CreateAccountForm: React.FC = () => {
       </div>
 
       <div className="mb-4">
-        <Label htmlFor="passwordConfirm">Confirm Password</Label>
+        <Label htmlFor="passwordConfirm" className="mb-2">
+          Confirm Password
+        </Label>
         <Input
           id="passwordConfirm"
           {...register('passwordConfirm', {

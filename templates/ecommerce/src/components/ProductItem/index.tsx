@@ -37,6 +37,7 @@ export const ProductItem: React.FC<Props> = ({
   }
 
   const itemPrice = variant?.priceInUSD || product.priceInUSD
+  const itemURL = `/products/${product.slug}${variant ? `?variant=${variant.id}` : ''}`
 
   return (
     <div className="flex items-center gap-4">
@@ -49,7 +50,9 @@ export const ProductItem: React.FC<Props> = ({
       </div>
       <div className="flex grow justify-between items-center">
         <div className="flex flex-col gap-1">
-          <p className="font-medium text-lg">{title}</p>
+          <p className="font-medium text-lg">
+            <Link href={itemURL}>{title}</Link>
+          </p>
           {variant && (
             <p className="text-sm font-mono text-primary/50 tracking-[0.1em]">
               {variant.options

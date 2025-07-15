@@ -38,14 +38,11 @@ export const CheckoutPage: React.FC = () => {
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
 
   const initiatePaymentIntent = async (paymentID: string) => {
-    console.log('initiating payment intent', paymentID)
     const paymentIntent = await initiatePayment(paymentID, {
       additionalData: {
         ...(email ? { customerEmail: email } : {}),
       },
     })
-
-    console.log({ paymentIntent })
   }
 
   if (!stripe) return null

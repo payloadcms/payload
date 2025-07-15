@@ -529,6 +529,13 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
+              label: 'Find my order',
+              url: '/find-order',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
               label: 'Source Code',
               newTab: true,
               url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
