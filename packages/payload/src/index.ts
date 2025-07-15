@@ -836,7 +836,7 @@ export class BasePayload {
       throw error
     }
 
-    if (this.config.jobs.enabled && this.config.jobs.autoRun && !isNextBuild()) {
+    if (this.config.jobs.enabled && this.config.jobs.autoRun && !isNextBuild() && options.cron) {
       const DEFAULT_CRON = '* * * * *'
       const DEFAULT_LIMIT = 10
 
@@ -974,7 +974,7 @@ export const reload = async (
 }
 
 export const getPayload = async (
-  options: Pick<InitOptions, 'config' | 'importMap'>,
+  options: Pick<InitOptions, 'config' | 'cron' | 'importMap'>,
 ): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayload to work.')
@@ -1109,6 +1109,8 @@ export { generateImportMap } from './bin/generateImportMap/index.js'
 
 export type { ImportMap } from './bin/generateImportMap/index.js'
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
+export { migrate as migrateCLI } from './bin/migrate.js'
+
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -1155,7 +1157,6 @@ export type {
 } from './collections/config/types.js'
 
 export type { CompoundIndex } from './collections/config/types.js'
-
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
@@ -1171,6 +1172,7 @@ export { findVersionsOperation } from './collections/operations/findVersions.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
+
 export { buildConfig } from './config/build.js'
 
 export {
@@ -1180,7 +1182,6 @@ export {
   serverOnlyConfigProperties,
   type UnsanitizedClientConfig,
 } from './config/client.js'
-
 export { defaults } from './config/defaults.js'
 export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
@@ -1297,10 +1298,11 @@ export {
   ValidationError,
   ValidationErrorName,
 } from './errors/index.js'
-export type { ValidationFieldError } from './errors/index.js'
 
+export type { ValidationFieldError } from './errors/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
+
 export {
   createClientField,
   createClientFields,
@@ -1308,9 +1310,9 @@ export {
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
 
-export { sanitizeFields } from './fields/config/sanitize.js'
-
 export interface FieldCustom extends Record<string, any> {}
+
+export { sanitizeFields } from './fields/config/sanitize.js'
 
 export type {
   AdminClient,
@@ -1421,14 +1423,13 @@ export type {
 } from './fields/config/types.js'
 
 export { getDefaultValue } from './fields/getDefaultValue.js'
-
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
-export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 
+export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export { validations } from './fields/validations.js'
 export type {
   ArrayFieldValidation,
@@ -1481,8 +1482,8 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
-export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 
+export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
@@ -1505,8 +1506,8 @@ export type {
 } from './preferences/types.js'
 export type { QueryPreset } from './query-presets/types.js'
 export { jobAfterRead } from './queues/config/index.js'
-export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 
+export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 export type {
   RunInlineTaskFunction,
   RunTaskFunction,
@@ -1530,14 +1531,14 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
-export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
 
+export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
-export type * from './uploads/types.js'
 
+export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
@@ -1609,8 +1610,8 @@ export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
-export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 
+export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
