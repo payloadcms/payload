@@ -4,7 +4,9 @@ import {
   _internal_resetJobSystemGlobals,
   type JobTaskStatus,
   type Payload,
+  type SanitizedConfig,
 } from 'payload'
+import { migrateCLI } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
@@ -1463,5 +1465,26 @@ describe('Queues', () => {
 
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples?.docs?.[0]?.title).toBe('hello!')
+  })
+})
+
+describe('Queues - CLI', () => {
+  let config: SanitizedConfig
+  beforeAll(async () => {
+    ;({ config } = await initPayloadInt(dirname, undefined, false))
+  })
+  it('can run migrate CLI without jobs attempting to run', async () => {
+    await migrateCLI({
+      config,
+      parsedArgs: {
+        _: ['migrate'],
+      },
+    })
+
+    // Wait 3 seconds to let potential autorun crons trigger
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+
+    // Expect no errors. Previously, this would throw an "error: relation "payload_jobs" does not exist" error
+    expect(true).toBe(true)
   })
 })
