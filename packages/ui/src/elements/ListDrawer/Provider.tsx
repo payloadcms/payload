@@ -24,17 +24,17 @@ export type ListDrawerContextProps = {
      */
     docID: string
   }) => void
-  /**
-   * When called, will either refresh the list view with its currently selected collection.
-   * If an collection slug is provided, will use that instead of the currently selected one.
-   */
-  readonly refresh: (collectionSlug: CollectionSlug) => Promise<void>
   readonly selectedOption?: Option<CollectionSlug>
   readonly setSelectedOption?: (option: Option<CollectionSlug>) => void
 }
 
 export type ListDrawerContextType = {
-  isInDrawer: boolean
+  readonly isInDrawer: boolean
+  /**
+   * When called, will either refresh the list view with its currently selected collection.
+   * If an collection slug is provided, will use that instead of the currently selected one.
+   */
+  readonly refresh: (collectionSlug: CollectionSlug) => Promise<void>
 } & ListDrawerContextProps
 
 export const ListDrawerContext = createContext({} as ListDrawerContextType)
@@ -42,6 +42,7 @@ export const ListDrawerContext = createContext({} as ListDrawerContextType)
 export const ListDrawerContextProvider: React.FC<
   {
     children: React.ReactNode
+    refresh: ListDrawerContextType['refresh']
   } & ListDrawerContextProps
 > = ({ children, ...rest }) => {
   return (

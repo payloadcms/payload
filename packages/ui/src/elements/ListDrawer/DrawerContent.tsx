@@ -5,7 +5,7 @@ import { useModal } from '@faceless-ui/modal'
 import { hoistQueryParamsToAnd } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { ListDrawerContextProps } from '../ListDrawer/Provider.js'
+import type { ListDrawerContextProps, ListDrawerContextType } from '../ListDrawer/Provider.js'
 import type { ListDrawerProps } from './types.js'
 
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
@@ -170,7 +170,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     [refresh],
   )
 
-  const refreshSelf: ListDrawerContextProps['refresh'] = useCallback(
+  const refreshSelf: ListDrawerContextType['refresh'] = useCallback(
     async (incomingCollectionSlug) => {
       if (incomingCollectionSlug) {
         setSelectedOption({
