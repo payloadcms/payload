@@ -4,6 +4,7 @@ import type { SanitizedConfig } from 'payload'
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -195,6 +196,51 @@ describe('Auth', () => {
       await saveDocAndAssert(page)
       await expect(page.locator('#users-api-result')).toHaveText('Goodbye, world!')
       await expect(page.locator('#use-auth-result')).toHaveText('Goodbye, world!')
+    })
+
+    // Need to test unlocking documents on logout here as this test suite does not auto login users
+    test('should unlock document on logout after editing without saving', async () => {
+      await page.goto(url.list)
+
+      await page.locator('.table .row-1 .cell-custom a').click()
+
+      const textInput = page.locator('#field-namedSaveToJWT')
+      await textInput.fill('some text')
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(1000)
+
+      const lockedDocs = await payload.find({
+        collection: 'payload-locked-documents',
+        limit: 1,
+        pagination: false,
+      })
+
+      expect(lockedDocs.docs.length).toBe(1)
+
+      await page.locator('.template-default__nav-toggler').click()
+
+      await page.locator('.nav .nav__controls a[href="/admin/logout"]').click()
+
+      // Locate the modal container
+      const modalContainer = page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeVisible()
+
+      // Click the "Leave anyway" button
+      await page
+        .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
+        .click()
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      const unlockedDocs = await payload.find({
+        collection: 'payload-locked-documents',
+        limit: 1,
+        pagination: false,
+      })
+
+      expect(unlockedDocs.docs.length).toBe(0)
     })
   })
 
