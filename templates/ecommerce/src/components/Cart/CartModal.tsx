@@ -23,13 +23,9 @@ import { Button } from '@/components/ui/button'
 import { Product } from '@/payload-types'
 
 export function CartModal() {
-  const { cart, clearCart } = useCart()
+  const { cart } = useCart()
   const [isOpen, setIsOpen] = useState(false)
-  const quantityRef = useRef(
-    cart?.items?.length
-      ? cart.items.reduce((quantity, product) => (product.quantity || 0) + quantity, 0)
-      : 0,
-  )
+
   const pathname = usePathname()
 
   // useEffect(() => {

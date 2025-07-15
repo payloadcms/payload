@@ -99,5 +99,15 @@ export const Users: CollectionConfig = {
         defaultColumns: ['id', 'createdAt', 'total', 'currency', 'items'],
       },
     },
+    {
+      name: 'addresses',
+      type: 'join',
+      collection: 'addresses',
+      on: 'customer',
+      admin: {
+        allowCreate: false,
+        defaultColumns: ['id'],
+      },
+    },
   ],
 }

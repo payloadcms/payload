@@ -80,6 +80,7 @@ export interface Config {
     forms: Form;
     'form-submissions': FormSubmission;
     search: Search;
+    addresses: Address;
     variants: Variant;
     variantTypes: VariantType;
     variantOptions: VariantOption;
@@ -95,6 +96,7 @@ export interface Config {
     users: {
       orders: 'orders';
       cart: 'carts';
+      addresses: 'addresses';
     };
     variantTypes: {
       options: 'variantOptions';
@@ -112,6 +114,7 @@ export interface Config {
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
+    addresses: AddressesSelect<false> | AddressesSelect<true>;
     variants: VariantsSelect<false> | VariantsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
     variantOptions: VariantOptionsSelect<false> | VariantOptionsSelect<true>;
@@ -127,12 +130,12 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {
-    footer: Footer;
     header: Header;
+    footer: Footer;
   };
   globalsSelect: {
-    footer: FooterSelect<false> | FooterSelect<true>;
     header: HeaderSelect<false> | HeaderSelect<true>;
+    footer: FooterSelect<false> | FooterSelect<true>;
   };
   locale: null;
   user: User & {
@@ -176,6 +179,11 @@ export interface User {
   };
   cart?: {
     docs?: (string | Cart)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  addresses?: {
+    docs?: (string | Address)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -284,7 +292,7 @@ export interface Product {
     description?: string | null;
   };
   categories?: (string | Category)[] | null;
-  slug?: string | null;
+  slug: string;
   slugLock?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -431,7 +439,7 @@ export interface Page {
     image?: (string | null) | Media;
     description?: string | null;
   };
-  slug?: string | null;
+  slug: string;
   slugLock?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -534,6 +542,7 @@ export interface Category {
   id: string;
   title: string;
   slug: string;
+  slugLock?: boolean | null;
   parent?: (string | null) | Category;
   breadcrumbs?:
     | {
@@ -890,6 +899,27 @@ export interface Cart {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "addresses".
+ */
+export interface Address {
+  id: string;
+  customer?: (string | null) | User;
+  title: string;
+  firstName: string;
+  lastName: string;
+  company?: string | null;
+  addressLine1: string;
+  addressLine2?: string | null;
+  city: string;
+  state?: string | null;
+  postalCode: string;
+  country: string;
+  phone?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1001,6 +1031,10 @@ export interface PayloadLockedDocument {
         value: string | Search;
       } | null)
     | ({
+        relationTo: 'addresses';
+        value: string | Address;
+      } | null)
+    | ({
         relationTo: 'variants';
         value: string | Variant;
       } | null)
@@ -1079,6 +1113,7 @@ export interface UsersSelect<T extends boolean = true> {
   roles?: T;
   orders?: T;
   cart?: T;
+  addresses?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1275,6 +1310,7 @@ export interface FormBlockSelect<T extends boolean = true> {
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  slugLock?: T;
   parent?: T;
   breadcrumbs?:
     | T
@@ -1499,6 +1535,26 @@ export interface SearchSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "addresses_select".
+ */
+export interface AddressesSelect<T extends boolean = true> {
+  customer?: T;
+  title?: T;
+  firstName?: T;
+  lastName?: T;
+  company?: T;
+  addressLine1?: T;
+  addressLine2?: T;
+  city?: T;
+  state?: T;
+  postalCode?: T;
+  country?: T;
+  phone?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "variants_select".
  */
 export interface VariantsSelect<T extends boolean = true> {
@@ -1668,30 +1724,6 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "footer".
- */
-export interface Footer {
-  id: string;
-  navItems?:
-    | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
-          url?: string | null;
-          label: string;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header".
  */
 export interface Header {
@@ -1716,9 +1748,33 @@ export interface Header {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "footer_select".
+ * via the `definition` "footer".
  */
-export interface FooterSelect<T extends boolean = true> {
+export interface Footer {
+  id: string;
+  navItems?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?: {
+            relationTo: 'pages';
+            value: string | Page;
+          } | null;
+          url?: string | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header_select".
+ */
+export interface HeaderSelect<T extends boolean = true> {
   navItems?:
     | T
     | {
@@ -1739,9 +1795,9 @@ export interface FooterSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header_select".
+ * via the `definition` "footer_select".
  */
-export interface HeaderSelect<T extends boolean = true> {
+export interface FooterSelect<T extends boolean = true> {
   navItems?:
     | T
     | {

@@ -90,6 +90,7 @@ export const addressesCollection: (props?: Props) => CollectionConfig = (props) 
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
         t('plugin-ecommerce:addressPostalCode'),
+      required: true,
     },
     {
       name: 'country',

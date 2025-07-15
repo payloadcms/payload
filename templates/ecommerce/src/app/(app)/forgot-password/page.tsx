@@ -3,12 +3,12 @@ import type { Metadata } from 'next'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import React from 'react'
 
-import { RecoverPasswordForm } from './RecoverPasswordForm'
+import { ForgotPasswordForm } from './ForgotPasswordForm'
 
-export default async function RecoverPassword() {
+export default async function ForgotPasswordPage() {
   return (
     <div className="container py-16">
-      <RecoverPasswordForm />
+      <ForgotPasswordForm />
     </div>
   )
 }
@@ -16,8 +16,8 @@ export default async function RecoverPassword() {
 export const metadata: Metadata = {
   description: 'Enter your email address to recover your password.',
   openGraph: mergeOpenGraph({
-    title: 'Recover Password',
-    url: '/recover-password',
+    title: 'Forgot Password',
+    url: '/forgot-password',
   }),
-  title: 'Recover Password',
+  title: 'Forgot Password',
 }

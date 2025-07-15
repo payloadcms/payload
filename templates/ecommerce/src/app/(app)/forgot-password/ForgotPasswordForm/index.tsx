@@ -12,7 +12,7 @@ type FormData = {
   email: string
 }
 
-export const RecoverPasswordForm: React.FC = () => {
+export const ForgotPasswordForm: React.FC = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
@@ -48,7 +48,7 @@ export const RecoverPasswordForm: React.FC = () => {
     <Fragment>
       {!success && (
         <React.Fragment>
-          <h1 className="text-xl mb-4">Recover Password</h1>
+          <h1 className="text-xl mb-4">Forgot Password</h1>
           <div className="prose dark:prose-invert mb-8">
             <p>
               {`Please enter your email below. You will receive an email message with instructions on
@@ -59,11 +59,13 @@ export const RecoverPasswordForm: React.FC = () => {
           <form className="max-w-lg" onSubmit={handleSubmit(onSubmit)}>
             <Message className="mb-8" error={error} />
             <div className="mb-8">
-              <Label htmlFor="email">Email address</Label>
+              <Label htmlFor="email" className="mb-2">
+                Email address
+              </Label>
               <Input id="email" {...register('email', { required: true })} required type="email" />
             </div>
             <Button type="submit" variant="default">
-              Recover Password
+              Forgot Password
             </Button>
           </form>
         </React.Fragment>
