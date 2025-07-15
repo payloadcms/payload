@@ -11,7 +11,9 @@ import { getCustomFieldFunctions } from './export/getCustomFieldFunctions.js'
 import { getSelect } from './export/getSelect.js'
 import { getExportCollection } from './getExportCollection.js'
 import { translations } from './translations/index.js'
+import { collectRootFieldNames } from './utilities/collectRootFieldNames.js'
 import { getFlattenedFieldKeys } from './utilities/getFlattenedFieldKeys.js'
+import { removeDisabledFields } from './utilities/removeDisabledFields.js'
 
 export const importExportPlugin =
   (pluginConfig: ImportExportPluginConfig) =>
@@ -97,6 +99,7 @@ export const importExportPlugin =
           collectionSlug: string
           draft?: 'no' | 'yes'
           fields?: string[]
+          format?: 'csv' | 'json'
           limit?: number
           locale?: string
           sort?: any
@@ -126,29 +129,55 @@ export const importExportPlugin =
           where,
         })
 
+        const isCSV = req?.data?.format === 'csv'
         const docs = result.docs
 
-        const toCSVFunctions = getCustomFieldFunctions({
-          fields: collection.config.fields as FlattenedField[],
-        })
+        let transformed: Record<string, unknown>[] = []
 
-        const possibleKeys = getFlattenedFieldKeys(collection.config.fields as FlattenedField[])
-
-        const transformed = docs.map((doc) => {
-          const row = flattenObject({
-            doc,
-            fields,
-            toCSVFunctions,
+        if (isCSV) {
+          const toCSVFunctions = getCustomFieldFunctions({
+            fields: collection.config.fields as FlattenedField[],
           })
 
-          for (const key of possibleKeys) {
-            if (!(key in row)) {
-              row[key] = null
-            }
-          }
+          const possibleKeys = getFlattenedFieldKeys(collection.config.fields as FlattenedField[])
 
-          return row
-        })
+          transformed = docs.map((doc) => {
+            const row = flattenObject({
+              doc,
+              fields,
+              toCSVFunctions,
+            })
+
+            for (const key of possibleKeys) {
+              if (!(key in row)) {
+                row[key] = null
+              }
+            }
+
+            return row
+          })
+        } else {
+          const disabledFields =
+            collection.config.admin.custom?.['plugin-import-export']?.disabledFields
+
+          const topLevelKeys = collectRootFieldNames(collection.config.fields)
+
+          transformed = docs.map((doc) => {
+            let output: Record<string, unknown> = { ...doc }
+
+            // Pad missing top-level keys
+            topLevelKeys.forEach((k) => {
+              if (!(k in output)) {
+                output[k] = null
+              }
+            })
+
+            // Finally remove disabled nested paths
+            output = removeDisabledFields(output, disabledFields)
+
+            return output
+          })
+        }
 
         return Response.json({
           docs: transformed,
