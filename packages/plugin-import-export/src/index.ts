@@ -11,7 +11,6 @@ import { getCustomFieldFunctions } from './export/getCustomFieldFunctions.js'
 import { getSelect } from './export/getSelect.js'
 import { getExportCollection } from './getExportCollection.js'
 import { translations } from './translations/index.js'
-import { collectRootFieldNames } from './utilities/collectRootFieldNames.js'
 import { getFlattenedFieldKeys } from './utilities/getFlattenedFieldKeys.js'
 import { removeDisabledFields } from './utilities/removeDisabledFields.js'
 
@@ -160,22 +159,8 @@ export const importExportPlugin =
           const disabledFields =
             collection.config.admin.custom?.['plugin-import-export']?.disabledFields
 
-          const topLevelKeys = collectRootFieldNames(collection.config.fields)
-
           transformed = docs.map((doc) => {
-            let output: Record<string, unknown> = { ...doc }
-
-            // Pad missing top-level keys
-            topLevelKeys.forEach((k) => {
-              if (!(k in output)) {
-                output[k] = null
-              }
-            })
-
-            // Finally remove disabled nested paths
-            output = removeDisabledFields(output, disabledFields)
-
-            return output
+            return removeDisabledFields(doc, disabledFields)
           })
         }
 
