@@ -116,6 +116,13 @@ Hooks are only triggered on the server and are automatically excluded from the c
 
 Hooks are a powerful way to customize the behavior of your APIs, but some hooks are run very often and can add significant overhead to your requests if not optimized.
 
+When building hooks, combine together as many of these strategies as possible to ensure your hooks are as performant as they can be.
+
+<Banner type="success">
+  For more performance tips, see the [Performance
+  documentation](../performance/overview).
+</Banner>
+
 ### Writing efficient hooks
 
 Consider when hooks are run. One common pitfall is putting expensive logic in hooks that run very often.
@@ -145,7 +152,6 @@ Instead, you might want to use a `beforeChange` or `afterChange` hook, which onl
       async ({ context }) => {
         // This is more acceptable here, although still should be mindful of performance
         await doSomethingExpensive()
-
         // ...
       },
     ]
@@ -164,7 +170,6 @@ Use [Hook Context](./context) avoid prevent infinite loops or avoid repeating ex
       async ({ context }) => {
         const somethingExpensive = await doSomethingExpensive()
         context.somethingExpensive = somethingExpensive
-
         // ...
       },
     ],
@@ -185,7 +190,6 @@ If your hooks perform any long-running tasks that don't direct affect request li
       async ({ doc, req }) => {
         // Offload to job queue
         await req.payload.jobs.queue(...)
-
         // ...
       },
     ],

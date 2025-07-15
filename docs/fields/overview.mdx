@@ -367,9 +367,9 @@ import {
 
 #### Validation Performance
 
-When writing async or computationally heavy validation functions, it is important to consider the performance implications. Within the Admin Panel, validations are executed on every change to the field, so they should be as lightweight as possible.
+When writing async or computationally heavy validation functions, it is important to consider the performance implications. Within the Admin Panel, validations are executed on every change to the field, so they should be as lightweight as possible and only run when necessary.
 
-If you need to perform expensive validations, such as querying the database, consider using the `event` property in the `ctx` object to only run the validation on form submission.
+If you need to perform expensive validations, such as querying the database, consider using the `event` property in the `ctx` object to only run that particular validation on form submission.
 
 To write asynchronous validation functions, use the `async` keyword to define your function:
 
@@ -402,6 +402,11 @@ export const Orders: CollectionConfig = {
   ],
 }
 ```
+
+<Banner type="success">
+  For more performance tips, see the [Performance
+  documentation](../performance/overview).
+</Banner>
 
 ## Custom ID Fields
 
