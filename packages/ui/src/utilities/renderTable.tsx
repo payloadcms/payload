@@ -245,7 +245,7 @@ export const renderTable = ({
       // key is required since Next.js 15.2.0 to prevent React key error
       Table: (
         <div
-          className={['table-wrap', groupByValue && `table-wrap--group-by`]
+          className={['table-wrap', groupByValue !== undefined && `table-wrap--group-by`]
             .filter(Boolean)
             .join(' ')}
           key={key}
@@ -284,7 +284,7 @@ export const renderTable = ({
     // key is required since Next.js 15.2.0 to prevent React key error
     Table: (
       <div
-        className={['table-wrap', groupByValue && `table-wrap__tables--group-by`]
+        className={['table-wrap', groupByValue !== undefined && `table-wrap--group-by`]
           .filter(Boolean)
           .join(' ')}
         key={key}

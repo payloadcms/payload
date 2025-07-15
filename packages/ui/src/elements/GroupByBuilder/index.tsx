@@ -66,7 +66,7 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
             const value = v === null ? undefined : v.value
 
             await refineListData({
-              groupBy: query.groupBy?.startsWith('-') ? `-${value}` : value,
+              groupBy: value ? (query.groupBy?.startsWith('-') ? `-${value}` : value) : undefined,
               page: '1',
             })
           }}
@@ -83,6 +83,10 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           isClearable={false}
           name="direction"
           onChange={async ({ value }: { value: string }) => {
+            if (!groupByFieldName) {
+              return
+            }
+
             await refineListData({
               groupBy: value === 'asc' ? groupByFieldName : `-${groupByFieldName}`,
               page: '1',
@@ -93,6 +97,7 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
             { label: t('general:descending'), value: 'desc' },
           ]}
           path="direction"
+          readOnly={!groupByFieldName}
           value={
             !query.groupBy
               ? 'asc'
