@@ -24,9 +24,13 @@ export type ListDrawerContextProps = {
      */
     docID: string
   }) => void
-  readonly refresh: () => Promise<void>
-  readonly selectedOption?: Option<string>
-  readonly setSelectedOption?: (option: Option<string>) => void
+  /**
+   * When called, will either refresh the list view with its currently selected collection.
+   * If an collection slug is provided, will use that instead of the currently selected one.
+   */
+  readonly refresh: (collectionSlug: CollectionSlug) => Promise<void>
+  readonly selectedOption?: Option<CollectionSlug>
+  readonly setSelectedOption?: (option: Option<CollectionSlug>) => void
 }
 
 export type ListDrawerContextType = {

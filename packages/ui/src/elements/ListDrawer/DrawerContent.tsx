@@ -1,10 +1,11 @@
 'use client'
-import type { ListQuery } from 'payload'
+import type { CollectionSlug, ListQuery } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { hoistQueryParamsToAnd } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
+import type { ListDrawerContextProps } from '../ListDrawer/Provider.js'
 import type { ListDrawerProps } from './types.js'
 
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
@@ -25,7 +26,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   onBulkSelect,
   onSelect,
   overrideEntityVisibility = true,
-  selectedCollection: selectedCollectionFromProps,
+  selectedCollection: collectionSlugFromProps,
 }) => {
   const { closeModal, isModalOpen } = useModal()
 
@@ -45,7 +46,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   })
 
   const [selectedOption, setSelectedOption] = useState<Option<string>>(() => {
-    const initialSelection = selectedCollectionFromProps || enabledCollections[0]?.slug
+    const initialSelection = collectionSlugFromProps || enabledCollections[0]?.slug
     const found = getEntityConfig({ collectionSlug: initialSelection })
 
     return found
@@ -61,19 +62,24 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       collectionSlug: selectedOption.value,
     })
 
-  const updateSelectedOption = useEffectEvent((selectedCollectionFromProps: string) => {
-    if (selectedCollectionFromProps && selectedCollectionFromProps !== selectedOption?.value) {
+  const updateSelectedOption = useEffectEvent((collectionSlug: CollectionSlug) => {
+    if (collectionSlug && collectionSlug !== selectedOption?.value) {
       setSelectedOption({
-        label: getEntityConfig({ collectionSlug: selectedCollectionFromProps })?.labels,
-        value: selectedCollectionFromProps,
+        label: getEntityConfig({ collectionSlug })?.labels,
+        value: collectionSlug,
       })
     }
   })
 
   useEffect(() => {
-    updateSelectedOption(selectedCollectionFromProps)
-  }, [selectedCollectionFromProps])
+    updateSelectedOption(collectionSlugFromProps)
+  }, [collectionSlugFromProps])
 
+  /**
+   * This performs a full server round trip to get the list view for the selected collection.
+   * On the server, the data is freshly queried for the list view and all components are fully rendered.
+   * This work includes building column state, rendering custom components, etc.
+   */
   const refresh = useCallback(
     async ({ slug, query }: { query?: ListQuery; slug: string }) => {
       try {
@@ -149,26 +155,34 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     [closeModal, documentDrawerSlug, drawerSlug, onSelect, selectedOption.value],
   )
 
-  const onQueryChange = useCallback(
-    (query: ListQuery) => {
+  const onQueryChange: ListDrawerContextProps['onQueryChange'] = useCallback(
+    (query) => {
       void refresh({ slug: selectedOption?.value, query })
     },
     [refresh, selectedOption.value],
   )
 
-  const setMySelectedOption = useCallback(
-    (incomingSelection: Option<string>) => {
+  const setMySelectedOption: ListDrawerContextProps['setSelectedOption'] = useCallback(
+    (incomingSelection) => {
       setSelectedOption(incomingSelection)
       void refresh({ slug: incomingSelection?.value })
     },
     [refresh],
   )
 
-  const refreshSelf = useCallback(async () => {
-    if (selectedOption?.value) {
-      await refresh({ slug: selectedOption.value })
-    }
-  }, [refresh, selectedOption?.value])
+  const refreshSelf: ListDrawerContextProps['refresh'] = useCallback(
+    async (incomingCollectionSlug) => {
+      if (incomingCollectionSlug) {
+        setSelectedOption({
+          label: getEntityConfig({ collectionSlug: incomingCollectionSlug })?.labels,
+          value: incomingCollectionSlug,
+        })
+      }
+
+      await refresh({ slug: selectedOption.value || incomingCollectionSlug })
+    },
+    [getEntityConfig, refresh, selectedOption.value],
+  )
 
   if (isLoading) {
     return <LoadingOverlay />
