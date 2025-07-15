@@ -87,10 +87,15 @@ export const hrTranslations: DefaultTranslationsObject = {
     deletingFile: 'Dogodila se pogreška pri brisanju datoteke.',
     deletingTitle:
       'Dogodila se pogreška pri brisanju {{title}}. Molimo provjerite svoju internet vezu i pokušajte ponovno.',
+    documentNotFound:
+      'Dokument s ID-om {{id}} nije mogao biti pronađen. Možda je izbrisan ili nikad nije postojao, ili možda nemate pristup njemu.',
     emailOrPasswordIncorrect: 'E-mail adresa ili lozinka netočni.',
     followingFieldsInvalid_one: 'Ovo polje je neispravno:',
     followingFieldsInvalid_other: 'Ova polja su neispravna:',
     incorrectCollection: 'Neispravna kolekcija',
+    insufficientClipboardPermissions:
+      'Pristup međuspremniku odbijen. Provjerite svoja dopuštenja za međuspremnik.',
+    invalidClipboardData: 'Nevažeći podaci u međuspremniku.',
     invalidFileType: 'Neispravan tip datoteke',
     invalidFileTypeValue: 'Neispravan tip datoteke: {{value}}',
     invalidRequestArgs: 'Nevažeći argumenti u zahtjevu: {{args}}',
@@ -112,6 +117,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Došlo je do problema pri učitavanju datoteke.',
     tokenInvalidOrExpired: 'Token je neispravan ili je istekao.',
     tokenNotProvided: 'Token nije pružen.',
+    unableToCopy: 'Nije moguće kopirati.',
     unableToDeleteCount: 'Nije moguće izbrisati {{count}} od {{total}} {{label}}.',
     unableToReindexCollection:
       'Pogreška pri ponovnom indeksiranju kolekcije {{collection}}. Operacija je prekinuta.',
@@ -241,7 +247,9 @@ export const hrTranslations: DefaultTranslationsObject = {
       'Ovo će ukloniti postojeće indekse i ponovno indeksirati dokumente u svim kolekcijama.',
     copied: 'Kopirano',
     copy: 'Kopiraj',
+    copyField: 'Kopiraj polje',
     copying: 'Kopiranje',
+    copyRow: 'Kopiraj redak',
     copyWarning:
       'Na rubu ste prepisivanja {{to}} s {{from}} za {{label}} {{title}}. Jeste li sigurni?',
     create: 'Izradi',
@@ -336,6 +344,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Prepišite postojeće podatke u polju',
     pageNotFound: 'Stranica nije pronađena',
     password: 'Lozinka',
+    pasteField: 'Zalijepi polje',
+    pasteRow: 'Zalijepi redak',
     payloadSettings: 'Payload postavke',
     perPage: 'Po stranici: {{limit}}',
     previous: 'Prethodni',

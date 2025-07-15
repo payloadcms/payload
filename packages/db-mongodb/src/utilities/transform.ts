@@ -417,7 +417,7 @@ export const transform = ({
 
   if (operation === 'read') {
     delete data['__v']
-    data.id = data._id
+    data.id = data._id || data.id
     delete data['_id']
 
     if (data.id instanceof Types.ObjectId) {

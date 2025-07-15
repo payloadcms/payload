@@ -15,7 +15,7 @@ import type { AuthArgs } from './auth/operations/auth.js'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js'
 import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
-import type { AuthStrategy, User } from './auth/types.js'
+import type { AuthStrategy, UntypedUser } from './auth/types.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -156,7 +156,6 @@ export { extractAccessFromPermission } from './auth/extractAccessFromPermission.
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export { getLoginOptions } from './auth/getLoginOptions.js'
-
 export interface GeneratedTypes {
   authUntyped: {
     [slug: string]: {
@@ -216,7 +215,7 @@ export interface GeneratedTypes {
     }
   }
   localeUntyped: null | string
-  userUntyped: User
+  userUntyped: UntypedUser
 }
 
 // Helper type to resolve the correct type using conditional types
@@ -299,6 +298,10 @@ type ResolveLocaleType<T> = 'locale' extends keyof T ? T['locale'] : T['localeUn
 type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
 
 export type TypedLocale = ResolveLocaleType<GeneratedTypes>
+
+/**
+ * @todo rename to `User` in 4.0
+ */
 export type TypedUser = ResolveUserType<GeneratedTypes>
 
 // @ts-expect-error
@@ -1099,7 +1102,7 @@ export type {
   SanitizedFieldPermissions,
   SanitizedGlobalPermission,
   SanitizedPermissions,
-  User,
+  UntypedUser as User,
   VerifyConfig,
 } from './auth/types.js'
 export { generateImportMap } from './bin/generateImportMap/index.js'
@@ -1532,9 +1535,10 @@ export { importHandlerPath } from './queues/operations/runJobs/runJob/importHand
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
+export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
 export type * from './uploads/types.js'
-export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 
+export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {
@@ -1606,8 +1610,8 @@ export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
-export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 
+export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'

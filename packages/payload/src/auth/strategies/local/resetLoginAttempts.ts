@@ -15,7 +15,10 @@ export const resetLoginAttempts = async ({
   payload,
   req,
 }: Args): Promise<void> => {
-  if (!('lockUntil' in doc && typeof doc.lockUntil === 'string') || doc.loginAttempts === 0) {
+  if (
+    !('lockUntil' in doc && typeof doc.lockUntil === 'string') &&
+    (!('loginAttempts' in doc) || doc.loginAttempts === 0)
+  ) {
     return
   }
   await payload.update({

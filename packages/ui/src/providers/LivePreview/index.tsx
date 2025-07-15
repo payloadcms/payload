@@ -21,8 +21,8 @@ export type LivePreviewProviderProps = {
     height: number
     width: number
   }
+  isLivePreviewEnabled?: boolean
   isLivePreviewing: boolean
-  operation?: 'create' | 'update'
   url: string
 }
 
@@ -37,8 +37,8 @@ const getAbsoluteUrl = (url) => {
 export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   breakpoints: incomingBreakpoints,
   children,
+  isLivePreviewEnabled,
   isLivePreviewing: incomingIsLivePreviewing,
-  operation,
   url: incomingUrl,
 }) => {
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
@@ -235,13 +235,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         fieldSchemaJSON,
         iframeHasLoaded,
         iframeRef,
-        isLivePreviewEnabled: Boolean(
-          (operation !== 'create' &&
-            collectionSlug &&
-            config?.admin?.livePreview?.collections?.includes(collectionSlug)) ||
-            (globalSlug && config.admin?.livePreview?.globals?.includes(globalSlug)) ||
-            entityConfig?.admin?.livePreview,
-        ),
+        isLivePreviewEnabled,
         isLivePreviewing,
         isPopupOpen,
         listeningForMessages,

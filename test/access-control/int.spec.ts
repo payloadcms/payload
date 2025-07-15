@@ -231,6 +231,26 @@ describe('Access Control', () => {
       expect(updatedDoc.cannotMutateRequired).toBe('cannotMutateRequired')
       expect(updatedDoc.cannotMutateNotRequired).toBe('cannotMutateNotRequired')
     })
+
+    it('should not return default values for hidden fields with values', async () => {
+      const doc = await payload.create({
+        collection: hiddenFieldsSlug,
+        data: {
+          title: 'Test Title',
+        },
+        showHiddenFields: true,
+      })
+
+      expect(doc.hiddenWithDefault).toBe('default value')
+
+      const findDoc2 = await payload.findByID({
+        id: doc.id,
+        collection: hiddenFieldsSlug,
+        overrideAccess: false,
+      })
+
+      expect(findDoc2.hiddenWithDefault).toBeUndefined()
+    })
   })
   describe('Collections', () => {
     describe('restricted collection', () => {

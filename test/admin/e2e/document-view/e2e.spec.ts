@@ -363,6 +363,43 @@ describe('Document View', () => {
   })
 
   describe('drawers', () => {
+    test('document drawers do not unmount across save events', async () => {
+      // Navigate to a post document
+      await navigateToDoc(page, postsUrl)
+
+      // Open the relationship drawer
+      await page
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+
+      const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+      const drawerEditView = drawer.locator('.drawer__content .collection-edit')
+      await expect(drawerEditView).toBeVisible()
+
+      const drawerTitleField = drawerEditView.locator('#field-title')
+      const testTitle = 'Test Title for Persistence'
+      await drawerTitleField.fill(testTitle)
+      await expect(drawerTitleField).toHaveValue(testTitle)
+
+      await drawerEditView.evaluate((el) => {
+        el.setAttribute('data-test-instance', 'This is a test')
+      })
+
+      await expect(drawerEditView).toHaveAttribute('data-test-instance', 'This is a test')
+
+      await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] .drawer__content #action-save')
+
+      await expect(drawerEditView).toBeVisible()
+      await expect(drawerTitleField).toHaveValue(testTitle)
+
+      // Verify the element instance hasn't changed (i.e., it wasn't re-mounted and discarded the custom attribute)
+      await expect
+        .poll(async () => {
+          return await drawerEditView.getAttribute('data-test-instance')
+        })
+        .toBe('This is a test')
+    })
+
     test('document drawers are visually stacking', async () => {
       await navigateToDoc(page, postsUrl)
       await page.locator('#field-title').fill(title)

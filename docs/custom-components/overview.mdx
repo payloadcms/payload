@@ -505,3 +505,51 @@ Payload also exports its [SCSS](https://sass-lang.com) library for reuse which i
   **Note:** You can also drill into Payload's own component styles, or easily
   apply global, app-wide CSS. More on that [here](../admin/customizing-css).
 </Banner>
+
+## Performance
+
+An often overlooked aspect of Custom Components is performance. If unchecked, Custom Components can lead to slow load times of the Admin Panel and ultimately a poor user experience.
+
+This is different from front-end performance of your public-facing site.
+
+<Banner type="success">
+  For more performance tips, see the [Performance
+  documentation](../performance/overview).
+</Banner>
+
+### Follow React and Next.js best practices
+
+All Custom Components are built using [React](https://react.dev). For this reason, it is important to follow React best practices. This includes using memoization, streaming, caching, optimizing renders, using hooks appropriately, and more.
+
+To learn more, see the [React documentation](https://react.dev/learn).
+
+The Admin Panel itself is a [Next.js](https://nextjs.org) application. For this reason, it is _also_ important to follow Next.js best practices. This includes bundling, when to use layouts vs pages, where to place the server/client boundary, and more.
+
+To learn more, see the [Next.js documentation](https://nextjs.org/docs).
+
+### Reducing initial HTML size
+
+With Server Components, be aware of what is being sent to through the server/client boundary. All props are serialized and sent through the network. This can lead to large HTML sizes and slow initial load times if too much data is being sent to the client.
+
+To minimize this, you must be explicit about what props are sent to the client. Prefer server components and only send the necessary props to the client. This will also offset some of the JS execution to the server.
+
+<Banner type="success">
+  **Tip:** Use [React Suspense](https://react.dev/reference/react/Suspense) to
+  progressively load components and improve perceived performance.
+</Banner>
+
+### Prevent unnecessary re-renders
+
+If subscribing your component to form state, it may be re-rendering more often than necessary.
+
+To do this, use the [`useFormFields`](../admin/react-hooks) hook instead of `useFields` when you only need to access specific fields.
+
+```ts
+'use client'
+import { useFormFields } from '@payloadcms/ui'
+
+const MyComponent: TextFieldClientComponent = ({ path }) => {
+  const value = useFormFields(([fields, dispatch]) => fields[path])
+  // ...
+}
+```

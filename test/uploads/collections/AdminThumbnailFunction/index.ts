@@ -11,7 +11,8 @@ export const AdminThumbnailFunction: CollectionConfig = {
   slug: adminThumbnailFunctionSlug,
   upload: {
     staticDir: path.resolve(dirname, 'test/uploads/media'),
-    adminThumbnail: () => 'https://payloadcms.com/images/universal-truth.jpg',
+    adminThumbnail: () =>
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
   },
   fields: [],
 }
