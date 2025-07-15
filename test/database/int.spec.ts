@@ -403,7 +403,6 @@ describe('database', () => {
 
     const res = await payload.findDistinct({
       collection: 'posts',
-      sortOrder: 'asc',
       field: 'title',
     })
 
@@ -422,7 +421,6 @@ describe('database', () => {
 
     const resLimit = await payload.findDistinct({
       collection: 'posts',
-      sortOrder: 'asc',
       field: 'title',
       limit: 3,
     })
@@ -435,7 +433,7 @@ describe('database', () => {
 
     const resDesc = await payload.findDistinct({
       collection: 'posts',
-      sortOrder: 'desc',
+      sort: '-title',
       field: 'title',
     })
 
@@ -471,12 +469,17 @@ describe('database', () => {
       }
     }
 
-    const resultDepth0 = await payload.findDistinct({ collection: 'posts', field: 'category' })
+    const resultDepth0 = await payload.findDistinct({
+      collection: 'posts',
+      sort: 'category.title',
+      field: 'category',
+    })
     expect(resultDepth0.values).toStrictEqual(categoriesIDS)
     const resultDepth1 = await payload.findDistinct({
       depth: 1,
       collection: 'posts',
       field: 'category',
+      sort: 'category.title',
     })
 
     for (let i = 0; i < resultDepth1.values.length; i++) {

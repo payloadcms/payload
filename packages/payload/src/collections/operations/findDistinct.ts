@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDistinctDocs } from '../../database/types.js'
-import type { PayloadRequest, PopulateType, Where } from '../../types/index.js'
+import type { PayloadRequest, PopulateType, Sort, Where } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -28,7 +28,7 @@ export type Arguments = {
   populate?: PopulateType
   req?: PayloadRequest
   showHiddenFields?: boolean
-  sortOrder?: 'asc' | 'desc'
+  sort?: Sort
   where?: Where
 }
 export const findDistinctOperation = async (
@@ -136,7 +136,7 @@ export const findDistinctOperation = async (
       locale: locale!,
       page: args.page,
       req,
-      sortOrder: args.sortOrder,
+      sort: args.sort,
       where: fullWhere,
     })
 

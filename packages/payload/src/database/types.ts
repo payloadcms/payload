@@ -489,7 +489,7 @@ export type FindDistinctArgs = {
   locale?: string
   page?: number
   req?: Partial<PayloadRequest>
-  sortOrder?: 'asc' | 'desc'
+  sort?: Sort
   where?: Where
 }
 
