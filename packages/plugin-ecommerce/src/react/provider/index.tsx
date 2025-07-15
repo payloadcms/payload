@@ -671,6 +671,10 @@ export const useCurrency = () => {
         return value.toString()
       }
 
+      if (value === 0) {
+        return `${currencyToUse.symbol}0.${'0'.repeat(currencyToUse.decimals)}`
+      }
+
       // Convert from base value (e.g., cents) to decimal value (e.g., dollars)
       const decimalValue = value / Math.pow(10, currencyToUse.decimals)
 

@@ -138,7 +138,7 @@ export function CartModal() {
                           </div>
                         </Link>
                         <div className="flex h-16 flex-col justify-between">
-                          {price && (
+                          {typeof price === 'number' && (
                             <Price
                               amount={price}
                               className="flex justify-end space-y-2 text-right text-sm"
@@ -160,7 +160,7 @@ export function CartModal() {
 
               <div className="px-4">
                 <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
-                  {cart?.subtotal && (
+                  {typeof cart?.subtotal === 'number' && (
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
                       <p>Total</p>
                       <Price
