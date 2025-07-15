@@ -74,7 +74,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     updateSelectedOption(selectedCollectionFromProps)
   }, [selectedCollectionFromProps])
 
-  const renderList = useCallback(
+  const refresh = useCallback(
     async ({ slug, query }: { query?: ListQuery; slug: string }) => {
       try {
         const newQuery: ListQuery = { ...(query || {}), where: { ...(query?.where || {}) } }
@@ -129,9 +129,9 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   useEffect(() => {
     if (!ListView) {
-      void renderList({ slug: selectedOption?.value })
+      void refresh({ slug: selectedOption?.value })
     }
-  }, [renderList, ListView, selectedOption.value])
+  }, [refresh, ListView, selectedOption.value])
 
   const onCreateNew = useCallback(
     ({ doc }) => {
@@ -151,18 +151,24 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const onQueryChange = useCallback(
     (query: ListQuery) => {
-      void renderList({ slug: selectedOption?.value, query })
+      void refresh({ slug: selectedOption?.value, query })
     },
-    [renderList, selectedOption.value],
+    [refresh, selectedOption.value],
   )
 
   const setMySelectedOption = useCallback(
     (incomingSelection: Option<string>) => {
       setSelectedOption(incomingSelection)
-      void renderList({ slug: incomingSelection?.value })
+      void refresh({ slug: incomingSelection?.value })
     },
-    [renderList],
+    [refresh],
   )
+
+  const refreshSelf = useCallback(async () => {
+    if (selectedOption?.value) {
+      await refresh({ slug: selectedOption.value })
+    }
+  }, [refresh, selectedOption?.value])
 
   if (isLoading) {
     return <LoadingOverlay />
@@ -178,6 +184,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       onBulkSelect={onBulkSelect}
       onQueryChange={onQueryChange}
       onSelect={onSelect}
+      refresh={refreshSelf}
       selectedOption={selectedOption}
       setSelectedOption={setMySelectedOption}
     >

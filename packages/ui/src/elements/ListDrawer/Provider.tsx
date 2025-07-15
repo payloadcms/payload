@@ -24,6 +24,7 @@ export type ListDrawerContextProps = {
      */
     docID: string
   }) => void
+  readonly refresh: () => Promise<void>
   readonly selectedOption?: Option<string>
   readonly setSelectedOption?: (option: Option<string>) => void
 }
