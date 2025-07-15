@@ -111,8 +111,13 @@ export const Preview = () => {
 
         const fieldKeys =
           Array.isArray(fields) && fields.length > 0
-            ? selectedKeys // strictly only what was selected
-            : [...selectedKeys, ...defaultMetaFields.filter((key) => allKeys.includes(key))]
+            ? selectedKeys // strictly use selected fields only
+            : [
+                ...selectedKeys,
+                ...defaultMetaFields.filter(
+                  (key) => allKeys.includes(key) && !selectedKeys.includes(key),
+                ),
+              ]
 
         // Build columns based on flattened keys
         const newColumns: Column[] = fieldKeys.map((key) => ({

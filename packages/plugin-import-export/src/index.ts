@@ -160,7 +160,25 @@ export const importExportPlugin =
             collection.config.admin.custom?.['plugin-import-export']?.disabledFields
 
           transformed = docs.map((doc) => {
-            return removeDisabledFields(doc, disabledFields)
+            let output: Record<string, unknown> = { ...doc }
+
+            // Remove disabled fields first
+            output = removeDisabledFields(output, disabledFields)
+
+            // Then trim to selected fields only (if fields are provided)
+            if (Array.isArray(fields) && fields.length > 0) {
+              const trimmed: Record<string, unknown> = {}
+
+              for (const key of fields) {
+                if (key in output) {
+                  trimmed[key] = output[key]
+                }
+              }
+
+              output = trimmed
+            }
+
+            return output
           })
         }
 
