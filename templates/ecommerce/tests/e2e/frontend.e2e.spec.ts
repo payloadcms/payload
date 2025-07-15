@@ -194,8 +194,31 @@ test.describe('Frontend', () => {
     await expectOrderIsDisplayed(page)
   })
 
-  // test('Guest can view their order using /find-order', async ({ page }) => {
-  // })
+  test('Guest can view their order using /find-order', async ({ page }) => {
+    await logoutAndExpectSuccess(page)
+    await addToCartAndConfirm(page, {
+      productName: 'Test Product',
+      productSlug: 'test-product',
+    })
+
+    const guestEmail = 'guest@test.com'
+
+    await checkout(page, testPaymentDetails, guestEmail)
+
+    const orderHeader = await page.locator('h1.text-sm.uppercase.font-mono > span').textContent()
+    const orderNumber = orderHeader?.replace(/^Order #/, '').trim()
+
+    await page.goto(`${baseURL}/find-order`)
+    const orderNumberInput = page.locator('input[name="orderID"]')
+    const emailInput = page.locator('input[name="email"]')
+    await orderNumberInput.fill(orderNumber || '')
+    await emailInput.fill(guestEmail)
+
+    const findOrderButton = page.getByRole('button', { name: 'Find my order' })
+    await findOrderButton.click()
+
+    await expect(orderHeader).not.toBeNull()
+  })
 
   test('Admins can update and view prices on products', async ({ page }) => {
     await loginFromUI(page, adminEmail, adminPassword)
@@ -527,7 +550,7 @@ test.describe('Frontend', () => {
     await page.goto(`${baseURL}/shop`)
     await expect(page).toHaveURL(/\/shop/)
 
-    const productCard = page.locator(`a[href="/products/${productSlug}"]`)
+    const productCard = page.locator(`a[href="/products/${productSlug}"]`).first()
     await productCard.waitFor({ state: 'visible' })
     await productCard.click()
 
