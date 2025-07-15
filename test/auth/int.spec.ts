@@ -262,6 +262,42 @@ describe('Auth', () => {
         expect(data.user.custom).toBe('Goodbye, world!')
       })
 
+      it('keeps apiKey encrypted in DB after refresh operation', async () => {
+        const apiKey = '987e6543-e21b-12d3-a456-426614174999'
+        const user = await payload.create({
+          collection: slug,
+          data: { email: 'user@example.com', password: 'Password123', apiKey, enableAPIKey: true },
+        })
+        const { token } = await payload.login({
+          collection: 'users',
+          data: { email: 'user@example.com', password: 'Password123' },
+        })
+        await restClient.POST('/users/refresh-token', {
+          headers: { Authorization: `JWT ${token}` },
+        })
+        const raw = await payload.db.findOne<any>({
+          collection: 'users',
+          req: { locale: 'en' } as any,
+          where: { id: { equals: user.id } },
+        })
+        expect(raw?.apiKey).not.toContain('-') // still ciphertext
+      })
+
+      it('returns a user with decrypted apiKey after refresh', async () => {
+        const { token } = await payload.login({
+          collection: 'users',
+          data: { email: 'user@example.com', password: 'Password123' },
+        })
+
+        const res = await restClient
+          .POST('/users/refresh-token', {
+            headers: { Authorization: `JWT ${token}` },
+          })
+          .then((r) => r.json())
+
+        expect(res.user.apiKey).toMatch(/[0-9a-f-]{36}/) // UUID string
+      })
+
       it('should allow a user to be created', async () => {
         const response = await restClient.POST(`/${slug}`, {
           body: JSON.stringify({
