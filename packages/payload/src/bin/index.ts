@@ -63,6 +63,142 @@ export const bin = async () => {
     return
   }
 
+  // Auto-compile workspace packages if drizzle:studio command before loading config
+  if (script === 'drizzle:studio') {
+    try {
+      const { execSync } = await import('child_process')
+      const fs = await import('fs')
+      const path = await import('path')
+
+      // Check if we have workspace packages that need building
+      const workspacePackages = [
+        '@payloadcms/drizzle',
+        '@payloadcms/db-postgres',
+        '@payloadcms/translations',
+        'payload',
+      ]
+      const packagesToBuild = []
+
+      // Check if we're in a workspace environment
+      const isWorkspace = fs.existsSync(path.join(process.cwd(), 'packages'))
+
+      if (isWorkspace) {
+        for (const pkgName of workspacePackages) {
+          try {
+            // Map package names to their workspace directory paths
+            const pkgDirMap: Record<string, string> = {
+              '@payloadcms/db-postgres': 'packages/db-postgres',
+              '@payloadcms/drizzle': 'packages/drizzle',
+              '@payloadcms/translations': 'packages/translations',
+              payload: 'packages/payload',
+            }
+
+            const pkgPath = pkgDirMap[pkgName]
+            if (!pkgPath) {
+              console.log(`Debug: Unknown package ${pkgName}, skipping`)
+              continue
+            }
+
+            const pkgDir = path.join(process.cwd(), pkgPath)
+            const pkgJsonPath = path.join(pkgDir, 'package.json')
+
+            if (fs.existsSync(pkgJsonPath)) {
+              // Check if dist directory exists and has required files
+              const distDir = path.join(pkgDir, 'dist')
+              const hasCompiledFiles = fs.existsSync(distDir) && fs.readdirSync(distDir).length > 0
+
+              if (!hasCompiledFiles) {
+                if (pkgName === '@payloadcms/drizzle') {
+                  packagesToBuild.push('build:drizzle')
+                }
+                if (pkgName === '@payloadcms/db-postgres') {
+                  packagesToBuild.push('build:db-postgres')
+                }
+                if (pkgName === '@payloadcms/translations') {
+                  packagesToBuild.push('build:translations')
+                }
+                if (pkgName === 'payload') {
+                  packagesToBuild.push('build:payload')
+                }
+              }
+            }
+          } catch (err) {
+            // Silent error handling - package may not exist or be malformed
+          }
+        }
+      }
+
+      if (packagesToBuild.length > 0) {
+        console.log('Building required workspace packages for Drizzle Studio...')
+
+        execSync(`pnpm ${packagesToBuild.join(' && pnpm ')}`, {
+          cwd: process.cwd(),
+          stdio: 'inherit',
+        })
+      }
+
+      // Temporarily modify workspace package exports to use dist/ for drizzle:studio
+      const originalConfigs = new Map<string, string>()
+
+      for (const pkgName of workspacePackages) {
+        const pkgDirMap: Record<string, string> = {
+          '@payloadcms/db-postgres': 'packages/db-postgres',
+          '@payloadcms/drizzle': 'packages/drizzle',
+          '@payloadcms/translations': 'packages/translations',
+          payload: 'packages/payload',
+        }
+
+        const pkgPath = pkgDirMap[pkgName]
+        if (!pkgPath) {continue}
+
+        const pkgDir = path.join(process.cwd(), pkgPath)
+        const pkgJsonPath = path.join(pkgDir, 'package.json')
+
+        if (fs.existsSync(pkgJsonPath)) {
+          const originalConfig = fs.readFileSync(pkgJsonPath, 'utf8')
+          originalConfigs.set(pkgJsonPath, originalConfig)
+
+          const config = JSON.parse(originalConfig)
+
+          // Modify exports to use dist/
+          if (config.exports) {
+            Object.keys(config.exports).forEach((key) => {
+              if (config.exports[key].import) {
+                config.exports[key].import = config.exports[key].import
+                  .replace('/src/', '/dist/')
+                  .replace('.ts', '.js')
+                config.exports[key].types = config.exports[key].types
+                  .replace('/src/', '/dist/')
+                  .replace('.ts', '.d.ts')
+                config.exports[key].default = config.exports[key].default
+                  .replace('/src/', '/dist/')
+                  .replace('.ts', '.js')
+              }
+            })
+          }
+          if (config.main) {
+            config.main = config.main.replace('/src/', '/dist/').replace('.ts', '.js')
+          }
+          if (config.types) {
+            config.types = config.types.replace('/src/', '/dist/').replace('.ts', '.d.ts')
+          }
+
+          fs.writeFileSync(pkgJsonPath, JSON.stringify(config, null, 2))
+        }
+      }
+
+      // Store original configs for restoration
+      process.env.__DRIZZLE_STUDIO_ORIGINAL_CONFIGS = JSON.stringify(
+        Array.from(originalConfigs.entries()),
+      )
+    } catch (error) {
+      console.warn(
+        'Could not build workspace packages automatically. If you encounter import errors, try running the build commands manually.',
+      )
+      console.error(error)
+    }
+  }
+
   const configPath = findConfig()
   const configPromise = await import(pathToFileURL(configPath).toString())
   let config = await configPromise
