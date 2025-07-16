@@ -21,6 +21,25 @@ export const allDatabaseAdapters = {
       strength: 1,
     },
   })`,
+  firestore: `
+  import { mongooseAdapter, compatabilityOptions } from '@payloadcms/db-mongodb'
+
+  export const databaseAdapter = mongooseAdapter({
+    ...compatabilityOptions.firestore,
+    url:
+      process.env.DATABASE_URI ||
+      process.env.MONGODB_MEMORY_SERVER_URI ||
+      'mongodb://127.0.0.1/payloadtests',
+    collation: {
+      strength: 1,
+    },
+    // The following options prevent some tests from failing.
+    // More work needed to get tests succeeding without these options.
+    ensureIndexes: true,
+    transactionOptions: {},
+    disableIndexHints: false,
+    useAlternativeDropDatabase: false,
+  })`,
   postgres: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
 
