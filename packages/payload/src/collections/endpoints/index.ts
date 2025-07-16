@@ -56,11 +56,6 @@ export const defaultCollectionEndpoints: Endpoint[] = [
     //   path: '/distinct',
     // },
     {
-      handler: findDistinctHandler,
-      method: 'get',
-      path: '/distinct',
-    },
-    {
       handler: duplicateHandler,
       method: 'post',
       path: '/:id/duplicate',
