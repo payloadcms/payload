@@ -98,30 +98,26 @@ export async function ensureCompilationIsDone({
 
       await page.goto(adminURL)
 
-      await expect
-        .poll(
-          () => {
-            console.log({
-              noAutoLogin,
-              readyURL,
-            })
-            if (readyURL) {
-              return page.url() === readyURL ? true : false
-            }
-
-            if (noAutoLogin) {
-              const baseAdminURL = adminURL + (adminURL.endsWith('/') ? '' : '/')
-              return (
-                page.url() === `${baseAdminURL}create-first-user` ||
-                page.url() === `${baseAdminURL}login`
-              )
-            } else {
-              return page.url() === adminURL
-            }
-          },
-          { timeout: POLL_TOPASS_TIMEOUT },
-        )
-        .toBe(true)
+      if (readyURL) {
+        await page.waitForURL(readyURL)
+      } else {
+        await expect
+          .poll(
+            () => {
+              if (noAutoLogin) {
+                const baseAdminURL = adminURL + (adminURL.endsWith('/') ? '' : '/')
+                return (
+                  page.url() === `${baseAdminURL}create-first-user` ||
+                  page.url() === `${baseAdminURL}login`
+                )
+              } else {
+                return page.url() === adminURL
+              }
+            },
+            { timeout: POLL_TOPASS_TIMEOUT },
+          )
+          .toBe(true)
+      }
 
       console.log('Successfully compiled')
       return
