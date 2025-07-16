@@ -2,11 +2,14 @@ import type { Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
+import { devUser } from 'credentials.js'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
-import { addGroupBy, openGroupBy } from 'helpers/e2e/groupBy.js'
+import { addGroupBy, closeGroupBy, openGroupBy } from 'helpers/e2e/groupBy.js'
+import { deletePreferences } from 'helpers/e2e/preferences.js'
 import { sortColumn } from 'helpers/e2e/sortColumn.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
+import { openNav } from 'helpers/e2e/toggleNav.js'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
@@ -17,6 +20,7 @@ import { ensureCompilationIsDone, exactText, initPageConsoleErrorCatch } from '.
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { postsSlug } from './collections/Posts/index.js'
 
 const { beforeEach } = test
 
@@ -28,6 +32,7 @@ test.describe('Group By', () => {
   let url: AdminUrlUtil
   let serverURL: string
   let payload: PayloadTestSDK<Config>
+  let user: any
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -38,6 +43,14 @@ test.describe('Group By', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
+
+    user = await payload.login({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
   })
 
   beforeEach(async () => {
@@ -63,15 +76,20 @@ test.describe('Group By', () => {
     await expect(page.locator('#toggle-group-by')).toBeHidden()
   })
 
-  test('should open group-by drawer', async () => {
+  test('should open and close group-by dropdown', async () => {
     await page.goto(url.list)
-    await openGroupBy(page, {})
+    await openGroupBy(page)
     await expect(page.locator('#list-controls-group-by.rah-static--height-auto')).toBeVisible()
+    await closeGroupBy(page)
+    await expect(page.locator('#list-controls-group-by.rah-static--height-auto')).toBeHidden()
   })
 
-  test('should display field options in group-by drawer', async () => {
+  test('should display field options in group-by dropdown', async () => {
     await page.goto(url.list)
-    const { groupByContainer } = await openGroupBy(page, {})
+    const { groupByContainer } = await openGroupBy(page)
+
+    // TODO: expect no initial selection and for the sort control to be disabled
+
     const field = groupByContainer.locator('#group-by--field-select')
     await field.click()
 
@@ -82,32 +100,7 @@ test.describe('Group By', () => {
     ).toBeVisible()
   })
 
-  test('should reset a field selection', async () => {
-    await page.goto(url.list)
-    const { groupByContainer } = await openGroupBy(page, {})
-
-    const field = groupByContainer.locator('#group-by--field-select')
-    await expect(field.locator('.react-select--single-value')).toHaveText('Select a value')
-
-    await expect(groupByContainer.locator('#group-by--reset')).toBeHidden()
-
-    await field.click()
-
-    await field
-      .locator('.rs__option', {
-        hasText: exactText('Title'),
-      })
-      ?.click()
-
-    await expect(groupByContainer.locator('#group-by--reset')).toBeVisible()
-    await groupByContainer.locator('#group-by--reset').click()
-    await expect(field.locator('.react-select--single-value')).toHaveText('Select a value')
-    await expect(groupByContainer.locator('#group-by--reset')).toBeHidden()
-
-    await expect(page).not.toHaveURL(/&groupBy=/)
-  })
-
-  test('should group by field', async () => {
+  test('should properly group by field', async () => {
     await page.goto(url.list)
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
@@ -149,6 +142,73 @@ test.describe('Group By', () => {
     await expect(table2CategoryCells.first()).toHaveText(/Category 2/)
   })
 
+  test('should load group-by from user preferences', async () => {
+    await deletePreferences({
+      payload,
+      key: `${postsSlug}.list`,
+      user,
+    })
+
+    await page.goto(url.list)
+    await expect(page).not.toHaveURL(/groupBy=/)
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+    await expect(page).toHaveURL(/groupBy=category/)
+    await expect(page.locator('.table-wrap')).toHaveCount(2)
+
+    await page.goto(url.admin)
+
+    // click on the "Posts" link in the sidebar to invoke a soft navigation
+    await openNav(page)
+    await page.locator(`.nav a[href="/admin/collections/${postsSlug}"]`).click()
+
+    await expect(page).toHaveURL(/groupBy=category/)
+    await expect(page.locator('.table-wrap')).toHaveCount(2)
+  })
+
+  test('should reset group-by using the global "clear" button', async () => {
+    await page.goto(url.list)
+    const { groupByContainer } = await openGroupBy(page)
+
+    const field = groupByContainer.locator('#group-by--field-select')
+    await expect(field.locator('.react-select--single-value')).toHaveText('Select a value')
+
+    await expect(groupByContainer.locator('#group-by--reset')).toBeHidden()
+
+    await field.click()
+
+    await field
+      .locator('.rs__option', {
+        hasText: exactText('Title'),
+      })
+      ?.click()
+
+    await expect(groupByContainer.locator('#group-by--reset')).toBeVisible()
+    await groupByContainer.locator('#group-by--reset').click()
+    await expect(field.locator('.react-select--single-value')).toHaveText('Select a value')
+    await expect(groupByContainer.locator('#group-by--reset')).toBeHidden()
+
+    await expect(page).not.toHaveURL(/&groupBy=/)
+
+    await expect(groupByContainer.locator('#field-direction input')).toBeDisabled()
+  })
+
+  test('should reset group-by using the select field\'s "x" button', async () => {
+    await page.goto(url.list)
+
+    const { field, groupByContainer } = await addGroupBy(page, {
+      fieldLabel: 'Title',
+      fieldPath: 'title',
+    })
+
+    // click the "x" button on the select field itself
+    await field.locator('.clear-indicator').click()
+
+    await expect(field.locator('.react-select--single-value')).toHaveText('Select a value')
+
+    await expect(page).not.toHaveURL(/&groupBy=/)
+    await expect(groupByContainer.locator('#field-direction input')).toBeDisabled()
+  })
+
   test('should sort by group', async () => {
     await page.goto(url.list)
 
@@ -181,7 +241,6 @@ test.describe('Group By', () => {
     await expect(table1ColumnHeadings.nth(1)).toHaveText('Title')
     await expect(table1ColumnHeadings.nth(2)).toHaveText('Category')
 
-    // scroll second table into view
     const table2ColumnHeadings = page.locator('.table-wrap').nth(1).locator('thead tr th')
     await expect(table2ColumnHeadings.nth(1)).toHaveText('Title')
     await expect(table2ColumnHeadings.nth(2)).toHaveText('Category')
@@ -286,6 +345,7 @@ test.describe('Group By', () => {
     await goToNextPage(page, {
       scope: table1,
       // TODO: this actually does affect the URL, but not in the same way as traditional pagination
+      // e.g. it manipulates the `?queryByGroup=` param instead of `?page=2`
       affectsURL: false,
     })
   })

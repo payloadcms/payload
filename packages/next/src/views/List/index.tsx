@@ -99,7 +99,7 @@ export const renderListView = async (
     req,
     value: {
       columns,
-      groupBy: query?.groupBy || '',
+      groupBy: query?.groupBy,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       preset: query?.preset || null,
       sort: (query?.sort as string) || '',

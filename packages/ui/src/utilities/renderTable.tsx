@@ -15,7 +15,7 @@ import type {
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumnState/index.js'
 

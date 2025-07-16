@@ -3,34 +3,59 @@ import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import { exactText } from 'helpers.js'
 
+type ToggleOptions = {
+  groupByContainerSelector: string
+  targetState: 'closed' | 'open'
+  togglerSelector: string
+}
+
 /**
- * Opens the group-by drawer in the list view. If it's already open, does nothing.
- * Return the filter container locator for further interactions.
+ * Toggles the group-by drawer in the list view based on the targetState option.
  */
-export const openGroupBy = async (
+export const toggleGroupBy = async (
   page: Page,
   {
+    targetState = 'open',
     togglerSelector = '#toggle-group-by',
     groupByContainerSelector = '#list-controls-group-by',
-  }: {
-    groupByContainerSelector?: string
-    togglerSelector?: string
-  } = {},
-): Promise<{
-  groupByContainer: Locator
-}> => {
+  }: ToggleOptions,
+) => {
   const groupByContainer = page.locator(groupByContainerSelector).first()
 
   const isAlreadyOpen = await groupByContainer.isVisible()
 
-  if (!isAlreadyOpen) {
+  if (!isAlreadyOpen && targetState === 'open') {
     await page.locator(togglerSelector).first().click()
+    await expect(page.locator(`${groupByContainerSelector}.rah-static--height-auto`)).toBeVisible()
   }
 
-  await expect(page.locator(`${groupByContainerSelector}.rah-static--height-auto`)).toBeVisible()
+  if (isAlreadyOpen && targetState === 'closed') {
+    await page.locator(togglerSelector).first().click()
+    await expect(page.locator(`${groupByContainerSelector}.rah-static--height-auto`)).toBeHidden()
+  }
 
   return { groupByContainer }
 }
+
+/**
+ * Closes the group-by drawer in the list view. If it's already closed, does nothing.
+ */
+export const closeGroupBy = async (
+  page: Page,
+  options?: Omit<ToggleOptions, 'targetState'>,
+): Promise<{
+  groupByContainer: Locator
+}> => toggleGroupBy(page, { ...(options || ({} as ToggleOptions)), targetState: 'closed' })
+
+/**
+ * Opens the group-by drawer in the list view. If it's already open, does nothing.
+ */
+export const openGroupBy = async (
+  page: Page,
+  options?: Omit<ToggleOptions, 'targetState'>,
+): Promise<{
+  groupByContainer: Locator
+}> => toggleGroupBy(page, { ...(options || ({} as ToggleOptions)), targetState: 'open' })
 
 export const addGroupBy = async (
   page: Page,

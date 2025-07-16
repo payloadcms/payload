@@ -145,15 +145,22 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     let shouldUpdateQueryString = false
     const newQuery = { ...(currentQuery || {}) }
 
-    // Allow the URL to override the default limit
+    // Allow the URL to override the default `limit`
+    // i.e. only apply the `defaultLimit` if there is no limit in the URL
     if (isNumber(defaultLimit) && !('limit' in currentQuery)) {
       newQuery.limit = String(defaultLimit)
       shouldUpdateQueryString = true
     }
 
-    // Allow the URL to override the default sort
+    // Allow the URL to override the default `sort`
+    // i.e. only apply the `defaultSort` if there is no sort in the URL
     if (defaultSort && !('sort' in currentQuery)) {
       newQuery.sort = defaultSort
+      shouldUpdateQueryString = true
+    }
+
+    if (listPreferences?.groupBy && !('groupBy' in currentQuery)) {
+      newQuery.groupBy = listPreferences.groupBy
       shouldUpdateQueryString = true
     }
 
