@@ -90,7 +90,6 @@ const config = buildConfig({
       // highlight-start
       url: ({ data, collectionConfig, locale }) =>
         `${data.tenant.url}${
-          // Multi-tenant top-level domain
           collectionConfig.slug === 'posts'
             ? `/posts/${data.slug}`
             : `${data.slug !== 'home' ? `/${data.slug}` : ''}`
