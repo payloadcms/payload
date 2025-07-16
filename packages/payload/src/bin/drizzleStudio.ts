@@ -5,33 +5,6 @@ import path from 'path'
 import type { SanitizedConfig } from '../config/types.js'
 
 export const drizzleStudio = async (config: SanitizedConfig) => {
-  // Restore workspace package configs after the command completes
-  const restoreWorkspaceConfigs = () => {
-    const originalConfigsData = process.env.__DRIZZLE_STUDIO_ORIGINAL_CONFIGS
-    if (originalConfigsData) {
-      try {
-        const originalConfigs = new Map<string, string>(JSON.parse(originalConfigsData))
-        for (const [pkgJsonPath, originalConfig] of originalConfigs) {
-          fs.writeFileSync(pkgJsonPath, originalConfig)
-        }
-        delete process.env.__DRIZZLE_STUDIO_ORIGINAL_CONFIGS
-      } catch (err) {
-        console.warn('Could not restore workspace package configs:', err)
-      }
-    }
-  }
-
-  // Set up cleanup handlers
-  process.on('exit', restoreWorkspaceConfigs)
-  process.on('SIGINT', () => {
-    restoreWorkspaceConfigs()
-    process.exit(0)
-  })
-  process.on('SIGTERM', () => {
-    restoreWorkspaceConfigs()
-    process.exit(0)
-  })
-
   const { default: payload } = await import('../index.js')
 
   // Initialize payload to get database adapter
