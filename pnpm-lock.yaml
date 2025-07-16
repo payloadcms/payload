@@ -30,6 +30,12 @@ importers:
       '@payloadcms/db-postgres':
         specifier: workspace:*
         version: link:packages/db-postgres
+      '@payloadcms/db-sqlite':
+        specifier: workspace:*
+        version: link:packages/db-sqlite
+      '@payloadcms/drizzle':
+        specifier: workspace:*
+        version: link:packages/drizzle
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:packages/eslint-config
@@ -39,6 +45,9 @@ importers:
       '@payloadcms/live-preview-react':
         specifier: workspace:*
         version: link:packages/live-preview-react
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:packages/translations
       '@playwright/test':
         specifier: 1.50.0
         version: 1.50.0
@@ -141,6 +150,9 @@ importers:
       p-limit:
         specifier: ^5.0.0
         version: 5.0.0
+      payload:
+        specifier: workspace:*
+        version: link:packages/payload
       pg:
         specifier: 8.16.3
         version: 8.16.3
