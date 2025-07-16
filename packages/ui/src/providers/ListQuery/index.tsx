@@ -183,8 +183,9 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       shouldUpdateQueryString = true
     }
 
-    // Iterate through `newQuery` and remove all empty strings
-    // This is how we know to clear them from preferences on the server, but are no longer needed
+    // Sanitize empty strings from the query
+    // This is how we determine whether to clear user preferences for certain params, e.g. `?preset=`
+    // Once cleared, they are no longer needed in the URL
     Object.entries(newQuery).forEach(([key, value]) => {
       if (value === '') {
         newQuery[key] = undefined
