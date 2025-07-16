@@ -83,13 +83,24 @@ export const reduceFields = ({
             (tabFields, tab) => {
               if ('fields' in tab) {
                 const isNamedTab = 'name' in tab && tab.name
+
+                const newPath = isNamedTab ? `${path}${path ? '.' : ''}${tab.name}` : path
+
                 return [
                   ...tabFields,
                   ...reduceFields({
                     disabledFields,
                     fields: tab.fields,
-                    labelPrefix,
-                    path: isNamedTab ? createNestedClientFieldPath(path, field) : path,
+                    labelPrefix: isNamedTab
+                      ? combineLabel({
+                          field: {
+                            name: tab.name,
+                            label: tab.label ?? tab.name,
+                          } as any,
+                          prefix: labelPrefix,
+                        })
+                      : labelPrefix,
+                    path: newPath,
                   }),
                 ]
               }

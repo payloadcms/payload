@@ -5,6 +5,7 @@ import { type FindDistinct, getFieldByPath } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
+import { buildSortParam } from './queries/buildSortParam.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 
@@ -17,6 +18,18 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
   const session = await getSession(this, args.req)
 
   const { where = {} } = args
+
+  const sortAggregation: PipelineStage[] = []
+
+  const sort = buildSortParam({
+    adapter: this,
+    config: this.payload.config,
+    fields: collectionConfig.flattenedFields,
+    locale: args.locale,
+    sort: args.sort ?? args.field,
+    sortAggregation,
+    timestamps: true,
+  })
 
   const query = await buildQuery({
     adapter: this,
@@ -37,30 +50,38 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
 
   const page = args.page || 1
 
-  const basePipeline: PipelineStage[] = [
+  const sortProperty = Object.keys(sort)[0]! // assert because buildSortParam always returns at least 1 key.
+  const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
+
+  const pipeline: PipelineStage[] = [
     {
       $match: query,
     },
+    ...(sortAggregation.length > 0 ? sortAggregation : []),
+
     {
       $group: {
-        _id: `$${fieldPath}`,
+        _id: {
+          _field: `$${fieldPath}`,
+          ...(sortProperty === fieldPath
+            ? {}
+            : {
+                _sort: `$${sortProperty}`,
+              }),
+        },
       },
     },
-  ]
-
-  const pipeline: PipelineStage[] = [
-    ...basePipeline,
     {
       $sort: {
-        _id: args.sortOrder === 'desc' ? -1 : 1,
+        [sortProperty === fieldPath ? '_id._field' : '_id._sort']: sortDirection,
       },
     },
   ]
 
-  const getValues = () => {
+  const getValues = async () => {
     return Model.aggregate(pipeline, { session }).then((res) =>
       res.map((each) => ({
-        [args.field]: JSON.parse(JSON.stringify(each._id)),
+        [args.field]: JSON.parse(JSON.stringify(each._id._field)),
       })),
     )
   }
@@ -70,9 +91,22 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
       $skip: (page - 1) * args.limit,
     })
     pipeline.push({ $limit: args.limit })
-    const totalDocs = await Model.aggregate([...basePipeline, { $count: 'count' }], {
-      session,
-    }).then((res) => res[0]?.count ?? 0)
+    const totalDocs = await Model.aggregate(
+      [
+        {
+          $match: query,
+        },
+        {
+          $group: {
+            _id: `$${fieldPath}`,
+          },
+        },
+        { $count: 'count' },
+      ],
+      {
+        session,
+      },
+    ).then((res) => res[0]?.count ?? 0)
     const totalPages = Math.ceil(totalDocs / args.limit)
     const hasPrevPage = page > 1
     const hasNextPage = totalPages > page

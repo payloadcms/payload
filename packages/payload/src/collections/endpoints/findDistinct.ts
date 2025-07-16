@@ -11,11 +11,12 @@ import { findDistinctOperation } from '../operations/findDistinct.js'
 
 export const findDistinctHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { depth, field, limit, page, sortOrder, where } = req.query as {
+  const { depth, field, limit, page, sort, where } = req.query as {
     depth?: string
     field?: string
     limit?: string
     page?: string
+    sort?: string
     sortOrder?: string
     where?: Where
   }
@@ -31,7 +32,7 @@ export const findDistinctHandler: PayloadHandler = async (req) => {
     limit: isNumber(limit) ? Number(limit) : undefined,
     page: isNumber(page) ? Number(page) : undefined,
     req,
-    sortOrder: sortOrder === 'asc' || sortOrder === 'desc' ? sortOrder : undefined,
+    sort: typeof sort === 'string' ? sort.split(',') : undefined,
     where,
   })
 

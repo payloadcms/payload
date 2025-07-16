@@ -7,6 +7,7 @@ import type {
   PayloadRequest,
   PopulateType,
   RequestContext,
+  Sort,
   TypedLocale,
   Where,
 } from '../../../index.js'
@@ -72,10 +73,16 @@ export type Options<
    */
   req?: Partial<PayloadRequest>
   /**
-   * Sorting order
-   * @default 'desc'
+   * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
+   * @default false
    */
-  sortOrder?: 'asc' | 'desc'
+  showHiddenFields?: boolean
+  /**
+   * Sort the documents, can be a string or an array of strings
+   * @example '-createdAt' // Sort DESC by createdAt
+   * @example ['group', '-createdAt'] // sort by 2 fields, ASC group and DESC createdAt
+   */
+  sort?: Sort
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
@@ -102,7 +109,8 @@ export async function findDistinct<
     overrideAccess = true,
     page,
     populate,
-    sortOrder,
+    showHiddenFields,
+    sort,
     where,
   } = options
   const collection = payload.collections[collectionSlug]
@@ -123,7 +131,8 @@ export async function findDistinct<
     page,
     populate,
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
-    sortOrder,
+    showHiddenFields,
+    sort,
     where,
   }) as Promise<PaginatedDistinctDocs<Record<TField, DataFromCollectionSlug<TSlug>[TField]>>>
 }

@@ -49,6 +49,12 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       method: 'get',
       path: '/versions',
     },
+    // Might be uncommented in the future
+    // {
+    //   handler: findDistinctHandler,
+    //   method: 'get',
+    //   path: '/distinct',
+    // },
     {
       handler: findDistinctHandler,
       method: 'get',

@@ -2,7 +2,11 @@ import type { FindDistinct, SanitizedCollectionConfig } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
+<<<<<<< HEAD
 import type { DrizzleAdapter } from './types.js'
+=======
+import type { DrizzleAdapter, GenericColumn } from './types.js'
+>>>>>>> main
 
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
@@ -11,7 +15,10 @@ import { DistinctSymbol } from './utilities/rawConstraint.js'
 
 export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, args) {
   const db = await getTransaction(this, args.req)
+<<<<<<< HEAD
   const sort = args.sortOrder === 'desc' ? `-${args.field}` : args.field
+=======
+>>>>>>> main
   const collectionConfig: SanitizedCollectionConfig =
     this.payload.collections[args.collection].config
   const page = args.page || 1
@@ -22,7 +29,11 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     adapter: this,
     fields: collectionConfig.flattenedFields,
     locale: args.locale,
+<<<<<<< HEAD
     sort,
+=======
+    sort: args.sort ?? args.field,
+>>>>>>> main
     tableName,
     where: {
       and: [
@@ -58,7 +69,12 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     },
     selectFields: {
       _selected: selectFields['_selected'],
+<<<<<<< HEAD
     },
+=======
+      ...(orderBy[0].column === selectFields['_selected'] ? {} : { _order: orderBy[0].column }),
+    } as Record<string, GenericColumn>,
+>>>>>>> main
     tableName,
     where,
   })
