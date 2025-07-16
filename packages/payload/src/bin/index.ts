@@ -172,25 +172,3 @@ export const bin = async () => {
 
   process.exit(1)
 }
-
-/**
- * Auto-execute CLI handler when this file is run directly
- *
- * This block is essential for CLI functionality. When users run:
- * - `npx payload drizzle:studio` (after build)
- * - `npx tsx packages/payload/src/bin/index.ts drizzle:studio` (development)
- *
- * Without this auto-execution:
- * - The file would load and define the bin() function
- * - But never actually execute it, resulting in silent failure
- *
- * The check `process.argv[1].includes('index.ts')` detects when this file
- * is being executed directly (not imported as a module) and automatically
- * calls bin() to process the command-line arguments.
- */
-if (process.argv[1] && process.argv[1].includes('index.ts')) {
-  bin().catch((error) => {
-    console.error('Error executing command:', error)
-    process.exit(1)
-  })
-}
