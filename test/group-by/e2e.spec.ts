@@ -100,6 +100,23 @@ test.describe('Group By', () => {
     ).toBeVisible()
   })
 
+  test('should omit unsupported fields from appearing as options in the group-by dropdown', async () => {
+    await page.goto(url.list)
+
+    await openGroupBy(page)
+
+    // certain fields are not allowed to be grouped by, for example rich text and the ID field itself
+    const forbiddenOptions = ['ID', 'Content']
+
+    const field = page.locator('#group-by--field-select')
+    await field.click()
+
+    for (const fieldOption of forbiddenOptions) {
+      const optionEl = page.locator('.rs__option', { hasText: exactText(fieldOption) })
+      await expect(optionEl).toHaveCount(0)
+    }
+  })
+
   test('should properly group by field', async () => {
     await page.goto(url.list)
 
@@ -209,7 +226,7 @@ test.describe('Group By', () => {
     await expect(groupByContainer.locator('#field-direction input')).toBeDisabled()
   })
 
-  test('should sort by group', async () => {
+  test('should sort the group-by field globally', async () => {
     await page.goto(url.list)
 
     const { groupByContainer } = await addGroupBy(page, {
@@ -227,6 +244,55 @@ test.describe('Group By', () => {
 
     await expect(page.locator('.table__heading').first()).toHaveText(/Category 2/)
     await expect(page.locator('.table__heading').nth(1)).toHaveText(/Category 1/)
+  })
+
+  test('should sort by columns within each table (will affect all tables)', async () => {
+    await page.goto(url.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Category',
+      fieldPath: 'category',
+    })
+
+    const table1 = page.locator('.table-wrap').first()
+
+    await sortColumn(page, {
+      scope: table1,
+      fieldLabel: 'Title',
+      fieldPath: 'title',
+      targetState: 'asc',
+    })
+
+    const table1AscOrder = ['Find me', 'Post 1', 'Post 10', 'Post 11']
+    const table2AscOrder = ['Find me', 'Post 16', 'Post 17', 'Post 18']
+
+    const table1Titles = table1.locator('tbody tr td.cell-title')
+    const table2Titles = page.locator('.table-wrap').nth(1).locator('tbody tr td.cell-title')
+
+    await expect(table1Titles).toHaveCount(10)
+    await expect(table2Titles).toHaveCount(10)
+
+    // Note: it would be nice to put this in a loop, but this was flaky
+    await expect(table1Titles.nth(0)).toHaveText(table1AscOrder[0] || '')
+    await expect(table1Titles.nth(1)).toHaveText(table1AscOrder[1] || '')
+    await expect(table2Titles.nth(0)).toHaveText(table2AscOrder[0] || '')
+    await expect(table2Titles.nth(1)).toHaveText(table2AscOrder[1] || '')
+
+    await sortColumn(page, {
+      scope: table1,
+      fieldLabel: 'Title',
+      fieldPath: 'title',
+      targetState: 'desc',
+    })
+
+    const table1DescOrder = ['Post 9', 'Post 8', 'Post 7', 'Post 6']
+    const table2DescOrder = ['Post 30', 'Post 29', 'Post 28', 'Post 27']
+
+    // Note: it would be nice to put this in a loop, but this was flaky
+    await expect(table1Titles.nth(0)).toHaveText(table1DescOrder[0] || '')
+    await expect(table1Titles.nth(1)).toHaveText(table1DescOrder[1] || '')
+    await expect(table2Titles.nth(0)).toHaveText(table2DescOrder[0] || '')
+    await expect(table2Titles.nth(1)).toHaveText(table2DescOrder[1] || '')
   })
 
   test('should apply columns to all tables', async () => {
@@ -282,53 +348,12 @@ test.describe('Group By', () => {
     await expect(table2Rows.first().locator('td.cell-title')).toHaveText('Find me')
   })
 
-  test('should sort tables (will affect all groups)', async () => {
+  test('should paginate globally (all tables)', async () => {
     await page.goto(url.list)
 
-    await addGroupBy(page, {
-      fieldLabel: 'Category',
-      fieldPath: 'category',
-    })
+    await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
 
-    const table1 = page.locator('.table-wrap').first()
-
-    await sortColumn(page, {
-      scope: table1,
-      fieldLabel: 'Title',
-      fieldPath: 'title',
-      targetState: 'asc',
-    })
-
-    const table1AscOrder = ['Find me', 'Post 1', 'Post 10', 'Post 11']
-    const table2AscOrder = ['Find me', 'Post 16', 'Post 17', 'Post 18']
-
-    const table1Titles = table1.locator('tbody tr td.cell-title')
-    const table2Titles = page.locator('.table-wrap').nth(1).locator('tbody tr td.cell-title')
-
-    await expect(table1Titles).toHaveCount(10)
-    await expect(table2Titles).toHaveCount(10)
-
-    // Note: it would be nice to put this in a loop, but this was flaky
-    await expect(table1Titles.nth(0)).toHaveText(table1AscOrder[0] || '')
-    await expect(table1Titles.nth(1)).toHaveText(table1AscOrder[1] || '')
-    await expect(table2Titles.nth(0)).toHaveText(table2AscOrder[0] || '')
-    await expect(table2Titles.nth(1)).toHaveText(table2AscOrder[1] || '')
-
-    await sortColumn(page, {
-      scope: table1,
-      fieldLabel: 'Title',
-      fieldPath: 'title',
-      targetState: 'desc',
-    })
-
-    const table1DescOrder = ['Post 9', 'Post 8', 'Post 7', 'Post 6']
-    const table2DescOrder = ['Post 30', 'Post 29', 'Post 28', 'Post 27']
-
-    // Note: it would be nice to put this in a loop, but this was flaky
-    await expect(table1Titles.nth(0)).toHaveText(table1DescOrder[0] || '')
-    await expect(table1Titles.nth(1)).toHaveText(table1DescOrder[1] || '')
-    await expect(table2Titles.nth(0)).toHaveText(table2DescOrder[0] || '')
-    await expect(table2Titles.nth(1)).toHaveText(table2DescOrder[1] || '')
+    await expect(page.locator('.sticky-toolbar')).toBeVisible()
   })
 
   test('should paginate per table', async () => {
@@ -350,12 +375,21 @@ test.describe('Group By', () => {
     })
   })
 
-  test('should paginate globally (all tables)', async () => {
+  test('should render date fields in proper format when displayed as table headers', async () => {
     await page.goto(url.list)
+    await addGroupBy(page, { fieldLabel: 'Updated At', fieldPath: 'updatedAt' })
 
-    await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
+    // the value of the updated at column in the table should match exactly the value in the table cell
+    const table1 = page.locator('.table-wrap').first()
+    const firstTableHeading = table1.locator('.table__heading')
+    const firstRowUpdatedAtCell = table1.locator('tbody tr td.cell-updatedAt').first()
 
-    await expect(page.locator('.sticky-toolbar')).toBeVisible()
+    const headingText = (await firstTableHeading.textContent())?.trim()
+    const cellText = (await firstRowUpdatedAtCell.textContent())?.trim()
+
+    expect(headingText).toBeTruthy()
+    expect(cellText).toBeTruthy()
+    expect(headingText).toEqual(cellText)
   })
 
   test.skip('should group by within a document drawer', async () => {

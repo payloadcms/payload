@@ -9,6 +9,7 @@ import type {
 } from 'payload'
 
 import { renderTable } from '@payloadcms/ui/rsc'
+import { formatDate } from '@payloadcms/ui/shared'
 import { flattenAllFields } from 'payload'
 
 export const getDataAndRenderTables = async ({
@@ -58,15 +59,15 @@ export const getDataAndRenderTables = async ({
     const groupByFieldName = query.groupBy.replace(/^-/, '')
 
     const groupByField = flattenedFields.find((f) => f.name === groupByFieldName)
-    const isRelationship = groupByField?.type === 'relationship'
 
-    const relationshipConfig = isRelationship
-      ? clientConfig.collections.find((c) => c.slug === groupByField.relationTo)
-      : undefined
+    const relationshipConfig =
+      groupByField?.type === 'relationship'
+        ? clientConfig.collections.find((c) => c.slug === groupByField.relationTo)
+        : undefined
 
     let populate
 
-    if (isRelationship && groupByField.relationTo) {
+    if (groupByField?.type === 'relationship' && groupByField.relationTo) {
       const relationTo =
         typeof groupByField.relationTo === 'string'
           ? [groupByField.relationTo]
@@ -107,7 +108,7 @@ export const getDataAndRenderTables = async ({
           const potentiallyPopulatedRelationship = distinctValue[groupByFieldName]
 
           const valueOrRelationshipID =
-            isRelationship &&
+            groupByField?.type === 'relationship' &&
             potentiallyPopulatedRelationship &&
             typeof potentiallyPopulatedRelationship === 'object' &&
             'id' in potentiallyPopulatedRelationship
@@ -141,6 +142,25 @@ export const getDataAndRenderTables = async ({
             },
           })
 
+          let heading = valueOrRelationshipID || 'No value'
+
+          if (
+            groupByField?.type === 'relationship' &&
+            typeof potentiallyPopulatedRelationship === 'object'
+          ) {
+            heading =
+              potentiallyPopulatedRelationship[relationshipConfig.admin.useAsTitle || 'id'] ||
+              valueOrRelationshipID
+          }
+
+          if (groupByField.type === 'date') {
+            heading = formatDate({
+              date: String(heading),
+              i18n: req.i18n,
+              pattern: clientConfig.admin.dateFormat,
+            })
+          }
+
           const { columnState: newColumnState, Table: NewTable } = renderTable({
             clientCollectionConfig,
             collectionConfig,
@@ -151,11 +171,7 @@ export const getDataAndRenderTables = async ({
             drawerSlug,
             enableRowSelections,
             groupByValue: valueOrRelationshipID,
-            heading:
-              isRelationship && typeof potentiallyPopulatedRelationship === 'object'
-                ? potentiallyPopulatedRelationship[relationshipConfig.admin.useAsTitle || 'id'] ||
-                  valueOrRelationshipID
-                : potentiallyPopulatedRelationship || 'Untitled',
+            heading,
             i18n: req.i18n,
             key: `table-${valueOrRelationshipID}`,
             orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,

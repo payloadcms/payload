@@ -11,6 +11,7 @@ export const PostsCollection: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     groupBy: true,
+    defaultColumns: ['title', 'category', 'createdAt', 'updatedAt'],
   },
   fields: [
     {

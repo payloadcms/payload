@@ -1,5 +1,5 @@
 'use client'
-import type { ClientField, SanitizedCollectionConfig } from 'payload'
+import type { ClientField, Field, SanitizedCollectionConfig } from 'payload'
 
 import './index.scss'
 
@@ -17,6 +17,27 @@ export type Props = {
 }
 
 const baseClass = 'group-by-builder'
+
+/**
+ * Note: Some fields are already omitted from the list of fields:
+ * - fields with nested field, e.g. `tabs`, `groups`, etc.
+ * - fields that don't affect data, i.e. `row`, `collapsible`, `ui`, etc.
+ * So we don't technically need to omit them here, but do anyway.
+ * But some remaining fields still need an additional check, e.g. `richText`, etc.
+ */
+const supportedFieldTypes: Field['type'][] = [
+  'text',
+  'textarea',
+  'number',
+  'select',
+  'relationship',
+  'date',
+  'checkbox',
+  'radio',
+  'email',
+  'number',
+  'upload',
+]
 
 export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
   const { i18n, t } = useTranslation()
@@ -71,7 +92,10 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
             })
           }}
           options={reducedFields.filter(
-            (field) => !field.field.admin.disableListFilter && field.value !== 'id',
+            (field) =>
+              !field.field.admin.disableListFilter &&
+              field.value !== 'id' &&
+              supportedFieldTypes.includes(field.field.type),
           )}
           value={{
             label: groupByField?.label || t('general:selectValue'),
