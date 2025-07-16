@@ -108,15 +108,31 @@ export const createExport = async (args: CreateExportArgs) => {
     fields: collectionConfig.flattenedFields,
   })
 
-  const disabledFieldsDot =
+  const disabledFields =
     collectionConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
-  const disabledFields = disabledFieldsDot.map((f: string) => f.replace(/\./g, '_'))
+
+  const disabledRegexes: RegExp[] = disabledFields.map((field: string) => {
+    const parts = field.split('.')
+
+    const patternParts = parts.map((part) => {
+      return `${part}(?:_\\d+)?(?:_[^_]+)?`
+    })
+
+    const pattern = `^${patternParts.join('_')}(?:_.*)?$`
+    return new RegExp(pattern)
+  })
 
   const filterDisabled = (row: Record<string, unknown>): Record<string, unknown> => {
-    for (const key of disabledFields) {
-      delete row[key]
+    const filtered: Record<string, unknown> = {}
+
+    for (const [key, value] of Object.entries(row)) {
+      const isDisabled = disabledRegexes.some((regex) => regex.test(key))
+      if (!isDisabled) {
+        filtered[key] = value
+      }
     }
-    return row
+
+    return filtered
   }
 
   if (download) {
