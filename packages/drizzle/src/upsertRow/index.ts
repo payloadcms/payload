@@ -42,7 +42,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   where,
 }: Args): Promise<T> => {
   let insertedRow: Record<string, unknown> = { id }
-  if (id && !shouldUseOptimizedUpsertRow({ data, fields })) {
+  if (id && shouldUseOptimizedUpsertRow({ data, fields })) {
     const { row } = transformForWrite({
       adapter,
       data,

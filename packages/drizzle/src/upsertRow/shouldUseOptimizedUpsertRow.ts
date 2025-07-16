@@ -32,21 +32,21 @@ export const shouldUseOptimizedUpsertRow = ({
         Array.isArray(field.relationTo)) ||
       field.localized
     ) {
-      return true
+      return false
     }
 
     if (
       (field.type === 'group' || field.type === 'tab') &&
       value &&
       typeof value === 'object' &&
-      shouldUseOptimizedUpsertRow({
+      !shouldUseOptimizedUpsertRow({
         data: value as Record<string, unknown>,
         fields: field.flattenedFields,
       })
     ) {
-      return true
+      return false
     }
   }
 
-  return false
+  return true
 }
