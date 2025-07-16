@@ -1,7 +1,13 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
-import type { Payload, PayloadRequest, TypeWithID, ValidationError } from 'payload'
+import type {
+  DataFromCollectionSlug,
+  Payload,
+  PayloadRequest,
+  TypeWithID,
+  ValidationError,
+} from 'payload'
 
 import {
   migrateRelationshipsV2_V3,
@@ -2807,7 +2813,7 @@ describe('database', () => {
     }
   })
 
-  it('should update simple', async () => {
+  it('should use optimized updateOne', async () => {
     const post = await payload.create({
       collection: 'posts',
       data: {
@@ -2818,7 +2824,7 @@ describe('database', () => {
         arrayWithIDs: [{ text: 'some text' }],
       },
     })
-    const res = await payload.db.updateOne({
+    const res = (await payload.db.updateOne({
       where: { id: { equals: post.id } },
       data: {
         title: 'hello updated',
@@ -2826,14 +2832,61 @@ describe('database', () => {
         tab: { text: 'in tab updated' },
       },
       collection: 'posts',
-    })
+    })) as unknown as DataFromCollectionSlug<'posts'>
 
     expect(res.title).toBe('hello updated')
     expect(res.text).toBe('other text (should not be nuked)')
-    expect(res.group.text).toBe('in group updated')
-    expect(res.tab.text).toBe('in tab updated')
+    expect(res.group?.text).toBe('in group updated')
+    expect(res.tab?.text).toBe('in tab updated')
     expect(res.arrayWithIDs).toHaveLength(1)
-    expect(res.arrayWithIDs[0].text).toBe('some text')
+    expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
+  })
+
+  it('should use optimized updateMany', async () => {
+    const post1 = await payload.create({
+      collection: 'posts',
+      data: {
+        text: 'other text (should not be nuked)',
+        title: 'hello',
+        group: { text: 'in group' },
+        tab: { text: 'in tab' },
+        arrayWithIDs: [{ text: 'some text' }],
+      },
+    })
+    const post2 = await payload.create({
+      collection: 'posts',
+      data: {
+        text: 'other text 2 (should not be nuked)',
+        title: 'hello',
+        group: { text: 'in group' },
+        tab: { text: 'in tab' },
+        arrayWithIDs: [{ text: 'some text' }],
+      },
+    })
+
+    const res = (await payload.db.updateMany({
+      where: { id: { in: [post1.id, post2.id] } },
+      data: {
+        title: 'hello updated',
+        group: { text: 'in group updated' },
+        tab: { text: 'in tab updated' },
+      },
+      collection: 'posts',
+    })) as unknown as Array<DataFromCollectionSlug<'posts'>>
+
+    expect(res).toHaveLength(2)
+    const resPost1 = res?.find((r) => r.id === post1.id)
+    const resPost2 = res?.find((r) => r.id === post2.id)
+    expect(resPost1?.text).toBe('other text (should not be nuked)')
+    expect(resPost2?.text).toBe('other text 2 (should not be nuked)')
+
+    for (const post of res) {
+      expect(post.title).toBe('hello updated')
+      expect(post.group?.text).toBe('in group updated')
+      expect(post.tab?.text).toBe('in tab updated')
+      expect(post.arrayWithIDs).toHaveLength(1)
+      expect(post.arrayWithIDs?.[0]?.text).toBe('some text')
+    }
   })
 
   it('should allow incremental number update', async () => {
