@@ -178,6 +178,20 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       shouldUpdateQueryString = true
     }
 
+    if (listPreferences?.preset && !('preset' in currentQuery)) {
+      newQuery.preset = listPreferences.preset
+      shouldUpdateQueryString = true
+    }
+
+    // Iterate through `newQuery` and remove all empty strings
+    // This is how we know to clear them from preferences on the server, but are no longer needed
+    Object.entries(newQuery).forEach(([key, value]) => {
+      if (value === '') {
+        newQuery[key] = undefined
+        shouldUpdateQueryString = true
+      }
+    })
+
     if (shouldUpdateQueryString) {
       setCurrentQuery(newQuery)
       // Do not use router.replace here to avoid re-rendering on initial load

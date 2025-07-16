@@ -104,7 +104,7 @@ export const useQueryPresets = ({
     await refineListData(
       {
         columns: undefined,
-        preset: undefined,
+        preset: '',
         where: undefined,
       },
       false,
