@@ -40,7 +40,7 @@ import {
 } from './auth/operations/local/verifyEmail.js'
 export type { FieldState } from './admin/forms/Form.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
-import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types.js'
+import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
 import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
 import type {
@@ -72,6 +72,10 @@ import {
   findByIDLocal,
   type Options as FindByIDOptions,
 } from './collections/operations/local/findByID.js'
+import {
+  findDistinct as findDistinctLocal,
+  type Options as FindDistinctOptions,
+} from './collections/operations/local/findDistinct.js'
 import {
   findVersionByIDLocal,
   type Options as FindVersionByIDOptions,
@@ -462,6 +466,20 @@ export class BasePayload {
     options: FindByIDOptions<TSlug, TDisableErrors, TSelect>,
   ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
     return findByIDLocal<TSlug, TDisableErrors, TSelect>(this, options)
+  }
+
+  /**
+   * @description Find distinct field values
+   * @param options
+   * @returns result with distinct field values
+   */
+  findDistinct = async <
+    TSlug extends CollectionSlug,
+    TField extends keyof DataFromCollectionSlug<TSlug> & string,
+  >(
+    options: FindDistinctOptions<TSlug, TField>,
+  ): Promise<PaginatedDistinctDocs<Record<TField, DataFromCollectionSlug<TSlug>[TField]>>> => {
+    return findDistinctLocal(this, options)
   }
 
   findGlobal = async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
@@ -1174,7 +1192,6 @@ export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
 
 export { buildConfig } from './config/build.js'
-
 export {
   type ClientConfig,
   createClientConfig,
@@ -1183,6 +1200,7 @@ export {
   type UnsanitizedClientConfig,
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
+
 export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
@@ -1237,6 +1255,7 @@ export type {
   Destroy,
   Find,
   FindArgs,
+  FindDistinct,
   FindGlobal,
   FindGlobalArgs,
   FindGlobalVersions,
@@ -1250,6 +1269,7 @@ export type {
   Migration,
   MigrationData,
   MigrationTemplateArgs,
+  PaginatedDistinctDocs,
   PaginatedDocs,
   QueryDrafts,
   QueryDraftsArgs,
