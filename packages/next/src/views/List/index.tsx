@@ -1,17 +1,19 @@
 import type {
   AdminViewServerProps,
   CollectionPreferences,
+  Column,
   ColumnPreference,
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
+  PaginatedDocs,
   QueryPreset,
   SanitizedCollectionPermission,
 } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { renderFilters, upsertPreferences } from '@payloadcms/ui/rsc'
+import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
 import {
   formatAdminURL,
@@ -22,7 +24,7 @@ import {
 import React, { Fragment } from 'react'
 
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
-import { getDataAndRenderTables } from './getDataAndRenderTables.js'
+import { handleGroupBy } from './handleGroupBy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
@@ -173,19 +175,55 @@ export const renderListView = async (
       }
     }
 
-    const { columnState, data, Table } = await getDataAndRenderTables({
-      clientConfig,
-      collectionConfig,
-      collectionPreferences,
-      collectionSlug,
-      columns,
-      customCellProps,
-      drawerSlug,
-      enableRowSelections,
-      query,
-      req,
-      user,
-    })
+    let data: PaginatedDocs
+    let Table: React.ReactNode | React.ReactNode[] = null
+    let columnState: Column[] = []
+
+    if (collectionConfig.admin.groupBy && query.groupBy) {
+      ;({ columnState, data, Table } = await handleGroupBy({
+        clientConfig,
+        collectionConfig,
+        collectionPreferences,
+        collectionSlug,
+        columns,
+        customCellProps,
+        drawerSlug,
+        enableRowSelections,
+        query,
+        req,
+        user,
+      }))
+    } else {
+      data = await req.payload.find({
+        collection: collectionSlug,
+        depth: 0,
+        draft: true,
+        fallbackLocale: false,
+        includeLockStatus: true,
+        limit: query?.limit ? Number(query.limit) : undefined,
+        locale: req.locale,
+        overrideAccess: false,
+        page: query?.page ? Number(query.page) : undefined,
+        req,
+        sort: query?.sort,
+        user,
+        where: query?.where || {},
+      })
+      ;({ columnState, Table } = renderTable({
+        clientCollectionConfig: clientConfig.collections.find((c) => c.slug === collectionSlug),
+        collectionConfig,
+        columnPreferences: collectionPreferences?.columns,
+        columns,
+        customCellProps,
+        data,
+        drawerSlug,
+        enableRowSelections,
+        i18n: req.i18n,
+        orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
+        payload: req.payload,
+        useAsTitle: collectionConfig.admin.useAsTitle,
+      }))
+    }
 
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
