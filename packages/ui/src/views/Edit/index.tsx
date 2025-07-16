@@ -333,7 +333,7 @@ export function DefaultEditView({
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = await getFormState({
+      const result = await getFormState({
         id,
         collectionSlug,
         docPermissions,
@@ -350,6 +350,12 @@ export function DefaultEditView({
         signal: controller.signal,
         updateLastEdited,
       })
+
+      if (!result) {
+        return
+      }
+
+      const { lockedState, state } = result
 
       if (isLockingEnabled) {
         handleDocumentLocking(lockedState)
