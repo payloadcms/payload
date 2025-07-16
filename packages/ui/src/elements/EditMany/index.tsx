@@ -22,12 +22,13 @@ export type EditManyProps = {
 }
 
 export const EditMany: React.FC<EditManyProps> = (props) => {
-  const { count, selectAll, selected } = useSelection()
+  const { count, selectAll, selected, toggleAll } = useSelection()
   return (
     <EditMany_v4
       {...props}
       count={count}
       ids={Array.from(selected.keys())}
+      onSuccess={() => toggleAll(false)}
       selectAll={selectAll === SelectAllStatus.AllAvailable}
     />
   )
@@ -37,9 +38,10 @@ export const EditMany_v4: React.FC<
   {
     count: number
     ids: (number | string)[]
+    onSuccess?: () => void
     selectAll: boolean
   } & EditManyProps
-> = ({ collection, count, ids, selectAll }) => {
+> = ({ collection, count, ids, onSuccess, selectAll }) => {
   const { permissions } = useAuth()
   const { openModal } = useModal()
 
@@ -73,6 +75,7 @@ export const EditMany_v4: React.FC<
             count={count}
             drawerSlug={drawerSlug}
             ids={ids}
+            onSuccess={onSuccess}
             selectAll={selectAll}
             selectedFields={selectedFields}
             setSelectedFields={setSelectedFields}

@@ -1,8 +1,8 @@
 import type {
   AdminViewServerProps,
+  CollectionPreferences,
   ColumnPreference,
   DefaultDocumentIDType,
-  ListPreferences,
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
@@ -98,8 +98,8 @@ export const renderListView = async (
    * This will ensure that prefs are only updated when explicitly set by the user
    * This could potentially be done by injecting a `sessionID` into the params and comparing it against a session cookie
    */
-  const listPreferences = await upsertPreferences<ListPreferences>({
-    key: `${collectionSlug}-list`,
+  const collectionPreferences = await upsertPreferences<CollectionPreferences>({
+    key: `collection-${collectionSlug}`,
     req,
     value: {
       columns,
@@ -120,10 +120,10 @@ export const renderListView = async (
 
     const page = isNumber(query?.page) ? Number(query.page) : 0
 
-    const limit = listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+    const limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
 
     const sort =
-      listPreferences?.sort ||
+      collectionPreferences?.sort ||
       (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
 
     let where = mergeListSearchAndWhere({
@@ -150,10 +150,10 @@ export const renderListView = async (
     let queryPreset: QueryPreset | undefined
     let queryPresetPermissions: SanitizedCollectionPermission | undefined
 
-    if (listPreferences?.preset) {
+    if (collectionPreferences?.preset) {
       try {
         queryPreset = (await payload.findByID({
-          id: listPreferences?.preset,
+          id: collectionPreferences?.preset,
           collection: 'payload-query-presets',
           depth: 0,
           overrideAccess: false,
@@ -194,7 +194,7 @@ export const renderListView = async (
     const { columnState, Table } = renderTable({
       clientCollectionConfig,
       collectionConfig,
-      columnPreferences: listPreferences?.columns,
+      columnPreferences: collectionPreferences?.columns,
       columns,
       customCellProps,
       docs: data.docs,
@@ -225,12 +225,15 @@ export const renderListView = async (
 
     const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
 
+    // Check if there's a notFound query parameter (document ID that wasn't found)
+    const notFoundDocId = typeof searchParams?.notFound === 'string' ? searchParams.notFound : null
+
     const serverProps: ListViewServerPropsOnly = {
       collectionConfig,
       data,
       i18n,
       limit,
-      listPreferences,
+      listPreferences: collectionPreferences,
       listSearchableFields: collectionConfig.admin.listSearchableFields,
       locale: fullLocale,
       params,
@@ -248,6 +251,7 @@ export const renderListView = async (
       },
       collectionConfig,
       description: staticDescription,
+      notFoundDocId,
       payload,
       serverProps,
     })
@@ -264,7 +268,7 @@ export const renderListView = async (
             data={data}
             defaultLimit={limit}
             defaultSort={sort}
-            listPreferences={listPreferences}
+            listPreferences={collectionPreferences}
             modifySearchParams={!isInDrawer}
             orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
           >
@@ -274,11 +278,11 @@ export const renderListView = async (
                 collectionSlug,
                 columnState,
                 disableBulkDelete,
-                disableBulkEdit,
+                disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
                 disableQueryPresets,
                 enableRowSelections,
                 hasCreatePermission,
-                listPreferences,
+                listPreferences: collectionPreferences,
                 newDocumentURL,
                 queryPreset,
                 queryPresetPermissions,

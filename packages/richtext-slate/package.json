@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-slate",
-  "version": "3.40.0",
+  "version": "3.47.0",
   "description": "The officially supported Slate richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,11 +17,11 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "type": "module",
   "sideEffects": [
     "*.scss",
     "*.css"
   ],
+  "type": "module",
   "exports": {
     ".": {
       "import": "./src/index.tsx",
@@ -66,7 +66,7 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/is-hotkey": "^0.1.10",
-    "@types/node": "22.5.4",
+    "@types/node": "22.15.30",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.2",
     "payload": "workspace:*"

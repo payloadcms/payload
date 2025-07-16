@@ -1,7 +1,7 @@
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import {
@@ -19,6 +19,7 @@ export type Arguments = {
   where?: Where
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
   args: Arguments,
 ): Promise<{ totalDocs: number }> => {

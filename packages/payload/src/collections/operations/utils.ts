@@ -12,6 +12,7 @@ import type { deleteOperation } from './delete.js'
 import type { deleteByIDOperation } from './deleteByID.js'
 import type { findOperation } from './find.js'
 import type { findByIDOperation } from './findByID.js'
+import type { findDistinctOperation } from './findDistinct.js'
 import type { updateOperation } from './update.js'
 import type { updateByIDOperation } from './updateByID.js'
 
@@ -30,6 +31,7 @@ export type AfterOperationMap<TOperationGeneric extends CollectionSlug> = {
     boolean,
     SelectFromCollectionSlug<TOperationGeneric>
   >
+  findDistinct: typeof findDistinctOperation
   forgotPassword: typeof forgotPasswordOperation
   login: typeof loginOperation<TOperationGeneric>
   refresh: typeof refreshOperation
@@ -80,6 +82,11 @@ export type AfterOperationArg<TOperationGeneric extends CollectionSlug> = {
       args: Parameters<AfterOperationMap<TOperationGeneric>['findByID']>[0]
       operation: 'findByID'
       result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['findByID']>>
+    }
+  | {
+      args: Parameters<AfterOperationMap<TOperationGeneric>['findDistinct']>[0]
+      operation: 'findDistinct'
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['findDistinct']>>
     }
   | {
       args: Parameters<AfterOperationMap<TOperationGeneric>['forgotPassword']>[0]

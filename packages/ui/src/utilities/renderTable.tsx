@@ -3,11 +3,11 @@ import type {
   ClientConfig,
   ClientField,
   CollectionConfig,
+  CollectionPreferences,
   Column,
   ColumnPreference,
   Field,
   ImportMap,
-  ListPreferences,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
@@ -80,8 +80,8 @@ export const renderTable = ({
   clientConfig?: ClientConfig
   collectionConfig?: SanitizedCollectionConfig
   collections?: string[]
-  columnPreferences: ListPreferences['columns']
-  columns?: ListPreferences['columns']
+  columnPreferences: CollectionPreferences['columns']
+  columns?: CollectionPreferences['columns']
   customCellProps?: Record<string, unknown>
   docs: PaginatedDocs['docs']
   drawerSlug?: string
@@ -205,7 +205,7 @@ export const renderTable = ({
       },
       Heading: i18n.t('version:type'),
       renderedCells: docs.map((doc, i) => (
-        <Pill key={i}>
+        <Pill key={i} size="small">
           {getTranslation(
             collections
               ? payload.collections[doc.relationTo].config.labels.singular

@@ -15,7 +15,7 @@ import type {
 } from '../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
@@ -30,7 +30,7 @@ import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utils.js'
@@ -367,6 +367,7 @@ export const createOperation = async <
           (await hook({
             collection: collectionConfig,
             context: req.context,
+            data,
             doc: result,
             operation: 'create',
             previousDoc: {},

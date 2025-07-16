@@ -3,7 +3,7 @@ import type { Field, FieldWithSubFields } from './config/types.js'
 import { deepMergeWithReactComponents } from '../utilities/deepMerge.js'
 import { fieldAffectsData, fieldHasSubFields } from './config/types.js'
 
-const mergeBaseFields = (fields: Field[], baseFields: Field[]): Field[] => {
+export const mergeBaseFields = (fields: Field[], baseFields: Field[]): Field[] => {
   const mergedFields = [...(fields || [])]
 
   baseFields.forEach((baseField) => {
@@ -41,5 +41,3 @@ const mergeBaseFields = (fields: Field[], baseFields: Field[]): Field[] => {
 
   return mergedFields
 }
-
-export default mergeBaseFields

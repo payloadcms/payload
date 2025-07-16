@@ -128,6 +128,7 @@ import type {
   CollectionSlug,
   DateFieldValidation,
   EmailFieldValidation,
+  FieldCustom,
   JSONFieldValidation,
   PointFieldValidation,
   RadioFieldValidation,
@@ -141,6 +142,7 @@ import type {
   JsonObject,
   Operation,
   PayloadRequest,
+  PickPreserveOptional,
   Where,
 } from '../../types/index.js'
 import type {
@@ -482,7 +484,7 @@ export interface FieldBase {
   }
   admin?: Admin
   /** Extension point to add your custom data. Server only. */
-  custom?: Record<string, any>
+  custom?: FieldCustom
   defaultValue?: DefaultValue
   hidden?: boolean
   hooks?: {
@@ -631,8 +633,8 @@ export type TextField = {
   Omit<FieldBase, 'validate'>
 
 export type TextFieldClient = {
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  admin?: AdminClient & Pick<TextField['admin'], 'autoComplete' | 'placeholder' | 'rtl'>
+  admin?: AdminClient &
+    PickPreserveOptional<NonNullable<TextField['admin']>, 'autoComplete' | 'placeholder' | 'rtl'>
 } & FieldBaseClient &
   Pick<TextField, 'hasMany' | 'maxLength' | 'maxRows' | 'minLength' | 'minRows' | 'type'>
 
@@ -652,8 +654,8 @@ export type EmailField = {
 } & Omit<FieldBase, 'validate'>
 
 export type EmailFieldClient = {
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  admin?: AdminClient & Pick<EmailField['admin'], 'autoComplete' | 'placeholder'>
+  admin?: AdminClient &
+    PickPreserveOptional<NonNullable<EmailField['admin']>, 'autoComplete' | 'placeholder'>
 } & FieldBaseClient &
   Pick<EmailField, 'type'>
 
@@ -676,8 +678,8 @@ export type TextareaField = {
 } & Omit<FieldBase, 'validate'>
 
 export type TextareaFieldClient = {
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  admin?: AdminClient & Pick<TextareaField['admin'], 'placeholder' | 'rows' | 'rtl'>
+  admin?: AdminClient &
+    PickPreserveOptional<NonNullable<TextareaField['admin']>, 'placeholder' | 'rows' | 'rtl'>
 } & FieldBaseClient &
   Pick<TextareaField, 'maxLength' | 'minLength' | 'type'>
 
@@ -1267,6 +1269,8 @@ export type RichTextField<
 > = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Error?: CustomComponent
       Label?: CustomComponent
     } & Admin['components']

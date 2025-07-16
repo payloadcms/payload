@@ -23,15 +23,18 @@ export type AdminViewConfig = {
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
   meta?: MetaConfig
-  path?: string
+  /**
+   * Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands. Must begin with a forward slash (`/`).
+   */
+  path?: `/${string}`
   sensitive?: boolean
   strict?: boolean
 }
 
 export type AdminViewClientProps = {
+  browseByFolderSlugs?: SanitizedCollectionConfig['slug'][]
   clientConfig: ClientConfig
   documentSubViewType?: DocumentSubViewTypes
-  folderCollectionSlugs?: SanitizedCollectionConfig['slug'][]
   viewType: ViewTypes
 }
 

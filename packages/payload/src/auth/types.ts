@@ -1,6 +1,6 @@
 import type { DeepRequired } from 'ts-essentials'
 
-import type { CollectionSlug, GlobalSlug, Payload } from '../index.js'
+import type { CollectionSlug, GlobalSlug, Payload, TypedUser } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
 /**
@@ -118,10 +118,14 @@ type BaseUser = {
   collection: string
   email?: string
   id: number | string
+  sessions?: Array<UserSession>
   username?: string
 }
 
-export type User = {
+/**
+ * @deprecated Use `TypedUser` instead. This will be removed in 4.0.
+ */
+export type UntypedUser = {
   [key: string]: any
 } & BaseUser
 
@@ -133,6 +137,7 @@ export type ClientUser = {
   [key: string]: any
 } & BaseUser
 
+export type UserSession = { createdAt: Date | string; expiresAt: Date | string; id: string }
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
   req: PayloadRequest
   token: string
@@ -177,7 +182,7 @@ export type AuthStrategyResult = {
     | ({
         _strategy?: string
         collection?: string
-      } & User)
+      } & TypedUser)
     | null
 }
 
@@ -277,6 +282,13 @@ export interface IncomingAuthType {
    * @link https://payloadcms.com/docs/authentication/api-keys
    */
   useAPIKey?: boolean
+
+  /**
+   * Use sessions for authentication. Enabled by default.
+   * @default true
+   */
+  useSessions?: boolean
+
   /**
    * Set to true or pass an object with verification options to require users to verify by email before they are allowed to log into your app.
    * @link https://payloadcms.com/docs/authentication/email#email-verification

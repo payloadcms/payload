@@ -4,7 +4,7 @@ import type { FindOneArgs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
@@ -209,6 +209,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
           (await hook({
             collection: collectionConfig,
             context: req.context,
+            data: result,
             doc: result,
             operation: 'update',
             previousDoc: prevDocWithLocales,

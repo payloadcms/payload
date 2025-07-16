@@ -10,18 +10,20 @@ export type CronConfig = {
    * @default '* * * * *' (every minute).
    *
    * @example
-   *     ┌───────────── minute (0 - 59)
-   *     │ ┌───────────── hour (0 - 23)
-   *     │ │ ┌───────────── day of the month (1 - 31)
-   *     │ │ │ ┌───────────── month (1 - 12)
-   *     │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)
-   *     │ │ │ │ │
-   *     │ │ │ │ │
-   *  - '0 * * * *' every hour at minute 0
-   *  - '0 0 * * *' daily at midnight
-   *  - '0 0 * * 0' weekly at midnight on Sundays
-   *  - '0 0 1 * *' monthly at midnight on the 1st day of the month
-   *  - '0/5 * * * *' every 5 minutes
+   *     ┌───────────── (optional) second (0 - 59)
+   *     │ ┌───────────── minute (0 - 59)
+   *     │ │ ┌───────────── hour (0 - 23)
+   *     │ │ │ ┌───────────── day of the month (1 - 31)
+   *     │ │ │ │ ┌───────────── month (1 - 12)
+   *     │ │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)
+   *     │ │ │ │ │ │
+   *     │ │ │ │ │ │
+   *  - '* 0 * * * *' every hour at minute 0
+   *  - '* 0 0 * * *' daily at midnight
+   *  - '* 0 0 * * 0' weekly at midnight on Sundays
+   *  - '* 0 0 1 * *' monthly at midnight on the 1st day of the month
+   *  - '* 0/5 * * * *' every 5 minutes
+   *  - '* * * * * *' every second
    */
   cron?: string
   /**
@@ -40,6 +42,13 @@ export type RunJobAccessArgs = {
 
 export type RunJobAccess = (args: RunJobAccessArgs) => boolean | Promise<boolean>
 
+export type SanitizedJobsConfig = {
+  /**
+   * If set to `true`, the job system is enabled and a payload-jobs collection exists.
+   * This property is automatically set during sanitization.
+   */
+  enabled?: boolean
+} & JobsConfig
 export type JobsConfig = {
   /**
    * Specify access control to determine who can interact with jobs.
@@ -58,7 +67,10 @@ export type JobsConfig = {
    */
   addParentToTaskLog?: boolean
   /**
-   * Queue cron jobs automatically on payload initialization.
+   * Allows you to configure cron jobs that automatically run queued jobs
+   * at specified intervals. Note that this does not _queue_ new jobs - only
+   * _runs_ jobs that are already in the specified queue.
+   *
    * @remark this property should not be used on serverless platforms like Vercel
    */
   autoRun?: ((payload: Payload) => CronConfig[] | Promise<CronConfig[]>) | CronConfig[]
@@ -109,6 +121,7 @@ export type JobsConfig = {
   /**
    * A function that will be executed before Payload picks up jobs which are configured by the `jobs.autorun` function.
    * If this function returns true, jobs will be queried and picked up. If it returns false, jobs will not be run.
+   * @default undefined - if this function is not defined, jobs will be run - as if () => true was passed.
    * @param payload
    * @returns boolean
    */

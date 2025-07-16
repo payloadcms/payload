@@ -9,6 +9,7 @@ import type { Config, User } from './payload-types.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { textToLexicalJSON } from '../lexical/collections/LexicalLocalized/textToLexicalJSON.js'
+import { Auth } from './collections/Auth/index.js'
 import { Disabled } from './collections/Disabled/index.js'
 import { Hooks } from './collections/hooks/index.js'
 import { Regression1 } from './collections/Regression-1/index.js'
@@ -483,6 +484,12 @@ export default buildConfigWithDefaults(
             type: 'checkbox',
             hidden: true,
           },
+          {
+            name: 'hiddenWithDefault',
+            type: 'text',
+            hidden: true,
+            defaultValue: 'default value',
+          },
         ],
       },
       {
@@ -569,6 +576,7 @@ export default buildConfigWithDefaults(
       Regression1,
       Regression2,
       Hooks,
+      Auth,
     ],
     globals: [
       {

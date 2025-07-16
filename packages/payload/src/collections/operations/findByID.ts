@@ -15,16 +15,17 @@ import type {
   TypeWithID,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { validateQueryPaths } from '../../index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
+import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
@@ -109,6 +110,12 @@ export const findByIDOperation = async <
     const where = { id: { equals: id } }
 
     const fullWhere = combineQueries(where, accessResult)
+
+    sanitizeWhereQuery({
+      fields: collectionConfig.flattenedFields,
+      payload: args.req.payload,
+      where: fullWhere,
+    })
 
     const sanitizedJoins = await sanitizeJoinQuery({
       collectionConfig,

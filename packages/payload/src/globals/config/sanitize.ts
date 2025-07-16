@@ -1,13 +1,13 @@
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
-import defaultAccess from '../../auth/defaultAccess.js'
+import { defaultAccess } from '../../auth/defaultAccess.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import mergeBaseFields from '../../fields/mergeBaseFields.js'
+import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
-import baseVersionFields from '../../versions/baseFields.js'
+import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultGlobalEndpoints } from '../endpoints/index.js'
 

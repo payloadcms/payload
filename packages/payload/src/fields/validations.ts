@@ -1,9 +1,11 @@
-// @ts-strict-ignore
 import Ajv from 'ajv'
 import ObjectIdImport from 'bson-objectid'
 
 const ObjectId = (ObjectIdImport.default ||
   ObjectIdImport) as unknown as typeof ObjectIdImport.default
+
+import type { TFunction } from '@payloadcms/translations'
+import type { JSONSchema4 } from 'json-schema'
 
 import type { RichTextAdapter } from '../admin/types.js'
 import type { CollectionSlug } from '../index.js'
@@ -29,6 +31,7 @@ import type {
   TextField,
   UploadField,
   Validate,
+  ValueWithRelation,
 } from './config/types.js'
 
 import { isNumber } from '../utilities/isNumber.js'
@@ -314,7 +317,7 @@ export const json: JSONFieldValidation = (
   value,
   { jsonError, jsonSchema, req: { t }, required },
 ) => {
-  const isNotEmpty = (value) => {
+  const isNotEmpty = (value: null | string | undefined) => {
     if (value === undefined || value === null) {
       return false
     }
@@ -330,11 +333,10 @@ export const json: JSONFieldValidation = (
     return true
   }
 
-  const fetchSchema = ({ schema, uri }: Record<string, unknown>) => {
+  const fetchSchema = ({ schema, uri }: { schema: JSONSchema4; uri: string }) => {
     if (uri && schema) {
       return schema
     }
-    // @ts-expect-error
     return fetch(uri)
       .then((response) => {
         if (!response.ok) {
@@ -342,7 +344,10 @@ export const json: JSONFieldValidation = (
         }
         return response.json()
       })
-      .then((json) => {
+      .then((_json) => {
+        const json = _json as {
+          id: string
+        }
         const jsonSchemaSanitizations = {
           id: undefined,
           $id: json.id,
@@ -365,14 +370,14 @@ export const json: JSONFieldValidation = (
     try {
       jsonSchema.schema = fetchSchema(jsonSchema)
       const { schema } = jsonSchema
-      // @ts-expect-error
+      // @ts-expect-error missing types
       const ajv = new Ajv()
 
       if (!ajv.validate(schema, value)) {
         return ajv.errorsText()
       }
     } catch (error) {
-      return error.message
+      return error instanceof Error ? error.message : 'Unknown error'
     }
   }
   return true
@@ -399,7 +404,7 @@ export const date: DateFieldValidation = (
   // We need to also check for the timezone data based on this field's config
   // We cannot do this inside the timezone field validation as it's visually hidden
   const hasRequiredTimezone = timezone && required
-  const selectedTimezone: string = siblingData?.[`${name}_tz`]
+  const selectedTimezone: string = siblingData?.[`${name}_tz` as keyof typeof siblingData]
   // Always resolve to true if the field is not required, as timezone may be optional too then
   const validTimezone = hasRequiredTimezone ? Boolean(selectedTimezone) : true
 
@@ -438,17 +443,17 @@ export const richText: RichTextFieldValidation = async (value, options) => {
 }
 
 const validateArrayLength = (
-  value,
+  value: unknown,
   options: {
     maxRows?: number
     minRows?: number
     required?: boolean
-    t: (key: string, options?: { [key: string]: number | string }) => string
+    t: TFunction
   },
 ) => {
   const { maxRows, minRows, required, t } = options
 
-  const arrayLength = Array.isArray(value) ? value.length : value || 0
+  const arrayLength = Array.isArray(value) ? value.length : (value as number) || 0
 
   if (!required && arrayLength === 0) {
     return true
@@ -539,7 +544,7 @@ const validateFilterOptions: Validate<
   RelationshipField | UploadField
 > = async (
   value,
-  { id, blockData, data, filterOptions, relationTo, req, req: { payload, t, user }, siblingData },
+  { id, blockData, data, filterOptions, relationTo, req, req: { t, user }, siblingData },
 ) => {
   if (typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -816,7 +821,7 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
 
     const invalidRelationships = values.filter((val) => {
       let collectionSlug: string
-      let requestedID
+      let requestedID: number | string | undefined | ValueWithRelation
 
       if (typeof relationTo === 'string') {
         collectionSlug = relationTo
@@ -839,7 +844,7 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
       const idType =
         payload.collections[collectionSlug!]?.customIDType || payload?.db?.defaultIDType || 'text'
 
-      return !isValidID(requestedID, idType)
+      return !isValidID(requestedID as number | string, idType)
     })
 
     if (invalidRelationships.length > 0) {
@@ -932,11 +937,19 @@ export type PointFieldValidation = Validate<
 >
 
 export const point: PointFieldValidation = (value = ['', ''], { req: { t }, required }) => {
-  const lng = parseFloat(String(value![0]))
-  const lat = parseFloat(String(value![1]))
+  if (value === null) {
+    if (required) {
+      return t('validation:required')
+    }
+
+    return true
+  }
+
+  const lng = parseFloat(String(value[0]))
+  const lat = parseFloat(String(value[1]))
   if (
     required &&
-    ((value![0] && value![1] && typeof lng !== 'number' && typeof lat !== 'number') ||
+    ((value[0] && value[1] && typeof lng !== 'number' && typeof lat !== 'number') ||
       Number.isNaN(lng) ||
       Number.isNaN(lat) ||
       (Array.isArray(value) && value.length !== 2))
@@ -944,7 +957,7 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
     return t('validation:requiresTwoNumbers')
   }
 
-  if ((value![1] && Number.isNaN(lng)) || (value![0] && Number.isNaN(lat))) {
+  if ((value[1] && Number.isNaN(lng)) || (value[0] && Number.isNaN(lat))) {
     return t('validation:invalidInput')
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.40.0",
+  "version": "3.47.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -36,6 +36,16 @@
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
+    "./icons/*": {
+      "import": "./src/icons/*/index.tsx",
+      "types": "./src/icons/*/index.tsx",
+      "default": "./src/icons/*/index.tsx"
+    },
+    "./elements/*": {
+      "import": "./src/elements/*/index.tsx",
+      "types": "./src/elements/*/index.tsx",
+      "default": "./src/elements/*/index.tsx"
+    },
     "./elements/RenderServerComponent": {
       "import": "./src/elements/RenderServerComponent/index.tsx",
       "types": "./src/elements/RenderServerComponent/index.tsx",
@@ -55,6 +65,11 @@
       "import": "./src/utilities/buildTableState.ts",
       "types": "./src/utilities/buildTableState.ts",
       "default": "./src/utilities/buildTableState.ts"
+    },
+    "./utilities/getFolderResultsComponentAndData": {
+      "import": "./src/utilities/getFolderResultsComponentAndData.tsx",
+      "types": "./src/utilities/getFolderResultsComponentAndData.tsx",
+      "default": "./src/utilities/getFolderResultsComponentAndData.tsx"
     },
     "./utilities/getClientSchemaMap": {
       "import": "./src/utilities/getClientSchemaMap.ts",
@@ -106,8 +121,10 @@
   "scripts": {
     "build": "pnpm build:reactcompiler",
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
-    "build:esbuild": "node bundle.js && rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client",
-    "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:types",
+    "build:bundle-for-analysis": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild esbuild --no-split",
+    "build:esbuild": "node bundle.js",
+    "build:esbuild:postprocess": "rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client && rm -rf dist/exports/shared && mv dist/exports/shared_optimized dist/exports/shared",
+    "build:reactcompiler": "rm -rf dist esbuild && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:esbuild:postprocess && pnpm build:types",
     "build:remove-artifact": "rm dist/prod/index.js",
     "build:swc": "swc ./src -d dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",

@@ -15,7 +15,7 @@ import type {
   SelectFromGlobalSlug,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -368,6 +368,7 @@ export const updateOperation = async <
         result =
           (await hook({
             context: req.context,
+            data,
             doc: result,
             global: globalConfig,
             previousDoc: originalDoc,

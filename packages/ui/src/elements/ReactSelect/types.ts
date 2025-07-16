@@ -22,6 +22,7 @@ type CustomSelectProps = {
   }) => void
   onDuplicate?: DocumentDrawerProps['onSave']
   onSave?: DocumentDrawerProps['onSave']
+  valueContainerLabel?: string
 }
 
 // augment the types for the `Select` component from `react-select`

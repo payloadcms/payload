@@ -52,7 +52,13 @@ export const AddNewRelation: React.FC<Props> = ({
 
   const onSave: DocumentDrawerContextType['onSave'] = useCallback(
     ({ doc, operation }) => {
-      if (operation === 'create') {
+      // if autosave is enabled, the operation will be 'update'
+      const isAutosaveEnabled =
+        typeof collectionConfig?.versions?.drafts === 'object'
+          ? collectionConfig.versions.drafts.autosave
+          : false
+
+      if (operation === 'create' || (operation === 'update' && isAutosaveEnabled)) {
         // ensure the value is not already in the array
         let isNewValue = false
         if (!value) {
@@ -139,7 +145,7 @@ export const AddNewRelation: React.FC<Props> = ({
   }, [isDrawerOpen, relatedToMany])
 
   const label = t('fields:addNewLabel', {
-    label: getTranslation(relatedCollections[0].labels.singular, i18n),
+    label: getTranslation(relatedCollections[0]?.labels.singular, i18n),
   })
 
   if (show) {

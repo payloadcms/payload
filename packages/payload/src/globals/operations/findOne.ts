@@ -8,13 +8,13 @@ import type {
 } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
+import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
 type Args = {
   depth?: number

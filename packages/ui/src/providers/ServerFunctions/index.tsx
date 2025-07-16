@@ -1,10 +1,16 @@
 import type {
+  AdminViewServerPropsOnly,
   BuildFormStateArgs,
   BuildTableStateArgs,
   Data,
+  DocumentPreferences,
   DocumentSlots,
-  ErrorResult,
+  FormState,
+  GetFolderResultsComponentAndDataArgs,
   Locale,
+  Params,
+  RenderDocumentVersionsProperties,
+  ServerFunction,
   ServerFunctionClient,
 } from 'payload'
 
@@ -13,6 +19,7 @@ import React, { createContext, useCallback } from 'react'
 import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
 import type { CopyDataFromLocaleArgs } from '../../utilities/copyDataFromLocale.js'
+import type { getFolderResultsComponentAndDataHandler } from '../../utilities/getFolderResultsComponentAndData.js'
 import type {
   schedulePublishHandler,
   SchedulePublishHandlerArgs,
@@ -36,21 +43,43 @@ type GetTableStateClient = (
   } & Omit<BuildTableStateArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof buildTableStateHandler>
 
-type RenderDocument = (args: {
+export type RenderDocumentResult = {
+  data: any
+  Document: React.ReactNode
+  preferences: DocumentPreferences
+}
+
+type RenderDocumentBaseArgs = {
   collectionSlug: string
   disableActions?: boolean
-  docID?: number | string
+  docID: number | string
   drawerSlug?: string
   initialData?: Data
+  initialState?: FormState
   locale?: Locale
   overrideEntityVisibility?: boolean
+  paramsOverride?: AdminViewServerPropsOnly['params']
   redirectAfterCreate?: boolean
-  redirectAfterDelete?: boolean
-  redirectAfterDuplicate?: boolean
-  signal?: AbortSignal
-}) => Promise<
-  { data: Data; Document: React.ReactNode } | ({ data: never; Document: never } & ErrorResult)
+  redirectAfterDelete: boolean
+  redirectAfterDuplicate: boolean
+  searchParams?: Params
+  /**
+   * Properties specific to the versions view
+   */
+  versions?: RenderDocumentVersionsProperties
+}
+
+export type RenderDocumentServerFunction = ServerFunction<
+  RenderDocumentBaseArgs,
+  Promise<RenderDocumentResult>
 >
+
+type RenderDocumentServerFunctionHookFn = (
+  // No req or importMap - those are augmented by handleServerFunctions
+  args: {
+    signal?: AbortSignal
+  } & RenderDocumentBaseArgs,
+) => Promise<RenderDocumentResult>
 
 type CopyDataFromLocaleClient = (
   args: {
@@ -63,12 +92,19 @@ type GetDocumentSlots = (args: {
   signal?: AbortSignal
 }) => Promise<DocumentSlots>
 
+type GetFolderResultsComponentAndDataClient = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<GetFolderResultsComponentAndDataArgs, 'req'>,
+) => ReturnType<typeof getFolderResultsComponentAndDataHandler>
+
 type ServerFunctionsContextType = {
   copyDataFromLocale: CopyDataFromLocaleClient
   getDocumentSlots: GetDocumentSlots
+  getFolderResultsComponentAndData: GetFolderResultsComponentAndDataClient
   getFormState: GetFormStateClient
   getTableState: GetTableStateClient
-  renderDocument: RenderDocument
+  renderDocument: RenderDocumentServerFunctionHookFn
   schedulePublish: SchedulePublishClient
   serverFunction: ServerFunctionClient
 }
@@ -127,7 +163,7 @@ export const ServerFunctionsProvider: React.FC<{
         error += ` for document with ID ${rest.doc.value} in collection ${rest.doc.relationTo}`
       }
 
-      return { error: '' }
+      return { error }
     },
     [serverFunction],
   )
@@ -180,15 +216,17 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
-  const renderDocument = useCallback<RenderDocument>(
+  const renderDocument = useCallback<RenderDocumentServerFunctionHookFn>(
     async (args) => {
       const { signal: remoteSignal, ...rest } = args || {}
-
       try {
         const result = (await serverFunction({
           name: 'render-document',
-          args: { fallbackLocale: false, ...rest },
-        })) as Awaited<ReturnType<typeof renderDocument>> // TODO: infer this type when `strictNullChecks` is enabled
+          args: {
+            fallbackLocale: false,
+            ...rest,
+          } as Parameters<RenderDocumentServerFunctionHookFn>[0],
+        })) as Awaited<ReturnType<RenderDocumentServerFunctionHookFn>> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
       } catch (_err) {
@@ -218,11 +256,32 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const getFolderResultsComponentAndData = useCallback<GetFolderResultsComponentAndDataClient>(
+    async (args) => {
+      const { signal: remoteSignal, ...rest } = args || {}
+
+      try {
+        const result = (await serverFunction({
+          name: 'get-folder-results-component-and-data',
+          args: rest,
+        })) as Awaited<ReturnType<typeof getFolderResultsComponentAndDataHandler>>
+
+        if (!remoteSignal?.aborted) {
+          return result
+        }
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+    },
+    [serverFunction],
+  )
+
   return (
     <ServerFunctionsContext
       value={{
         copyDataFromLocale,
         getDocumentSlots,
+        getFolderResultsComponentAndData,
         getFormState,
         getTableState,
         renderDocument,

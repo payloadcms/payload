@@ -51,6 +51,7 @@ import type {
   TypedUser,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
+import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -171,6 +172,11 @@ export type LivePreviewConfig = {
     | string
 }
 
+export type RootLivePreviewConfig = {
+  collections?: string[]
+  globals?: string[]
+} & LivePreviewConfig
+
 export type OGImageConfig = {
   alt?: string
   height?: number | string
@@ -201,7 +207,7 @@ export type MetaConfig = {
   titleSuffix?: string
 } & DeepClone<Metadata>
 
-export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
+export type ServerOnlyLivePreviewProperties = keyof Pick<RootLivePreviewConfig, 'url'>
 
 type GeneratePreviewURLOptions = {
   locale: string
@@ -252,6 +258,13 @@ export type InitOptions = {
    */
   config: Promise<SanitizedConfig> | SanitizedConfig
   /**
+   * If set to `true`, payload will initialize crons for things like autorunning jobs on initialization.
+   *
+   * @default false
+   */
+  cron?: boolean
+
+  /**
    * Disable connect to the database on init
    */
   disableDBConnect?: boolean
@@ -262,7 +275,6 @@ export type InitOptions = {
   disableOnInit?: boolean
 
   importMap?: ImportMap
-
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
@@ -340,29 +352,50 @@ export type Endpoint = {
   root?: never
 }
 
-export type EditViewComponent = PayloadComponent<DocumentViewServerProps>
+/**
+ * @deprecated
+ * This type will be renamed in v4.
+ * Use `DocumentViewComponent` instead.
+ */
+export type EditViewComponent = DocumentViewComponent
 
-export type EditViewConfig = {
+export type DocumentViewComponent = PayloadComponent<DocumentViewServerProps>
+
+/**
+ * @deprecated
+ * This type will be renamed in v4.
+ * Use `DocumentViewConfig` instead.
+ */
+export type EditViewConfig = DocumentViewConfig
+
+type BaseDocumentViewConfig = {
+  actions?: CustomComponent[]
   meta?: MetaConfig
-} & (
-  | {
-      actions?: CustomComponent[]
-    }
-  | {
-      Component: EditViewComponent
-      path?: string
-    }
-  | {
-      path?: string
-      /**
-       * Add a new Edit View to the admin panel
-       * i.e. you can render a custom view that has no tab, if desired
-       * Or override a specific properties of an existing one
-       * i.e. you can customize the `Default` view tab label, if desired
-       */
-      tab?: DocumentTabConfig
-    }
-)
+  tab?: DocumentTabConfig
+}
+
+/*
+  If your view does not originate from a "known" key, e.g. `myCustomView`, then it is considered a "custom" view and can accept a `path`, etc.
+  To render just a tab component without an accompanying view, you can omit the `path` and `Component` properties altogether.
+*/
+export type CustomDocumentViewConfig =
+  | ({
+      Component: DocumentViewComponent
+      path: `/${string}`
+    } & BaseDocumentViewConfig)
+  | ({
+      Component?: DocumentViewComponent
+      path?: never
+    } & BaseDocumentViewConfig)
+
+/*
+  If your view does originates from a "known" key, e.g. `api`, then it is considered a "default" view and cannot accept a `path`, etc.
+*/
+export type DefaultDocumentViewConfig = {
+  Component?: DocumentViewComponent
+} & BaseDocumentViewConfig
+
+export type DocumentViewConfig = CustomDocumentViewConfig | DefaultDocumentViewConfig
 
 export type Params = { [key: string]: string | string[] | undefined }
 
@@ -839,10 +872,7 @@ export type Config = {
        */
       importMapFile?: string
     }
-    livePreview?: {
-      collections?: string[]
-      globals?: string[]
-    } & LivePreviewConfig
+    livePreview?: RootLivePreviewConfig
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: MetaConfig
     routes?: {
@@ -991,7 +1021,7 @@ export type Config = {
    * Options for folder view within the admin panel
    * @experimental this feature may change in minor versions until it is fully stable
    */
-  folders?: RootFoldersConfiguration
+  folders?: false | RootFoldersConfiguration
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
@@ -1005,6 +1035,17 @@ export type Config = {
    */
   graphQL?: {
     disable?: boolean
+    /**
+     * Disable introspection queries in production.
+     *
+     * @default true
+     */
+    disableIntrospectionInProduction?: boolean
+    /**
+     * Disable the GraphQL Playground in production.
+     *
+     * @default true
+     */
     disablePlaygroundInProduction?: boolean
     maxComplexity?: number
     /**
@@ -1138,18 +1179,35 @@ export type Config = {
     filterConstraints?: SelectField['filterOptions']
     labels?: CollectionConfig['labels']
   }
-  /** Control the routing structure that Payload binds itself to. */
+  /**
+   * Control the routing structure that Payload binds itself to.
+   * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+   */
   routes?: {
-    /** The route for the admin panel.
-     * @example "/my-admin"
+    /**
+     * The route for the admin panel.
+     * @example "/my-admin" or "/"
      * @default "/admin"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
      */
     admin?: string
-    /** @default "/api"  */
+    /**
+     * The base route for all REST API endpoints.
+     * @default "/api"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     api?: string
-    /** @default "/graphql"  */
+    /**
+     * The base route for all GraphQL endpoints.
+     * @default "/graphql"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     graphQL?: string
-    /** @default "/graphql-playground" */
+    /**
+     * The route for the GraphQL Playground.
+     * @default "/graphql-playground"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     graphQLPlayground?: string
   }
   /** Secure string that Payload will use for any encryption workflows */
@@ -1229,7 +1287,7 @@ export type SanitizedConfig = {
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
-  jobs: JobsConfig // Redefine here, as the DeepRequired<Config> can break its type
+  jobs: SanitizedJobsConfig
   localization: false | SanitizedLocalizationConfig
   paths: {
     config: string
@@ -1254,52 +1312,53 @@ export type SanitizedConfig = {
   | 'endpoint'
   | 'globals'
   | 'i18n'
+  | 'jobs'
   | 'localization'
   | 'upload'
 >
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
 
+/**
+ * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
+ * + `root` - `/admin/collections/:collection/:id/**\/*`
+ * @link https://payloadcms.com/docs/custom-components/document-views#document-root
+ */
 export type EditConfigWithRoot = {
   api?: never
   default?: never
   livePreview?: never
-  /**
-   * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
-   * + `root` - `/admin/collections/:collection/:id/**\/*`
-   */
-  root: Partial<EditViewConfig>
+  root: DefaultDocumentViewConfig
   version?: never
   versions?: never
 }
 
+type KnownEditKeys = 'api' | 'default' | 'livePreview' | 'root' | 'version' | 'versions'
+
+/**
+ * Replace or modify individual nested routes, or add new ones:
+ * + `default` - `/admin/collections/:collection/:id`
+ * + `api` - `/admin/collections/:collection/:id/api`
+ * + `livePreview` - `/admin/collections/:collection/:id/preview`
+ * + `references` - `/admin/collections/:collection/:id/references`
+ * + `relationships` - `/admin/collections/:collection/:id/relationships`
+ * + `versions` - `/admin/collections/:collection/:id/versions`
+ * + `version` - `/admin/collections/:collection/:id/versions/:version`
+ * + `customView` - `/admin/collections/:collection/:id/:path`
+ *
+ * To override the entire Edit View including all nested views, use the `root` key.
+ *
+ * @link https://payloadcms.com/docs/custom-components/document-views
+ */
 export type EditConfigWithoutRoot = {
-  [key: string]: EditViewConfig
-  /**
-   * Replace or modify individual nested routes, or add new ones:
-   * + `default` - `/admin/collections/:collection/:id`
-   * + `api` - `/admin/collections/:collection/:id/api`
-   * + `livePreview` - `/admin/collections/:collection/:id/preview`
-   * + `references` - `/admin/collections/:collection/:id/references`
-   * + `relationships` - `/admin/collections/:collection/:id/relationships`
-   * + `versions` - `/admin/collections/:collection/:id/versions`
-   * + `version` - `/admin/collections/:collection/:id/versions/:version`
-   * + `customView` - `/admin/collections/:collection/:id/:path`
-   *
-   * To override the entire Edit View including all nested views, use the `root` key.
-   */
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  api?: Partial<EditViewConfig>
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  default?: Partial<EditViewConfig>
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  livePreview?: Partial<EditViewConfig>
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+  [K in Exclude<string, KnownEditKeys>]: CustomDocumentViewConfig
+} & {
+  api?: DefaultDocumentViewConfig
+  default?: DefaultDocumentViewConfig
+  livePreview?: DefaultDocumentViewConfig
   root?: never
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  version?: Partial<EditViewConfig>
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  versions?: Partial<EditViewConfig>
+  version?: DefaultDocumentViewConfig
+  versions?: DefaultDocumentViewConfig
 }
 
 export type EntityDescriptionComponent = CustomComponent
