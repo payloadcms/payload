@@ -18,8 +18,9 @@ import type {
   PluginImportExportTranslations,
 } from '../../translations/index.js'
 
-import { useImportExport } from '../ImportExportProvider/index.js'
+import { buildDisabledFieldRegex } from '../../utilities/buildDisabledFieldRegex.js'
 import './index.scss'
+import { useImportExport } from '../ImportExportProvider/index.js'
 
 const baseClass = 'preview'
 
@@ -50,16 +51,7 @@ export const Preview = () => {
     const disabledFieldPaths =
       collectionConfig?.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
 
-    return disabledFieldPaths.map((path: string) => {
-      const parts = path.split('.')
-
-      const patternParts = parts.map((part) => {
-        return `${part}(?:_\\d+)?(?:_[^_]+)?`
-      })
-
-      const pattern = `^${patternParts.join('_')}(?:_.*)?$`
-      return new RegExp(pattern)
-    })
+    return disabledFieldPaths.map(buildDisabledFieldRegex)
   }, [collectionConfig])
 
   const isCSV = format === 'csv'
