@@ -2836,6 +2836,34 @@ describe('database', () => {
     expect(res.arrayWithIDs[0].text).toBe('some text')
   })
 
+  it('should allow incremental number update', async () => {
+    const post = await payload.create({ collection: 'posts', data: { number: 1, title: 'post' } })
+
+    const res = await payload.db.updateOne({
+      data: {
+        number: {
+          $inc: 10,
+        },
+      },
+      collection: 'posts',
+      where: { id: { equals: post.id } },
+    })
+
+    expect(res.number).toBe(11)
+
+    const res2 = await payload.db.updateOne({
+      data: {
+        number: {
+          $inc: -3,
+        },
+      },
+      collection: 'posts',
+      where: { id: { equals: post.id } },
+    })
+
+    expect(res2.number).toBe(8)
+  })
+
   it('should support x3 nesting blocks', async () => {
     const res = await payload.create({
       collection: 'posts',
