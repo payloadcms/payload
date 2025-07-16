@@ -1,4 +1,5 @@
 'use client'
+import { dequal } from 'dequal/lite'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { type ListQuery, type Where } from 'payload'
 import { isNumber, transformColumnsToSearchParams } from 'payload/shared'
@@ -143,6 +144,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const syncQuery = useEffectEvent(() => {
     let shouldUpdateQueryString = false
+
     const newQuery = { ...(currentQuery || {}) }
 
     // Allow the URL to override the default `limit`
@@ -163,6 +165,20 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       newQuery.groupBy = listPreferences.groupBy
       shouldUpdateQueryString = true
     }
+
+    if (listPreferences?.preset && !('preset' in currentQuery)) {
+      newQuery.preset = listPreferences.preset
+      shouldUpdateQueryString = true
+    }
+
+    // Iterate through `newQuery` and remove all empty strings
+    // This is how we know to clear them from preferences on the server, but are no longer needed
+    Object.entries(newQuery).forEach(([key, value]) => {
+      if (value === '') {
+        newQuery[key] = undefined
+        shouldUpdateQueryString = true
+      }
+    })
 
     // Only modify columns if they originated from preferences
     // We can assume they did if `listPreferences.columns` is defined

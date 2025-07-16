@@ -64,7 +64,7 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
             id="group-by--reset"
             onClick={async () => {
               await refineListData({
-                groupBy: undefined,
+                groupBy: '',
               })
             }}
             type="button"
@@ -85,6 +85,14 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           isMulti={false}
           onChange={async (v: { value: string } | null) => {
             const value = v === null ? undefined : v.value
+
+            // value is being cleared
+            if (v === null) {
+              await refineListData({
+                groupBy: '',
+                page: '1',
+              })
+            }
 
             await refineListData({
               groupBy: value ? (query.groupBy?.startsWith('-') ? `-${value}` : value) : undefined,

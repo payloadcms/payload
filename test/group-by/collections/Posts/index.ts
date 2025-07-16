@@ -30,5 +30,19 @@ export const PostsCollection: CollectionConfig = {
         features: ({ defaultFeatures }) => [...defaultFeatures],
       }),
     },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Tab 1',
+          fields: [
+            {
+              name: 'tab1Field',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
   ],
 }

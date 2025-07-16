@@ -207,6 +207,10 @@ describe('Query Presets', () => {
     await page.goto(pagesUrl.list)
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
+    // TODO: THIS TEST (AND UNDERLYING BUG) ACTUALLY NEEDS TO BE FIXED!
+    // CANNOT SIMPLY RELOAD, AS THE `queryPreset` PARAM WILL BE IN THE URL
+    // THIS TEST PASSES DESPITE THIS NOT WORKING AS INTENDED
+    // NEED TO HARD NAVIGATE TO THE URL WITHOUT THE 'queryPreset' PARAM
     await page.reload()
 
     await assertURLParams({

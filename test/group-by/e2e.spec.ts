@@ -188,34 +188,32 @@ test.describe('Group By', () => {
 
     const field = groupByContainer.locator('#group-by--field-select')
     await expect(field.locator('.react-select--single-value')).toHaveText('Select a value')
-
     await expect(groupByContainer.locator('#group-by--reset')).toBeHidden()
 
-    await field.click()
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+    await expect(page.locator('.table-wrap')).toHaveCount(2)
+    await expect(page.locator('.table__heading')).toHaveCount(2)
 
-    await field
-      .locator('.rs__option', {
-        hasText: exactText('Title'),
-      })
-      ?.click()
-
-    await expect(groupByContainer.locator('#group-by--reset')).toBeVisible()
     await groupByContainer.locator('#group-by--reset').click()
+
     await expect(field.locator('.react-select--single-value')).toHaveText('Select a value')
     await expect(groupByContainer.locator('#group-by--reset')).toBeHidden()
-
     await expect(page).not.toHaveURL(/&groupBy=/)
-
     await expect(groupByContainer.locator('#field-direction input')).toBeDisabled()
+    await expect(page.locator('.table-wrap')).toHaveCount(1)
+    await expect(page.locator('.table__heading')).toHaveCount(0)
   })
 
   test('should reset group-by using the select field\'s "x" button', async () => {
     await page.goto(url.list)
 
     const { field, groupByContainer } = await addGroupBy(page, {
-      fieldLabel: 'Title',
-      fieldPath: 'title',
+      fieldLabel: 'Category',
+      fieldPath: 'category',
     })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(2)
+    await expect(page.locator('.table__heading')).toHaveCount(2)
 
     // click the "x" button on the select field itself
     await field.locator('.clear-indicator').click()
@@ -224,6 +222,8 @@ test.describe('Group By', () => {
 
     await expect(page).not.toHaveURL(/&groupBy=/)
     await expect(groupByContainer.locator('#field-direction input')).toBeDisabled()
+    await expect(page.locator('.table-wrap')).toHaveCount(1)
+    await expect(page.locator('.table__heading')).toHaveCount(0)
   })
 
   test('should sort the group-by field globally', async () => {
@@ -390,6 +390,11 @@ test.describe('Group By', () => {
     expect(headingText).toBeTruthy()
     expect(cellText).toBeTruthy()
     expect(headingText).toEqual(cellText)
+  })
+
+  test.skip('should group by nested fields', async () => {
+    await page.goto(url.list)
+    expect(true).toBe(true)
   })
 
   test.skip('should group by within a document drawer', async () => {

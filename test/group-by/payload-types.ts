@@ -140,6 +140,7 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
+  tab1Field?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -294,6 +295,7 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
   content?: T;
+  tab1Field?: T;
   updatedAt?: T;
   createdAt?: T;
 }
