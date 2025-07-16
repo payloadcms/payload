@@ -63,6 +63,8 @@ export interface BaseDatabaseAdapter {
 
   find: Find
 
+  findDistinct: FindDistinct
+
   findGlobal: FindGlobal
 
   findGlobalVersions: FindGlobalVersions
@@ -82,16 +84,15 @@ export interface BaseDatabaseAdapter {
    * Run any migration up functions that have not yet been performed and update the status
    */
   migrate: (args?: { migrations?: Migration[] }) => Promise<void>
-
   /**
    * Run any migration down functions that have been performed
    */
   migrateDown: () => Promise<void>
+
   /**
    * Drop the current database and run all migrate up functions
    */
   migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
-
   /**
    * Run all migration down functions before running up
    */
@@ -104,6 +105,7 @@ export interface BaseDatabaseAdapter {
    * Read the current state of migrations and output the result to show which have been run
    */
   migrateStatus: () => Promise<void>
+
   /**
    * Path to read and write migration files from
    */
@@ -113,7 +115,6 @@ export interface BaseDatabaseAdapter {
    * The name of the database adapter
    */
   name: string
-
   /**
    * Full package name of the database adapter
    *
@@ -124,6 +125,7 @@ export interface BaseDatabaseAdapter {
    * reference to the instance of payload
    */
   payload: Payload
+
   queryDrafts: QueryDrafts
 
   /**
@@ -151,7 +153,6 @@ export interface BaseDatabaseAdapter {
   updateMany: UpdateMany
 
   updateOne: UpdateOne
-
   updateVersion: UpdateVersion
   upsert: Upsert
 }
@@ -480,6 +481,34 @@ export type CreateArgs = {
   returning?: boolean
   select?: SelectType
 }
+
+export type FindDistinctArgs = {
+  collection: CollectionSlug
+  field: string
+  limit?: number
+  locale?: string
+  page?: number
+  req?: Partial<PayloadRequest>
+  sort?: Sort
+  where?: Where
+}
+
+export type PaginatedDistinctDocs<T extends Record<string, unknown>> = {
+  hasNextPage: boolean
+  hasPrevPage: boolean
+  limit: number
+  nextPage?: null | number | undefined
+  page: number
+  pagingCounter: number
+  prevPage?: null | number | undefined
+  totalDocs: number
+  totalPages: number
+  values: T[]
+}
+
+export type FindDistinct = (
+  args: FindDistinctArgs,
+) => Promise<PaginatedDistinctDocs<Record<string, any>>>
 
 export type Create = (args: CreateArgs) => Promise<Document>
 

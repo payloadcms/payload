@@ -426,6 +426,11 @@ export const transform = ({
       data.id = data.id.toHexString()
     }
 
+    // Handle BigInt conversion for custom ID fields of type 'number'
+    if (adapter.useBigIntForNumberIDs && typeof data.id === 'bigint') {
+      data.id = Number(data.id)
+    }
+
     if (!adapter.allowAdditionalKeys) {
       stripFields({
         config,

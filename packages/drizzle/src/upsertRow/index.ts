@@ -109,7 +109,6 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       tableName,
     })
   }
-
   // Split out the incoming data into the corresponding:
   // base row, locales, relationships, blocks, and arrays
   const rowToInsert = transformForWrite({
