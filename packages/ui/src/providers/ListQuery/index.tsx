@@ -134,47 +134,38 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     [refineListData],
   )
 
-  const syncQueryToURL = useEffectEvent(() => {
-    let shouldUpdateQueryString = false
+  const syncQueryFromPropsToURL = useEffectEvent(() => {
+    const newQuery = { ...(currentQuery || {}), ...(queryFromProps || {}) }
 
-    const newQuery = { ...(currentQuery || {}) }
-
-    if (queryFromProps) {
-      Object.entries(queryFromProps).forEach(([key, value]) => {
-        if (value !== undefined && !(key in newQuery)) {
-          newQuery[key] = value
-          shouldUpdateQueryString = true
-        }
-      })
-    }
-
-    // Sanitize empty strings from the query
-    // This is how we determine whether to clear user preferences for certain params, e.g. `?preset=`
-    // Once cleared, they are no longer needed in the URL
     Object.entries(newQuery).forEach(([key, value]) => {
+      // Sanitize empty arrays from the query, see note below
+      if (key === 'columns' && Array.isArray(newQuery[key]) && newQuery[key].length === 0) {
+        newQuery[key] = undefined
+      }
+
+      // Sanitize empty strings from the query
+      // This is how we determine whether to clear user preferences for certain params, e.g. `?preset=`
+      // Once cleared, they are no longer needed in the URL
       if (value === '') {
         newQuery[key] = undefined
-        shouldUpdateQueryString = true
       }
     })
 
-    if (shouldUpdateQueryString) {
-      setCurrentQuery(newQuery)
+    setCurrentQuery(newQuery)
 
-      // Do not use router.replace here to avoid re-rendering on initial load
-      window.history.replaceState(
-        null,
-        '',
-        `?${qs.stringify({ ...newQuery, columns: JSON.stringify(newQuery.columns) })}`,
-      )
-    }
+    // Do not use router.replace here to avoid re-rendering on initial load
+    window.history.replaceState(
+      null,
+      '',
+      `?${qs.stringify({ ...newQuery, columns: JSON.stringify(newQuery.columns) })}`,
+    )
   })
 
   // If `query` is updated externally, update the local state
   // I.e. when HMR runs, these properties may be different
   useEffect(() => {
     if (modifySearchParams) {
-      syncQueryToURL()
+      syncQueryFromPropsToURL()
     }
   }, [modifySearchParams, queryFromProps])
 
