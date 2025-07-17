@@ -20,10 +20,7 @@ export type OnListQueryChange = (query: ListQuery) => void
 export type ListQueryProps = {
   readonly children: React.ReactNode
   readonly collectionSlug?: ClientCollectionConfig['slug']
-  readonly columns?: ColumnPreference[]
   readonly data: PaginatedDocs
-  readonly defaultLimit?: number
-  readonly defaultSort?: Sort
   readonly modifySearchParams?: boolean
   readonly onQueryChange?: OnListQueryChange
   readonly orderableFieldName?: string
@@ -31,7 +28,7 @@ export type ListQueryProps = {
    * @deprecated
    */
   readonly preferenceKey?: string
-  readonly preset?: number | string
+  query?: ListQuery
 }
 
 export type IListQueryContext = {

@@ -1,7 +1,6 @@
 'use client'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { type ListQuery, type Where } from 'payload'
-import { isNumber, transformColumnsToSearchParams } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -19,14 +18,11 @@ export { useListQuery } from './context.js'
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
   collectionSlug,
-  columns,
   data,
-  defaultLimit,
-  defaultSort,
   modifySearchParams,
   onQueryChange: onQueryChangeFromProps,
   orderableFieldName,
-  preset,
+  query: queryFromProps,
 }) => {
   // eslint-disable-next-line react-compiler/react-compiler
   'use no memo'
@@ -53,8 +49,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       return searchParams
     } else {
       return {
-        limit: defaultLimit,
-        sort: defaultSort,
+        limit: queryFromProps.limit,
+        sort: queryFromProps.sort,
       }
     }
   })
@@ -70,8 +66,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
       const newQuery = mergeQuery(currentQuery, incomingQuery, {
         defaults: {
-          limit: defaultLimit,
-          sort: defaultSort,
+          limit: queryFromProps.limit,
+          sort: queryFromProps.sort,
         },
       })
 
@@ -93,8 +89,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     },
     [
       currentQuery,
-      defaultLimit,
-      defaultSort,
+      queryFromProps,
       modifySearchParams,
       onQueryChange,
       onQueryChangeFromProps,
@@ -139,33 +134,18 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     [refineListData],
   )
 
-  const syncQuery = useEffectEvent(() => {
+  const syncQueryToURL = useEffectEvent(() => {
     let shouldUpdateQueryString = false
 
     const newQuery = { ...(currentQuery || {}) }
 
-    // Allow the URL to override the default `limit`
-    // i.e. only apply the `defaultLimit` if there is no limit in the URL
-    if (isNumber(defaultLimit) && !('limit' in currentQuery)) {
-      newQuery.limit = defaultLimit
-      shouldUpdateQueryString = true
-    }
-
-    // Allow the URL to override the default `sort`
-    // i.e. only apply the `defaultSort` if there is no sort in the URL
-    if (defaultSort && !('sort' in currentQuery)) {
-      newQuery.sort = defaultSort
-      shouldUpdateQueryString = true
-    }
-
-    if (columns && !('columns' in currentQuery)) {
-      newQuery.columns = transformColumnsToSearchParams(columns)
-      shouldUpdateQueryString = true
-    }
-
-    if (preset && !('preset' in currentQuery)) {
-      newQuery.preset = preset
-      shouldUpdateQueryString = true
+    if (queryFromProps) {
+      Object.entries(queryFromProps).forEach(([key, value]) => {
+        if (value !== undefined && !(key in newQuery)) {
+          newQuery[key] = value
+          shouldUpdateQueryString = true
+        }
+      })
     }
 
     // Sanitize empty strings from the query
@@ -180,6 +160,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
     if (shouldUpdateQueryString) {
       setCurrentQuery(newQuery)
+
       // Do not use router.replace here to avoid re-rendering on initial load
       window.history.replaceState(
         null,
@@ -189,13 +170,13 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     }
   })
 
-  // If `defaultLimit` or `defaultSort` are updated externally, update the query
+  // If `query` is updated externally, update the local state
   // I.e. when HMR runs, these properties may be different
   useEffect(() => {
     if (modifySearchParams) {
-      syncQuery()
+      syncQueryToURL()
     }
-  }, [defaultSort, defaultLimit, modifySearchParams, columns, preset])
+  }, [modifySearchParams, queryFromProps])
 
   return (
     <ListQueryContext
