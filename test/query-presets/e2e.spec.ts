@@ -153,10 +153,12 @@ describe('Query Presets', () => {
 
   test('should select preset and apply filters', async () => {
     await page.goto(pagesUrl.list)
+
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
     await assertURLParams({
       page,
+      columns: seededData.everyone.columns,
       preset: everyoneID,
     })
   })
@@ -218,14 +220,14 @@ describe('Query Presets', () => {
 
   test('should save last used preset to preferences and load on initial render', async () => {
     await page.goto(pagesUrl.list)
+
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
     await page.goto(pagesUrl.list)
 
     await assertURLParams({
       page,
-      /** @todo fix columns assertion */
-      // columns: seededData.everyone.columns,
+      columns: seededData.everyone.columns,
       where: seededData.everyone.where,
       preset: everyoneID,
     })
@@ -237,8 +239,7 @@ describe('Query Presets', () => {
 
     await assertURLParams({
       page,
-      /** @todo fix columns assertion */
-      // columns: seededData.everyone.columns,
+      columns: seededData.everyone.columns,
       where: seededData.everyone.where,
       preset: everyoneID,
     })

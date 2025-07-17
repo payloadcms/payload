@@ -256,13 +256,13 @@ export const renderListView = async (
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
             collectionSlug={collectionSlug}
-            columns={collectionPreferences.columns}
+            columns={collectionPreferences?.columns}
             data={data}
             defaultLimit={query.limit}
             defaultSort={query.sort}
             modifySearchParams={!isInDrawer}
             orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
-            preset={collectionPreferences.preset}
+            preset={collectionPreferences?.preset}
           >
             {RenderServerComponent({
               clientProps: {
