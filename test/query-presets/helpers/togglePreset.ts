@@ -37,8 +37,7 @@ export async function clearSelectedPreset({ page }: { page: Page }) {
     await clearButton.click()
   }
 
-  // columns can either be omitted or an empty string after being cleared
-  const regex = /columns=(?:\[\]|$)/
+  const regex = /columns=/
 
   await page.waitForURL((url) => !regex.test(url.search), {
     timeout: TEST_TIMEOUT_LONG,
