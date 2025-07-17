@@ -36,7 +36,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     },
   })
 
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 15; i++) {
     await createPost(payload, {
       title: `Post ${i}`,
       folder: undefined,

@@ -126,6 +126,8 @@ export { BrowseByFolderButton } from '../../elements/FolderView/BrowseByFolderBu
 export { FolderTypeField } from '../../elements/FolderView/FolderTypeField/index.js'
 export { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index.js'
 export { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
+export { FolderDocumentsPagination } from '../../elements/FolderView/Pagination/index.js'
+export { FolderQueryParamsProvider } from '../../providers/FolderQueryParams/index.js'
 
 export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
 export { ReactSelect as Select } from '../../elements/ReactSelect/index.js'

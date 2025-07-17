@@ -1,0 +1,16 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .folder-documents-pagination {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+
+    &__page-controls {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: var(--base);
+    }
+  }
+}

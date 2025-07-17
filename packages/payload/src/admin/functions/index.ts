@@ -77,6 +77,16 @@ export type BuildCollectionFolderViewResult = {
   View: React.ReactNode
 }
 
+export type FolderQueryParams = {
+  docLimit?: string
+  docPage?: string
+  folderLimit?: string
+  folderPage?: string
+  search?: string
+  sort?: Sort
+  // where?: Where
+} & Record<string, unknown>
+
 export type GetFolderResultsComponentAndDataArgs = {
   /**
    * If true and no folderID is provided, only folders will be returned.
@@ -96,6 +106,16 @@ export type GetFolderResultsComponentAndDataArgs = {
    */
   displayAs: 'grid' | 'list'
   /**
+   * The `limit` parameter used for document pagination
+   * @default 10
+   */
+  docLimit: number
+  /**
+   * The `page` parameter used for document pagination
+   * @default 1
+   */
+  docPage: number
+  /**
    * Used to filter folders by the collections they are assigned to.
    *
    * i.e. ['posts'] will only include folders that are assigned to the posts collections.
@@ -105,6 +125,16 @@ export type GetFolderResultsComponentAndDataArgs = {
    * The ID of the folder to filter results by.
    */
   folderID: number | string | undefined
+  /**
+   * The `limit` parameter used for folder pagination
+   * @default 10
+   */
+  folderLimit?: number
+  /**
+   * The `page` parameter used for folder pagination
+   * @default 1
+   */
+  folderPage?: number
   req: PayloadRequest
   /**
    * The sort order for the results.

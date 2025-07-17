@@ -15,7 +15,6 @@ import { DragOverlaySelection } from '../../elements/FolderView/DragOverlaySelec
 import { FilterFolderTypePill } from '../../elements/FolderView/FilterFolderTypePill/index.js'
 import { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index.js'
 import { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
-import { SortByPill } from '../../elements/FolderView/SortByPill/index.js'
 import { ToggleViewButtons } from '../../elements/FolderView/ToggleViewButtons/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListHeader } from '../../elements/ListHeader/index.js'
@@ -25,14 +24,15 @@ import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useFolderQueryParams } from '../../providers/FolderQueryParams/context.js'
 import { FolderProvider, useFolder } from '../../providers/Folders/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
-import { ListSelection } from '../CollectionFolder/ListSelection/index.js'
 import './index.scss'
+import { ListSelection } from '../CollectionFolder/ListSelection/index.js'
 
 const baseClass = 'folder-list'
 
@@ -107,6 +107,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
   const { setPreference } = usePreferences()
+  const { handleSearchChange } = useFolderQueryParams()
   const {
     activeCollectionFolderSlugs: visibleCollectionSlugs,
     allowCreateCollectionSlugs,
@@ -119,7 +120,6 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
     getFolderRoute,
     getSelectedItems,
     moveToFolder,
-    refineFolderData,
     search,
     selectedItemKeys,
     setIsDragging,
@@ -276,7 +276,6 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
           />
           <SearchBar
             Actions={[
-              <SortByPill key="sort-by-pill" />,
               folderID && <FilterFolderTypePill key="collection-type" />,
               <ToggleViewButtons
                 activeView={activeView}
@@ -286,7 +285,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
               <CurrentFolderActions key="current-folder-actions" />,
             ].filter(Boolean)}
             label={searchPlaceholder}
-            onSearchChange={(search) => refineFolderData({ query: { search }, updateURL: true })}
+            onSearchChange={handleSearchChange}
             searchQueryParam={search}
           />
           {BeforeFolderListTable}

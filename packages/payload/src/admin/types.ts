@@ -573,6 +573,7 @@ export type {
   BuildCollectionFolderViewResult,
   BuildTableStateArgs,
   DefaultServerFunctionArgs,
+  FolderQueryParams,
   GetFolderResultsComponentAndDataArgs,
   ListQuery,
   ServerFunction,

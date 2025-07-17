@@ -9,7 +9,7 @@ import { Drafts } from './collections/Drafts/index.js'
 import { Media } from './collections/Media/index.js'
 import { OmittedFromBrowseBy } from './collections/OmittedFromBrowseBy/index.js'
 import { Posts } from './collections/Posts/index.js'
-// import { seed } from './seed/index.js'
+import { seed } from './seed/index.js'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -42,14 +42,14 @@ export default buildConfigWithDefaults({
     },
   ],
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-    // await seed(payload)
+    // await payload.create({
+    //   collection: 'users',
+    //   data: {
+    //     email: devUser.email,
+    //     password: devUser.password,
+    //   },
+    // })
+    await seed(payload)
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

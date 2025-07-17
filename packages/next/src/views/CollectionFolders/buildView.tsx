@@ -7,11 +7,16 @@ import type {
   ListQuery,
 } from 'payload'
 
-import { DefaultCollectionFolderView, HydrateAuthProvider } from '@payloadcms/ui'
+import {
+  DefaultCollectionFolderView,
+  FolderQueryParamsProvider,
+  HydrateAuthProvider,
+} from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getFolderResultsComponentAndData, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
+import { isNumber } from 'payload/shared'
 import React from 'react'
 
 // import { renderFolderViewSlots } from './renderFolderViewSlots.js'
@@ -87,18 +92,26 @@ export const buildCollectionFolderView = async (
      * This could potentially be done by injecting a `sessionID` into the params and comparing it against a session cookie
      */
     const collectionFolderPreferences = await upsertPreferences<{
+      docLimit?: number
+      folderLimit?: number
       sort?: FolderSortKeys
       viewPreference?: 'grid' | 'list'
     }>({
       key: `${collectionSlug}-collection-folder`,
       req: initPageResult.req,
       value: {
+        docLimit: isNumber(query?.docLimit) ? Number(query.docLimit) : undefined,
+        folderLimit: isNumber(query?.folderLimit) ? Number(query.folderLimit) : undefined,
         sort: query?.sort as FolderSortKeys,
       },
     })
 
     const sortPreference: FolderSortKeys = collectionFolderPreferences?.sort || 'name'
     const viewPreference = collectionFolderPreferences?.viewPreference || 'grid'
+    const docLimit = collectionFolderPreferences?.docLimit || 10
+    const folderLimit = collectionFolderPreferences?.folderLimit || 0
+    const docPage = isNumber(query?.docPage) ? Number(query.docPage) : 1
+    const folderPage = isNumber(query?.folderPage) ? Number(query.folderPage) : 1
 
     const {
       routes: { admin: adminRoute },
@@ -114,8 +127,12 @@ export const buildCollectionFolderView = async (
       browseByFolder: false,
       collectionsToDisplay: [config.folders.slug, collectionSlug],
       displayAs: viewPreference,
+      docLimit,
+      docPage,
       folderAssignedCollections: [collectionSlug],
       folderID,
+      folderLimit,
+      folderPage,
       req: initPageResult.req,
       sort: sortPreference,
     })
@@ -170,37 +187,43 @@ export const buildCollectionFolderView = async (
       View: (
         <>
           <HydrateAuthProvider permissions={permissions} />
-          {RenderServerComponent({
-            clientProps: {
-              // ...folderViewSlots,
-              allCollectionFolderSlugs: [config.folders.slug, collectionSlug],
-              allowCreateCollectionSlugs: [
-                permissions?.collections?.[config.folders.slug]?.create
-                  ? config.folders.slug
-                  : null,
-                permissions?.collections?.[collectionSlug]?.create ? collectionSlug : null,
-              ].filter(Boolean),
-              baseFolderPath: `/collections/${collectionSlug}/${config.folders.slug}`,
-              breadcrumbs,
-              collectionSlug,
-              disableBulkDelete,
-              disableBulkEdit,
-              documents,
-              enableRowSelections,
-              folderAssignedCollections,
-              folderFieldName: config.folders.fieldName,
-              folderID: resolvedFolderID || null,
-              FolderResultsComponent,
-              search,
-              sort: sortPreference,
-              subfolders,
-              viewPreference,
-            } satisfies FolderListViewClientProps,
-            // Component: collectionConfig?.admin?.components?.views?.Folders?.Component,
-            Fallback: DefaultCollectionFolderView,
-            importMap: payload.importMap,
-            serverProps,
-          })}
+          <FolderQueryParamsProvider
+            defaultDocLimit={docLimit}
+            defaultFolderLimit={folderLimit}
+            modifySearchParams={!isInDrawer}
+          >
+            {RenderServerComponent({
+              clientProps: {
+                // ...folderViewSlots,
+                allCollectionFolderSlugs: [config.folders.slug, collectionSlug],
+                allowCreateCollectionSlugs: [
+                  permissions?.collections?.[config.folders.slug]?.create
+                    ? config.folders.slug
+                    : null,
+                  permissions?.collections?.[collectionSlug]?.create ? collectionSlug : null,
+                ].filter(Boolean),
+                baseFolderPath: `/collections/${collectionSlug}/${config.folders.slug}`,
+                breadcrumbs,
+                collectionSlug,
+                disableBulkDelete,
+                disableBulkEdit,
+                documents,
+                enableRowSelections,
+                folderAssignedCollections,
+                folderFieldName: config.folders.fieldName,
+                folderID: resolvedFolderID || null,
+                FolderResultsComponent,
+                search,
+                sort: sortPreference,
+                subfolders,
+                viewPreference,
+              } satisfies FolderListViewClientProps,
+              // Component: collectionConfig?.admin?.components?.views?.Folders?.Component,
+              Fallback: DefaultCollectionFolderView,
+              importMap: payload.importMap,
+              serverProps,
+            })}
+          </FolderQueryParamsProvider>
         </>
       ),
     }

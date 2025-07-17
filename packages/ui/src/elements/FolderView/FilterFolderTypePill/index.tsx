@@ -4,6 +4,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { useConfig } from '../../../providers/Config/index.js'
+import { useFolderQueryParams } from '../../../providers/FolderQueryParams/context.js'
 import { useFolder } from '../../../providers/Folders/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
@@ -13,11 +14,11 @@ import './index.scss'
 const baseClass = 'collection-type'
 
 export function FilterFolderTypePill() {
+  const { handleRelationToChange } = useFolderQueryParams()
   const {
     activeCollectionFolderSlugs: visibleCollectionSlugs,
     allCollectionFolderSlugs: folderCollectionSlugs,
     folderCollectionSlug,
-    refineFolderData,
   } = useFolder()
   const { i18n, t } = useTranslation()
   const { config, getEntityConfig } = useConfig()
@@ -57,8 +58,8 @@ export function FilterFolderTypePill() {
         </Button>
       }
       key="relation-to-selection-popup"
-      onChange={({ selectedValues: relationTo }) => {
-        void refineFolderData({ query: { relationTo }, updateURL: true })
+      onChange={({ selectedValues }) => {
+        void handleRelationToChange(selectedValues)
       }}
       options={allCollectionOptions}
       selectedValues={visibleCollectionSlugs}

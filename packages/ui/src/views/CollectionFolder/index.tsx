@@ -27,14 +27,15 @@ import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useFolderQueryParams } from '../../providers/FolderQueryParams/context.js'
 import { FolderProvider, useFolder } from '../../providers/Folders/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
-import { ListSelection } from './ListSelection/index.js'
 import './index.scss'
+import { ListSelection } from './ListSelection/index.js'
 
 const baseClass = 'collection-folder-list'
 
@@ -103,6 +104,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
   const drawerDepth = useEditDepth()
   const { setStepNav } = useStepNav()
   const { setPreference } = usePreferences()
+  const { handleSearchChange } = useFolderQueryParams()
   const {
     allowCreateCollectionSlugs,
     breadcrumbs,
@@ -114,7 +116,6 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
     folderType,
     getSelectedItems,
     moveToFolder,
-    refineFolderData,
     selectedItemKeys,
     setIsDragging,
     subfolders,
@@ -317,7 +318,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
             label={t('general:searchBy', {
               label: t('general:name'),
             })}
-            onSearchChange={(search) => refineFolderData({ query: { search }, updateURL: true })}
+            onSearchChange={handleSearchChange}
             searchQueryParam={search}
           />
           {BeforeFolderListTable}

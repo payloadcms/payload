@@ -52,6 +52,11 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
     totalPages = null,
   } = props
 
+  console.log({
+    hasNextPage,
+    hasPrevPage,
+  })
+
   if (!hasNextPage && !hasPrevPage) {
     return null
   }

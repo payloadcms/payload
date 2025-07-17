@@ -2,10 +2,9 @@ import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { FolderOrDocument, FolderSortKeys, GetFolderDataResult } from '../types.js'
 
-import { parseDocumentID } from '../../index.js'
+import { APIError, parseDocumentID } from '../../index.js'
+import { getDocsAndPagination } from './getDocsAndPagination.js'
 import { getFolderBreadcrumbs } from './getFolderBreadcrumbs.js'
-import { queryDocumentsAndFoldersFromJoin } from './getFoldersAndDocumentsFromJoin.js'
-import { getOrphanedDocs } from './getOrphanedDocs.js'
 
 type Args = {
   /**
@@ -14,6 +13,16 @@ type Args = {
    * @example 'posts'
    */
   collectionSlug?: CollectionSlug
+  /**
+   * The `limit` parameter used for document pagination
+   * @default 10
+   */
+  docLimit: number
+  /**
+   * The `page` parameter used for document pagination
+   * @default 1
+   */
+  docPage: number
   /**
    * Optional where clause to filter documents by
    * @default undefined
@@ -24,6 +33,16 @@ type Args = {
    * @default undefined
    */
   folderID?: number | string
+  /**
+   * The `limit` parameter used for folder pagination
+   * @default 10
+   */
+  folderLimit?: number
+  /**
+   * The `page` parameter used for folder pagination
+   * @default 1
+   */
+  folderPage?: number
   /** Optional where clause to filter subfolders by
    * @default undefined
    */
@@ -36,8 +55,12 @@ type Args = {
  */
 export const getFolderData = async ({
   collectionSlug,
+  docLimit,
+  docPage,
   documentWhere,
   folderID: _folderID,
+  folderLimit = 100,
+  folderPage = 1,
   folderWhere,
   req,
   sort = 'name',
@@ -45,7 +68,7 @@ export const getFolderData = async ({
   const { payload } = req
 
   if (payload.config.folders === false) {
-    throw new Error('Folders are not enabled')
+    throw new APIError('Folders are not enabled', 500)
   }
 
   const parentFolderID = parseDocumentID({
@@ -59,53 +82,65 @@ export const getFolderData = async ({
     req,
   })
 
-  if (parentFolderID) {
-    // subfolders and documents are queried together
-    const documentAndSubfolderPromise = queryDocumentsAndFoldersFromJoin({
-      documentWhere,
-      folderWhere,
-      parentFolderID,
-      req,
-    })
-    const [breadcrumbs, result] = await Promise.all([
-      breadcrumbsPromise,
-      documentAndSubfolderPromise,
-    ])
+  const foldersPromise = getDocsAndPagination({
+    collectionSlug: payload.config.folders.slug,
+    folderFieldName: payload.config.folders.fieldName,
+    foldersSlug: payload.config.folders.slug,
+    limit: folderLimit,
+    page: folderPage,
+    parentFolderID,
+    req,
+    // sort,
+    where: folderWhere || {},
+  })
 
-    return {
-      breadcrumbs,
-      documents: sortDocs({ docs: result.documents, sort }),
-      folderAssignedCollections: result.folderAssignedCollections,
-      subfolders: sortDocs({ docs: result.subfolders, sort }),
-    }
-  } else {
-    // subfolders and documents are queried separately
-    const subfoldersPromise = getOrphanedDocs({
-      collectionSlug: payload.config.folders.slug,
-      folderFieldName: payload.config.folders.fieldName,
-      req,
-      where: folderWhere,
-    })
-    const documentsPromise = collectionSlug
-      ? getOrphanedDocs({
-          collectionSlug,
-          folderFieldName: payload.config.folders.fieldName,
-          req,
-          where: documentWhere,
-        })
-      : Promise.resolve([])
-    const [breadcrumbs, subfolders, documents] = await Promise.all([
-      breadcrumbsPromise,
-      subfoldersPromise,
-      documentsPromise,
-    ])
+  const documentsPromise = getDocsAndPagination({
+    collectionSlug,
+    folderFieldName: payload.config.folders.fieldName,
+    foldersSlug: payload.config.folders.slug,
+    limit: docLimit,
+    page: docPage,
+    parentFolderID,
+    req,
+    // sort,
+    where: documentWhere || {},
+  })
 
-    return {
-      breadcrumbs,
-      documents: sortDocs({ docs: documents, sort }),
-      folderAssignedCollections: collectionSlug ? [collectionSlug] : undefined,
-      subfolders: sortDocs({ docs: subfolders, sort }),
-    }
+  const [breadcrumbs, foldersResult, documentsResult] = await Promise.all([
+    breadcrumbsPromise,
+    foldersPromise,
+    documentsPromise,
+  ])
+
+  const {
+    docs: subfolders,
+    folderAssignedCollections: _folderAssignedCollections,
+    pagination: foldersPagination,
+  } = foldersResult
+  const { docs: documents, pagination: documentsPagination } = documentsResult
+
+  /**
+   * 1. If no parentFolderID and you are viewing a specific collection,
+   * then the folderAssignedCollections will be the collection slug.
+   *
+   * 2. If no parentFolderID and you are not viewing a specific collection,
+   * then the folderAssignedCollections will be undefined. (i.e. all collections can be assigned)
+   *
+   * 3. If there is a parentFolderID use the folderAssignedCollections from the subfolders result.
+   */
+  const folderAssignedCollections = !parentFolderID
+    ? collectionSlug
+      ? [collectionSlug]
+      : undefined
+    : _folderAssignedCollections
+
+  return {
+    breadcrumbs,
+    documents: sortDocs({ docs: documents, sort }),
+    documentsPagination,
+    folderAssignedCollections,
+    foldersPagination,
+    subfolders: sortDocs({ docs: subfolders, sort }),
   }
 }
 

@@ -3,15 +3,21 @@ import type {
   BuildCollectionFolderViewResult,
   FolderListViewClientProps,
   FolderListViewServerPropsOnly,
+  FolderQueryParams,
   FolderSortKeys,
   ListQuery,
 } from 'payload'
 
-import { DefaultBrowseByFolderView, HydrateAuthProvider } from '@payloadcms/ui'
+import {
+  DefaultBrowseByFolderView,
+  FolderQueryParamsProvider,
+  HydrateAuthProvider,
+} from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getFolderResultsComponentAndData, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
+import { isNumber } from 'payload/shared'
 import React from 'react'
 
 export type BuildFolderViewArgs = {
@@ -22,7 +28,7 @@ export type BuildFolderViewArgs = {
   folderID?: number | string
   isInDrawer?: boolean
   overrideEntityVisibility?: boolean
-  query: ListQuery
+  query: FolderQueryParams
 } & AdminViewServerProps
 
 export const buildBrowseByFolderView = async (
@@ -79,7 +85,7 @@ export const buildBrowseByFolderView = async (
               ? JSON.parse(queryFromReq.relationTo)
               : undefined,
         }
-      : {}) as ListQuery)
+      : {}) as FolderQueryParams)
 
   /**
    * If a folderID is provided and the relationTo query param exists,
@@ -108,26 +114,38 @@ export const buildBrowseByFolderView = async (
    * This could potentially be done by injecting a `sessionID` into the params and comparing it against a session cookie
    */
   const browseByFolderPreferences = await upsertPreferences<{
+    docLimit?: number
+    folderLimit?: number
     sort?: FolderSortKeys
     viewPreference?: 'grid' | 'list'
   }>({
     key: 'browse-by-folder',
     req: initPageResult.req,
     value: {
+      docLimit: isNumber(query?.docLimit) ? Number(query.docLimit) : undefined,
+      folderLimit: isNumber(query?.folderLimit) ? Number(query.folderLimit) : undefined,
       sort: query?.sort as FolderSortKeys,
     },
   })
 
   const sortPreference: FolderSortKeys = browseByFolderPreferences?.sort || 'name'
   const viewPreference = browseByFolderPreferences?.viewPreference || 'grid'
+  const docLimit = browseByFolderPreferences?.docLimit || 10
+  const folderLimit = browseByFolderPreferences?.folderLimit || 0
+  const docPage = isNumber(query?.docPage) ? Number(query.docPage) : 1
+  const folderPage = isNumber(query?.folderPage) ? Number(query.folderPage) : 1
 
   const { breadcrumbs, documents, folderAssignedCollections, FolderResultsComponent, subfolders } =
     await getFolderResultsComponentAndData({
       browseByFolder: true,
       collectionsToDisplay,
       displayAs: viewPreference,
+      docLimit,
+      docPage,
       folderAssignedCollections: collectionsToDisplay.filter((slug) => slug !== foldersSlug) || [],
       folderID,
+      folderLimit,
+      folderPage,
       req: initPageResult.req,
       sort: sortPreference,
     })
@@ -200,31 +218,38 @@ export const buildBrowseByFolderView = async (
     View: (
       <>
         <HydrateAuthProvider permissions={permissions} />
-        {RenderServerComponent({
-          clientProps: {
-            // ...folderViewSlots,
-            activeCollectionFolderSlugs: availableActiveCollectionFolderSlugs,
-            allCollectionFolderSlugs: allAvailableCollectionSlugs,
-            allowCreateCollectionSlugs,
-            baseFolderPath: `/browse-by-folder`,
-            breadcrumbs,
-            disableBulkDelete,
-            disableBulkEdit,
-            documents,
-            enableRowSelections,
-            folderAssignedCollections,
-            folderFieldName: config.folders.fieldName,
-            folderID: resolvedFolderID || null,
-            FolderResultsComponent,
-            sort: sortPreference,
-            subfolders,
-            viewPreference,
-          } satisfies FolderListViewClientProps,
-          // Component:config.folders?.components?.views?.BrowseByFolders?.Component,
-          Fallback: DefaultBrowseByFolderView,
-          importMap: payload.importMap,
-          serverProps,
-        })}
+        {/* todo: get these defaults from the params like the list view */}
+        <FolderQueryParamsProvider
+          defaultDocLimit={docLimit}
+          defaultFolderLimit={folderLimit}
+          modifySearchParams={!isInDrawer}
+        >
+          {RenderServerComponent({
+            clientProps: {
+              // ...folderViewSlots,
+              activeCollectionFolderSlugs: availableActiveCollectionFolderSlugs,
+              allCollectionFolderSlugs: allAvailableCollectionSlugs,
+              allowCreateCollectionSlugs,
+              baseFolderPath: `/browse-by-folder`,
+              breadcrumbs,
+              disableBulkDelete,
+              disableBulkEdit,
+              documents,
+              enableRowSelections,
+              folderAssignedCollections,
+              folderFieldName: config.folders.fieldName,
+              folderID: resolvedFolderID || null,
+              FolderResultsComponent,
+              sort: sortPreference,
+              subfolders,
+              viewPreference,
+            } satisfies FolderListViewClientProps,
+            // Component:config.folders?.components?.views?.BrowseByFolders?.Component,
+            Fallback: DefaultBrowseByFolderView,
+            importMap: payload.importMap,
+            serverProps,
+          })}
+        </FolderQueryParamsProvider>
       </>
     ),
   }

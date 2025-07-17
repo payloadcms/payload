@@ -11,6 +11,7 @@ import { APIError, formatErrors, getFolderData } from 'payload'
 import { buildFolderWhereConstraints, combineWhereConstraints } from 'payload/shared'
 
 import {
+  FolderDocumentsPagination,
   FolderFileTable,
   ItemCardGrid,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- This component is returned via server functions, it must reference the exports dir
@@ -63,8 +64,12 @@ export const getFolderResultsComponentAndData = async ({
   browseByFolder = false,
   collectionsToDisplay: activeCollectionSlugs,
   displayAs,
+  docLimit = 10,
+  docPage = 1,
   folderAssignedCollections,
   folderID = undefined,
+  folderLimit = 0,
+  folderPage = 1,
   req,
   sort,
 }: GetFolderResultsComponentAndDataArgs): Promise<GetFolderResultsComponentAndDataResult> => {
@@ -85,6 +90,8 @@ export const getFolderResultsComponentAndData = async ({
     Array.isArray(activeCollectionSlugs) && !activeCollectionSlugs.length ? emptyQuery : undefined
   let folderWhere: undefined | Where =
     Array.isArray(activeCollectionSlugs) && !activeCollectionSlugs.length ? emptyQuery : undefined
+
+  const limits = new Set<number>()
 
   // todo(perf): - collect promises and resolve them in parallel
   for (const activeCollectionSlug of activeCollectionSlugs) {
@@ -145,8 +152,13 @@ export const getFolderResultsComponentAndData = async ({
         }
       }
 
+      const collectionConfig = payload.collections[activeCollectionSlug].config
+      if (Array.isArray(collectionConfig.admin.pagination.limits)) {
+        collectionConfig.admin.pagination.limits.forEach((limit) => limits.add(limit))
+      }
+
       const collectionConstraints = await buildFolderWhereConstraints({
-        collectionConfig: payload.collections[activeCollectionSlug].config,
+        collectionConfig,
         folderID,
         localeCode: req?.locale,
         req,
@@ -162,12 +174,17 @@ export const getFolderResultsComponentAndData = async ({
 
   const folderData = await getFolderData({
     collectionSlug,
+    docLimit,
+    docPage,
     documentWhere,
     folderID,
+    folderLimit,
+    folderPage,
     folderWhere,
     req,
     sort,
   })
+  const { breadcrumbs, documents, documentsPagination, subfolders } = folderData
 
   let FolderResultsComponent = null
 
@@ -188,19 +205,26 @@ export const getFolderResultsComponentAndData = async ({
               title={'Documents'}
               type="file"
             />
+
+            <FolderDocumentsPagination {...documentsPagination} limits={[...limits]} />
           </>
         ) : null}
       </div>
     )
   } else {
-    FolderResultsComponent = <FolderFileTable showRelationCell={browseByFolder} />
+    FolderResultsComponent = (
+      <>
+        <FolderFileTable showRelationCell={browseByFolder} />
+        <FolderDocumentsPagination {...documentsPagination} limits={[...limits]} />
+      </>
+    )
   }
 
   return {
-    breadcrumbs: folderData.breadcrumbs,
-    documents: folderData.documents,
+    breadcrumbs,
+    documents,
     folderAssignedCollections: folderData.folderAssignedCollections,
     FolderResultsComponent,
-    subfolders: folderData.subfolders,
+    subfolders,
   }
 }
