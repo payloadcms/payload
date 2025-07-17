@@ -87,7 +87,7 @@ export const handleGroupBy = async ({
     page: query?.page ? Number(query.page) : undefined,
     populate,
     req,
-    sortOrder: query.groupBy?.startsWith('-') ? 'desc' : 'asc',
+    sort: query?.groupBy,
   })
 
   const data = {
