@@ -1,5 +1,4 @@
 'use client'
-import { dequal } from 'dequal/lite'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { type ListQuery, type Where } from 'payload'
 import { isNumber, transformColumnsToSearchParams } from 'payload/shared'
@@ -24,10 +23,10 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   data,
   defaultLimit,
   defaultSort,
-  listPreferences,
   modifySearchParams,
   onQueryChange: onQueryChangeFromProps,
   orderableFieldName,
+  preset,
 }) => {
   // eslint-disable-next-line react-compiler/react-compiler
   'use no memo'
@@ -54,7 +53,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       return searchParams
     } else {
       return {
-        limit: String(defaultLimit),
+        limit: defaultLimit,
         sort: defaultSort,
       }
     }
@@ -71,7 +70,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
       const newQuery = mergeQuery(currentQuery, incomingQuery, {
         defaults: {
-          limit: defaultLimit?.toString(),
+          limit: defaultLimit,
           sort: defaultSort,
         },
       })
@@ -105,17 +104,15 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   )
 
   const handlePageChange = useCallback(
-    async (page: number) => {
-      // same thing here
-      await refineListData({ page: String(page) })
+    async (arg: number) => {
+      await refineListData({ page: arg })
     },
     [refineListData],
   )
 
   const handlePerPageChange = React.useCallback(
-    async (limit: number) => {
-      // Same thing here
-      await refineListData({ limit: String(limit), page: '1' })
+    async (arg: number) => {
+      await refineListData({ limit: arg, page: 1 })
     },
     [refineListData],
   )
@@ -150,7 +147,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     // Allow the URL to override the default `limit`
     // i.e. only apply the `defaultLimit` if there is no limit in the URL
     if (isNumber(defaultLimit) && !('limit' in currentQuery)) {
-      newQuery.limit = String(defaultLimit)
+      newQuery.limit = defaultLimit
       shouldUpdateQueryString = true
     }
 
@@ -161,34 +158,13 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       shouldUpdateQueryString = true
     }
 
-    if (listPreferences?.groupBy && !('groupBy' in currentQuery)) {
-      newQuery.groupBy = listPreferences.groupBy
-      shouldUpdateQueryString = true
-    }
-
-    if (listPreferences?.preset && !('preset' in currentQuery)) {
-      newQuery.preset = listPreferences.preset
-      shouldUpdateQueryString = true
-    }
-
-    // Iterate through `newQuery` and remove all empty strings
-    // This is how we know to clear them from preferences on the server, but are no longer needed
-    Object.entries(newQuery).forEach(([key, value]) => {
-      if (value === '') {
-        newQuery[key] = undefined
-        shouldUpdateQueryString = true
-      }
-    })
-
-    // Only modify columns if they originated from preferences
-    // We can assume they did if `listPreferences.columns` is defined
-    if (columns && listPreferences?.columns && !('columns' in currentQuery)) {
+    if (columns && !('columns' in currentQuery)) {
       newQuery.columns = transformColumnsToSearchParams(columns)
       shouldUpdateQueryString = true
     }
 
-    if (listPreferences?.preset && !('preset' in currentQuery)) {
-      newQuery.preset = listPreferences.preset
+    if (preset && !('preset' in currentQuery)) {
+      newQuery.preset = preset
       shouldUpdateQueryString = true
     }
 
@@ -219,7 +195,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     if (modifySearchParams) {
       syncQuery()
     }
-  }, [defaultSort, defaultLimit, modifySearchParams, columns])
+  }, [defaultSort, defaultLimit, modifySearchParams, columns, preset])
 
   return (
     <ListQueryContext

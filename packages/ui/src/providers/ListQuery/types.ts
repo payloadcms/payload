@@ -1,6 +1,5 @@
 import type {
   ClientCollectionConfig,
-  CollectionPreferences,
   ColumnPreference,
   ListQuery,
   PaginatedDocs,
@@ -25,7 +24,6 @@ export type ListQueryProps = {
   readonly data: PaginatedDocs
   readonly defaultLimit?: number
   readonly defaultSort?: Sort
-  readonly listPreferences?: CollectionPreferences
   readonly modifySearchParams?: boolean
   readonly onQueryChange?: OnListQueryChange
   readonly orderableFieldName?: string
@@ -33,6 +31,7 @@ export type ListQueryProps = {
    * @deprecated
    */
   readonly preferenceKey?: string
+  readonly preset?: number | string
 }
 
 export type IListQueryContext = {

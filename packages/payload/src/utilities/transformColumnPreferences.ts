@@ -48,5 +48,5 @@ export const transformColumnsToPreferences = (
 export const transformColumnsToSearchParams = (
   columns: Column[] | ColumnPreference[],
 ): ColumnsFromURL => {
-  return columns.map((col) => (col.active ? col.accessor : `-${col.accessor}`))
+  return columns?.map((col) => (col.active ? col.accessor : `-${col.accessor}`))
 }

@@ -1,6 +1,5 @@
 import type {
   ClientConfig,
-  CollectionPreferences,
   Column,
   ListQuery,
   PaginatedDocs,
@@ -15,7 +14,6 @@ import { flattenAllFields } from 'payload'
 export const handleGroupBy = async ({
   clientConfig,
   collectionConfig,
-  collectionPreferences,
   collectionSlug,
   columns,
   customCellProps,
@@ -27,7 +25,6 @@ export const handleGroupBy = async ({
 }: {
   clientConfig: ClientConfig
   collectionConfig: SanitizedCollectionConfig
-  collectionPreferences?: CollectionPreferences
   collectionSlug: string
   columns: any[]
   customCellProps?: Record<string, any>
@@ -158,7 +155,6 @@ export const handleGroupBy = async ({
         const { columnState: newColumnState, Table: NewTable } = renderTable({
           clientCollectionConfig,
           collectionConfig,
-          columnPreferences: collectionPreferences?.columns,
           columns,
           customCellProps,
           data: groupData,
@@ -189,7 +185,6 @@ export const handleGroupBy = async ({
     ;({ columnState } = renderTable({
       clientCollectionConfig,
       collectionConfig,
-      columnPreferences: collectionPreferences?.columns,
       columns,
       customCellProps,
       data,

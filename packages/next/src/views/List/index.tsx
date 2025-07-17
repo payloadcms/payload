@@ -87,15 +87,15 @@ export const renderListView = async (
     throw new Error('not-found')
   }
 
-  const query = queryFromArgs || (queryFromReq as ListQuery) || {}
+  const query: ListQuery = queryFromArgs || queryFromReq
 
-  const columns: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
+  const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
   const collectionPreferences = await upsertPreferences<CollectionPreferences>({
     key: `collection-${collectionSlug}`,
     req,
     value: {
-      columns,
+      columns: columnsFromQuery,
       groupBy: query?.groupBy,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       preset: query?.preset,
@@ -104,6 +104,16 @@ export const renderListView = async (
   })
 
   query.preset = collectionPreferences?.preset
+
+  query.page = isNumber(query?.page) ? Number(query.page) : 0
+
+  query.limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+
+  query.sort =
+    collectionPreferences?.sort ||
+    (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+
+  query.groupBy = collectionPreferences?.groupBy
 
   const {
     routes: { admin: adminRoute },
@@ -114,29 +124,18 @@ export const renderListView = async (
       throw new Error('not-found')
     }
 
-    // TODO: don't stringify this...
-    query.limit = (
-      collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
-    ).toString()
-
-    query.groupBy = collectionPreferences?.groupBy
-
-    const sort =
-      collectionPreferences?.sort ||
-      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
-
     let where = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
-      where: query?.where || undefined,
+      where: query?.where,
     })
 
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
       const baseListFilter = await collectionConfig.admin.baseListFilter({
-        limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-        page: isNumber(query?.page) ? Number(query.page) : 0,
+        limit: query.limit,
+        page: query.page,
         req,
-        sort,
+        sort: query.sort,
       })
 
       if (baseListFilter) {
@@ -180,9 +179,8 @@ export const renderListView = async (
       ;({ columnState, data, Table } = await handleGroupBy({
         clientConfig,
         collectionConfig,
-        collectionPreferences,
         collectionSlug,
-        columns,
+        columns: collectionPreferences?.columns,
         customCellProps,
         drawerSlug,
         enableRowSelections,
@@ -209,8 +207,7 @@ export const renderListView = async (
       ;({ columnState, Table } = renderTable({
         clientCollectionConfig: clientConfig.collections.find((c) => c.slug === collectionSlug),
         collectionConfig,
-        columnPreferences: collectionPreferences?.columns,
-        columns,
+        columns: collectionPreferences?.columns,
         customCellProps,
         data,
         drawerSlug,
@@ -248,7 +245,7 @@ export const renderListView = async (
       collectionConfig,
       data,
       i18n,
-      limit: isNumber(query.limit) ? Number(query.limit) : undefined,
+      limit: query.limit,
       listPreferences: collectionPreferences,
       listSearchableFields: collectionConfig.admin.listSearchableFields,
       locale: fullLocale,
@@ -280,13 +277,13 @@ export const renderListView = async (
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
             collectionSlug={collectionSlug}
-            columns={transformColumnsToPreferences(columnState)}
+            columns={collectionPreferences?.columns}
             data={data}
-            defaultLimit={isNumber(query.limit) ? Number(query.limit) : undefined}
-            defaultSort={sort}
-            listPreferences={collectionPreferences}
+            defaultLimit={query.limit}
+            defaultSort={query.sort}
             modifySearchParams={!isInDrawer}
             orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
+            preset={collectionPreferences?.preset}
           >
             {RenderServerComponent({
               clientProps: {

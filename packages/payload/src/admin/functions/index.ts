@@ -50,8 +50,8 @@ export type ListQuery = {
    * A leading hyphen represents descending order, e.g. `-category`
    */
   groupBy?: string
-  limit?: string
-  page?: string
+  limit?: number
+  page?: number
   preset?: number | string
   queryByGroup?: Record<string, ListQuery>
   /*
