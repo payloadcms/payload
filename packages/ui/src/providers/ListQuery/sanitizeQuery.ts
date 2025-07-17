@@ -9,7 +9,10 @@ export const sanitizeQuery = (toSanitize: ListQuery): ListQuery => {
   const sanitized = { ...toSanitize }
 
   Object.entries(sanitized).forEach(([key, value]) => {
-    if (key === 'columns' && Array.isArray(sanitized[key]) && sanitized[key].length === 0) {
+    if (
+      key === 'columns' &&
+      (value === '[]' || (Array.isArray(sanitized[key]) && sanitized[key].length === 0))
+    ) {
       delete sanitized[key]
     }
 

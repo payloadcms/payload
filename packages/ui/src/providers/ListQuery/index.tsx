@@ -1,5 +1,4 @@
 'use client'
-import { dequal } from 'dequal/lite'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { type ListQuery, type Where } from 'payload'
 import * as qs from 'qs-esm'
@@ -147,17 +146,13 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
     const newQuery = { ...(currentQuery || {}), ...(sanitizedQueryFromProps || {}) }
 
-    const isEqual = dequal(currentQuery, newQuery)
+    const search = `?${qs.stringify({ ...newQuery, columns: JSON.stringify(newQuery.columns) })}`
 
-    if (!isEqual) {
+    if (window.location.search !== search) {
       setCurrentQuery(newQuery)
 
       // Important: do not use router.replace here to avoid re-rendering on initial load
-      window.history.replaceState(
-        null,
-        '',
-        `?${qs.stringify({ ...newQuery, columns: JSON.stringify(newQuery.columns) })}`,
-      )
+      window.history.replaceState(null, '', search)
     }
   })
 
