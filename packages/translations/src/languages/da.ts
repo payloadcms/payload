@@ -321,6 +321,7 @@ export const daTranslations: DefaultTranslationsObject = {
     moveUp: 'Ryk op',
     moving: 'Flytter',
     movingCount: 'Flytter {{count}} {{label}}',
+    newLabel: 'Ny {{label}}',
     newPassword: 'Ny adgangskode',
     next: 'Næste',
     no: 'Nej',

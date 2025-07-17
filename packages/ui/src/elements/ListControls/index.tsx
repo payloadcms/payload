@@ -7,7 +7,7 @@ import React, { Fragment, useEffect, useRef, useState } from 'react'
 
 import type { ListControlsProps } from './types.js'
 
-import { Popup, PopupList } from '../../elements/Popup/index.js'
+import { Popup } from '../../elements/Popup/index.js'
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { Dots } from '../../icons/Dots/index.js'
@@ -17,11 +17,11 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { Pill } from '../Pill/index.js'
+import { ActiveQueryPreset } from '../QueryPresets/ActiveQueryPreset/index.js'
+import { useQueryPresets } from '../QueryPresets/useQueryPresets.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
-import { ActiveQueryPreset } from './ActiveQueryPreset/index.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
-import { useQueryPresets } from './useQueryPresets.js'
 import './index.scss'
 
 const baseClass = 'list-controls'
@@ -40,7 +40,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     enableColumns = true,
     enableFilters = true,
     enableSort = false,
-    listMenuItems: listMenuItemsFromProps,
+    listMenuItems,
     queryPreset: activePreset,
     queryPresetPermissions,
     renderedFilters,
@@ -53,7 +53,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     CreateNewPresetDrawer,
     DeletePresetModal,
     EditPresetDrawer,
-    hasModifiedPreset,
     openPresetListDrawer,
     PresetListDrawer,
     queryPresetMenuItems,
@@ -137,38 +136,51 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     }
   }, [t, listSearchableFields, i18n, searchLabel])
 
-  let listMenuItems: React.ReactNode[] = listMenuItemsFromProps
-
-  if (
-    collectionConfig?.enableQueryPresets &&
-    !disableQueryPresets &&
-    queryPresetMenuItems?.length > 0
-  ) {
-    // Cannot push or unshift into `listMenuItemsFromProps` as it will mutate the original array
-    listMenuItems = [
-      ...queryPresetMenuItems,
-      listMenuItemsFromProps?.length > 0 ? <PopupList.Divider key="divider" /> : null,
-      ...(listMenuItemsFromProps || []),
-    ]
-  }
+  const isQueryPresetsEnabled = collectionConfig?.enableQueryPresets && !disableQueryPresets
 
   return (
     <Fragment>
       <div className={baseClass}>
-        <div className={`${baseClass}__wrap`}>
-          <SearchIcon />
-          <SearchFilter
-            handleChange={handleSearchChange}
-            key={collectionSlug}
-            // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
-            label={searchLabelTranslated.current}
-            searchQueryParam={query?.search}
-          />
-          {activePreset && hasModifiedPreset ? (
-            <div className={`${baseClass}__modified`}>Modified</div>
-          ) : null}
-          <div className={`${baseClass}__buttons`}>
-            <div className={`${baseClass}__buttons-wrap`}>
+        <div
+          className={[
+            `${baseClass}__outer-wrap`,
+            isQueryPresetsEnabled && `${baseClass}__outer-wrap--with-presets`,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {isQueryPresetsEnabled && (
+            <div className={`${baseClass}__preset-controls`}>
+              <ActiveQueryPreset
+                activePreset={activePreset}
+                openPresetListDrawer={openPresetListDrawer}
+                resetPreset={resetPreset}
+              />
+              <div className={`${baseClass}__preset-menu-items`}>
+                {queryPresetMenuItems.map((item, i) => (
+                  <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
+                ))}
+              </div>
+            </div>
+          )}
+          <div
+            className={[
+              `${baseClass}__wrap`,
+              isQueryPresetsEnabled && `${baseClass}__wrap--with-presets`,
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            <div className={`${baseClass}__search`}>
+              <SearchIcon />
+              <SearchFilter
+                handleChange={handleSearchChange}
+                key={collectionSlug}
+                label={searchLabelTranslated.current}
+                searchQueryParam={query?.search}
+              />
+            </div>
+            <div className={`${baseClass}__buttons`}>
               {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
               {enableColumns && (
                 <Pill
@@ -211,20 +223,13 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   {t('general:sort')}
                 </Pill>
               )}
-              {!disableQueryPresets && (
-                <ActiveQueryPreset
-                  activePreset={activePreset}
-                  openPresetListDrawer={openPresetListDrawer}
-                  resetPreset={resetPreset}
-                />
-              )}
               {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
                 <Popup
                   button={<Dots ariaLabel={t('general:moreOptions')} />}
                   className={`${baseClass}__popup`}
                   horizontalAlign="right"
                   id="list-menu"
-                  size="medium"
+                  size="small"
                   verticalAlign="bottom"
                 >
                   {listMenuItems.map((item, i) => (

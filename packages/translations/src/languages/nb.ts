@@ -323,6 +323,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     moveUp: 'Flytt opp',
     moving: 'Flytting',
     movingCount: 'Flytter {{count}} {{label}}',
+    newLabel: 'Ny {{label}}',
     newPassword: 'Nytt passord',
     next: 'Neste',
     no: 'Nei',

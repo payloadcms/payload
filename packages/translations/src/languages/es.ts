@@ -328,6 +328,7 @@ export const esTranslations: DefaultTranslationsObject = {
     moveUp: 'Mover arriba',
     moving: 'Moviendo',
     movingCount: 'Moviendo {{count}} {{label}}',
+    newLabel: 'Nuevo {{label}}',
     newPassword: 'Nueva contraseña',
     next: 'Siguiente',
     no: 'No',
