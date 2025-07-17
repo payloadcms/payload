@@ -141,7 +141,7 @@ export const enTranslations = {
     addNewLabel: 'Add new {{label}}',
     addRelationship: 'Add Relationship',
     addUpload: 'Add Upload',
-    block: 'block',
+    block: 'Block',
     blocks: 'blocks',
     blockType: 'Block Type',
     chooseBetweenCustomTextOrDocument:
