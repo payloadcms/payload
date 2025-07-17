@@ -244,6 +244,15 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDrawerOpen])
 
+  const memoizedListQuery = React.useMemo(
+    () => ({
+      columns: transformColumnsToPreferences(columnState)?.map(({ accessor }) => accessor),
+      limit: field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit,
+      sort: field.defaultSort ?? collectionConfig?.defaultSort,
+    }),
+    [columnState, field, collectionConfig],
+  )
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
@@ -318,13 +327,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     ? undefined
                     : `_${field.collection}_${fieldPath.replaceAll('.', '_')}_order`
                 }
-                query={{
-                  columns: transformColumnsToPreferences(columnState)?.map(
-                    ({ accessor }) => accessor,
-                  ),
-                  limit: field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit,
-                  sort: field.defaultSort ?? collectionConfig?.defaultSort,
-                }}
+                query={memoizedListQuery}
               >
                 <TableColumnsProvider
                   collectionSlug={isPolymorphic ? relationTo[0] : relationTo}

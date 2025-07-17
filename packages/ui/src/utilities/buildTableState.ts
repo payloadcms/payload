@@ -158,7 +158,7 @@ const buildTableState = async (
 
   // lookup docs, if desired, i.e. within `join` field which initialize with `depth: 0`
 
-  if (!data.docs || query) {
+  if (!data?.docs || query) {
     if (Array.isArray(collectionSlug)) {
       if (!parent) {
         throw new APIError('Unexpected array of collectionSlug, parent must be provided')
