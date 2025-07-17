@@ -284,6 +284,7 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - folders
           - hooks
           - lexical__collections__Lexical__e2e__main
           - lexical__collections__Lexical__e2e__blocks
@@ -418,6 +419,7 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - folders
           - hooks
           - lexical__collections__Lexical__e2e__main
           - lexical__collections__Lexical__e2e__blocks

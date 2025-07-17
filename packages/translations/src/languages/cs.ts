@@ -186,6 +186,8 @@ export const csTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Smazat složku',
     folderName: 'Název složky',
     folders: 'Složky',
+    folderTypeDescription:
+      'Vyberte, který typ dokumentů ze sbírky by měl být dovolen v této složce.',
     itemHasBeenMoved: '{{title}} bylo přesunuto do {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} byl přesunut do kořenové složky',
     itemsMovedToFolder: '{{title}} přesunuto do {{folderName}}',
