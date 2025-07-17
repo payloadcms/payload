@@ -1,4 +1,5 @@
 import type { ReadonlyURLSearchParams } from 'next/navigation.js'
+import type { ListQuery } from 'payload'
 
 import * as qs from 'qs-esm'
 
@@ -8,13 +9,24 @@ import * as qs from 'qs-esm'
  * In Next.js, the `useSearchParams()` hook from `next/navigation` returns a `URLSearchParams` object.
  * This function can be used to parse that object into a more usable format.
  * @param {ReadonlyURLSearchParams} searchParams - The URLSearchParams object to parse.
- * @returns {qs.ParsedQs} - The parsed query string object.
+ * @returns {ListQuery} - The parsed query string object.
  */
-export function parseSearchParams(searchParams: ReadonlyURLSearchParams): qs.ParsedQs {
+export function parseSearchParams(searchParams: ReadonlyURLSearchParams): ListQuery {
   const search = searchParams.toString()
 
-  return qs.parse(search, {
+  const parsed = qs.parse(search, {
     depth: 10,
     ignoreQueryPrefix: true,
-  })
+  }) as ListQuery
+
+  // now sanitize some parameters string to numbers where needed, e.g. page, limit, etc.
+  const numberParams = ['page', 'limit']
+
+  for (const param of numberParams) {
+    if (parsed[param] && typeof parsed[param] === 'string' && !isNaN(Number(parsed[param]))) {
+      parsed[param] = Number(parsed[param])
+    }
+  }
+
+  return parsed
 }
