@@ -306,12 +306,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           {data?.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <ListQueryProvider
-                columns={transformColumnsToPreferences(columnState)}
                 data={data}
-                defaultLimit={
-                  field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit
-                }
-                defaultSort={field.defaultSort ?? collectionConfig?.defaultSort}
                 modifySearchParams={false}
                 onQueryChange={setQuery}
                 orderableFieldName={
@@ -319,6 +314,13 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     ? undefined
                     : `_${field.collection}_${fieldPath.replaceAll('.', '_')}_order`
                 }
+                query={{
+                  columns: transformColumnsToPreferences(columnState)?.map(
+                    ({ accessor }) => accessor,
+                  ),
+                  limit: field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit,
+                  sort: field.defaultSort ?? collectionConfig?.defaultSort,
+                }}
               >
                 <TableColumnsProvider
                   collectionSlug={isPolymorphic ? relationTo[0] : relationTo}

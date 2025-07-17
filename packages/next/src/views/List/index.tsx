@@ -18,6 +18,7 @@ import {
   isNumber,
   mergeListSearchAndWhere,
   transformColumnsToPreferences,
+  transformColumnsToSearchParams,
 } from 'payload/shared'
 import React, { Fragment } from 'react'
 
@@ -109,6 +110,8 @@ export const renderListView = async (
   query.sort =
     collectionPreferences?.sort ||
     (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+
+  query.columns = transformColumnsToSearchParams(collectionPreferences?.columns || [])
 
   const {
     routes: { admin: adminRoute },
@@ -256,13 +259,10 @@ export const renderListView = async (
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
             collectionSlug={collectionSlug}
-            columns={collectionPreferences?.columns}
             data={data}
-            defaultLimit={query.limit}
-            defaultSort={query.sort}
             modifySearchParams={!isInDrawer}
             orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
-            preset={collectionPreferences?.preset}
+            query={query}
           >
             {RenderServerComponent({
               clientProps: {
