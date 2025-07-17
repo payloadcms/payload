@@ -114,7 +114,11 @@ export const reduceFields = ({
       const val = createNestedClientFieldPath(path, field)
 
       // If the field is disabled, skip it
-      if (disabledFields.includes(val)) {
+      if (
+        disabledFields.some(
+          (disabledField) => val === disabledField || val.startsWith(`${disabledField}.`),
+        )
+      ) {
         return fieldsToUse
       }
 
