@@ -13,10 +13,6 @@ export type ColumnsFromURL = string[]
 export const transformColumnsToPreferences = (
   columns: Column[] | ColumnPreference[] | ColumnsFromURL | string | undefined,
 ): ColumnPreference[] | undefined => {
-  if (!columns) {
-    return undefined
-  }
-
   let columnsToTransform = columns
 
   // Columns that originate from the URL are a stringified JSON array and need to be parsed first
@@ -48,5 +44,5 @@ export const transformColumnsToPreferences = (
 export const transformColumnsToSearchParams = (
   columns: Column[] | ColumnPreference[],
 ): ColumnsFromURL => {
-  return columns.map((col) => (col.active ? col.accessor : `-${col.accessor}`))
+  return columns?.map((col) => (col.active ? col.accessor : `-${col.accessor}`))
 }

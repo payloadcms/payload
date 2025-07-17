@@ -232,7 +232,6 @@ const buildTableState = async (
     clientConfig,
     collectionConfig,
     collections: Array.isArray(collectionSlug) ? collectionSlug : undefined,
-    columnPreferences: Array.isArray(collectionSlug) ? collectionPreferences?.columns : undefined, // TODO, might not be neededcolumns,
     columns,
     docs,
     enableRowSelections,

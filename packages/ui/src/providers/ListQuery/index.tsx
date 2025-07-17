@@ -22,10 +22,10 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   data,
   defaultLimit,
   defaultSort,
-  listPreferences,
   modifySearchParams,
   onQueryChange: onQueryChangeFromProps,
   orderableFieldName,
+  preset,
 }) => {
   // TODO: Investigate if this is still needed
   // eslint-disable-next-line react-compiler/react-compiler
@@ -171,15 +171,13 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       shouldUpdateQueryString = true
     }
 
-    // Only modify columns if they originated from preferences
-    // We can assume they did if `listPreferences.columns` is defined
-    if (columns && listPreferences?.columns && !('columns' in currentQuery)) {
+    if (columns && !('columns' in currentQuery)) {
       newQuery.columns = transformColumnsToSearchParams(columns)
       shouldUpdateQueryString = true
     }
 
-    if (listPreferences?.preset && !('preset' in currentQuery)) {
-      newQuery.preset = listPreferences.preset
+    if (preset && !('preset' in currentQuery)) {
+      newQuery.preset = preset
       shouldUpdateQueryString = true
     }
 
@@ -210,7 +208,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     if (modifySearchParams) {
       syncQuery()
     }
-  }, [defaultSort, defaultLimit, modifySearchParams, columns])
+  }, [defaultSort, defaultLimit, modifySearchParams, columns, preset])
 
   return (
     <ListQueryContext

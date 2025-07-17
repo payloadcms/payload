@@ -87,13 +87,13 @@ export const renderListView = async (
 
   const query: ListQuery = queryFromArgs || queryFromReq
 
-  const columns: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
+  const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
   const collectionPreferences = await upsertPreferences<CollectionPreferences>({
     key: `collection-${collectionSlug}`,
     req,
     value: {
-      columns,
+      columns: columnsFromQuery,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       preset: query?.preset,
       sort: query?.sort as string,
@@ -101,8 +101,11 @@ export const renderListView = async (
   })
 
   query.preset = collectionPreferences?.preset
+
   query.page = isNumber(query?.page) ? Number(query.page) : 0
+
   query.limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+
   query.sort =
     collectionPreferences?.sort ||
     (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
@@ -184,8 +187,7 @@ export const renderListView = async (
     const { columnState, Table } = renderTable({
       clientCollectionConfig,
       collectionConfig,
-      columnPreferences: collectionPreferences?.columns,
-      columns,
+      columns: collectionPreferences?.columns,
       customCellProps,
       docs: data.docs,
       drawerSlug,
@@ -254,13 +256,13 @@ export const renderListView = async (
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
             collectionSlug={collectionSlug}
-            columns={transformColumnsToPreferences(columnState)}
+            columns={collectionPreferences.columns}
             data={data}
             defaultLimit={query.limit}
             defaultSort={query.sort}
-            listPreferences={collectionPreferences}
             modifySearchParams={!isInDrawer}
             orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
+            preset={collectionPreferences.preset}
           >
             {RenderServerComponent({
               clientProps: {
