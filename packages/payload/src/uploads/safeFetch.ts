@@ -1,7 +1,15 @@
-import type { Dispatcher } from 'undici'
+import type { LookupFunction } from 'net'
 
+import { lookup } from 'dns'
 import ipaddr from 'ipaddr.js'
 import { Agent, fetch as undiciFetch } from 'undici'
+
+/**
+ * @internal this is used to mock the IP `lookup` function in integration tests
+ */
+export const _internal_safeFetchGlobal = {
+  lookup,
+}
 
 const isSafeIp = (ip: string) => {
   try {
@@ -24,27 +32,56 @@ const isSafeIp = (ip: string) => {
   return true
 }
 
-const ssrfFilterInterceptor: Dispatcher.DispatcherComposeInterceptor = (dispatch) => {
-  return (opts, handler) => {
-    const url = new URL(opts.origin?.toString() + opts.path)
-    if (!isSafeIp(url.hostname)) {
-      throw new Error(`Blocked unsafe attempt to ${url}`)
+const ssrfFilterInterceptor: LookupFunction = (hostname, options, callback) => {
+  _internal_safeFetchGlobal.lookup(hostname, options, (err, address, family) => {
+    if (err) {
+      callback(err, address, family)
+    } else {
+      let ips = [] as string[]
+      if (Array.isArray(address)) {
+        ips = address.map((a) => a.address)
+      } else {
+        ips = [address]
+      }
+
+      if (ips.some((ip) => !isSafeIp(ip))) {
+        callback(new Error(`Blocked unsafe attempt to ${hostname}`), address, family)
+        return
+      }
+
+      callback(null, address, family)
     }
-    return dispatch(opts, handler)
-  }
+  })
 }
 
-const safeDispatcher = new Agent().compose(ssrfFilterInterceptor)
-
+const safeDispatcher = new Agent({
+  connect: { lookup: ssrfFilterInterceptor },
+})
 /**
  * A "safe" version of undici's fetch that prevents SSRF attacks.
  *
  * - Utilizes a custom dispatcher that filters out requests to unsafe IP addresses.
+ * - Validates domain names by resolving them to IP addresses and checking if they're safe.
  * - Undici was used because it supported interceptors as well as "credentials: include". Native fetch
  */
 export const safeFetch = async (...args: Parameters<typeof undiciFetch>) => {
-  const [url, options] = args
+  const [unverifiedUrl, options] = args
+
   try {
+    const url = new URL(unverifiedUrl)
+
+    let hostname = url.hostname
+
+    // Strip brackets from IPv6 addresses (e.g., "[::1]" => "::1")
+    if (hostname.startsWith('[') && hostname.endsWith(']')) {
+      hostname = hostname.slice(1, -1)
+    }
+
+    if (ipaddr.isValid(hostname)) {
+      if (!isSafeIp(hostname)) {
+        throw new Error(`Blocked unsafe attempt to ${hostname}`)
+      }
+    }
     return await undiciFetch(url, {
       ...options,
       dispatcher: safeDispatcher,
@@ -56,11 +93,13 @@ export const safeFetch = async (...args: Parameters<typeof undiciFetch>) => {
         // The desired message we want to bubble up is in the cause
         throw new Error(error.cause.message)
       } else {
-        let stringifiedUrl: string | undefined | URL = undefined
-        if (typeof url === 'string' || url instanceof URL) {
-          stringifiedUrl = url
-        } else if (url instanceof Request) {
-          stringifiedUrl = url.url
+        let stringifiedUrl: string | undefined = undefined
+        if (typeof unverifiedUrl === 'string') {
+          stringifiedUrl = unverifiedUrl
+        } else if (unverifiedUrl instanceof URL) {
+          stringifiedUrl = unverifiedUrl.toString()
+        } else if (unverifiedUrl instanceof Request) {
+          stringifiedUrl = unverifiedUrl.url
         }
 
         throw new Error(`Failed to fetch from ${stringifiedUrl}, ${error.message}`)

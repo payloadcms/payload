@@ -86,10 +86,15 @@ export const slTranslations: DefaultTranslationsObject = {
     deletingFile: 'Pri brisanju datoteke je prišlo do napake.',
     deletingTitle:
       'Pri brisanju {{title}} je prišlo do napake. Prosimo, preverite povezavo in poskusite znova.',
+    documentNotFound:
+      'Dokumenta z ID {{id}} ni bilo mogoče najti. Morda je bil izbrisan ali nikoli ni obstajal, ali pa do njega nimate dostopa.',
     emailOrPasswordIncorrect: 'Vnesena e-pošta ali geslo je napačno.',
     followingFieldsInvalid_one: 'Naslednje polje je neveljavno:',
     followingFieldsInvalid_other: 'Naslednja polja so neveljavna:',
     incorrectCollection: 'Napačna zbirka',
+    insufficientClipboardPermissions:
+      'Dostop do odložišča je bil zavrnjen. Preverite dovoljenja za odložišče.',
+    invalidClipboardData: 'Neveljavni podatki v odložišču.',
     invalidFileType: 'Neveljaven tip datoteke',
     invalidFileTypeValue: 'Neveljaven tip datoteke: {{value}}',
     invalidRequestArgs: 'V zahtevi so bili poslani neveljavni argumenti: {{args}}',
@@ -111,6 +116,7 @@ export const slTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Pri nalaganju datoteke je prišlo do težave.',
     tokenInvalidOrExpired: 'Žeton je neveljaven ali je potekel.',
     tokenNotProvided: 'Žeton ni bil posredovan.',
+    unableToCopy: 'Kopiranje ni mogoče.',
     unableToDeleteCount: 'Ni bilo mogoče izbrisati {{count}} od {{total}} {{label}}.',
     unableToReindexCollection:
       'Napaka pri reindeksiranju zbirke {{collection}}. Operacija je bila prekinjena.',
@@ -243,7 +249,9 @@ export const slTranslations: DefaultTranslationsObject = {
       'To bo odstranilo obstoječe indekse in ponovno indeksiralo dokumente v vseh zbirkah.',
     copied: 'Kopirano',
     copy: 'Kopiraj',
+    copyField: 'Kopiraj polje',
     copying: 'Kopiranje',
+    copyRow: 'Kopiraj vrstico',
     copyWarning: 'Prepisali boste {{to}} z {{from}} za {{label}} {{title}}. Ste prepričani?',
     create: 'Ustvari',
     created: 'Ustvarjeno',
@@ -337,6 +345,8 @@ export const slTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Prepišite obstoječe podatke polja',
     pageNotFound: 'Stran ni najdena',
     password: 'Geslo',
+    pasteField: 'Prilepi polje',
+    pasteRow: 'Prilepi vrstico',
     payloadSettings: 'Nastavitve Payloada',
     perPage: 'Na stran: {{limit}}',
     previous: 'Prejšnji',

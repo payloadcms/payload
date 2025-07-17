@@ -1,4 +1,4 @@
-import type { OptionObject, Payload, User } from 'payload'
+import type { OptionObject, Payload, TypedUser } from 'payload'
 
 import { cookies as getCookies } from 'next/headers.js'
 
@@ -10,7 +10,7 @@ type Args = {
   payload: Payload
   tenantsCollectionSlug: string
   useAsTitle: string
-  user: User
+  user: TypedUser
 }
 
 export const TenantSelectionProvider = async ({

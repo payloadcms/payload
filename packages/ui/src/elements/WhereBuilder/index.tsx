@@ -185,7 +185,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             onClick={async () => {
               await addCondition({
                 andIndex: 0,
-                field: reducedFields[0],
+                field: reducedFields.find((field) => !field.field.admin?.disableListFilter),
                 orIndex: conditions.length,
                 relation: 'or',
               })

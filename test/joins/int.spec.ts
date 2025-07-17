@@ -115,6 +115,7 @@ describe('Joins Field', () => {
           camelCaseCategory: category.id,
         },
         array: [{ category: category.id }],
+        arrayHasMany: [{ category: [category.id] }],
         localizedArray: [{ category: category.id }],
         blocks: [{ blockType: 'block', category: category.id }],
       })
@@ -245,6 +246,16 @@ describe('Joins Field', () => {
 
     expect(categoryWithPosts.arrayPosts.docs).toBeDefined()
     expect(categoryWithPosts.arrayPosts.docs).toHaveLength(10)
+  })
+
+  it('should populate joins with array hasMany relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.arrayHasManyPosts.docs).toBeDefined()
+    expect(categoryWithPosts.arrayHasManyPosts.docs).toHaveLength(10)
   })
 
   it('should populate joins with localized array relationships', async () => {

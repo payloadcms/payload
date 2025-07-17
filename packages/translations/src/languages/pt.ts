@@ -87,10 +87,15 @@ export const ptTranslations: DefaultTranslationsObject = {
     deletingFile: 'Ocorreu um erro ao excluir o arquivo.',
     deletingTitle:
       'Ocorreu um erro ao excluir {{title}}. Por favor, verifique sua conexão e tente novamente.',
+    documentNotFound:
+      'O documento com o ID {{id}} não pôde ser encontrado. Ele pode ter sido deletado ou nunca ter existido, ou você pode não ter acesso a ele.',
     emailOrPasswordIncorrect: 'O email ou senha fornecido está incorreto.',
     followingFieldsInvalid_one: 'O campo a seguir está inválido:',
     followingFieldsInvalid_other: 'Os campos a seguir estão inválidos:',
     incorrectCollection: 'Coleção Incorreta',
+    insufficientClipboardPermissions:
+      'Acesso à área de transferência negado. Verifique suas permissões da área de transferência.',
+    invalidClipboardData: 'Dados inválidos na área de transferência.',
     invalidFileType: 'Tipo de arquivo inválido',
     invalidFileTypeValue: 'Tipo de arquivo inválido: {{value}}',
     invalidRequestArgs: 'Argumentos inválidos passados na solicitação: {{args}}',
@@ -112,6 +117,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Ocorreu um problema ao carregar o arquivo.',
     tokenInvalidOrExpired: 'Token expirado ou inválido.',
     tokenNotProvided: 'Token não fornecido.',
+    unableToCopy: 'Não é possível copiar.',
     unableToDeleteCount: 'Não é possível excluir {{count}} de {{total}} {{label}}.',
     unableToReindexCollection: 'Erro ao reindexar a coleção {{collection}}. Operação abortada.',
     unableToUpdateCount: 'Não foi possível atualizar {{count}} de {{total}} {{label}}.',
@@ -243,7 +249,9 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Isso removerá os índices existentes e reindexará os documentos em todas as coleções.',
     copied: 'Copiado',
     copy: 'Copiar',
+    copyField: 'Copiar campo',
     copying: 'Copiando',
+    copyRow: 'Copiar linha',
     copyWarning:
       'Você está prestes a sobrescrever {{to}} com {{from}} para {{label}} {{title}}. Tem certeza?',
     create: 'Criar',
@@ -338,6 +346,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Sobrescrever dados de campo existentes',
     pageNotFound: 'Página não encontrada',
     password: 'Senha',
+    pasteField: 'Colar campo',
+    pasteRow: 'Colar linha',
     payloadSettings: 'Configurações do Payload',
     perPage: 'Itens por Página: {{limit}}',
     previous: 'Anterior',

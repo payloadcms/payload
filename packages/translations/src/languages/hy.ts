@@ -86,10 +86,15 @@ export const hyTranslations: DefaultTranslationsObject = {
     deletingFile: 'Ֆայլը ջնջելու ժամանակ սխալ է տեղի ունեցել։',
     deletingTitle:
       '{{title}}-ը ջնջելու ժամանակ սխալ է տեղի ունեցել։ Խնդրում ենք ստուգել Ձեր կապը և կրկին փորձել։',
+    documentNotFound:
+      'Գրառումը ID-ով {{id}} չի գտնվել։ Այն կարող է ջնջվել կամ նույնիսկ էլ գոյություն չունել։ Ֆո',
     emailOrPasswordIncorrect: 'Տրամադրված էլ. փոստը կամ գաղտնաբառը սխալ է։',
     followingFieldsInvalid_one: 'Հետևյալ դաշտն անվավեր է։',
     followingFieldsInvalid_other: 'Հետևյալ դաշտերն անվավեր են։',
     incorrectCollection: 'Սխալ հավաքածու',
+    insufficientClipboardPermissions:
+      'Սեղմատախտակին հասանելիությունը մերժվել է։ Խնդրում ենք ստուգել ձեր սեղմատախտակի թույլտվությունները։',
+    invalidClipboardData: 'Անվավեր սեղմատախտակի տվյալներ։',
     invalidFileType: 'Անվավեր ֆայլի տեսակ',
     invalidFileTypeValue: 'Անվավեր ֆայլի տեսակ՝ {{value}}',
     invalidRequestArgs: 'Հայտում փոխանցված անվավեր արգումենտներ՝ {{args}}',
@@ -111,6 +116,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Ֆայլը վերբեռնելու ժամանակ խնդիր է առաջացել։',
     tokenInvalidOrExpired: 'Թոքենն անվավեր է կամ ժամկետանց։',
     tokenNotProvided: 'Թոքենը տրամադրված չէ։',
+    unableToCopy: 'Չհաջողվեց պատճենել։',
     unableToDeleteCount: 'Հնարավոր չէ ջնջել {{count}}-ը {{total}} {{label}}-ից։',
     unableToReindexCollection:
       'Հավաքածու {{collection}}-ը վերաինդեքսավորելու սխալ։ Գործողությունն ընդհատվել է։',
@@ -243,7 +249,9 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Սա կհեռացնի գոյություն ունեցող ինդեքսները և կվերաինդեքսավորի փաստաթղթերը բոլոր հավաքածուներում։',
     copied: 'Պատճենված',
     copy: 'Պատճենել',
+    copyField: 'Պատճենել դաշտը',
     copying: 'Պատճենվում է',
+    copyRow: 'Պատճենել տողը',
     copyWarning:
       'Դուք պատրաստվում եք վերագրել {{to}}-ը {{from}}-ով {{label}} {{title}}-ի համար։ Համոզվա՞ծ եք։',
     create: 'Ստեղծել',
@@ -338,6 +346,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Վերագրել գոյություն ունեցող դաշտի տվյալները',
     pageNotFound: 'Էջը չի գտնվել',
     password: 'Գաղտնաբառ',
+    pasteField: 'Տեղադրել դաշտը',
+    pasteRow: 'Տեղադրել տողը',
     payloadSettings: 'Payload-ի կարգավորումներ',
     perPage: 'Էջում՝ {{limit}}',
     previous: 'Նախորդ',

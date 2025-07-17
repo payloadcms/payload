@@ -123,6 +123,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.endpoints = config.endpoints ?? []
   config.globals = config.globals ?? []
   config.graphQL = {
+    disableIntrospectionInProduction: true,
     disablePlaygroundInProduction: true,
     maxComplexity: 1000,
     schemaOutputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/schema.graphql`,

@@ -86,10 +86,15 @@ export const koTranslations: DefaultTranslationsObject = {
     deletingFile: '파일을 삭제하는 중에 오류가 발생했습니다.',
     deletingTitle:
       '{{title}} 삭제하는 중에 오류가 발생했습니다. 인터넷 연결을 확인하고 다시 시도하세요.',
+    documentNotFound:
+      'ID가 {{id}}인 문서를 찾을 수 없습니다. 이 문서는 삭제되었거나 존재하지 않았거나, 당신이 접근 권한이 없을 수 있습니다.',
     emailOrPasswordIncorrect: '입력한 이메일 또는 비밀번호가 올바르지 않습니다.',
     followingFieldsInvalid_one: '다음 입력란이 유효하지 않습니다:',
     followingFieldsInvalid_other: '다음 입력란이 유효하지 않습니다:',
     incorrectCollection: '잘못된 컬렉션',
+    insufficientClipboardPermissions:
+      '클립보드 접근이 거부되었습니다. 클립보드 권한을 확인하십시오.',
+    invalidClipboardData: '유효하지 않은 클립보드 데이터입니다.',
     invalidFileType: '잘못된 파일 형식',
     invalidFileTypeValue: '잘못된 파일 형식: {{value}}',
     invalidRequestArgs: '요청에 잘못된 인수가 전달되었습니다: {{args}}',
@@ -111,6 +116,7 @@ export const koTranslations: DefaultTranslationsObject = {
     problemUploadingFile: '파일 업로드 중에 문제가 발생했습니다.',
     tokenInvalidOrExpired: '토큰이 유효하지 않거나 만료되었습니다.',
     tokenNotProvided: '토큰이 제공되지 않았습니다.',
+    unableToCopy: '복사할 수 없습니다.',
     unableToDeleteCount: '총 {{total}}개 중 {{count}}개의 {{label}}을(를) 삭제할 수 없습니다.',
     unableToReindexCollection:
       '{{collection}} 컬렉션의 재인덱싱 중 오류가 발생했습니다. 작업이 중단되었습니다.',
@@ -240,7 +246,9 @@ export const koTranslations: DefaultTranslationsObject = {
       '이 작업은 기존 인덱스를 삭제하고 모든 컬렉션 내의 문서를 다시 인덱싱합니다.',
     copied: '복사됨',
     copy: '복사',
+    copyField: '필드 복사',
     copying: '복사하기',
+    copyRow: '행 복사',
     copyWarning: '{{label}} {{title}}에 대해 {{from}}으로 {{to}}를 덮어쓰려고 합니다. 확실합니까?',
     create: '생성',
     created: '생성됨',
@@ -334,6 +342,8 @@ export const koTranslations: DefaultTranslationsObject = {
     overwriteExistingData: '기존 필드 데이터 덮어쓰기',
     pageNotFound: '페이지를 찾을 수 없음',
     password: '비밀번호',
+    pasteField: '필드 붙여넣기',
+    pasteRow: '행 붙여넣기',
     payloadSettings: 'Payload 설정',
     perPage: '페이지당 개수: {{limit}}',
     previous: '이전',

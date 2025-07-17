@@ -779,7 +779,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                   // and when the devtools are closed. Temporary solution, we can probably do better.
                   setTimeout(() => {
                     openListDrawer()
-                  }, 50)
+                  }, 100)
                 } else if (appearance === 'select') {
                   setMenuIsOpen(true)
                   if (!hasLoadedFirstPageRef.current) {

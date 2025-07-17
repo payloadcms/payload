@@ -569,9 +569,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].hasOnePolymorphic_relationTo).toBe('posts')
 
       // hasManyPolymorphic
-      expect(data[0].hasManyPolymorphic_0_value_id).toBeDefined()
+      expect(data[0].hasManyPolymorphic_0_id).toBeDefined()
       expect(data[0].hasManyPolymorphic_0_relationTo).toBe('users')
-      expect(data[0].hasManyPolymorphic_1_value_id).toBeDefined()
+      expect(data[0].hasManyPolymorphic_1_id).toBeDefined()
       expect(data[0].hasManyPolymorphic_1_relationTo).toBe('posts')
     })
 

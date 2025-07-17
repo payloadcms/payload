@@ -208,6 +208,7 @@ const sanitizeDate = ({
 }
 
 type Args = {
+  $inc?: Record<string, number>
   /** instance of the adapter */
   adapter: MongooseAdapter
   /** data to transform, can be an array of documents or a single document */
@@ -396,6 +397,7 @@ const stripFields = ({
 }
 
 export const transform = ({
+  $inc,
   adapter,
   data,
   fields,
@@ -406,7 +408,7 @@ export const transform = ({
 }: Args) => {
   if (Array.isArray(data)) {
     for (const item of data) {
-      transform({ adapter, data: item, fields, globalSlug, operation, validateRelationships })
+      transform({ $inc, adapter, data: item, fields, globalSlug, operation, validateRelationships })
     }
     return
   }
@@ -417,11 +419,16 @@ export const transform = ({
 
   if (operation === 'read') {
     delete data['__v']
-    data.id = data._id
+    data.id = data._id || data.id
     delete data['_id']
 
     if (data.id instanceof Types.ObjectId) {
       data.id = data.id.toHexString()
+    }
+
+    // Handle BigInt conversion for custom ID fields of type 'number'
+    if (adapter.useBigIntForNumberIDs && typeof data.id === 'bigint') {
+      data.id = Number(data.id)
     }
 
     if (!adapter.allowAdditionalKeys) {
@@ -438,12 +445,26 @@ export const transform = ({
     data.globalType = globalSlug
   }
 
-  const sanitize: TraverseFieldsCallback = ({ field, ref: incomingRef }) => {
+  const sanitize: TraverseFieldsCallback = ({ field, parentPath, ref: incomingRef }) => {
     if (!incomingRef || typeof incomingRef !== 'object') {
       return
     }
 
     const ref = incomingRef as Record<string, unknown>
+
+    if (
+      $inc &&
+      field.type === 'number' &&
+      operation === 'write' &&
+      field.name in ref &&
+      ref[field.name]
+    ) {
+      const value = ref[field.name]
+      if (value && typeof value === 'object' && '$inc' in value && typeof value.$inc === 'number') {
+        $inc[`${parentPath}${field.name}`] = value.$inc
+        delete ref[field.name]
+      }
+    }
 
     if (field.type === 'date' && operation === 'read' && field.name in ref && ref[field.name]) {
       if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {

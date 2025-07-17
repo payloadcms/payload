@@ -1,5 +1,7 @@
 const RawConstraintSymbol = Symbol('RawConstraint')
 
+export const DistinctSymbol = Symbol('DistinctSymbol')
+
 /**
  * You can use this to inject a raw query to where
  */

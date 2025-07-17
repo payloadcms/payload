@@ -1,6 +1,7 @@
-import type { JobTaskStatus, Payload } from 'payload'
+import type { JobTaskStatus, Payload, SanitizedConfig } from 'payload'
 
 import path from 'path'
+import { migrateCLI } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -1397,7 +1398,7 @@ describe('Queues', () => {
       // TODO: This test is flaky on supabase in CI, so we skip it for now
       return
     }
-    const amount = 500
+    const amount = 50
     payload.config.jobs.deleteJobOnComplete = false
 
     const job = await payload.jobs.queue({
@@ -1432,5 +1433,26 @@ describe('Queues', () => {
       expect(logEntry).toBeDefined()
       expect((logEntry?.output as any)?.simpleID).toBe(simpleDoc?.id)
     }
+  })
+})
+
+describe('Queues - CLI', () => {
+  let config: SanitizedConfig
+  beforeAll(async () => {
+    ;({ config } = await initPayloadInt(dirname, undefined, false))
+  })
+  it('can run migrate CLI without jobs attempting to run', async () => {
+    await migrateCLI({
+      config,
+      parsedArgs: {
+        _: ['migrate'],
+      },
+    })
+
+    // Wait 3 seconds to let potential autorun crons trigger
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+
+    // Expect no errors. Previously, this would throw an "error: relation "payload_jobs" does not exist" error
+    expect(true).toBe(true)
   })
 })

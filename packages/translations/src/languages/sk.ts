@@ -87,10 +87,15 @@ export const skTranslations: DefaultTranslationsObject = {
     deletingFile: 'Pri mazaní súboru došlo k chybe.',
     deletingTitle:
       'Pri mazaní {{title}} došlo k chybe. Skontrolujte svoje pripojenie a skúste to znova.',
+    documentNotFound:
+      'Dokument s ID {{id}} sa nepodarilo nájsť. Možno bol vymazaný, nikdy neexistoval, alebo k nemu nemáte prístup.',
     emailOrPasswordIncorrect: 'Zadaný email alebo heslo nie je správne.',
     followingFieldsInvalid_one: 'Nasledujúce pole je neplatné:',
     followingFieldsInvalid_other: 'Nasledujúce polia sú neplatné:',
     incorrectCollection: 'Nesprávna kolekcia',
+    insufficientClipboardPermissions:
+      'Prístup do schránky bol zamietnutý. Skontrolujte svoje oprávnenia pre schránku.',
+    invalidClipboardData: 'Neplatné dáta v schránke.',
     invalidFileType: 'Neplatný typ súboru',
     invalidFileTypeValue: 'Neplatný typ súboru: {{value}}',
     invalidRequestArgs: 'Neplatné argumenty odoslané v požiadavke: {{args}}',
@@ -112,6 +117,7 @@ export const skTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Pri nahrávaní súboru došlo k chybe.',
     tokenInvalidOrExpired: 'Token je neplatný alebo vypršal.',
     tokenNotProvided: 'Token nie je poskytnutý.',
+    unableToCopy: 'Kopírovanie nie je možné.',
     unableToDeleteCount: 'Nie je možné zmazať {{count}} z {{total}} {{label}}.',
     unableToReindexCollection:
       'Chyba pri reindexácii kolekcie {{collection}}. Operácia bola prerušená.',
@@ -245,7 +251,9 @@ export const skTranslations: DefaultTranslationsObject = {
       'Týmto sa odstránia existujúce indexy a znova sa zaindexujú dokumenty vo všetkých kolekciách.',
     copied: 'Skopírované',
     copy: 'Kopírovať',
+    copyField: 'Kopírovať pole',
     copying: 'Kopírovanie',
+    copyRow: 'Kopírovať riadok',
     copyWarning: 'Chystáte sa prepísať {{to}} na {{from}} pre {{label}} {{title}}. Ste si istý?',
     create: 'Vytvoriť',
     created: 'Vytvořeno',
@@ -338,6 +346,8 @@ export const skTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Prepísať existujúce pole dát',
     pageNotFound: 'Stránka nenájdená',
     password: 'Heslo',
+    pasteField: 'Prilepiť pole',
+    pasteRow: 'Prilepiť riadok',
     payloadSettings: 'Nastavenia dátového záznamu',
     perPage: 'Na stránku: {{limit}}',
     previous: 'Predchádzajúci',

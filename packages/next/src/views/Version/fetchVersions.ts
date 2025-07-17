@@ -4,8 +4,8 @@ import {
   type PayloadRequest,
   type SelectType,
   type Sort,
+  type TypedUser,
   type TypeWithVersion,
-  type User,
   type Where,
 } from 'payload'
 
@@ -28,7 +28,7 @@ export const fetchVersion = async <TVersionData extends object = object>({
   overrideAccess?: boolean
   req: PayloadRequest
   select?: SelectType
-  user?: User
+  user?: TypedUser
 }): Promise<null | TypeWithVersion<TVersionData>> => {
   try {
     if (collectionSlug) {
@@ -88,7 +88,7 @@ export const fetchVersions = async <TVersionData extends object = object>({
   req: PayloadRequest
   select?: SelectType
   sort?: Sort
-  user?: User
+  user?: TypedUser
   where?: Where
 }): Promise<null | PaginatedDocs<TypeWithVersion<TVersionData>>> => {
   const where: Where = { and: [...(whereFromArgs ? [whereFromArgs] : [])] }
@@ -160,7 +160,7 @@ export const fetchLatestVersion = async <TVersionData extends object = object>({
   req: PayloadRequest
   select?: SelectType
   status: 'draft' | 'published'
-  user?: User
+  user?: TypedUser
   where?: Where
 }): Promise<null | TypeWithVersion<TVersionData>> => {
   const and: Where[] = [
