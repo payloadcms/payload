@@ -1417,7 +1417,7 @@ describe('Versions', () => {
       const firstBlocksDiffRow = blocksDiffRows.locator('.iterable-diff__row').first()
       await expect(firstBlocksDiffRow).toBeVisible()
 
-      const firstBlockDiffLabel = firstBlocksDiffRow.getByText('block 01', { exact: true })
+      const firstBlockDiffLabel = firstBlocksDiffRow.getByText('Block 01', { exact: true })
       await expect(firstBlockDiffLabel).toBeVisible()
     })
 
