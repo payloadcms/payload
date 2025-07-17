@@ -13,7 +13,9 @@ import { getExportCollection } from './getExportCollection.js'
 import { translations } from './translations/index.js'
 import { collectDisabledFieldPaths } from './utilities/collectDisabledFieldPaths.js'
 import { getFlattenedFieldKeys } from './utilities/getFlattenedFieldKeys.js'
+import { getValueAtPath } from './utilities/getvalueAtPath.js'
 import { removeDisabledFields } from './utilities/removeDisabledFields.js'
+import { setNestedValue } from './utilities/setNestedValue.js'
 
 export const importExportPlugin =
   (pluginConfig: ImportExportPluginConfig) =>
@@ -164,9 +166,8 @@ export const importExportPlugin =
               const trimmed: Record<string, unknown> = {}
 
               for (const key of fields) {
-                if (key in output) {
-                  trimmed[key] = output[key]
-                }
+                const value = getValueAtPath(output, key)
+                setNestedValue(trimmed, key, value ?? null)
               }
 
               output = trimmed
