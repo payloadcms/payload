@@ -5,9 +5,9 @@ import { combineWhereConstraints } from '../../utilities/combineWhereConstraints
 import { formatFolderOrDocumentItem } from './formatFolderOrDocumentItem.js'
 
 type JoinFieldDocs<T> = {
-  count: number
   docs: (number | string | T)[]
   hasNextPage: boolean
+  totalDocs: number
 }
 
 type GetItemsResult = {
@@ -91,57 +91,61 @@ export async function getDocsAndPagination({
      * Use the join field to get documents in the folder and format them as FolderOrDocument items.
      */
     const safeLimit = limit > 0 ? limit : 10
-    const folderResult = await payload.findByID({
-      id: parentFolderID,
-      collection: foldersSlug,
-      joins: {
-        documentsAndFolders: {
-          count: true,
-          limit: safeLimit,
-          page,
-          sort,
-          where,
+    try {
+      const folderResult = await payload.findByID({
+        id: parentFolderID,
+        collection: foldersSlug,
+        joins: {
+          documentsAndFolders: {
+            count: true,
+            limit: safeLimit,
+            page,
+            sort,
+            where,
+          },
         },
-      },
-      overrideAccess: false,
-      req,
-      user,
-    })
+        overrideAccess: false,
+        req,
+        user,
+      })
 
-    const joinResult: JoinFieldDocs<any> = folderResult.documentsAndFolders || {
-      docs: [],
-    }
+      const joinResult: JoinFieldDocs<any> = folderResult.documentsAndFolders || {
+        docs: [],
+      }
 
-    const docsInFolder: FolderOrDocument[] = (joinResult?.docs || []).map(
-      ({ relationTo, value }: Document) => {
-        return formatFolderOrDocumentItem({
-          folderFieldName,
-          isUpload: Boolean(payload.collections[relationTo]!.config.upload),
-          relationTo,
-          useAsTitle: payload.collections[relationTo]!.config.admin?.useAsTitle,
-          value,
-        })
-      },
-    )
+      const docsInFolder: FolderOrDocument[] = (joinResult?.docs || []).map(
+        ({ relationTo, value }: Document) => {
+          return formatFolderOrDocumentItem({
+            folderFieldName,
+            isUpload: Boolean(payload.collections[relationTo]!.config.upload),
+            relationTo,
+            useAsTitle: payload.collections[relationTo]!.config.admin?.useAsTitle,
+            value,
+          })
+        },
+      )
 
-    const totalDocs = joinResult.count
-    const hasNextPage = joinResult.hasNextPage
-    const hasPrevPage = page > 1
+      const totalDocs = joinResult.totalDocs
+      const hasNextPage = page * safeLimit < totalDocs
+      const hasPrevPage = page > 1
 
-    return {
-      docs: docsInFolder,
-      folderAssignedCollections: folderResult.folderType || [],
-      pagination: {
-        hasNextPage,
-        hasPrevPage,
-        limit: safeLimit,
-        nextPage: hasNextPage ? page + 1 : null,
-        page,
-        pagingCounter: (page - 1) * safeLimit + 1,
-        prevPage: hasPrevPage ? page - 1 : null,
-        totalDocs,
-        totalPages: safeLimit > 0 ? Math.ceil(totalDocs / safeLimit) : 1,
-      },
+      return {
+        docs: docsInFolder,
+        folderAssignedCollections: folderResult.folderType || [],
+        pagination: {
+          hasNextPage,
+          hasPrevPage,
+          limit: safeLimit,
+          nextPage: hasNextPage ? page + 1 : null,
+          page,
+          pagingCounter: (page - 1) * safeLimit + 1,
+          prevPage: hasPrevPage ? page - 1 : null,
+          totalDocs,
+          totalPages: safeLimit > 0 ? Math.ceil(totalDocs / safeLimit) : 1,
+        },
+      }
+    } catch (err) {
+      return hasNoResults(safeLimit)
     }
   } else if (collectionSlug) {
     /**
@@ -149,51 +153,55 @@ export async function getDocsAndPagination({
      *
      * Use the find results and format them as FolderOrDocument items.
      */
-    const docsNotInFolder = (await payload.find({
-      collection: collectionSlug,
-      limit,
-      overrideAccess: false,
-      page,
-      req,
-      sort: payload.collections[collectionSlug]?.config.admin.useAsTitle,
-      user,
-      where: combineWhereConstraints([
-        where,
-        {
-          or: [
-            {
-              [folderFieldName]: {
-                exists: false,
+    try {
+      const docsNotInFolder = (await payload.find({
+        collection: collectionSlug,
+        limit,
+        overrideAccess: false,
+        page,
+        req,
+        sort: payload.collections[collectionSlug]?.config.admin.useAsTitle,
+        user,
+        where: combineWhereConstraints([
+          where,
+          {
+            or: [
+              {
+                [folderFieldName]: {
+                  exists: false,
+                },
               },
-            },
-            {
-              [folderFieldName]: {
-                equals: null,
+              {
+                [folderFieldName]: {
+                  equals: null,
+                },
               },
-            },
-          ],
-        },
-      ]),
-    })) as PaginatedDocs<Document>
+            ],
+          },
+        ]),
+      })) as PaginatedDocs<Document>
 
-    if (!docsNotInFolder || !docsNotInFolder.docs) {
+      if (!docsNotInFolder || !docsNotInFolder.docs) {
+        return hasNoResults(limit)
+      }
+
+      const { docs, ...pagination } = docsNotInFolder
+
+      return {
+        docs: docs.map((doc) =>
+          formatFolderOrDocumentItem({
+            folderFieldName,
+            isUpload: Boolean(payload.collections[collectionSlug]?.config.upload),
+            relationTo: collectionSlug,
+            useAsTitle: payload.collections[collectionSlug]?.config.admin.useAsTitle,
+            value: doc,
+          }),
+        ),
+        folderAssignedCollections: [collectionSlug],
+        pagination,
+      }
+    } catch (err) {
       return hasNoResults(limit)
-    }
-
-    const { docs, ...pagination } = docsNotInFolder
-
-    return {
-      docs: docs.map((doc) =>
-        formatFolderOrDocumentItem({
-          folderFieldName,
-          isUpload: Boolean(payload.collections[collectionSlug]?.config.upload),
-          relationTo: collectionSlug,
-          useAsTitle: payload.collections[collectionSlug]?.config.admin.useAsTitle,
-          value: doc,
-        }),
-      ),
-      folderAssignedCollections: [collectionSlug],
-      pagination,
     }
   } else {
     /**
