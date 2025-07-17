@@ -618,6 +618,21 @@ describe('Localization', () => {
     await expect(searchInput).toBeVisible()
     await expect(searchInput).toHaveAttribute('placeholder', 'Search by Full title')
   })
+
+  describe('publish specific locale', () => {
+    test('should create post in correct locale with publishSpecificLocale', async () => {
+      await page.goto(urlPostsWithDrafts.create)
+      await changeLocale(page, 'es')
+      await fillValues({ title: 'Created In Spanish' })
+      const chevronButton = page.locator('.form-submit .popup__trigger-wrap > .popup-button')
+      await chevronButton.click()
+      await saveDocAndAssert(page, '#publish-locale')
+
+      await expect(page.locator('#field-title')).toHaveValue('Created In Spanish')
+      await changeLocale(page, defaultLocale)
+      await expect(page.locator('#field-title')).toBeEmpty()
+    })
+  })
 })
 
 async function fillValues(data: Partial<LocalizedPost>) {

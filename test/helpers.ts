@@ -279,7 +279,12 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
 
 export async function saveDocAndAssert(
   page: Page,
-  selector: '#action-publish' | '#action-save' | '#action-save-draft' | string = '#action-save',
+  selector:
+    | '#action-publish'
+    | '#action-save'
+    | '#action-save-draft'
+    | '#publish-locale'
+    | string = '#action-save',
   expectation: 'error' | 'success' = 'success',
 ): Promise<void> {
   await wait(500) // TODO: Fix this
