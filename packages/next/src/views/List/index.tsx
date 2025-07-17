@@ -148,6 +148,8 @@ export const renderListView = async (
       }
     }
 
+    query.where = where
+
     let queryPreset: QueryPreset | undefined
     let queryPresetPermissions: SanitizedCollectionPermission | undefined
 
