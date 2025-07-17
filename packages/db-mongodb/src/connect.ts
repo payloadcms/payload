@@ -36,6 +36,25 @@ export const connect: Connect = async function connect(
 
   try {
     this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
+    if (this.useAlternativeDropDatabase) {
+      if (this.connection.db) {
+        // Firestore doesn't support dropDatabase, so we monkey patch
+        // dropDatabase to delete all documents from all collections instead
+        this.connection.db.dropDatabase = async function (): Promise<boolean> {
+          const existingCollections = await this.listCollections().toArray()
+          await Promise.all(
+            existingCollections.map(async (collectionInfo) => {
+              const collection = this.collection(collectionInfo.name)
+              await collection.deleteMany({})
+            }),
+          )
+          return true
+        }
+        this.connection.dropDatabase = async function () {
+          await this.db?.dropDatabase()
+        }
+      }
+    }
 
     // If we are running a replica set with MongoDB Memory Server,
     // wait until the replica set elects a primary before proceeding

@@ -3,7 +3,8 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import Categories from './collections/Categories.js'
+import { Categories } from './collections/Categories.js'
+import { CollectionLevelConfig } from './collections/CollectionLevelConfig.js'
 import { Media } from './collections/Media.js'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
@@ -44,7 +45,17 @@ export default buildConfigWithDefaults({
   },
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   csrf: ['http://localhost:3000', 'http://localhost:3001'],
-  collections: [Users, Pages, Posts, SSR, SSRAutosave, Tenants, Categories, Media],
+  collections: [
+    Users,
+    Pages,
+    Posts,
+    SSR,
+    SSRAutosave,
+    Tenants,
+    Categories,
+    Media,
+    CollectionLevelConfig,
+  ],
   globals: [Header, Footer],
   onInit: seed,
   typescript: {

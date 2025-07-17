@@ -194,6 +194,27 @@ const result = await payload.count({
 })
 ```
 
+### FindDistinct#collection-find-distinct
+
+```js
+// Result will be an object with:
+// {
+//   values: ['value-1', 'value-2'], // array of distinct values,
+//   field: 'title', // the field
+//   totalDocs: 10, // count of the distinct values satisfies query,
+//   perPage: 10, // count of distinct values per page (based on provided limit)
+// }
+const result = await payload.findDistinct({
+  collection: 'posts', // required
+  locale: 'en',
+  where: {}, // pass a `where` query here
+  user: dummyUser,
+  overrideAccess: false,
+  field: 'title',
+  sort: 'title',
+})
+```
+
 ### Update by ID#collection-update-by-id
 
 ```js

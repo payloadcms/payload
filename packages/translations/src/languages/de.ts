@@ -88,10 +88,15 @@ export const deTranslations: DefaultTranslationsObject = {
     deletingFile: 'Beim Löschen der Datei ist ein Fehler aufgetreten.',
     deletingTitle:
       'Es gab ein Problem während der Löschung von {{title}}. Bitte überprüfe deine Verbindung und versuche es erneut.',
+    documentNotFound:
+      'Das Dokument mit der ID {{id}} konnte nicht gefunden werden. Es könnte gelöscht oder niemals existiert haben, oder Sie haben möglicherweise keinen Zugang dazu.',
     emailOrPasswordIncorrect: 'Die E-Mail-Adresse oder das Passwort sind nicht korrekt.',
     followingFieldsInvalid_one: 'Das folgende Feld ist nicht korrekt:',
     followingFieldsInvalid_other: 'Die folgenden Felder sind nicht korrekt:',
     incorrectCollection: 'Falsche Sammlung',
+    insufficientClipboardPermissions:
+      'Zugriff auf die Zwischenablage verweigert. Bitte überprüfen Sie die Berechtigungen.',
+    invalidClipboardData: 'Ungültige Zwischenablagedaten.',
     invalidFileType: 'Ungültiger Datei-Typ',
     invalidFileTypeValue: 'Ungültiger Datei-Typ: {{value}}',
     invalidRequestArgs: 'Ungültige Argumente in der Anfrage: {{args}}',
@@ -112,8 +117,9 @@ export const deTranslations: DefaultTranslationsObject = {
     previewing: 'Bei der Vorschau dieses Dokuments ist ein Fehler aufgetreten.',
     problemUploadingFile: 'Beim Hochladen der Datei ist ein Fehler aufgetreten.',
     tokenInvalidOrExpired: 'Token ist entweder ungültig oder abgelaufen.',
-    tokenNotProvided: 'Kein Token vorhanden.',
-    unableToDeleteCount: '{{count}} von {{total}} {{label}} konnten nicht gelöscht werden.',
+    tokenNotProvided: 'Token nicht bereitgestellt.',
+    unableToCopy: 'Kopieren nicht möglich.',
+    unableToDeleteCount: '{{count}} von {{total}} {{label}} konnte nicht gelöscht werden.',
     unableToReindexCollection:
       'Fehler beim Neuindizieren der Sammlung {{collection}}. Vorgang abgebrochen.',
     unableToUpdateCount: '{{count}} von {{total}} {{label}} konnten nicht aktualisiert werden.',
@@ -185,6 +191,8 @@ export const deTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Ordner löschen',
     folderName: 'Ordnername',
     folders: 'Ordner',
+    folderTypeDescription:
+      'Wählen Sie aus, welche Art von Sammlungsdokumenten in diesem Ordner zugelassen sein sollte.',
     itemHasBeenMoved: '{{title}} wurde in {{folderName}} verschoben.',
     itemHasBeenMovedToRoot: '{{title}} wurde in den Hauptordner verschoben',
     itemsMovedToFolder: '{{title}} wurde in {{folderName}} verschoben.',
@@ -246,7 +254,9 @@ export const deTranslations: DefaultTranslationsObject = {
       'Dies entfernt bestehende Indizes und indiziert die Dokumente in allen Sammlungen neu.',
     copied: 'Kopiert',
     copy: 'Kopieren',
+    copyField: 'Feld kopieren',
     copying: 'Kopieren',
+    copyRow: 'Zeile kopieren',
     copyWarning:
       'Du bist dabei, {{to}} mit {{from}} für {{label}} {{title}} zu überschreiben. Bist du dir sicher?',
     create: 'Erstellen',
@@ -341,6 +351,8 @@ export const deTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Vorhandene Eingaben überschreiben',
     pageNotFound: 'Seite nicht gefunden',
     password: 'Passwort',
+    pasteField: 'Feld einfügen',
+    pasteRow: 'Zeile einfügen',
     payloadSettings: 'Payload-Einstellungen',
     perPage: 'Pro Seite: {{limit}}',
     previous: 'Vorherige',

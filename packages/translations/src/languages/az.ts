@@ -86,10 +86,15 @@ export const azTranslations: DefaultTranslationsObject = {
     deletingFile: 'Faylın silinməsində xəta baş verdi.',
     deletingTitle:
       '{{title}} silinərkən xəta baş verdi. Zəhmət olmasa, bağlantınızı yoxlayın və yenidən cəhd edin.',
+    documentNotFound:
+      '{{id}} ID-li sənəd tapılmadı. Bu, onun silinmiş və ya heç vaxt mövcud olmamış ola bilər və ya sizin ona giriş hüququnuz olmayabilir.',
     emailOrPasswordIncorrect: 'Təqdim olunan e-poçt və ya şifrə yanlışdır.',
     followingFieldsInvalid_one: 'Aşağıdakı sahə yanlışdır:',
     followingFieldsInvalid_other: 'Aşağıdaki sahələr yanlışdır:',
     incorrectCollection: 'Yanlış Kolleksiya',
+    insufficientClipboardPermissions:
+      'Mübadilə buferinə giriş rədd edildi. Zəhmət olmasa, icazələri yoxlayın.',
+    invalidClipboardData: 'Yanlış mübadilə buferi məlumatı.',
     invalidFileType: 'Yanlış fayl növü',
     invalidFileTypeValue: 'Yanlış fayl növü: {{value}}',
     invalidRequestArgs: 'Sorguda etibarsız arqumentlər təqdim edildi: {{args}}',
@@ -111,6 +116,7 @@ export const azTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Faylın yüklənməsi zamanı problem yarandı.',
     tokenInvalidOrExpired: 'Token ya yanlışdır və ya müddəti bitib.',
     tokenNotProvided: 'Token təqdim edilməyib.',
+    unableToCopy: 'Kopyalama mümkün deyil.',
     unableToDeleteCount: '{{count}} dən {{total}} {{label}} silinə bilmir.',
     unableToReindexCollection:
       '{{collection}} kolleksiyasının yenidən indekslənməsi zamanı səhv baş verdi. Əməliyyat dayandırıldı.',
@@ -180,6 +186,7 @@ export const azTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Qovluğu Sil',
     folderName: 'Qovluq Adı',
     folders: 'Qovluqlar',
+    folderTypeDescription: 'Bu qovluqda hangi tip kolleksiya sənədlərinə icazə verilməlidir seçin.',
     itemHasBeenMoved: '{{title}} {{folderName}} qovluğuna köçürüldü.',
     itemHasBeenMovedToRoot: '{{title}} kök qovluğa köçürüldü.',
     itemsMovedToFolder: '{{title}} {{folderName}} qovluğuna köçürüldü',
@@ -241,7 +248,9 @@ export const azTranslations: DefaultTranslationsObject = {
       'Bu, mövcud indeksləri siləcək və bütün kolleksiyalardakı sənədləri yenidən indeksləyəcək.',
     copied: 'Kopyalandı',
     copy: 'Kopyala',
+    copyField: 'Sahəni kopyala',
     copying: 'Kopyalama',
+    copyRow: 'Sətiri kopyala',
     copyWarning:
       'Siz {{label}} {{title}} üçün {{from}} ilə {{to}} -nu üzərindən yazmaq ətrafındasınız. Eminsiniz?',
     create: 'Yarat',
@@ -336,6 +345,8 @@ export const azTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Mövcud sahə məlumatlarını yenidən yazın',
     pageNotFound: 'Səhifə tapılmadı',
     password: 'Şifrə',
+    pasteField: 'Sahəni yapışdır',
+    pasteRow: 'Sətiri yapışdır',
     payloadSettings: 'Payload Parametrləri',
     perPage: 'Hər səhifədə: {{limit}}',
     previous: 'Əvvəlki',

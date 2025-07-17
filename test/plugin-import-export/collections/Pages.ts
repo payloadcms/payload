@@ -95,7 +95,6 @@ export const Pages: CollectionConfig = {
       ],
     },
     {
-      name: 'tabs',
       type: 'tabs',
       tabs: [
         {
