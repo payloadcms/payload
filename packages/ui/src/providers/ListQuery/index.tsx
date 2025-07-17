@@ -1,4 +1,5 @@
 'use client'
+import { dequal } from 'dequal/lite'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { type ListQuery, type Where } from 'payload'
 import * as qs from 'qs-esm'
@@ -11,6 +12,8 @@ import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ListQueryContext, ListQueryModifiedContext } from './context.js'
+import { mergeQuery } from './mergeQuery.js'
+import { sanitizeQuery } from './sanitizeQuery.js'
 
 export { useListQuery } from './context.js'
 
@@ -24,7 +27,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   query: queryFromProps,
 }) => {
   // TODO: Investigate if this is still needed
-  // eslint-disable-next-line react-compiler/react-compiler
+
   'use no memo'
   const router = useRouter()
   const rawSearchParams = useSearchParams()
@@ -32,7 +35,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const [modified, setModified] = useState(false)
 
   const searchParams = useMemo<ListQuery>(
-    () => parseSearchParams(rawSearchParams),
+    () => sanitizeQuery(parseSearchParams(rawSearchParams)),
     [rawSearchParams],
   )
 
@@ -53,34 +56,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     }
   })
 
-  const mergeQuery = useCallback(
-    (newQuery: ListQuery = {}): ListQuery => {
-      let page = 'page' in newQuery ? newQuery.page : currentQuery?.page
-
-      if ('where' in newQuery || 'search' in newQuery) {
-        page = 1
-      }
-
-      const mergedQuery: ListQuery = {
-        ...currentQuery,
-        ...newQuery,
-        columns: 'columns' in newQuery ? newQuery.columns : currentQuery.columns,
-        limit: 'limit' in newQuery ? newQuery.limit : (currentQuery?.limit ?? queryFromProps.limit),
-        page,
-        preset: 'preset' in newQuery ? newQuery.preset : currentQuery?.preset,
-        search: 'search' in newQuery ? newQuery.search : currentQuery?.search,
-        sort:
-          'sort' in newQuery
-            ? newQuery.sort
-            : ((currentQuery?.sort as string) ?? queryFromProps.sort),
-        where: 'where' in newQuery ? newQuery.where : currentQuery?.where,
-      }
-
-      return mergedQuery
-    },
-    [currentQuery, queryFromProps],
-  )
-
   const refineListData = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await
     async (incomingQuery: ListQuery, modified?: boolean) => {
@@ -90,12 +65,23 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         setModified(true)
       }
 
-      const newQuery = mergeQuery(incomingQuery)
+      const newQuery = mergeQuery(currentQuery, incomingQuery, {
+        defaults: {
+          limit: queryFromProps.limit,
+          sort: queryFromProps.sort,
+        },
+      })
 
       if (modifySearchParams) {
         startRouteTransition(() =>
           router.replace(
-            `${qs.stringify({ ...newQuery, columns: JSON.stringify(newQuery.columns) }, { addQueryPrefix: true })}`,
+            `${qs.stringify(
+              {
+                ...newQuery,
+                columns: JSON.stringify(newQuery.columns),
+              },
+              { addQueryPrefix: true },
+            )}`,
           ),
         )
       } else if (
@@ -109,7 +95,9 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       setCurrentQuery(newQuery)
     },
     [
-      mergeQuery,
+      currentQuery,
+      queryFromProps.limit,
+      queryFromProps.sort,
       modifySearchParams,
       onQueryChange,
       onQueryChangeFromProps,
@@ -154,38 +142,30 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     [refineListData],
   )
 
-  const syncQueryFromPropsToURL = useEffectEvent(() => {
-    const newQuery = { ...(currentQuery || {}), ...(queryFromProps || {}) }
+  const mergeQueryFromPropsAndSyncToURL = useEffectEvent(() => {
+    const sanitizedQueryFromProps = sanitizeQuery(queryFromProps)
 
-    Object.entries(newQuery).forEach(([key, value]) => {
-      // Sanitize empty arrays from the query, see note below
-      if (key === 'columns' && Array.isArray(newQuery[key]) && newQuery[key].length === 0) {
-        newQuery[key] = undefined
-      }
+    const newQuery = { ...(currentQuery || {}), ...(sanitizedQueryFromProps || {}) }
 
-      // Sanitize empty strings from the query
-      // This is how we determine whether to clear user preferences for certain params, e.g. `?preset=`
-      // Once cleared, they are no longer needed in the URL
-      if (value === '') {
-        newQuery[key] = undefined
-      }
-    })
+    const isEqual = dequal(currentQuery, newQuery)
 
-    setCurrentQuery(newQuery)
+    if (!isEqual) {
+      setCurrentQuery(newQuery)
 
-    // Do not use router.replace here to avoid re-rendering on initial load
-    window.history.replaceState(
-      null,
-      '',
-      `?${qs.stringify({ ...newQuery, columns: JSON.stringify(newQuery.columns) })}`,
-    )
+      // Important: do not use router.replace here to avoid re-rendering on initial load
+      window.history.replaceState(
+        null,
+        '',
+        `?${qs.stringify({ ...newQuery, columns: JSON.stringify(newQuery.columns) })}`,
+      )
+    }
   })
 
   // If `query` is updated externally, update the local state
-  // I.e. when HMR runs, these properties may be different
+  // E.g. when HMR runs, these properties may be different
   useEffect(() => {
     if (modifySearchParams) {
-      syncQueryFromPropsToURL()
+      mergeQueryFromPropsAndSyncToURL()
     }
   }, [modifySearchParams, queryFromProps])
 

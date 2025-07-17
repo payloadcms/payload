@@ -113,6 +113,9 @@ export const renderListView = async (
 
   query.columns = transformColumnsToSearchParams(collectionPreferences?.columns || [])
 
+  // Needed to prevent: Only plain objects can be passed to Client Components from Server Components. Objects with toJSON methods are not supported. Convert it manually to a simple value before passing it to props.
+  // query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
+
   const {
     routes: { admin: adminRoute },
   } = config
@@ -122,7 +125,7 @@ export const renderListView = async (
       throw new Error('not-found')
     }
 
-    let where = mergeListSearchAndWhere({
+    query.where = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
       where: query?.where,
@@ -137,8 +140,8 @@ export const renderListView = async (
       })
 
       if (baseListFilter) {
-        where = {
-          and: [where, baseListFilter].filter(Boolean),
+        query.where = {
+          and: [query.where, baseListFilter].filter(Boolean),
         }
       }
     }
@@ -182,7 +185,7 @@ export const renderListView = async (
       req,
       sort: query.sort,
       user,
-      where: where || {},
+      where: query.where,
     })
 
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
