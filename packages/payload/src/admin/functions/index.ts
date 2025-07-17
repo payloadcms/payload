@@ -45,8 +45,8 @@ export type ListQuery = {
    * Use `transformColumnsToPreferences` and `transformColumnsToSearchParams` to convert it back and forth
    */
   columns?: ColumnsFromURL
-  limit?: string
-  page?: string
+  limit?: number
+  page?: number
   preset?: number | string
   /*
     When provided, is automatically injected into the `where` object

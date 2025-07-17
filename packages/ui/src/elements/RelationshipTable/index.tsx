@@ -114,7 +114,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const renderTable = useCallback(
     async (docs?: PaginatedDocs['docs']) => {
       const newQuery: ListQuery = {
-        limit: String(field?.defaultLimit || collectionConfig?.admin?.pagination?.defaultLimit),
+        limit: field?.defaultLimit || collectionConfig?.admin?.pagination?.defaultLimit,
         sort: field.defaultSort || collectionConfig?.defaultSort,
         ...(query || {}),
         where: { ...(query?.where || {}) },

@@ -2,13 +2,11 @@ import type {
   AdminViewServerProps,
   CollectionPreferences,
   ColumnPreference,
-  DefaultDocumentIDType,
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
   QueryPreset,
   SanitizedCollectionPermission,
-  Where,
 } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
@@ -87,11 +85,9 @@ export const renderListView = async (
     throw new Error('not-found')
   }
 
-  const query = queryFromArgs || queryFromReq
+  const query: ListQuery = queryFromArgs || queryFromReq
 
-  const columns: ColumnPreference[] = transformColumnsToPreferences(
-    query?.columns as ColumnPreference[] | string,
-  )
+  const columns: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
   const collectionPreferences = await upsertPreferences<CollectionPreferences>({
     key: `collection-${collectionSlug}`,
@@ -99,12 +95,17 @@ export const renderListView = async (
     value: {
       columns,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-      preset: query?.preset as DefaultDocumentIDType,
+      preset: query?.preset,
       sort: query?.sort as string,
     },
   })
 
   query.preset = collectionPreferences?.preset
+  query.page = isNumber(query?.page) ? Number(query.page) : 0
+  query.limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+  query.sort =
+    collectionPreferences?.sort ||
+    (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
 
   const {
     routes: { admin: adminRoute },
@@ -115,26 +116,18 @@ export const renderListView = async (
       throw new Error('not-found')
     }
 
-    const page = isNumber(query?.page) ? Number(query.page) : 0
-
-    const limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
-
-    const sort =
-      collectionPreferences?.sort ||
-      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
-
     let where = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
-      where: (query?.where as Where) || undefined,
+      where: query?.where,
     })
 
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
       const baseListFilter = await collectionConfig.admin.baseListFilter({
-        limit,
-        page,
+        limit: query.limit,
+        page: query.page,
         req,
-        sort,
+        sort: query.sort,
       })
 
       if (baseListFilter) {
@@ -176,12 +169,12 @@ export const renderListView = async (
       draft: true,
       fallbackLocale: false,
       includeLockStatus: true,
-      limit,
+      limit: query.limit,
       locale,
       overrideAccess: false,
-      page,
+      page: query.page,
       req,
-      sort,
+      sort: query.sort,
       user,
       where: where || {},
     })
@@ -229,7 +222,7 @@ export const renderListView = async (
       collectionConfig,
       data,
       i18n,
-      limit,
+      limit: query.limit,
       listPreferences: collectionPreferences,
       listSearchableFields: collectionConfig.admin.listSearchableFields,
       locale: fullLocale,
@@ -263,8 +256,8 @@ export const renderListView = async (
             collectionSlug={collectionSlug}
             columns={transformColumnsToPreferences(columnState)}
             data={data}
-            defaultLimit={limit}
-            defaultSort={sort}
+            defaultLimit={query.limit}
+            defaultSort={query.sort}
             listPreferences={collectionPreferences}
             modifySearchParams={!isInDrawer}
             orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}

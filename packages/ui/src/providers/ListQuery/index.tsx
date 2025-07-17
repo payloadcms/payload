@@ -51,7 +51,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       return searchParams
     } else {
       return {
-        limit: String(defaultLimit),
+        limit: defaultLimit,
         sort: defaultSort,
       }
     }
@@ -62,14 +62,14 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       let page = 'page' in newQuery ? newQuery.page : currentQuery?.page
 
       if ('where' in newQuery || 'search' in newQuery) {
-        page = '1'
+        page = 1
       }
 
       const mergedQuery: ListQuery = {
         ...currentQuery,
         ...newQuery,
         columns: 'columns' in newQuery ? newQuery.columns : currentQuery.columns,
-        limit: 'limit' in newQuery ? newQuery.limit : (currentQuery?.limit ?? String(defaultLimit)),
+        limit: 'limit' in newQuery ? newQuery.limit : (currentQuery?.limit ?? defaultLimit),
         page,
         preset: 'preset' in newQuery ? newQuery.preset : currentQuery?.preset,
         search: 'search' in newQuery ? newQuery.search : currentQuery?.search,
@@ -121,14 +121,14 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const handlePageChange = useCallback(
     async (arg: number) => {
-      await refineListData({ page: String(arg) })
+      await refineListData({ page: arg })
     },
     [refineListData],
   )
 
   const handlePerPageChange = React.useCallback(
     async (arg: number) => {
-      await refineListData({ limit: String(arg), page: '1' })
+      await refineListData({ limit: arg, page: 1 })
     },
     [refineListData],
   )
@@ -161,7 +161,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
     // Allow the URL to override the default limit
     if (isNumber(defaultLimit) && !('limit' in currentQuery)) {
-      newQuery.limit = String(defaultLimit)
+      newQuery.limit = defaultLimit
       shouldUpdateQueryString = true
     }
 
