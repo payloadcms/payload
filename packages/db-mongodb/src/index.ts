@@ -42,6 +42,7 @@ import { deleteOne } from './deleteOne.js'
 import { deleteVersions } from './deleteVersions.js'
 import { destroy } from './destroy.js'
 import { find } from './find.js'
+import { findDistinct } from './findDistinct.js'
 import { findGlobal } from './findGlobal.js'
 import { findGlobalVersions } from './findGlobalVersions.js'
 import { findOne } from './findOne.js'
@@ -297,6 +298,7 @@ export function mongooseAdapter({
       destroy,
       disableFallbackSort,
       find,
+      findDistinct,
       findGlobal,
       findGlobalVersions,
       findOne,

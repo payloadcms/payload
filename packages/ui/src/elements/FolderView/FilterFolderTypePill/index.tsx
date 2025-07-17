@@ -12,7 +12,7 @@ import './index.scss'
 
 const baseClass = 'collection-type'
 
-export function CollectionTypePill() {
+export function FilterFolderTypePill() {
   const {
     activeCollectionFolderSlugs: visibleCollectionSlugs,
     allCollectionFolderSlugs: folderCollectionSlugs,
