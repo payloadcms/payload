@@ -28,7 +28,7 @@ export const GroupByPageControls: React.FC<{
       await refineListData({
         queryByGroup: {
           [groupByValue]: {
-            page: String(page),
+            page,
           },
         },
       })
@@ -41,8 +41,8 @@ export const GroupByPageControls: React.FC<{
       await refineListData({
         queryByGroup: {
           [groupByValue]: {
-            limit: String(limit),
-            page: '1',
+            limit,
+            page: 1,
           },
         },
       })

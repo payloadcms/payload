@@ -90,13 +90,13 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
             if (v === null) {
               await refineListData({
                 groupBy: '',
-                page: '1',
+                page: 1,
               })
             }
 
             await refineListData({
               groupBy: value ? (query.groupBy?.startsWith('-') ? `-${value}` : value) : undefined,
-              page: '1',
+              page: 1,
             })
           }}
           options={reducedFields.filter(
@@ -121,7 +121,7 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
 
             await refineListData({
               groupBy: value === 'asc' ? groupByFieldName : `-${groupByFieldName}`,
-              page: '1',
+              page: 1,
             })
           }}
           options={[

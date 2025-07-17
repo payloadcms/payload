@@ -10,7 +10,7 @@ export const mergeQuery = (
   let page = 'page' in newQuery ? newQuery.page : currentQuery?.page
 
   if ('where' in newQuery || 'search' in newQuery) {
-    page = '1'
+    page = 1
   }
 
   // Deeply merge queryByGroup so we can send a partial update for a specific group
@@ -37,10 +37,7 @@ export const mergeQuery = (
       'groupBy' in newQuery
         ? newQuery.groupBy
         : (currentQuery?.groupBy ?? options?.defaults?.groupBy),
-    limit:
-      'limit' in newQuery
-        ? newQuery.limit
-        : (currentQuery?.limit ?? String(options?.defaults?.limit)),
+    limit: 'limit' in newQuery ? newQuery.limit : (currentQuery?.limit ?? options?.defaults?.limit),
     page,
     preset: 'preset' in newQuery ? newQuery.preset : currentQuery?.preset,
     queryByGroup: mergedQueryByGroup,
