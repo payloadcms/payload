@@ -24,14 +24,13 @@ export const incrementLoginAttempts = async ({
 
     // Expired lock, restart count at 1
     if (lockUntil < Date.now()) {
-      await payload.update({
+      await payload.db.updateOne({
         id: doc.id,
         collection: collection.slug,
         data: {
           lockUntil: null,
           loginAttempts: 1,
         },
-        depth: 0,
         req,
       })
     }
