@@ -557,7 +557,6 @@ describe('Auth', () => {
         const incorrectMessage = 'The email or password provided is incorrect.'
 
         it('should lock the user after too many attempts', async () => {
-          console.log('11111')
           const user1 = await tryLogin()
           const user2 = await tryLogin()
           const user3 = await tryLogin() // Let it call multiple times, therefore the unlock condition has no bug.
@@ -633,9 +632,8 @@ describe('Auth', () => {
           expect(incorrectMessages).toHaveLength(2)
           expect(lockedMessages).toHaveLength(users.length - 2)
 
-          console.log('AAAA')
           const successfulLogin = await tryLogin(true)
-          console.log('BBBB', successfulLogin)
+
           expect(successfulLogin.errors?.[0].message).toBe(
             'This user is locked due to having too many failed login attempts.',
           )

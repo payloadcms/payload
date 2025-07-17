@@ -247,6 +247,30 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       throw new UnverifiedEmail({ t: req.t })
     }
 
+    /*
+     * Correct password accepted - re‑check that the account didn't
+     * get locked by parallel bad attempts in the meantime.
+     */
+    if (maxLoginAttemptsEnabled) {
+      const { lockUntil, loginAttempts } = (await payload.db.findOne<TypedUser>({
+        collection: collectionConfig.slug,
+        req,
+        select: {
+          lockUntil: true,
+          loginAttempts: true,
+        },
+        where: { id: { equals: user.id } },
+      }))!
+
+      user.lockUntil = lockUntil
+      user.loginAttempts = loginAttempts
+
+      checkLoginPermission({
+        req,
+        user,
+      })
+    }
+
     const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
       collectionConfig,
       email: sanitizedEmail!,
