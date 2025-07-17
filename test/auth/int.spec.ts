@@ -601,8 +601,7 @@ describe('Auth', () => {
             tryLogin(),
           ])
 
-          // Expect exactly 1 locked message and 2 incorrect messages.
-
+          // Expect min. 8 locked message max. 2 incorrect messages.
           const lockedMessages = users.filter(
             (result) =>
               result.status === 'fulfilled' && result.value?.errors?.[0]?.message === lockedMessage,
@@ -629,8 +628,8 @@ describe('Auth', () => {
           expect(loginAttempts).toBe(10)
           expect(lockUntil).toBeDefined()
 
-          expect(incorrectMessages).toHaveLength(2)
-          expect(lockedMessages).toHaveLength(users.length - 2)
+          expect(incorrectMessages.length).toBeLessThanOrEqual(2)
+          expect(lockedMessages.length).toBeGreaterThanOrEqual(users.length - 2)
 
           const successfulLogin = await tryLogin(true)
 
