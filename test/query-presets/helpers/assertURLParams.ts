@@ -10,12 +10,12 @@ export async function assertURLParams({
   page,
   columns,
   where,
-  presetID,
+  preset,
 }: {
   columns?: ColumnPreference[]
   page: Page
-  presetID?: string | undefined
-  where: Where
+  preset?: string | undefined
+  where?: Where
 }) {
   if (where) {
     // TODO: can't get columns to encode correctly
@@ -32,8 +32,8 @@ export async function assertURLParams({
     await page.waitForURL(columnsRegex)
   }
 
-  if (presetID) {
-    const presetRegex = new RegExp(`preset=${presetID}`)
+  if (preset) {
+    const presetRegex = new RegExp(`preset=${preset}`)
     await page.waitForURL(presetRegex)
   }
 }

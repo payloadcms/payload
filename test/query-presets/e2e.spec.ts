@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
+import { openNav } from 'helpers/e2e/toggleNav.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -152,23 +153,37 @@ describe('Query Presets', () => {
 
   test('should select preset and apply filters', async () => {
     await page.goto(pagesUrl.list)
+
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
     await assertURLParams({
       page,
       columns: seededData.everyone.columns,
-      where: seededData.everyone.where,
-      presetID: everyoneID,
+      preset: everyoneID,
     })
-
-    expect(true).toBe(true)
   })
 
   test('should clear selected preset and reset filters', async () => {
     await page.goto(pagesUrl.list)
+
     await selectPreset({ page, presetTitle: seededData.everyone.title })
+
     await clearSelectedPreset({ page })
-    expect(true).toBe(true)
+
+    // ensure that the preset was cleared from preferences by navigating without the `?preset=` param
+    await page.goto(pagesUrl.list)
+
+    // poll url to ensure that `?preset=` param is not present
+    // this is first set to an empty string to clear from the user's preferences
+    // it is then removed entirely after it is processed on the server
+    const regex = /preset=/
+    await page.waitForURL((url) => !regex.test(url.search), { timeout: TEST_TIMEOUT_LONG })
+
+    await expect(
+      page.locator('button#select-preset', {
+        hasText: exactText('Select Preset'),
+      }),
+    ).toBeVisible()
   })
 
   test('should delete a preset, clear selection, and reset changes', async () => {
@@ -180,7 +195,8 @@ describe('Query Presets', () => {
 
     await page.locator('#confirm-delete-preset #confirm-action').click()
 
-    const regex = /columns=/
+    // columns can either be omitted or an empty string after being cleared
+    const regex = /columns=(?:\[\]|$)/
 
     await page.waitForURL((url) => !regex.test(url.search), {
       timeout: TEST_TIMEOUT_LONG,
@@ -205,22 +221,29 @@ describe('Query Presets', () => {
 
   test('should save last used preset to preferences and load on initial render', async () => {
     await page.goto(pagesUrl.list)
+
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
-    // TODO: THIS TEST (AND UNDERLYING BUG) ACTUALLY NEEDS TO BE FIXED!
-    // CANNOT SIMPLY RELOAD, AS THE `queryPreset` PARAM WILL BE IN THE URL
-    // THIS TEST PASSES DESPITE THIS NOT WORKING AS INTENDED
-    // NEED TO HARD NAVIGATE TO THE URL WITHOUT THE 'queryPreset' PARAM
-    await page.reload()
+    await page.goto(pagesUrl.list)
 
     await assertURLParams({
       page,
       columns: seededData.everyone.columns,
       where: seededData.everyone.where,
-      // presetID: everyoneID,
+      preset: everyoneID,
     })
 
-    expect(true).toBe(true)
+    // for good measure, also soft navigate away and back
+    await page.goto(pagesUrl.admin)
+    await openNav(page)
+    await page.click(`a[href="/admin/collections/${pagesSlug}"]`)
+
+    await assertURLParams({
+      page,
+      columns: seededData.everyone.columns,
+      where: seededData.everyone.where,
+      preset: everyoneID,
+    })
   })
 
   test('should only show "edit" and "delete" controls when there is an active preset', async () => {

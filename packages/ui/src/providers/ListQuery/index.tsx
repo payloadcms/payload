@@ -187,6 +187,21 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       shouldUpdateQueryString = true
     }
 
+    if (listPreferences?.preset && !('preset' in currentQuery)) {
+      newQuery.preset = listPreferences.preset
+      shouldUpdateQueryString = true
+    }
+
+    // Sanitize empty strings from the query
+    // This is how we determine whether to clear user preferences for certain params, e.g. `?preset=`
+    // Once cleared, they are no longer needed in the URL
+    Object.entries(newQuery).forEach(([key, value]) => {
+      if (value === '') {
+        newQuery[key] = undefined
+        shouldUpdateQueryString = true
+      }
+    })
+
     if (shouldUpdateQueryString) {
       setCurrentQuery(newQuery)
       // Do not use router.replace here to avoid re-rendering on initial load

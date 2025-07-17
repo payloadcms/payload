@@ -91,11 +91,6 @@ export const renderListView = async (
 
   const columns: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
-  /**
-   * @todo: find a pattern to avoid setting preferences on hard navigation, i.e. direct links, page refresh, etc.
-   * This will ensure that prefs are only updated when explicitly set by the user
-   * This could potentially be done by injecting a `sessionID` into the params and comparing it against a session cookie
-   */
   const collectionPreferences = await upsertPreferences<CollectionPreferences>({
     key: `collection-${collectionSlug}`,
     req,
@@ -103,10 +98,12 @@ export const renderListView = async (
       columns,
       groupBy: query?.groupBy,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-      preset: query?.preset || null,
-      sort: (query?.sort as string) || '',
+      preset: query?.preset,
+      sort: query?.sort as string,
     },
   })
+
+  query.preset = collectionPreferences?.preset
 
   const {
     routes: { admin: adminRoute },
