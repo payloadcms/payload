@@ -179,6 +179,7 @@ export const sanitizeFields = async ({
         console.warn(
           `(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`,
         )
+
         field.minRows = field.min
       }
 
@@ -186,6 +187,7 @@ export const sanitizeFields = async ({
         console.warn(
           `(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`,
         )
+
         field.maxRows = field.max
       }
     }

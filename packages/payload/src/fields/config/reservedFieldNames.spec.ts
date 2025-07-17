@@ -1,5 +1,5 @@
 import type { Config } from '../../config/types.js'
-import type { CollectionConfig, Field } from '../../index.js'
+import type { CollectionConfig, Field, SanitizedCollectionConfig } from '../../index.js'
 
 import { ReservedFieldName } from '../../errors/index.js'
 import { sanitizeCollection } from '../../collections/config/sanitize.js'
@@ -27,9 +27,8 @@ describe('reservedFieldNames - collections -', () => {
       ]
 
       await expect(async () => {
-        await sanitizeCollection(
-          // @ts-expect-error
-          {
+        await sanitizeCollection({
+          config: {
             ...config,
             collections: [
               {
@@ -37,12 +36,12 @@ describe('reservedFieldNames - collections -', () => {
                 fields,
               },
             ],
-          },
-          {
+          } as Config,
+          collectionConfig: {
             ...collectionWithUploads,
             fields,
           },
-        )
+        })
       }).rejects.toThrow(ReservedFieldName)
     })
 
@@ -56,9 +55,8 @@ describe('reservedFieldNames - collections -', () => {
       ]
 
       await expect(async () => {
-        await sanitizeCollection(
-          // @ts-expect-error
-          {
+        await sanitizeCollection({
+          config: {
             ...config,
             collections: [
               {
@@ -66,12 +64,12 @@ describe('reservedFieldNames - collections -', () => {
                 fields,
               },
             ],
-          },
-          {
+          } as Config,
+          collectionConfig: {
             ...collectionWithUploads,
             fields,
           },
-        )
+        })
       }).not.toThrow()
     })
   })
@@ -97,9 +95,8 @@ describe('reservedFieldNames - collections -', () => {
       ]
 
       await expect(async () => {
-        await sanitizeCollection(
-          // @ts-expect-error
-          {
+        await sanitizeCollection({
+          config: {
             ...config,
             collections: [
               {
@@ -107,12 +104,12 @@ describe('reservedFieldNames - collections -', () => {
                 fields,
               },
             ],
-          },
-          {
+          } as Config,
+          collectionConfig: {
             ...collectionWithAuth,
             fields,
           },
-        )
+        })
       }).rejects.toThrow(ReservedFieldName)
     })
 
@@ -126,9 +123,8 @@ describe('reservedFieldNames - collections -', () => {
       ]
 
       await expect(async () => {
-        await sanitizeCollection(
-          // @ts-expect-error
-          {
+        await sanitizeCollection({
+          config: {
             ...config,
             collections: [
               {
@@ -136,12 +132,12 @@ describe('reservedFieldNames - collections -', () => {
                 fields,
               },
             ],
-          },
-          {
+          } as Config,
+          collectionConfig: {
             ...collectionWithAuth,
             fields,
           },
-        )
+        })
       }).rejects.toThrow(ReservedFieldName)
     })
 
@@ -155,9 +151,8 @@ describe('reservedFieldNames - collections -', () => {
       ]
 
       await expect(async () => {
-        await sanitizeCollection(
-          // @ts-expect-error
-          {
+        await sanitizeCollection({
+          config: {
             ...config,
             collections: [
               {
@@ -165,12 +160,12 @@ describe('reservedFieldNames - collections -', () => {
                 fields,
               },
             ],
-          },
-          {
+          } as Config,
+          collectionConfig: {
             ...collectionWithAuth,
             fields,
           },
-        )
+        })
       }).not.toThrow()
     })
   })

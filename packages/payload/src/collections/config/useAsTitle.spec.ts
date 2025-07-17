@@ -29,14 +29,13 @@ describe('sanitize - collections -', () => {
         },
       }
       await expect(async () => {
-        await sanitizeCollection(
-          // @ts-expect-error
-          {
+        await sanitizeCollection({
+          config: {
             ...config,
             collections: [collectionConfig],
-          },
-          collectionConfig,
-        )
+          } as Config,
+          collection: collectionConfig,
+        })
       }).rejects.toThrow(InvalidConfiguration)
     })
 
@@ -48,14 +47,13 @@ describe('sanitize - collections -', () => {
         },
       }
       await expect(async () => {
-        await sanitizeCollection(
-          // @ts-expect-error
-          {
+        await sanitizeCollection({
+          config: {
             ...config,
             collections: [collectionConfig],
-          },
-          collectionConfig,
-        )
+          } as Config,
+          collection: collectionConfig,
+        })
       }).not.toThrow()
     })
 
@@ -83,14 +81,13 @@ describe('sanitize - collections -', () => {
         ],
       }
       await expect(async () => {
-        await sanitizeCollection(
-          // @ts-expect-error
-          {
+        await sanitizeCollection({
+          config: {
             ...config,
             collections: [collectionConfig],
-          },
-          collectionConfig,
-        )
+          } as Config,
+          collection: collectionConfig,
+        })
       }).not.toThrow()
     })
 
@@ -114,14 +111,13 @@ describe('sanitize - collections -', () => {
         ],
       }
       await expect(async () => {
-        await sanitizeCollection(
-          // @ts-expect-error
-          {
+        await sanitizeCollection({
+          config: {
             ...config,
             collections: [collectionConfig],
-          },
-          collectionConfig,
-        )
+          } as Config,
+          collection: collectionConfig,
+        })
       }).not.toThrow()
     })
 
@@ -133,14 +129,13 @@ describe('sanitize - collections -', () => {
         },
       }
       await expect(async () => {
-        await sanitizeCollection(
-          // @ts-expect-error
-          {
+        await sanitizeCollection({
+          config: {
             ...config,
             collections: [collectionConfig],
-          },
-          collectionConfig,
-        )
+          } as Config,
+          collection: collectionConfig,
+        })
       }).rejects.toThrow(InvalidConfiguration)
     })
 
@@ -152,14 +147,13 @@ describe('sanitize - collections -', () => {
         },
       }
       await expect(async () => {
-        await sanitizeCollection(
-          // @ts-expect-error
-          {
+        await sanitizeCollection({
+          config: {
             ...config,
             collections: [collectionConfig],
-          },
-          collectionConfig,
-        )
+          } as Config,
+          collection: collectionConfig,
+        })
       }).not.toThrow()
     })
 
@@ -172,14 +166,13 @@ describe('sanitize - collections -', () => {
         },
       }
       await expect(async () => {
-        await sanitizeCollection(
-          // @ts-expect-error
-          {
+        await sanitizeCollection({
+          config: {
             ...config,
             collections: [collectionConfig],
-          },
-          collectionConfig,
-        )
+          } as Config,
+          collection: collectionConfig,
+        })
       }).not.toThrow()
     })
     it('should throw on default field: email if auth is not enabled', async () => {
@@ -190,14 +183,13 @@ describe('sanitize - collections -', () => {
         },
       }
       await expect(async () => {
-        await sanitizeCollection(
-          // @ts-expect-error
-          {
+        await sanitizeCollection({
+          config: {
             ...config,
             collections: [collectionConfig],
-          },
-          collectionConfig,
-        )
+          } as Config,
+          collection: collectionConfig,
+        })
       }).rejects.toThrow(InvalidConfiguration)
     })
   })
