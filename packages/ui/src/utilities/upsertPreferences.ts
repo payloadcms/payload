@@ -70,6 +70,10 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
       value: T
     }
 )): Promise<T> => {
+  if (!req.user) {
+    return
+  }
+
   const existingPrefs: { id?: DefaultDocumentIDType; value?: T } = req.user
     ? await getPreferences<T>(key, req.payload, req.user.id, req.user.collection)
     : {}
