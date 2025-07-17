@@ -49,6 +49,11 @@ type CheckLoginPermissionArgs = {
   user: any
 }
 
+/**
+ * Throws an error if the user is locked or does not exist.
+ * This does not check the login attempts, only the lock status. Whoever increments login attempts
+ * is responsible for locking the user properly, not whoever checks the login permission.
+ */
 export const checkLoginPermission = ({
   loggingInWithUsername,
   req,
@@ -58,7 +63,7 @@ export const checkLoginPermission = ({
     throw new AuthenticationError(req.t, Boolean(loggingInWithUsername))
   }
 
-  if (isUserLocked(new Date(user.lockUntil).getTime())) {
+  if (isUserLocked(new Date(user.lockUntil))) {
     throw new LockedAuth(req.t)
   }
 }
@@ -222,9 +227,16 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       if (maxLoginAttemptsEnabled) {
         await incrementLoginAttempts({
           collection: collectionConfig,
-          doc: user,
           payload: req.payload,
           req,
+          user,
+        })
+
+        // Re-check login permissions and max attempts after incrementing attempts, in case parallel updates occurred
+        checkLoginPermission({
+          loggingInWithUsername: Boolean(canLoginWithUsername && sanitizedUsername),
+          req,
+          user,
         })
       }
 
