@@ -486,6 +486,12 @@ export type BaseLocalizationConfig = {
    * @default 'all'
    */
   defaultLocalePublishOption?: 'active' | 'all'
+  /**
+   * Enable localization of the status of the document.
+   * If enabled, the status will reflect the current locale throughout the Admin UI.
+   * @default false
+   */
+  enableStatusLocalization?: boolean
   /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale`
    *
    * If false, then no requests will fallback unless a fallbackLocale is specified in the request.

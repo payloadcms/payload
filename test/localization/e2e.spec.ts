@@ -618,6 +618,28 @@ describe('Localization', () => {
     await expect(searchInput).toBeVisible()
     await expect(searchInput).toHaveAttribute('placeholder', 'Search by Full title')
   })
+
+  test('should show localized status in collection list', async () => {
+    await page.goto(urlPostsWithDrafts.create)
+    const engTitle = 'Eng published'
+    const spanTitle = 'Spanish draft'
+
+    await changeLocale(page, defaultLocale)
+    await fillValues({ title: engTitle })
+    await saveDocAndAssert(page)
+
+    await changeLocale(page, spanishLocale)
+    await fillValues({ title: spanTitle })
+    await saveDocAndAssert(page, '#action-save-draft')
+
+    await page.goto(urlPostsWithDrafts.list)
+    await expect(page.locator('.row-1 .cell-title')).toContainText(spanTitle)
+    await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
+
+    await changeLocale(page, defaultLocale)
+    await expect(page.locator('.row-1 .cell-title')).toContainText(engTitle)
+    await expect(page.locator('.row-1 .cell-_status')).toContainText('Published')
+  })
 })
 
 async function fillValues(data: Partial<LocalizedPost>) {

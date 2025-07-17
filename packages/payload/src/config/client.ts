@@ -193,6 +193,11 @@ export const createClientConfig = ({
               config.localization.defaultLocalePublishOption
           }
 
+          if (config.localization.enableStatusLocalization) {
+            clientConfig.localization.enableStatusLocalization =
+              config.localization.enableStatusLocalization
+          }
+
           if (config.localization.fallback) {
             clientConfig.localization.fallback = config.localization.fallback
           }

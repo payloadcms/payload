@@ -36,6 +36,7 @@ export const Status: React.FC = () => {
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
   const { reset: resetForm } = useForm()
@@ -47,8 +48,19 @@ export const Status: React.FC = () => {
 
   let statusToRender: 'changed' | 'draft' | 'published'
 
+  const collectionConfig = getEntityConfig({ collectionSlug })
+  const globalConfig = getEntityConfig({ globalSlug })
+
+  const docConfig = collectionConfig || globalConfig
+  const autosaveEnabled =
+    typeof docConfig?.versions?.drafts === 'object' ? docConfig.versions.drafts.autosave : false
+
   if (unpublishedVersionCount > 0 && hasPublishedDoc) {
-    statusToRender = 'changed'
+    if (autosaveEnabled) {
+      statusToRender = 'changed'
+    } else {
+      statusToRender = 'draft'
+    }
   } else if (!hasPublishedDoc) {
     statusToRender = 'draft'
   } else if (hasPublishedDoc && unpublishedVersionCount <= 0) {
@@ -183,7 +195,7 @@ export const Status: React.FC = () => {
               />
             </React.Fragment>
           )}
-          {canUpdate && statusToRender === 'changed' && (
+          {canUpdate && (statusToRender === 'draft' || statusToRender === 'changed') && (
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button

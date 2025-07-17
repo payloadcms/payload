@@ -432,6 +432,7 @@ export default buildConfigWithDefaults({
     },
     defaultLocale,
     fallback: true,
+    enableStatusLocalization: true,
     locales: [
       {
         code: 'xx',
