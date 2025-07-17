@@ -386,7 +386,7 @@ export type CreateVersionArgs<T = TypeWithID> = {
   autosave: boolean
   collectionSlug: CollectionSlug
   createdAt: string
-  localeStatus: Record<string, 'draft' | 'published'>
+  localeStatus?: Record<string, 'draft' | 'published'>
   /** ID of the parent document for which the version should be created for */
   parent: number | string
   publishedLocale?: string
