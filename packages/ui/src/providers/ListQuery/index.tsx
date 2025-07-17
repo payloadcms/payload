@@ -142,9 +142,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   )
 
   const mergeQueryFromPropsAndSyncToURL = useEffectEvent(() => {
-    const sanitizedQueryFromProps = sanitizeQuery(queryFromProps)
-
-    const newQuery = { ...(currentQuery || {}), ...(sanitizedQueryFromProps || {}) }
+    const newQuery = sanitizeQuery({ ...(currentQuery || {}), ...(queryFromProps || {}) })
 
     const search = `?${qs.stringify({ ...newQuery, columns: JSON.stringify(newQuery.columns) })}`
 

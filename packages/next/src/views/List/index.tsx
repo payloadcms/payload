@@ -113,9 +113,6 @@ export const renderListView = async (
 
   query.columns = transformColumnsToSearchParams(collectionPreferences?.columns || [])
 
-  // Needed to prevent: Only plain objects can be passed to Client Components from Server Components. Objects with toJSON methods are not supported. Convert it manually to a simple value before passing it to props.
-  // query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
-
   const {
     routes: { admin: adminRoute },
   } = config
@@ -255,6 +252,9 @@ export const renderListView = async (
     })
 
     const isInDrawer = Boolean(drawerSlug)
+
+    // Needed to prevent: Only plain objects can be passed to Client Components from Server Components. Objects with toJSON methods are not supported. Convert it manually to a simple value before passing it to props.
+    query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
 
     return {
       List: (
