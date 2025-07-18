@@ -397,6 +397,11 @@ test.describe('Group By', () => {
     expect(true).toBe(true)
   })
 
+  test.skip('should select rows across groupings', async () => {
+    await page.goto(url.list)
+    expect(true).toBe(true)
+  })
+
   test.skip('should group by within a document drawer', async () => {
     await page.goto(url.list)
     expect(true).toBe(true)
