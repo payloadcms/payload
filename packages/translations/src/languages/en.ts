@@ -230,6 +230,7 @@ export const enTranslations = {
     cancel: 'Cancel',
     changesNotSaved:
       'Your changes have not been saved. If you leave now, you will lose your changes.',
+    clear: 'Clear',
     clearAll: 'Clear All',
     close: 'Close',
     collapse: 'Collapse',
@@ -301,6 +302,7 @@ export const enTranslations = {
     filterWhere: 'Filter {{label}} where',
     globals: 'Globals',
     goBack: 'Go back',
+    groupByLabel: 'Group by {{label}}',
     import: 'Import',
     isEditing: 'is editing',
     item: 'item',

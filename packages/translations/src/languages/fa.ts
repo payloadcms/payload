@@ -227,6 +227,7 @@ export const faTranslations: DefaultTranslationsObject = {
     cancel: 'لغو',
     changesNotSaved:
       'تغییرات شما ذخیره نشده، اگر این برگه را ترک کنید. تمام تغییرات از دست خواهد رفت.',
+    clear: 'روشن',
     clearAll: 'همه را پاک کنید',
     close: 'بستن',
     collapse: 'بستن',
@@ -298,6 +299,7 @@ export const faTranslations: DefaultTranslationsObject = {
     filterWhere: 'علامت گذاری کردن {{label}} جایی که',
     globals: 'سراسری',
     goBack: 'برگشت',
+    groupByLabel: 'گروه بندی بر اساس {{label}}',
     import: 'واردات',
     isEditing: 'در حال ویرایش است',
     item: 'مورد',

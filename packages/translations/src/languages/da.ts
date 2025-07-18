@@ -228,6 +228,7 @@ export const daTranslations: DefaultTranslationsObject = {
     cancel: 'Anuller',
     changesNotSaved:
       'Dine ændringer er ikke blevet gemt. Hvis du forlader siden, vil din ændringer gå tabt.',
+    clear: 'Klar',
     clearAll: 'Ryd alt',
     close: 'Luk',
     collapse: 'Skjul',
@@ -298,6 +299,7 @@ export const daTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filter {{label}} hvor',
     globals: 'Globale',
     goBack: 'Gå tilbage',
+    groupByLabel: 'Gruppér efter {{label}}',
     import: 'Import',
     isEditing: 'redigerer',
     item: 'vare',

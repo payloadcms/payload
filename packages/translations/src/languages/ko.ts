@@ -227,6 +227,8 @@ export const koTranslations: DefaultTranslationsObject = {
     backToDashboard: '대시보드로 돌아가기',
     cancel: '취소',
     changesNotSaved: '변경 사항이 저장되지 않았습니다. 지금 떠나면 변경 사항을 잃게 됩니다.',
+    clear:
+      '페이로드의 맥락 내에서 원문의 의미를 존중하십시오. 다음은 페이로드에서 사용되는 특정 의미를 내포하는 일반적인 페이로드 용어 목록입니다: \n- Collection: 컬렉션은 공통의 구조와 목적을 공유하는 문서의 그룹입니다. 컬렉션은 페이로드에서 콘텐츠를 정리하고 관리하는 데 사용됩니다.\n- Field: 필드는 컬렉',
     clearAll: '모두 지우기',
     close: '닫기',
     collapse: '접기',
@@ -297,6 +299,7 @@ export const koTranslations: DefaultTranslationsObject = {
     filterWhere: '{{label}} 필터링 조건',
     globals: '글로벌',
     goBack: '돌아가기',
+    groupByLabel: '{{label}}로 그룹화',
     import: '수입',
     isEditing: '편집 중',
     item: '항목',

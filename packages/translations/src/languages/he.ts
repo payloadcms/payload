@@ -222,6 +222,8 @@ export const heTranslations: DefaultTranslationsObject = {
     backToDashboard: 'חזרה ללוח המחוונים',
     cancel: 'ביטול',
     changesNotSaved: 'השינויים שלך לא נשמרו. אם תצא כעת, תאבד את השינויים שלך.',
+    clear:
+      'בהתחשב במשמעות של הטקסט המקורי בהקשר של Payload. הנה רשימה של מונחים מקוריים של Payload שנושאים משמעויות מסוימות:\n- אוסף: אוסף הוא קבוצה של מסמכים ששותפים למבנה ולמטרה משות',
     clearAll: 'נקה הכל',
     close: 'סגור',
     collapse: 'כווץ',
@@ -292,6 +294,7 @@ export const heTranslations: DefaultTranslationsObject = {
     filterWhere: 'סנן {{label}} בהם',
     globals: 'גלובלים',
     goBack: 'חזור',
+    groupByLabel: 'קבץ לפי {{label}}',
     import: 'יבוא',
     isEditing: 'עורך',
     item: 'פריט',

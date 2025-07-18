@@ -82,9 +82,9 @@ export interface Config {
   collectionsJoins: {
     'orderable-join': {
       orderableJoinField1: 'orderable';
-      'group.orderableJoinField': 'orderable';
       orderableJoinField2: 'orderable';
       nonOrderableJoinField: 'orderable';
+      'group.orderableJoinField': 'orderable';
     };
   };
   collectionsSelect: {
@@ -206,8 +206,8 @@ export interface Localized {
  */
 export interface Orderable {
   id: string;
-  _orderable_orderableJoinField2_order?: string | null;
   _orderable_group_orderableJoinField_order?: string | null;
+  _orderable_orderableJoinField2_order?: string | null;
   _orderable_orderableJoinField1_order?: string | null;
   _order?: string | null;
   title?: string | null;
@@ -227,13 +227,6 @@ export interface OrderableJoin {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  group?: {
-    orderableJoinField?: {
-      docs?: (string | Orderable)[];
-      hasNextPage?: boolean;
-      totalDocs?: number;
-    };
-  };
   orderableJoinField2?: {
     docs?: (string | Orderable)[];
     hasNextPage?: boolean;
@@ -243,6 +236,13 @@ export interface OrderableJoin {
     docs?: (string | Orderable)[];
     hasNextPage?: boolean;
     totalDocs?: number;
+  };
+  group?: {
+    orderableJoinField?: {
+      docs?: (string | Orderable)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
   };
   updatedAt: string;
   createdAt: string;
@@ -262,6 +262,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -417,8 +424,8 @@ export interface LocalizedSelect<T extends boolean = true> {
  * via the `definition` "orderable_select".
  */
 export interface OrderableSelect<T extends boolean = true> {
-  _orderable_orderableJoinField2_order?: T;
   _orderable_group_orderableJoinField_order?: T;
+  _orderable_orderableJoinField2_order?: T;
   _orderable_orderableJoinField1_order?: T;
   _order?: T;
   title?: T;
@@ -433,13 +440,13 @@ export interface OrderableSelect<T extends boolean = true> {
 export interface OrderableJoinSelect<T extends boolean = true> {
   title?: T;
   orderableJoinField1?: T;
+  orderableJoinField2?: T;
+  nonOrderableJoinField?: T;
   group?:
     | T
     | {
         orderableJoinField?: T;
       };
-  orderableJoinField2?: T;
-  nonOrderableJoinField?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -457,6 +464,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

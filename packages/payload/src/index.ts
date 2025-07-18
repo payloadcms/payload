@@ -1208,7 +1208,6 @@ export { findVersionsOperation } from './collections/operations/findVersions.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
-
 export { buildConfig } from './config/build.js'
 export {
   type ClientConfig,

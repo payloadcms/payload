@@ -4,6 +4,7 @@ import type { CollectionSlug } from 'payload'
 import { expect, test } from '@playwright/test'
 import { assertToastErrors } from 'helpers/assertToastErrors.js'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { openCreateDocDrawer, openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
@@ -739,9 +740,7 @@ describe('Relationship Field', () => {
       const relationship = page.locator('.row-1 .cell-relationshipHasManyMultiple')
       await expect(relationship).toHaveText(relationTwoDoc.id)
 
-      const paginator = page.locator('.clickable-arrow--right')
-      await paginator.click()
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
+      await goToNextPage(page)
 
       // check first doc on second page (should be different)
       await expect(relationship).toContainText(relationOneDoc.id)

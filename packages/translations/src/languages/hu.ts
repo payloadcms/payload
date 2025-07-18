@@ -232,6 +232,7 @@ export const huTranslations: DefaultTranslationsObject = {
     cancel: 'Mégsem',
     changesNotSaved:
       'A módosítások nem lettek mentve. Ha most távozik, elveszíti a változtatásokat.',
+    clear: 'Tiszta',
     clearAll: 'Törölj mindent',
     close: 'Bezárás',
     collapse: 'Összecsukás',
@@ -303,6 +304,7 @@ export const huTranslations: DefaultTranslationsObject = {
     filterWhere: 'Szűrő {{label}} ahol',
     globals: 'Globálisok',
     goBack: 'Vissza',
+    groupByLabel: 'Csoportosítás {{label}} szerint',
     import: 'Behozatal',
     isEditing: 'szerkeszt',
     item: 'tétel',

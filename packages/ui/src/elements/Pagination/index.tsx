@@ -15,6 +15,7 @@ const nodeTypes = {
 const baseClass = 'paginator'
 
 export type PaginationProps = {
+  forceShow?: boolean
   hasNextPage?: boolean
   hasPrevPage?: boolean
   limit?: number
@@ -52,7 +53,9 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
     totalPages = null,
   } = props
 
-  if (!hasNextPage && !hasPrevPage) {
+  const hasPrevOrNext = hasNextPage || hasPrevPage
+
+  if (!hasPrevOrNext) {
     return null
   }
 

@@ -112,7 +112,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const { getTableState } = useServerFunctions()
 
   const renderTable = useCallback(
-    async (docs?: PaginatedDocs['docs']) => {
+    async (data?: PaginatedDocs) => {
       const newQuery: ListQuery = {
         limit: field?.defaultLimit || collectionConfig?.admin?.pagination?.defaultLimit,
         sort: field.defaultSort || collectionConfig?.defaultSort,
@@ -139,7 +139,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       } = await getTableState({
         collectionSlug: relationTo,
         columns: transformColumnsToPreferences(query?.columns) || defaultColumns,
-        docs,
+        data,
         enableRowSelections: false,
         orderableFieldName:
           !field.orderable || Array.isArray(field.collection)
@@ -190,17 +190,17 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
       const foundDocIndex = data?.docs?.findIndex((doc) => doc.id === args.doc.id)
-      let withNewOrUpdatedDoc: PaginatedDocs['docs'] = undefined
+      const withNewOrUpdatedData: PaginatedDocs = { docs: [] } as PaginatedDocs
 
       if (foundDocIndex !== -1) {
         const newDocs = [...data.docs]
         newDocs[foundDocIndex] = args.doc
-        withNewOrUpdatedDoc = newDocs
+        withNewOrUpdatedData.docs = newDocs
       } else {
-        withNewOrUpdatedDoc = [args.doc, ...data.docs]
+        withNewOrUpdatedData.docs = [args.doc, ...data.docs]
       }
 
-      void renderTable(withNewOrUpdatedDoc)
+      void renderTable(withNewOrUpdatedData)
     },
     [data?.docs, renderTable],
   )
@@ -217,9 +217,13 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const onDrawerDelete = useCallback<DocumentDrawerProps['onDelete']>(
     (args) => {
       const newDocs = data.docs.filter((doc) => doc.id !== args.id)
-      void renderTable(newDocs)
+
+      void renderTable({
+        ...data,
+        docs: newDocs,
+      })
     },
-    [data?.docs, renderTable],
+    [data, renderTable],
   )
 
   const canCreate =
@@ -240,13 +244,13 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDrawerOpen])
 
-  const memoizedQuery = React.useMemo(
+  const memoizedListQuery = React.useMemo(
     () => ({
       columns: transformColumnsToPreferences(columnState)?.map(({ accessor }) => accessor),
       limit: field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit,
       sort: field.defaultSort ?? collectionConfig?.defaultSort,
     }),
-    [field, columnState, collectionConfig],
+    [columnState, field, collectionConfig],
   )
 
   return (
@@ -323,7 +327,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     ? undefined
                     : `_${field.collection}_${fieldPath.replaceAll('.', '_')}_order`
                 }
-                query={memoizedQuery}
+                query={memoizedListQuery}
               >
                 <TableColumnsProvider
                   collectionSlug={isPolymorphic ? relationTo[0] : relationTo}

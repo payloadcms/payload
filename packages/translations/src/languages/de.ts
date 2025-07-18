@@ -235,6 +235,8 @@ export const deTranslations: DefaultTranslationsObject = {
     cancel: 'Abbrechen',
     changesNotSaved:
       'Deine Änderungen wurden nicht gespeichert. Wenn du diese Seite verlässt, gehen deine Änderungen verloren.',
+    clear:
+      'Respektieren Sie die Bedeutung des ursprünglichen Textes im Kontext von Payload. Hier ist eine Liste von gängigen Payload-Begriffen, die sehr spezifische Bedeutungen tragen:\n    - Sammlung: Eine Sammlung ist eine Gruppe von Dokumenten, die eine gemeinsame Struktur und Funktion teilen. Sammlungen werden verwendet, um Inhalte in Payload zu organisieren und zu verwalten.\n    - Feld: Ein Feld ist ein spezifisches Datenstück innerhalb eines Dokuments in einer Sammlung. Felder definieren die Struktur und den Datentyp, der in einem Dokument gespeichert werden kann.\n    -',
     clearAll: 'Alles löschen',
     close: 'Schließen',
     collapse: 'Einklappen',
@@ -306,6 +308,7 @@ export const deTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filter {{label}}, wo',
     globals: 'Globale Dokumente',
     goBack: 'Zurück',
+    groupByLabel: 'Gruppieren nach {{label}}',
     import: 'Importieren',
     isEditing: 'bearbeitet gerade',
     item: 'Artikel',

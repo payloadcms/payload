@@ -9,10 +9,10 @@ import type { AddCondition, RemoveCondition, UpdateCondition, WhereBuilderProps 
 
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { reduceFieldsToOptions } from '../../utilities/reduceFieldsToOptions.js'
 import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
 import fieldTypes from './field-types.js'
-import { reduceFields } from './reduceFields.js'
 import './index.scss'
 
 const baseClass = 'where-builder'
@@ -27,7 +27,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { collectionPluralLabel, fields, renderedFilters, resolvedFilterOptions } = props
   const { i18n, t } = useTranslation()
 
-  const reducedFields = useMemo(() => reduceFields({ fields, i18n }), [fields, i18n])
+  const reducedFields = useMemo(() => reduceFieldsToOptions({ fields, i18n }), [fields, i18n])
 
   const { handleWhereChange, query } = useListQuery()
 
@@ -129,9 +129,9 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     <div className={baseClass}>
       {conditions.length > 0 && (
         <React.Fragment>
-          <div className={`${baseClass}__label`}>
+          <p className={`${baseClass}__label`}>
             {t('general:filterWhere', { label: getTranslation(collectionPluralLabel, i18n) })}
-          </div>
+          </p>
           <ul className={`${baseClass}__or-filters`}>
             {conditions.map((or, orIndex) => {
               const compoundOrKey = `${orIndex}_${Array.isArray(or?.and) ? or.and.length : ''}`

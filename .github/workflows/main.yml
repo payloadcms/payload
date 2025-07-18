@@ -284,6 +284,7 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - group-by
           - folders
           - hooks
           - lexical__collections__Lexical__e2e__main
@@ -419,6 +420,7 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - group-by
           - folders
           - hooks
           - lexical__collections__Lexical__e2e__main

@@ -26,8 +26,9 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   query: queryFromProps,
 }) => {
   // TODO: Investigate if this is still needed
-
   'use no memo'
+  // TODO: Investigate if this is still needed
+
   const router = useRouter()
   const rawSearchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
@@ -128,15 +129,15 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   )
 
   const handleSortChange = useCallback(
-    async (arg: string) => {
-      await refineListData({ sort: arg })
+    async (sort: string) => {
+      await refineListData({ sort })
     },
     [refineListData],
   )
 
   const handleWhereChange = useCallback(
-    async (arg: Where) => {
-      await refineListData({ where: arg })
+    async (where: Where) => {
+      await refineListData({ where })
     },
     [refineListData],
   )
@@ -176,7 +177,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         query: currentQuery,
         refineListData,
         setModified,
-
         ...contextRef.current,
       }}
     >
