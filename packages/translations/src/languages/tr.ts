@@ -188,6 +188,8 @@ export const trTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Klasörü Sil',
     folderName: 'Klasör Adı',
     folders: 'Klasörler',
+    folderTypeDescription:
+      'Bu klasörde hangi türden koleksiyon belgelerine izin verilmesi gerektiğini seçin.',
     itemHasBeenMoved: '{{title}} {{folderName}} klasörüne taşındı.',
     itemHasBeenMovedToRoot: '{{title}} kök klasöre taşındı.',
     itemsMovedToFolder: "{{title}} {{folderName}}'ye taşındı.",

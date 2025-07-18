@@ -5,6 +5,7 @@ import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
 import { Readable } from 'stream'
 
+import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
 import { flattenObject } from './flattenObject.js'
 import { getCustomFieldFunctions } from './getCustomFieldFunctions.js'
 import { getFilename } from './getFilename.js'
@@ -108,15 +109,22 @@ export const createExport = async (args: CreateExportArgs) => {
     fields: collectionConfig.flattenedFields,
   })
 
-  const disabledFieldsDot =
+  const disabledFields =
     collectionConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
-  const disabledFields = disabledFieldsDot.map((f: string) => f.replace(/\./g, '_'))
+
+  const disabledRegexes: RegExp[] = disabledFields.map(buildDisabledFieldRegex)
 
   const filterDisabled = (row: Record<string, unknown>): Record<string, unknown> => {
-    for (const key of disabledFields) {
-      delete row[key]
+    const filtered: Record<string, unknown> = {}
+
+    for (const [key, value] of Object.entries(row)) {
+      const isDisabled = disabledRegexes.some((regex) => regex.test(key))
+      if (!isDisabled) {
+        filtered[key] = value
+      }
     }
-    return row
+
+    return filtered
   }
 
   if (download) {

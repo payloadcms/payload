@@ -186,6 +186,8 @@ export const enTranslations = {
     deleteFolder: 'Delete Folder',
     folderName: 'Folder Name',
     folders: 'Folders',
+    folderTypeDescription:
+      'Select which type of collection documents should be allowed in this folder.',
     itemHasBeenMoved: '{{title}} has been moved to {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} has been moved to the root folder',
     itemsMovedToFolder: '{{title}} moved to {{folderName}}',

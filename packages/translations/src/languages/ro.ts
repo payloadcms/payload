@@ -190,6 +190,8 @@ export const roTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Ștergeți dosarul',
     folderName: 'Nume dosar',
     folders: 'Dosare',
+    folderTypeDescription:
+      'Selectați ce tip de documente din colecție ar trebui să fie permise în acest dosar.',
     itemHasBeenMoved: '{{title}} a fost mutat în {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} a fost mutat în dosarul rădăcină',
     itemsMovedToFolder: '{{title}} a fost mutat în {{folderName}}',

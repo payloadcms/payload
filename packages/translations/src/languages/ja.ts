@@ -187,6 +187,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     deleteFolder: 'フォルダを削除する',
     folderName: 'フォルダ名',
     folders: 'フォルダー',
+    folderTypeDescription:
+      'このフォルダーに許可されるコレクションドキュメントのタイプを選択してください。',
     itemHasBeenMoved: '{{title}}は{{folderName}}に移動されました',
     itemHasBeenMovedToRoot: '{{title}}はルートフォルダに移動されました',
     itemsMovedToFolder: '{{title}}は{{folderName}}に移動されました',

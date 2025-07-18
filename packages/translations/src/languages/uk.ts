@@ -187,6 +187,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Видалити папку',
     folderName: 'Назва папки',
     folders: 'Папки',
+    folderTypeDescription:
+      'Виберіть, який тип документів колекції повинен бути дозволений у цій папці.',
     itemHasBeenMoved: '{{title}} було переміщено до {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} був переміщений до кореневої папки',
     itemsMovedToFolder: '{{title}} перенесено до {{folderName}}',

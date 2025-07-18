@@ -186,6 +186,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Dzēst mapi',
     folderName: 'Mapes nosaukums',
     folders: 'Mapes',
+    folderTypeDescription:
+      'Izvēlieties, kāda veida kolekcijas dokumentiem jābūt atļautiem šajā mapē.',
     itemHasBeenMoved: '{{title}} ir pārvietots uz {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} ir pārvietots uz saknes mapi',
     itemsMovedToFolder: '{{title}} pārvietots uz {{folderName}}',

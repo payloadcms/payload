@@ -5,6 +5,7 @@ import type {
   PaginatedDocs,
   PayloadRequest,
   SanitizedCollectionConfig,
+  Where,
 } from 'payload'
 
 import { renderTable } from '@payloadcms/ui/rsc'
@@ -22,6 +23,7 @@ export const handleGroupBy = async ({
   query,
   req,
   user,
+  where: whereWithMergedSearch,
 }: {
   clientConfig: ClientConfig
   collectionConfig: SanitizedCollectionConfig
@@ -33,6 +35,7 @@ export const handleGroupBy = async ({
   query?: ListQuery
   req: PayloadRequest
   user: any
+  where: Where
 }): Promise<{
   columnState: any[]
   data: PaginatedDocs
@@ -126,7 +129,7 @@ export const handleGroupBy = async ({
           sort: query?.sort,
           user,
           where: {
-            ...(query?.where || {}),
+            ...(whereWithMergedSearch || {}),
             [groupByFieldName]: {
               equals: valueOrRelationshipID,
             },

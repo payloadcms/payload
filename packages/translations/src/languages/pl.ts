@@ -185,6 +185,8 @@ export const plTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Usuń folder',
     folderName: 'Nazwa folderu',
     folders: 'Foldery',
+    folderTypeDescription:
+      'Wybierz, które typy dokumentów z kolekcji powinny być dozwolone w tym folderze.',
     itemHasBeenMoved: '{{title}} został przeniesiony do {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} został przeniesiony do folderu głównego',
     itemsMovedToFolder: '{{title}} przeniesiono do {{folderName}}',

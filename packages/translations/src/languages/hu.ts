@@ -188,6 +188,8 @@ export const huTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Mappa törlése',
     folderName: 'Mappa neve',
     folders: 'Mappák',
+    folderTypeDescription:
+      'Válassza ki, hogy milyen típusú dokumentumokat engedélyez ebben a mappában.',
     itemHasBeenMoved: '{{title}} át lett helyezve a {{folderName}} nevű mappába.',
     itemHasBeenMovedToRoot: 'A(z) {{title}} át lett helyezve a gyökérmappába.',
     itemsMovedToFolder: '{{title}} áthelyezve a(z) {{folderName}} mappába',

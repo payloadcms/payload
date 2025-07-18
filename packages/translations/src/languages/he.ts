@@ -181,6 +181,7 @@ export const heTranslations: DefaultTranslationsObject = {
     deleteFolder: 'מחק תיקייה',
     folderName: 'שם תיקייה',
     folders: 'תיקיות',
+    folderTypeDescription: 'בחר איזה סוג של מסמכים מהאוסף יותרו להיות בתיקייה זו.',
     itemHasBeenMoved: '"{{title}}" הועבר ל- "{{folderName}}"',
     itemHasBeenMovedToRoot: '"{{title}}" הועבר לתיקיית השורש',
     itemsMovedToFolder: '{{title}} הועבר אל {{folderName}}',

@@ -188,6 +188,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Удалить папку',
     folderName: 'Название папки',
     folders: 'Папки',
+    folderTypeDescription:
+      'Выберите, какие типы документов коллекции должны быть разрешены в этой папке.',
     itemHasBeenMoved: '{{title}} был перемещен в {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} был перемещен в корневую папку',
     itemsMovedToFolder: '{{title}} перемещен в {{folderName}}',

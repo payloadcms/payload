@@ -171,6 +171,7 @@ describe('Query Presets', () => {
     await clearSelectedPreset({ page })
 
     // ensure that the preset was cleared from preferences by navigating without the `?preset=` param
+    // e.g. do not do `page.reload()`
     await page.goto(pagesUrl.list)
 
     // poll url to ensure that `?preset=` param is not present

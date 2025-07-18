@@ -187,6 +187,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Izbriši mapu',
     folderName: 'Naziv mape',
     folders: 'Mape',
+    folderTypeDescription:
+      'Odaberite koja vrsta dokumenata kolekcije treba biti dozvoljena u ovoj mapi.',
     itemHasBeenMoved: '{{title}} je premješten u {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} je premješten u korijensku mapu.',
     itemsMovedToFolder: '{{title}} premješteno u {{folderName}}',

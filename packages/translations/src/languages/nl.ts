@@ -188,6 +188,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Verwijder map',
     folderName: 'Mapnaam',
     folders: 'Mappen',
+    folderTypeDescription:
+      'Selecteer welk type verzameldocumenten toegestaan zou moeten zijn in deze map.',
     itemHasBeenMoved: '{{title}} is verplaatst naar {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} is verplaatst naar de hoofdmap',
     itemsMovedToFolder: '{{title}} verplaatst naar {{folderName}}',

@@ -10,16 +10,10 @@ import './index.scss'
 const baseClass = 'drag-overlay-selection'
 
 type DragCardsProps = {
-  readonly allItems: FolderOrDocument[]
-  readonly lastSelected?: number
+  readonly item: FolderOrDocument
   readonly selectedCount: number
 }
-export function DragOverlaySelection({ allItems, lastSelected, selectedCount }: DragCardsProps) {
-  const visibleItem = allItems?.[lastSelected || 0]
-  if (!selectedCount || !visibleItem) {
-    return null
-  }
-
+export function DragOverlaySelection({ item, selectedCount }: DragCardsProps) {
   return (
     <DragOverlay
       dropAnimation={null}
@@ -43,7 +37,7 @@ export function DragOverlaySelection({ allItems, lastSelected, selectedCount }: 
               id={null}
               isSelected
               itemKey="overlay-card"
-              title={visibleItem.value._folderOrDocumentTitle}
+              title={item.value._folderOrDocumentTitle}
               type="folder"
             />
           </div>

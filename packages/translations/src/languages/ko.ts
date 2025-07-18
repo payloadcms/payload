@@ -186,6 +186,7 @@ export const koTranslations: DefaultTranslationsObject = {
     deleteFolder: '폴더 삭제',
     folderName: '폴더 이름',
     folders: '폴더들',
+    folderTypeDescription: '이 폴더에서 어떤 유형의 컬렉션 문서가 허용되어야 하는지 선택하세요.',
     itemHasBeenMoved: '{{title}}는 {{folderName}}로 이동되었습니다.',
     itemHasBeenMovedToRoot: '{{title}}이(가) 루트 폴더로 이동되었습니다.',
     itemsMovedToFolder: '{{title}}이(가) {{folderName}}로 이동되었습니다.',

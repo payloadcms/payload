@@ -97,7 +97,7 @@ export const renderListView = async (
     req,
     value: {
       columns: columnsFromQuery,
-      groupBy: query?.groupBy,
+      groupBy: query?.groupBy as string,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       preset: query?.preset,
       sort: query?.sort as string,
@@ -127,12 +127,6 @@ export const renderListView = async (
       throw new Error('not-found')
     }
 
-    let where = mergeListSearchAndWhere({
-      collectionConfig,
-      search: typeof query?.search === 'string' ? query.search : undefined,
-      where: query?.where,
-    })
-
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
       const baseListFilter = await collectionConfig.admin.baseListFilter({
         limit: query.limit,
@@ -142,13 +136,17 @@ export const renderListView = async (
       })
 
       if (baseListFilter) {
-        where = {
-          and: [where, baseListFilter].filter(Boolean),
+        query.where = {
+          and: [query.where, baseListFilter].filter(Boolean),
         }
       }
     }
 
-    query.where = where
+    const whereWithMergedSearch = mergeListSearchAndWhere({
+      collectionConfig,
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      where: query?.where,
+    })
 
     let queryPreset: QueryPreset | undefined
     let queryPresetPermissions: SanitizedCollectionPermission | undefined
@@ -192,6 +190,7 @@ export const renderListView = async (
         query,
         req,
         user,
+        where: whereWithMergedSearch,
       }))
     } else {
       data = await req.payload.find({
@@ -207,7 +206,7 @@ export const renderListView = async (
         req,
         sort: query?.sort,
         user,
-        where: query?.where || {},
+        where: whereWithMergedSearch,
       })
       ;({ columnState, Table } = renderTable({
         clientCollectionConfig: clientConfig.collections.find((c) => c.slug === collectionSlug),
@@ -275,6 +274,9 @@ export const renderListView = async (
     })
 
     const isInDrawer = Boolean(drawerSlug)
+
+    // Needed to prevent: Only plain objects can be passed to Client Components from Server Components. Objects with toJSON methods are not supported. Convert it manually to a simple value before passing it to props.
+    query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
 
     return {
       List: (

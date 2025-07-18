@@ -186,6 +186,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Apagar Pasta',
     folderName: 'Nome da Pasta',
     folders: 'Pastas',
+    folderTypeDescription:
+      'Selecione qual tipo de documentos da coleção devem ser permitidos nesta pasta.',
     itemHasBeenMoved: '{{title}} foi movido para {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} foi movido para a pasta raiz',
     itemsMovedToFolder: '{{title}} movido para {{folderName}}',
