@@ -54,7 +54,8 @@ The plugin accepts an object with the following properties:
 ```ts
 type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
-   * After a tenant is deleted, the plugin will attempt to clean up related documents
+   * After a tenant is deleted, the plugin will attempt
+   * to clean up related documents
    * - removing documents with the tenant ID
    * - removing the tenant from users
    *
@@ -67,19 +68,22 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   collections: {
     [key in CollectionSlug]?: {
       /**
-       * Set to `true` if you want the collection to behave as a global
+       * Set to `true` if you want the collection to
+       * behave as a global
        *
        * @default false
        */
       isGlobal?: boolean
       /**
-       * Set to `false` if you want to manually apply the baseListFilter
+       * Set to `false` if you want to manually apply
+       * the baseListFilter
        *
        * @default true
        */
       useBaseListFilter?: boolean
       /**
-       * Set to `false` if you want to handle collection access manually without the multi-tenant constraints applied
+       * Set to `false` if you want to handle collection access
+       * manually without the multi-tenant constraints applied
        *
        * @default true
        */
@@ -88,7 +92,8 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   }
   /**
    * Enables debug mode
-   * - Makes the tenant field visible in the admin UI within applicable collections
+   * - Makes the tenant field visible in the
+   * admin UI within applicable collections
    *
    * @default false
    */
@@ -100,22 +105,27 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    */
   enabled?: boolean
   /**
-   * Field configuration for the field added to all tenant enabled collections
+   * Field configuration for the field added
+   * to all tenant enabled collections
    */
   tenantField?: {
     access?: RelationshipField['access']
     /**
-     * The name of the field added to all tenant enabled collections
+     * The name of the field added to all tenant
+     * enabled collections
      *
      * @default 'tenant'
      */
     name?: string
   }
   /**
-   * Field configuration for the field added to the users collection
+   * Field configuration for the field added
+   * to the users collection
    *
-   * If `includeDefaultField` is `false`, you must include the field on your users collection manually
-   * This is useful if you want to customize the field or place the field in a specific location
+   * If `includeDefaultField` is `false`, you must
+   * include the field on your users collection manually
+   * This is useful if you want to customize the field
+   * or place the field in a specific location
    */
   tenantsArrayField?:
     | {
@@ -136,7 +146,8 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
          */
         arrayTenantFieldName?: string
         /**
-         * When `includeDefaultField` is `true`, the field will be added to the users collection automatically
+         * When `includeDefaultField` is `true`, the field will
+         * be added to the users collection automatically
          */
         includeDefaultField?: true
         /**
@@ -153,7 +164,8 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
         arrayFieldName?: string
         arrayTenantFieldName?: string
         /**
-         * When `includeDefaultField` is `false`, you must include the field on your users collection manually
+         * When `includeDefaultField` is `false`, you must
+         * include the field on your users collection manually
          */
         includeDefaultField?: false
         rowFields?: never
@@ -162,7 +174,8 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
    * Customize tenant selector label
    *
-   * Either a string or an object where the keys are i18n codes and the values are the string labels
+   * Either a string or an object where the keys are i18n
+   * codes and the values are the string labels
    */
   tenantSelectorLabel?:
     | Partial<{
@@ -176,7 +189,8 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    */
   tenantsSlug?: string
   /**
-   * Function that determines if a user has access to _all_ tenants
+   * Function that determines if a user has access
+   * to _all_ tenants
    *
    * Useful for super-admin type users
    */
@@ -184,15 +198,18 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
     user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : User,
   ) => boolean
   /**
-   * Opt out of adding access constraints to the tenants collection
+   * Opt out of adding access constraints to
+   * the tenants collection
    */
   useTenantsCollectionAccess?: boolean
   /**
-   * Opt out including the baseListFilter to filter tenants by selected tenant
+   * Opt out including the baseListFilter to filter
+   * tenants by selected tenant
    */
   useTenantsListFilter?: boolean
   /**
-   * Opt out including the baseListFilter to filter users by selected tenant
+   * Opt out including the baseListFilter to filter
+   * users by selected tenant
    */
   useUsersTenantFilter?: boolean
 }
@@ -327,14 +344,16 @@ type ContextType = {
   /**
    * Prevents a refresh when the tenant is changed
    *
-   * If not switching tenants while viewing a "global", set to true
+   * If not switching tenants while viewing a "global",
+   * set to true
    */
   setPreventRefreshOnChange: React.Dispatch<React.SetStateAction<boolean>>
   /**
    * Sets the selected tenant ID
    *
    * @param args.id - The ID of the tenant to select
-   * @param args.refresh - Whether to refresh the page after changing the tenant
+   * @param args.refresh - Whether to refresh the page
+   * after changing the tenant
    */
   setTenant: (args: {
     id: number | string | undefined

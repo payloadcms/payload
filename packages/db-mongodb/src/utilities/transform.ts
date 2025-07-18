@@ -406,6 +406,10 @@ export const transform = ({
   parentIsLocalized = false,
   validateRelationships = true,
 }: Args) => {
+  if (!data) {
+    return null
+  }
+
   if (Array.isArray(data)) {
     for (const item of data) {
       transform({ $inc, adapter, data: item, fields, globalSlug, operation, validateRelationships })
@@ -424,6 +428,11 @@ export const transform = ({
 
     if (data.id instanceof Types.ObjectId) {
       data.id = data.id.toHexString()
+    }
+
+    // Handle BigInt conversion for custom ID fields of type 'number'
+    if (adapter.useBigIntForNumberIDs && typeof data.id === 'bigint') {
+      data.id = Number(data.id)
     }
 
     if (!adapter.allowAdditionalKeys) {

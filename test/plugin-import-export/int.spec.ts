@@ -364,8 +364,8 @@ describe('@payloadcms/plugin-import-export', () => {
       const expectedPath = path.join(dirname, './uploads', doc.filename as string)
       const data = await readCSV(expectedPath)
 
-      expect(data[0].blocks_0_blockType).toStrictEqual('hero')
-      expect(data[0].blocks_1_blockType).toStrictEqual('content')
+      expect(data[0].blocks_0_hero_blockType).toStrictEqual('hero')
+      expect(data[0].blocks_1_content_blockType).toStrictEqual('content')
     })
 
     it('should create a csv of all fields when fields is empty', async () => {
@@ -629,8 +629,8 @@ describe('@payloadcms/plugin-import-export', () => {
       const expectedPath = path.join(dirname, './uploads', doc.filename as string)
       const data = await readCSV(expectedPath)
 
-      expect(data[0].blocks_0_blockType).toStrictEqual('hero')
-      expect(data[0].blocks_1_blockType).toStrictEqual('content')
+      expect(data[0].blocks_0_hero_blockType).toStrictEqual('hero')
+      expect(data[0].blocks_1_content_blockType).toStrictEqual('content')
     })
   })
 })

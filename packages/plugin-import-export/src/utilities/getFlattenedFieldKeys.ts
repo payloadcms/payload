@@ -34,12 +34,15 @@ export const getFlattenedFieldKeys = (fields: FieldWithPresentational[], prefix 
         keys.push(...subKeys)
         break
       }
-      case 'blocks':
+      case 'blocks': {
         field.blocks.forEach((block) => {
-          const blockKeys = getFlattenedFieldKeys(block.fields as FlattenedField[], `${name}_0`)
-          keys.push(...blockKeys)
+          const blockPrefix = `${name}_0_${block.slug}`
+          keys.push(`${blockPrefix}_blockType`)
+          keys.push(`${blockPrefix}_id`)
+          keys.push(...getFlattenedFieldKeys(block.fields as FlattenedField[], blockPrefix))
         })
         break
+      }
       case 'collapsible':
       case 'group':
       case 'row':
