@@ -122,11 +122,6 @@ export const getFolderResultsComponentAndData = async ({
                 },
                 {
                   folderType: {
-                    equals: [],
-                  },
-                },
-                {
-                  folderType: {
                     equals: null,
                   },
                 },

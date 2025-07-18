@@ -80,10 +80,10 @@ export const FolderTypeField = ({
       if (!readOnly || disabled) {
         let newValue: string | string[] = null
         if (selectedOption && hasMany) {
-          if (Array.isArray(selectedOption)) {
+          if (Array.isArray(selectedOption) && selectedOption.length > 0) {
             newValue = selectedOption.map((option) => option.value)
           } else {
-            newValue = []
+            newValue = null
           }
         } else if (selectedOption && !Array.isArray(selectedOption)) {
           newValue = selectedOption.value
