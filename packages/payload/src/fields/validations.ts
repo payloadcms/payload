@@ -61,7 +61,7 @@ export const text: TextFieldValidation = (
   let maxLength!: number
 
   if (!required) {
-    if (!value) {
+    if (value === undefined || value === null) {
       return true
     }
   }
