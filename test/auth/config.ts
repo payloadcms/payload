@@ -8,6 +8,8 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import {
   apiKeysSlug,
+  customVerificationTokenSlug,
+  expectedVerificationToken,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
@@ -261,6 +263,15 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+    },
+    {
+      slug: customVerificationTokenSlug,
+      auth: {
+        verify: {
+          generateVerificationToken: async () => Promise.resolve(expectedVerificationToken),
+        },
+      },
+      fields: [],
     },
   ],
   onInit: async (payload) => {
