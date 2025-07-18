@@ -70,6 +70,7 @@ export function DefaultEditView({
     disableLeaveWithoutSaving,
     docPermissions,
     documentIsLocked,
+    documentLockState,
     getDocPermissions,
     getDocPreferences,
     globalSlug,
@@ -164,16 +165,6 @@ export function DefaultEditView({
 
   const isLockExpired = Date.now() > lockExpiryTime
 
-  const documentLockStateRef = useRef<{
-    hasShownLockedModal: boolean
-    isLocked: boolean
-    user: ClientUser | number | string
-  } | null>({
-    hasShownLockedModal: false,
-    isLocked: false,
-    user: null,
-  })
-
   const schemaPathSegments = useMemo(() => [entitySlug], [entitySlug])
 
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
@@ -184,13 +175,15 @@ export function DefaultEditView({
     return false
   })
 
+  const nextHrefRef = React.useRef<null | string>(null)
+
   const handleDocumentLocking = useCallback(
     (lockedState: LockedState) => {
       setDocumentIsLocked(true)
       const previousOwnerID =
-        typeof documentLockStateRef.current?.user === 'object'
-          ? documentLockStateRef.current?.user?.id
-          : documentLockStateRef.current?.user
+        typeof documentLockState.current?.user === 'object'
+          ? documentLockState.current?.user?.id
+          : documentLockState.current?.user
 
       if (lockedState) {
         const lockedUserID =
@@ -198,14 +191,14 @@ export function DefaultEditView({
             ? lockedState.user
             : lockedState.user.id
 
-        if (!documentLockStateRef.current || lockedUserID !== previousOwnerID) {
+        if (!documentLockState.current || lockedUserID !== previousOwnerID) {
           if (previousOwnerID === user.id && lockedUserID !== user.id) {
             setShowTakeOverModal(true)
-            documentLockStateRef.current.hasShownLockedModal = true
+            documentLockState.current.hasShownLockedModal = true
           }
 
-          documentLockStateRef.current = {
-            hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
+          documentLockState.current = {
+            hasShownLockedModal: documentLockState.current?.hasShownLockedModal || false,
             isLocked: true,
             user: lockedState.user as ClientUser,
           }
@@ -213,8 +206,51 @@ export function DefaultEditView({
         }
       }
     },
-    [setCurrentEditor, setDocumentIsLocked, user?.id],
+    [documentLockState, setCurrentEditor, setDocumentIsLocked, user?.id],
   )
+
+  const handlePrevent = useCallback((nextHref: null | string) => {
+    nextHrefRef.current = nextHref
+  }, [])
+
+  const handleLeaveConfirm = useCallback(async () => {
+    const lockUser = documentLockState.current?.user
+
+    const isLockOwnedByCurrentUser =
+      typeof lockUser === 'object' ? lockUser?.id === user?.id : lockUser === user?.id
+
+    if (isLockingEnabled && documentIsLocked && (id || globalSlug)) {
+      // Check where user is trying to go
+      const nextPath = nextHrefRef.current ? new URL(nextHrefRef.current).pathname : ''
+      const isInternalView = ['/preview', '/api', '/versions'].some((path) =>
+        nextPath.includes(path),
+      )
+
+      // Only retain the lock if the user is still viewing the document
+      if (!isInternalView) {
+        if (isLockOwnedByCurrentUser) {
+          try {
+            await unlockDocument(id, collectionSlug ?? globalSlug)
+            setDocumentIsLocked(false)
+            setCurrentEditor(null)
+          } catch (err) {
+            console.error('Failed to unlock before leave', err)
+          }
+        }
+      }
+    }
+  }, [
+    collectionSlug,
+    documentIsLocked,
+    documentLockState,
+    globalSlug,
+    id,
+    isLockingEnabled,
+    setCurrentEditor,
+    setDocumentIsLocked,
+    unlockDocument,
+    user?.id,
+  ])
 
   const onSave = useCallback(
     async (json): Promise<FormState> => {
@@ -342,7 +378,7 @@ export function DefaultEditView({
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = await getFormState({
+      const result = await getFormState({
         id,
         collectionSlug,
         docPermissions,
@@ -359,6 +395,12 @@ export function DefaultEditView({
         signal: controller.signal,
         updateLastEdited,
       })
+
+      if (!result) {
+        return
+      }
+
+      const { lockedState, state } = result
 
       if (isLockingEnabled) {
         handleDocumentLocking(lockedState)
@@ -386,38 +428,9 @@ export function DefaultEditView({
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
-      if (isLockingEnabled && documentIsLocked && (id || globalSlug)) {
-        // Only retain the lock if the user is still viewing the document
-        const shouldUnlockDocument = !['preview', 'api', 'versions'].some((path) =>
-          window.location.pathname.includes(path),
-        )
-        if (shouldUnlockDocument) {
-          // Check if this user is still the current editor
-          if (
-            typeof documentLockStateRef.current?.user === 'object'
-              ? documentLockStateRef.current?.user?.id === user?.id
-              : documentLockStateRef.current?.user === user?.id
-          ) {
-            void unlockDocument(id, collectionSlug ?? globalSlug)
-            setDocumentIsLocked(false)
-            setCurrentEditor(null)
-          }
-        }
-      }
-
       setShowTakeOverModal(false)
     }
-  }, [
-    collectionSlug,
-    globalSlug,
-    id,
-    unlockDocument,
-    user,
-    setCurrentEditor,
-    isLockingEnabled,
-    documentIsLocked,
-    setDocumentIsLocked,
-  ])
+  }, [])
 
   useEffect(() => {
     const abortOnChange = abortOnChangeRef.current
@@ -437,7 +450,7 @@ export function DefaultEditView({
       : currentEditor !== user?.id) &&
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
-    !documentLockStateRef.current?.hasShownLockedModal &&
+    !documentLockState.current?.hasShownLockedModal &&
     !isLockExpired
 
   const isFolderCollection = config.folders && collectionSlug === config.folders?.slug
@@ -487,7 +500,7 @@ export function DefaultEditView({
                   false,
                   updateDocumentEditor,
                   setCurrentEditor,
-                  documentLockStateRef,
+                  documentLockState,
                   isLockingEnabled,
                 )
               }
@@ -505,7 +518,9 @@ export function DefaultEditView({
               }}
             />
           )}
-          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && <LeaveWithoutSaving />}
+          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && (
+            <LeaveWithoutSaving onConfirm={handleLeaveConfirm} onPrevent={handlePrevent} />
+          )}
           {!isInDrawer && (
             <SetDocumentStepNav
               collectionSlug={collectionConfig?.slug}
@@ -552,7 +567,7 @@ export function DefaultEditView({
                 true,
                 updateDocumentEditor,
                 setCurrentEditor,
-                documentLockStateRef,
+                documentLockState,
                 isLockingEnabled,
                 setIsReadOnlyForIncomingUser,
               )
