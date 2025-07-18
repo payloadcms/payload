@@ -9,41 +9,14 @@ export const BlocksCollection: CollectionConfig = {
       name: 'content',
       label: 'Content',
       type: 'blocks',
-      localized: true,
       blocks: [
         {
           slug: 'blockInsideBlock',
           fields: [
             {
-              name: 'content',
-              type: 'blocks',
-              blocks: [
-                {
-                  slug: 'textBlock',
-                  fields: [
-                    {
-                      name: 'text',
-                      type: 'text',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              name: 'array',
-              type: 'array',
-              fields: [
-                {
-                  name: 'link',
-                  type: 'group',
-                  fields: [
-                    {
-                      name: 'label',
-                      type: 'text',
-                    },
-                  ],
-                },
-              ],
+              name: 'myText',
+              type: 'text',
+              localized: true,
             },
           ],
         },
