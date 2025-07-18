@@ -116,7 +116,7 @@ export const VersionPillLabel: React.FC<{
           )}
         </React.Fragment>
       )}
-      {localeLabel && <Pill>{localeLabel}</Pill>}
+      {localeLabel && <Pill size="small">{localeLabel}</Pill>}
     </div>
   )
 }

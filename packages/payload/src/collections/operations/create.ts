@@ -285,6 +285,7 @@ export const createOperation = async <
         autosave,
         collection: collectionConfig,
         docWithLocales: result,
+        locale,
         payload,
         req,
       })
