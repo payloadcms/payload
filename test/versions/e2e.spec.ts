@@ -85,6 +85,7 @@ describe('Versions', () => {
   let autosaveWithDraftButtonURL: AdminUrlUtil
   let autosaveWithDraftValidateURL: AdminUrlUtil
   let draftWithValidateURL: AdminUrlUtil
+  let draftURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
@@ -1063,6 +1064,7 @@ describe('Versions', () => {
     beforeAll(() => {
       autosaveWithDraftValidateURL = new AdminUrlUtil(serverURL, autosaveWithDraftValidateSlug)
       draftWithValidateURL = new AdminUrlUtil(serverURL, draftWithValidateCollectionSlug)
+      draftURL = new AdminUrlUtil(serverURL, draftCollectionSlug)
     })
 
     test('- can save', async () => {
@@ -1080,6 +1082,55 @@ describe('Versions', () => {
 
       // Ensure its saved
       await expect(page.locator('#field-title')).toHaveValue('New title')
+    })
+
+    test('- can save drafts with validation errors and continue editing without being shown publishing validation', async () => {
+      await page.goto(draftURL.create)
+
+      const titleField = page.locator('#field-title')
+      const descriptionField = page.locator('#field-description')
+
+      await titleField.fill('Initial')
+      await descriptionField.fill('Initial description')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Clear the required field to create validation error
+      await titleField.fill('')
+      // Save draft should succeed even with validation errors since validation is disabled for drafts
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Verify that the empty value was saved and no validation errors are shown
+      await expect(page.locator('#field-title')).toHaveValue('')
+      await expect(page.locator('.field-error')).toHaveCount(0)
+
+      // Make another field invalid and wait for debounced validation
+      await descriptionField.fill('')
+
+      // Verify the absence of validation errors even after the debounced validation would have been triggered and processed.
+      await expect(async () => {
+        await expect(page.locator('.field-error')).toHaveCount(0)
+      }).toPass({
+        timeout: 3000,
+        intervals: [500], // Check every 500ms for 3 seconds
+      })
+
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await page.reload()
+
+      // Ensure both empty values were persisted
+      await expect(page.locator('#field-title')).toHaveValue('')
+      await expect(page.locator('#field-description')).toHaveValue('')
+      await expect(page.locator('.field-error')).toHaveCount(0)
+
+      // Verify we can continue editing after saving invalid draft
+      await titleField.fill('New valid title')
+      await descriptionField.fill('New valid description')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await page.reload()
+      await expect(page.locator('#field-title')).toHaveValue('New valid title')
+      await expect(page.locator('#field-description')).toHaveValue('New valid description')
     })
 
     test('- can safely trigger validation errors and then continue editing', async () => {
