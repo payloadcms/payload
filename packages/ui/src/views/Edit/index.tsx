@@ -175,6 +175,8 @@ export function DefaultEditView({
     return false
   })
 
+  const nextHrefRef = React.useRef<null | string>(null)
+
   const handleDocumentLocking = useCallback(
     (lockedState: LockedState) => {
       setDocumentIsLocked(true)
@@ -206,6 +208,49 @@ export function DefaultEditView({
     },
     [documentLockState, setCurrentEditor, setDocumentIsLocked, user?.id],
   )
+
+  const handlePrevent = useCallback((nextHref: null | string) => {
+    nextHrefRef.current = nextHref
+  }, [])
+
+  const handleLeaveConfirm = useCallback(async () => {
+    const lockUser = documentLockState.current?.user
+
+    const isLockOwnedByCurrentUser =
+      typeof lockUser === 'object' ? lockUser?.id === user?.id : lockUser === user?.id
+
+    if (isLockingEnabled && documentIsLocked && (id || globalSlug)) {
+      // Check where user is trying to go
+      const nextPath = nextHrefRef.current ? new URL(nextHrefRef.current).pathname : ''
+      const isInternalView = ['/preview', '/api', '/versions'].some((path) =>
+        nextPath.includes(path),
+      )
+
+      // Only retain the lock if the user is still viewing the document
+      if (!isInternalView) {
+        if (isLockOwnedByCurrentUser) {
+          try {
+            await unlockDocument(id, collectionSlug ?? globalSlug)
+            setDocumentIsLocked(false)
+            setCurrentEditor(null)
+          } catch (err) {
+            console.error('Failed to unlock before leave', err)
+          }
+        }
+      }
+    }
+  }, [
+    collectionSlug,
+    documentIsLocked,
+    documentLockState,
+    globalSlug,
+    id,
+    isLockingEnabled,
+    setCurrentEditor,
+    setDocumentIsLocked,
+    unlockDocument,
+    user?.id,
+  ])
 
   const onSave = useCallback(
     async (json): Promise<FormState> => {
@@ -473,7 +518,9 @@ export function DefaultEditView({
               }}
             />
           )}
-          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && <LeaveWithoutSaving />}
+          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && (
+            <LeaveWithoutSaving onConfirm={handleLeaveConfirm} onPrevent={handlePrevent} />
+          )}
           {!isInDrawer && (
             <SetDocumentStepNav
               collectionSlug={collectionConfig?.slug}
