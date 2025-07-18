@@ -132,7 +132,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
       limit: 100,
     })
 
-    expect(allSimples.totalDocs).toBe(1) // TODO: FLAKE: Could be 2
+    expect(allSimples.totalDocs).toBe(1)
     expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
   })
 
