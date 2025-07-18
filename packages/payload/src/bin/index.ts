@@ -133,7 +133,7 @@ export const bin = async () => {
 
       await payload.destroy() // close database connections after running jobs so process can exit cleanly
 
-      return
+      process.exit(0)
     }
   }
 

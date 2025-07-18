@@ -1,25 +1,28 @@
 import type { CollectionConfig } from '../../collections/config/types.js'
-import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { SanitizedConfig } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { Job } from '../../index.js'
 
-import { runJobsEndpoint } from '../restEndpointRun.js'
+import { handleSchedulesJobsEndpoint } from '../endpoints/handleSchedules.js'
+import { runJobsEndpoint } from '../endpoints/run.js'
 import { getJobTaskStatus } from '../utilities/getJobTaskStatus.js'
 
 export const jobsCollectionSlug = 'payload-jobs'
 
-export const getDefaultJobsCollection: (config: Config) => CollectionConfig = (config) => {
+export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => CollectionConfig = (
+  jobsConfig,
+) => {
   const workflowSlugs: Set<string> = new Set()
   const taskSlugs: Set<string> = new Set(['inline'])
 
-  if (config.jobs?.workflows?.length) {
-    config.jobs?.workflows.forEach((workflow) => {
+  if (jobsConfig.workflows?.length) {
+    jobsConfig.workflows.forEach((workflow) => {
       workflowSlugs.add(workflow.slug)
     })
   }
 
-  if (config.jobs?.tasks?.length) {
-    config.jobs.tasks.forEach((task) => {
+  if (jobsConfig.tasks?.length) {
+    jobsConfig.tasks.forEach((task) => {
       if (workflowSlugs.has(task.slug)) {
         throw new Error(
           `Task slug "${task.slug}" is already used by a workflow. No tasks are allowed to have the same slug as a workflow.`,
@@ -78,7 +81,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig = (c
     },
   ]
 
-  if (config?.jobs?.addParentToTaskLog) {
+  if (jobsConfig.addParentToTaskLog) {
     logFields.push({
       name: 'parent',
       type: 'group',
@@ -102,7 +105,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig = (c
       group: 'System',
       hidden: true,
     },
-    endpoints: [runJobsEndpoint],
+    endpoints: [runJobsEndpoint, handleSchedulesJobsEndpoint],
     fields: [
       {
         name: 'input',
@@ -198,6 +201,9 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig = (c
       {
         name: 'waitUntil',
         type: 'date',
+        admin: {
+          date: { pickerAppearance: 'dayAndTime' },
+        },
         index: true,
       },
       {
@@ -237,6 +243,15 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig = (c
     lockDocuments: false,
   }
 
+  if (jobsConfig.stats) {
+    // TODO: In 4.0, this should be added by default.
+    // The meta field can be used to store arbitrary data about the job. The scheduling system uses this to store
+    // `scheduled: true` to indicate that the job was queued by the scheduling system.
+    jobsCollection.fields.push({
+      name: 'meta',
+      type: 'json',
+    })
+  }
   return jobsCollection
 }
 
