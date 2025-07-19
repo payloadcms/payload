@@ -1,45 +1,47 @@
-import type { OptionObject, Payload, TypedUser } from 'payload'
+import type { Payload, TypedUser } from 'payload'
 
 import { cookies as getCookies } from 'next/headers.js'
 
-import { findTenantOptions } from '../../queries/findTenantOptions.js'
+import type { MultiTenantPluginConfig } from '../../types.js'
+
+import { getTenantOptions } from '../../utilities/getTenantOptions.js'
 import { TenantSelectionProviderClient } from './index.client.js'
 
-type Args = {
+type Args<ConfigType> = {
   children: React.ReactNode
   payload: Payload
+  tenantsArrayFieldName: string
+  tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
   user: TypedUser
+  userHasAccessToAllTenants: Required<
+    MultiTenantPluginConfig<ConfigType>
+  >['userHasAccessToAllTenants']
 }
 
 export const TenantSelectionProvider = async ({
   children,
   payload,
+  tenantsArrayFieldName,
+  tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
   useAsTitle,
   user,
-}: Args) => {
-  let tenantOptions: OptionObject[] = []
-
-  try {
-    const { docs } = await findTenantOptions({
-      limit: 0,
-      payload,
-      tenantsCollectionSlug,
-      useAsTitle,
-      user,
-    })
-    tenantOptions = docs.map((doc) => ({
-      label: String(doc[useAsTitle]),
-      value: doc.id,
-    }))
-  } catch (_) {
-    // user likely does not have access
-  }
+  userHasAccessToAllTenants,
+}: Args<any>) => {
+  const tenantOptions = await getTenantOptions({
+    payload,
+    tenantsArrayFieldName,
+    tenantsArrayTenantFieldName,
+    tenantsCollectionSlug,
+    useAsTitle,
+    user,
+    userHasAccessToAllTenants,
+  })
 
   const cookies = await getCookies()
-  let tenantCookie = cookies.get('payload-tenant')?.value
+  const tenantCookie = cookies.get('payload-tenant')?.value
   let initialValue = undefined
 
   /**
@@ -56,17 +58,14 @@ export const TenantSelectionProvider = async ({
    * If the there was no cookie or the cookie was an invalid tenantID set intialValue
    */
   if (!initialValue) {
-    tenantCookie = undefined
     initialValue = tenantOptions.length > 1 ? undefined : tenantOptions[0]?.value
   }
 
   return (
     <TenantSelectionProviderClient
+      initialTenantOptions={tenantOptions}
       initialValue={initialValue}
-      tenantCookie={tenantCookie}
-      tenantOptions={tenantOptions}
       tenantsCollectionSlug={tenantsCollectionSlug}
-      useAsTitle={useAsTitle}
     >
       {children}
     </TenantSelectionProviderClient>

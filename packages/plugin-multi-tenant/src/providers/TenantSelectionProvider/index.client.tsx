@@ -65,18 +65,14 @@ const Context = createContext<ContextType>({
 
 export const TenantSelectionProviderClient = ({
   children,
+  initialTenantOptions,
   initialValue,
-  tenantCookie,
-  tenantOptions: tenantOptionsFromProps,
   tenantsCollectionSlug,
-  useAsTitle,
 }: {
   children: React.ReactNode
+  initialTenantOptions: OptionObject[]
   initialValue?: number | string
-  tenantCookie?: string
-  tenantOptions: OptionObject[]
   tenantsCollectionSlug: string
-  useAsTitle: string
 }) => {
   const [selectedTenantID, setSelectedTenantID] = React.useState<number | string | undefined>(
     initialValue,
@@ -89,7 +85,7 @@ export const TenantSelectionProviderClient = ({
   const prevUserID = React.useRef(userID)
   const userChanged = userID !== prevUserID.current
   const [tenantOptions, setTenantOptions] = React.useState<OptionObject[]>(
-    () => tenantOptionsFromProps,
+    () => initialTenantOptions,
   )
   const selectedTenantLabel = React.useMemo(
     () => tenantOptions.find((option) => option.value === selectedTenantID)?.label,
@@ -142,7 +138,7 @@ export const TenantSelectionProviderClient = ({
   const syncTenants = React.useCallback(async () => {
     try {
       const req = await fetch(
-        `${config.serverURL}${config.routes.api}/${tenantsCollectionSlug}?select[${useAsTitle}]=true&limit=0&depth=0`,
+        `${config.serverURL}${config.routes.api}/${tenantsCollectionSlug}/populate-tenant-options`,
         {
           credentials: 'include',
           method: 'GET',
@@ -151,23 +147,18 @@ export const TenantSelectionProviderClient = ({
 
       const result = await req.json()
 
-      if (result.docs && userID) {
-        setTenantOptions(
-          result.docs.map((doc: Record<string, number | string>) => ({
-            label: doc[useAsTitle],
-            value: doc.id,
-          })),
-        )
+      if (result.tenantOptions && userID) {
+        setTenantOptions(result.tenantOptions)
 
-        if (result.totalDocs === 1) {
-          setSelectedTenantID(result.docs[0].id)
-          setCookie(String(result.docs[0].id))
+        if (result.tenantOptions.length === 1) {
+          setSelectedTenantID(result.tenantOptions[0].value)
+          setCookie(String(result.tenantOptions[0].value))
         }
       }
     } catch (e) {
       toast.error(`Error fetching tenants`)
     }
-  }, [config.serverURL, config.routes.api, tenantsCollectionSlug, useAsTitle, setCookie, userID])
+  }, [config.serverURL, config.routes.api, tenantsCollectionSlug, setCookie, userID])
 
   const updateTenants = React.useCallback<ContextType['updateTenants']>(
     ({ id, label }) => {

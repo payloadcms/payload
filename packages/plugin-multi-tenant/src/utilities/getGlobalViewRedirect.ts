@@ -1,10 +1,13 @@
 import type { Payload, TypedUser, ViewTypes } from 'payload'
 
+import { unauthorized } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 
-import { findTenantOptions } from '../queries/findTenantOptions.js'
+import type { MultiTenantPluginConfig } from '../types.js'
+
 import { getCollectionIDType } from './getCollectionIDType.js'
 import { getTenantFromCookie } from './getTenantFromCookie.js'
+import { getTenantOptions } from './getTenantOptions.js'
 
 type Args = {
   basePath?: string
@@ -13,9 +16,12 @@ type Args = {
   payload: Payload
   slug: string
   tenantFieldName: string
+  tenantsArrayFieldName: string
+  tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
   user?: TypedUser
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig<any>>['userHasAccessToAllTenants']
   view: ViewTypes
 }
 export async function getGlobalViewRedirect({
@@ -25,9 +31,12 @@ export async function getGlobalViewRedirect({
   headers,
   payload,
   tenantFieldName,
+  tenantsArrayFieldName,
+  tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
   useAsTitle,
   user,
+  userHasAccessToAllTenants,
   view,
 }: Args): Promise<string | void> {
   const idType = getCollectionIDType({
@@ -37,16 +46,22 @@ export async function getGlobalViewRedirect({
   let tenant = getTenantFromCookie(headers, idType)
   let redirectRoute: `/${string}` | void = undefined
 
+  if (!user) {
+    return unauthorized()
+  }
+
   if (!tenant) {
-    const tenantsQuery = await findTenantOptions({
-      limit: 1,
+    const tenantOptions = await getTenantOptions({
       payload,
+      tenantsArrayFieldName,
+      tenantsArrayTenantFieldName,
       tenantsCollectionSlug,
       useAsTitle,
       user,
+      userHasAccessToAllTenants,
     })
 
-    tenant = tenantsQuery.docs[0]?.id || null
+    tenant = tenantOptions[0]?.value || null
   }
 
   try {
