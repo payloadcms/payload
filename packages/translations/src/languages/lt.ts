@@ -347,6 +347,7 @@ export const ltTranslations: DefaultTranslationsObject = {
       'Nerasta jokių {{label}}. Arba dar nėra sukurtų {{label}}, arba jie neatitinka nurodytų filtrų aukščiau.',
     notFound: 'Nerasta',
     nothingFound: 'Nieko nerasta',
+    noTrashResults: 'Nėra {{label}} šiukšliadėžėje.',
     noUpcomingEventsScheduled: 'Nėra suplanuotų būsimų renginių.',
     noValue: 'Nėra vertės',
     of: 'apie',

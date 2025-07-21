@@ -346,6 +346,7 @@ export const myTranslations: DefaultTranslationsObject = {
       '{{label}} မတွေ့ပါ။ {{label}} မရှိသေးသည်ဖြစ်စေ အထက်တွင်ဖော်ပြထားသော စစ်ထုတ်မှုများနှင့် ကိုက်ညီမှုမရှိပါ။',
     notFound: 'ဘာမှ မရှိတော့ဘူး။',
     nothingFound: 'ဘာမှလည်း မတွေ့ဘူး။',
+    noTrashResults: 'Tiada {{label}} dalam tong sampah.',
     noUpcomingEventsScheduled: 'Tiada acara yang akan datang dijadualkan.',
     noValue: 'တန်ဖိုး မရှိပါ။',
     of: '၏',

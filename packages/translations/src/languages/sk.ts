@@ -344,6 +344,7 @@ export const skTranslations: DefaultTranslationsObject = {
       'Neboli nájdené žiadne {{label}}. Buď neexistujú žiadne {{label}}, alebo žiadne nespĺňajú filtre, ktoré ste zadali vyššie.',
     notFound: 'Nenájdené',
     nothingFound: 'Nič nenájdené',
+    noTrashResults: 'Žiadne {{label}} v koši.',
     noUpcomingEventsScheduled: 'Nie sú naplánované žiadne nadchádzajúce udalosti.',
     noValue: 'Žiadna hodnota',
     of: 'z',

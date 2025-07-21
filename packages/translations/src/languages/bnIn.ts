@@ -346,6 +346,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
       'কোনো {{label}} পাওয়া যায়নি। হয় এখনও কোনো {{label}} তৈরি করা হয়নি বা উপরে নির্দিষ্ট করা ফিল্টারগুলির সাথে কোনোটি মেলে না।',
     notFound: 'পাওয়া যায়নি',
     nothingFound: 'কিছুই পাওয়া যায়নি',
+    noTrashResults: 'ট্র্যাশে কোনো {{label}} নেই।',
     noUpcomingEventsScheduled: 'কোনো আসন্ন ইভেন্ট নির্ধারিত নেই।',
     noValue: 'কোনো মান নেই',
     of: 'এর',

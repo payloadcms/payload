@@ -343,6 +343,7 @@ export const viTranslations: DefaultTranslationsObject = {
       'Danh sách rỗng: {{label}}. Có thể {{label}} chưa tồn tại hoặc không có dữ kiện trùng với bộ lọc hiện tại.',
     notFound: 'Không tìm thấy',
     nothingFound: 'Không tìm thấy',
+    noTrashResults: 'Không có {{label}} trong thùng rác.',
     noUpcomingEventsScheduled: 'Không có sự kiện sắp tới được lên lịch.',
     noValue: 'Không có giá trị',
     of: 'trong số',

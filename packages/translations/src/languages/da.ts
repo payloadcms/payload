@@ -342,6 +342,7 @@ export const daTranslations: DefaultTranslationsObject = {
       'No {{label}} fundet. Enten findes der endnu ingen {{label}}, eller også matcher ingen af de filtre angivet ovenfor.',
     notFound: 'Ikke fundet',
     nothingFound: 'Intet fundet',
+    noTrashResults: 'Ingen {{label}} i papirkurven.',
     noUpcomingEventsScheduled: 'Ingen kommende begivenheder planlagt.',
     noValue: 'Ingen værdi',
     of: 'Af',

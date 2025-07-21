@@ -345,6 +345,7 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Nenhum {{label}} encontrado. Ou nenhum(a) {{label}} existe ainda, ou nenhum(a) corresponde aos filtros que você especificou acima.',
     notFound: 'Não Encontrado',
     nothingFound: 'Nada encontrado',
+    noTrashResults: 'Não há {{label}} no lixo.',
     noUpcomingEventsScheduled: 'Não há eventos futuros agendados.',
     noValue: 'Nenhum valor',
     of: 'de',

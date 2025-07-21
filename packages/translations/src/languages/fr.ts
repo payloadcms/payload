@@ -352,6 +352,7 @@ export const frTranslations: DefaultTranslationsObject = {
       'Aucun(e) {{label}} trouvé(e). Soit aucun(e) {{label}} n’existe encore, soit aucun(e) ne correspond aux filtres que vous avez spécifiés ci-dessus',
     notFound: 'Pas trouvé',
     nothingFound: 'Rien n’a été trouvé',
+    noTrashResults: 'Aucun {{label}} dans la corbeille.',
     noUpcomingEventsScheduled: 'Aucun événement à venir prévu.',
     noValue: 'Aucune valeur',
     of: 'de',

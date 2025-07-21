@@ -349,6 +349,7 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Geen {{label}} gevonden. Of er bestaat nog geen {{label}}, of niets komt overeen met de hierboven gespecifieerde filters.',
     notFound: 'Niet gevonden',
     nothingFound: 'Niets gevonden',
+    noTrashResults: 'Geen {{label}} in prullenbak.',
     noUpcomingEventsScheduled: 'Geen aankomende evenementen gepland.',
     noValue: 'Geen waarde',
     of: 'van',

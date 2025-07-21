@@ -344,6 +344,7 @@ export const hyTranslations: DefaultTranslationsObject = {
       '{{label}}-ը չի գտնվել։ Կա՛մ դեռևս {{label}} չկա, կա՛մ ոչ մեկը չի համապատասխանում վերևում նշված ֆիլտրերին։',
     notFound: 'Չի գտնվել',
     nothingFound: 'Ոչինչ չի գտնվել',
+    noTrashResults: 'Ոչ մի {{label}} աղբարկղում:',
     noUpcomingEventsScheduled: 'Իրադարձություններ նախատեսված չեն։',
     noValue: 'Արժեք չկա',
     of: 'ի',

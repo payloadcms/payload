@@ -345,6 +345,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Nema pronađenih {{label}}. Moguće da {{label}} još uvek ne postoji ili nema rezultata u skladu sa postavljenim filterima.',
     notFound: 'Nije pronađeno',
     nothingFound: 'Ništa nije pronađeno',
+    noTrashResults: 'Nema {{label}} u otpadu.',
     noUpcomingEventsScheduled: 'Nema zakazanih predstojećih događaja.',
     noValue: 'Bez vrednosti',
     of: 'Od',

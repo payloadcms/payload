@@ -344,6 +344,7 @@ export const azTranslations: DefaultTranslationsObject = {
       'Heç bir {{label}} tapılmadı. Ya hələ {{label}} yoxdur, ya da yuxarıda göstərdiyiniz filtrlərə uyğun gəlmir.',
     notFound: 'Tapılmadı',
     nothingFound: 'Heç nə tapılmadı',
+    noTrashResults: 'Çöplükdə heç bir {{label}} yoxdur.',
     noUpcomingEventsScheduled: 'Heç bir gələcək tədbir cədvələ alınmayıb.',
     noValue: 'Dəyər yoxdur',
     of: 'dən',

@@ -349,6 +349,7 @@ export const roTranslations: DefaultTranslationsObject = {
       'Nici un {{label}} găsit. Fie nu există încă niciun {{label}}, fie niciunul nu se potrivește cu filtrele pe care le-ați specificat mai sus..',
     notFound: 'Nu a fost găsit',
     nothingFound: 'Nimic găsit',
+    noTrashResults: 'Niciun {{label}} în coșul de gunoi.',
     noUpcomingEventsScheduled: 'Nu sunt evenimente programate în viitor.',
     noValue: 'Nici o valoare',
     of: 'de',

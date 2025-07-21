@@ -336,6 +336,7 @@ export const arTranslations: DefaultTranslationsObject = {
       'لا يوجد {{label}}. إما أن لا {{label}} موجودة حتى الآن أو لا تتطابق مع عوامل التصفية التي حددتها أعلاه.',
     notFound: 'غير موجود',
     nothingFound: 'لم يتم العثور على شيء',
+    noTrashResults: 'لا {{label}} في المهملات.',
     noUpcomingEventsScheduled: 'لا يوجد أحداث مقبلة مجدولة.',
     noValue: 'لا يوجد قيمة',
     of: 'من',

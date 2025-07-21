@@ -343,6 +343,7 @@ export const bgTranslations: DefaultTranslationsObject = {
       '{{label}} не е открит. {{label}} не съществува или никой не отговаря на зададените филтри.',
     notFound: 'Няма открит',
     nothingFound: 'Нищо не беше открито',
+    noTrashResults: 'Няма {{label}} в кошчето.',
     noUpcomingEventsScheduled: 'Няма предстоящи събития.',
     noValue: 'Няма стойност',
     of: 'от',

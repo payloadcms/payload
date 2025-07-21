@@ -344,6 +344,7 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Nav atrasts neviens {{label}}. Vai nu vēl nav izveidots, vai neviens neatbilst augstāk norādītajiem filtriem.',
     notFound: 'Nav atrasts',
     nothingFound: 'Nekas nav atrasts',
+    noTrashResults: 'Nav {{label}} miskastē.',
     noUpcomingEventsScheduled: 'Nav ieplānotu notikumu.',
     noValue: 'Nav vērtības',
     of: 'no',

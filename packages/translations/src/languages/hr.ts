@@ -344,6 +344,7 @@ export const hrTranslations: DefaultTranslationsObject = {
       'Nije pronađen nijedan {{label}}. Ili {{label}} još uvijek ne postoji ili nijedan od odgovara postavljenim filterima.',
     notFound: 'Nije pronađeno',
     nothingFound: 'Ništa nije pronađeno',
+    noTrashResults: 'Nema {{label}} u smeću.',
     noUpcomingEventsScheduled: 'Nema zakazanih nadolazećih događanja.',
     noValue: 'Bez vrijednosti',
     of: 'od',

@@ -345,6 +345,7 @@ export const caTranslations: DefaultTranslationsObject = {
       "No s'ha trobat cap {{label}}. O no n'hi ha cap encara o cap coincideix amb els filtres que has especificat anteriorment.",
     notFound: 'No trobat',
     nothingFound: 'Res trobat',
+    noTrashResults: 'No hi ha cap {{label}} a la paperera.',
     noUpcomingEventsScheduled: 'No hi ha esdeveniments programats.',
     noValue: 'No hi ha cap valor',
     of: 'de',

@@ -345,6 +345,7 @@ export const jaTranslations: DefaultTranslationsObject = {
       '{{label}} データが見つかりませんでした。データが存在しない、または、絞り込みに一致するものがありません。',
     notFound: 'Not Found',
     nothingFound: 'Nothing found',
+    noTrashResults: 'ゴミ箱に{{label}}はありません。',
     noUpcomingEventsScheduled: '予定されているイベントはありません。',
     noValue: '未設定',
     of: '/',

@@ -337,6 +337,7 @@ export const thTranslations: DefaultTranslationsObject = {
       'ไม่พบ {{label}} เนื่องจากยังไม่มี {{label}} หรือไม่มี {{label}} ใดตรงกับการกรองด้านบน',
     notFound: 'ไม่พบ',
     nothingFound: 'ไม่พบสิ่งใด',
+    noTrashResults: 'ไม่มี {{label}} ในถังขยะ.',
     noUpcomingEventsScheduled: 'ไม่มีกิจกรรมที่จะมาถึงถูกกำหนดไว้',
     noValue: 'ไม่มีค่า',
     of: 'จาก',

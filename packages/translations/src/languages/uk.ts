@@ -343,6 +343,7 @@ export const ukTranslations: DefaultTranslationsObject = {
       'Жодного {{label}} не знайдено. Або {{label}} ще не існує, або жодна з них не відповідає фільтрам, що ви задали више.',
     notFound: 'Не знайдено',
     nothingFound: 'Нічого не знайдено',
+    noTrashResults: 'Немає {{label}} у смітнику.',
     noUpcomingEventsScheduled: 'Не заплановано жодних майбутніх подій.',
     noValue: 'Немає значення',
     of: 'з',

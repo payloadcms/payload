@@ -347,6 +347,7 @@ export const trTranslations: DefaultTranslationsObject = {
       '{{label}} bulunamadı. Henüz bir {{label}} eklenmemiş olabilir veya seçtiğiniz filtrelerle eşleşen bir sonuç bulunamamış olabilir.',
     notFound: 'Bulunamadı',
     nothingFound: 'Hiçbir şey bulunamadı',
+    noTrashResults: 'Çöpte hiç {{label}} yok.',
     noUpcomingEventsScheduled: 'Planlanan gelecek etkinlik yok.',
     noValue: 'Değer yok',
     of: 'of',

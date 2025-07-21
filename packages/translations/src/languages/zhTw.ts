@@ -326,6 +326,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     noResults: '沒有找到{{label}}。{{label}}並不存在或沒有符合您上面所指定的過濾器。',
     notFound: '未找到',
     nothingFound: '沒有找到任何東西',
+    noTrashResults: '垃圾桶中無{{label}}。',
     noUpcomingEventsScheduled: '沒有即將到來的活動。',
     noValue: '沒有數值',
     of: '的',

@@ -343,6 +343,7 @@ export const slTranslations: DefaultTranslationsObject = {
       'Ni najdenih {{label}}. Ali {{label}} še ne obstajajo ali pa ne ustrezajo filtrom, ki ste jih določili zgoraj.',
     notFound: 'Ni najdeno',
     nothingFound: 'Nič ni najdeno',
+    noTrashResults: 'Ni {{label}} v smetnjaku.',
     noUpcomingEventsScheduled: 'Ni načrtovanih prihajajočih dogodkov.',
     noValue: 'Ni vrednosti',
     of: 'od',

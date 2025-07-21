@@ -342,6 +342,7 @@ export const csTranslations: DefaultTranslationsObject = {
       'Nebyly nalezeny žádné {{label}}. Buď ještě neexistují žádné {{label}}, nebo žádné nesplňují filtry, které jste zadali výše.',
     notFound: 'Nenalezeno',
     nothingFound: 'Nic nenalezeno',
+    noTrashResults: 'Žádný {{label}} v koši.',
     noUpcomingEventsScheduled: 'Žádné nadcházející události nejsou naplánovány.',
     noValue: 'Žádná hodnota',
     of: 'z',

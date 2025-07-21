@@ -345,6 +345,7 @@ export const enTranslations = {
       "No {{label}} found. Either no {{label}} exist yet or none match the filters you've specified above.",
     notFound: 'Not Found',
     nothingFound: 'Nothing found',
+    noTrashResults: 'No {{label}} in trash.',
     noUpcomingEventsScheduled: 'No upcoming events scheduled.',
     noValue: 'No value',
     of: 'of',

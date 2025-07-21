@@ -214,7 +214,9 @@ export function DefaultListView(props: ListViewClientProps) {
               {docs.length === 0 && (
                 <div className={`${baseClass}__no-results`}>
                   <p>
-                    {i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}
+                    {i18n.t(viewType === 'trash' ? 'general:noTrashResults' : 'general:noResults', {
+                      label: getTranslation(labels?.plural, i18n),
+                    })}
                   </p>
                   {hasCreatePermission && newDocumentURL && viewType !== 'trash' && (
                     <Fragment>

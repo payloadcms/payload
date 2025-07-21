@@ -340,6 +340,7 @@ export const etTranslations: DefaultTranslationsObject = {
       '{{label}} ei leitud. Kas ühtegi {{label}} pole veel olemas või ükski ei vasta ülal määratud filtritele.',
     notFound: 'Ei leitud',
     nothingFound: 'Midagi ei leitud',
+    noTrashResults: 'Pole {{label}} prügikastis.',
     noUpcomingEventsScheduled: 'Eelseisvaid sündmusi ei ole plaanitud.',
     noValue: 'Väärtus puudub',
     of: '/',

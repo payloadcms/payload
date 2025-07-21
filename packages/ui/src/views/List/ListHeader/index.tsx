@@ -6,7 +6,6 @@ import React from 'react'
 
 import { CloseModalButton } from '../../../elements/CloseModalButton/index.js'
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
-import { ListFolderPills } from '../../../elements/ListFolderPills/index.js'
 import { DrawerRelationshipSelect } from '../../../elements/ListHeader/DrawerRelationshipSelect/index.js'
 import { ListDrawerCreateNewDocButton } from '../../../elements/ListHeader/DrawerTitleActions/index.js'
 import { ListHeader } from '../../../elements/ListHeader/index.js'
@@ -15,9 +14,11 @@ import {
   ListCreateNewButton,
   ListEmptyTrashButton,
 } from '../../../elements/ListHeader/TitleActions/index.js'
-import { ListTrashViewPill } from '../../../elements/ListTrashViewPill/index.js'
-import { useConfig } from '../../../providers/Config/index.js'
+import { ByFolderPill } from '../../../elements/ListHeaderTabs/ByFolderPill.js'
+import { DefaultListPill } from '../../../elements/ListHeaderTabs/DefaultListPill.js'
 import './index.scss'
+import { TrashPill } from '../../../elements/ListHeaderTabs/TrashPill.js'
+import { useConfig } from '../../../providers/Config/index.js'
 import { ListSelection } from '../ListSelection/index.js'
 
 const drawerBaseClass = 'list-drawer'
@@ -115,18 +116,25 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             viewType={viewType}
           />
         ),
-        isTrashEnabled && (
-          <ListTrashViewPill
+        collectionConfig.folders && config.folders && (
+          <ByFolderPill
             collectionConfig={collectionConfig}
-            key="list-header-trash-view-button"
+            folderCollectionSlug={config.folders.slug}
+            key="list-header-by-folder-button"
             viewType={viewType}
           />
         ),
-        collectionConfig.folders && config.folders && (
-          <ListFolderPills
+        ((collectionConfig.folders && config.folders) || isTrashEnabled) && (
+          <DefaultListPill
             collectionConfig={collectionConfig}
-            folderCollectionSlug={config.folders.slug}
-            key="list-header-buttons"
+            key="list-header-default-button"
+            viewType={viewType}
+          />
+        ),
+        isTrashEnabled && (
+          <TrashPill
+            collectionConfig={collectionConfig}
+            key="list-header-trash-button"
             viewType={viewType}
           />
         ),

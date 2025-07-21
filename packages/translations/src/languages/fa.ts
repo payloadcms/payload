@@ -341,6 +341,7 @@ export const faTranslations: DefaultTranslationsObject = {
       'هیچ {{label}} یافت نشد. {{label}} یا هنوز وجود ندارد یا هیچ کدام با علامت‌گذاری‌هایی که در بالا مشخص کرده اید مطابقت ندارد.',
     notFound: 'یافت نشد',
     nothingFound: 'چیزی یافت نشد',
+    noTrashResults: 'به زباله‌دان {{label}} موجود نیست.',
     noUpcomingEventsScheduled: 'هیچ رویدادی در دست نیست.',
     noValue: 'بدون مقدار',
     of: 'از',

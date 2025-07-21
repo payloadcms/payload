@@ -343,6 +343,7 @@ export const plTranslations: DefaultTranslationsObject = {
       'Nie znaleziono {{label}}. Być może {{label}} jeszcze nie istnieje, albo żaden nie pasuje do filtrów określonych powyżej.',
     notFound: 'Nie znaleziono',
     nothingFound: 'Nic nie znaleziono',
+    noTrashResults: 'Brak {{label}} w koszu.',
     noUpcomingEventsScheduled: 'Nie zaplanowano żadnych nadchodzących wydarzeń.',
     noValue: 'Brak wartości',
     of: 'z',

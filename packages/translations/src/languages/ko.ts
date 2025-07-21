@@ -340,6 +340,7 @@ export const koTranslations: DefaultTranslationsObject = {
       '{{label}}를 찾을 수 없습니다. 아직 {{label}}이 없거나 설정한 필터와 일치하는 것이 없습니다.',
     notFound: '찾을 수 없음',
     nothingFound: '찾을 수 없습니다',
+    noTrashResults: '휴지통에 {{label}}이 없습니다.',
     noUpcomingEventsScheduled: '예정된 행사가 없습니다.',
     noValue: '값 없음',
     of: '의',

@@ -333,6 +333,7 @@ export const heTranslations: DefaultTranslationsObject = {
     noResults: 'לא נמצאו {{label}}. אין עדיין {{label}}, או שאינם תואמים למסננים שנבחרו.',
     notFound: 'לא נמצא',
     nothingFound: 'לא נמצא כלום',
+    noTrashResults: 'אין {{label}} בפח.',
     noUpcomingEventsScheduled: 'אין אירועים מתוכנתים בהמשך.',
     noValue: 'אין ערך',
     of: 'מתוך',

@@ -350,6 +350,7 @@ export const deTranslations: DefaultTranslationsObject = {
       'Keine {{label}} gefunden. Entweder es existieren keine {{label}} oder es gibt keine Übereinstimmung zu den von dir verwendeten Filtern.',
     notFound: 'Nicht gefunden',
     nothingFound: 'Keine Ergebnisse',
+    noTrashResults: 'Kein {{label}} im Papierkorb.',
     noUpcomingEventsScheduled: 'Keine bevorstehenden Veranstaltungen geplant.',
     noValue: 'Kein Wert',
     of: 'von',

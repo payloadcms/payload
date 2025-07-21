@@ -327,6 +327,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     noResults: '没有找到{{label}}。{{label}}并不存在或没有符合您上面所指定的过滤条件。',
     notFound: '未找到',
     nothingFound: '没有找到任何东西',
+    noTrashResults: '回收站中没有 {{label}}。',
     noUpcomingEventsScheduled: '没有即将进行的活动计划。',
     noValue: '没有值',
     of: '共',

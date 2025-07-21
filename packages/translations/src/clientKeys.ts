@@ -272,6 +272,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:noResults',
   'general:notFound',
   'general:nothingFound',
+  'general:noTrashResults',
   'general:noUpcomingEventsScheduled',
   'general:noValue',
   'general:of',
