@@ -29,6 +29,7 @@ export const goToPreviousPage = async (
     affectsURL?: boolean // if false, won't wait for URL change (useful for when pagination doesn't affect URL)
     /**
      * Scope the pagination to a specific selector. If not provided, will search the whole page for the controls.
+     * This is useful when multiple pagination controls are displayed on the same page (e.g. group-by)
      */
     scope?: Locator
     // defaults to 1, assuming you're on page 2
@@ -39,7 +40,7 @@ export const goToPreviousPage = async (
   },
 ) => {
   const pageControls = (options.scope || page).locator('.paginator')
-  await pageControls.locator('.paginator button').first().click()
+  await pageControls.locator('button').nth(0).click()
 
   if (options.affectsURL) {
     const regex = new RegExp(`page=${options.targetPage}(?:&|$)`)
