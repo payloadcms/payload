@@ -278,6 +278,10 @@ export type BaseListFilter = (args: {
 }) => null | Promise<null | Where> | Where
 
 export type CollectionAdminOptions = {
+  /**
+   * Define a default base filter for this collection's List view, which will be merged into any filters that the user performs.
+   * @link https://payloadcms.com/docs/collections#base-list-filter
+   */
   baseListFilter?: BaseListFilter
   /**
    * Custom admin components
@@ -427,6 +431,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Use `true` to enable with default options
    */
   auth?: boolean | IncomingAuthType
+  /**
+   * The name of the collection
+   */
+  baseFilterOptions?: string
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
   /**

@@ -14,5 +14,9 @@ export const MenuItems: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    {
+      name: 'description',
+      type: 'richText',
+    },
   ],
 }

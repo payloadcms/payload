@@ -192,22 +192,7 @@ export interface BlocksField {
   id: string;
   content?:
     | {
-        content?:
-          | {
-              text?: string | null;
-              id?: string | null;
-              blockName?: string | null;
-              blockType: 'textBlock';
-            }[]
-          | null;
-        array?:
-          | {
-              link?: {
-                label?: string | null;
-              };
-              id?: string | null;
-            }[]
-          | null;
+        myText?: string | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'blockInsideBlock';
@@ -361,6 +346,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -850,27 +842,7 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
         blockInsideBlock?:
           | T
           | {
-              content?:
-                | T
-                | {
-                    textBlock?:
-                      | T
-                      | {
-                          text?: T;
-                          id?: T;
-                          blockName?: T;
-                        };
-                  };
-              array?:
-                | T
-                | {
-                    link?:
-                      | T
-                      | {
-                          label?: T;
-                        };
-                    id?: T;
-                  };
+              myText?: T;
               id?: T;
               blockName?: T;
             };
@@ -997,6 +969,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
