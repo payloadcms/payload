@@ -136,7 +136,7 @@ export const handleGroupBy = async ({
           },
         })
 
-        let heading = valueOrRelationshipID || 'No value'
+        let heading = valueOrRelationshipID || req.i18n.t('general:noValue')
 
         if (
           groupByField?.type === 'relationship' &&
