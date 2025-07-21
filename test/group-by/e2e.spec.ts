@@ -348,6 +348,43 @@ test.describe('Group By', () => {
     await expect(table2Rows.first().locator('td.cell-title')).toHaveText('Find me')
   })
 
+  test('should apply filters to the distinct results of the group-by field', async () => {
+    // This ensures that no tables are rendered without docs
+
+    await page.goto(url.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Category',
+      fieldPath: 'category',
+    })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(2)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Category',
+      operatorLabel: 'equals',
+      value: 'Category 1',
+    })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(1)
+
+    // Reset the filter by reloading the page without URL params
+    // TODO: There are no current test helpers for this
+    await page.goto(url.list)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Title',
+      operatorLabel: 'equals',
+      value: 'This title does not exist',
+    })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(0)
+
+    await page.locator('.collection-list__no-results').isVisible()
+  })
+
   test('should paginate globally (all tables)', async () => {
     await page.goto(url.list)
 

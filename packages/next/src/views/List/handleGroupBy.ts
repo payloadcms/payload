@@ -88,6 +88,7 @@ export const handleGroupBy = async ({
     populate,
     req,
     sort: query?.groupBy,
+    where: whereWithMergedSearch,
   })
 
   const data = {
@@ -155,36 +156,38 @@ export const handleGroupBy = async ({
           })
         }
 
-        const { columnState: newColumnState, Table: NewTable } = renderTable({
-          clientCollectionConfig,
-          collectionConfig,
-          columns,
-          customCellProps,
-          data: groupData,
-          drawerSlug,
-          enableRowSelections,
-          groupByValue: valueOrRelationshipID,
-          heading,
-          i18n: req.i18n,
-          key: `table-${valueOrRelationshipID}`,
-          orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
-          payload: req.payload,
-          query,
-          useAsTitle: collectionConfig.admin.useAsTitle,
-        })
+        if (groupData.docs && groupData.docs.length > 0) {
+          const { columnState: newColumnState, Table: NewTable } = renderTable({
+            clientCollectionConfig,
+            collectionConfig,
+            columns,
+            customCellProps,
+            data: groupData,
+            drawerSlug,
+            enableRowSelections,
+            groupByValue: valueOrRelationshipID,
+            heading,
+            i18n: req.i18n,
+            key: `table-${valueOrRelationshipID}`,
+            orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
+            payload: req.payload,
+            query,
+            useAsTitle: collectionConfig.admin.useAsTitle,
+          })
 
-        // Only need to set `columnState` once, using the first table's column state
-        // This will avoid needing to generate column state explicitly for root context that wraps all tables
-        if (!columnState) {
-          columnState = newColumnState
+          // Only need to set `columnState` once, using the first table's column state
+          // This will avoid needing to generate column state explicitly for root context that wraps all tables
+          if (!columnState) {
+            columnState = newColumnState
+          }
+
+          if (!Table) {
+            Table = []
+          }
+
+          dataByGroup[valueOrRelationshipID] = groupData
+          ;(Table as Array<React.ReactNode>)[i] = NewTable
         }
-
-        if (!Table) {
-          Table = []
-        }
-
-        dataByGroup[valueOrRelationshipID] = groupData
-        ;(Table as Array<React.ReactNode>)[i] = NewTable
       }),
     )
   }
