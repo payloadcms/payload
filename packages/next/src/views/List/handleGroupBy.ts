@@ -37,12 +37,12 @@ export const handleGroupBy = async ({
   user: any
   where: Where
 }): Promise<{
-  columnState: any[]
+  columnState: Column[]
   data: PaginatedDocs
   Table: null | React.ReactNode | React.ReactNode[]
 }> => {
   let Table: React.ReactNode | React.ReactNode[] = null
-  let columnState: Column[] = []
+  let columnState: Column[]
 
   const dataByGroup: Record<string, PaginatedDocs> = {}
   const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
@@ -97,100 +97,98 @@ export const handleGroupBy = async ({
     values: undefined,
   }
 
-  if (distinct.values) {
-    await Promise.all(
-      distinct.values.map(async (distinctValue, i) => {
-        const potentiallyPopulatedRelationship = distinctValue[groupByFieldName]
+  await Promise.all(
+    distinct.values.map(async (distinctValue, i) => {
+      const potentiallyPopulatedRelationship = distinctValue[groupByFieldName]
 
-        const valueOrRelationshipID =
-          groupByField?.type === 'relationship' &&
-          potentiallyPopulatedRelationship &&
-          typeof potentiallyPopulatedRelationship === 'object' &&
-          'id' in potentiallyPopulatedRelationship
-            ? potentiallyPopulatedRelationship.id
-            : potentiallyPopulatedRelationship
+      const valueOrRelationshipID =
+        groupByField?.type === 'relationship' &&
+        potentiallyPopulatedRelationship &&
+        typeof potentiallyPopulatedRelationship === 'object' &&
+        'id' in potentiallyPopulatedRelationship
+          ? potentiallyPopulatedRelationship.id
+          : potentiallyPopulatedRelationship
 
-        const groupData = await req.payload.find({
-          collection: collectionSlug,
-          depth: 0,
-          draft: true,
-          fallbackLocale: false,
-          includeLockStatus: true,
-          limit: query?.queryByGroup?.[valueOrRelationshipID]?.limit
-            ? Number(query.queryByGroup[valueOrRelationshipID].limit)
-            : undefined,
-          locale: req.locale,
-          overrideAccess: false,
-          page: query?.queryByGroup?.[valueOrRelationshipID]?.page
-            ? Number(query.queryByGroup[valueOrRelationshipID].page)
-            : undefined,
-          req,
-          // Note: if we wanted to enable table-by-table sorting, we could use this:
-          // sort: query?.queryByGroup?.[valueOrRelationshipID]?.sort,
-          sort: query?.sort,
-          user,
-          where: {
-            ...(whereWithMergedSearch || {}),
-            [groupByFieldName]: {
-              equals: valueOrRelationshipID,
-            },
+      const groupData = await req.payload.find({
+        collection: collectionSlug,
+        depth: 0,
+        draft: true,
+        fallbackLocale: false,
+        includeLockStatus: true,
+        limit: query?.queryByGroup?.[valueOrRelationshipID]?.limit
+          ? Number(query.queryByGroup[valueOrRelationshipID].limit)
+          : undefined,
+        locale: req.locale,
+        overrideAccess: false,
+        page: query?.queryByGroup?.[valueOrRelationshipID]?.page
+          ? Number(query.queryByGroup[valueOrRelationshipID].page)
+          : undefined,
+        req,
+        // Note: if we wanted to enable table-by-table sorting, we could use this:
+        // sort: query?.queryByGroup?.[valueOrRelationshipID]?.sort,
+        sort: query?.sort,
+        user,
+        where: {
+          ...(whereWithMergedSearch || {}),
+          [groupByFieldName]: {
+            equals: valueOrRelationshipID,
           },
+        },
+      })
+
+      let heading = valueOrRelationshipID || req.i18n.t('general:noValue')
+
+      if (
+        groupByField?.type === 'relationship' &&
+        typeof potentiallyPopulatedRelationship === 'object'
+      ) {
+        heading =
+          potentiallyPopulatedRelationship[relationshipConfig.admin.useAsTitle || 'id'] ||
+          valueOrRelationshipID
+      }
+
+      if (groupByField.type === 'date') {
+        heading = formatDate({
+          date: String(heading),
+          i18n: req.i18n,
+          pattern: clientConfig.admin.dateFormat,
+        })
+      }
+
+      if (groupData.docs && groupData.docs.length > 0) {
+        const { columnState: newColumnState, Table: NewTable } = renderTable({
+          clientCollectionConfig,
+          collectionConfig,
+          columns,
+          customCellProps,
+          data: groupData,
+          drawerSlug,
+          enableRowSelections,
+          groupByValue: valueOrRelationshipID,
+          heading,
+          i18n: req.i18n,
+          key: `table-${valueOrRelationshipID}`,
+          orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
+          payload: req.payload,
+          query,
+          useAsTitle: collectionConfig.admin.useAsTitle,
         })
 
-        let heading = valueOrRelationshipID || req.i18n.t('general:noValue')
-
-        if (
-          groupByField?.type === 'relationship' &&
-          typeof potentiallyPopulatedRelationship === 'object'
-        ) {
-          heading =
-            potentiallyPopulatedRelationship[relationshipConfig.admin.useAsTitle || 'id'] ||
-            valueOrRelationshipID
+        // Only need to set `columnState` once, using the first table's column state
+        // This will avoid needing to generate column state explicitly for root context that wraps all tables
+        if (!columnState) {
+          columnState = newColumnState
         }
 
-        if (groupByField.type === 'date') {
-          heading = formatDate({
-            date: String(heading),
-            i18n: req.i18n,
-            pattern: clientConfig.admin.dateFormat,
-          })
+        if (!Table) {
+          Table = []
         }
 
-        if (groupData.docs && groupData.docs.length > 0) {
-          const { columnState: newColumnState, Table: NewTable } = renderTable({
-            clientCollectionConfig,
-            collectionConfig,
-            columns,
-            customCellProps,
-            data: groupData,
-            drawerSlug,
-            enableRowSelections,
-            groupByValue: valueOrRelationshipID,
-            heading,
-            i18n: req.i18n,
-            key: `table-${valueOrRelationshipID}`,
-            orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
-            payload: req.payload,
-            query,
-            useAsTitle: collectionConfig.admin.useAsTitle,
-          })
-
-          // Only need to set `columnState` once, using the first table's column state
-          // This will avoid needing to generate column state explicitly for root context that wraps all tables
-          if (!columnState) {
-            columnState = newColumnState
-          }
-
-          if (!Table) {
-            Table = []
-          }
-
-          dataByGroup[valueOrRelationshipID] = groupData
-          ;(Table as Array<React.ReactNode>)[i] = NewTable
-        }
-      }),
-    )
-  }
+        dataByGroup[valueOrRelationshipID] = groupData
+        ;(Table as Array<React.ReactNode>)[i] = NewTable
+      }
+    }),
+  )
 
   return {
     columnState,
