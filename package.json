@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.46.0",
+  "version": "3.48.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -91,6 +91,10 @@
     "reinstall": "pnpm clean:all && pnpm install",
     "release": "pnpm --filter releaser release --tag latest",
     "runts": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" node --no-deprecation --no-experimental-strip-types --import @swc-node/register/esm-register",
+    "script:audit": "pnpm audit -P",
+    "script:audit:critical": "pnpm audit -P --audit-level critical",
+    "script:audit:high": "pnpm audit -P --audit-level high",
+    "script:audit:moderate": "pnpm audit -P --audit-level moderate",
     "script:build-template-with-local-pkgs": "pnpm --filter scripts build-template-with-local-pkgs",
     "script:gen-templates": "pnpm --filter scripts gen-templates",
     "script:gen-templates:build": "pnpm --filter scripts gen-templates --build",
@@ -108,6 +112,7 @@
     "test:e2e:prod:ci": "pnpm prepare-run-test-against-prod:ci && pnpm runts ./test/runE2E.ts --prod",
     "test:e2e:prod:ci:noturbo": "pnpm prepare-run-test-against-prod:ci && pnpm runts ./test/runE2E.ts --prod --no-turbo",
     "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
+    "test:int:firestore": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:types": "tstyche",
@@ -121,7 +126,6 @@
       "prettier --write",
       "eslint --cache --fix"
     ],
-    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --no-frozen-lockfile --ignore-workspace; pnpm run lint --fix\"",
     "templates/**/pnpm-lock.yaml": "pnpm runts scripts/remove-template-lock-files.ts",
     "tsconfig.base.json": "node scripts/reset-tsconfig.js"
   },

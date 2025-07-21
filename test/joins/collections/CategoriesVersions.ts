@@ -1,12 +1,14 @@
 import type { CollectionConfig } from 'payload'
 
-import { versionsSlug } from './Versions.js'
-
-export const categoriesVersionsSlug = 'categories-versions'
+import { categoriesVersionsSlug, versionsSlug } from '../shared.js'
 
 export const CategoriesVersions: CollectionConfig = {
   slug: categoriesVersionsSlug,
   fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
     {
       name: 'relatedVersions',
       type: 'join',

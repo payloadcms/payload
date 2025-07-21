@@ -86,10 +86,15 @@ export const bnInTranslations: DefaultTranslationsObject = {
     deletingFile: 'ফাইল মুছতে একটি ত্রুটি হয়েছে।',
     deletingTitle:
       '{{title}} মুছতে একটি ত্রুটি হয়েছে। আপনার সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।',
+    documentNotFound:
+      'ID সহ {{id}} ডকুমেন্টটি পাওয়া যায়নি। এটি মুছে ফেলা হতে পারে বা কখনই ছিল না, অথবা আপনার এটির অ্যাক্সেস নেই।',
     emailOrPasswordIncorrect: 'প্রদত্ত ইমেইল বা পাসওয়ার্ড ভুল।',
     followingFieldsInvalid_one: 'নিম্নলিখিত ক্ষেত্রটি অবৈধ:',
     followingFieldsInvalid_other: 'নিম্নলিখিত ক্ষেত্রগুলি অবৈধ:',
     incorrectCollection: 'ভুল সংগ্রহ',
+    insufficientClipboardPermissions:
+      'ক্লিপবোর্ড অ্যাক্সেস অস্বীকৃত হয়েছে। অনুগ্রহ করে আপনার ক্লিপবোর্ড অনুমতিগুলি পরীক্ষা করুন।',
+    invalidClipboardData: 'অবৈধ ক্লিপবোর্ড ডেটা।',
     invalidFileType: 'অবৈধ ফাইল প্রকার',
     invalidFileTypeValue: 'অবৈধ ফাইল প্রকার: {{value}}',
     invalidRequestArgs: 'অনুরোধে অবৈধ আর্গুমেন্ট পাস করা হয়েছে: {{args}}',
@@ -111,6 +116,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'ফাইল আপলোড করতে একটি সমস্যা হয়েছে।',
     tokenInvalidOrExpired: 'টোকেন অবৈধ বা মেয়াদ শেষ হয়ে গেছে।',
     tokenNotProvided: 'টোকেন প্রদান করা হয়নি।',
+    unableToCopy: 'কপি করতে অক্ষম।',
     unableToDeleteCount: '{{total}} {{label}} এর মধ্যে {{count}} টি মুছতে অক্ষম।',
     unableToReindexCollection:
       '{{collection}} সংগ্রহ পুনরায় সূচিবদ্ধ করতে ত্রুটি হয়েছে। অপারেশন বাতিল করা হয়েছে।',
@@ -181,6 +187,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     deleteFolder: 'ফোল্ডার মুছুন',
     folderName: 'ফোল্ডারের নাম',
     folders: 'ফোল্ডারগুলি',
+    folderTypeDescription:
+      'এই ফোল্ডারে কোন ধরণের কালেকশন ডকুমেন্টস অনুমতি দেওয়া উচিত তা নির্বাচন করুন।',
     itemHasBeenMoved: '{{title}} কে {{folderName}} এ সরানো হয়েছে',
     itemHasBeenMovedToRoot: '{{title}} কে মূল ফোল্ডারে সরানো হয়েছে',
     itemsMovedToFolder: '{{title}} কে {{folderName}} এ সরানো হয়েছে',
@@ -247,7 +255,9 @@ export const bnInTranslations: DefaultTranslationsObject = {
     confirmRestoration: 'পুনর্বাসন নিশ্চিত করুন',
     copied: 'কপি করা হয়েছে',
     copy: 'কপি করুন',
+    copyField: 'ফিল্ড কপি করুন',
     copying: 'কপি করা হচ্ছে',
+    copyRow: 'সারি কপি করুন',
     copyWarning:
       'আপনি {{label}} {{title}} এর জন্য {{to}} কে {{from}} দ্বারা ওভাররাইট করতে চলেছেন। আপনি কি নিশ্চিত?',
     create: 'তৈরি করুন',
@@ -346,6 +356,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'বিদ্যমান ফিল্ড ডেটা ওভাররাইট করুন',
     pageNotFound: 'পৃষ্ঠা পাওয়া যায়নি',
     password: 'পাসওয়ার্ড',
+    pasteField: 'ফিল্ড পেস্ট করুন',
+    pasteRow: 'সারি পেস্ট করুন',
     payloadSettings: 'পেলোড সেটিংস',
     perPage: 'প্রতি পৃষ্ঠায়: {{limit}}',
     previous: 'পূর্ববর্তী',

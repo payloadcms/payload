@@ -440,7 +440,9 @@ describe('Localization', () => {
       await addBlock.click()
       const selectBlock = page.locator('.blocks-drawer__block button')
       await selectBlock.click()
-      const addContentButton = page.locator('#field-content__0__content button')
+      const addContentButton = page
+        .locator('#field-content__0__content')
+        .getByRole('button', { name: 'Add Content' })
       await addContentButton.click()
       await selectBlock.click()
       const textField = page.locator('#field-content__0__content__0__text')
@@ -615,6 +617,21 @@ describe('Localization', () => {
     const searchInput = page.locator('.search-filter__input')
     await expect(searchInput).toBeVisible()
     await expect(searchInput).toHaveAttribute('placeholder', 'Search by Full title')
+  })
+
+  describe('publish specific locale', () => {
+    test('should create post in correct locale with publishSpecificLocale', async () => {
+      await page.goto(urlPostsWithDrafts.create)
+      await changeLocale(page, 'es')
+      await fillValues({ title: 'Created In Spanish' })
+      const chevronButton = page.locator('.form-submit .popup__trigger-wrap > .popup-button')
+      await chevronButton.click()
+      await saveDocAndAssert(page, '#publish-locale')
+
+      await expect(page.locator('#field-title')).toHaveValue('Created In Spanish')
+      await changeLocale(page, defaultLocale)
+      await expect(page.locator('#field-title')).toBeEmpty()
+    })
   })
 })
 

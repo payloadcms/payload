@@ -87,10 +87,15 @@ export const rsTranslations: DefaultTranslationsObject = {
     deletingFile: 'Догодила се грешка при брисању датотеке.',
     deletingTitle:
       'Догодила се грешка при брисању {{title}}. Проверите интернет конекцију и покушајте поново.',
+    documentNotFound:
+      'Dokument sa ID-om {{id}} nije mogao biti pronađen. Moguće je da je obrisan ili nikada nije postojao, ili možda nemate pristup njemu.',
     emailOrPasswordIncorrect: 'Емаил или лозинка су неисправни.',
     followingFieldsInvalid_one: 'Ово поље је невалидно:',
     followingFieldsInvalid_other: 'Ова поља су невалидна:',
     incorrectCollection: 'Невалидна колекција',
+    insufficientClipboardPermissions:
+      'Приступ к клипборду је одбијен. Провјерите своја овлашћења за клипборд.',
+    invalidClipboardData: 'Неважећи подаци у клипборду.',
     invalidFileType: 'Невалидан тип датотеке',
     invalidFileTypeValue: 'Невалидан тип датотеке: {{value}}',
     invalidRequestArgs: 'Неважећи аргументи прослеђени у захтеву: {{args}}',
@@ -112,6 +117,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Постоји проблем при учитавању датотеке.',
     tokenInvalidOrExpired: 'Токен је невалидан или је истекао.',
     tokenNotProvided: 'Token nije dostavljen.',
+    unableToCopy: 'Није могуће копирати.',
     unableToDeleteCount: 'Није могуће избрисати {{count}} од {{total}} {{label}}.',
     unableToReindexCollection:
       'Грешка при реиндексирању колекције {{collection}}. Операција је прекинута.',
@@ -181,6 +187,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Obriši fasciklu',
     folderName: 'Ime fascikle',
     folders: 'Fascikle',
+    folderTypeDescription:
+      'Odaberite koja vrsta dokumenata iz kolekcije treba biti dozvoljena u ovom folderu.',
     itemHasBeenMoved: '{{title}} je premješten u {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} je premešten u osnovni direktorijum.',
     itemsMovedToFolder: '{{title}} premešten u {{folderName}}',
@@ -246,7 +254,9 @@ export const rsTranslations: DefaultTranslationsObject = {
     confirmRestoration: 'Potvrdite obnovu',
     copied: 'Копирано',
     copy: 'Копирај',
+    copyField: 'Копирај поље',
     copying: 'Kopiranje',
+    copyRow: 'Копирај ред',
     copyWarning:
       'На путу сте да препишете {{to}} са {{from}} за {{label}} {{title}}. Да ли сте сигурни?',
     create: 'Креирај',
@@ -345,6 +355,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Prepišite postojeće podatke u polju',
     pageNotFound: 'Страница није пронађена',
     password: 'Лозинка',
+    pasteField: 'Залепи поље',
+    pasteRow: 'Залепи ред',
     payloadSettings: 'Payload поставке',
     perPage: 'По страници: {{limit}}',
     previous: 'Prethodni',

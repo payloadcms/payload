@@ -65,7 +65,6 @@ export const renderTable = ({
   clientConfig,
   collectionConfig,
   collections,
-  columnPreferences,
   columns: columnsFromArgs,
   customCellProps,
   docs,
@@ -82,7 +81,6 @@ export const renderTable = ({
   clientConfig?: ClientConfig
   collectionConfig?: SanitizedCollectionConfig
   collections?: string[]
-  columnPreferences: CollectionPreferences['columns']
   columns?: CollectionPreferences['columns']
   customCellProps?: Record<string, unknown>
   docs: PaginatedDocs['docs']
@@ -157,7 +155,6 @@ export const renderTable = ({
   const sharedArgs: Pick<
     BuildColumnStateArgs,
     | 'clientFields'
-    | 'columnPreferences'
     | 'columns'
     | 'customCellProps'
     | 'enableRowSelections'
@@ -168,7 +165,6 @@ export const renderTable = ({
     | 'viewType'
   > = {
     clientFields,
-    columnPreferences,
     columns,
     enableRowSelections,
     i18n,
