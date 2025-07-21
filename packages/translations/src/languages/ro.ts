@@ -116,6 +116,8 @@ export const roTranslations: DefaultTranslationsObject = {
     noUser: 'Nici un utilizator',
     previewing: 'A existat o problemă la previzualizarea acestui document.',
     problemUploadingFile: 'A existat o problemă în timpul încărcării fișierului.',
+    restoringTitle:
+      'A survenit o eroare în timpul restaurării {{title}}. Verificați conexiunea și încercați din nou.',
     tokenInvalidOrExpired: 'Tokenul este invalid sau a expirat.',
     tokenNotProvided: 'Tokenul nu a fost furnizat.',
     unableToCopy: 'Imposibil de copiat.',
@@ -218,6 +220,8 @@ export const roTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Sunteți pe cale să ștergeți {{count}} {{label}}',
     aboutToDeleteCount_one: 'Sunteți pe cale să ștergeți {{count}} {{label}}',
     aboutToDeleteCount_other: 'Sunteți pe cale să ștergeți {{count}} {{label}}',
+    aboutToRestore:
+      'Sunteți pe cale să restaurați {{label}} <1>{{title}}</1> ca o schiță. Sunteți sigur?',
     aboutToRestoreCount: 'Sunteți pe cale să restaurați {{count}} {{label}}',
     aboutToTrash:
       'Sunteți pe cale să mutați {{label}} <1>{{title}}</1> în coșul de gunoi. Sunteți sigur?',
@@ -276,6 +280,7 @@ export const roTranslations: DefaultTranslationsObject = {
     dark: 'Dark',
     dashboard: 'Panoul de bord',
     delete: 'Șterge',
+    deleted: 'Șters',
     deletedAt: 'Șters la',
     deletedCountSuccessfully: 'Șterse cu succes {{count}} {{label}}.',
     deletedSuccessfully: 'Șters cu succes.',
@@ -374,6 +379,7 @@ export const roTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription: 'Aceasta va reseta toate preferințele tale la setările implicite.',
     resettingPreferences: 'Resetare preferințe.',
     restore: 'Restaurare',
+    restoreAsPublished: 'Restabilește ca versiune publicată',
     restoredCountSuccessfully: '{{count}} {{label}} restabilite cu succes.',
     restoring:
       'Respectați semnificația textului original în contextul Payload. Iată o listă de termeni obișnuiți Payload care au semnificații foarte specifice:\n    - Colectie: O colectie este un grup de documente care împart o structură și un scop comun. Colectiile sunt utilizate pentru a organiza și gestiona conținutul în Payload.\n    - Câmp: Un câmp este o piesă specifică de date dintr-un document dintr-o colecție. Câmpurile definesc structura și tipul de date care pot fi stocate într-un document.\n    - Document',
@@ -407,6 +413,7 @@ export const roTranslations: DefaultTranslationsObject = {
     time: 'Timp',
     timezone: 'Fus orar',
     titleDeleted: '{{label}} "{{title}}" șters cu succes.',
+    titleRestored: '{{label}} "{{title}}" a fost restaurat cu succes.',
     titleTrashed: 'Eticheta "{{title}}" a fost aruncată cu succes.',
     trash: 'Gunoi',
     trashedCountSuccessfully: 'Amplasat în coșul de gunoi {{count}} {{label}} cu succes.',

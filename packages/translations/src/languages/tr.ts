@@ -115,6 +115,8 @@ export const trTranslations: DefaultTranslationsObject = {
     noUser: 'Kullanıcı yok',
     previewing: 'Önizleme başarısız oldu',
     problemUploadingFile: 'Dosya yüklenirken bir sorun oluştu.',
+    restoringTitle:
+      '{{title}} geri yüklenirken bir hata oluştu. Lütfen bağlantınızı kontrol edin ve tekrar deneyin.',
     tokenInvalidOrExpired: 'Geçersiz veya süresi dolmuş token.',
     tokenNotProvided: 'Jeton sağlanmadı.',
     unableToCopy: 'Kopyalanamıyor.',
@@ -217,6 +219,8 @@ export const trTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: '{{count}} {{label}} silmek üzeresiniz',
     aboutToDeleteCount_one: '{{count}} {{label}} silmek üzeresiniz',
     aboutToDeleteCount_other: '{{count}} {{label}} silmek üzeresiniz',
+    aboutToRestore:
+      '{{label}} <1>{{title}}</1> taslağı olarak geri yüklemek üzeresiniz. Emin misiniz?',
     aboutToRestoreCount: '{{count}} {{label}} geri yüklemek üzeresiniz.',
     aboutToTrash: '{{label}} <1>{{title}}</1> çöp kutusuna taşımayı düşünüyorsunuz. Emin misiniz?',
     aboutToTrashCount: '{{count}} {{label}} çöp kutusuna taşımayı düşünüyorsunuz.',
@@ -274,6 +278,7 @@ export const trTranslations: DefaultTranslationsObject = {
     dark: 'Karanlık',
     dashboard: 'Anasayfa',
     delete: 'Sil',
+    deleted: 'Silindi',
     deletedAt: 'Silindiği Tarih',
     deletedCountSuccessfully: '{{count}} {{label}} başarıyla silindi.',
     deletedSuccessfully: 'Başarıyla silindi.',
@@ -373,6 +378,7 @@ export const trTranslations: DefaultTranslationsObject = {
       'Bu, tüm tercihlerinizin varsayılan ayarlara sıfırlanmasını sağlar.',
     resettingPreferences: 'Tercihler sıfırlanıyor.',
     restore: 'Geri Yükle',
+    restoreAsPublished: 'Yayınlanan sürüm olarak geri yükle',
     restoredCountSuccessfully: '{{count}} {{label}} başarıyla geri yüklendi.',
     restoring:
       "Özgün metnin anlamını Payload bağlamında saygıyla yeniden oluşturun. İşte çok belirli anlamlar taşıyan yaygın Payload terimlerinin bir listesi:\n    - Koleksiyon: Bir koleksiyon, ortak bir yapı ve amaca sahip belgelerin grubudur. Koleksiyonlar içerik organizasyonu ve yönetiminde Payload'da kullanılır.\n    - Alan: Bir alan, bir koleksiyon içindeki belgedeki belirli bir veri parçasıdır. Alanlar, bir belgede saklanabilen ver",
@@ -406,6 +412,7 @@ export const trTranslations: DefaultTranslationsObject = {
     time: 'Zaman',
     timezone: 'Saat dilimi',
     titleDeleted: '{{label}} {{title}} başarıyla silindi.',
+    titleRestored: '"{{title}}" başarıyla geri yüklendi.',
     titleTrashed: '"{{label}}" "{{title}}" başarıyla çöpe atıldı.',
     trash: 'Çöp',
     trashedCountSuccessfully: '{{count}} {{label}} başarıyla çöpe atıldı.',

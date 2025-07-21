@@ -113,6 +113,8 @@ export const faTranslations: DefaultTranslationsObject = {
     noUser: 'بدون کاربر',
     previewing: 'مشکلی در پیش‌نمایش این رسانه رخ داد.',
     problemUploadingFile: 'هنگام بارگذاری سند خطایی رخ داد.',
+    restoringTitle:
+      'هنگام بازیابی {{title}} خطایی رخ داد. لطفا اتصال خود را بررسی کرده و دوباره تلاش کنید.',
     tokenInvalidOrExpired: 'ژتون شما نامعتبر یا منقضی شده است.',
     tokenNotProvided: 'توکن ارائه نشده است.',
     unableToCopy: 'کپی امکان‌پذیر نیست.',
@@ -211,6 +213,8 @@ export const faTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'شما در حال پاک کردن {{count}} تعداد {{label}} هستید',
     aboutToDeleteCount_one: 'شما در حال پاک کردن {{count}} تعداد {{label}} هستید',
     aboutToDeleteCount_other: 'شما در شرف حذف هستید {{count}} {{label}}',
+    aboutToRestore:
+      'شما در حال بازیابی {{label}} <1>{{title}}</1> به عنوان یک پیش‌نویس هستید. آیا مطمئن هستید؟',
     aboutToRestoreCount: 'شما در حال بازگرداندن {{count}} {{label}} هستید.',
     aboutToTrash: 'شما در حال حاضر در صدد حذف {{label}} <1>{{title}}</1> هستید. آيا مطمئن هستید؟',
     aboutToTrashCount: 'شما در حال حاضر در مورد انتقال {{count}} {{label}} به سطل زباله هستید',
@@ -268,6 +272,7 @@ export const faTranslations: DefaultTranslationsObject = {
     dark: 'تاریک',
     dashboard: 'پیشخوان',
     delete: 'حذف',
+    deleted: 'حذف شد',
     deletedAt: 'حذف شده در',
     deletedCountSuccessfully: 'تعداد {{count}} {{label}} با موفقیت پاک گردید.',
     deletedSuccessfully: 'با موفقیت حذف شد.',
@@ -366,6 +371,7 @@ export const faTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription: 'این تمام تنظیمات شما را به تنظیمات پیش‌فرض بازنشانی خواهد کرد.',
     resettingPreferences: 'در حال بازنشانی تنظیمات.',
     restore: 'بازیابی',
+    restoreAsPublished: 'بازگردانی به عنوان نسخه منتشر شده',
     restoredCountSuccessfully: '{{count}} {{label}} با موفقیت بازیابی شد.',
     restoring:
       'درک معنی متن اصلی در زمینه Payload. در اینجا لیستی از اصطلاحات متداول Payload که معانی خاص خاص خود را دارند:\n- مجموعه: مجموعه گروهی از اسناد است که ساختار و هدف مشترکی را به اشتراک می‌گذارند. مجموعه‌ها برای سازماندهی و مدیر',
@@ -399,6 +405,7 @@ export const faTranslations: DefaultTranslationsObject = {
     time: 'زمان',
     timezone: 'منطقه زمانی',
     titleDeleted: '{{label}} "{{title}}" با موفقیت پاک شد.',
+    titleRestored: '{{label}} "{{title}}" با موفقیت بازیابی شد.',
     titleTrashed: '{{label}} "{{title}}" با موفقیت به سطل زباله انتقال یافت.',
     trash: 'زباله',
     trashedCountSuccessfully: '{{label}} به تعداد {{count}} با موفقیت به سطل زباله منتقل شد.',

@@ -114,6 +114,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     noUser: 'কোনো ব্যবহারকারী নেই',
     previewing: 'এই ডকুমেন্টটি প্রিভিউ করতে একটি সমস্যা হয়েছে।',
     problemUploadingFile: 'ফাইল আপলোড করতে একটি সমস্যা হয়েছে।',
+    restoringTitle:
+      '{{title}} পুনরুদ্ধার করতে গিয়ে একটি ত্রুটি ঘটেছে। দয়া করে আপনার সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।',
     tokenInvalidOrExpired: 'টোকেন অবৈধ বা মেয়াদ শেষ হয়ে গেছে।',
     tokenNotProvided: 'টোকেন প্রদান করা হয়নি।',
     unableToCopy: 'কপি করতে অক্ষম।',
@@ -215,6 +217,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
     aboutToDeleteCount_one: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
     aboutToDeleteCount_other: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
+    aboutToRestore:
+      'আপনি কি নিশ্চিত যে আপনি {{label}} <1>{{title}}</1> কে খসড়া হিসেবে পুনরুদ্ধার করতে চলেছেন?',
     aboutToRestoreCount: 'আপনি প্রস্তুত {{count}} {{label}} পুনরুদ্ধার করতে',
     aboutToTrash:
       'আপনি সত্যিই স্থানান্তর করতে চাইছেন {{label}} <1>{{title}}</1> কে আবর্জনায়? আপনি কি নিশ্চিত?',
@@ -273,6 +277,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     dark: 'ডার্ক',
     dashboard: 'ড্যাশবোর্ড',
     delete: 'মুছুন',
+    deleted: 'মুছে ফেলা হয়েছে',
     deletedAt: 'মুছে ফেলার সময়',
     deletedCountSuccessfully: '{{count}} {{label}} সফলভাবে মুছে ফেলা হয়েছে।',
     deletedSuccessfully: 'সফলভাবে মুছে ফেলা হয়েছে।',
@@ -371,6 +376,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription: 'এটি আপনার সমস্ত পছন্দগুলি তাদের ডিফল্ট সেটিংসে রিসেট করবে।',
     resettingPreferences: 'পছন্দগুলি রিসেট করা হচ্ছে।',
     restore: 'পুনরুদ্ধার করুন',
+    restoreAsPublished: 'প্রকাশিত সংস্করণ হিসাবে পুনরুদ্ধার করুন',
     restoredCountSuccessfully: '{{count}} {{label}} সফলভাবে পুনরুদ্ধার করা হয়েছে।',
     restoring:
       'প্রস্থাপনার অর্থকে সম্মান করুন। এখানে Payload এর সাথে সম্পর্কিত কিছু সাধারণ পদগুলির তালিকা রয়েছে যা খুব নির্দিষ্ট অর্থ বহন করে:\n    - কালেক',
@@ -404,6 +410,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     time: 'সময়',
     timezone: 'টাইমজোন',
     titleDeleted: '{{label}} "{{title}}" সফলভাবে মুছে ফেলা হয়েছে।',
+    titleRestored: '"{{label}}" "{{title}}" সফলভাবে পুনরুদ্ধার করা হয়েছে।',
     titleTrashed: '"{{label}}" "{{title}}" সফলভাবে ট্র্যাশ করা হয়েছে।',
     trash: 'আবর্জনা',
     trashedCountSuccessfully: 'সফলভাবে {{count}} {{label}} মুছে ফেলা হয়েছে.',

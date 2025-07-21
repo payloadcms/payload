@@ -1,3 +1,5 @@
+import { title } from 'process'
+
 import type { Language } from '../types.js'
 
 export const enTranslations = {
@@ -115,6 +117,8 @@ export const enTranslations = {
     noUser: 'No User',
     previewing: 'There was a problem previewing this document.',
     problemUploadingFile: 'There was a problem while uploading the file.',
+    restoringTitle:
+      'There was an error while restoring {{title}}. Please check your connection and try again.',
     tokenInvalidOrExpired: 'Token is either invalid or has expired.',
     tokenNotProvided: 'Token not provided.',
     unableToCopy: 'Unable to copy.',
@@ -214,6 +218,8 @@ export const enTranslations = {
     aboutToDeleteCount_many: 'You are about to delete {{count}} {{label}}',
     aboutToDeleteCount_one: 'You are about to delete {{count}} {{label}}',
     aboutToDeleteCount_other: 'You are about to delete {{count}} {{label}}',
+    aboutToRestore:
+      'You are about to restore the {{label}} <1>{{title}}</1> as a draft. Are you sure?',
     aboutToRestoreCount: 'You are about to restore {{count}} {{label}}',
     aboutToTrash:
       'You are about to move the {{label}} <1>{{title}}</1> to the trash. Are you sure?',
@@ -272,6 +278,7 @@ export const enTranslations = {
     dark: 'Dark',
     dashboard: 'Dashboard',
     delete: 'Delete',
+    deleted: 'Deleted',
     deletedAt: 'Deleted At',
     deletedCountSuccessfully: 'Deleted {{count}} {{label}} successfully.',
     deletedSuccessfully: 'Deleted successfully.',
@@ -371,6 +378,7 @@ export const enTranslations = {
       'This will reset all of your preferences to their default settings.',
     resettingPreferences: 'Resetting Preferences.',
     restore: 'Restore',
+    restoreAsPublished: 'Restore as published version',
     restoredCountSuccessfully: 'Restored {{count}} {{label}} successfully.',
     restoring: 'Restoring...',
     row: 'Row',
@@ -403,6 +411,7 @@ export const enTranslations = {
     time: 'Time',
     timezone: 'Timezone',
     titleDeleted: '{{label}} "{{title}}" successfully deleted.',
+    titleRestored: '{{label}} "{{title}}" successfully restored.',
     titleTrashed: '{{label}} "{{title}}" successfully trashed.',
     trash: 'Trash',
     trashedCountSuccessfully: 'Trashed {{count}} {{label}} successfully.',

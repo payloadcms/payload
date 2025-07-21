@@ -114,6 +114,8 @@ export const myTranslations: DefaultTranslationsObject = {
     noUser: 'အသုံးပြုသူ မရှိပါ။',
     previewing: 'ဖိုင်ကို အစမ်းကြည့်ရန် ပြဿနာရှိနေသည်။',
     problemUploadingFile: 'ဖိုင်ကို အပ်လုဒ်တင်ရာတွင် ပြဿနာရှိနေသည်။',
+    restoringTitle:
+      'Terdapat ralat semasa memulihkan {{title}}. Sila semak sambungan anda dan cuba lagi.',
     tokenInvalidOrExpired: 'တိုကင်သည် မမှန်ကန်ပါ သို့မဟုတ် သက်တမ်းကုန်သွားပါပြီ။',
     tokenNotProvided: 'Token မပေးထားပါ။',
     unableToCopy: 'ကူးရန်မဖြစ်နိုင်ပါ။',
@@ -215,6 +217,8 @@ export const myTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
     aboutToDeleteCount_one: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
     aboutToDeleteCount_other: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
+    aboutToRestore:
+      'Anda akan memulihkan {{label}} <1>{{title}}</1> sebagai draf. Adakah anda pasti?',
     aboutToRestoreCount: 'Anda akan memulihkan {{count}} {{label}}',
     aboutToTrash:
       'Anda akan memindahkan {{label}} <1>{{title}}</1> ke tong sampah. Adakah anda pasti?',
@@ -273,6 +277,7 @@ export const myTranslations: DefaultTranslationsObject = {
     dark: 'အမှောင်',
     dashboard: 'ပင်မစာမျက်နှာ',
     delete: 'ဖျက်မည်။',
+    deleted: 'ဖျက်ထား',
     deletedAt: 'Dihapus Pada',
     deletedCountSuccessfully: '{{count}} {{label}} ကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
     deletedSuccessfully: 'အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
@@ -372,6 +377,7 @@ export const myTranslations: DefaultTranslationsObject = {
       'ဤသည်သည် သင့်၏အကြိုက်များအားလုံးကို အခြားတပ်ဆင်မှုများမှ ပြန်လည်သတ်မှတ်ပေးပါလိမ့်မည်။',
     resettingPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်နေပါသည်။',
     restore: 'Pulihkan',
+    restoreAsPublished: 'Pulihkan sebagai versi yang diterbitkan',
     restoredCountSuccessfully: 'Berjaya memulihkan {{count}} {{label}}.',
     restoring:
       'Hormati makna teks asal dalam konteks Payload. Berikut adalah senarai istilah Payload yang membawa maksud tertentu :\n    - Koleksi : Koleksi ialah kumpulan dokumen yang berkongsi struktur dan tujuan yang sama. Koleksi digunakan untuk mengatur dan menguruskan kandungan dalam Payload.\n    - Medan: Medan adalah sebahagian daripada data dalam dokumen dalam suatu koleksi. Medan menentukan struktur dan jenis data yang boleh disimpan dalam dokumen.\n    - Dokumen: Dokumen adalah rekod individu dalam suatu koleksi. Ia mengandungi data yang telah',
@@ -405,6 +411,7 @@ export const myTranslations: DefaultTranslationsObject = {
     time: 'Masa',
     timezone: 'Masa Wilayah',
     titleDeleted: '{{label}} {{title}} အောင်မြင်စွာ ဖျက်သိမ်းခဲ့သည်။',
+    titleRestored: '"{{label}}" "{{title}}" အောင်မြင်စွာ ပြန်လည် ထည့်သွင်းပြီး ဖြစ်ပါတယ်။',
     titleTrashed: '"{{label}}" "{{title}}" အောင်မြင်စွာ စုဖြတ်ပြီးပါပြီ။',
     trash: 'ဖျက်သိမ်းခြင်း',
     trashedCountSuccessfully: 'Berjaya membuang {{count}} {{label}}.',

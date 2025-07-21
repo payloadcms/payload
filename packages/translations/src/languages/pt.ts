@@ -115,6 +115,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     noUser: 'Nenhum Usuário',
     previewing: 'Ocorreu um problema ao visualizar esse documento.',
     problemUploadingFile: 'Ocorreu um problema ao carregar o arquivo.',
+    restoringTitle:
+      'Ocorreu um erro ao restaurar {{title}}. Por favor, verifique sua conexão e tente novamente.',
     tokenInvalidOrExpired: 'Token expirado ou inválido.',
     tokenNotProvided: 'Token não fornecido.',
     unableToCopy: 'Não é possível copiar.',
@@ -214,6 +216,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Você está prestes a deletar {{count}} {{label}}',
     aboutToDeleteCount_one: 'Você está prestes a deletar {{count}} {{label}}',
     aboutToDeleteCount_other: 'Você está prestes a deletar {{count}} {{label}}',
+    aboutToRestore:
+      'Está prestes a restaurar o {{label}} <1>{{title}}</1> como um rascunho. Tem certeza?',
     aboutToRestoreCount: 'Você está prestes a restaurar {{count}} {{label}}',
     aboutToTrash:
       'Você está prestes a mover o {{label}} <1>{{title}}</1> para a lixeira. Tem certeza?',
@@ -272,6 +276,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     dark: 'Escuro',
     dashboard: 'Painel de Controle',
     delete: 'Excluir',
+    deleted: 'Excluído',
     deletedAt: 'Excluído Em',
     deletedCountSuccessfully: 'Excluído {{count}} {{label}} com sucesso.',
     deletedSuccessfully: 'Apagado com sucesso.',
@@ -371,6 +376,7 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Isso redefinirá todas as suas preferências para as configurações padrão.',
     resettingPreferences: 'Redefinindo preferências.',
     restore: 'Restaurar',
+    restoreAsPublished: 'Restaurar como versão publicada',
     restoredCountSuccessfully: 'Restaurado {{count}} {{label}} com sucesso.',
     restoring:
       'Respeite o significado do texto original dentro do contexto do Payload. Aqui está uma lista de termos comuns do Payload que possuem significados muito específicos:\n    - Collection: Uma coleção é um grupo de documentos que compartilham uma estrutura e propósito comuns. As coleções são usadas para organizar e gerenciar conteúdo no Payload.\n    - Field: Um campo é uma peça específica de dados dentro de um documento em uma coleção. Os campos definem a estrutura e o tipo de dados que podem ser armazenados em um documento.\n    - Document: Um documento é um registro individual dentro de uma coleção. Ele contém dados estruturados de acordo',
@@ -404,6 +410,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     time: 'Tempo',
     timezone: 'Fuso horário',
     titleDeleted: '{{label}} {{title}} excluído com sucesso.',
+    titleRestored: '{{label}} "{{title}}" restaurado com sucesso.',
     titleTrashed: '{{label}} "{{title}}" excluído com sucesso.',
     trash: 'Lixo',
     trashedCountSuccessfully: 'Descartados {{count}} {{label}} com sucesso.',

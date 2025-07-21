@@ -114,6 +114,8 @@ export const koTranslations: DefaultTranslationsObject = {
     noUser: '사용자가 없습니다.',
     previewing: '이 문서를 미리보는 중에 문제가 발생했습니다.',
     problemUploadingFile: '파일 업로드 중에 문제가 발생했습니다.',
+    restoringTitle:
+      '{{title}} 복원 중 오류가 발생했습니다. 연결 상태를 확인하고 다시 시도해 주세요.',
     tokenInvalidOrExpired: '토큰이 유효하지 않거나 만료되었습니다.',
     tokenNotProvided: '토큰이 제공되지 않았습니다.',
     unableToCopy: '복사할 수 없습니다.',
@@ -212,6 +214,8 @@ export const koTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: '{{label}}를 {{count}}개 삭제하려고 합니다.',
     aboutToDeleteCount_one: '{{label}}를 {{count}}개 삭제하려고 합니다.',
     aboutToDeleteCount_other: '{{label}}를 {{count}}개 삭제하려고 합니다.',
+    aboutToRestore:
+      '당신은 {{label}} <1>{{title}}</1>을(를) 초안으로 복원하려고 합니다. 확실하십니까?',
     aboutToRestoreCount: '당신은 곧 {{count}} {{label}}를 복원하려 하고 있습니다.',
     aboutToTrash: '{{label}} <1>{{title}}</1>을 휴지통으로 이동하려고 합니다. 확실합니까?',
     aboutToTrashCount: '당신은 곧 {{count}} {{label}}을(를) 휴지통으로 이동하려고 합니다.',
@@ -267,6 +271,7 @@ export const koTranslations: DefaultTranslationsObject = {
     dark: '다크',
     dashboard: '대시보드',
     delete: '삭제',
+    deleted: '삭제됨',
     deletedAt: '삭제된 시간',
     deletedCountSuccessfully: '{{count}}개의 {{label}}를 삭제했습니다.',
     deletedSuccessfully: '삭제되었습니다.',
@@ -365,6 +370,7 @@ export const koTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription: '이렇게 하면 모든 기본 설정이 기본값으로 재설정됩니다.',
     resettingPreferences: '기본 설정을 재설정하는 중.',
     restore: '복원',
+    restoreAsPublished: '게시된 버전으로 복원하다',
     restoredCountSuccessfully: '성공적으로 {{count}} {{label}}를 복원했습니다.',
     restoring:
       '원래 텍스트의 의미를 Payload 문맥 내에서 존중하십시오. 여기에는 매우 특정한 의미를 가진 일반 Payload 용어 목록이 있습니다:\n    - Collection: 컬렉션은 공통 구조와 목적을 공유하는 문서의 그룹입니다. 컬렉션은 Payload에서 컨텐츠를 구성하고 관리하는 데 사용됩니다.\n    - Field: 필드는 컬렉션 내의 문서에 있는 특정 데이터 조각입니다.',
@@ -398,6 +404,7 @@ export const koTranslations: DefaultTranslationsObject = {
     time: '시간',
     timezone: '시간대',
     titleDeleted: '{{label}} "{{title}}"을(를) 삭제했습니다.',
+    titleRestored: '"{{label}}" "{{title}}"이(가) 성공적으로 복원되었습니다.',
     titleTrashed: '"{{label}} "{{title}}"이(가) 성공적으로 휴지통으로 이동되었습니다.',
     trash: '휴지통',
     trashedCountSuccessfully: '성공적으로 {{count}} {{label}}을(를) 휴지통에 넣었습니다.',

@@ -113,6 +113,8 @@ export const daTranslations: DefaultTranslationsObject = {
     noUser: 'Ingen bruger',
     previewing: 'Der opstod et problem med at vise dokumentet.',
     problemUploadingFile: 'Der opstod et problem under uploadingen af filen.',
+    restoringTitle:
+      'Der opstod en fejl under genoprettelsen af {{title}}. Kontroller venligst din forbindelse og prøv igen.',
     tokenInvalidOrExpired: 'Token er enten ugyldig eller udløbet.',
     tokenNotProvided: 'Token ikke angivet.',
     unableToCopy: 'Kan ikke kopiere.',
@@ -212,6 +214,7 @@ export const daTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Du er ved at slette {{count}} {{label}}',
     aboutToDeleteCount_one: 'Du er ved at slette {{count}} {{label}}',
     aboutToDeleteCount_other: 'Du er ved at slette {{count}} {{label}}',
+    aboutToRestore: 'Du er ved at gendanne {{label}} <1>{{title}}</1> som et udkast. Er du sikker?',
     aboutToRestoreCount: 'Du er ved at gendanne {{count}} {{label}}',
     aboutToTrash:
       'Du er ved at flytte {{label}} <1>{{title}}</1> til skraldespanden. Er du sikker?',
@@ -269,6 +272,7 @@ export const daTranslations: DefaultTranslationsObject = {
     dark: 'Mørk',
     dashboard: 'Dashboard',
     delete: 'Slet',
+    deleted: 'Slettet',
     deletedAt: 'Slettet Ved',
     deletedCountSuccessfully: 'Slettet {{count}} {{label}}.',
     deletedSuccessfully: 'Slettet.',
@@ -368,6 +372,7 @@ export const daTranslations: DefaultTranslationsObject = {
       'Dette vil nulstille alle dine præferencer til standardindstillingerne.',
     resettingPreferences: 'Nulstiller præferencer.',
     restore: 'Gendan',
+    restoreAsPublished: 'Gendan som udgivet version',
     restoredCountSuccessfully: 'Gendannede {{count}} {{label}} succesfuldt.',
     restoring:
       'Respekter betydningen af den originale tekst inden for konteksten Payload. Her er en liste over almindelige Payload-udtryk, der bærer meget specifikke betydninger:\n    - Samling: En samling er en gruppe af dokumenter, der deler en fælles struktur og formål. Samlinger anvendes til at organisere og administrere indhold i Payload.\n    - Felt: Et felt er et specifikt stykke data i et dokument i en samling. Felter definerer struktur og type af data, der kan gemmes i et dokument.\n    - Dokument: Et dokument er en individuel post inden for',
@@ -401,6 +406,7 @@ export const daTranslations: DefaultTranslationsObject = {
     time: 'Tid',
     timezone: 'Tidszone',
     titleDeleted: '{{label}} "{{title}}" slettet.',
+    titleRestored: '{{label}} "{{title}}" succesfuldt genoprettet.',
     titleTrashed: '{{label}} "{{title}}" er succesfuldt slettet.',
     trash: 'Affald',
     trashedCountSuccessfully: 'Slettet {{count}} {{label}} med succes.',

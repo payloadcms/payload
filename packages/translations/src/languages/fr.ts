@@ -117,6 +117,8 @@ export const frTranslations: DefaultTranslationsObject = {
     noUser: 'Aucun utilisateur',
     previewing: 'Un problème est survenu lors de l’aperçu de ce document.',
     problemUploadingFile: 'Il y a eu un problème lors du téléversement du fichier.',
+    restoringTitle:
+      'Il y a eu une erreur lors de la restauration de {{title}}. Veuillez vérifier votre connexion et réessayer.',
     tokenInvalidOrExpired: 'Le jeton n’est soit pas valide ou a expiré.',
     tokenNotProvided: 'Jeton non fourni.',
     unableToCopy: 'Impossible de copier.',
@@ -221,6 +223,8 @@ export const frTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Vous êtes sur le point de supprimer {{count}} {{label}}',
     aboutToDeleteCount_one: 'Vous êtes sur le point de supprimer {{count}} {{label}}',
     aboutToDeleteCount_other: 'Vous êtes sur le point de supprimer {{count}} {{label}}',
+    aboutToRestore:
+      'Vous êtes sur le point de restaurer le {{label}} <1>{{title}}</1> en tant que brouillon. Êtes-vous sûr ?',
     aboutToRestoreCount: 'Vous êtes sur le point de restaurer {{count}} {{label}}',
     aboutToTrash:
       'Vous êtes sur le point de déplacer le {{label}} <1>{{title}}</1> dans la corbeille. Êtes-vous sûr ?',
@@ -279,6 +283,7 @@ export const frTranslations: DefaultTranslationsObject = {
     dark: 'Sombre',
     dashboard: 'Tableau de bord',
     delete: 'Supprimer',
+    deleted: 'Supprimé',
     deletedAt: 'Supprimé à',
     deletedCountSuccessfully: '{{count}} {{label}} supprimé avec succès.',
     deletedSuccessfully: 'Supprimé(e) avec succès.',
@@ -378,6 +383,7 @@ export const frTranslations: DefaultTranslationsObject = {
       'Cela réinitialisera toutes vos préférences aux paramètres par défaut.',
     resettingPreferences: 'Réinitialisation des préférences.',
     restore: 'Restaurer',
+    restoreAsPublished: 'Restaurer en tant que version publiée',
     restoredCountSuccessfully: '{{count}} {{label}} restauré avec succès.',
     restoring: 'Restauration...',
     row: 'Ligne',
@@ -410,6 +416,7 @@ export const frTranslations: DefaultTranslationsObject = {
     time: 'Temps',
     timezone: 'Fuseau horaire',
     titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
+    titleRestored: '{{label}} "{{title}}" restauré avec succès.',
     titleTrashed: '{{label}} "{{title}}" a été mis à la poubelle avec succès.',
     trash: 'Corbeille',
     trashedCountSuccessfully: '{{count}} {{label}} supprimé avec succès.',

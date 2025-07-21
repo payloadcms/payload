@@ -114,6 +114,8 @@ export const azTranslations: DefaultTranslationsObject = {
     noUser: 'İstifadəçi Yoxdur',
     previewing: 'Bu sənədin ön baxışı zamanı problem yarandı.',
     problemUploadingFile: 'Faylın yüklənməsi zamanı problem yarandı.',
+    restoringTitle:
+      '{{title}} bərpa olunarkən xəta baş verdi. Zəhmət olmasa, internet bağlantınızı yoxlayın və yenidən cəhd edin.',
     tokenInvalidOrExpired: 'Token ya yanlışdır və ya müddəti bitib.',
     tokenNotProvided: 'Token təqdim edilməyib.',
     unableToCopy: 'Kopyalama mümkün deyil.',
@@ -213,6 +215,8 @@ export const azTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Siz {{count}} {{label}} silməyə hazırsınız.',
     aboutToDeleteCount_one: 'Siz {{count}} {{label}} silməyə hazırsınız.',
     aboutToDeleteCount_other: 'Siz {{count}} {{label}} silməyə hazırsınız.',
+    aboutToRestore:
+      'Siz {{label}} <1>{{title}}</1>ni qaralaması kimi bərpa etməkləsiniz. Eminsinizmi?',
     aboutToRestoreCount: 'Siz {{count}} {{label}} bərpası etməyə hazırsınız.',
     aboutToTrash:
       'Siz {{label}} <1>{{title}}</1> elementini zibilliyə köçürmək barədəsiniz. Eminsiniz?',
@@ -271,6 +275,7 @@ export const azTranslations: DefaultTranslationsObject = {
     dark: 'Tünd',
     dashboard: 'Panel',
     delete: 'Sil',
+    deleted: 'Silinmiş',
     deletedAt: 'Silinib Tarixi',
     deletedCountSuccessfully: '{{count}} {{label}} uğurla silindi.',
     deletedSuccessfully: 'Uğurla silindi.',
@@ -369,6 +374,7 @@ export const azTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription: 'Bu, bütün parametrlərinizi standart vəziyyətlərinə sıfırlayacaq.',
     resettingPreferences: 'Təhlükəsizlik parametrləri sıfırlanır.',
     restore: 'Bərpa et',
+    restoreAsPublished: 'Nəşr edilmiş versiya kimi bərpa et',
     restoredCountSuccessfully: '{{count}} {{label}} uğurla bərpa edildi.',
     restoring:
       'Orijinal mətnin mənasını Payload kontekstində qoruyun. Ən əhəmiyyətli Payload ifadələrinin siyahısı aşağıdakı kimi dir:\n\n    - Collection: "Collection" bir sıra sənədlərin əməkdaş olduğu, ortaq struktur və məqsədi olan bir qrupdur. "Collections", Payload-də məzmunu təşkil etmək və idarə etmək üçün istifadə edilir.\n    - Field: "Field", kolle',
@@ -402,6 +408,7 @@ export const azTranslations: DefaultTranslationsObject = {
     time: 'Vaxt',
     timezone: 'Saat qurşağı',
     titleDeleted: '{{label}} "{{title}}" uğurla silindi.',
+    titleRestored: '"{{title}}" "{{label}}" uğurla bərpa edildi.',
     titleTrashed: '"{{label}}" "{{title}}" uğurla zibil qutusuna atıldı.',
     trash: 'Zibil',
     trashedCountSuccessfully: '{{count}} {{label}} uğurla zibilə yollandı.',

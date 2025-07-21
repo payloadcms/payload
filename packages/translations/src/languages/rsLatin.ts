@@ -115,6 +115,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     noUser: 'Nema korisnika',
     previewing: 'Postoji problem pri pregledu ovog dokumenta.',
     problemUploadingFile: 'Postoji problem pri učitavanju datoteke.',
+    restoringTitle:
+      'Došlo je do greške prilikom vraćanja {{title}}. Molimo vas da proverite svoju vezu i pokušate ponovo.',
     tokenInvalidOrExpired: 'Token je nevalidan ili je istekao.',
     tokenNotProvided: 'Token nije obezbeđen.',
     unableToCopy: 'Kopiranje nije moguće.',
@@ -215,6 +217,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Izbrisaćete {{count}} {{label}}',
     aboutToDeleteCount_one: 'Izbrisaćete {{count}} {{label}}',
     aboutToDeleteCount_other: 'Izbrisaćete {{count}} {{label}}',
+    aboutToRestore:
+      'Na korak ste da vratite {{label}} <1>{{title}}</1> kao nacrt. Da li ste sigurni?',
     aboutToRestoreCount: 'Uskoro ćete vratiti {{count}} {{label}}',
     aboutToTrash:
       'Na korak ste da premestite {{label}} <1>{{title}}</1> u otpad. Da li ste sigurni?',
@@ -272,6 +276,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     dark: 'Tamno',
     dashboard: 'Kontrolni panel',
     delete: 'Obriši',
+    deleted: 'Obrisano',
     deletedAt: 'Obrisano U',
     deletedCountSuccessfully: 'Uspešno izbrisano {{count}} {{label}}.',
     deletedSuccessfully: 'Uspešno izbrisano.',
@@ -371,6 +376,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Ovo će poništiti sva vaša podešavanja na podrazumevane vrednosti.',
     resettingPreferences: 'Poništavanje podešavanja.',
     restore: 'Vrati',
+    restoreAsPublished: 'Vrati kao objavljenu verziju',
     restoredCountSuccessfully: 'Uspešno obnovljeno {{count}} {{label}}.',
     restoring: 'Vraćanje na prethodno stanje...',
     row: 'Red',
@@ -403,6 +409,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     time: 'Vreme',
     timezone: 'Vremenska zona',
     titleDeleted: '{{label}} "{{title}}" uspešno obrisano.',
+    titleRestored: 'Oznaka "{{title}}" uspešno obnovljena.',
     titleTrashed: 'Oznaka "{{title}}" uspešno prebačena u otpad.',
     trash: 'Otpad',
     trashedCountSuccessfully: 'Uspešno ste premeštali u otpad {{count}} {{label}}.',

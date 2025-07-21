@@ -276,15 +276,15 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
               ),
               config.folders && collectionConfig.folders && (
                 <Fragment key="list-header-folder-view-buttons">
+                  <DefaultListPill
+                    collectionConfig={collectionConfig}
+                    key="list-header-default-button"
+                    viewType="folders"
+                  />
                   <ByFolderPill
                     collectionConfig={collectionConfig}
                     folderCollectionSlug={folderCollectionSlug}
                     key="list-header-by-folder-button"
-                    viewType="folders"
-                  />
-                  <DefaultListPill
-                    collectionConfig={collectionConfig}
-                    key="list-header-default-button"
                     viewType="folders"
                   />
                 </Fragment>

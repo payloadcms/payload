@@ -114,6 +114,8 @@ export const svTranslations: DefaultTranslationsObject = {
     noUser: 'Ingen Användare',
     previewing: 'Det uppstod ett problem när det här dokumentet skulle förhandsgranskas.',
     problemUploadingFile: 'Det uppstod ett problem när filen laddades upp.',
+    restoringTitle:
+      'Det uppstod ett fel vid återställning av {{title}}. Vänligen kontrollera din anslutning och försök igen.',
     tokenInvalidOrExpired: 'Token är antingen ogiltig eller har löpt ut.',
     tokenNotProvided: 'Token inte tillhandahållet.',
     unableToCopy: 'Kan inte kopiera.',
@@ -213,6 +215,8 @@ export const svTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Du är på väg att ta bort {{count}} {{label}}',
     aboutToDeleteCount_one: 'Du är på väg att ta bort {{count}} {{label}}',
     aboutToDeleteCount_other: 'Du är på väg att ta bort {{count}} {{label}}',
+    aboutToRestore:
+      'Du är på väg att återställa {{label}} <1>{{title}}</1> som ett utkast. Är du säker?',
     aboutToRestoreCount: 'Du är på väg att återställa {{count}} {{label}}',
     aboutToTrash:
       'Du håller på att flytta {{label}} <1>{{title}}</1> till papperskorgen. Är du säker?',
@@ -271,6 +275,7 @@ export const svTranslations: DefaultTranslationsObject = {
     dark: 'Mörkt',
     dashboard: 'Översikt',
     delete: 'Ta bort',
+    deleted: 'Raderad',
     deletedAt: 'Raderad Vid',
     deletedCountSuccessfully: 'Raderade {{count}} {{label}}',
     deletedSuccessfully: 'Borttaget',
@@ -370,6 +375,7 @@ export const svTranslations: DefaultTranslationsObject = {
       'Detta kommer att återställa alla dina preferenser till standardinställningarna.',
     resettingPreferences: 'Återställer preferenser...',
     restore: 'Återställ',
+    restoreAsPublished: 'Återställ som publicerad version',
     restoredCountSuccessfully: 'Återställde {{count}} {{label}} framgångsrikt.',
     restoring:
       'Respektera innebörden av den ursprungliga texten inom kontexten av Payload. Här är en lista över gemensamma Payload-termer som bär väldigt specifika betydelser:\n    - Samling: En samling är en grupp dokument som delar en gemensam struktur och syfte. Samlingar används för att organisera och hantera innehåll i Payload.\n    - Fält: Ett fält är en specifik data inom ett dokument i en samling. Fält definierar strukturen och typen av data som kan lagras i ett dokument.\n    - Dokument: Ett dokument är en',
@@ -403,6 +409,7 @@ export const svTranslations: DefaultTranslationsObject = {
     time: 'Tid',
     timezone: 'Tidszon',
     titleDeleted: '{{label}} "{{title}}" togs bort',
+    titleRestored: '{{label}} "{{title}}" har framgångsrikt återställts.',
     titleTrashed: '{{label}} "{{title}}" framgångsrikt slängt.',
     trash: 'Skräp',
     trashedCountSuccessfully: 'Raderade framgångsrikt {{count}} {{label}}.',

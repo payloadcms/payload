@@ -115,6 +115,8 @@ export const caTranslations: DefaultTranslationsObject = {
     noUser: 'Cap usuari',
     previewing: 'Hi ha hagut un problema en previsualitzar aquest document.',
     problemUploadingFile: "Hi ha hagut un problema mentre es carregava l'arxiu.",
+    restoringTitle:
+      'Hi ha hagut un error en restaurar {{title}}. Si us plau, comproveu la vostra connexió i torneu-ho a provar.',
     tokenInvalidOrExpired: 'El token és invàlid o ha caducat.',
     tokenNotProvided: "No s'ha proporcionat cap token.",
     unableToCopy: 'No es pot copiar.',
@@ -215,6 +217,8 @@ export const caTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Estas apunt de eliminar {{count}} {{label}}',
     aboutToDeleteCount_one: 'Estas apunt de eliminar {{count}} {{label}}',
     aboutToDeleteCount_other: 'Estas apunt de eliminar {{count}} {{label}}',
+    aboutToRestore:
+      "Esteu a punt de restaurar l'{{label}} <1>{{title}}</1> com a esborrany. N'estàs segur?",
     aboutToRestoreCount: 'Esteu a punt de restaurar {{count}} {{label}}',
     aboutToTrash:
       "Estàs a punt de moure l'{{label}} <1>{{title}}</1> a la paperera. N'estàs segur?",
@@ -272,6 +276,7 @@ export const caTranslations: DefaultTranslationsObject = {
     dark: 'Fosc',
     dashboard: 'Tauler',
     delete: 'Eliminar',
+    deleted: 'Eliminat',
     deletedAt: 'Eliminat en',
     deletedCountSuccessfully: 'Eliminat {{count}} {{label}} correctament.',
     deletedSuccessfully: 'Eliminat correntament.',
@@ -371,6 +376,7 @@ export const caTranslations: DefaultTranslationsObject = {
       'Això restablirà totes les teves preferències a les configuracions per defecte.',
     resettingPreferences: 'Restablint les preferències.',
     restore: 'Restaura',
+    restoreAsPublished: 'Restaura com a versió publicada',
     restoredCountSuccessfully: "S'ha restaurat {{count}} {{label}} correctament.",
     restoring: 'Restauració...',
     row: 'Fila',
@@ -403,6 +409,7 @@ export const caTranslations: DefaultTranslationsObject = {
     time: 'Temps',
     timezone: 'Fus horari',
     titleDeleted: '{{label}} "{{title}}" eliminat correctament.',
+    titleRestored: '{{label}} "{{title}}" s\'ha restaurat correctament.',
     titleTrashed: '{{label}} "{{title}}" s\'ha enviat correctament a la paperera.',
     trash: 'Brossa',
     trashedCountSuccessfully: "S'ha eliminat amb èxit {{count}} {{label}}.",

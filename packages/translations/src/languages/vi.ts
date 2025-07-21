@@ -114,6 +114,8 @@ export const viTranslations: DefaultTranslationsObject = {
     noUser: 'Lỗi - Request thiếu thông tin người dùng.',
     previewing: 'Lỗi - Đã xảy ra vấn đề khi xem trước bản tài liệu này.',
     problemUploadingFile: 'Lỗi - Đã xảy ra vấn để khi tải lên file sau.',
+    restoringTitle:
+      'Đã xảy ra lỗi trong quá trình khôi phục {{title}}. Vui lòng kiểm tra kết nối của bạn và thử lại.',
     tokenInvalidOrExpired: 'Lỗi - Token không hợp lệ hoặc đã hết hạn.',
     tokenNotProvided: 'Không cung cấp mã thông báo.',
     unableToCopy: 'Không thể sao chép.',
@@ -213,6 +215,8 @@ export const viTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Bạn sắp xóa {{count}} {{label}}',
     aboutToDeleteCount_one: 'Bạn sắp xóa {{count}} {{label}}',
     aboutToDeleteCount_other: 'Bạn sắp xóa {{count}} {{label}}',
+    aboutToRestore:
+      'Bạn đang chuẩn bị khôi phục {{label}} <1>{{title}}</1> dưới dạng bản nháp. Bạn có chắc không?',
     aboutToRestoreCount: 'Bạn sắp khôi phục {{count}} {{label}}',
     aboutToTrash:
       'Bạn đang chuẩn bị di chuyển {{label}} <1>{{title}}</1> vào thùng rác. Bạn có chắc không?',
@@ -270,6 +274,7 @@ export const viTranslations: DefaultTranslationsObject = {
     dark: 'Nền tối',
     dashboard: 'Bảng điều khiển',
     delete: 'Xóa',
+    deleted: 'Đã xóa',
     deletedAt: 'Đã Xóa Lúc',
     deletedCountSuccessfully: 'Đã xóa thành công {{count}} {{label}}.',
     deletedSuccessfully: 'Đã xoá thành công.',
@@ -368,6 +373,7 @@ export const viTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription: 'Điều này sẽ đặt lại tất cả sở thích của bạn về cài đặt mặc định.',
     resettingPreferences: 'Đang đặt lại sở thích.',
     restore: 'Khôi phục',
+    restoreAsPublished: 'Khôi phục thành phiên bản đã xuất bản',
     restoredCountSuccessfully: 'Đã khôi phục {{count}} {{label}} thành công.',
     restoring:
       'Tôn trọng ý nghĩa của văn bản gốc trong bối cảnh của Payload. Dưới đây là danh sách các thuật ngữ Payload thông thường mang ý nghĩa rất cụ thể:\n- Collection: Collection (tạm dịch: Bộ sưu tập) là một nhóm các tài liệu chia sẻ cấu trúc và mục đích chung. Các Collection được sử dụng để tổ chức và quản lý nội dung trong Payload.\n- Field: Field là một phần cụ th',
@@ -401,6 +407,7 @@ export const viTranslations: DefaultTranslationsObject = {
     time: 'Thời gian',
     timezone: 'Múi giờ',
     titleDeleted: '{{label}} {{title}} đã được xóa thành công.',
+    titleRestored: '{{label}} "{{title}}" được khôi phục thành công.',
     titleTrashed: '{{label}} "{{title}}" đã được chuyển vào thùng rác thành công.',
     trash: 'Rác',
     trashedCountSuccessfully: 'Đã xóa thành công {{count}} {{label}}.',

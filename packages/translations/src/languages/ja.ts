@@ -115,6 +115,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     noUser: 'ユーザーなし',
     previewing: 'このデータをプレビューする際に問題が発生しました。',
     problemUploadingFile: 'ファイルのアップロード中に問題が発生しました。',
+    restoringTitle:
+      '{{title}}の復元中にエラーが発生しました。接続を確認して、もう一度お試しください。',
     tokenInvalidOrExpired: 'トークンが無効、または、有効期限が切れています。',
     tokenNotProvided: 'トークンが提供されていません。',
     unableToCopy: 'コピーできません。',
@@ -215,6 +217,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: '{{label}}を{{count}}つ削除しようとしています',
     aboutToDeleteCount_one: '{{label}}を{{count}}つ削除しようとしています',
     aboutToDeleteCount_other: '{{label}}を{{count}}つ削除しようとしています',
+    aboutToRestore:
+      'あなたは{{label}} <1>{{title}}</1>をドラフトとして復元しようとしています。よろしいですか？',
     aboutToRestoreCount: '{{count}} {{label}}を復元しようとしています',
     aboutToTrash:
       'あなたは{{label}} <1>{{title}}</1>をゴミ箱に移動しようとしています。よろしいですか？',
@@ -272,6 +276,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     dark: 'ダークモード',
     dashboard: 'ダッシュボード',
     delete: '削除',
+    deleted: '削除されました',
     deletedAt: '削除された時間',
     deletedCountSuccessfully: '{{count}}つの{{label}}を正常に削除しました。',
     deletedSuccessfully: '正常に削除されました。',
@@ -370,6 +375,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription: 'これにより、すべての設定がデフォルト設定にリセットされます。',
     resettingPreferences: '設定をリセットしています。',
     restore: '復元',
+    restoreAsPublished: '公開バージョンとして復元する',
     restoredCountSuccessfully: '{{count}} {{label}} の復元に成功しました。',
     restoring:
       '以下はPayloadの文脈での原文の意味を尊重してください。以下に、特定の意味を持つ一般的なPayload用語のリストを示します。\n    - コレクション: コレクションは、共通の構造と目的を共有する文書のグループです。コレクションは、Payload内のコンテンツを整理および管理するために使用されます。\n    - フィールド: フィールドは、コレクション内の文',
@@ -403,6 +409,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     time: '時間',
     timezone: 'タイムゾーン',
     titleDeleted: '{{label}} "{{title}}" が削除されました。',
+    titleRestored: '「{{label}}」"{{title}}" が正常に復元されました。',
     titleTrashed: '「{{title}}」の「{{label}}」が正常に削除されました。',
     trash: 'ゴミ',
     trashedCountSuccessfully: '{{count}} の{{label}}を正常に削除しました。',

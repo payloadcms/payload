@@ -116,6 +116,8 @@ export const huTranslations: DefaultTranslationsObject = {
     noUser: 'Nincs felhasználó',
     previewing: 'Hiba történt a dokumentum előnézetének megtekintése közben.',
     problemUploadingFile: 'Hiba történt a fájl feltöltése közben.',
+    restoringTitle:
+      'Hiba történt a {{title}} visszaállítása közben. Kérjük, ellenőrizze az internetkapcsolatát, és próbálkozzon újra.',
     tokenInvalidOrExpired: 'A token érvénytelen vagy lejárt.',
     tokenNotProvided: 'Token nem biztosított.',
     unableToCopy: 'Másolás nem lehetséges.',
@@ -216,6 +218,8 @@ export const huTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Törölni készül {{count}} {{label}}',
     aboutToDeleteCount_one: 'Törölni készül {{count}} {{label}}',
     aboutToDeleteCount_other: 'Törölni készül {{count}} {{label}}',
+    aboutToRestore:
+      'Készül visszaállítani a {{label}} <1>{{title}}</1> -t vázlatként. Biztos benne?',
     aboutToRestoreCount: 'Ön {{count}} {{label}} helyreállítására készül.',
     aboutToTrash:
       'Ön azon van, hogy a következőt: {{label}} <1>{{title}}</1> áthelyezze a szemetesbe. Biztos benne?',
@@ -274,6 +278,7 @@ export const huTranslations: DefaultTranslationsObject = {
     dark: 'Sötét',
     dashboard: 'Irányítópult',
     delete: 'Törlés',
+    deleted: 'Törölt',
     deletedAt: 'Törölve Ekkor',
     deletedCountSuccessfully: '{{count}} {{label}} sikeresen törölve.',
     deletedSuccessfully: 'Sikeresen törölve.',
@@ -372,6 +377,7 @@ export const huTranslations: DefaultTranslationsObject = {
       'Ez visszaállítja az összes beállítást az alapértelmezett értékekre.',
     resettingPreferences: 'Beállítások visszaállítása.',
     restore: 'Visszaállítás',
+    restoreAsPublished: 'Állítsa vissza közzétett változatként',
     restoredCountSuccessfully: 'Sikeresen visszaállított {{count}} {{label}}.',
     restoring:
       'Tartsa tiszteletben az eredeti szöveg jelentését a Payload kontextusában. Íme egy lista a Payloadban gyakran használt kifejezésekről, amelyek rendkívül specifikus jelentéssel bírnak:\n    - Gyűjtemény: A gyűjtemény egy olyan dokumentumcsoport, amelyek közös struktúrával és céllal rendelkeznek. A gyűjteményeket a tartalom szervezésére és kezelésére használjuk a Payloadban.\n    - Mező',
@@ -405,6 +411,7 @@ export const huTranslations: DefaultTranslationsObject = {
     time: 'Idő',
     timezone: 'Időzóna',
     titleDeleted: '{{label}} "{{title}}" sikeresen törölve.',
+    titleRestored: '"{{label}}" "{{title}}" sikeresen visszaállítva.',
     titleTrashed: '{{label}} "{{title}}" sikeresen a szemétbe került.',
     trash: 'Szemét',
     trashedCountSuccessfully: 'Sikeresen kukába dobott {{count}} {{label}}.',

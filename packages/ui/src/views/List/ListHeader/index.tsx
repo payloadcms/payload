@@ -116,18 +116,18 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             viewType={viewType}
           />
         ),
+        ((collectionConfig.folders && config.folders) || isTrashEnabled) && (
+          <DefaultListPill
+            collectionConfig={collectionConfig}
+            key="list-header-default-button"
+            viewType={viewType}
+          />
+        ),
         collectionConfig.folders && config.folders && (
           <ByFolderPill
             collectionConfig={collectionConfig}
             folderCollectionSlug={config.folders.slug}
             key="list-header-by-folder-button"
-            viewType={viewType}
-          />
-        ),
-        ((collectionConfig.folders && config.folders) || isTrashEnabled) && (
-          <DefaultListPill
-            collectionConfig={collectionConfig}
-            key="list-header-default-button"
             viewType={viewType}
           />
         ),

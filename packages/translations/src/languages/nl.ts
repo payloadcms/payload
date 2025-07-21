@@ -115,6 +115,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     noUser: 'Geen gebruiker',
     previewing: 'Er was een probleem met het voorvertonen van dit document.',
     problemUploadingFile: 'Er was een probleem bij het uploaden van het bestand.',
+    restoringTitle:
+      'Er is een fout opgetreden bij het herstellen van {{title}}. Controleer uw verbinding en probeer het opnieuw.',
     tokenInvalidOrExpired: 'Token is ongeldig of verlopen.',
     tokenNotProvided: 'Token niet verstrekt.',
     unableToCopy: 'Kan niet kopiëren.',
@@ -217,6 +219,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Je staat op het punt {{count}} {{label}} te verwijderen',
     aboutToDeleteCount_one: 'Je staat op het punt {{count}} {{label}} te verwijderen',
     aboutToDeleteCount_other: 'Je staat op het punt {{count}} {{label}} te verwijderen',
+    aboutToRestore:
+      'U staat op het punt om het {{label}} <1>{{title}}</1> te herstellen als een concept. Weet u het zeker?',
     aboutToRestoreCount: 'U staat op het punt om {{count}} {{label}} te herstellen',
     aboutToTrash:
       'U staat op het punt om het {{label}} <1>{{title}}</1> naar de prullenbak te verplaatsen. Weet u het zeker?',
@@ -276,6 +280,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     dark: 'Donker',
     dashboard: 'Dashboard',
     delete: 'Verwijderen',
+    deleted: 'Verwijderd',
     deletedAt: 'Verwijderd Op',
     deletedCountSuccessfully: '{{count}} {{label}} succesvol verwijderd.',
     deletedSuccessfully: 'Succesvol verwijderd.',
@@ -375,6 +380,7 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Dit zal al je voorkeuren terugzetten naar de standaardinstellingen.',
     resettingPreferences: 'Voorkeuren worden gereset.',
     restore: 'Herstellen',
+    restoreAsPublished: 'Herstellen als gepubliceerde versie',
     restoredCountSuccessfully: '{{count}} {{label}} succesvol hersteld.',
     restoring:
       'Respecteer de betekenis van de originele tekst in de context van Payload. Hier volgt een lijst van veelvoorkomende Payload-termen die zeer specifieke betekenissen hebben:\n    - Collectie: Een collectie is een groep documenten die een gemeenschappelijke structuur en doel delen. Collecties worden gebruikt om content in Payload te organiseren en beheren.\n    - Veld: Een veld is een specifiek stuk data binnen een document in een collectie. Velden bepalen de structuur en het type data dat in een document kan worden opgeslagen.\n    - Document: Een document is een individueel record binnen',
@@ -408,6 +414,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     time: 'Tijd',
     timezone: 'Tijdzone',
     titleDeleted: '{{label}} "{{title}}" succesvol verwijderd.',
+    titleRestored: '{{label}} "{{title}}" succesvol hersteld.',
     titleTrashed: '{{label}} "{{title}}" succesvol naar de prullenbak verplaatst.',
     trash: 'Prullenbak',
     trashedCountSuccessfully: '{{count}} {{label}} succesvol verwijderd.',

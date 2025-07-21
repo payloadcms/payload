@@ -114,6 +114,8 @@ export const slTranslations: DefaultTranslationsObject = {
     noUser: 'Ni uporabnika',
     previewing: 'Pri predogledu tega dokumenta je prišlo do težave.',
     problemUploadingFile: 'Pri nalaganju datoteke je prišlo do težave.',
+    restoringTitle:
+      'Pri obnavljanju {{title}} je prišlo do napake. Prosimo, preverite svojo povezavo in poskusite znova.',
     tokenInvalidOrExpired: 'Žeton je neveljaven ali je potekel.',
     tokenNotProvided: 'Žeton ni bil posredovan.',
     unableToCopy: 'Kopiranje ni mogoče.',
@@ -214,6 +216,8 @@ export const slTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Izbrisali boste {{count}} {{label}}',
     aboutToDeleteCount_one: 'Izbrisali boste {{count}} {{label}}',
     aboutToDeleteCount_other: 'Izbrisali boste {{count}} {{label}}',
+    aboutToRestore:
+      'Pravkar boste obnovili {{label}} <1>{{title}}</1> kot osnutek. Ste prepričani?',
     aboutToRestoreCount: 'Pravkar boste obnovili {{count}} {{label}}',
     aboutToTrash: 'Pravkar boste premaknili {{label}} <1>{{title}}</1> v smeti. Ste prepričani?',
     aboutToTrashCount: 'Pravkar boste premaknili {{count}} {{label}} v smeti.',
@@ -270,6 +274,7 @@ export const slTranslations: DefaultTranslationsObject = {
     dark: 'Temno',
     dashboard: 'Nadzorna plošča',
     delete: 'Izbriši',
+    deleted: 'Izbrisano',
     deletedAt: 'Izbrisano ob',
     deletedCountSuccessfully: 'Uspešno izbrisano {{count}} {{label}}.',
     deletedSuccessfully: 'Uspešno izbrisano.',
@@ -368,6 +373,7 @@ export const slTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription: 'To bo ponastavilo vse vaše nastavitve na privzete vrednosti.',
     resettingPreferences: 'Ponastavitev nastavitve.',
     restore: 'Obnovi',
+    restoreAsPublished: 'Obnovi kot objavljeno različico',
     restoredCountSuccessfully: 'Uspešno obnovljeno {{count}} {{label}}.',
     restoring:
       'Spoštujte pomen izvirnega besedila znotraj konteksta Payload. Tu je seznam pogostih izrazov Payload, ki imajo zelo specifične pomene:\n    - Zbirka: Zbirka je skupina dokumentov, ki delijo skupno strukturo in namen. Zbirke se uporabljajo za organizacijo in upravljanje vsebine v Payload.\n    - Polje: Polje je določen del podatkov znotraj dokumenta v zbirki. Polja opredeljujejo strukturo in vrsto podatkov, ki jih je mogoče sh',
@@ -401,6 +407,7 @@ export const slTranslations: DefaultTranslationsObject = {
     time: 'Čas',
     timezone: 'Časovni pas',
     titleDeleted: '{{label}} "{{title}}" uspešno izbrisan.',
+    titleRestored: 'Oznaka "{{title}}" je bila uspešno obnovljena.',
     titleTrashed: '{{label}} "{{title}}" uspešno premaknjeno v smetnjak.',
     trash: 'Smeti',
     trashedCountSuccessfully: '{{count}} {{label}} uspešno premaknjeno v koš.',

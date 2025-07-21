@@ -114,6 +114,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     noUser: 'Օգտատեր չկա',
     previewing: 'Այս փաստաթուղթը նախադիտելու ժամանակ խնդիր է առաջացել։',
     problemUploadingFile: 'Ֆայլը վերբեռնելու ժամանակ խնդիր է առաջացել։',
+    restoringTitle:
+      'Սխալ է տեղի ունեցել {{title}}-ի վերականգնելիս: Խնդրում ենք ստուգել ձեր կապը և կրկին փորձել:',
     tokenInvalidOrExpired: 'Թոքենն անվավեր է կամ ժամկետանց։',
     tokenNotProvided: 'Թոքենը տրամադրված չէ։',
     unableToCopy: 'Չհաջողվեց պատճենել։',
@@ -214,6 +216,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Դուք պատրաստվում եք ջնջել {{count}} {{label}}',
     aboutToDeleteCount_one: 'Դուք պատրաստվում եք ջնջել {{count}} {{label}}',
     aboutToDeleteCount_other: 'Դուք պատրաստվում եք ջնջել {{count}} {{label}}',
+    aboutToRestore:
+      'Դուք պատրաստ եք վերականգնել {{label}} <1>{{title}}</1>-ը որպես սևագիր: Համոզված եք:',
     aboutToRestoreCount: 'Դուք պատրաստ եք վերականգնել {{count}} {{label}}',
     aboutToTrash: 'Դուք պատրաստ եք տեղափոխել {{label}} <1>{{title}}</1>-ը աղբականջը։ Վստահ եք։',
     aboutToTrashCount: 'Դուք պատրաստ եք տեղափոխել {{count}} {{label}} աղբամանը',
@@ -271,6 +275,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     dark: 'Մուգ',
     dashboard: 'Վահանակ',
     delete: 'Ջնջել',
+    deleted: 'Ջնջված',
     deletedAt: 'Ջնջված է',
     deletedCountSuccessfully: '{{count}} {{label}} հաջողությամբ ջնջված է։',
     deletedSuccessfully: 'Հաջողությամբ ջնջված է։',
@@ -370,6 +375,7 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Սա կվերակայի Ձեր բոլոր նախընտրությունները դեպի լռելյայն կարգավորումներ։',
     resettingPreferences: 'Նախընտրությունները վերակայվում են',
     restore: 'Վերականգնել',
+    restoreAsPublished: 'Վերականգնել որպես հրատարակված տարբերակ',
     restoredCountSuccessfully: '{{count}} {{label}} հաջողությամբ վերականգնվեց:',
     restoring:
       'Payload-i original teksti mijocov achqers, nran avelacnum e urish Payload nshanakutyunner, oronq kangnvec en specifik texer:\n\n- Zuygh: Zuygh e ayd dokumnerneri jmum, oronq kanen arden mek ban u zoracnum en Payload-i nersum u bavararum.\n- Dasht: Dasht e ayd zuyghi bnutyun dokumneri mej. Dashter pahpanum en bnutyunneri banakanutyuny u texy, ete oronq sa patrastvi dokumentnerum.\n- Dokument: Dokument e mi',
@@ -403,6 +409,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     time: 'Ժամ',
     timezone: 'Ժամային գոտի',
     titleDeleted: '{{label}} "{{title}}" հաջողությամբ ջնջվել է։',
+    titleRestored: '"{{label}}" "{{title}}" հաջողությամբ վերականգնվել է։',
     titleTrashed: '"{{label}} "{{title}}" հաջողությամբ թափվել է։',
     trash: 'աղբ',
     trashedCountSuccessfully: '{{count}} {{label}} հաջողությամբ թափափվել է:',

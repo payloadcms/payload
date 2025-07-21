@@ -114,6 +114,8 @@ export const esTranslations: DefaultTranslationsObject = {
     noUser: 'Sin usuario',
     previewing: 'Ocurrió un problema al previsualizar este documento.',
     problemUploadingFile: 'Ocurrió un problema al subir el archivo.',
+    restoringTitle:
+      'Hubo un error al restaurar {{title}}. Por favor, verifique su conexión e intente nuevamente.',
     tokenInvalidOrExpired: 'El token es inválido o ya expiró.',
     tokenNotProvided: 'Token no proporcionado.',
     unableToCopy: 'No se puede copiar.',
@@ -218,6 +220,8 @@ export const esTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Estás a punto de eliminar {{count}} {{label}}',
     aboutToDeleteCount_one: 'Estás a punto de eliminar {{count}} {{label}}',
     aboutToDeleteCount_other: 'Estás a punto de eliminar {{count}} {{label}}',
+    aboutToRestore:
+      'Estás a punto de restaurar la {{label}} <1>{{title}}</1> como un borrador. ¿Estás seguro?',
     aboutToRestoreCount: 'Está a punto de restaurar {{count}} {{label}}',
     aboutToTrash:
       'Estás a punto de mover la {{label}} <1>{{title}}</1> a la papelera. ¿Estás seguro?',
@@ -276,6 +280,7 @@ export const esTranslations: DefaultTranslationsObject = {
     dark: 'Oscuro',
     dashboard: 'Panel de Control',
     delete: 'Eliminar',
+    deleted: 'Eliminado',
     deletedAt: 'Eliminado En',
     deletedCountSuccessfully: 'Se eliminaron {{count}} {{label}} correctamente.',
     deletedSuccessfully: 'Eliminado correctamente.',
@@ -375,6 +380,7 @@ export const esTranslations: DefaultTranslationsObject = {
       'Esto restablecerá todas tus preferencias a los valores predeterminados.',
     resettingPreferences: 'Restableciendo preferencias...',
     restore: 'Restaurar',
+    restoreAsPublished: 'Restaurar como versión publicada',
     restoredCountSuccessfully: 'Restaurado {{count}} {{label}} con éxito.',
     restoring: 'Restaurando...',
     row: 'Fila',
@@ -407,6 +413,7 @@ export const esTranslations: DefaultTranslationsObject = {
     time: 'Hora',
     timezone: 'Zona horaria',
     titleDeleted: '{{label}} "{{title}}" eliminado con éxito.',
+    titleRestored: '{{label}} "{{title}}" restaurado con éxito.',
     titleTrashed: '{{label}} "{{title}}" ha sido enviado a la papelera exitosamente.',
     trash: 'Basura',
     trashedCountSuccessfully: 'Eliminado con éxito {{count}} {{label}}.',

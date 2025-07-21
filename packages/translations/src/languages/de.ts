@@ -116,6 +116,8 @@ export const deTranslations: DefaultTranslationsObject = {
     noUser: 'Kein Benutzer',
     previewing: 'Bei der Vorschau dieses Dokuments ist ein Fehler aufgetreten.',
     problemUploadingFile: 'Beim Hochladen der Datei ist ein Fehler aufgetreten.',
+    restoringTitle:
+      'Es gab einen Fehler beim Wiederherstellen von {{title}}. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.',
     tokenInvalidOrExpired: 'Token ist entweder ungültig oder abgelaufen.',
     tokenNotProvided: 'Token nicht bereitgestellt.',
     unableToCopy: 'Kopieren nicht möglich.',
@@ -219,6 +221,8 @@ export const deTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Du bist dabei, {{count}} {{label}} zu löschen',
     aboutToDeleteCount_one: 'Du bist dabei, {{count}} {{label}} zu löschen',
     aboutToDeleteCount_other: 'Du bist dabei, {{count}} {{label}} zu löschen',
+    aboutToRestore:
+      'Sie sind dabei, das {{label}} <1>{{title}}</1> als Entwurf wiederherzustellen. Sind Sie sicher?',
     aboutToRestoreCount: 'Sie sind dabei, {{count}} {{label}} wiederherzustellen.',
     aboutToTrash:
       'Sie sind dabei, das {{label}} <1>{{title}}</1> in den Papierkorb zu verschieben. Sind Sie sicher?',
@@ -277,6 +281,7 @@ export const deTranslations: DefaultTranslationsObject = {
     dark: 'Dunkel',
     dashboard: 'Übersicht',
     delete: 'Löschen',
+    deleted: 'Gelöscht',
     deletedAt: 'Gelöscht am',
     deletedCountSuccessfully: '{{count}} {{label}} erfolgreich gelöscht.',
     deletedSuccessfully: 'Erfolgreich gelöscht.',
@@ -375,6 +380,7 @@ export const deTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription: 'Alle Präferenzen werden auf die Standardwerte zurückgesetzt.',
     resettingPreferences: 'Präferenzen werden zurückgesetzt.',
     restore: 'Wiederherstellen',
+    restoreAsPublished: 'Wiederherstellen als veröffentlichte Version',
     restoredCountSuccessfully: '{{count}} {{label}} erfolgreich wiederhergestellt.',
     restoring:
       'Respektieren Sie die Bedeutung des Originaltextes im Kontext von Payload. Hier ist eine Liste häufiger Payload-Begriffe, die sehr spezifische Bedeutungen haben:\n    - Sammlung: Eine Sammlung ist eine Gruppe von Dokumenten, die eine gemeinsame Struktur und einen gemeinsamen Zweck teilen. Sammlungen werden verwendet, um Inhalte in Payload zu organisieren und zu verwalten.\n    - Feld: Ein Feld ist ein spezifisches Datenstück innerhalb eines Dokuments in einer Sammlung. Felder definieren die Struktur und den Datentyp, der in einem Dokument gespeichert werden kann.\n    - Dokument:',
@@ -409,6 +415,7 @@ export const deTranslations: DefaultTranslationsObject = {
     time: 'Zeit',
     timezone: 'Zeitzone',
     titleDeleted: '{{label}} {{title}} wurde erfolgreich gelöscht.',
+    titleRestored: '{{label}} "{{title}}" erfolgreich wiederhergestellt.',
     titleTrashed: '{{label}} "{{title}}" erfolgreich entfernt.',
     trash: 'Müll',
     trashedCountSuccessfully: 'Erfolgreich {{count}} {{label}} in den Papierkorb verschoben.',

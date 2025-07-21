@@ -114,6 +114,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     noUser: 'Nav lietotāja',
     previewing: 'Radās problēma, priekšskatot šo dokumentu.',
     problemUploadingFile: 'Radās problēma, augšupielādējot failu.',
+    restoringTitle:
+      'Notika kļūda, atjaunojot {{title}}. Lūdzu, pārbaudiet savu savienojumu un mēģiniet vēlreiz.',
     tokenInvalidOrExpired: 'Tokens ir nederīgs vai beidzies.',
     tokenNotProvided: 'Tokens nav norādīts.',
     unableToCopy: 'Neizdevās kopēt.',
@@ -214,6 +216,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Jūs grasāties dzēst {{count}} {{label}}',
     aboutToDeleteCount_one: 'Jūs grasāties dzēst {{count}} {{label}}',
     aboutToDeleteCount_other: 'Jūs grasāties dzēst {{count}} {{label}}',
+    aboutToRestore:
+      'Jūs gatavojaties atjaunot {{label}} <1>{{title}}</1> kā melnrakstu. Vai esat pārliecināts?',
     aboutToRestoreCount: 'Jūs gatavojaties atjaunot {{count}} {{label}}',
     aboutToTrash:
       'Jūs gatavojaties pārvietot {{label}} <1>{{title}}</1> uz miskasti. Vai esat pārliecināts?',
@@ -271,6 +275,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     dark: 'Tumšs',
     dashboard: 'Panelis',
     delete: 'Dzēst',
+    deleted: 'Dzēsts',
     deletedAt: 'Dzēsts datumā',
     deletedCountSuccessfully: 'Veiksmīgi izdzēsti {{count}} {{label}}.',
     deletedSuccessfully: 'Veiksmīgi izdzēsts.',
@@ -369,6 +374,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription: 'Tas atjaunos visus jūsu iestatījumus uz noklusētajiem.',
     resettingPreferences: 'Atiestata iestatījumus...',
     restore: 'Atjaunot',
+    restoreAsPublished: 'Atjaunot kā publicēto versiju',
     restoredCountSuccessfully: 'Veiksmīgi atjaunots {{count}} {{label}}.',
     restoring: 'Atjaunojot...',
     row: 'Rinda',
@@ -401,6 +407,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     time: 'Laiks',
     timezone: 'Laika zona',
     titleDeleted: '{{label}} "{{title}}" veiksmīgi izdzēsts.',
+    titleRestored: '{{label}} "{{title}}" veiksmīgi atjaunots.',
     titleTrashed: '{{label}} "{{title}}" veiksmīgi pārvietots uz miskasti.',
     trash: 'Atkritumi',
     trashedCountSuccessfully: 'Veiksmīgi izmesti {{count}} {{label}}.',
