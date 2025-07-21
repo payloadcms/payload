@@ -235,6 +235,7 @@ const buildTableState = async (
     i18n: req.i18n,
     orderableFieldName,
     payload,
+    query,
     renderRowTypes,
     tableAppearance,
     useAsTitle: Array.isArray(collectionSlug)

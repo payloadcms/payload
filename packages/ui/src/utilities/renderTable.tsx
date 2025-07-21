@@ -8,6 +8,7 @@ import type {
   ColumnPreference,
   Field,
   ImportMap,
+  ListQuery,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
@@ -75,6 +76,7 @@ export const renderTable = ({
   key = 'table',
   orderableFieldName,
   payload,
+  query,
   renderRowTypes,
   tableAppearance,
   useAsTitle,
@@ -94,6 +96,7 @@ export const renderTable = ({
   key?: string
   orderableFieldName: string
   payload: Payload
+  query?: ListQuery
   renderRowTypes?: boolean
   tableAppearance?: 'condensed' | 'default'
   useAsTitle: CollectionConfig['admin']['useAsTitle']
@@ -292,11 +295,13 @@ export const renderTable = ({
           data={data.docs}
           heading={heading}
         />
-        <GroupByPageControls
-          collectionConfig={clientCollectionConfig}
-          data={data}
-          groupByValue={groupByValue}
-        />
+        {collectionConfig?.admin?.groupBy && query?.groupBy && (
+          <GroupByPageControls
+            collectionConfig={clientCollectionConfig}
+            data={data}
+            groupByValue={groupByValue}
+          />
+        )}
       </div>
     ),
   }

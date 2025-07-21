@@ -219,6 +219,7 @@ export const renderListView = async (
         i18n: req.i18n,
         orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
         payload: req.payload,
+        query,
         useAsTitle: collectionConfig.admin.useAsTitle,
       }))
     }

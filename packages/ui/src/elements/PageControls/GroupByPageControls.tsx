@@ -11,7 +11,7 @@ import { PageControlsComponent } from './index.js'
 /**
  * If `groupBy` is set in the query, multiple tables will render, one for each group.
  * In this case, each table needs its own `PageControls` to handle pagination.
- * These page controls, however, should not modify the global ListQuery state.
+ * These page controls, however, should not modify the global `ListQuery` state.
  * Instead, they should only handle the pagination for the current group.
  * To do this, build a wrapper around `PageControlsComponent` that handles the pagination logic for the current group.
  */
@@ -21,7 +21,7 @@ export const GroupByPageControls: React.FC<{
   data: PaginatedDocs
   groupByValue?: number | string
 }> = ({ AfterPageControls, collectionConfig, data, groupByValue }) => {
-  const { query, refineListData } = useListQuery()
+  const { refineListData } = useListQuery()
 
   const handlePageChange: IListQueryContext['handlePageChange'] = useCallback(
     async (page) => {
@@ -50,11 +50,6 @@ export const GroupByPageControls: React.FC<{
     [refineListData, groupByValue],
   )
 
-  if (!collectionConfig.admin.groupBy || !query.groupBy) {
-    return null
-  }
-
-  // TODO: control the actions with custom logic to modify the groupBy state instead of the global state
   return (
     <PageControlsComponent
       AfterPageControls={AfterPageControls}
