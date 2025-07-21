@@ -632,7 +632,7 @@ describe('List View', () => {
       const tableItems = page.locator(tableRowLocator)
 
       await expect(tableItems).toHaveCount(5)
-      await expect(page.locator('.collection-list__page-info')).toHaveText('1-5 of 6')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
       await page.goto(`${postsUrl.list}?limit=5&page=2`)
 
@@ -644,7 +644,7 @@ describe('List View', () => {
       })
 
       await page.waitForURL(new RegExp(`${postsUrl.list}\\?limit=5&page=1`))
-      await expect(page.locator('.collection-list__page-info')).toHaveText('1-3 of 3')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-3 of 3')
     })
 
     test('should reset filter values for every additional filter', async () => {
@@ -1357,7 +1357,7 @@ describe('List View', () => {
 
       await page.reload()
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
-      await expect(page.locator('.collection-list__page-info')).toHaveText('1-5 of 6')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
 
       await goToNextPage(page)
@@ -1377,7 +1377,7 @@ describe('List View', () => {
       await page.reload()
       const tableItems = page.locator(tableRowLocator)
       await expect(tableItems).toHaveCount(5)
-      await expect(page.locator('.collection-list__page-info')).toHaveText('1-5 of 16')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 16')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
       await page.locator('.per-page .popup-button').click()
 
@@ -1393,7 +1393,7 @@ describe('List View', () => {
       await goToNextPage(page)
       await expect(tableItems).toHaveCount(1)
       await expect(page.locator('.per-page')).toContainText('Per Page: 15') // ensure this hasn't changed
-      await expect(page.locator('.collection-list__page-info')).toHaveText('16-16 of 16')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16')
     })
   })
 

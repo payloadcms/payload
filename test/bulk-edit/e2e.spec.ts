@@ -320,7 +320,7 @@ test.describe('Bulk Edit', () => {
 
     await page.goto(postsUrl.list)
 
-    await expect(page.locator('.collection-list__page-info')).toContainText('1-5 of 6')
+    await expect(page.locator('.page-controls__page-info')).toContainText('1-5 of 6')
 
     await page.locator('#search-filter-input').fill('Post')
     await page.waitForURL(/search=Post/)

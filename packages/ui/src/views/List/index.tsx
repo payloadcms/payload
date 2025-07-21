@@ -204,33 +204,35 @@ export function DefaultListView(props: ListViewClientProps) {
                 </div>
               )}
               {AfterListTable}
-              {docs.length > 0 && !collectionConfig.admin.groupBy && !query.groupBy && (
-                <PageControls
-                  AfterPageControls={
-                    smallBreak ? (
-                      <div className={`${baseClass}__list-selection`}>
-                        <ListSelection
-                          collectionConfig={collectionConfig}
-                          disableBulkDelete={disableBulkDelete}
-                          disableBulkEdit={disableBulkEdit}
-                          label={getTranslation(collectionConfig.labels.plural, i18n)}
-                        />
-                        <div className={`${baseClass}__list-selection-actions`}>
-                          {enableRowSelections && typeof onBulkSelect === 'function'
-                            ? beforeActions
-                              ? [
-                                  ...beforeActions,
-                                  <SelectMany key="select-many" onClick={onBulkSelect} />,
-                                ]
-                              : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                            : beforeActions}
+              {docs.length > 0 &&
+                (!collectionConfig.admin.groupBy ||
+                  (collectionConfig.admin.groupBy && !query.groupBy)) && (
+                  <PageControls
+                    AfterPageControls={
+                      smallBreak ? (
+                        <div className={`${baseClass}__list-selection`}>
+                          <ListSelection
+                            collectionConfig={collectionConfig}
+                            disableBulkDelete={disableBulkDelete}
+                            disableBulkEdit={disableBulkEdit}
+                            label={getTranslation(collectionConfig.labels.plural, i18n)}
+                          />
+                          <div className={`${baseClass}__list-selection-actions`}>
+                            {enableRowSelections && typeof onBulkSelect === 'function'
+                              ? beforeActions
+                                ? [
+                                    ...beforeActions,
+                                    <SelectMany key="select-many" onClick={onBulkSelect} />,
+                                  ]
+                                : [<SelectMany key="select-many" onClick={onBulkSelect} />]
+                              : beforeActions}
+                          </div>
                         </div>
-                      </div>
-                    ) : null
-                  }
-                  collectionConfig={collectionConfig}
-                />
-              )}
+                      ) : null
+                    }
+                    collectionConfig={collectionConfig}
+                  />
+                )}
             </Gutter>
             {AfterList}
           </SelectionProvider>
