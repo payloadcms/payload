@@ -46,11 +46,17 @@ export const ecommercePlugin =
       const overrides =
         typeof sanitizedPluginConfig.customers.addresses === 'boolean'
           ? undefined
-          : sanitizedPluginConfig.customers.addresses
+          : sanitizedPluginConfig.customers.addresses.collectionOverride
+
+      const supportedCountries =
+        typeof sanitizedPluginConfig.customers.addresses === 'boolean'
+          ? undefined
+          : sanitizedPluginConfig.customers.addresses.supportedCountries
 
       const addresses = addressesCollection({
         customersSlug: collectionSlugMap.customers,
         overrides,
+        supportedCountries,
       })
 
       incomingConfig.collections.push(addresses)
@@ -224,10 +230,6 @@ export const ecommercePlugin =
       translations,
       incomingConfig.i18n?.translations,
     )
-
-    if (!incomingConfig.endpoints) {
-      incomingConfig.endpoints = []
-    }
 
     // incomingConfig.typescript = {
     //   ...incomingConfig.typescript,

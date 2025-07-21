@@ -1,5 +1,7 @@
 import type { ProductsValidation } from '../types.js'
 
+import { MissingPrice, OutOfStock } from './errorCodes.js'
+
 export const defaultProductsValidation: ProductsValidation = ({
   currenciesConfig,
   currency,
@@ -23,17 +25,18 @@ export const defaultProductsValidation: ProductsValidation = ({
         `Variant with ID ${variant.id} is out of stock or does not have enough inventory.`,
       )
     }
-  }
-
-  if (product) {
+  } else if (product) {
+    // Validate the product's details only if the variant is not provided as it can have its own inventory and price
     if (!product[priceField]) {
-      throw new Error(`Product with ID ${product.id} does not have a price in ${currency}.`)
+      throw new Error(`Product does not have a price in.`, {
+        cause: { code: MissingPrice, codes: [product.id, currency] },
+      })
     }
 
     if (product.inventory === 0 || (product.inventory && product.inventory < quantity)) {
-      throw new Error(
-        `Product with ID ${product.id} is out of stock or does not have enough inventory.`,
-      )
+      throw new Error(`Product is out of stock or does not have enough inventory.`, {
+        cause: { code: OutOfStock, codes: [product.id] },
+      })
     }
   }
 }

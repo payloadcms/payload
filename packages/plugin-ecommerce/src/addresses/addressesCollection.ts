@@ -1,6 +1,8 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionConfig, Field, Option } from 'payload'
 
-import type { FieldsOverride } from '../types.js'
+import type { CountryType, FieldsOverride } from '../types.js'
+
+import { defaultCountries } from './defaultCountries.js'
 
 type Props = {
   /**
@@ -8,11 +10,14 @@ type Props = {
    */
   customersSlug?: string
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
+  supportedCountries?: CountryType[]
 }
 
 export const addressesCollection: (props?: Props) => CollectionConfig = (props) => {
-  const { customersSlug = 'users', overrides } = props || {}
+  const { customersSlug = 'users', overrides, supportedCountries } = props || {}
   const fieldsOverride = overrides?.fields
+
+  const hasOnlyOneCountry = supportedCountries && supportedCountries.length === 1
 
   const defaultFields: Field[] = [
     {
@@ -94,11 +99,20 @@ export const addressesCollection: (props?: Props) => CollectionConfig = (props) 
     },
     {
       name: 'country',
-      type: 'text',
+      type: 'select',
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
         t('plugin-ecommerce:addressCountry'),
+      options: supportedCountries || defaultCountries,
       required: true,
+      ...(supportedCountries && supportedCountries?.[0] && hasOnlyOneCountry
+        ? {
+            admin: {
+              disabled: true,
+            },
+            defaultValue: supportedCountries?.[0].value,
+          }
+        : {}),
     },
     {
       name: 'phone',

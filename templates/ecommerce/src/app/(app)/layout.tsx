@@ -61,7 +61,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <main>{children}</main>
           <Footer />
 
-          <Toaster richColors />
+          <Toaster richColors position="bottom-left" />
         </Providers>
       </body>
     </html>

@@ -104,9 +104,23 @@ export type PaymentAdapter = {
    */
   initiatePayment: (args: {
     data: {
+      /**
+       * Billing address for the payment.
+       */
+      billingAddress: TypedCollection['addresses']
+      /**
+       * Cart items.
+       */
       cart: Cart
+      /**
+       * Currency code to use for the payment.
+       */
       currency: string
-      customerEmail?: string
+      customerEmail: string
+      /**
+       * Shipping address for the payment.
+       */
+      shippingAddress?: TypedCollection['addresses']
     }
     req: PayloadRequest
     /**
@@ -218,13 +232,34 @@ export type PaymentsConfig = {
   variantsQuery?: CustomQuery
 }
 
+export type CountryType = {
+  /**
+   * A user friendly name for the country.
+   */
+  label: string
+  /**
+   * The ISO 3166-1 alpha-2 country code.
+   * @example 'US'
+   */
+  value: string
+}
+
+type AddressesConfig = {
+  /**
+   * These fields will be applied to all locations where addresses are used, such as Orders and Transactions. Preferred use over the collectionOverride config.
+   */
+  addressFields?: FieldsOverride
+  collectionOverride?: CollectionOverride
+  supportedCountries?: CountryType[]
+}
+
 export type CustomersConfig = {
   /**
    * Enable the addresses collection for customers.
    * This allows customers to have multiple addresses for shipping and billing. Accepts an override to customise the addresses collection.
    * Defaults to true.
    */
-  addresses?: boolean | CollectionOverride
+  addresses?: AddressesConfig | boolean
   /**
    * Slug of the customers collection, defaults to 'users'.
    * This is used to link carts and orders to customers.

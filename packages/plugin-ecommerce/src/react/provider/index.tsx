@@ -11,6 +11,7 @@ const defaultContext: EcommerceContextType = {
   addItem: async () => {},
   clearCart: async () => {},
   confirmOrder: async () => {},
+  createAddress: async () => {},
   currenciesConfig: {
     defaultCurrency: 'USD',
     supportedCurrencies: [
@@ -34,6 +35,7 @@ const defaultContext: EcommerceContextType = {
   paymentMethods: [],
   removeItem: async () => {},
   setCurrency: () => {},
+  updateAddress: async () => {},
 }
 
 const EcommerceContext = createContext<EcommerceContextType>(defaultContext)
@@ -43,6 +45,7 @@ const defaultLocalStorage = {
 }
 
 export const EcommerceProvider: React.FC<ContextProps> = ({
+  addressesSlug = 'addresses',
   api,
   cartsSlug = 'carts',
   children,
@@ -58,6 +61,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     ],
   },
   customersSlug = 'users',
+  debug = false,
   paymentMethods = [],
   syncLocalStorage = true,
 }) => {
@@ -70,6 +74,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       : defaultLocalStorage
 
   const { apiRoute = '/api', cartsFetchQuery = {}, serverURL = '' } = api || {}
+  const baseAPIURL = `${serverURL}${apiRoute}`
 
   /**
    * The payment data received from the payment initiation process, this is then threaded through to the payment confirmation process.
@@ -78,6 +83,8 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
   const [paymentData, setPaymentData] = useState<EcommerceContextType['paymentData']>()
 
   const [user, setUser] = useState<null | TypedUser>(null)
+
+  const [addresses, setAddresses] = useState<TypedCollection['addresses'][]>()
 
   const hasRendered = useRef(false)
 
@@ -125,7 +132,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     async (initialData: Record<string, unknown>) => {
       const query = qs.stringify(cartQuery)
 
-      const response = await fetch(`/api/${cartsSlug}?${query}`, {
+      const response = await fetch(`${baseAPIURL}/${cartsSlug}?${query}`, {
         body: JSON.stringify({
           ...initialData,
           currency: selectedCurrency.code,
@@ -151,14 +158,14 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
       return data.doc as TypedCollection['carts']
     },
-    [cartQuery, cartsSlug, selectedCurrency.code, user?.id],
+    [baseAPIURL, cartQuery, cartsSlug, selectedCurrency.code, user?.id],
   )
 
   const getCart = useCallback(
     async (cartID: DefaultDocumentIDType) => {
       const query = qs.stringify(cartQuery)
 
-      const response = await fetch(`/api/${cartsSlug}/${cartID}?${query}`, {
+      const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}?${query}`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -176,14 +183,14 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
       return data as TypedCollection['carts']
     },
-    [cartQuery, cartsSlug],
+    [baseAPIURL, cartQuery, cartsSlug],
   )
 
   const updateCart = useCallback(
     async (cartID: DefaultDocumentIDType, data: Partial<TypedCollection['carts']>) => {
       const query = qs.stringify(cartQuery)
 
-      const response = await fetch(`/api/${cartsSlug}/${cartID}?${query}`, {
+      const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}?${query}`, {
         body: JSON.stringify(data),
         credentials: 'include',
         headers: {
@@ -200,12 +207,12 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       const updatedCart = await response.json()
       setCart(updatedCart.doc as TypedCollection['carts'])
     },
-    [cartQuery, cartsSlug],
+    [baseAPIURL, cartQuery, cartsSlug],
   )
 
   const deleteCart = useCallback(
     async (cartID: DefaultDocumentIDType) => {
-      const response = await fetch(`/api/${cartsSlug}/${cartID}`, {
+      const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -221,7 +228,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       setCart(undefined)
       setCartID(undefined)
     },
-    [cartsSlug],
+    [baseAPIURL, cartsSlug],
   )
 
   useEffect(() => {
@@ -442,7 +449,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       setSelectedPaymentMethod(paymentMethodID)
 
       if (paymentMethod.initiatePayment) {
-        const fetchURL = `/api/payments/${paymentMethodID}/initiate`
+        const fetchURL = `${baseAPIURL}/payments/${paymentMethodID}/initiate`
 
         const data = {
           cartID,
@@ -479,7 +486,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         throw new Error(`Payment method "${paymentMethodID}" does not support payment initiation`)
       }
     },
-    [cartID, paymentMethods, selectedCurrency.code],
+    [baseAPIURL, cartID, paymentMethods, selectedCurrency.code],
   )
 
   const confirmOrder = useCallback<EcommerceContextType['initiatePayment']>(
@@ -495,7 +502,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       }
 
       if (paymentMethod.confirmOrder) {
-        const fetchURL = `/api/payments/${paymentMethodID}/confirm-order`
+        const fetchURL = `${baseAPIURL}/payments/${paymentMethodID}/confirm-order`
 
         const data = {
           cartID,
@@ -527,14 +534,14 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         }
 
         // Clear the payment data
-        setPaymentData({})
+        setPaymentData(undefined)
 
         return responseData
       } else {
         throw new Error(`Payment method "${paymentMethodID}" does not support order confirmation`)
       }
     },
-    [cartID, paymentData, paymentMethods, selectedCurrency.code],
+    [baseAPIURL, cartID, paymentData, paymentMethods, selectedCurrency.code],
   )
 
   const getUser = useCallback(async () => {
@@ -547,7 +554,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         },
       })
 
-      const response = await fetch(`/api/${customersSlug}/me?${query}`, {
+      const response = await fetch(`${baseAPIURL}/${customersSlug}/me?${query}`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -571,10 +578,149 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         return userData.user as TypedUser
       }
     } catch (error) {
-      console.error('Error fetching user:', error)
+      if (debug) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching user:', error)
+      }
       setUser(null)
+      throw new Error(
+        `Failed to fetch user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      )
     }
-  }, [customersSlug])
+  }, [baseAPIURL, customersSlug, debug])
+
+  const getAddresses = useCallback(async () => {
+    if (!user) {
+      return
+    }
+
+    try {
+      const query = qs.stringify({
+        depth: 0,
+        limit: 0,
+        pagination: false,
+      })
+
+      const response = await fetch(`${baseAPIURL}/${addressesSlug}?${query}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'GET',
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+
+        throw new Error(errorText)
+      }
+
+      const data = await response.json()
+
+      if (data.error) {
+        throw new Error(`Address fetch error: ${data.error}`)
+      }
+
+      if (data.docs && data.docs.length > 0) {
+        setAddresses(data.docs)
+      }
+    } catch (error) {
+      if (debug) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching addresses:', error)
+      }
+      setAddresses(undefined)
+      throw new Error(
+        `Failed to fetch addresses: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      )
+    }
+  }, [user, baseAPIURL, addressesSlug, debug])
+
+  const updateAddress = useCallback<EcommerceContextType['updateAddress']>(
+    async (addressID, address) => {
+      if (!user) {
+        throw new Error('User must be logged in to update or create an address')
+      }
+
+      try {
+        const response = await fetch(`${baseAPIURL}/${addressesSlug}/${addressID}`, {
+          body: JSON.stringify(address),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'PATCH',
+        })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Failed to update or create address: ${errorText}`)
+        }
+
+        const data = await response.json()
+
+        if (data.error) {
+          throw new Error(`Address update/create error: ${data.error}`)
+        }
+
+        // Refresh addresses after updating or creating
+        await getAddresses()
+      } catch (error) {
+        if (debug) {
+          // eslint-disable-next-line no-console
+          console.error('Error updating or creating address:', error)
+        }
+
+        throw new Error(
+          `Failed to update or create address: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        )
+      }
+    },
+    [user, baseAPIURL, addressesSlug, getAddresses, debug],
+  )
+
+  const createAddress = useCallback<EcommerceContextType['createAddress']>(
+    async (address) => {
+      if (!user) {
+        throw new Error('User must be logged in to update or create an address')
+      }
+
+      try {
+        const response = await fetch(`${baseAPIURL}/${addressesSlug}`, {
+          body: JSON.stringify(address),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Failed to update or create address: ${errorText}`)
+        }
+
+        const data = await response.json()
+
+        if (data.error) {
+          throw new Error(`Address update/create error: ${data.error}`)
+        }
+
+        // Refresh addresses after updating or creating
+        await getAddresses()
+      } catch (error) {
+        if (debug) {
+          // eslint-disable-next-line no-console
+          console.error('Error updating or creating address:', error)
+        }
+
+        throw new Error(
+          `Failed to update or create address: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        )
+      }
+    },
+    [user, baseAPIURL, addressesSlug, getAddresses, debug],
+  )
 
   // If localStorage is enabled, we can add logic to persist the cart state
   useEffect(() => {
@@ -587,7 +733,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
               setCart(fetchedCart)
               setCartID(storedCart as DefaultDocumentIDType)
             })
-            .catch((error) => {
+            .catch((_) => {
               // console.error('Error fetching cart from localStorage:', error)
               // If there's an error fetching the cart, we can clear it from localStorage
               localStorage.removeItem(localStorageConfig.key)
@@ -612,23 +758,41 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
                 setCartID(cartID)
               })
               .catch((error) => {
-                // console.error('Error fetching user cart:', error)
+                if (debug) {
+                  // eslint-disable-next-line no-console
+                  console.error('Error fetching user cart:', error)
+                }
+
                 setCart(undefined)
                 setCartID(undefined)
+
+                throw new Error(`Failed to fetch user cart: ${error.message}`)
               })
           }
         }
       })
     }
-  }, [getCart, getUser, localStorageConfig.key, syncLocalStorage])
+  }, [debug, getAddresses, getCart, getUser, localStorageConfig.key, syncLocalStorage])
+
+  useEffect(() => {
+    if (user) {
+      // If the user is logged in, fetch their addresses
+      void getAddresses()
+    } else {
+      // If no user is logged in, clear addresses
+      setAddresses(undefined)
+    }
+  }, [getAddresses, user])
 
   return (
     <EcommerceContext
       value={{
         addItem,
+        addresses,
         cart,
         clearCart,
         confirmOrder,
+        createAddress,
         currenciesConfig,
         currency: selectedCurrency,
         decrementItem,
@@ -639,6 +803,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         removeItem,
         selectedPaymentMethod,
         setCurrency,
+        updateAddress,
       }}
     >
       {children}
@@ -715,4 +880,14 @@ export const usePayments = () => {
   }
 
   return { confirmOrder, initiatePayment, paymentData, paymentMethods, selectedPaymentMethod }
+}
+
+export const useAddresses = () => {
+  const { addresses, createAddress, updateAddress } = useEcommerce()
+
+  if (!createAddress) {
+    throw new Error('usePayments must be used within an EcommerceProvider')
+  }
+
+  return { addresses, createAddress, updateAddress }
 }

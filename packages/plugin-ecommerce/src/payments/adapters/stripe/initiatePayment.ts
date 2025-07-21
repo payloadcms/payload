@@ -19,6 +19,8 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
     const currency = data.currency
     const cart = data.cart
     const amount = cart.subtotal
+    const billingAddress = data.billingAddress
+    const shippingAddress = data.shippingAddress
 
     if (!secretKey) {
       throw new Error('Stripe secret key is required.')
@@ -64,12 +66,40 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
         })
       }
 
+      const sanitisedCart = cart.items.map((item) => {
+        const productID = typeof item.product === 'object' ? item.product.id : item.product
+        const variantID = item.variant
+          ? typeof item.variant === 'object'
+            ? item.variant.id
+            : item.variant
+          : undefined
+
+        return {
+          product: productID,
+          quantity: item.quantity,
+          variant: variantID,
+        }
+      })
+
       const paymentIntent = await stripe.paymentIntents.create({
         amount,
         currency,
         customer: customer.id,
         metadata: {
           cartID: cart.id,
+          cartItemsSnapshot: JSON.stringify(sanitisedCart),
+        },
+        shipping: {
+          name: `${shippingAddress?.firstName} ${shippingAddress?.lastName}`,
+          address: {
+            city: shippingAddress?.city,
+            country: shippingAddress?.country,
+            line1: shippingAddress?.addressLine1,
+            line2: shippingAddress?.addressLine2,
+            postal_code: shippingAddress?.postalCode,
+            state: shippingAddress?.state,
+          },
+          phone: shippingAddress?.phone,
         },
       })
 

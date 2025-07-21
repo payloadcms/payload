@@ -5,9 +5,10 @@ type Props = {
   variantsSlug: string
 }
 
-export const updateSubtotalHook: (args: Props) => CollectionBeforeChangeHook =
+export const beforeChangeCart: (args: Props) => CollectionBeforeChangeHook =
   ({ productsSlug, variantsSlug }) =>
   async ({ data, req }) => {
+    // Update subtotal based on items in the cart
     if (data.items && Array.isArray(data.items)) {
       const priceField = `priceIn${data.currency}`
 

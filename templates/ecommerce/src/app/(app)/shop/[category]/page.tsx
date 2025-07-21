@@ -56,6 +56,19 @@ export default async function SearchCategoryPage({
         },
       ],
     },
+    select: {
+      title: true,
+      slug: true,
+      gallery: true,
+      categories: true,
+      priceInUSD: true,
+      variants: true,
+    },
+    populate: {
+      variants: {
+        priceInUSD: true,
+      },
+    },
   })
   const resultsText = products.docs.length > 1 ? 'results' : 'result'
 

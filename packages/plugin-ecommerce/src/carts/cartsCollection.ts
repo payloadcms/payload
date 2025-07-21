@@ -5,7 +5,7 @@ import type { CurrenciesConfig, FieldsOverride } from '../types.js'
 import { amountField } from '../fields/amountField.js'
 import { cartItemsField } from '../fields/cartItemsField.js'
 import { currencyField } from '../fields/currencyField.js'
-import { updateSubtotalHook } from './updateSubtotalHook.js'
+import { beforeChangeCart } from './beforeChange.js'
 
 type Props = {
   currenciesConfig?: CurrenciesConfig
@@ -103,7 +103,7 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
     hooks: {
       beforeChange: [
         // This hook can be used to update the subtotal before saving the cart
-        updateSubtotalHook({ productsSlug, variantsSlug }),
+        beforeChangeCart({ productsSlug, variantsSlug }),
         ...(overrides?.hooks?.beforeChange || []),
       ],
       ...overrides?.hooks,

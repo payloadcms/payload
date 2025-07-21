@@ -26,6 +26,12 @@ export default async function SearchPage({ searchParams }: Props) {
       gallery: true,
       categories: true,
       priceInUSD: true,
+      variants: true,
+    },
+    populate: {
+      variants: {
+        priceInUSD: true,
+      },
     },
   })
 

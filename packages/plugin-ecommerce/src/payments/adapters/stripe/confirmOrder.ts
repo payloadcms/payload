@@ -77,14 +77,25 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
       // Verify the payment intent exists and retrieve it
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentID)
 
-      const cartToUse = paymentIntent.metadata.cartID
+      console.log({ paymentIntent })
 
-      if (!cartToUse) {
+      const cartID = paymentIntent.metadata.cartID
+      const cartItemsSnapshot = paymentIntent.metadata.cartItemsSnapshot
+        ? JSON.parse(paymentIntent.metadata.cartItemsSnapshot)
+        : undefined
+
+      if (!cartID) {
         throw new Error('Cart ID not found in the PaymentIntent metadata')
       }
 
+      if (!cartItemsSnapshot || !Array.isArray(cartItemsSnapshot)) {
+        throw new Error('Cart items snapshot not found or invalid in the PaymentIntent metadata')
+      }
+
+      console.log({ cartItemsSnapshot })
+
       const cart = await payload.findByID({
-        id: cartToUse,
+        id: cartID,
         collection: cartsSlug,
         depth: 2,
         overrideAccess: false,
@@ -102,10 +113,10 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         collection: ordersSlug,
         data: {
           amount: paymentIntent.amount,
-          cart: cartToUse,
+          cart: cart.id,
           currency: paymentIntent.currency.toUpperCase(),
           ...(req.user ? { customer: req.user.id } : { customerEmail }),
-          items: cart.items,
+          items: cartItemsSnapshot,
           status: 'processing',
           transactions: [transaction.id],
         },

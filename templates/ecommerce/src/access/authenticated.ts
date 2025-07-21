@@ -4,10 +4,6 @@ import type { User } from '@/payload-types'
 
 import { checkRole } from '@/access/checkRole'
 
-export const adminsOrLoggedIn: Access = ({ req: { user } }: AccessArgs<User>) => {
-  if (user && checkRole(['admin'], user)) {
-    return true
-  }
-
+export const authenticated: Access = ({ req: { user } }: AccessArgs<User>) => {
   return !!user
 }

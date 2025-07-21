@@ -1,17 +1,15 @@
 import type { Metadata } from 'next'
 
-import { Button } from '@/components/ui/button'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
-import Link from 'next/link'
 import { headers as getHeaders } from 'next/headers.js'
 import configPromise from '@payload-config'
-import { AccountForm } from '@/components/forms/AccountForm'
 import { Order } from '@/payload-types'
-import { OrderItem } from '@/components/OrderItem'
 import { getPayload } from 'payload'
 import { redirect } from 'next/navigation'
+import { AddressListing } from '@/components/addresses/AddressListing'
+import { CreateAddressModal } from '@/components/addresses/CreateAddressModal'
 
-export default async function AccountPage() {
+export default async function AddressesPage() {
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
@@ -49,47 +47,23 @@ export default async function AccountPage() {
   return (
     <>
       <div className="border p-8 rounded-lg bg-primary-foreground">
-        <h1 className="text-3xl font-medium mb-8">Account settings</h1>
-        <AccountForm />
-      </div>
+        <h1 className="text-3xl font-medium mb-8">Addresses</h1>
 
-      <div className=" border p-8 rounded-lg bg-primary-foreground">
-        <h2 className="text-3xl font-medium mb-8">Recent Orders</h2>
-
-        <div className="prose dark:prose-invert mb-8">
-          <p>
-            These are the most recent orders you have placed. Each order is associated with an
-            payment. As you place more orders, they will appear in your orders list.
-          </p>
+        <div className="mb-8">
+          <AddressListing />
         </div>
 
-        {(!orders || !Array.isArray(orders) || orders?.length === 0) && (
-          <p className="mb-8">You have no orders.</p>
-        )}
-
-        {orders && orders.length > 0 && (
-          <ul className="flex flex-col gap-6 mb-8">
-            {orders?.map((order, index) => (
-              <li key={order.id}>
-                <OrderItem order={order} />
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <Button asChild variant="default">
-          <Link href="/orders">View all orders</Link>
-        </Button>
+        <CreateAddressModal />
       </div>
     </>
   )
 }
 
 export const metadata: Metadata = {
-  description: 'Create an account or log in to your existing account.',
+  description: 'Manage your addresses.',
   openGraph: mergeOpenGraph({
-    title: 'Account',
-    url: '/account',
+    title: 'Addresses',
+    url: '/account/addresses',
   }),
-  title: 'Account',
+  title: 'Addresses',
 }

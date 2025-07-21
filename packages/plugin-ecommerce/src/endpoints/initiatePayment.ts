@@ -65,7 +65,10 @@ export const initiatePaymentHandler: InitiatePayment =
     let currency: string = currenciesConfig.defaultCurrency
     let cartID: DefaultDocumentIDType = data?.cartID
     let cart = undefined
+    const billingAddress = data?.billingAddress
+    const shippingAddress = data?.shippingAddress
 
+    console.log({ billingAddress, shippingAddress })
     let customerEmail: string = user?.email ?? ''
 
     if (user) {
@@ -289,9 +292,11 @@ export const initiatePaymentHandler: InitiatePayment =
     try {
       const paymentResponse = await paymentMethod.initiatePayment({
         data: {
+          billingAddress,
           cart,
           currency,
           customerEmail,
+          shippingAddress,
         },
         req,
         transactionsSlug,

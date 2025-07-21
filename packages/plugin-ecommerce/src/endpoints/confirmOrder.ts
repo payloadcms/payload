@@ -62,6 +62,10 @@ export const confirmOrderHandler: ConfirmOrder =
     let cart = undefined
     let customerEmail: string = user?.email ?? ''
 
+    console.log({ customerEmail, user })
+
+    console.log('validating the user')
+
     if (user) {
       if (user.cart?.docs && Array.isArray(user.cart.docs) && user.cart.docs.length > 0) {
         if (!cartID && user.cart.docs[0]) {
@@ -89,6 +93,8 @@ export const confirmOrderHandler: ConfirmOrder =
         )
       }
     }
+
+    console.log('going into card validation')
 
     if (!cart) {
       if (cartID) {
@@ -145,6 +151,8 @@ export const confirmOrderHandler: ConfirmOrder =
       )
     }
 
+    console.log('going into product validation')
+
     try {
       if (Array.isArray(cart.items) && cart.items.length > 0) {
         for (const item of cart.items) {
@@ -166,6 +174,11 @@ export const confirmOrderHandler: ConfirmOrder =
             })
 
             if (!product) {
+              payload.logger.error(
+                `Product with ID ${item.product} not found.`,
+                'Error validating product',
+              )
+
               return Response.json(
                 {
                   message: `Product with ID ${item.product} not found.`,
@@ -195,6 +208,7 @@ export const confirmOrderHandler: ConfirmOrder =
                   })
                 }
               } catch (error) {
+                payload.logger.error(error, 'Error validating product.')
                 return Response.json(
                   {
                     message: error,
@@ -220,6 +234,11 @@ export const confirmOrderHandler: ConfirmOrder =
               })
 
               if (!variant) {
+                payload.logger.error(
+                  `Variant with ID ${item.variant} not found.`,
+                  'Error validating variant',
+                )
+
                 return Response.json(
                   {
                     message: `Variant with ID ${item.variant} not found.`,
@@ -249,6 +268,8 @@ export const confirmOrderHandler: ConfirmOrder =
                   })
                 }
               } catch (error) {
+                payload.logger.error(error, 'Error validating product or variant.')
+
                 return Response.json(
                   {
                     message: error,
@@ -263,6 +284,8 @@ export const confirmOrderHandler: ConfirmOrder =
         }
       }
 
+      console.log('gonna confirm the order')
+
       const paymentResponse = await paymentMethod.confirmOrder({
         data: {
           ...data,
@@ -276,11 +299,13 @@ export const confirmOrderHandler: ConfirmOrder =
 
       return Response.json(paymentResponse)
     } catch (error) {
+      console.log({ error })
+
       payload.logger.error(error, 'Error initiating payment')
 
       return Response.json(
         {
-          message: 'Error initiating payment',
+          message: 'Error confirming order.',
         },
         {
           status: 500,

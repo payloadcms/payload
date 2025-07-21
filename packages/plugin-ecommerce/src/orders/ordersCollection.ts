@@ -7,6 +7,10 @@ import { cartItemsField } from '../fields/cartItemsField.js'
 import { currencyField } from '../fields/currencyField.js'
 
 type Props = {
+  /**
+   * Slug of the carts collection, defaults to 'carts'.
+   */
+  cartsSlug?: string
   currenciesConfig?: CurrenciesConfig
   /**
    * Slug of the customers collection, defaults to 'users'.
@@ -30,6 +34,7 @@ type Props = {
 
 export const ordersCollection: (props?: Props) => CollectionConfig = (props) => {
   const {
+    cartsSlug = 'carts',
     currenciesConfig,
     customersSlug = 'users',
     enableVariants = false,
@@ -55,6 +60,11 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
         t('plugin-ecommerce:customerEmail'),
+    },
+    {
+      name: 'cart',
+      type: 'relationship',
+      relationTo: cartsSlug,
     },
     {
       name: 'transactions',

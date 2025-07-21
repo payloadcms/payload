@@ -30,9 +30,10 @@ export const getCollectionSlugMap = ({ sanitizedPluginConfig }: Props): Collecti
 
     if (
       typeof sanitizedPluginConfig.customers.addresses === 'object' &&
-      sanitizedPluginConfig.customers.addresses.slug
+      sanitizedPluginConfig.customers.addresses.collectionOverride?.slug
     ) {
-      collectionSlugsMap.addresses = sanitizedPluginConfig.customers.addresses.slug
+      collectionSlugsMap.addresses =
+        sanitizedPluginConfig.customers.addresses.collectionOverride.slug
     }
   }
 
