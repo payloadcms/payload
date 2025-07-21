@@ -155,7 +155,7 @@ export const handleGroupBy = async ({
           })
         }
 
-        const { Table: NewTable } = renderTable({
+        const { columnState: newColumnState, Table: NewTable } = renderTable({
           clientCollectionConfig,
           collectionConfig,
           columns,
@@ -173,6 +173,12 @@ export const handleGroupBy = async ({
           useAsTitle: collectionConfig.admin.useAsTitle,
         })
 
+        // Only need to set `columnState` once, using the first table's column state
+        // This will avoid needing to generate column state explicitly for root context that wraps all tables
+        if (!columnState) {
+          columnState = newColumnState
+        }
+
         if (!Table) {
           Table = []
         }
@@ -181,25 +187,6 @@ export const handleGroupBy = async ({
         ;(Table as Array<React.ReactNode>)[i] = NewTable
       }),
     )
-
-    // Need to run an initial `buildColumnState` here because we need column state for _all_ tables
-    // This will build the columns that apply to _all_ tables, like which are available, which are on/off, and their orders
-    // For now, just call `renderTable` and don't use the returned `Table`, only the `columnState`
-    // TODO: can we just use the first columnState for this?
-    ;({ columnState } = renderTable({
-      clientCollectionConfig,
-      collectionConfig,
-      columns,
-      customCellProps,
-      data,
-      drawerSlug,
-      enableRowSelections,
-      i18n: req.i18n,
-      orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
-      payload: req.payload,
-      query,
-      useAsTitle: collectionConfig.admin.useAsTitle,
-    }))
   }
 
   return {
