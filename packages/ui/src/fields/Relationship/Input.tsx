@@ -415,11 +415,17 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       })
 
       if (idsToLoad.length > 0) {
+        const collection = getEntityConfig({ collectionSlug: relation })
+        const fieldToSelect = collection?.admin?.useAsTitle || 'id'
+
         const query = {
           depth: 0,
           draft: true,
           limit: idsToLoad.length,
           locale,
+          select: {
+            [fieldToSelect]: true,
+          },
           where: {
             id: {
               in: idsToLoad,
@@ -438,8 +444,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             },
             method: 'POST',
           })
-
-          const collection = getEntityConfig({ collectionSlug: relation })
           let docs = []
 
           if (response.ok) {
