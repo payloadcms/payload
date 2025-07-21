@@ -82,6 +82,11 @@ jobs:
         with:
           mongodb-version: 6.0
 
+        # The template generation script runs import map generation which needs the built payload bin scripts
+      - run: pnpm run build:all
+        env:
+          DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+
       - name: Update template lockfiles and migrations
         run: pnpm script:gen-templates
 

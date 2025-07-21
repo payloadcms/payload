@@ -18,8 +18,9 @@ import type {
   PluginImportExportTranslations,
 } from '../../translations/index.js'
 
-import { useImportExport } from '../ImportExportProvider/index.js'
+import { buildDisabledFieldRegex } from '../../utilities/buildDisabledFieldRegex.js'
 import './index.scss'
+import { useImportExport } from '../ImportExportProvider/index.js'
 
 const baseClass = 'preview'
 
@@ -45,6 +46,13 @@ export const Preview = () => {
   const collectionConfig = config.collections.find(
     (collection) => collection.slug === collectionSlug,
   )
+
+  const disabledFieldRegexes: RegExp[] = React.useMemo(() => {
+    const disabledFieldPaths =
+      collectionConfig?.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
+
+    return disabledFieldPaths.map(buildDisabledFieldRegex)
+  }, [collectionConfig])
 
   const isCSV = format === 'csv'
 
@@ -93,9 +101,17 @@ export const Preview = () => {
           Array.isArray(fields) && fields.length > 0
             ? fields.flatMap((field) => {
                 const regex = fieldToRegex(field)
-                return allKeys.filter((key) => regex.test(key))
+                return allKeys.filter(
+                  (key) =>
+                    regex.test(key) &&
+                    !disabledFieldRegexes.some((disabledRegex) => disabledRegex.test(key)),
+                )
               })
-            : allKeys.filter((key) => !defaultMetaFields.includes(key))
+            : allKeys.filter(
+                (key) =>
+                  !defaultMetaFields.includes(key) &&
+                  !disabledFieldRegexes.some((regex) => regex.test(key)),
+              )
 
         const fieldKeys =
           Array.isArray(fields) && fields.length > 0
@@ -136,7 +152,18 @@ export const Preview = () => {
     }
 
     void fetchData()
-  }, [collectionConfig, collectionSlug, draft, fields, i18n, limit, locale, sort, where])
+  }, [
+    collectionConfig,
+    collectionSlug,
+    disabledFieldRegexes,
+    draft,
+    fields,
+    i18n,
+    limit,
+    locale,
+    sort,
+    where,
+  ])
 
   return (
     <div className={baseClass}>

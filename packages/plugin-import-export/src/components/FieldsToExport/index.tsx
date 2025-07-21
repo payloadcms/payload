@@ -27,7 +27,14 @@ export const FieldsToExport: SelectFieldClientComponent = (props) => {
   const { query } = useListQuery()
 
   const collectionConfig = getEntityConfig({ collectionSlug: collectionSlug ?? collection })
-  const fieldOptions = reduceFields({ fields: collectionConfig?.fields })
+
+  const disabledFields =
+    collectionConfig?.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
+
+  const fieldOptions = reduceFields({
+    disabledFields,
+    fields: collectionConfig?.fields,
+  })
 
   useEffect(() => {
     if (id || !collectionSlug) {

@@ -16,6 +16,7 @@ export const createHandler: PayloadHandler = async (req) => {
   const autosave = searchParams.get('autosave') === 'true'
   const draft = searchParams.get('draft') === 'true'
   const depth = searchParams.get('depth')
+  const publishSpecificLocale = req.query.publishSpecificLocale as string | undefined
 
   const doc = await createOperation({
     autosave,
@@ -24,6 +25,7 @@ export const createHandler: PayloadHandler = async (req) => {
     depth: isNumber(depth) ? depth : undefined,
     draft,
     populate: sanitizePopulateParam(req.query.populate),
+    publishSpecificLocale,
     req,
     select: sanitizeSelectParam(req.query.select),
   })
