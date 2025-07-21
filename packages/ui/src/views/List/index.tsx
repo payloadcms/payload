@@ -204,7 +204,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 </div>
               )}
               {AfterListTable}
-              {docs.length > 0 && !query.groupBy && (
+              {docs.length > 0 && !collectionConfig.admin.groupBy && !query.groupBy && (
                 <PageControls
                   AfterPageControls={
                     smallBreak ? (
@@ -236,11 +236,14 @@ export function DefaultListView(props: ListViewClientProps) {
           </SelectionProvider>
         </div>
       </TableColumnsProvider>
-      {docs.length > 0 && query.groupBy && data.totalPages > 1 && (
-        <StickyToolbar>
-          <PageControls collectionConfig={collectionConfig} />
-        </StickyToolbar>
-      )}
+      {docs.length > 0 &&
+        collectionConfig.admin.groupBy &&
+        query.groupBy &&
+        data.totalPages > 1 && (
+          <StickyToolbar>
+            <PageControls collectionConfig={collectionConfig} />
+          </StickyToolbar>
+        )}
     </Fragment>
   )
 }
