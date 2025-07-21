@@ -28,11 +28,7 @@ export const Table: React.FC<Props> = ({ appearance, columns, data, heading }) =
         .filter(Boolean)
         .join(' ')}
     >
-      {typeof heading === 'string' ? (
-        <h4 className={`${baseClass}__heading`}>{heading}</h4>
-      ) : (
-        <div className={`${baseClass}__heading`}>{heading}</div>
-      )}
+      {heading ? <h4 className={`${baseClass}__heading`}>{heading}</h4> : null}
       <table cellPadding="0" cellSpacing="0">
         <thead>
           <tr>

@@ -155,7 +155,7 @@ export const handleGroupBy = async ({
           })
         }
 
-        const { columnState: newColumnState, Table: NewTable } = renderTable({
+        const { Table: NewTable } = renderTable({
           clientCollectionConfig,
           collectionConfig,
           columns,

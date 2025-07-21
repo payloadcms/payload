@@ -375,6 +375,13 @@ test.describe('Group By', () => {
     })
   })
 
+  test('should not render per table pagination controls when group-by is not active', async () => {
+    // delete user prefs to ensure that group-by isn't populated after loading the page
+    await deletePreferences({ payload, key: `${postsSlug}.list`, user })
+    await page.goto(url.list)
+    await expect(page.locator('.page-controls')).toHaveCount(1)
+  })
+
   test('should render date fields in proper format when displayed as table headers', async () => {
     await page.goto(url.list)
     await addGroupBy(page, { fieldLabel: 'Updated At', fieldPath: 'updatedAt' })

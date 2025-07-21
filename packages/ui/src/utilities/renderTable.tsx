@@ -255,11 +255,13 @@ export const renderTable = ({
             data={data.docs}
             heading={heading}
           />
-          <GroupByPageControls
-            collectionConfig={clientCollectionConfig}
-            data={data}
-            groupByValue={groupByValue}
-          />
+          {collectionConfig?.admin?.groupBy && query?.groupBy && (
+            <GroupByPageControls
+              collectionConfig={clientCollectionConfig}
+              data={data}
+              groupByValue={groupByValue}
+            />
+          )}
         </div>
       ),
     }
