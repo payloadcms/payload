@@ -11,6 +11,10 @@ type Args = {
   cartsSlug?: string
   currenciesConfig: CurrenciesConfig
   /**
+   * The slug of the customers collection, defaults to 'users'.
+   */
+  customersSlug?: string
+  /**
    * The slug of the orders collection, defaults to 'orders'.
    */
   ordersSlug?: string
@@ -33,16 +37,17 @@ type Args = {
   variantsSlug?: string
 }
 
-type ConfirmOrder = (args: Args) => Endpoint['handler']
+type ConfirmOrderHandler = (args: Args) => Endpoint['handler']
 
 /**
  * Handles the endpoint for initiating payments. We will handle checking the amount and product and variant prices here before it is sent to the payment provider.
  * This is the first step in the payment process.
  */
-export const confirmOrderHandler: ConfirmOrder =
+export const confirmOrderHandler: ConfirmOrderHandler =
   ({
     cartsSlug = 'carts',
     currenciesConfig,
+    customersSlug = 'users',
     ordersSlug = 'orders',
     paymentMethod,
     productsSlug = 'products',
@@ -61,10 +66,6 @@ export const confirmOrderHandler: ConfirmOrder =
     let cartID: DefaultDocumentIDType = data?.cartID
     let cart = undefined
     let customerEmail: string = user?.email ?? ''
-
-    console.log({ customerEmail, user })
-
-    console.log('validating the user')
 
     if (user) {
       if (user.cart?.docs && Array.isArray(user.cart.docs) && user.cart.docs.length > 0) {
@@ -93,8 +94,6 @@ export const confirmOrderHandler: ConfirmOrder =
         )
       }
     }
-
-    console.log('going into card validation')
 
     if (!cart) {
       if (cartID) {
@@ -150,8 +149,6 @@ export const confirmOrderHandler: ConfirmOrder =
         },
       )
     }
-
-    console.log('going into product validation')
 
     try {
       if (Array.isArray(cart.items) && cart.items.length > 0) {
@@ -284,12 +281,10 @@ export const confirmOrderHandler: ConfirmOrder =
         }
       }
 
-      console.log('gonna confirm the order')
-
       const paymentResponse = await paymentMethod.confirmOrder({
+        customersSlug,
         data: {
           ...data,
-          cart,
           customerEmail,
         },
         ordersSlug,
@@ -297,10 +292,12 @@ export const confirmOrderHandler: ConfirmOrder =
         transactionsSlug,
       })
 
+      if (paymentResponse) {
+        // Start decrementing the inventory for each product and variant in the cart
+      }
+
       return Response.json(paymentResponse)
     } catch (error) {
-      console.log({ error })
-
       payload.logger.error(error, 'Error initiating payment')
 
       return Response.json(

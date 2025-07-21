@@ -29,11 +29,10 @@ export const getCollectionSlugMap = ({ sanitizedPluginConfig }: Props): Collecti
     collectionSlugsMap.customers = sanitizedPluginConfig.customers.slug
 
     if (
-      typeof sanitizedPluginConfig.customers.addresses === 'object' &&
-      sanitizedPluginConfig.customers.addresses.collectionOverride?.slug
+      typeof sanitizedPluginConfig.addresses === 'object' &&
+      sanitizedPluginConfig.addresses.collectionOverride?.slug
     ) {
-      collectionSlugsMap.addresses =
-        sanitizedPluginConfig.customers.addresses.collectionOverride.slug
+      collectionSlugsMap.addresses = sanitizedPluginConfig.addresses.collectionOverride.slug
     }
   }
 

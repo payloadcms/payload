@@ -32,35 +32,89 @@ type DefaultCartType = {
 
 export type Cart = DefaultCartType
 
+type InitiatePaymentReturnType = {
+  [key: string]: any // Allows for additional data to be returned, such as payment method specific data
+  clientSecret: string
+  message: string
+  paymentIntentID: string
+}
+
+type InitiatePayment = (args: {
+  /**
+   * The slug of the customers collection, defaults to 'users'.
+   */
+  customersSlug?: string
+  data: {
+    /**
+     * Billing address for the payment.
+     */
+    billingAddress: TypedCollection['addresses']
+    /**
+     * Cart items.
+     */
+    cart: Cart
+    /**
+     * Currency code to use for the payment.
+     */
+    currency: string
+    customerEmail: string
+    /**
+     * Shipping address for the payment.
+     */
+    shippingAddress?: TypedCollection['addresses']
+  }
+  req: PayloadRequest
+  /**
+   * The slug of the transactions collection, defaults to 'transactions'.
+   * For example, this is used to create a record of the payment intent in the transactions collection.
+   */
+  transactionsSlug: string
+}) => Promise<Record<string, unknown>> | Record<string, unknown>
+
+type ConfirmOrderReturnType = {
+  [key: string]: any // Allows for additional data to be returned, such as payment method specific data
+  message: string
+  order: TypedCollection['orders']
+  orderID: DefaultDocumentIDType
+}
+
+type ConfirmOrder = (args: {
+  /**
+   * The slug of the carts collection, defaults to 'carts'.
+   * For example, this is used to retrieve the cart for the order.
+   */
+  cartsSlug?: string
+  /**
+   * The slug of the customers collection, defaults to 'users'.
+   */
+  customersSlug?: string
+  /**
+   * Data made available to the payment method when confirming an order. You should get the cart items from the transaction.
+   */
+  data: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any // Allows for additional data to be passed through, such as payment method specific data
+    customerEmail?: string
+  }
+  /**
+   * The slug of the orders collection, defaults to 'orders'.
+   */
+  ordersSlug?: string
+  req: PayloadRequest
+  /**
+   * The slug of the transactions collection, defaults to 'transactions'.
+   * For example, this is used to create a record of the payment intent in the transactions collection.
+   */
+  transactionsSlug?: string
+}) => ConfirmOrderReturnType | Promise<ConfirmOrderReturnType>
+
 /**
  * The full payment adapter config expected as part of the config for the Ecommerce plugin.
  *
  * You can insert this type directly or return it from a function constructing it.
  */
 export type PaymentAdapter = {
-  confirmOrder: (args: {
-    /**
-     * The slug of the carts collection, defaults to 'carts'.
-     * For example, this is used to retrieve the cart for the order.
-     */
-    cartsSlug?: string
-    data: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      [key: string]: any // Allows for additional data to be passed through, such as payment method specific data
-      cart: Cart
-      customerEmail?: string
-    }
-    /**
-     * The slug of the orders collection, defaults to 'orders'.
-     */
-    ordersSlug?: string
-    req: PayloadRequest
-    /**
-     * The slug of the transactions collection, defaults to 'transactions'.
-     * For example, this is used to create a record of the payment intent in the transactions collection.
-     */
-    transactionsSlug?: string
-  }) => Promise<Record<string, unknown>> | Record<string, unknown>
+  confirmOrder: ConfirmOrder
   /**
    * An array of endpoints to be bootstrapped to Payload's API in order to support the payment method. All API paths are relative to `/api/payments/{provider_name}`.
    *
@@ -103,6 +157,10 @@ export type PaymentAdapter = {
    * Hooks used to manage the lifecycle of the payment method. These are run on transactions at various stages when they update.
    */
   initiatePayment: (args: {
+    /**
+     * The slug of the customers collection, defaults to 'users'.
+     */
+    customersSlug?: string
     data: {
       /**
        * Billing address for the payment.
@@ -255,12 +313,6 @@ type AddressesConfig = {
 
 export type CustomersConfig = {
   /**
-   * Enable the addresses collection for customers.
-   * This allows customers to have multiple addresses for shipping and billing. Accepts an override to customise the addresses collection.
-   * Defaults to true.
-   */
-  addresses?: AddressesConfig | boolean
-  /**
    * Slug of the customers collection, defaults to 'users'.
    * This is used to link carts and orders to customers.
    */
@@ -324,6 +376,11 @@ export type CollectionSlugMap = {
 
 export type EcommercePluginConfig = {
   /**
+   * Enable the addresses collection to allow customers, transactions and orders to have multiple addresses for shipping and billing. Accepts an override to customise the addresses collection.
+   * Defaults to supporting a default set of countries.
+   */
+  addresses?: AddressesConfig | boolean
+  /**
    * Configure the target collection used for carts.
    *
    * Defaults to true.
@@ -369,9 +426,10 @@ export type EcommercePluginConfig = {
 }
 
 export type SanitizedEcommercePluginConfig = {
+  addresses: { addressFields: Field[] } & Omit<AddressesConfig, 'addressFields'>
   currencies: Required<CurrenciesConfig>
   inventory?: InventoryConfig
   payments: {
     paymentMethods: [] | PaymentAdapter[]
   }
-} & Omit<Required<EcommercePluginConfig>, 'currencies' | 'inventory' | 'payments'>
+} & Omit<Required<EcommercePluginConfig>, 'addresses' | 'currencies' | 'inventory' | 'payments'>

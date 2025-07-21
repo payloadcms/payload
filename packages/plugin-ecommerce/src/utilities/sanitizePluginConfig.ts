@@ -1,5 +1,6 @@
 import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from '../types.js'
 
+import { defaultAddressFields } from '../addresses/defaultAddressFields.js'
 import { USD } from '../currencies/index.js'
 
 type Props = {
@@ -14,11 +15,28 @@ export const sanitizePluginConfig = ({ pluginConfig }: Props): SanitizedEcommerc
   if (typeof config.customers === 'undefined') {
     config.customers = {
       slug: 'users',
-      addresses: true,
+    }
+  }
+
+  if (
+    typeof config.addresses === 'undefined' ||
+    (typeof config.addresses === 'boolean' && config.addresses === true)
+  ) {
+    config.addresses = {
+      addressFields: defaultAddressFields(),
     }
   } else {
-    if (typeof config.customers.addresses === 'undefined') {
-      config.customers.addresses = true
+    const addressFields =
+      (typeof pluginConfig.addresses === 'object' &&
+        typeof pluginConfig.addresses.addressFields === 'function' &&
+        pluginConfig.addresses.addressFields({
+          defaultFields: defaultAddressFields(),
+        })) ||
+      defaultAddressFields()
+
+    config.addresses = {
+      ...config.addresses,
+      addressFields,
     }
   }
 

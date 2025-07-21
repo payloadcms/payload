@@ -1,10 +1,14 @@
-import type { CollectionConfig, Field, Option } from 'payload'
+import type { CollectionConfig, Field } from 'payload'
 
 import type { CountryType, FieldsOverride } from '../types.js'
 
 import { defaultCountries } from './defaultCountries.js'
 
 type Props = {
+  /**
+   * Array of fields used for capturing the address data. Use this over overrides to customise the fields here as it's reused across the plugin.
+   */
+  addressFields: Field[]
   /**
    * Slug of the customers collection, defaults to 'users'.
    */
@@ -13,10 +17,12 @@ type Props = {
   supportedCountries?: CountryType[]
 }
 
-export const addressesCollection: (props?: Props) => CollectionConfig = (props) => {
-  const { customersSlug = 'users', overrides, supportedCountries } = props || {}
+export const addressesCollection: (props: Props) => CollectionConfig = (props) => {
+  const { addressFields, customersSlug = 'users', overrides } = props || {}
   const fieldsOverride = overrides?.fields
 
+  const { supportedCountries: supportedCountriesFromProps } = props || {}
+  const supportedCountries = supportedCountriesFromProps || defaultCountries
   const hasOnlyOneCountry = supportedCountries && supportedCountries.length === 1
 
   const defaultFields: Field[] = [
@@ -28,99 +34,26 @@ export const addressesCollection: (props?: Props) => CollectionConfig = (props) 
         t('plugin-ecommerce:customer'),
       relationTo: customersSlug,
     },
-    {
-      name: 'title',
-      type: 'text',
-      label: ({ t }) =>
-        // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:addressTitle'),
-      required: true,
-    },
-    {
-      name: 'firstName',
-      type: 'text',
-      label: ({ t }) =>
-        // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:addressFirstName'),
-      required: true,
-    },
-    {
-      name: 'lastName',
-      type: 'text',
-      label: ({ t }) =>
-        // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:addressLastName'),
-      required: true,
-    },
-    {
-      name: 'company',
-      type: 'text',
-      label: ({ t }) =>
-        // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:addressCompany'),
-    },
-    {
-      name: 'addressLine1',
-      type: 'text',
-      label: ({ t }) =>
-        // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:addressLine1'),
-      required: true,
-    },
-    {
-      name: 'addressLine2',
-      type: 'text',
-      label: ({ t }) =>
-        // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:addressLine2'),
-    },
-    {
-      name: 'city',
-      type: 'text',
-      label: ({ t }) =>
-        // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:addressCity'),
-      required: true,
-    },
-    {
-      name: 'state',
-      type: 'text',
-      label: ({ t }) =>
-        // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:addressState'),
-    },
-    {
-      name: 'postalCode',
-      type: 'text',
-      label: ({ t }) =>
-        // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:addressPostalCode'),
-      required: true,
-    },
-    {
-      name: 'country',
-      type: 'select',
-      label: ({ t }) =>
-        // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:addressCountry'),
-      options: supportedCountries || defaultCountries,
-      required: true,
-      ...(supportedCountries && supportedCountries?.[0] && hasOnlyOneCountry
-        ? {
-            admin: {
-              disabled: true,
-            },
-            defaultValue: supportedCountries?.[0].value,
-          }
-        : {}),
-    },
-    {
-      name: 'phone',
-      type: 'text',
-      label: ({ t }) =>
-        // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:addressPhone'),
-    },
+    ...addressFields.map((field) => {
+      if ('name' in field && field.name === 'country') {
+        return {
+          name: 'country',
+          type: 'select',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-ecommerce:addressCountry'),
+          options: supportedCountries || defaultCountries,
+          required: true,
+          ...(supportedCountries && supportedCountries?.[0] && hasOnlyOneCountry
+            ? {
+                defaultValue: supportedCountries?.[0].value,
+              }
+            : {}),
+        } as Field
+      }
+
+      return field
+    }),
   ]
 
   const fields =

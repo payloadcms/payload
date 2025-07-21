@@ -3,6 +3,7 @@ import type { GenericTranslationsObject } from '@payloadcms/translations'
 export const en: GenericTranslationsObject = {
   $schema: './translation-schema.json',
   'plugin-ecommerce': {
+    abandoned: 'Abandoned',
     addressCity: 'City',
     addressCompany: 'Company',
     addressCountry: 'Country',
@@ -16,6 +17,7 @@ export const en: GenericTranslationsObject = {
     addressTitle: 'Title',
     amount: 'Amount',
     availableVariants: 'Available variants',
+    billingAddress: 'Billing address',
     cancelled: 'Cancelled',
     cart: 'Cart',
     completed: 'Completed',
@@ -30,6 +32,7 @@ export const en: GenericTranslationsObject = {
     inventory: 'Inventory',
     item: 'Item',
     items: 'Items',
+    open: 'Open',
     order: 'Order',
     paymentMethod: 'Payment method',
     paymentMethods: 'Payment methods',
@@ -43,6 +46,7 @@ export const en: GenericTranslationsObject = {
     products: 'Products',
     quantity: 'Quantity',
     refunded: 'Refunded',
+    shippingAddress: 'Shipping address',
     status: 'Status',
     subtotal: 'Subtotal',
     succeeded: 'Succeeded',

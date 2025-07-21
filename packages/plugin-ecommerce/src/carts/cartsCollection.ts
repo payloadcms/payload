@@ -49,6 +49,39 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
         t('plugin-ecommerce:customer'),
       relationTo: customersSlug,
     },
+    {
+      name: 'purchasedAt',
+      type: 'date',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:purchasedAt'),
+    },
+    {
+      name: 'status',
+      type: 'select',
+      defaultValue: 'open',
+      interfaceName: 'CartStatus',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:status'),
+      options: [
+        {
+          // @ts-expect-error - translations are not typed in plugins yet
+          label: ({ t }) => t('plugin-ecommerce:open'),
+          value: 'open',
+        },
+        {
+          // @ts-expect-error - translations are not typed in plugins yet
+          label: ({ t }) => t('plugin-ecommerce:abandoned'),
+          value: 'abandoned',
+        },
+        {
+          // @ts-expect-error - translations are not typed in plugins yet
+          label: ({ t }) => t('plugin-ecommerce:completed'),
+          value: 'completed',
+        },
+      ],
+    },
     ...(currenciesConfig
       ? [
           currencyField({
@@ -65,7 +98,6 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
           }),
         ]
       : []),
-
     cartItemsField({
       enableVariants,
       overrides: {

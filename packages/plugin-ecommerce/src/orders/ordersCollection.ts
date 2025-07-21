@@ -8,9 +8,9 @@ import { currencyField } from '../fields/currencyField.js'
 
 type Props = {
   /**
-   * Slug of the carts collection, defaults to 'carts'.
+   * Array of fields used for capturing the shipping address data.
    */
-  cartsSlug?: string
+  addressFields?: Field[]
   currenciesConfig?: CurrenciesConfig
   /**
    * Slug of the customers collection, defaults to 'users'.
@@ -34,7 +34,7 @@ type Props = {
 
 export const ordersCollection: (props?: Props) => CollectionConfig = (props) => {
   const {
-    cartsSlug = 'carts',
+    addressFields,
     currenciesConfig,
     customersSlug = 'users',
     enableVariants = false,
@@ -60,11 +60,6 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
         t('plugin-ecommerce:customerEmail'),
-    },
-    {
-      name: 'cart',
-      type: 'relationship',
-      relationTo: cartsSlug,
     },
     {
       name: 'transactions',
@@ -106,6 +101,18 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
         },
       ],
     },
+    ...(addressFields
+      ? [
+          {
+            name: 'shippingAddress',
+            type: 'group',
+            fields: addressFields,
+            label: ({ t }) =>
+              // @ts-expect-error - translations are not typed in plugins yet
+              t('plugin-ecommerce:shippingAddress'),
+          } as Field,
+        ]
+      : []),
     ...(currenciesConfig
       ? [amountField({ currenciesConfig }), currencyField({ currenciesConfig })]
       : []),

@@ -107,7 +107,9 @@ export const plugins: Plugin[] = [
   ecommercePlugin({
     customers: {
       slug: 'users',
-      addresses: Addresses,
+    },
+    addresses: {
+      collectionOverride: Addresses,
     },
     payments: {
       paymentMethods: [

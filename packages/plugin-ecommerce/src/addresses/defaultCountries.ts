@@ -1,4 +1,4 @@
-import type { Option } from 'payload'
+import type { CountryType } from '../types.js'
 
 /**
  * Default list of countries supported for forms and payments.
@@ -6,7 +6,7 @@ import type { Option } from 'payload'
  *
  * The label is the human-readable name of the country, and the value is the ISO 3166-1 alpha-2 code.
  */
-export const defaultCountries: Option[] = [
+export const defaultCountries: CountryType[] = [
   { label: 'United States', value: 'US' },
   { label: 'United Kingdom', value: 'GB' },
   { label: 'Canada', value: 'CA' },

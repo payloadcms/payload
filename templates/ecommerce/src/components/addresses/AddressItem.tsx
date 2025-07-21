@@ -5,7 +5,7 @@ import type { Address } from '@/payload-types'
 import { CreateAddressModal } from '@/components/addresses/CreateAddressModal'
 
 type Props = {
-  address: Address
+  address: Omit<Partial<Address>, 'country'> & { country: string }
   /**
    * Completely override the default actions
    */
@@ -54,7 +54,7 @@ export const AddressItem: React.FC<Props> = ({
         <p>{address.country}</p>
       </div>
 
-      {!hideActions && (
+      {!hideActions && address.id && (
         <div className="shrink flex flex-col gap-2">
           {actions ? (
             actions

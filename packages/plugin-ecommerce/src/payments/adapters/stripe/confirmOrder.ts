@@ -11,13 +11,7 @@ type Props = {
 
 export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confirmOrder'] =
   (props) =>
-  async ({
-    cartsSlug = 'carts',
-    data,
-    ordersSlug = 'orders',
-    req,
-    transactionsSlug = 'transactions',
-  }) => {
+  async ({ data, ordersSlug = 'orders', req, transactionsSlug = 'transactions' }) => {
     const payload = req.payload
     const { apiVersion, appInfo, secretKey } = props || {}
 
@@ -77,11 +71,13 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
       // Verify the payment intent exists and retrieve it
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentID)
 
-      console.log({ paymentIntent })
-
       const cartID = paymentIntent.metadata.cartID
       const cartItemsSnapshot = paymentIntent.metadata.cartItemsSnapshot
         ? JSON.parse(paymentIntent.metadata.cartItemsSnapshot)
+        : undefined
+
+      const shippingAddress = paymentIntent.metadata.shippingAddress
+        ? JSON.parse(paymentIntent.metadata.shippingAddress)
         : undefined
 
       if (!cartID) {
@@ -92,31 +88,14 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         throw new Error('Cart items snapshot not found or invalid in the PaymentIntent metadata')
       }
 
-      console.log({ cartItemsSnapshot })
-
-      const cart = await payload.findByID({
-        id: cartID,
-        collection: cartsSlug,
-        depth: 2,
-        overrideAccess: false,
-        select: {
-          id: true,
-          currency: true,
-          customerEmail: true,
-          items: true,
-          subtotal: true,
-        },
-        user,
-      })
-
       const order = await payload.create({
         collection: ordersSlug,
         data: {
           amount: paymentIntent.amount,
-          cart: cart.id,
           currency: paymentIntent.currency.toUpperCase(),
           ...(req.user ? { customer: req.user.id } : { customerEmail }),
           items: cartItemsSnapshot,
+          shippingAddress,
           status: 'processing',
           transactions: [transaction.id],
         },

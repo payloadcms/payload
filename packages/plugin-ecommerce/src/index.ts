@@ -42,20 +42,22 @@ export const ecommercePlugin =
     const currenciesConfig: Required<SanitizedEcommercePluginConfig['currencies']> =
       sanitizedPluginConfig.currencies
 
-    if (sanitizedPluginConfig.customers.addresses) {
-      const overrides =
-        typeof sanitizedPluginConfig.customers.addresses === 'boolean'
-          ? undefined
-          : sanitizedPluginConfig.customers.addresses.collectionOverride
+    let addressFields
 
-      const supportedCountries =
-        typeof sanitizedPluginConfig.customers.addresses === 'boolean'
-          ? undefined
-          : sanitizedPluginConfig.customers.addresses.supportedCountries
+    if (sanitizedPluginConfig.addresses) {
+      const collectionOverrides =
+        typeof sanitizedPluginConfig.addresses === 'object'
+          ? sanitizedPluginConfig.addresses.collectionOverride
+          : undefined
+
+      addressFields = sanitizedPluginConfig.addresses.addressFields
+
+      const supportedCountries = sanitizedPluginConfig.addresses.supportedCountries
 
       const addresses = addressesCollection({
+        addressFields,
         customersSlug: collectionSlugMap.customers,
-        overrides,
+        overrides: collectionOverrides,
         supportedCountries,
       })
 
@@ -129,6 +131,7 @@ export const ecommercePlugin =
 
     if (sanitizedPluginConfig.orders) {
       const orders = ordersCollection({
+        addressFields,
         currenciesConfig,
         customersSlug: collectionSlugMap.customers,
         enableVariants,
@@ -209,10 +212,15 @@ export const ecommercePlugin =
 
     if (sanitizedPluginConfig.transactions) {
       const transactions = transactionsCollection({
+        addressFields,
+        cartsSlug: collectionSlugMap.carts,
         currenciesConfig,
         customersSlug: collectionSlugMap.customers,
+        enableVariants,
         ordersSlug: collectionSlugMap.orders,
         paymentMethods,
+        productsSlug: collectionSlugMap.products,
+        variantsSlug: collectionSlugMap.variants,
       })
 
       incomingConfig.collections.push(transactions)

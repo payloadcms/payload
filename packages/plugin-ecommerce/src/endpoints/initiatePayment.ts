@@ -1,7 +1,6 @@
 import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from 'payload'
 
 import type {
-  Cart,
   CurrenciesConfig,
   PaymentAdapter,
   ProductsValidation,
@@ -16,6 +15,10 @@ type Args = {
    */
   cartsSlug?: string
   currenciesConfig: CurrenciesConfig
+  /**
+   * The slug of the customers collection, defaults to 'users'.
+   */
+  customersSlug?: string
   /**
    * Track inventory stock for the products and variants.
    * Accepts an object to override the default field name.
@@ -50,6 +53,7 @@ export const initiatePaymentHandler: InitiatePayment =
   ({
     cartsSlug = 'carts',
     currenciesConfig,
+    customersSlug = 'users',
     paymentMethod,
     productsSlug = 'products',
     productsValidation,
@@ -68,7 +72,6 @@ export const initiatePaymentHandler: InitiatePayment =
     const billingAddress = data?.billingAddress
     const shippingAddress = data?.shippingAddress
 
-    console.log({ billingAddress, shippingAddress })
     let customerEmail: string = user?.email ?? ''
 
     if (user) {
@@ -291,6 +294,7 @@ export const initiatePaymentHandler: InitiatePayment =
 
     try {
       const paymentResponse = await paymentMethod.initiatePayment({
+        customersSlug,
         data: {
           billingAddress,
           cart,

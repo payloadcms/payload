@@ -12,6 +12,8 @@ import { ProductItem } from '@/components/ProductItem'
 import { headers as getHeaders } from 'next/headers.js'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
+import { OrderStatus } from '@/components/OrderStatus'
+import { AddressItem } from '@/components/addresses/AddressItem'
 
 export const dynamic = 'force-dynamic'
 
@@ -74,6 +76,7 @@ export default async function Order({ params, searchParams }: PageProps) {
         status: true,
         createdAt: true,
         updatedAt: true,
+        shippingAddress: true,
       },
     })
 
@@ -139,10 +142,12 @@ export default async function Order({ params, searchParams }: PageProps) {
             {order.amount && <Price className="text-lg" amount={order.amount} />}
           </div>
 
-          <div className="grow max-w-1/3">
-            <p className="font-mono uppercase text-primary/50 mb-1 text-sm">Status</p>
-            <p className="text-lg capitalize">{order.status}</p>
-          </div>
+          {order.status && (
+            <div className="grow max-w-1/3">
+              <p className="font-mono uppercase text-primary/50 mb-1 text-sm">Status</p>
+              <OrderStatus className="text-sm" status={order.status} />
+            </div>
+          )}
         </div>
 
         {order.items && (
@@ -172,6 +177,14 @@ export default async function Order({ params, searchParams }: PageProps) {
                 )
               })}
             </ul>
+          </div>
+        )}
+
+        {order.shippingAddress && (
+          <div>
+            <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">Shipping Address</h2>
+
+            <AddressItem address={order.shippingAddress} hideActions />
           </div>
         )}
       </div>

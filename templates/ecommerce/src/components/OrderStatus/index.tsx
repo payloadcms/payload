@@ -1,17 +1,22 @@
 import { OrderStatus as StatusOptions } from '@/payload-types'
-import clsx from 'clsx'
+import { cn } from '@/utilities/cn'
 
 type Props = {
   status: StatusOptions
+  className?: string
 }
 
-export const OrderStatus: React.FC<Props> = ({ status }) => {
+export const OrderStatus: React.FC<Props> = ({ status, className }) => {
   return (
     <div
-      className={clsx('text-xs tracking-[0.1em] font-mono uppercase py-0 px-2 rounded', {
-        'bg-primary/10': status === 'processing',
-        'bg-accent/10 text-accent': status === 'completed',
-      })}
+      className={cn(
+        'text-xs tracking-[0.1em] font-mono uppercase py-0 px-2 rounded w-fit',
+        className,
+        {
+          'bg-primary/10': status === 'processing',
+          'bg-success': status === 'completed',
+        },
+      )}
     >
       {status}
     </div>
