@@ -209,9 +209,8 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       setSelected(new Map())
       prevSearchString.current = searchParamsString
     }
-  }, [searchParamsString, toggleAll])
+  }, [searchParamsString])
 
-  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   contextRef.current = {
     count,
     getQueryParams,
@@ -223,7 +222,6 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     totalDocs,
   }
 
-  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   return <Context value={contextRef.current}>{children}</Context>
 }
 
