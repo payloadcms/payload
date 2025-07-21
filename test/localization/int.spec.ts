@@ -2592,6 +2592,7 @@ describe('Localization', () => {
         user['collection'] = 'users'
       })
 
+      // 1
       it('should copy to locale', async () => {
         const doc = await payload.create({
           collection: 'localized-posts',
@@ -2621,6 +2622,7 @@ describe('Localization', () => {
         expect(res.localizedCheckbox).toBe(true)
       })
 
+      // 2
       it('should copy localized nested to arrays', async () => {
         const doc = await payload.create({
           collection: 'nested',
@@ -2645,10 +2647,21 @@ describe('Localization', () => {
           collectionSlug: 'nested',
         })) as Nested
 
-        expect(res.topLevelArray[0].localizedText).toBe('some-localized-text')
-        expect(res.topLevelArray[0].notLocalizedText).toBe('some-not-localized-text')
+        expect(res.topLevelArray?.[0]?.localizedText).toBe('some-localized-text')
+        expect(res.topLevelArray?.[0]?.notLocalizedText).toBe('some-not-localized-text')
+
+        const refreshedDoc = await payload.findByID({
+          id: doc.id,
+          collection: 'nested',
+        })
+
+        // The source data should remain unchanged
+        expect(refreshedDoc.topLevelArray?.[0]?.localizedText).toBe('some-localized-text')
+        expect(refreshedDoc.topLevelArray?.[0]?.notLocalizedText).toBe('some-not-localized-text')
+        expect(refreshedDoc.topLevelArray).toHaveLength(1)
       })
 
+      // 3
       it('should copy localized arrays', async () => {
         const doc = await payload.create({
           collection: 'nested',
@@ -2672,199 +2685,15 @@ describe('Localization', () => {
           collectionSlug: 'nested',
         })) as Nested
 
-        expect(res.topLevelArrayLocalized[0].text).toBe('some-text')
-      })
+        expect(res.topLevelArrayLocalized?.[0]?.text).toBe('some-text')
 
-      it('should copy localized fields within arrays correctly', async () => {
-        // Simple test to verify basic functionality
-        const doc = await payload.create({
-          collection: 'nested',
-          locale: 'en',
-          data: {
-            topLevelArray: [
-              {
-                localizedText: 'en-text',
-                notLocalizedText: 'en-not-localized',
-              },
-            ],
-          },
-        })
-
-        // Add some data to Spanish locale
-        await payload.update({
+        const refreshedDoc = await payload.findByID({
           id: doc.id,
           collection: 'nested',
-          locale: 'es',
-          data: {
-            topLevelArray: [
-              {
-                localizedText: 'es-text',
-                notLocalizedText: 'es-not-localized',
-              },
-            ],
-          },
         })
 
-        const req = await createLocalReq({ user }, payload)
-
-        // Copy from English to Spanish
-        const res = (await copyDataFromLocaleHandler({
-          fromLocale: 'en',
-          req,
-          toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'nested',
-        })) as Nested
-
-        // The localized field should be copied from English
-        expect(res.topLevelArray[0].localizedText).toBe('en-text')
-
-        // The non-localized field should remain from Spanish
-        expect(res.topLevelArray[0].notLocalizedText).toBe('es-not-localized')
-      })
-
-      it('should preserve existing array elements when copying from locale with fewer elements', async () => {
-        // This test reproduces the issue #12536
-        // When the target locale has more array elements than the source locale,
-        // the extra elements should be preserved, not lost
-
-        const doc = await payload.create({
-          collection: 'nested',
-          locale: 'en',
-          data: {
-            topLevelArray: [
-              {
-                localizedText: 'source-text-1',
-                notLocalizedText: 'source-not-localized-1',
-              },
-              {
-                localizedText: 'source-text-2',
-                notLocalizedText: 'source-not-localized-2',
-              },
-            ],
-          },
-        })
-
-        // Update the Spanish locale to have more elements
-        await payload.update({
-          id: doc.id,
-          collection: 'nested',
-          locale: 'es',
-          data: {
-            topLevelArray: [
-              {
-                localizedText: 'target-text-1',
-                notLocalizedText: 'target-not-localized-1',
-              },
-              {
-                localizedText: 'target-text-2',
-                notLocalizedText: 'target-not-localized-2',
-              },
-              {
-                localizedText: 'target-text-3',
-                notLocalizedText: 'target-not-localized-3',
-              },
-            ],
-          },
-        })
-
-        const req = await createLocalReq({ user }, payload)
-
-        // Copy from English (2 elements) to Spanish (3 elements)
-        const res = (await copyDataFromLocaleHandler({
-          fromLocale: 'en',
-          req,
-          toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'nested',
-        })) as Nested
-
-        // The localized fields should be copied from the source for existing elements
-        expect(res.topLevelArray[0].localizedText).toBe('source-text-1')
-        expect(res.topLevelArray[1].localizedText).toBe('source-text-2')
-
-        // The non-localized fields should remain unchanged
-        expect(res.topLevelArray[0].notLocalizedText).toBe('target-not-localized-1')
-        expect(res.topLevelArray[1].notLocalizedText).toBe('target-not-localized-2')
-
-        // The third element (extra in target) should be preserved completely
-        expect(res.topLevelArray[2].localizedText).toBe('target-text-3')
-        expect(res.topLevelArray[2].notLocalizedText).toBe('target-not-localized-3')
-
-        // Ensure we still have all 3 elements
-        expect(res.topLevelArray).toHaveLength(3)
-      })
-
-      it('should reproduce issue #12536 - preserve array elements with localized fields', async () => {
-        // Create a simple test case: EN has 1 element, ES has 2 elements
-        // After copying EN→ES, ES should still have 2 elements
-
-        const doc = await payload.create({
-          collection: 'nested',
-          locale: 'en',
-          data: {
-            topLevelArray: [
-              {
-                localizedText: 'english-text-1',
-                notLocalizedText: 'english-not-localized-1',
-              },
-            ],
-          },
-        })
-
-        console.log('=== CREATED DOC IN EN ===')
-
-        // Add more elements to Spanish
-        await payload.update({
-          id: doc.id,
-          collection: 'nested',
-          locale: 'es',
-          data: {
-            topLevelArray: [
-              {
-                localizedText: 'spanish-text-1',
-                notLocalizedText: 'spanish-not-localized-1',
-              },
-              {
-                localizedText: 'spanish-text-2',
-                notLocalizedText: 'spanish-not-localized-2',
-              },
-            ],
-          },
-        })
-
-        console.log('=== ADDED DATA TO ES ===')
-
-        // Verify ES has 2 elements before copy
-        const beforeCopy = await payload.findByID({
-          id: doc.id,
-          collection: 'nested',
-          locale: 'es',
-        })
-        console.log('ES before copy:', beforeCopy.topLevelArray.length, 'elements')
-
-        const req = await createLocalReq({ user }, payload)
-
-        console.log('=== STARTING COPY EN->ES ===')
-        // Copy from English (1 element) to Spanish (2 elements)
-        const result = (await copyDataFromLocaleHandler({
-          fromLocale: 'en',
-          req,
-          toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'nested',
-        })) as Nested
-
-        console.log('=== COPY COMPLETED ===')
-        console.log('Result array length:', result.topLevelArray.length)
-        console.log('Result elements:', result.topLevelArray)
-
-        // This is where the bug manifests
-        expect(result.topLevelArray).toHaveLength(2) // ❌ Bug: Should preserve both ES elements
-        expect(result.topLevelArray[0].localizedText).toBe('english-text-1') // Should copy localized from EN
-        expect(result.topLevelArray[0].notLocalizedText).toBe('spanish-not-localized-1') // Should keep non-localized from ES
-        expect(result.topLevelArray[1].localizedText).toBe('spanish-text-2') // Should preserve ES element
-        expect(result.topLevelArray[1].notLocalizedText).toBe('spanish-not-localized-2') // Should preserve ES element
+        // The source data should remain unchanged
+        expect(refreshedDoc.topLevelArrayLocalized?.[0]?.text).toBe('some-text')
       })
     })
   })

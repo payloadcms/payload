@@ -8,6 +8,7 @@ export const ArrayCollection: CollectionConfig = {
     {
       name: 'items',
       type: 'array',
+      localized: true,
       fields: [
         {
           name: 'text',
