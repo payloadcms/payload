@@ -62,6 +62,35 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
           return locale.code
         }),
       })
+
+      if (config.localization.enableStatusLocalization) {
+        const localeStatusFields: Field[] = config.localization.locales.map((locale) => {
+          const code = typeof locale === 'string' ? locale : locale.code
+
+          return {
+            name: code,
+            type: 'select',
+            options: [
+              { label: 'Draft', value: 'draft' },
+              { label: 'Published', value: 'published' },
+            ],
+          }
+        })
+
+        fields.push({
+          name: 'localeStatus',
+          type: 'group',
+          admin: {
+            disableBulkEdit: true,
+            disabled: true,
+          },
+          fields: localeStatusFields,
+          index: true,
+          ...(flatten && {
+            flattenedFields: localeStatusFields as FlattenedField[],
+          })!,
+        })
+      }
     }
 
     fields.push({
