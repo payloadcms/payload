@@ -169,6 +169,7 @@ export const handleGroupBy = async ({
           key: `table-${valueOrRelationshipID}`,
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,
+          query,
           useAsTitle: collectionConfig.admin.useAsTitle,
         })
 
