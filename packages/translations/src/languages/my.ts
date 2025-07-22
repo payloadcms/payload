@@ -369,6 +369,8 @@ export const myTranslations: DefaultTranslationsObject = {
     pasteRow: 'တန်းကိုတင်ပါ',
     payloadSettings: 'ရွေးချယ်စရာများ',
     permanentlyDelete: 'Padam Selamanya',
+    permanentlyDeletedCountSuccessfully:
+      '{{count}} {{label}} telah berjaya dipadamkan secara kekal.',
     perPage: 'စာမျက်နှာ အလိုက်: {{limit}}',
     previous: 'ယခင်',
     reindex: 'ပြန်လည်အညွှန်းပြုလုပ်ပါ',

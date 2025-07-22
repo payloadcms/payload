@@ -357,6 +357,7 @@ export const arTranslations: DefaultTranslationsObject = {
     pasteRow: 'لصق الصف',
     payloadSettings: 'الإعدادات',
     permanentlyDelete: 'حذف بشكل دائم',
+    permanentlyDeletedCountSuccessfully: 'تم حذف {{count}} {{label}} بشكل دائم بنجاح.',
     perPage: 'لكلّ صفحة: {{limit}}',
     previous: 'سابق',
     reindex: 'إعادة الفهرسة',

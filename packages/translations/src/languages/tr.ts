@@ -370,6 +370,7 @@ export const trTranslations: DefaultTranslationsObject = {
     pasteRow: 'Satırı yapıştır',
     payloadSettings: 'Ayarlar',
     permanentlyDelete: 'Kalıcı Olarak Sil',
+    permanentlyDeletedCountSuccessfully: 'Kalıcı olarak {{count}} {{label}} başarıyla silindi.',
     perPage: 'Sayfa başına: {{limit}}',
     previous: 'Önceki',
     reindex: 'Yeniden İndeksle',

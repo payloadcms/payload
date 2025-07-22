@@ -367,6 +367,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     pasteRow: 'Տեղադրել տողը',
     payloadSettings: 'Payload-ի կարգավորումներ',
     permanentlyDelete: 'Մշտականությամբ Ջնջել',
+    permanentlyDeletedCountSuccessfully: '{{count}} {{label}}-ը հաստատապես ջնջվել է հաջողակ:',
     perPage: 'Էջում՝ {{limit}}',
     previous: 'Նախորդ',
     reindex: 'Վերաինդեքսավորել',

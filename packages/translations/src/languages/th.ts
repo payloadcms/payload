@@ -359,6 +359,7 @@ export const thTranslations: DefaultTranslationsObject = {
     pasteRow: 'วางแถว',
     payloadSettings: 'การตั้งค่า Payload',
     permanentlyDelete: 'ลบถาวร',
+    permanentlyDeletedCountSuccessfully: 'ลบ {{label}} {{count}} รายการอย่างถาวรสำเร็จแล้ว',
     perPage: 'จำนวนต่อหน้า: {{limit}}',
     previous: 'ก่อนหน้านี้',
     reindex: 'จัดทำดัชนีใหม่',

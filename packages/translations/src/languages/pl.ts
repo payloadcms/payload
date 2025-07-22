@@ -366,6 +366,7 @@ export const plTranslations: DefaultTranslationsObject = {
     pasteRow: 'Wklej wiersz',
     payloadSettings: 'Ustawienia Payload',
     permanentlyDelete: 'Trwale Usuń',
+    permanentlyDeletedCountSuccessfully: 'Trwale usunięto {{count}} {{label}} pomyślnie.',
     perPage: 'Na stronę: {{limit}}',
     previous: 'Poprzedni',
     reindex: 'Ponowne indeksowanie',

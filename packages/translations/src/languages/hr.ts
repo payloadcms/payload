@@ -366,6 +366,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     pasteRow: 'Zalijepi redak',
     payloadSettings: 'Payload postavke',
     permanentlyDelete: 'Trajno izbriši',
+    permanentlyDeletedCountSuccessfully: 'Trajno izbrisano {{count}} {{label}} uspješno.',
     perPage: 'Po stranici: {{limit}}',
     previous: 'Prethodni',
     reindex: 'Ponovno indeksiraj',

@@ -368,6 +368,8 @@ export const itTranslations: DefaultTranslationsObject = {
     pasteRow: 'Incolla riga',
     payloadSettings: 'Impostazioni di Payload',
     permanentlyDelete: 'Elimina Permanentemente',
+    permanentlyDeletedCountSuccessfully:
+      'Eliminato definitivamente {{count}} {{label}} con successo.',
     perPage: 'Per Pagina: {{limit}}',
     previous: 'Precedente',
     reindex: 'Reindicizza',

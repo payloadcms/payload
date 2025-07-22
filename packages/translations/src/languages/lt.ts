@@ -369,6 +369,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     pasteRow: 'Įklijuoti eilutę',
     payloadSettings: 'Payload nustatymai',
     permanentlyDelete: 'Visam laikui pašalinti',
+    permanentlyDeletedCountSuccessfully: 'Sėkmingai visam laikui ištrinta {{count}} {{label}}.',
     perPage: 'Puslapyje: {{limit}}',
     previous: 'Ankstesnis',
     reindex: 'Perindeksuoti',

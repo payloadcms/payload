@@ -372,6 +372,8 @@ export const esTranslations: DefaultTranslationsObject = {
     pasteRow: 'Pegar fila',
     payloadSettings: 'Configuración de Payload',
     permanentlyDelete: 'Eliminar Permanentemente',
+    permanentlyDeletedCountSuccessfully:
+      'Se ha eliminado permanentemente {{count}} {{label}} con éxito.',
     perPage: 'Por página: {{limit}}',
     previous: 'Anterior',
     reindex: 'Reindexar',

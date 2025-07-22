@@ -111,7 +111,7 @@ export function ListEmptyTrashButton({
 
       if (res.status < 400) {
         toast.success(
-          t('general:deletedCountSuccessfully', {
+          t('general:permanentlyDeletedCountSuccessfully', {
             count: deletedCount,
             label: getTranslation(labels?.plural, i18n),
           }),

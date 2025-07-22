@@ -364,6 +364,7 @@ export const daTranslations: DefaultTranslationsObject = {
     pasteRow: 'Indsæt række',
     payloadSettings: 'Payload-indstillinger',
     permanentlyDelete: 'Permanent Sletning',
+    permanentlyDeletedCountSuccessfully: 'Permanent slettet {{count}} {{label}} succesfuldt.',
     perPage: 'Per side: {{limit}}',
     previous: 'Tidligere',
     reindex: 'Genindekser',

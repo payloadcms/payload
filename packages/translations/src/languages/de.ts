@@ -373,6 +373,7 @@ export const deTranslations: DefaultTranslationsObject = {
     pasteRow: 'Zeile einfügen',
     payloadSettings: 'Payload-Einstellungen',
     permanentlyDelete: 'Dauerhaft löschen',
+    permanentlyDeletedCountSuccessfully: '{{count}} {{label}} erfolgreich dauerhaft gelöscht.',
     perPage: 'Pro Seite: {{limit}}',
     previous: 'Vorherige',
     reindex: 'Neuindizieren',

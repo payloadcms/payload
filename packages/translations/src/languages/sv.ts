@@ -367,6 +367,7 @@ export const svTranslations: DefaultTranslationsObject = {
     pasteRow: 'Klistra in rad',
     payloadSettings: 'Programinställningar',
     permanentlyDelete: 'Permanent Radera',
+    permanentlyDeletedCountSuccessfully: '{{count}} {{label}} raderades permanent framgångsrikt.',
     perPage: 'Per Sida: {{limit}}',
     previous: 'Föregående',
     reindex: 'Omindexera',

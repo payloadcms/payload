@@ -364,6 +364,7 @@ export const faTranslations: DefaultTranslationsObject = {
     pasteRow: 'چسباندن ردیف',
     payloadSettings: 'تنظیمات پی‌لود',
     permanentlyDelete: 'حذف دائم',
+    permanentlyDeletedCountSuccessfully: '{{count}} {{label}} با موفقیت حذف همیشگی شد.',
     perPage: 'هر برگه: {{limit}}',
     previous: 'قبلی',
     reindex: 'بازنمایه‌سازی',

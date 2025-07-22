@@ -366,6 +366,7 @@ export const viTranslations: DefaultTranslationsObject = {
     pasteRow: 'Dán dòng',
     payloadSettings: 'Cài đặt',
     permanentlyDelete: 'Xóa vĩnh viễn',
+    permanentlyDeletedCountSuccessfully: 'Đã xóa vĩnh viễn {{count}} {{label}} thành công.',
     perPage: 'Hiển thị mỗi trang: {{limit}}',
     previous: 'Trước đó',
     reindex: 'Tái lập chỉ mục',

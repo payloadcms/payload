@@ -375,6 +375,7 @@ export const frTranslations: DefaultTranslationsObject = {
     pasteRow: 'Coller la ligne',
     payloadSettings: 'Paramètres de Payload',
     permanentlyDelete: 'Supprimer définitivement',
+    permanentlyDeletedCountSuccessfully: 'Supprimé définitivement {{count}} {{label}} avec succès.',
     perPage: 'Par Page: {{limit}}',
     previous: 'Précédent',
     reindex: 'Réindexer',

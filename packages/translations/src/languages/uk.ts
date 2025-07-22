@@ -365,6 +365,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     pasteRow: 'Вставити рядок',
     payloadSettings: 'Налаштування Payload',
     permanentlyDelete: 'Назавжди видалити',
+    permanentlyDeletedCountSuccessfully: 'Успішно видалено назавжди {{count}} {{label}}.',
     perPage: 'На сторінці: {{limit}}',
     previous: 'Попередній',
     reindex: 'Повторне індексування',

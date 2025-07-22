@@ -364,6 +364,7 @@ export const csTranslations: DefaultTranslationsObject = {
     pasteRow: 'Vložit řádek',
     payloadSettings: 'Payload nastavení',
     permanentlyDelete: 'Trvale smazat',
+    permanentlyDeletedCountSuccessfully: 'Trvale odstraněno {{count}} {{label}} úspěšně.',
     perPage: 'Na stránku: {{limit}}',
     previous: 'Předchozí',
     reindex: 'Přeindexovat',

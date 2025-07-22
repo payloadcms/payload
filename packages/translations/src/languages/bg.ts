@@ -366,6 +366,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     pasteRow: 'Постави ред',
     payloadSettings: 'Настройки на Payload',
     permanentlyDelete: 'Трайно изтриване',
+    permanentlyDeletedCountSuccessfully: 'Успешно изтрити завинаги {{count}} {{label}}.',
     perPage: 'На страница: {{limit}}',
     previous: 'Предишен',
     reindex: 'Преиндексиране',

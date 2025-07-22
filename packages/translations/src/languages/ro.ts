@@ -372,6 +372,7 @@ export const roTranslations: DefaultTranslationsObject = {
     pasteRow: 'Lipește rândul',
     payloadSettings: 'Setări de Payload',
     permanentlyDelete: 'Șterge definitiv',
+    permanentlyDeletedCountSuccessfully: 'Șters permanent cu succes {{count}} {{label}}.',
     perPage: 'Pe pagină: {{limit}}',
     previous: 'Anterior',
     reindex: 'Reindexare',

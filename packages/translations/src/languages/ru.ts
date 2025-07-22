@@ -369,6 +369,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     pasteRow: 'Вставить строку',
     payloadSettings: 'Настройки Payload',
     permanentlyDelete: 'Удалить Навсегда',
+    permanentlyDeletedCountSuccessfully: 'Успешно удалено {{count}} {{label}} навсегда.',
     perPage: 'На странице: {{limit}}',
     previous: 'Предыдущий',
     reindex: 'Переиндексировать',

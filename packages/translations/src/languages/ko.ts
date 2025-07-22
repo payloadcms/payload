@@ -363,6 +363,8 @@ export const koTranslations: DefaultTranslationsObject = {
     pasteRow: '행 붙여넣기',
     payloadSettings: 'Payload 설정',
     permanentlyDelete: '영구적으로 삭제',
+    permanentlyDeletedCountSuccessfully:
+      '영구적으로 {{count}} {{label}}가 성공적으로 삭제되었습니다.',
     perPage: '페이지당 개수: {{limit}}',
     previous: '이전',
     reindex: '재인덱싱',

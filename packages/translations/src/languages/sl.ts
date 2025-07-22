@@ -366,6 +366,7 @@ export const slTranslations: DefaultTranslationsObject = {
     pasteRow: 'Prilepi vrstico',
     payloadSettings: 'Nastavitve Payloada',
     permanentlyDelete: 'Trajno Izbrisano',
+    permanentlyDeletedCountSuccessfully: 'Uspešno trajno izbrisano {{count}} {{label}}.',
     perPage: 'Na stran: {{limit}}',
     previous: 'Prejšnji',
     reindex: 'Reindeksiraj',

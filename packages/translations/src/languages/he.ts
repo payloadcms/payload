@@ -354,6 +354,7 @@ export const heTranslations: DefaultTranslationsObject = {
     pasteRow: 'הדבק שורה',
     payloadSettings: 'הגדרות מערכת Payload',
     permanentlyDelete: 'מחק לצמיתות',
+    permanentlyDeletedCountSuccessfully: 'נמחקו לצמיתות {{count}} {{label}} בהצלחה.',
     perPage: '{{limit}} בכל עמוד',
     previous: 'קודם',
     reindex: 'החזרת אינדקס',

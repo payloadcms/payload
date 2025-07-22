@@ -362,6 +362,7 @@ export const etTranslations: DefaultTranslationsObject = {
     pasteRow: 'Kleebi rida',
     payloadSettings: 'Payload seaded',
     permanentlyDelete: 'Püsivalt Kustuta',
+    permanentlyDeletedCountSuccessfully: '{{count}} {{label}} edukalt ja lõplikult kustutatud.',
     perPage: 'Lehel: {{limit}}',
     previous: 'Eelmine',
     reindex: 'Indekseeri uuesti',

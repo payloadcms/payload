@@ -292,6 +292,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:pasteRow',
   'general:payloadSettings',
   'general:permanentlyDelete',
+  'general:permanentlyDeletedCountSuccessfully',
   'general:perPage',
   'general:previous',
   'general:reindex',

@@ -367,6 +367,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     pasteRow: 'Ielīmēt rindu',
     payloadSettings: 'Payload iestatījumi',
     permanentlyDelete: 'Pastāvīgi Dzēst',
+    permanentlyDeletedCountSuccessfully: 'Veiksmīgi neatgriezeniski izdzēsts {{count}} {{label}}.',
     perPage: 'Lapas ieraksti: {{limit}}',
     previous: 'Iepriekšējais',
     reindex: 'Pārindeksēt',

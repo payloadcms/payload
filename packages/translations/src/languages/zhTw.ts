@@ -347,6 +347,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     pasteRow: '貼上列',
     payloadSettings: 'Payload設定',
     permanentlyDelete: '永久刪除',
+    permanentlyDeletedCountSuccessfully: '成功永久刪除 {{count}} {{label}}。',
     perPage: '每一頁： {{limit}} 個',
     previous: '先前的',
     reindex: '重新索引',

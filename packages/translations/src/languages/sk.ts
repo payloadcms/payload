@@ -366,6 +366,7 @@ export const skTranslations: DefaultTranslationsObject = {
     pasteRow: 'Prilepiť riadok',
     payloadSettings: 'Nastavenia dátového záznamu',
     permanentlyDelete: 'Trvalo odstrániť',
+    permanentlyDeletedCountSuccessfully: 'Úspešne ste natrvalo odstránili {{count}} {{label}}.',
     perPage: 'Na stránku: {{limit}}',
     previous: 'Predchádzajúci',
     reindex: 'Reindexovať',

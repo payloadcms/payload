@@ -368,6 +368,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     pasteRow: 'Zalepi red',
     payloadSettings: 'Payload postavke',
     permanentlyDelete: 'Trajno Obriši',
+    permanentlyDeletedCountSuccessfully: 'Trajno obrisano {{count}} {{label}} uspešno.',
     perPage: 'Po stranici: {{limit}}',
     previous: 'Prethodni',
     reindex: 'Reindeksiraj',

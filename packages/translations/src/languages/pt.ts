@@ -368,6 +368,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     pasteRow: 'Colar linha',
     payloadSettings: 'Configurações do Payload',
     permanentlyDelete: 'Excluir Permanentemente',
+    permanentlyDeletedCountSuccessfully: 'Apagou permanentemente {{count}} {{label}} com sucesso.',
     perPage: 'Itens por Página: {{limit}}',
     previous: 'Anterior',
     reindex: 'Reindexar',

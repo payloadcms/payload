@@ -368,6 +368,8 @@ export const caTranslations: DefaultTranslationsObject = {
     pasteRow: 'Enganxar fila',
     payloadSettings: 'configuracio Payload',
     permanentlyDelete: 'Esborrar permanentment',
+    permanentlyDeletedCountSuccessfully:
+      "S'ha eliminat permanentment {{count}} {{label}} amb èxit.",
     perPage: 'Per pagian: {{limit}}',
     previous: 'Previ',
     reindex: 'Reindexa',

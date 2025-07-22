@@ -369,6 +369,7 @@ export const huTranslations: DefaultTranslationsObject = {
     pasteRow: 'Sor beillesztése',
     payloadSettings: 'Payload beállítások',
     permanentlyDelete: 'Végleges Törlés',
+    permanentlyDeletedCountSuccessfully: 'Véglegesen törölt {{count}} {{label}} sikeresen.',
     perPage: 'Oldalanként: {{limit}}',
     previous: 'Előző',
     reindex: 'Újraindexelés',

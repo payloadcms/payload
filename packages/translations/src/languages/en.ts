@@ -370,6 +370,7 @@ export const enTranslations = {
     pasteRow: 'Paste Row',
     payloadSettings: 'Payload Settings',
     permanentlyDelete: 'Permanently Delete',
+    permanentlyDeletedCountSuccessfully: 'Permanently deleted {{count}} {{label}} successfully.',
     perPage: 'Per Page: {{limit}}',
     previous: 'Previous',
     reindex: 'Reindex',

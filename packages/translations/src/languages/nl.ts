@@ -372,6 +372,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     pasteRow: 'Rij plakken',
     payloadSettings: 'Payload Instellingen',
     permanentlyDelete: 'Permanent Verwijderen',
+    permanentlyDeletedCountSuccessfully: 'Permanent {{count}} {{label}} succesvol verwijderd.',
     perPage: 'Per pagina: {{limit}}',
     previous: 'Vorige',
     reindex: 'Herindexeren',

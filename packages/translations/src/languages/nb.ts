@@ -366,6 +366,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     pasteRow: 'Lim inn rad',
     payloadSettings: 'Payload-innstillinger',
     permanentlyDelete: 'Permanent slett',
+    permanentlyDeletedCountSuccessfully: 'Permanent slettet {{count}} {{label}} med suksess.',
     perPage: 'Per side: {{limit}}',
     previous: 'Forrige',
     reindex: 'Reindekser',

@@ -348,6 +348,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     pasteRow: '粘贴行',
     payloadSettings: 'Payload设置',
     permanentlyDelete: '永久删除',
+    permanentlyDeletedCountSuccessfully: '已成功永久删除 {{count}} {{label}}。',
     perPage: '每一页: {{limit}}',
     previous: '前一个',
     reindex: '重新索引',

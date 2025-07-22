@@ -367,6 +367,7 @@ export const azTranslations: DefaultTranslationsObject = {
     pasteRow: 'Sətiri yapışdır',
     payloadSettings: 'Payload Parametrləri',
     permanentlyDelete: 'Daimi Olaraq Sil',
+    permanentlyDeletedCountSuccessfully: '{{count}} {{label}} uğurla daimi olaraq silindi.',
     perPage: 'Hər səhifədə: {{limit}}',
     previous: 'Əvvəlki',
     reindex: 'Yenidən indekslə',

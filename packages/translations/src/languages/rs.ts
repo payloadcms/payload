@@ -367,6 +367,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     pasteRow: 'Залепи ред',
     payloadSettings: 'Payload поставке',
     permanentlyDelete: 'Trajno Izbriši',
+    permanentlyDeletedCountSuccessfully: 'Trajno obrisano {{count}} {{label}} uspešno.',
     perPage: 'По страници: {{limit}}',
     previous: 'Prethodni',
     reindex: 'Реиндексирај',
