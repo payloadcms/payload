@@ -31,7 +31,7 @@ export type Props = {
   readonly title?: string
 }
 
-export const PermaDeleteButton: React.FC<Props> = (props) => {
+export const PermanentlyDeleteButton: React.FC<Props> = (props) => {
   const {
     id,
     buttonId,

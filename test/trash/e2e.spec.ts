@@ -476,21 +476,24 @@ describe('Trash', () => {
         await expect(threeDotMenu).toBeHidden()
       })
 
-      test('Should not render status block', async () => {
+      test('Should render status block with correct status', async () => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
         const statusBlock = page.locator('.doc-controls__status')
-        await expect(statusBlock).toBeHidden()
+        await expect(statusBlock).toBeVisible()
+        await expect(statusBlock).toContainText('Previously Published')
       })
 
-      test('Should disable save buttons', async () => {
+      test('Should render Permanently Delete and Restore buttons in doc controls', async () => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
-        const saveDraftButton = page.locator('.doc-controls__controls #action-save-draft')
-        await expect(saveDraftButton).toBeDisabled()
+        const permanentlyDeleteButton = page.locator(
+          '.doc-controls__controls #action-permanently-delete',
+        )
+        await expect(permanentlyDeleteButton).toBeVisible()
 
-        const publishButton = page.locator('.doc-controls__controls #action-save')
-        await expect(publishButton).toBeDisabled()
+        const restoreButton = page.locator('.doc-controls__controls #action-restore')
+        await expect(restoreButton).toBeVisible()
       })
 
       test('Should render fields as read-only', async () => {

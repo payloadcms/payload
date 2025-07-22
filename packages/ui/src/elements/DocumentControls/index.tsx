@@ -28,7 +28,7 @@ import { MoveDocToFolder } from '../FolderView/MoveDocToFolder/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { LivePreviewToggler } from '../LivePreview/Toggler/index.js'
 import { Locked } from '../Locked/index.js'
-import { PermaDeleteButton } from '../PermaDeleteButton/index.js'
+import { PermanentlyDeleteButton } from '../PermanentlyDeleteButton/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { PreviewButton } from '../PreviewButton/index.js'
 import { PublishButton } from '../PublishButton/index.js'
@@ -295,8 +295,8 @@ export const DocumentControls: React.FC<{
               </Fragment>
             )}
             {hasDeletePermission && isTrashed && (
-              <PermaDeleteButton
-                buttonId="action-perma-delete"
+              <PermanentlyDeleteButton
+                buttonId="action-permanently-delete"
                 collectionSlug={collectionConfig?.slug}
                 id={id.toString()}
                 onDelete={onDelete}
