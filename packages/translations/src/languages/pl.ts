@@ -413,7 +413,7 @@ export const plTranslations: DefaultTranslationsObject = {
     titleRestored: 'Etykieta "{{title}}" została pomyślnie przywrócona.',
     titleTrashed: '{{label}} "{{title}}" przeniesiony do kosza.',
     trash: 'Śmieci',
-    trashedCountSuccessfully: 'Pomyślnie przeniesiono do kosza {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} przeniesiono do kosza.',
     true: 'Prawda',
     unauthorized: 'Brak autoryzacji',
     unsavedChanges: 'Masz niezapisane zmiany. Zapisz lub odrzuć, zanim kontynuujesz.',

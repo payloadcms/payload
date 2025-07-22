@@ -416,7 +416,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" успешно восстановлен.',
     titleTrashed: '{{label}} "{{title}}" перемещен в корзину.',
     trash: 'Мусор',
-    trashedCountSuccessfully: 'Успешно удалено {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} перемещено в корзину.',
     true: 'Правда',
     unauthorized: 'Нет доступа',
     unsavedChanges:

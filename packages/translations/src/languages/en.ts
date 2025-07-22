@@ -418,7 +418,7 @@ export const enTranslations = {
     titleRestored: '{{label}} "{{title}}" successfully restored.',
     titleTrashed: '{{label}} "{{title}}" moved to trash.',
     trash: 'Trash',
-    trashedCountSuccessfully: 'Trashed {{count}} {{label}} successfully.',
+    trashedCountSuccessfully: '{{count}} {{label}} moved to trash.',
     true: 'True',
     unauthorized: 'Unauthorized',
     unsavedChanges: 'You have unsaved changes. Save or discard before continuing.',

@@ -416,7 +416,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     titleRestored: '"{{label}}" "{{title}}" հաջողությամբ վերականգնվել է։',
     titleTrashed: '«{{label}}» «{{title}}» տեղափոխվել է աղբարկղում:',
     trash: 'աղբ',
-    trashedCountSuccessfully: '{{count}} {{label}} հաջողությամբ թափափվել է:',
+    trashedCountSuccessfully: '{{count}} {{label}} տեղափոխվել է աղբարկղում։',
     true: 'Ճիշտ',
     unauthorized: 'Չթույլատրված',
     unsavedChanges:

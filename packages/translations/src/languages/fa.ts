@@ -412,7 +412,7 @@ export const faTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" با موفقیت بازیابی شد.',
     titleTrashed: '{{label}} "{{title}}" به سطل زباله منتقل شد.',
     trash: 'زباله',
-    trashedCountSuccessfully: '{{label}} به تعداد {{count}} با موفقیت به سطل زباله منتقل شد.',
+    trashedCountSuccessfully: '{{count}} {{label}} به سطل زباله منتقل شد.',
     true: 'درست',
     unauthorized: 'غیرمجاز',
     unsavedChanges: 'تغییرات ذخیره نشده ای دارید. قبل از ادامه ذخیره کنید یا رد کنید.',

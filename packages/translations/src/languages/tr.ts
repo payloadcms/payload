@@ -419,7 +419,7 @@ export const trTranslations: DefaultTranslationsObject = {
     titleRestored: '"{{title}}" başarıyla geri yüklendi.',
     titleTrashed: '{{label}} "{{title}}" çöpe taşındı.',
     trash: 'Çöp',
-    trashedCountSuccessfully: '{{count}} {{label}} başarıyla çöpe atıldı.',
+    trashedCountSuccessfully: '{{count}} {{label}} çöp kutusuna taşındı.',
     true: 'Doğru',
     unauthorized: 'Yetkisiz',
     unsavedChanges: 'Kaydedilmemiş değişiklikleriniz var. Devam etmeden önce kaydedin veya atın.',

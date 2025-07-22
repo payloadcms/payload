@@ -414,7 +414,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" uspešno obnovljen.',
     titleTrashed: '{{label}} "{{title}}" premešten u otpad.',
     trash: 'Smeće',
-    trashedCountSuccessfully: 'Uspešno obrisano {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} premješteno u smeće.',
     true: 'Istinito',
     unauthorized: 'Нисте ауторизовани',
     unsavedChanges: 'Imate nesačuvane izmene. Sačuvajte ili odbacite pre nego što nastavite.',

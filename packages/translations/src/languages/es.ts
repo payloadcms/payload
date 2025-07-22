@@ -420,7 +420,7 @@ export const esTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" restaurado con éxito.',
     titleTrashed: '{{label}} "{{title}}" movido a la papelera.',
     trash: 'Basura',
-    trashedCountSuccessfully: 'Eliminado con éxito {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} movido a la papelera.',
     true: 'Verdadero',
     unauthorized: 'No autorizado',
     unsavedChanges: 'Tienes cambios sin guardar. Guarda o descarta antes de continuar.',

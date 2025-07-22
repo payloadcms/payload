@@ -409,7 +409,7 @@ export const etTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" edukalt taastatud.',
     titleTrashed: '{{label}} "{{title}}" viidi prügikasti.',
     trash: 'Prügi',
-    trashedCountSuccessfully: 'Prügikasti visatud {{count}} {{label}} edukalt.',
+    trashedCountSuccessfully: '{{count}} {{label}} kanti prügikasti.',
     true: 'Tõene',
     unauthorized: 'Volitamata',
     unsavedChanges: 'Teil on salvestamata muudatusi. Salvestage või tühistage enne jätkamist.',

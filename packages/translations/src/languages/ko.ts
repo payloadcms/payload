@@ -411,7 +411,7 @@ export const koTranslations: DefaultTranslationsObject = {
     titleRestored: '"{{label}}" "{{title}}"이(가) 성공적으로 복원되었습니다.',
     titleTrashed: '"{{label}}" "{{title}}"이(가) 휴지통으로 이동되었습니다.',
     trash: '휴지통',
-    trashedCountSuccessfully: '성공적으로 {{count}} {{label}}을(를) 휴지통에 넣었습니다.',
+    trashedCountSuccessfully: '{{count}} {{label}}가 휴지통으로 이동했습니다.',
     true: '참',
     unauthorized: '권한 없음',
     unsavedChanges: '저장되지 않은 변경 사항이 있습니다. 계속하기 전에 저장하거나 무시하십시오.',

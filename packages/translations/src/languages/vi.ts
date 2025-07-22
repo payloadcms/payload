@@ -414,7 +414,7 @@ export const viTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" được khôi phục thành công.',
     titleTrashed: '{{label}} "{{title}}" đã được chuyển vào thùng rác.',
     trash: 'Rác',
-    trashedCountSuccessfully: 'Đã xóa thành công {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} đã được chuyển vào thùng rác.',
     true: 'Thật',
     unauthorized: 'Không có quyền truy cập.',
     unsavedChanges: 'Bạn có những thay đổi chưa được lưu. Lưu hoặc hủy trước khi tiếp tục.',

@@ -420,7 +420,7 @@ export const roTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" a fost restaurat cu succes.',
     titleTrashed: '{{label}} "{{title}}" a fost mutat la coșul de gunoi.',
     trash: 'Gunoi',
-    trashedCountSuccessfully: 'Amplasat în coșul de gunoi {{count}} {{label}} cu succes.',
+    trashedCountSuccessfully: '{{count}} {{label}} mutate la coșul de gunoi.',
     true: 'Adevărat',
     unauthorized: 'neautorizat(ă)',
     unsavedChanges: 'Aveți modificări nesalvate. Salvați sau renunțați înainte de a continua.',

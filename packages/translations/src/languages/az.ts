@@ -415,7 +415,7 @@ export const azTranslations: DefaultTranslationsObject = {
     titleRestored: '"{{title}}" "{{label}}" uğurla bərpa edildi.',
     titleTrashed: '{{label}} "{{title}}" zibilə köçürüldü.',
     trash: 'Zibil',
-    trashedCountSuccessfully: '{{count}} {{label}} uğurla zibilə yollandı.',
+    trashedCountSuccessfully: '{{count}} {{label}} zibilə köçürüldü.',
     true: 'Doğru',
     unauthorized: 'İcazəsiz',
     unsavedChanges:

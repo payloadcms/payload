@@ -395,7 +395,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     titleRestored: '"{{label}}" "{{title}}" 成功恢复。',
     titleTrashed: '{{label}} "{{title}}" 已移至垃圾桶。',
     trash: '垃圾',
-    trashedCountSuccessfully: '成功地删除了{{count}} {{label}}。',
+    trashedCountSuccessfully: '{{count}} {{label}} 被移至垃圾桶。',
     true: '是',
     unauthorized: '未经授权',
     unsavedChanges: '您有未保存的更改。请在继续之前保存或放弃。',

@@ -416,7 +416,7 @@ export const caTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" s\'ha restaurat correctament.',
     titleTrashed: '{{label}} "{{title}}" s\'ha traslladat a la paperera.',
     trash: 'Brossa',
-    trashedCountSuccessfully: "S'ha eliminat amb èxit {{count}} {{label}}.",
+    trashedCountSuccessfully: "{{count}} {{label}} s'ha mogut a la paperera.",
     true: 'Veritat',
     unauthorized: 'No autoritzat',
     unsavedChanges: 'Tens canvis no desats. Vols continuar sense desar?',

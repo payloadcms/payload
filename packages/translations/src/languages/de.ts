@@ -422,7 +422,7 @@ export const deTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" erfolgreich wiederhergestellt.',
     titleTrashed: '{{label}} "{{title}}" wurde in den Papierkorb verschoben.',
     trash: 'Müll',
-    trashedCountSuccessfully: 'Erfolgreich {{count}} {{label}} in den Papierkorb verschoben.',
+    trashedCountSuccessfully: '{{count}} {{label}} wurde in den Papierkorb verschoben.',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',
     unsavedChanges:

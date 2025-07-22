@@ -423,7 +423,7 @@ export const frTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" restauré avec succès.',
     titleTrashed: '{{label}} "{{title}}" déplacé vers la corbeille.',
     trash: 'Corbeille',
-    trashedCountSuccessfully: '{{count}} {{label}} supprimé avec succès.',
+    trashedCountSuccessfully: '{{count}} {{label}} déplacé à la corbeille.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',
     unsavedChanges:

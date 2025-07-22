@@ -413,7 +413,7 @@ export const daTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" succesfuldt genoprettet.',
     titleTrashed: '{{label}} "{{title}}" flyttet til papirkurven.',
     trash: 'Affald',
-    trashedCountSuccessfully: 'Slettet {{count}} {{label}} med succes.',
+    trashedCountSuccessfully: '{{count}} {{label}} flyttet til papirkurven.',
     true: 'Sandt',
     unauthorized: 'Uautoriseret',
     unsavedChanges: 'Du har ikke gemte ændringer. Gem eller kassér før fortsættelse.',

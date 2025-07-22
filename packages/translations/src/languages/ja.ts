@@ -416,7 +416,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     titleRestored: '「{{label}}」"{{title}}" が正常に復元されました。',
     titleTrashed: '{{label}} "{{title}}"がゴミ箱へ移動されました。',
     trash: 'ゴミ',
-    trashedCountSuccessfully: '{{count}} の{{label}}を正常に削除しました。',
+    trashedCountSuccessfully: '{{count}} {{label}}がゴミ箱に移動しました。',
     true: '真実',
     unauthorized: '未認証',
     unsavedChanges: '保存されていない変更があります。続行する前に保存または破棄してください。',

@@ -414,7 +414,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" veiksmīgi atjaunots.',
     titleTrashed: '{{label}} "{{title}}" pārvietots uz miskasti.',
     trash: 'Atkritumi',
-    trashedCountSuccessfully: 'Veiksmīgi izmesti {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} pārvietoti uz miskasti.',
     true: 'Patiesi',
     unauthorized: 'Neautorizēts',
     unsavedChanges: 'Jums ir nesaglabātas izmaiņas. Saglabājiet vai atceliet pirms turpināšanas.',

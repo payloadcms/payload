@@ -413,7 +413,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" успішно відновлено.',
     titleTrashed: '{{label}} "{{title}}" переміщено до кошика.',
     trash: 'Сміття',
-    trashedCountSuccessfully: 'Успішно видалено {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} перенесено в кошик.',
     true: 'Правда',
     unauthorized: 'Немає доступу',
     unsavedChanges: 'У вас є незбережені зміни. Збережіть або скасуйте перед продовженням.',

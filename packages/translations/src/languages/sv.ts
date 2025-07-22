@@ -416,7 +416,7 @@ export const svTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" har framgångsrikt återställts.',
     titleTrashed: '{{label}} "{{title}}" flyttades till papperskorgen.',
     trash: 'Skräp',
-    trashedCountSuccessfully: 'Raderade framgångsrikt {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} flyttades till papperskorgen.',
     true: 'Sann',
     unauthorized: 'Obehörig',
     unsavedChanges: 'Du har osparade ändringar. Spara innan du fortsätter.',

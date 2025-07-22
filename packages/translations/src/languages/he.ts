@@ -402,7 +402,7 @@ export const heTranslations: DefaultTranslationsObject = {
     titleRestored: 'התווית "{{title}}" שוחזרה בהצלחה.',
     titleTrashed: '{{label}} "{{title}}" הועבר לפח.',
     trash: 'זבל',
-    trashedCountSuccessfully: 'נמחקו בהצלחה {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} הועברו לפח.',
     true: 'True',
     unauthorized: 'אין הרשאה',
     unsavedChanges: 'יש לך שינויים שלא נשמרו. שמור או מחק לפני שתמשיך.',

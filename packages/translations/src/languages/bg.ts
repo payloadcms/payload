@@ -414,7 +414,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" беше успешно възстановено.',
     titleTrashed: '{{label}} "{{title}}" е преместено в кошчето.',
     trash: 'Боклук',
-    trashedCountSuccessfully: 'Успешно изхвърлено {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} преместени в кошчето.',
     true: 'Вярно',
     unauthorized: 'Неоторизиран',
     unsavedChanges: 'Имате незапазени промени. Запазете или отхвърлете преди да продължите.',

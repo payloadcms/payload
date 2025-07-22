@@ -406,7 +406,7 @@ export const arTranslations: DefaultTranslationsObject = {
     titleRestored: 'تمت استعادة "{{title}}" "{{label}}" بنجاح.',
     titleTrashed: '"{{label}}" "{{title}}" تم نقلها إلى سلة المهملات.',
     trash: 'سلة المهملات',
-    trashedCountSuccessfully: 'تم حذف {{count}} {{label}} بنجاح.',
+    trashedCountSuccessfully: '{{count}} {{label}} تم نقلها إلى سلة المهملات.',
     true: 'صحيح',
     unauthorized: 'غير مصرح به',
     unsavedChanges: 'لديك تغييرات غير محفوظة. قم بالحفظ أو التجاهل قبل المتابعة.',

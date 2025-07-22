@@ -417,7 +417,7 @@ export const itTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" ripristinato con successo.',
     titleTrashed: '{{label}} "{{title}}" spostato nel cestino.',
     trash: 'Cestino',
-    trashedCountSuccessfully: 'Cestinati con successo {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} spostati nel cestino.',
     true: 'Vero',
     unauthorized: 'Non autorizzato',
     unsavedChanges: 'Hai delle modifiche non salvate. Salva o scarta prima di continuare.',

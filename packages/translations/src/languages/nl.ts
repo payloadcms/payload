@@ -421,7 +421,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" succesvol hersteld.',
     titleTrashed: '{{label}} "{{title}}" verplaatst naar prullenbak.',
     trash: 'Prullenbak',
-    trashedCountSuccessfully: '{{count}} {{label}} succesvol verwijderd.',
+    trashedCountSuccessfully: '{{count}} {{label}} verplaatst naar prullenbak.',
     true: 'Waar',
     unauthorized: 'Onbevoegd',
     unsavedChanges: 'U heeft niet-opgeslagen wijzigingen. Sla op of verwijder voordat u doorgaat.',

@@ -418,7 +418,7 @@ export const myTranslations: DefaultTranslationsObject = {
     titleRestored: '"{{label}}" "{{title}}" အောင်မြင်စွာ ပြန်လည် ထည့်သွင်းပြီး ဖြစ်ပါတယ်။',
     titleTrashed: '"{{label}}" "{{title}}" dipindahkan ke tong sampah.',
     trash: 'ဖျက်သိမ်းခြင်း',
-    trashedCountSuccessfully: 'Berjaya membuang {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} သို့ ဖယ်ရှားလိုက်သည်။',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
     unsavedChanges:

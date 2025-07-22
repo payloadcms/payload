@@ -415,7 +415,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" ble gjenopprettet.',
     titleTrashed: '{{label}} "{{title}}" flyttet til søppel.',
     trash: 'Søppel',
-    trashedCountSuccessfully: 'Kastet {{count}} {{label}} vellykket.',
+    trashedCountSuccessfully: '{{count}} {{label}} flyttet til søppel.',
     true: 'Sann',
     unauthorized: 'Ikke autorisert',
     unsavedChanges: 'Du har ulagrede endringer. Lagre eller forkast før du fortsetter.',

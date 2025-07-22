@@ -412,7 +412,7 @@ export const csTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" úspěšně obnoveno.',
     titleTrashed: '{{label}} "{{title}}" přesunuto do koše.',
     trash: 'Koš',
-    trashedCountSuccessfully: '{{label}} úspěšně přesunuto do koše ({{count}}).',
+    trashedCountSuccessfully: '{{count}} {{label}} přesunuto do koše.',
     true: 'Pravda',
     unauthorized: 'Neoprávněný',
     unsavedChanges: 'Máte neuložené změny. Uložte nebo zahoďte před pokračováním.',

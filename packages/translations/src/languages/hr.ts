@@ -414,7 +414,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" uspješno je obnovljeno.',
     titleTrashed: '{{label}} "{{title}}" premješteno u smeće.',
     trash: 'Otpad',
-    trashedCountSuccessfully: 'Uspješno izbačeno {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} premješteno u smeće.',
     true: 'Istinito',
     unauthorized: 'Neovlašteno',
     unsavedChanges: 'Imate nespremljene promjene. Spremite ili odbacite prije nastavka.',

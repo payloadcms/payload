@@ -414,7 +414,7 @@ export const slTranslations: DefaultTranslationsObject = {
     titleRestored: 'Oznaka "{{title}}" je bila uspešno obnovljena.',
     titleTrashed: '{{label}} "{{title}}" premaknjeno v smeti.',
     trash: 'Smeti',
-    trashedCountSuccessfully: '{{count}} {{label}} uspešno premaknjeno v koš.',
+    trashedCountSuccessfully: '{{count}} {{label}} premaknjeno v smeti.',
     true: 'Da',
     unauthorized: 'Nepooblaščeno',
     unsavedChanges: 'Neshranjene spremembe',

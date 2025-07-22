@@ -413,7 +413,7 @@ export const skTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" úspešne obnovený.',
     titleTrashed: '{{label}} "{{title}}" presunuté do koša.',
     trash: 'Koš',
-    trashedCountSuccessfully: 'Úspešne vymazané {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} presunuté do koša.',
     true: 'Pravda',
     unauthorized: 'Neoprávnený prístup',
     unsavedChanges: 'Máte neuložené zmeny. Uložte alebo zahoďte pred pokračovaním.',

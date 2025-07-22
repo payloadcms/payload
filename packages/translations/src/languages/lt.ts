@@ -416,7 +416,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" sėkmingai atkurta.',
     titleTrashed: '{{label}} "{{title}}" perkeltas į šiukšliadėžę.',
     trash: 'Šiukšlės',
-    trashedCountSuccessfully: 'Sėkmingai išmestas {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} perkeltas į šiukšlinę.',
     true: 'Tiesa',
     unauthorized: 'Neleistinas',
     unsavedChanges: 'Turite neišsaugotų pakeitimų. Išsaugokite arba atmestkite prieš tęsdami.',

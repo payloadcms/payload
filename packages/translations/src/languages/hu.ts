@@ -418,7 +418,7 @@ export const huTranslations: DefaultTranslationsObject = {
     titleRestored: '"{{label}}" "{{title}}" sikeresen visszaállítva.',
     titleTrashed: '"{{label}}" "{{title}}" a szemétbe került.',
     trash: 'Szemét',
-    trashedCountSuccessfully: 'Sikeresen kukába dobott {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} átkerült a szemeteskukába.',
     true: 'Igaz',
     unauthorized: 'Jogosulatlan',
     unsavedChanges: 'Vannak mentetlen változtatásai. Mentsen vagy dobja el mielőtt folytatja.',

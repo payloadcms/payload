@@ -417,7 +417,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     titleRestored: '"{{label}}" "{{title}}" সফলভাবে পুনরুদ্ধার করা হয়েছে।',
     titleTrashed: '{{label}} "{{title}}" আবর্জনাস্থলে সরিয়ে নেওয়া হয়েছে।',
     trash: 'আবর্জনা',
-    trashedCountSuccessfully: 'সফলভাবে {{count}} {{label}} মুছে ফেলা হয়েছে।',
+    trashedCountSuccessfully: '{{count}} {{label}} ট্র্যাশে মুভ করা হয়েছে।',
     true: 'সত্য',
     unauthorized: 'অননুমোদিত',
     unsavedChanges:

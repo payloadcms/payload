@@ -407,7 +407,7 @@ export const thTranslations: DefaultTranslationsObject = {
     titleRestored: '{{label}} "{{title}}" ถูกกู้คืนสำเร็จแล้ว.',
     titleTrashed: '{{label}} "{{title}}" ถูกย้ายไปถังขยะ',
     trash: 'ถังขยะ',
-    trashedCountSuccessfully: 'ทำการลบ {{count}} {{label}} เรียบร้อยแล้ว',
+    trashedCountSuccessfully: '{{count}} {{label}} ถูกย้ายไปยังถังขยะ',
     true: 'จริง',
     unauthorized: 'ไม่ได้รับอนุญาต',
     unsavedChanges: 'คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก บันทึกหรือทิ้งก่อนที่จะดำเนินการต่อ',
