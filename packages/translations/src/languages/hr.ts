@@ -217,6 +217,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Upravo ćete izbrisati {{count}} {{label}}',
     aboutToDeleteCount_one: 'Upravo ćete izbrisati {{count}} {{label}}',
     aboutToDeleteCount_other: 'Upravo ćete izbrisati {{count}} {{label}}',
+    aboutToPermanentlyDelete:
+      'Na rubu ste trajnog brisanja {{label}} <1>{{title}}</1>. Jeste li sigurni?',
     aboutToPermanentlyDeleteTrash:
       'Na rubu ste trajnog brisanja <0>{{count}}</0> <1>{{label}}</1> iz smeća. Jeste li sigurni?',
     aboutToRestore: 'Sada ćete vratiti {{label}} <1>{{title}}</1> kao skicu. Jeste li sigurni?',

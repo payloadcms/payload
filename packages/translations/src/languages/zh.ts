@@ -204,6 +204,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: '您即将删除 {{count}}个{{label}}',
     aboutToDeleteCount_one: '您即将删除 {{count}}个{{label}}',
     aboutToDeleteCount_other: '您即将删除 {{count}}个{{label}}',
+    aboutToPermanentlyDelete: '您即将永久删除{{label}} <1>{{title}}</1>。你确定吗？',
     aboutToPermanentlyDeleteTrash:
       '您即将从垃圾箱中永久删除<0>{{count}}</0> <1>{{label}}</1>。你确定吗？',
     aboutToRestore: '您即将将{{label}}<1>{{title}}</1>恢复为草稿。您确定吗？',

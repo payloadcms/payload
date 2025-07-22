@@ -216,6 +216,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Você está prestes a deletar {{count}} {{label}}',
     aboutToDeleteCount_one: 'Você está prestes a deletar {{count}} {{label}}',
     aboutToDeleteCount_other: 'Você está prestes a deletar {{count}} {{label}}',
+    aboutToPermanentlyDelete:
+      'Está prestes a apagar permanentemente o {{label}} <1>{{title}}</1>. Tem certeza?',
     aboutToPermanentlyDeleteTrash:
       'Você está prestes a excluir permanentemente <0>{{count}}</0> <1>{{label}}</1> da lixeira. Você tem certeza?',
     aboutToRestore:

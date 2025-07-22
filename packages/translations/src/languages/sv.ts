@@ -215,6 +215,8 @@ export const svTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Du är på väg att ta bort {{count}} {{label}}',
     aboutToDeleteCount_one: 'Du är på väg att ta bort {{count}} {{label}}',
     aboutToDeleteCount_other: 'Du är på väg att ta bort {{count}} {{label}}',
+    aboutToPermanentlyDelete:
+      'Du är på väg att permanent radera {{label}} <1>{{title}}</1>. Är du säker?',
     aboutToPermanentlyDeleteTrash:
       'Du är på väg att permanent radera <0>{{count}}</0> <1>{{label}}</1> från papperskorgen. Är du säker?',
     aboutToRestore:

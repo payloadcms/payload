@@ -217,6 +217,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
     aboutToDeleteCount_one: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
     aboutToDeleteCount_other: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
+    aboutToPermanentlyDelete:
+      'আপনি স্থায়ীভাবে {{label}} <1>{{title}}</1> মুছে ফেলতে যাচ্ছেন। আপনি কি নিশ্চিত?',
     aboutToPermanentlyDeleteTrash:
       'আপনি চূর্ণনিবিন্ন <0>{{count}}</0> <1>{{label}}</1> টি সর্বদা মুছে ফেলতে যাচ্ছেন। আপনি কি নিশ্চিত?',
     aboutToRestore:

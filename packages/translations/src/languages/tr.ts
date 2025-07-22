@@ -219,6 +219,8 @@ export const trTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: '{{count}} {{label}} silmek üzeresiniz',
     aboutToDeleteCount_one: '{{count}} {{label}} silmek üzeresiniz',
     aboutToDeleteCount_other: '{{count}} {{label}} silmek üzeresiniz',
+    aboutToPermanentlyDelete:
+      '{{label}} <1>{{title}}</1> kalıcı olarak silmek üzeresiniz. Emin misiniz?',
     aboutToPermanentlyDeleteTrash:
       'Çöpten <0>{{count}}</0> <1>{{label}}</1> kalıcı olarak silmek üzeresiniz. Emin misiniz?',
     aboutToRestore:

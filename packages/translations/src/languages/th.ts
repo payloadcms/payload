@@ -211,6 +211,7 @@ export const thTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'คุณกำลังจะลบ {{count}} {{label}}',
     aboutToDeleteCount_one: 'คุณกำลังจะลบ {{count}} {{label}}',
     aboutToDeleteCount_other: 'คุณกำลังจะลบ {{count}} {{label}}',
+    aboutToPermanentlyDelete: 'คุณกำลังจะลบ {{label}} <1>{{title}}</1> อย่างถาวร คุณแน่ใจหรือไม่?',
     aboutToPermanentlyDeleteTrash:
       'คุณกำลังจะลบ <0>{{count}}</0> <1>{{label}}</1> อย่างถาวรจากถังขยะ คุณแน่ใจหรือไม่?',
     aboutToRestore: 'คุณกำลังจะเรียกคืน {{label}} <1>{{title}}</1> เป็นร่าง คุณแน่ใจไหม?',

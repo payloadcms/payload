@@ -214,6 +214,8 @@ export const koTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: '{{label}}를 {{count}}개 삭제하려고 합니다.',
     aboutToDeleteCount_one: '{{label}}를 {{count}}개 삭제하려고 합니다.',
     aboutToDeleteCount_other: '{{label}}를 {{count}}개 삭제하려고 합니다.',
+    aboutToPermanentlyDelete:
+      '당신은 {{label}} <1>{{title}}</1>을 영구적으로 삭제하려고 합니다. 확실합니까?',
     aboutToPermanentlyDeleteTrash:
       '휴지통에서 <0>{{count}}</0> <1>{{label}}</1>을(를) 영구적으로 삭제하려고 합니다. 확실합니까?',
     aboutToRestore:

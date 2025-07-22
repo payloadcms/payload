@@ -219,6 +219,8 @@ export const skTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Chystáte sa zmazať {{count}} {{label}}',
     aboutToDeleteCount_one: 'Chystáte sa zmazať {{count}} {{label}}',
     aboutToDeleteCount_other: 'Chystáte sa zmazať {{count}} {{label}}',
+    aboutToPermanentlyDelete:
+      'Chystáte sa natrvalo vymazať {{label}} <1>{{title}}</1>. Ste si istý?',
     aboutToPermanentlyDeleteTrash:
       'Chystáte sa natrvalo odstrániť <0>{{count}}</0> <1>{{label}}</1> z koša. Ste si istý?',
     aboutToRestore: 'Chystáte sa obnoviť {{label}} <1>{{title}}</1> ako koncept. Ste si istý?',

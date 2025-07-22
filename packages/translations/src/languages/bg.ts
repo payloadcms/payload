@@ -216,6 +216,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'На път си да изтриеш {{count}} {{label}}',
     aboutToDeleteCount_one: 'На път си да изтриеш {{count}} {{label}}',
     aboutToDeleteCount_other: 'На път си да изтриеш {{count}} {{label}}',
+    aboutToPermanentlyDelete:
+      'Предстои да изтриете завинаги {{label}} <1>{{title}}</1>. Сигурни ли сте?',
     aboutToPermanentlyDeleteTrash:
       'Вие се насочвате към перманентно изтриване на <0>{{count}}</0> <1>{{label}}</1> от кошчето. Сигурни ли сте?',
     aboutToRestore:

@@ -215,6 +215,8 @@ export const azTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Siz {{count}} {{label}} silməyə hazırsınız.',
     aboutToDeleteCount_one: 'Siz {{count}} {{label}} silməyə hazırsınız.',
     aboutToDeleteCount_other: 'Siz {{count}} {{label}} silməyə hazırsınız.',
+    aboutToPermanentlyDelete:
+      'Siz əbədi olaraq {{label}} <1>{{title}}</1> silmək üzrəsiniz. Eminsiniz?',
     aboutToPermanentlyDeleteTrash:
       'Siz müllifdən daimi olaraq <0>{{count}}</0> <1>{{label}}</1> silinəcəkdir. Eminsiniz?',
     aboutToRestore:

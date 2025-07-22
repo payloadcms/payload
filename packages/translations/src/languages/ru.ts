@@ -218,6 +218,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Вы собираетесь удалить {{count}} {{label}}',
     aboutToDeleteCount_one: 'Вы собираетесь удалить {{count}} {{label}}',
     aboutToDeleteCount_other: 'Вы собираетесь удалить {{count}} {{label}}',
+    aboutToPermanentlyDelete:
+      'Вы собираетесь навсегда удалить {{label}} <1>{{title}}</1>. Вы уверены?',
     aboutToPermanentlyDeleteTrash:
       'Вы собираетесь навсегда удалить <0>{{count}}</0> <1>{{label}}</1> из корзины. Вы уверены?',
     aboutToRestore:

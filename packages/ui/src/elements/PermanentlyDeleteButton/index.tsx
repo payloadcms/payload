@@ -151,7 +151,7 @@ export const PermanentlyDeleteButton: React.FC<Props> = (props) => {
               elements={{
                 '1': ({ children }) => <strong>{children}</strong>,
               }}
-              i18nKey="general:aboutToDelete"
+              i18nKey="general:aboutToPermanentlyDelete"
               t={t}
               variables={{
                 label: getTranslation(singularLabel, i18n),

@@ -220,6 +220,8 @@ export const roTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Sunteți pe cale să ștergeți {{count}} {{label}}',
     aboutToDeleteCount_one: 'Sunteți pe cale să ștergeți {{count}} {{label}}',
     aboutToDeleteCount_other: 'Sunteți pe cale să ștergeți {{count}} {{label}}',
+    aboutToPermanentlyDelete:
+      'Sunteți pe cale să ștergeți definitiv {{label}} <1>{{title}}</1>. Sunteți sigur?',
     aboutToPermanentlyDeleteTrash:
       'Sunteți pe cale să ștergeți definitiv <0>{{count}}</0> <1>{{label}}</1> din coșul de gunoi. Sunteți sigur?',
     aboutToRestore:

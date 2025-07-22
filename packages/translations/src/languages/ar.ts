@@ -210,6 +210,7 @@ export const arTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'أنت على وشك حذف {{count}} {{label}}',
     aboutToDeleteCount_one: 'أنت على وشك حذف {{count}} {{label}}',
     aboutToDeleteCount_other: 'أنت على وشك حذف {{count}} {{label}}',
+    aboutToPermanentlyDelete: 'أنت على وشك حذف {{label}} <1>{{title}}</1> نهائيا. هل أنت متأكد؟',
     aboutToPermanentlyDeleteTrash:
       'أنت على وشك حذف <0>{{count}}</0> <1>{{label}}</1> نهائياً من سلة المهملات. هل أنت متأكد؟',
     aboutToRestore: 'أنت على وشك استعادة {{label}} <1>{{title}}</1> كمسودة. هل أنت متأكد؟',
