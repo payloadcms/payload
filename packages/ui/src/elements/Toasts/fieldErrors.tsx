@@ -63,11 +63,15 @@ export function FieldErrorsToast({ errorMessage }) {
     <div>
       {message}
       {Array.isArray(errors) && errors.length > 0 ? (
-        <ul data-testid="field-errors">
-          {errors.map((error, index) => {
-            return <li key={index}>{error}</li>
-          })}
-        </ul>
+        errors.length === 1 ? (
+          <span data-testid="field-error">{errors[0]}</span>
+        ) : (
+          <ul data-testid="field-errors">
+            {errors.map((error, index) => {
+              return <li key={index}>{error}</li>
+            })}
+          </ul>
+        )
       ) : null}
     </div>
   )
