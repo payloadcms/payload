@@ -109,6 +109,7 @@ export type RelationshipInputProps = {
   readonly minRows?: number
   readonly path: string
   readonly placeholder?: LabelFunction | string
+  readonly populateDocumentTitleOnly?: boolean
   readonly readOnly?: boolean
   readonly relationTo: string[]
   readonly required?: boolean
