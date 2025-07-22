@@ -1,0 +1,141 @@
+---
+title: Import Export
+label: Import Export
+order: 40
+desc: Add Import and export functionality to create CSV and JSON data exports
+keywords: plugins, plugin, import, export, csv, JSON, data, ETL, download
+---
+
+![https://www.npmjs.com/package/@payloadcms/plugin-import-export](https://img.shields.io/npm/v/@payloadcms/plugin-import-export)
+
+<Banner type="warning">
+  Note: The plugin is under development and currently only supports exporting of
+  collection data. Some aspects of this plugin may change on any minor releases.
+</Banner>
+
+This plugin adds features that give admin users the ability to download or create export data as an upload collection and import it back into a project.
+
+## Core Features
+
+- Export data as CSV or JSON format via the admin UI
+- Download the export directly through the browser
+- Create a file upload of the export data
+- Use the jobs queue for large exports
+- (Coming soon) Import collection data
+
+## Installation
+
+Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
+
+```bash
+pnpm add @payloadcms/plugin-import-export
+```
+
+## Basic Usage
+
+In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+
+```ts
+import { buildConfig } from 'payload'
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
+
+const config = buildConfig({
+  collections: [Pages, Media],
+  plugins: [
+    importExportPlugin({
+      collections: ['users', 'pages'],
+      // see below for a list of available options
+    }),
+  ],
+})
+
+export default config
+```
+
+## Options
+
+- `collections` - string[] | optional
+
+Collections to include the Import/Export controls in
+Defaults to all collections
+
+- `debug` - boolean | optional
+
+If true, enables debug logging
+
+- `disableDownload` - boolean | optional
+
+If true, disables the download button in the export preview UI
+
+- `disableJobsQueue` - boolean | optional
+
+Enable to force the export to run synchronously
+
+- `disableSave` - boolean | optional
+
+If true, disables the save button in the export preview UI, defaults to false.
+
+- `format` - 'csv' | 'json' | optional
+
+Forces a specific export format (`csv` or `json`) and hides the format dropdown from the UI and prevents the user from having to choose the export format.
+
+`overrideExportCollection` - function | undefined
+
+This function takes the default export collection configured in the plugin and allows you to override it by modifying and returning it.
+
+## Field Options
+
+In addition to the above plugin configuration options, you can granularly set the following field level options using the `custom['plugin-import-export']` properties.
+
+`disabled` - boolean | undefined
+
+When `true` the field is **completely excluded** from the import-export plugin:
+
+- It will not appear in the “Fields to export” selector.
+- It is hidden from the preview list when no specific fields are chosen.
+- Its data is omitted from the final CSV / JSON export.
+
+`toCSV` - (args) => unknown | undefined
+
+Custom function used to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value.
+
+The toCSV function argument is an object with the following properties:
+
+| Property     | Type    | Description                                                       |
+| ------------ | ------- | ----------------------------------------------------------------- |
+| `columnName` | string  | The CSV column name given to the field.                           |
+| `doc`        | object  | The top level document                                            |
+| `row`        | object  | The object data that can be manipulated to assign data to the CSV |
+| `siblingDoc` | object  | The document data at the level where it belongs                   |
+| `value`      | unknown | The data for the field.                                           |
+
+Example function:
+
+```ts
+const pages: CollectionConfig = {
+  slug: 'pages',
+  fields: [
+    {
+      name: 'author',
+      type: 'relationship',
+      relationTo: 'users',
+      custom: {
+        'plugin-import-export': {
+          toCSV: ({ value, columnName, row }) => {
+            // add both `author_id` and the `author_email` to the csv export
+            if (
+              value &&
+              typeof value === 'object' &&
+              'id' in value &&
+              'email' in value
+            ) {
+              row[`${columnName}_id`] = (value as { id: number | string }).id
+              row[`${columnName}_email`] = (value as { email: string }).email
+            }
+          },
+        },
+      },
+    },
+  ],
+}
+```
