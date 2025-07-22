@@ -11,13 +11,7 @@ type Props = {
 
 export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confirmOrder'] =
   (props) =>
-  async ({
-    cartsSlug = 'carts',
-    data,
-    ordersSlug = 'orders',
-    req,
-    transactionsSlug = 'transactions',
-  }) => {
+  async ({ data, ordersSlug = 'orders', req, transactionsSlug = 'transactions' }) => {
     const payload = req.payload
     const { apiVersion, appInfo, secretKey } = props || {}
 
@@ -77,35 +71,31 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
       // Verify the payment intent exists and retrieve it
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentID)
 
-      const cartToUse = paymentIntent.metadata.cartID
+      const cartID = paymentIntent.metadata.cartID
+      const cartItemsSnapshot = paymentIntent.metadata.cartItemsSnapshot
+        ? JSON.parse(paymentIntent.metadata.cartItemsSnapshot)
+        : undefined
 
-      if (!cartToUse) {
+      const shippingAddress = paymentIntent.metadata.shippingAddress
+        ? JSON.parse(paymentIntent.metadata.shippingAddress)
+        : undefined
+
+      if (!cartID) {
         throw new Error('Cart ID not found in the PaymentIntent metadata')
       }
 
-      const cart = await payload.findByID({
-        id: cartToUse,
-        collection: cartsSlug,
-        depth: 2,
-        overrideAccess: false,
-        select: {
-          id: true,
-          currency: true,
-          customerEmail: true,
-          items: true,
-          subtotal: true,
-        },
-        user,
-      })
+      if (!cartItemsSnapshot || !Array.isArray(cartItemsSnapshot)) {
+        throw new Error('Cart items snapshot not found or invalid in the PaymentIntent metadata')
+      }
 
       const order = await payload.create({
         collection: ordersSlug,
         data: {
           amount: paymentIntent.amount,
-          cart: cartToUse,
           currency: paymentIntent.currency.toUpperCase(),
           ...(req.user ? { customer: req.user.id } : { customerEmail }),
-          items: cart.items,
+          items: cartItemsSnapshot,
+          shippingAddress,
           status: 'processing',
           transactions: [transaction.id],
         },

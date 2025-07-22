@@ -1,10 +1,4 @@
-import type {
-  DefaultDocumentIDType,
-  PopulateType,
-  SelectType,
-  TypedCollection,
-  Where,
-} from 'payload'
+import type { DefaultDocumentIDType, PopulateType, SelectType, TypedCollection } from 'payload'
 import type React from 'react'
 
 import type { CurrenciesConfig, Currency, PaymentAdapterClient } from '../../types.js'
@@ -39,10 +33,16 @@ type APIProps = {
 }
 
 export type ContextProps = {
+  /**
+   * The slug for the addresses collection.
+   *
+   * Defaults to 'addresses'.
+   */
+  addressesSlug?: string
   api?: APIProps
   /**
    * The slug for the carts collection.
-   * This is used in fetch requests to identify the carts collection.
+   *
    * Defaults to 'carts'.
    */
   cartsSlug?: string
@@ -54,13 +54,12 @@ export type ContextProps = {
   currenciesConfig?: CurrenciesConfig
   /**
    * The slug for the customers collection.
-   * This is used in fetch requests to identify the customers collection.
    *
    * Defaults to 'users'.
    */
   customersSlug?: string
   /**
-   * Enable debug mode for the ecommerce context.
+   * Enable debug mode for the ecommerce context. This will log additional information to the console.
    * Defaults to false.
    */
   debug?: boolean
@@ -101,6 +100,12 @@ export type EcommerceContext = {
    */
   addItem: (item: CartItemArgument, quantity?: number) => Promise<void>
   /**
+   * All current addresses for the current user.
+   * This is used to manage shipping and billing addresses.
+   */
+  addresses?: TypedCollection['addresses'][]
+
+  /**
    * Apply coupon.
    */
   applyCoupon: (couponCode: string) => Promise<void>
@@ -125,6 +130,10 @@ export type EcommerceContext = {
     paymentMethodID: string,
     options?: { additionalData: Record<string, unknown> },
   ) => Promise<unknown>
+  /**
+   * Create a new address by providing the data.
+   */
+  createAddress: (data: Partial<TypedCollection['addresses']>) => Promise<void>
   /**
    * The configuration for the currencies used in the ecommerce context.
    */
@@ -170,4 +179,11 @@ export type EcommerceContext = {
    * This will update the currency used for pricing and calculations.
    */
   setCurrency: (currency: string) => void
+  /**
+   * Update an address by providing the data and the ID.
+   */
+  updateAddress: (
+    addressID: DefaultDocumentIDType,
+    data: Partial<TypedCollection['addresses']>,
+  ) => Promise<void>
 }

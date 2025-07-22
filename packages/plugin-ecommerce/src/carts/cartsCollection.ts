@@ -5,7 +5,7 @@ import type { CurrenciesConfig, FieldsOverride } from '../types.js'
 import { amountField } from '../fields/amountField.js'
 import { cartItemsField } from '../fields/cartItemsField.js'
 import { currencyField } from '../fields/currencyField.js'
-import { updateSubtotalHook } from './updateSubtotalHook.js'
+import { beforeChangeCart } from './beforeChange.js'
 
 type Props = {
   /**
@@ -59,6 +59,39 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
         // @ts-expect-error - translations are not typed in plugins yet
         t('plugin-ecommerce:customer'),
       relationTo: customersSlug,
+    },
+    {
+      name: 'purchasedAt',
+      type: 'date',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:purchasedAt'),
+    },
+    {
+      name: 'status',
+      type: 'select',
+      defaultValue: 'open',
+      interfaceName: 'CartStatus',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:status'),
+      options: [
+        {
+          // @ts-expect-error - translations are not typed in plugins yet
+          label: ({ t }) => t('plugin-ecommerce:open'),
+          value: 'open',
+        },
+        {
+          // @ts-expect-error - translations are not typed in plugins yet
+          label: ({ t }) => t('plugin-ecommerce:abandoned'),
+          value: 'abandoned',
+        },
+        {
+          // @ts-expect-error - translations are not typed in plugins yet
+          label: ({ t }) => t('plugin-ecommerce:completed'),
+          value: 'completed',
+        },
+      ],
     },
     {
       name: 'test',
@@ -162,7 +195,6 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
           }),
         ]
       : []),
-
     cartItemsField({
       enableCoupons,
       enableVariants,
@@ -201,7 +233,7 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
     hooks: {
       beforeChange: [
         // This hook can be used to update the subtotal before saving the cart
-        updateSubtotalHook({ couponsSlug, productsSlug, variantsSlug }),
+        updateSubtotalHook({ productsSlug, variantsSlug }),
         ...(overrides?.hooks?.beforeChange || []),
       ],
       ...overrides?.hooks,

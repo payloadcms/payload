@@ -178,6 +178,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     deleteFolder: '刪除資料夾',
     folderName: '資料夾名稱',
     folders: '資料夾',
+    folderTypeDescription: '在此文件夾中選擇應允許的集合文件類型。',
     itemHasBeenMoved: '{{title}}已被移至{{folderName}}',
     itemHasBeenMovedToRoot: '{{title}}已被移至根文件夾',
     itemsMovedToFolder: '{{title}} 已移至 {{folderName}}',

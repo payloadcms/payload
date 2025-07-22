@@ -13,7 +13,7 @@ export const statusOptions: SelectField['options'] = [
   },
   {
     // @ts-expect-error - translations are not typed in plugins yet
-    label: ({ t }) => t('plugin-ecommerce:completed'),
+    label: ({ t }) => t('plugin-ecommerce:failed'),
     value: 'failed',
   },
   {

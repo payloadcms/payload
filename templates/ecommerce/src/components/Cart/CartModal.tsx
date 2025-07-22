@@ -14,7 +14,7 @@ import { ShoppingCart } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { DeleteItemButton } from './DeleteItemButton'
 import { EditItemQuantityButton } from './EditItemQuantityButton'
@@ -30,13 +30,9 @@ interface CouponFormData {
 }
 
 export function CartModal() {
-  const { cart, clearCart, applyCoupon } = useCart()
+  const { cart, applyCoupon } = useCart()
   const [isOpen, setIsOpen] = useState(false)
-  const quantityRef = useRef(
-    cart?.items?.length
-      ? cart.items.reduce((quantity, product) => (product.quantity || 0) + quantity, 0)
-      : 0,
-  )
+
   const pathname = usePathname()
   const {
     formState: { errors, isLoading },
@@ -66,10 +62,15 @@ export function CartModal() {
     await applyCoupon(couponCode)
   }
 
+  const totalQuantity = useMemo(() => {
+    if (!cart || !cart.items || !cart.items.length) return undefined
+    return cart.items.reduce((quantity, item) => (item.quantity || 0) + quantity, 0)
+  }, [cart])
+
   return (
     <Sheet onOpenChange={setIsOpen} open={isOpen}>
       <SheetTrigger asChild>
-        <OpenCartButton quantity={cart?.items?.length} />
+        <OpenCartButton quantity={totalQuantity} />
       </SheetTrigger>
 
       <SheetContent className="flex flex-col">
@@ -110,6 +111,10 @@ export function CartModal() {
 
                   if (isVariant) {
                     price = variant?.priceInUSD
+
+                    if (variant && variant.gallery?.[0] && typeof variant.gallery[0] === 'object') {
+                      image = variant.gallery[0]
+                    }
                   }
 
                   return (
@@ -149,7 +154,7 @@ export function CartModal() {
                           </div>
                         </Link>
                         <div className="flex h-16 flex-col justify-between">
-                          {price && (
+                          {typeof price === 'number' && (
                             <Price
                               amount={price}
                               className="flex justify-end space-y-2 text-right text-sm"
@@ -179,7 +184,7 @@ export function CartModal() {
               </form>
               <div className="px-4">
                 <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
-                  {cart?.subtotal && (
+                  {typeof cart?.subtotal === 'number' && (
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
                       <p>Subtotal</p>
                       <Price

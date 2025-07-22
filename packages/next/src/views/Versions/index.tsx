@@ -148,10 +148,12 @@ export async function VersionsView(props: DocumentViewServerProps) {
         <GutterComponent className={`${baseClass}__wrap`}>
           <ListQueryProvider
             data={versionsData}
-            defaultLimit={limitToUse}
-            defaultSort={sort as string}
             modifySearchParams
             orderableFieldName={collectionConfig?.orderable === true ? '_order' : undefined}
+            query={{
+              limit: limitToUse,
+              sort: sort as string,
+            }}
           >
             <VersionsViewClient
               baseClass={baseClass}

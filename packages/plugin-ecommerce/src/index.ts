@@ -4,6 +4,7 @@ import { deepMergeSimple } from 'payload/shared'
 
 import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from './types.js'
 
+import { addressesCollection } from './addresses/addressesCollection.js'
 import { cartsCollection } from './carts/cartsCollection.js'
 import { couponsCollection } from './coupons/couponsCollection.js'
 import { applyCouponHandler } from './endpoints/applyCoupon.js'
@@ -42,6 +43,28 @@ export const ecommercePlugin =
 
     const currenciesConfig: Required<SanitizedEcommercePluginConfig['currencies']> =
       sanitizedPluginConfig.currencies
+
+    let addressFields
+
+    if (sanitizedPluginConfig.addresses) {
+      const collectionOverrides =
+        typeof sanitizedPluginConfig.addresses === 'object'
+          ? sanitizedPluginConfig.addresses.collectionOverride
+          : undefined
+
+      addressFields = sanitizedPluginConfig.addresses.addressFields
+
+      const supportedCountries = sanitizedPluginConfig.addresses.supportedCountries
+
+      const addresses = addressesCollection({
+        addressFields,
+        customersSlug: collectionSlugMap.customers,
+        overrides: collectionOverrides,
+        supportedCountries,
+      })
+
+      incomingConfig.collections.push(addresses)
+    }
 
     if (sanitizedPluginConfig.products) {
       const productsConfig =
@@ -111,6 +134,7 @@ export const ecommercePlugin =
 
     if (sanitizedPluginConfig.orders) {
       const orders = ordersCollection({
+        addressFields,
         currenciesConfig,
         customersSlug: collectionSlugMap.customers,
         enableVariants,
@@ -132,6 +156,11 @@ export const ecommercePlugin =
           incomingConfig.endpoints = []
         }
 
+        const productsValidation =
+          (typeof sanitizedPluginConfig.products === 'object' &&
+            sanitizedPluginConfig.products.validation) ||
+          undefined
+
         paymentMethods.forEach((paymentMethod) => {
           const methodPath = `/payments/${paymentMethod.name}`
           const endpoints: Endpoint[] = []
@@ -142,6 +171,7 @@ export const ecommercePlugin =
               inventory: sanitizedPluginConfig.inventory,
               paymentMethod,
               productsSlug: collectionSlugMap.products,
+              productsValidation,
               transactionsSlug: collectionSlugMap.transactions,
               variantsSlug: collectionSlugMap.variants,
             }),
@@ -155,6 +185,7 @@ export const ecommercePlugin =
               currenciesConfig,
               ordersSlug: collectionSlugMap.orders,
               paymentMethod,
+              productsValidation,
               transactionsSlug: collectionSlugMap.transactions,
             }),
             method: 'post',
@@ -184,10 +215,15 @@ export const ecommercePlugin =
 
     if (sanitizedPluginConfig.transactions) {
       const transactions = transactionsCollection({
+        addressFields,
+        cartsSlug: collectionSlugMap.carts,
         currenciesConfig,
         customersSlug: collectionSlugMap.customers,
+        enableVariants,
         ordersSlug: collectionSlugMap.orders,
         paymentMethods,
+        productsSlug: collectionSlugMap.products,
+        variantsSlug: collectionSlugMap.variants,
       })
 
       incomingConfig.collections.push(transactions)
@@ -228,10 +264,6 @@ export const ecommercePlugin =
       translations,
       incomingConfig.i18n?.translations,
     )
-
-    if (!incomingConfig.endpoints) {
-      incomingConfig.endpoints = []
-    }
 
     // incomingConfig.typescript = {
     //   ...incomingConfig.typescript,

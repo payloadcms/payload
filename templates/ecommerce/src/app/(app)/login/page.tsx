@@ -7,7 +7,7 @@ import React from 'react'
 import { headers as getHeaders } from 'next/headers'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import { LoginForm } from './LoginForm'
+import { LoginForm } from '@/components/forms/LoginForm'
 import { redirect } from 'next/navigation'
 
 export default async function Login() {

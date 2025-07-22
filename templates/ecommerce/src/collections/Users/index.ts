@@ -6,8 +6,6 @@ import { anyone } from '@/access/anyone'
 import { adminsAndUser } from '@/access/adminsAndUser'
 import { checkRole } from '@/access/checkRole'
 
-import { customerProxy } from './endpoints/customer'
-import { createStripeCustomer } from './hooks/createStripeCustomer'
 import { ensureFirstUserIsAdmin } from './hooks/ensureFirstUserIsAdmin'
 
 export const Users: CollectionConfig = {
@@ -59,7 +57,7 @@ export const Users: CollectionConfig = {
       name: 'roles',
       type: 'select',
       access: {
-        /* create: admins, */
+        create: admins,
         read: admins,
         update: admins,
       },
@@ -97,6 +95,16 @@ export const Users: CollectionConfig = {
       admin: {
         allowCreate: false,
         defaultColumns: ['id', 'createdAt', 'total', 'currency', 'items'],
+      },
+    },
+    {
+      name: 'addresses',
+      type: 'join',
+      collection: 'addresses',
+      on: 'customer',
+      admin: {
+        allowCreate: false,
+        defaultColumns: ['id'],
       },
     },
   ],

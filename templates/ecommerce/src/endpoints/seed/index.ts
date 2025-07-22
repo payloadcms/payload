@@ -12,6 +12,7 @@ import { home } from './home'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
 import { imageHero1 } from './image-hero-1'
+import { Address, Transaction } from '@/payload-types'
 
 const collections: CollectionSlug[] = [
   'categories',
@@ -26,6 +27,8 @@ const collections: CollectionSlug[] = [
   'variants',
   'carts',
   'transactions',
+  'addresses',
+  'orders',
 ]
 
 const sizeVariantOptions = [
@@ -41,6 +44,31 @@ const colorVariantOptions = [
 ]
 
 const globals: GlobalSlug[] = ['header', 'footer']
+
+const baseAddressUSData: Transaction['billingAddress'] = {
+  title: 'Dr',
+  firstName: 'Otto',
+  lastName: 'Octavius',
+  phone: '1234567890',
+  company: 'Oscorp',
+  addressLine1: '123 Main St',
+  addressLine2: 'Suite 100',
+  city: 'New York',
+  state: 'NY',
+  postalCode: '10001',
+  country: 'US',
+}
+
+const baseAddressUKData: Transaction['billingAddress'] = {
+  title: 'Mr',
+  firstName: 'Oliver',
+  lastName: 'Twist',
+  phone: '1234567890',
+  addressLine1: '48 Great Portland St',
+  city: 'London',
+  postalCode: 'W1W 7ND',
+  country: 'GB',
+}
 
 // Next.js revalidation errors are normal when seeding the database without a server running
 // i.e. running `yarn seed` locally instead of using the admin UI within an active app
@@ -87,14 +115,14 @@ export const seed = async ({
       .map((collection) => payload.db.deleteVersions({ collection, req, where: {} })),
   )
 
-  payload.logger.info(`— Seeding demo author and user...`)
+  payload.logger.info(`— Seeding customer and customer data...`)
 
   await payload.delete({
     collection: 'users',
     depth: 0,
     where: {
       email: {
-        equals: 'demo-author@example.com',
+        equals: 'customer@example.com',
       },
     },
   })
@@ -117,7 +145,7 @@ export const seed = async ({
   ])
 
   const [
-    demoAuthor,
+    customer,
     image1Doc,
     image2Doc,
     image3Doc,
@@ -130,9 +158,10 @@ export const seed = async ({
     payload.create({
       collection: 'users',
       data: {
-        name: 'Demo Author',
-        email: 'demo-author@example.com',
+        name: 'Customer',
+        email: 'customer@example.com',
         password: 'password',
+        roles: ['customer'],
       },
     }),
     payload.create({
@@ -212,7 +241,7 @@ export const seed = async ({
     }),
   ])
 
-  let demoAuthorID: number | string = demoAuthor.id
+  let customerID: number | string = customer.id
 
   let image1ID: number | string = image1Doc.id
   let image2ID: number | string = image2Doc.id
@@ -229,7 +258,7 @@ export const seed = async ({
     image2ID = `"${image2Doc.id}"`
     image3ID = `"${image3Doc.id}"`
     imageHomeID = `"${imageHomeDoc.id}"`
-    demoAuthorID = `"${demoAuthorID}"`
+    customerID = `"${customerID}"`
 
     accessoriesID = `"${accessoriesCategory.id}"`
     tshirtsID = `"${tshirtsCategory.id}"`
@@ -384,7 +413,12 @@ export const seed = async ({
     hoodieID = `"${hoodieID}"`
   }
 
-  await Promise.all(
+  const [
+    smallWhiteHoodieVariant,
+    mediumWhiteHoodieVariant,
+    largeWhiteHoodieVariant,
+    xlargeWhiteHoodieVariant,
+  ] = await Promise.all(
     [smallVariantOptionID, mediumVariantOptionID, largeVariantOptionID, xlargeVariantOptionID].map(
       (id) =>
         payload.create({
@@ -454,33 +488,171 @@ export const seed = async ({
     }),
   ])
 
+  payload.logger.info(`— Seeding addresses...`)
+
+  const customerUSAddress = await payload.create({
+    collection: 'addresses',
+    depth: 0,
+    data: {
+      customer: customer.id,
+      ...(baseAddressUSData as Address),
+    },
+  })
+
+  const customerUKAddress = await payload.create({
+    collection: 'addresses',
+    depth: 0,
+    data: {
+      customer: customer.id,
+      ...(baseAddressUKData as Address),
+    },
+  })
+
   payload.logger.info(`— Seeding transactions...`)
 
-  const pendingPaymentRecord = await payload.create({
+  const pendingTransaction = await payload.create({
     collection: 'transactions',
     data: {
       currency: 'USD',
-      customer: demoAuthor.id,
+      customer: customer.id,
       paymentMethod: 'stripe',
       stripe: {
         customerID: 'cus_123',
         paymentIntentID: 'pi_123',
       },
       status: 'pending',
+      billingAddress: baseAddressUSData,
     },
   })
 
-  const succeededPaymentRecord = await payload.create({
+  const succeededTransaction = await payload.create({
     collection: 'transactions',
     data: {
       currency: 'USD',
-      customer: demoAuthor.id,
+      customer: customer.id,
       paymentMethod: 'stripe',
       stripe: {
         customerID: 'cus_123',
         paymentIntentID: 'pi_123',
       },
       status: 'succeeded',
+      billingAddress: baseAddressUSData,
+    },
+  })
+
+  let succeededTransactionID: number | string = succeededTransaction.id
+
+  if (payload.db.defaultIDType === 'text') {
+    succeededTransactionID = `"${succeededTransactionID}"`
+  }
+
+  payload.logger.info(`— Seeding carts...`)
+
+  const openCart = await payload.create({
+    collection: 'carts',
+    data: {
+      customer: customer.id,
+      currency: 'USD',
+      status: 'open',
+      items: [
+        {
+          product: productHoodie.id,
+          variant: mediumWhiteHoodieVariant.id,
+          quantity: 1,
+        },
+      ],
+    },
+  })
+
+  const abandonedCart = await payload.create({
+    collection: 'carts',
+    data: {
+      currency: 'USD',
+      status: 'abandoned',
+      items: [
+        {
+          product: productMousepad.id,
+          quantity: 1,
+        },
+      ],
+    },
+  })
+
+  const completedCart = await payload.create({
+    collection: 'carts',
+    data: {
+      customer: customer.id,
+      currency: 'USD',
+      status: 'completed',
+      subtotal: 7499,
+      items: [
+        {
+          product: productHat.id,
+          variant: variantHatWhite.id,
+          quantity: 1,
+        },
+        {
+          product: productHoodie.id,
+          variant: mediumWhiteHoodieVariant.id,
+          quantity: 1,
+        },
+      ],
+    },
+  })
+
+  let completedCartID: number | string = completedCart.id
+
+  if (payload.db.defaultIDType === 'text') {
+    completedCartID = `"${completedCartID}"`
+  }
+
+  payload.logger.info(`— Seeding orders...`)
+
+  const orderInCompleted = await payload.create({
+    collection: 'orders',
+    data: {
+      amount: 7499,
+      currency: 'USD',
+      customer: customer.id,
+      shippingAddress: baseAddressUSData,
+      items: [
+        {
+          product: productHat.id,
+          variant: variantHatWhite.id,
+          quantity: 1,
+        },
+        {
+          product: productHoodie.id,
+          variant: mediumWhiteHoodieVariant.id,
+          quantity: 1,
+        },
+      ],
+      status: 'completed',
+      transactions: [succeededTransaction.id],
+    },
+  })
+
+  const orderInProcessing = await payload.create({
+    collection: 'orders',
+    data: {
+      amount: 7499,
+      currency: 'USD',
+      customer: customer.id,
+      shippingAddress: baseAddressUSData,
+      items: [
+        {
+          product: productHat.id,
+          variant: variantHatWhite.id,
+          quantity: 1,
+        },
+        {
+          product: productHoodie.id,
+          variant: mediumWhiteHoodieVariant.id,
+          quantity: 1,
+        },
+      ],
+      status: 'processing',
+      transactions: [succeededTransaction.id],
     },
   })
 
@@ -524,6 +696,13 @@ export const seed = async ({
               type: 'custom',
               label: 'Admin',
               url: '/admin',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'Find my order',
+              url: '/find-order',
             },
           },
           {

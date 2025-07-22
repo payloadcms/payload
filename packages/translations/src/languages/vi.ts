@@ -186,6 +186,7 @@ export const viTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Xóa Thư mục',
     folderName: 'Tên thư mục',
     folders: 'Thư mục',
+    folderTypeDescription: 'Chọn loại tài liệu bộ sưu tập nào nên được cho phép trong thư mục này.',
     itemHasBeenMoved: '{{title}} đã được chuyển đến {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} đã được chuyển đến thư mục gốc',
     itemsMovedToFolder: '{{title}} đã được di chuyển vào {{folderName}}',

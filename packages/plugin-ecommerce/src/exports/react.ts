@@ -1,5 +1,6 @@
 export {
   EcommerceProvider,
+  useAddresses,
   useCart,
   useCurrency,
   useEcommerce,

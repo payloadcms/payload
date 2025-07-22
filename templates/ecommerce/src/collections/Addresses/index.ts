@@ -1,27 +1,16 @@
-import type { User } from '@/payload-types'
-import type { CollectionConfig } from 'payload'
+import { CollectionOverride } from '@payloadcms/plugin-ecommerce/types'
+import { ownerOrAdminAddress } from './access'
+import { authenticated } from '@/access/authenticated'
+import { beforeChangeAddress } from './beforeChange'
 
-import { admins } from '@/access/admins'
-import { anyone } from '@/access/anyone'
-import { adminsAndUser } from '@/access/adminsAndUser'
-
-export const Addresses: CollectionConfig = {
-  slug: 'addresses',
+export const Addresses: CollectionOverride = {
   access: {
-    create: adminsAndUser,
-    delete: adminsAndUser,
-    read: adminsAndUser,
-    update: adminsAndUser,
+    create: authenticated,
+    delete: ownerOrAdminAddress,
+    read: ownerOrAdminAddress,
+    update: ownerOrAdminAddress,
   },
-  admin: {
-    defaultColumns: ['customer'],
+  hooks: {
+    beforeChange: [beforeChangeAddress],
   },
-  fields: [
-    {
-      name: 'customer',
-      required: true,
-      type: 'relationship',
-      relationTo: 'users',
-    },
-  ],
 }

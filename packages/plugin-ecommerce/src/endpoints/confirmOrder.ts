@@ -1,6 +1,8 @@
 import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from 'payload'
 
-import type { Cart, CurrenciesConfig, PaymentAdapter } from '../types.js'
+import type { CurrenciesConfig, PaymentAdapter, ProductsValidation } from '../types.js'
+
+import { defaultProductsValidation } from '../utilities/defaultProductsValidation.js'
 
 type Args = {
   /**
@@ -8,6 +10,10 @@ type Args = {
    */
   cartsSlug?: string
   currenciesConfig: CurrenciesConfig
+  /**
+   * The slug of the customers collection, defaults to 'users'.
+   */
+  customersSlug?: string
   /**
    * The slug of the orders collection, defaults to 'orders'.
    */
@@ -18,6 +24,10 @@ type Args = {
    */
   productsSlug?: string
   /**
+   * Customise the validation used for checking products or variants before a transaction is created.
+   */
+  productsValidation?: ProductsValidation
+  /**
    * The slug of the transactions collection, defaults to 'transactions'.
    */
   transactionsSlug?: string
@@ -27,19 +37,21 @@ type Args = {
   variantsSlug?: string
 }
 
-type ConfirmOrder = (args: Args) => Endpoint['handler']
+type ConfirmOrderHandler = (args: Args) => Endpoint['handler']
 
 /**
  * Handles the endpoint for initiating payments. We will handle checking the amount and product and variant prices here before it is sent to the payment provider.
  * This is the first step in the payment process.
  */
-export const confirmOrderHandler: ConfirmOrder =
+export const confirmOrderHandler: ConfirmOrderHandler =
   ({
     cartsSlug = 'carts',
     currenciesConfig,
+    customersSlug = 'users',
     ordersSlug = 'orders',
     paymentMethod,
     productsSlug = 'products',
+    productsValidation,
     transactionsSlug = 'transactions',
     variantsSlug = 'variants',
   }) =>
@@ -145,55 +157,8 @@ export const confirmOrderHandler: ConfirmOrder =
           const priceField = `priceIn${currency.toUpperCase()}`
           const quantity = item.quantity || 1
 
-          if (item.variant) {
-            const id = typeof item.variant === 'object' ? item.variant.id : item.variant
-
-            const variant = await payload.findByID({
-              id,
-              collection: variantsSlug,
-              depth: 0,
-              select: {
-                inventory: true,
-                [priceField]: true,
-              },
-            })
-
-            if (!variant) {
-              return Response.json(
-                {
-                  message: `Variant with ID ${item.variant} not found.`,
-                },
-                {
-                  status: 404,
-                },
-              )
-            }
-
-            if (!variant[priceField]) {
-              return Response.json(
-                {
-                  message: `Variant with ID ${item.variant} does not have a price in ${currency}.`,
-                },
-                {
-                  status: 400,
-                },
-              )
-            }
-
-            if (variant.inventory === 0 || (variant.inventory && variant.inventory < quantity)) {
-              return Response.json(
-                {
-                  message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory.`,
-                },
-                {
-                  status: 400,
-                },
-              )
-            }
-          }
-
           // If the item has a product but no variant, we assume the product has a price in the specified currency
-          if (item.product && !item.variant) {
+          if (item.product) {
             const id = typeof item.product === 'object' ? item.product.id : item.product
 
             const product = await payload.findByID({
@@ -206,6 +171,11 @@ export const confirmOrderHandler: ConfirmOrder =
             })
 
             if (!product) {
+              payload.logger.error(
+                `Product with ID ${item.product} not found.`,
+                'Error validating product',
+              )
+
               return Response.json(
                 {
                   message: `Product with ID ${item.product} not found.`,
@@ -215,35 +185,106 @@ export const confirmOrderHandler: ConfirmOrder =
                 },
               )
             }
-            if (!product[priceField]) {
-              return Response.json(
-                {
-                  message: `Product with ID ${item.product} does not have a price in ${currency}.`,
-                },
-                {
-                  status: 400,
-                },
-              )
+
+            // Run product validation only if the item does not have a variant, each variant will have its own inventory and price
+            if (!item.variant) {
+              try {
+                if (productsValidation) {
+                  await productsValidation({
+                    currenciesConfig,
+                    currency,
+                    product,
+                    quantity,
+                  })
+                } else {
+                  await defaultProductsValidation({
+                    currenciesConfig,
+                    currency,
+                    product,
+                    quantity,
+                  })
+                }
+              } catch (error) {
+                payload.logger.error(error, 'Error validating product.')
+                return Response.json(
+                  {
+                    message: error,
+                  },
+                  {
+                    status: 400,
+                  },
+                )
+              }
             }
 
-            if (product.inventory === 0 || (product.inventory && product.inventory < quantity)) {
-              return Response.json(
-                {
-                  message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory.`,
+            if (item.variant) {
+              const id = typeof item.variant === 'object' ? item.variant.id : item.variant
+
+              const variant = await payload.findByID({
+                id,
+                collection: variantsSlug,
+                depth: 0,
+                select: {
+                  inventory: true,
+                  [priceField]: true,
                 },
-                {
-                  status: 400,
-                },
-              )
+              })
+
+              if (!variant) {
+                payload.logger.error(
+                  `Variant with ID ${item.variant} not found.`,
+                  'Error validating variant',
+                )
+
+                return Response.json(
+                  {
+                    message: `Variant with ID ${item.variant} not found.`,
+                  },
+                  {
+                    status: 404,
+                  },
+                )
+              }
+
+              try {
+                if (productsValidation) {
+                  await productsValidation({
+                    currenciesConfig,
+                    currency,
+                    product,
+                    quantity,
+                    variant,
+                  })
+                } else {
+                  await defaultProductsValidation({
+                    currenciesConfig,
+                    currency,
+                    product,
+                    quantity,
+                    variant,
+                  })
+                }
+              } catch (error) {
+                payload.logger.error(error, 'Error validating product or variant.')
+
+                return Response.json(
+                  {
+                    message: error,
+                  },
+                  {
+                    status: 400,
+                  },
+                )
+              }
             }
           }
         }
       }
 
       const paymentResponse = await paymentMethod.confirmOrder({
+        customersSlug,
         data: {
           ...data,
-          cart,
           customerEmail,
         },
         ordersSlug,
@@ -251,13 +292,17 @@ export const confirmOrderHandler: ConfirmOrder =
         transactionsSlug,
       })
 
+      if (paymentResponse) {
+        // Start decrementing the inventory for each product and variant in the cart
+      }
+
       return Response.json(paymentResponse)
     } catch (error) {
       payload.logger.error(error, 'Error initiating payment')
 
       return Response.json(
         {
-          message: 'Error initiating payment',
+          message: 'Error confirming order.',
         },
         {
           status: 500,

@@ -19,6 +19,8 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
     const currency = data.currency
     const cart = data.cart
     const amount = cart.subtotal
+    const billingAddressFromData = data.billingAddress
+    const shippingAddressFromData = data.shippingAddress
 
     if (!secretKey) {
       throw new Error('Stripe secret key is required.')
@@ -64,12 +66,31 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
         })
       }
 
+      const flattenedCart = cart.items.map((item) => {
+        const productID = typeof item.product === 'object' ? item.product.id : item.product
+        const variantID = item.variant
+          ? typeof item.variant === 'object'
+            ? item.variant.id
+            : item.variant
+          : undefined
+
+        return {
+          product: productID,
+          quantity: item.quantity,
+          variant: variantID,
+        }
+      })
+
+      const shippingAddress = JSON.stringify(shippingAddressFromData)
+
       const paymentIntent = await stripe.paymentIntents.create({
         amount,
         currency,
         customer: customer.id,
         metadata: {
           cartID: cart.id,
+          cartItemsSnapshot: JSON.stringify(flattenedCart),
+          shippingAddress,
         },
       })
 
@@ -79,7 +100,10 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
         data: {
           ...(req.user ? { customer: req.user.id } : { customerEmail }),
           amount: paymentIntent.amount,
+          billingAddress: billingAddressFromData,
+          cart: cart.id,
           currency: paymentIntent.currency.toUpperCase(),
+          items: flattenedCart,
           paymentMethod: 'stripe',
           status: 'pending',
           stripe: {

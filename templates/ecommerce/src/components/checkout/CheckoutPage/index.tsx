@@ -1,6 +1,5 @@
 'use client'
 
-import { LoadingShimmer } from '@/components/LoadingShimmer'
 import { Media } from '@/components/Media'
 import { Message } from '@/components/Message'
 import { Price } from '@/components/Price'
@@ -13,11 +12,15 @@ import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import React, { Fragment, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import React, { Suspense, useCallback, useEffect, useState } from 'react'
 
 import { cssVariables } from '@/cssVariables'
-import { CheckoutForm } from '../CheckoutForm'
-import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/react'
+import { CheckoutForm } from '@/components/forms/CheckoutForm'
+import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/react'
+import { CheckoutAddresses } from '@/components/checkout/CheckoutAddresses'
+import { Address } from '@/payload-types'
+import { Checkbox } from '@/components/ui/checkbox'
+import { AddressItem } from '@/components/addresses/AddressItem'
 
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
 const stripe = loadStripe(apiKey)
@@ -34,28 +37,71 @@ export const CheckoutPage: React.FC = () => {
   const [email, setEmail] = useState('')
   const [emailEditable, setEmailEditable] = useState(true)
   const { paymentData, initiatePayment, selectedPaymentMethod, paymentMethods } = usePayments()
+  const { addresses } = useAddresses()
+  const [shippingAddress, setShippingAddress] = useState<Address>()
+  const [billingAddress, setBillingAddress] = useState<Address>()
+  const [billingAddressSameAsShipping, setBillingAddressSameAsShipping] = useState(true)
 
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
 
-  const initiatePaymentIntent = async (paymentID: string) => {
-    console.log('initiating payment intent', paymentID)
-    const paymentIntent = await initiatePayment(paymentID, {
-      additionalData: {
-        ...(email ? { customerEmail: email } : {}),
-      },
-    })
+  const canGoToPayment = Boolean(
+    (email || user) && billingAddress && (billingAddressSameAsShipping || shippingAddress),
+  )
 
-    console.log({ paymentIntent })
-  }
+  console.log({ canGoToPayment, billingAddress, user, email, shippingAddress, paymentData })
+
+  // On initial load wait for addresses to be loaded and check to see if we can prefill a default one
+  useEffect(() => {
+    if (!shippingAddress) {
+      if (addresses && addresses.length > 0) {
+        const defaultAddress = addresses[0]
+        if (defaultAddress) {
+          setBillingAddress(defaultAddress)
+        }
+      }
+    }
+  }, [addresses])
+
+  useEffect(() => {
+    return () => {
+      setShippingAddress(undefined)
+      setBillingAddress(undefined)
+      setBillingAddressSameAsShipping(true)
+      setEmail('')
+      setEmailEditable(true)
+    }
+  }, [])
+
+  const initiatePaymentIntent = useCallback(
+    async (paymentID: string) => {
+      const paymentIntent = await initiatePayment(paymentID, {
+        additionalData: {
+          ...(email ? { customerEmail: email } : {}),
+          billingAddress,
+          shippingAddress: billingAddressSameAsShipping ? billingAddress : shippingAddress,
+        },
+      })
+    },
+    [billingAddress, billingAddressSameAsShipping, shippingAddress],
+  )
 
   if (!stripe) return null
 
+  if (cartIsEmpty) {
+    return (
+      <div className="prose dark:prose-invert py-12 w-full items-center">
+        <p>Your cart is empty.</p>
+        <Link href="/search">Continue shopping?</Link>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col items-stretch justify-stretch md:flex-row grow">
-      <div className="basis-full lg:basis-1/2 flex flex-col gap-8 lg:pr-8 pt-8">
+      <div className="basis-full lg:basis-2/3 flex flex-col gap-8 md:pr-6 lg:pr-8 pt-8">
         <h2 className="font-medium text-3xl">Contact</h2>
         {!user && (
-          <div className="prose dark:prose-invert bg-black rounded-sm p-4 grow w-full flex items-center">
+          <div className="prose dark:prose-invert bg-accent dark:bg-black rounded-sm p-4 grow w-full flex items-center">
             <Button asChild className="no-underline text-inherit" variant="outline">
               <Link href="/login">Log in</Link>
             </Button>
@@ -66,16 +112,19 @@ export const CheckoutPage: React.FC = () => {
           </div>
         )}
         {user ? (
-          <div className="bg-black rounded-sm p-4 w-full">
+          <div className="bg-accent dark:bg-black rounded-sm p-4 w-full">
             <div>
               <p>{user.email}</p>{' '}
               <p>
-                Not you? <Link href="/logout">Log out</Link>
+                Not you?{' '}
+                <Link className="underline" href="/logout">
+                  Log out
+                </Link>
               </p>
             </div>
           </div>
         ) : (
-          <div className="bg-black rounded-sm p-4 w-full">
+          <div className="bg-accent dark:bg-black rounded-sm p-4 w-full">
             <div>
               <p className="mb-4">Enter your email to checkout as a guest.</p>
               <div className="max-w-sm mb-4">
@@ -91,7 +140,8 @@ export const CheckoutPage: React.FC = () => {
               </div>
               <Button
                 disabled={!email || !emailEditable}
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault()
                   setEmailEditable(false)
                 }}
                 variant="default"
@@ -102,37 +152,106 @@ export const CheckoutPage: React.FC = () => {
           </div>
         )}
 
-        <h2 className="font-medium text-3xl">Payment</h2>
+        <h2 className="font-medium text-3xl">Address</h2>
 
-        {cartIsEmpty && (
-          <div className="prose dark:prose-invert">
-            <p>
-              Your cart is empty.
-              <Link href="/search">Continue shopping?</Link>
-            </p>
+        {billingAddress ? (
+          <div>
+            <AddressItem
+              actions={
+                <Button
+                  variant={'outline'}
+                  disabled={Boolean(paymentData)}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setBillingAddress(undefined)
+                  }}
+                >
+                  Remove
+                </Button>
+              }
+              address={billingAddress}
+            />
           </div>
+        ) : (
+          <CheckoutAddresses heading="Billing address" setAddress={setBillingAddress} />
         )}
-        {!paymentData?.['clientSecret'] && !error && (
-          <div className="my-8">
-            <LoadingShimmer number={1} />
-          </div>
+
+        <div className="flex gap-4 items-center">
+          <Checkbox
+            id="shippingTheSameAsBilling"
+            checked={billingAddressSameAsShipping}
+            disabled={Boolean(paymentData)}
+            onCheckedChange={(state) => {
+              setBillingAddressSameAsShipping(state as boolean)
+            }}
+          />
+          <Label htmlFor="shippingTheSameAsBilling">Shipping is the same as billing</Label>
+        </div>
+
+        {!billingAddressSameAsShipping && (
+          <>
+            {shippingAddress ? (
+              <div>
+                <AddressItem
+                  actions={
+                    <Button
+                      variant={'outline'}
+                      disabled={Boolean(paymentData)}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setShippingAddress(undefined)
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  }
+                  address={shippingAddress}
+                />
+              </div>
+            ) : (
+              <CheckoutAddresses
+                heading="Shipping address"
+                description="Please select a shipping address."
+                setAddress={setShippingAddress}
+              />
+            )}
+          </>
         )}
+
+        {!paymentData && (
+          <Button
+            className="self-start"
+            disabled={!canGoToPayment}
+            onClick={(e) => {
+              e.preventDefault()
+              void initiatePaymentIntent('stripe')
+            }}
+          >
+            Go to payment
+          </Button>
+        )}
+
         {!paymentData?.['clientSecret'] && error && (
           <div className="my-8">
             <Message error={error} />
 
-            <Button onClick={() => router.refresh()} variant="default">
+            <Button
+              onClick={(e) => {
+                e.preventDefault()
+                router.refresh()
+              }}
+              variant="default"
+            >
               Try again
             </Button>
           </div>
         )}
 
-        <Button onClick={() => void initiatePaymentIntent('stripe')}>Confirm address</Button>
-
         <Suspense fallback={<React.Fragment />}>
           {/* @ts-ignore */}
           {paymentData && paymentData?.['clientSecret'] && (
-            <Fragment>
+            <div className="pb-16">
+              <h2 className="font-medium text-3xl">Payment</h2>
               {error && <p>{`Error: ${error}`}</p>}
               <Elements
                 options={{
@@ -161,15 +280,15 @@ export const CheckoutPage: React.FC = () => {
                 }}
                 stripe={stripe}
               >
-                <CheckoutForm customerEmail={email} />
+                <CheckoutForm customerEmail={email} billingAddress={billingAddress} />
               </Elements>
-            </Fragment>
+            </div>
           )}
         </Suspense>
       </div>
 
       {!cartIsEmpty && (
-        <div className="basis-full lg:basis-1/2 lg:pl-8 p-8 border-l bg-primary/5 flex flex-col gap-8">
+        <div className="basis-full lg:basis-1/3 lg:pl-8 p-8 border-l bg-primary/5 flex flex-col gap-8">
           <h2 className="text-3xl font-medium">Your cart</h2>
           {cart?.items?.map((item, index) => {
             if (typeof item.product === 'object' && item.product) {
@@ -184,6 +303,10 @@ export const CheckoutPage: React.FC = () => {
 
               const image = gallery?.[0] || meta?.image
 
+              const variantPrice = typeof variant === 'object' ? variant?.priceInUSD : undefined
+
+              const price = product?.priceInUSD ?? variantPrice
+
               return (
                 <div className="flex items-start gap-4" key={index}>
                   <div className="flex items-stretch justify-stretch h-20 w-20 p-2 rounded-lg border">
@@ -196,21 +319,23 @@ export const CheckoutPage: React.FC = () => {
                   <div className="flex grow justify-between items-center">
                     <div className="flex flex-col gap-1">
                       <p className="font-medium text-lg">{title}</p>
-                      {/* {variant && (
+                      {variant && typeof variant === 'object' && (
                         <p className="text-sm font-mono text-primary/50 tracking-[0.1em]">
-                          {product.variants
-                            ?.find((v) => v.id === variantId)
-                            ?.options.map((option) => option.value)
+                          {variant.options
+                            ?.map((option) => {
+                              if (typeof option === 'object') return option.label
+                              return null
+                            })
                             .join(', ')}
                         </p>
-                      )} */}
+                      )}
                       <div>
                         {'x'}
                         {quantity}
                       </div>
                     </div>
 
-                    {product.priceInUSD && <Price amount={product.priceInUSD} />}
+                    {typeof price === 'number' && <Price amount={price} />}
                   </div>
                 </div>
               )

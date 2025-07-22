@@ -29,11 +29,24 @@ export const AccountNav: React.FC<Props> = ({ className }) => {
         </li>
 
         <li>
+          <Button asChild variant="link">
+            <Link
+              href="/account/addresses"
+              className={clsx('text-primary/50 hover:text-primary/100 hover:no-underline', {
+                'text-primary/100': pathname === '/account/addresses',
+              })}
+            >
+              Addresses
+            </Link>
+          </Button>
+        </li>
+
+        <li>
           <Button
             asChild
             variant="link"
             className={clsx('text-primary/50 hover:text-primary/100 hover:no-underline', {
-              'text-primary/100': pathname === '/orders',
+              'text-primary/100': pathname === '/orders' || pathname.includes('/orders'),
             })}
           >
             <Link href="/orders">Orders</Link>

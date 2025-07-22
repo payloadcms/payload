@@ -1,4 +1,4 @@
-import canUseDOM from './canUseDOM'
+import { canUseDOM } from './canUseDOM'
 
 export const getServerSideURL = () => {
   let url = process.env.NEXT_PUBLIC_SERVER_URL

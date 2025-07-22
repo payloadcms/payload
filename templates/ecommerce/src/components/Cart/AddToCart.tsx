@@ -7,7 +7,7 @@ import { useCart } from '@payloadcms/plugin-ecommerce/react'
 import clsx from 'clsx'
 import { useSearchParams } from 'next/navigation'
 import React, { useCallback, useMemo } from 'react'
-
+import { toast } from 'sonner'
 type Props = {
   product: Product
 }
@@ -43,6 +43,8 @@ export function AddToCart({ product }: Props) {
       addItem({
         product: product.id,
         variant: selectedVariant?.id ?? undefined,
+      }).then(() => {
+        toast.success('Item added to cart.')
       })
     },
     [addItem, product, selectedVariant],

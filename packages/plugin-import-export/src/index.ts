@@ -11,6 +11,7 @@ import { getCustomFieldFunctions } from './export/getCustomFieldFunctions.js'
 import { getSelect } from './export/getSelect.js'
 import { getExportCollection } from './getExportCollection.js'
 import { translations } from './translations/index.js'
+import { collectDisabledFieldPaths } from './utilities/collectDisabledFieldPaths.js'
 import { getFlattenedFieldKeys } from './utilities/getFlattenedFieldKeys.js'
 
 export const importExportPlugin =
@@ -32,7 +33,7 @@ export const importExportPlugin =
     )
 
     // inject the createExport job into the config
-    ;((config.jobs ??= {}).tasks ??= []).push(getCreateCollectionExportTask(config))
+    ;((config.jobs ??= {}).tasks ??= []).push(getCreateCollectionExportTask(config, pluginConfig))
 
     let collectionsToUpdate = config.collections
 
@@ -58,6 +59,19 @@ export const importExportPlugin =
         },
         path: '@payloadcms/plugin-import-export/rsc#ExportListMenuItem',
       })
+
+      // // Find fields explicitly marked as disabled for import/export
+      const disabledFieldAccessors = collectDisabledFieldPaths(collection.fields)
+
+      // Store disabled field accessors in the admin config for use in the UI
+      collection.admin.custom = {
+        ...(collection.admin.custom || {}),
+        'plugin-import-export': {
+          ...(collection.admin.custom?.['plugin-import-export'] || {}),
+          disabledFields: disabledFieldAccessors,
+        },
+      }
+
       collection.admin.components = components
     })
 
@@ -161,6 +175,14 @@ export const importExportPlugin =
 declare module 'payload' {
   export interface FieldCustom {
     'plugin-import-export'?: {
+      /**
+       * When `true` the field is **completely excluded** from the import-export plugin:
+       * - It will not appear in the “Fields to export” selector.
+       * - It is hidden from the preview list when no specific fields are chosen.
+       * - Its data is omitted from the final CSV / JSON export.
+       * @default false
+       */
+      disabled?: boolean
       toCSV?: ToCSVFunction
     }
   }

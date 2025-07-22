@@ -41,6 +41,7 @@ type ActionProps =
     }
 export type MoveToFolderDrawerProps = {
   readonly drawerSlug: string
+  readonly folderAssignedCollections: CollectionSlug[]
   readonly folderCollectionSlug: string
   readonly folderFieldName: string
   readonly fromFolderID?: number | string
@@ -86,11 +87,13 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
     async (folderIDToPopulate: null | number | string) => {
       try {
         const result = await getFolderResultsComponentAndData({
-          activeCollectionSlugs: [props.folderCollectionSlug],
           browseByFolder: false,
+          collectionsToDisplay: [props.folderCollectionSlug],
           displayAs: 'grid',
+          // todo: should be able to pass undefined, empty array or null and get all folders. Need to look at API for this in the server function
+          folderAssignedCollections: props.folderAssignedCollections,
           folderID: folderIDToPopulate,
-          sort: '_folderOrDocumentTitle',
+          sort: 'name',
         })
 
         setBreadcrumbs(result.breadcrumbs || [])
@@ -107,7 +110,7 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
 
       hasLoadedRef.current = true
     },
-    [getFolderResultsComponentAndData, props.folderCollectionSlug],
+    [getFolderResultsComponentAndData, props.folderAssignedCollections, props.folderCollectionSlug],
   )
 
   React.useEffect(() => {
@@ -167,6 +170,7 @@ function Content({
     folderFieldName,
     folderID,
     FolderResultsComponent,
+    folderType,
     getSelectedItems,
     subfolders,
   } = useFolder()
@@ -229,7 +233,7 @@ function Content({
   }, [drawerSlug, isModalOpen, clearRouteCache, folderAddedToUnderlyingFolder])
 
   return (
-    <>
+    <div className={baseClass}>
       <DrawerActionHeader
         onCancel={() => {
           closeModal(drawerSlug)
@@ -298,6 +302,7 @@ function Content({
             <FolderDocumentDrawer
               initialData={{
                 [folderFieldName]: folderID,
+                folderType,
               }}
               onSave={(result) => {
                 void onCreateSuccess({
@@ -321,6 +326,7 @@ function Content({
               <ListCreateNewDocInFolderButton
                 buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
                 collectionSlugs={[folderCollectionSlug]}
+                folderAssignedCollections={props.folderAssignedCollections}
                 key="create-folder"
                 onCreateSuccess={onCreateSuccess}
                 slugPrefix="create-new-folder-from-drawer--no-results"
@@ -355,7 +361,7 @@ function Content({
           onConfirm={onConfirmMove}
         />
       )}
-    </>
+    </div>
   )
 }
 

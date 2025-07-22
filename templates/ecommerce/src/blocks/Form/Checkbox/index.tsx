@@ -9,6 +9,8 @@ import React from 'react'
 
 import { Error } from '../Error'
 import { Width } from '../Width'
+import { capitaliseFirstLetter } from '@/utilities/capitaliseFirstLetter'
+import { FormError } from '@/components/forms/FormError'
 
 export const Checkbox: React.FC<
   CheckboxField & {
@@ -22,7 +24,11 @@ export const Checkbox: React.FC<
     setValue: any
   }
 > = ({ name, defaultValue, errors, label, register, required: requiredFromProps, width }) => {
-  const props = register(name, { required: requiredFromProps })
+  const props = register(name, {
+    required: requiredFromProps
+      ? `${capitaliseFirstLetter(label || name)} is required.`
+      : undefined,
+  })
   const { setValue } = useFormContext()
 
   return (
@@ -38,7 +44,9 @@ export const Checkbox: React.FC<
         />
         <Label htmlFor={name}>{label}</Label>
       </div>
-      {requiredFromProps && errors[name] && <Error />}
+      {errors?.[name]?.message && typeof errors?.[name]?.message === 'string' && (
+        <FormError message={errors?.[name]?.message} />
+      )}
     </Width>
   )
 }

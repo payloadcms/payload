@@ -3,7 +3,7 @@ import type { UpdateJobsArgs } from '../../database/types.js'
 import type { Job } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 
-import { jobAfterRead, jobsCollectionSlug } from '../config/index.js'
+import { jobAfterRead, jobsCollectionSlug } from '../config/collection.js'
 
 type BaseArgs = {
   data: Partial<Job>

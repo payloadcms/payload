@@ -67,7 +67,7 @@
 
   --success: hsl(196 52% 74%);
   --warning: hsl(34 89% 85%);
-  --error: hsl(10 100% 86%);
+  --error: hsl(10, 93%, 70%);
 }
 
 [data-theme='dark'] {

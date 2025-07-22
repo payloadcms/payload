@@ -1,11 +1,13 @@
 import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from 'payload'
 
 import type {
-  Cart,
   CurrenciesConfig,
   PaymentAdapter,
+  ProductsValidation,
   SanitizedEcommercePluginConfig,
 } from '../types.js'
+
+import { defaultProductsValidation } from '../utilities/defaultProductsValidation.js'
 
 type Args = {
   /**
@@ -13,6 +15,10 @@ type Args = {
    */
   cartsSlug?: string
   currenciesConfig: CurrenciesConfig
+  /**
+   * The slug of the customers collection, defaults to 'users'.
+   */
+  customersSlug?: string
   /**
    * Track inventory stock for the products and variants.
    * Accepts an object to override the default field name.
@@ -23,6 +29,10 @@ type Args = {
    * The slug of the products collection, defaults to 'products'.
    */
   productsSlug?: string
+  /**
+   * Customise the validation used for checking products or variants before a transaction is created.
+   */
+  productsValidation?: ProductsValidation
   /**
    * The slug of the transactions collection, defaults to 'transactions'.
    */
@@ -43,8 +53,10 @@ export const initiatePaymentHandler: InitiatePayment =
   ({
     cartsSlug = 'carts',
     currenciesConfig,
+    customersSlug = 'users',
     paymentMethod,
     productsSlug = 'products',
+    productsValidation,
     transactionsSlug = 'transactions',
     variantsSlug = 'variants',
   }) =>
@@ -57,6 +69,8 @@ export const initiatePaymentHandler: InitiatePayment =
     let currency: string = currenciesConfig.defaultCurrency
     let cartID: DefaultDocumentIDType = data?.cartID
     let cart = undefined
+    const billingAddress = data?.billingAddress
+    const shippingAddress = data?.shippingAddress
 
     let customerEmail: string = user?.email ?? ''
 
@@ -176,53 +190,6 @@ export const initiatePaymentHandler: InitiatePayment =
       const priceField = `priceIn${currency.toUpperCase()}`
       const quantity = item.quantity || 1
 
-      if (item.variant) {
-        const id = typeof item.variant === 'object' ? item.variant.id : item.variant
-
-        const variant = await payload.findByID({
-          id,
-          collection: variantsSlug,
-          depth: 0,
-          select: {
-            inventory: true,
-            [priceField]: true,
-          },
-        })
-
-        if (!variant) {
-          return Response.json(
-            {
-              message: `Variant with ID ${item.variant} not found.`,
-            },
-            {
-              status: 404,
-            },
-          )
-        }
-
-        if (!variant[priceField]) {
-          return Response.json(
-            {
-              message: `Variant with ID ${item.variant} does not have a price in ${currency}.`,
-            },
-            {
-              status: 400,
-            },
-          )
-        }
-
-        if (variant.inventory === 0 || (variant.inventory && variant.inventory < quantity)) {
-          return Response.json(
-            {
-              message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory.`,
-            },
-            {
-              status: 400,
-            },
-          )
-        }
-      }
-
       // If the item has a product but no variant, we assume the product has a price in the specified currency
       if (item.product && !item.variant) {
         const id = typeof item.product === 'object' ? item.product.id : item.product
@@ -246,10 +213,22 @@ export const initiatePaymentHandler: InitiatePayment =
             },
           )
         }
-        if (!product[priceField]) {
+
+        try {
+          if (productsValidation) {
+            await productsValidation({ currenciesConfig, currency, product, quantity })
+          } else {
+            await defaultProductsValidation({
+              currenciesConfig,
+              currency,
+              product,
+              quantity,
+            })
+          }
+        } catch (error) {
           return Response.json(
             {
-              message: `Product with ID ${item.product} does not have a price in ${currency}.`,
+              message: error,
             },
             {
               status: 400,
@@ -257,25 +236,71 @@ export const initiatePaymentHandler: InitiatePayment =
           )
         }
 
-        if (product.inventory === 0 || (product.inventory && product.inventory < quantity)) {
-          return Response.json(
-            {
-              message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory.`,
+        if (item.variant) {
+          const id = typeof item.variant === 'object' ? item.variant.id : item.variant
+
+          const variant = await payload.findByID({
+            id,
+            collection: variantsSlug,
+            depth: 0,
+            select: {
+              inventory: true,
+              [priceField]: true,
             },
-            {
-              status: 400,
-            },
-          )
+          })
+
+          if (!variant) {
+            return Response.json(
+              {
+                message: `Variant with ID ${item.variant} not found.`,
+              },
+              {
+                status: 404,
+              },
+            )
+          }
+
+          try {
+            if (productsValidation) {
+              await productsValidation({
+                currenciesConfig,
+                currency,
+                product: item.product,
+                quantity,
+                variant,
+              })
+            } else {
+              await defaultProductsValidation({
+                currenciesConfig,
+                currency,
+                product: item.product,
+                quantity,
+                variant,
+              })
+            }
+          } catch (error) {
+            return Response.json(
+              {
+                message: error,
+              },
+              {
+                status: 400,
+              },
+            )
+          }
         }
       }
     }
 
     try {
       const paymentResponse = await paymentMethod.initiatePayment({
+        customersSlug,
         data: {
+          billingAddress,
           cart,
           currency,
           customerEmail,
+          shippingAddress,
         },
         req,
         transactionsSlug,

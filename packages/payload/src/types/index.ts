@@ -1,5 +1,6 @@
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
+import type { OptionalKeys, RequiredKeys } from 'ts-essentials'
 import type { URL } from 'url'
 
 import type {
@@ -262,3 +263,8 @@ export type TransformGlobalWithSelect<
 export type PopulateType = Partial<TypedCollectionSelect>
 
 export type ResolvedFilterOptions = { [collection: string]: Where }
+
+export type PickPreserveOptional<T, K extends keyof T> = Partial<
+  Pick<T, Extract<K, OptionalKeys<T>>>
+> &
+  Pick<T, Extract<K, RequiredKeys<T>>>

@@ -30,7 +30,7 @@ export const OrderItem: React.FC<Props> = ({ order }) => {
           {order.amount && (
             <>
               <span>•</span>
-              <Price amount={order.amount} currencyCode={order.currency ?? undefined} />
+              <Price as="span" amount={order.amount} currencyCode={order.currency ?? undefined} />
             </>
           )}
         </p>

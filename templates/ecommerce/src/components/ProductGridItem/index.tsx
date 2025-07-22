@@ -1,4 +1,4 @@
-import type { Product } from '@/payload-types'
+import type { Product, Variant } from '@/payload-types'
 
 import Link from 'next/link'
 import React from 'react'
@@ -6,8 +6,28 @@ import clsx from 'clsx'
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
 
-export function ProductGridItem({ product }: { product: Partial<Product> }) {
+type Props = {
+  product: Partial<Product>
+}
+
+export const ProductGridItem: React.FC<Props> = ({ product }) => {
   const { gallery, priceInUSD, title } = product
+
+  let price = priceInUSD
+
+  const variants = product.variants?.docs
+
+  if (variants && variants.length > 0) {
+    const variant = variants[0]
+    if (
+      variant &&
+      typeof variant === 'object' &&
+      variant?.priceInUSD &&
+      typeof variant.priceInUSD === 'number'
+    ) {
+      price = variant.priceInUSD
+    }
+  }
 
   const image = gallery?.[0] && typeof gallery[0] !== 'string' ? gallery[0] : false
 
@@ -30,9 +50,9 @@ export function ProductGridItem({ product }: { product: Partial<Product> }) {
       <div className="font-mono text-primary/50 group-hover:text-primary/100 flex justify-between items-center mt-4">
         <div>{title}</div>
 
-        {priceInUSD && (
+        {typeof price === 'number' && (
           <div className="">
-            <Price amount={priceInUSD} />
+            <Price amount={price} />
           </div>
         )}
       </div>

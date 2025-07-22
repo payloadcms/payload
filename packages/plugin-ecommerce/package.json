@@ -41,6 +41,11 @@
       "types": "./src/exports/variants.ts",
       "default": "./src/exports/variants.ts"
     },
+    "./addresses": {
+      "import": "./src/exports/addresses.ts",
+      "types": "./src/exports/addresses.ts",
+      "default": "./src/exports/addresses.ts"
+    },
     "./fields": {
       "import": "./src/exports/fields.ts",
       "types": "./src/exports/fields.ts",
@@ -141,6 +146,11 @@
         "import": "./dist/exports/variants.js",
         "types": "./dist/exports/variants.d.ts",
         "default": "./dist/exports/variants.js"
+      },
+      "./addresses": {
+        "import": "./dist/exports/addresses.js",
+        "types": "./dist/exports/addresses.d.ts",
+        "default": "./dist/exports/addresses.js"
       },
       "./fields": {
         "import": "./dist/exports/fields.js",

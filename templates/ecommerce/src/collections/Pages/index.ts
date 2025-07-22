@@ -126,7 +126,11 @@ export const Pages: CollectionConfig = {
         },
       ],
     },
-    slugField(),
+    ...slugField('title', {
+      slugOverrides: {
+        required: true,
+      },
+    }),
   ],
   hooks: {
     afterChange: [revalidatePage],
