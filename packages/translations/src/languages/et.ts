@@ -214,6 +214,8 @@ export const etTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Olete kustutamas {{count}} {{label}}',
     aboutToDeleteCount_one: 'Olete kustutamas {{count}} {{label}}',
     aboutToDeleteCount_other: 'Olete kustutamas {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'Te oled püsivalt kustutamas <0>{{count}}</0> <1>{{label}}</1> prügikastist. Kas oled kindel?',
     aboutToRestore: 'Olete taastamas {{label}} <1>{{title}}</1> mustandina. Olete kindel?',
     aboutToRestoreCount: 'Te oled taastamas {{count}} {{label}}',
     aboutToTrash:

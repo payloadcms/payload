@@ -215,6 +215,8 @@ export const plTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Zamierzasz usunąć {{count}} {{label}}',
     aboutToDeleteCount_one: 'Zamierzasz usunąć {{count}} {{label}}',
     aboutToDeleteCount_other: 'Zamierzasz usunąć {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'Zamierzasz na stałe usunąć <0>{{count}}</0> <1>{{label}}</1> z kosza. Czy jesteś pewny?',
     aboutToRestore:
       'Zamierzasz przywrócić {{label}} <1>{{title}}</1> jako szkic. Czy jesteś pewien?',
     aboutToRestoreCount: 'Zamierzasz przywrócić {{count}} {{label}}',

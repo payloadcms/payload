@@ -217,6 +217,8 @@ export const caTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Estas apunt de eliminar {{count}} {{label}}',
     aboutToDeleteCount_one: 'Estas apunt de eliminar {{count}} {{label}}',
     aboutToDeleteCount_other: 'Estas apunt de eliminar {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      "Estàs a punt de suprimir permanentment <0>{{count}}</0> <1>{{label}}</1> de la paperera. N'estàs segur?",
     aboutToRestore:
       "Esteu a punt de restaurar l'{{label}} <1>{{title}}</1> com a esborrany. N'estàs segur?",
     aboutToRestoreCount: 'Esteu a punt de restaurar {{count}} {{label}}',

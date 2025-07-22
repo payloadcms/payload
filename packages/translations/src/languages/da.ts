@@ -214,6 +214,8 @@ export const daTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Du er ved at slette {{count}} {{label}}',
     aboutToDeleteCount_one: 'Du er ved at slette {{count}} {{label}}',
     aboutToDeleteCount_other: 'Du er ved at slette {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'Du er ved at slette <0>{{count}}</0> <1>{{label}}</1> permanent fra papirkurven. Er du sikker?',
     aboutToRestore: 'Du er ved at gendanne {{label}} <1>{{title}}</1> som et udkast. Er du sikker?',
     aboutToRestoreCount: 'Du er ved at gendanne {{count}} {{label}}',
     aboutToTrash:

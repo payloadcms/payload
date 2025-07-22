@@ -213,6 +213,8 @@ export const faTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'شما در حال پاک کردن {{count}} تعداد {{label}} هستید',
     aboutToDeleteCount_one: 'شما در حال پاک کردن {{count}} تعداد {{label}} هستید',
     aboutToDeleteCount_other: 'شما در شرف حذف هستید {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'شما در حال حذف همیشگی <0>{{count}}</0> <1>{{label}}</1> از سطل زباله هستید. آیا مطمئن هستید؟',
     aboutToRestore:
       'شما در حال بازیابی {{label}} <1>{{title}}</1> به عنوان یک پیش‌نویس هستید. آیا مطمئن هستید؟',
     aboutToRestoreCount: 'شما در حال بازگرداندن {{count}} {{label}} هستید.',

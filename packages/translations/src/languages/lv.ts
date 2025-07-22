@@ -216,6 +216,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Jūs grasāties dzēst {{count}} {{label}}',
     aboutToDeleteCount_one: 'Jūs grasāties dzēst {{count}} {{label}}',
     aboutToDeleteCount_other: 'Jūs grasāties dzēst {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'Jūs gatavojaties neatgriezeniski dzēst <0>{{count}}</0> <1>{{label}}</1> no miskastes. Vai esat pārliecināts?',
     aboutToRestore:
       'Jūs gatavojaties atjaunot {{label}} <1>{{title}}</1> kā melnrakstu. Vai esat pārliecināts?',
     aboutToRestoreCount: 'Jūs gatavojaties atjaunot {{count}} {{label}}',

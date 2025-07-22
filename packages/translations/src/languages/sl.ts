@@ -216,6 +216,8 @@ export const slTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Izbrisali boste {{count}} {{label}}',
     aboutToDeleteCount_one: 'Izbrisali boste {{count}} {{label}}',
     aboutToDeleteCount_other: 'Izbrisali boste {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'Pravkar boste trajno izbrisali <0>{{count}}</0> <1>{{label}}</1> iz smetnjaka. Ali ste prepričani?',
     aboutToRestore:
       'Pravkar boste obnovili {{label}} <1>{{title}}</1> kot osnutek. Ste prepričani?',
     aboutToRestoreCount: 'Pravkar boste obnovili {{count}} {{label}}',

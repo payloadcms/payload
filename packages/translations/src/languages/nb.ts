@@ -215,6 +215,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Du er i ferd med å slette {{count}} {{label}}',
     aboutToDeleteCount_one: 'Du er i ferd med å slette {{count}} {{label}}',
     aboutToDeleteCount_other: 'Du er i ferd med å slette {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'Du er i ferd med å permanent slette <0>{{count}}</0> <1>{{label}}</1> fra søppelkassen. Er du sikker?',
     aboutToRestore:
       'Du er i ferd med å gjenopprette {{label}} <1>{{title}}</1> som et utkast. Er du sikker?',
     aboutToRestoreCount: 'Du er i ferd med å gjenopprette {{count}} {{label}}',

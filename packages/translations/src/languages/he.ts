@@ -208,6 +208,8 @@ export const heTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'אתה עומד למחוק {{count}} {{label}}',
     aboutToDeleteCount_one: 'אתה עומד למחוק {{label}} אחד',
     aboutToDeleteCount_other: 'אתה עומד למחוק {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'אתה עומד למחוק לצמיתות <0>{{count}}</0> <1>{{label}}</1> מהאשפה. האם אתה בטוח?',
     aboutToRestore: 'אתה עומד לשחזר את ה-{{label}} <1>{{title}}</1> כטיוטה. האם אתה בטוח?',
     aboutToRestoreCount: 'אתה עומד לשחזר {{count}} {{label}}',
     aboutToTrash: 'אתה עומד להעביר את ה{{label}} <1>{{title}}</1> לפח. האם אתה בטוח?',

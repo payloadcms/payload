@@ -220,6 +220,8 @@ export const itTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Stai per eliminare {{count}} {{label}}',
     aboutToDeleteCount_one: 'Stai per eliminare {{count}} {{label}}',
     aboutToDeleteCount_other: 'Stai per eliminare {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'Stai per eliminare definitivamente <0>{{count}}</0> <1>{{label}}</1> dal cestino. Sei sicuro?',
     aboutToRestore: 'Stai per ripristinare il {{label}} <1>{{title}}</1> come bozza. Sei sicuro?',
     aboutToRestoreCount: 'Stai per ripristinare {{count}} {{label}}',
     aboutToTrash: 'Stai per spostare il {{label}} <1>{{title}}</1> nel cestino. Sei sicuro?',

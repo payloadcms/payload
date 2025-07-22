@@ -219,6 +219,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Je staat op het punt {{count}} {{label}} te verwijderen',
     aboutToDeleteCount_one: 'Je staat op het punt {{count}} {{label}} te verwijderen',
     aboutToDeleteCount_other: 'Je staat op het punt {{count}} {{label}} te verwijderen',
+    aboutToPermanentlyDeleteTrash:
+      'U staat op het punt om permanent <0>{{count}}</0> <1>{{label}}</1> uit de prullenbak te verwijderen. Bent u zeker?',
     aboutToRestore:
       'U staat op het punt om het {{label}} <1>{{title}}</1> te herstellen als een concept. Weet u het zeker?',
     aboutToRestoreCount: 'U staat op het punt om {{count}} {{label}} te herstellen',

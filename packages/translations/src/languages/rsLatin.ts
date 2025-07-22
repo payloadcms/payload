@@ -217,6 +217,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Izbrisaćete {{count}} {{label}}',
     aboutToDeleteCount_one: 'Izbrisaćete {{count}} {{label}}',
     aboutToDeleteCount_other: 'Izbrisaćete {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'Na korak ste da trajno obrišete <0>{{count}}</0> <1>{{label}}</1> iz otpada. Da li ste sigurni?',
     aboutToRestore:
       'Na korak ste da vratite {{label}} <1>{{title}}</1> kao nacrt. Da li ste sigurni?',
     aboutToRestoreCount: 'Uskoro ćete vratiti {{count}} {{label}}',

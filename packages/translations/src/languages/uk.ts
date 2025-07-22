@@ -217,6 +217,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Ви бажаєте видалити {{count}} {{label}}',
     aboutToDeleteCount_one: 'Ви бажаєте видалити {{count}} {{label}}',
     aboutToDeleteCount_other: 'Ви бажаєте видалити {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'Ви збираєтеся назавжди видалити <0>{{count}}</0> <1>{{label}}</1> з кошика. Ви впевнені?',
     aboutToRestore: 'Ви збираєтеся відновити {{label}} <1>{{title}}</1> як чернетку. Ви впевнені?',
     aboutToRestoreCount: 'Ви збираєтеся відновити {{count}} {{label}}',
     aboutToTrash: 'Ви збираєтеся перемістити {{label}} <1>{{title}}</1> у смітник. Ви впевнені?',

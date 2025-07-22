@@ -15,6 +15,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { requests } from '../../../utilities/api.js'
 import { Button } from '../../Button/index.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
+import { Translation } from '../../Translation/index.js'
 
 const confirmEmptyTrashSlug = 'confirm-empty-trash'
 
@@ -167,13 +168,25 @@ export function ListEmptyTrashButton({
         {t('general:emptyTrash')}
       </Button>
       <ConfirmationModal
-        body={t('general:aboutToDeleteCount', {
-          count: trashCount ?? 0,
-          label: getTranslation(
-            trashCount === 1 ? collectionConfig.labels?.singular : collectionConfig.labels?.plural,
-            i18n,
-          ),
-        })}
+        body={
+          <Translation
+            elements={{
+              '0': ({ children }) => <strong>{children}</strong>,
+              '1': ({ children }) => <strong>{children}</strong>,
+            }}
+            i18nKey="general:aboutToPermanentlyDeleteTrash"
+            t={t}
+            variables={{
+              count: trashCount ?? 0,
+              label: getTranslation(
+                trashCount === 1
+                  ? collectionConfig.labels?.singular
+                  : collectionConfig.labels?.plural,
+                i18n,
+              ),
+            }}
+          />
+        }
         confirmingLabel={t('general:deleting')}
         heading={t('general:confirmDeletion')}
         modalSlug={confirmEmptyTrashSlug}

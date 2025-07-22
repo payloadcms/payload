@@ -218,6 +218,8 @@ export const enTranslations = {
     aboutToDeleteCount_many: 'You are about to delete {{count}} {{label}}',
     aboutToDeleteCount_one: 'You are about to delete {{count}} {{label}}',
     aboutToDeleteCount_other: 'You are about to delete {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'You are about to permanently delete <0>{{count}}</0> <1>{{label}}</1> from the trash. Are you sure?',
     aboutToRestore:
       'You are about to restore the {{label}} <1>{{title}}</1> as a draft. Are you sure?',
     aboutToRestoreCount: 'You are about to restore {{count}} {{label}}',

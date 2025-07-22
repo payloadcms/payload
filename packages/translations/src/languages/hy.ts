@@ -216,6 +216,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Դուք պատրաստվում եք ջնջել {{count}} {{label}}',
     aboutToDeleteCount_one: 'Դուք պատրաստվում եք ջնջել {{count}} {{label}}',
     aboutToDeleteCount_other: 'Դուք պատրաստվում եք ջնջել {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'Դուք պատրաստ եք ընդմիշտ ջնջել <0>{{count}}</0> <1>{{label}}</1> աղբավաղուց։ Վստահ եք։',
     aboutToRestore:
       'Դուք պատրաստ եք վերականգնել {{label}} <1>{{title}}</1>-ը որպես սևագիր: Համոզված եք:',
     aboutToRestoreCount: 'Դուք պատրաստ եք վերականգնել {{count}} {{label}}',

@@ -217,6 +217,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
     aboutToDeleteCount_one: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
     aboutToDeleteCount_other: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
+    aboutToPermanentlyDeleteTrash:
+      'আপনি চূর্ণনিবিন্ন <0>{{count}}</0> <1>{{label}}</1> টি সর্বদা মুছে ফেলতে যাচ্ছেন। আপনি কি নিশ্চিত?',
     aboutToRestore:
       'আপনি কি নিশ্চিত যে, আপনি খসড়া হিসেবে {{label}} <1>{{title}}</1> পুনরুদ্ধার করতে চান?',
     aboutToRestoreCount: 'আপনি প্রস্তুত হচ্ছেন পুনরুদ্ধার করার জন্য {{count}} {{label}}',

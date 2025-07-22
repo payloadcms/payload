@@ -221,6 +221,8 @@ export const deTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Du bist dabei, {{count}} {{label}} zu löschen',
     aboutToDeleteCount_one: 'Du bist dabei, {{count}} {{label}} zu löschen',
     aboutToDeleteCount_other: 'Du bist dabei, {{count}} {{label}} zu löschen',
+    aboutToPermanentlyDeleteTrash:
+      'Sie sind dabei, <0>{{count}}</0> <1>{{label}}</1> endgültig aus dem Papierkorb zu löschen. Sind Sie sicher?',
     aboutToRestore:
       'Sie sind dabei, das {{label}} <1>{{title}}</1> als Entwurf wiederherzustellen. Sind Sie sicher?',
     aboutToRestoreCount: 'Sie sind dabei, {{count}} {{label}} wiederherzustellen.',

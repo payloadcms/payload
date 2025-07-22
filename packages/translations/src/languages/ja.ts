@@ -217,6 +217,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: '{{label}}を{{count}}つ削除しようとしています',
     aboutToDeleteCount_one: '{{label}}を{{count}}つ削除しようとしています',
     aboutToDeleteCount_other: '{{label}}を{{count}}つ削除しようとしています',
+    aboutToPermanentlyDeleteTrash:
+      'あなたはゴミ箱から<0>{{count}}</0> <1>{{label}}</1>を永久に削除しようとしています。よろしいですか？',
     aboutToRestore:
       'あなたは{{label}} <1>{{title}}</1>をドラフトとして復元しようとしています。よろしいですか？',
     aboutToRestoreCount: '{{count}} {{label}}を復元しようとしています',

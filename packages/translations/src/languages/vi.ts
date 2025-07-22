@@ -215,6 +215,8 @@ export const viTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Bạn sắp xóa {{count}} {{label}}',
     aboutToDeleteCount_one: 'Bạn sắp xóa {{count}} {{label}}',
     aboutToDeleteCount_other: 'Bạn sắp xóa {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'Bạn sắp xóa vĩnh viễn <0>{{count}}</0> <1>{{label}}</1> từ thùng rác. Bạn có chắc chắn không?',
     aboutToRestore:
       'Bạn đang chuẩn bị khôi phục {{label}} <1>{{title}}</1> dưới dạng bản nháp. Bạn có chắc không?',
     aboutToRestoreCount: 'Bạn sắp khôi phục {{count}} {{label}}',

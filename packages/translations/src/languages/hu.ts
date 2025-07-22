@@ -218,6 +218,8 @@ export const huTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Törölni készül {{count}} {{label}}',
     aboutToDeleteCount_one: 'Törölni készül {{count}} {{label}}',
     aboutToDeleteCount_other: 'Törölni készül {{count}} {{label}}',
+    aboutToPermanentlyDeleteTrash:
+      'Ön véglegesen törölni készül <0>{{count}}</0> <1>{{label}}</1> elemet a szemetesből. Biztos benne?',
     aboutToRestore:
       'Készül visszaállítani a {{label}} <1>{{title}}</1> -t vázlatként. Biztos benne?',
     aboutToRestoreCount: 'Ön {{count}} {{label}} helyreállítására készül.',

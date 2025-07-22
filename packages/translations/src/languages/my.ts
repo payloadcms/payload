@@ -217,6 +217,8 @@ export const myTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
     aboutToDeleteCount_one: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
     aboutToDeleteCount_other: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
+    aboutToPermanentlyDeleteTrash:
+      'Anda akan menghapus secara kekal <0>{{count}}</0> <1>{{label}}</1> dari tong sampah. Adakah anda pasti?',
     aboutToRestore:
       'Anda akan memulihkan {{label}} <1>{{title}}</1> sebagai draf. Adakah anda pasti?',
     aboutToRestoreCount: 'Anda akan memulihkan {{count}} {{label}}',
