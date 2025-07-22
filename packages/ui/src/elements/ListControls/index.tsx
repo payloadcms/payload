@@ -226,7 +226,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   aria-controls={`${baseClass}-group-by`}
                   aria-expanded={visibleDrawer === 'group-by'}
                   className={`${baseClass}__toggle-group-by`}
-                  icon={<ChevronIcon />}
+                  icon={<ChevronIcon direction={visibleDrawer === 'group-by' ? 'up' : 'down'} />}
                   id="toggle-group-by"
                   onClick={() =>
                     setVisibleDrawer(visibleDrawer !== 'group-by' ? 'group-by' : undefined)

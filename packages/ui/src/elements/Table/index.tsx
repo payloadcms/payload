@@ -10,12 +10,12 @@ const baseClass = 'table'
 
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
+  readonly BeforeTable?: React.ReactNode
   readonly columns?: Column[]
   readonly data: Record<string, unknown>[]
-  readonly heading?: React.ReactNode
 }
 
-export const Table: React.FC<Props> = ({ appearance, columns, data, heading }) => {
+export const Table: React.FC<Props> = ({ appearance, BeforeTable, columns, data }) => {
   const activeColumns = columns?.filter((col) => col?.active)
 
   if (!activeColumns || activeColumns.length === 0) {
@@ -28,7 +28,7 @@ export const Table: React.FC<Props> = ({ appearance, columns, data, heading }) =
         .filter(Boolean)
         .join(' ')}
     >
-      {heading ? <h4 className={`${baseClass}__heading`}>{heading}</h4> : null}
+      {BeforeTable}
       <table cellPadding="0" cellSpacing="0">
         <thead>
           <tr>
@@ -41,7 +41,7 @@ export const Table: React.FC<Props> = ({ appearance, columns, data, heading }) =
         </thead>
         <tbody>
           {data &&
-            data.map((row, rowIndex) => (
+            data?.map((row, rowIndex) => (
               <tr
                 className={`row-${rowIndex + 1}`}
                 key={

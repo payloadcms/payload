@@ -10,6 +10,7 @@ import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
+import { useConfig } from '../Config/index.js'
 import { ListQueryContext, ListQueryModifiedContext } from './context.js'
 import { mergeQuery } from './mergeQuery.js'
 import { sanitizeQuery } from './sanitizeQuery.js'
@@ -33,6 +34,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const rawSearchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
   const [modified, setModified] = useState(false)
+  const { getEntityConfig } = useConfig()
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   const searchParams = useMemo<ListQuery>(
     () => sanitizeQuery(parseSearchParams(rawSearchParams)),
@@ -45,7 +48,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const { onQueryChange } = useListDrawerContext()
 
-  const [currentQuery, setCurrentQuery] = useState<ListQuery>(() => {
+  const [query, setQuery] = useState<ListQuery>(() => {
     if (modifySearchParams) {
       return searchParams
     } else {
@@ -65,7 +68,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         setModified(true)
       }
 
-      const newQuery = mergeQuery(currentQuery, incomingQuery, {
+      const newQuery = mergeQuery(query, incomingQuery, {
         defaults: {
           limit: queryFromProps.limit,
           sort: queryFromProps.sort,
@@ -92,10 +95,10 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         onChangeFn(newQuery)
       }
 
-      setCurrentQuery(newQuery)
+      setQuery(newQuery)
     },
     [
-      currentQuery,
+      query,
       queryFromProps.limit,
       queryFromProps.sort,
       modifySearchParams,
@@ -143,12 +146,12 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   )
 
   const mergeQueryFromPropsAndSyncToURL = useEffectEvent(() => {
-    const newQuery = sanitizeQuery({ ...(currentQuery || {}), ...(queryFromProps || {}) })
+    const newQuery = sanitizeQuery({ ...(query || {}), ...(queryFromProps || {}) })
 
     const search = `?${qs.stringify({ ...newQuery, columns: JSON.stringify(newQuery.columns) })}`
 
     if (window.location.search !== search) {
-      setCurrentQuery(newQuery)
+      setQuery(newQuery)
 
       // Important: do not use router.replace here to avoid re-rendering on initial load
       window.history.replaceState(null, '', search)
@@ -173,8 +176,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         handleSearchChange,
         handleSortChange,
         handleWhereChange,
+        isGroupingBy: Boolean(
+          !collectionConfig?.admin?.groupBy || (collectionConfig?.admin?.groupBy && query?.groupBy),
+        ),
         orderableFieldName,
-        query: currentQuery,
+        query,
         refineListData,
         setModified,
         ...contextRef.current,

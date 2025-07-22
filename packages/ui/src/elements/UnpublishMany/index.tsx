@@ -22,7 +22,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
       {...props}
       count={count}
       ids={Array.from(selected.keys())}
-      onSuccess={() => toggleAll(false)}
+      onSuccess={() => toggleAll()}
       selectAll={selectAll === SelectAllStatus.AllAvailable}
     />
   )

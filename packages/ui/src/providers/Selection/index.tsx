@@ -24,6 +24,11 @@ type SelectionContext = {
   selectAll: SelectAllStatus
   selected: Map<number | string, boolean>
   setSelection: (id: number | string) => void
+  /**
+   * Selects all rows on the current page within the current query.
+   * If `allAvailable` is true, selects all available rows across all pages within the current query.
+   * If `groupBy` is enabled, `allAvailable` is not supported. Use
+   */
   toggleAll: (allAvailable?: boolean) => void
   totalDocs: number
 }
@@ -45,9 +50,11 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
   const [selected, setSelected] = useState<SelectionContext['selected']>(() => {
     const rows = new Map()
+
     docs.forEach(({ id }) => {
       rows.set(id, false)
     })
+
     return rows
   })
 
@@ -60,12 +67,14 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       const rows = new Map()
       if (allAvailable) {
         setSelectAll(SelectAllStatus.AllAvailable)
+
         docs.forEach(({ id, _isLocked, _userEditing }) => {
           if (!_isLocked || _userEditing?.id === user?.id) {
             rows.set(id, true)
           }
         })
       } else if (
+        // Reset back to `None` if we previously had any type of selection
         selectAll === SelectAllStatus.AllAvailable ||
         selectAll === SelectAllStatus.AllInPage
       ) {
@@ -114,7 +123,9 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
         const params = parseSearchParams(searchParams)?.where as Where
 
         where = params || {
-          id: { not_equals: '' },
+          id: {
+            exists: true,
+          },
         }
       } else {
         const ids = []
@@ -201,7 +212,6 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     setCount(newCount)
   }, [selectAll, selected, totalDocs])
 
-  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   contextRef.current = {
     count,
     getQueryParams,
@@ -213,7 +223,6 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     totalDocs,
   }
 
-  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   return <Context value={contextRef.current}>{children}</Context>
 }
 

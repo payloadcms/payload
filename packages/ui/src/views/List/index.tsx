@@ -72,7 +72,7 @@ export function DefaultListView(props: ListViewClientProps) {
   const { getEntityConfig } = useConfig()
   const router = useRouter()
 
-  const { data, query } = useListQuery()
+  const { data, isGroupingBy } = useListQuery()
 
   const { openModal } = useModal()
   const { drawerSlug: bulkUploadDrawerSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
@@ -102,9 +102,9 @@ export function DefaultListView(props: ListViewClientProps) {
         }
       })
     } else {
-      return data.docs
+      return data?.docs
     }
-  }, [data.docs, isUploadCollection])
+  }, [data?.docs, isUploadCollection])
 
   const openBulkUpload = React.useCallback(() => {
     setCollectionSlug(collectionSlug)
@@ -126,7 +126,7 @@ export function DefaultListView(props: ListViewClientProps) {
     <Fragment>
       <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
         <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
-          <SelectionProvider docs={docs} totalDocs={data.totalDocs} user={user}>
+          <SelectionProvider docs={docs} totalDocs={data?.totalDocs} user={user}>
             {BeforeList}
             <Gutter className={`${baseClass}__wrap`}>
               <CollectionListHeader
@@ -174,12 +174,12 @@ export function DefaultListView(props: ListViewClientProps) {
                 resolvedFilterOptions={resolvedFilterOptions}
               />
               {BeforeListTable}
-              {docs.length > 0 && (
+              {docs?.length > 0 && (
                 <div className={`${baseClass}__tables`}>
                   <RelationshipProvider>{Table}</RelationshipProvider>
                 </div>
               )}
-              {docs.length === 0 && (
+              {docs?.length === 0 && (
                 <div className={`${baseClass}__no-results`}>
                   <p>
                     {i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}
@@ -204,48 +204,44 @@ export function DefaultListView(props: ListViewClientProps) {
                 </div>
               )}
               {AfterListTable}
-              {docs.length > 0 &&
-                (!collectionConfig.admin.groupBy ||
-                  (collectionConfig.admin.groupBy && !query.groupBy)) && (
-                  <PageControls
-                    AfterPageControls={
-                      smallBreak ? (
-                        <div className={`${baseClass}__list-selection`}>
-                          <ListSelection
-                            collectionConfig={collectionConfig}
-                            disableBulkDelete={disableBulkDelete}
-                            disableBulkEdit={disableBulkEdit}
-                            label={getTranslation(collectionConfig.labels.plural, i18n)}
-                          />
-                          <div className={`${baseClass}__list-selection-actions`}>
-                            {enableRowSelections && typeof onBulkSelect === 'function'
-                              ? beforeActions
-                                ? [
-                                    ...beforeActions,
-                                    <SelectMany key="select-many" onClick={onBulkSelect} />,
-                                  ]
-                                : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                              : beforeActions}
-                          </div>
+              {docs?.length > 0 && !isGroupingBy && (
+                <PageControls
+                  AfterPageControls={
+                    smallBreak ? (
+                      <div className={`${baseClass}__list-selection`}>
+                        <ListSelection
+                          collectionConfig={collectionConfig}
+                          disableBulkDelete={disableBulkDelete}
+                          disableBulkEdit={disableBulkEdit}
+                          label={getTranslation(collectionConfig.labels.plural, i18n)}
+                          showSelectAllAcrossPages={!isGroupingBy}
+                        />
+                        <div className={`${baseClass}__list-selection-actions`}>
+                          {enableRowSelections && typeof onBulkSelect === 'function'
+                            ? beforeActions
+                              ? [
+                                  ...beforeActions,
+                                  <SelectMany key="select-many" onClick={onBulkSelect} />,
+                                ]
+                              : [<SelectMany key="select-many" onClick={onBulkSelect} />]
+                            : beforeActions}
                         </div>
-                      ) : null
-                    }
-                    collectionConfig={collectionConfig}
-                  />
-                )}
+                      </div>
+                    ) : null
+                  }
+                  collectionConfig={collectionConfig}
+                />
+              )}
             </Gutter>
             {AfterList}
           </SelectionProvider>
         </div>
       </TableColumnsProvider>
-      {docs.length > 0 &&
-        collectionConfig.admin.groupBy &&
-        query.groupBy &&
-        data.totalPages > 1 && (
-          <StickyToolbar>
-            <PageControls collectionConfig={collectionConfig} />
-          </StickyToolbar>
-        )}
+      {docs?.length > 0 && isGroupingBy && data.totalPages > 1 && (
+        <StickyToolbar>
+          <PageControls collectionConfig={collectionConfig} />
+        </StickyToolbar>
+      )}
     </Fragment>
   )
 }

@@ -16,6 +16,7 @@ export type ListSelectionProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   label: string
+  showSelectAllAcrossPages?: boolean
 }
 
 export const ListSelection: React.FC<ListSelectionProps> = ({
@@ -23,11 +24,12 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   disableBulkDelete,
   disableBulkEdit,
   label,
+  showSelectAllAcrossPages = true,
 }) => {
   const { count, getSelectedIds, selectAll, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
 
-  const onActionSuccess = useCallback(() => toggleAll(false), [toggleAll])
+  const onActionSuccess = useCallback(() => toggleAll(), [toggleAll])
 
   if (count === 0) {
     return null
@@ -37,7 +39,9 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
     <ListSelection_v4
       count={count}
       ListActions={[
-        selectAll !== SelectAllStatus.AllAvailable && count < totalDocs ? (
+        selectAll !== SelectAllStatus.AllAvailable &&
+        count < totalDocs &&
+        showSelectAllAcrossPages !== false ? (
           <ListSelectionButton
             aria-label={t('general:selectAll', { count: `(${totalDocs})`, label })}
             id="select-all-across-pages"

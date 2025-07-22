@@ -16,7 +16,12 @@ import { fileURLToPath } from 'url'
 
 import type { Config } from './payload-types.js'
 
-import { ensureCompilationIsDone, exactText, initPageConsoleErrorCatch } from '../helpers.js'
+import {
+  ensureCompilationIsDone,
+  exactText,
+  initPageConsoleErrorCatch,
+  selectTableRow,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -441,7 +446,49 @@ test.describe('Group By', () => {
     expect(true).toBe(true)
   })
 
-  test.skip('should select rows across groupings', async () => {
+  test('can select all in a group', async () => {
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+
+    const firstTable = page.locator('.table-wrap').first()
+    const firstTableRows = firstTable.locator('tbody tr')
+
+    await expect(firstTableRows).toHaveCount(10)
+
+    // select all in the first group
+    await firstTable.locator('input#select-all').check()
+
+    // ensure that the selection is applied to all rows in the first group
+    for (let i = 0; i < 10; i++) {
+      await expect(firstTableRows.nth(i).locator('input[type="checkbox"]')).toBeChecked()
+    }
+  })
+
+  test('should render individual "select all across pages" bulk edit controls for each group', async () => {
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+
+    const groupByHeadings = page.locator('.table__heading')
+    await expect(groupByHeadings).toHaveCount(2)
+
+    const table1 = page.locator('.table-wrap').first()
+
+    await table1.locator('input#select-all').check()
+
+    // TODO: either wire this up or truly don't render it when groupBy is enabled
+    // await expect(page.locator('button#select-all-across-pages')).toBeHidden()
+
+    const firstGroupBulkEditControls = page
+      .locator('.table-wrap')
+      .first()
+      .locator('.bulk-edit-controls')
+
+    await expect(firstGroupBulkEditControls).toBeVisible()
+  })
+
+  test('tbd', async () => {
     await page.goto(url.list)
     expect(true).toBe(true)
   })

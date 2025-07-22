@@ -28,7 +28,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
       {...props}
       count={count}
       ids={Array.from(selected.keys())}
-      onSuccess={() => toggleAll(false)}
+      onSuccess={() => toggleAll()}
       selectAll={selectAll === SelectAllStatus.AllAvailable}
     />
   )

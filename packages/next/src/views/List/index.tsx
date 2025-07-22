@@ -174,7 +174,7 @@ export const renderListView = async (
       }
     }
 
-    let data: PaginatedDocs
+    let data: PaginatedDocs | undefined
     let Table: React.ReactNode | React.ReactNode[] = null
     let columnState: Column[] = []
 
@@ -277,6 +277,7 @@ export const renderListView = async (
     const isInDrawer = Boolean(drawerSlug)
 
     // Needed to prevent: Only plain objects can be passed to Client Components from Server Components. Objects with toJSON methods are not supported. Convert it manually to a simple value before passing it to props.
+    // Is there a way to avoid this? The `where` object is already seemingly plain, but is not bc it originates from the params.
     query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
 
     return {

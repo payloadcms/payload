@@ -128,6 +128,7 @@ type DeleteMany_v4Props = {
  */
 export function DeleteMany_v4({ afterDelete, search, selections, where }: DeleteMany_v4Props) {
   const { t } = useTranslation()
+
   const {
     config: {
       collections,
@@ -135,6 +136,7 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
       serverURL,
     },
   } = useConfig()
+
   const { code: locale } = useLocale()
   const { i18n } = useTranslation()
   const { openModal } = useModal()
@@ -142,8 +144,10 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
   const handleDelete = React.useCallback(async () => {
     const deletingOneCollection = Object.keys(selections).length === 1
     const result: AfterDeleteResult = {}
+
     for (const [relationTo, { all, ids = [] }] of Object.entries(selections)) {
       const collectionConfig = collections.find(({ slug }) => slug === relationTo)
+
       if (collectionConfig) {
         let whereConstraint: Where
 
@@ -153,7 +157,9 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
             whereConstraint = where
           } else {
             whereConstraint = {
-              id: { not_equals: '' },
+              id: {
+                exists: true,
+              },
             }
           }
         } else {
@@ -219,6 +225,7 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
             toast.error(t('error:unknown'))
             result[relationTo].errors = [t('error:unknown')]
           }
+
           continue
         } catch (_err) {
           toast.error(t('error:unknown'))
@@ -247,7 +254,9 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
           value.totalCount > 1 ? collectionConfig.labels.plural : collectionConfig.labels.singular,
           i18n,
         )}`
+
         let newLabel
+
         if (index === array.length - 1 && index !== 0) {
           newLabel = `${acc.label} and ${collectionLabel}`
         } else if (index > 0) {

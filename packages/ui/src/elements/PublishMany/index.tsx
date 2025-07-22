@@ -22,7 +22,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
       {...props}
       count={count}
       ids={Array.from(selected.keys())}
-      onSuccess={() => toggleAll(false)}
+      onSuccess={() => toggleAll()}
       selectAll={selectAll === SelectAllStatus.AllAvailable}
     />
   )
