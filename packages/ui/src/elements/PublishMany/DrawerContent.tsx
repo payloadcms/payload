@@ -73,7 +73,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
       whereConstraints.push(
         (parseSearchParams(searchParams)?.where as Where) || {
           id: {
-            exists: true,
+            not_equals: '',
           },
         },
       )

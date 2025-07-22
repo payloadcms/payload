@@ -176,7 +176,7 @@ export function DeleteMany_v4({
           } else {
             whereConstraint = {
               id: {
-                exists: true,
+                not_equals: '',
               },
             }
           }

@@ -234,7 +234,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
       whereConstraints.push(
         (parseSearchParams(searchParams)?.where as Where) || {
           id: {
-            exists: true,
+            not_equals: '',
           },
         },
       )

@@ -126,7 +126,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
         where = params || {
           id: {
-            exists: true,
+            not_equals: '',
           },
         }
       } else {
