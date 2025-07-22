@@ -16,6 +16,7 @@ export type ListSelectionProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   label: string
+  modalPrefix?: string
   showSelectAllAcrossPages?: boolean
 }
 
@@ -24,6 +25,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   disableBulkDelete,
   disableBulkEdit,
   label,
+  modalPrefix,
   showSelectAllAcrossPages = true,
 }) => {
   const { count, getSelectedIds, selectAll, toggleAll, totalDocs } = useSelection()
@@ -59,6 +61,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               collection={collectionConfig}
               count={count}
               ids={getSelectedIds()}
+              modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
             />
@@ -66,6 +69,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               collection={collectionConfig}
               count={count}
               ids={getSelectedIds()}
+              modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
             />
@@ -73,12 +77,15 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               collection={collectionConfig}
               count={count}
               ids={getSelectedIds()}
+              modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
             />
           </Fragment>
         ),
-        !disableBulkDelete && <DeleteMany collection={collectionConfig} key="bulk-delete" />,
+        !disableBulkDelete && (
+          <DeleteMany collection={collectionConfig} key="bulk-delete" modalPrefix={modalPrefix} />
+        ),
       ].filter(Boolean)}
     />
   )

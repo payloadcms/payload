@@ -11,9 +11,9 @@ import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Drawer } from '../Drawer/index.js'
-import './index.scss'
 import { ListSelectionButton } from '../ListSelection/index.js'
 import { EditManyDrawerContent } from './DrawerContent.js'
+import './index.scss'
 
 export const baseClass = 'edit-many'
 
@@ -38,10 +38,14 @@ export const EditMany_v4: React.FC<
   {
     count: number
     ids: (number | string)[]
+    /**
+     * When multiple EditMany components are rendered on the page, this will differentiate them.
+     */
+    modalPrefix?: string
     onSuccess?: () => void
     selectAll: boolean
   } & EditManyProps
-> = ({ collection, count, ids, onSuccess, selectAll }) => {
+> = ({ collection, count, ids, modalPrefix, onSuccess, selectAll }) => {
   const { permissions } = useAuth()
   const { openModal } = useModal()
 
@@ -51,7 +55,7 @@ export const EditMany_v4: React.FC<
 
   const collectionPermissions = permissions?.collections?.[collection.slug]
 
-  const drawerSlug = `edit-${collection.slug}`
+  const drawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}edit-${collection.slug}`
 
   if (count === 0 || !collectionPermissions?.update) {
     return null

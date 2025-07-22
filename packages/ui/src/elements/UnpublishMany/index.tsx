@@ -32,6 +32,10 @@ export const UnpublishMany_v4: React.FC<
   {
     count: number
     ids: (number | string)[]
+    /**
+     * When multiple UnpublishMany components are rendered on the page, this will differentiate them.
+     */
+    modalPrefix?: string
     onSuccess?: () => void
     selectAll: boolean
   } & UnpublishManyProps
@@ -41,6 +45,7 @@ export const UnpublishMany_v4: React.FC<
     collection: { slug, versions } = {},
     count,
     ids,
+    modalPrefix,
     onSuccess,
     selectAll,
   } = props
@@ -52,7 +57,7 @@ export const UnpublishMany_v4: React.FC<
   const collectionPermissions = permissions?.collections?.[slug]
   const hasPermission = collectionPermissions?.update
 
-  const drawerSlug = `unpublish-${slug}`
+  const drawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}unpublish-${slug}`
 
   if (!versions?.drafts || count === 0 || !hasPermission) {
     return null

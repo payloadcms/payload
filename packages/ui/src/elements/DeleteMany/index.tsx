@@ -20,15 +20,20 @@ import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
 
-const confirmManyDeleteDrawerSlug = `confirm-delete-many-docs`
-
 export type Props = {
   collection: ClientCollectionConfig
+  /**
+   * When multiple DeleteMany components are rendered on the page, this will differentiate them.
+   */
+  modalPrefix?: string
+  /**
+   * When multiple PublishMany components are rendered on the page, this will differentiate them.
+   */
   title?: string
 }
 
 export const DeleteMany: React.FC<Props> = (props) => {
-  const { collection: { slug } = {} } = props
+  const { collection: { slug } = {}, modalPrefix } = props
 
   const { permissions } = useAuth()
   const { count, getSelectedIds, selectAll, toggleAll } = useSelection()
@@ -64,6 +69,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
 
           clearRouteCache()
         }}
+        modalPrefix={modalPrefix}
         search={parseSearchParams(searchParams)?.search as string}
         selections={{
           [slug]: {
@@ -91,6 +97,10 @@ type DeleteMany_v4Props = {
    * A callback function to be called after the delete request is completed.
    */
   afterDelete?: (result: AfterDeleteResult) => void
+  /**
+   * When multiple DeleteMany components are rendered on the page, this will differentiate them.
+   */
+  modalPrefix?: string
   /**
    * Optionally pass a search string to filter the documents to be deleted.
    *
@@ -126,7 +136,13 @@ type DeleteMany_v4Props = {
  *
  * If you are deleting monomorphic documents, shape your `selections` to match the polymorphic structure.
  */
-export function DeleteMany_v4({ afterDelete, search, selections, where }: DeleteMany_v4Props) {
+export function DeleteMany_v4({
+  afterDelete,
+  modalPrefix,
+  search,
+  selections,
+  where,
+}: DeleteMany_v4Props) {
   const { t } = useTranslation()
 
   const {
@@ -140,6 +156,8 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
   const { code: locale } = useLocale()
   const { i18n } = useTranslation()
   const { openModal } = useModal()
+
+  const confirmManyDeleteDrawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}confirm-delete-many-docs`
 
   const handleDelete = React.useCallback(async () => {
     const deletingOneCollection = Object.keys(selections).length === 1

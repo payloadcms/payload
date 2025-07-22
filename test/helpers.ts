@@ -391,9 +391,9 @@ export const checkBreadcrumb = async (page: Page, text: string) => {
     .toBe(text)
 }
 
-export const selectTableRow = async (page: Page, title: string): Promise<void> => {
+export const selectTableRow = async (page: Page, title: string, scope: Locator): Promise<void> => {
   const selector = `tbody tr:has-text("${title}") .select-row__checkbox input[type=checkbox]`
-  await page.locator(selector).check()
+  await (page || scope).locator(selector).check()
   await expect(page.locator(selector)).toBeChecked()
 }
 

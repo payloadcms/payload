@@ -26,7 +26,6 @@ import {
   OrderableTable,
   Pill,
   SelectAll,
-  SelectionProvider,
   SelectRow,
   SortHeader,
   SortRow,
@@ -114,9 +113,7 @@ export const renderTable = ({
   let serverFields: Field[] = collectionConfig?.fields || []
   const isPolymorphic = collections
 
-  const isGroupingBy = Boolean(
-    !collectionConfig?.admin?.groupBy || (collectionConfig?.admin?.groupBy && query?.groupBy),
-  )
+  const isGroupingBy = Boolean(collectionConfig?.admin?.groupBy && query?.groupBy)
 
   if (isPolymorphic) {
     clientFields = []
@@ -258,7 +255,11 @@ export const renderTable = ({
         >
           <ConditionalSelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
             {isGroupingBy && (
-              <GroupByHeader collectionConfig={clientCollectionConfig} heading={heading} />
+              <GroupByHeader
+                collectionConfig={clientCollectionConfig}
+                groupByValue={groupByValue}
+                heading={heading}
+              />
             )}
             <Table appearance={tableAppearance} columns={columnsToUse} data={data.docs} />
             {isGroupingBy && (

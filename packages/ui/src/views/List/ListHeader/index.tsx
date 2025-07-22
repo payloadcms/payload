@@ -100,7 +100,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   return (
     <ListHeader
       Actions={[
-        !smallBreak && (
+        !smallBreak && !isGroupingBy && (
           <ListSelection
             collectionConfig={collectionConfig}
             disableBulkDelete={disableBulkDelete}

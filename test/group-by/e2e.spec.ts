@@ -446,7 +446,7 @@ test.describe('Group By', () => {
     expect(true).toBe(true)
   })
 
-  test('can bulk edit table by table', async () => {
+  test('can select all rows in a table', async () => {
     await page.goto(url.list)
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
@@ -465,5 +465,27 @@ test.describe('Group By', () => {
     await firstTable.locator('button#select-all-across-pages').click()
 
     await expect(firstTable.locator('button#select-all-across-pages')).toBeHidden()
+  })
+
+  test('can bulk edit table-by-table', async () => {
+    // select one doc from table 1, and one from table 2
+    // then delete using table 1 controls
+    // check that table 2 is unaffected
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+
+    const firstTable = page.locator('.table-wrap').first()
+    const secondTable = page.locator('.table-wrap').nth(1)
+
+    const firstTableRows = firstTable.locator('tbody tr')
+    const secondTableRows = secondTable.locator('tbody tr')
+
+    await sortColumn(page, {
+      scope: firstTable,
+      fieldLabel: 'Title',
+      fieldPath: 'title',
+      targetState: 'asc',
+    })
   })
 })

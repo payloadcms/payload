@@ -31,6 +31,10 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
 type PublishMany_v4Props = {
   count: number
   ids: (number | string)[]
+  /**
+   * When multiple PublishMany components are rendered on the page, this will differentiate them.
+   */
+  modalPrefix?: string
   onSuccess?: () => void
   selectAll: boolean
 } & PublishManyProps
@@ -40,6 +44,7 @@ export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
     collection: { slug, versions } = {},
     count,
     ids,
+    modalPrefix,
     onSuccess,
     selectAll,
   } = props
@@ -52,7 +57,7 @@ export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
   const collectionPermissions = permissions?.collections?.[slug]
   const hasPermission = collectionPermissions?.update
 
-  const drawerSlug = `publish-${slug}`
+  const drawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}publish-${slug}`
 
   if (!versions?.drafts || count === 0 || !hasPermission) {
     return null
