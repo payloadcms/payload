@@ -6,6 +6,7 @@ import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useRef, useState } from 'react'
 
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
+import { useListQuery } from '../ListQuery/index.js'
 import { useLocale } from '../Locale/index.js'
 
 export enum SelectAllStatus {
@@ -61,6 +62,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const [selectAll, setSelectAll] = useState<SelectAllStatus>(SelectAllStatus.None)
   const [count, setCount] = useState(0)
   const searchParams = useSearchParams()
+  const { query } = useListQuery()
 
   const toggleAll = useCallback(
     (allAvailable = false) => {
@@ -211,6 +213,11 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
     setCount(newCount)
   }, [selectAll, selected, totalDocs])
+
+  useEffect(() => {
+    setSelectAll(SelectAllStatus.None)
+    setSelected(new Map())
+  }, [query])
 
   contextRef.current = {
     count,
