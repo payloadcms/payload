@@ -21,9 +21,16 @@ import { EditItemQuantityButton } from './EditItemQuantityButton'
 import { OpenCartButton } from './OpenCart'
 import { Button } from '@/components/ui/button'
 import { Product } from '@/payload-types'
+import { Input } from '../ui/input'
+import { useForm } from 'react-hook-form'
+import { getCouponDiscountValue } from 'node_modules/@payloadcms/plugin-ecommerce/src/utilities/getCouponDiscountValue'
+
+interface CouponFormData {
+  couponCode: string
+}
 
 export function CartModal() {
-  const { cart, clearCart } = useCart()
+  const { cart, clearCart, applyCoupon } = useCart()
   const [isOpen, setIsOpen] = useState(false)
   const quantityRef = useRef(
     cart?.items?.length
@@ -31,6 +38,11 @@ export function CartModal() {
       : 0,
   )
   const pathname = usePathname()
+  const {
+    formState: { errors, isLoading },
+    handleSubmit,
+    register,
+  } = useForm<CouponFormData>()
 
   // useEffect(() => {
   //   // Open cart modal when quantity changes.
@@ -49,6 +61,10 @@ export function CartModal() {
     // Close the cart modal when the pathname changes.
     setIsOpen(false)
   }, [pathname])
+
+  const onSubmit = async ({ couponCode }: { couponCode: string }) => {
+    await applyCoupon(couponCode)
+  }
 
   return (
     <Sheet onOpenChange={setIsOpen} open={isOpen}>
@@ -153,15 +169,46 @@ export function CartModal() {
                 })}
               </ul>
 
+              <form onSubmit={handleSubmit(onSubmit)} className="flex gap-4 px-4">
+                <Input
+                  className="flex-grow"
+                  type="text"
+                  {...register('couponCode', { required: true })}
+                ></Input>
+                <Button type="submit">Apply</Button>
+              </form>
               <div className="px-4">
                 <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
                   {cart?.subtotal && (
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
-                      <p>Total</p>
+                      <p>Subtotal</p>
                       <Price
                         amount={cart?.subtotal}
                         className="text-right text-base text-black dark:text-white"
                       />
+                    </div>
+                  )}
+
+                  {!!cart?.totalDiscount && (
+                    <div>
+                      <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
+                        <p>Discount</p>
+                        <Price
+                          amount={cart?.totalDiscount}
+                          className="text-right text-base text-black dark:text-white"
+                        />
+                      </div>
+
+                      <p>Applied coupons</p>
+
+                      {cart.coupons?.map((item) => {
+                        return (
+                          <div key={item.id} className="p-1 flex">
+                            <p>{item.title}</p>
+                            {getCouponDiscountValue()}
+                          </div>
+                        )
+                      })}
                     </div>
                   )}
 

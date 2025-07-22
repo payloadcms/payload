@@ -9,6 +9,7 @@ import type { ContextProps, EcommerceContext as EcommerceContextType } from './t
 
 const defaultContext: EcommerceContextType = {
   addItem: async () => {},
+  applyCoupon: async () => {},
   clearCart: async () => {},
   confirmOrder: async () => {},
   currenciesConfig: {
@@ -113,8 +114,10 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         },
       },
       select: {
+        coupons: true,
         items: true,
         subtotal: true,
+        totalDiscount: true,
       },
     }
 
@@ -178,6 +181,27 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     },
     [cartQuery, cartsSlug],
   )
+
+  const applyCoupon = useCallback(async (couponCode: string) => {
+    const response = await fetch(`/api/apply-coupon`, {
+      body: JSON.stringify({
+        couponCode,
+      }),
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    })
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Failed to apply coupon cart: ${errorText}`)
+    }
+    const data = await response.json()
+    if (data.error) {
+      throw new Error(`Cart fetch error: ${data.error}`)
+    }
+  }, [])
 
   const updateCart = useCallback(
     async (cartID: DefaultDocumentIDType, data: Partial<TypedCollection['carts']>) => {
@@ -626,6 +650,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     <EcommerceContext
       value={{
         addItem,
+        applyCoupon,
         cart,
         clearCart,
         confirmOrder,
@@ -693,13 +718,14 @@ export const useCurrency = () => {
 }
 
 export const useCart = () => {
-  const { addItem, cart, clearCart, decrementItem, incrementItem, removeItem } = useEcommerce()
+  const { addItem, applyCoupon, cart, clearCart, decrementItem, incrementItem, removeItem } =
+    useEcommerce()
 
   if (!addItem) {
     throw new Error('useCart must be used within an EcommerceProvider')
   }
 
-  return { addItem, cart, clearCart, decrementItem, incrementItem, removeItem }
+  return { addItem, applyCoupon, cart, clearCart, decrementItem, incrementItem, removeItem }
 }
 
 export const usePayments = () => {

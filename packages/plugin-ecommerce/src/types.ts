@@ -15,6 +15,7 @@ export type CollectionOverride = { fields?: FieldsOverride } & Partial<
 >
 
 export type CartItem = {
+  coupons?: Array<Coupon>
   id: DefaultDocumentIDType
   product: DefaultDocumentIDType | TypedCollection['products']
   quantity: number
@@ -22,6 +23,7 @@ export type CartItem = {
 }
 
 type DefaultCartType = {
+  coupons?: Array<Coupon>
   currency?: string
   customer?: DefaultDocumentIDType | TypedCollection['customers']
   id: DefaultDocumentIDType
@@ -30,6 +32,21 @@ type DefaultCartType = {
 }
 
 export type Cart = DefaultCartType
+
+export type Coupon = {
+  appliesTo: 'cart' | 'product'
+  eligbleCustomers: Array<DefaultDocumentIDType | TypedCollection['customers']>
+  eligbleProducts: Array<DefaultDocumentIDType | TypedCollection['products']>
+  id: DefaultDocumentIDType
+  identifier: string
+  maxClaims?: number
+  numberOfClaims: number
+  title: string
+  type: 'flat' | 'percentage'
+  validFrom?: string
+  validTo?: string
+  value: number
+}
 
 /**
  * The full payment adapter config expected as part of the config for the Ecommerce plugin.
@@ -255,6 +272,12 @@ export type EcommercePluginConfig = {
    * Defaults to true.
    */
   carts?: boolean | CartsConfig
+  /**
+   * Enable/disable coupons feature.
+   *
+   * Defaults to true.
+   */
+  coupons?: boolean
   /**
    * Configure supported currencies and default settings.
    *

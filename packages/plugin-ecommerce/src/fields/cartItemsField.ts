@@ -7,9 +7,18 @@ import { currencyField } from './currencyField.js'
 
 type Props = {
   /**
+   * Slug of the coupons collection, defaults to 'coupons'.
+   */
+  couponsSlug?: string
+  /**
    * Include this in order to enable support for currencies per item in the cart.
    */
   currenciesConfig?: CurrenciesConfig
+  /**
+   * Enables coupons for specific products / cart items.
+   * Defaults to false.
+   */
+  enableCoupons?: boolean
   enableVariants?: boolean
   /**
    * Enables individual prices for each item in the cart.
@@ -17,6 +26,7 @@ type Props = {
    */
   individualPrices?: boolean
   overrides?: Partial<ArrayField>
+
   /**
    * Slug of the products collection, defaults to 'products'.
    */
@@ -29,7 +39,9 @@ type Props = {
 
 export const cartItemsField: (props?: Props) => ArrayField = (props) => {
   const {
+    couponsSlug = 'coupons',
     currenciesConfig,
+    enableCoupons = false,
     enableVariants = false,
     individualPrices,
     overrides,
@@ -61,6 +73,47 @@ export const cartItemsField: (props?: Props) => ArrayField = (props) => {
             } as Field,
           ]
         : []),
+      ...(enableCoupons && currenciesConfig
+        ? [
+            {
+              name: 'discount',
+              type: 'group',
+              fields: [
+                amountField({
+                  currenciesConfig,
+                  overrides: {
+                    name: 'amount',
+                    // @ts-expect-error - translations are not typed in plugins yet
+                    label: ({ t }) => t('plugin-ecommerce:discount.amount'),
+                  },
+                }),
+                {
+                  name: 'discountLines',
+                  type: 'array' as const,
+                  fields: [
+                    {
+                      name: 'coupon',
+                      type: 'relationship',
+                      hasMany: false,
+                      label: 'Coupons',
+                      relationTo: 'coupons',
+                    },
+
+                    amountField({
+                      currenciesConfig,
+                      overrides: {
+                        name: 'amount',
+                        label: ({ t }) =>
+                          // @ts-expect-error - translations are not typed in plugins yet
+                          t('plugin-ecommerce:subtotal'),
+                      },
+                    }),
+                  ],
+                },
+              ],
+            } as Field,
+          ]
+        : []),
       {
         name: 'quantity',
         type: 'number',
@@ -71,6 +124,7 @@ export const cartItemsField: (props?: Props) => ArrayField = (props) => {
         min: 1,
         required: true,
       },
+
       ...(currenciesConfig && individualPrices ? [amountField({ currenciesConfig })] : []),
       ...(currenciesConfig ? [currencyField({ currenciesConfig })] : []),
     ],

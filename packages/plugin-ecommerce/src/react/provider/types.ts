@@ -101,6 +101,10 @@ export type EcommerceContext = {
    */
   addItem: (item: CartItemArgument, quantity?: number) => Promise<void>
   /**
+   * Apply coupon.
+   */
+  applyCoupon: (couponCode: string) => Promise<void>
+  /**
    * The current data of the cart.
    */
   cart?: TypedCollection['carts']
