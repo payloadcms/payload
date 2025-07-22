@@ -20,10 +20,10 @@ export default async function FindOrderPage() {
 }
 
 export const metadata: Metadata = {
-  description: 'Enter your email address to recover your password.',
+  description: 'Find your order with us using your email.',
   openGraph: mergeOpenGraph({
-    title: 'Forgot Password',
-    url: '/forgot-password',
+    title: 'Find order',
+    url: '/find-order',
   }),
-  title: 'Forgot Password',
+  title: 'Find order',
 }
