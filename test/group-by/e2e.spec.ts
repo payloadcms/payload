@@ -468,9 +468,6 @@ test.describe('Group By', () => {
   })
 
   test('can bulk edit table-by-table', async () => {
-    // select one doc from table 1, and one from table 2
-    // then delete using table 1 controls
-    // check that table 2 is unaffected
     await page.goto(url.list)
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
@@ -487,5 +484,68 @@ test.describe('Group By', () => {
       fieldPath: 'title',
       targetState: 'asc',
     })
+
+    // select 'Find me' from both tables, only the first should get edited in the end
+    await selectTableRow(firstTable, 'Find me')
+    await selectTableRow(secondTable, 'Find me')
+
+    await firstTable.locator('.list-selection .edit-many__toggle').click()
+    const modal = page.locator('[id$="-edit-posts"]').first()
+
+    await expect(modal).toBeVisible()
+
+    await modal.locator('.field-select .rs__control').click()
+    await modal.locator('.field-select .rs__option', { hasText: exactText('Title') }).click()
+
+    const field = modal.locator(`#field-title`)
+    await expect(field).toBeVisible()
+
+    await field.fill('Find me (updated)')
+    await modal.locator('.form-submit button[type="submit"].edit-many__save').click()
+
+    await expect(
+      firstTableRows.locator('td.cell-title', { hasText: exactText('Find me (updated)') }),
+    ).toHaveCount(0)
+
+    await expect(
+      secondTableRows.locator('td.cell-title', { hasText: exactText('Find me') }),
+    ).toHaveCount(1)
+  })
+
+  test('can bulk delete table-by-table', async () => {
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+
+    const firstTable = page.locator('.table-wrap').first()
+    const secondTable = page.locator('.table-wrap').nth(1)
+
+    const firstTableRows = firstTable.locator('tbody tr')
+    const secondTableRows = secondTable.locator('tbody tr')
+
+    await sortColumn(page, {
+      scope: firstTable,
+      fieldLabel: 'Title',
+      fieldPath: 'title',
+      targetState: 'asc',
+    })
+
+    // select 'Find me' from both tables, only the first should get deleted in the end
+    await selectTableRow(firstTable, 'Find me')
+    await selectTableRow(secondTable, 'Find me')
+
+    await firstTable.locator('.list-selection .delete-documents__toggle').click()
+    const modal = page.locator('[id$="-confirm-delete-many-docs"]').first()
+
+    await expect(modal).toBeVisible()
+    await modal.locator('#confirm-action').click()
+
+    await expect(
+      firstTableRows.locator('td.cell-title', { hasText: exactText('Find me') }),
+    ).toHaveCount(0)
+
+    await expect(
+      secondTableRows.locator('td.cell-title', { hasText: exactText('Find me') }),
+    ).toHaveCount(1)
   })
 })
