@@ -14,11 +14,7 @@ type Props = {
   shippingAddress?: Partial<Address>
 }
 
-export const CheckoutForm: React.FC<Props> = ({
-  customerEmail,
-  billingAddress,
-  shippingAddress,
-}) => {
+export const CheckoutForm: React.FC<Props> = ({ customerEmail, billingAddress }) => {
   const stripe = useStripe()
   const elements = useElements()
   const [error, setError] = React.useState<null | string>(null)
@@ -103,7 +99,7 @@ export const CheckoutForm: React.FC<Props> = ({
   )
 
   return (
-    <form className="'" onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}>
       {error && <Message error={error} />}
       <PaymentElement />
       <div className="mt-8 flex gap-4">
@@ -114,5 +110,3 @@ export const CheckoutForm: React.FC<Props> = ({
     </form>
   )
 }
-
-export default CheckoutForm

@@ -1,5 +1,7 @@
 'use client'
 
+import { FormError } from '@/components/forms/FormError'
+import { FormItem } from '@/components/forms/FormItem'
 import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +11,7 @@ import { useAuth } from '@/providers/Auth'
 import { useRouter } from 'next/navigation'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 
 type FormData = {
   email: string
@@ -18,13 +21,11 @@ type FormData = {
 }
 
 export const AccountForm: React.FC = () => {
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const { setUser, user } = useAuth()
   const [changePassword, setChangePassword] = useState(false)
 
   const {
-    formState: { errors, isLoading },
+    formState: { errors, isLoading, isSubmitting, isDirty },
     handleSubmit,
     register,
     reset,
@@ -52,8 +53,7 @@ export const AccountForm: React.FC = () => {
         if (response.ok) {
           const json = await response.json()
           setUser(json.doc)
-          setSuccess('Successfully updated account.')
-          setError('')
+          toast.success('Successfully updated account.')
           setChangePassword(false)
           reset({
             name: json.doc.name,
@@ -62,7 +62,7 @@ export const AccountForm: React.FC = () => {
             passwordConfirm: '',
           })
         } else {
-          setError('There was a problem updating your account.')
+          toast.error('There was a problem updating your account.')
         }
       }
     },
@@ -91,7 +91,6 @@ export const AccountForm: React.FC = () => {
 
   return (
     <form className="max-w-xl" onSubmit={handleSubmit(onSubmit)}>
-      <Message className="" error={error} success={success} />
       {!changePassword ? (
         <Fragment>
           <div className="prose dark:prose-invert mb-8">
@@ -108,17 +107,31 @@ export const AccountForm: React.FC = () => {
               {' to change your password.'}
             </p>
           </div>
-          <div className="mb-4">
-            <Label htmlFor="email" className="mb-2">
-              Email Address
-            </Label>
-            <Input id="email" {...register('email', { required: true })} required type="email" />
-          </div>
-          <div className="mb-8">
-            <Label htmlFor="name" className="mb-2">
-              Name
-            </Label>
-            <Input id="name" {...register('name', { required: true })} required type="text" />
+
+          <div className="flex flex-col gap-8 mb-8">
+            <FormItem>
+              <Label htmlFor="email" className="mb-2">
+                Email Address
+              </Label>
+              <Input
+                id="email"
+                {...register('email', { required: 'Please provide an email.' })}
+                type="email"
+              />
+              {errors.email && <FormError message={errors.email.message} />}
+            </FormItem>
+
+            <FormItem>
+              <Label htmlFor="name" className="mb-2">
+                Name
+              </Label>
+              <Input
+                id="name"
+                {...register('name', { required: 'Please provide a name.' })}
+                type="text"
+              />
+              {errors.name && <FormError message={errors.name.message} />}
+            </FormItem>
           </div>
         </Fragment>
       ) : (
@@ -137,36 +150,43 @@ export const AccountForm: React.FC = () => {
               .
             </p>
           </div>
-          <div className="mb-4">
-            <Label htmlFor="password" className="mb-2">
-              New password
-            </Label>
-            <Input
-              id="password"
-              {...register('password', { required: true })}
-              required
-              type="password"
-            />
-          </div>
 
-          <div className="mb-8">
-            <Label htmlFor="passwordConfirm" className="mb-2">
-              Confirm password
-            </Label>
-            <Input
-              id="passwordConfirm"
-              {...register('passwordConfirm', {
-                required: true,
-                validate: (value) => value === password.current || 'The passwords do not match',
-              })}
-              required
-              type="password"
-            />
+          <div className="flex flex-col gap-8 mb-8">
+            <FormItem>
+              <Label htmlFor="password" className="mb-2">
+                New password
+              </Label>
+              <Input
+                id="password"
+                {...register('password', { required: 'Please provide a new password.' })}
+                type="password"
+              />
+              {errors.password && <FormError message={errors.password.message} />}
+            </FormItem>
+
+            <FormItem>
+              <Label htmlFor="passwordConfirm" className="mb-2">
+                Confirm password
+              </Label>
+              <Input
+                id="passwordConfirm"
+                {...register('passwordConfirm', {
+                  required: 'Please confirm your new password.',
+                  validate: (value) => value === password.current || 'The passwords do not match',
+                })}
+                type="password"
+              />
+              {errors.passwordConfirm && <FormError message={errors.passwordConfirm.message} />}
+            </FormItem>
           </div>
         </Fragment>
       )}
-      <Button disabled={isLoading} type="submit" variant="default">
-        {isLoading ? 'Processing' : changePassword ? 'Change Password' : 'Update Account'}
+      <Button disabled={isLoading || isSubmitting || !isDirty} type="submit" variant="default">
+        {isLoading || isSubmitting
+          ? 'Processing'
+          : changePassword
+            ? 'Change Password'
+            : 'Update Account'}
       </Button>
     </form>
   )

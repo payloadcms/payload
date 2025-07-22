@@ -1,5 +1,7 @@
 'use client'
 
+import { FormError } from '@/components/forms/FormError'
+import { FormItem } from '@/components/forms/FormItem'
 import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -77,40 +79,48 @@ export const CreateAccountForm: React.FC = () => {
           <Link href="/admin/collections/users">login to the admin dashboard</Link>.
         </p>
       </div>
-      <Message className="classes.message" error={error} />
 
-      <div className="mb-4">
-        <Label htmlFor="email" className="mb-2">
-          Email Address
-        </Label>
-        <Input id="email" {...register('email', { required: true })} required type="email" />
-      </div>
+      <Message error={error} />
 
-      <div className="mb-4">
-        <Label htmlFor="password" className="mb-2">
-          New password
-        </Label>
-        <Input
-          id="password"
-          {...register('password', { required: true })}
-          required
-          type="password"
-        />
-      </div>
+      <div className="flex flex-col gap-8 mb-8">
+        <FormItem>
+          <Label htmlFor="email" className="mb-2">
+            Email Address
+          </Label>
+          <Input
+            id="email"
+            {...register('email', { required: 'Email is required.' })}
+            type="email"
+          />
+          {errors.email && <FormError message={errors.email.message} />}
+        </FormItem>
 
-      <div className="mb-4">
-        <Label htmlFor="passwordConfirm" className="mb-2">
-          Confirm Password
-        </Label>
-        <Input
-          id="passwordConfirm"
-          {...register('passwordConfirm', {
-            required: true,
-            validate: (value) => value === password.current || 'The passwords do not match',
-          })}
-          required
-          type="password"
-        />
+        <FormItem>
+          <Label htmlFor="password" className="mb-2">
+            New password
+          </Label>
+          <Input
+            id="password"
+            {...register('password', { required: 'Password is required.' })}
+            type="password"
+          />
+          {errors.password && <FormError message={errors.password.message} />}
+        </FormItem>
+
+        <FormItem>
+          <Label htmlFor="passwordConfirm" className="mb-2">
+            Confirm Password
+          </Label>
+          <Input
+            id="passwordConfirm"
+            {...register('passwordConfirm', {
+              required: 'Please confirm your password.',
+              validate: (value) => value === password.current || 'The passwords do not match',
+            })}
+            type="password"
+          />
+          {errors.passwordConfirm && <FormError message={errors.passwordConfirm.message} />}
+        </FormItem>
       </div>
       <Button disabled={loading} type="submit" variant="default">
         {loading ? 'Processing' : 'Create Account'}

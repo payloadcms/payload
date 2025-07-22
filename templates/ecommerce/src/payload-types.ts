@@ -218,20 +218,19 @@ export interface Order {
   id: string;
   customer?: (string | null) | User;
   customerEmail?: string | null;
-  cart?: (string | null) | Cart;
   transactions?: (string | Transaction)[] | null;
   status?: OrderStatus;
-  shippingAddress: {
+  shippingAddress?: {
     title?: string | null;
-    firstName: string;
-    lastName: string;
+    firstName?: string | null;
+    lastName?: string | null;
     company?: string | null;
-    addressLine1: string;
+    addressLine1?: string | null;
     addressLine2?: string | null;
-    city: string;
+    city?: string | null;
     state?: string | null;
-    postalCode: string;
-    country: string;
+    postalCode?: string | null;
+    country?: string | null;
     phone?: string | null;
   };
   amount?: number | null;
@@ -249,11 +248,54 @@ export interface Order {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transactions".
+ */
+export interface Transaction {
+  id: string;
+  customer?: (string | null) | User;
+  customerEmail?: string | null;
+  order?: (string | null) | Order;
+  cart?: (string | null) | Cart;
+  billingAddress?: {
+    title?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    company?: string | null;
+    addressLine1?: string | null;
+    addressLine2?: string | null;
+    city?: string | null;
+    state?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
+    phone?: string | null;
+  };
+  items?:
+    | {
+        product?: (string | null) | Product;
+        variant?: (string | null) | Variant;
+        quantity: number;
+        id?: string | null;
+      }[]
+    | null;
+  status: 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'expired' | 'refunded';
+  paymentMethod?: 'stripe' | null;
+  stripe?: {
+    customerID?: string | null;
+    paymentIntentID?: string | null;
+  };
+  currency?: 'USD' | null;
+  amount?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "carts".
  */
 export interface Cart {
   id: string;
   customer?: (string | null) | User;
+  purchasedAt?: string | null;
   status?: CartStatus;
   currency?: 'USD' | null;
   subtotal?: number | null;
@@ -899,62 +941,20 @@ export interface Variant {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "transactions".
- */
-export interface Transaction {
-  id: string;
-  customer?: (string | null) | User;
-  customerEmail?: string | null;
-  order?: (string | null) | Order;
-  cart?: (string | null) | Cart;
-  billingAddress: {
-    title?: string | null;
-    firstName: string;
-    lastName: string;
-    company?: string | null;
-    addressLine1: string;
-    addressLine2?: string | null;
-    city: string;
-    state?: string | null;
-    postalCode: string;
-    country: string;
-    phone?: string | null;
-  };
-  items?:
-    | {
-        product?: (string | null) | Product;
-        variant?: (string | null) | Variant;
-        quantity: number;
-        id?: string | null;
-      }[]
-    | null;
-  status: 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'expired' | 'refunded';
-  paymentMethod?: 'stripe' | null;
-  stripe?: {
-    customerID?: string | null;
-    paymentIntentID?: string | null;
-  };
-  currency?: 'USD' | null;
-  amount?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "addresses".
  */
 export interface Address {
   id: string;
   customer?: (string | null) | User;
   title?: string | null;
-  firstName: string;
-  lastName: string;
+  firstName?: string | null;
+  lastName?: string | null;
   company?: string | null;
-  addressLine1: string;
+  addressLine1?: string | null;
   addressLine2?: string | null;
-  city: string;
+  city?: string | null;
   state?: string | null;
-  postalCode: string;
+  postalCode?: string | null;
   country:
     | 'US'
     | 'GB'
@@ -1716,6 +1716,7 @@ export interface ProductsSelect<T extends boolean = true> {
  */
 export interface CartsSelect<T extends boolean = true> {
   customer?: T;
+  purchasedAt?: T;
   status?: T;
   currency?: T;
   subtotal?: T;
@@ -1737,7 +1738,6 @@ export interface CartsSelect<T extends boolean = true> {
 export interface OrdersSelect<T extends boolean = true> {
   customer?: T;
   customerEmail?: T;
-  cart?: T;
   transactions?: T;
   status?: T;
   shippingAddress?:

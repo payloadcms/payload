@@ -1,7 +1,7 @@
 'use client'
 import type { Product } from '@/payload-types'
 
-import RichText from '@/components/RichText'
+import { RichText } from '@/components/RichText'
 import { AddToCart } from '@/components/Cart/AddToCart'
 import { Price } from '@/components/Price'
 import React, { Suspense } from 'react'

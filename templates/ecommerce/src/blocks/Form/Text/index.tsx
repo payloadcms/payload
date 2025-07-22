@@ -5,8 +5,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import React from 'react'
 
-import { Error } from '../Error'
 import { Width } from '../Width'
+import { FormItem } from '@/components/forms/FormItem'
+import { FormError } from '@/components/forms/FormError'
+import { capitaliseFirstLetter } from '@/utilities/capitaliseFirstLetter'
 
 export const Text: React.FC<
   TextField & {
@@ -20,14 +22,23 @@ export const Text: React.FC<
 > = ({ name, defaultValue, errors, label, register, required: requiredFromProps, width }) => {
   return (
     <Width width={width}>
-      <Label htmlFor={name}>{label}</Label>
-      <Input
-        defaultValue={defaultValue}
-        id={name}
-        type="text"
-        {...register(name, { required: requiredFromProps })}
-      />
-      {requiredFromProps && errors[name] && <Error />}
+      <FormItem>
+        <Label htmlFor={name}>{label}</Label>
+        <Input
+          defaultValue={defaultValue}
+          id={name}
+          type="text"
+          {...register(name, {
+            required: requiredFromProps
+              ? `${capitaliseFirstLetter(label || name)} is required.`
+              : undefined,
+          })}
+        />
+
+        {errors?.[name]?.message && typeof errors?.[name]?.message === 'string' && (
+          <FormError message={errors?.[name]?.message} />
+        )}
+      </FormItem>
     </Width>
   )
 }

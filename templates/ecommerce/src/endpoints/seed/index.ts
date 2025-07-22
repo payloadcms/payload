@@ -612,7 +612,6 @@ export const seed = async ({
     collection: 'orders',
     data: {
       amount: 7499,
-      cart: completedCart.id,
       currency: 'USD',
       customer: customer.id,
       shippingAddress: baseAddressUSData,
@@ -637,7 +636,6 @@ export const seed = async ({
     collection: 'orders',
     data: {
       amount: 7499,
-      cart: completedCart.id,
       currency: 'USD',
       customer: customer.id,
       shippingAddress: baseAddressUSData,

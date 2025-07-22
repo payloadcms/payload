@@ -18,24 +18,25 @@ import { titles } from './constants'
 import { Button } from '@/components/ui/button'
 import { deepMergeSimple } from 'payload/shared'
 import { FormError } from '@/components/forms/FormError'
+import { FormItem } from '@/components/forms/FormItem'
 
 type AddressFormValues = {
-  title: string | null
-  firstName: string
-  lastName: string
+  title?: string | null
+  firstName?: string | null
+  lastName?: string | null
   company?: string | null
-  addressLine1: string
+  addressLine1?: string | null
   addressLine2?: string | null
-  city: string
+  city?: string | null
   state?: string | null
-  postalCode: string
-  country: string
+  postalCode?: string | null
+  country?: string | null
   phone?: string | null
 }
 
 type Props = {
   addressID?: Config['db']['defaultIDType']
-  initialData?: Omit<Partial<Address>, 'country'> & { country: string }
+  initialData?: Omit<Address, 'country' | 'id' | 'updatedAt' | 'createdAt'> & { country?: string }
   callback?: () => void
 }
 
@@ -70,12 +71,10 @@ export const AddressForm: React.FC<Props> = ({ addressID, initialData, callback 
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="flex flex-col gap-6 mb-8">
+      <div className="flex flex-col gap-4 mb-8">
         <div className="flex gap-4">
-          <div className="shrink">
-            <Label htmlFor="title" className="mb-2">
-              Title
-            </Label>
+          <FormItem className="shrink">
+            <Label htmlFor="title">Title</Label>
 
             <Select
               {...register('title')}
@@ -96,101 +95,84 @@ export const AddressForm: React.FC<Props> = ({ addressID, initialData, callback 
               </SelectContent>
             </Select>
             {errors.title && <FormError message={errors.title.message} />}
-          </div>
-          <div>
-            <Label htmlFor="firstName" className="mb-2">
-              First name*
-            </Label>
+          </FormItem>
+
+          <FormItem>
+            <Label htmlFor="firstName">First name*</Label>
             <Input
               id="firstName"
               autoComplete="given-name"
               {...register('firstName', { required: 'First name is required.' })}
             />
             {errors.firstName && <FormError message={errors.firstName.message} />}
-          </div>
-          <div>
-            <Label htmlFor="lastName" className="mb-2">
-              Last name*
-            </Label>
+          </FormItem>
+
+          <FormItem>
+            <Label htmlFor="lastName">Last name*</Label>
             <Input
               autoComplete="family-name"
               id="lastName"
               {...register('lastName', { required: 'Last name is required.' })}
             />
             {errors.lastName && <FormError message={errors.lastName.message} />}
-          </div>
+          </FormItem>
         </div>
 
-        <div>
-          <Label htmlFor="phone" className="mb-2">
-            Phone
-          </Label>
+        <FormItem>
+          <Label htmlFor="phone">Phone</Label>
           <Input type="tel" id="phone" autoComplete="mobile tel" {...register('phone')} />
           {errors.phone && <FormError message={errors.phone.message} />}
-        </div>
+        </FormItem>
 
-        <div>
-          <Label htmlFor="company" className="mb-2">
-            Company
-          </Label>
+        <FormItem>
+          <Label htmlFor="company">Company</Label>
           <Input id="company" autoComplete="organization" {...register('company')} />
           {errors.company && <FormError message={errors.company.message} />}
-        </div>
+        </FormItem>
 
-        <div>
-          <Label htmlFor="addressLine1" className="mb-2">
-            Address line 1*
-          </Label>
+        <FormItem>
+          <Label htmlFor="addressLine1">Address line 1*</Label>
           <Input
             id="addressLine1"
             autoComplete="address-line1"
             {...register('addressLine1', { required: 'Address line 1 is required.' })}
           />
           {errors.addressLine1 && <FormError message={errors.addressLine1.message} />}
-        </div>
-        <div>
-          <Label htmlFor="addressLine2" className="mb-2">
-            Address line 2
-          </Label>
+        </FormItem>
+
+        <FormItem>
+          <Label htmlFor="addressLine2">Address line 2</Label>
           <Input id="addressLine2" autoComplete="address-line2" {...register('addressLine2')} />
           {errors.addressLine2 && <FormError message={errors.addressLine2.message} />}
-        </div>
+        </FormItem>
 
-        <div>
-          <Label htmlFor="city" className="mb-2">
-            City*
-          </Label>
+        <FormItem>
+          <Label htmlFor="city">City*</Label>
           <Input
             id="city"
             autoComplete="address-level2"
             {...register('city', { required: 'City is required.' })}
           />
           {errors.city && <FormError message={errors.city.message} />}
-        </div>
+        </FormItem>
 
-        <div>
-          <Label htmlFor="state" className="mb-2">
-            State
-          </Label>
+        <FormItem>
+          <Label htmlFor="state">State</Label>
           <Input id="state" autoComplete="address-level1" {...register('state')} />
           {errors.state && <FormError message={errors.state.message} />}
-        </div>
+        </FormItem>
 
-        <div>
-          <Label htmlFor="postalCode" className="mb-2">
-            Zip Code*
-          </Label>
+        <FormItem>
+          <Label htmlFor="postalCode">Zip Code*</Label>
           <Input
             id="postalCode"
             {...register('postalCode', { required: 'Postal code is required.' })}
           />
           {errors.postalCode && <FormError message={errors.postalCode.message} />}
-        </div>
+        </FormItem>
 
-        <div>
-          <Label htmlFor="country" className="mb-2">
-            Country*
-          </Label>
+        <FormItem>
+          <Label htmlFor="country">Country*</Label>
 
           <Select
             {...register('country', {
@@ -224,7 +206,7 @@ export const AddressForm: React.FC<Props> = ({ addressID, initialData, callback 
             </SelectContent>
           </Select>
           {errors.country && <FormError message={errors.country.message} />}
-        </div>
+        </FormItem>
       </div>
 
       <Button type="submit">Submit</Button>

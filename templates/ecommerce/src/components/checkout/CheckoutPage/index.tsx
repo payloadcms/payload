@@ -1,6 +1,5 @@
 'use client'
 
-import { LoadingShimmer } from '@/components/LoadingShimmer'
 import { Media } from '@/components/Media'
 import { Message } from '@/components/Message'
 import { Price } from '@/components/Price'
@@ -16,7 +15,7 @@ import { useRouter } from 'next/navigation'
 import React, { Suspense, useCallback, useEffect, useState } from 'react'
 
 import { cssVariables } from '@/cssVariables'
-import { CheckoutForm } from '../CheckoutForm'
+import { CheckoutForm } from '@/components/forms/CheckoutForm'
 import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/react'
 import { CheckoutAddresses } from '@/components/checkout/CheckoutAddresses'
 import { Address } from '@/payload-types'

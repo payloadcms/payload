@@ -1,5 +1,7 @@
 'use client'
 
+import { FormError } from '@/components/forms/FormError'
+import { FormItem } from '@/components/forms/FormItem'
 import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -45,22 +47,33 @@ export const LoginForm: React.FC = () => {
   return (
     <form className="" onSubmit={handleSubmit(onSubmit)}>
       <Message className="classes.message" error={error} />
+      <div className="flex flex-col gap-8">
+        <FormItem>
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            {...register('email', { required: 'Email is required.' })}
+          />
+          {errors.email && <FormError message={errors.email.message} />}
+        </FormItem>
 
-      <div className="mb-6 flex flex-col gap-2">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" {...register('email', { required: true })} />
-      </div>
+        <FormItem>
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            {...register('password', { required: 'Please provide a password.' })}
+          />
+          {errors.password && <FormError message={errors.password.message} />}
+        </FormItem>
 
-      <div className="mb-6 flex flex-col gap-2">
-        <Label htmlFor="password">Password</Label>
-        <Input id="password" type="password" {...register('password', { required: true })} />
-      </div>
-
-      <div className="text-primary/70 mb-6 prose prose-a:hover:text-primary dark:prose-invert">
-        <p>
-          Forgot your password?{' '}
-          <Link href={`/recover-password${allParams}`}>Click here to reset it</Link>
-        </p>
+        <div className="text-primary/70 mb-6 prose prose-a:hover:text-primary dark:prose-invert">
+          <p>
+            Forgot your password?{' '}
+            <Link href={`/recover-password${allParams}`}>Click here to reset it</Link>
+          </p>
+        </div>
       </div>
 
       <div className="flex gap-4 justify-between">

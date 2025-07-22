@@ -4,7 +4,7 @@ import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
-import RichText from '@/components/RichText'
+import { RichText } from '@/components/RichText'
 import { Button } from '@/components/ui/button'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
@@ -143,6 +143,7 @@ export const FormBlock: React.FC<
                   formFromProps.fields &&
                   formFromProps.fields?.map((field, index) => {
                     const Field: React.FC<any> = fields?.[field.blockType]
+
                     if (Field) {
                       return (
                         <div className="mb-6 last:mb-0" key={index}>

@@ -5,7 +5,7 @@ import type { Address } from '@/payload-types'
 import { CreateAddressModal } from '@/components/addresses/CreateAddressModal'
 
 type Props = {
-  address: Omit<Partial<Address>, 'country'> & { country: string }
+  address: Omit<Address, 'country'> & { country?: string } // Allow address to be partial and entirely optional as this is entirely for display purposes
   /**
    * Completely override the default actions
    */
@@ -61,12 +61,14 @@ export const AddressItem: React.FC<Props> = ({
           ) : (
             <>
               {beforeActions}
-              <CreateAddressModal
-                addressID={address.id}
-                initialData={address}
-                buttonText={'Edit'}
-                modalTitle={'Edit address'}
-              />
+              {address.id && (
+                <CreateAddressModal
+                  addressID={address.id}
+                  initialData={address}
+                  buttonText={'Edit'}
+                  modalTitle={'Edit address'}
+                />
+              )}
               {afterActions}
             </>
           )}

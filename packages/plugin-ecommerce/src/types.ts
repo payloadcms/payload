@@ -34,9 +34,7 @@ export type Cart = DefaultCartType
 
 type InitiatePaymentReturnType = {
   [key: string]: any // Allows for additional data to be returned, such as payment method specific data
-  clientSecret: string
   message: string
-  paymentIntentID: string
 }
 
 type InitiatePayment = (args: {
@@ -69,7 +67,7 @@ type InitiatePayment = (args: {
    * For example, this is used to create a record of the payment intent in the transactions collection.
    */
   transactionsSlug: string
-}) => Promise<Record<string, unknown>> | Record<string, unknown>
+}) => InitiatePaymentReturnType | Promise<InitiatePaymentReturnType>
 
 type ConfirmOrderReturnType = {
   [key: string]: any // Allows for additional data to be returned, such as payment method specific data
@@ -156,37 +154,7 @@ export type PaymentAdapter = {
   /**
    * Hooks used to manage the lifecycle of the payment method. These are run on transactions at various stages when they update.
    */
-  initiatePayment: (args: {
-    /**
-     * The slug of the customers collection, defaults to 'users'.
-     */
-    customersSlug?: string
-    data: {
-      /**
-       * Billing address for the payment.
-       */
-      billingAddress: TypedCollection['addresses']
-      /**
-       * Cart items.
-       */
-      cart: Cart
-      /**
-       * Currency code to use for the payment.
-       */
-      currency: string
-      customerEmail: string
-      /**
-       * Shipping address for the payment.
-       */
-      shippingAddress?: TypedCollection['addresses']
-    }
-    req: PayloadRequest
-    /**
-     * The slug of the transactions collection, defaults to 'transactions'.
-     * For example, this is used to create a record of the payment intent in the transactions collection.
-     */
-    transactionsSlug: string
-  }) => Promise<Record<string, unknown>> | Record<string, unknown>
+  initiatePayment: InitiatePayment
   /**
    * The label of the payment method
    * @example

@@ -184,6 +184,7 @@ export default async function Order({ params, searchParams }: PageProps) {
           <div>
             <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">Shipping Address</h2>
 
+            {/* @ts-expect-error - some kind of type hell */}
             <AddressItem address={order.shippingAddress} hideActions />
           </div>
         )}

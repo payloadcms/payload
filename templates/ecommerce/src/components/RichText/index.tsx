@@ -46,7 +46,7 @@ type Props = {
   enableProse?: boolean
 } & React.HTMLAttributes<HTMLDivElement>
 
-export default function RichText(props: Props) {
+export const RichText: React.FC<Props> = (props) => {
   const { className, enableProse = true, enableGutter = true, ...rest } = props
   return (
     <RichTextWithoutBlocks

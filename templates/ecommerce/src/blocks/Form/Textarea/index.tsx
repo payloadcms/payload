@@ -5,8 +5,10 @@ import { Label } from '@/components/ui/label'
 import { Textarea as TextAreaComponent } from '@/components/ui/textarea'
 import React from 'react'
 
-import { Error } from '../Error'
 import { Width } from '../Width'
+import { capitaliseFirstLetter } from '@/utilities/capitaliseFirstLetter'
+import { FormItem } from '@/components/forms/FormItem'
+import { FormError } from '@/components/forms/FormError'
 
 export const Textarea: React.FC<
   TextField & {
@@ -30,16 +32,24 @@ export const Textarea: React.FC<
 }) => {
   return (
     <Width width={width}>
-      <Label htmlFor={name}>{label}</Label>
+      <FormItem>
+        <Label htmlFor={name}>{label}</Label>
 
-      <TextAreaComponent
-        defaultValue={defaultValue}
-        id={name}
-        rows={rows}
-        {...register(name, { required: requiredFromProps })}
-      />
+        <TextAreaComponent
+          defaultValue={defaultValue}
+          id={name}
+          rows={rows}
+          {...register(name, {
+            required: requiredFromProps
+              ? `${capitaliseFirstLetter(label || name)} is required.`
+              : undefined,
+          })}
+        />
 
-      {requiredFromProps && errors[name] && <Error />}
+        {errors?.[name]?.message && typeof errors?.[name]?.message === 'string' && (
+          <FormError message={errors?.[name]?.message} />
+        )}
+      </FormItem>
     </Width>
   )
 }

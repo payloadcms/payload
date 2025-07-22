@@ -1,5 +1,7 @@
 'use client'
 
+import { FormError } from '@/components/forms/FormError'
+import { FormItem } from '@/components/forms/FormItem'
 import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -58,12 +60,19 @@ export const ForgotPasswordForm: React.FC = () => {
           </div>
           <form className="max-w-lg" onSubmit={handleSubmit(onSubmit)}>
             <Message className="mb-8" error={error} />
-            <div className="mb-8">
+
+            <FormItem className="mb-8">
               <Label htmlFor="email" className="mb-2">
                 Email address
               </Label>
-              <Input id="email" {...register('email', { required: true })} required type="email" />
-            </div>
+              <Input
+                id="email"
+                {...register('email', { required: 'Please provide your email.' })}
+                type="email"
+              />
+              {errors.email && <FormError message={errors.email.message} />}
+            </FormItem>
+
             <Button type="submit" variant="default">
               Forgot Password
             </Button>

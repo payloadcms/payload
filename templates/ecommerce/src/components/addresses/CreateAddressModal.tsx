@@ -14,7 +14,7 @@ import { Address } from '@/payload-types'
 
 type Props = {
   addressID?: string
-  initialData?: Omit<Partial<Address>, 'country'> & { country: string }
+  initialData?: Omit<Address, 'country'> & { country?: string }
   buttonText?: string
   modalTitle?: string
 }
