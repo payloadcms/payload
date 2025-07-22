@@ -21,7 +21,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
 
   const filteredColumns = useMemo(
     () =>
-      columns.filter(
+      columns?.filter(
         (col) =>
           !(fieldIsHiddenOrDisabled(col.field) && !fieldIsID(col.field)) &&
           !col?.field?.admin?.disableListColumn,

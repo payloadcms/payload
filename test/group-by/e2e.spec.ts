@@ -129,10 +129,10 @@ test.describe('Group By', () => {
 
     await expect(page.locator('.table-wrap')).toHaveCount(2)
 
-    await expect(page.locator('.table__heading')).toHaveCount(2)
+    await expect(page.locator('.group-by-header')).toHaveCount(2)
 
     await expect(
-      page.locator('.table__heading', { hasText: exactText('Category 1') }),
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
     ).toBeVisible()
 
     await expect(page.locator('.table-wrap').first().locator('tbody tr')).toHaveCount(10)
@@ -146,7 +146,7 @@ test.describe('Group By', () => {
     await expect(table1CategoryCells.first()).toHaveText(/Category 1/)
 
     await expect(
-      page.locator('.table__heading', { hasText: exactText('Category 2') }),
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
     ).toBeVisible()
 
     const table2 = page.locator('.table-wrap').nth(1)
@@ -197,7 +197,7 @@ test.describe('Group By', () => {
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
     await expect(page.locator('.table-wrap')).toHaveCount(2)
-    await expect(page.locator('.table__heading')).toHaveCount(2)
+    await expect(page.locator('.group-by-header')).toHaveCount(2)
 
     await groupByContainer.locator('#group-by--reset').click()
 
@@ -206,7 +206,7 @@ test.describe('Group By', () => {
     await expect(page).not.toHaveURL(/&groupBy=/)
     await expect(groupByContainer.locator('#field-direction input')).toBeDisabled()
     await expect(page.locator('.table-wrap')).toHaveCount(1)
-    await expect(page.locator('.table__heading')).toHaveCount(0)
+    await expect(page.locator('.group-by-header')).toHaveCount(0)
   })
 
   test('should reset group-by using the select field\'s "x" button', async () => {
@@ -218,7 +218,7 @@ test.describe('Group By', () => {
     })
 
     await expect(page.locator('.table-wrap')).toHaveCount(2)
-    await expect(page.locator('.table__heading')).toHaveCount(2)
+    await expect(page.locator('.group-by-header')).toHaveCount(2)
 
     // click the "x" button on the select field itself
     await field.locator('.clear-indicator').click()
@@ -228,7 +228,7 @@ test.describe('Group By', () => {
     await expect(page).not.toHaveURL(/&groupBy=/)
     await expect(groupByContainer.locator('#field-direction input')).toBeDisabled()
     await expect(page.locator('.table-wrap')).toHaveCount(1)
-    await expect(page.locator('.table__heading')).toHaveCount(0)
+    await expect(page.locator('.group-by-header')).toHaveCount(0)
   })
 
   test('should sort the group-by field globally', async () => {
@@ -239,16 +239,16 @@ test.describe('Group By', () => {
       fieldPath: 'category',
     })
 
-    const firstHeading = page.locator('.table__heading').first()
+    const firstHeading = page.locator('.group-by-header__heading').first()
     await expect(firstHeading).toHaveText(/Category 1/)
-    const secondHeading = page.locator('.table__heading').nth(1)
+    const secondHeading = page.locator('.group-by-header__heading').nth(1)
     await expect(secondHeading).toHaveText(/Category 2/)
 
     await groupByContainer.locator('#group-by--sort').click()
     await groupByContainer.locator('.rs__option', { hasText: exactText('Descending') })?.click()
 
-    await expect(page.locator('.table__heading').first()).toHaveText(/Category 2/)
-    await expect(page.locator('.table__heading').nth(1)).toHaveText(/Category 1/)
+    await expect(page.locator('.group-by-header__heading').first()).toHaveText(/Category 2/)
+    await expect(page.locator('.group-by-header__heading').nth(1)).toHaveText(/Category 1/)
   })
 
   test('should sort by columns within each table (will affect all tables)', async () => {
@@ -430,7 +430,7 @@ test.describe('Group By', () => {
 
     // the value of the updated at column in the table should match exactly the value in the table cell
     const table1 = page.locator('.table-wrap').first()
-    const firstTableHeading = table1.locator('.table__heading')
+    const firstTableHeading = table1.locator('.group-by-header__heading')
     const firstRowUpdatedAtCell = table1.locator('tbody tr td.cell-updatedAt').first()
 
     const headingText = (await firstTableHeading.textContent())?.trim()

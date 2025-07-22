@@ -37,7 +37,7 @@ import { ConditionalSelectionProvider } from '../providers/Selection/Conditional
 import { filterFields } from '../providers/TableColumns/buildColumnState/filterFields.js'
 import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'
 import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'
-import { TableGroupHeader } from '../views/List/GroupHeader/index.js'
+import { GroupByHeader } from '../views/List/GroupByHeader/index.js'
 
 export const renderFilters = (
   fields: Field[],
@@ -257,16 +257,10 @@ export const renderTable = ({
           key={key}
         >
           <ConditionalSelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
-            <Table
-              appearance={tableAppearance}
-              BeforeTable={
-                isGroupingBy && (
-                  <TableGroupHeader collectionConfig={clientCollectionConfig} heading={heading} />
-                )
-              }
-              columns={columnsToUse}
-              data={data.docs}
-            />
+            {isGroupingBy && (
+              <GroupByHeader collectionConfig={clientCollectionConfig} heading={heading} />
+            )}
+            <Table appearance={tableAppearance} columns={columnsToUse} data={data.docs} />
             {isGroupingBy && (
               <GroupByPageControls
                 collectionConfig={clientCollectionConfig}

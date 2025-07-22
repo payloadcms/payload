@@ -5,9 +5,9 @@ import React from 'react'
 import { ListSelection } from '../ListSelection/index.js'
 import './index.scss'
 
-const baseClass = 'table-group-header'
+const baseClass = 'group-by-header'
 
-export const TableGroupHeader: React.FC<{
+export const GroupByHeader: React.FC<{
   collectionConfig?: ClientCollectionConfig
   heading: string
 }> = ({ collectionConfig, heading }) => {
