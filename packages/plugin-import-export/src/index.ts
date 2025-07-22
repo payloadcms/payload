@@ -216,6 +216,9 @@ declare module 'payload' {
        * @default false
        */
       disabled?: boolean
+      /**
+       * Custom function used to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value
+       */
       toCSV?: ToCSVFunction
     }
   }
