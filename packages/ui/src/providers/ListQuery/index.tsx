@@ -82,6 +82,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
               {
                 ...newQuery,
                 columns: JSON.stringify(newQuery.columns),
+                queryByGroup: JSON.stringify(newQuery.queryByGroup),
               },
               { addQueryPrefix: true },
             )}`,
@@ -148,7 +149,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const mergeQueryFromPropsAndSyncToURL = useEffectEvent(() => {
     const newQuery = sanitizeQuery({ ...(query || {}), ...(queryFromProps || {}) })
 
-    const search = `?${qs.stringify({ ...newQuery, columns: JSON.stringify(newQuery.columns) })}`
+    const search = `?${qs.stringify({
+      ...newQuery,
+      columns: JSON.stringify(newQuery.columns),
+      queryByGroup: JSON.stringify(newQuery.queryByGroup),
+    })}`
 
     if (window.location.search !== search) {
       setQuery(newQuery)

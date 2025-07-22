@@ -92,6 +92,11 @@ export const renderListView = async (
 
   const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
+  query.queryByGroup =
+    query?.queryByGroup && typeof query.queryByGroup === 'string'
+      ? JSON.parse(query.queryByGroup)
+      : query?.queryByGroup
+
   const collectionPreferences = await upsertPreferences<CollectionPreferences>({
     key: `collection-${collectionSlug}`,
     req,

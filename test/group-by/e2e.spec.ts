@@ -5,7 +5,7 @@ import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
-import { addGroupBy, closeGroupBy, openGroupBy } from 'helpers/e2e/groupBy.js'
+import { addGroupBy, clearGroupBy, closeGroupBy, openGroupBy } from 'helpers/e2e/groupBy.js'
 import { deletePreferences } from 'helpers/e2e/preferences.js'
 import { sortColumn } from 'helpers/e2e/sortColumn.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
@@ -199,14 +199,7 @@ test.describe('Group By', () => {
     await expect(page.locator('.table-wrap')).toHaveCount(2)
     await expect(page.locator('.group-by-header')).toHaveCount(2)
 
-    await groupByContainer.locator('#group-by--reset').click()
-
-    await expect(field.locator('.react-select--single-value')).toHaveText('Select a value')
-    await expect(groupByContainer.locator('#group-by--reset')).toBeHidden()
-    await expect(page).not.toHaveURL(/&groupBy=/)
-    await expect(groupByContainer.locator('#field-direction input')).toBeDisabled()
-    await expect(page.locator('.table-wrap')).toHaveCount(1)
-    await expect(page.locator('.group-by-header')).toHaveCount(0)
+    await clearGroupBy(page)
   })
 
   test('should reset group-by using the select field\'s "x" button', async () => {
@@ -415,6 +408,29 @@ test.describe('Group By', () => {
       // e.g. it manipulates the `?queryByGroup=` param instead of `?page=2`
       affectsURL: false,
     })
+  })
+
+  test('should reset ?queryByGroup= param when other params change', async () => {
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+
+    const table1 = page.locator('.table-wrap').first()
+    const table2 = page.locator('.table-wrap').nth(1)
+
+    await expect(table1.locator('.page-controls')).toBeVisible()
+    await expect(table2.locator('.page-controls')).toBeVisible()
+
+    await goToNextPage(page, {
+      scope: table1,
+      affectsURL: false,
+    })
+
+    await expect(page).toHaveURL(/queryByGroup=/)
+
+    await clearGroupBy(page)
+
+    await expect(page).not.toHaveURL(/queryByGroup=/)
   })
 
   test('should not render per table pagination controls when group-by is not active', async () => {

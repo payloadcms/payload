@@ -9,24 +9,36 @@ export const mergeQuery = (
 ): ListQuery => {
   let page = 'page' in newQuery ? newQuery.page : currentQuery?.page
 
-  if ('where' in newQuery || 'search' in newQuery) {
+  const shouldResetPage = ['where', 'search', 'groupBy']?.some(
+    (key) => key in newQuery && !['limit', 'page'].includes(key),
+  )
+
+  if (shouldResetPage) {
     page = 1
   }
 
-  // Deeply merge queryByGroup so we can send a partial update for a specific group
-  const mergedQueryByGroup = {
-    ...(currentQuery?.queryByGroup || {}),
-    ...(newQuery.queryByGroup
-      ? Object.fromEntries(
-          Object.entries(newQuery.queryByGroup).map(([key, value]) => [
-            key,
-            {
-              ...(currentQuery?.queryByGroup?.[key] || {}),
-              ...value,
-            },
-          ]),
-        )
-      : {}),
+  const shouldResetQueryByGroup = ['where', 'search', 'page', 'limit', 'groupBy', 'sort'].some(
+    (key) => key in newQuery,
+  )
+
+  let mergedQueryByGroup = undefined
+
+  if (!shouldResetQueryByGroup) {
+    // Deeply merge queryByGroup so we can send a partial update for a specific group
+    mergedQueryByGroup = {
+      ...(currentQuery?.queryByGroup || {}),
+      ...(newQuery.queryByGroup
+        ? Object.fromEntries(
+            Object.entries(newQuery.queryByGroup).map(([key, value]) => [
+              key,
+              {
+                ...(currentQuery?.queryByGroup?.[key] || {}),
+                ...value,
+              },
+            ]),
+          )
+        : {}),
+    }
   }
 
   const mergedQuery: ListQuery = {
