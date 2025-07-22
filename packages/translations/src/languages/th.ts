@@ -278,6 +278,7 @@ export const thTranslations: DefaultTranslationsObject = {
     descending: 'มากไปน้อย',
     deselectAllRows: 'ยกเลิกการเลือกทุกแถว',
     document: 'เอกสาร',
+    documentIsTrashed: 'ป้ายนี้ {{label}} ถูกทำให้เป็นขยะและอ่านอย่างเดียว',
     documentLocked: 'เอกสารถูกล็อค',
     documents: 'เอกสาร',
     duplicate: 'สำเนา',

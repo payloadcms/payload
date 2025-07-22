@@ -284,6 +284,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     descending: 'Низходящо',
     deselectAllRows: 'Демаркирай всички редове',
     document: 'Документ',
+    documentIsTrashed: 'Този {{label}} е изтрит и е само за четене.',
     documentLocked: 'Документът е заключен',
     documents: 'Документи',
     duplicate: 'Дупликирай',

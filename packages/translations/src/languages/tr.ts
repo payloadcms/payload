@@ -288,6 +288,7 @@ export const trTranslations: DefaultTranslationsObject = {
     descending: 'Azalan',
     deselectAllRows: 'Tüm satırların seçimini kaldır',
     document: 'Belge',
+    documentIsTrashed: 'Bu {{label}} çöpe atıldı ve sadece okuma modunda.',
     documentLocked: 'Belge kilitlendi',
     documents: 'Belgeler',
     duplicate: 'Çoğalt',

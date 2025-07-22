@@ -285,6 +285,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     descending: 'Dilstošā secībā',
     deselectAllRows: 'Atdzēlēt visas rindas',
     document: 'Dokuments',
+    documentIsTrashed: 'Šis {{label}} ir miskastē un ir tikai lasāms.',
     documentLocked: 'Dokuments bloķēts',
     documents: 'Dokumenti',
     duplicate: 'Dublēt',

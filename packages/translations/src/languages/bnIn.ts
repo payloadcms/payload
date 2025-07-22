@@ -287,6 +287,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     descending: 'অবরোহী',
     deselectAllRows: 'সমস্ত সারি নির্বাচন বাতিল করুন',
     document: 'ডকুমেন্ট',
+    documentIsTrashed: 'এই {{label}} টি মুছে ফেলা হয়েছে এবং এটি কেবল পড়ার জন্য।',
     documentLocked: 'ডকুমেন্ট লক করা হয়েছে',
     documents: 'ডকুমেন্টগুলি',
     duplicate: 'ডুপ্লিকেট করুন',

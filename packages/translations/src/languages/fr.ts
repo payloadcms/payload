@@ -293,6 +293,7 @@ export const frTranslations: DefaultTranslationsObject = {
     descending: 'Descendant(e)',
     deselectAllRows: 'Désélectionner toutes les lignes',
     document: 'Document',
+    documentIsTrashed: 'Ce {{label}} est mis à la corbeille et est en lecture seule.',
     documentLocked: 'Document verrouillé',
     documents: 'Documents',
     duplicate: 'Dupliquer',

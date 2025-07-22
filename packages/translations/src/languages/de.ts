@@ -291,6 +291,7 @@ export const deTranslations: DefaultTranslationsObject = {
     descending: 'Absteigend',
     deselectAllRows: 'Alle Zeilen abwählen',
     document: 'Dokument',
+    documentIsTrashed: 'Dieses {{label}} wurde gelöscht und ist nur lesbar.',
     documentLocked: 'Dokument gesperrt',
     documents: 'Dokumente',
     duplicate: 'Duplizieren',

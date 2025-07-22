@@ -290,6 +290,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     descending: 'Aflopend',
     deselectAllRows: 'Deselecteer alle rijen',
     document: 'Document',
+    documentIsTrashed: 'Dit {{label}} is verwijderd en is alleen-lezen.',
     documentLocked: 'Document vergrendeld',
     documents: 'Documenten',
     duplicate: 'Dupliceren',

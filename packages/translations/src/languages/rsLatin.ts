@@ -286,6 +286,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     descending: 'Opadajuće',
     deselectAllRows: 'Deselektujte sve redove',
     document: 'Dokument',
+    documentIsTrashed: 'Ova {{label}} je odbačena i može se samo čitati.',
     documentLocked: 'Dokument je zaključan',
     documents: 'Dokumenti',
     duplicate: 'Duplikat',

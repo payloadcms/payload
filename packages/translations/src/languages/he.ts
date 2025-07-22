@@ -274,6 +274,7 @@ export const heTranslations: DefaultTranslationsObject = {
     descending: 'בסדר יורד',
     deselectAllRows: 'בטל בחירת כל השורות',
     document: 'מסמך',
+    documentIsTrashed: 'ה{{label}} הזה במיחזור ובמצב לקריאה בלבד.',
     documentLocked: 'המסמך ננעל',
     documents: 'מסמכים',
     duplicate: 'שכפול',

@@ -281,6 +281,7 @@ export const koTranslations: DefaultTranslationsObject = {
     descending: '내림차순',
     deselectAllRows: '모든 행 선택 해제',
     document: '문서',
+    documentIsTrashed: '이 {{label}}은 휴지통에 있으며 읽기 전용입니다.',
     documentLocked: '문서가 잠겼습니다',
     documents: '문서들',
     duplicate: '복제',

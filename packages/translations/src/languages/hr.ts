@@ -284,6 +284,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     descending: 'Silazno',
     deselectAllRows: 'Odznači sve redove',
     document: 'Dokument',
+    documentIsTrashed: 'Ova {{label}} je u smeću i dostupna je samo za čitanje.',
     documentLocked: 'Dokument je zaključan',
     documents: 'Dokumenti',
     duplicate: 'Duplikat',

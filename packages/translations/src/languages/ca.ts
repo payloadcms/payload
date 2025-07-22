@@ -286,6 +286,7 @@ export const caTranslations: DefaultTranslationsObject = {
     descending: 'Descendent',
     deselectAllRows: 'Deselecciona totes les files',
     document: 'Document',
+    documentIsTrashed: "Aquesta {{label}} s'ha eliminat i és de només lectura.",
     documentLocked: 'Document bloquejat',
     documents: 'Documents',
     duplicate: 'Duplicar',

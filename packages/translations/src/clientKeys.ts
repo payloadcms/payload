@@ -219,6 +219,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:depth',
   'general:deselectAllRows',
   'general:document',
+  'general:documentIsTrashed',
   'general:documentLocked',
   'general:documents',
   'general:duplicate',

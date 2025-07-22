@@ -287,6 +287,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     descending: 'Уменьшение',
     deselectAllRows: 'Снять выделение со всех строк',
     document: 'Документ',
+    documentIsTrashed: 'Этот {{label}} находится в корзине и доступен только для чтения.',
     documentLocked: 'Документ заблокирован',
     documents: 'Документы',
     duplicate: 'Дублировать',

@@ -286,6 +286,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     descending: 'Decrescente',
     deselectAllRows: 'Desmarcar todas as linhas',
     document: 'Documento',
+    documentIsTrashed: 'Este {{label}} está na lixeira e é somente para leitura.',
     documentLocked: 'Documento bloqueado',
     documents: 'Documentos',
     duplicate: 'Duplicar',

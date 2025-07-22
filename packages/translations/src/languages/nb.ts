@@ -284,6 +284,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     descending: 'Synkende',
     deselectAllRows: 'Fjern markeringen fra alle rader',
     document: 'Dokument',
+    documentIsTrashed: 'Denne {{label}} er søppel og er skrivebeskyttet.',
     documentLocked: 'Låst dokument',
     documents: 'Dokumenter',
     duplicate: 'Dupliser',

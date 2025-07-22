@@ -281,6 +281,7 @@ export const etTranslations: DefaultTranslationsObject = {
     descending: 'Kahanev',
     deselectAllRows: 'Tühista kõigi ridade valik',
     document: 'Dokument',
+    documentIsTrashed: 'See {{label}} on prügikastis ja on ainult loetav.',
     documentLocked: 'Dokument lukustatud',
     documents: 'Dokumendid',
     duplicate: 'Dubleeri',

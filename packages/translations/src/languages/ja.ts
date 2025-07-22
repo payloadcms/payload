@@ -286,6 +286,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     descending: '降順',
     deselectAllRows: 'すべての行の選択を解除します',
     document: 'ドキュメント',
+    documentIsTrashed: 'この{{label}}は廃棄され、読み取り専用です。',
     documentLocked: 'ドキュメントがロックされました',
     documents: 'ドキュメント',
     duplicate: '複製',

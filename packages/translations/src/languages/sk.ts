@@ -285,6 +285,7 @@ export const skTranslations: DefaultTranslationsObject = {
     descending: 'Zostupne',
     deselectAllRows: 'Zrušiť výber všetkých riadkov',
     document: 'Dokument',
+    documentIsTrashed: 'Táto {{label}} je v koši a je iba na čítanie.',
     documentLocked: 'Dokument je zamknutý',
     documents: 'Dokumenty',
     duplicate: 'Duplikovať',

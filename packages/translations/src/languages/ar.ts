@@ -276,6 +276,7 @@ export const arTranslations: DefaultTranslationsObject = {
     descending: 'تنازلي',
     deselectAllRows: 'إلغاء تحديد جميع الصفوف',
     document: 'وثيقة',
+    documentIsTrashed: 'تم تحويل {{label}} هذا إلى المهملات وهو للقراءة فقط.',
     documentLocked: 'تم قفل المستند',
     documents: 'وثائق',
     duplicate: 'استنساخ',

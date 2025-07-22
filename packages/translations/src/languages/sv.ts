@@ -285,6 +285,7 @@ export const svTranslations: DefaultTranslationsObject = {
     descending: 'Fallande',
     deselectAllRows: 'Avmarkera alla rader',
     document: 'Dokument',
+    documentIsTrashed: 'Det här {{label}} har slagits i spill och är skrivskyddad.',
     documentLocked: 'Dokument låst',
     documents: 'Dokument',
     duplicate: 'Duplicera',

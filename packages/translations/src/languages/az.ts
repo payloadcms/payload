@@ -285,6 +285,7 @@ export const azTranslations: DefaultTranslationsObject = {
     descending: 'Azalan',
     deselectAllRows: 'Bütün sıraları seçimi ləğv edin',
     document: 'Sənəd',
+    documentIsTrashed: 'Bu {{label}} zibil qutusuna atılıb və yalnız oxuna bilər.',
     documentLocked: 'Sənəd kilidləndi',
     documents: 'Sənədlər',
     duplicate: 'Dublikat',

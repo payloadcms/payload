@@ -290,6 +290,7 @@ export const roTranslations: DefaultTranslationsObject = {
     descending: 'Descendentă',
     deselectAllRows: 'Deselectează toate rândurile',
     document: 'Document',
+    documentIsTrashed: 'Acest {{label}} este la gunoi și poate fi doar citit.',
     documentLocked: 'Document blocat',
     documents: 'Documente',
     duplicate: 'Duplicați',

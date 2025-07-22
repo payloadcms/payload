@@ -287,6 +287,7 @@ export const myTranslations: DefaultTranslationsObject = {
     descending: 'ဆင်းသက်လာသည်။',
     deselectAllRows: 'အားလုံးကို မရွေးနိုင်ပါ',
     document: 'စာရွက်စာတမ်း',
+    documentIsTrashed: 'Ini {{label}} telah dibuang dan hanya boleh dibaca sahaja.',
     documentLocked: 'စာရွက်စာတမ်းကိုပိတ်ထားသည်',
     documents: 'စာရွက်စာတမ်းများ',
     duplicate: 'ပုံတူပွားမည်။',

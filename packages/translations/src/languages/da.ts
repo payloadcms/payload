@@ -282,6 +282,7 @@ export const daTranslations: DefaultTranslationsObject = {
     descending: 'Faldende',
     deselectAllRows: 'Fjern markering af alle rækker',
     document: 'Dokument',
+    documentIsTrashed: 'Denne {{label}} er smidt væk og er kun til læsning.',
     documentLocked: 'Dette dokument er låst',
     documents: 'Dokumenter',
     duplicate: 'Duplikér',

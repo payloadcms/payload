@@ -288,6 +288,7 @@ export const huTranslations: DefaultTranslationsObject = {
     descending: 'Csökkenő',
     deselectAllRows: 'Jelölje ki az összes sort',
     document: 'Dokumentum',
+    documentIsTrashed: 'Ez a {{label}} szemétdobozba került, és csak olvasható.',
     documentLocked: 'A dokumentum zárolva van',
     documents: 'Dokumentumok',
     duplicate: 'Duplikálás',

@@ -268,6 +268,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     descending: '降序',
     deselectAllRows: '取消选择所有行',
     document: '文档',
+    documentIsTrashed: '此 {{label}} 已被丢弃，为只读状态。',
     documentLocked: '文档已锁定',
     documents: '文档',
     duplicate: '复制',

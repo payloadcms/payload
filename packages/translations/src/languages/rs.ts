@@ -285,6 +285,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     descending: 'Опадајуће',
     deselectAllRows: 'Деселектујте све редове',
     document: 'Dokument',
+    documentIsTrashed: 'Ova {{label}} je odbačena i samo je za čitanje.',
     documentLocked: 'Документ је закључан',
     documents: 'Dokumenti',
     duplicate: 'Дупликат',

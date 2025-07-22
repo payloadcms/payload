@@ -283,6 +283,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     descending: 'В порядку спадання',
     deselectAllRows: 'Скасувати вибір всіх рядків',
     document: 'Документ',
+    documentIsTrashed: 'Цей {{label}} видалено та доступний лише для читання.',
     documentLocked: 'Документ заблоковано',
     documents: 'Документи',
     duplicate: 'Дублювати',

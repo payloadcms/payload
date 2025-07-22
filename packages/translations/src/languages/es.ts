@@ -290,6 +290,7 @@ export const esTranslations: DefaultTranslationsObject = {
     descending: 'Descendente',
     deselectAllRows: 'Deseleccionar todas las filas',
     document: 'Documento',
+    documentIsTrashed: 'Esta {{label}} está en la papelera y es de solo lectura.',
     documentLocked: 'Documento bloqueado',
     documents: 'Documentos',
     duplicate: 'Duplicar',

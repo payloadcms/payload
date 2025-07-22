@@ -282,6 +282,7 @@ export const faTranslations: DefaultTranslationsObject = {
     descending: 'رو به پایین',
     deselectAllRows: 'تمام سطرها را از انتخاب خارج کنید',
     document: 'سند',
+    documentIsTrashed: 'این {{label}} حذف شده و فقط قابل خواندن است.',
     documentLocked: 'سند قفل شده است',
     documents: 'اسناد',
     duplicate: 'تکراری',

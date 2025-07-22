@@ -285,6 +285,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     descending: 'Նվազող',
     deselectAllRows: 'Հանել բոլոր տողերի ընտրությունը',
     document: 'Փաստաթուղթ',
+    documentIsTrashed: 'Այս {{label}}-ն աղբարկղած է և հասանելի է միայն ընթերցման համար։',
     documentLocked: 'Փաստաթուղթը կողպված է',
     documents: 'Փաստաթղթեր',
     duplicate: 'Կրկնօրինակել',

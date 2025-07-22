@@ -288,6 +288,7 @@ export const enTranslations = {
     descending: 'Descending',
     deselectAllRows: 'Deselect all rows',
     document: 'Document',
+    documentIsTrashed: 'This {{label}} is trashed and is read-only.',
     documentLocked: 'Document locked',
     documents: 'Documents',
     duplicate: 'Duplicate',

@@ -282,6 +282,7 @@ export const csTranslations: DefaultTranslationsObject = {
     descending: 'Sestupně',
     deselectAllRows: 'Zrušte výběr všech řádků',
     document: 'Dokument',
+    documentIsTrashed: 'Tento {{label}} je v koši a je pouze pro čtení.',
     documentLocked: 'Dokument je uzamčen',
     documents: 'Dokumenty',
     duplicate: 'Duplikovat',

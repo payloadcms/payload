@@ -287,6 +287,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     descending: 'Mažėjantis',
     deselectAllRows: 'Atžymėkite visas eilutes',
     document: 'Dokumentas',
+    documentIsTrashed: 'Šis {{label}} yra ištrintas ir yra tik skaitymui.',
     documentLocked: 'Dokumentas užrakintas',
     documents: 'Dokumentai',
     duplicate: 'Dublikatas',

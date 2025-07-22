@@ -284,6 +284,7 @@ export const plTranslations: DefaultTranslationsObject = {
     descending: 'Malejąco',
     deselectAllRows: 'Odznacz wszystkie wiersze',
     document: 'Dokument',
+    documentIsTrashed: 'To {{label}} jest w koszu i jest tylko do odczytu.',
     documentLocked: 'Dokument zablokowany',
     documents: 'Dokumenty',
     duplicate: 'Zduplikuj',

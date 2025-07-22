@@ -284,6 +284,7 @@ export const slTranslations: DefaultTranslationsObject = {
     descending: 'Padajoče',
     deselectAllRows: 'Odznači vse vrstice',
     document: 'Dokument',
+    documentIsTrashed: 'Ta {{label}} je v smetnjaku in je samo za branje.',
     documentLocked: 'Dokument zaklenjen',
     documents: 'Dokumenti',
     duplicate: 'Podvoji',

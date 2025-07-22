@@ -284,6 +284,7 @@ export const viTranslations: DefaultTranslationsObject = {
     descending: 'Xếp theo thứ tự giảm dần',
     deselectAllRows: 'Bỏ chọn tất cả các hàng',
     document: 'Tài liệu',
+    documentIsTrashed: 'Nhãn này {{label}} đã bị xóa và chỉ được phép đọc.',
     documentLocked: 'Tài liệu bị khóa',
     documents: 'Tài liệu',
     duplicate: 'Tạo bản sao',

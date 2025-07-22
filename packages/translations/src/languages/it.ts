@@ -287,6 +287,7 @@ export const itTranslations: DefaultTranslationsObject = {
     descending: 'Decrescente',
     deselectAllRows: 'Deseleziona tutte le righe',
     document: 'Documento',
+    documentIsTrashed: 'Questo {{label}} è stato cestinato ed è in sola lettura.',
     documentLocked: 'Documento bloccato',
     documents: 'Documenti',
     duplicate: 'Duplica',

@@ -267,6 +267,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     descending: '降冪',
     deselectAllRows: '取消選擇全部',
     document: '文件',
+    documentIsTrashed: '此 {{label}} 已被丟入垃圾桶且只能讀取。',
     documentLocked: '文件已鎖定',
     documents: '文件',
     duplicate: '複製',
