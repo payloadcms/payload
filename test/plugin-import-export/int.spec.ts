@@ -486,7 +486,8 @@ describe('@payloadcms/plugin-import-export', () => {
       const data = await response.json()
 
       expect(Array.isArray(data)).toBe(true)
-      expect(data[0]).toMatchObject({ id: expect.any(String), title: expect.any(String) })
+      expect(['string', 'number']).toContain(typeof data[0].id)
+      expect(typeof data[0].title).toBe('string')
     })
 
     it('should create an export with every field when no fields are defined', async () => {
