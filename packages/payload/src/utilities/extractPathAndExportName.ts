@@ -6,7 +6,7 @@ export const extractPathAndExportName = (
   let exportName = defaultExport
 
   // `#` is a valid import path prefix.
-  // We have check if alias is not the only occurence.
+  // We have to check if alias is not the only occurrence.
   const lastDelimiterIndex = pathAndMaybeExport?.lastIndexOf('#') ?? -1
   if (lastDelimiterIndex > 0) {
     exportName = pathAndMaybeExport.substring(lastDelimiterIndex + 1)
