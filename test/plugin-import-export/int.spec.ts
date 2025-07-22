@@ -467,6 +467,28 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].title).toStrictEqual('JSON 0')
     })
 
+    it('should download an existing export JSON file', async () => {
+      const response = await restClient.POST('/exports/download', {
+        body: JSON.stringify({
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title'],
+            format: 'json',
+            sort: 'title',
+          },
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      expect(response.status).toBe(200)
+      expect(response.headers.get('content-type')).toMatch(/application\/json/)
+
+      const data = await response.json()
+
+      expect(Array.isArray(data)).toBe(true)
+      expect(data[0]).toMatchObject({ id: expect.any(String), title: expect.any(String) })
+    })
+
     it('should create an export with every field when no fields are defined', async () => {
       let doc = await payload.create({
         collection: 'exports',
