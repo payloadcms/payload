@@ -64,7 +64,7 @@ export const createExport = async (args: CreateExportArgs) => {
   } = args
 
   if (debug) {
-    req.payload.logger.info({
+    req.payload.logger.debug({
       message: 'Starting export process with args:',
       collectionSlug,
       drafts,
@@ -84,7 +84,7 @@ export const createExport = async (args: CreateExportArgs) => {
   const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
 
   if (debug) {
-    req.payload.logger.info({ message: 'Export configuration:', name, isCSV, locale })
+    req.payload.logger.debug({ message: 'Export configuration:', name, isCSV, locale })
   }
 
   const findArgs = {
@@ -102,7 +102,7 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   if (debug) {
-    req.payload.logger.info({ message: 'Find arguments:', findArgs })
+    req.payload.logger.debug({ message: 'Find arguments:', findArgs })
   }
 
   const toCSVFunctions = getCustomFieldFunctions({
@@ -129,7 +129,7 @@ export const createExport = async (args: CreateExportArgs) => {
 
   if (download) {
     if (debug) {
-      req.payload.logger.info('Pre-scanning all columns before streaming')
+      req.payload.logger.debug('Pre-scanning all columns before streaming')
     }
 
     const allColumnsSet = new Set<string>()
@@ -155,7 +155,7 @@ export const createExport = async (args: CreateExportArgs) => {
     }
 
     if (debug) {
-      req.payload.logger.info(`Discovered ${allColumns.length} columns`)
+      req.payload.logger.debug(`Discovered ${allColumns.length} columns`)
     }
 
     const encoder = new TextEncoder()
@@ -167,7 +167,7 @@ export const createExport = async (args: CreateExportArgs) => {
         const result = await payload.find({ ...findArgs, page: streamPage })
 
         if (debug) {
-          req.payload.logger.info(`Streaming batch ${streamPage} with ${result.docs.length} docs`)
+          req.payload.logger.debug(`Streaming batch ${streamPage} with ${result.docs.length} docs`)
         }
 
         if (result.docs.length === 0) {
@@ -198,7 +198,7 @@ export const createExport = async (args: CreateExportArgs) => {
 
         if (!result.hasNextPage) {
           if (debug) {
-            req.payload.logger.info('Stream complete - no more pages')
+            req.payload.logger.debug('Stream complete - no more pages')
           }
           this.push(null) // End the stream
         }
@@ -215,7 +215,7 @@ export const createExport = async (args: CreateExportArgs) => {
 
   // Non-download path (buffered export)
   if (debug) {
-    req.payload.logger.info('Starting file generation')
+    req.payload.logger.debug('Starting file generation')
   }
 
   const outputData: string[] = []
@@ -232,7 +232,7 @@ export const createExport = async (args: CreateExportArgs) => {
     })
 
     if (debug) {
-      req.payload.logger.info(
+      req.payload.logger.debug(
         `Processing batch ${findArgs.page} with ${result.docs.length} documents`,
       )
     }
@@ -281,12 +281,12 @@ export const createExport = async (args: CreateExportArgs) => {
 
   const buffer = Buffer.from(format === 'json' ? `[${outputData.join(',')}]` : outputData.join(''))
   if (debug) {
-    req.payload.logger.info(`${format} file generation complete`)
+    req.payload.logger.debug(`${format} file generation complete`)
   }
 
   if (!id) {
     if (debug) {
-      req.payload.logger.info('Creating new export file')
+      req.payload.logger.debug('Creating new export file')
     }
     req.file = {
       name,
@@ -296,7 +296,7 @@ export const createExport = async (args: CreateExportArgs) => {
     }
   } else {
     if (debug) {
-      req.payload.logger.info(`Updating existing export with id: ${id}`)
+      req.payload.logger.debug(`Updating existing export with id: ${id}`)
     }
     await req.payload.update({
       id,
@@ -312,6 +312,6 @@ export const createExport = async (args: CreateExportArgs) => {
     })
   }
   if (debug) {
-    req.payload.logger.info('Export process completed successfully')
+    req.payload.logger.debug('Export process completed successfully')
   }
 }
