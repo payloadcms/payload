@@ -415,7 +415,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     timezone: 'Fuso horário',
     titleDeleted: '{{label}} {{title}} excluído com sucesso.',
     titleRestored: '{{label}} "{{title}}" restaurado com sucesso.',
-    titleTrashed: '{{label}} "{{title}}" excluído com sucesso.',
+    titleTrashed: '{{label}} "{{title}}" movido para a lixeira.',
     trash: 'Lixo',
     trashedCountSuccessfully: 'Descartados {{count}} {{label}} com sucesso.',
     true: 'Verdadeiro',

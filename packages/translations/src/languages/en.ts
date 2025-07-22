@@ -416,7 +416,7 @@ export const enTranslations = {
     timezone: 'Timezone',
     titleDeleted: '{{label}} "{{title}}" successfully deleted.',
     titleRestored: '{{label}} "{{title}}" successfully restored.',
-    titleTrashed: '{{label}} "{{title}}" successfully trashed.',
+    titleTrashed: '{{label}} "{{title}}" moved to trash.',
     trash: 'Trash',
     trashedCountSuccessfully: 'Trashed {{count}} {{label}} successfully.',
     true: 'True',

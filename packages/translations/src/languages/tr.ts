@@ -417,7 +417,7 @@ export const trTranslations: DefaultTranslationsObject = {
     timezone: 'Saat dilimi',
     titleDeleted: '{{label}} {{title}} başarıyla silindi.',
     titleRestored: '"{{title}}" başarıyla geri yüklendi.',
-    titleTrashed: '"{{label}}" "{{title}}" başarıyla çöpe atıldı.',
+    titleTrashed: '{{label}} "{{title}}" çöpe taşındı.',
     trash: 'Çöp',
     trashedCountSuccessfully: '{{count}} {{label}} başarıyla çöpe atıldı.',
     true: 'Doğru',

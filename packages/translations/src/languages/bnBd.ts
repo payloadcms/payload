@@ -415,7 +415,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     timezone: 'টাইমজোন',
     titleDeleted: '{{label}} "{{title}}" সফলভাবে মুছে ফেলা হয়েছে।',
     titleRestored: '"{{label}}" "{{title}}" সফলভাবে পুনরুদ্ধার করা হয়েছে।',
-    titleTrashed: '{{label}} "{{title}}" সফলভাবে ট্র্যাশ করা হয়েছে।',
+    titleTrashed: '{{label}} "{{title}}" আবর্জনাস্থলে সরিয়ে নেওয়া হয়েছে।',
     trash: 'আবর্জনা',
     trashedCountSuccessfully: 'সফলভাবে {{count}} {{label}} মুছে ফেলা হয়েছে।',
     true: 'সত্য',

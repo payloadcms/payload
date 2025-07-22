@@ -416,7 +416,7 @@ export const myTranslations: DefaultTranslationsObject = {
     timezone: 'Masa Wilayah',
     titleDeleted: '{{label}} {{title}} အောင်မြင်စွာ ဖျက်သိမ်းခဲ့သည်။',
     titleRestored: '"{{label}}" "{{title}}" အောင်မြင်စွာ ပြန်လည် ထည့်သွင်းပြီး ဖြစ်ပါတယ်။',
-    titleTrashed: '"{{label}}" "{{title}}" အောင်မြင်စွာ စုဖြတ်ပြီးပါပြီ။',
+    titleTrashed: '"{{label}}" "{{title}}" dipindahkan ke tong sampah.',
     trash: 'ဖျက်သိမ်းခြင်း',
     trashedCountSuccessfully: 'Berjaya membuang {{count}} {{label}}.',
     true: 'အမှန်',

@@ -414,7 +414,7 @@ export const svTranslations: DefaultTranslationsObject = {
     timezone: 'Tidszon',
     titleDeleted: '{{label}} "{{title}}" togs bort',
     titleRestored: '{{label}} "{{title}}" har framgångsrikt återställts.',
-    titleTrashed: '{{label}} "{{title}}" framgångsrikt slängt.',
+    titleTrashed: '{{label}} "{{title}}" flyttades till papperskorgen.',
     trash: 'Skräp',
     trashedCountSuccessfully: 'Raderade framgångsrikt {{count}} {{label}}.',
     true: 'Sann',

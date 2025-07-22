@@ -421,7 +421,7 @@ export const frTranslations: DefaultTranslationsObject = {
     timezone: 'Fuseau horaire',
     titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
     titleRestored: '{{label}} "{{title}}" restauré avec succès.',
-    titleTrashed: '{{label}} "{{title}}" a été mis à la poubelle avec succès.',
+    titleTrashed: '{{label}} "{{title}}" déplacé vers la corbeille.',
     trash: 'Corbeille',
     trashedCountSuccessfully: '{{count}} {{label}} supprimé avec succès.',
     true: 'Vrai',

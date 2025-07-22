@@ -414,7 +414,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     timezone: 'Ժամային գոտի',
     titleDeleted: '{{label}} "{{title}}" հաջողությամբ ջնջվել է։',
     titleRestored: '"{{label}}" "{{title}}" հաջողությամբ վերականգնվել է։',
-    titleTrashed: '"{{label}} "{{title}}" հաջողությամբ թափվել է։',
+    titleTrashed: '«{{label}}» «{{title}}» տեղափոխվել է աղբարկղում:',
     trash: 'աղբ',
     trashedCountSuccessfully: '{{count}} {{label}} հաջողությամբ թափափվել է:',
     true: 'Ճիշտ',

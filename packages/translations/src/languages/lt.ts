@@ -414,7 +414,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     timezone: 'Laiko juosta',
     titleDeleted: '{{label}} "{{title}}" sėkmingai ištrinta.',
     titleRestored: '{{label}} "{{title}}" sėkmingai atkurta.',
-    titleTrashed: '{{label}} "{{title}}" sėkmingai ištrintas.',
+    titleTrashed: '{{label}} "{{title}}" perkeltas į šiukšliadėžę.',
     trash: 'Šiukšlės',
     trashedCountSuccessfully: 'Sėkmingai išmestas {{count}} {{label}}.',
     true: 'Tiesa',

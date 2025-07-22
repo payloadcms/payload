@@ -404,7 +404,7 @@ export const arTranslations: DefaultTranslationsObject = {
     timezone: 'المنطقة الزمنية',
     titleDeleted: 'تم حذف {{label}} "{{title}}" بنجاح.',
     titleRestored: 'تمت استعادة "{{title}}" "{{label}}" بنجاح.',
-    titleTrashed: '{{label}} "{{title}}" تم إرسالها إلى سلة المحذوفات بنجاح.',
+    titleTrashed: '"{{label}}" "{{title}}" تم نقلها إلى سلة المهملات.',
     trash: 'سلة المهملات',
     trashedCountSuccessfully: 'تم حذف {{count}} {{label}} بنجاح.',
     true: 'صحيح',

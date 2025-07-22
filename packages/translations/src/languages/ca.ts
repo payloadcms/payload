@@ -414,7 +414,7 @@ export const caTranslations: DefaultTranslationsObject = {
     timezone: 'Fus horari',
     titleDeleted: '{{label}} "{{title}}" eliminat correctament.',
     titleRestored: '{{label}} "{{title}}" s\'ha restaurat correctament.',
-    titleTrashed: '{{label}} "{{title}}" s\'ha enviat correctament a la paperera.',
+    titleTrashed: '{{label}} "{{title}}" s\'ha traslladat a la paperera.',
     trash: 'Brossa',
     trashedCountSuccessfully: "S'ha eliminat amb èxit {{count}} {{label}}.",
     true: 'Veritat',

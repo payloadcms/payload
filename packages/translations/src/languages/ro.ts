@@ -418,7 +418,7 @@ export const roTranslations: DefaultTranslationsObject = {
     timezone: 'Fus orar',
     titleDeleted: '{{label}} "{{title}}" șters cu succes.',
     titleRestored: '{{label}} "{{title}}" a fost restaurat cu succes.',
-    titleTrashed: 'Eticheta "{{title}}" a fost aruncată cu succes.',
+    titleTrashed: '{{label}} "{{title}}" a fost mutat la coșul de gunoi.',
     trash: 'Gunoi',
     trashedCountSuccessfully: 'Amplasat în coșul de gunoi {{count}} {{label}} cu succes.',
     true: 'Adevărat',

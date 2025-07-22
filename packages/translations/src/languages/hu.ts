@@ -416,7 +416,7 @@ export const huTranslations: DefaultTranslationsObject = {
     timezone: 'Időzóna',
     titleDeleted: '{{label}} "{{title}}" sikeresen törölve.',
     titleRestored: '"{{label}}" "{{title}}" sikeresen visszaállítva.',
-    titleTrashed: '{{label}} "{{title}}" sikeresen a szemétbe került.',
+    titleTrashed: '"{{label}}" "{{title}}" a szemétbe került.',
     trash: 'Szemét',
     trashedCountSuccessfully: 'Sikeresen kukába dobott {{count}} {{label}}.',
     true: 'Igaz',

@@ -410,7 +410,7 @@ export const faTranslations: DefaultTranslationsObject = {
     timezone: 'منطقه زمانی',
     titleDeleted: '{{label}} "{{title}}" با موفقیت پاک شد.',
     titleRestored: '{{label}} "{{title}}" با موفقیت بازیابی شد.',
-    titleTrashed: '{{label}} "{{title}}" با موفقیت به سطل زباله انتقال یافت.',
+    titleTrashed: '{{label}} "{{title}}" به سطل زباله منتقل شد.',
     trash: 'زباله',
     trashedCountSuccessfully: '{{label}} به تعداد {{count}} با موفقیت به سطل زباله منتقل شد.',
     true: 'درست',

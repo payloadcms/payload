@@ -405,7 +405,7 @@ export const thTranslations: DefaultTranslationsObject = {
     timezone: 'เขตเวลา',
     titleDeleted: 'ลบ {{label}} "{{title}}" สำเร็จ',
     titleRestored: '{{label}} "{{title}}" ถูกกู้คืนสำเร็จแล้ว.',
-    titleTrashed: '{{label}} "{{title}}" ถูกย้ายไปในถังขยะแล้วสำเร็จ',
+    titleTrashed: '{{label}} "{{title}}" ถูกย้ายไปถังขยะ',
     trash: 'ถังขยะ',
     trashedCountSuccessfully: 'ทำการลบ {{count}} {{label}} เรียบร้อยแล้ว',
     true: 'จริง',

@@ -411,7 +411,7 @@ export const skTranslations: DefaultTranslationsObject = {
     timezone: 'Časové pásmo',
     titleDeleted: '{{label}} "{{title}}" úspešne zmazané.',
     titleRestored: '{{label}} "{{title}}" úspešne obnovený.',
-    titleTrashed: '{{label}} "{{title}}" úspešne presunuté do koša.',
+    titleTrashed: '{{label}} "{{title}}" presunuté do koša.',
     trash: 'Koš',
     trashedCountSuccessfully: 'Úspešne vymazané {{count}} {{label}}.',
     true: 'Pravda',

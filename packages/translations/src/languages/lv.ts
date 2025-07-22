@@ -412,7 +412,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     timezone: 'Laika zona',
     titleDeleted: '{{label}} "{{title}}" veiksmīgi izdzēsts.',
     titleRestored: '{{label}} "{{title}}" veiksmīgi atjaunots.',
-    titleTrashed: '{{label}} "{{title}}" veiksmīgi pārvietots uz miskasti.',
+    titleTrashed: '{{label}} "{{title}}" pārvietots uz miskasti.',
     trash: 'Atkritumi',
     trashedCountSuccessfully: 'Veiksmīgi izmesti {{count}} {{label}}.',
     true: 'Patiesi',

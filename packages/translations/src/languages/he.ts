@@ -400,7 +400,7 @@ export const heTranslations: DefaultTranslationsObject = {
     timezone: 'אזור זמן',
     titleDeleted: '{{label}} "{{title}}" נמחק בהצלחה.',
     titleRestored: 'התווית "{{title}}" שוחזרה בהצלחה.',
-    titleTrashed: '{{label}} "{{title}}" הושמד בהצלחה.',
+    titleTrashed: '{{label}} "{{title}}" הועבר לפח.',
     trash: 'זבל',
     trashedCountSuccessfully: 'נמחקו בהצלחה {{count}} {{label}}.',
     true: 'True',

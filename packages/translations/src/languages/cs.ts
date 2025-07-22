@@ -410,7 +410,7 @@ export const csTranslations: DefaultTranslationsObject = {
     timezone: 'Časové pásmo',
     titleDeleted: '{{label}} "{{title}}" úspěšně smazáno.',
     titleRestored: '{{label}} "{{title}}" úspěšně obnoveno.',
-    titleTrashed: '{{label}} "{{title}}" úspěšně přesunuto do koše.',
+    titleTrashed: '{{label}} "{{title}}" přesunuto do koše.',
     trash: 'Koš',
     trashedCountSuccessfully: '{{label}} úspěšně přesunuto do koše ({{count}}).',
     true: 'Pravda',

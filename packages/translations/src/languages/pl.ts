@@ -411,7 +411,7 @@ export const plTranslations: DefaultTranslationsObject = {
     timezone: 'Strefa czasowa',
     titleDeleted: 'Pomyślnie usunięto {{label}} {{title}}',
     titleRestored: 'Etykieta "{{title}}" została pomyślnie przywrócona.',
-    titleTrashed: 'Etykieta "{{title}}" została pomyślnie przeniesiona do kosza.',
+    titleTrashed: '{{label}} "{{title}}" przeniesiony do kosza.',
     trash: 'Śmieci',
     trashedCountSuccessfully: 'Pomyślnie przeniesiono do kosza {{count}} {{label}}.',
     true: 'Prawda',

@@ -414,7 +414,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     timezone: 'タイムゾーン',
     titleDeleted: '{{label}} "{{title}}" が削除されました。',
     titleRestored: '「{{label}}」"{{title}}" が正常に復元されました。',
-    titleTrashed: '「{{title}}」の「{{label}}」が正常に削除されました。',
+    titleTrashed: '{{label}} "{{title}}"がゴミ箱へ移動されました。',
     trash: 'ゴミ',
     trashedCountSuccessfully: '{{count}} の{{label}}を正常に削除しました。',
     true: '真実',

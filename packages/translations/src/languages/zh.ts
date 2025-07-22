@@ -393,7 +393,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     timezone: '时区',
     titleDeleted: '{{label}} "{{title}}"已被成功删除。',
     titleRestored: '"{{label}}" "{{title}}" 成功恢复。',
-    titleTrashed: '"{{label}}" "{{title}}" 已成功移至垃圾桶。',
+    titleTrashed: '{{label}} "{{title}}" 已移至垃圾桶。',
     trash: '垃圾',
     trashedCountSuccessfully: '成功地删除了{{count}} {{label}}。',
     true: '是',

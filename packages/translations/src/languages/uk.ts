@@ -411,7 +411,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     timezone: 'Часовий пояс',
     titleDeleted: '{{label}} "{{title}}" успішно видалено.',
     titleRestored: '{{label}} "{{title}}" успішно відновлено.',
-    titleTrashed: '{{label}} "{{title}}" успішно переміщено в кошик.',
+    titleTrashed: '{{label}} "{{title}}" переміщено до кошика.',
     trash: 'Сміття',
     trashedCountSuccessfully: 'Успішно видалено {{count}} {{label}}.',
     true: 'Правда',

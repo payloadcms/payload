@@ -412,7 +412,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     timezone: 'Часова зона',
     titleDeleted: '{{label}} "{{title}}" успешно изтрит.',
     titleRestored: '{{label}} "{{title}}" беше успешно възстановено.',
-    titleTrashed: '{{label}} "{{title}}" успешно премахнато.',
+    titleTrashed: '{{label}} "{{title}}" е преместено в кошчето.',
     trash: 'Боклук',
     trashedCountSuccessfully: 'Успешно изхвърлено {{count}} {{label}}.',
     true: 'Вярно',

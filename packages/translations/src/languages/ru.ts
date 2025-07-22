@@ -414,7 +414,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     timezone: 'Часовой пояс',
     titleDeleted: '{{label}} {{title}} успешно удалено.',
     titleRestored: '{{label}} "{{title}}" успешно восстановлен.',
-    titleTrashed: '{{label}} "{{title}}" успешно перемещен в корзину.',
+    titleTrashed: '{{label}} "{{title}}" перемещен в корзину.',
     trash: 'Мусор',
     trashedCountSuccessfully: 'Успешно удалено {{count}} {{label}}.',
     true: 'Правда',

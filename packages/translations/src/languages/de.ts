@@ -420,7 +420,7 @@ export const deTranslations: DefaultTranslationsObject = {
     timezone: 'Zeitzone',
     titleDeleted: '{{label}} {{title}} wurde erfolgreich gelöscht.',
     titleRestored: '{{label}} "{{title}}" erfolgreich wiederhergestellt.',
-    titleTrashed: '{{label}} "{{title}}" erfolgreich entfernt.',
+    titleTrashed: '{{label}} "{{title}}" wurde in den Papierkorb verschoben.',
     trash: 'Müll',
     trashedCountSuccessfully: 'Erfolgreich {{count}} {{label}} in den Papierkorb verschoben.',
     true: 'Wahr',

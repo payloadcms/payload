@@ -419,7 +419,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     timezone: 'Tijdzone',
     titleDeleted: '{{label}} "{{title}}" succesvol verwijderd.',
     titleRestored: '{{label}} "{{title}}" succesvol hersteld.',
-    titleTrashed: '{{label}} "{{title}}" succesvol naar de prullenbak verplaatst.',
+    titleTrashed: '{{label}} "{{title}}" verplaatst naar prullenbak.',
     trash: 'Prullenbak',
     trashedCountSuccessfully: '{{count}} {{label}} succesvol verwijderd.',
     true: 'Waar',
