@@ -17,6 +17,7 @@ export async function initDevAndTest(
   testSuiteArg: string,
   writeDBAdapter: string,
   skipGenImportMap: string,
+  configFile?: string,
 ): Promise<void> {
   const importMapPath: string = path.resolve(
     getNextRootDir(testSuiteArg).rootDir,
@@ -44,7 +45,7 @@ export async function initDevAndTest(
   const testDir = path.resolve(dirname, testSuiteArg)
   console.log('Generating import map for config:', testDir)
 
-  const configUrl = pathToFileURL(path.resolve(testDir, 'config.ts')).href
+  const configUrl = pathToFileURL(path.resolve(testDir, configFile ?? 'config.ts')).href
   const config: SanitizedConfig = await (await import(configUrl)).default
 
   process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir
