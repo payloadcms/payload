@@ -244,7 +244,7 @@ export const promise = async ({
 
         rows.forEach((row, rowIndex) => {
           const existingRow = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
-          const existingRowWithLocales = siblingDocWithLocales?.[field.name]?.[rowIndex]
+          const existingRowWithLocales = siblingDocWithLocales?.[field.name]?.[rowIndex] || {}
 
           promises.push(
             traverseFields({
@@ -275,7 +275,7 @@ export const promise = async ({
               req,
               siblingData: row as JsonObject,
               siblingDoc: existingRow,
-              siblingDocWithLocales: existingRowWithLocales || {},
+              siblingDocWithLocales: existingRowWithLocales,
               skipValidation: skipValidationFromHere,
             }),
           )
@@ -295,7 +295,7 @@ export const promise = async ({
         rows.forEach((row, rowIndex) => {
           const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
 
-          const rowSiblingDocWithLocales = siblingDocWithLocales?.[field.name]?.[rowIndex]
+          const rowSiblingDocWithLocales = siblingDocWithLocales?.[field.name]?.[rowIndex] || {}
 
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
 
