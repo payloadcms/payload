@@ -28,14 +28,15 @@ import { MoveDocToFolder } from '../FolderView/MoveDocToFolder/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { LivePreviewToggler } from '../LivePreview/Toggler/index.js'
 import { Locked } from '../Locked/index.js'
+import { PermaDeleteButton } from '../PermaDeleteButton/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { PreviewButton } from '../PreviewButton/index.js'
 import { PublishButton } from '../PublishButton/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { RestoreButton } from '../RestoreButton/index.js'
 import { SaveButton } from '../SaveButton/index.js'
-import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import './index.scss'
+import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
 
 const baseClass = 'doc-controls'
@@ -205,20 +206,21 @@ export const DocumentControls: React.FC<{
                 </p>
               </li>
             )}
-
-            {!isTrashed &&
-              (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) && (
-                <Fragment>
-                  {(globalConfig || (collectionConfig && isEditing)) && (
-                    <li
-                      className={[`${baseClass}__status`, `${baseClass}__list-item`]
-                        .filter(Boolean)
-                        .join(' ')}
-                    >
-                      <Status />
-                    </li>
-                  )}
-                  {hasSavePermission && autosaveEnabled && !unsavedDraftWithValidations && (
+            {(collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) && (
+              <Fragment>
+                {(globalConfig || (collectionConfig && isEditing)) && (
+                  <li
+                    className={[`${baseClass}__status`, `${baseClass}__list-item`]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    <Status />
+                  </li>
+                )}
+                {hasSavePermission &&
+                  autosaveEnabled &&
+                  !unsavedDraftWithValidations &&
+                  !isTrashed && (
                     <li className={`${baseClass}__list-item`}>
                       <Autosave
                         collection={collectionConfig}
@@ -228,8 +230,8 @@ export const DocumentControls: React.FC<{
                       />
                     </li>
                   )}
-                </Fragment>
-              )}
+              </Fragment>
+            )}
             {collectionConfig?.timestamps && (isEditing || isAccountView) && (
               <Fragment>
                 <li
@@ -291,6 +293,16 @@ export const DocumentControls: React.FC<{
                   />
                 )}
               </Fragment>
+            )}
+            {hasDeletePermission && isTrashed && (
+              <PermaDeleteButton
+                buttonId="action-perma-delete"
+                collectionSlug={collectionConfig?.slug}
+                id={id.toString()}
+                onDelete={onDelete}
+                redirectAfterDelete={redirectAfterDelete}
+                singularLabel={collectionConfig?.labels?.singular}
+              />
             )}
             {hasSavePermission && isTrashed && (
               <RestoreButton

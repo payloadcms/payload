@@ -7,12 +7,11 @@ import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { Fragment, useCallback, useState } from 'react'
+import React, { Fragment, useCallback } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
-import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
@@ -20,28 +19,25 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
-import './index.scss'
 import { Translation } from '../Translation/index.js'
-
-const baseClass = 'restore-button'
 
 export type Props = {
   readonly buttonId?: string
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly id?: string
-  readonly onRestore?: DocumentDrawerContextType['onRestore']
-  readonly redirectAfterRestore?: boolean
+  readonly onDelete?: DocumentDrawerContextType['onDelete']
+  readonly redirectAfterDelete?: boolean
   readonly singularLabel: SanitizedCollectionConfig['labels']['singular']
   readonly title?: string
 }
 
-export const RestoreButton: React.FC<Props> = (props) => {
+export const PermaDeleteButton: React.FC<Props> = (props) => {
   const {
     id,
     buttonId,
     collectionSlug,
-    onRestore,
-    redirectAfterRestore = true,
+    onDelete,
+    redirectAfterDelete = true,
     singularLabel,
     title: titleFromProps,
   } = props
@@ -61,15 +57,13 @@ export const RestoreButton: React.FC<Props> = (props) => {
   const { startRouteTransition } = useRouteTransition()
   const { openModal } = useModal()
 
-  const modalSlug = `restore-${id}`
-
-  const [restoreAsPublished, setRestoreAsPublished] = useState(false)
+  const modalSlug = `perma-delete-${id}`
 
   const addDefaultError = useCallback(() => {
-    toast.error(t('error:restoringTitle', { title }))
+    toast.error(t('error:deletingTitle', { title }))
   }, [t, title])
 
-  const handleRestore = useCallback(async () => {
+  const handleDelete = useCallback(async () => {
     try {
       const url = `${serverURL}${api}/${collectionSlug}?${qs.stringify({
         trash: true,
@@ -78,11 +72,7 @@ export const RestoreButton: React.FC<Props> = (props) => {
         },
       })}`
 
-      const res = await requests.patch(url, {
-        body: JSON.stringify({
-          _status: restoreAsPublished ? 'published' : 'draft',
-          deletedAt: null,
-        }),
+      const res = await requests.delete(url, {
         headers: {
           'Accept-Language': i18n.language,
           'Content-Type': 'application/json',
@@ -93,25 +83,25 @@ export const RestoreButton: React.FC<Props> = (props) => {
 
       if (res.status < 400) {
         toast.success(
-          t('general:titleRestored', {
+          t('general:titleDeleted', {
             label: getTranslation(singularLabel, i18n),
             title,
           }) || json.message,
         )
 
-        if (redirectAfterRestore) {
+        if (redirectAfterDelete) {
           return startRouteTransition(() =>
             router.push(
               formatAdminURL({
                 adminRoute,
-                path: `/collections/${collectionSlug}/${id}`,
+                path: `/collections/${collectionSlug}/trash`,
               }),
             ),
           )
         }
 
-        if (typeof onRestore === 'function') {
-          await onRestore({ id, collectionConfig })
+        if (typeof onDelete === 'function') {
+          await onDelete({ id, collectionConfig })
         }
 
         return
@@ -137,56 +127,42 @@ export const RestoreButton: React.FC<Props> = (props) => {
     title,
     router,
     adminRoute,
-    redirectAfterRestore,
-    onRestore,
+    redirectAfterDelete,
+    onDelete,
     collectionConfig,
     startRouteTransition,
-    restoreAsPublished,
   ])
 
   if (id) {
     return (
       <Fragment>
         <Button
-          buttonStyle="primary"
+          buttonStyle="secondary"
           id={buttonId}
-          key={buttonId}
           onClick={() => {
             openModal(modalSlug)
           }}
         >
-          {t('general:restore')}
+          {t('general:permanentlyDelete')}
         </Button>
         <ConfirmationModal
           body={
-            <Fragment>
-              <Translation
-                elements={{
-                  '1': ({ children }) => <strong>{children}</strong>,
-                }}
-                i18nKey="general:aboutToRestore"
-                t={t}
-                variables={{
-                  label: getTranslation(singularLabel, i18n),
-                  title: titleFromProps || title || id,
-                }}
-              />
-              <div className={`${baseClass}__checkbox`}>
-                <CheckboxInput
-                  checked={restoreAsPublished}
-                  id="restore-as-published"
-                  label={t('general:restoreAsPublished')}
-                  name="restore-as-published"
-                  onToggle={(e) => setRestoreAsPublished(e.target.checked)}
-                />
-              </div>
-            </Fragment>
+            <Translation
+              elements={{
+                '1': ({ children }) => <strong>{children}</strong>,
+              }}
+              i18nKey="general:aboutToDelete"
+              t={t}
+              variables={{
+                label: getTranslation(singularLabel, i18n),
+                title: titleFromProps || title || id,
+              }}
+            />
           }
-          className={baseClass}
-          confirmingLabel={t('general:restoring')}
-          heading={t('general:confirmRestoration')}
+          confirmingLabel={t('general:deleting')}
+          heading={t('general:confirmDeletion')}
           modalSlug={modalSlug}
-          onConfirm={handleRestore}
+          onConfirm={handleDelete}
         />
       </Fragment>
     )
