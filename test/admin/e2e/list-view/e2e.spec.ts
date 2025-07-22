@@ -1649,6 +1649,33 @@ describe('List View', () => {
       'Custom placeholder',
     )
   })
+
+  test('should reset list selection when query params change', async () => {
+    await deleteAllPosts()
+    await Promise.all(Array.from({ length: 12 }, (_, i) => createPost({ title: `post${i + 1}` })))
+    await page.goto(postsUrl.list)
+
+    const pageOneButton = page.locator('.paginator__page', { hasText: '1' })
+    await expect(pageOneButton).toBeVisible()
+    await pageOneButton.click()
+
+    await page.locator('.checkbox-input:has(#select-all)').locator('input').click()
+    await expect(page.locator('.checkbox-input:has(#select-all)').locator('input')).toBeChecked()
+    await expect(page.locator('.list-selection')).toContainText('5 selected')
+
+    const pageTwoButton = page.locator('.paginator__page', { hasText: '2' })
+    await expect(pageTwoButton).toBeVisible()
+    await pageTwoButton.click()
+
+    await expect(
+      page.locator('.checkbox-input:has(#select-all) input:not([checked])'),
+    ).toBeVisible()
+
+    await page.locator('.row-1 .cell-_select input').check()
+    await page.locator('.row-2 .cell-_select input').check()
+
+    await expect(page.locator('.list-selection')).toContainText('2 selected')
+  })
 })
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
