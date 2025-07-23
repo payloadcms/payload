@@ -4,6 +4,7 @@ import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
   AnySQLiteColumn,
+  SQLiteColumn,
   SQLiteInsertOnConflictDoUpdateConfig,
   SQLiteTableWithColumns,
   SQLiteTransactionConfig,
@@ -85,6 +86,7 @@ export type GenericTable = SQLiteTableWithColumns<{
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
 export type CountDistinct = (args: {
+  column?: SQLiteColumn<any>
   db: LibSQLDatabase
   joins: BuildQueryJoinAliases
   tableName: string
