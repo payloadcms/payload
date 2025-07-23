@@ -2,7 +2,7 @@
 import type { ClientCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
 
@@ -22,19 +22,13 @@ export type EditManyProps = {
 }
 
 export const EditMany: React.FC<EditManyProps> = (props) => {
-  const { count, getSelectedIds, selectAll, selected, toggleAll } = useSelection()
-  const [ids, setIds] = useState(() => Array.from(selected.keys()))
-
-  const onModalOpen = useCallback(() => {
-    setIds(getSelectedIds())
-  }, [setIds, getSelectedIds])
+  const { count, selectAll, selectedIDs, toggleAll } = useSelection()
 
   return (
     <EditMany_v4
       {...props}
       count={count}
-      ids={ids}
-      onModalOpen={onModalOpen}
+      ids={selectedIDs}
       onSuccess={() => toggleAll()}
       selectAll={selectAll === SelectAllStatus.AllAvailable}
     />

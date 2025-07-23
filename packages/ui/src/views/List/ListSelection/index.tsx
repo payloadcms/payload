@@ -1,7 +1,7 @@
 'use client'
 import type { ClientCollectionConfig } from 'payload'
 
-import React, { Fragment, useCallback, useState } from 'react'
+import React, { Fragment, useCallback } from 'react'
 
 import { DeleteMany } from '../../../elements/DeleteMany/index.js'
 import { EditMany_v4 } from '../../../elements/EditMany/index.js'
@@ -28,15 +28,10 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   modalPrefix,
   showSelectAllAcrossPages = true,
 }) => {
-  const { count, getSelectedIds, selectAll, toggleAll, totalDocs } = useSelection()
+  const { count, selectAll, selectedIDs, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
 
   const onActionSuccess = useCallback(() => toggleAll(), [toggleAll])
-  const [ids, setIds] = useState(() => getSelectedIds())
-
-  const onModalOpen = useCallback(() => {
-    setIds(getSelectedIds())
-  }, [setIds, getSelectedIds])
 
   if (count === 0) {
     return null
@@ -65,27 +60,24 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             <EditMany_v4
               collection={collectionConfig}
               count={count}
-              ids={ids}
+              ids={selectedIDs}
               modalPrefix={modalPrefix}
-              onModalOpen={onModalOpen}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
             />
             <PublishMany_v4
               collection={collectionConfig}
               count={count}
-              ids={ids}
+              ids={selectedIDs}
               modalPrefix={modalPrefix}
-              onModalOpen={onModalOpen}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
             />
             <UnpublishMany_v4
               collection={collectionConfig}
               count={count}
-              ids={ids}
+              ids={selectedIDs}
               modalPrefix={modalPrefix}
-              onModalOpen={onModalOpen}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
             />

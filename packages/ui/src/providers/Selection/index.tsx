@@ -3,7 +3,7 @@ import type { ClientUser, Where } from 'payload'
 
 import { useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
-import React, { createContext, use, useCallback, useEffect, useRef, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useListQuery } from '../ListQuery/index.js'
@@ -24,6 +24,7 @@ type SelectionContext = {
   getSelectedIds: () => (number | string)[]
   selectAll: SelectAllStatus
   selected: Map<number | string, boolean>
+  selectedIDs: (number | string)[]
   setSelection: (id: number | string) => void
   /**
    * Selects all rows on the current page within the current query.
@@ -34,7 +35,17 @@ type SelectionContext = {
   totalDocs: number
 }
 
-const Context = createContext({} as SelectionContext)
+const Context = createContext({
+  count: undefined,
+  getQueryParams: (additionalParams?: Where) => '',
+  getSelectedIds: () => [],
+  selectAll: undefined,
+  selected: new Map(),
+  selectedIDs: [],
+  setSelection: (id: number | string) => {},
+  toggleAll: (toggleAll: boolean) => {},
+  totalDocs: undefined,
+} satisfies SelectionContext)
 
 type Props = {
   readonly children: React.ReactNode
@@ -64,7 +75,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const searchParams = useSearchParams()
   const { query } = useListQuery()
 
-  const toggleAll = useCallback(
+  const toggleAll: SelectionContext['toggleAll'] = useCallback(
     (allAvailable = false) => {
       const rows = new Map()
       if (allAvailable) {
@@ -94,7 +105,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     [docs, selectAll, user?.id],
   )
 
-  const setSelection = useCallback(
+  const setSelection: SelectionContext['setSelection'] = useCallback(
     (id) => {
       const doc = docs.find((doc) => doc.id === id)
 
@@ -221,12 +232,25 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     setSelected(new Map())
   }, [query])
 
+  const selectedIDs = useMemo(() => {
+    const ids = []
+
+    for (const [key, value] of selected) {
+      if (value) {
+        ids.push(key)
+      }
+    }
+
+    return ids
+  }, [selected])
+
   contextRef.current = {
     count,
     getQueryParams,
     getSelectedIds,
     selectAll,
     selected,
+    selectedIDs,
     setSelection,
     toggleAll,
     totalDocs,

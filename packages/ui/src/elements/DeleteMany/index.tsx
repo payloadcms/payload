@@ -6,7 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { toast } from 'sonner'
 
 import { useAuth } from '../../providers/Auth/index.js'
@@ -36,7 +36,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
   const { collection: { slug } = {}, modalPrefix } = props
 
   const { permissions } = useAuth()
-  const { count, getSelectedIds, selectAll, toggleAll } = useSelection()
+  const { count, selectAll, selectedIDs, toggleAll } = useSelection()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { clearRouteCache } = useRouteCache()
@@ -44,12 +44,13 @@ export const DeleteMany: React.FC<Props> = (props) => {
   const collectionPermissions = permissions?.collections?.[slug]
   const hasDeletePermission = collectionPermissions?.delete
 
+  const selectingAll = selectAll === SelectAllStatus.AllAvailable
+
+  const ids = selectingAll ? [] : selectedIDs
+
   if (selectAll === SelectAllStatus.None || !hasDeletePermission) {
     return null
   }
-
-  const selectingAll = selectAll === SelectAllStatus.AllAvailable
-  const selectedIDs = !selectingAll ? getSelectedIds() : []
 
   return (
     <React.Fragment>
@@ -74,8 +75,8 @@ export const DeleteMany: React.FC<Props> = (props) => {
         selections={{
           [slug]: {
             all: selectAll === SelectAllStatus.AllAvailable,
-            ids: selectedIDs,
-            totalCount: selectingAll ? count : selectedIDs.length,
+            ids,
+            totalCount: selectingAll ? count : ids.length,
           },
         }}
         where={parseSearchParams(searchParams)?.where as Where}
@@ -101,6 +102,7 @@ type DeleteMany_v4Props = {
    * When multiple DeleteMany components are rendered on the page, this will differentiate them.
    */
   modalPrefix?: string
+  onModalOpen?: () => void
   /**
    * Optionally pass a search string to filter the documents to be deleted.
    *
@@ -139,6 +141,7 @@ type DeleteMany_v4Props = {
 export function DeleteMany_v4({
   afterDelete,
   modalPrefix,
+  onModalOpen,
   search,
   selections,
   where,
@@ -155,9 +158,19 @@ export function DeleteMany_v4({
 
   const { code: locale } = useLocale()
   const { i18n } = useTranslation()
-  const { openModal } = useModal()
+  const { isModalOpen, openModal } = useModal()
 
   const confirmManyDeleteDrawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}confirm-delete-many-docs`
+
+  const isOpen = isModalOpen(confirmManyDeleteDrawerSlug)
+
+  useEffect(() => {
+    if (isOpen) {
+      if (typeof onModalOpen === 'function') {
+        onModalOpen()
+      }
+    }
+  }, [isOpen, onModalOpen])
 
   const handleDelete = React.useCallback(async () => {
     const deletingOneCollection = Object.keys(selections).length === 1

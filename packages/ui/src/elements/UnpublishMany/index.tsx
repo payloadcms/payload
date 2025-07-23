@@ -2,7 +2,7 @@
 import type { ClientCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
@@ -15,19 +15,13 @@ export type UnpublishManyProps = {
 }
 
 export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
-  const { count, getSelectedIds, selectAll, toggleAll } = useSelection()
-  const [ids, setIds] = useState(() => getSelectedIds())
-
-  const onModalOpen = useCallback(() => {
-    setIds(getSelectedIds())
-  }, [setIds, getSelectedIds])
+  const { count, selectAll, selectedIDs, toggleAll } = useSelection()
 
   return (
     <UnpublishMany_v4
       {...props}
       count={count}
-      ids={ids}
-      onModalOpen={onModalOpen}
+      ids={selectedIDs}
       onSuccess={() => toggleAll()}
       selectAll={selectAll === SelectAllStatus.AllAvailable}
     />
