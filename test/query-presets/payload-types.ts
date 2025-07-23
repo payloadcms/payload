@@ -154,6 +154,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -227,12 +234,12 @@ export interface PayloadQueryPreset {
   isShared?: boolean | null;
   access?: {
     read?: {
-      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles' | 'noone') | null;
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles' | 'noone' | 'onlyAdmins') | null;
       users?: (string | User)[] | null;
       roles?: ('admin' | 'editor' | 'user')[] | null;
     };
     update?: {
-      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles' | 'onlyAdmins') | null;
       users?: (string | User)[] | null;
       roles?: ('admin' | 'editor' | 'user')[] | null;
     };
@@ -301,6 +308,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

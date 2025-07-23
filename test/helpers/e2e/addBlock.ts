@@ -8,21 +8,24 @@ import { openBlocksDrawer } from './openBlocksDrawer.js'
 export const addBlock = async ({
   page,
   fieldName = 'blocks',
-  blockLabel = 'Block',
+  blockToSelect = 'Block',
 }: {
-  blockLabel: string
+  /**
+   * The name of the block to select from the blocks drawer.
+   */
+  blockToSelect: string
   fieldName: string
   page: Page
 }) => {
   const blocksDrawer = await openBlocksDrawer({ page, fieldName })
 
   const blockCard = blocksDrawer.locator('.blocks-drawer__block .thumbnail-card__label', {
-    hasText: blockLabel,
+    hasText: blockToSelect,
   })
 
   await expect(blockCard).toBeVisible()
 
-  await blocksDrawer.getByRole('button', { name: exactText(blockLabel) }).click()
+  await blocksDrawer.getByRole('button', { name: exactText(blockToSelect) }).click()
 
   // expect to see the block on the page
 }

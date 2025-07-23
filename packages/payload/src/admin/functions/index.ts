@@ -1,7 +1,7 @@
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { CollectionSlug, ColumnPreference } from '../../index.js'
+import type { CollectionSlug, ColumnPreference, FolderSortKeys } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
 
@@ -22,9 +22,10 @@ export type ServerFunctionClientArgs = {
 
 export type ServerFunctionClient = (args: ServerFunctionClientArgs) => Promise<unknown> | unknown
 
-export type ServerFunction = (
-  args: DefaultServerFunctionArgs & ServerFunctionClientArgs['args'],
-) => Promise<unknown> | unknown
+export type ServerFunction<
+  TArgs extends object = Record<string, unknown>,
+  TReturnType = Promise<unknown> | unknown,
+> = (args: DefaultServerFunctionArgs & TArgs) => TReturnType
 
 export type ServerFunctionConfig = {
   fn: ServerFunction
@@ -44,8 +45,8 @@ export type ListQuery = {
    * Use `transformColumnsToPreferences` and `transformColumnsToSearchParams` to convert it back and forth
    */
   columns?: ColumnsFromURL
-  limit?: string
-  page?: string
+  limit?: number
+  page?: number
   preset?: number | string
   /*
     When provided, is automatically injected into the `where` object
@@ -74,4 +75,39 @@ export type BuildTableStateArgs = {
 
 export type BuildCollectionFolderViewResult = {
   View: React.ReactNode
+}
+
+export type GetFolderResultsComponentAndDataArgs = {
+  /**
+   * If true and no folderID is provided, only folders will be returned.
+   * If false, the results will include documents from the active collections.
+   */
+  browseByFolder: boolean
+  /**
+   * Used to filter document types to include in the results/display.
+   *
+   * i.e. ['folders', 'posts'] will only include folders and posts in the results.
+   *
+   * collectionsToQuery?
+   */
+  collectionsToDisplay: CollectionSlug[]
+  /**
+   * Used to determine how the results should be displayed.
+   */
+  displayAs: 'grid' | 'list'
+  /**
+   * Used to filter folders by the collections they are assigned to.
+   *
+   * i.e. ['posts'] will only include folders that are assigned to the posts collections.
+   */
+  folderAssignedCollections: CollectionSlug[]
+  /**
+   * The ID of the folder to filter results by.
+   */
+  folderID: number | string | undefined
+  req: PayloadRequest
+  /**
+   * The sort order for the results.
+   */
+  sort: FolderSortKeys
 }

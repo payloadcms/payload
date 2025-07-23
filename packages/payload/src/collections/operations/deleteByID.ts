@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { CollectionSlug } from '../../index.js'
 import type {
   PayloadRequest,
@@ -8,7 +7,7 @@ import type {
 } from '../../types/index.js'
 import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
@@ -110,7 +109,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
 
     const docToDelete = await req.payload.db.findOne({
       collection: collectionConfig.slug,
-      locale: req.locale,
+      locale: req.locale!,
       req,
       where: combineQueries({ id: { equals: id } }, accessResults),
     })
@@ -137,7 +136,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     await deleteAssociatedFiles({
       collectionConfig,
       config,
-      doc: docToDelete,
+      doc: docToDelete!,
       overrideDelete: true,
       req,
     })
@@ -202,17 +201,17 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     result = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: result,
-      draft: undefined,
-      fallbackLocale,
+      draft: undefined!,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////

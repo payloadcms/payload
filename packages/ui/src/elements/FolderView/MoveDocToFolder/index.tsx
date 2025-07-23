@@ -1,5 +1,6 @@
 'use client'
 
+import type { CollectionSlug } from 'payload'
 import type { FolderOrDocument } from 'payload/shared'
 
 import { useModal } from '@faceless-ui/modal'
@@ -16,8 +17,8 @@ import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { formatDrawerSlug, useDrawerDepth } from '../../Drawer/index.js'
-import { MoveItemsToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 import './index.scss'
+import { MoveItemsToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 
 const baseClass = 'move-doc-to-folder'
 
@@ -27,11 +28,13 @@ const baseClass = 'move-doc-to-folder'
 export function MoveDocToFolder({
   buttonProps,
   className = '',
+  folderCollectionSlug,
   folderFieldName,
 }: {
-  buttonProps?: Partial<ButtonProps>
-  className?: string
-  folderFieldName: string
+  readonly buttonProps?: Partial<ButtonProps>
+  readonly className?: string
+  readonly folderCollectionSlug: string
+  readonly folderFieldName: string
 }) {
   const { t } = useTranslation()
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
@@ -49,7 +52,7 @@ export function MoveDocToFolder({
   React.useEffect(() => {
     async function fetchFolderLabel() {
       if (fromFolderID && (typeof fromFolderID === 'string' || typeof fromFolderID === 'number')) {
-        const response = await fetch(`${config.routes.api}/${config.folders.slug}/${fromFolderID}`)
+        const response = await fetch(`${config.routes.api}/${folderCollectionSlug}/${fromFolderID}`)
         const folderData = await response.json()
         setFromFolderName(folderData?.name || t('folder:noFolder'))
       } else {
@@ -58,7 +61,7 @@ export function MoveDocToFolder({
     }
 
     void fetchFolderLabel()
-  }, [config.folders.slug, config.routes.api, fromFolderID, t])
+  }, [folderCollectionSlug, config.routes.api, fromFolderID, t])
 
   return (
     <MoveDocToFolderButton
@@ -68,6 +71,8 @@ export function MoveDocToFolder({
       docData={initialData as FolderOrDocument['value']}
       docID={id}
       docTitle={title}
+      folderCollectionSlug={folderCollectionSlug}
+      folderFieldName={folderFieldName}
       fromFolderID={fromFolderID as number | string}
       fromFolderName={fromFolderName}
       modalSlug={`move-to-folder-${modalID}`}
@@ -87,17 +92,19 @@ export function MoveDocToFolder({
 }
 
 type MoveDocToFolderButtonProps = {
-  buttonProps?: Partial<ButtonProps>
-  className?: string
-  collectionSlug: string
-  docData: FolderOrDocument['value']
-  docID: number | string
-  docTitle?: string
-  fromFolderID?: number | string
-  fromFolderName: string
-  modalSlug: string
-  onConfirm?: (args: { id: number | string; name: string }) => Promise<void> | void
-  skipConfirmModal?: boolean
+  readonly buttonProps?: Partial<ButtonProps>
+  readonly className?: string
+  readonly collectionSlug: string
+  readonly docData: FolderOrDocument['value']
+  readonly docID: number | string
+  readonly docTitle?: string
+  readonly folderCollectionSlug: string
+  readonly folderFieldName: string
+  readonly fromFolderID?: number | string
+  readonly fromFolderName: string
+  readonly modalSlug: string
+  readonly onConfirm?: (args: { id: number | string; name: string }) => Promise<void> | void
+  readonly skipConfirmModal?: boolean
 }
 
 /**
@@ -110,6 +117,8 @@ export const MoveDocToFolderButton = ({
   docData,
   docID,
   docTitle,
+  folderCollectionSlug,
+  folderFieldName,
   fromFolderID,
   fromFolderName,
   modalSlug,
@@ -143,6 +152,10 @@ export const MoveDocToFolderButton = ({
       <MoveItemsToFolderDrawer
         action="moveItemToFolder"
         drawerSlug={drawerSlug}
+        //todo this should inherit
+        folderAssignedCollections={[collectionSlug]}
+        folderCollectionSlug={folderCollectionSlug}
+        folderFieldName={folderFieldName}
         fromFolderID={fromFolderID}
         fromFolderName={fromFolderName}
         itemsToMove={[

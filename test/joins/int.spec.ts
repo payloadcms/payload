@@ -115,6 +115,7 @@ describe('Joins Field', () => {
           camelCaseCategory: category.id,
         },
         array: [{ category: category.id }],
+        arrayHasMany: [{ category: [category.id] }],
         localizedArray: [{ category: category.id }],
         blocks: [{ blockType: 'block', category: category.id }],
       })
@@ -122,9 +123,7 @@ describe('Joins Field', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should populate joins using findByID', async () => {
@@ -249,6 +248,16 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.arrayPosts.docs).toHaveLength(10)
   })
 
+  it('should populate joins with array hasMany relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.arrayHasManyPosts.docs).toBeDefined()
+    expect(categoryWithPosts.arrayHasManyPosts.docs).toHaveLength(10)
+  })
+
   it('should populate joins with localized array relationships', async () => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
@@ -287,6 +296,64 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.polymorphics.docs[0]).toHaveProperty('id')
     expect(categoryWithPosts.localizedPolymorphic.docs[0]).toHaveProperty('id')
     expect(categoryWithPosts.localizedPolymorphics.docs[0]).toHaveProperty('id')
+  })
+
+  it('should not throw a path validation error when querying joins with polymorphic relationships', async () => {
+    const folderDoc = await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'sharedFolder',
+      },
+    })
+
+    await payload.create({
+      collection: 'folderPoly1',
+      data: {
+        folderPoly1Title: 'Poly 1 title',
+        folder: folderDoc.id,
+      },
+      depth: 0,
+    })
+
+    await payload.create({
+      collection: 'folderPoly2',
+      data: {
+        folderPoly2Title: 'Poly 2 Title',
+        folder: folderDoc.id,
+      },
+      depth: 0,
+    })
+
+    const result = await payload.find({
+      collection: 'payload-folders',
+      joins: {
+        documentsAndFolders: {
+          limit: 100_000,
+          sort: 'name',
+          where: {
+            and: [
+              {
+                relationTo: {
+                  in: ['folderPoly1', 'folderPoly2'],
+                },
+              },
+              {
+                folderPoly2Title: {
+                  equals: 'Poly 2 Title',
+                },
+              },
+            ],
+          },
+        },
+      },
+      where: {
+        id: {
+          equals: folderDoc.id,
+        },
+      },
+    })
+
+    expect(result.docs[0]?.documentsAndFolders.docs).toHaveLength(1)
   })
 
   it('should filter joins using where query', async () => {
@@ -1561,6 +1628,31 @@ describe('Joins Field', () => {
 
     expect(found.docs).toHaveLength(1)
     expect(found.docs[0].id).toBe(category.id)
+  })
+
+  it('should support where querying by a join field as ID', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    const post = await payload.create({
+      collection: 'posts',
+      data: { category: category.id, title: 'my-title' },
+    })
+    const found_1 = await payload.find({
+      collection: 'categories',
+      where: { 'relatedPosts.id': { equals: post.id } },
+      overrideAccess: true,
+    })
+
+    expect(found_1.docs).toHaveLength(1)
+    expect(found_1.docs[0].id).toBe(category.id)
+
+    const found_2 = await payload.find({
+      collection: 'categories',
+      where: { relatedPosts: { equals: post.id } },
+      overrideAccess: true,
+    })
+
+    expect(found_2.docs).toHaveLength(1)
+    expect(found_2.docs[0].id).toBe(category.id)
   })
 
   it('should support where querying by a join field with hasMany relationship', async () => {

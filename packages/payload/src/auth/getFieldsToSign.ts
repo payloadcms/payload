@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Field, TabAsField } from '../fields/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
@@ -115,9 +114,10 @@ const traverseFields = ({
 export const getFieldsToSign = (args: {
   collectionConfig: CollectionConfig
   email: string
+  sid?: string
   user: PayloadRequest['user']
 }): Record<string, unknown> => {
-  const { collectionConfig, email, user } = args
+  const { collectionConfig, email, sid, user } = args
 
   const result: Record<string, unknown> = {
     id: user?.id,
@@ -125,8 +125,12 @@ export const getFieldsToSign = (args: {
     email,
   }
 
+  if (sid) {
+    result.sid = sid
+  }
+
   traverseFields({
-    data: user,
+    data: user!,
     fields: collectionConfig.fields,
     result,
   })

@@ -45,154 +45,6 @@ let page: Page
 let context: BrowserContext
 let serverURL: string
 
-/**
- * Client-side navigation to the lexical editor from list view
- */
-async function navigateToLexicalFields(
-  navigateToListView: boolean = true,
-  localized: boolean = false,
-): Promise<{
-  richTextField: Locator
-}> {
-  if (navigateToListView) {
-    const url: AdminUrlUtil = new AdminUrlUtil(
-      serverURL,
-      localized ? 'lexical-localized-fields' : 'lexical-fields',
-    )
-    await page.goto(url.list)
-  }
-
-  const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
-  await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-  const linkDocHref = await linkToDoc.getAttribute('href')
-
-  await linkToDoc.click()
-
-  await page.waitForURL(`**${linkDocHref}`)
-
-  const richTextField = page.locator('.rich-text-lexical').nth(2) // second
-  await richTextField.scrollIntoViewIfNeeded()
-  await expect(richTextField).toBeVisible()
-  // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
-  await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
-
-  return {
-    richTextField,
-  }
-}
-
-async function createInlineBlock({
-  name,
-  richTextField,
-}: {
-  name: string
-  richTextField: Locator
-}): Promise<{
-  inlineBlockDrawer: Locator
-  saveDrawer: () => Promise<{
-    inlineBlock: Locator
-    openEditDrawer: () => Promise<{ editDrawer: Locator; saveEditDrawer: () => Promise<void> }>
-  }>
-}> {
-  const lastParagraph = richTextField.locator('p').last()
-  await lastParagraph.scrollIntoViewIfNeeded()
-  await expect(lastParagraph).toBeVisible()
-
-  const spanInEditor = richTextField.locator('span').getByText('Upload Node:').first()
-  await expect(spanInEditor).toBeVisible()
-  await spanInEditor.click()
-
-  /**
-   * Create new sub-block
-   */
-  await page.keyboard.press(' ')
-  await page.keyboard.press('/')
-  await page.keyboard.type(name.includes(' ') ? (name.split(' ')?.[0] ?? name) : name)
-
-  // Create Rich Text Block
-  const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
-  await expect(slashMenuPopover).toBeVisible()
-
-  const richTextBlockSelectButton = slashMenuPopover.locator('button').getByText(name).first()
-  await expect(richTextBlockSelectButton).toBeVisible()
-  await expect(richTextBlockSelectButton).toHaveText(name)
-  await richTextBlockSelectButton.click()
-  await expect(slashMenuPopover).toBeHidden()
-
-  // Wait for inline block drawer to pop up. Drawer id starts with drawer_1_lexical-inlineBlocks-create-
-  const inlineBlockDrawer = page
-    .locator('dialog[id^=drawer_1_lexical-inlineBlocks-create-]')
-    .first()
-  await expect(inlineBlockDrawer).toBeVisible()
-  await expect(page.locator('.shimmer-effect')).toHaveCount(0)
-  await wait(500)
-
-  return {
-    inlineBlockDrawer,
-    saveDrawer: async () => {
-      await wait(500)
-      await inlineBlockDrawer.locator('button').getByText('Save changes').click()
-      await expect(inlineBlockDrawer).toBeHidden()
-
-      const inlineBlock = richTextField.locator('.inline-block').nth(0)
-      const editButton = inlineBlock.locator('.inline-block__editButton').first()
-
-      return {
-        inlineBlock,
-        openEditDrawer: async () => {
-          await editButton.click()
-          const editDrawer = page
-            .locator('dialog[id^=drawer_1_lexical-inlineBlocks-create-]')
-            .first()
-          await expect(editDrawer).toBeVisible()
-          await expect(page.locator('.shimmer-effect')).toHaveCount(0)
-          await wait(500)
-
-          return {
-            editDrawer,
-            saveEditDrawer: async () => {
-              await wait(500)
-              const saveButton = editDrawer.locator('button').getByText('Save changes').first()
-              await saveButton.click()
-              await expect(editDrawer).toBeHidden()
-            },
-          }
-        },
-      }
-    },
-  }
-}
-
-async function assertLexicalDoc({
-  depth = 0,
-  fn,
-}: {
-  depth?: number
-  fn: (args: {
-    lexicalDoc: LexicalField
-    lexicalWithBlocks: SerializedEditorState
-  }) => Promise<void> | void
-}) {
-  await expect(async () => {
-    const lexicalDoc: LexicalField = (
-      await payload.find({
-        collection: lexicalFieldsSlug,
-        depth,
-        overrideAccess: true,
-        where: {
-          title: {
-            equals: lexicalDocData.title,
-          },
-        },
-      })
-    ).docs[0] as never
-
-    await fn({ lexicalDoc, lexicalWithBlocks: lexicalDoc.lexicalWithBlocks })
-  }).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-}
-
 describe('lexicalBlocks', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -214,11 +66,8 @@ describe('lexicalBlocks', () => {
     })*/
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: [
-        path.resolve(dirname, './collections/Upload/uploads'),
-        path.resolve(dirname, './collections/Upload2/uploads2'),
-      ],
+      snapshotKey: 'lexicalTest',
+      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
 
     if (client) {
@@ -231,34 +80,18 @@ describe('lexicalBlocks', () => {
   test('ensure block with custom Block RSC can be created, updates data when saving edit fields drawer, and maintains cursor position', async () => {
     const { richTextField } = await navigateToLexicalFields()
 
-    const lastParagraph = richTextField.locator('p').last()
-    await lastParagraph.scrollIntoViewIfNeeded()
-    await expect(lastParagraph).toBeVisible()
+    const { newBlock: newRSCBlock } = await createBlock({
+      richTextField,
+      name: 'Block R S C',
+      async afterLastParagraphClick() {
+        await page.keyboard.press('1')
+        await page.keyboard.press('2')
+        await page.keyboard.press('3')
 
-    await lastParagraph.click()
-    await page.keyboard.press('1')
-    await page.keyboard.press('2')
-    await page.keyboard.press('3')
+        await page.keyboard.press('Enter')
+      },
+    })
 
-    await page.keyboard.press('Enter')
-    await page.keyboard.press('/')
-    await page.keyboard.type('RSC')
-
-    // CreateBlock
-    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
-    await expect(slashMenuPopover).toBeVisible()
-
-    // Click 1. Button and ensure it's the RSC block creation button (it should be! Otherwise, sorting wouldn't work)
-    const rscBlockSelectButton = slashMenuPopover.locator('button').first()
-    await expect(rscBlockSelectButton).toBeVisible()
-    await expect(rscBlockSelectButton).toContainText('Block R S C')
-    await rscBlockSelectButton.click()
-    await expect(slashMenuPopover).toBeHidden()
-
-    const newRSCBlock = richTextField
-      .locator('.lexical-block:not(.lexical-block .lexical-block)')
-      .nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
-    await newRSCBlock.scrollIntoViewIfNeeded()
     await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data:')
 
     // Select paragraph with text "123"
@@ -314,6 +147,17 @@ describe('lexicalBlocks', () => {
     })
   })
 
+  test('ensure disableBlockName property is respected', async () => {
+    const { richTextField } = await navigateToLexicalFields()
+
+    const { newBlock } = await createBlock({
+      richTextField,
+      name: 'No Block Name',
+    })
+
+    await expect(newBlock.locator('#blockName')).toHaveCount(0)
+  })
+
   describe('block filterOptions', () => {
     async function setupFilterOptionsTests() {
       const { richTextField } = await navigateToLexicalFields()
@@ -326,30 +170,10 @@ describe('lexicalBlocks', () => {
         depth: 0,
       })
 
-      const lastParagraph = richTextField.locator('p').last()
-      await lastParagraph.scrollIntoViewIfNeeded()
-      await expect(lastParagraph).toBeVisible()
-
-      await lastParagraph.click()
-
-      await page.keyboard.press('Enter')
-      await page.keyboard.press('/')
-      await page.keyboard.type('filter')
-
-      // CreateBlock
-      const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
-      await expect(slashMenuPopover).toBeVisible()
-
-      const blockSelectButton = slashMenuPopover.locator('button').first()
-      await expect(blockSelectButton).toBeVisible()
-      await expect(blockSelectButton).toContainText('Filter Options Block')
-      await blockSelectButton.click()
-      await expect(slashMenuPopover).toBeHidden()
-
-      const newBlock = richTextField
-        .locator('.lexical-block:not(.lexical-block .lexical-block)')
-        .nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
-      await newBlock.scrollIntoViewIfNeeded()
+      const { newBlock } = await createBlock({
+        richTextField,
+        name: 'Filter Options Block',
+      })
 
       await saveDocAndAssert(page)
 
@@ -517,30 +341,10 @@ describe('lexicalBlocks', () => {
         depth: 0,
       })
 
-      const lastParagraph = richTextField.locator('p').last()
-      await lastParagraph.scrollIntoViewIfNeeded()
-      await expect(lastParagraph).toBeVisible()
-
-      await lastParagraph.click()
-
-      await page.keyboard.press('Enter')
-      await page.keyboard.press('/')
-      await page.keyboard.type('validation')
-
-      // CreateBlock
-      const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
-      await expect(slashMenuPopover).toBeVisible()
-
-      const blockSelectButton = slashMenuPopover.locator('button').first()
-      await expect(blockSelectButton).toBeVisible()
-      await expect(blockSelectButton).toContainText('Validation Block')
-      await blockSelectButton.click()
-      await expect(slashMenuPopover).toBeHidden()
-
-      const newBlock = richTextField
-        .locator('.lexical-block:not(.lexical-block .lexical-block)')
-        .nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
-      await newBlock.scrollIntoViewIfNeeded()
+      const { newBlock } = await createBlock({
+        richTextField,
+        name: 'Validation Block',
+      })
 
       await saveDocAndAssert(page)
 
@@ -613,7 +417,7 @@ describe('lexicalBlocks', () => {
         async () => {
           await blockGroupTextField.fill('')
         },
-        { allowedNumberOfRequests: 2 },
+        { allowedNumberOfRequests: 3, minimumNumberOfRequests: 2 },
       )
 
       await saveDocAndAssert(page)
@@ -637,7 +441,7 @@ describe('lexicalBlocks', () => {
         async () => {
           await blockTextField.fill('')
         },
-        { allowedNumberOfRequests: 2 },
+        { allowedNumberOfRequests: 3, minimumNumberOfRequests: 2 },
       )
 
       await saveDocAndAssert(page)
@@ -647,30 +451,11 @@ describe('lexicalBlocks', () => {
   test('ensure async hooks are awaited properly', async () => {
     const { richTextField } = await navigateToLexicalFields()
 
-    const lastParagraph = richTextField.locator('p').last()
-    await lastParagraph.scrollIntoViewIfNeeded()
-    await expect(lastParagraph).toBeVisible()
+    const { newBlock } = await createBlock({
+      richTextField,
+      name: 'Async Hooks Block',
+    })
 
-    await lastParagraph.click()
-
-    await page.keyboard.press('Enter')
-    await page.keyboard.press('/')
-    await page.keyboard.type('Async')
-
-    // CreateBlock
-    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
-    await expect(slashMenuPopover).toBeVisible()
-
-    const asyncHooksBlockSelectButton = slashMenuPopover.locator('button').first()
-    await expect(asyncHooksBlockSelectButton).toBeVisible()
-    await expect(asyncHooksBlockSelectButton).toContainText('Async Hooks Block')
-    await asyncHooksBlockSelectButton.click()
-    await expect(slashMenuPopover).toBeHidden()
-
-    const newBlock = richTextField
-      .locator('.lexical-block:not(.lexical-block .lexical-block)')
-      .nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
-    await newBlock.scrollIntoViewIfNeeded()
     await newBlock.locator('#field-test1').fill('text1')
     await newBlock.locator('#field-test2').fill('text2')
 
@@ -994,34 +779,10 @@ describe('lexicalBlocks', () => {
     test('ensure creation of a lexical, lexical-field-block, which contains another lexical, lexical-and-upload-field-block, works and that the sub-upload field is properly populated', async () => {
       const { richTextField } = await navigateToLexicalFields()
 
-      const lastParagraph = richTextField.locator('p').last()
-      await lastParagraph.scrollIntoViewIfNeeded()
-      await expect(lastParagraph).toBeVisible()
-
-      /**
-       * Create new sub-block
-       */
-      // type / to open the slash menu
-      await lastParagraph.click()
-      await page.keyboard.press('/')
-      await page.keyboard.type('Rich')
-
-      // Create Rich Text Block
-      const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
-      await expect(slashMenuPopover).toBeVisible()
-
-      // Click 1. Button and ensure it's the Rich Text block creation button (it should be! Otherwise, sorting wouldn't work)
-      const richTextBlockSelectButton = slashMenuPopover.locator('button').first()
-      await expect(richTextBlockSelectButton).toBeVisible()
-      await expect(richTextBlockSelectButton).toContainText('Rich Text')
-      await richTextBlockSelectButton.click()
-      await expect(slashMenuPopover).toBeHidden()
-
-      const newRichTextBlock = richTextField
-        .locator('.lexical-block:not(.lexical-block .lexical-block)')
-        .nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
-      await newRichTextBlock.scrollIntoViewIfNeeded()
-      await expect(newRichTextBlock).toBeVisible()
+      const { newBlock: newRichTextBlock, slashMenuPopover } = await createBlock({
+        richTextField,
+        name: 'Rich Text',
+      })
 
       // Ensure that sub-editor is empty
       const newRichTextEditorParagraph = newRichTextBlock.locator('p').first()
@@ -1718,3 +1479,192 @@ describe('lexicalBlocks', () => {
     })
   })
 })
+
+/**
+ * Client-side navigation to the lexical editor from list view
+ */
+async function navigateToLexicalFields(
+  navigateToListView: boolean = true,
+  localized: boolean = false,
+): Promise<{
+  richTextField: Locator
+}> {
+  if (navigateToListView) {
+    const url: AdminUrlUtil = new AdminUrlUtil(
+      serverURL,
+      localized ? 'lexical-localized-fields' : 'lexical-fields',
+    )
+    await page.goto(url.list)
+  }
+
+  const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
+  await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+  const linkDocHref = await linkToDoc.getAttribute('href')
+
+  await linkToDoc.click()
+
+  await page.waitForURL(`**${linkDocHref}`)
+
+  const richTextField = page.locator('.rich-text-lexical').nth(2) // second
+  await richTextField.scrollIntoViewIfNeeded()
+  await expect(richTextField).toBeVisible()
+  // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+  await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+
+  return {
+    richTextField,
+  }
+}
+
+async function createInlineBlock({
+  name,
+  richTextField,
+}: {
+  name: string
+  richTextField: Locator
+}): Promise<{
+  inlineBlockDrawer: Locator
+  saveDrawer: () => Promise<{
+    inlineBlock: Locator
+    openEditDrawer: () => Promise<{ editDrawer: Locator; saveEditDrawer: () => Promise<void> }>
+  }>
+}> {
+  const lastParagraph = richTextField.locator('p').last()
+  await lastParagraph.scrollIntoViewIfNeeded()
+  await expect(lastParagraph).toBeVisible()
+
+  const spanInEditor = richTextField.locator('span').getByText('Upload Node:').first()
+  await expect(spanInEditor).toBeVisible()
+  await spanInEditor.click()
+
+  /**
+   * Create new sub-block
+   */
+  await page.keyboard.press(' ')
+  await page.keyboard.press('/')
+  await page.keyboard.type(name.includes(' ') ? (name.split(' ')?.[0] ?? name) : name)
+
+  // Create Rich Text Block
+  const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+  await expect(slashMenuPopover).toBeVisible()
+
+  const richTextBlockSelectButton = slashMenuPopover.locator('button').getByText(name).first()
+  await expect(richTextBlockSelectButton).toBeVisible()
+  await expect(richTextBlockSelectButton).toHaveText(name)
+  await richTextBlockSelectButton.click()
+  await expect(slashMenuPopover).toBeHidden()
+
+  // Wait for inline block drawer to pop up. Drawer id starts with drawer_1_lexical-inlineBlocks-create-
+  const inlineBlockDrawer = page
+    .locator('dialog[id^=drawer_1_lexical-inlineBlocks-create-]')
+    .first()
+  await expect(inlineBlockDrawer).toBeVisible()
+  await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+  await wait(500)
+
+  return {
+    inlineBlockDrawer,
+    saveDrawer: async () => {
+      await wait(500)
+      await inlineBlockDrawer.locator('button').getByText('Save changes').click()
+      await expect(inlineBlockDrawer).toBeHidden()
+
+      const inlineBlock = richTextField.locator('.inline-block').nth(0)
+      const editButton = inlineBlock.locator('.inline-block__editButton').first()
+
+      return {
+        inlineBlock,
+        openEditDrawer: async () => {
+          await editButton.click()
+          const editDrawer = page
+            .locator('dialog[id^=drawer_1_lexical-inlineBlocks-create-]')
+            .first()
+          await expect(editDrawer).toBeVisible()
+          await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+          await wait(500)
+
+          return {
+            editDrawer,
+            saveEditDrawer: async () => {
+              await wait(500)
+              const saveButton = editDrawer.locator('button').getByText('Save changes').first()
+              await saveButton.click()
+              await expect(editDrawer).toBeHidden()
+            },
+          }
+        },
+      }
+    },
+  }
+}
+
+async function createBlock({
+  richTextField,
+  name,
+  afterLastParagraphClick,
+}: {
+  afterLastParagraphClick?: (args: { lastParagraph: Locator }) => Promise<void> | void
+  name: string
+  richTextField: Locator
+}): Promise<{
+  newBlock: Locator
+  slashMenuPopover: Locator
+}> {
+  const lastParagraph = richTextField.locator('p').last()
+  await lastParagraph.scrollIntoViewIfNeeded()
+  await expect(lastParagraph).toBeVisible()
+
+  await lastParagraph.click()
+
+  if (afterLastParagraphClick) {
+    await afterLastParagraphClick({ lastParagraph })
+  }
+
+  await page.keyboard.press('/')
+  await page.keyboard.type(name.toLocaleLowerCase().replace(/ /g, ''))
+
+  // CreateBlock
+  const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+  await expect(slashMenuPopover).toBeVisible()
+
+  // Click 1. Button and ensure it's the block creation button (it should be! Otherwise, sorting wouldn't work)
+  const blockSelectButton = slashMenuPopover.locator('button').first()
+  await expect(blockSelectButton).toBeVisible()
+  await expect(blockSelectButton).toContainText(name)
+  await blockSelectButton.click()
+  await expect(slashMenuPopover).toBeHidden()
+
+  const newBlock = richTextField.locator('.lexical-block:not(.lexical-block .lexical-block)').nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
+  await newBlock.scrollIntoViewIfNeeded()
+  return { newBlock, slashMenuPopover }
+}
+
+async function assertLexicalDoc({
+  depth = 0,
+  fn,
+}: {
+  depth?: number
+  fn: (args: {
+    lexicalDoc: LexicalField
+    lexicalWithBlocks: SerializedEditorState
+  }) => Promise<void> | void
+}) {
+  await expect(async () => {
+    const lexicalDoc: LexicalField = (
+      await payload.find({
+        collection: lexicalFieldsSlug,
+        depth,
+        overrideAccess: true,
+        where: {
+          title: {
+            equals: lexicalDocData.title,
+          },
+        },
+      })
+    ).docs[0] as never
+
+    await fn({ lexicalDoc, lexicalWithBlocks: lexicalDoc.lexicalWithBlocks })
+  }).toPass({
+    timeout: POLL_TOPASS_TIMEOUT,
+  })
+}

@@ -1,6 +1,6 @@
 import { I18nClient } from '@payloadcms/translations'
 import { ClientField } from '../fields/config/client.js'
-import flattenFields from './flattenTopLevelFields.js'
+import { flattenTopLevelFields } from './flattenTopLevelFields.js'
 
 describe('flattenFields', () => {
   const i18n: I18nClient = {
@@ -21,7 +21,7 @@ describe('flattenFields', () => {
   describe('basic flattening', () => {
     it('should return flat list for top-level fields', () => {
       const fields = [baseField]
-      const result = flattenFields(fields)
+      const result = flattenTopLevelFields(fields)
       expect(result).toHaveLength(1)
       expect(result[0].name).toBe('title')
     })
@@ -44,15 +44,15 @@ describe('flattenFields', () => {
         },
       ]
 
-      const result = flattenFields(fields, {
+      const result = flattenTopLevelFields(fields, {
         moveSubFieldsToTop: true,
         i18n,
       })
 
-      expect(result).toHaveLength(1)
-      expect(result[0].name).toBe('slug')
-      expect(result[0].accessor).toBe('meta-slug')
-      expect(result[0].labelWithPrefix).toBe('Meta Info > Slug')
+      expect(result).toHaveLength(2)
+      expect(result[1].name).toBe('slug')
+      expect(result[1].accessor).toBe('meta.slug')
+      expect(result[1].labelWithPrefix).toBe('Meta Info > Slug')
     })
 
     it('should NOT flatten fields inside group without moveSubFieldsToTop', () => {
@@ -71,7 +71,7 @@ describe('flattenFields', () => {
         },
       ]
 
-      const result = flattenFields(fields)
+      const result = flattenTopLevelFields(fields)
 
       // Should return the group as a top-level item, not the inner field
       expect(result).toHaveLength(1)
@@ -104,17 +104,17 @@ describe('flattenFields', () => {
         },
       ]
 
-      const hoisted = flattenFields(fields, {
+      const hoisted = flattenTopLevelFields(fields, {
         moveSubFieldsToTop: true,
         i18n,
       })
 
-      expect(hoisted).toHaveLength(1)
-      expect(hoisted[0].name).toBe('deep')
-      expect(hoisted[0].accessor).toBe('outer-inner-deep')
-      expect(hoisted[0].labelWithPrefix).toBe('Outer > Inner > Deep Field')
+      expect(hoisted).toHaveLength(3)
+      expect(hoisted[2].name).toBe('deep')
+      expect(hoisted[2].accessor).toBe('outer.inner.deep')
+      expect(hoisted[2].labelWithPrefix).toBe('Outer > Inner > Deep Field')
 
-      const nonHoisted = flattenFields(fields)
+      const nonHoisted = flattenTopLevelFields(fields)
 
       expect(nonHoisted).toHaveLength(1)
       expect(nonHoisted[0].name).toBe('outer')
@@ -137,21 +137,22 @@ describe('flattenFields', () => {
         },
       ]
 
-      const withExtract = flattenFields(fields, {
+      const withExtract = flattenTopLevelFields(fields, {
         moveSubFieldsToTop: true,
         i18n,
       })
 
-      // Should keep the group as a single top-level field
-      expect(withExtract).toHaveLength(1)
-      expect(withExtract[0].type).toBe('text')
-      expect(withExtract[0].accessor).toBeUndefined()
-      expect(withExtract[0].labelWithPrefix).toBeUndefined()
+      // Should include top level group and its nested field as a top-level field
+      expect(withExtract).toHaveLength(2)
+      expect(withExtract[1].type).toBe('text')
+      expect(withExtract[1].accessor).toBeUndefined()
+      expect(withExtract[1].labelWithPrefix).toBeUndefined()
 
-      const withoutExtract = flattenFields(fields)
+      const withoutExtract = flattenTopLevelFields(fields)
 
+      // Should return the group as a top-level item, not the inner field
       expect(withoutExtract).toHaveLength(1)
-      expect(withoutExtract[0].type).toBe('group')
+      expect(withoutExtract[0].type).toBe('text')
       expect(withoutExtract[0].accessor).toBeUndefined()
       expect(withoutExtract[0].labelWithPrefix).toBeUndefined()
     })
@@ -190,17 +191,17 @@ describe('flattenFields', () => {
         },
       ]
 
-      const hoistedResult = flattenFields(fields, {
+      const hoistedResult = flattenTopLevelFields(fields, {
         moveSubFieldsToTop: true,
         i18n,
       })
 
-      expect(hoistedResult).toHaveLength(1)
-      expect(hoistedResult[0].name).toBe('nestedField')
-      expect(hoistedResult[0].accessor).toBe('namedGroup-nestedField')
-      expect(hoistedResult[0].labelWithPrefix).toBe('Named Group > Nested Field')
+      expect(hoistedResult).toHaveLength(5)
+      expect(hoistedResult[4].name).toBe('nestedField')
+      expect(hoistedResult[4].accessor).toBe('namedGroup.nestedField')
+      expect(hoistedResult[4].labelWithPrefix).toBe('Named Group > Nested Field')
 
-      const nonHoistedResult = flattenFields(fields)
+      const nonHoistedResult = flattenTopLevelFields(fields)
 
       expect(nonHoistedResult).toHaveLength(1)
       expect(nonHoistedResult[0].type).toBe('group')
@@ -243,7 +244,7 @@ describe('flattenFields', () => {
         },
       ]
 
-      const result = flattenFields(fields, { moveSubFieldsToTop: true })
+      const result = flattenTopLevelFields(fields, { moveSubFieldsToTop: true })
       expect(result).toHaveLength(2)
       expect(result[0].name).toBe('items')
       expect(result[1].name).toBe('layout')
@@ -281,7 +282,7 @@ describe('flattenFields', () => {
         },
       ]
 
-      const result = flattenFields(fields)
+      const result = flattenTopLevelFields(fields)
       expect(result).toHaveLength(2)
       expect(result[0].name).toBe('things')
       expect(result[1].name).toBe('contentBlocks')
@@ -310,7 +311,7 @@ describe('flattenFields', () => {
         },
       ]
 
-      const result = flattenFields(fields, { moveSubFieldsToTop: true })
+      const result = flattenTopLevelFields(fields, { moveSubFieldsToTop: true })
       expect(result).toHaveLength(1)
       expect(result[0].name).toBe('arrayField')
     })
@@ -342,7 +343,7 @@ describe('flattenFields', () => {
         },
       ]
 
-      const result = flattenFields(fields, { moveSubFieldsToTop: true })
+      const result = flattenTopLevelFields(fields, { moveSubFieldsToTop: true })
       expect(result).toHaveLength(1)
       expect(result[0].name).toBe('blockField')
     })
@@ -364,8 +365,8 @@ describe('flattenFields', () => {
         },
       ]
 
-      const defaultResult = flattenFields(fields)
-      const hoistedResult = flattenFields(fields, { moveSubFieldsToTop: true })
+      const defaultResult = flattenTopLevelFields(fields)
+      const hoistedResult = flattenTopLevelFields(fields, { moveSubFieldsToTop: true })
 
       for (const result of [defaultResult, hoistedResult]) {
         expect(result).toHaveLength(1)
@@ -394,8 +395,8 @@ describe('flattenFields', () => {
         },
       ]
 
-      const defaultResult = flattenFields(fields)
-      const hoistedResult = flattenFields(fields, { moveSubFieldsToTop: true })
+      const defaultResult = flattenTopLevelFields(fields)
+      const hoistedResult = flattenTopLevelFields(fields, { moveSubFieldsToTop: true })
 
       for (const result of [defaultResult, hoistedResult]) {
         expect(result).toHaveLength(2)
@@ -427,14 +428,14 @@ describe('flattenFields', () => {
         },
       ]
 
-      const result = flattenFields(fields, {
+      const result = flattenTopLevelFields(fields, {
         moveSubFieldsToTop: true,
         i18n,
       })
 
-      expect(result).toHaveLength(1)
-      expect(result[0].accessor).toBe('groupInRow-nestedInRowGroup')
-      expect(result[0].labelWithPrefix).toBe('Group In Row > Nested In Row Group')
+      expect(result).toHaveLength(2)
+      expect(result[1].accessor).toBe('groupInRow.nestedInRowGroup')
+      expect(result[1].labelWithPrefix).toBe('Group In Row > Nested In Row Group')
     })
 
     it('should hoist named group fields inside collapsibles', () => {
@@ -459,20 +460,119 @@ describe('flattenFields', () => {
         },
       ]
 
-      const result = flattenFields(fields, {
+      const result = flattenTopLevelFields(fields, {
         moveSubFieldsToTop: true,
         i18n,
       })
 
-      expect(result).toHaveLength(1)
-      expect(result[0].accessor).toBe('groupInCollapsible-nestedInCollapsibleGroup')
-      expect(result[0].labelWithPrefix).toBe('Group In Collapsible > Nested In Collapsible Group')
+      expect(result).toHaveLength(2)
+      expect(result[1].accessor).toBe('groupInCollapsible.nestedInCollapsibleGroup')
+      expect(result[1].labelWithPrefix).toBe('Group In Collapsible > Nested In Collapsible Group')
     })
   })
 
   describe('tab integration', () => {
-    it('should hoist named group fields inside tabs when moveSubFieldsToTop is true', () => {
-      const fields: ClientField[] = [
+    const namedTabFields: ClientField[] = [
+      {
+        type: 'tabs',
+        tabs: [
+          {
+            label: 'Tab One',
+            name: 'tabOne',
+            fields: [
+              {
+                type: 'array',
+                name: 'array',
+                fields: [
+                  {
+                    type: 'text',
+                    name: 'text',
+                  },
+                ],
+              },
+              {
+                type: 'row',
+                fields: [
+                  {
+                    name: 'arrayInRow',
+                    type: 'array',
+                    fields: [
+                      {
+                        name: 'textInArrayInRow',
+                        type: 'text',
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                type: 'text',
+                name: 'textInTab',
+                label: 'Text In Tab',
+              },
+              {
+                type: 'group',
+                name: 'groupInTab',
+                label: 'Group In Tab',
+                fields: [
+                  {
+                    type: 'text',
+                    name: 'nestedTextInTabGroup',
+                    label: 'Nested Text In Tab Group',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ]
+
+    const unnamedTabFields: ClientField[] = [
+      {
+        type: 'tabs',
+        tabs: [
+          {
+            label: 'Tab One',
+            fields: [
+              {
+                type: 'array',
+                name: 'array',
+                fields: [
+                  {
+                    type: 'text',
+                    name: 'text',
+                  },
+                ],
+              },
+              {
+                type: 'row',
+                fields: [
+                  {
+                    name: 'arrayInRow',
+                    type: 'array',
+                    fields: [
+                      {
+                        name: 'textInArrayInRow',
+                        type: 'text',
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                type: 'text',
+                name: 'textInTab',
+                label: 'Text In Tab',
+              },
+            ],
+          },
+        ],
+      },
+    ]
+
+    it('should hoist named group fields inside unamed tabs when moveSubFieldsToTop is true', () => {
+      const unnamedTabWithNamedGroup: ClientField[] = [
         {
           type: 'tabs',
           tabs: [
@@ -497,14 +597,107 @@ describe('flattenFields', () => {
         },
       ]
 
-      const result = flattenFields(fields, {
+      const result = flattenTopLevelFields(unnamedTabWithNamedGroup, {
         moveSubFieldsToTop: true,
         i18n,
       })
 
+      expect(result).toHaveLength(2)
+      expect(result[1].accessor).toBe('groupInTab.nestedInTabGroup')
+      expect(result[1].labelWithPrefix).toBe('Group In Tab > Nested In Tab Group')
+    })
+
+    it('should hoist fields inside unnamed groups inside unnamed tabs when moveSubFieldsToTop is true', () => {
+      const unnamedTabWithUnnamedGroup: ClientField[] = [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Tab One',
+              fields: [
+                {
+                  type: 'group',
+                  label: 'Unnamed Group In Tab',
+                  fields: [
+                    {
+                      type: 'text',
+                      name: 'nestedInUnnamedGroup',
+                      label: 'Nested In Unnamed Group',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ]
+
+      const defaultResult = flattenTopLevelFields(unnamedTabWithUnnamedGroup)
+
+      expect(defaultResult).toHaveLength(1)
+      expect(defaultResult[0].type).toBe('text')
+      expect(defaultResult[0].label).toBe('Nested In Unnamed Group')
+      expect('accessor' in defaultResult[0]).toBe(false)
+      expect('labelWithPrefix' in defaultResult[0]).toBe(false)
+
+      const hoistedResult = flattenTopLevelFields(unnamedTabWithUnnamedGroup, {
+        moveSubFieldsToTop: true,
+        i18n,
+      })
+
+      expect(hoistedResult).toHaveLength(2)
+      const hoistedField = hoistedResult[1]
+      expect(hoistedField.name).toBe('nestedInUnnamedGroup')
+      expect(hoistedField.accessor).toBeUndefined()
+      expect(hoistedField.labelWithPrefix).toBeUndefined()
+    })
+
+    it('should properly hoist fields inside named tabs when moveSubFieldsToTop is true', () => {
+      const result = flattenTopLevelFields(namedTabFields, {
+        moveSubFieldsToTop: true,
+        i18n,
+      })
+
+      expect(result).toHaveLength(5)
+      expect(result[0].accessor).toBe('tabOne.array')
+      expect(result[0].labelWithPrefix).toBe('Tab One > array')
+      expect(result[1].accessor).toBe('tabOne.arrayInRow')
+      expect(result[1].labelWithPrefix).toBe('Tab One > arrayInRow')
+      expect(result[2].accessor).toBe('tabOne.textInTab')
+      expect(result[2].labelWithPrefix).toBe('Tab One > Text In Tab')
+      expect(result[4].accessor).toBe('tabOne.groupInTab.nestedTextInTabGroup')
+      expect(result[4].labelWithPrefix).toBe('Tab One > Group In Tab > Nested Text In Tab Group')
+    })
+
+    it('should NOT hoist fields inside named tabs when moveSubFieldsToTop is false', () => {
+      const result = flattenTopLevelFields(namedTabFields)
+
+      // We expect one top-level field: the tabs container itself is *not* hoisted
       expect(result).toHaveLength(1)
-      expect(result[0].accessor).toBe('groupInTab-nestedInTabGroup')
-      expect(result[0].labelWithPrefix).toBe('Group In Tab > Nested In Tab Group')
+
+      const tabField = result[0]
+      expect(tabField.type).toBe('tab')
+
+      // Confirm nested fields are NOT hoisted: no accessors or labelWithPrefix at the top level
+      expect('accessor' in tabField).toBe(false)
+      expect('labelWithPrefix' in tabField).toBe(false)
+    })
+
+    it('should hoist fields inside unnamed tabs regardless of moveSubFieldsToTop', () => {
+      const resultDefault = flattenTopLevelFields(unnamedTabFields)
+      const resultHoisted = flattenTopLevelFields(unnamedTabFields, {
+        moveSubFieldsToTop: true,
+        i18n,
+      })
+
+      expect(resultDefault).toHaveLength(3)
+      expect(resultHoisted).toHaveLength(3)
+      expect(resultDefault).toEqual(resultHoisted)
+
+      for (const field of resultDefault) {
+        expect(field.accessor).toBeUndefined()
+        expect(field.labelWithPrefix).toBeUndefined()
+      }
     })
   })
 })

@@ -53,6 +53,11 @@ export type {
 export type { DefaultCellComponentProps, DefaultServerCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
+export type {
+  EditMenuItemsClientProps,
+  EditMenuItemsServerProps,
+  EditMenuItemsServerPropsOnly,
+} from './elements/EditMenuItems.js'
 export type { NavGroupPreferences, NavPreferences } from './elements/Nav.js'
 export type {
   PreviewButtonClientProps,
@@ -555,17 +560,20 @@ export type FieldRow = {
 export type DocumentSlots = {
   BeforeDocumentControls?: React.ReactNode
   Description?: React.ReactNode
+  EditMenuItems?: React.ReactNode
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
   Upload?: React.ReactNode
+  UploadControls?: React.ReactNode
 }
 
 export type {
   BuildCollectionFolderViewResult,
   BuildTableStateArgs,
   DefaultServerFunctionArgs,
+  GetFolderResultsComponentAndDataArgs,
   ListQuery,
   ServerFunction,
   ServerFunctionArgs,
@@ -617,6 +625,7 @@ export type {
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewProps,
+  RenderDocumentVersionsProperties,
 } from './views/document.js'
 
 export type {

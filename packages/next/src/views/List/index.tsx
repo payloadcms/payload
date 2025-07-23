@@ -1,14 +1,12 @@
 import type {
   AdminViewServerProps,
+  CollectionPreferences,
   ColumnPreference,
-  DefaultDocumentIDType,
-  ListPreferences,
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
   QueryPreset,
   SanitizedCollectionPermission,
-  Where,
 } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
@@ -20,6 +18,7 @@ import {
   isNumber,
   mergeListSearchAndWhere,
   transformColumnsToPreferences,
+  transformColumnsToSearchParams,
 } from 'payload/shared'
 import React, { Fragment } from 'react'
 
@@ -87,27 +86,32 @@ export const renderListView = async (
     throw new Error('not-found')
   }
 
-  const query = queryFromArgs || queryFromReq
+  const query: ListQuery = queryFromArgs || queryFromReq
 
-  const columns: ColumnPreference[] = transformColumnsToPreferences(
-    query?.columns as ColumnPreference[] | string,
-  )
+  const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
-  /**
-   * @todo: find a pattern to avoid setting preferences on hard navigation, i.e. direct links, page refresh, etc.
-   * This will ensure that prefs are only updated when explicitly set by the user
-   * This could potentially be done by injecting a `sessionID` into the params and comparing it against a session cookie
-   */
-  const listPreferences = await upsertPreferences<ListPreferences>({
-    key: `${collectionSlug}-list`,
+  const collectionPreferences = await upsertPreferences<CollectionPreferences>({
+    key: `collection-${collectionSlug}`,
     req,
     value: {
-      columns,
+      columns: columnsFromQuery,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-      preset: (query?.preset as DefaultDocumentIDType) || null,
+      preset: query?.preset,
       sort: query?.sort as string,
     },
   })
+
+  query.preset = collectionPreferences?.preset
+
+  query.page = isNumber(query?.page) ? Number(query.page) : 0
+
+  query.limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+
+  query.sort =
+    collectionPreferences?.sort ||
+    (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+
+  query.columns = transformColumnsToSearchParams(collectionPreferences?.columns || [])
 
   const {
     routes: { admin: adminRoute },
@@ -118,42 +122,34 @@ export const renderListView = async (
       throw new Error('not-found')
     }
 
-    const page = isNumber(query?.page) ? Number(query.page) : 0
-
-    const limit = listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
-
-    const sort =
-      listPreferences?.sort ||
-      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
-
-    let where = mergeListSearchAndWhere({
-      collectionConfig,
-      search: typeof query?.search === 'string' ? query.search : undefined,
-      where: (query?.where as Where) || undefined,
-    })
-
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
       const baseListFilter = await collectionConfig.admin.baseListFilter({
-        limit,
-        page,
+        limit: query.limit,
+        page: query.page,
         req,
-        sort,
+        sort: query.sort,
       })
 
       if (baseListFilter) {
-        where = {
-          and: [where, baseListFilter].filter(Boolean),
+        query.where = {
+          and: [query.where, baseListFilter].filter(Boolean),
         }
       }
     }
 
+    const whereWithMergedSearch = mergeListSearchAndWhere({
+      collectionConfig,
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      where: query?.where,
+    })
+
     let queryPreset: QueryPreset | undefined
     let queryPresetPermissions: SanitizedCollectionPermission | undefined
 
-    if (listPreferences?.preset) {
+    if (collectionPreferences?.preset) {
       try {
         queryPreset = (await payload.findByID({
-          id: listPreferences?.preset,
+          id: collectionPreferences?.preset,
           collection: 'payload-query-presets',
           depth: 0,
           overrideAccess: false,
@@ -179,14 +175,14 @@ export const renderListView = async (
       draft: true,
       fallbackLocale: false,
       includeLockStatus: true,
-      limit,
+      limit: query.limit,
       locale,
       overrideAccess: false,
-      page,
+      page: query.page,
       req,
-      sort,
+      sort: query.sort,
       user,
-      where: where || {},
+      where: whereWithMergedSearch,
     })
 
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
@@ -194,8 +190,7 @@ export const renderListView = async (
     const { columnState, Table } = renderTable({
       clientCollectionConfig,
       collectionConfig,
-      columnPreferences: listPreferences?.columns,
-      columns,
+      columns: collectionPreferences?.columns,
       customCellProps,
       docs: data.docs,
       drawerSlug,
@@ -225,12 +220,15 @@ export const renderListView = async (
 
     const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
 
+    // Check if there's a notFound query parameter (document ID that wasn't found)
+    const notFoundDocId = typeof searchParams?.notFound === 'string' ? searchParams.notFound : null
+
     const serverProps: ListViewServerPropsOnly = {
       collectionConfig,
       data,
       i18n,
-      limit,
-      listPreferences,
+      limit: query.limit,
+      listPreferences: collectionPreferences,
       listSearchableFields: collectionConfig.admin.listSearchableFields,
       locale: fullLocale,
       params,
@@ -248,11 +246,15 @@ export const renderListView = async (
       },
       collectionConfig,
       description: staticDescription,
+      notFoundDocId,
       payload,
       serverProps,
     })
 
     const isInDrawer = Boolean(drawerSlug)
+
+    // Needed to prevent: Only plain objects can be passed to Client Components from Server Components. Objects with toJSON methods are not supported. Convert it manually to a simple value before passing it to props.
+    query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
 
     return {
       List: (
@@ -260,13 +262,10 @@ export const renderListView = async (
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
             collectionSlug={collectionSlug}
-            columns={transformColumnsToPreferences(columnState)}
             data={data}
-            defaultLimit={limit}
-            defaultSort={sort}
-            listPreferences={listPreferences}
             modifySearchParams={!isInDrawer}
             orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
+            query={query}
           >
             {RenderServerComponent({
               clientProps: {
@@ -274,11 +273,11 @@ export const renderListView = async (
                 collectionSlug,
                 columnState,
                 disableBulkDelete,
-                disableBulkEdit,
+                disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
                 disableQueryPresets,
                 enableRowSelections,
                 hasCreatePermission,
-                listPreferences,
+                listPreferences: collectionPreferences,
                 newDocumentURL,
                 queryPreset,
                 queryPresetPermissions,

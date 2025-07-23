@@ -6,6 +6,7 @@ import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
   AnySQLiteColumn,
+  SQLiteColumn,
   SQLiteInsertOnConflictDoUpdateConfig,
   SQLiteTableWithColumns,
   SQLiteTransactionConfig,
@@ -26,6 +27,35 @@ type SQLiteSchemaHookArgs = {
 export type SQLiteSchemaHook = (args: SQLiteSchemaHookArgs) => Promise<SQLiteSchema> | SQLiteSchema
 
 export type Args = {
+  /**
+   * Transform the schema after it's built.
+   * You can use it to customize the schema with features that aren't supported by Payload.
+   * Examples may include: composite indices, generated columns, vectors
+   */
+  afterSchemaInit?: SQLiteSchemaHook[]
+  /**
+   * Enable this flag if you want to thread your own ID to create operation data, for example:
+   * ```ts
+   * // doc created with id 1
+   * const doc = await payload.create({ collection: 'posts', data: {id: 1, title: "my title"}})
+   * ```
+   */
+  allowIDOnCreate?: boolean
+  /**
+   * Enable [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for Primary Keys.
+   * This ensures that the same ID cannot be reused from previously deleted rows.
+   */
+  autoIncrement?: boolean
+  /**
+   * Transform the schema before it's built.
+   * You can use it to preserve an existing database schema and if there are any collissions Payload will override them.
+   * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
+   */
+  beforeSchemaInit?: SQLiteSchemaHook[]
+  /**
+   * Store blocks as JSON column instead of storing them in relational structure.
+   */
+  blocksAsJSON?: boolean
   client: Config
 } & BaseSQLiteArgs
 
@@ -43,6 +73,7 @@ export type GenericTable = SQLiteTableWithColumns<{
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
 export type CountDistinct = (args: {
+  column?: SQLiteColumn<any>
   db: LibSQLDatabase
   joins: BuildQueryJoinAliases
   tableName: string

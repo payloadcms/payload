@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { MarkOptional } from 'ts-essentials'
 
 import type {
@@ -36,8 +35,9 @@ function checkAndSanitizeFieldsPermssions(data: FieldsPermissions): boolean {
  * If nested fields or blocks are present, the function will recursively check those as well.
  */
 function checkAndSanitizePermissions(
-  data: CollectionPermission | FieldPermissions | GlobalPermission,
+  _data: CollectionPermission | FieldPermissions | GlobalPermission,
 ): boolean {
+  const data = _data as Record<string, any>
   /**
    * Check blocks permissions
    */
@@ -151,7 +151,9 @@ function checkAndSanitizePermissions(
  * Check if an object is a permission object.
  */
 function isPermissionObject(data: unknown): boolean {
-  return typeof data === 'object' && 'permission' in data && typeof data['permission'] === 'boolean'
+  return (
+    typeof data === 'object' && 'permission' in data! && typeof data['permission'] === 'boolean'
+  )
 }
 
 /**

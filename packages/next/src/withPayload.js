@@ -1,7 +1,7 @@
 /**
  * @param {import('next').NextConfig} nextConfig
- * @param {Object} [sortOnOptions] - Optional configuration options
- * @param {boolean} [sortOnOptions.devBundleServerPackages] - Whether to bundle server packages in development mode. @default true
+ * @param {Object} [options] - Optional configuration options
+ * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default true
  *
  * @returns {import('next').NextConfig}
  * */

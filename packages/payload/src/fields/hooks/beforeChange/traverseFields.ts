@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
@@ -90,7 +89,7 @@ export const traverseFields = async ({
   siblingDocWithLocales,
   skipValidation,
 }: Args): Promise<void> => {
-  const promises = []
+  const promises: Promise<void>[] = []
 
   fields.forEach((field, fieldIndex) => {
     promises.push(
@@ -111,7 +110,7 @@ export const traverseFields = async ({
         operation,
         overrideAccess,
         parentIndexPath,
-        parentIsLocalized,
+        parentIsLocalized: parentIsLocalized!,
         parentPath,
         parentSchemaPath,
         req,
@@ -119,7 +118,7 @@ export const traverseFields = async ({
         siblingDoc,
         siblingDocWithLocales,
         siblingFields: fields,
-        skipValidation,
+        skipValidation: skipValidation!,
       }),
     )
   })

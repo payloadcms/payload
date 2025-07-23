@@ -248,8 +248,6 @@ export const rootEslintConfig = [
       payload: payloadPlugin,
     },
     rules: {
-      ...baseRules,
-      ...typescriptRules,
       'no-restricted-exports': 'off',
     },
     files: ['*.config.ts', 'config.ts'],

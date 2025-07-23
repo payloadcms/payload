@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.39.1",
+  "version": "3.48.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -16,8 +16,16 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": [
+    "*.scss",
+    "*.css"
+  ],
   "type": "module",
   "exports": {
+    "./css": {
+      "import": "./src/dummy.css",
+      "default": "./src/dummy.css"
+    },
     ".": {
       "import": "./src/index.js",
       "types": "./src/index.js",
@@ -66,6 +74,7 @@
   "scripts": {
     "build": "pnpm build:reactcompiler",
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
+    "build:bundle-for-analysis": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && node ./bundle.js esbuild",
     "build:cjs": "swc ./src/withPayload.js -o ./dist/cjs/withPayload.cjs --config-file .swcrc-cjs --strip-leading-paths",
     "build:esbuild": "node bundleScss.js",
     "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:types && pnpm build:esbuild  && pnpm build:cjs",
@@ -99,27 +108,26 @@
     "http-status": "2.1.0",
     "path-to-regexp": "6.3.0",
     "qs-esm": "7.0.2",
-    "react-diff-viewer-continued": "4.0.5",
     "sass": "1.77.4",
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.26.4",
-    "@babel/core": "7.26.7",
-    "@babel/preset-env": "7.26.7",
-    "@babel/preset-react": "7.26.3",
-    "@babel/preset-typescript": "7.26.0",
-    "@next/eslint-plugin-next": "15.3.0",
+    "@babel/cli": "7.27.2",
+    "@babel/core": "7.27.3",
+    "@babel/preset-env": "7.27.2",
+    "@babel/preset-react": "7.27.1",
+    "@babel/preset-typescript": "7.27.1",
+    "@next/eslint-plugin-next": "15.3.2",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.2",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
-    "esbuild": "0.24.2",
+    "babel-plugin-react-compiler": "19.1.0-rc.2",
+    "esbuild": "0.25.5",
     "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "3.1.0"
+    "swc-plugin-transform-remove-imports": "4.0.4"
   },
   "peerDependencies": {
     "graphql": "^16.8.1",

@@ -102,9 +102,7 @@ describe('Collections - Live Preview', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('handles `postMessage`', async () => {
@@ -1465,7 +1463,7 @@ describe('Collections - Live Preview', () => {
     // Verify that the request was made to the properly encoded URL
     // Without encodeURI wrapper the request URL - would receive string: "undefined/api/posts?depth=1&where[id][in]=66ba7ab6a60a945d10c8b976,66ba7ab6a60a945d10c8b979
     expect(capturedEndpoint).toContain(
-      encodeURI(`posts?depth=1&where[id][in]=${testPost.id},${testPostTwo.id}`),
+      encodeURI(`posts?depth=1&limit=2&where[id][in]=${testPost.id},${testPostTwo.id}`),
     )
   })
 })

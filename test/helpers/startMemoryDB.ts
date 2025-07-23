@@ -4,9 +4,21 @@ import dotenv from 'dotenv'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 dotenv.config()
 
+declare global {
+  // Add the custom property to the NodeJS global type
+  // eslint-disable-next-line no-var
+  var _mongoMemoryServer: MongoMemoryReplSet | undefined
+}
+
+/**
+ * WARNING: This file MUST export a default function.
+ * @link https://jestjs.io/docs/configuration#globalsetup-string
+ */
 // eslint-disable-next-line no-restricted-exports
 export default async () => {
-  // @ts-expect-error
+  if (process.env.DATABASE_URI) {
+    return
+  }
   process.env.NODE_ENV = 'test'
   process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.NODE_OPTIONS = '--no-deprecation'
@@ -16,8 +28,10 @@ export default async () => {
     process.env.PAYLOAD_DROP_DATABASE = 'false'
     console.log('Starting memory D1 db...')
     global.d1 = new D1DatabaseAPI(await createSQLiteDB(':memory'))
-  } else if (
-    (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongodb') &&
+  }
+  if (
+    (!process.env.PAYLOAD_DATABASE ||
+      ['firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE)) &&
     !global._mongoMemoryServer
   ) {
     console.log('Starting memory db...')
@@ -28,8 +42,11 @@ export default async () => {
       },
     })
 
+    await db.waitUntilRunning()
+
     global._mongoMemoryServer = db
 
     process.env.MONGODB_MEMORY_SERVER_URI = `${global._mongoMemoryServer.getUri()}&retryWrites=true`
+    console.log('Started memory db')
   }
 }

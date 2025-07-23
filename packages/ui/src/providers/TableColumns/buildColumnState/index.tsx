@@ -2,12 +2,12 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientComponentProps,
   ClientField,
+  CollectionPreferences,
   CollectionSlug,
   Column,
   DefaultCellComponentProps,
   Document,
   Field,
-  ListPreferences,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
@@ -38,8 +38,7 @@ import { sortFieldMap } from './sortFieldMap.js'
 export type BuildColumnStateArgs = {
   beforeRows?: Column[]
   clientFields: ClientField[]
-  columnPreferences: ListPreferences['columns']
-  columns?: ListPreferences['columns']
+  columns?: CollectionPreferences['columns']
   customCellProps: DefaultCellComponentProps['customCellProps']
   enableLinkedCell?: boolean
   enableRowSelections: boolean
@@ -70,7 +69,6 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     beforeRows,
     clientFields,
     collectionSlug,
-    columnPreferences,
     columns,
     customCellProps,
     dataType,
@@ -99,7 +97,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
-  // then sort the rest of the fields based on the `defaultColumns` or `columnPreferences`
+  // then sort the rest of the fields based on the `defaultColumns` or `columns`
   const idFieldIndex = sortedFieldMap?.findIndex((field) => fieldIsID(field))
 
   if (idFieldIndex > -1) {
@@ -116,10 +114,10 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     sortedFieldMap.unshift(useAsTitleField)
   }
 
-  const sortTo = columnPreferences || columns
+  const sortTo = columns
 
   if (sortTo) {
-    // sort the fields to the order of `defaultColumns` or `columnPreferences`
+    // sort the fields to the order of `defaultColumns` or `columns`
     sortedFieldMap = sortFieldMap<ClientField>(sortedFieldMap, sortTo)
     _sortedFieldMap = sortFieldMap<Field>(_sortedFieldMap, sortTo) // TODO: think of a way to avoid this additional sort
   }
@@ -139,14 +137,25 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
       return fAccessor === accessor
     })
 
-    const columnPreference = columnPreferences?.find(
+    const hasCustomCell =
+      serverField?.admin &&
+      'components' in serverField.admin &&
+      serverField.admin.components &&
+      'Cell' in serverField.admin.components &&
+      serverField.admin.components.Cell
+
+    if (serverField && serverField.type === 'group' && !hasCustomCell) {
+      return acc // skip any group without a custom cell
+    }
+
+    const columnPref = columns?.find(
       (preference) => clientField && 'name' in clientField && preference.accessor === accessor,
     )
 
     const isActive = isColumnActive({
       accessor,
       activeColumnsIndices,
-      columnPreference,
+      column: columnPref,
       columns,
     })
 
