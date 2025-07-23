@@ -23,6 +23,7 @@ type PublishManyDrawerContentProps = {
   onSuccess?: () => void
   selectAll: boolean
 } & PublishManyProps
+
 export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
   const {
     collection,
@@ -34,12 +35,14 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
   } = props
 
   const { clearRouteCache } = useRouteCache()
+
   const {
     config: {
       routes: { api },
       serverURL,
     },
   } = useConfig()
+
   const { code: locale } = useLocale()
 
   const router = useRouter()

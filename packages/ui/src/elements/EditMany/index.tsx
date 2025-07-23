@@ -2,7 +2,7 @@
 import type { ClientCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
 
@@ -22,12 +22,19 @@ export type EditManyProps = {
 }
 
 export const EditMany: React.FC<EditManyProps> = (props) => {
-  const { count, selectAll, selected, toggleAll } = useSelection()
+  const { count, getSelectedIds, selectAll, selected, toggleAll } = useSelection()
+  const [ids, setIds] = useState(() => Array.from(selected.keys()))
+
+  const onModalOpen = useCallback(() => {
+    setIds(getSelectedIds())
+  }, [setIds, getSelectedIds])
+
   return (
     <EditMany_v4
       {...props}
       count={count}
-      ids={Array.from(selected.keys())}
+      ids={ids}
+      onModalOpen={onModalOpen}
       onSuccess={() => toggleAll()}
       selectAll={selectAll === SelectAllStatus.AllAvailable}
     />
@@ -42,12 +49,13 @@ export const EditMany_v4: React.FC<
      * When multiple EditMany components are rendered on the page, this will differentiate them.
      */
     modalPrefix?: string
+    onModalOpen?: () => void
     onSuccess?: () => void
     selectAll: boolean
-  } & EditManyProps
-> = ({ collection, count, ids, modalPrefix, onSuccess, selectAll }) => {
+  } & Omit<EditManyProps, 'ids'>
+> = ({ collection, count, ids, modalPrefix, onModalOpen, onSuccess, selectAll }) => {
   const { permissions } = useAuth()
-  const { openModal } = useModal()
+  const { isModalOpen, openModal } = useModal()
 
   const { t } = useTranslation()
 
@@ -56,6 +64,16 @@ export const EditMany_v4: React.FC<
   const collectionPermissions = permissions?.collections?.[collection.slug]
 
   const drawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}edit-${collection.slug}`
+
+  const isOpen = isModalOpen(drawerSlug)
+
+  useEffect(() => {
+    if (isOpen) {
+      if (typeof onModalOpen === 'function') {
+        onModalOpen()
+      }
+    }
+  }, [isOpen, onModalOpen])
 
   if (count === 0 || !collectionPermissions?.update) {
     return null

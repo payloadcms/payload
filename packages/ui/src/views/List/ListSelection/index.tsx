@@ -31,9 +31,12 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   const { count, getSelectedIds, selectAll, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
 
-  const [selectedIDs] = useState(() => getSelectedIds())
-
   const onActionSuccess = useCallback(() => toggleAll(), [toggleAll])
+  const [ids, setIds] = useState(() => getSelectedIds())
+
+  const onModalOpen = useCallback(() => {
+    setIds(getSelectedIds())
+  }, [setIds, getSelectedIds])
 
   if (count === 0) {
     return null
@@ -62,24 +65,27 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             <EditMany_v4
               collection={collectionConfig}
               count={count}
-              ids={selectedIDs}
+              ids={ids}
               modalPrefix={modalPrefix}
+              onModalOpen={onModalOpen}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
             />
             <PublishMany_v4
               collection={collectionConfig}
               count={count}
-              ids={selectedIDs}
+              ids={ids}
               modalPrefix={modalPrefix}
+              onModalOpen={onModalOpen}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
             />
             <UnpublishMany_v4
               collection={collectionConfig}
               count={count}
-              ids={selectedIDs}
+              ids={ids}
               modalPrefix={modalPrefix}
+              onModalOpen={onModalOpen}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
             />

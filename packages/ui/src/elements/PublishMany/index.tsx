@@ -2,7 +2,7 @@
 import type { ClientCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import React from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
@@ -15,13 +15,20 @@ export type PublishManyProps = {
 }
 
 export const PublishMany: React.FC<PublishManyProps> = (props) => {
-  const { count, selectAll, selected, toggleAll } = useSelection()
+  const { count, getSelectedIds, selectAll, toggleAll } = useSelection()
+
+  const [ids, setIds] = useState(() => getSelectedIds())
+
+  const onModalOpen = useCallback(() => {
+    setIds(getSelectedIds())
+  }, [setIds, getSelectedIds])
 
   return (
     <PublishMany_v4
       {...props}
       count={count}
-      ids={Array.from(selected.keys())}
+      ids={ids}
+      onModalOpen={onModalOpen}
       onSuccess={() => toggleAll()}
       selectAll={selectAll === SelectAllStatus.AllAvailable}
     />
@@ -35,9 +42,11 @@ type PublishMany_v4Props = {
    * When multiple PublishMany components are rendered on the page, this will differentiate them.
    */
   modalPrefix?: string
+  onModalOpen?: () => void
   onSuccess?: () => void
   selectAll: boolean
 } & PublishManyProps
+
 export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
   const {
     collection,
@@ -45,6 +54,7 @@ export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
     count,
     ids,
     modalPrefix,
+    onModalOpen,
     onSuccess,
     selectAll,
   } = props
@@ -52,12 +62,22 @@ export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
   const { permissions } = useAuth()
   const { t } = useTranslation()
 
-  const { openModal } = useModal()
+  const { isModalOpen, openModal } = useModal()
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasPermission = collectionPermissions?.update
 
   const drawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}publish-${slug}`
+
+  const isOpen = isModalOpen(drawerSlug)
+
+  useEffect(() => {
+    if (isOpen) {
+      if (typeof onModalOpen === 'function') {
+        onModalOpen()
+      }
+    }
+  }, [isOpen, onModalOpen])
 
   if (!versions?.drafts || count === 0 || !hasPermission) {
     return null
