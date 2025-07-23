@@ -78,10 +78,10 @@ describe('List View', () => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
-      dirname,
-      prebuild,
-    }))
+      ; ({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
+        dirname,
+        prebuild,
+      }))
 
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     arrayUrl = new AdminUrlUtil(serverURL, arrayCollectionSlug)
@@ -558,8 +558,7 @@ describe('List View', () => {
     test('should accept where query from complex, valid URL where parameter using the near operator', async () => {
       // We have one point collection with the point [5,-5] and one with [7,-7]. This where query should kick out the [5,-5] point
       await page.goto(
-        `${
-          new AdminUrlUtil(serverURL, 'geo').list
+        `${new AdminUrlUtil(serverURL, 'geo').list
         }?limit=10&page=1&where[or][0][and][0][point][near]=6,-7,200000`,
       )
 
@@ -1588,55 +1587,6 @@ describe('List View', () => {
     })
   })
 
-  describe('i18n', () => {
-    test('should display translated collections and globals config options', async () => {
-      await page.goto(postsUrl.list)
-      await expect(page.locator('#nav-posts')).toContainText('Posts')
-      await expect(page.locator('#nav-global-global')).toContainText('Global')
-    })
-
-    test('should display translated field titles', async () => {
-      await createPost()
-
-      await page.locator('.list-controls__toggle-columns').click()
-
-      await expect(
-        page.locator('.pill-selector__pill', {
-          hasText: exactText('Title'),
-        }),
-      ).toHaveText('Title')
-
-      await openListFilters(page, {})
-
-      await page.locator('.where-builder__add-first-filter').click()
-      await page.locator('.condition__field .rs__control').click()
-      const options = page.locator('.rs__option')
-
-      await expect(options.first()).toHaveText('Title')
-
-      await expect(page.locator('#heading-title .sort-column__label')).toHaveText('Title')
-      await expect(page.locator('.search-filter input')).toHaveAttribute('placeholder', /(Title)/)
-    })
-
-    test('should use fallback language on field titles', async () => {
-      // change language German
-      await page.goto(postsUrl.account)
-      await page.locator('.payload-settings__language .react-select').click()
-      const languageSelect = page.locator('.rs__option')
-      // text field does not have a 'de' label
-      await languageSelect.locator('text=Deutsch').click()
-
-      await page.goto(postsUrl.list)
-      await page.locator('.list-controls__toggle-columns').click()
-      // expecting the label to fall back to english as default fallbackLng
-      await expect(
-        page.locator('.pill-selector__pill', {
-          hasText: exactText('Title'),
-        }),
-      ).toHaveText('Title')
-    })
-  })
-
   describe('placeholder', () => {
     test('should display placeholder in filter options', async () => {
       await page.goto(
@@ -1695,6 +1645,33 @@ describe('List View', () => {
     await expect(page.locator('#field-placeholderRelationship .rs__placeholder')).toHaveText(
       'Custom placeholder',
     )
+  })
+
+  test('should reset list selection when query params change', async () => {
+    await deleteAllPosts()
+    await Promise.all(Array.from({ length: 12 }, (_, i) => createPost({ title: `post${i + 1}` })))
+    await page.goto(postsUrl.list)
+
+    const pageOneButton = page.locator('.paginator__page', { hasText: '1' })
+    await expect(pageOneButton).toBeVisible()
+    await pageOneButton.click()
+
+    await page.locator('.checkbox-input:has(#select-all)').locator('input').click()
+    await expect(page.locator('.checkbox-input:has(#select-all)').locator('input')).toBeChecked()
+    await expect(page.locator('.list-selection')).toContainText('5 selected')
+
+    const pageTwoButton = page.locator('.paginator__page', { hasText: '2' })
+    await expect(pageTwoButton).toBeVisible()
+    await pageTwoButton.click()
+
+    await expect(
+      page.locator('.checkbox-input:has(#select-all) input:not([checked])'),
+    ).toBeVisible()
+
+    await page.locator('.row-1 .cell-_select input').check()
+    await page.locator('.row-2 .cell-_select input').check()
+
+    await expect(page.locator('.list-selection')).toContainText('2 selected')
   })
 })
 

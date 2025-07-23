@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, SanitizedPermissions, User } from 'payload'
+import type { ClientUser, SanitizedPermissions, TypedUser } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
@@ -23,7 +23,7 @@ export type UserWithToken<T = ClientUser> = {
 }
 
 export type AuthContext<T = ClientUser> = {
-  fetchFullUser: () => Promise<null | User>
+  fetchFullUser: () => Promise<null | TypedUser>
   logOut: () => Promise<boolean>
   permissions?: SanitizedPermissions
   refreshCookie: (forceRefresh?: boolean) => void

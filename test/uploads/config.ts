@@ -1,5 +1,3 @@
-/* eslint-disable no-restricted-exports */
-
 import type { CollectionSlug, File } from 'payload'
 
 import path from 'path'
@@ -13,7 +11,10 @@ import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/ind
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWithSearchQueries/index.js'
 import { AdminUploadControl } from './collections/AdminUploadControl/index.js'
+import { BulkUploadsCollection } from './collections/BulkUploads/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
+import { FileMimeType } from './collections/FileMimeType/index.js'
+import { SimpleRelationshipCollection } from './collections/SimpleRelationship/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
 import {
@@ -25,14 +26,20 @@ import {
   enlargeSlug,
   focalNoSizesSlug,
   hideFileInputOnCreateSlug,
+  imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
   mediaWithoutRelationPreviewSlug,
   mediaWithRelationPreviewSlug,
+  noRestrictFileMimeTypesSlug,
+  noRestrictFileTypesSlug,
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
+  restrictFileTypesSlug,
+  skipAllowListSafeFetchMediaSlug,
+  skipSafeFetchMediaSlug,
   threeDimensionalSlug,
   unstoredMediaSlug,
   versionSlug,
@@ -297,6 +304,26 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: imageSizesOnlySlug,
+      fields: [],
+      upload: {
+        crop: false,
+        focalPoint: false,
+        imageSizes: [
+          {
+            name: 'sizeOne',
+            height: 300,
+            width: 400,
+          },
+          {
+            name: 'sizeTwo',
+            height: 400,
+            width: 300,
+          },
+        ],
+      },
+    },
+    {
       slug: focalNoSizesSlug,
       fields: [],
       upload: {
@@ -427,6 +454,43 @@ export default buildConfigWithDefaults({
           ],
         },
         staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
+      slug: skipSafeFetchMediaSlug,
+      fields: [],
+      upload: {
+        skipSafeFetch: true,
+        staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
+      slug: skipAllowListSafeFetchMediaSlug,
+      fields: [],
+      upload: {
+        skipSafeFetch: [{ protocol: 'http', hostname: '127.0.0.1', port: '', search: '' }],
+        staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
+      slug: restrictFileTypesSlug,
+      fields: [],
+      upload: {
+        allowRestrictedFileTypes: false,
+      },
+    },
+    {
+      slug: noRestrictFileTypesSlug,
+      fields: [],
+      upload: {
+        allowRestrictedFileTypes: true,
+      },
+    },
+    {
+      slug: noRestrictFileMimeTypesSlug,
+      fields: [],
+      upload: {
+        mimeTypes: ['text/html'],
       },
     },
     {
@@ -843,6 +907,9 @@ export default buildConfigWithDefaults({
         staticDir: path.resolve(dirname, './media'),
       },
     },
+    BulkUploadsCollection,
+    SimpleRelationshipCollection,
+    FileMimeType,
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')

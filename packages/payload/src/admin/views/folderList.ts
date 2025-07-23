@@ -30,6 +30,7 @@ export type FolderListViewClientProps = {
   disableBulkEdit?: boolean
   documents: FolderOrDocument[]
   enableRowSelections?: boolean
+  folderAssignedCollections?: SanitizedCollectionConfig['slug'][]
   folderFieldName: string
   folderID: null | number | string
   FolderResultsComponent: React.ReactNode

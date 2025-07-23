@@ -1,15 +1,22 @@
 import type {
   AdminViewServerProps,
+  CollectionPreferences,
   Data,
   DocumentViewClientProps,
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewComponent,
+  LivePreviewConfig,
   PayloadComponent,
   RenderDocumentVersionsProperties,
 } from 'payload'
 
-import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import {
+  DocumentInfoProvider,
+  EditDepthProvider,
+  HydrateAuthProvider,
+  LivePreviewProvider,
+} from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
@@ -21,6 +28,7 @@ import React from 'react'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
+import { getPreferences } from '../../utilities/getPreferences.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocPreferences } from './getDocPreferences.js'
 import { getDocumentData } from './getDocumentData.js'
@@ -112,13 +120,25 @@ export const renderDocument = async ({
     }))
 
   if (isEditing && !doc) {
-    throw new Error('not-found')
+    // If it's a collection document that doesn't exist, redirect to collection list
+    if (collectionSlug) {
+      const redirectURL = formatAdminURL({
+        adminRoute,
+        path: `/collections/${collectionSlug}?notFound=${encodeURIComponent(idFromArgs)}`,
+        serverURL,
+      })
+      redirect(redirectURL)
+    } else {
+      // For globals or other cases, keep the 404 behavior
+      throw new Error('not-found')
+    }
   }
 
   const [
     docPreferences,
     { docPermissions, hasPublishPermission, hasSavePermission },
     { currentEditor, isLocked, lastUpdateTime },
+    entityPreferences,
   ] = await Promise.all([
     // Get document preferences
     getDocPreferences({
@@ -146,7 +166,17 @@ export const renderDocument = async ({
       isEditing,
       req,
     }),
+
+    // get entity preferences
+    getPreferences<CollectionPreferences>(
+      collectionSlug ? `collection-${collectionSlug}` : `global-${globalSlug}`,
+      payload,
+      req.user.id,
+      req.user.collection,
+    ),
   ])
+
+  const operation = (collectionSlug && idFromArgs) || globalSlug ? 'update' : 'create'
 
   const [
     { hasPublishedDoc, mostRecentVersionIsAutosaved, unpublishedVersionCount, versionCount },
@@ -171,7 +201,7 @@ export const renderDocument = async ({
       fallbackLocale: false,
       globalSlug,
       locale: locale?.code,
-      operation: (collectionSlug && idFromArgs) || globalSlug ? 'update' : 'create',
+      operation,
       renderAllFields: true,
       req,
       schemaPath: collectionSlug || globalSlug,
@@ -310,6 +340,37 @@ export const renderDocument = async ({
     viewType,
   }
 
+  const isLivePreviewEnabled = Boolean(
+    config.admin?.livePreview?.collections?.includes(collectionSlug) ||
+      config.admin?.livePreview?.globals?.includes(globalSlug) ||
+      collectionConfig?.admin?.livePreview ||
+      globalConfig?.admin?.livePreview,
+  )
+
+  const livePreviewConfig: LivePreviewConfig = {
+    ...(isLivePreviewEnabled ? config.admin.livePreview : {}),
+    ...(collectionConfig?.admin?.livePreview || {}),
+    ...(globalConfig?.admin?.livePreview || {}),
+  }
+
+  const livePreviewURL =
+    operation !== 'create'
+      ? typeof livePreviewConfig?.url === 'function'
+        ? await livePreviewConfig.url({
+            collectionConfig,
+            data: doc,
+            globalConfig,
+            locale,
+            req,
+            /**
+             * @deprecated
+             * Use `req.payload` instead. This will be removed in the next major version.
+             */
+            payload: initPageResult.req.payload,
+          })
+        : livePreviewConfig?.url
+      : ''
+
   return {
     data: doc,
     Document: (
@@ -337,24 +398,31 @@ export const renderDocument = async ({
         unpublishedVersionCount={unpublishedVersionCount}
         versionCount={versionCount}
       >
-        {showHeader && !drawerSlug && (
-          <DocumentHeader
-            collectionConfig={collectionConfig}
-            globalConfig={globalConfig}
-            i18n={i18n}
-            payload={payload}
-            permissions={permissions}
-          />
-        )}
-        <HydrateAuthProvider permissions={permissions} />
-        <EditDepthProvider>
-          {RenderServerComponent({
-            clientProps,
-            Component: View,
-            importMap,
-            serverProps: documentViewServerProps,
-          })}
-        </EditDepthProvider>
+        <LivePreviewProvider
+          breakpoints={livePreviewConfig?.breakpoints}
+          isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
+          isLivePreviewing={entityPreferences?.value?.editViewType === 'live-preview'}
+          url={livePreviewURL}
+        >
+          {showHeader && !drawerSlug && (
+            <DocumentHeader
+              collectionConfig={collectionConfig}
+              globalConfig={globalConfig}
+              i18n={i18n}
+              payload={payload}
+              permissions={permissions}
+            />
+          )}
+          <HydrateAuthProvider permissions={permissions} />
+          <EditDepthProvider>
+            {RenderServerComponent({
+              clientProps,
+              Component: View,
+              importMap,
+              serverProps: documentViewServerProps,
+            })}
+          </EditDepthProvider>
+        </LivePreviewProvider>
       </DocumentInfoProvider>
     ),
   }

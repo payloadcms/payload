@@ -63,7 +63,7 @@ export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
             width={width as number}
           />
 
-          {(enableAdjustments || customUploadActions) && (
+          {(enableAdjustments || (hasImageSizes && doc.filename) || customUploadActions) && (
             <UploadActions
               customActions={customUploadActions}
               enableAdjustments={Boolean(enableAdjustments)}

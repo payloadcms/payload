@@ -1,10 +1,8 @@
 packages:
-  # all packages in direct subdirs of packages/
   - 'packages/*'
   - 'tools/*'
   - 'test'
-  # exclude packages that are inside test directories
-  # - '!**/test/**'
+  - 'templates/blank'
+  - 'templates/website'
 
-# Allow all build scripts
-neverBuiltDependencies: []
+updateNotifier: false

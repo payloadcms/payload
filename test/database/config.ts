@@ -38,10 +38,21 @@ export default buildConfigWithDefaults({
   collections: [
     {
       slug: 'categories',
+      versions: { drafts: true },
       fields: [
         {
           type: 'text',
           name: 'title',
+        },
+      ],
+    },
+    {
+      slug: 'categories-custom-id',
+      versions: { drafts: true },
+      fields: [
+        {
+          type: 'number',
+          name: 'id',
         },
       ],
     },
@@ -58,6 +69,11 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: 'categories',
           name: 'category',
+        },
+        {
+          type: 'relationship',
+          relationTo: 'categories-custom-id',
+          name: 'categoryCustomID',
         },
         {
           name: 'localized',
@@ -77,14 +93,14 @@ export default buildConfigWithDefaults({
           name: 'blocks',
           blocks: [
             {
-              slug: 'block',
+              slug: 'block-third',
               fields: [
                 {
                   type: 'blocks',
                   name: 'nested',
                   blocks: [
                     {
-                      slug: 'block',
+                      slug: 'block-fourth',
                       fields: [
                         {
                           type: 'blocks',
@@ -197,13 +213,27 @@ export default buildConfigWithDefaults({
           type: 'blocks',
           blocks: [
             {
-              slug: 'block',
+              slug: 'block-first',
               fields: [
                 {
                   name: 'text',
                   type: 'text',
                 },
               ],
+            },
+          ],
+        },
+        {
+          type: 'group',
+          name: 'group',
+          fields: [{ name: 'text', type: 'text' }],
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'tab',
+              fields: [{ name: 'text', type: 'text' }],
             },
           ],
         },
@@ -455,7 +485,7 @@ export default buildConfigWithDefaults({
           type: 'blocks',
           blocks: [
             {
-              slug: 'block',
+              slug: 'block-second',
               dbName: 'customBlocks',
               fields: [
                 {
@@ -514,6 +544,11 @@ export default buildConfigWithDefaults({
           name: 'postCategoryID',
           type: 'json',
           virtual: 'post.category.id',
+        },
+        {
+          name: 'postCategoryCustomID',
+          type: 'number',
+          virtual: 'post.categoryCustomID.id',
         },
         {
           name: 'postID',

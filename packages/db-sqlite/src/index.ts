@@ -18,6 +18,7 @@ import {
   deleteVersions,
   destroy,
   find,
+  findDistinct,
   findGlobal,
   findGlobalVersions,
   findMigrationDir,
@@ -38,6 +39,7 @@ import {
   updateMany,
   updateOne,
   updateVersion,
+  upsert,
 } from '@payloadcms/drizzle'
 import { like, notLike } from 'drizzle-orm'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
@@ -100,6 +102,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
         json: true,
       },
       fieldConstraints: {},
+      findDistinct,
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'sqlite-core',
@@ -189,7 +192,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       updateGlobalVersion,
       updateOne,
       updateVersion,
-      upsert: updateOne,
+      upsert,
     })
   }
 

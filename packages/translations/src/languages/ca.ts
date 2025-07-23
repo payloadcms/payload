@@ -86,11 +86,16 @@ export const caTranslations: DefaultTranslationsObject = {
     deletingFile: "Hi ha hagut un error en eliminar l'arxiu.",
     deletingTitle:
       "Hi ha hagut un error mentre s'eliminava {{title}}. Si us plau, comprova la teva connexió i torna-ho a intentar.",
+    documentNotFound:
+      "El document amb ID {{id}} no s'ha pogut trobar. Pot haver estat esborrat o mai haver existit, o potser no tens accés a aquest.",
     emailOrPasswordIncorrect:
       'El correu electrònic o la contrasenya proporcionats no són correctes.',
     followingFieldsInvalid_one: 'El següent camp no és vàlid:',
     followingFieldsInvalid_other: 'Els següents camps no són vàlids:',
     incorrectCollection: 'Col·lecció incorrecta',
+    insufficientClipboardPermissions:
+      'Accés al porta-retalls denegat. Comproveu els permisos del porta-retalls.',
+    invalidClipboardData: 'Dades del porta-retalls no vàlides.',
     invalidFileType: "Tipus d'arxiu no vàlid",
     invalidFileTypeValue: "Tipus d'arxiu no vàlid: {{value}}",
     invalidRequestArgs: 'Arguments no vàlids en la sol·licitud: {{args}}',
@@ -112,6 +117,7 @@ export const caTranslations: DefaultTranslationsObject = {
     problemUploadingFile: "Hi ha hagut un problema mentre es carregava l'arxiu.",
     tokenInvalidOrExpired: 'El token és invàlid o ha caducat.',
     tokenNotProvided: "No s'ha proporcionat cap token.",
+    unableToCopy: 'No es pot copiar.',
     unableToDeleteCount: "No s'han pogut eliminar {{count}} de {{total}} {{label}}.",
     unableToReindexCollection:
       'Error al reindexar la col·lecció {{collection}}. Operació cancel·lada.',
@@ -181,6 +187,8 @@ export const caTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Esborra la carpeta',
     folderName: 'Nom de la Carpeta',
     folders: 'Carpetes',
+    folderTypeDescription:
+      'Seleccioneu quin tipus de documents de la col·lecció haurien de ser permesos en aquesta carpeta.',
     itemHasBeenMoved: "{{title}} s'ha traslladat a {{folderName}}",
     itemHasBeenMovedToRoot: "{{title}} s'ha mogut a la carpeta arrel",
     itemsMovedToFolder: "{{title}} s'ha traslladat a {{folderName}}",
@@ -241,7 +249,9 @@ export const caTranslations: DefaultTranslationsObject = {
       'Aixo eliminarà els índexs existents i reindexarà els documents de totes les col·leccions.',
     copied: 'Copiat',
     copy: 'Copiar',
+    copyField: 'Copiar camp',
     copying: 'Copiant',
+    copyRow: 'Copiar fila',
     copyWarning:
       'Estas a punt de sobreescriure {{to}} amb {{from}} per {{label}} {{title}}. Estas segur?',
     create: 'Crear',
@@ -282,6 +292,7 @@ export const caTranslations: DefaultTranslationsObject = {
     enterAValue: 'Introdueix un valor',
     error: 'Error',
     errors: 'Errors',
+    exitLivePreview: 'Sortir de la Vista Previa en Directe',
     export: 'Exportació',
     fallbackToDefaultLocale: 'Torna al idioma per defecte',
     false: 'Fals',
@@ -335,6 +346,8 @@ export const caTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Sobreescriu les dades existents',
     pageNotFound: 'Pàgina no trobada',
     password: 'Contrasenya',
+    pasteField: 'Enganxar camp',
+    pasteRow: 'Enganxar fila',
     payloadSettings: 'configuracio Payload',
     perPage: 'Per pagian: {{limit}}',
     previous: 'Previ',

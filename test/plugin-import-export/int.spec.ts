@@ -364,8 +364,8 @@ describe('@payloadcms/plugin-import-export', () => {
       const expectedPath = path.join(dirname, './uploads', doc.filename as string)
       const data = await readCSV(expectedPath)
 
-      expect(data[0].blocks_0_blockType).toStrictEqual('hero')
-      expect(data[0].blocks_1_blockType).toStrictEqual('content')
+      expect(data[0].blocks_0_hero_blockType).toStrictEqual('hero')
+      expect(data[0].blocks_1_content_blockType).toStrictEqual('content')
     })
 
     it('should create a csv of all fields when fields is empty', async () => {
@@ -437,6 +437,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].customRelationship_id).toBeDefined()
       expect(data[0].customRelationship_email).toBeDefined()
       expect(data[0].customRelationship_createdAt).toBeUndefined()
+      expect(data[0].customRelationship).toBeUndefined()
     })
 
     it('should create a JSON file for collection', async () => {
@@ -540,14 +541,48 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].title).toStrictEqual('Jobs 0')
     })
 
+    it('should export polymorphic relationship fields to CSV', async () => {
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields: ['id', 'hasOnePolymorphic', 'hasManyPolymorphic'],
+          format: 'csv',
+          where: {
+            title: { contains: 'Polymorphic' },
+          },
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // hasOnePolymorphic
+      expect(data[0].hasOnePolymorphic_id).toBeDefined()
+      expect(data[0].hasOnePolymorphic_relationTo).toBe('posts')
+
+      // hasManyPolymorphic
+      expect(data[0].hasManyPolymorphic_0_id).toBeDefined()
+      expect(data[0].hasManyPolymorphic_0_relationTo).toBe('users')
+      expect(data[0].hasManyPolymorphic_1_id).toBeDefined()
+      expect(data[0].hasManyPolymorphic_1_relationTo).toBe('posts')
+    })
+
     // disabled so we don't always run a massive test
     it.skip('should create a file from a large set of collection documents', async () => {
       const allPromises = []
       let promises = []
       for (let i = 0; i < 100000; i++) {
         promises.push(
-          payload.create({
-            collectionSlug: 'pages',
+          await payload.create({
+            collection: 'pages',
             data: {
               title: `Array ${i}`,
               blocks: [
@@ -594,8 +629,8 @@ describe('@payloadcms/plugin-import-export', () => {
       const expectedPath = path.join(dirname, './uploads', doc.filename as string)
       const data = await readCSV(expectedPath)
 
-      expect(data[0].blocks_0_blockType).toStrictEqual('hero')
-      expect(data[0].blocks_1_blockType).toStrictEqual('content')
+      expect(data[0].blocks_0_hero_blockType).toStrictEqual('hero')
+      expect(data[0].blocks_1_content_blockType).toStrictEqual('content')
     })
   })
 })

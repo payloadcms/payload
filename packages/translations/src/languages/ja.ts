@@ -87,10 +87,15 @@ export const jaTranslations: DefaultTranslationsObject = {
     deletingFile: 'ファイルの削除中にエラーが発生しました。',
     deletingTitle:
       '{{title}} を削除する際にエラーが発生しました。接続を確認してからもう一度お試しください。',
+    documentNotFound:
+      'ID {{id}}のドキュメントが見つかりませんでした。削除されたか、存在しなかったか、またはアクセス権限がない可能性があります。',
     emailOrPasswordIncorrect: 'メールアドレス、または、パスワードが正しくありません。',
     followingFieldsInvalid_one: '次のフィールドは無効です:',
     followingFieldsInvalid_other: '次のフィールドは無効です:',
     incorrectCollection: '不正なコレクション',
+    insufficientClipboardPermissions:
+      'クリップボードへのアクセスが拒否されました。クリップボードの権限を確認してください。',
+    invalidClipboardData: '無効なクリップボードデータ。',
     invalidFileType: '無効なファイル形式',
     invalidFileTypeValue: '無効なファイル形式: {{value}}',
     invalidRequestArgs: 'リクエストに無効な引数が渡されました: {{args}}',
@@ -112,6 +117,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'ファイルのアップロード中に問題が発生しました。',
     tokenInvalidOrExpired: 'トークンが無効、または、有効期限が切れています。',
     tokenNotProvided: 'トークンが提供されていません。',
+    unableToCopy: 'コピーできません。',
     unableToDeleteCount: '{{total}} {{label}} から {{count}} を削除できません。',
     unableToReindexCollection:
       'コレクション {{collection}} の再インデックス中にエラーが発生しました。操作は中止されました。',
@@ -181,6 +187,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     deleteFolder: 'フォルダを削除する',
     folderName: 'フォルダ名',
     folders: 'フォルダー',
+    folderTypeDescription:
+      'このフォルダーに許可されるコレクションドキュメントのタイプを選択してください。',
     itemHasBeenMoved: '{{title}}は{{folderName}}に移動されました',
     itemHasBeenMovedToRoot: '{{title}}はルートフォルダに移動されました',
     itemsMovedToFolder: '{{title}}は{{folderName}}に移動されました',
@@ -241,7 +249,9 @@ export const jaTranslations: DefaultTranslationsObject = {
       'これにより既存のインデックスが削除され、すべてのコレクション内のドキュメントが再インデックスされます。',
     copied: 'コピーしました',
     copy: 'コピー',
+    copyField: 'フィールドをコピー',
     copying: 'コピーする',
+    copyRow: '行をコピー',
     copyWarning:
       'あなたは{{label}} {{title}}の{{to}}を{{from}}で上書きしようとしています。よろしいですか？',
     create: '作成',
@@ -282,6 +292,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     enterAValue: '値を入力',
     error: 'エラー',
     errors: 'エラー',
+    exitLivePreview: 'ライブプレビューを終了する',
     export: '輸出',
     fallbackToDefaultLocale: 'デフォルトロケールへのフォールバック',
     false: '偽',
@@ -335,6 +346,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     overwriteExistingData: '既存のフィールドデータを上書きする',
     pageNotFound: 'ページが見つかりません',
     password: 'パスワード',
+    pasteField: 'フィールドを貼り付け',
+    pasteRow: '行を貼り付け',
     payloadSettings: 'Payload 設定',
     perPage: '表示件数: {{limit}}',
     previous: '前の',

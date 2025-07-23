@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-export const versionsSlug = 'versions'
+import { versionsSlug } from '../shared.js'
 
 export const Versions: CollectionConfig = {
   slug: versionsSlug,
