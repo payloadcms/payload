@@ -91,7 +91,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         .update(adapter.tables[tableName])
         .set(row)
         .where(eq(adapter.tables[tableName].id, id))
-        .returning(selectedFields)
+        .returning(Object.keys(selectedFields).length ? selectedFields : undefined)
 
       return transform<T>({
         adapter,
