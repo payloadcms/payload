@@ -64,9 +64,6 @@ describePostgres('Select - with postgres logs', () => {
         // Count every console log
         const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
 
-        const originalLoggerValue = payload.db.logger
-        payload.db.logger = true
-
         const res = removeEmptyAndUndefined(
           (await payload.db.updateOne({
             collection: 'posts',
@@ -77,7 +74,6 @@ describePostgres('Select - with postgres logs', () => {
             select: { text: true, number: true },
           })) as any,
         )
-        payload.db.logger = originalLoggerValue
 
         expect(consoleCount).toHaveBeenCalledTimes(1) // Should be 1 single sql call if the optimization is used. If not, this would be 2 calls
         consoleCount.mockRestore()
