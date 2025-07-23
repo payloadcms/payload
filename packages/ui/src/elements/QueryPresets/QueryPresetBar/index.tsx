@@ -184,97 +184,7 @@ export const QueryPresetBar: React.FC<{
     setQueryModified,
   ])
 
-  // Memoize so that components aren't re-rendered on query and column changes
-  const queryPresetMenuItems = useMemo(() => {
-    const hasModifiedPreset = activePreset && modified
-    const items: React.ReactNode[] = []
-
-    if (hasModifiedPreset) {
-      items.push(
-        <ListSelectionButton
-          id="reset-preset"
-          key="reset"
-          onClick={async () => {
-            await refineListData(
-              {
-                columns: transformColumnsToSearchParams(activePreset.columns),
-                where: activePreset.where,
-              },
-              false,
-            )
-          }}
-          type="button"
-        >
-          {t('general:reset')}
-        </ListSelectionButton>,
-      )
-    }
-
-    if (hasModifiedPreset && queryPresetPermissions.update) {
-      items.push(
-        <ListSelectionButton
-          id="save-preset"
-          key="save"
-          onClick={async () => {
-            await saveCurrentChanges()
-          }}
-          type="button"
-        >
-          {activePreset?.isShared ? t('general:updateForEveryone') : t('general:save')}
-        </ListSelectionButton>,
-      )
-    }
-
-    items.push(
-      <ListSelectionButton
-        id="create-new-preset"
-        onClick={() => {
-          openCreateNewDrawer()
-        }}
-        type="button"
-      >
-        {t('general:newLabel', { label: presetConfig?.labels?.singular })}
-      </ListSelectionButton>,
-    )
-
-    if (activePreset && queryPresetPermissions?.delete) {
-      items.push(
-        <ListSelectionButton
-          id="delete-preset"
-          onClick={() => openModal(confirmDeletePresetModalSlug)}
-          type="button"
-        >
-          {t('general:delete')}
-        </ListSelectionButton>,
-      )
-
-      items.push(
-        <ListSelectionButton
-          id="edit-preset"
-          onClick={() => {
-            openDocumentDrawer()
-          }}
-          type="button"
-        >
-          {t('general:edit')}
-        </ListSelectionButton>,
-      )
-    }
-
-    return items
-  }, [
-    activePreset,
-    queryPresetPermissions?.delete,
-    queryPresetPermissions?.update,
-    openCreateNewDrawer,
-    openDocumentDrawer,
-    openModal,
-    saveCurrentChanges,
-    t,
-    refineListData,
-    modified,
-    presetConfig?.labels?.singular,
-  ])
+  const hasModifiedPreset = activePreset && modified
 
   return (
     <Fragment>
@@ -285,9 +195,65 @@ export const QueryPresetBar: React.FC<{
           resetPreset={resetQueryPreset}
         />
         <div className={`${baseClass}__menu-items`}>
-          {queryPresetMenuItems.map((item, i) => (
-            <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
-          ))}
+          {hasModifiedPreset && (
+            <ListSelectionButton
+              id="reset-preset"
+              key="reset"
+              onClick={async () => {
+                await refineListData(
+                  {
+                    columns: transformColumnsToSearchParams(activePreset.columns),
+                    where: activePreset.where,
+                  },
+                  false,
+                )
+              }}
+              type="button"
+            >
+              {t('general:reset')}
+            </ListSelectionButton>
+          )}
+          {hasModifiedPreset && queryPresetPermissions.update && (
+            <ListSelectionButton
+              id="save-preset"
+              key="save"
+              onClick={async () => {
+                await saveCurrentChanges()
+              }}
+              type="button"
+            >
+              {activePreset?.isShared ? t('general:updateForEveryone') : t('general:save')}
+            </ListSelectionButton>
+          )}
+          <ListSelectionButton
+            id="create-new-preset"
+            onClick={() => {
+              openCreateNewDrawer()
+            }}
+            type="button"
+          >
+            {t('general:newLabel', { label: presetConfig?.labels?.singular })}
+          </ListSelectionButton>
+          {activePreset && queryPresetPermissions?.delete && (
+            <Fragment>
+              <ListSelectionButton
+                id="delete-preset"
+                onClick={() => openModal(confirmDeletePresetModalSlug)}
+                type="button"
+              >
+                {t('general:delete')}
+              </ListSelectionButton>
+              <ListSelectionButton
+                id="edit-preset"
+                onClick={() => {
+                  openDocumentDrawer()
+                }}
+                type="button"
+              >
+                {t('general:edit')}
+              </ListSelectionButton>
+            </Fragment>
+          )}
         </div>
       </div>
       <CreateNewPresetDrawer
