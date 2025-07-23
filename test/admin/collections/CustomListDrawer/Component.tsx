@@ -1,13 +1,13 @@
 'use client'
-import { useListDrawer, useListDrawerContext } from '@payloadcms/ui'
+import { toast, useListDrawer, useListDrawerContext, useTranslation } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
 export const CustomListDrawer = () => {
   const [isCreating, setIsCreating] = React.useState(false)
-  const [success, setSuccess] = React.useState(false)
 
   // this is the _outer_ drawer context (if any), not the one for the list drawer below
   const { refresh } = useListDrawerContext()
+  const { t } = useTranslation()
 
   const [ListDrawer, ListDrawerToggler] = useListDrawer({
     collectionSlugs: ['custom-list-drawer'],
@@ -18,7 +18,6 @@ export const CustomListDrawer = () => {
       return
     }
 
-    setSuccess(false)
     setIsCreating(true)
 
     try {
@@ -32,7 +31,12 @@ export const CustomListDrawer = () => {
       })
 
       setIsCreating(false)
-      setSuccess(true)
+
+      toast.success(
+        t('general:successfullyCreated', {
+          label: 'Custom List Drawer',
+        }),
+      )
 
       // In the root document view, there is no outer drawer context, so this will be `undefined`
       if (typeof refresh === 'function') {
@@ -41,17 +45,16 @@ export const CustomListDrawer = () => {
     } catch (_err) {
       console.error('Error creating document:', _err) // eslint-disable-line no-console
       setIsCreating(false)
-      setSuccess(false)
     }
-  }, [isCreating, refresh])
+  }, [isCreating, refresh, t])
 
   return (
     <div>
-      <button onClick={createDoc} type="button">
-        {isCreating ? 'Creating...' : success ? 'Created!' : 'Create Document'}
+      <button id="create-custom-list-drawer-doc" onClick={createDoc} type="button">
+        {isCreating ? 'Creating...' : 'Create Document'}
       </button>
       <ListDrawer />
-      <ListDrawerToggler>Open list drawer</ListDrawerToggler>
+      <ListDrawerToggler id="open-custom-list-drawer">Open list drawer</ListDrawerToggler>
     </div>
   )
 }
