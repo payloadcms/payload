@@ -185,6 +185,29 @@ export default buildConfigWithDefaults({
     Placeholder,
     UseAsTitleGroupField,
     DisableBulkEdit,
+    {
+      slug: 'custom-list-drawer',
+      fields: [
+        {
+          name: 'customListDrawer',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: '/components/CustomListDrawer/index.js#CustomListDrawer',
+            },
+          },
+        },
+        {
+          name: 'refreshListDrawer',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: '/components/CustomListDrawer/RefreshListDrawer.js#RefreshListDrawer',
+            },
+          },
+        },
+      ],
+    },
   ],
   globals: [
     GlobalHidden,
