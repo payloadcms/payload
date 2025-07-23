@@ -368,7 +368,7 @@ export type CollectionAdminOptions = {
    */
   group?: false | Record<string, string> | string
   /**
-   * @experimental This option is experimental and may change in future releases and/or contain bugs.
+   * @experimental This option is currently in beta and may change in future releases and/or contain bugs.
    * Use at your own risk.
    * @description Enable grouping by a field in the list view.
    * Uses `payload.findDistinct` under the hood to populate the group-by options.

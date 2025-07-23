@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
@@ -37,6 +37,7 @@ type PublishMany_v4Props = {
   modalPrefix?: string
   onSuccess?: () => void
   selectAll: boolean
+  where?: Where
 } & PublishManyProps
 
 export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
@@ -48,6 +49,7 @@ export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
     modalPrefix,
     onSuccess,
     selectAll,
+    where,
   } = props
 
   const { permissions } = useAuth()
@@ -80,6 +82,7 @@ export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
         ids={ids}
         onSuccess={onSuccess}
         selectAll={selectAll}
+        where={where}
       />
     </React.Fragment>
   )

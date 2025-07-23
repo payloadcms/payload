@@ -462,7 +462,7 @@ test.describe('Group By', () => {
     expect(true).toBe(true)
   })
 
-  test('can select all rows in a table', async () => {
+  test('can select all rows within a single table as expected', async () => {
     await page.goto(url.list)
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
@@ -483,7 +483,7 @@ test.describe('Group By', () => {
     await expect(firstTable.locator('button#select-all-across-pages')).toBeHidden()
   })
 
-  test('can bulk edit table-by-table', async () => {
+  test('can bulk edit within a single table without affecting the others', async () => {
     await page.goto(url.list)
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
@@ -528,7 +528,7 @@ test.describe('Group By', () => {
     ).toHaveCount(1)
   })
 
-  test('can bulk delete table-by-table', async () => {
+  test('can bulk delete within a single table without affecting the others', async () => {
     await page.goto(url.list)
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
@@ -563,5 +563,45 @@ test.describe('Group By', () => {
     await expect(
       secondTableRows.locator('td.cell-title', { hasText: exactText('Find me') }),
     ).toHaveCount(1)
+  })
+
+  test('can bulk edit across pages within a single table without affecting the others', async () => {
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+
+    const firstTable = page.locator('.table-wrap').first()
+    const secondTable = page.locator('.table-wrap').nth(1)
+
+    const firstTableRows = firstTable.locator('tbody tr')
+    const secondTableRows = secondTable.locator('tbody tr')
+
+    // click the select all checkbox, then the "select all across pages" button
+    await firstTable.locator('input#select-all').check()
+    await firstTable.locator('button#select-all-across-pages').click()
+
+    // now edit all titles and ensure that only the first table gets updated, not the second
+    await firstTable.locator('.list-selection .edit-many__toggle').click()
+    const modal = page.locator('[id$="-edit-posts"]').first()
+
+    await expect(modal).toBeVisible()
+
+    await modal.locator('.field-select .rs__control').click()
+    await modal.locator('.field-select .rs__option', { hasText: exactText('Title') }).click()
+
+    const field = modal.locator(`#field-title`)
+    await expect(field).toBeVisible()
+    await field.fill('Bulk edit across all pages')
+    await modal.locator('.form-submit button[type="submit"].edit-many__save').click()
+
+    await expect(
+      firstTableRows.locator('td.cell-title', { hasText: exactText('Bulk edit across all pages') }),
+    ).toHaveCount(10)
+
+    await expect(
+      secondTableRows.locator('td.cell-title', {
+        hasText: exactText('Bulk edit across all pages'),
+      }),
+    ).toHaveCount(0)
   })
 })

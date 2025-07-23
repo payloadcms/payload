@@ -72,6 +72,7 @@ export const renderTable = ({
   customCellProps,
   data,
   enableRowSelections,
+  groupByFieldPath,
   groupByValue,
   heading,
   i18n,
@@ -92,6 +93,7 @@ export const renderTable = ({
   data: PaginatedDocs
   drawerSlug?: string
   enableRowSelections: boolean
+  groupByFieldPath?: string
   groupByValue?: string
   heading?: string
   i18n: I18nClient
@@ -256,6 +258,7 @@ export const renderTable = ({
           <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
             <GroupByHeader
               collectionConfig={clientCollectionConfig}
+              groupByFieldPath={groupByFieldPath}
               groupByValue={groupByValue}
               heading={heading}
             />

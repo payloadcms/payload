@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, Where } from 'payload'
 
 import React, { Fragment, useCallback } from 'react'
 
@@ -18,6 +18,7 @@ export type ListSelectionProps = {
   label: string
   modalPrefix?: string
   showSelectAllAcrossPages?: boolean
+  where?: Where
 }
 
 export const ListSelection: React.FC<ListSelectionProps> = ({
@@ -27,6 +28,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   label,
   modalPrefix,
   showSelectAllAcrossPages = true,
+  where,
 }) => {
   const { count, selectAll, selectedIDs, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
@@ -64,6 +66,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
+              where={where}
             />
             <PublishMany_v4
               collection={collectionConfig}
@@ -72,6 +75,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
+              where={where}
             />
             <UnpublishMany_v4
               collection={collectionConfig}
@@ -80,6 +84,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
+              where={where}
             />
           </Fragment>
         ),

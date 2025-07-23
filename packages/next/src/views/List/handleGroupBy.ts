@@ -50,9 +50,9 @@ export const handleGroupBy = async ({
   // NOTE: is there a faster/better way to do this?
   const flattenedFields = flattenAllFields({ fields: collectionConfig.fields })
 
-  const groupByFieldName = query.groupBy.replace(/^-/, '')
+  const groupByFieldPath = query.groupBy.replace(/^-/, '')
 
-  const groupByField = flattenedFields.find((f) => f.name === groupByFieldName)
+  const groupByField = flattenedFields.find((f) => f.name === groupByFieldPath)
 
   const relationshipConfig =
     groupByField?.type === 'relationship'
@@ -80,7 +80,7 @@ export const handleGroupBy = async ({
   const distinct = await req.payload.findDistinct({
     collection: collectionSlug,
     depth: 1,
-    field: groupByFieldName,
+    field: groupByFieldPath,
     limit: query?.limit ? Number(query.limit) : undefined,
     locale: req.locale,
     overrideAccess: false,
@@ -99,7 +99,7 @@ export const handleGroupBy = async ({
 
   await Promise.all(
     distinct.values.map(async (distinctValue, i) => {
-      const potentiallyPopulatedRelationship = distinctValue[groupByFieldName]
+      const potentiallyPopulatedRelationship = distinctValue[groupByFieldPath]
 
       const valueOrRelationshipID =
         groupByField?.type === 'relationship' &&
@@ -130,7 +130,7 @@ export const handleGroupBy = async ({
         user,
         where: {
           ...(whereWithMergedSearch || {}),
-          [groupByFieldName]: {
+          [groupByFieldPath]: {
             equals: valueOrRelationshipID,
           },
         },
@@ -164,6 +164,7 @@ export const handleGroupBy = async ({
           data: groupData,
           drawerSlug,
           enableRowSelections,
+          groupByFieldPath,
           groupByValue: valueOrRelationshipID,
           heading,
           i18n: req.i18n,

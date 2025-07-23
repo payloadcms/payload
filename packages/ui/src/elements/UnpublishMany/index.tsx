@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
@@ -39,6 +39,7 @@ export const UnpublishMany_v4: React.FC<
     onModalOpen?: () => void
     onSuccess?: () => void
     selectAll: boolean
+    where?: Where
   } & UnpublishManyProps
 > = (props) => {
   const {
@@ -49,6 +50,7 @@ export const UnpublishMany_v4: React.FC<
     modalPrefix,
     onSuccess,
     selectAll,
+    where,
   } = props
 
   const { t } = useTranslation()
@@ -80,6 +82,7 @@ export const UnpublishMany_v4: React.FC<
         ids={ids}
         onSuccess={onSuccess}
         selectAll={selectAll}
+        where={where}
       />
     </React.Fragment>
   )

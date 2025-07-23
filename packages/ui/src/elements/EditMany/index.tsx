@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React, { useState } from 'react'
@@ -46,8 +46,9 @@ export const EditMany_v4: React.FC<
     onModalOpen?: () => void
     onSuccess?: () => void
     selectAll: boolean
+    where?: Where
   } & Omit<EditManyProps, 'ids'>
-> = ({ collection, count, ids, modalPrefix, onSuccess, selectAll }) => {
+> = ({ collection, count, ids, modalPrefix, onSuccess, selectAll, where }) => {
   const { permissions } = useAuth()
   const { openModal } = useModal()
 
@@ -85,6 +86,7 @@ export const EditMany_v4: React.FC<
             selectAll={selectAll}
             selectedFields={selectedFields}
             setSelectedFields={setSelectedFields}
+            where={where}
           />
         </Drawer>
       </EditDepthProvider>

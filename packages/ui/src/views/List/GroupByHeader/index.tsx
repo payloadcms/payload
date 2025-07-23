@@ -9,9 +9,10 @@ const baseClass = 'group-by-header'
 
 export const GroupByHeader: React.FC<{
   collectionConfig?: ClientCollectionConfig
-  groupByValue?: string
+  groupByFieldPath: string
+  groupByValue: string
   heading: string
-}> = ({ collectionConfig, groupByValue, heading }) => {
+}> = ({ collectionConfig, groupByFieldPath, groupByValue, heading }) => {
   return (
     <header className={baseClass}>
       <h4 className={`${baseClass}__heading`}>{heading}</h4>
@@ -19,6 +20,11 @@ export const GroupByHeader: React.FC<{
         collectionConfig={collectionConfig}
         label={heading}
         modalPrefix={groupByValue}
+        where={{
+          [groupByFieldPath]: {
+            equals: groupByValue,
+          },
+        }}
       />
     </header>
   )
