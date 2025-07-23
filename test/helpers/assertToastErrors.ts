@@ -26,7 +26,7 @@ export async function assertToastErrors({
     )
   } else {
     // Check multiple errors
-    const errorItems = page.locator('payload-toast-container [data-testid="field-errors"] li')
+    const errorItems = page.locator('.payload-toast-container [data-testid="field-errors"] li')
     for (let i = 0; i < errors.length; i++) {
       await expect(errorItems.nth(i)).toHaveText(errors[i]!)
     }
