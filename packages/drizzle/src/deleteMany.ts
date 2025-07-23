@@ -1,11 +1,11 @@
 import type { DeleteMany } from 'payload'
 
-import { inArray } from 'drizzle-orm'
+import { type SQL } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
-import { findMany } from './find/findMany.js'
+import { parseParams } from './queries/parseParams.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const deleteMany: DeleteMany = async function deleteMany(
@@ -17,30 +17,24 @@ export const deleteMany: DeleteMany = async function deleteMany(
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
-  const result = await findMany({
-    adapter: this,
-    fields: collectionConfig.flattenedFields,
-    joins: false,
-    limit: 0,
-    locale: req?.locale,
-    page: 1,
-    pagination: false,
-    req,
-    tableName,
-    where,
-  })
+  let whereSQL: SQL
 
-  const ids = []
-
-  result.docs.forEach((data) => {
-    ids.push(data.id)
-  })
-
-  if (ids.length > 0) {
-    await this.deleteWhere({
-      db,
+  if (where && Object.keys(where).length > 0) {
+    whereSQL = parseParams({
+      adapter: this,
+      context: { sort: undefined },
+      fields: collectionConfig.flattenedFields,
+      joins: [],
+      parentIsLocalized: false,
+      selectFields: {},
       tableName,
-      where: inArray(this.tables[tableName].id, ids),
+      where,
     })
   }
+
+  await this.deleteWhere({
+    db,
+    tableName,
+    where: whereSQL,
+  })
 }
