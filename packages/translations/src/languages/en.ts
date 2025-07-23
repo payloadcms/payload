@@ -259,6 +259,7 @@ export const enTranslations = {
     delete: 'Delete',
     deletedCountSuccessfully: 'Deleted {{count}} {{label}} successfully.',
     deletedSuccessfully: 'Deleted successfully.',
+    deleteLabel: 'Delete {{label}}',
     deleting: 'Deleting...',
     depth: 'Depth',
     descending: 'Descending',
@@ -345,6 +346,7 @@ export const enTranslations = {
     remove: 'Remove',
     rename: 'Rename',
     reset: 'Reset',
+    resetLabel: 'Reset {{label}}',
     resetPreferences: 'Reset Preferences',
     resetPreferencesDescription:
       'This will reset all of your preferences to their default settings.',
@@ -352,6 +354,7 @@ export const enTranslations = {
     row: 'Row',
     rows: 'Rows',
     save: 'Save',
+    saveLabel: 'Save {{label}}',
     saving: 'Saving...',
     schedulePublishFor: 'Schedule publish for {{title}}',
     searchBy: 'Search by {{label}}',

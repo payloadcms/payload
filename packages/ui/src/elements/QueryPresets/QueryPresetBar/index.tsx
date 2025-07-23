@@ -210,7 +210,7 @@ export const QueryPresetBar: React.FC<{
               }}
               type="button"
             >
-              {t('general:reset')}
+              {t('general:resetLabel', { label: presetConfig?.labels?.singular })}
             </ListSelectionButton>
           )}
           {hasModifiedPreset && queryPresetPermissions.update && (
@@ -222,7 +222,9 @@ export const QueryPresetBar: React.FC<{
               }}
               type="button"
             >
-              {activePreset?.isShared ? t('general:updateForEveryone') : t('general:save')}
+              {activePreset?.isShared
+                ? t('general:updateForEveryone')
+                : t('general:saveLabel', { label: presetConfig?.labels?.singular })}
             </ListSelectionButton>
           )}
           <ListSelectionButton
@@ -241,7 +243,7 @@ export const QueryPresetBar: React.FC<{
                 onClick={() => openModal(confirmDeletePresetModalSlug)}
                 type="button"
               >
-                {t('general:delete')}
+                {t('general:deleteLabel', { label: presetConfig?.labels?.singular })}
               </ListSelectionButton>
               <ListSelectionButton
                 id="edit-preset"
@@ -250,7 +252,7 @@ export const QueryPresetBar: React.FC<{
                 }}
                 type="button"
               >
-                {t('general:edit')}
+                {t('general:editLabel', { label: presetConfig?.labels?.singular })}
               </ListSelectionButton>
             </Fragment>
           )}
