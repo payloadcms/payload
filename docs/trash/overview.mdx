@@ -17,7 +17,7 @@ Soft delete is a safer way to manage content lifecycle, giving editors a chance 
 
 ## Collection Configuration
 
-To enable soft delete for a collection, set the `trash` property to `true`:
+To enable soft deleting for a collection, set the `trash` property to `true`:
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -42,7 +42,7 @@ When enabled, Payload automatically injects a deletedAt field into the collectio
 Once `trash` is enabled, the Admin Panel provides a dedicated Trash view for each collection:
 
 - A new route is added at `/collections/:collectionSlug/trash`
-- The Trash view shows all documents that have a `deletedAt` timestamp
+- The `Trash` view shows all documents that have a `deletedAt` timestamp
 
 From the Trash view, you can:
 
@@ -54,8 +54,9 @@ From the Trash view, you can:
 
 - Enter each document's **edit view**, just like in the main list view. While in the edit view of a trashed document:
   - All fields are in a **read-only** state
-  - All document actions (e.g. Save, Publish, Restore Version) are hidden or disabled
-  - Preserve access to the **API**, **Versions**, and **Preview** views
+  - Standard document actions (e.g., Save, Publish, Restore Version) are hidden and disabled.
+  - The available actions are **Restore** and **Permanently Delete**.
+  - Access to the **API**, **Versions**, and **Preview** views is preserved.
 
 When deleting a document from the main collection List View, Payload will soft-delete the document by default. A checkbox in the delete confirmation modal allows users to skip the trash and permanently delete instead.
 
