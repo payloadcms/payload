@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { after } from 'next/server.js'
 import * as path from 'path'
 import { mapAsync } from 'payload'
 import { fileURLToPath } from 'url'
@@ -120,7 +119,7 @@ describe('Trash', () => {
         await page.locator('#confirm-delete-many-docs #confirm-action').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-          'Deleted 1 Post successfully.',
+          'Permanently deleted 1 Post successfully.',
         )
 
         await page.reload()
@@ -133,7 +132,7 @@ describe('Trash', () => {
 
         await page.locator('#confirm-delete-many-docs #confirm-action').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-          'Trashed 1 Post successfully.',
+          '1 Post moved to trash.',
         )
       })
     })
@@ -211,7 +210,7 @@ describe('Trash', () => {
         await page.locator('.delete-document #confirm-action').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-          'Post "Post 2" successfully trashed.',
+          'Post "Post 2" moved to trash.',
         )
       })
     })
@@ -255,7 +254,7 @@ describe('Trash', () => {
 
         await page.locator('#confirm-delete-many-docs #confirm-action').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-          'Trashed 1 Post successfully.',
+          '1 Post moved to trash.',
         )
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
@@ -319,13 +318,13 @@ describe('Trash', () => {
 
         await expect(page.locator('#confirm-empty-trash')).toBeVisible()
         await expect(
-          page.locator('#confirm-empty-trash .confirmation-modal__content p'),
-        ).toContainText('You are about to delete 3 Posts')
+          page.locator('#confirm-empty-trash .confirmation-modal__content'),
+        ).toContainText('You are about to permanently delete 3 Posts from the trash. Are you sure?')
 
         await page.locator('#confirm-empty-trash #confirm-action').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-          'Deleted 3 Posts successfully.',
+          'Permanently deleted 3 Posts successfully.',
         )
       })
 
@@ -395,13 +394,13 @@ describe('Trash', () => {
         await expect(page.locator('#confirm-delete-many-docs')).toBeVisible()
 
         await expect(
-          page.locator('#confirm-delete-many-docs .confirmation-modal__content p'),
-        ).toContainText('You are about to delete 2 Posts')
+          page.locator('#confirm-delete-many-docs .confirmation-modal__content'),
+        ).toContainText('You are about to permanently delete 2 Posts from the trash. Are you sure?')
 
         await page.locator('#confirm-delete-many-docs #confirm-action').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-          'Deleted 2 Posts successfully.',
+          'Permanently deleted 2 Posts successfully.',
         )
 
         // Verify that the posts are no longer in the trash view
@@ -518,10 +517,14 @@ describe('Trash', () => {
 
         await page.locator('#confirm-delete-many-docs #confirm-action').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-          'Trashed 1 Post successfully.',
+          '1 Post moved to trash.',
         )
+
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
+
+        // Assert the URL is /posts/trash
+        await expect(page).toHaveURL(/\/posts\/trash(\?|$)/)
 
         await expect(page.locator('table')).toBeVisible()
 
@@ -560,10 +563,13 @@ describe('Trash', () => {
 
         await page.locator('#confirm-delete-many-docs #confirm-action').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-          'Trashed 1 Post successfully.',
+          '1 Post moved to trash.',
         )
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
+
+        // Assert the URL is /posts/trash
+        await expect(page).toHaveURL(/\/posts\/trash(\?|$)/)
 
         await expect(page.locator('table')).toBeVisible()
 
@@ -608,10 +614,13 @@ describe('Trash', () => {
 
         await page.locator('#confirm-delete-many-docs #confirm-action').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-          'Trashed 1 Post successfully.',
+          '1 Post moved to trash.',
         )
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
+
+        // Assert the URL is /posts/trash
+        await expect(page).toHaveURL(/\/posts\/trash(\?|$)/)
 
         await expect(page.locator('table')).toBeVisible()
 
@@ -658,10 +667,13 @@ describe('Trash', () => {
 
         await page.locator('#confirm-delete-many-docs #confirm-action').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-          'Trashed 1 Post successfully.',
+          '1 Post moved to trash.',
         )
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
+
+        // Assert the URL is /posts/trash
+        await expect(page).toHaveURL(/\/posts\/trash(\?|$)/)
 
         await expect(page.locator('table')).toBeVisible()
 
@@ -700,10 +712,13 @@ describe('Trash', () => {
 
         await page.locator('#confirm-delete-many-docs #confirm-action').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-          'Trashed 1 Post successfully.',
+          '1 Post moved to trash.',
         )
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
+
+        // Assert the URL is /posts/trash
+        await expect(page).toHaveURL(/\/posts\/trash(\?|$)/)
 
         await expect(page.locator('table')).toBeVisible()
 
