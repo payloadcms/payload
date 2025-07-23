@@ -16,6 +16,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
 import {
+  combineWhereConstraints,
   formatAdminURL,
   isNumber,
   mergeListSearchAndWhere,
@@ -141,20 +142,15 @@ export const renderListView = async (
         req,
         sort: query.sort,
       })
-
-      if (baseListFilter) {
-        query.where = {
-          and: [query.where, baseListFilter].filter(Boolean),
-        }
-      }
     }
 
     let queryPreset: QueryPreset | undefined
     let queryPresetPermissions: SanitizedCollectionPermission | undefined
+
     const whereWithMergedSearch = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
-      where: query?.where,
+      where: combineWhereConstraints([query?.where, baseListFilter]),
     })
 
     if (collectionPreferences?.preset) {
