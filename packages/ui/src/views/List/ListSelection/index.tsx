@@ -1,7 +1,7 @@
 'use client'
 import type { ClientCollectionConfig } from 'payload'
 
-import React, { Fragment, useCallback } from 'react'
+import React, { Fragment, useCallback, useState } from 'react'
 
 import { DeleteMany } from '../../../elements/DeleteMany/index.js'
 import { EditMany_v4 } from '../../../elements/EditMany/index.js'
@@ -30,6 +30,8 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
 }) => {
   const { count, getSelectedIds, selectAll, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
+
+  const [selectedIDs] = useState(() => getSelectedIds())
 
   const onActionSuccess = useCallback(() => toggleAll(), [toggleAll])
 
@@ -60,7 +62,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             <EditMany_v4
               collection={collectionConfig}
               count={count}
-              ids={getSelectedIds()}
+              ids={selectedIDs}
               modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
@@ -68,7 +70,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             <PublishMany_v4
               collection={collectionConfig}
               count={count}
-              ids={getSelectedIds()}
+              ids={selectedIDs}
               modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
@@ -76,7 +78,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             <UnpublishMany_v4
               collection={collectionConfig}
               count={count}
-              ids={getSelectedIds()}
+              ids={selectedIDs}
               modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}

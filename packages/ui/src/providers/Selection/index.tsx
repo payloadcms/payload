@@ -164,11 +164,13 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
   const getSelectedIds = useCallback(() => {
     const ids = []
+
     for (const [key, value] of selected) {
       if (value) {
         ids.push(key)
       }
     }
+
     return ids
   }, [selected])
 
