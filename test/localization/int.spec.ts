@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type {
+  BlocksField,
   LocalizedPost,
   LocalizedSort,
   Nested,
@@ -2175,6 +2176,55 @@ describe('Localization', () => {
     })
 
     describe('nested fields', () => {
+      it('should update localized block', async () => {
+        const doc = await payload.create({
+          collection: 'blocks-fields',
+          locale: 'en',
+          data: {
+            content: [
+              {
+                blockType: 'blockInsideBlock',
+                content: [
+                  {
+                    blockType: 'textBlock',
+                    text: 'some-text',
+                  },
+                ],
+              },
+            ],
+          },
+        })
+
+        const updated = await payload.update({
+          id: doc.id,
+          collection: 'blocks-fields',
+          data: {
+            // id: doc.id,
+            content: [
+              {
+                id: doc.content?.[0]?.id, // if this is deleted the test passes
+                blockName: null,
+                array: [],
+                blockType: 'blockInsideBlock',
+                content: [
+                  {
+                    id: doc.content?.[0]?.content?.[0]?.id, // if this is deleted the test passes
+                    text: 'some-text',
+                    blockName: null,
+                    blockType: 'textBlock',
+                  },
+                ],
+              },
+            ],
+          },
+          locale: 'es',
+        })
+
+        console.dir(updated, { depth: null })
+
+        expect(updated.content?.[0]?.content?.[0]?.text).toBe('some-text')
+      })
+
       it('update specific locale should not erease the others in blocks and arrays', async () => {
         const doc = await payload.create({
           collection: 'nested',
@@ -2753,6 +2803,41 @@ describe('Localization', () => {
         expect(res.group.children).toBe('Children')
         expect(res.unique).toBe('unique-field')
         expect(res.localizedCheckbox).toBe(true)
+      })
+
+      it('should copy block to locale', async () => {
+        // This was previously an e2e test but it was migrated to int
+        // because at the moment only int tests run in Postgres in CI,
+        // and that's where the bug occurs.
+        const doc = await payload.create({
+          collection: 'blocks-fields',
+          locale: 'en',
+          data: {
+            content: [
+              {
+                blockType: 'blockInsideBlock',
+                content: [
+                  {
+                    blockType: 'textBlock',
+                    text: 'some-text',
+                  },
+                ],
+              },
+            ],
+          },
+        })
+
+        const req = await createLocalReq({ user }, payload)
+
+        const res = (await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          req,
+          toLocale: 'es',
+          docID: doc.id,
+          collectionSlug: 'blocks-fields',
+        })) as BlocksField
+
+        expect(res.content?.[0]?.content?.[0]?.text).toBe('some-text')
       })
 
       it('should copy localized nested to arrays', async () => {

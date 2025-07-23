@@ -431,32 +431,6 @@ describe('Localization', () => {
       await expect(arrayField).toHaveValue(sampleText)
     })
 
-    test('should copy block to locale', async () => {
-      const sampleText = 'Copy this text'
-      const blocksCollection = new AdminUrlUtil(serverURL, blocksCollectionSlug)
-      await page.goto(blocksCollection.create)
-      await changeLocale(page, 'pt')
-      const addBlock = page.locator('.blocks-field__drawer-toggler')
-      await addBlock.click()
-      const selectBlock = page.locator('.blocks-drawer__block button')
-      await selectBlock.click()
-      const addContentButton = page
-        .locator('#field-content__0__content')
-        .getByRole('button', { name: 'Add Content' })
-      await addContentButton.click()
-      await selectBlock.click()
-      const textField = page.locator('#field-content__0__content__0__text')
-      await expect(textField).toBeVisible()
-      await textField.fill(sampleText)
-      await saveDocAndAssert(page)
-
-      await openCopyToLocaleDrawer(page)
-      await setToLocale(page, 'English')
-      await runCopy(page)
-
-      await expect(textField).toHaveValue(sampleText)
-    })
-
     test('should default source locale to current locale', async () => {
       await changeLocale(page, spanishLocale)
       await createAndSaveDoc(page, url, { title })
