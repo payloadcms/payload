@@ -6,7 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { toast } from 'sonner'
 
 import { useAuth } from '../../providers/Auth/index.js'
@@ -102,7 +102,6 @@ type DeleteMany_v4Props = {
    * When multiple DeleteMany components are rendered on the page, this will differentiate them.
    */
   modalPrefix?: string
-  onModalOpen?: () => void
   /**
    * Optionally pass a search string to filter the documents to be deleted.
    *
@@ -141,7 +140,6 @@ type DeleteMany_v4Props = {
 export function DeleteMany_v4({
   afterDelete,
   modalPrefix,
-  onModalOpen,
   search,
   selections,
   where,
@@ -158,19 +156,9 @@ export function DeleteMany_v4({
 
   const { code: locale } = useLocale()
   const { i18n } = useTranslation()
-  const { isModalOpen, openModal } = useModal()
+  const { openModal } = useModal()
 
   const confirmManyDeleteDrawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}confirm-delete-many-docs`
-
-  const isOpen = isModalOpen(confirmManyDeleteDrawerSlug)
-
-  useEffect(() => {
-    if (isOpen) {
-      if (typeof onModalOpen === 'function') {
-        onModalOpen()
-      }
-    }
-  }, [isOpen, onModalOpen])
 
   const handleDelete = React.useCallback(async () => {
     const deletingOneCollection = Object.keys(selections).length === 1

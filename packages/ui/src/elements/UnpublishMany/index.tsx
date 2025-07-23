@@ -2,7 +2,7 @@
 import type { ClientCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
@@ -47,29 +47,18 @@ export const UnpublishMany_v4: React.FC<
     count,
     ids,
     modalPrefix,
-    onModalOpen,
     onSuccess,
     selectAll,
   } = props
 
   const { t } = useTranslation()
   const { permissions } = useAuth()
-  const { isModalOpen, toggleModal } = useModal()
+  const { toggleModal } = useModal()
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasPermission = collectionPermissions?.update
 
   const drawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}unpublish-${slug}`
-
-  const isOpen = isModalOpen(drawerSlug)
-
-  useEffect(() => {
-    if (onModalOpen) {
-      if (typeof onModalOpen === 'function') {
-        onModalOpen()
-      }
-    }
-  }, [onModalOpen, isOpen])
 
   if (!versions?.drafts || count === 0 || !hasPermission) {
     return null

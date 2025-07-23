@@ -55,6 +55,18 @@ type Props = {
   user: ClientUser
 }
 
+const reduceActiveSelections = (selected: Map<number | string, boolean>): (number | string)[] => {
+  const ids = []
+
+  for (const [key, value] of selected) {
+    if (value) {
+      ids.push(key)
+    }
+  }
+
+  return ids
+}
+
 export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs, user }) => {
   const contextRef = useRef({} as SelectionContext)
 
@@ -173,17 +185,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     [selectAll, selected, locale, searchParams],
   )
 
-  const getSelectedIds = useCallback(() => {
-    const ids = []
-
-    for (const [key, value] of selected) {
-      if (value) {
-        ids.push(key)
-      }
-    }
-
-    return ids
-  }, [selected])
+  const getSelectedIds = useCallback(() => reduceActiveSelections(selected), [selected])
 
   useEffect(() => {
     if (selectAll === SelectAllStatus.AllAvailable) {
@@ -232,17 +234,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     setSelected(new Map())
   }, [query])
 
-  const selectedIDs = useMemo(() => {
-    const ids = []
-
-    for (const [key, value] of selected) {
-      if (value) {
-        ids.push(key)
-      }
-    }
-
-    return ids
-  }, [selected])
+  const selectedIDs = useMemo(() => reduceActiveSelections(selected), [selected])
 
   contextRef.current = {
     count,

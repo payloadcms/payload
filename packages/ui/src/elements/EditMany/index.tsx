@@ -2,7 +2,7 @@
 import type { ClientCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
 
@@ -47,9 +47,9 @@ export const EditMany_v4: React.FC<
     onSuccess?: () => void
     selectAll: boolean
   } & Omit<EditManyProps, 'ids'>
-> = ({ collection, count, ids, modalPrefix, onModalOpen, onSuccess, selectAll }) => {
+> = ({ collection, count, ids, modalPrefix, onSuccess, selectAll }) => {
   const { permissions } = useAuth()
-  const { isModalOpen, openModal } = useModal()
+  const { openModal } = useModal()
 
   const { t } = useTranslation()
 
@@ -58,16 +58,6 @@ export const EditMany_v4: React.FC<
   const collectionPermissions = permissions?.collections?.[collection.slug]
 
   const drawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}edit-${collection.slug}`
-
-  const isOpen = isModalOpen(drawerSlug)
-
-  useEffect(() => {
-    if (isOpen) {
-      if (typeof onModalOpen === 'function') {
-        onModalOpen()
-      }
-    }
-  }, [isOpen, onModalOpen])
 
   if (count === 0 || !collectionPermissions?.update) {
     return null
