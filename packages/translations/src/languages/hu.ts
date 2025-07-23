@@ -88,10 +88,15 @@ export const huTranslations: DefaultTranslationsObject = {
     deletingFile: 'Hiba történt a fájl törlésekor.',
     deletingTitle:
       'Hiba történt a {{title}} törlése közben. Kérjük, ellenőrizze a kapcsolatot, és próbálja meg újra.',
+    documentNotFound:
+      'A dokumentum azonosítóval {{id}} nem található. Lehet, hogy törölték, soha nem létezett, vagy Önnek nincs hozzáférése hozzá.',
     emailOrPasswordIncorrect: 'A megadott e-mail-cím vagy jelszó helytelen.',
     followingFieldsInvalid_one: 'A következő mező érvénytelen:',
     followingFieldsInvalid_other: 'A következő mezők érvénytelenek:',
     incorrectCollection: 'Helytelen gyűjtemény',
+    insufficientClipboardPermissions:
+      'A vágólaphoz való hozzáférés elutasítva. Kérjük, ellenőrizze a vágólap engedélyeit.',
+    invalidClipboardData: 'Érvénytelen vágólap adat.',
     invalidFileType: 'Érvénytelen fájltípus',
     invalidFileTypeValue: 'Érvénytelen fájltípus: {{value}}',
     invalidRequestArgs: 'Érvénytelen argumentumok a kérésben: {{args}}',
@@ -113,6 +118,7 @@ export const huTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Hiba történt a fájl feltöltése közben.',
     tokenInvalidOrExpired: 'A token érvénytelen vagy lejárt.',
     tokenNotProvided: 'Token nem biztosított.',
+    unableToCopy: 'Másolás nem lehetséges.',
     unableToDeleteCount: 'Nem sikerült törölni {{count}}/{{total}} {{label}}.',
     unableToReindexCollection:
       'Hiba a(z) {{collection}} gyűjtemény újraindexelésekor. A művelet megszakítva.',
@@ -182,6 +188,8 @@ export const huTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Mappa törlése',
     folderName: 'Mappa neve',
     folders: 'Mappák',
+    folderTypeDescription:
+      'Válassza ki, hogy milyen típusú dokumentumokat engedélyez ebben a mappában.',
     itemHasBeenMoved: '{{title}} át lett helyezve a {{folderName}} nevű mappába.',
     itemHasBeenMovedToRoot: 'A(z) {{title}} át lett helyezve a gyökérmappába.',
     itemsMovedToFolder: '{{title}} áthelyezve a(z) {{folderName}} mappába',
@@ -243,7 +251,9 @@ export const huTranslations: DefaultTranslationsObject = {
       'Ez eltávolítja a meglévő indexeket, és újraindexálja a dokumentumokat az összes gyűjteményben.',
     copied: 'Másolva',
     copy: 'Másolás',
+    copyField: 'Mező másolása',
     copying: 'Másolás',
+    copyRow: 'Sor másolása',
     copyWarning:
       'Ön azzal készül felülírni {{to}} -t {{from}} -mal a {{label}} {{title}} számára. Biztos benne?',
     create: 'Létrehozás',
@@ -284,6 +294,7 @@ export const huTranslations: DefaultTranslationsObject = {
     enterAValue: 'Adjon meg egy értéket',
     error: 'Hiba',
     errors: 'Hibák',
+    exitLivePreview: 'Kilépés az Élő Előnézetből',
     export: 'Export',
     fallbackToDefaultLocale: 'Visszatérés az alapértelmezett nyelvhez',
     false: 'Hamis',
@@ -336,6 +347,8 @@ export const huTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Írja felül a meglévő mezőadatokat',
     pageNotFound: 'Az oldal nem található',
     password: 'Jelszó',
+    pasteField: 'Mező beillesztése',
+    pasteRow: 'Sor beillesztése',
     payloadSettings: 'Payload beállítások',
     perPage: 'Oldalanként: {{limit}}',
     previous: 'Előző',

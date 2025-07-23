@@ -24,7 +24,7 @@ export type Options<TSlug extends CollectionSlug> = {
   showHiddenFields?: boolean
 }
 
-export async function localLogin<TSlug extends CollectionSlug>(
+export async function loginLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<{ user: DataFromCollectionSlug<TSlug> } & Result> {
@@ -61,5 +61,3 @@ export async function localLogin<TSlug extends CollectionSlug>(
 
   return result
 }
-
-export const login = localLogin

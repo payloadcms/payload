@@ -160,7 +160,7 @@ describe('Document View', () => {
       await page.goto(collectionWithPreview.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await expect(page.locator('.btn.preview-btn')).toBeVisible()
+      await expect(page.locator('button#preview-button')).toBeVisible()
     })
 
     test('collection — should not render preview button when `admin.preview` is not set', async () => {
@@ -168,13 +168,13 @@ describe('Document View', () => {
       await page.goto(collectionWithoutPreview.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await expect(page.locator('.btn.preview-btn')).toBeHidden()
+      await expect(page.locator('button#preview-button')).toBeHidden()
     })
 
     test('global — should render preview button when `admin.preview` is set', async () => {
       const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
       await page.goto(globalWithPreview.global(globalSlug))
-      await expect(page.locator('.btn.preview-btn')).toBeVisible()
+      await expect(page.locator('button#preview-button')).toBeVisible()
     })
 
     test('global — should not render preview button when `admin.preview` is not set', async () => {
@@ -182,7 +182,7 @@ describe('Document View', () => {
       await page.goto(globalWithoutPreview.global(group1GlobalSlug))
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await expect(page.locator('.btn.preview-btn')).toBeHidden()
+      await expect(page.locator('button#preview-button')).toBeHidden()
     })
   })
 
@@ -363,6 +363,43 @@ describe('Document View', () => {
   })
 
   describe('drawers', () => {
+    test('document drawers do not unmount across save events', async () => {
+      // Navigate to a post document
+      await navigateToDoc(page, postsUrl)
+
+      // Open the relationship drawer
+      await page
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+
+      const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+      const drawerEditView = drawer.locator('.drawer__content .collection-edit')
+      await expect(drawerEditView).toBeVisible()
+
+      const drawerTitleField = drawerEditView.locator('#field-title')
+      const testTitle = 'Test Title for Persistence'
+      await drawerTitleField.fill(testTitle)
+      await expect(drawerTitleField).toHaveValue(testTitle)
+
+      await drawerEditView.evaluate((el) => {
+        el.setAttribute('data-test-instance', 'This is a test')
+      })
+
+      await expect(drawerEditView).toHaveAttribute('data-test-instance', 'This is a test')
+
+      await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] .drawer__content #action-save')
+
+      await expect(drawerEditView).toBeVisible()
+      await expect(drawerTitleField).toHaveValue(testTitle)
+
+      // Verify the element instance hasn't changed (i.e., it wasn't re-mounted and discarded the custom attribute)
+      await expect
+        .poll(async () => {
+          return await drawerEditView.getAttribute('data-test-instance')
+        })
+        .toBe('This is a test')
+    })
+
     test('document drawers are visually stacking', async () => {
       await navigateToDoc(page, postsUrl)
       await page.locator('#field-title').fill(title)
@@ -660,10 +697,10 @@ describe('Document View', () => {
       await saveDocAndAssert(page)
     })
 
-    test('collection — should show live preview as first tab', async () => {
+    test('collection — should show api as first tab', async () => {
       const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
       const firstTab = tabs.first()
-      await expect(firstTab).toContainText('Live Preview')
+      await expect(firstTab).toContainText('API')
     })
 
     test('collection — should show edit as third tab', async () => {
@@ -680,24 +717,6 @@ describe('Document View', () => {
       await saveDocAndAssert(page)
 
       const threeDotMenu = page.getByRole('main').locator('.doc-controls__popup')
-      await expect(threeDotMenu).toBeVisible()
-      await threeDotMenu.click()
-
-      const customEditMenuItem = page.locator('.popup-button-list__button', {
-        hasText: 'Custom Edit Menu Item',
-      })
-
-      await expect(customEditMenuItem).toBeVisible()
-    })
-    test('should render custom editMenuItems component in live preview tab', async () => {
-      await page.goto(editMenuItemsURL.create)
-      await page.locator('#field-title')?.fill(title)
-      await saveDocAndAssert(page)
-
-      const livePreviewURL = `${page.url()}/preview`
-      await page.goto(livePreviewURL)
-
-      const threeDotMenu = page.locator('.doc-controls__popup')
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 

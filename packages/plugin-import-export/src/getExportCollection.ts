@@ -34,6 +34,10 @@ export const getExportCollection = ({
           SaveButton: '@payloadcms/plugin-import-export/rsc#ExportSaveButton',
         },
       },
+      custom: {
+        disableDownload: pluginConfig.disableDownload ?? false,
+        disableSave: pluginConfig.disableSave ?? false,
+      },
       group: false,
       useAsTitle: 'name',
     },
@@ -47,7 +51,7 @@ export const getExportCollection = ({
         path: '/download',
       },
     ],
-    fields: getFields(config),
+    fields: getFields(config, pluginConfig),
     hooks: {
       afterChange,
       beforeOperation,

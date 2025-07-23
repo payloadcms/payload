@@ -87,10 +87,15 @@ export const nlTranslations: DefaultTranslationsObject = {
     deletingFile: 'Er is een fout opgetreden bij het verwijderen van dit bestand.',
     deletingTitle:
       'Er is een fout opgetreden tijdens het verwijderen van {{title}}. Controleer uw verbinding en probeer het opnieuw.',
+    documentNotFound:
+      'Het document met ID {{id}} kon niet worden gevonden. Het kan zijn verwijderd of heeft nooit bestaan, of u heeft mogelijk geen toegang tot het.',
     emailOrPasswordIncorrect: 'Het opgegeven e-mailadres of wachtwoord is onjuist.',
     followingFieldsInvalid_one: 'Het volgende veld is ongeldig:',
     followingFieldsInvalid_other: 'De volgende velden zijn ongeldig:',
     incorrectCollection: 'Ongeldige collectie',
+    insufficientClipboardPermissions:
+      'Toegang tot het klembord geweigerd. Controleer je klembordmachtigingen.',
+    invalidClipboardData: 'Ongeldige klembordgegevens.',
     invalidFileType: 'Ongeldig bestandstype',
     invalidFileTypeValue: 'Ongeldig bestandstype: {{value}}',
     invalidRequestArgs: 'Ongeldige argumenten in verzoek: {{args}}',
@@ -112,6 +117,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Er was een probleem bij het uploaden van het bestand.',
     tokenInvalidOrExpired: 'Token is ongeldig of verlopen.',
     tokenNotProvided: 'Token niet verstrekt.',
+    unableToCopy: 'Kan niet kopiëren.',
     unableToDeleteCount: 'Kan {{count}} van {{total}} {{label}} niet verwijderen.',
     unableToReindexCollection:
       'Fout bij het herindexeren van de collectie {{collection}}. De operatie is afgebroken.',
@@ -182,6 +188,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Verwijder map',
     folderName: 'Mapnaam',
     folders: 'Mappen',
+    folderTypeDescription:
+      'Selecteer welk type verzameldocumenten toegestaan zou moeten zijn in deze map.',
     itemHasBeenMoved: '{{title}} is verplaatst naar {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} is verplaatst naar de hoofdmap',
     itemsMovedToFolder: '{{title}} verplaatst naar {{folderName}}',
@@ -244,7 +252,9 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Dit verwijdert bestaande indexen en indexeert de documenten in alle collecties opnieuw.',
     copied: 'Gekopieerd',
     copy: 'Kopiëren',
+    copyField: 'Veld kopiëren',
     copying: 'Kopiëren',
+    copyRow: 'Rij kopiëren',
     copyWarning:
       'U staat op het punt om {{to}} te overschrijven met {{from}} voor {{label}} {{title}}. Bent u zeker?',
     create: 'Aanmaken',
@@ -285,6 +295,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     enterAValue: 'Waarde invoeren',
     error: 'Fout',
     errors: 'Fouten',
+    exitLivePreview: 'Verlaat Live Voorbeeld',
     export: 'Exporteren',
     fallbackToDefaultLocale: 'Terugval naar standaardtaal',
     false: 'Onwaar',
@@ -338,6 +349,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Overschrijf bestaande veldgegevens',
     pageNotFound: 'Pagina niet gevonden',
     password: 'Wachtwoord',
+    pasteField: 'Veld plakken',
+    pasteRow: 'Rij plakken',
     payloadSettings: 'Payload Instellingen',
     perPage: 'Per pagina: {{limit}}',
     previous: 'Vorige',

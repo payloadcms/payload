@@ -3,11 +3,11 @@ import type {
   ClientConfig,
   ClientField,
   CollectionConfig,
+  CollectionPreferences,
   Column,
   ColumnPreference,
   Field,
   ImportMap,
-  ListPreferences,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
@@ -64,7 +64,6 @@ export const renderTable = ({
   clientConfig,
   collectionConfig,
   collections,
-  columnPreferences,
   columns: columnsFromArgs,
   customCellProps,
   docs,
@@ -80,8 +79,7 @@ export const renderTable = ({
   clientConfig?: ClientConfig
   collectionConfig?: SanitizedCollectionConfig
   collections?: string[]
-  columnPreferences: ListPreferences['columns']
-  columns?: ListPreferences['columns']
+  columns?: CollectionPreferences['columns']
   customCellProps?: Record<string, unknown>
   docs: PaginatedDocs['docs']
   drawerSlug?: string
@@ -154,7 +152,6 @@ export const renderTable = ({
   const sharedArgs: Pick<
     BuildColumnStateArgs,
     | 'clientFields'
-    | 'columnPreferences'
     | 'columns'
     | 'customCellProps'
     | 'enableRowSelections'
@@ -164,7 +161,6 @@ export const renderTable = ({
     | 'useAsTitle'
   > = {
     clientFields,
-    columnPreferences,
     columns,
     enableRowSelections,
     i18n,

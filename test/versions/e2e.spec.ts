@@ -38,6 +38,7 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
@@ -50,7 +51,7 @@ import {
   autoSaveGlobalSlug,
   autosaveWithDraftButtonGlobal,
   autosaveWithDraftButtonSlug,
-  autosaveWithValidateCollectionSlug,
+  autosaveWithDraftValidateSlug,
   customIDSlug,
   diffCollectionSlug,
   disablePublishGlobalSlug,
@@ -82,7 +83,7 @@ describe('Versions', () => {
   let serverURL: string
   let autosaveURL: AdminUrlUtil
   let autosaveWithDraftButtonURL: AdminUrlUtil
-  let autosaveWithValidateURL: AdminUrlUtil
+  let autosaveWithDraftValidateURL: AdminUrlUtil
   let draftWithValidateURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
@@ -103,11 +104,12 @@ describe('Versions', () => {
   })
 
   beforeEach(async () => {
-    /* await throttleTest({
-      page,
-      context,
-      delay: 'Slow 4G',
-    }) */
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Fast 4G',
+    // })
+
     await reInitializeDB({
       serverURL,
       snapshotKey: 'versionsTest',
@@ -121,7 +123,7 @@ describe('Versions', () => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       autosaveWithDraftButtonURL = new AdminUrlUtil(serverURL, autosaveWithDraftButtonSlug)
-      autosaveWithValidateURL = new AdminUrlUtil(serverURL, autosaveWithValidateCollectionSlug)
+      autosaveWithDraftValidateURL = new AdminUrlUtil(serverURL, autosaveWithDraftValidateSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
@@ -205,6 +207,7 @@ describe('Versions', () => {
       const fieldValue = autosaveRelationField.locator('.value-container')
       await expect(fieldValue).toContainText('test')
     })
+
     test('should show collection versions view level action in collection versions view', async () => {
       await page.goto(url.list)
       await page.locator('tbody tr .cell-title a').first().click()
@@ -839,6 +842,51 @@ describe('Versions', () => {
       await page.goto(url.global(disablePublishGlobalSlug))
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
+
+    test('global — should show versions drawer when SelectComparison more option is clicked', async () => {
+      await payload.updateGlobal({
+        slug: draftGlobalSlug,
+        data: {
+          title: 'initial title',
+        },
+      })
+      await payload.updateGlobal({
+        slug: draftGlobalSlug,
+        data: {
+          title: 'initial title 2',
+        },
+      })
+
+      const url = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(`${url.global(draftGlobalSlug)}/versions`)
+
+      const versionsTable = page.locator('.table table')
+      await expect(versionsTable).toBeVisible()
+
+      const versionAnchor = versionsTable.locator('tbody tr.row-1 td.cell-updatedAt a')
+      await expect(versionAnchor).toBeVisible()
+      await versionAnchor.click()
+
+      const compareFromContainer = page.locator(
+        '.view-version__version-from .field-type.compare-version',
+      )
+      await expect(compareFromContainer).toBeVisible()
+
+      const fromSelect = compareFromContainer.locator('.react-select .rs__control')
+      await expect(fromSelect).toBeVisible()
+      await fromSelect.click()
+
+      const moreVersions = compareFromContainer.locator('.rs__option:has-text("More versions...")')
+      await expect(moreVersions).toBeVisible()
+      await moreVersions.click()
+
+      const versionDrawer = page.locator('dialog.version-drawer')
+      await expect(versionDrawer).toBeVisible()
+
+      const versionsDrawerTableBody = versionDrawer.locator('main.versions table tbody')
+      await expect(versionsDrawerTableBody).toBeVisible()
+      await expect(versionsDrawerTableBody.locator('tr')).toHaveCount(2)
+    })
   })
 
   describe('Scheduled publish', () => {
@@ -1013,7 +1061,7 @@ describe('Versions', () => {
 
   describe('Collections with draft validation', () => {
     beforeAll(() => {
-      autosaveWithValidateURL = new AdminUrlUtil(serverURL, autosaveWithValidateCollectionSlug)
+      autosaveWithDraftValidateURL = new AdminUrlUtil(serverURL, autosaveWithDraftValidateSlug)
       draftWithValidateURL = new AdminUrlUtil(serverURL, draftWithValidateCollectionSlug)
     })
 
@@ -1127,7 +1175,7 @@ describe('Versions', () => {
     })
 
     test('- with autosave - can save', async () => {
-      await page.goto(autosaveWithValidateURL.create)
+      await page.goto(autosaveWithDraftValidateURL.create)
 
       const titleField = page.locator('#field-title')
       await titleField.fill('Initial')
@@ -1145,7 +1193,7 @@ describe('Versions', () => {
 
     test('- with autosave - can safely trigger validation errors and then continue editing', async () => {
       // This test has to make sure we don't enter an infinite loop when draft.validate is on and we have autosave enabled
-      await page.goto(autosaveWithValidateURL.create)
+      await page.goto(autosaveWithDraftValidateURL.create)
 
       const titleField = page.locator('#field-title')
       await titleField.fill('Initial')
@@ -1167,7 +1215,7 @@ describe('Versions', () => {
     })
 
     test('- with autosave - shows a prevent leave alert when form is submitted but invalid', async () => {
-      await page.goto(autosaveWithValidateURL.create)
+      await page.goto(autosaveWithDraftValidateURL.create)
 
       // Flag to check against if window alert has been displayed and dismissed since we can only check via events
       let alertDisplayed = false

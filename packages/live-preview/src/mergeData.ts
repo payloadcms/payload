@@ -84,7 +84,7 @@ export const mergeData = async <T extends Record<string, any>>(args: {
         res = await requestHandler({
           apiPath: apiRoute || '/api',
           endpoint: encodeURI(
-            `${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}${locale ? `&locale=${locale}` : ''}`,
+            `${collection}?depth=${depth}&limit=${ids.size}&where[id][in]=${Array.from(ids).join(',')}${locale ? `&locale=${locale}` : ''}`,
           ),
           serverURL,
         }).then((res) => res.json())

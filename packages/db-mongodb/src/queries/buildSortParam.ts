@@ -19,7 +19,7 @@ type Args = {
   fields: FlattenedField[]
   locale?: string
   parentIsLocalized?: boolean
-  sort: Sort
+  sort?: Sort
   sortAggregation?: PipelineStage[]
   timestamps: boolean
   versions?: boolean
@@ -77,6 +77,9 @@ const relationshipSort = ({
     ) {
       const relationshipPath = segments.slice(0, i + 1).join('.')
       let sortFieldPath = segments.slice(i + 1, segments.length).join('.')
+      if (sortFieldPath.endsWith('.id')) {
+        sortFieldPath = sortFieldPath.split('.').slice(0, -1).join('.')
+      }
       if (Array.isArray(field.relationTo)) {
         throw new APIError('Not supported')
       }
@@ -96,31 +99,57 @@ const relationshipSort = ({
         sortFieldPath = foreignFieldPath.localizedPath.replace('<locale>', locale)
       }
 
-      if (
-        !sortAggregation.some((each) => {
-          return '$lookup' in each && each.$lookup.as === `__${path}`
-        })
-      ) {
+      const as = `__${relationshipPath.replace(/\./g, '__')}`
+
+      // If we have not already sorted on this relationship yet, we need to add a lookup stage
+      if (!sortAggregation.some((each) => '$lookup' in each && each.$lookup.as === as)) {
+        let localField = versions ? `version.${relationshipPath}` : relationshipPath
+
+        if (adapter.usePipelineInSortLookup) {
+          const flattenedField = `__${localField.replace(/\./g, '__')}_lookup`
+          sortAggregation.push({
+            $addFields: {
+              [flattenedField]: `$${localField}`,
+            },
+          })
+          localField = flattenedField
+        }
+
         sortAggregation.push({
           $lookup: {
-            as: `__${path}`,
+            as,
             foreignField: '_id',
             from: foreignCollection.Model.collection.name,
-            localField: versions ? `version.${relationshipPath}` : relationshipPath,
-            pipeline: [
-              {
-                $project: {
-                  [sortFieldPath]: true,
+            localField,
+            ...(!adapter.usePipelineInSortLookup && {
+              pipeline: [
+                {
+                  $project: {
+                    [sortFieldPath]: true,
+                  },
                 },
-              },
-            ],
+              ],
+            }),
           },
         })
 
-        sort[`__${path}.${sortFieldPath}`] = sortDirection
-
-        return true
+        if (adapter.usePipelineInSortLookup) {
+          sortAggregation.push({
+            $unset: localField,
+          })
+        }
       }
+
+      if (!adapter.usePipelineInSortLookup) {
+        const lookup = sortAggregation.find(
+          (each) => '$lookup' in each && each.$lookup.as === as,
+        ) as PipelineStage.Lookup
+        const pipeline = lookup.$lookup.pipeline![0] as PipelineStage.Project
+        pipeline.$project[sortFieldPath] = true
+      }
+
+      sort[`${as}.${sortFieldPath}`] = sortDirection
+      return true
     }
   }
 
@@ -150,6 +179,12 @@ export const buildSortParam = ({
     sort = [sort]
   }
 
+  // We use this flag to determine if the sort is unique or not to decide whether to add a fallback sort.
+  const isUniqueSort = sort.some((item) => {
+    const field = getFieldByPath({ fields, path: item })
+    return field?.field?.unique
+  })
+
   // In the case of Mongo, when sorting by a field that is not unique, the results are not guaranteed to be in the same order each time.
   // So we add a fallback sort to ensure that the results are always in the same order.
   let fallbackSort = '-id'
@@ -158,7 +193,12 @@ export const buildSortParam = ({
     fallbackSort = '-createdAt'
   }
 
-  if (!(sort.includes(fallbackSort) || sort.includes(fallbackSort.replace('-', '')))) {
+  const includeFallbackSort =
+    !adapter.disableFallbackSort &&
+    !isUniqueSort &&
+    !(sort.includes(fallbackSort) || sort.includes(fallbackSort.replace('-', '')))
+
+  if (includeFallbackSort) {
     sort.push(fallbackSort)
   }
 

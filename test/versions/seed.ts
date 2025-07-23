@@ -8,7 +8,7 @@ import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import { generateLexicalData } from './collections/Diff/generateLexicalData.js'
 import {
-  autosaveWithValidateCollectionSlug,
+  autosaveWithDraftValidateSlug,
   diffCollectionSlug,
   draftCollectionSlug,
   media2CollectionSlug,
@@ -141,7 +141,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   await _payload.create({
-    collection: autosaveWithValidateCollectionSlug,
+    collection: autosaveWithDraftValidateSlug,
     data: {
       title: 'Initial seeded title',
     },
@@ -300,11 +300,17 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     depth: 0,
   })
 
+  const pointGeoJSON: any = {
+    type: 'Point',
+    coordinates: [1, 3],
+  }
+
   await _payload.db.updateOne({
     collection: diffCollectionSlug,
     id: diffDoc.id,
     data: {
       ...diffDoc,
+      point: pointGeoJSON,
       createdAt: new Date(new Date(diffDoc.createdAt).getTime() - 2 * 60 * 10000).toISOString(),
       updatedAt: new Date(new Date(diffDoc.updatedAt).getTime() - 2 * 60 * 10000).toISOString(),
     },
@@ -390,7 +396,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
           },
         ],
       },
-      point: [1, 3],
+      point: pointGeoJSON,
       radio: 'option2',
       relationship: draft2.id,
       relationshipHasMany: [manyDraftsID, draft2.id],

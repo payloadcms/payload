@@ -83,6 +83,10 @@ export default buildConfigWithDefaults({
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
+        collections: {
+          Component: '/components/views/CustomView/index.js#CustomView',
+          path: '/collections',
+        },
         CustomDefaultView: {
           Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
           path: '/custom-default-view',
