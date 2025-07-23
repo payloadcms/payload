@@ -14,6 +14,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
 import {
+  combineWhereConstraints,
   formatAdminURL,
   isNumber,
   mergeListSearchAndWhere,
@@ -122,26 +123,16 @@ export const renderListView = async (
       throw new Error('not-found')
     }
 
+    let baseListFilter = undefined
+
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
-      const baseListFilter = await collectionConfig.admin.baseListFilter({
+      baseListFilter = await collectionConfig.admin.baseListFilter({
         limit: query.limit,
         page: query.page,
         req,
         sort: query.sort,
       })
-
-      if (baseListFilter) {
-        query.where = {
-          and: [query.where, baseListFilter].filter(Boolean),
-        }
-      }
     }
-
-    const whereWithMergedSearch = mergeListSearchAndWhere({
-      collectionConfig,
-      search: typeof query?.search === 'string' ? query.search : undefined,
-      where: query?.where,
-    })
 
     let queryPreset: QueryPreset | undefined
     let queryPresetPermissions: SanitizedCollectionPermission | undefined
@@ -182,7 +173,11 @@ export const renderListView = async (
       req,
       sort: query.sort,
       user,
-      where: whereWithMergedSearch,
+      where: mergeListSearchAndWhere({
+        collectionConfig,
+        search: typeof query?.search === 'string' ? query.search : undefined,
+        where: combineWhereConstraints([query?.where, baseListFilter]),
+      }),
     })
 
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
