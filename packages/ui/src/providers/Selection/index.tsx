@@ -1,11 +1,12 @@
 'use client'
-import type { ClientUser, Where } from 'payload'
+import type { Where } from 'payload'
 
 import { useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
+import { useAuth } from '../Auth/index.js'
 import { useListQuery } from '../ListQuery/index.js'
 import { useLocale } from '../Locale/index.js'
 
@@ -52,7 +53,6 @@ type Props = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly docs: any[]
   readonly totalDocs: number
-  user: ClientUser
 }
 
 const reduceActiveSelections = (selected: Map<number | string, boolean>): (number | string)[] => {
@@ -67,8 +67,9 @@ const reduceActiveSelections = (selected: Map<number | string, boolean>): (numbe
   return ids
 }
 
-export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs, user }) => {
+export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs }) => {
   const contextRef = useRef({} as SelectionContext)
+  const { user } = useAuth()
 
   const { code: locale } = useLocale()
 

@@ -126,7 +126,7 @@ export function DefaultListView(props: ListViewClientProps) {
     <Fragment>
       <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
         <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
-          <SelectionProvider docs={docs} totalDocs={data?.totalDocs} user={user}>
+          <SelectionProvider docs={docs} totalDocs={data?.totalDocs}>
             {BeforeList}
             <Gutter className={`${baseClass}__wrap`}>
               <CollectionListHeader

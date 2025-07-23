@@ -23,20 +23,20 @@ import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumn
 import { GroupByPageControls } from '../elements/PageControls/GroupByPageControls.js'
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import {
+  GroupByHeader,
   OrderableTable,
   Pill,
   SelectAll,
+  SelectionProvider,
   SelectRow,
   SortHeader,
   SortRow,
   Table,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- these MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../exports/client/index.js'
-import { ConditionalSelectionProvider } from '../providers/Selection/ConditionalProvider.js'
 import { filterFields } from '../providers/TableColumns/buildColumnState/filterFields.js'
 import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'
 import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'
-import { GroupByHeader } from '../views/List/GroupByHeader/index.js'
 
 export const renderFilters = (
   fields: Field[],
@@ -242,7 +242,7 @@ export const renderTable = ({
     } as Column)
   }
 
-  if (!orderableFieldName || isGroupingBy) {
+  if (isGroupingBy) {
     return {
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
@@ -253,23 +253,36 @@ export const renderTable = ({
             .join(' ')}
           key={key}
         >
-          <ConditionalSelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
-            {isGroupingBy && (
-              <GroupByHeader
-                collectionConfig={clientCollectionConfig}
-                groupByValue={groupByValue}
-                heading={heading}
-              />
-            )}
+          <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
+            <GroupByHeader
+              collectionConfig={clientCollectionConfig}
+              groupByValue={groupByValue}
+              heading={heading}
+            />
             <Table appearance={tableAppearance} columns={columnsToUse} data={data.docs} />
-            {isGroupingBy && (
-              <GroupByPageControls
-                collectionConfig={clientCollectionConfig}
-                data={data}
-                groupByValue={groupByValue}
-              />
-            )}
-          </ConditionalSelectionProvider>
+            <GroupByPageControls
+              collectionConfig={clientCollectionConfig}
+              data={data}
+              groupByValue={groupByValue}
+            />
+          </SelectionProvider>
+        </div>
+      ),
+    }
+  }
+
+  if (!orderableFieldName) {
+    return {
+      columnState,
+      // key is required since Next.js 15.2.0 to prevent React key error
+      Table: (
+        <div
+          className={['table-wrap', groupByValue !== undefined && `table-wrap--group-by`]
+            .filter(Boolean)
+            .join(' ')}
+          key={key}
+        >
+          <Table appearance={tableAppearance} columns={columnsToUse} data={data.docs} />
         </div>
       ),
     }
