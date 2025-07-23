@@ -16,7 +16,13 @@ export const getFlattenedFieldKeys = (fields: FieldWithPresentational[], prefix 
   const keys: string[] = []
 
   fields.forEach((field) => {
-    if (!('name' in field) || typeof field.name !== 'string') {
+    const fieldHasToCSVFunction =
+      'custom' in field &&
+      typeof field.custom === 'object' &&
+      'plugin-import-export' in field.custom &&
+      field.custom['plugin-import-export']?.toCSV
+
+    if (!('name' in field) || typeof field.name !== 'string' || fieldHasToCSVFunction) {
       return
     }
 
@@ -28,12 +34,15 @@ export const getFlattenedFieldKeys = (fields: FieldWithPresentational[], prefix 
         keys.push(...subKeys)
         break
       }
-      case 'blocks':
+      case 'blocks': {
         field.blocks.forEach((block) => {
-          const blockKeys = getFlattenedFieldKeys(block.fields as FlattenedField[], `${name}_0`)
-          keys.push(...blockKeys)
+          const blockPrefix = `${name}_0_${block.slug}`
+          keys.push(`${blockPrefix}_blockType`)
+          keys.push(`${blockPrefix}_id`)
+          keys.push(...getFlattenedFieldKeys(block.fields as FlattenedField[], blockPrefix))
         })
         break
+      }
       case 'collapsible':
       case 'group':
       case 'row':
@@ -41,11 +50,21 @@ export const getFlattenedFieldKeys = (fields: FieldWithPresentational[], prefix 
         break
       case 'relationship':
         if (field.hasMany) {
-          // e.g. hasManyPolymorphic_0_value_id
-          keys.push(`${name}_0_relationTo`, `${name}_0_value_id`)
+          if (Array.isArray(field.relationTo)) {
+            // hasMany polymorphic
+            keys.push(`${name}_0_relationTo`, `${name}_0_id`)
+          } else {
+            // hasMany monomorphic
+            keys.push(`${name}_0`)
+          }
         } else {
-          // e.g. hasOnePolymorphic_id
-          keys.push(`${name}_id`, `${name}_relationTo`)
+          if (Array.isArray(field.relationTo)) {
+            // hasOne polymorphic
+            keys.push(`${name}_relationTo`, `${name}_id`)
+          } else {
+            // hasOne monomorphic
+            keys.push(name)
+          }
         }
         break
       case 'tabs':

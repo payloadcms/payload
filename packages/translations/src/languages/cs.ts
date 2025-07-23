@@ -86,10 +86,15 @@ export const csTranslations: DefaultTranslationsObject = {
     deletingFile: 'Při mazání souboru došlo k chybě.',
     deletingTitle:
       'Při mazání {{title}} došlo k chybě. Zkontrolujte své připojení a zkuste to znovu.',
+    documentNotFound:
+      'Dokument s ID {{id}} nebyl nalezen. Mohlo být smazáno nebo nikdy neexistovalo, nebo k němu nemáte přístup.',
     emailOrPasswordIncorrect: 'Zadaný email nebo heslo není správné.',
     followingFieldsInvalid_one: 'Následující pole je neplatné:',
     followingFieldsInvalid_other: 'Následující pole jsou neplatná:',
     incorrectCollection: 'Nesprávná kolekce',
+    insufficientClipboardPermissions:
+      'Přístup ke schránce byl odepřen. Zkontrolujte oprávnění ke schránce.',
+    invalidClipboardData: 'Neplatná data ve schránce.',
     invalidFileType: 'Neplatný typ souboru',
     invalidFileTypeValue: 'Neplatný typ souboru: {{value}}',
     invalidRequestArgs: 'Neplatné argumenty v požadavku: {{args}}',
@@ -111,6 +116,7 @@ export const csTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Při nahrávání souboru došlo k chybě.',
     tokenInvalidOrExpired: 'Token je neplatný nebo vypršel.',
     tokenNotProvided: 'Token není poskytnut.',
+    unableToCopy: 'Nelze zkopírovat.',
     unableToDeleteCount: 'Nelze smazat {{count}} z {{total}} {{label}}',
     unableToReindexCollection:
       'Chyba při přeindexování kolekce {{collection}}. Operace byla přerušena.',
@@ -180,6 +186,8 @@ export const csTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Smazat složku',
     folderName: 'Název složky',
     folders: 'Složky',
+    folderTypeDescription:
+      'Vyberte, který typ dokumentů ze sbírky by měl být dovolen v této složce.',
     itemHasBeenMoved: '{{title}} bylo přesunuto do {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} byl přesunut do kořenové složky',
     itemsMovedToFolder: '{{title}} přesunuto do {{folderName}}',
@@ -240,7 +248,9 @@ export const csTranslations: DefaultTranslationsObject = {
       'Tímto budou odstraněny stávající indexy a dokumenty ve všech kolekcích budou znovu zaindexovány.',
     copied: 'Zkopírováno',
     copy: 'Kopírovat',
+    copyField: 'Kopírovat pole',
     copying: 'Kopírování',
+    copyRow: 'Kopírovat řádek',
     copyWarning: 'Chystáte se přepsat {{to}} s {{from}} pro {{label}} {{title}}. Jste si jistý?',
     create: 'Vytvořit',
     created: 'Vytvořeno',
@@ -336,6 +346,8 @@ export const csTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Přepsat existující data pole',
     pageNotFound: 'Stránka nenalezena',
     password: 'Heslo',
+    pasteField: 'Vložit pole',
+    pasteRow: 'Vložit řádek',
     payloadSettings: 'Payload nastavení',
     perPage: 'Na stránku: {{limit}}',
     previous: 'Předchozí',

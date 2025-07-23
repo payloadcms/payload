@@ -86,10 +86,15 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     deletingFile: 'ফাইল মুছতে একটি ত্রুটি হয়েছে।',
     deletingTitle:
       '{{title}} মুছতে একটি ত্রুটি হয়েছে। আপনার সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।',
+    documentNotFound:
+      'আইডি {{id}} এর সাথে সম্পর্কিত ডকুমেন্টটি পাওয়া যাচ্ছে না। এটি মোছা হয়েছে বা কখনই না থাকতে পারে, অথবা আপনার এর প্রবেশাধিকার না থ',
     emailOrPasswordIncorrect: 'প্রদত্ত ইমেইল বা পাসওয়ার্ড ভুল।',
     followingFieldsInvalid_one: 'নিম্নলিখিত ক্ষেত্রটি অবৈধ:',
     followingFieldsInvalid_other: 'নিম্নলিখিত ক্ষেত্রগুলি অবৈধ:',
     incorrectCollection: 'ভুল সংগ্রহ',
+    insufficientClipboardPermissions:
+      'ক্লিপবোর্ড অ্যাক্সেস প্রত্যাখ্যান করা হয়েছে। দয়া করে আপনার ক্লিপবোর্ড অনুমতিগুলি পরীক্ষা করুন।',
+    invalidClipboardData: 'অবৈধ ক্লিপবোর্ড ডেটা।',
     invalidFileType: 'অবৈধ ফাইল প্রকার',
     invalidFileTypeValue: 'অবৈধ ফাইল প্রকার: {{value}}',
     invalidRequestArgs: 'অনুরোধে অবৈধ আর্গুমেন্ট পাস করা হয়েছে: {{args}}',
@@ -111,6 +116,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'ফাইল আপলোড করতে একটি সমস্যা হয়েছে।',
     tokenInvalidOrExpired: 'টোকেন অবৈধ বা মেয়াদ শেষ হয়ে গেছে।',
     tokenNotProvided: 'টোকেন প্রদান করা হয়নি।',
+    unableToCopy: 'কপি করা সম্ভব নয়।',
     unableToDeleteCount: '{{total}} {{label}} এর মধ্যে {{count}} টি মুছতে অক্ষম।',
     unableToReindexCollection:
       '{{collection}} সংগ্রহ পুনরায় সূচিবদ্ধ করতে ত্রুটি হয়েছে। অপারেশন বাতিল করা হয়েছে।',
@@ -181,6 +187,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     deleteFolder: 'ফোল্ডার মুছুন',
     folderName: 'ফোল্ডারের নাম',
     folders: 'ফোল্ডারগুলি',
+    folderTypeDescription:
+      'এই ফোল্ডারে কোন ধরনের সংগ্রহ নথিপত্র অনুমোদিত হওয়া উচিত তা নির্বাচন করুন।',
     itemHasBeenMoved: '{{title}} কে {{folderName}} এ সরানো হয়েছে',
     itemHasBeenMovedToRoot: '{{title}} কে মূল ফোল্ডারে সরানো হয়েছে',
     itemsMovedToFolder: '{{title}} কে {{folderName}} এ সরানো হয়েছে',
@@ -242,7 +250,9 @@ export const bnBdTranslations: DefaultTranslationsObject = {
       'এটি বিদ্যমান সূচিগুলি সরিয়ে দেবে এবং সমস্ত সংগ্রহগুলির ডকুমেন্টগুলি পুনরায় সূচিবদ্ধ করবে।',
     copied: 'কপি করা হয়েছে',
     copy: 'কপি করুন',
+    copyField: 'ফিল্ড কপি করুন',
     copying: 'কপি করা হচ্ছে',
+    copyRow: 'সারি কপি করুন',
     copyWarning:
       'আপনি {{label}} {{title}} এর জন্য {{to}} কে {{from}} দ্বারা ওভাররাইট করতে চলেছেন। আপনি কি নিশ্চিত?',
     create: 'তৈরি করুন',
@@ -339,6 +349,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'বিদ্যমান ফিল্ড ডেটা ওভাররাইট করুন',
     pageNotFound: 'পৃষ্ঠা পাওয়া যায়নি',
     password: 'পাসওয়ার্ড',
+    pasteField: 'ফিল্ড পেস্ট করুন',
+    pasteRow: 'সারি পেস্ট করুন',
     payloadSettings: 'পেলোড সেটিংস',
     perPage: 'প্রতি পৃষ্ঠায়: {{limit}}',
     previous: 'পূর্ববর্তী',

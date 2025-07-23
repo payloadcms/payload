@@ -123,7 +123,7 @@ export const generateFileData = async <T>({
     }
   }
 
-  checkFileRestrictions({
+  await checkFileRestrictions({
     collection: collectionConfig,
     file,
     req,

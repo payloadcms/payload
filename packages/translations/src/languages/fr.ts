@@ -88,10 +88,15 @@ export const frTranslations: DefaultTranslationsObject = {
     deletingFile: 'Une erreur s’est produite lors de la suppression du fichier.',
     deletingTitle:
       'Une erreur s’est produite lors de la suppression de {{title}}. Veuillez vérifier votre connexion puis réessayer.',
+    documentNotFound:
+      "Le document avec l'ID {{id}} n'a pas pu être trouvé. Il a peut-être été supprimé ou n'a jamais existé, ou vous n'avez peut-être pas accès à celui-ci.",
     emailOrPasswordIncorrect: 'L’adresse e-mail ou le mot de passe fourni est incorrect.',
     followingFieldsInvalid_one: 'Le champ suivant n’est pas valide :',
     followingFieldsInvalid_other: 'Les champs suivants ne sont pas valides :',
     incorrectCollection: 'Collection incorrecte',
+    insufficientClipboardPermissions:
+      'Accès au presse-papiers refusé. Veuillez vérifier vos autorisations pour le presse-papiers.',
+    invalidClipboardData: 'Données invalides dans le presse-papiers.',
     invalidFileType: 'Type de fichier invalide',
     invalidFileTypeValue: 'Type de fichier invalide : {{value}}',
     invalidRequestArgs: 'Arguments non valides dans la requête : {{args}}',
@@ -114,6 +119,7 @@ export const frTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Il y a eu un problème lors du téléversement du fichier.',
     tokenInvalidOrExpired: 'Le jeton n’est soit pas valide ou a expiré.',
     tokenNotProvided: 'Jeton non fourni.',
+    unableToCopy: 'Impossible de copier.',
     unableToDeleteCount: 'Impossible de supprimer {{count}} sur {{total}} {{label}}.',
     unableToReindexCollection:
       'Erreur lors de la réindexation de la collection {{collection}}. Opération annulée.',
@@ -186,6 +192,8 @@ export const frTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Supprimer le dossier',
     folderName: 'Nom du dossier',
     folders: 'Dossiers',
+    folderTypeDescription:
+      'Sélectionnez le type de documents de collection qui devraient être autorisés dans ce dossier.',
     itemHasBeenMoved: '{{title}} a été déplacé vers {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} a été déplacé dans le dossier racine',
     itemsMovedToFolder: '{{title}} déplacé vers {{folderName}}',
@@ -248,7 +256,9 @@ export const frTranslations: DefaultTranslationsObject = {
       'Cela supprimera les index existants et réindexera les documents dans toutes les collections.',
     copied: 'Copié',
     copy: 'Copie',
+    copyField: 'Copier le champ',
     copying: 'Copie',
+    copyRow: 'Copier la ligne',
     copyWarning:
       "Vous êtes sur le point d'écraser {{to}} avec {{from}} pour {{label}} {{title}}. Êtes-vous sûr ?",
     create: 'Créer',
@@ -345,6 +355,8 @@ export const frTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Écraser les données existantes du champ',
     pageNotFound: 'Page non trouvée',
     password: 'Mot de passe',
+    pasteField: 'Coller le champ',
+    pasteRow: 'Coller la ligne',
     payloadSettings: 'Paramètres de Payload',
     perPage: 'Par Page: {{limit}}',
     previous: 'Précédent',
