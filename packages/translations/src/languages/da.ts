@@ -362,7 +362,6 @@ export const daTranslations: DefaultTranslationsObject = {
     row: 'Række',
     rows: 'Rækker',
     save: 'Gem',
-    saveLabel: 'Gem {{label}}',
     saving: 'Gemmer...',
     schedulePublishFor: 'Planlæg offentliggørelse for {{title}}',
     searchBy: 'Søg efter {{label}}',

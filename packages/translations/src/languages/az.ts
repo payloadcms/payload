@@ -363,7 +363,6 @@ export const azTranslations: DefaultTranslationsObject = {
     row: 'Sətir',
     rows: 'Sətirlər',
     save: 'Saxla',
-    saveLabel: '{{label}}-i saxla',
     saving: 'Saxlanılır...',
     schedulePublishFor: '{{title}} üçün nəşr cədvəlini təyin edin',
     searchBy: '{{label}} ilə axtar',

@@ -364,7 +364,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     row: 'Rad',
     rows: 'Rader',
     save: 'Lagre',
-    saveLabel: 'Lagre {{label}}',
     saving: 'Lagrer...',
     schedulePublishFor: 'Planlegg publisering for {{title}}',
     searchBy: 'Søk etter {{label}}',

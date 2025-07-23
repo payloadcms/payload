@@ -347,7 +347,6 @@ export const zhTranslations: DefaultTranslationsObject = {
     row: '行',
     rows: '行',
     save: '保存',
-    saveLabel: '保存 {{label}}',
     saving: '保存中...',
     schedulePublishFor: '为{{title}}安排发布时间',
     searchBy: '搜索{{label}}',

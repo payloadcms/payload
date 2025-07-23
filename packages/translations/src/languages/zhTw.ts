@@ -346,7 +346,6 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     row: '行',
     rows: '行',
     save: '儲存',
-    saveLabel: '保存 {{label}}',
     saving: '儲存中...',
     schedulePublishFor: '為{{title}}設定發佈時間',
     searchBy: '搜尋{{label}}',

@@ -366,7 +366,6 @@ export const huTranslations: DefaultTranslationsObject = {
     row: 'Sor',
     rows: 'Sorok',
     save: 'Mentés',
-    saveLabel: 'Mentse el a {{label}}',
     saving: 'Mentés...',
     schedulePublishFor: 'Tervezett közzététel a(z) {{title}} című számára',
     searchBy: 'Keresés a következő szerint: {{label}}',

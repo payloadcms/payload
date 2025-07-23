@@ -235,9 +235,7 @@ export const QueryPresetBar: React.FC<{
               }}
               type="button"
             >
-              {activePreset?.isShared
-                ? t('general:updateForEveryone')
-                : t('general:saveLabel', { label: presetConfig?.labels?.singular })}
+              {activePreset?.isShared ? t('general:updateForEveryone') : t('fields:saveChanges')}
             </ListSelectionButton>
           )}
           {activePreset && queryPresetPermissions?.delete && (

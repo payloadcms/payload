@@ -365,7 +365,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     row: 'Տող',
     rows: 'Տողեր',
     save: 'Պահպանել',
-    saveLabel: 'Պահպանել {{label}}',
     saving: 'Պահպանվում է...',
     schedulePublishFor: 'Հրապարակման ժամանակ նշանակել {{title}}-ի համար',
     searchBy: 'Որոնել ըստ {{label}}-ի',

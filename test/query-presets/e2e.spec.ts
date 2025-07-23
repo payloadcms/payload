@@ -268,7 +268,7 @@ describe('Query Presets', () => {
 
     await expect(
       page.locator('#save-preset', {
-        hasText: exactText('Save'),
+        hasText: exactText('Save changes'),
       }),
     ).toBeVisible()
   })
@@ -285,7 +285,7 @@ describe('Query Presets', () => {
 
     await expect(
       page.locator('#save-preset', {
-        hasText: exactText('Save'),
+        hasText: exactText('Save changes'),
       }),
     ).toBeVisible()
 

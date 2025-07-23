@@ -363,7 +363,6 @@ export const slTranslations: DefaultTranslationsObject = {
     row: 'Vrstica',
     rows: 'Vrstice',
     save: 'Shrani',
-    saveLabel: 'Shrani {{label}}',
     saving: 'Shranjevanje...',
     schedulePublishFor: 'Načrtujte objavo za {{naslov}}',
     searchBy: 'Išči po {{label}}',

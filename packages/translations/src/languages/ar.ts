@@ -357,7 +357,6 @@ export const arTranslations: DefaultTranslationsObject = {
     row: 'سطر',
     rows: 'أسطُر',
     save: 'حفظ',
-    saveLabel: 'احفظ {{label}}',
     saving: 'جاري الحفظ...',
     schedulePublishFor: 'جدولة النشر لـ {{العنوان}}',
     searchBy: 'البحث عن طريق {{label}}',

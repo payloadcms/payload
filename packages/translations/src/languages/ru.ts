@@ -366,7 +366,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     row: 'Строка',
     rows: 'Строки',
     save: 'Сохранить',
-    saveLabel: 'Сохранить {{label}}',
     saving: 'Сохранение...',
     schedulePublishFor: 'Запланировать публикацию для {{title}}',
     searchBy: 'Искать по',

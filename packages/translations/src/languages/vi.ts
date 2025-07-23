@@ -362,7 +362,6 @@ export const viTranslations: DefaultTranslationsObject = {
     row: 'Hàng',
     rows: 'Những hàng',
     save: 'Luu',
-    saveLabel: 'Lưu {{label}}',
     saving: 'Đang lưu...',
     schedulePublishFor: 'Lên lịch xuất bản cho {{title}}',
     searchBy: 'Tìm với {{label}}',

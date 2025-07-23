@@ -364,7 +364,6 @@ export const svTranslations: DefaultTranslationsObject = {
     row: 'Rad',
     rows: 'Rader',
     save: 'Spara',
-    saveLabel: 'Spara {{label}}',
     saving: 'Sparar...',
     schedulePublishFor: 'Schemalägg publicering för {{title}}',
     searchBy: 'Sök efter {{label}}',

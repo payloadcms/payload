@@ -359,7 +359,6 @@ export const etTranslations: DefaultTranslationsObject = {
     row: 'Rida',
     rows: 'Read',
     save: 'Salvesta',
-    saveLabel: 'Salvesta {{label}}',
     saving: 'Salvestamine...',
     schedulePublishFor: 'Planeeri avaldamine {{title}} jaoks',
     searchBy: 'Otsi {{label}} järgi',

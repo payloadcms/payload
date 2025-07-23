@@ -363,7 +363,6 @@ export const plTranslations: DefaultTranslationsObject = {
     row: 'Wiersz',
     rows: 'Wiersze',
     save: 'Zapisz',
-    saveLabel: 'Zapisz {{label}}',
     saving: 'Zapisywanie...',
     schedulePublishFor: 'Zaplanuj publikację dla {{title}}',
     searchBy: 'Szukaj według',

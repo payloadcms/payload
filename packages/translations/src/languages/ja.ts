@@ -364,7 +364,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     row: '列',
     rows: '列',
     save: '保存',
-    saveLabel: '{{label}}を保存する',
     saving: '保存しています...',
     schedulePublishFor: '{{title}}の公開を予定する',
     searchBy: '{{label}} で検索',

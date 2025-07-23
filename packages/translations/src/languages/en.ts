@@ -365,7 +365,6 @@ export const enTranslations = {
     row: 'Row',
     rows: 'Rows',
     save: 'Save',
-    saveLabel: 'Save {{label}}',
     saving: 'Saving...',
     schedulePublishFor: 'Schedule publish for {{title}}',
     searchBy: 'Search by {{label}}',

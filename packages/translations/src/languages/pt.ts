@@ -365,7 +365,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     row: 'Linha',
     rows: 'Linhas',
     save: 'Salvar',
-    saveLabel: 'Salve {{label}}',
     saving: 'Salvando...',
     schedulePublishFor: 'Agendar publicação para {{title}}',
     searchBy: 'Buscar por {{label}}',

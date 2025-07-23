@@ -364,7 +364,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     row: 'ред',
     rows: 'Редове',
     save: 'Запази',
-    saveLabel: 'Запази {{label}}',
     saving: 'Запазване...',
     schedulePublishFor: 'Планирано публикуване за {{title}}',
     searchBy: 'Търси по {{label}}',

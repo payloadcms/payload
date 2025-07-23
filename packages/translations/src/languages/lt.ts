@@ -366,7 +366,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     row: 'Eilutė',
     rows: 'Eilutės',
     save: 'Išsaugoti',
-    saveLabel: 'Išsaugoti {{label}}',
     saving: 'Išsaugoti...',
     schedulePublishFor: 'Suplanuokite publikaciją „{{title}}“',
     searchBy: 'Ieškokite pagal {{label}}',

@@ -361,7 +361,6 @@ export const faTranslations: DefaultTranslationsObject = {
     row: 'ردیف',
     rows: 'ردیف‌ها',
     save: 'ذخیره',
-    saveLabel: 'ذخیره {{label}}',
     saving: 'در حال ذخیره...',
     schedulePublishFor: 'برنامه‌ریزی انتشار برای {{عنوان}}',
     searchBy: 'جستجو بر اساس {{label}}',

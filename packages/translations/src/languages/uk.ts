@@ -363,7 +363,6 @@ export const ukTranslations: DefaultTranslationsObject = {
     row: 'Рядок',
     rows: 'Рядки',
     save: 'Зберегти',
-    saveLabel: 'Зберегти {{label}}',
     saving: 'Збереження...',
     schedulePublishFor: 'Запланувати публікацію для {{title}}',
     searchBy: 'Шукати по {{label}}',

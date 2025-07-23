@@ -357,7 +357,6 @@ export const thTranslations: DefaultTranslationsObject = {
     row: 'แถว',
     rows: 'แถว',
     save: 'บันทึก',
-    saveLabel: 'บันทึก {{label}}',
     saving: 'กำลังบันทึก...',
     schedulePublishFor: 'ตั้งเวลาเผยแพร่สำหรับ {{title}}',
     searchBy: 'ค้นหาด้วย {{label}}',
