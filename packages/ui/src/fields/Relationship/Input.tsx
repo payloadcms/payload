@@ -49,6 +49,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     Description,
     Error,
     filterOptions,
+    formatDisplayedOptions,
     hasMany,
     initialValue,
     isSortable = true,
@@ -101,8 +102,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const valueRef = useRef(value)
   // the line below seems odd
-
-  valueRef.current = value
 
   const [DocumentDrawer, , { isDrawerOpen, openDrawer }] = useDocumentDrawer({
     id: currentlyOpenRelationship.id,
@@ -742,14 +741,18 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                   ? (selected) => {
                       if (hasMany) {
                         if (selected === null) {
+                          valueRef.current = []
                           onChange([])
                         } else {
+                          valueRef.current = selected as ValueWithRelation[]
                           onChange(selected as ValueWithRelation[])
                         }
                       } else if (hasMany === false) {
                         if (selected === null) {
+                          valueRef.current = null
                           onChange(null)
                         } else {
+                          valueRef.current = selected as ValueWithRelation
                           onChange(selected as ValueWithRelation)
                         }
                       }
@@ -822,7 +825,11 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                       }),
                 })
               }}
-              options={options}
+              options={
+                typeof formatDisplayedOptions === 'function'
+                  ? formatDisplayedOptions(options)
+                  : options
+              }
               placeholder={placeholder}
               showError={showError}
               value={valueToRender ?? null}
