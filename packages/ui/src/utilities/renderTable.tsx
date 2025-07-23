@@ -20,10 +20,10 @@ import React from 'react'
 
 import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumnState/index.js'
 
-import { GroupByPageControls } from '../elements/PageControls/GroupByPageControls.js'
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import {
   GroupByHeader,
+  GroupByPageControls,
   OrderableTable,
   Pill,
   SelectAll,
