@@ -1,5 +1,5 @@
 ---
-title: Import Export
+title: Import Export Plugin
 label: Import Export
 order: 40
 desc: Add Import and export functionality to create CSV and JSON data exports
@@ -54,34 +54,15 @@ export default config
 
 ## Options
 
-- `collections` - string[] | optional
-
-Collections to include the Import/Export controls in
-Defaults to all collections
-
-- `debug` - boolean | optional
-
-If true, enables debug logging
-
-- `disableDownload` - boolean | optional
-
-If true, disables the download button in the export preview UI
-
-- `disableJobsQueue` - boolean | optional
-
-Enable to force the export to run synchronously
-
-- `disableSave` - boolean | optional
-
-If true, disables the save button in the export preview UI, defaults to false.
-
-- `format` - 'csv' | 'json' | optional
-
-Forces a specific export format (`csv` or `json`) and hides the format dropdown from the UI and prevents the user from having to choose the export format.
-
-`overrideExportCollection` - function | undefined
-
-This function takes the default export collection configured in the plugin and allows you to override it by modifying and returning it.
+| Property                   | Type            | Default         | Description                                                                                                                          |
+| -------------------------- | --------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `collections`              | string[]        | All collections | Collections to include Import/Export controls in. Defaults to all collections.                                                       |
+| `debug`                    | boolean         | false           | If true, enables debug logging.                                                                                                      |
+| `disableDownload`          | boolean         | false           | If true, disables the download button in the export preview UI.                                                                      |
+| `disableJobsQueue`         | boolean         | false           | If true, forces the export to run synchronously.                                                                                     |
+| `disableSave`              | boolean         | false           | If true, disables the save button in the export preview UI.                                                                          |
+| `format`                   | 'csv' \| 'json' | undefined       | Forces a specific export format (`csv` or `json`), hides the format dropdown, and prevents the user from choosing the export format. |
+| `overrideExportCollection` | function        | undefined       | Function to override the default export collection; takes the default export collection and allows you to modify and return it.      |
 
 ## Field Options
 
