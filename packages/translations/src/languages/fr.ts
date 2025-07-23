@@ -365,6 +365,7 @@ export const frTranslations: DefaultTranslationsObject = {
     remove: 'Retirer',
     rename: 'Renommer',
     reset: 'Réinitialiser',
+    resetLabel: 'Réinitialiser {{label}}',
     resetPreferences: 'Réinitialiser les préférences',
     resetPreferencesDescription:
       'Cela réinitialisera toutes vos préférences aux paramètres par défaut.',

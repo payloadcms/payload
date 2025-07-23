@@ -357,6 +357,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     remove: 'Видалити',
     rename: 'Перейменувати',
     reset: 'Скидання',
+    resetLabel: 'Скинути {{label}}',
     resetPreferences: 'Скинути налаштування',
     resetPreferencesDescription: 'Це скине всі ваші налаштування до значень за замовчуванням.',
     resettingPreferences: 'Скидання налаштувань.',

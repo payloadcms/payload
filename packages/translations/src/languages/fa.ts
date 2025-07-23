@@ -355,6 +355,7 @@ export const faTranslations: DefaultTranslationsObject = {
     remove: 'برداشتن',
     rename: 'تغییر نام',
     reset: 'بازنشانی',
+    resetLabel: 'تنظیم مجدد {{label}}',
     resetPreferences: 'بازنشانی تنظیمات',
     resetPreferencesDescription: 'این تمام تنظیمات شما را به تنظیمات پیش‌فرض بازنشانی خواهد کرد.',
     resettingPreferences: 'در حال بازنشانی تنظیمات.',

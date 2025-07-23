@@ -359,6 +359,7 @@ export const myTranslations: DefaultTranslationsObject = {
     remove: 'ဖယ်ရှားမည်။',
     rename: 'အမည်ပြောင်း',
     reset: 'Tetapkan semula',
+    resetLabel: 'Set semula {{label}}',
     resetPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်မည်',
     resetPreferencesDescription:
       'ဤသည်သည် သင့်၏အကြိုက်များအားလုံးကို အခြားတပ်ဆင်မှုများမှ ပြန်လည်သတ်မှတ်ပေးပါလိမ့်မည်။',

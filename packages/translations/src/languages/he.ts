@@ -347,6 +347,7 @@ export const heTranslations: DefaultTranslationsObject = {
     remove: 'הסר',
     rename: 'שנה שם',
     reset: 'איפוס',
+    resetLabel: 'איפוס {{label}}',
     resetPreferences: 'איפוס העדפות',
     resetPreferencesDescription: 'זאת תאפס את כל ההעדפות שלך להגדרות ברירת המחדל.',
     resettingPreferences: 'מאפס העדפות.',

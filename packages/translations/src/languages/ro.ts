@@ -362,6 +362,7 @@ export const roTranslations: DefaultTranslationsObject = {
     remove: 'Eliminați',
     rename: 'Redenumire',
     reset: 'Resetare',
+    resetLabel: 'Resetați {{label}}',
     resetPreferences: 'Resetare preferințe',
     resetPreferencesDescription: 'Aceasta va reseta toate preferințele tale la setările implicite.',
     resettingPreferences: 'Resetare preferințe.',

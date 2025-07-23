@@ -358,6 +358,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     remove: '削除',
     rename: '名前を変更する',
     reset: 'リセット',
+    resetLabel: '{{label}} をリセットする',
     resetPreferences: '設定をリセット',
     resetPreferencesDescription: 'これにより、すべての設定がデフォルト設定にリセットされます。',
     resettingPreferences: '設定をリセットしています。',

@@ -359,6 +359,7 @@ export const huTranslations: DefaultTranslationsObject = {
     remove: 'Törlés',
     rename: 'Átnevez',
     reset: 'Visszaállítás',
+    resetLabel: '{{label}} visszaállítása',
     resetPreferences: 'Beállítások visszaállítása',
     resetPreferencesDescription:
       'Ez visszaállítja az összes beállítást az alapértelmezett értékekre.',

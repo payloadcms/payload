@@ -358,6 +358,7 @@ export const skTranslations: DefaultTranslationsObject = {
     remove: 'Odstrániť',
     rename: 'Premenovať',
     reset: 'Resetovať',
+    resetLabel: 'Resetovať {{label}}',
     resetPreferences: 'Obnoviť nastavenia',
     resetPreferencesDescription: 'Týmto sa všetky vaše nastavenia vrátia na predvolené hodnoty.',
     resettingPreferences: 'Obnovovanie nastavení.',

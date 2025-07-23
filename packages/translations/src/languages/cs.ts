@@ -356,6 +356,7 @@ export const csTranslations: DefaultTranslationsObject = {
     remove: 'Odstranit',
     rename: 'Přejmenovat',
     reset: 'Resetovat',
+    resetLabel: 'Resetovat {{label}}',
     resetPreferences: 'Obnovit nastavení',
     resetPreferencesDescription: 'Toto obnoví všechna vaše nastavení na výchozí hodnoty.',
     resettingPreferences: 'Obnovování nastavení.',

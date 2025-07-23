@@ -361,6 +361,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     remove: 'Verwijderen',
     rename: 'Hernoemen',
     reset: 'Resetten',
+    resetLabel: 'Herstel {{label}}',
     resetPreferences: 'Voorkeuren resetten',
     resetPreferencesDescription:
       'Dit zal al je voorkeuren terugzetten naar de standaardinstellingen.',

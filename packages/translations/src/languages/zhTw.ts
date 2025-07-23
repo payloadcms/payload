@@ -340,6 +340,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     remove: '移除',
     rename: '重新命名',
     reset: '重設',
+    resetLabel: '重設 {{label}}',
     resetPreferences: '重設偏好設定',
     resetPreferencesDescription: '這將把您的所有偏好設定恢復為預設值。',
     resettingPreferences: '正在重設偏好設定。',

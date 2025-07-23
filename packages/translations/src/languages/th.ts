@@ -351,6 +351,7 @@ export const thTranslations: DefaultTranslationsObject = {
     remove: 'ลบ',
     rename: 'เปลี่ยนชื่อ',
     reset: 'รีเซ็ต',
+    resetLabel: 'รีเซ็ต {{label}}',
     resetPreferences: 'รีเซ็ตการตั้งค่า',
     resetPreferencesDescription: 'การกระทำนี้จะรีเซ็ตการตั้งค่าทั้งหมดของคุณเป็นค่าเริ่มต้น',
     resettingPreferences: 'กำลังรีเซ็ตการตั้งค่า',

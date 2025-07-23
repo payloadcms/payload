@@ -356,6 +356,7 @@ export const viTranslations: DefaultTranslationsObject = {
     remove: 'Loại bỏ',
     rename: 'Đổi tên',
     reset: 'Đặt lại',
+    resetLabel: 'Đặt lại {{label}}',
     resetPreferences: 'Đặt lại sở thích',
     resetPreferencesDescription: 'Điều này sẽ đặt lại tất cả sở thích của bạn về cài đặt mặc định.',
     resettingPreferences: 'Đang đặt lại sở thích.',

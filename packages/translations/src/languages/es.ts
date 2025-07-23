@@ -362,6 +362,7 @@ export const esTranslations: DefaultTranslationsObject = {
     remove: 'Eliminar',
     rename: 'Renombrar',
     reset: 'Restablecer',
+    resetLabel: 'Restablecer {{label}}',
     resetPreferences: 'Restablecer preferencias',
     resetPreferencesDescription:
       'Esto restablecerá todas tus preferencias a los valores predeterminados.',

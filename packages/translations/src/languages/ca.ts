@@ -358,6 +358,7 @@ export const caTranslations: DefaultTranslationsObject = {
     remove: 'Elimina',
     rename: 'Canvia el nom',
     reset: 'Restableix',
+    resetLabel: 'Restableix {{label}}',
     resetPreferences: 'Restablir les preferències',
     resetPreferencesDescription:
       'Això restablirà totes les teves preferències a les configuracions per defecte.',
