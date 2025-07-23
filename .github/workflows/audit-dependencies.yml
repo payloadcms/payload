@@ -9,7 +9,7 @@ on:
       audit-level:
         description: The level of audit to run (low, moderate, high, critical)
         required: false
-        default: critical
+        default: high
       debug:
         description: Enable debug logging
         required: false

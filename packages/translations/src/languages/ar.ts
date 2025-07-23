@@ -183,6 +183,7 @@ export const arTranslations: DefaultTranslationsObject = {
     deleteFolder: 'حذف المجلد',
     folderName: 'اسم المجلد',
     folders: 'مجلدات',
+    folderTypeDescription: 'حدد نوع المستندات التي يجب السماح بها في هذا المجلد من المجموعات.',
     itemHasBeenMoved: 'تم نقل {{title}} إلى {{folderName}}',
     itemHasBeenMovedToRoot: 'تم نقل {{title}} إلى المجلد الجذر',
     itemsMovedToFolder: '{{title}} تم نقله إلى {{folderName}}',

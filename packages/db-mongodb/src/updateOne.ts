@@ -1,4 +1,4 @@
-import type { MongooseUpdateQueryOptions } from 'mongoose'
+import type { MongooseUpdateQueryOptions, UpdateQuery } from 'mongoose'
 import type { UpdateOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -50,15 +50,20 @@ export const updateOne: UpdateOne = async function updateOne(
 
   let result
 
-  transform({ adapter: this, data, fields, operation: 'write' })
+  const $inc: Record<string, number> = {}
+  let updateData: UpdateQuery<any> = data
+  transform({ $inc, adapter: this, data, fields, operation: 'write' })
+  if (Object.keys($inc).length) {
+    updateData = { $inc, $set: updateData }
+  }
 
   try {
     if (returning === false) {
-      await Model.updateOne(query, data, options)
+      await Model.updateOne(query, updateData, options)
       transform({ adapter: this, data, fields, operation: 'read' })
       return null
     } else {
-      result = await Model.findOneAndUpdate(query, data, options)
+      result = await Model.findOneAndUpdate(query, updateData, options)
     }
   } catch (error) {
     handleError({ collection: collectionSlug, error, req })

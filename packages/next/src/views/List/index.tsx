@@ -2,13 +2,11 @@ import type {
   AdminViewServerProps,
   CollectionPreferences,
   ColumnPreference,
-  DefaultDocumentIDType,
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
   QueryPreset,
   SanitizedCollectionPermission,
-  Where,
 } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
@@ -16,10 +14,12 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
 import {
+  combineWhereConstraints,
   formatAdminURL,
   isNumber,
   mergeListSearchAndWhere,
   transformColumnsToPreferences,
+  transformColumnsToSearchParams,
 } from 'payload/shared'
 import React, { Fragment } from 'react'
 
@@ -87,27 +87,32 @@ export const renderListView = async (
     throw new Error('not-found')
   }
 
-  const query = queryFromArgs || queryFromReq
+  const query: ListQuery = queryFromArgs || queryFromReq
 
-  const columns: ColumnPreference[] = transformColumnsToPreferences(
-    query?.columns as ColumnPreference[] | string,
-  )
+  const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
-  /**
-   * @todo: find a pattern to avoid setting preferences on hard navigation, i.e. direct links, page refresh, etc.
-   * This will ensure that prefs are only updated when explicitly set by the user
-   * This could potentially be done by injecting a `sessionID` into the params and comparing it against a session cookie
-   */
   const collectionPreferences = await upsertPreferences<CollectionPreferences>({
     key: `collection-${collectionSlug}`,
     req,
     value: {
-      columns,
+      columns: columnsFromQuery,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-      preset: (query?.preset as DefaultDocumentIDType) || null,
+      preset: query?.preset,
       sort: query?.sort as string,
     },
   })
+
+  query.preset = collectionPreferences?.preset
+
+  query.page = isNumber(query?.page) ? Number(query.page) : 0
+
+  query.limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+
+  query.sort =
+    collectionPreferences?.sort ||
+    (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+
+  query.columns = transformColumnsToSearchParams(collectionPreferences?.columns || [])
 
   const {
     routes: { admin: adminRoute },
@@ -118,33 +123,15 @@ export const renderListView = async (
       throw new Error('not-found')
     }
 
-    const page = isNumber(query?.page) ? Number(query.page) : 0
-
-    const limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
-
-    const sort =
-      collectionPreferences?.sort ||
-      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
-
-    let where = mergeListSearchAndWhere({
-      collectionConfig,
-      search: typeof query?.search === 'string' ? query.search : undefined,
-      where: (query?.where as Where) || undefined,
-    })
+    let baseListFilter = undefined
 
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
-      const baseListFilter = await collectionConfig.admin.baseListFilter({
-        limit,
-        page,
+      baseListFilter = await collectionConfig.admin.baseListFilter({
+        limit: query.limit,
+        page: query.page,
         req,
-        sort,
+        sort: query.sort,
       })
-
-      if (baseListFilter) {
-        where = {
-          and: [where, baseListFilter].filter(Boolean),
-        }
-      }
     }
 
     let queryPreset: QueryPreset | undefined
@@ -179,14 +166,18 @@ export const renderListView = async (
       draft: true,
       fallbackLocale: false,
       includeLockStatus: true,
-      limit,
+      limit: query.limit,
       locale,
       overrideAccess: false,
-      page,
+      page: query.page,
       req,
-      sort,
+      sort: query.sort,
       user,
-      where: where || {},
+      where: mergeListSearchAndWhere({
+        collectionConfig,
+        search: typeof query?.search === 'string' ? query.search : undefined,
+        where: combineWhereConstraints([query?.where, baseListFilter]),
+      }),
     })
 
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
@@ -194,8 +185,7 @@ export const renderListView = async (
     const { columnState, Table } = renderTable({
       clientCollectionConfig,
       collectionConfig,
-      columnPreferences: collectionPreferences?.columns,
-      columns,
+      columns: collectionPreferences?.columns,
       customCellProps,
       docs: data.docs,
       drawerSlug,
@@ -232,7 +222,7 @@ export const renderListView = async (
       collectionConfig,
       data,
       i18n,
-      limit,
+      limit: query.limit,
       listPreferences: collectionPreferences,
       listSearchableFields: collectionConfig.admin.listSearchableFields,
       locale: fullLocale,
@@ -258,19 +248,19 @@ export const renderListView = async (
 
     const isInDrawer = Boolean(drawerSlug)
 
+    // Needed to prevent: Only plain objects can be passed to Client Components from Server Components. Objects with toJSON methods are not supported. Convert it manually to a simple value before passing it to props.
+    query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
+
     return {
       List: (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
             collectionSlug={collectionSlug}
-            columns={transformColumnsToPreferences(columnState)}
             data={data}
-            defaultLimit={limit}
-            defaultSort={sort}
-            listPreferences={collectionPreferences}
             modifySearchParams={!isInDrawer}
             orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
+            query={query}
           >
             {RenderServerComponent({
               clientProps: {

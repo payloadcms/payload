@@ -1,6 +1,5 @@
-import type { FlattenedField } from 'payload'
-
 import { sql } from 'drizzle-orm'
+import { APIError, type FlattenedField } from 'payload'
 import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -41,6 +40,7 @@ type Args = {
    */
   columnPrefix: string
   data: Record<string, unknown>
+  enableAtomicWrites?: boolean
   existingLocales?: Record<string, unknown>[]
   /**
    * A prefix that will retain camel-case formatting, representing prior fields
@@ -87,6 +87,7 @@ export const traverseFields = ({
   blocksToDelete,
   columnPrefix,
   data,
+  enableAtomicWrites,
   existingLocales,
   fieldPrefix,
   fields,
@@ -268,6 +269,7 @@ export const traverseFields = ({
               blocksToDelete,
               columnPrefix: `${columnName}_`,
               data: localeData as Record<string, unknown>,
+              enableAtomicWrites,
               existingLocales,
               fieldPrefix: `${fieldName}_`,
               fields: field.flattenedFields,
@@ -551,6 +553,22 @@ export const traverseFields = ({
 
         if (field.type === 'text' && value && typeof value !== 'string') {
           formattedValue = JSON.stringify(value)
+        }
+
+        if (
+          field.type === 'number' &&
+          value &&
+          typeof value === 'object' &&
+          '$inc' in value &&
+          typeof value.$inc === 'number'
+        ) {
+          if (!enableAtomicWrites) {
+            throw new APIError(
+              'The passed data must not contain any nested fields for atomic writes',
+            )
+          }
+
+          formattedValue = sql.raw(`${columnName} + ${value.$inc}`)
         }
 
         if (field.type === 'date') {

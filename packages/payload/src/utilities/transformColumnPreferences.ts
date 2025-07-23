@@ -11,7 +11,7 @@ export type ColumnsFromURL = string[]
  * This means that when handling columns, they need to be consistently transformed back and forth
  */
 export const transformColumnsToPreferences = (
-  columns: Column[] | ColumnPreference[] | ColumnsFromURL | string,
+  columns: Column[] | ColumnPreference[] | ColumnsFromURL | string | undefined,
 ): ColumnPreference[] | undefined => {
   let columnsToTransform = columns
 
@@ -44,5 +44,5 @@ export const transformColumnsToPreferences = (
 export const transformColumnsToSearchParams = (
   columns: Column[] | ColumnPreference[],
 ): ColumnsFromURL => {
-  return columns.map((col) => (col.active ? col.accessor : `-${col.accessor}`))
+  return columns?.map((col) => (col.active ? col.accessor : `-${col.accessor}`))
 }

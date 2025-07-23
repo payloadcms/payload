@@ -114,7 +114,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const renderTable = useCallback(
     async (docs?: PaginatedDocs['docs']) => {
       const newQuery: ListQuery = {
-        limit: String(field?.defaultLimit || collectionConfig?.admin?.pagination?.defaultLimit),
+        limit: field?.defaultLimit || collectionConfig?.admin?.pagination?.defaultLimit,
         sort: field.defaultSort || collectionConfig?.defaultSort,
         ...(query || {}),
         where: { ...(query?.where || {}) },
@@ -240,6 +240,15 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDrawerOpen])
 
+  const memoizedQuery = React.useMemo(
+    () => ({
+      columns: transformColumnsToPreferences(columnState)?.map(({ accessor }) => accessor),
+      limit: field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit,
+      sort: field.defaultSort ?? collectionConfig?.defaultSort,
+    }),
+    [field, columnState, collectionConfig],
+  )
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
@@ -306,12 +315,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           {data?.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <ListQueryProvider
-                columns={transformColumnsToPreferences(columnState)}
                 data={data}
-                defaultLimit={
-                  field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit
-                }
-                defaultSort={field.defaultSort ?? collectionConfig?.defaultSort}
                 modifySearchParams={false}
                 onQueryChange={setQuery}
                 orderableFieldName={
@@ -319,6 +323,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     ? undefined
                     : `_${field.collection}_${fieldPath.replaceAll('.', '_')}_order`
                 }
+                query={memoizedQuery}
               >
                 <TableColumnsProvider
                   collectionSlug={isPolymorphic ? relationTo[0] : relationTo}
