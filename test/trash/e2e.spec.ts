@@ -89,6 +89,12 @@ describe('Trash', () => {
         await expect(page.locator('#trash-view-pill')).toBeVisible()
       })
 
+      test('should show all posts tab in list view of a collection with trash enabled', async () => {
+        await page.goto(postsUrl.list)
+
+        await expect(page.locator('#all-posts')).toBeVisible()
+      })
+
       test('Should not show checkbox to delete permanently bulk delete modal in trash disabled collection', async () => {
         await page.goto(pagesUrl.list)
 
@@ -328,7 +334,7 @@ describe('Trash', () => {
         )
       })
 
-      test('Should successfully restore all trashed docs with restore button', async () => {
+      test('Should successfully restore all trashed docs with restore button as draft by default', async () => {
         await mapAsync([...Array(2)], async () => {
           await createTrashedPostDoc({
             title: 'Ready for restore',
@@ -346,8 +352,8 @@ describe('Trash', () => {
         await expect(page.locator('#confirm-restore-many-docs')).toBeVisible()
 
         await expect(
-          page.locator('#confirm-restore-many-docs .confirmation-modal__content p'),
-        ).toContainText('You are about to restore 2 Posts')
+          page.locator('#confirm-restore-many-docs .confirmation-modal__content'),
+        ).toContainText('You are about to restore 2 Posts as draft')
 
         await page.locator('#confirm-restore-many-docs #confirm-action').click()
 
@@ -363,6 +369,104 @@ describe('Trash', () => {
         // Verify that the posts have been restored and exist in the list view
         await expect(page.locator('.row-1 .cell-title')).toHaveText('Ready for restore')
         await expect(page.locator('.row-2 .cell-title')).toHaveText('Ready for restore')
+
+        // Check that restored docs have `_status = "draft"`
+        await expect
+          .poll(async () => {
+            const { docs } = await payload.find({
+              collection: postsSlug,
+              where: {
+                title: { equals: 'Ready for restore' },
+              },
+            })
+            return docs.length
+          })
+          .toBe(2)
+
+        await expect
+          .poll(async () => {
+            const { docs } = await payload.find({
+              collection: postsSlug,
+              where: {
+                title: { equals: 'Ready for restore' },
+              },
+            })
+            return docs.every((doc) => doc._status === 'draft')
+          })
+          .toBe(true)
+
+        await payload.delete({
+          collection: postsSlug,
+          where: {
+            title: {
+              equals: 'Ready for restore',
+            },
+          },
+        })
+      })
+
+      test('Should successfully restore all trashed docs with restore button as published', async () => {
+        await mapAsync([...Array(2)], async () => {
+          await createTrashedPostDoc({
+            title: 'Ready for restore',
+          })
+        })
+
+        await page.goto(postsUrl.trash)
+
+        await expect(page.locator('.cell-title', { hasText: 'Ready for restore' })).toHaveCount(2)
+
+        await page.locator('input#select-all').check()
+
+        await page.locator('.list-selection__button[aria-label="Restore"]').click()
+
+        await expect(page.locator('#confirm-restore-many-docs')).toBeVisible()
+
+        await expect(
+          page.locator('#confirm-restore-many-docs .confirmation-modal__content'),
+        ).toContainText('You are about to restore 2 Posts as draft')
+
+        await page.locator('#restore-as-published-many').check()
+
+        await page.locator('#confirm-restore-many-docs #confirm-action').click()
+
+        await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+          'Restored 2 Posts successfully.',
+        )
+        // Verify that the posts are no longer in the trash view
+        await expect(page.locator('.cell-title', { hasText: 'Ready for restore' })).toHaveCount(0)
+
+        // Navigate back to the list view
+        await page.goto(postsUrl.list)
+
+        // Verify that the posts have been restored and exist in the list view
+        await expect(page.locator('.row-1 .cell-title')).toHaveText('Ready for restore')
+        await expect(page.locator('.row-2 .cell-title')).toHaveText('Ready for restore')
+
+        // Check that restored docs have `_status = "draft"`
+        await expect
+          .poll(async () => {
+            const { docs } = await payload.find({
+              collection: postsSlug,
+              where: {
+                title: { equals: 'Ready for restore' },
+              },
+            })
+            return docs.length
+          })
+          .toBe(2)
+
+        await expect
+          .poll(async () => {
+            const { docs } = await payload.find({
+              collection: postsSlug,
+              where: {
+                title: { equals: 'Ready for restore' },
+              },
+            })
+            return docs.every((doc) => doc._status === 'published')
+          })
+          .toBe(true)
 
         await payload.delete({
           collection: postsSlug,
@@ -460,6 +564,12 @@ describe('Trash', () => {
         )
       })
 
+      test('should show trash banner in the edit view', async () => {
+        await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
+
+        await expect(page.locator('.trash-banner')).toBeVisible()
+      })
+
       test('Should navigate back to the trash view using the `trash` breadcrumb', async () => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
@@ -493,6 +603,98 @@ describe('Trash', () => {
 
         const restoreButton = page.locator('.doc-controls__controls #action-restore')
         await expect(restoreButton).toBeVisible()
+      })
+
+      test('should successfully permanently delete a trashed doc with Permanently Delete button', async () => {
+        await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
+
+        const permanentlyDeleteButton = page.locator(
+          '.doc-controls__controls #action-permanently-delete',
+        )
+        await expect(permanentlyDeleteButton).toBeVisible()
+
+        await permanentlyDeleteButton.click()
+
+        await expect(page.locator(`#perma-delete-${trashedPostDocOne.id}`)).toBeVisible()
+        await expect(
+          page.locator(`#perma-delete-${trashedPostDocOne.id} .confirmation-modal__content`),
+        ).toContainText('You are about to permanently delete the Post')
+
+        await page.locator(`#perma-delete-${trashedPostDocOne.id} #confirm-action`).click()
+
+        await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+          'Post "Trashed Post" successfully deleted.',
+        )
+
+        // Verify that the post has been permanently deleted
+        await expect
+          .poll(async () => {
+            const deletedPost = await payload.find({
+              collection: postsSlug,
+              trash: true,
+              where: {
+                and: [
+                  {
+                    deletedAt: {
+                      exists: true,
+                    },
+                  },
+                  {
+                    id: {
+                      equals: trashedPostDocOne.id,
+                    },
+                  },
+                ],
+              },
+            })
+            return deletedPost.docs.length
+          })
+          .toBe(0)
+      })
+
+      test('should successfully restore a trashed doc with Restore button', async () => {
+        await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
+
+        const restoreButton = page.locator('.doc-controls__controls #action-restore')
+        await expect(restoreButton).toBeVisible()
+
+        await restoreButton.click()
+
+        await expect(page.locator(`#restore-${trashedPostDocOne.id}`)).toBeVisible()
+        await expect(
+          page.locator(`#restore-${trashedPostDocOne.id} .confirmation-modal__content`),
+        ).toContainText('You are about to restore the Post Trashed Post as a draft. Are you sure?')
+
+        await page.locator(`#restore-${trashedPostDocOne.id} #confirm-action`).click()
+
+        await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+          'Post "Trashed Post" successfully restored.',
+        )
+
+        // Check that restored doc has `_status = "draft"`
+        await expect
+          .poll(async () => {
+            const { docs } = await payload.find({
+              collection: postsSlug,
+              where: {
+                id: { equals: trashedPostDocOne.id },
+              },
+            })
+            return docs.length
+          })
+          .toBe(1)
+
+        await expect
+          .poll(async () => {
+            const { docs } = await payload.find({
+              collection: postsSlug,
+              where: {
+                id: { equals: trashedPostDocOne.id },
+              },
+            })
+            return docs[0]?._status === 'draft'
+          })
+          .toBe(true)
       })
 
       test('Should render fields as read-only', async () => {
