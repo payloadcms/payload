@@ -385,6 +385,118 @@ describe('database', () => {
     })
   })
 
+  it('should find distinct field values of the collection', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    const titles = [
+      'title-1',
+      'title-2',
+      'title-3',
+      'title-4',
+      'title-5',
+      'title-6',
+      'title-7',
+      'title-8',
+      'title-9',
+    ].map((title) => ({ title }))
+
+    for (const { title } of titles) {
+      // eslint-disable-next-line jest/no-conditional-in-test
+      const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
+      for (let i = 0; i < docsCount; i++) {
+        await payload.create({ collection: 'posts', data: { title } })
+      }
+    }
+
+    const res = await payload.findDistinct({
+      collection: 'posts',
+      field: 'title',
+    })
+
+    expect(res.values).toStrictEqual(titles)
+
+    // const resREST = await restClient
+    //   .GET('/posts/distinct', {
+    //     headers: {
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //     query: { sortOrder: 'asc', field: 'title' },
+    //   })
+    //   .then((res) => res.json())
+
+    // expect(resREST.values).toEqual(titles)
+
+    const resLimit = await payload.findDistinct({
+      collection: 'posts',
+      field: 'title',
+      limit: 3,
+    })
+
+    expect(resLimit.values).toStrictEqual(
+      ['title-1', 'title-2', 'title-3'].map((title) => ({ title })),
+    )
+    // count is still 9
+    expect(resLimit.totalDocs).toBe(9)
+
+    const resDesc = await payload.findDistinct({
+      collection: 'posts',
+      sort: '-title',
+      field: 'title',
+    })
+
+    expect(resDesc.values).toStrictEqual(titles.toReversed())
+
+    const resAscDefault = await payload.findDistinct({
+      collection: 'posts',
+      field: 'title',
+    })
+
+    expect(resAscDefault.values).toStrictEqual(titles)
+  })
+
+  it('should populate distinct relationships when depth>0', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+
+    const categories = ['category-1', 'category-2', 'category-3', 'category-4'].map((title) => ({
+      title,
+    }))
+
+    const categoriesIDS: { category: string }[] = []
+
+    for (const { title } of categories) {
+      const doc = await payload.create({ collection: 'categories', data: { title } })
+      categoriesIDS.push({ category: doc.id })
+    }
+
+    for (const { category } of categoriesIDS) {
+      // eslint-disable-next-line jest/no-conditional-in-test
+      const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
+      for (let i = 0; i < docsCount; i++) {
+        await payload.create({ collection: 'posts', data: { title: randomUUID(), category } })
+      }
+    }
+
+    const resultDepth0 = await payload.findDistinct({
+      collection: 'posts',
+      sort: 'category.title',
+      field: 'category',
+    })
+    expect(resultDepth0.values).toStrictEqual(categoriesIDS)
+    const resultDepth1 = await payload.findDistinct({
+      depth: 1,
+      collection: 'posts',
+      field: 'category',
+      sort: 'category.title',
+    })
+
+    for (let i = 0; i < resultDepth1.values.length; i++) {
+      const fromRes = resultDepth1.values[i] as any
+      const id = categoriesIDS[i].category as any
+      const title = categories[i]?.title
+      expect(fromRes.category.title).toBe(title)
+      expect(fromRes.category.id).toBe(id)
+    }
+  })
+
   describe('Compound Indexes', () => {
     beforeEach(async () => {
       await payload.delete({ collection: 'compound-indexes', where: {} })

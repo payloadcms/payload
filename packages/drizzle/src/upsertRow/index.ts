@@ -1,4 +1,5 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
+import type { SelectedFields } from 'drizzle-orm/sqlite-core'
 import type { TypeWithID } from 'payload'
 
 import { eq } from 'drizzle-orm'
@@ -70,14 +71,27 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       tableName,
     })
 
-    if (!Object.keys(findManyArgs).length) {
+    const findManyKeysLength = Object.keys(findManyArgs).length
+    const hasOnlyColumns = Object.keys(findManyArgs.columns || {}).length > 0
+
+    if (findManyKeysLength === 0 || hasOnlyColumns) {
       // Optimization - No need for joins => can simply use returning(). This is optimal for very simple collections
       // without complex fields that live in separate tables like blocks, arrays, relationships, etc.
+
+      const selectedFields: SelectedFields = {}
+      if (hasOnlyColumns) {
+        for (const [column, enabled] of Object.entries(findManyArgs.columns)) {
+          if (enabled) {
+            selectedFields[column] = adapter.tables[tableName][column]
+          }
+        }
+      }
+
       const docs = await drizzle
         .update(adapter.tables[tableName])
         .set(row)
         .where(eq(adapter.tables[tableName].id, id))
-        .returning()
+        .returning(Object.keys(selectedFields).length ? selectedFields : undefined)
 
       return transform<T>({
         adapter,
@@ -109,7 +123,6 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       tableName,
     })
   }
-
   // Split out the incoming data into the corresponding:
   // base row, locales, relationships, blocks, and arrays
   const rowToInsert = transformForWrite({

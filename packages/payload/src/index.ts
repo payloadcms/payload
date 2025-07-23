@@ -40,7 +40,7 @@ import {
 } from './auth/operations/local/verifyEmail.js'
 export type { FieldState } from './admin/forms/Form.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
-import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types.js'
+import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
 import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
 import type {
@@ -72,6 +72,10 @@ import {
   findByIDLocal,
   type Options as FindByIDOptions,
 } from './collections/operations/local/findByID.js'
+import {
+  findDistinct as findDistinctLocal,
+  type Options as FindDistinctOptions,
+} from './collections/operations/local/findDistinct.js'
 import {
   findVersionByIDLocal,
   type Options as FindVersionByIDOptions,
@@ -133,6 +137,7 @@ import { countVersionsLocal } from './collections/operations/local/countVersions
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
+import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
@@ -462,6 +467,20 @@ export class BasePayload {
     options: FindByIDOptions<TSlug, TDisableErrors, TSelect>,
   ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
     return findByIDLocal<TSlug, TDisableErrors, TSelect>(this, options)
+  }
+
+  /**
+   * @description Find distinct field values
+   * @param options
+   * @returns result with distinct field values
+   */
+  findDistinct = async <
+    TSlug extends CollectionSlug,
+    TField extends keyof DataFromCollectionSlug<TSlug> & string,
+  >(
+    options: FindDistinctOptions<TSlug, TField>,
+  ): Promise<PaginatedDistinctDocs<Record<TField, DataFromCollectionSlug<TSlug>[TField]>>> => {
+    return findDistinctLocal(this, options)
   }
 
   findGlobal = async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
@@ -847,24 +866,38 @@ export class BasePayload {
 
       await Promise.all(
         cronJobs.map((cronConfig) => {
-          const job = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+          const jobAutorunCron = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+            if (
+              _internal_jobSystemGlobals.shouldAutoSchedule &&
+              !cronConfig.disableScheduling &&
+              this.config.jobs.scheduling
+            ) {
+              await this.jobs.handleSchedules({
+                queue: cronConfig.queue,
+              })
+            }
+
+            if (!_internal_jobSystemGlobals.shouldAutoRun) {
+              return
+            }
+
             if (typeof this.config.jobs.shouldAutoRun === 'function') {
               const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
 
               if (!shouldAutoRun) {
-                job.stop()
-
-                return false
+                jobAutorunCron.stop()
+                return
               }
             }
 
             await this.jobs.run({
               limit: cronConfig.limit ?? DEFAULT_LIMIT,
               queue: cronConfig.queue,
+              silent: cronConfig.silent,
             })
           })
 
-          this.crons.push(job)
+          this.crons.push(jobAutorunCron)
         }),
       )
     }
@@ -913,8 +946,10 @@ export const reload = async (
   payload: Payload,
   skipImportMapGeneration?: boolean,
 ): Promise<void> => {
-  await payload.destroy()
-
+  if (typeof payload.db.destroy === 'function') {
+    // Only destroy db, as we then later only call payload.db.init and not payload.init
+    await payload.db.destroy()
+  }
   payload.config = config
 
   payload.collections = config.collections.reduce(
@@ -1158,6 +1193,7 @@ export type {
 
 export type { CompoundIndex } from './collections/config/types.js'
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
+
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
@@ -1174,7 +1210,6 @@ export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
 
 export { buildConfig } from './config/build.js'
-
 export {
   type ClientConfig,
   createClientConfig,
@@ -1183,6 +1218,7 @@ export {
   type UnsanitizedClientConfig,
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
+
 export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
@@ -1237,6 +1273,7 @@ export type {
   Destroy,
   Find,
   FindArgs,
+  FindDistinct,
   FindGlobal,
   FindGlobalArgs,
   FindGlobalVersions,
@@ -1250,6 +1287,7 @@ export type {
   Migration,
   MigrationData,
   MigrationTemplateArgs,
+  PaginatedDistinctDocs,
   PaginatedDocs,
   QueryDrafts,
   QueryDraftsArgs,
@@ -1301,6 +1339,7 @@ export {
 
 export type { ValidationFieldError } from './errors/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
+
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 
 export {
@@ -1424,6 +1463,7 @@ export type {
 
 export { getDefaultValue } from './fields/getDefaultValue.js'
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
+
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
@@ -1431,6 +1471,7 @@ export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/b
 
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export { validations } from './fields/validations.js'
+
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
@@ -1485,6 +1526,7 @@ export type {
 
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
+
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
@@ -1505,8 +1547,7 @@ export type {
   TabsPreferences,
 } from './preferences/types.js'
 export type { QueryPreset } from './query-presets/types.js'
-export { jobAfterRead } from './queues/config/index.js'
-
+export { jobAfterRead } from './queues/config/collection.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 export type {
   RunInlineTaskFunction,
@@ -1521,6 +1562,7 @@ export type {
   TaskOutput,
   TaskType,
 } from './queues/config/types/taskTypes.js'
+
 export type {
   BaseJob,
   JobLog,
@@ -1531,8 +1573,14 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
-
+export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
+
+export {
+  _internal_jobSystemGlobals,
+  _internal_resetJobSystemGlobals,
+  getCurrentDate,
+} from './queues/utilities/getCurrentDate.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'

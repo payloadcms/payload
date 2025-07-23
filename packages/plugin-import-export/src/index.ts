@@ -1,6 +1,6 @@
 import type { Config, FlattenedField } from 'payload'
 
-import { addDataAndFileToRequest, deepMergeSimple, flattenTopLevelFields } from 'payload'
+import { addDataAndFileToRequest, deepMergeSimple } from 'payload'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { ImportExportPluginConfig, ToCSVFunction } from './types.js'
@@ -11,6 +11,7 @@ import { getCustomFieldFunctions } from './export/getCustomFieldFunctions.js'
 import { getSelect } from './export/getSelect.js'
 import { getExportCollection } from './getExportCollection.js'
 import { translations } from './translations/index.js'
+import { collectDisabledFieldPaths } from './utilities/collectDisabledFieldPaths.js'
 import { getFlattenedFieldKeys } from './utilities/getFlattenedFieldKeys.js'
 
 export const importExportPlugin =
@@ -59,15 +60,8 @@ export const importExportPlugin =
         path: '@payloadcms/plugin-import-export/rsc#ExportListMenuItem',
       })
 
-      // Flatten top-level fields to expose nested fields for export config
-      const flattenedFields = flattenTopLevelFields(collection.fields, {
-        moveSubFieldsToTop: true,
-      })
-
-      // Find fields explicitly marked as disabled for import/export
-      const disabledFieldAccessors = flattenedFields
-        .filter((field) => field.custom?.['plugin-import-export']?.disabled)
-        .map((field) => field.accessor || field.name)
+      // // Find fields explicitly marked as disabled for import/export
+      const disabledFieldAccessors = collectDisabledFieldPaths(collection.fields)
 
       // Store disabled field accessors in the admin config for use in the UI
       collection.admin.custom = {

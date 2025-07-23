@@ -187,6 +187,7 @@ export const myTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Padam Folder',
     folderName: 'ဖိုင်နာမည်',
     folders: 'Fail',
+    folderTypeDescription: 'Pilih jenis dokumen koleksi yang harus diizinkan dalam folder ini.',
     itemHasBeenMoved: '{{title}} telah dipindahkan ke {{folderName}}',
     itemHasBeenMovedToRoot: '"{{title}}" က ဗဟိုဖိုလ်ဒါသို့ရွှေ့ပြီးပါပြီ။',
     itemsMovedToFolder: '{{title}} သို့ {{folderName}} သို့ ရွှေ့လိုက်သွားပါပယ်',
