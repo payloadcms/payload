@@ -40,7 +40,7 @@ export const CustomListDrawer = () => {
 
       // In the root document view, there is no outer drawer context, so this will be `undefined`
       if (typeof refresh === 'function') {
-        await refresh('custom-list-drawer')
+        await refresh()
       }
     } catch (_err) {
       console.error('Error creating document:', _err) // eslint-disable-line no-console

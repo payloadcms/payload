@@ -34,7 +34,7 @@ export type ListDrawerContextType = {
    * When called, will either refresh the list view with its currently selected collection.
    * If an collection slug is provided, will use that instead of the currently selected one.
    */
-  readonly refresh: (collectionSlug: CollectionSlug) => Promise<void>
+  readonly refresh: (collectionSlug?: CollectionSlug) => Promise<void>
 } & ListDrawerContextProps
 
 export const ListDrawerContext = createContext({} as ListDrawerContextType)
