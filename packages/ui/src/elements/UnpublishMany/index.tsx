@@ -36,7 +36,6 @@ export const UnpublishMany_v4: React.FC<
      * When multiple UnpublishMany components are rendered on the page, this will differentiate them.
      */
     modalPrefix?: string
-    onModalOpen?: () => void
     onSuccess?: () => void
     selectAll: boolean
     where?: Where

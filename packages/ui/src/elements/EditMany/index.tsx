@@ -43,7 +43,6 @@ export const EditMany_v4: React.FC<
      * When multiple EditMany components are rendered on the page, this will differentiate them.
      */
     modalPrefix?: string
-    onModalOpen?: () => void
     onSuccess?: () => void
     selectAll: boolean
     where?: Where

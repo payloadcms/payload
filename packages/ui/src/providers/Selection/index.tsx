@@ -29,8 +29,7 @@ type SelectionContext = {
   setSelection: (id: number | string) => void
   /**
    * Selects all rows on the current page within the current query.
-   * If `allAvailable` is true, selects all available rows across all pages within the current query.
-   * If `groupBy` is enabled, `allAvailable` is not supported. Use
+   * If `allAvailable` is true, does not select specific IDs so that the query itself affects all rows across all pages.
    */
   toggleAll: (allAvailable?: boolean) => void
   totalDocs: number
