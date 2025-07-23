@@ -17,8 +17,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { Pill } from '../Pill/index.js'
-import { ActiveQueryPreset } from '../QueryPresets/ActiveQueryPreset/index.js'
-import { useQueryPresets } from '../QueryPresets/useQueryPresets.js'
+import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
@@ -48,20 +47,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   } = props
 
   const { handleSearchChange, query } = useListQuery()
-
-  const {
-    CreateNewPresetDrawer,
-    DeletePresetModal,
-    EditPresetDrawer,
-    openPresetListDrawer,
-    PresetListDrawer,
-    queryPresetMenuItems,
-    resetPreset,
-  } = useQueryPresets({
-    activePreset,
-    collectionSlug,
-    queryPresetPermissions,
-  })
 
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
@@ -136,137 +121,104 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     }
   }, [t, listSearchableFields, i18n, searchLabel])
 
-  const isQueryPresetsEnabled = collectionConfig?.enableQueryPresets && !disableQueryPresets
-
   return (
-    <Fragment>
-      <div className={baseClass}>
-        <div
-          className={[
-            `${baseClass}__outer-wrap`,
-            isQueryPresetsEnabled && `${baseClass}__outer-wrap--with-presets`,
-          ]
-            .filter(Boolean)
-            .join(' ')}
-        >
-          {isQueryPresetsEnabled && (
-            <div className={`${baseClass}__preset-controls`}>
-              <ActiveQueryPreset
-                activePreset={activePreset}
-                openPresetListDrawer={openPresetListDrawer}
-                resetPreset={resetPreset}
-              />
-              <div className={`${baseClass}__preset-menu-items`}>
-                {queryPresetMenuItems.map((item, i) => (
-                  <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
-                ))}
-              </div>
-            </div>
-          )}
-          <div
-            className={[
-              `${baseClass}__wrap`,
-              isQueryPresetsEnabled && `${baseClass}__wrap--with-presets`,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-          >
-            <div className={`${baseClass}__search`}>
-              <SearchIcon />
-              <SearchFilter
-                handleChange={handleSearchChange}
-                key={collectionSlug}
-                label={searchLabelTranslated.current}
-                searchQueryParam={query?.search}
-              />
-            </div>
-            <div className={`${baseClass}__buttons`}>
-              {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
-              {enableColumns && (
-                <Pill
-                  aria-controls={`${baseClass}-columns`}
-                  aria-expanded={visibleDrawer === 'columns'}
-                  className={`${baseClass}__toggle-columns`}
-                  icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
-                  onClick={() =>
-                    setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
-                  }
-                  pillStyle="light"
-                  size="small"
-                >
-                  {t('general:columns')}
-                </Pill>
-              )}
-              {enableFilters && (
-                <Pill
-                  aria-controls={`${baseClass}-where`}
-                  aria-expanded={visibleDrawer === 'where'}
-                  className={`${baseClass}__toggle-where`}
-                  icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
-                  onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
-                  pillStyle="light"
-                  size="small"
-                >
-                  {t('general:filters')}
-                </Pill>
-              )}
-              {enableSort && (
-                <Pill
-                  aria-controls={`${baseClass}-sort`}
-                  aria-expanded={visibleDrawer === 'sort'}
-                  className={`${baseClass}__toggle-sort`}
-                  icon={<ChevronIcon />}
-                  onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
-                  pillStyle="light"
-                  size="small"
-                >
-                  {t('general:sort')}
-                </Pill>
-              )}
-              {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
-                <Popup
-                  button={<Dots ariaLabel={t('general:moreOptions')} />}
-                  className={`${baseClass}__popup`}
-                  horizontalAlign="right"
-                  id="list-menu"
-                  size="small"
-                  verticalAlign="bottom"
-                >
-                  {listMenuItems.map((item, i) => (
-                    <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
-                  ))}
-                </Popup>
-              )}
-            </div>
-          </div>
-        </div>
-        {enableColumns && (
-          <AnimateHeight
-            className={`${baseClass}__columns`}
-            height={visibleDrawer === 'columns' ? 'auto' : 0}
-            id={`${baseClass}-columns`}
-          >
-            <ColumnSelector collectionSlug={collectionConfig.slug} />
-          </AnimateHeight>
-        )}
-        <AnimateHeight
-          className={`${baseClass}__where`}
-          height={visibleDrawer === 'where' ? 'auto' : 0}
-          id={`${baseClass}-where`}
-        >
-          <WhereBuilder
-            collectionPluralLabel={collectionConfig?.labels?.plural}
-            collectionSlug={collectionConfig.slug}
-            fields={collectionConfig?.fields}
-            renderedFilters={renderedFilters}
-            resolvedFilterOptions={resolvedFilterOptions}
+    <div className={baseClass}>
+      {collectionConfig?.enableQueryPresets && !disableQueryPresets && (
+        <QueryPresetBar
+          activePreset={activePreset}
+          collectionSlug={collectionSlug}
+          queryPresetPermissions={queryPresetPermissions}
+        />
+      )}
+      <div className={`${baseClass}__wrap`}>
+        <div className={`${baseClass}__search`}>
+          <SearchIcon />
+          <SearchFilter
+            handleChange={handleSearchChange}
+            key={collectionSlug}
+            label={searchLabelTranslated.current}
+            searchQueryParam={query?.search}
           />
-        </AnimateHeight>
+        </div>
+        <div className={`${baseClass}__buttons`}>
+          {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
+          {enableColumns && (
+            <Pill
+              aria-controls={`${baseClass}-columns`}
+              aria-expanded={visibleDrawer === 'columns'}
+              className={`${baseClass}__toggle-columns`}
+              icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
+              onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
+              pillStyle="light"
+              size="small"
+            >
+              {t('general:columns')}
+            </Pill>
+          )}
+          {enableFilters && (
+            <Pill
+              aria-controls={`${baseClass}-where`}
+              aria-expanded={visibleDrawer === 'where'}
+              className={`${baseClass}__toggle-where`}
+              icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
+              onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
+              pillStyle="light"
+              size="small"
+            >
+              {t('general:filters')}
+            </Pill>
+          )}
+          {enableSort && (
+            <Pill
+              aria-controls={`${baseClass}-sort`}
+              aria-expanded={visibleDrawer === 'sort'}
+              className={`${baseClass}__toggle-sort`}
+              icon={<ChevronIcon />}
+              onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
+              pillStyle="light"
+              size="small"
+            >
+              {t('general:sort')}
+            </Pill>
+          )}
+          {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
+            <Popup
+              button={<Dots ariaLabel={t('general:moreOptions')} />}
+              className={`${baseClass}__popup`}
+              horizontalAlign="right"
+              id="list-menu"
+              size="small"
+              verticalAlign="bottom"
+            >
+              {listMenuItems.map((item, i) => (
+                <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
+              ))}
+            </Popup>
+          )}
+        </div>
       </div>
-      {PresetListDrawer}
-      {EditPresetDrawer}
-      {CreateNewPresetDrawer}
-      {DeletePresetModal}
-    </Fragment>
+      {enableColumns && (
+        <AnimateHeight
+          className={`${baseClass}__columns`}
+          height={visibleDrawer === 'columns' ? 'auto' : 0}
+          id={`${baseClass}-columns`}
+        >
+          <ColumnSelector collectionSlug={collectionConfig.slug} />
+        </AnimateHeight>
+      )}
+      <AnimateHeight
+        className={`${baseClass}__where`}
+        height={visibleDrawer === 'where' ? 'auto' : 0}
+        id={`${baseClass}-where`}
+      >
+        <WhereBuilder
+          collectionPluralLabel={collectionConfig?.labels?.plural}
+          collectionSlug={collectionConfig.slug}
+          fields={collectionConfig?.fields}
+          renderedFilters={renderedFilters}
+          resolvedFilterOptions={resolvedFilterOptions}
+        />
+      </AnimateHeight>
+    </div>
   )
 }

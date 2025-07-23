@@ -12,7 +12,7 @@ import './index.scss'
 
 const baseClass = 'active-query-preset'
 
-export function ActiveQueryPreset({
+export function QueryPresetToggler({
   activePreset,
   openPresetListDrawer,
   resetPreset,

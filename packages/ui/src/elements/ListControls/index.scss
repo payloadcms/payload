@@ -2,66 +2,17 @@
 
 @layer payload-default {
   .list-controls {
-    &__outer-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    &__wrap {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: base(0.5);
       background-color: var(--theme-elevation-50);
       border-radius: var(--style-radius-m);
-    }
-
-    &__wrap {
-      display: flex;
-      align-items: center;
-      gap: base(0.5);
-      flex-grow: 1;
-      position: relative;
-    }
-
-    &__wrap--with-presets {
-      justify-content: flex-end;
-      max-width: 45%;
-
-      &::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translate3d(0, -50%, 0);
-        background-color: var(--theme-bg);
-        width: 1px;
-        height: 100%;
-        z-index: 1;
-      }
-
-      .list-controls__search {
-        flex-grow: 1;
-      }
-    }
-
-    &__preset-controls {
-      display: flex;
-      gap: base(0.6);
-      align-items: center;
-      flex-grow: 1;
-      padding-left: 10px;
-    }
-
-    &__preset-menu-items {
-      display: flex;
-      gap: base(0.6);
-
-      button {
-        background-color: transparent;
-        font-size: inherit;
-        line-height: inherit;
-        color: inherit;
-        border: none;
-        padding: 0;
-        margin: 0;
-        cursor: pointer;
-      }
     }
 
     &__search {
@@ -91,7 +42,7 @@
       flex-grow: 1;
 
       input {
-        height: 44px;
+        height: 46px;
         padding-left: 36px;
         margin: 0;
       }
@@ -116,26 +67,16 @@
     }
 
     @include small-break {
-      &__outer-wrap {
+      &__wrap {
         flex-direction: column;
         align-items: stretch;
-      }
-
-      &__wrap {
-        max-width: unset;
-        width: 100%;
-        flex-wrap: wrap;
-        background-color: unset;
-        padding: 0;
-        position: relative;
-      }
-
-      &__preset-menu-items {
-        display: none;
+        background-color: transparent;
+        border-radius: 0;
       }
 
       .search-filter {
         width: 100%;
+
         input {
           padding: 0 base(1.5);
         }

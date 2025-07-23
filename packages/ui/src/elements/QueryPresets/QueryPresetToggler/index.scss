@@ -29,5 +29,28 @@
       display: flex;
       align-items: center;
     }
+
+    &--active {
+      box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
+      background-color: var(--theme-elevation-0);
+
+      &:hover {
+        background-color: var(--theme-elevation-100);
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .active-query-preset {
+      &--active {
+        box-shadow: inset 0 0 0 1px var(--theme-elevation-300);
+        color: var(--theme-elevation-0);
+        background-color: var(--theme-elevation-800);
+
+        &:hover {
+          background-color: var(--theme-elevation-700);
+        }
+      }
+    }
   }
 }
