@@ -215,7 +215,7 @@ export const thTranslations: DefaultTranslationsObject = {
     aboutToPermanentlyDeleteTrash:
       'คุณกำลังจะลบ <0>{{count}}</0> <1>{{label}}</1> อย่างถาวรจากถังขยะ คุณแน่ใจหรือไม่?',
     aboutToRestore: 'คุณกำลังจะเรียกคืน {{label}} <1>{{title}}</1> เป็นร่าง คุณแน่ใจไหม?',
-    aboutToRestoreCount: 'คุณกำลังจะกู้คืน {{count}} {{label}}',
+    aboutToRestoreCount: 'คุณกำลังจะกู้คืน {{count}} {{label}} เป็นร่าง',
     aboutToTrash: 'คุณกำลังจะย้าย {{label}} <1>{{title}}</1> ไปยังถังขยะ คุณแน่ใจไหม?',
     aboutToTrashCount: 'คุณกำลังจะย้าย {{count}} {{label}} ไปที่ถังขยะ',
     addBelow: 'เพิ่มด้านล่าง',

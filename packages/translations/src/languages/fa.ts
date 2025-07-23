@@ -218,7 +218,7 @@ export const faTranslations: DefaultTranslationsObject = {
       'شما در حال حذف همیشگی <0>{{count}}</0> <1>{{label}}</1> از سطل زباله هستید. آیا مطمئن هستید؟',
     aboutToRestore:
       'شما در حال بازیابی {{label}} <1>{{title}}</1> به عنوان یک پیش‌نویس هستید. آیا مطمئن هستید؟',
-    aboutToRestoreCount: 'شما در حال بازگرداندن {{count}} {{label}} هستید.',
+    aboutToRestoreCount: 'شما در حال بازگرداندن {{count}} {{label}} به صورت پیش‌نویس هستید.',
     aboutToTrash: 'شما در حال حاضر در صدد حذف {{label}} <1>{{title}}</1> هستید. آيا مطمئن هستید؟',
     aboutToTrashCount: 'شما در حال حاضر در مورد انتقال {{count}} {{label}} به سطل زباله هستید',
     addBelow: 'افزودن به زیر',

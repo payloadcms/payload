@@ -225,7 +225,7 @@ export const itTranslations: DefaultTranslationsObject = {
     aboutToPermanentlyDeleteTrash:
       'Stai per eliminare definitivamente <0>{{count}}</0> <1>{{label}}</1> dal cestino. Sei sicuro?',
     aboutToRestore: 'Stai per ripristinare il {{label}} <1>{{title}}</1> come bozza. Sei sicuro?',
-    aboutToRestoreCount: 'Stai per ripristinare {{count}} {{label}}',
+    aboutToRestoreCount: 'Stai per ripristinare {{count}} {{label}} come bozza',
     aboutToTrash: 'Stai per spostare il {{label}} <1>{{title}}</1> nel cestino. Sei sicuro?',
     aboutToTrashCount: 'Stai per spostare {{count}} {{label}} nel cestino',
     addBelow: 'Aggiungi sotto',

@@ -226,7 +226,7 @@ export const roTranslations: DefaultTranslationsObject = {
       'Sunteți pe cale să ștergeți definitiv <0>{{count}}</0> <1>{{label}}</1> din coșul de gunoi. Sunteți sigur?',
     aboutToRestore:
       'Sunteți pe cale să restaurați {{label}} <1>{{title}}</1> ca o schiță. Sunteți sigur?',
-    aboutToRestoreCount: 'Sunteți pe cale să restaurați {{count}} {{label}}',
+    aboutToRestoreCount: 'Sunteți pe cale să restaurați {{count}} {{label}} ca proiect',
     aboutToTrash:
       'Sunteți pe cale să mutați {{label}} <1>{{title}}</1> în coșul de gunoi. Sunteți sigur?',
     aboutToTrashCount: 'Sunteți pe cale să mutați {{count}} {{label}} la gunoi.',

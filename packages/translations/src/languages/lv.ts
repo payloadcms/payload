@@ -222,7 +222,7 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Jūs gatavojaties neatgriezeniski dzēst <0>{{count}}</0> <1>{{label}}</1> no miskastes. Vai esat pārliecināts?',
     aboutToRestore:
       'Jūs gatavojaties atjaunot {{label}} <1>{{title}}</1> kā melnrakstu. Vai esat pārliecināts?',
-    aboutToRestoreCount: 'Jūs gatavojaties atjaunot {{count}} {{label}}',
+    aboutToRestoreCount: 'Jūs gatavojaties atjaunot {{count}} {{label}} kā melnrakstu',
     aboutToTrash:
       'Jūs gatavojaties pārvietot {{label}} <1>{{title}}</1> uz miskasti. Vai esat pārliecināts?',
     aboutToTrashCount: 'Jūs gatavojaties pārvietot {{count}} {{label}} uz miskasti',

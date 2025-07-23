@@ -219,7 +219,7 @@ export const etTranslations: DefaultTranslationsObject = {
     aboutToPermanentlyDeleteTrash:
       'Te oled püsivalt kustutamas <0>{{count}}</0> <1>{{label}}</1> prügikastist. Kas oled kindel?',
     aboutToRestore: 'Olete taastamas {{label}} <1>{{title}}</1> mustandina. Olete kindel?',
-    aboutToRestoreCount: 'Te oled taastamas {{count}} {{label}}',
+    aboutToRestoreCount: 'Te oled kohe taastamas {{count}} {{label}} mustandina',
     aboutToTrash:
       'Te olete just prügikasti liigutamas {{label}} <1>{{title}}</1>. Kas olete kindel?',
     aboutToTrashCount: 'Te oled valmis liigutama {{count}} {{label}} prügikasti.',

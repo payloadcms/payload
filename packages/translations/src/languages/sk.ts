@@ -224,7 +224,7 @@ export const skTranslations: DefaultTranslationsObject = {
     aboutToPermanentlyDeleteTrash:
       'Chystáte sa natrvalo odstrániť <0>{{count}}</0> <1>{{label}}</1> z koša. Ste si istý?',
     aboutToRestore: 'Chystáte sa obnoviť {{label}} <1>{{title}}</1> ako koncept. Ste si istý?',
-    aboutToRestoreCount: 'Chystáte sa obnoviť {{count}} {{label}}',
+    aboutToRestoreCount: 'Chystáte sa obnoviť {{count}} {{label}} ako koncept',
     aboutToTrash: 'Chystáte sa presunúť {{label}} <1>{{title}}</1> do koša. Ste si istý?',
     aboutToTrashCount: 'Chystáte sa presunúť {{count}} {{label}} do koša',
     addBelow: 'Pridať pod',

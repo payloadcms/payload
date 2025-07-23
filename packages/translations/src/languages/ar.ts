@@ -214,7 +214,7 @@ export const arTranslations: DefaultTranslationsObject = {
     aboutToPermanentlyDeleteTrash:
       'أنت على وشك حذف <0>{{count}}</0> <1>{{label}}</1> نهائياً من سلة المهملات. هل أنت متأكد؟',
     aboutToRestore: 'أنت على وشك استعادة {{label}} <1>{{title}}</1> كمسودة. هل أنت متأكد؟',
-    aboutToRestoreCount: 'أنت على وشك استعادة {{count}} {{label}}',
+    aboutToRestoreCount: 'أنت على وشك استعادة {{count}} {{label}} كمسودة',
     aboutToTrash: 'أنت على وشك نقل {{label}} <1>{{title}}</1> إلى القمامة. هل أنت متأكد؟',
     aboutToTrashCount: 'أنت على وشك نقل {{count}} {{label}} إلى المهملات',
     addBelow: 'أضف في الاسفل',

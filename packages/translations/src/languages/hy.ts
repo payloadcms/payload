@@ -222,7 +222,7 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Դուք պատրաստ եք ընդմիշտ ջնջել <0>{{count}}</0> <1>{{label}}</1> աղբավաղուց։ Վստահ եք։',
     aboutToRestore:
       'Դուք պատրաստ եք վերականգնել {{label}} <1>{{title}}</1>-ը որպես սևագիր: Համոզված եք:',
-    aboutToRestoreCount: 'Դուք պատրաստ եք վերականգնել {{count}} {{label}}',
+    aboutToRestoreCount: 'Դուք պատրաստ եք վերականգնել {{count}} {{label}} նախագծի որպես',
     aboutToTrash: 'Դուք պատրաստ եք տեղափոխել {{label}} <1>{{title}}</1>-ը աղբականջը։ Վստահ եք։',
     aboutToTrashCount: 'Դուք պատրաստ եք տեղափոխել {{count}} {{label}} աղբամանը',
     addBelow: 'Ավելացնել ներքևում',

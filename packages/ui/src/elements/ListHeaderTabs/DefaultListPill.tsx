@@ -21,6 +21,9 @@ export function DefaultListPill({ collectionConfig, viewType }: DefaultListPillP
   const { i18n, t } = useTranslation()
   const { config } = useConfig()
 
+  const buttonLabel = `${t('general:all')} ${getTranslation(collectionConfig?.labels?.plural, i18n)}`
+  const buttonId = buttonLabel.toLowerCase().replace(/\s+/g, '-')
+
   return (
     <div className={baseClass}>
       <Button
@@ -30,6 +33,7 @@ export function DefaultListPill({ collectionConfig, viewType }: DefaultListPillP
           .join(' ')}
         disabled={viewType === 'list'}
         el={viewType === 'folders' || viewType === 'trash' ? 'link' : 'div'}
+        id={buttonId}
         to={formatAdminURL({
           adminRoute: config.routes.admin,
           path: `/collections/${collectionConfig.slug}`,

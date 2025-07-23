@@ -222,7 +222,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     aboutToPermanentlyDeleteTrash:
       'Ви збираєтеся назавжди видалити <0>{{count}}</0> <1>{{label}}</1> з кошика. Ви впевнені?',
     aboutToRestore: 'Ви збираєтеся відновити {{label}} <1>{{title}}</1> як чернетку. Ви впевнені?',
-    aboutToRestoreCount: 'Ви збираєтеся відновити {{count}} {{label}}',
+    aboutToRestoreCount: 'Ви збираєтеся відновити {{count}} {{label}} як чернетку',
     aboutToTrash: 'Ви збираєтеся перемістити {{label}} <1>{{title}}</1> у смітник. Ви впевнені?',
     aboutToTrashCount: 'Ви збираєтеся перемістити {{count}} {{label}} до кошика',
     addBelow: 'Додати нижче',

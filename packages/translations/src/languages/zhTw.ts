@@ -207,7 +207,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     aboutToPermanentlyDeleteTrash:
       '您即將從垃圾桶中永久刪除<0>{{count}}</0> <1>{{label}}</1>。你確定嗎？',
     aboutToRestore: '您即將將{{label}} <1>{{title}}</1> 恢復為草稿。您確定嗎？',
-    aboutToRestoreCount: '您即將還原 {{count}} {{label}}',
+    aboutToRestoreCount: '您即將還原 {{count}} {{label}} 為草稿',
     aboutToTrash: '您即將將 {{label}} <1>{{title}}</1> 移到垃圾桶。你確定嗎？',
     aboutToTrashCount: '您即將把 {{count}} {{label}} 移到垃圾桶',
     addBelow: '新增到下方',

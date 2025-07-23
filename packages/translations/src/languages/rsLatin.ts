@@ -223,7 +223,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Na korak ste da trajno obrišete <0>{{count}}</0> <1>{{label}}</1> iz otpada. Da li ste sigurni?',
     aboutToRestore:
       'Na korak ste da vratite {{label}} <1>{{title}}</1> kao nacrt. Da li ste sigurni?',
-    aboutToRestoreCount: 'Uskoro ćete vratiti {{count}} {{label}}',
+    aboutToRestoreCount: 'Uskoro ćete vratiti {{count}} {{label}} kao nacrt',
     aboutToTrash:
       'Na korak ste da premestite {{label}} <1>{{title}}</1> u otpad. Da li ste sigurni?',
     aboutToTrashCount: 'Upravo ćete prebaciti {{count}} {{label}} u smeće',

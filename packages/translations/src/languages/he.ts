@@ -213,7 +213,7 @@ export const heTranslations: DefaultTranslationsObject = {
     aboutToPermanentlyDeleteTrash:
       'אתה עומד למחוק לצמיתות <0>{{count}}</0> <1>{{label}}</1> מהאשפה. האם אתה בטוח?',
     aboutToRestore: 'אתה עומד לשחזר את ה-{{label}} <1>{{title}}</1> כטיוטה. האם אתה בטוח?',
-    aboutToRestoreCount: 'אתה עומד לשחזר {{count}} {{label}}',
+    aboutToRestoreCount: 'אתה עומד לשחזר {{count}} {{label}} כטיוטה',
     aboutToTrash: 'אתה עומד להעביר את ה{{label}} <1>{{title}}</1> לפח. האם אתה בטוח?',
     aboutToTrashCount: 'אתה עומד להעביר {{count}} {{label}} לפח אשפה',
     addBelow: 'הוסף מתחת',

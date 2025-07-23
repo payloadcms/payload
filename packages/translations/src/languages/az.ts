@@ -221,7 +221,7 @@ export const azTranslations: DefaultTranslationsObject = {
       'Siz müllifdən daimi olaraq <0>{{count}}</0> <1>{{label}}</1> silinəcəkdir. Eminsiniz?',
     aboutToRestore:
       'Siz {{label}} <1>{{title}}</1>ni qaralaması kimi bərpa etməkləsiniz. Eminsinizmi?',
-    aboutToRestoreCount: 'Siz {{count}} {{label}} bərpası etməyə hazırsınız.',
+    aboutToRestoreCount: 'Siz {{count}} {{label}}-ni qaralamak üçün bərpa etməyə hazırlaşırsınız',
     aboutToTrash:
       'Siz {{label}} <1>{{title}}</1> elementini zibilliyə köçürmək barədəsiniz. Eminsiniz?',
     aboutToTrashCount: 'Siz {{count}} {{label}}-i zibilə köçürmək barədəsiz.',

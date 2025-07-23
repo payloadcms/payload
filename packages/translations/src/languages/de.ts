@@ -227,7 +227,7 @@ export const deTranslations: DefaultTranslationsObject = {
       'Sie sind dabei, <0>{{count}}</0> <1>{{label}}</1> endgültig aus dem Papierkorb zu löschen. Sind Sie sicher?',
     aboutToRestore:
       'Sie sind dabei, das {{label}} <1>{{title}}</1> als Entwurf wiederherzustellen. Sind Sie sicher?',
-    aboutToRestoreCount: 'Sie sind dabei, {{count}} {{label}} wiederherzustellen.',
+    aboutToRestoreCount: 'Sie sind dabei, {{count}} {{label}} als Entwurf wiederherzustellen.',
     aboutToTrash:
       'Sie sind dabei, das {{label}} <1>{{title}}</1> in den Papierkorb zu verschieben. Sind Sie sicher?',
     aboutToTrashCount: 'Sie sind dabei, {{count}} {{label}} in den Papierkorb zu verschieben.',

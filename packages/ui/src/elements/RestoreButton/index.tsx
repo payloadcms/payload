@@ -20,8 +20,8 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
-import './index.scss'
 import { Translation } from '../Translation/index.js'
+import './index.scss'
 
 const baseClass = 'restore-button'
 

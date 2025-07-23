@@ -223,7 +223,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
       'আপনি চূর্ণনিবিন্ন <0>{{count}}</0> <1>{{label}}</1> টি সর্বদা মুছে ফেলতে যাচ্ছেন। আপনি কি নিশ্চিত?',
     aboutToRestore:
       'আপনি কি নিশ্চিত যে, আপনি খসড়া হিসেবে {{label}} <1>{{title}}</1> পুনরুদ্ধার করতে চান?',
-    aboutToRestoreCount: 'আপনি প্রস্তুত হচ্ছেন পুনরুদ্ধার করার জন্য {{count}} {{label}}',
+    aboutToRestoreCount:
+      'আপনি সম্প্রদায়ে {{count}} {{label}} খসড়া হিসাবে পুনরুদ্ধার করতে যাচ্ছেন',
     aboutToTrash:
       'আপনি প্রথমরা {{label}} <1>{{title}}</1> কে আবর্জনায় স্থানান্তর করতে যাচ্ছেন। আপনি কি নিশ্চিত?',
     aboutToTrashCount: 'আপনি সম্পর্কে {{count}} {{label}} মুছে ফেলার জন্য সরিয়ে ফেলাতে যাচ্ছেন',

@@ -221,7 +221,7 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Du er i ferd med å permanent slette <0>{{count}}</0> <1>{{label}}</1> fra søppelkassen. Er du sikker?',
     aboutToRestore:
       'Du er i ferd med å gjenopprette {{label}} <1>{{title}}</1> som et utkast. Er du sikker?',
-    aboutToRestoreCount: 'Du er i ferd med å gjenopprette {{count}} {{label}}',
+    aboutToRestoreCount: 'Du er i ferd med å gjenopprette {{count}} {{label}} som utkast',
     aboutToTrash: 'Du er i ferd med å flytte {{label}} <1>{{title}}</1> til søppel. Er du sikker?',
     aboutToTrashCount: 'Du er i ferd med å flytte {{count}} {{label}} til søppelkurven',
     addBelow: 'Legg til under',

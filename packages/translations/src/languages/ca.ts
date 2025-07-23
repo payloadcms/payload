@@ -223,7 +223,7 @@ export const caTranslations: DefaultTranslationsObject = {
       "Estàs a punt de suprimir permanentment <0>{{count}}</0> <1>{{label}}</1> de la paperera. N'estàs segur?",
     aboutToRestore:
       "Esteu a punt de restaurar l'{{label}} <1>{{title}}</1> com a esborrany. N'estàs segur?",
-    aboutToRestoreCount: 'Esteu a punt de restaurar {{count}} {{label}}',
+    aboutToRestoreCount: 'Està a punt de restaurar {{count}} {{label}} com a esborrany',
     aboutToTrash:
       "Estàs a punt de moure l'{{label}} <1>{{title}}</1> a la paperera. N'estàs segur?",
     aboutToTrashCount: 'Estàs a punt de moure {{count}} {{label}} a la paperera',

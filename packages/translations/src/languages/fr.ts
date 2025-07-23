@@ -229,7 +229,8 @@ export const frTranslations: DefaultTranslationsObject = {
       'Vous êtes sur le point de supprimer définitivement <0>{{count}}</0> <1>{{label}}</1> de la corbeille. Êtes-vous sûr ?',
     aboutToRestore:
       'Vous êtes sur le point de restaurer le {{label}} <1>{{title}}</1> en tant que brouillon. Êtes-vous sûr ?',
-    aboutToRestoreCount: 'Vous êtes sur le point de restaurer {{count}} {{label}}',
+    aboutToRestoreCount:
+      'Vous êtes sur le point de restaurer {{count}} {{label}} en tant que brouillon',
     aboutToTrash:
       'Vous êtes sur le point de déplacer le {{label}} <1>{{title}}</1> dans la corbeille. Êtes-vous sûr ?',
     aboutToTrashCount: 'Vous êtes sur le point de déplacer {{count}} {{label}} à la corbeille',

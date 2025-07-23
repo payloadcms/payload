@@ -225,7 +225,7 @@ export const trTranslations: DefaultTranslationsObject = {
       'Çöpten <0>{{count}}</0> <1>{{label}}</1> kalıcı olarak silmek üzeresiniz. Emin misiniz?',
     aboutToRestore:
       '{{label}} <1>{{title}}</1> taslağı olarak geri yüklemek üzeresiniz. Emin misiniz?',
-    aboutToRestoreCount: '{{count}} {{label}} geri yüklemek üzeresiniz.',
+    aboutToRestoreCount: 'Taslağı olarak geri yükleme üzeresiniz: {{count}} {{label}}',
     aboutToTrash: '{{label}} <1>{{title}}</1> çöp kutusuna taşımayı düşünüyorsunuz. Emin misiniz?',
     aboutToTrashCount: '{{count}} {{label}} çöp kutusuna taşımayı düşünüyorsunuz.',
     addBelow: 'Altına ekle',

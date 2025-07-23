@@ -222,7 +222,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     aboutToPermanentlyDeleteTrash:
       'На путу сте да трајно обришете <0>{{count}}</0> <1>{{label}}</1> из смећа. Да ли сте сигурни?',
     aboutToRestore: 'Uskoro ćete vratiti {{label}} <1>{{title}}</1> kao nacrt. Jeste li sigurni?',
-    aboutToRestoreCount: 'Uskoro ćete vratiti {{count}} {{label}}',
+    aboutToRestoreCount: 'Upravo ste na koraku da povratite {{count}} {{label}} kao skicu',
     aboutToTrash:
       'Na korak ste da premestite {{label}} <1>{{title}}</1> u otpad. Da li ste sigurni?',
     aboutToTrashCount: 'Upravo ćete premestiti {{count}} {{label}} u smeće',
