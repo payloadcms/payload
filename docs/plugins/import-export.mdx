@@ -9,8 +9,9 @@ keywords: plugins, plugin, import, export, csv, JSON, data, ETL, download
 ![https://www.npmjs.com/package/@payloadcms/plugin-import-export](https://img.shields.io/npm/v/@payloadcms/plugin-import-export)
 
 <Banner type="warning">
-  Note: The plugin is under development and currently only supports exporting of
-  collection data. Some aspects of this plugin may change on any minor releases.
+  **Note**: This plugin is in **beta** as some aspects of it may change on any
+  minor releases. It is under development and currently only supports exporting
+  of collection data.
 </Banner>
 
 This plugin adds features that give admin users the ability to download or create export data as an upload collection and import it back into a project.
@@ -54,31 +55,28 @@ export default config
 
 ## Options
 
-| Property                   | Type            | Default         | Description                                                                                                                          |
-| -------------------------- | --------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `collections`              | string[]        | All collections | Collections to include Import/Export controls in. Defaults to all collections.                                                       |
-| `debug`                    | boolean         | false           | If true, enables debug logging.                                                                                                      |
-| `disableDownload`          | boolean         | false           | If true, disables the download button in the export preview UI.                                                                      |
-| `disableJobsQueue`         | boolean         | false           | If true, forces the export to run synchronously.                                                                                     |
-| `disableSave`              | boolean         | false           | If true, disables the save button in the export preview UI.                                                                          |
-| `format`                   | 'csv' \| 'json' | undefined       | Forces a specific export format (`csv` or `json`), hides the format dropdown, and prevents the user from choosing the export format. |
-| `overrideExportCollection` | function        | undefined       | Function to override the default export collection; takes the default export collection and allows you to modify and return it.      |
+| Property                 | Type     | Description                                                                                                                          |
+| ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| collections              | string[] | Collections to include Import/Export controls in. Defaults to all collections.                                                       |
+| debug                    | boolean  | If true, enables debug logging.                                                                                                      |
+| disableDownload          | boolean  | If true, disables the download button in the export preview UI.                                                                      |
+| disableJobsQueue         | boolean  | If true, forces the export to run synchronously.                                                                                     |
+| disableSave              | boolean  | If true, disables the save button in the export preview UI.                                                                          |
+| format                   | string   | Forces a specific export format (`csv` or `json`), hides the format dropdown, and prevents the user from choosing the export format. |
+| overrideExportCollection | function | Function to override the default export collection; takes the default export collection and allows you to modify and return it.      |
 
 ## Field Options
 
-In addition to the above plugin configuration options, you can granularly set the following field level options using the `custom['plugin-import-export']` properties.
+In addition to the above plugin configuration options, you can granularly set the following field level options using the `custom['plugin-import-export']` properties in any of your collections.
 
-`disabled` - boolean | undefined
+| Property | Type     | Description                                                                                                                   |
+| -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| disabled | boolean  | When `true` the field is completely excluded from the import-export plugin.                                                   |
+| toCSV    | function | Custom function used to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value. |
 
-When `true` the field is **completely excluded** from the import-export plugin:
+### Customizing the output of CSV data
 
-- It will not appear in the “Fields to export” selector.
-- It is hidden from the preview list when no specific fields are chosen.
-- Its data is omitted from the final CSV / JSON export.
-
-`toCSV` - (args) => unknown | undefined
-
-Custom function used to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value.
+To manipulate the data that a field exports you can add `toCSV` custom functions. This allows you to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value.
 
 The toCSV function argument is an object with the following properties:
 
