@@ -4,8 +4,6 @@
   .active-query-preset {
     &__label {
       display: flex;
-      gap: calc(var(--base) / 4);
-      display: flex;
       align-items: center;
     }
 
@@ -25,14 +23,21 @@
       align-items: center;
     }
 
+    &__shared {
+      margin-right: 2px;
+    }
+
     &__clear {
       display: flex;
       align-items: center;
+      width: var(--pill-icon-size);
+      height: var(--pill-icon-size);
     }
 
     &--active {
       box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
       background-color: var(--theme-elevation-0);
+      padding-right: 4px;
 
       &:hover {
         background-color: var(--theme-elevation-100);

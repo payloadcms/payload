@@ -357,7 +357,6 @@ export const slTranslations: DefaultTranslationsObject = {
     remove: 'Odstrani',
     rename: 'Preimenuj',
     reset: 'Ponastavi',
-    resetLabel: 'Ponastavi {{label}}',
     resetPreferences: 'Ponastavi nastavitve',
     resetPreferencesDescription: 'To bo ponastavilo vse vaše nastavitve na privzete vrednosti.',
     resettingPreferences: 'Ponastavitev nastavitve.',

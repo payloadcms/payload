@@ -286,7 +286,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:remove',
   'general:rename',
   'general:reset',
-  'general:resetLabel',
   'general:resetPreferences',
   'general:resetPreferencesDescription',
   'general:resettingPreferences',

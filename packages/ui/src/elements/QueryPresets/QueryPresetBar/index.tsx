@@ -6,6 +6,7 @@ import { transformColumnsToPreferences, transformColumnsToSearchParams } from 'p
 import React, { Fragment, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
+import { PlusIcon } from '../../../icons/Plus/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useListQuery } from '../../../providers/ListQuery/context.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -13,14 +14,14 @@ import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
 import { useListDrawer } from '../../ListDrawer/index.js'
 import { ListSelectionButton } from '../../ListSelection/index.js'
+import { Pill } from '../../Pill/index.js'
 import { Translation } from '../../Translation/index.js'
 import { QueryPresetToggler } from '../QueryPresetToggler/index.js'
+import './index.scss'
 
 const confirmDeletePresetModalSlug = 'confirm-delete-preset'
 
 const queryPresetsSlug = 'payload-query-presets'
-
-import './index.scss'
 
 const baseClass = 'query-preset-bar'
 
@@ -189,11 +190,23 @@ export const QueryPresetBar: React.FC<{
   return (
     <Fragment>
       <div className={baseClass}>
-        <QueryPresetToggler
-          activePreset={activePreset}
-          openPresetListDrawer={openListDrawer}
-          resetPreset={resetQueryPreset}
-        />
+        <div className={`${baseClass}__menu`}>
+          <QueryPresetToggler
+            activePreset={activePreset}
+            openPresetListDrawer={openListDrawer}
+            resetPreset={resetQueryPreset}
+          />
+          <Pill
+            aria-label={t('general:newLabel', { label: presetConfig?.labels?.singular })}
+            className={`${baseClass}__create-new-preset`}
+            icon={<PlusIcon />}
+            id="create-new-preset"
+            onClick={() => {
+              openCreateNewDrawer()
+            }}
+            size="small"
+          />
+        </div>
         <div className={`${baseClass}__menu-items`}>
           {hasModifiedPreset && (
             <ListSelectionButton
@@ -210,7 +223,7 @@ export const QueryPresetBar: React.FC<{
               }}
               type="button"
             >
-              {t('general:resetLabel', { label: presetConfig?.labels?.singular })}
+              {t('general:reset')}
             </ListSelectionButton>
           )}
           {hasModifiedPreset && queryPresetPermissions.update && (
@@ -227,15 +240,6 @@ export const QueryPresetBar: React.FC<{
                 : t('general:saveLabel', { label: presetConfig?.labels?.singular })}
             </ListSelectionButton>
           )}
-          <ListSelectionButton
-            id="create-new-preset"
-            onClick={() => {
-              openCreateNewDrawer()
-            }}
-            type="button"
-          >
-            {t('general:newLabel', { label: presetConfig?.labels?.singular })}
-          </ListSelectionButton>
           {activePreset && queryPresetPermissions?.delete && (
             <Fragment>
               <ListSelectionButton

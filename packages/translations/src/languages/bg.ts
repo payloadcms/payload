@@ -357,7 +357,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     remove: 'Премахни',
     rename: 'Преименувайте',
     reset: 'Нулиране',
-    resetLabel: 'Нулиране {{label}}',
     resetPreferences: 'Нулиране на предпочитанията',
     resetPreferencesDescription:
       'Това ще нулира всички ваши предпочитания до техните настройки по подразбиране.',

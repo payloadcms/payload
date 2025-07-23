@@ -358,7 +358,6 @@ export const hrTranslations: DefaultTranslationsObject = {
     remove: 'Ukloni',
     rename: 'Preimenuj',
     reset: 'Ponovno postavi',
-    resetLabel: 'Resetiraj {{label}}',
     resetPreferences: 'Ponovno postavljanje postavki',
     resetPreferencesDescription: 'Ovo će vratiti sve vaše postavke na zadane vrijednosti.',
     resettingPreferences: 'Ponovno postavljanje postavki.',

@@ -358,7 +358,6 @@ export const enTranslations = {
     remove: 'Remove',
     rename: 'Rename',
     reset: 'Reset',
-    resetLabel: 'Reset {{label}}',
     resetPreferences: 'Reset Preferences',
     resetPreferencesDescription:
       'This will reset all of your preferences to their default settings.',

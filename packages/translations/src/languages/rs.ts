@@ -358,7 +358,6 @@ export const rsTranslations: DefaultTranslationsObject = {
     remove: 'Уклони',
     rename: 'Preimenujte',
     reset: 'Поново постави',
-    resetLabel: 'Resetuj {{label}}',
     resetPreferences: 'Поништи подешавања',
     resetPreferencesDescription: 'Ово ће поништити сва ваша подешавања на подразумеване вредности.',
     resettingPreferences: 'Поништавање подешавања.',

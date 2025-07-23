@@ -358,7 +358,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     remove: 'Remover',
     rename: 'Renomear',
     reset: 'Redefinir',
-    resetLabel: 'Redefinir {{label}}',
     resetPreferences: 'Redefinir preferências',
     resetPreferencesDescription:
       'Isso redefinirá todas as suas preferências para as configurações padrão.',

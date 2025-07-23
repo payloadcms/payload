@@ -357,7 +357,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     remove: 'Fjern',
     rename: 'Endre navn',
     reset: 'Tilbakestill',
-    resetLabel: 'Tilbakestill {{label}}',
     resetPreferences: 'Tilbakestill preferanser',
     resetPreferencesDescription:
       'Dette vil tilbakestille alle preferansene dine til standardinnstillingene.',

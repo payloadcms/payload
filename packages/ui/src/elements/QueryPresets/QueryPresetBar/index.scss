@@ -9,7 +9,26 @@
     border-radius: var(--style-radius-m);
     padding: base(0.5);
 
+    &__menu {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-grow: 1;
+    }
+
+    &__create-new-preset {
+      height: 100%;
+      padding: 0 3px;
+      background: transparent;
+      box-shadow: inset 0 0 0 1px var(--theme-elevation-150);
+
+      &:hover {
+        background: transparent;
+      }
+    }
+
     &__menu-items {
+      overflow: auto;
       display: flex;
       gap: base(0.5);
 

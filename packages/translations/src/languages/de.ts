@@ -363,7 +363,6 @@ export const deTranslations: DefaultTranslationsObject = {
     remove: 'Entfernen',
     rename: 'Umbenennen',
     reset: 'Zurücksetzen',
-    resetLabel: '{{label}} zurücksetzen',
     resetPreferences: 'Präferenzen zurücksetzen',
     resetPreferencesDescription: 'Alle Präferenzen werden auf die Standardwerte zurückgesetzt.',
     resettingPreferences: 'Präferenzen werden zurückgesetzt.',

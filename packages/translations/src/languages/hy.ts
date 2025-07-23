@@ -358,7 +358,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     remove: 'Հեռացնել',
     rename: 'Վերանվանել',
     reset: 'Վերակայել',
-    resetLabel: 'Վերակայեցնել {{label}}',
     resetPreferences: 'Վերակայել նախընտրությունները',
     resetPreferencesDescription:
       'Սա կվերակայի Ձեր բոլոր նախընտրությունները դեպի լռելյայն կարգավորումներ։',

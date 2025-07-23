@@ -350,7 +350,6 @@ export const arTranslations: DefaultTranslationsObject = {
     remove: 'إزالة',
     rename: 'إعادة تسمية',
     reset: 'إعادة تعيين',
-    resetLabel: 'إعادة تعيين {{label}}',
     resetPreferences: 'إعادة تعيين التفضيلات',
     resetPreferencesDescription:
       'سيؤدي ذلك إلى إعادة تعيين جميع تفضيلاتك إلى الإعدادات الافتراضية.',

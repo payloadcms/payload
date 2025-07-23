@@ -354,7 +354,6 @@ export const koTranslations: DefaultTranslationsObject = {
     remove: '제거',
     rename: '이름 변경',
     reset: '초기화',
-    resetLabel: '{{label}} 재설정',
     resetPreferences: '기본 설정으로 재설정',
     resetPreferencesDescription: '이렇게 하면 모든 기본 설정이 기본값으로 재설정됩니다.',
     resettingPreferences: '기본 설정을 재설정하는 중.',

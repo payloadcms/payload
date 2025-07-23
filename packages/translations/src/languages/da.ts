@@ -355,7 +355,6 @@ export const daTranslations: DefaultTranslationsObject = {
     remove: 'Fjern',
     rename: 'Omdøb',
     reset: 'Nulstil',
-    resetLabel: 'Nulstil {{label}}',
     resetPreferences: 'Nulstil præferencer',
     resetPreferencesDescription:
       'Dette vil nulstille alle dine præferencer til standardindstillingerne.',

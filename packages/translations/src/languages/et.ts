@@ -353,7 +353,6 @@ export const etTranslations: DefaultTranslationsObject = {
     remove: 'Eemalda',
     rename: 'Nimeta ümber',
     reset: 'Lähtesta',
-    resetLabel: 'Lähtesta {{label}}',
     resetPreferences: 'Lähtesta eelistused',
     resetPreferencesDescription: 'See lähtestab kõik teie eelistused vaikeväärtustele.',
     resettingPreferences: 'Lähtestan eelistusi.',

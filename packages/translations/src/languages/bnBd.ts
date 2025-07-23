@@ -359,7 +359,6 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     remove: 'অপসারণ করুন',
     rename: 'নাম পরিবর্তন করুন',
     reset: 'রিসেট করুন',
-    resetLabel: '{{label}} রিসেট করুন',
     resetPreferences: 'পছন্দগুলি রিসেট করুন',
     resetPreferencesDescription: 'এটি আপনার সমস্ত পছন্দগুলি তাদের ডিফল্ট সেটিংসে রিসেট করবে।',
     resettingPreferences: 'পছন্দগুলি রিসেট করা হচ্ছে।',

@@ -357,7 +357,6 @@ export const plTranslations: DefaultTranslationsObject = {
     remove: 'Usuń',
     rename: 'Zmień nazwę',
     reset: 'Zresetuj',
-    resetLabel: 'Zresetuj {{label}}',
     resetPreferences: 'Zresetuj preferencje',
     resetPreferencesDescription: 'To zresetuje wszystkie Twoje preferencje do ustawień domyślnych.',
     resettingPreferences: 'Resetowanie preferencji.',

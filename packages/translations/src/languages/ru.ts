@@ -360,7 +360,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     remove: 'Удалить',
     rename: 'Переименовать',
     reset: 'Сброс',
-    resetLabel: 'Сбросить {{label}}',
     resetPreferences: 'Сбросить настройки',
     resetPreferencesDescription: 'Это сбросит все ваши настройки до значений по умолчанию.',
     resettingPreferences: 'Сброс настроек.',

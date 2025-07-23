@@ -360,7 +360,6 @@ export const itTranslations: DefaultTranslationsObject = {
     remove: 'Rimuovi',
     rename: 'Rinomina',
     reset: 'Ripristina',
-    resetLabel: 'Ripristina {{label}}',
     resetPreferences: 'Ripristina le preferenze',
     resetPreferencesDescription:
       'Questo ripristinerà tutte le tue preferenze alle impostazioni predefinite.',

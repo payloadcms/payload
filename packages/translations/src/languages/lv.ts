@@ -357,7 +357,6 @@ export const lvTranslations: DefaultTranslationsObject = {
     remove: 'Noņemt',
     rename: 'Pārdēvēt',
     reset: 'Atiestatīt',
-    resetLabel: 'Atiestatīt {{label}}',
     resetPreferences: 'Atiestatīt iestatījumus',
     resetPreferencesDescription: 'Tas atjaunos visus jūsu iestatījumus uz noklusētajiem.',
     resettingPreferences: 'Atiestata iestatījumus...',

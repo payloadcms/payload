@@ -357,7 +357,6 @@ export const azTranslations: DefaultTranslationsObject = {
     remove: 'Sil',
     rename: 'Yenidən adlandırın',
     reset: 'Yenidən başlat',
-    resetLabel: "{{label}}'i sıfırlayın",
     resetPreferences: 'Təhlükəsizlik parametrlərini sıfırlamaq',
     resetPreferencesDescription: 'Bu, bütün parametrlərinizi standart vəziyyətlərinə sıfırlayacaq.',
     resettingPreferences: 'Təhlükəsizlik parametrləri sıfırlanır.',

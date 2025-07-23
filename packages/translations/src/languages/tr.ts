@@ -361,7 +361,6 @@ export const trTranslations: DefaultTranslationsObject = {
     remove: 'Kaldır',
     rename: 'Yeniden adlandır',
     reset: 'Sıfırla',
-    resetLabel: '{{label}} Sıfırla',
     resetPreferences: 'Tercihleri sıfırla',
     resetPreferencesDescription:
       'Bu, tüm tercihlerinizin varsayılan ayarlara sıfırlanmasını sağlar.',

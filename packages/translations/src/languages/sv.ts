@@ -357,7 +357,6 @@ export const svTranslations: DefaultTranslationsObject = {
     remove: 'Ta bort',
     rename: 'Byt namn',
     reset: 'Återställ',
-    resetLabel: 'Återställ {{label}}',
     resetPreferences: 'Återställ preferenser',
     resetPreferencesDescription:
       'Detta kommer att återställa alla dina preferenser till standardinställningarna.',

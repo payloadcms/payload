@@ -360,7 +360,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     remove: 'Pašalinti',
     rename: 'Pervadinti',
     reset: 'Atstatyti',
-    resetLabel: 'Atstatyti {{label}}',
     resetPreferences: 'Atstatyti nuostatas',
     resetPreferencesDescription: 'Tai atstatys visas jūsų nuostatas į numatytąsias reikšmes.',
     resettingPreferences: 'Nustatymų atstatymas.',
