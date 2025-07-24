@@ -250,6 +250,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     cancel: 'Annuleren',
     changesNotSaved:
       'Uw wijzigingen zijn niet bewaard. Als u weggaat zullen de wijzigingen verloren gaan.',
+    clear: 'Duidelijk',
     clearAll: 'Alles wissen',
     close: 'Dichtbij',
     collapse: 'Samenvouwen',
@@ -328,6 +329,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filter {{label}} waar',
     globals: 'Globalen',
     goBack: 'Ga terug',
+    groupByLabel: 'Groepeer op {{label}}',
     import: 'Importeren',
     isEditing: 'is aan het bewerken',
     item: 'artikel',

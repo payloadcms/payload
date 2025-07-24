@@ -244,6 +244,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     cancel: 'Cancelar',
     changesNotSaved:
       'Suas alterações não foram salvas. Se você sair agora, essas alterações serão perdidas.',
+    clear: 'Claro',
     clearAll: 'Limpar Tudo',
     close: 'Fechar',
     collapse: 'Recolher',
@@ -322,6 +323,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrar {{label}} em que',
     globals: 'Globais',
     goBack: 'Voltar',
+    groupByLabel: 'Agrupar por {{label}}',
     import: 'Importar',
     isEditing: 'está editando',
     item: 'item',

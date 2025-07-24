@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ViewTypes } from 'payload'
+import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
 
 import React, { Fragment, useCallback } from 'react'
 
@@ -17,7 +17,10 @@ export type ListSelectionProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   label: string
+  modalPrefix?: string
+  showSelectAllAcrossPages?: boolean
   viewType?: ViewTypes
+  where?: Where
 }
 
 export const ListSelection: React.FC<ListSelectionProps> = ({
@@ -25,12 +28,15 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   disableBulkDelete,
   disableBulkEdit,
   label,
+  modalPrefix,
+  showSelectAllAcrossPages = true,
   viewType,
+  where,
 }) => {
-  const { count, getSelectedIds, selectAll, toggleAll, totalDocs } = useSelection()
+  const { count, selectAll, selectedIDs, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
 
-  const onActionSuccess = useCallback(() => toggleAll(false), [toggleAll])
+  const onActionSuccess = useCallback(() => toggleAll(), [toggleAll])
 
   if (count === 0) {
     return null
@@ -42,7 +48,9 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
     <ListSelection_v4
       count={count}
       ListActions={[
-        selectAll !== SelectAllStatus.AllAvailable && count < totalDocs ? (
+        selectAll !== SelectAllStatus.AllAvailable &&
+        count < totalDocs &&
+        showSelectAllAcrossPages !== false ? (
           <ListSelectionButton
             aria-label={t('general:selectAll', { count: `(${totalDocs})`, label })}
             id="select-all-across-pages"
@@ -59,23 +67,29 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             <EditMany_v4
               collection={collectionConfig}
               count={count}
-              ids={getSelectedIds()}
+              ids={selectedIDs}
+              modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
+              where={where}
             />
             <PublishMany_v4
               collection={collectionConfig}
               count={count}
-              ids={getSelectedIds()}
+              ids={selectedIDs}
+              modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
+              where={where}
             />
             <UnpublishMany_v4
               collection={collectionConfig}
               count={count}
-              ids={getSelectedIds()}
+              ids={selectedIDs}
+              modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
+              where={where}
             />
           </Fragment>
         ),
@@ -83,7 +97,12 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
           <RestoreMany collection={collectionConfig} key="bulk-restore" viewType={viewType} />
         ),
         !disableBulkDelete && (
-          <DeleteMany collection={collectionConfig} key="bulk-delete" viewType={viewType} />
+          <DeleteMany
+            collection={collectionConfig}
+            key="bulk-delete"
+            modalPrefix={modalPrefix}
+            viewType={viewType}
+          />
         ),
       ].filter(Boolean)}
     />

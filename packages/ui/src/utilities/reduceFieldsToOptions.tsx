@@ -5,11 +5,11 @@ import type { ClientField } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
 
-import type { ReducedField } from './types.js'
+import type { ReducedField } from '../elements/WhereBuilder/types.js'
 
-import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
-import { combineFieldLabel } from '../../utilities/combineFieldLabel.js'
-import fieldTypes, { arrayOperators } from './field-types.js'
+import fieldTypes, { arrayOperators } from '../elements/WhereBuilder/field-types.js'
+import { createNestedClientFieldPath } from '../forms/Form/createNestedClientFieldPath.js'
+import { combineFieldLabel } from './combineFieldLabel.js'
 
 type ReduceFieldOptionsArgs = {
   fields: ClientField[]
@@ -22,7 +22,7 @@ type ReduceFieldOptionsArgs = {
  * Reduces a field map to a flat array of fields with labels and values.
  * Used in the WhereBuilder component to render the fields in the dropdown.
  */
-export const reduceFields = ({
+export const reduceFieldsToOptions = ({
   fields,
   i18n,
   labelPrefix,
@@ -55,7 +55,7 @@ export const reduceFields = ({
 
           if (typeof localizedTabLabel === 'string') {
             reduced.push(
-              ...reduceFields({
+              ...reduceFieldsToOptions({
                 fields: tab.fields,
                 i18n,
                 labelPrefix: labelWithPrefix,
@@ -71,7 +71,7 @@ export const reduceFields = ({
     // Rows cant have labels, so we need to handle them differently
     if (field.type === 'row' && 'fields' in field) {
       reduced.push(
-        ...reduceFields({
+        ...reduceFieldsToOptions({
           fields: field.fields,
           i18n,
           labelPrefix,
@@ -89,7 +89,7 @@ export const reduceFields = ({
         : localizedTabLabel
 
       reduced.push(
-        ...reduceFields({
+        ...reduceFieldsToOptions({
           fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,
@@ -117,7 +117,7 @@ export const reduceFields = ({
           : pathPrefix
 
         reduced.push(
-          ...reduceFields({
+          ...reduceFieldsToOptions({
             fields: field.fields,
             i18n,
             labelPrefix: labelWithPrefix,
@@ -126,7 +126,7 @@ export const reduceFields = ({
         )
       } else {
         reduced.push(
-          ...reduceFields({
+          ...reduceFieldsToOptions({
             fields: field.fields,
             i18n,
             labelPrefix: labelWithPrefix,
@@ -155,7 +155,7 @@ export const reduceFields = ({
         : pathPrefix
 
       reduced.push(
-        ...reduceFields({
+        ...reduceFieldsToOptions({
           fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,
