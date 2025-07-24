@@ -229,6 +229,7 @@ export const svTranslations: DefaultTranslationsObject = {
     cancel: 'Avbryt',
     changesNotSaved:
       'Dina ändringar har inte sparats. Om du lämnar nu kommer du att förlora dina ändringar.',
+    clear: 'Tydlig',
     clearAll: 'Rensa alla',
     close: 'Stänga',
     collapse: 'Kollapsa',
@@ -300,6 +301,7 @@ export const svTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrera {{label}} där',
     globals: 'Globala',
     goBack: 'Gå tillbaka',
+    groupByLabel: 'Gruppera efter {{label}}',
     import: 'Importera',
     isEditing: 'redigerar',
     item: 'artikel',

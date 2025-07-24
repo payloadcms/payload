@@ -231,6 +231,7 @@ export const myTranslations: DefaultTranslationsObject = {
     cancel: 'မလုပ်တော့ပါ။',
     changesNotSaved:
       'သင်၏ပြောင်းလဲမှုများကို မသိမ်းဆည်းရသေးပါ။ ယခု စာမျက်နှာက ထွက်လိုက်ပါက သင်၏ပြောင်းလဲမှုများ အကုန် ဆုံးရှုံးသွားပါမည်။ အကုန်နော်။',
+    clear: 'Jelas',
     clearAll: 'အားလုံးကိုရှင်းလင်းပါ',
     close: 'ပိတ်',
     collapse: 'ခေါက်သိမ်းပါ။',
@@ -302,6 +303,7 @@ export const myTranslations: DefaultTranslationsObject = {
     filterWhere: 'နေရာတွင် စစ်ထုတ်ပါ။',
     globals: 'Globals',
     goBack: 'နောက်သို့',
+    groupByLabel: 'Berkumpulkan mengikut {{label}}',
     import: 'သွင်းကုန်',
     isEditing: 'ပြင်ဆင်နေသည်',
     item: 'barang',

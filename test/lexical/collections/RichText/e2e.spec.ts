@@ -75,24 +75,32 @@ describe('Rich Text', () => {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
       await page.goto(url.list) // Navigate to rich-text list view
 
-      const table = page.locator('.list-controls ~ .table')
+      const table = page.locator('.table-wrap .table')
+      await expect(table).toBeVisible()
+
       const lexicalCell = table.locator('.cell-lexicalCustomFields').first()
+      await expect(lexicalCell).toBeVisible()
+
       const lexicalHtmlCell = table.locator('.cell-lexicalCustomFields_html').first()
+      await expect(lexicalHtmlCell).toBeVisible()
+
       const entireRow = table.locator('.row-1').first()
 
       // Make sure each of the 3 above are no larger than 300px in height:
       await expect
-        .poll(async () => (await lexicalCell.boundingBox()).height, {
+        .poll(async () => (await lexicalCell.boundingBox())?.height, {
           timeout: POLL_TOPASS_TIMEOUT,
         })
         .toBeLessThanOrEqual(300)
+
       await expect
-        .poll(async () => (await lexicalHtmlCell.boundingBox()).height, {
+        .poll(async () => (await lexicalHtmlCell.boundingBox())?.height, {
           timeout: POLL_TOPASS_TIMEOUT,
         })
         .toBeLessThanOrEqual(300)
+
       await expect
-        .poll(async () => (await entireRow.boundingBox()).height, { timeout: POLL_TOPASS_TIMEOUT })
+        .poll(async () => (await entireRow.boundingBox())?.height, { timeout: POLL_TOPASS_TIMEOUT })
         .toBeLessThanOrEqual(300)
     })
   })

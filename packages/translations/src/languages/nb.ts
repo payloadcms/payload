@@ -229,6 +229,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     cancel: 'Avbryt',
     changesNotSaved:
       'Endringene dine er ikke lagret. Hvis du forlater nå, vil du miste endringene dine.',
+    clear: 'Tydelig',
     clearAll: 'Tøm alt',
     close: 'Lukk',
     collapse: 'Skjul',
@@ -300,6 +301,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrer {{label}} der',
     globals: 'Globale variabler',
     goBack: 'Gå tilbake',
+    groupByLabel: 'Grupper etter {{label}}',
     import: 'Import',
     isEditing: 'redigerer',
     item: 'vare',

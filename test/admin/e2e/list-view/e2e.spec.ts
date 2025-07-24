@@ -35,10 +35,12 @@ let payload: PayloadTestSDK<Config>
 
 import { devUser } from 'credentials.js'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
 import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import { deletePreferences } from 'helpers/e2e/preferences.js'
+import { sortColumn } from 'helpers/e2e/sortColumn.js'
 import { toggleColumn, waitForColumnInURL } from 'helpers/e2e/toggleColumn.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from 'helpers/e2e/toggleListDrawer.js'
@@ -630,7 +632,7 @@ describe('List View', () => {
       const tableItems = page.locator(tableRowLocator)
 
       await expect(tableItems).toHaveCount(5)
-      await expect(page.locator('.collection-list__page-info')).toHaveText('1-5 of 6')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
       await page.goto(`${postsUrl.list}?limit=5&page=2`)
 
@@ -642,7 +644,7 @@ describe('List View', () => {
       })
 
       await page.waitForURL(new RegExp(`${postsUrl.list}\\?limit=5&page=1`))
-      await expect(page.locator('.collection-list__page-info')).toHaveText('1-3 of 3')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-3 of 3')
     })
 
     test('should reset filter values for every additional filter', async () => {
@@ -1355,13 +1357,13 @@ describe('List View', () => {
 
       await page.reload()
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
-      await expect(page.locator('.collection-list__page-info')).toHaveText('1-5 of 6')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
-      await page.locator('.paginator button').nth(1).click()
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
+
+      await goToNextPage(page)
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
-      await page.locator('.paginator button').nth(0).click()
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=1')
+
+      await goToPreviousPage(page)
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
     })
 
@@ -1375,7 +1377,7 @@ describe('List View', () => {
       await page.reload()
       const tableItems = page.locator(tableRowLocator)
       await expect(tableItems).toHaveCount(5)
-      await expect(page.locator('.collection-list__page-info')).toHaveText('1-5 of 16')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 16')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
       await page.locator('.per-page .popup-button').click()
 
@@ -1387,11 +1389,11 @@ describe('List View', () => {
 
       await expect(tableItems).toHaveCount(15)
       await expect(page.locator('.per-page .per-page__base-button')).toContainText('Per Page: 15')
-      await page.locator('.paginator button').nth(1).click()
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
+
+      await goToNextPage(page)
       await expect(tableItems).toHaveCount(1)
       await expect(page.locator('.per-page')).toContainText('Per Page: 15') // ensure this hasn't changed
-      await expect(page.locator('.collection-list__page-info')).toHaveText('16-16 of 16')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16')
     })
   })
 
@@ -1410,17 +1412,13 @@ describe('List View', () => {
 
     test('should sort', async () => {
       await page.reload()
-      const upChevron = page.locator('#heading-number .sort-column__asc')
-      const downChevron = page.locator('#heading-number .sort-column__desc')
 
-      await upChevron.click()
-      await page.waitForURL(/sort=number/)
+      await sortColumn(page, { fieldPath: 'number', fieldLabel: 'Number', targetState: 'asc' })
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('1')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('2')
 
-      await downChevron.click()
-      await page.waitForURL(/sort=-number/)
+      await sortColumn(page, { fieldPath: 'number', fieldLabel: 'Number', targetState: 'desc' })
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('2')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
@@ -1434,25 +1432,31 @@ describe('List View', () => {
           hasText: exactText('Named Group > Some Text Field'),
         })
         .click()
-      const upChevron = page.locator('#heading-namedGroup__someTextField .sort-column__asc')
-      const downChevron = page.locator('#heading-namedGroup__someTextField .sort-column__desc')
 
-      await upChevron.click()
-      await page.waitForURL(/sort=namedGroup.someTextField/)
+      await sortColumn(page, {
+        fieldPath: 'namedGroup.someTextField',
+        fieldLabel: 'Named Group > Some Text Field',
+        targetState: 'asc',
+      })
 
       await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
         '<No Some Text Field>',
       )
+
       await expect(page.locator('.row-2 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
       )
 
-      await downChevron.click()
-      await page.waitForURL(/sort=-namedGroup.someTextField/)
+      await sortColumn(page, {
+        fieldPath: 'namedGroup.someTextField',
+        fieldLabel: 'Named Group > Some Text Field',
+        targetState: 'desc',
+      })
 
       await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
       )
+
       await expect(page.locator('.row-2 .cell-namedGroup__someTextField')).toHaveText(
         '<No Some Text Field>',
       )
@@ -1466,29 +1470,31 @@ describe('List View', () => {
           hasText: exactText('Named Tab > Nested Text Field In Named Tab'),
         })
         .click()
-      const upChevron = page.locator(
-        '#heading-namedTab__nestedTextFieldInNamedTab .sort-column__asc',
-      )
-      const downChevron = page.locator(
-        '#heading-namedTab__nestedTextFieldInNamedTab .sort-column__desc',
-      )
 
-      await upChevron.click()
-      await page.waitForURL(/sort=namedTab.nestedTextFieldInNamedTab/)
+      await sortColumn(page, {
+        fieldPath: 'namedTab.nestedTextFieldInNamedTab',
+        fieldLabel: 'Named Tab > Nested Text Field In Named Tab',
+        targetState: 'asc',
+      })
 
       await expect(page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         '<No Nested Text Field In Named Tab>',
       )
+
       await expect(page.locator('.row-2 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         'nested text in named tab',
       )
 
-      await downChevron.click()
-      await page.waitForURL(/sort=-namedTab.nestedTextFieldInNamedTab/)
+      await sortColumn(page, {
+        fieldPath: 'namedTab.nestedTextFieldInNamedTab',
+        fieldLabel: 'Named Tab > Nested Text Field In Named Tab',
+        targetState: 'desc',
+      })
 
       await expect(page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         'nested text in named tab',
       )
+
       await expect(page.locator('.row-2 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         '<No Nested Text Field In Named Tab>',
       )

@@ -1,10 +1,12 @@
 import type {
   AdminViewServerProps,
   CollectionPreferences,
+  Column,
   ColumnPreference,
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
+  PaginatedDocs,
   QueryPreset,
   SanitizedCollectionPermission,
 } from 'payload'
@@ -24,6 +26,7 @@ import {
 import React, { Fragment } from 'react'
 
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
+import { handleGroupBy } from './handleGroupBy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
@@ -74,7 +77,6 @@ export const renderListView = async (
     req,
     req: {
       i18n,
-      locale,
       payload,
       payload: { config },
       query: queryFromReq,
@@ -91,11 +93,17 @@ export const renderListView = async (
 
   const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
+  query.queryByGroup =
+    query?.queryByGroup && typeof query.queryByGroup === 'string'
+      ? JSON.parse(query.queryByGroup)
+      : query?.queryByGroup
+
   const collectionPreferences = await upsertPreferences<CollectionPreferences>({
     key: `collection-${collectionSlug}`,
     req,
     value: {
       columns: columnsFromQuery,
+      groupBy: query?.groupBy,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       preset: query?.preset,
       sort: query?.sort as string,
@@ -111,6 +119,8 @@ export const renderListView = async (
   query.sort =
     collectionPreferences?.sort ||
     (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+
+  query.groupBy = collectionPreferences?.groupBy
 
   query.columns = transformColumnsToSearchParams(collectionPreferences?.columns || [])
 
@@ -137,6 +147,12 @@ export const renderListView = async (
     let queryPreset: QueryPreset | undefined
     let queryPresetPermissions: SanitizedCollectionPermission | undefined
 
+    const whereWithMergedSearch = mergeListSearchAndWhere({
+      collectionConfig,
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      where: combineWhereConstraints([query?.where, baseListFilter]),
+    })
+
     if (collectionPreferences?.preset) {
       try {
         queryPreset = (await payload.findByID({
@@ -160,41 +176,55 @@ export const renderListView = async (
       }
     }
 
-    const data = await payload.find({
-      collection: collectionSlug,
-      depth: 0,
-      draft: true,
-      fallbackLocale: false,
-      includeLockStatus: true,
-      limit: query.limit,
-      locale,
-      overrideAccess: false,
-      page: query.page,
-      req,
-      sort: query.sort,
-      user,
-      where: mergeListSearchAndWhere({
+    let data: PaginatedDocs | undefined
+    let Table: React.ReactNode | React.ReactNode[] = null
+    let columnState: Column[] = []
+
+    if (collectionConfig.admin.groupBy && query.groupBy) {
+      ;({ columnState, data, Table } = await handleGroupBy({
+        clientConfig,
         collectionConfig,
-        search: typeof query?.search === 'string' ? query.search : undefined,
-        where: combineWhereConstraints([query?.where, baseListFilter]),
-      }),
-    })
-
-    const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
-
-    const { columnState, Table } = renderTable({
-      clientCollectionConfig,
-      collectionConfig,
-      columns: collectionPreferences?.columns,
-      customCellProps,
-      docs: data.docs,
-      drawerSlug,
-      enableRowSelections,
-      i18n: req.i18n,
-      orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
-      payload,
-      useAsTitle: collectionConfig.admin.useAsTitle,
-    })
+        collectionSlug,
+        columns: collectionPreferences?.columns,
+        customCellProps,
+        drawerSlug,
+        enableRowSelections,
+        query,
+        req,
+        user,
+        where: whereWithMergedSearch,
+      }))
+    } else {
+      data = await req.payload.find({
+        collection: collectionSlug,
+        depth: 0,
+        draft: true,
+        fallbackLocale: false,
+        includeLockStatus: true,
+        limit: query?.limit ? Number(query.limit) : undefined,
+        locale: req.locale,
+        overrideAccess: false,
+        page: query?.page ? Number(query.page) : undefined,
+        req,
+        sort: query?.sort,
+        user,
+        where: whereWithMergedSearch,
+      })
+      ;({ columnState, Table } = renderTable({
+        clientCollectionConfig: clientConfig.collections.find((c) => c.slug === collectionSlug),
+        collectionConfig,
+        columns: collectionPreferences?.columns,
+        customCellProps,
+        data,
+        drawerSlug,
+        enableRowSelections,
+        i18n: req.i18n,
+        orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
+        payload: req.payload,
+        query,
+        useAsTitle: collectionConfig.admin.useAsTitle,
+      }))
+    }
 
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
@@ -249,6 +279,7 @@ export const renderListView = async (
     const isInDrawer = Boolean(drawerSlug)
 
     // Needed to prevent: Only plain objects can be passed to Client Components from Server Components. Objects with toJSON methods are not supported. Convert it manually to a simple value before passing it to props.
+    // Is there a way to avoid this? The `where` object is already seemingly plain, but is not bc it originates from the params.
     query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
 
     return {

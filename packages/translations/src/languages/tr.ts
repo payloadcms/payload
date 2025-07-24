@@ -233,6 +233,7 @@ export const trTranslations: DefaultTranslationsObject = {
     cancel: 'İptal',
     changesNotSaved:
       'Değişiklikleriniz henüz kaydedilmedi. Eğer bu sayfayı terk ederseniz değişiklikleri kaybedeceksiniz.',
+    clear: 'Temiz',
     clearAll: 'Hepsini Temizle',
     close: 'Kapat',
     collapse: 'Daralt',
@@ -304,6 +305,7 @@ export const trTranslations: DefaultTranslationsObject = {
     filterWhere: '{{label}} filtrele:',
     globals: 'Globaller',
     goBack: 'Geri dön',
+    groupByLabel: "{{label}}'ye göre grupla",
     import: 'İthalat',
     isEditing: 'düzenliyor',
     item: 'öğe',

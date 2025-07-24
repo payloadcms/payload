@@ -237,6 +237,7 @@ export const frTranslations: DefaultTranslationsObject = {
     cancel: 'Annuler',
     changesNotSaved:
       'Vos modifications n’ont pas été enregistrées. Vous perdrez vos modifications si vous quittez maintenant.',
+    clear: 'Clair',
     clearAll: 'Tout effacer',
     close: 'Fermer',
     collapse: 'Réduire',
@@ -308,6 +309,7 @@ export const frTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrer {{label}} où',
     globals: 'Globals(es)',
     goBack: 'Retourner',
+    groupByLabel: 'Regrouper par {{label}}',
     import: 'Importation',
     isEditing: 'est en train de modifier',
     item: 'article',

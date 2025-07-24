@@ -20,18 +20,23 @@ import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
 
-const confirmManyDeleteDrawerSlug = `confirm-delete-many-docs`
-
 export type Props = {
   collection: ClientCollectionConfig
+  /**
+   * When multiple DeleteMany components are rendered on the page, this will differentiate them.
+   */
+  modalPrefix?: string
+  /**
+   * When multiple PublishMany components are rendered on the page, this will differentiate them.
+   */
   title?: string
 }
 
 export const DeleteMany: React.FC<Props> = (props) => {
-  const { collection: { slug } = {} } = props
+  const { collection: { slug } = {}, modalPrefix } = props
 
   const { permissions } = useAuth()
-  const { count, getSelectedIds, selectAll, toggleAll } = useSelection()
+  const { count, selectAll, selectedIDs, toggleAll } = useSelection()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { clearRouteCache } = useRouteCache()
@@ -39,12 +44,13 @@ export const DeleteMany: React.FC<Props> = (props) => {
   const collectionPermissions = permissions?.collections?.[slug]
   const hasDeletePermission = collectionPermissions?.delete
 
+  const selectingAll = selectAll === SelectAllStatus.AllAvailable
+
+  const ids = selectingAll ? [] : selectedIDs
+
   if (selectAll === SelectAllStatus.None || !hasDeletePermission) {
     return null
   }
-
-  const selectingAll = selectAll === SelectAllStatus.AllAvailable
-  const selectedIDs = !selectingAll ? getSelectedIds() : []
 
   return (
     <React.Fragment>
@@ -64,12 +70,13 @@ export const DeleteMany: React.FC<Props> = (props) => {
 
           clearRouteCache()
         }}
+        modalPrefix={modalPrefix}
         search={parseSearchParams(searchParams)?.search as string}
         selections={{
           [slug]: {
             all: selectAll === SelectAllStatus.AllAvailable,
-            ids: selectedIDs,
-            totalCount: selectingAll ? count : selectedIDs.length,
+            ids,
+            totalCount: selectingAll ? count : ids.length,
           },
         }}
         where={parseSearchParams(searchParams)?.where as Where}
@@ -91,6 +98,10 @@ type DeleteMany_v4Props = {
    * A callback function to be called after the delete request is completed.
    */
   afterDelete?: (result: AfterDeleteResult) => void
+  /**
+   * When multiple DeleteMany components are rendered on the page, this will differentiate them.
+   */
+  modalPrefix?: string
   /**
    * Optionally pass a search string to filter the documents to be deleted.
    *
@@ -126,8 +137,15 @@ type DeleteMany_v4Props = {
  *
  * If you are deleting monomorphic documents, shape your `selections` to match the polymorphic structure.
  */
-export function DeleteMany_v4({ afterDelete, search, selections, where }: DeleteMany_v4Props) {
+export function DeleteMany_v4({
+  afterDelete,
+  modalPrefix,
+  search,
+  selections,
+  where,
+}: DeleteMany_v4Props) {
   const { t } = useTranslation()
+
   const {
     config: {
       collections,
@@ -135,15 +153,20 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
       serverURL,
     },
   } = useConfig()
+
   const { code: locale } = useLocale()
   const { i18n } = useTranslation()
   const { openModal } = useModal()
 
+  const confirmManyDeleteDrawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}confirm-delete-many-docs`
+
   const handleDelete = React.useCallback(async () => {
     const deletingOneCollection = Object.keys(selections).length === 1
     const result: AfterDeleteResult = {}
+
     for (const [relationTo, { all, ids = [] }] of Object.entries(selections)) {
       const collectionConfig = collections.find(({ slug }) => slug === relationTo)
+
       if (collectionConfig) {
         let whereConstraint: Where
 
@@ -153,7 +176,9 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
             whereConstraint = where
           } else {
             whereConstraint = {
-              id: { not_equals: '' },
+              id: {
+                not_equals: '',
+              },
             }
           }
         } else {
@@ -219,6 +244,7 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
             toast.error(t('error:unknown'))
             result[relationTo].errors = [t('error:unknown')]
           }
+
           continue
         } catch (_err) {
           toast.error(t('error:unknown'))
@@ -247,7 +273,9 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
           value.totalCount > 1 ? collectionConfig.labels.plural : collectionConfig.labels.singular,
           i18n,
         )}`
+
         let newLabel
+
         if (index === array.length - 1 && index !== 0) {
           newLabel = `${acc.label} and ${collectionLabel}`
         } else if (index > 0) {

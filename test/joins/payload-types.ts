@@ -805,6 +805,7 @@ export interface FolderInterface {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  folderType?: ('folderPoly1' | 'folderPoly2')[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1351,6 +1352,7 @@ export interface PayloadFoldersSelect<T extends boolean = true> {
   name?: T;
   folder?: T;
   documentsAndFolders?: T;
+  folderType?: T;
   updatedAt?: T;
   createdAt?: T;
 }

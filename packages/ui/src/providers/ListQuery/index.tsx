@@ -10,6 +10,7 @@ import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
+import { useConfig } from '../Config/index.js'
 import { ListQueryContext, ListQueryModifiedContext } from './context.js'
 import { mergeQuery } from './mergeQuery.js'
 import { sanitizeQuery } from './sanitizeQuery.js'
@@ -26,12 +27,15 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   query: queryFromProps,
 }) => {
   // TODO: Investigate if this is still needed
-
   'use no memo'
+  // TODO: Investigate if this is still needed
+
   const router = useRouter()
   const rawSearchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
   const [modified, setModified] = useState(false)
+  const { getEntityConfig } = useConfig()
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   const searchParams = useMemo<ListQuery>(
     () => sanitizeQuery(parseSearchParams(rawSearchParams)),
@@ -44,7 +48,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const { onQueryChange } = useListDrawerContext()
 
-  const [currentQuery, setCurrentQuery] = useState<ListQuery>(() => {
+  const [query, setQuery] = useState<ListQuery>(() => {
     if (modifySearchParams) {
       return searchParams
     } else {
@@ -64,7 +68,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         setModified(true)
       }
 
-      const newQuery = mergeQuery(currentQuery, incomingQuery, {
+      const newQuery = mergeQuery(query, incomingQuery, {
         defaults: {
           limit: queryFromProps.limit,
           sort: queryFromProps.sort,
@@ -78,6 +82,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
               {
                 ...newQuery,
                 columns: JSON.stringify(newQuery.columns),
+                queryByGroup: JSON.stringify(newQuery.queryByGroup),
               },
               { addQueryPrefix: true },
             )}`,
@@ -91,10 +96,10 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         onChangeFn(newQuery)
       }
 
-      setCurrentQuery(newQuery)
+      setQuery(newQuery)
     },
     [
-      currentQuery,
+      query,
       queryFromProps.limit,
       queryFromProps.sort,
       modifySearchParams,
@@ -128,26 +133,30 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   )
 
   const handleSortChange = useCallback(
-    async (arg: string) => {
-      await refineListData({ sort: arg })
+    async (sort: string) => {
+      await refineListData({ sort })
     },
     [refineListData],
   )
 
   const handleWhereChange = useCallback(
-    async (arg: Where) => {
-      await refineListData({ where: arg })
+    async (where: Where) => {
+      await refineListData({ where })
     },
     [refineListData],
   )
 
   const mergeQueryFromPropsAndSyncToURL = useEffectEvent(() => {
-    const newQuery = sanitizeQuery({ ...(currentQuery || {}), ...(queryFromProps || {}) })
+    const newQuery = sanitizeQuery({ ...(query || {}), ...(queryFromProps || {}) })
 
-    const search = `?${qs.stringify({ ...newQuery, columns: JSON.stringify(newQuery.columns) })}`
+    const search = `?${qs.stringify({
+      ...newQuery,
+      columns: JSON.stringify(newQuery.columns),
+      queryByGroup: JSON.stringify(newQuery.queryByGroup),
+    })}`
 
     if (window.location.search !== search) {
-      setCurrentQuery(newQuery)
+      setQuery(newQuery)
 
       // Important: do not use router.replace here to avoid re-rendering on initial load
       window.history.replaceState(null, '', search)
@@ -172,11 +181,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         handleSearchChange,
         handleSortChange,
         handleWhereChange,
+        isGroupingBy: Boolean(collectionConfig?.admin?.groupBy && query?.groupBy),
         orderableFieldName,
-        query: currentQuery,
+        query,
         refineListData,
         setModified,
-
         ...contextRef.current,
       }}
     >

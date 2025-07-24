@@ -230,6 +230,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     cancel: 'Չեղարկել',
     changesNotSaved:
       'Ձեր փոփոխությունները չեն պահպանվել։ Եթե հիմա հեռանաք, կկորցնեք չպահպանված փոփոխությունները։',
+    clear:
+      'Հիմնական տեքստի իմաստը պետք է պահպանվի Payload կոնտեքստի մեջ: Այս այս այստեղ են հաճախակի',
     clearAll: 'Մաքրել բոլորը',
     close: 'Փակել',
     collapse: 'Փակել',
@@ -301,6 +303,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     filterWhere: 'Ֆիլտրել {{label}}-ը, որտեղ',
     globals: 'Համընդհանուրներ',
     goBack: 'Հետ գնալ',
+    groupByLabel: 'Խմբավորել {{label}}-ով',
     import: 'Ներմուծում',
     isEditing: 'խմբագրում է',
     item: 'տարր',

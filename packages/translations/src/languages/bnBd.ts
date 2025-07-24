@@ -231,6 +231,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     cancel: 'বাতিল করুন',
     changesNotSaved:
       'আপনার পরিবর্তনগুলি সংরক্ষণ করা হয়নি। আপনি যদি এখন চলে যান, তাহলে আপনার পরিবর্তনগুলি হারিয়ে যাবে।',
+    clear:
+      'মূল পাঠের অর্থ সম্মান করুন পেলোড প্রসঙ্গে। এখানে পেলোড নির্দিষ্ট বিশেষ অর্থ বহন করে এরকম একটি সাধারণ টার্মের তালিকা:\n    - সংগ্রহ',
     clearAll: 'সমস্ত সাফ করুন',
     close: 'বন্ধ করুন',
     collapse: 'সংকুচিত করুন',
@@ -302,6 +304,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     filterWhere: '{{label}} যেখানে ফিল্টার করুন',
     globals: 'গ্লোবালগুলি',
     goBack: 'পিছনে যান',
+    groupByLabel: '{{label}} অনুযায়ী গ্রুপ করুন',
     import: 'ইম্পোর্ট করুন',
     isEditing: 'সম্পাদনা করছেন',
     item: 'আইটেম',
