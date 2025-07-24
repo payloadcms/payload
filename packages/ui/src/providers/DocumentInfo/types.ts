@@ -49,6 +49,11 @@ export type DocumentInfoContext = {
   currentEditor?: ClientUser | null | number | string
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   documentIsLocked?: boolean
+  documentLockState: React.RefObject<{
+    hasShownLockedModal: boolean
+    isLocked: boolean
+    user: ClientUser | number | string
+  } | null>
   getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
   incrementVersionCount: () => void
