@@ -42,7 +42,6 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
-  trash?: boolean
 }
 
 type CheckLoginPermissionArgs = {
@@ -105,7 +104,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         payload: { secret },
       },
       showHiddenFields,
-      trash = false,
     } = args
 
     // /////////////////////////////////////
@@ -202,13 +200,11 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     }
 
     // Exclude trashed users
-    if (collectionConfig.trash) {
-      whereConstraint = appendNonTrashedFilter({
-        enableTrash: collectionConfig.trash,
-        trash,
-        where: whereConstraint,
-      })
-    }
+    whereConstraint = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash: false,
+      where: whereConstraint,
+    })
 
     let user = await payload.db.findOne<any>({
       collection: collectionConfig.slug,

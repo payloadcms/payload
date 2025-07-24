@@ -15,14 +15,13 @@ export type Options<T extends CollectionSlug> = {
   disableEmail?: boolean
   expiration?: number
   req?: Partial<PayloadRequest>
-  trash?: boolean
 }
 
 export async function forgotPasswordLocal<T extends CollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<Result> {
-  const { collection: collectionSlug, data, disableEmail, expiration, trash = false } = options
+  const { collection: collectionSlug, data, disableEmail, expiration } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -40,6 +39,5 @@ export async function forgotPasswordLocal<T extends CollectionSlug>(
     disableEmail,
     expiration,
     req: await createLocalReq(options, payload),
-    trash,
   }) as Promise<Result>
 }

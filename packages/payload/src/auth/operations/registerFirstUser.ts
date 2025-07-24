@@ -19,7 +19,6 @@ export type Arguments<TSlug extends CollectionSlug> = {
   data: AuthOperationsFromCollectionSlug<TSlug>['registerFirstUser'] &
     RequiredDataFromCollectionSlug<TSlug>
   req: PayloadRequest
-  trash?: boolean
 }
 
 export type Result<TData> = {
@@ -42,7 +41,6 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
     data,
     req,
     req: { payload },
-    trash = false,
   } = args
 
   if (config.auth.disableLocalStrategy) {
@@ -62,7 +60,7 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
 
     const where = appendNonTrashedFilter({
       enableTrash: Boolean(config.trash),
-      trash,
+      trash: false,
       where: {}, // no initial filter; just exclude trashed docs
     })
 
