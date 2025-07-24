@@ -12,6 +12,7 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { APIError } from '../../errors/index.js'
 import { Forbidden } from '../../index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -26,6 +27,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableEmail?: boolean
   expiration?: number
   req: PayloadRequest
+  trash?: boolean
 }
 
 export type Result = string
@@ -86,6 +88,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
         payload,
       },
       req,
+      trash = false,
     } = args
 
     // /////////////////////////////////////
@@ -122,6 +125,13 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
         },
       }
     }
+
+    // Exclude trashed users unless `trash: true`
+    whereConstraint = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: whereConstraint,
+    })
 
     let user = await payload.db.findOne<UserDoc>({
       collection: collectionConfig.slug,
