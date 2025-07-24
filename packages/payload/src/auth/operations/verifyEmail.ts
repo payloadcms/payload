@@ -13,11 +13,10 @@ export type Args = {
   collection: Collection
   req: PayloadRequest
   token: string
-  trash?: boolean
 }
 
 export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
-  const { collection, req, token, trash = false } = args
+  const { collection, req, token } = args
 
   if (collection.config.auth.disableLocalStrategy) {
     throw new Forbidden(req.t)
@@ -31,7 +30,7 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
 
     const where = appendNonTrashedFilter({
       enableTrash: Boolean(collection.config.trash),
-      trash,
+      trash: false,
       where: {
         _verificationToken: { equals: token },
       },

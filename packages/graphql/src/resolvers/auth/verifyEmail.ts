@@ -18,7 +18,6 @@ export function verifyEmail(collection: Collection) {
       collection,
       req: isolateObjectProperty(context.req, 'transactionID'),
       token: args.token,
-      trash: args.trash,
     }
 
     const success = await verifyEmailOperation(options)

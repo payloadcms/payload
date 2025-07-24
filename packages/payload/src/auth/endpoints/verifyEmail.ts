@@ -8,12 +8,11 @@ import { verifyEmailOperation } from '../operations/verifyEmail.js'
 
 export const verifyEmailHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req, { disableSanitize: true })
-  const { searchParams, t } = req
+  const { t } = req
   await verifyEmailOperation({
     collection,
     req,
     token: id,
-    trash: searchParams.get('trash') === 'true',
   })
 
   return Response.json(
