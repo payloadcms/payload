@@ -11,11 +11,17 @@ import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
+import { ReusableContent } from './collections/ReusableContents'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { CallToAction } from '@/blocks/CallToAction/config'
+import { Content } from '@/blocks/Content/config'
+import { Archive } from '@/blocks/ArchiveBlock/config'
+import { MediaBlock } from '@/blocks/MediaBlock/config'
+import { FormBlock } from '@/blocks/Form/config'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -57,6 +63,7 @@ export default buildConfig({
       ],
     },
   },
+  blocks: [CallToAction, Content, Archive, MediaBlock, FormBlock],
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
   // database-adapter-config-start
@@ -64,7 +71,7 @@ export default buildConfig({
     url: process.env.DATABASE_URI,
   }),
   // database-adapter-config-end
-  collections: [Pages, Posts, Media, Categories, Users],
+  collections: [Pages, Posts, Media, Categories, ReusableContent, Users],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
@@ -72,7 +79,6 @@ export default buildConfig({
     // storage-adapter-placeholder
   ],
   secret: process.env.PAYLOAD_SECRET,
-  sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
