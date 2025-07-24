@@ -7,7 +7,6 @@ export function init(collection: string) {
     const options = {
       collection,
       req: isolateObjectProperty(context.req, 'transactionID'),
-      trash: args.trash,
     }
 
     return initOperation(options)
