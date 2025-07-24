@@ -35,7 +35,6 @@ export async function loginLocal<TSlug extends CollectionSlug>(
     depth,
     overrideAccess = true,
     showHiddenFields,
-    trash = false,
   } = options
 
   const collection = payload.collections[collectionSlug]
@@ -53,7 +52,6 @@ export async function loginLocal<TSlug extends CollectionSlug>(
     overrideAccess,
     req: await createLocalReq(options, payload),
     showHiddenFields,
-    trash,
   }
 
   const result = await loginOperation<TSlug>(args)
