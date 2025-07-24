@@ -57,7 +57,6 @@ export const selectDistinct = ({
     }
 
     joins.forEach(({ condition, table }) => {
-      // TODO: Instead of always doing leftjoin, shouldnt we read join.type ?
       query = query.leftJoin(table, condition)
     })
 
