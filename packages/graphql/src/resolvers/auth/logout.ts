@@ -10,6 +10,7 @@ export function logout(collection: Collection): any {
       allSessions: args.allSessions,
       collection,
       req: isolateObjectProperty(context.req, 'transactionID'),
+      trash: args.trash,
     }
 
     const result = await logoutOperation(options)
