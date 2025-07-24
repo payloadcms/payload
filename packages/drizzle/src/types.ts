@@ -98,6 +98,7 @@ export type CountDistinct = (args: {
 
 export type DeleteWhere = (args: {
   db: DrizzleTransaction | LibSQLDatabase | PostgresDB
+  joins?: BuildQueryJoinAliases
   tableName: string
   where: SQL
 }) => Promise<void>

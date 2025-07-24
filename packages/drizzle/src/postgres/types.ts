@@ -74,6 +74,7 @@ export type CountDistinct = (args: {
 
 export type DeleteWhere = (args: {
   db: PostgresDB | TransactionPg
+  joins?: BuildQueryJoinAliases
   tableName: string
   where: SQL
 }) => Promise<void>
