@@ -582,6 +582,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
             type: GraphQLBoolean,
             args: {
               token: { type: GraphQLString },
+              trash: { type: GraphQLBoolean },
             },
             resolve: verifyEmail(collection),
           }

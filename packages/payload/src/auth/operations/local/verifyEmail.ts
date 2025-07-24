@@ -10,13 +10,14 @@ export type Options<T extends CollectionSlug> = {
   context?: RequestContext
   req?: Partial<PayloadRequest>
   token: string
+  trash?: boolean
 }
 
 export async function verifyEmailLocal<T extends CollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<boolean> {
-  const { collection: collectionSlug, token } = options
+  const { collection: collectionSlug, token, trash = false } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -30,5 +31,6 @@ export async function verifyEmailLocal<T extends CollectionSlug>(
     collection,
     req: await createLocalReq(options, payload),
     token,
+    trash,
   })
 }
