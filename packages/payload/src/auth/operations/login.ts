@@ -17,6 +17,7 @@ import {
 } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { Forbidden } from '../../index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
@@ -41,6 +42,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
+  trash?: boolean
 }
 
 type CheckLoginPermissionArgs = {
@@ -103,6 +105,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         payload: { secret },
       },
       showHiddenFields,
+      trash = false,
     } = args
 
     // /////////////////////////////////////
@@ -196,6 +199,15 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       whereConstraint = emailConstraint
     } else if (canLoginWithUsername && sanitizedUsername) {
       whereConstraint = usernameConstraint
+    }
+
+    // Exclude trashed users
+    if (collectionConfig.trash) {
+      whereConstraint = appendNonTrashedFilter({
+        enableTrash: collectionConfig.trash,
+        trash,
+        where: whereConstraint,
+      })
     }
 
     let user = await payload.db.findOne<any>({

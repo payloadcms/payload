@@ -539,6 +539,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
             args: {
               ...authArgs,
               password: { type: GraphQLString },
+              trash: { type: GraphQLBoolean },
             },
             resolve: login(collection),
           }

@@ -12,6 +12,7 @@ export const loginHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
   const { searchParams, t } = req
   const depth = searchParams.get('depth')
+  const trash = searchParams.get('trash') === 'true'
   const authData =
     collection.config.auth?.loginWithUsername !== false
       ? {
@@ -29,6 +30,7 @@ export const loginHandler: PayloadHandler = async (req) => {
     data: authData,
     depth: isNumber(depth) ? Number(depth) : undefined,
     req,
+    trash,
   })
 
   const cookie = generatePayloadCookie({

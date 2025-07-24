@@ -15,6 +15,7 @@ export function login(collection: Collection): any {
       },
       depth: 0,
       req: isolateObjectProperty(context.req, 'transactionID'),
+      trash: args.trash,
     }
 
     const result = await loginOperation(options)
