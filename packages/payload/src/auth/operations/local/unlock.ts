@@ -16,13 +16,14 @@ export type Options<TSlug extends CollectionSlug> = {
   data: AuthOperationsFromCollectionSlug<TSlug>['unlock']
   overrideAccess: boolean
   req?: Partial<PayloadRequest>
+  trash?: boolean
 }
 
 export async function unlockLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<boolean> {
-  const { collection: collectionSlug, data, overrideAccess = true } = options
+  const { collection: collectionSlug, data, overrideAccess = true, trash = false } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -37,5 +38,6 @@ export async function unlockLocal<TSlug extends CollectionSlug>(
     data,
     overrideAccess,
     req: await createLocalReq(options, payload),
+    trash,
   })
 }

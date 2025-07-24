@@ -9,6 +9,7 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 
 import { APIError } from '../../errors/index.js'
 import { Forbidden } from '../../index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -21,6 +22,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   data: AuthOperationsFromCollectionSlug<TSlug>['unlock']
   overrideAccess?: boolean
   req: PayloadRequest
+  trash?: boolean
 }
 
 export const unlockOperation = async <TSlug extends CollectionSlug>(
@@ -31,6 +33,7 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
     overrideAccess,
     req: { locale },
     req,
+    trash = false,
   } = args
 
   const loginWithUsername = collectionConfig.auth.loginWithUsername
@@ -85,6 +88,13 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
         },
       }
     }
+
+    // Exclude trashed users unless `trash: true`
+    whereConstraint = appendNonTrashedFilter({
+      enableTrash: Boolean(collectionConfig.trash),
+      trash,
+      where: whereConstraint,
+    })
 
     const user = await req.payload.db.findOne({
       collection: collectionConfig.slug,

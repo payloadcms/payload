@@ -520,7 +520,10 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           if (collectionConfig.auth.maxLoginAttempts > 0) {
             graphqlResult.Mutation.fields[`unlock${singularName}`] = {
               type: new GraphQLNonNull(GraphQLBoolean),
-              args: authArgs,
+              args: {
+                ...authArgs,
+                trash: { type: GraphQLBoolean },
+              },
               resolve: unlock(collection),
             }
           }
