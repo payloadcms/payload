@@ -197,9 +197,9 @@ function mergeData(
  */
 function removeIdIfParentIsLocalized(data: Data, fields: Field[]): Data {
   traverseFields({
-    callback: ({ field, parentIsLocalized, ref }) => {
-      if (parentIsLocalized && 'id' in ref) {
-        delete ref.id
+    callback: ({ parentIsLocalized, ref }) => {
+      if (parentIsLocalized) {
+        delete (ref as { id: unknown }).id
       }
     },
     fields,
