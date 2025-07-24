@@ -465,6 +465,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
 
         graphqlResult.Query.fields[`initialized${singularName}`] = {
           type: GraphQLBoolean,
+          args: {
+            trash: { type: GraphQLBoolean },
+          },
           resolve: init(collection.config.slug),
         }
       }
