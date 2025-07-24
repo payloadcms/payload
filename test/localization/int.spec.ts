@@ -2199,16 +2199,20 @@ describe('Localization', () => {
           id: doc.id,
           collection: 'blocks-fields',
           data: {
-            // id: doc.id,
+            id: doc.id,
             content: [
               {
-                id: doc.content?.[0]?.id, // if this is deleted the test passes
+                // This can't be added in Postgres because you'd get a duplicate ID error
+                // since the parent is localized, and the primary key in the block table
+                // consists only of the ID. That's why it's removed in `copyToLocale`.
+                // id: doc.content?.[0]?.id,
                 blockName: null,
                 array: [],
                 blockType: 'blockInsideBlock',
                 content: [
                   {
-                    id: doc.content?.[0]?.content?.[0]?.id, // if this is deleted the test passes
+                    // Same as above.
+                    // id: doc.content?.[0]?.content?.[0]?.id, // if this is deleted the test passes
                     text: 'some-text',
                     blockName: null,
                     blockType: 'textBlock',
