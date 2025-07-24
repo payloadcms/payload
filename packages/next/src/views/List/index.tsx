@@ -132,8 +132,10 @@ export const renderListView = async (
       throw new Error('not-found')
     }
 
+    let baseListFilter = undefined
+
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
-      const baseListFilter = await collectionConfig.admin.baseListFilter({
+      baseListFilter = await collectionConfig.admin.baseListFilter({
         limit: query.limit,
         page: query.page,
         req,
@@ -147,14 +149,13 @@ export const renderListView = async (
       }
     }
 
+    let queryPreset: QueryPreset | undefined
+    let queryPresetPermissions: SanitizedCollectionPermission | undefined
     const whereWithMergedSearch = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
       where: query?.where,
     })
-
-    let queryPreset: QueryPreset | undefined
-    let queryPresetPermissions: SanitizedCollectionPermission | undefined
 
     if (collectionPreferences?.preset) {
       try {
