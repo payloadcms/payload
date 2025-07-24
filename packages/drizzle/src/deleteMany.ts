@@ -49,7 +49,6 @@ export const deleteMany: DeleteMany = async function deleteMany(
       where: whereArg,
     })
 
-    // Set wheretouse to sql that checks if ids in array
     whereToUse = inArray(
       table.id,
       result.docs.map((doc) => doc.id),
