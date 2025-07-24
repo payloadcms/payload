@@ -11,13 +11,10 @@ export const logoutHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
   const { searchParams, t } = req
 
-  const trash = searchParams.get('trash') === 'true'
-
   const result = await logoutOperation({
     allSessions: searchParams.get('allSessions') === 'true',
     collection,
     req,
-    trash,
   })
 
   const headers = headersWithCors({

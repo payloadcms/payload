@@ -498,7 +498,6 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           type: GraphQLString,
           args: {
             allSessions: { type: GraphQLBoolean },
-            trash: { type: GraphQLBoolean },
           },
           resolve: logout(collection),
         }

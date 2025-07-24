@@ -10,7 +10,6 @@ export type Arguments = {
   allSessions?: boolean
   collection: Collection
   req: PayloadRequest
-  trash?: boolean
 }
 
 export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean> => {
@@ -20,7 +19,6 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
     collection: { config: collectionConfig },
     req: { user },
     req,
-    trash = false,
   } = incomingArgs
 
   if (!user) {
@@ -44,7 +42,7 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
   if (collectionConfig.auth.disableLocalStrategy !== true && collectionConfig.auth.useSessions) {
     const where = appendNonTrashedFilter({
       enableTrash: Boolean(collectionConfig.trash),
-      trash,
+      trash: false,
       where: {
         id: {
           equals: user.id,
