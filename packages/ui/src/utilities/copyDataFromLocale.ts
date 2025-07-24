@@ -71,8 +71,9 @@ function iterateFields(
           // if the field has no value, take the source value
           if (
             field.name in toLocaleData &&
-            // only replace if the target value is null or undefined
-            [null, undefined].includes(toLocaleData[field.name]) &&
+            // only replace if the target value is null, undefined, or empty array
+            ([null, undefined].includes(toLocaleData[field.name]) ||
+              (Array.isArray(toLocaleData[field.name]) && toLocaleData[field.name].length === 0)) &&
             field.name in fromLocaleData
           ) {
             toLocaleData[field.name] = fromLocaleData[field.name]
