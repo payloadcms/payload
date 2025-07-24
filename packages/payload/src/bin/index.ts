@@ -7,7 +7,6 @@ import path from 'path'
 
 import { findConfig } from '../config/find.js'
 import payload, { getPayload } from '../index.js'
-import { drizzleStudio } from './drizzleStudio.js'
 import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
 import { info } from './info.js'
@@ -16,7 +15,6 @@ import { migrate, availableCommands as migrateCommands } from './migrate.js'
 
 // Note: this does not account for any user bin scripts
 const availableScripts = [
-  'drizzle:studio',
   'generate:db-schema',
   'generate:importmap',
   'generate:types',
@@ -98,10 +96,6 @@ export const bin = async () => {
 
   if (script.startsWith('migrate')) {
     return migrate({ config, parsedArgs: args }).then(() => process.exit(0))
-  }
-
-  if (script === 'drizzle:studio') {
-    return drizzleStudio(config)
   }
 
   if (script === 'generate:types') {
