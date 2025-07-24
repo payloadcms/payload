@@ -213,8 +213,10 @@ export const arTranslations: DefaultTranslationsObject = {
     aboutToPermanentlyDelete: 'أنت على وشك حذف {{label}} <1>{{title}}</1> نهائيا. هل أنت متأكد؟',
     aboutToPermanentlyDeleteTrash:
       'أنت على وشك حذف <0>{{count}}</0> <1>{{label}}</1> نهائياً من سلة المهملات. هل أنت متأكد؟',
-    aboutToRestore: 'أنت على وشك استعادة {{label}} <1>{{title}}</1> كمسودة. هل أنت متأكد؟',
-    aboutToRestoreCount: 'أنت على وشك استعادة {{count}} {{label}} كمسودة',
+    aboutToRestore: 'أنت على وشك استعادة {{label}} <1>{{title}}</1>. هل أنت متأكد؟',
+    aboutToRestoreAsDraft: 'أنت على وشك استعادة {{label}} <1>{{title}}</1> كمسودة. هل أنت متأكد؟',
+    aboutToRestoreAsDraftCount: 'أنت على وشك استعادة {{count}} {{label}} كمسودة',
+    aboutToRestoreCount: 'أنت على وشك استعادة {{count}} {{label}}',
     aboutToTrash: 'أنت على وشك نقل {{label}} <1>{{title}}</1> إلى القمامة. هل أنت متأكد؟',
     aboutToTrashCount: 'أنت على وشك نقل {{count}} {{label}} إلى المهملات',
     addBelow: 'أضف في الاسفل',

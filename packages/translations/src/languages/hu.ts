@@ -223,8 +223,11 @@ export const huTranslations: DefaultTranslationsObject = {
     aboutToPermanentlyDeleteTrash:
       'Ön véglegesen törölni készül <0>{{count}}</0> <1>{{label}}</1> elemet a szemetesből. Biztos benne?',
     aboutToRestore:
-      'Készül visszaállítani a {{label}} <1>{{title}}</1> -t vázlatként. Biztos benne?',
-    aboutToRestoreCount: 'Ön hamarosan visszaállít {{count}} {{label}}-t mint vázlat',
+      'Ön helyreállítja a következőt: {{label}} <1>{{title}}</1>. Biztosan így szeretné?',
+    aboutToRestoreAsDraft:
+      'Ön azzal készül, hogy a következőt: {{label}} <1>{{title}}</1>, vázlatként állítja vissza. Biztos benne?',
+    aboutToRestoreAsDraftCount: 'Ön hamarosan visszaállít {{count}} {{label}}-t mint vázlat',
+    aboutToRestoreCount: 'Ön a következők visszaállítására készül: {{count}} {{label}}',
     aboutToTrash:
       'Ön azon van, hogy a következőt: {{label}} <1>{{title}}</1> áthelyezze a szemetesbe. Biztos benne?',
     aboutToTrashCount: 'Ön a(z) {{count}} {{label}} elemet készül a kukába helyezni.',

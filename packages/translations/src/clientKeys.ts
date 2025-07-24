@@ -159,6 +159,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:aboutToPermanentlyDelete',
   'general:aboutToPermanentlyDeleteTrash',
   'general:aboutToRestore',
+  'general:aboutToRestoreAsDraft',
+  'general:aboutToRestoreAsDraftCount',
   'general:aboutToRestoreCount',
   'general:aboutToTrash',
   'general:aboutToTrashCount',

@@ -221,10 +221,12 @@ export const jaTranslations: DefaultTranslationsObject = {
       'あなたは永久に{{label}} <1>{{title}}</1>を削除しようとしています。よろしいですか？',
     aboutToPermanentlyDeleteTrash:
       'あなたはゴミ箱から<0>{{count}}</0> <1>{{label}}</1>を永久に削除しようとしています。よろしいですか？',
-    aboutToRestore:
-      'あなたは{{label}} <1>{{title}}</1>をドラフトとして復元しようとしています。よろしいですか？',
-    aboutToRestoreCount:
+    aboutToRestore: 'あなたは{{label}} <1>{{title}}</1>を復元しようとしています。よろしいですか？',
+    aboutToRestoreAsDraft:
+      'あなたは {{label}} <1>{{title}}</1> を下書きとして復元しようとしています。よろしいですか？',
+    aboutToRestoreAsDraftCount:
       'あなたはまもなく、{{count}} {{label}}を下書きとして復元しようとしています。',
+    aboutToRestoreCount: 'あなたはまもなく{{count}} {{label}}を復元しようとしています。',
     aboutToTrash:
       'あなたは{{label}} <1>{{title}}</1>をゴミ箱に移動しようとしています。よろしいですか？',
     aboutToTrashCount: 'あなたはまもなく{{count}} {{label}}をゴミ箱に移動しようとしています。',

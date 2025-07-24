@@ -222,9 +222,11 @@ export const ruTranslations: DefaultTranslationsObject = {
       'Вы собираетесь навсегда удалить {{label}} <1>{{title}}</1>. Вы уверены?',
     aboutToPermanentlyDeleteTrash:
       'Вы собираетесь навсегда удалить <0>{{count}}</0> <1>{{label}}</1> из корзины. Вы уверены?',
-    aboutToRestore:
+    aboutToRestore: 'Вы собираетесь восстановить {{label}} <1>{{title}}</1>. Вы уверены?',
+    aboutToRestoreAsDraft:
       'Вы собираетесь восстановить {{label}} <1>{{title}}</1> как черновик. Вы уверены?',
-    aboutToRestoreCount: 'Вы собираетесь восстановить {{count}} {{label}} как черновик',
+    aboutToRestoreAsDraftCount: 'Вы собираетесь восстановить {{count}} {{label}} как черновик',
+    aboutToRestoreCount: 'Вы собираетесь восстановить {{count}} {{label}}',
     aboutToTrash: 'Вы собираетесь переместить {{label}} <1>{{title}}</1> в корзину. Вы уверены?',
     aboutToTrashCount: 'Вы собираетесь переместить {{count}} {{label}} в корзину',
     addBelow: 'Добавить ниже',

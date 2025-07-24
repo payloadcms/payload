@@ -222,9 +222,11 @@ export const enTranslations = {
       'You are about to permanently delete the {{label}} <1>{{title}}</1>. Are you sure?',
     aboutToPermanentlyDeleteTrash:
       'You are about to permanently delete <0>{{count}}</0> <1>{{label}}</1> from the trash. Are you sure?',
-    aboutToRestore:
+    aboutToRestore: 'You are about to restore the {{label}} <1>{{title}}</1>. Are you sure?',
+    aboutToRestoreAsDraft:
       'You are about to restore the {{label}} <1>{{title}}</1> as a draft. Are you sure?',
-    aboutToRestoreCount: 'You are about to restore {{count}} {{label}} as draft',
+    aboutToRestoreAsDraftCount: 'You are about to restore {{count}} {{label}} as draft',
+    aboutToRestoreCount: 'You are about to restore {{count}} {{label}}',
     aboutToTrash:
       'You are about to move the {{label}} <1>{{title}}</1> to the trash. Are you sure?',
     aboutToTrashCount: 'You are about to move {{count}} {{label}} to the trash',

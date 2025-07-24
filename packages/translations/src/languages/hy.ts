@@ -220,9 +220,11 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Դուք պատրաստ եք հաստատականորեն ջնջել {{label}} <1>{{title}}</1>։ Արդյոք վստահ եք:',
     aboutToPermanentlyDeleteTrash:
       'Դուք պատրաստ եք ընդմիշտ ջնջել <0>{{count}}</0> <1>{{label}}</1> աղբավաղուց։ Վստահ եք։',
-    aboutToRestore:
-      'Դուք պատրաստ եք վերականգնել {{label}} <1>{{title}}</1>-ը որպես սևագիր: Համոզված եք:',
-    aboutToRestoreCount: 'Դուք պատրաստ եք վերականգնել {{count}} {{label}} նախագծի որպես',
+    aboutToRestore: 'Մոտեցել եք {{label}} <1>{{title}}</1> վերականգնելուն։ Համոզված ե՞ք։',
+    aboutToRestoreAsDraft:
+      'Ձեր մտադրությունը վերականգնել է {{label}} <1>{{title}}</1> նախագծի որպես: Վստահ եք:',
+    aboutToRestoreAsDraftCount: 'Դուք պատրաստ եք վերականգնել {{count}} {{label}} նախագծի որպես',
+    aboutToRestoreCount: 'Դուք պատրաստ եք վերականգնել {{count}} {{label}}',
     aboutToTrash: 'Դուք պատրաստ եք տեղափոխել {{label}} <1>{{title}}</1>-ը աղբականջը։ Վստահ եք։',
     aboutToTrashCount: 'Դուք պատրաստ եք տեղափոխել {{count}} {{label}} աղբամանը',
     addBelow: 'Ավելացնել ներքևում',

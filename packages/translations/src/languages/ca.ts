@@ -221,9 +221,11 @@ export const caTranslations: DefaultTranslationsObject = {
       "Estàs a punt d'esborrar permanentment l'{{etiqueta}} <1>{{títol}}</1>. N'estàs segur?",
     aboutToPermanentlyDeleteTrash:
       "Estàs a punt de suprimir permanentment <0>{{count}}</0> <1>{{label}}</1> de la paperera. N'estàs segur?",
-    aboutToRestore:
-      "Esteu a punt de restaurar l'{{label}} <1>{{title}}</1> com a esborrany. N'estàs segur?",
-    aboutToRestoreCount: 'Està a punt de restaurar {{count}} {{label}} com a esborrany',
+    aboutToRestore: "Estàs a punt de restaurar l'{{label}} <1>{{title}}</1>. N'estàs segur?",
+    aboutToRestoreAsDraft:
+      "Estàs a punt de restaurar l'etiqueta {{label}} <1>{{title}}</1> com a esborrany. N'estàs segur?",
+    aboutToRestoreAsDraftCount: 'Està a punt de restaurar {{count}} {{label}} com a esborrany',
+    aboutToRestoreCount: 'Està a punt de restaurar {{count}} {{label}}',
     aboutToTrash:
       "Estàs a punt de moure l'{{label}} <1>{{title}}</1> a la paperera. N'estàs segur?",
     aboutToTrashCount: 'Estàs a punt de moure {{count}} {{label}} a la paperera',

@@ -220,9 +220,11 @@ export const slTranslations: DefaultTranslationsObject = {
       'Ravno boste trajno izbrisali {{label}} <1>{{title}}</1>. Ste prepričani?',
     aboutToPermanentlyDeleteTrash:
       'Pravkar boste trajno izbrisali <0>{{count}}</0> <1>{{label}}</1> iz smetnjaka. Ali ste prepričani?',
-    aboutToRestore:
-      'Pravkar boste obnovili {{label}} <1>{{title}}</1> kot osnutek. Ste prepričani?',
-    aboutToRestoreCount: 'Pravkar boste obnovili {{count}} {{label}} kot osnutek.',
+    aboutToRestore: 'Ravno se odpravljate na obnovitev {{label}} <1>{{title}}</1>. Ste prepričani?',
+    aboutToRestoreAsDraft:
+      'Pravkar boste obnovili {{label}} <1>{{title}}</1> kot osnutek. Ali ste prepričani?',
+    aboutToRestoreAsDraftCount: 'Pravkar boste obnovili {{count}} {{label}} kot osnutek.',
+    aboutToRestoreCount: 'Pravkar boste obnovili {{count}} {{label}}',
     aboutToTrash: 'Pravkar boste premaknili {{label}} <1>{{title}}</1> v smeti. Ste prepričani?',
     aboutToTrashCount: 'Pravkar boste premaknili {{count}} {{label}} v smeti.',
     addBelow: 'Dodaj spodaj',

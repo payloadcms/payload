@@ -220,9 +220,11 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Jūs esat gatavs neatgriezeniski dzēst {{label}} <1>{{title}}</1>. Vai esat pārliecināts?',
     aboutToPermanentlyDeleteTrash:
       'Jūs gatavojaties neatgriezeniski dzēst <0>{{count}}</0> <1>{{label}}</1> no miskastes. Vai esat pārliecināts?',
-    aboutToRestore:
+    aboutToRestore: 'Jūs esat gatavs atjaunot {{label}} <1>{{title}}</1>. Vai esat pārliecināts?',
+    aboutToRestoreAsDraft:
       'Jūs gatavojaties atjaunot {{label}} <1>{{title}}</1> kā melnrakstu. Vai esat pārliecināts?',
-    aboutToRestoreCount: 'Jūs gatavojaties atjaunot {{count}} {{label}} kā melnrakstu',
+    aboutToRestoreAsDraftCount: 'Jūs gatavojaties atjaunot {{count}} {{label}} kā melnrakstu',
+    aboutToRestoreCount: 'Jūs gatavojaties atjaunot {{count}} {{label}}',
     aboutToTrash:
       'Jūs gatavojaties pārvietot {{label}} <1>{{title}}</1> uz miskasti. Vai esat pārliecināts?',
     aboutToTrashCount: 'Jūs gatavojaties pārvietot {{count}} {{label}} uz miskasti',

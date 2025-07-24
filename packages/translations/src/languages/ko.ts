@@ -218,9 +218,11 @@ export const koTranslations: DefaultTranslationsObject = {
       '당신은 {{label}} <1>{{title}}</1>을 영구적으로 삭제하려고 합니다. 확실합니까?',
     aboutToPermanentlyDeleteTrash:
       '휴지통에서 <0>{{count}}</0> <1>{{label}}</1>을(를) 영구적으로 삭제하려고 합니다. 확실합니까?',
-    aboutToRestore:
-      '당신은 {{label}} <1>{{title}}</1>을(를) 초안으로 복원하려고 합니다. 확실하십니까?',
-    aboutToRestoreCount: '당신은 {{count}}개의 {{label}}을 초안으로 복원하려고 합니다.',
+    aboutToRestore: '당신은 {{label}} <1>{{title}}</1>을 복원하려고 합니다. 확실합니까?',
+    aboutToRestoreAsDraft:
+      '당신은 {{label}} <1>{{title}}</1>을 초안으로 복원하려고 합니다. 확실합니까?',
+    aboutToRestoreAsDraftCount: '당신은 {{count}}개의 {{label}}을 초안으로 복원하려고 합니다.',
+    aboutToRestoreCount: '당신은 {{count}} {{label}}을 복원하려고 합니다.',
     aboutToTrash: '{{label}} <1>{{title}}</1>을 휴지통으로 이동하려고 합니다. 확실합니까?',
     aboutToTrashCount: '당신은 곧 {{count}} {{label}}을(를) 휴지통으로 이동하려고 합니다.',
     addBelow: '아래에 추가',

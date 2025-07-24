@@ -219,9 +219,11 @@ export const plTranslations: DefaultTranslationsObject = {
       'Zamierzasz na stałe usunąć {{label}} <1>{{title}}</1>. Czy jesteś pewien?',
     aboutToPermanentlyDeleteTrash:
       'Zamierzasz na stałe usunąć <0>{{count}}</0> <1>{{label}}</1> z kosza. Czy jesteś pewny?',
-    aboutToRestore:
+    aboutToRestore: 'Zamierzasz przywrócić {{label}} <1>{{title}}</1>. Czy jesteś pewny?',
+    aboutToRestoreAsDraft:
       'Zamierzasz przywrócić {{label}} <1>{{title}}</1> jako szkic. Czy jesteś pewien?',
-    aboutToRestoreCount: 'Za chwilę przywrócisz {{count}} {{label}} jako szkic',
+    aboutToRestoreAsDraftCount: 'Za chwilę przywrócisz {{count}} {{label}} jako szkic',
+    aboutToRestoreCount: 'Za chwilę przywrócisz {{count}} {{label}}',
     aboutToTrash: 'Zamierzasz przenieść {{label}} <1>{{title}}</1> do kosza. Czy jesteś pewien?',
     aboutToTrashCount: 'Zamierzasz przenieść {{count}} {{label}} do kosza.',
     addBelow: 'Dodaj poniżej',

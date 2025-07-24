@@ -223,8 +223,11 @@ export const skTranslations: DefaultTranslationsObject = {
       'Chystáte sa natrvalo vymazať {{label}} <1>{{title}}</1>. Ste si istý?',
     aboutToPermanentlyDeleteTrash:
       'Chystáte sa natrvalo odstrániť <0>{{count}}</0> <1>{{label}}</1> z koša. Ste si istý?',
-    aboutToRestore: 'Chystáte sa obnoviť {{label}} <1>{{title}}</1> ako koncept. Ste si istý?',
-    aboutToRestoreCount: 'Chystáte sa obnoviť {{count}} {{label}} ako koncept',
+    aboutToRestore: 'Chystáte sa obnoviť {{label}} <1>{{title}}</1>. Ste si istý?',
+    aboutToRestoreAsDraft:
+      'Chystáte sa obnoviť {{label}} <1>{{title}}</1> ako koncept. Ste si istý?',
+    aboutToRestoreAsDraftCount: 'Chystáte sa obnoviť {{count}} {{label}} ako koncept',
+    aboutToRestoreCount: 'Chystáte sa obnoviť {{count}} {{label}}',
     aboutToTrash: 'Chystáte sa presunúť {{label}} <1>{{title}}</1> do koša. Ste si istý?',
     aboutToTrashCount: 'Chystáte sa presunúť {{count}} {{label}} do koša',
     addBelow: 'Pridať pod',

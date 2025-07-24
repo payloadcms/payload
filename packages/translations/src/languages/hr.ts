@@ -221,8 +221,11 @@ export const hrTranslations: DefaultTranslationsObject = {
       'Na rubu ste trajnog brisanja {{label}} <1>{{title}}</1>. Jeste li sigurni?',
     aboutToPermanentlyDeleteTrash:
       'Na rubu ste trajnog brisanja <0>{{count}}</0> <1>{{label}}</1> iz smeća. Jeste li sigurni?',
-    aboutToRestore: 'Sada ćete vratiti {{label}} <1>{{title}}</1> kao skicu. Jeste li sigurni?',
-    aboutToRestoreCount: 'Uskoro ćete obnoviti {{count}} {{label}} kao nacrt',
+    aboutToRestore: 'Na rubu ste obnoviti {{label}} <1>{{title}}</1>. Jeste li sigurni?',
+    aboutToRestoreAsDraft:
+      'Uskoro ćete vratiti {{label}} <1>{{title}}</1> kao skicu. Jeste li sigurni?',
+    aboutToRestoreAsDraftCount: 'Uskoro ćete obnoviti {{count}} {{label}} kao nacrt',
+    aboutToRestoreCount: 'Uskoro ćete obnoviti {{count}} {{label}}',
     aboutToTrash: 'Na rubu ste premještanja {{label}} <1>{{title}}</1> u otpad. Jeste li sigurni?',
     aboutToTrashCount: 'Na korak ste od premještanja {{count}} {{label}} u smeće',
     addBelow: 'Dodaj ispod',

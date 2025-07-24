@@ -212,8 +212,10 @@ export const heTranslations: DefaultTranslationsObject = {
       'אתה עומד למחוק לצמיתות את ה{{label}} <1>{{title}}</1>. האם אתה בטוח?',
     aboutToPermanentlyDeleteTrash:
       'אתה עומד למחוק לצמיתות <0>{{count}}</0> <1>{{label}}</1> מהאשפה. האם אתה בטוח?',
-    aboutToRestore: 'אתה עומד לשחזר את ה-{{label}} <1>{{title}}</1> כטיוטה. האם אתה בטוח?',
-    aboutToRestoreCount: 'אתה עומד לשחזר {{count}} {{label}} כטיוטה',
+    aboutToRestore: 'אתה עומד לשחזר את {{label}} <1>{{title}}</1>. האם אתה בטוח?',
+    aboutToRestoreAsDraft: 'אתה עומד לשחזר את ה{{label}} <1>{{title}}</1> כטיוטה. האם אתה בטוח?',
+    aboutToRestoreAsDraftCount: 'אתה עומד לשחזר {{count}} {{label}} כטיוטה',
+    aboutToRestoreCount: 'אתה עומד לשחזר {{count}} {{label}}',
     aboutToTrash: 'אתה עומד להעביר את ה{{label}} <1>{{title}}</1> לפח. האם אתה בטוח?',
     aboutToTrashCount: 'אתה עומד להעביר {{count}} {{label}} לפח אשפה',
     addBelow: 'הוסף מתחת',

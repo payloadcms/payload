@@ -219,9 +219,11 @@ export const viTranslations: DefaultTranslationsObject = {
       'Bạn đang chuẩn bị xóa vĩnh viễn {{label}} <1>{{title}}</1>. Bạn có chắc không?',
     aboutToPermanentlyDeleteTrash:
       'Bạn sắp xóa vĩnh viễn <0>{{count}}</0> <1>{{label}}</1> từ thùng rác. Bạn có chắc chắn không?',
-    aboutToRestore:
+    aboutToRestore: 'Bạn đang chuẩn bị khôi phục {{label}} <1>{{title}}</1>. Bạn có chắc không?',
+    aboutToRestoreAsDraft:
       'Bạn đang chuẩn bị khôi phục {{label}} <1>{{title}}</1> dưới dạng bản nháp. Bạn có chắc không?',
-    aboutToRestoreCount: 'Bạn sắp khôi phục {{count}} {{label}} dưới dạng bản nháp',
+    aboutToRestoreAsDraftCount: 'Bạn sắp khôi phục {{count}} {{label}} dưới dạng bản nháp',
+    aboutToRestoreCount: 'Bạn sắp khôi phục {{count}} {{label}}',
     aboutToTrash:
       'Bạn đang chuẩn bị di chuyển {{label}} <1>{{title}}</1> vào thùng rác. Bạn có chắc không?',
     aboutToTrashCount: 'Bạn đang chuẩn bị chuyển {{count}} {{label}} vào thùng rác',

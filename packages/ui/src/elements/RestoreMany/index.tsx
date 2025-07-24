@@ -98,11 +98,17 @@ export const RestoreMany: React.FC<Props> = (props) => {
       { addQueryPrefix: true },
     )}`
 
+    const body: Record<string, unknown> = {
+      deletedAt: null,
+    }
+
+    // Only include _status if drafts are enabled
+    if (collectionConfig?.versions?.drafts) {
+      body._status = restoreAsPublished ? 'published' : 'draft'
+    }
+
     const restoreManyResponse = await requests.patch(url, {
-      body: JSON.stringify({
-        _status: restoreAsPublished ? 'published' : 'draft',
-        deletedAt: null,
-      }),
+      body: JSON.stringify(body),
       headers: {
         'Accept-Language': i18n.language,
         'Content-Type': 'application/json',
@@ -170,19 +176,26 @@ export const RestoreMany: React.FC<Props> = (props) => {
       <ConfirmationModal
         body={
           <React.Fragment>
-            {t('general:aboutToRestoreCount', {
-              count,
-              label: labelString,
-            })}
-            <div className={`${baseClass}__checkbox`}>
-              <CheckboxInput
-                checked={restoreAsPublished}
-                id="restore-as-published-many"
-                label={t('general:restoreAsPublished')}
-                name="restore-as-published-many"
-                onToggle={(e) => setRestoreAsPublished(e.target.checked)}
-              />
-            </div>
+            {t(
+              collectionConfig?.versions?.drafts
+                ? 'general:aboutToRestoreAsDraftCount'
+                : 'general:aboutToRestoreCount',
+              {
+                count,
+                label: labelString,
+              },
+            )}
+            {collectionConfig?.versions?.drafts && (
+              <div className={`${baseClass}__checkbox`}>
+                <CheckboxInput
+                  checked={restoreAsPublished}
+                  id="restore-as-published-many"
+                  label={t('general:restoreAsPublished')}
+                  name="restore-as-published-many"
+                  onToggle={(e) => setRestoreAsPublished(e.target.checked)}
+                />
+              </div>
+            )}
           </React.Fragment>
         }
         className={baseClass}

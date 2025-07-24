@@ -218,8 +218,11 @@ export const daTranslations: DefaultTranslationsObject = {
       'Du er ved at slette {{label}} <1>{{title}}</1> permanent. Er du sikker?',
     aboutToPermanentlyDeleteTrash:
       'Du er ved at slette <0>{{count}}</0> <1>{{label}}</1> permanent fra papirkurven. Er du sikker?',
-    aboutToRestore: 'Du er ved at gendanne {{label}} <1>{{title}}</1> som et udkast. Er du sikker?',
-    aboutToRestoreCount: 'Du er ved at gendanne {{count}} {{label}} som udkast',
+    aboutToRestore: 'Du er ved at gendanne {{label}} <1>{{title}}</1>. Er du sikker?',
+    aboutToRestoreAsDraft:
+      'Du er ved at gendanne {{label}} <1>{{title}}</1> som et udkast. Er du sikker?',
+    aboutToRestoreAsDraftCount: 'Du er ved at gendanne {{count}} {{label}} som udkast',
+    aboutToRestoreCount: 'Du er ved at gendanne {{count}} {{label}}',
     aboutToTrash:
       'Du er ved at flytte {{label}} <1>{{title}}</1> til skraldespanden. Er du sikker?',
     aboutToTrashCount: 'Du er ved at flytte {{count}} {{label}} til skraldespanden',

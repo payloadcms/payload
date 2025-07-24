@@ -78,11 +78,17 @@ export const RestoreButton: React.FC<Props> = (props) => {
         },
       })}`
 
+      const body: Record<string, unknown> = {
+        deletedAt: null,
+      }
+
+      // Only include _status if drafts are enabled
+      if (collectionConfig?.versions?.drafts) {
+        body._status = restoreAsPublished ? 'published' : 'draft'
+      }
+
       const res = await requests.patch(url, {
-        body: JSON.stringify({
-          _status: restoreAsPublished ? 'published' : 'draft',
-          deletedAt: null,
-        }),
+        body: JSON.stringify(body),
         headers: {
           'Accept-Language': i18n.language,
           'Content-Type': 'application/json',
@@ -164,22 +170,28 @@ export const RestoreButton: React.FC<Props> = (props) => {
                 elements={{
                   '1': ({ children }) => <strong>{children}</strong>,
                 }}
-                i18nKey="general:aboutToRestore"
+                i18nKey={
+                  collectionConfig?.versions?.drafts
+                    ? 'general:aboutToRestoreAsDraft'
+                    : 'general:aboutToRestore'
+                }
                 t={t}
                 variables={{
                   label: getTranslation(singularLabel, i18n),
                   title: titleFromProps || title || id,
                 }}
               />
-              <div className={`${baseClass}__checkbox`}>
-                <CheckboxInput
-                  checked={restoreAsPublished}
-                  id="restore-as-published"
-                  label={t('general:restoreAsPublished')}
-                  name="restore-as-published"
-                  onToggle={(e) => setRestoreAsPublished(e.target.checked)}
-                />
-              </div>
+              {collectionConfig?.versions?.drafts && (
+                <div className={`${baseClass}__checkbox`}>
+                  <CheckboxInput
+                    checked={restoreAsPublished}
+                    id="restore-as-published"
+                    label={t('general:restoreAsPublished')}
+                    name="restore-as-published"
+                    onToggle={(e) => setRestoreAsPublished(e.target.checked)}
+                  />
+                </div>
+              )}
             </Fragment>
           }
           className={baseClass}

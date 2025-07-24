@@ -220,9 +220,11 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Está prestes a apagar permanentemente o {{label}} <1>{{title}}</1>. Tem certeza?',
     aboutToPermanentlyDeleteTrash:
       'Você está prestes a excluir permanentemente <0>{{count}}</0> <1>{{label}}</1> da lixeira. Você tem certeza?',
-    aboutToRestore:
+    aboutToRestore: 'Está prestes a restaurar o {{label}} <1>{{title}}</1>. Tem certeza?',
+    aboutToRestoreAsDraft:
       'Está prestes a restaurar o {{label}} <1>{{title}}</1> como um rascunho. Tem certeza?',
-    aboutToRestoreCount: 'Está prestes a restaurar {{count}} {{label}} como rascunho',
+    aboutToRestoreAsDraftCount: 'Está prestes a restaurar {{count}} {{label}} como rascunho',
+    aboutToRestoreCount: 'Você está prestes a restaurar {{count}} {{label}}',
     aboutToTrash:
       'Você está prestes a mover o {{label}} <1>{{title}}</1> para a lixeira. Tem certeza?',
     aboutToTrashCount: 'Estás prestes a mover {{count}} {{label}} para o lixo',

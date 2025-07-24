@@ -224,8 +224,12 @@ export const nlTranslations: DefaultTranslationsObject = {
     aboutToPermanentlyDeleteTrash:
       'U staat op het punt om permanent <0>{{count}}</0> <1>{{label}}</1> uit de prullenbak te verwijderen. Bent u zeker?',
     aboutToRestore:
-      'U staat op het punt om het {{label}} <1>{{title}}</1> te herstellen als een concept. Weet u het zeker?',
-    aboutToRestoreCount: 'U staat op het punt om {{count}} {{label}} als concept te herstellen',
+      'U staat op het punt om de {{label}} <1>{{title}}</1> te herstellen. Weet u het zeker?',
+    aboutToRestoreAsDraft:
+      'U staat op het punt om het {{label}} <1>{{title}}</1> als concept te herstellen. Weet u het zeker?',
+    aboutToRestoreAsDraftCount:
+      'U staat op het punt om {{count}} {{label}} als concept te herstellen',
+    aboutToRestoreCount: 'U staat op het punt om {{count}} {{label}} te herstellen',
     aboutToTrash:
       'U staat op het punt om het {{label}} <1>{{title}}</1> naar de prullenbak te verplaatsen. Weet u het zeker?',
     aboutToTrashCount:

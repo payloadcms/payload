@@ -222,8 +222,11 @@ export const ltTranslations: DefaultTranslationsObject = {
       'Jūs ketinate visam laikui ištrinti {{label}} <1>{{title}}</1>. Ar esate įsitikinęs?',
     aboutToPermanentlyDeleteTrash:
       'Jūs ketinate visam laikui ištrinti <0>{{count}}</0> <1>{{label}}</1> iš šiukšliadėžės. Ar esate įsitikinęs?',
-    aboutToRestore: 'Jūs ketinate atkurti {{label}} <1>{{title}}</1> kaip juodraštį. Ar jūs tikri?',
-    aboutToRestoreCount: 'Jūs ketinate atkurti {{count}} {{label}} kaip juodraštį',
+    aboutToRestore: 'Jūs ketinate atkurti {{label}} <1>{{title}}</1>. Ar esate tikri?',
+    aboutToRestoreAsDraft:
+      'Jūs ketinate atkurti {{label}} <1>{{title}}</1> kaip juodraštį. Ar esate įsitikinęs?',
+    aboutToRestoreAsDraftCount: 'Jūs ketinate atkurti {{count}} {{label}} kaip juodraštį',
+    aboutToRestoreCount: 'Jūs ketinate atkurti {{count}} {{label}}',
     aboutToTrash:
       'Jūs ketinate perkelti {{label}} <1>{{title}}</1> į šiukšliadėžę. Ar esate tikras?',
     aboutToTrashCount: 'Jūs ketinate perkelti {{count}} {{label}} į šiukšlinę',

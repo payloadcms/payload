@@ -221,10 +221,12 @@ export const bnBdTranslations: DefaultTranslationsObject = {
       'আপনি স্থায়ীভাবে {{label}} <1>{{title}}</1> মুছে ফেলতে যাচ্ছেন। আপনি কি নিশ্চিত?',
     aboutToPermanentlyDeleteTrash:
       'আপনি চূর্ণনিবিন্ন <0>{{count}}</0> <1>{{label}}</1> টি সর্বদা মুছে ফেলতে যাচ্ছেন। আপনি কি নিশ্চিত?',
-    aboutToRestore:
-      'আপনি কি নিশ্চিত যে, আপনি খসড়া হিসেবে {{label}} <1>{{title}}</1> পুনরুদ্ধার করতে চান?',
-    aboutToRestoreCount:
+    aboutToRestore: 'আপনি কি নিশ্চিত যে আপনি {{label}} <1>{{title}}</1> পুনরুদ্ধার করতে চান?',
+    aboutToRestoreAsDraft:
+      'আপনি কি নিশ্চিত যে, আপনি {{label}} <1>{{title}}</1> একটি খসড়া হিসাবে পুনরুদ্ধার করতে চলেছেন?',
+    aboutToRestoreAsDraftCount:
       'আপনি সম্প্রদায়ে {{count}} {{label}} খসড়া হিসাবে পুনরুদ্ধার করতে যাচ্ছেন',
+    aboutToRestoreCount: 'আপনি এখন প্রস্তুত {{count}} {{label}} পুনরুদ্ধার করতে',
     aboutToTrash:
       'আপনি প্রথমরা {{label}} <1>{{title}}</1> কে আবর্জনায় স্থানান্তর করতে যাচ্ছেন। আপনি কি নিশ্চিত?',
     aboutToTrashCount: 'আপনি সম্পর্কে {{count}} {{label}} মুছে ফেলার জন্য সরিয়ে ফেলাতে যাচ্ছেন',

@@ -219,9 +219,12 @@ export const azTranslations: DefaultTranslationsObject = {
       'Siz əbədi olaraq {{label}} <1>{{title}}</1> silmək üzrəsiniz. Eminsiniz?',
     aboutToPermanentlyDeleteTrash:
       'Siz müllifdən daimi olaraq <0>{{count}}</0> <1>{{label}}</1> silinəcəkdir. Eminsiniz?',
-    aboutToRestore:
-      'Siz {{label}} <1>{{title}}</1>ni qaralaması kimi bərpa etməkləsiniz. Eminsinizmi?',
-    aboutToRestoreCount: 'Siz {{count}} {{label}}-ni qaralamak üçün bərpa etməyə hazırlaşırsınız',
+    aboutToRestore: '{{label}} <1>{{title}}</1> bərpa edilmək üzrədir. Eminsiniz?',
+    aboutToRestoreAsDraft:
+      'Siz {{label}} <1>{{title}}</1> draft kimi bərpa etmək əzəldəsiniz. Eminsinizmi?',
+    aboutToRestoreAsDraftCount:
+      'Siz {{count}} {{label}}-ni qaralamak üçün bərpa etməyə hazırlaşırsınız',
+    aboutToRestoreCount: 'Siz {{count}} {{label}} bərpa etməyə hazırlaşırsınız.',
     aboutToTrash:
       'Siz {{label}} <1>{{title}}</1> elementini zibilliyə köçürmək barədəsiniz. Eminsiniz?',
     aboutToTrashCount: 'Siz {{count}} {{label}}-i zibilə köçürmək barədəsiz.',

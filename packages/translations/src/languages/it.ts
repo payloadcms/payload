@@ -224,8 +224,11 @@ export const itTranslations: DefaultTranslationsObject = {
       "Stai per eliminare definitivamente l'{{label}} <1>{{title}}</1>. Sei sicuro?",
     aboutToPermanentlyDeleteTrash:
       'Stai per eliminare definitivamente <0>{{count}}</0> <1>{{label}}</1> dal cestino. Sei sicuro?',
-    aboutToRestore: 'Stai per ripristinare il {{label}} <1>{{title}}</1> come bozza. Sei sicuro?',
-    aboutToRestoreCount: 'Stai per ripristinare {{count}} {{label}} come bozza',
+    aboutToRestore: 'Stai per ripristinare il {{label}} <1>{{title}}</1>. Sei sicuro?',
+    aboutToRestoreAsDraft:
+      "Stai per ripristinare l'etichetta {{label}} <1>{{title}}</1> come bozza. Sei sicuro?",
+    aboutToRestoreAsDraftCount: 'Stai per ripristinare {{count}} {{label}} come bozza',
+    aboutToRestoreCount: 'Stai per ripristinare {{count}} {{label}}',
     aboutToTrash: 'Stai per spostare il {{label}} <1>{{title}}</1> nel cestino. Sei sicuro?',
     aboutToTrashCount: 'Stai per spostare {{count}} {{label}} nel cestino',
     addBelow: 'Aggiungi sotto',

@@ -219,9 +219,11 @@ export const svTranslations: DefaultTranslationsObject = {
       'Du är på väg att permanent radera {{label}} <1>{{title}}</1>. Är du säker?',
     aboutToPermanentlyDeleteTrash:
       'Du är på väg att permanent radera <0>{{count}}</0> <1>{{label}}</1> från papperskorgen. Är du säker?',
-    aboutToRestore:
+    aboutToRestore: 'Du är på väg att återställa {{label}} <1>{{title}}</1>. Är du säker?',
+    aboutToRestoreAsDraft:
       'Du är på väg att återställa {{label}} <1>{{title}}</1> som ett utkast. Är du säker?',
-    aboutToRestoreCount: 'Du är på väg att återställa {{count}} {{label}} som utkast',
+    aboutToRestoreAsDraftCount: 'Du är på väg att återställa {{count}} {{label}} som utkast',
+    aboutToRestoreCount: 'Du är på väg att återställa {{count}} {{label}}',
     aboutToTrash:
       'Du håller på att flytta {{label}} <1>{{title}}</1> till papperskorgen. Är du säker?',
     aboutToTrashCount: 'Du håller på att flytta {{count}} {{label}} till papperskorgen',

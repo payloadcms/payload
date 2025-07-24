@@ -221,9 +221,11 @@ export const myTranslations: DefaultTranslationsObject = {
       'Anda akan menghapuskan secara kekal {{label}} <1>{{title}}</1>. Adakah anda pasti?',
     aboutToPermanentlyDeleteTrash:
       'Anda akan menghapus secara kekal <0>{{count}}</0> <1>{{label}}</1> dari tong sampah. Adakah anda pasti?',
-    aboutToRestore:
+    aboutToRestore: 'Anda akan memulihkan {{label}} <1>{{title}}</1>. Adakah anda pasti?',
+    aboutToRestoreAsDraft:
       'Anda akan memulihkan {{label}} <1>{{title}}</1> sebagai draf. Adakah anda pasti?',
-    aboutToRestoreCount: 'Anda akan memulihkan {{count}} {{label}} sebagai draf',
+    aboutToRestoreAsDraftCount: 'Anda akan memulihkan {{count}} {{label}} sebagai draf',
+    aboutToRestoreCount: 'Anda akan memulihkan {{count}} {{label}}',
     aboutToTrash:
       'Anda akan memindahkan {{label}} <1>{{title}}</1> ke tong sampah. Adakah anda pasti?',
     aboutToTrashCount: 'Anda akan memindah {{count}} {{label}} ke tong sampah',

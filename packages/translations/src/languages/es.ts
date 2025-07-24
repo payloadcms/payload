@@ -224,9 +224,11 @@ export const esTranslations: DefaultTranslationsObject = {
       'Está a punto de eliminar permanentemente la {{label}} <1>{{title}}</1>. ¿Está seguro?',
     aboutToPermanentlyDeleteTrash:
       'Está a punto de eliminar permanentemente <0>{{count}}</0> <1>{{label}}</1> de la basura. ¿Está seguro?',
-    aboutToRestore:
-      'Estás a punto de restaurar la {{label}} <1>{{title}}</1> como un borrador. ¿Estás seguro?',
-    aboutToRestoreCount: 'Estás a punto de restaurar {{count}} {{label}} como borrador',
+    aboutToRestore: 'Está a punto de restaurar la {{label}} <1>{{title}}</1>. ¿Está seguro?',
+    aboutToRestoreAsDraft:
+      'Está a punto de restaurar la {{label}} <1>{{title}}</1> como borrador. ¿Está seguro?',
+    aboutToRestoreAsDraftCount: 'Estás a punto de restaurar {{count}} {{label}} como borrador',
+    aboutToRestoreCount: 'Estás a punto de restaurar {{count}} {{label}}',
     aboutToTrash:
       'Estás a punto de mover la {{label}} <1>{{title}}</1> a la papelera. ¿Estás seguro?',
     aboutToTrashCount: 'Estás a punto de mover {{count}} {{label}} a la papelera',

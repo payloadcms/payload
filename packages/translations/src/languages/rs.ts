@@ -221,8 +221,11 @@ export const rsTranslations: DefaultTranslationsObject = {
       'Управо ћете заувек избрисати {{label}} <1>{{title}}</1>. Јесте ли сигурни?',
     aboutToPermanentlyDeleteTrash:
       'На путу сте да трајно обришете <0>{{count}}</0> <1>{{label}}</1> из смећа. Да ли сте сигурни?',
-    aboutToRestore: 'Uskoro ćete vratiti {{label}} <1>{{title}}</1> kao nacrt. Jeste li sigurni?',
-    aboutToRestoreCount: 'Upravo ste na koraku da povratite {{count}} {{label}} kao skicu',
+    aboutToRestore: 'На путу сте да вратите {{label}} <1>{{title}}</1>. Јесте ли сигурни?',
+    aboutToRestoreAsDraft:
+      'Na korak ste od obnavljanja {{label}} <1>{{title}}</1> kao nacrta. Da li ste sigurni?',
+    aboutToRestoreAsDraftCount: 'Upravo ste na koraku da povratite {{count}} {{label}} kao skicu',
+    aboutToRestoreCount: 'Uskoro ćete obnoviti {{count}} {{label}}',
     aboutToTrash:
       'Na korak ste da premestite {{label}} <1>{{title}}</1> u otpad. Da li ste sigurni?',
     aboutToTrashCount: 'Upravo ćete premestiti {{count}} {{label}} u smeće',
