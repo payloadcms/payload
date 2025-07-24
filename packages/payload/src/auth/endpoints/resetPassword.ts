@@ -11,6 +11,7 @@ export const resetPasswordHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
   const { searchParams, t } = req
   const depth = searchParams.get('depth')
+  const trash = searchParams.get('trash') === 'true'
 
   const result = await resetPasswordOperation({
     collection,
@@ -20,6 +21,7 @@ export const resetPasswordHandler: PayloadHandler = async (req) => {
     },
     depth: depth ? Number(depth) : undefined,
     req,
+    trash,
   })
 
   const cookie = generatePayloadCookie({
