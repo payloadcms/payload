@@ -1676,6 +1676,42 @@ describe('List View', () => {
 
     await expect(page.locator('.list-selection')).toContainText('2 selected')
   })
+
+  test('should refresh custom list drawer using the refresh method from context', async () => {
+    const url = new AdminUrlUtil(serverURL, 'custom-list-drawer')
+
+    await payload.delete({
+      collection: 'custom-list-drawer',
+      where: { id: { exists: true } },
+    })
+
+    const { id } = await payload.create({
+      collection: 'custom-list-drawer',
+      data: {},
+    })
+
+    await page.goto(url.list)
+
+    await expect(page.locator('.table > table > tbody > tr')).toHaveCount(1)
+
+    await page.goto(url.edit(id))
+
+    await page.locator('#open-custom-list-drawer').click()
+    const drawer = page.locator('[id^=list-drawer_1_]')
+    await expect(drawer).toBeVisible()
+
+    await expect(drawer.locator('.table > table > tbody > tr')).toHaveCount(1)
+
+    await drawer.locator('.list-header__create-new-button.doc-drawer__toggler').click()
+    const createNewDrawer = page.locator('[id^=doc-drawer_custom-list-drawer_1_]')
+    await createNewDrawer.locator('#create-custom-list-drawer-doc').click()
+
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
+    await createNewDrawer.locator('.doc-drawer__header-close').click()
+
+    await expect(drawer.locator('.table > table > tbody > tr')).toHaveCount(2)
+  })
 })
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
