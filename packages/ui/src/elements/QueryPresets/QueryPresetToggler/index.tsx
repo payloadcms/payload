@@ -12,7 +12,7 @@ import './index.scss'
 
 const baseClass = 'active-query-preset'
 
-export function ActiveQueryPreset({
+export function QueryPresetToggler({
   activePreset,
   openPresetListDrawer,
   resetPreset,
@@ -35,38 +35,40 @@ export function ActiveQueryPreset({
       onClick={() => {
         openPresetListDrawer()
       }}
-      pillStyle={activePreset ? 'always-white' : 'light'}
+      pillStyle="light"
       size="small"
     >
-      {activePreset?.isShared && <PeopleIcon className={`${baseClass}__shared`} />}
-      <div className={`${baseClass}__label-text-max-width`}>
-        <div className={`${baseClass}__label-text`}>
-          {activePreset?.title ||
-            t('general:selectLabel', {
-              label: getTranslation(presetsConfig.labels.singular, i18n),
-            })}
+      <div className={`${baseClass}__label`}>
+        {activePreset?.isShared && <PeopleIcon className={`${baseClass}__shared`} />}
+        <div className={`${baseClass}__label-text-max-width`}>
+          <div className={`${baseClass}__label-text`}>
+            {activePreset?.title ||
+              t('general:selectLabel', {
+                label: getTranslation(presetsConfig.labels.singular, i18n),
+              })}
+          </div>
         </div>
-      </div>
-      {activePreset ? (
-        <div
-          className={`${baseClass}__clear`}
-          id="clear-preset"
-          onClick={async (e) => {
-            e.stopPropagation()
-            await resetPreset()
-          }}
-          onKeyDown={async (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
+        {activePreset ? (
+          <div
+            className={`${baseClass}__clear`}
+            id="clear-preset"
+            onClick={async (e) => {
               e.stopPropagation()
               await resetPreset()
-            }
-          }}
-          role="button"
-          tabIndex={0}
-        >
-          <XIcon />
-        </div>
-      ) : null}
+            }}
+            onKeyDown={async (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.stopPropagation()
+                await resetPreset()
+              }
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            <XIcon />
+          </div>
+        ) : null}
+      </div>
     </Pill>
   )
 }

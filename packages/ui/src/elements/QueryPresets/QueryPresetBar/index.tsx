@@ -1,43 +1,35 @@
-import type { CollectionSlug, QueryPreset, SanitizedCollectionPermission } from 'payload'
+import type { QueryPreset, SanitizedCollectionPermission } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { transformColumnsToPreferences, transformColumnsToSearchParams } from 'payload/shared'
-import React, { useCallback, useMemo } from 'react'
+import React, { Fragment, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
-import { useConfig } from '../../providers/Config/index.js'
-import { useListQuery } from '../../providers/ListQuery/context.js'
-import { useTranslation } from '../../providers/Translation/index.js'
-import { ConfirmationModal } from '../ConfirmationModal/index.js'
-import { useDocumentDrawer } from '../DocumentDrawer/index.js'
-import { useListDrawer } from '../ListDrawer/index.js'
-import { PopupList } from '../Popup/index.js'
-import { PopupListGroupLabel } from '../Popup/PopupGroupLabel/index.js'
-import { Translation } from '../Translation/index.js'
+import { PlusIcon } from '../../../icons/Plus/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
+import { useListQuery } from '../../../providers/ListQuery/context.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import { ConfirmationModal } from '../../ConfirmationModal/index.js'
+import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
+import { useListDrawer } from '../../ListDrawer/index.js'
+import { ListSelectionButton } from '../../ListSelection/index.js'
+import { Pill } from '../../Pill/index.js'
+import { Translation } from '../../Translation/index.js'
+import { QueryPresetToggler } from '../QueryPresetToggler/index.js'
+import './index.scss'
 
 const confirmDeletePresetModalSlug = 'confirm-delete-preset'
 
 const queryPresetsSlug = 'payload-query-presets'
 
-export const useQueryPresets = ({
-  activePreset,
-  collectionSlug,
-  queryPresetPermissions,
-}: {
+const baseClass = 'query-preset-bar'
+
+export const QueryPresetBar: React.FC<{
   activePreset: QueryPreset
-  collectionSlug: CollectionSlug
+  collectionSlug?: string
   queryPresetPermissions: SanitizedCollectionPermission
-}): {
-  CreateNewPresetDrawer: React.ReactNode
-  DeletePresetModal: React.ReactNode
-  EditPresetDrawer: React.ReactNode
-  hasModifiedPreset: boolean
-  openPresetListDrawer: () => void
-  PresetListDrawer: React.ReactNode
-  queryPresetMenuItems: React.ReactNode[]
-  resetPreset: () => Promise<void>
-} => {
+}> = ({ activePreset, collectionSlug, queryPresetPermissions }) => {
   const { modified, query, refineListData, setModified: setQueryModified } = useListQuery()
 
   const { i18n, t } = useTranslation()
@@ -193,80 +185,81 @@ export const useQueryPresets = ({
     setQueryModified,
   ])
 
-  // Memoize so that components aren't re-rendered on query and column changes
-  const queryPresetMenuItems = useMemo(() => {
-    const hasModifiedPreset = activePreset && modified
+  const hasModifiedPreset = activePreset && modified
 
-    return [
-      <PopupListGroupLabel
-        key="preset-group-label"
-        label={getTranslation(presetConfig?.labels?.plural, i18n)}
-      />,
-      <PopupList.ButtonGroup key="preset-group-buttons">
-        {hasModifiedPreset && (
-          <PopupList.Button
-            onClick={async () => {
-              await refineListData(
-                {
-                  columns: transformColumnsToSearchParams(activePreset.columns),
-                  where: activePreset.where,
-                },
-                false,
-              )
+  return (
+    <Fragment>
+      <div className={baseClass}>
+        <div className={`${baseClass}__menu`}>
+          <QueryPresetToggler
+            activePreset={activePreset}
+            openPresetListDrawer={openListDrawer}
+            resetPreset={resetQueryPreset}
+          />
+          <Pill
+            aria-label={t('general:newLabel', { label: presetConfig?.labels?.singular })}
+            className={`${baseClass}__create-new-preset`}
+            icon={<PlusIcon />}
+            id="create-new-preset"
+            onClick={() => {
+              openCreateNewDrawer()
             }}
-          >
-            {t('general:reset')}
-          </PopupList.Button>
-        )}
-        {hasModifiedPreset && queryPresetPermissions.update && (
-          <PopupList.Button
-            onClick={async () => {
-              await saveCurrentChanges()
-            }}
-          >
-            {activePreset?.isShared ? t('general:updateForEveryone') : t('general:save')}
-          </PopupList.Button>
-        )}
-        <PopupList.Button
-          onClick={() => {
-            openCreateNewDrawer()
-          }}
-        >
-          {t('general:createNew')}
-        </PopupList.Button>
-        {activePreset && queryPresetPermissions?.delete && (
-          <>
-            <PopupList.Button onClick={() => openModal(confirmDeletePresetModalSlug)}>
-              {t('general:delete')}
-            </PopupList.Button>
-            <PopupList.Button
-              onClick={() => {
-                openDocumentDrawer()
+            size="small"
+          />
+        </div>
+        <div className={`${baseClass}__menu-items`}>
+          {hasModifiedPreset && (
+            <ListSelectionButton
+              id="reset-preset"
+              key="reset"
+              onClick={async () => {
+                await refineListData(
+                  {
+                    columns: transformColumnsToSearchParams(activePreset.columns),
+                    where: activePreset.where,
+                  },
+                  false,
+                )
               }}
+              type="button"
             >
-              {t('general:edit')}
-            </PopupList.Button>
-          </>
-        )}
-      </PopupList.ButtonGroup>,
-    ]
-  }, [
-    activePreset,
-    queryPresetPermissions?.delete,
-    queryPresetPermissions?.update,
-    openCreateNewDrawer,
-    openDocumentDrawer,
-    openModal,
-    saveCurrentChanges,
-    t,
-    refineListData,
-    modified,
-    presetConfig?.labels?.plural,
-    i18n,
-  ])
-
-  return {
-    CreateNewPresetDrawer: (
+              {t('general:reset')}
+            </ListSelectionButton>
+          )}
+          {hasModifiedPreset && queryPresetPermissions.update && (
+            <ListSelectionButton
+              id="save-preset"
+              key="save"
+              onClick={async () => {
+                await saveCurrentChanges()
+              }}
+              type="button"
+            >
+              {activePreset?.isShared ? t('general:updateForEveryone') : t('fields:saveChanges')}
+            </ListSelectionButton>
+          )}
+          {activePreset && queryPresetPermissions?.delete && (
+            <Fragment>
+              <ListSelectionButton
+                id="delete-preset"
+                onClick={() => openModal(confirmDeletePresetModalSlug)}
+                type="button"
+              >
+                {t('general:deleteLabel', { label: presetConfig?.labels?.singular })}
+              </ListSelectionButton>
+              <ListSelectionButton
+                id="edit-preset"
+                onClick={() => {
+                  openDocumentDrawer()
+                }}
+                type="button"
+              >
+                {t('general:editLabel', { label: presetConfig?.labels?.singular })}
+              </ListSelectionButton>
+            </Fragment>
+          )}
+        </div>
+      </div>
       <CreateNewPresetDrawer
         initialData={{
           columns: transformColumnsToPreferences(query.columns),
@@ -279,8 +272,6 @@ export const useQueryPresets = ({
         }}
         redirectAfterCreate={false}
       />
-    ),
-    DeletePresetModal: (
       <ConfirmationModal
         body={
           <Translation
@@ -300,8 +291,6 @@ export const useQueryPresets = ({
         modalSlug={confirmDeletePresetModalSlug}
         onConfirm={handleDeletePreset}
       />
-    ),
-    EditPresetDrawer: (
       <PresetDocumentDrawer
         onDelete={() => {
           // setSelectedPreset(undefined)
@@ -313,10 +302,6 @@ export const useQueryPresets = ({
           await handlePresetChange(doc as QueryPreset)
         }}
       />
-    ),
-    hasModifiedPreset: modified,
-    openPresetListDrawer: openListDrawer,
-    PresetListDrawer: (
       <ListDrawer
         allowCreate={false}
         disableQueryPresets
@@ -325,8 +310,6 @@ export const useQueryPresets = ({
           await handlePresetChange(doc as QueryPreset)
         }}
       />
-    ),
-    queryPresetMenuItems,
-    resetPreset: resetQueryPreset,
-  }
+    </Fragment>
+  )
 }
