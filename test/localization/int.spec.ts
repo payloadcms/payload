@@ -2212,7 +2212,7 @@ describe('Localization', () => {
                 content: [
                   {
                     // Same as above.
-                    // id: doc.content?.[0]?.content?.[0]?.id, // if this is deleted the test passes
+                    // id: doc.content?.[0]?.content?.[0]?.id,
                     text: 'some-text',
                     blockName: null,
                     blockType: 'textBlock',
