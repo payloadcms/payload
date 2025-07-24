@@ -167,11 +167,24 @@ export const renderListView = async (
     let queryPreset: QueryPreset | undefined
     let queryPresetPermissions: SanitizedCollectionPermission | undefined
 
-    const whereWithMergedSearch = mergeListSearchAndWhere({
+    let whereWithMergedSearch = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
       where: combineWhereConstraints([query?.where, baseListFilter]),
     })
+
+    if (query?.trash === true) {
+      whereWithMergedSearch = {
+        and: [
+          whereWithMergedSearch,
+          {
+            deletedAt: {
+              exists: true,
+            },
+          },
+        ],
+      }
+    }
 
     if (collectionPreferences?.preset) {
       try {
