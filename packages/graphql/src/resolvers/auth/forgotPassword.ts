@@ -15,7 +15,6 @@ export function forgotPassword(collection: Collection): any {
       disableEmail: args.disableEmail,
       expiration: args.expiration,
       req: isolateObjectProperty(context.req, 'transactionID'),
-      trash: args.trash,
     }
 
     await forgotPasswordOperation(options)
