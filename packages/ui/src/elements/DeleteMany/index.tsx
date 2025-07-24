@@ -20,6 +20,7 @@ import { requests } from '../../utilities/api.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
+import { Translation } from '../Translation/index.js'
 import './index.scss'
 
 const confirmManyDeleteDrawerSlug = `confirm-delete-many-docs`
@@ -250,16 +251,24 @@ export function DeleteMany_v4({
           if (deleteManyResponse.status < 400 || deletedDocs > 0) {
             const wasTrashed = collectionConfig.trash && !deletePermanently && viewType !== 'trash'
 
+            let successKey:
+              | 'general:deletedCountSuccessfully'
+              | 'general:permanentlyDeletedCountSuccessfully'
+              | 'general:trashedCountSuccessfully'
+
+            if (wasTrashed) {
+              successKey = 'general:trashedCountSuccessfully'
+            } else if (viewType === 'trash' || deletePermanently) {
+              successKey = 'general:permanentlyDeletedCountSuccessfully'
+            } else {
+              successKey = 'general:deletedCountSuccessfully'
+            }
+
             toast.success(
-              t(
-                wasTrashed
-                  ? 'general:trashedCountSuccessfully'
-                  : 'general:deletedCountSuccessfully',
-                {
-                  count: deletedDocs,
-                  label: getTranslation(successLabel, i18n),
-                },
-              ),
+              t(successKey, {
+                count: deletedDocs,
+                label: getTranslation(successLabel, i18n),
+              }),
             )
           }
 
@@ -358,14 +367,25 @@ export function DeleteMany_v4({
         body={
           <React.Fragment>
             <p>
-              {t(
-                trash && viewType !== 'trash'
-                  ? 'general:aboutToTrashCount'
-                  : 'general:aboutToDeleteCount',
-                {
-                  count: labelCount,
-                  label: labelString,
-                },
+              {trash ? (
+                viewType === 'trash' ? (
+                  <Translation
+                    elements={{
+                      '0': ({ children }) => <strong>{children}</strong>,
+                      '1': ({ children }) => <strong>{children}</strong>,
+                    }}
+                    i18nKey="general:aboutToPermanentlyDeleteTrash"
+                    t={t}
+                    variables={{
+                      count: labelCount ?? 0,
+                      label: labelString,
+                    }}
+                  />
+                ) : (
+                  t('general:aboutToTrashCount', { count: labelCount, label: labelString })
+                )
+              ) : (
+                t('general:aboutToDeleteCount', { count: labelCount, label: labelString })
               )}
             </p>
             {trash && viewType !== 'trash' && (

@@ -84,6 +84,7 @@ export function DefaultEditView({
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
+    redirectAfterRestore,
     savedDocumentData,
     setCurrentEditor,
     setDocumentIsLocked,
@@ -97,6 +98,7 @@ export function DefaultEditView({
     drawerSlug,
     onDelete,
     onDuplicate,
+    onRestore,
     onSave: onSaveFromContext,
   } = useDocumentDrawerContext()
 
@@ -545,6 +547,7 @@ export function DefaultEditView({
             onDelete={onDelete}
             onDrawerCreateNew={clearDoc}
             onDuplicate={onDuplicate}
+            onRestore={onRestore}
             onSave={onSave}
             onTakeOver={() =>
               handleTakeOver(
@@ -564,6 +567,7 @@ export function DefaultEditView({
             readOnlyForIncomingUser={isReadOnlyForIncomingUser}
             redirectAfterDelete={redirectAfterDelete}
             redirectAfterDuplicate={redirectAfterDuplicate}
+            redirectAfterRestore={redirectAfterRestore}
             slug={collectionConfig?.slug || globalConfig?.slug}
             user={currentEditor}
           />
@@ -625,6 +629,7 @@ export function DefaultEditView({
                 docPermissions={docPermissions}
                 fields={docConfig.fields}
                 forceSidebarWrap={isLivePreviewing}
+                isTrashed={isTrashed}
                 readOnly={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
                 schemaPathSegments={schemaPathSegments}
               />

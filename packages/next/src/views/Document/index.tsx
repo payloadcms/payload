@@ -65,6 +65,7 @@ export const renderDocument = async ({
   redirectAfterCreate,
   redirectAfterDelete,
   redirectAfterDuplicate,
+  redirectAfterRestore,
   searchParams,
   versions,
   viewType,
@@ -74,6 +75,7 @@ export const renderDocument = async ({
   readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
+  readonly redirectAfterRestore?: boolean
   versions?: RenderDocumentVersionsProperties
 } & AdminViewServerProps): Promise<{
   data: Data
@@ -400,6 +402,7 @@ export const renderDocument = async ({
         redirectAfterCreate={redirectAfterCreate}
         redirectAfterDelete={redirectAfterDelete}
         redirectAfterDuplicate={redirectAfterDuplicate}
+        redirectAfterRestore={redirectAfterRestore}
         unpublishedVersionCount={unpublishedVersionCount}
         versionCount={versionCount}
       >

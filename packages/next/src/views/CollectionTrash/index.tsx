@@ -16,6 +16,7 @@ type RenderTrashViewArgs = {
   query: ListQuery
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
+  redirectAfterRestore?: boolean
 } & AdminViewServerProps
 
 export const TrashView: React.FC<

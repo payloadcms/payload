@@ -8,7 +8,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 
-export function ListTrashViewPill({
+export function TrashPill({
   collectionConfig,
   viewType,
 }: {

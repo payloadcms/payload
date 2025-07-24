@@ -114,6 +114,8 @@ export const myTranslations: DefaultTranslationsObject = {
     noUser: 'အသုံးပြုသူ မရှိပါ။',
     previewing: 'ဖိုင်ကို အစမ်းကြည့်ရန် ပြဿနာရှိနေသည်။',
     problemUploadingFile: 'ဖိုင်ကို အပ်လုဒ်တင်ရာတွင် ပြဿနာရှိနေသည်။',
+    restoringTitle:
+      'Terdapat ralat semasa memulihkan {{title}}. Sila semak sambungan anda dan cuba lagi.',
     tokenInvalidOrExpired: 'တိုကင်သည် မမှန်ကန်ပါ သို့မဟုတ် သက်တမ်းကုန်သွားပါပြီ။',
     tokenNotProvided: 'Token မပေးထားပါ။',
     unableToCopy: 'ကူးရန်မဖြစ်နိုင်ပါ။',
@@ -215,7 +217,13 @@ export const myTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
     aboutToDeleteCount_one: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
     aboutToDeleteCount_other: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
-    aboutToRestoreCount: 'Anda akan memulihkan {{count}} {{label}}',
+    aboutToPermanentlyDelete:
+      'Anda akan menghapuskan secara kekal {{label}} <1>{{title}}</1>. Adakah anda pasti?',
+    aboutToPermanentlyDeleteTrash:
+      'Anda akan menghapus secara kekal <0>{{count}}</0> <1>{{label}}</1> dari tong sampah. Adakah anda pasti?',
+    aboutToRestore:
+      'Anda akan memulihkan {{label}} <1>{{title}}</1> sebagai draf. Adakah anda pasti?',
+    aboutToRestoreCount: 'Anda akan memulihkan {{count}} {{label}} sebagai draf',
     aboutToTrash:
       'Anda akan memindahkan {{label}} <1>{{title}}</1> ke tong sampah. Adakah anda pasti?',
     aboutToTrashCount: 'Anda akan memindah {{count}} {{label}} ke tong sampah',
@@ -273,6 +281,7 @@ export const myTranslations: DefaultTranslationsObject = {
     dark: 'အမှောင်',
     dashboard: 'ပင်မစာမျက်နှာ',
     delete: 'ဖျက်မည်။',
+    deleted: 'ဖျက်ထား',
     deletedAt: 'Dihapus Pada',
     deletedCountSuccessfully: '{{count}} {{label}} ကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
     deletedSuccessfully: 'အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
@@ -282,6 +291,7 @@ export const myTranslations: DefaultTranslationsObject = {
     descending: 'ဆင်းသက်လာသည်။',
     deselectAllRows: 'အားလုံးကို မရွေးနိုင်ပါ',
     document: 'စာရွက်စာတမ်း',
+    documentIsTrashed: 'Ini {{label}} telah dibuang dan hanya boleh dibaca sahaja.',
     documentLocked: 'စာရွက်စာတမ်းကိုပိတ်ထားသည်',
     documents: 'စာရွက်စာတမ်းများ',
     duplicate: 'ပုံတူပွားမည်။',
@@ -346,6 +356,7 @@ export const myTranslations: DefaultTranslationsObject = {
       '{{label}} မတွေ့ပါ။ {{label}} မရှိသေးသည်ဖြစ်စေ အထက်တွင်ဖော်ပြထားသော စစ်ထုတ်မှုများနှင့် ကိုက်ညီမှုမရှိပါ။',
     notFound: 'ဘာမှ မရှိတော့ဘူး။',
     nothingFound: 'ဘာမှလည်း မတွေ့ဘူး။',
+    noTrashResults: 'Tiada {{label}} dalam tong sampah.',
     noUpcomingEventsScheduled: 'Tiada acara yang akan datang dijadualkan.',
     noValue: 'တန်ဖိုး မရှိပါ။',
     of: '၏',
@@ -359,6 +370,9 @@ export const myTranslations: DefaultTranslationsObject = {
     pasteField: 'ကွက်လပ်ကိုတင်ပါ',
     pasteRow: 'တန်းကိုတင်ပါ',
     payloadSettings: 'ရွေးချယ်စရာများ',
+    permanentlyDelete: 'Padam Selamanya',
+    permanentlyDeletedCountSuccessfully:
+      '{{count}} {{label}} telah berjaya dipadamkan secara kekal.',
     perPage: 'စာမျက်နှာ အလိုက်: {{limit}}',
     previous: 'ယခင်',
     reindex: 'ပြန်လည်အညွှန်းပြုလုပ်ပါ',
@@ -371,6 +385,7 @@ export const myTranslations: DefaultTranslationsObject = {
       'ဤသည်သည် သင့်၏အကြိုက်များအားလုံးကို အခြားတပ်ဆင်မှုများမှ ပြန်လည်သတ်မှတ်ပေးပါလိမ့်မည်။',
     resettingPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်နေပါသည်။',
     restore: 'Pulihkan',
+    restoreAsPublished: 'Pulihkan sebagai versi yang diterbitkan',
     restoredCountSuccessfully: 'Berjaya memulihkan {{count}} {{label}}.',
     restoring:
       'Hormati makna teks asal dalam konteks Payload. Berikut adalah senarai istilah Payload yang membawa maksud tertentu :\n    - Koleksi : Koleksi ialah kumpulan dokumen yang berkongsi struktur dan tujuan yang sama. Koleksi digunakan untuk mengatur dan menguruskan kandungan dalam Payload.\n    - Medan: Medan adalah sebahagian daripada data dalam dokumen dalam suatu koleksi. Medan menentukan struktur dan jenis data yang boleh disimpan dalam dokumen.\n    - Dokumen: Dokumen adalah rekod individu dalam suatu koleksi. Ia mengandungi data yang telah',
@@ -404,9 +419,10 @@ export const myTranslations: DefaultTranslationsObject = {
     time: 'Masa',
     timezone: 'Masa Wilayah',
     titleDeleted: '{{label}} {{title}} အောင်မြင်စွာ ဖျက်သိမ်းခဲ့သည်။',
-    titleTrashed: '"{{label}}" "{{title}}" အောင်မြင်စွာ စုဖြတ်ပြီးပါပြီ။',
+    titleRestored: '"{{label}}" "{{title}}" အောင်မြင်စွာ ပြန်လည် ထည့်သွင်းပြီး ဖြစ်ပါတယ်။',
+    titleTrashed: '"{{label}}" "{{title}}" dipindahkan ke tong sampah.',
     trash: 'ဖျက်သိမ်းခြင်း',
-    trashedCountSuccessfully: 'Berjaya membuang {{count}} {{label}}.',
+    trashedCountSuccessfully: '{{count}} {{label}} သို့ ဖယ်ရှားလိုက်သည်။',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
     unsavedChanges:
@@ -556,6 +572,7 @@ export const myTranslations: DefaultTranslationsObject = {
     noRowsFound: '{{label}} အားမတွေ့ပါ။',
     noRowsSelected: 'Tiada {{label}} yang dipilih',
     preview: 'နမူနာပြရန်',
+    previouslyDraft: 'Sebelum ini Draf',
     previouslyPublished: 'တိုင်းရင်းသားထုတ်ဝေခဲ့',
     previousVersion: 'Versi Sebelumnya',
     problemRestoringVersion: 'ဤဗားရှင်းကို ပြန်လည်ရယူရာတွင် ပြဿနာရှိနေသည်။',

@@ -9,6 +9,7 @@ import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
 
+import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -19,8 +20,11 @@ import { requests } from '../../utilities/api.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
+import './index.scss'
 
 const confirmManyRestoreDrawerSlug = `confirm-restore-many-docs`
+
+const baseClass = 'restore-many'
 
 export type Props = {
   collection: ClientCollectionConfig
@@ -42,6 +46,8 @@ export const RestoreMany: React.FC<Props> = (props) => {
   const { openModal } = useModal()
 
   const { i18n, t } = useTranslation()
+
+  const [restoreAsPublished, setRestoreAsPublished] = React.useState(false)
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasUpdatePermission = collectionPermissions?.update
@@ -93,7 +99,10 @@ export const RestoreMany: React.FC<Props> = (props) => {
     )}`
 
     const restoreManyResponse = await requests.patch(url, {
-      body: JSON.stringify({ deletedAt: null }),
+      body: JSON.stringify({
+        _status: restoreAsPublished ? 'published' : 'draft',
+        deletedAt: null,
+      }),
       headers: {
         'Accept-Language': i18n.language,
         'Content-Type': 'application/json',
@@ -159,10 +168,24 @@ export const RestoreMany: React.FC<Props> = (props) => {
         {t('general:restore')}
       </ListSelectionButton>
       <ConfirmationModal
-        body={t('general:aboutToRestoreCount', {
-          count,
-          label: labelString,
-        })}
+        body={
+          <React.Fragment>
+            {t('general:aboutToRestoreCount', {
+              count,
+              label: labelString,
+            })}
+            <div className={`${baseClass}__checkbox`}>
+              <CheckboxInput
+                checked={restoreAsPublished}
+                id="restore-as-published-many"
+                label={t('general:restoreAsPublished')}
+                name="restore-as-published-many"
+                onToggle={(e) => setRestoreAsPublished(e.target.checked)}
+              />
+            </div>
+          </React.Fragment>
+        }
+        className={baseClass}
         confirmingLabel={t('general:restoring')}
         heading={t('general:confirmRestoration')}
         modalSlug={confirmManyRestoreDrawerSlug}

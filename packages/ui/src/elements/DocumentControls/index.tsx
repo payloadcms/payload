@@ -28,14 +28,16 @@ import { MoveDocToFolder } from '../FolderView/MoveDocToFolder/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { LivePreviewToggler } from '../LivePreview/Toggler/index.js'
 import { Locked } from '../Locked/index.js'
+import { PermanentlyDeleteButton } from '../PermanentlyDeleteButton/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { PreviewButton } from '../PreviewButton/index.js'
 import { PublishButton } from '../PublishButton/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
+import { RestoreButton } from '../RestoreButton/index.js'
 import { SaveButton } from '../SaveButton/index.js'
+import './index.scss'
 import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
-import './index.scss'
 
 const baseClass = 'doc-controls'
 
@@ -63,12 +65,14 @@ export const DocumentControls: React.FC<{
   readonly onDrawerCreateNew?: () => void
   /* Only available if `redirectAfterDuplicate` is `false` */
   readonly onDuplicate?: DocumentDrawerContextType['onDuplicate']
+  readonly onRestore?: DocumentDrawerContextType['onRestore']
   readonly onSave?: DocumentDrawerContextType['onSave']
   readonly onTakeOver?: () => void
   readonly permissions: null | SanitizedCollectionPermission | SanitizedGlobalPermission
   readonly readOnlyForIncomingUser?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
+  readonly redirectAfterRestore?: boolean
   readonly slug: SanitizedCollectionConfig['slug']
   readonly user?: ClientUser
 }> = (props) => {
@@ -94,11 +98,13 @@ export const DocumentControls: React.FC<{
     onDelete,
     onDrawerCreateNew,
     onDuplicate,
+    onRestore,
     onTakeOver,
     permissions,
     readOnlyForIncomingUser,
     redirectAfterDelete,
     redirectAfterDuplicate,
+    redirectAfterRestore,
     user,
   } = props
 
@@ -200,20 +206,21 @@ export const DocumentControls: React.FC<{
                 </p>
               </li>
             )}
-
-            {!isTrashed &&
-              (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) && (
-                <Fragment>
-                  {(globalConfig || (collectionConfig && isEditing)) && (
-                    <li
-                      className={[`${baseClass}__status`, `${baseClass}__list-item`]
-                        .filter(Boolean)
-                        .join(' ')}
-                    >
-                      <Status />
-                    </li>
-                  )}
-                  {hasSavePermission && autosaveEnabled && !unsavedDraftWithValidations && (
+            {(collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) && (
+              <Fragment>
+                {(globalConfig || (collectionConfig && isEditing)) && (
+                  <li
+                    className={[`${baseClass}__status`, `${baseClass}__list-item`]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    <Status />
+                  </li>
+                )}
+                {hasSavePermission &&
+                  autosaveEnabled &&
+                  !unsavedDraftWithValidations &&
+                  !isTrashed && (
                     <li className={`${baseClass}__list-item`}>
                       <Autosave
                         collection={collectionConfig}
@@ -223,8 +230,8 @@ export const DocumentControls: React.FC<{
                       />
                     </li>
                   )}
-                </Fragment>
-              )}
+              </Fragment>
+            )}
             {collectionConfig?.timestamps && (isEditing || isAccountView) && (
               <Fragment>
                 <li
@@ -233,7 +240,10 @@ export const DocumentControls: React.FC<{
                     .join(' ')}
                   title={data?.updatedAt ? updatedAt : ''}
                 >
-                  <p className={`${baseClass}__label`}>{i18n.t('general:lastModified')}:&nbsp;</p>
+                  <p className={`${baseClass}__label`}>
+                    {i18n.t(isTrashed ? 'general:deleted' : 'general:lastModified')}:&nbsp;
+                  </p>
+
                   {data?.updatedAt && <p className={`${baseClass}__value`}>{updatedAt}</p>}
                 </li>
                 <li
@@ -259,7 +269,7 @@ export const DocumentControls: React.FC<{
                 Fallback={<PreviewButton />}
               />
             )}
-            {hasSavePermission && (
+            {hasSavePermission && !isTrashed && (
               <Fragment>
                 {collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts ? (
                   <Fragment>
@@ -283,6 +293,26 @@ export const DocumentControls: React.FC<{
                   />
                 )}
               </Fragment>
+            )}
+            {hasDeletePermission && isTrashed && (
+              <PermanentlyDeleteButton
+                buttonId="action-permanently-delete"
+                collectionSlug={collectionConfig?.slug}
+                id={id.toString()}
+                onDelete={onDelete}
+                redirectAfterDelete={redirectAfterDelete}
+                singularLabel={collectionConfig?.labels?.singular}
+              />
+            )}
+            {hasSavePermission && isTrashed && (
+              <RestoreButton
+                buttonId="action-restore"
+                collectionSlug={collectionConfig?.slug}
+                id={id.toString()}
+                onRestore={onRestore}
+                redirectAfterRestore={redirectAfterRestore}
+                singularLabel={collectionConfig?.labels?.singular}
+              />
             )}
             {user && readOnlyForIncomingUser && (
               <Button

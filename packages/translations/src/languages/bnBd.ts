@@ -114,6 +114,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     noUser: 'কোনো ব্যবহারকারী নেই',
     previewing: 'এই ডকুমেন্টটি প্রিভিউ করতে একটি সমস্যা হয়েছে।',
     problemUploadingFile: 'ফাইল আপলোড করতে একটি সমস্যা হয়েছে।',
+    restoringTitle:
+      '{{title}} পুনরুদ্ধার করার সময় একটি ত্রুটি ঘটেছে। দয়া করে আপনার সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।',
     tokenInvalidOrExpired: 'টোকেন অবৈধ বা মেয়াদ শেষ হয়ে গেছে।',
     tokenNotProvided: 'টোকেন প্রদান করা হয়নি।',
     unableToCopy: 'কপি করা সম্ভব নয়।',
@@ -215,7 +217,14 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
     aboutToDeleteCount_one: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
     aboutToDeleteCount_other: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
-    aboutToRestoreCount: 'আপনি প্রস্তুত হচ্ছেন পুনরুদ্ধার করার জন্য {{count}} {{label}}',
+    aboutToPermanentlyDelete:
+      'আপনি স্থায়ীভাবে {{label}} <1>{{title}}</1> মুছে ফেলতে যাচ্ছেন। আপনি কি নিশ্চিত?',
+    aboutToPermanentlyDeleteTrash:
+      'আপনি চূর্ণনিবিন্ন <0>{{count}}</0> <1>{{label}}</1> টি সর্বদা মুছে ফেলতে যাচ্ছেন। আপনি কি নিশ্চিত?',
+    aboutToRestore:
+      'আপনি কি নিশ্চিত যে, আপনি খসড়া হিসেবে {{label}} <1>{{title}}</1> পুনরুদ্ধার করতে চান?',
+    aboutToRestoreCount:
+      'আপনি সম্প্রদায়ে {{count}} {{label}} খসড়া হিসাবে পুনরুদ্ধার করতে যাচ্ছেন',
     aboutToTrash:
       'আপনি প্রথমরা {{label}} <1>{{title}}</1> কে আবর্জনায় স্থানান্তর করতে যাচ্ছেন। আপনি কি নিশ্চিত?',
     aboutToTrashCount: 'আপনি সম্পর্কে {{count}} {{label}} মুছে ফেলার জন্য সরিয়ে ফেলাতে যাচ্ছেন',
@@ -273,6 +282,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     dark: 'ডার্ক',
     dashboard: 'ড্যাশবোর্ড',
     delete: 'মুছুন',
+    deleted: 'মুছে ফেলা হয়েছে',
     deletedAt: 'মুছে ফেলার সময়',
     deletedCountSuccessfully: '{{count}} {{label}} সফলভাবে মুছে ফেলা হয়েছে।',
     deletedSuccessfully: 'সফলভাবে মুছে ফেলা হয়েছে।',
@@ -282,6 +292,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     descending: 'অবরোহী',
     deselectAllRows: 'সমস্ত সারি নির্বাচন বাতিল করুন',
     document: 'ডকুমেন্ট',
+    documentIsTrashed: 'এই {{label}} ট্র্যাশ করা হয়েছে এবং এটি শুধুমাত্র পাঠনীয়।',
     documentLocked: 'ডকুমেন্ট লক করা হয়েছে',
     documents: 'ডকুমেন্টগুলি',
     duplicate: 'ডুপ্লিকেট করুন',
@@ -346,6 +357,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
       'কোনো {{label}} পাওয়া যায়নি। হয় এখনও কোনো {{label}} তৈরি করা হয়নি বা উপরে নির্দিষ্ট করা ফিল্টারগুলির সাথে কোনোটি মেলে না।',
     notFound: 'পাওয়া যায়নি',
     nothingFound: 'কিছুই পাওয়া যায়নি',
+    noTrashResults: 'ট্র্যাশে কোন {{label}} নেই।',
     noUpcomingEventsScheduled: 'কোনো আসন্ন ইভেন্ট নির্ধারিত নেই।',
     noValue: 'কোনো মান নেই',
     of: 'এর',
@@ -359,6 +371,9 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     pasteField: 'ফিল্ড পেস্ট করুন',
     pasteRow: 'সারি পেস্ট করুন',
     payloadSettings: 'পেলোড সেটিংস',
+    permanentlyDelete: 'চিরতরে মুছে ফেলুন',
+    permanentlyDeletedCountSuccessfully:
+      'স্থায়ীভাবে {{count}} {{label}} সফলভাবে মুছে ফেলা হয়েছে।',
     perPage: 'প্রতি পৃষ্ঠায়: {{limit}}',
     previous: 'পূর্ববর্তী',
     reindex: 'পুনরায় সূচিবদ্ধ করুন',
@@ -370,6 +385,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription: 'এটি আপনার সমস্ত পছন্দগুলি তাদের ডিফল্ট সেটিংসে রিসেট করবে।',
     resettingPreferences: 'পছন্দগুলি রিসেট করা হচ্ছে।',
     restore: 'পুনরুদ্ধার করুন',
+    restoreAsPublished: 'প্রকাশিত সংস্করণ হিসাবে পুনরুদ্ধার করুন',
     restoredCountSuccessfully: '{{count}} {{label}} সফলভাবে পুনরুদ্ধার করা হয়েছে।',
     restoring:
       'Payload এর প্রসঙ্গে মূল পাঠের অর্থ সম্মান করুন। এখানে Payload পদ গুলির একটি তালিকা রয়েছে যা খুব নির্দিষ্ট অর্থ বহন করে:\n     - সংগ্রহ: একটি সং',
@@ -403,9 +419,10 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     time: 'সময়',
     timezone: 'টাইমজোন',
     titleDeleted: '{{label}} "{{title}}" সফলভাবে মুছে ফেলা হয়েছে।',
-    titleTrashed: '{{label}} "{{title}}" সফলভাবে ট্র্যাশ করা হয়েছে।',
+    titleRestored: '"{{label}}" "{{title}}" সফলভাবে পুনরুদ্ধার করা হয়েছে।',
+    titleTrashed: '{{label}} "{{title}}" আবর্জনাস্থলে সরিয়ে নেওয়া হয়েছে।',
     trash: 'আবর্জনা',
-    trashedCountSuccessfully: 'সফলভাবে {{count}} {{label}} মুছে ফেলা হয়েছে।',
+    trashedCountSuccessfully: '{{count}} {{label}} ট্র্যাশে মুভ করা হয়েছে।',
     true: 'সত্য',
     unauthorized: 'অননুমোদিত',
     unsavedChanges:
@@ -550,6 +567,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     noRowsFound: 'কোনো {{label}} পাওয়া যায়নি',
     noRowsSelected: 'কোনো {{label}} নির্বাচিত হয়নি',
     preview: 'প্রাকদর্শন',
+    previouslyDraft: 'পূর্বে একটি খসড়া',
     previouslyPublished: 'পূর্বে প্রকাশিত',
     previousVersion: 'পূর্ববর্তী সংস্করণ',
     problemRestoringVersion: 'এই সংস্করণ পুনরুদ্ধারে সমস্যা হয়েছে',
