@@ -539,7 +539,6 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
             args: {
               ...authArgs,
               password: { type: GraphQLString },
-              trash: { type: GraphQLBoolean },
             },
             resolve: login(collection),
           }
@@ -550,7 +549,6 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
               disableEmail: { type: GraphQLBoolean },
               expiration: { type: GraphQLInt },
               ...authArgs,
-              trash: { type: GraphQLBoolean },
             },
             resolve: forgotPassword(collection),
           }

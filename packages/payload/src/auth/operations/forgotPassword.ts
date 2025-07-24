@@ -27,7 +27,6 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableEmail?: boolean
   expiration?: number
   req: PayloadRequest
-  trash?: boolean
 }
 
 export type Result = string
@@ -88,7 +87,6 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
         payload,
       },
       req,
-      trash = false,
     } = args
 
     // /////////////////////////////////////
@@ -129,7 +127,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     // Exclude trashed users unless `trash: true`
     whereConstraint = appendNonTrashedFilter({
       enableTrash: collectionConfig.trash,
-      trash,
+      trash: false,
       where: whereConstraint,
     })
 

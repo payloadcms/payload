@@ -9,8 +9,7 @@ import { registerFirstUserOperation } from '../operations/registerFirstUser.js'
 
 export const registerFirstUserHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { data, searchParams, t } = req
-  const trash = searchParams.get('trash') === 'true'
+  const { data, t } = req
   const authData = collection.config.auth?.loginWithUsername
     ? {
         email: typeof req.data?.email === 'string' ? req.data.email : '',
@@ -29,7 +28,6 @@ export const registerFirstUserHandler: PayloadHandler = async (req) => {
       ...authData,
     },
     req,
-    trash,
   })
 
   const cookie = generatePayloadCookie({

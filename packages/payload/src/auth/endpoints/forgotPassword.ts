@@ -7,11 +7,9 @@ import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { forgotPasswordOperation } from '../operations/forgotPassword.js'
 
 export const forgotPasswordHandler: PayloadHandler = async (req) => {
-  const { searchParams, t } = req
+  const { t } = req
 
   const collection = getRequestCollection(req)
-
-  const trash = searchParams.get('trash') === 'true'
 
   const authData = collection.config.auth?.loginWithUsername
     ? {
@@ -28,7 +26,6 @@ export const forgotPasswordHandler: PayloadHandler = async (req) => {
     disableEmail: Boolean(req.data?.disableEmail),
     expiration: typeof req.data?.expiration === 'number' ? req.data.expiration : undefined,
     req,
-    trash,
   })
 
   return Response.json(
