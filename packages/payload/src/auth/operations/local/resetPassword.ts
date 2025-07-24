@@ -15,14 +15,13 @@ export type Options<T extends CollectionSlug> = {
   }
   overrideAccess: boolean
   req?: Partial<PayloadRequest>
-  trash?: boolean
 }
 
 export async function resetPasswordLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<Result> {
-  const { collection: collectionSlug, data, overrideAccess, trash = false } = options
+  const { collection: collectionSlug, data, overrideAccess } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -39,7 +38,6 @@ export async function resetPasswordLocal<TSlug extends CollectionSlug>(
     data,
     overrideAccess,
     req: await createLocalReq(options, payload),
-    trash,
   })
 
   if (collection.config.auth.removeTokenFromResponses) {

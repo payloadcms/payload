@@ -570,7 +570,6 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
             args: {
               password: { type: GraphQLString },
               token: { type: GraphQLString },
-              trash: { type: GraphQLBoolean },
             },
             resolve: resetPassword(collection),
           }

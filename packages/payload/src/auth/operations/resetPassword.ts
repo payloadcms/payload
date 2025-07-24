@@ -29,7 +29,6 @@ export type Arguments = {
   depth?: number
   overrideAccess?: boolean
   req: PayloadRequest
-  trash?: boolean
 }
 
 export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
@@ -45,7 +44,6 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
       payload,
     },
     req,
-    trash = false,
   } = args
 
   if (
@@ -81,7 +79,7 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
 
     const where = appendNonTrashedFilter({
       enableTrash: Boolean(collectionConfig.trash),
-      trash,
+      trash: false,
       where: {
         resetPasswordExpiration: { greater_than: new Date().toISOString() },
         resetPasswordToken: { equals: data.token },
@@ -160,7 +158,7 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
       depth,
       overrideAccess,
       req,
-      trash,
+      trash: false,
     })
 
     if (shouldCommit) {

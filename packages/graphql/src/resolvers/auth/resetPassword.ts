@@ -19,7 +19,6 @@ export function resetPassword(collection: Collection): any {
       data: args,
       depth: 0,
       req: isolateObjectProperty(context.req, 'transactionID'),
-      trash: args.trash,
     }
 
     const result = await resetPasswordOperation(options)
