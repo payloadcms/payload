@@ -49,6 +49,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
     getSelectedItems,
     moveToFolder,
   } = useFolder()
+
   const { clearRouteCache } = useRouteCache()
   const { config } = useConfig()
   const { t } = useTranslation()

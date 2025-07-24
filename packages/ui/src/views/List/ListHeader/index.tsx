@@ -19,6 +19,7 @@ import { DefaultListPill } from '../../../elements/ListHeaderTabs/DefaultListPil
 import './index.scss'
 import { TrashPill } from '../../../elements/ListHeaderTabs/TrashPill.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { useListQuery } from '../../../providers/ListQuery/index.js'
 import { ListSelection } from '../ListSelection/index.js'
 
 const drawerBaseClass = 'list-drawer'
@@ -71,6 +72,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   const { config, getEntityConfig } = useConfig()
   const { drawerSlug, isInDrawer, selectedOption } = useListDrawerContext()
   const isTrashRoute = viewType === 'trash'
+  const { isGroupingBy } = useListQuery()
 
   if (isInDrawer) {
     return (
@@ -106,13 +108,14 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   return (
     <ListHeader
       Actions={[
-        !smallBreak && (
+        !smallBreak && !isGroupingBy && (
           <ListSelection
             collectionConfig={collectionConfig}
             disableBulkDelete={disableBulkDelete}
             disableBulkEdit={disableBulkEdit}
             key="list-selection"
             label={getTranslation(collectionConfig?.labels?.plural, i18n)}
+            showSelectAllAcrossPages={!isGroupingBy}
             viewType={viewType}
           />
         ),

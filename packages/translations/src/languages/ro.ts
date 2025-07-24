@@ -248,6 +248,7 @@ export const roTranslations: DefaultTranslationsObject = {
     cancel: 'Anulați',
     changesNotSaved:
       'Modificările dvs. nu au fost salvate. Dacă plecați acum, vă veți pierde modificările.',
+    clear: 'Clar',
     clearAll: 'Șterge tot',
     close: 'Închide',
     collapse: 'Colaps',
@@ -326,6 +327,7 @@ export const roTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrează {{label}} unde',
     globals: 'Globale',
     goBack: 'Înapoi',
+    groupByLabel: 'Grupare după {{label}}',
     import: 'Import',
     isEditing: 'editează',
     item: 'articol',
