@@ -8,6 +8,7 @@ import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, SelectType } from '../../types/index.js'
 
 import { Forbidden } from '../../errors/index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -18,6 +19,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   data: AuthOperationsFromCollectionSlug<TSlug>['registerFirstUser'] &
     RequiredDataFromCollectionSlug<TSlug>
   req: PayloadRequest
+  trash?: boolean
 }
 
 export type Result<TData> = {
@@ -40,6 +42,7 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
     data,
     req,
     req: { payload },
+    trash = false,
   } = args
 
   if (config.auth.disableLocalStrategy) {
@@ -57,9 +60,16 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
       req,
     })
 
+    const where = appendNonTrashedFilter({
+      enableTrash: Boolean(config.trash),
+      trash,
+      where: {}, // no initial filter; just exclude trashed docs
+    })
+
     const doc = await payload.db.findOne({
       collection: config.slug,
       req,
+      where,
     })
 
     if (doc) {
