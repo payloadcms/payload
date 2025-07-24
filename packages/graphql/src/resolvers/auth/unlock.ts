@@ -10,7 +10,6 @@ export function unlock(collection: Collection) {
       collection,
       data: { email: args.email, username: args.username },
       req: isolateObjectProperty(context.req, 'transactionID'),
-      trash: args.trash,
     }
 
     const result = await unlockOperation(options)

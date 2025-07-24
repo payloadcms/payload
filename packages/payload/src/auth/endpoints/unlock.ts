@@ -8,9 +8,7 @@ import { unlockOperation } from '../operations/unlock.js'
 
 export const unlockHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { searchParams, t } = req
-
-  const trash = searchParams.get('trash') === 'true'
+  const { t } = req
 
   const authData =
     collection.config.auth?.loginWithUsername !== false
@@ -26,7 +24,6 @@ export const unlockHandler: PayloadHandler = async (req) => {
     collection,
     data: authData,
     req,
-    trash,
   })
 
   return Response.json(

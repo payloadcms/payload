@@ -22,7 +22,6 @@ export type Arguments<TSlug extends CollectionSlug> = {
   data: AuthOperationsFromCollectionSlug<TSlug>['unlock']
   overrideAccess?: boolean
   req: PayloadRequest
-  trash?: boolean
 }
 
 export const unlockOperation = async <TSlug extends CollectionSlug>(
@@ -33,7 +32,6 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
     overrideAccess,
     req: { locale },
     req,
-    trash = false,
   } = args
 
   const loginWithUsername = collectionConfig.auth.loginWithUsername
@@ -92,7 +90,7 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
     // Exclude trashed users unless `trash: true`
     whereConstraint = appendNonTrashedFilter({
       enableTrash: Boolean(collectionConfig.trash),
-      trash,
+      trash: false,
       where: whereConstraint,
     })
 
