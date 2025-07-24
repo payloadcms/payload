@@ -48,6 +48,7 @@ describe('Sort functionality', () => {
   test('Orderable collection', async () => {
     const url = new AdminUrlUtil(serverURL, orderableSlug)
     await page.goto(`${url.list}?sort=-_order`)
+    await page.locator('.collection-list button', { hasText: 'Seed' }).click()
     // SORT BY ORDER ASCENDING
     await page.locator('.sort-header button').nth(0).click()
     await assertRows(0, 'A', 'B', 'C', 'D')
