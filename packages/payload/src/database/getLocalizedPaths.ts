@@ -157,19 +157,8 @@ export function getLocalizedPaths({
             // If this is a polymorphic relation,
             // We only support querying directly (no nested querying)
             if (matchedField.type !== 'join' && typeof matchedField.relationTo !== 'string') {
-              const lastSegmentIsValid =
-                ['relationTo', 'value'].includes(pathSegments[pathSegments.length - 1]!) ||
-                pathSegments.length === 1 ||
-                (pathSegments.length === 2 && pathSegments[0] === 'version')
-
               lastIncompletePath.path = pathSegments.join('.')
-
-              if (lastSegmentIsValid) {
-                lastIncompletePath.complete = true
-              } else {
-                lastIncompletePath.invalid = true
-                return paths
-              }
+              lastIncompletePath.complete = true
             } else {
               lastIncompletePath.complete = true
               lastIncompletePath.path = currentPath!
