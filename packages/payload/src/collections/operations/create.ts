@@ -258,7 +258,16 @@ export const createOperation = async <
     if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
       if (collectionConfig.auth.verify) {
         resultWithLocales._verified = Boolean(resultWithLocales._verified) || false
-        resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')
+
+        const verify = collectionConfig.auth.verify
+        if (typeof verify === 'object' && typeof verify.generateVerificationToken === 'function') {
+          resultWithLocales._verificationToken = await verify.generateVerificationToken({
+            req,
+            user: resultWithLocales,
+          })
+        } else {
+          resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')
+        }
       }
 
       doc = await registerLocalStrategy({

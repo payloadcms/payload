@@ -32,10 +32,11 @@ export const Customers: CollectionConfig = {
 
 The following options are available:
 
-| Option                     | Description                                                                                                                                           |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`generateEmailHTML`**    | Allows for overriding the HTML within emails that are sent to users indicating how to validate their account. [More details](#generateemailhtml).     |
-| **`generateEmailSubject`** | Allows for overriding the subject of the email that is sent to users indicating how to validate their account. [More details](#generateemailsubject). |
+| Option                          | Description                                                                                                                                           |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`generateEmailHTML`**         | Allows for overriding the HTML within emails that are sent to users indicating how to validate their account. [More details](#generateemailhtml).     |
+| **`generateEmailSubject`**      | Allows for overriding the subject of the email that is sent to users indicating how to validate their account. [More details](#generateemailsubject). |
+| **`generateVerificationToken`** | Allows for overriding the verification token generation logic. [More details](#generateverificationtoken).                                            |
 
 #### generateEmailHTML
 
@@ -89,6 +90,32 @@ export const Customers: CollectionConfig = {
   },
 }
 ```
+
+#### generateVerificationToken
+
+Function that allows for overriding the verification token generation logic. By default, Payload generates a random 40-character hex string. This function receives `{ req, user }` and must return a string that will be used as the verification token.
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Customers: CollectionConfig = {
+  // ...
+  auth: {
+    verify: {
+      // highlight-start
+      generateVerificationToken: ({ req, user }) => {
+        return `custom-${user.id}-${Date.now()}`
+      },
+      // highlight-end
+    },
+  },
+}
+```
+
+<Banner type="info">
+  **Note:** The verification token must be unique and secure. Avoid predictable
+  patterns that could be exploited.
+</Banner>
 
 ## Forgot Password
 
