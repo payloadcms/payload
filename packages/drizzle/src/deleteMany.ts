@@ -1,53 +1,64 @@
 import type { DeleteMany } from 'payload'
 
-import { type SQL } from 'drizzle-orm'
+import { inArray } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
+import { findMany } from './find/findMany.js'
 import { buildQuery } from './queries/buildQuery.js'
-import { parseParams } from './queries/parseParams.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const deleteMany: DeleteMany = async function deleteMany(
   this: DrizzleAdapter,
-  { collection, req, where },
+  { collection, req, where: whereArg },
 ) {
   const db = await getTransaction(this, req)
   const collectionConfig = this.payload.collections[collection].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
-  let whereSQL: SQL
+  const table = this.tables[tableName]
 
-  const bq = buildQuery({
+  const { joins, where } = buildQuery({
     adapter: this,
     fields: collectionConfig.flattenedFields,
-    locale: undefined,
-    sort: undefined,
+    locale: req?.locale,
     tableName,
-    where,
+    where: whereArg,
   })
 
-  console.log('deleteMany', collection, where, '111bq', bq)
+  let whereToUse = where
 
-  if (where && Object.keys(where).length > 0) {
-    whereSQL = parseParams({
+  if (joins?.length) {
+    // Difficult to support joins (through where referencing other tables) in deleteMany. => 2 separate queries.
+    // We can look into supporting this using one single query (through a subquery) in the future, though that's difficult to do in a generic way.
+    const result = await findMany({
       adapter: this,
-      context: { sort: undefined },
       fields: collectionConfig.flattenedFields,
-      joins: [],
-      parentIsLocalized: false,
-      selectFields: {},
+      joins: false,
+      limit: 0,
+      locale: req?.locale,
+      page: 1,
+      pagination: false,
+      req,
+      select: {
+        id: true,
+      },
       tableName,
-      where,
+      where: whereArg,
     })
+
+    // Set wheretouse to sql that checks if ids in array
+    whereToUse = inArray(
+      table.id,
+      result.docs.map((doc) => doc.id),
+    )
   }
 
   await this.deleteWhere({
     db,
-    joins: bq.joins,
     tableName,
-    where: whereSQL,
+    where: whereToUse,
   })
 }
