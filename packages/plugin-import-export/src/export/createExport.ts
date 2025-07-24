@@ -23,8 +23,10 @@ export type Export = {
   format: 'csv' | 'json'
   globals?: string[]
   id: number | string
+  limit?: number
   locale?: string
   name: string
+  page?: number
   slug: string
   sort: Sort
   user: string
@@ -57,6 +59,8 @@ export const createExport = async (args: CreateExportArgs) => {
       locale: localeInput,
       sort,
       user,
+      page,
+      limit,
       where,
     },
     req: { locale: localeArg, payload },

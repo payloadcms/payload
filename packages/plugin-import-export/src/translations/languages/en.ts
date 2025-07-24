@@ -11,6 +11,7 @@ export const enTranslations = {
     'field-limit-label': 'Limit',
     'field-locale-label': 'Locale',
     'field-name-label': 'File name',
+    'field-page-label': 'Page',
     'field-selectionToUse-label': 'Selection to use',
     'field-sort-label': 'Sort by',
     'selectionToUse-allDocuments': 'Use all documents',

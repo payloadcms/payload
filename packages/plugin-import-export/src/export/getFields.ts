@@ -11,7 +11,7 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
       name: 'locale',
       type: 'select',
       admin: {
-        width: '33%',
+        width: '180px',
       },
       defaultValue: 'all',
       // @ts-expect-error - this is not correctly typed in plugins right now
@@ -49,7 +49,7 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
               admin: {
                 // Hide if a forced format is set via plugin config
                 condition: () => !pluginConfig?.format,
-                width: '33%',
+                width: '180px',
               },
               defaultValue: (() => {
                 // Default to plugin-defined format, otherwise 'csv'
@@ -74,10 +74,23 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
               type: 'number',
               admin: {
                 placeholder: 'No limit',
-                width: '33%',
+                width: '180px',
               },
               // @ts-expect-error - this is not correctly typed in plugins right now
               label: ({ t }) => t('plugin-import-export:field-limit-label'),
+            },
+            {
+              name: 'page',
+              type: 'number',
+              admin: {
+                condition: ({ limit }) => {
+                  return typeof limit === 'number' && limit !== 0
+                },
+                width: '180px',
+              },
+              defaultValue: 1,
+              // @ts-expect-error - this is not correctly typed in plugins right now
+              label: ({ t }) => t('plugin-import-export:field-page-label'),
             },
             {
               name: 'sort',
@@ -109,7 +122,7 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
                       collectionConfig?.versions?.drafts,
                   )
                 },
-                width: '33%',
+                width: '180px',
               },
               defaultValue: 'yes',
               // @ts-expect-error - this is not correctly typed in plugins right now
@@ -163,6 +176,7 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
               value: 'all',
             },
           ],
+          virtual: true,
         },
         {
           name: 'fields',
