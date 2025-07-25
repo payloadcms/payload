@@ -173,7 +173,12 @@ export type UploadConfig = {
    */
   displayPreview?: boolean
   /**
-   * Ability to filter/modify Request Headers when fetching a file.
+   *
+   * Accepts existing headers and returns the headers after filtering or modifying.
+   * If using this option, you should handle the removal of any sensitive cookies
+   * (like payload-prefixed cookies) to prevent leaking session information to external
+   * services. By default, Payload automatically filters out payload-prefixed cookies
+   * when this option is NOT defined.
    *
    * Useful for adding custom headers to fetch from external providers.
    * @default undefined
