@@ -26,15 +26,6 @@ import { plugins } from './plugins'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export type GenerateTitle2<T = unknown> = (args: {
-  doc: T
-  locale?: string
-}) => Promise<string> | string
-
-const generateTitle: GenerateTitle = <Page>({ doc }) => {
-  return `${doc?.title ?? ''} | My Store`
-}
-
 export default buildConfig({
   admin: {
     components: {
