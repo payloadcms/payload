@@ -35,11 +35,13 @@ export type DocumentInfoProps = {
   readonly initialState?: FormState
   readonly isEditing?: boolean
   readonly isLocked: boolean
+  readonly isTrashed?: boolean
   readonly lastUpdateTime: number
   readonly mostRecentVersionIsAutosaved: boolean
   readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
+  readonly redirectAfterRestore?: boolean
   readonly unpublishedVersionCount: number
   readonly Upload?: React.ReactNode
   readonly versionCount: number

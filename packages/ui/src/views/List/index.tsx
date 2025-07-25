@@ -4,7 +4,7 @@ import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatFilesize } from 'payload/shared'
+import { formatAdminURL, formatFilesize } from 'payload/shared'
 import React, { Fragment, useEffect } from 'react'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
@@ -49,6 +49,7 @@ export function DefaultListView(props: ListViewClientProps) {
     disableQueryPresets,
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
+    hasDeletePermission,
     listMenuItems,
     newDocumentURL,
     queryPreset,
@@ -56,6 +57,7 @@ export function DefaultListView(props: ListViewClientProps) {
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
+    viewType,
   } = props
 
   const [Table] = useControllableState(InitialTable)
@@ -69,7 +71,12 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const { user } = useAuth()
 
-  const { getEntityConfig } = useConfig()
+  const {
+    config: {
+      routes: { admin: adminRoute },
+    },
+    getEntityConfig,
+  } = useConfig()
   const router = useRouter()
 
   const { data, isGroupingBy } = useListQuery()
@@ -84,6 +91,8 @@ export function DefaultListView(props: ListViewClientProps) {
   const isUploadCollection = Boolean(upload)
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
+
+  const isTrashEnabled = Boolean(collectionConfig.trash)
 
   const { i18n } = useTranslation()
 
@@ -114,13 +123,27 @@ export function DefaultListView(props: ListViewClientProps) {
 
   useEffect(() => {
     if (!isInDrawer) {
-      setStepNav([
-        {
-          label: labels?.plural,
-        },
-      ])
+      const baseLabel = {
+        label: getTranslation(labels?.plural, i18n),
+        url:
+          isTrashEnabled && viewType === 'trash'
+            ? formatAdminURL({
+                adminRoute,
+                path: `/collections/${collectionSlug}`,
+              })
+            : undefined,
+      }
+
+      const trashLabel = {
+        label: i18n.t('general:trash'),
+      }
+
+      const navItems =
+        isTrashEnabled && viewType === 'trash' ? [baseLabel, trashLabel] : [baseLabel]
+
+      setStepNav(navItems)
     }
-  }, [setStepNav, labels, isInDrawer])
+  }, [adminRoute, setStepNav, labels, isInDrawer, isTrashEnabled, viewType, i18n, collectionSlug])
 
   return (
     <Fragment>
@@ -147,12 +170,14 @@ export function DefaultListView(props: ListViewClientProps) {
                 disableBulkDelete={disableBulkDelete}
                 disableBulkEdit={disableBulkEdit}
                 hasCreatePermission={hasCreatePermission}
+                hasDeletePermission={hasDeletePermission}
                 i18n={i18n}
                 isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
+                isTrashEnabled={isTrashEnabled}
                 newDocumentURL={newDocumentURL}
                 openBulkUpload={openBulkUpload}
                 smallBreak={smallBreak}
-                viewType="list"
+                viewType={viewType}
               />
               <ListControls
                 beforeActions={
@@ -182,9 +207,11 @@ export function DefaultListView(props: ListViewClientProps) {
               {docs?.length === 0 && (
                 <div className={`${baseClass}__no-results`}>
                   <p>
-                    {i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}
+                    {i18n.t(viewType === 'trash' ? 'general:noTrashResults' : 'general:noResults', {
+                      label: getTranslation(labels?.plural, i18n),
+                    })}
                   </p>
-                  {hasCreatePermission && newDocumentURL && (
+                  {hasCreatePermission && newDocumentURL && viewType !== 'trash' && (
                     <Fragment>
                       {isInDrawer ? (
                         <Button el="button" onClick={() => openModal(createNewDrawerSlug)}>

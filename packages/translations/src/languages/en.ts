@@ -1,3 +1,5 @@
+import { title } from 'process'
+
 import type { Language } from '../types.js'
 
 export const enTranslations = {
@@ -115,6 +117,8 @@ export const enTranslations = {
     noUser: 'No User',
     previewing: 'There was a problem previewing this document.',
     problemUploadingFile: 'There was a problem while uploading the file.',
+    restoringTitle:
+      'There was an error while restoring {{title}}. Please check your connection and try again.',
     tokenInvalidOrExpired: 'Token is either invalid or has expired.',
     tokenNotProvided: 'Token not provided.',
     unableToCopy: 'Unable to copy.',
@@ -214,6 +218,18 @@ export const enTranslations = {
     aboutToDeleteCount_many: 'You are about to delete {{count}} {{label}}',
     aboutToDeleteCount_one: 'You are about to delete {{count}} {{label}}',
     aboutToDeleteCount_other: 'You are about to delete {{count}} {{label}}',
+    aboutToPermanentlyDelete:
+      'You are about to permanently delete the {{label}} <1>{{title}}</1>. Are you sure?',
+    aboutToPermanentlyDeleteTrash:
+      'You are about to permanently delete <0>{{count}}</0> <1>{{label}}</1> from the trash. Are you sure?',
+    aboutToRestore: 'You are about to restore the {{label}} <1>{{title}}</1>. Are you sure?',
+    aboutToRestoreAsDraft:
+      'You are about to restore the {{label}} <1>{{title}}</1> as a draft. Are you sure?',
+    aboutToRestoreAsDraftCount: 'You are about to restore {{count}} {{label}} as draft',
+    aboutToRestoreCount: 'You are about to restore {{count}} {{label}}',
+    aboutToTrash:
+      'You are about to move the {{label}} <1>{{title}}</1> to the trash. Are you sure?',
+    aboutToTrashCount: 'You are about to move {{count}} {{label}} to the trash',
     addBelow: 'Add Below',
     addFilter: 'Add Filter',
     adminTheme: 'Admin Theme',
@@ -248,6 +264,7 @@ export const enTranslations = {
       'This will remove existing indexes and reindex documents in the {{collections}} collections.',
     confirmReindexDescriptionAll:
       'This will remove existing indexes and reindex documents in all collections.',
+    confirmRestoration: 'Confirm restoration',
     copied: 'Copied',
     copy: 'Copy',
     copyField: 'Copy Field',
@@ -268,13 +285,17 @@ export const enTranslations = {
     dark: 'Dark',
     dashboard: 'Dashboard',
     delete: 'Delete',
+    deleted: 'Deleted',
+    deletedAt: 'Deleted At',
     deletedCountSuccessfully: 'Deleted {{count}} {{label}} successfully.',
     deletedSuccessfully: 'Deleted successfully.',
+    deletePermanently: 'Skip trash and delete permanently',
     deleting: 'Deleting...',
     depth: 'Depth',
     descending: 'Descending',
     deselectAllRows: 'Deselect all rows',
     document: 'Document',
+    documentIsTrashed: 'This {{label}} is trashed and is read-only.',
     documentLocked: 'Document locked',
     documents: 'Documents',
     duplicate: 'Duplicate',
@@ -290,6 +311,8 @@ export const enTranslations = {
     editLabel: 'Edit {{label}}',
     email: 'Email',
     emailAddress: 'Email Address',
+    emptyTrash: 'Empty trash',
+    emptyTrashLabel: 'Empty {{label}} trash',
     enterAValue: 'Enter a value',
     error: 'Error',
     errors: 'Errors',
@@ -338,6 +361,7 @@ export const enTranslations = {
       "No {{label}} found. Either no {{label}} exist yet or none match the filters you've specified above.",
     notFound: 'Not Found',
     nothingFound: 'Nothing found',
+    noTrashResults: 'No {{label}} in trash.',
     noUpcomingEventsScheduled: 'No upcoming events scheduled.',
     noValue: 'No value',
     of: 'of',
@@ -351,6 +375,8 @@ export const enTranslations = {
     pasteField: 'Paste Field',
     pasteRow: 'Paste Row',
     payloadSettings: 'Payload Settings',
+    permanentlyDelete: 'Permanently Delete',
+    permanentlyDeletedCountSuccessfully: 'Permanently deleted {{count}} {{label}} successfully.',
     perPage: 'Per Page: {{limit}}',
     previous: 'Previous',
     reindex: 'Reindex',
@@ -362,6 +388,10 @@ export const enTranslations = {
     resetPreferencesDescription:
       'This will reset all of your preferences to their default settings.',
     resettingPreferences: 'Resetting Preferences.',
+    restore: 'Restore',
+    restoreAsPublished: 'Restore as published version',
+    restoredCountSuccessfully: 'Restored {{count}} {{label}} successfully.',
+    restoring: 'Restoring...',
     row: 'Row',
     rows: 'Rows',
     save: 'Save',
@@ -392,6 +422,10 @@ export const enTranslations = {
     time: 'Time',
     timezone: 'Timezone',
     titleDeleted: '{{label}} "{{title}}" successfully deleted.',
+    titleRestored: '{{label}} "{{title}}" successfully restored.',
+    titleTrashed: '{{label}} "{{title}}" moved to trash.',
+    trash: 'Trash',
+    trashedCountSuccessfully: '{{count}} {{label}} moved to trash.',
     true: 'True',
     unauthorized: 'Unauthorized',
     unsavedChanges: 'You have unsaved changes. Save or discard before continuing.',
@@ -410,6 +444,7 @@ export const enTranslations = {
     username: 'Username',
     users: 'Users',
     value: 'Value',
+    viewing: 'Viewing',
     viewReadOnly: 'View read-only',
     welcome: 'Welcome',
     yes: 'Yes',
@@ -535,6 +570,7 @@ export const enTranslations = {
     noRowsFound: 'No {{label}} found',
     noRowsSelected: 'No {{label}} selected',
     preview: 'Preview',
+    previouslyDraft: 'Previously a Draft',
     previouslyPublished: 'Previously Published',
     previousVersion: 'Previous Version',
     problemRestoringVersion: 'There was a problem restoring this version',

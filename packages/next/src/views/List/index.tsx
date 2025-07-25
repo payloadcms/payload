@@ -67,6 +67,7 @@ export const renderListView = async (
     params,
     query: queryFromArgs,
     searchParams,
+    viewType,
   } = args
 
   const {
@@ -144,14 +145,46 @@ export const renderListView = async (
       })
     }
 
-    let queryPreset: QueryPreset | undefined
-    let queryPresetPermissions: SanitizedCollectionPermission | undefined
-
-    const whereWithMergedSearch = mergeListSearchAndWhere({
+    let whereCondition = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
       where: combineWhereConstraints([query?.where, baseListFilter]),
     })
+
+    if (query?.trash === true) {
+      whereCondition = {
+        and: [
+          whereCondition,
+          {
+            deletedAt: {
+              exists: true,
+            },
+          },
+        ],
+      }
+    }
+
+    let queryPreset: QueryPreset | undefined
+    let queryPresetPermissions: SanitizedCollectionPermission | undefined
+
+    let whereWithMergedSearch = mergeListSearchAndWhere({
+      collectionConfig,
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      where: combineWhereConstraints([query?.where, baseListFilter]),
+    })
+
+    if (query?.trash === true) {
+      whereWithMergedSearch = {
+        and: [
+          whereWithMergedSearch,
+          {
+            deletedAt: {
+              exists: true,
+            },
+          },
+        ],
+      }
+    }
 
     if (collectionPreferences?.preset) {
       try {
@@ -207,6 +240,7 @@ export const renderListView = async (
         page: query?.page ? Number(query.page) : undefined,
         req,
         sort: query?.sort,
+        trash: query?.trash === true,
         user,
         where: whereWithMergedSearch,
       })
@@ -223,6 +257,7 @@ export const renderListView = async (
         payload: req.payload,
         query,
         useAsTitle: collectionConfig.admin.useAsTitle,
+        viewType,
       }))
     }
 
@@ -244,6 +279,7 @@ export const renderListView = async (
     })
 
     const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
+    const hasDeletePermission = permissions?.collections?.[collectionSlug]?.delete
 
     // Check if there's a notFound query parameter (document ID that wasn't found)
     const notFoundDocId = typeof searchParams?.notFound === 'string' ? searchParams.notFound : null
@@ -267,6 +303,7 @@ export const renderListView = async (
       clientProps: {
         collectionSlug,
         hasCreatePermission,
+        hasDeletePermission,
         newDocumentURL,
       },
       collectionConfig,
@@ -303,6 +340,7 @@ export const renderListView = async (
                 disableQueryPresets,
                 enableRowSelections,
                 hasCreatePermission,
+                hasDeletePermission,
                 listPreferences: collectionPreferences,
                 newDocumentURL,
                 queryPreset,
@@ -310,6 +348,7 @@ export const renderListView = async (
                 renderedFilters,
                 resolvedFilterOptions,
                 Table,
+                viewType,
               } satisfies ListViewClientProps,
               Component: collectionConfig?.admin?.components?.views?.list?.Component,
               Fallback: DefaultListView,

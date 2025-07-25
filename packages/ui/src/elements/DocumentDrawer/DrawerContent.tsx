@@ -27,6 +27,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   redirectAfterCreate,
   redirectAfterDelete,
   redirectAfterDuplicate,
+  redirectAfterRestore,
 }) => {
   const { getEntityConfig } = useConfig()
   const locale = useLocale()
@@ -66,6 +67,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
             redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
             redirectAfterDuplicate:
               redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false,
+            redirectAfterRestore: redirectAfterRestore !== undefined ? redirectAfterRestore : false,
             signal: controller.signal,
           })
 
@@ -91,6 +93,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       initialData,
       redirectAfterDelete,
       redirectAfterDuplicate,
+      redirectAfterRestore,
       renderDocument,
       redirectAfterCreate,
       closeModal,
