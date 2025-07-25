@@ -21,6 +21,12 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
+  ssr: {
+    external: ['sharp'],
+    // Reduces Docker image size
+    // https://github.com/remix-run/remix/discussions/8878
+    noExternal: process.env.NODE_ENV === 'production' ? [/.*/] : [],
+  },
   optimizeDeps: {
     exclude: ['sharp', 'file-type'],
   },
