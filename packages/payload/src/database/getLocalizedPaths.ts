@@ -158,7 +158,11 @@ export function getLocalizedPaths({
             // We only support querying directly (no nested querying)
             if (matchedField.type !== 'join' && typeof matchedField.relationTo !== 'string') {
               lastIncompletePath.path = pathSegments.join('.')
-              lastIncompletePath.complete = true
+              if (![matchedField.name, 'relationTo', 'value'].includes(pathSegments.at(-1)!)) {
+                lastIncompletePath.invalid = true
+              } else {
+                lastIncompletePath.complete = true
+              }
             } else {
               lastIncompletePath.complete = true
               lastIncompletePath.path = currentPath!
