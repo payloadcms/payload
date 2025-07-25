@@ -77,7 +77,6 @@ This configuration only queues the Job - it does not execute it immediately. To 
 ```ts
 export default buildConfig({
   jobs: {
-    scheduler: 'cron',
     autoRun: [
       {
         cron: '* * * * *', // Runs every minute
