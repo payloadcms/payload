@@ -86,10 +86,15 @@ export const lvTranslations: DefaultTranslationsObject = {
     deletingFile: 'Radās kļūda, dzēšot failu.',
     deletingTitle:
       'Radās kļūda, dzēšot {{title}}. Lūdzu, pārbaudiet savienojumu un mēģiniet vēlreiz.',
+    documentNotFound:
+      'Dokuments ar ID {{id}} netika atrasts. Iespējams, tas ir izdzēsts vai nekad nav eksistējis, vai arī jums nav pieejas tam.',
     emailOrPasswordIncorrect: 'Norādītais e-pasts vai parole nav pareiza.',
     followingFieldsInvalid_one: 'Šis lauks nav derīgs:',
     followingFieldsInvalid_other: 'Šie lauki nav derīgi:',
     incorrectCollection: 'Nepareiza kolekcija',
+    insufficientClipboardPermissions:
+      'Piekļuve starpliktuvei liegta. Lūdzu, pārbaudiet savas starpliktuves atļaujas.',
+    invalidClipboardData: 'Nederīgi starpliktuves dati.',
     invalidFileType: 'Nederīgs faila tips',
     invalidFileTypeValue: 'Nederīgs faila tips: {{value}}',
     invalidRequestArgs: 'Pieprasījumā nodoti nederīgi argumenti: {{args}}',
@@ -111,6 +116,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Radās problēma, augšupielādējot failu.',
     tokenInvalidOrExpired: 'Tokens ir nederīgs vai beidzies.',
     tokenNotProvided: 'Tokens nav norādīts.',
+    unableToCopy: 'Neizdevās kopēt.',
     unableToDeleteCount: 'Neizdevās izdzēst {{count}} no {{total}} {{label}}.',
     unableToReindexCollection:
       'Radās kļūda, pārindeksējot kolekciju {{collection}}. Operācija pārtraukta.',
@@ -180,6 +186,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Dzēst mapi',
     folderName: 'Mapes nosaukums',
     folders: 'Mapes',
+    folderTypeDescription:
+      'Izvēlieties, kāda veida kolekcijas dokumentiem jābūt atļautiem šajā mapē.',
     itemHasBeenMoved: '{{title}} ir pārvietots uz {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} ir pārvietots uz saknes mapi',
     itemsMovedToFolder: '{{title}} pārvietots uz {{folderName}}',
@@ -221,6 +229,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Atpakaļ uz paneli',
     cancel: 'Atcelt',
     changesNotSaved: 'Jūsu izmaiņas nav saglabātas. Ja tagad pametīsiet, izmaiņas tiks zaudētas.',
+    clear:
+      'Izpratiet oriģinālteksta nozīmi Payload kontekstā. Šeit ir saraksts ar Payload terminiem, kas ir ļoti specifiskas nozīmes:\n    - Kolekcija: Kolekcija ir dokumentu grupa, kuriem ir kopīga struktūra un mērķis. Kolekcijas tiek izmantotas saturu organizēšanai un pārvaldīšanai Payload.\n    - Lauks: Lauks ir konkrēts datu fragments dokumentā iekš kolekcijas. Lauki definē struktūru un dat',
     clearAll: 'Notīrīt visu',
     close: 'Aizvērt',
     collapse: 'Sakļaut',
@@ -240,7 +250,9 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Tas noņems esošos indeksus un pārindeksēs dokumentus visās kolekcijās.',
     copied: 'Nokopēts',
     copy: 'Kopēt',
+    copyField: 'Kopēt lauku',
     copying: 'Kopē...',
+    copyRow: 'Kopēt rindu',
     copyWarning:
       'Jūs grasāties pārrakstīt {{to}} ar {{from}} priekš {{label}} {{title}}. Vai esat pārliecināts?',
     create: 'Izveidot',
@@ -290,6 +302,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrēt {{label}} kur',
     globals: 'Globālie',
     goBack: 'Doties atpakaļ',
+    groupByLabel: 'Grupēt pēc {{label}}',
     import: 'Imports',
     isEditing: 'redzē',
     item: 'vienība',
@@ -335,6 +348,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Pārrakstīt esošos datus',
     pageNotFound: 'Lapa nav atrasta',
     password: 'Parole',
+    pasteField: 'Ielīmēt lauku',
+    pasteRow: 'Ielīmēt rindu',
     payloadSettings: 'Payload iestatījumi',
     perPage: 'Lapas ieraksti: {{limit}}',
     previous: 'Iepriekšējais',

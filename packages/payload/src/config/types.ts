@@ -258,6 +258,13 @@ export type InitOptions = {
    */
   config: Promise<SanitizedConfig> | SanitizedConfig
   /**
+   * If set to `true`, payload will initialize crons for things like autorunning jobs on initialization.
+   *
+   * @default false
+   */
+  cron?: boolean
+
+  /**
    * Disable connect to the database on init
    */
   disableDBConnect?: boolean
@@ -268,7 +275,6 @@ export type InitOptions = {
   disableOnInit?: boolean
 
   importMap?: ImportMap
-
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
@@ -1029,6 +1035,17 @@ export type Config = {
    */
   graphQL?: {
     disable?: boolean
+    /**
+     * Disable introspection queries in production.
+     *
+     * @default true
+     */
+    disableIntrospectionInProduction?: boolean
+    /**
+     * Disable the GraphQL Playground in production.
+     *
+     * @default true
+     */
     disablePlaygroundInProduction?: boolean
     maxComplexity?: number
     /**

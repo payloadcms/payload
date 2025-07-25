@@ -14,6 +14,9 @@ const withBundleAnalyzer = bundleAnalyzer({
 export default withBundleAnalyzer(
   withPayload(
     {
+      devIndicators: {
+        position: 'bottom-right',
+      },
       eslint: {
         ignoreDuringBuilds: true,
       },

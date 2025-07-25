@@ -24,20 +24,44 @@ export const flattenObject = ({
       if (Array.isArray(value)) {
         value.forEach((item, index) => {
           if (typeof item === 'object' && item !== null) {
-            flatten(item, `${newKey}_${index}`)
+            const blockType = typeof item.blockType === 'string' ? item.blockType : undefined
+
+            const itemPrefix = blockType ? `${newKey}_${index}_${blockType}` : `${newKey}_${index}`
+
+            // Case: hasMany polymorphic relationships
+            if (
+              'relationTo' in item &&
+              'value' in item &&
+              typeof item.value === 'object' &&
+              item.value !== null
+            ) {
+              row[`${itemPrefix}_relationTo`] = item.relationTo
+              row[`${itemPrefix}_id`] = item.value.id
+              return
+            }
+
+            flatten(item, itemPrefix)
           } else {
             if (toCSVFunctions?.[newKey]) {
               const columnName = `${newKey}_${index}`
-              const result = toCSVFunctions[newKey]({
-                columnName,
-                data: row,
-                doc,
-                row,
-                siblingDoc,
-                value: item,
-              })
-              if (typeof result !== 'undefined') {
-                row[columnName] = result
+              try {
+                const result = toCSVFunctions[newKey]({
+                  columnName,
+                  data: row,
+                  doc,
+                  row,
+                  siblingDoc,
+                  value: item,
+                })
+                if (typeof result !== 'undefined') {
+                  row[columnName] = result
+                }
+              } catch (error) {
+                throw new Error(
+                  `Error in toCSVFunction for array item "${columnName}": ${JSON.stringify(item)}\n${
+                    (error as Error).message
+                  }`,
+                )
               }
             } else {
               row[`${newKey}_${index}`] = item
@@ -48,30 +72,42 @@ export const flattenObject = ({
         if (!toCSVFunctions?.[newKey]) {
           flatten(value, newKey)
         } else {
-          const result = toCSVFunctions[newKey]({
-            columnName: newKey,
-            data: row,
-            doc,
-            row,
-            siblingDoc,
-            value,
-          })
-          if (typeof result !== 'undefined') {
-            row[newKey] = result
+          try {
+            const result = toCSVFunctions[newKey]({
+              columnName: newKey,
+              data: row,
+              doc,
+              row,
+              siblingDoc,
+              value,
+            })
+            if (typeof result !== 'undefined') {
+              row[newKey] = result
+            }
+          } catch (error) {
+            throw new Error(
+              `Error in toCSVFunction for nested object "${newKey}": ${JSON.stringify(value)}\n${(error as Error).message}`,
+            )
           }
         }
       } else {
         if (toCSVFunctions?.[newKey]) {
-          const result = toCSVFunctions[newKey]({
-            columnName: newKey,
-            data: row,
-            doc,
-            row,
-            siblingDoc,
-            value,
-          })
-          if (typeof result !== 'undefined') {
-            row[newKey] = result
+          try {
+            const result = toCSVFunctions[newKey]({
+              columnName: newKey,
+              data: row,
+              doc,
+              row,
+              siblingDoc,
+              value,
+            })
+            if (typeof result !== 'undefined') {
+              row[newKey] = result
+            }
+          } catch (error) {
+            throw new Error(
+              `Error in toCSVFunction for field "${newKey}": ${JSON.stringify(value)}\n${(error as Error).message}`,
+            )
           }
         } else {
           row[newKey] = value

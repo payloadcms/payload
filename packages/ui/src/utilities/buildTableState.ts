@@ -74,7 +74,7 @@ const buildTableState = async (
   const {
     collectionSlug,
     columns,
-    docs: docsFromArgs,
+    data: dataFromArgs,
     enableRowSelections,
     orderableFieldName,
     parent,
@@ -154,12 +154,11 @@ const buildTableState = async (
     },
   })
 
-  let docs = docsFromArgs
-  let data: PaginatedDocs
+  let data: PaginatedDocs = dataFromArgs
 
   // lookup docs, if desired, i.e. within `join` field which initialize with `depth: 0`
 
-  if (!docs || query) {
+  if (!data?.docs || query) {
     if (Array.isArray(collectionSlug)) {
       if (!parent) {
         throw new APIError('Unexpected array of collectionSlug, parent must be provided')
@@ -205,7 +204,6 @@ const buildTableState = async (
       for (let i = 0; i < segments.length; i++) {
         if (i === segments.length - 1) {
           data = parentDoc[segments[i]]
-          docs = data.docs
         } else {
           parentDoc = parentDoc[segments[i]]
         }
@@ -214,15 +212,15 @@ const buildTableState = async (
       data = await payload.find({
         collection: collectionSlug,
         depth: 0,
-        limit: query?.limit ? parseInt(query.limit, 10) : undefined,
+        draft: true,
+        limit: query?.limit,
         locale: req.locale,
         overrideAccess: false,
-        page: query?.page ? parseInt(query.page, 10) : undefined,
+        page: query?.page,
         sort: query?.sort,
         user: req.user,
         where: query?.where,
       })
-      docs = data.docs
     }
   }
 
@@ -231,13 +229,13 @@ const buildTableState = async (
     clientConfig,
     collectionConfig,
     collections: Array.isArray(collectionSlug) ? collectionSlug : undefined,
-    columnPreferences: Array.isArray(collectionSlug) ? collectionPreferences?.columns : undefined, // TODO, might not be neededcolumns,
     columns,
-    docs,
+    data,
     enableRowSelections,
     i18n: req.i18n,
     orderableFieldName,
     payload,
+    query,
     renderRowTypes,
     tableAppearance,
     useAsTitle: Array.isArray(collectionSlug)

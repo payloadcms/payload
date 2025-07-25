@@ -86,10 +86,15 @@ export const nbTranslations: DefaultTranslationsObject = {
     deletingFile: 'Det oppstod en feil under sletting av filen.',
     deletingTitle:
       'Det oppstod en feil under sletting av {{title}}. Sjekk tilkoblingen og prøv igjen.',
+    documentNotFound:
+      'Dokumentet med ID {{id}} kunne ikke bli funnet. Det kan ha blitt slettet eller aldri eksistert, eller du har kanskje ikke tilgang til det.',
     emailOrPasswordIncorrect: 'E-postadressen eller passordet er feil.',
     followingFieldsInvalid_one: 'Følgende felt er ugyldig:',
     followingFieldsInvalid_other: 'Følgende felter er ugyldige:',
     incorrectCollection: 'Ugyldig samling',
+    insufficientClipboardPermissions:
+      'Tilgang til utklippstavlen ble nektet. Sjekk utklippstavle-tillatelsene dine.',
+    invalidClipboardData: 'Ugyldige utklippstavldata.',
     invalidFileType: 'Ugyldig filtype',
     invalidFileTypeValue: 'Ugyldig filtype: {{value}}',
     invalidRequestArgs: 'Ugyldige argumenter i forespørselen: {{args}}',
@@ -111,6 +116,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Det oppstod et problem under opplasting av filen.',
     tokenInvalidOrExpired: 'Token er enten ugyldig eller har utløpt.',
     tokenNotProvided: 'Token ikke angitt.',
+    unableToCopy: 'Kan ikke kopiere.',
     unableToDeleteCount: 'Kan ikke slette {{count}} av {{total}} {{label}}.',
     unableToReindexCollection:
       'Feil ved reindeksering av samlingen {{collection}}. Operasjonen ble avbrutt.',
@@ -180,6 +186,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Slett mappe',
     folderName: 'Mappenavn',
     folders: 'Mapper',
+    folderTypeDescription: 'Velg hvilken type samling dokumenter som skal tillates i denne mappen.',
     itemHasBeenMoved: '{{title}} er flyttet til {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} er flyttet til rotmappen',
     itemsMovedToFolder: '{{title}} flyttet til {{folderName}}',
@@ -222,6 +229,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     cancel: 'Avbryt',
     changesNotSaved:
       'Endringene dine er ikke lagret. Hvis du forlater nå, vil du miste endringene dine.',
+    clear: 'Tydelig',
     clearAll: 'Tøm alt',
     close: 'Lukk',
     collapse: 'Skjul',
@@ -241,7 +249,9 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Dette vil fjerne eksisterende indekser og reindeksere dokumentene i alle samlinger.',
     copied: 'Kopiert',
     copy: 'Kopiér',
+    copyField: 'Kopier felt',
     copying: 'Kopiering',
+    copyRow: 'Kopier rad',
     copyWarning:
       'Du er i ferd med å overskrive {{to}} med {{from}} for {{label}} {{title}}. Er du sikker?',
     create: 'Opprett',
@@ -291,6 +301,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrer {{label}} der',
     globals: 'Globale variabler',
     goBack: 'Gå tilbake',
+    groupByLabel: 'Grupper etter {{label}}',
     import: 'Import',
     isEditing: 'redigerer',
     item: 'vare',
@@ -336,6 +347,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Overskriv eksisterende feltdata',
     pageNotFound: 'Siden ble ikke funnet',
     password: 'Passord',
+    pasteField: 'Lim inn felt',
+    pasteRow: 'Lim inn rad',
     payloadSettings: 'Payload-innstillinger',
     perPage: 'Per side: {{limit}}',
     previous: 'Forrige',

@@ -87,10 +87,15 @@ export const enTranslations = {
     deletingFile: 'There was an error deleting file.',
     deletingTitle:
       'There was an error while deleting {{title}}. Please check your connection and try again.',
+    documentNotFound:
+      'The document with ID {{id}} could not be found. It may have been deleted or never existed, or you may not have access to it.',
     emailOrPasswordIncorrect: 'The email or password provided is incorrect.',
     followingFieldsInvalid_one: 'The following field is invalid:',
     followingFieldsInvalid_other: 'The following fields are invalid:',
     incorrectCollection: 'Incorrect Collection',
+    insufficientClipboardPermissions:
+      'Clipboard access denied. Please check your clipboard permissions.',
+    invalidClipboardData: 'Invalid clipboard data.',
     invalidFileType: 'Invalid file type',
     invalidFileTypeValue: 'Invalid file type: {{value}}',
     invalidRequestArgs: 'Invalid arguments passed in request: {{args}}',
@@ -112,6 +117,7 @@ export const enTranslations = {
     problemUploadingFile: 'There was a problem while uploading the file.',
     tokenInvalidOrExpired: 'Token is either invalid or has expired.',
     tokenNotProvided: 'Token not provided.',
+    unableToCopy: 'Unable to copy.',
     unableToDeleteCount: 'Unable to delete {{count}} out of {{total}} {{label}}.',
     unableToReindexCollection: 'Error reindexing collection {{collection}}. Operation aborted.',
     unableToUpdateCount: 'Unable to update {{count}} out of {{total}} {{label}}.',
@@ -180,6 +186,8 @@ export const enTranslations = {
     deleteFolder: 'Delete Folder',
     folderName: 'Folder Name',
     folders: 'Folders',
+    folderTypeDescription:
+      'Select which type of collection documents should be allowed in this folder.',
     itemHasBeenMoved: '{{title}} has been moved to {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} has been moved to the root folder',
     itemsMovedToFolder: '{{title}} moved to {{folderName}}',
@@ -222,6 +230,7 @@ export const enTranslations = {
     cancel: 'Cancel',
     changesNotSaved:
       'Your changes have not been saved. If you leave now, you will lose your changes.',
+    clear: 'Clear',
     clearAll: 'Clear All',
     close: 'Close',
     collapse: 'Collapse',
@@ -241,7 +250,9 @@ export const enTranslations = {
       'This will remove existing indexes and reindex documents in all collections.',
     copied: 'Copied',
     copy: 'Copy',
+    copyField: 'Copy Field',
     copying: 'Copying',
+    copyRow: 'Copy Row',
     copyWarning:
       'You are about to overwrite {{to}} with {{from}} for {{label}} {{title}}. Are you sure?',
     create: 'Create',
@@ -291,6 +302,7 @@ export const enTranslations = {
     filterWhere: 'Filter {{label}} where',
     globals: 'Globals',
     goBack: 'Go back',
+    groupByLabel: 'Group by {{label}}',
     import: 'Import',
     isEditing: 'is editing',
     item: 'item',
@@ -336,6 +348,8 @@ export const enTranslations = {
     overwriteExistingData: 'Overwrite existing field data',
     pageNotFound: 'Page not found',
     password: 'Password',
+    pasteField: 'Paste Field',
+    pasteRow: 'Paste Row',
     payloadSettings: 'Payload Settings',
     perPage: 'Per Page: {{limit}}',
     previous: 'Previous',

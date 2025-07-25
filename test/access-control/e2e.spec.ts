@@ -436,10 +436,15 @@ describe('Access Control', () => {
       const documentDrawer = page.locator(`[id^=doc-drawer_${createNotUpdateCollectionSlug}_1_]`)
       await expect(documentDrawer).toBeVisible()
       await expect(documentDrawer.locator('#action-save')).toBeVisible()
+
       await documentDrawer.locator('#field-name').fill('name')
       await expect(documentDrawer.locator('#field-name')).toHaveValue('name')
-      await documentDrawer.locator('#action-save').click()
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
+      await saveDocAndAssert(
+        page,
+        `[id^=doc-drawer_${createNotUpdateCollectionSlug}_1_] #action-save`,
+      )
+
       await expect(documentDrawer.locator('#action-save')).toBeHidden()
       await expect(documentDrawer.locator('#field-name')).toBeDisabled()
     })
@@ -724,7 +729,7 @@ describe('Access Control', () => {
       await page.locator('#field-unnamedTab').fill('unnamed tab')
 
       // array field
-      await page.locator('#field-array button').click()
+      await page.locator('#field-array > button').click()
       await page.locator('#field-array__0__text').fill('array row 0')
 
       await saveDocAndAssert(page)

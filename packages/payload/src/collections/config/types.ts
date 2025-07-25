@@ -82,6 +82,7 @@ export type HookOperationType =
   | 'forgotPassword'
   | 'login'
   | 'read'
+  | 'readDistinct'
   | 'refresh'
   | 'resetPassword'
   | 'update'
@@ -366,6 +367,13 @@ export type CollectionAdminOptions = {
    * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
    */
   group?: false | Record<string, string> | string
+  /**
+   * @experimental This option is currently in beta and may change in future releases and/or contain bugs.
+   * Use at your own risk.
+   * @description Enable grouping by a field in the list view.
+   * Uses `payload.findDistinct` under the hood to populate the group-by options.
+   */
+  groupBy?: boolean
   /**
    * Exclude the collection from the admin nav and routes
    */

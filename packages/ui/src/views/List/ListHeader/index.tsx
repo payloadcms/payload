@@ -15,6 +15,7 @@ import {
   ListCreateNewButton,
 } from '../../../elements/ListHeader/TitleActions/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { useListQuery } from '../../../providers/ListQuery/index.js'
 import { ListSelection } from '../ListSelection/index.js'
 import './index.scss'
 
@@ -63,6 +64,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
 }) => {
   const { config, getEntityConfig } = useConfig()
   const { drawerSlug, isInDrawer, selectedOption } = useListDrawerContext()
+  const { isGroupingBy } = useListQuery()
 
   if (isInDrawer) {
     return (
@@ -98,13 +100,14 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   return (
     <ListHeader
       Actions={[
-        !smallBreak && (
+        !smallBreak && !isGroupingBy && (
           <ListSelection
             collectionConfig={collectionConfig}
             disableBulkDelete={disableBulkDelete}
             disableBulkEdit={disableBulkEdit}
             key="list-selection"
             label={getTranslation(collectionConfig?.labels?.plural, i18n)}
+            showSelectAllAcrossPages={!isGroupingBy}
           />
         ),
         collectionConfig.folders && config.folders && (

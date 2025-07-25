@@ -355,6 +355,12 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
+  arrayWithCustomID?:
+    | {
+        id?: string | null;
+        text?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -542,6 +548,14 @@ export interface BlockField {
             blockType: 'blockWithoutGroup';
           }
       )[]
+    | null;
+  readOnly?:
+    | {
+        title?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'readOnlyBlock';
+      }[]
     | null;
   updatedAt: string;
   createdAt: string;
@@ -1977,6 +1991,12 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  arrayWithCustomID?:
+    | T
+    | {
+        id?: T;
+        text?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2206,6 +2226,17 @@ export interface BlockFieldsSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  readOnly?:
+    | T
+    | {
+        readOnlyBlock?:
+          | T
+          | {
+              title?: T;
               id?: T;
               blockName?: T;
             };
