@@ -42,6 +42,7 @@ import {
   mediaWithoutCacheTagsSlug,
   relationPreviewSlug,
   relationSlug,
+  svgOnlySlug,
   threeDimensionalSlug,
   withMetadataSlug,
   withOnlyJPEGMetadataSlug,
@@ -87,6 +88,7 @@ let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
 let bulkUploadsURL: AdminUrlUtil
 let fileMimeTypeURL: AdminUrlUtil
+let svgOnlyURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -126,6 +128,7 @@ describe('Uploads', () => {
     constructorOptionsURL = new AdminUrlUtil(serverURL, constructorOptionsSlug)
     bulkUploadsURL = new AdminUrlUtil(serverURL, bulkUploadsSlug)
     fileMimeTypeURL = new AdminUrlUtil(serverURL, fileMimeTypeSlug)
+    svgOnlyURL = new AdminUrlUtil(serverURL, svgOnlySlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -268,6 +271,23 @@ describe('Uploads', () => {
 
     const fileMetaSizeType = page.locator('.file-meta__size-type')
     await expect(fileMetaSizeType).toHaveText(/model\/gltf-binary/)
+  })
+
+  test('should show proper mimetype for svg+xml file', async () => {
+    await page.goto(svgOnlyURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './svgWithXml.svg'))
+    const filename = page.locator('.file-field__filename')
+    await expect(filename).toHaveValue('svgWithXml.svg')
+
+    await saveDocAndAssert(page)
+
+    const fileMetaSizeType = page.locator('.file-meta__size-type')
+    await expect(fileMetaSizeType).toHaveText(/image\/svg\+xml/)
+
+    // ensure the svg loads
+    const svgImage = page.locator('img[src*="svgWithXml"]')
+    await expect(svgImage).toBeVisible()
   })
 
   test('should create animated file upload', async () => {

@@ -1296,24 +1296,23 @@ describe('lexicalMain', () => {
     await page.getByLabel('Title*').fill('Indent and Text-align')
     await page.getByRole('paragraph').nth(1).click()
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
-    const getHTMLContent: (indentToSize: (indent: number) => string) => string = (indentToSize) =>
-      `<p style='text-align: center;'>paragraph centered</p><h1 style='text-align: right;'>Heading right</h1><p>paragraph without indent</p><p style='padding-inline-start: ${indentToSize(1)};'>paragraph indent 1</p><h2 style='padding-inline-start: ${indentToSize(2)};'>heading indent 2</h2><blockquote style='padding-inline-start: ${indentToSize(3)};'>quote indent 3</blockquote>`
+    const htmlContent = `<p style='text-align: center;'>paragraph centered</p><h1 style='text-align: right;'>Heading right</h1><p>paragraph without indent</p><p style='padding-inline-start: 40px;'>paragraph indent 1</p><h2 style='padding-inline-start: 80px;'>heading indent 2</h2><blockquote style='padding-inline-start: 120px;'>quote indent 3</blockquote>`
     await page.evaluate(
       async ([htmlContent]) => {
-        const blob = new Blob([htmlContent as string], { type: 'text/html' })
+        const blob = new Blob([htmlContent], { type: 'text/html' })
         const clipboardItem = new ClipboardItem({ 'text/html': blob })
         await navigator.clipboard.write([clipboardItem])
       },
-      [getHTMLContent((indent: number) => `${indent * 40}px`)],
+      [htmlContent],
     )
     // eslint-disable-next-line playwright/no-conditional-in-test
     const pasteKey = process.platform === 'darwin' ? 'Meta' : 'Control'
     await page.keyboard.press(`${pasteKey}+v`)
     await page.locator('#field-richText').click()
     await page.locator('#field-richText').fill('asd')
-    await saveDocAndAssert(page)
+    await page.getByRole('button', { name: 'Save' }).click()
     await page.getByRole('link', { name: 'API' }).click()
-    const htmlOutput = page.getByText(getHTMLContent((indent: number) => `${indent * 2}rem`))
+    const htmlOutput = page.getByText(htmlContent)
     await expect(htmlOutput).toBeVisible()
   })
 
@@ -1552,7 +1551,7 @@ describe('lexicalMain', () => {
     await closeTagInMultiSelect.click()
     await expect(decoratorLocator).toBeHidden()
 
-    const labelInsideCollapsableBody = page.locator('label').getByText('Sub Blocks')
+    const labelInsideCollapsableBody = page.locator('h3>span').getByText('Sub Blocks')
     await labelInsideCollapsableBody.click()
     await expectInsideSelectedDecorator(labelInsideCollapsableBody)
 

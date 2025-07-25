@@ -57,31 +57,101 @@ describePostgres('Select - with postgres logs', () => {
       await payload.delete({ id: pointId, collection: 'points' })
     })
 
-    describe('Local API - operations', () => {
-      it('ensure optimized db update is still used when using select', async () => {
-        const post = await createPost()
+    it('ensure optimized db update is still used when using select', async () => {
+      const post = await createPost()
 
-        // Count every console log
-        const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+      // Count every console log
+      const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
 
-        const res = removeEmptyAndUndefined(
-          (await payload.db.updateOne({
-            collection: 'posts',
-            id: post.id,
-            data: {
-              text: 'new text',
+      const res = removeEmptyAndUndefined(
+        (await payload.db.updateOne({
+          collection: 'posts',
+          id: post.id,
+          data: {
+            text: 'new text',
+          },
+          select: { text: true, number: true },
+        })) as any,
+      )
+
+      expect(consoleCount).toHaveBeenCalledTimes(1) // Should be 1 single sql call if the optimization is used. If not, this would be 2 calls
+      consoleCount.mockRestore()
+
+      expect(res.number).toEqual(1)
+      expect(res.text).toEqual('new text')
+      expect(res.id).toEqual(post.id)
+      expect(Object.keys(res)).toHaveLength(3)
+    })
+
+    // This verifies that select actually improves performance of simple updates for complex collections.
+    // This is possible as no `with` is returned by buildFindManyArgs for the blocks field, only if we have a select that does not select that blocks field.
+    it('ensure simple update of complex collection uses optimized upsertRow with optimized returning() if only simple fields are selected', async () => {
+      const page = await payload.create({
+        collection: 'pages',
+        data: {
+          slug: 'test-page',
+          additional: 'value',
+          blocks: [
+            {
+              id: '123',
+              blockType: 'some',
+              other: 'value',
+              title: 'Test Block',
             },
-            select: { text: true, number: true },
-          })) as any,
-        )
+          ],
+        },
+      })
 
-        expect(consoleCount).toHaveBeenCalledTimes(1) // Should be 1 single sql call if the optimization is used. If not, this would be 2 calls
-        consoleCount.mockRestore()
+      // Count every console log
+      const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
 
-        expect(res.number).toEqual(1)
-        expect(res.text).toEqual('new text')
-        expect(res.id).toEqual(post.id)
-        expect(Object.keys(res)).toHaveLength(3)
+      const res = removeEmptyAndUndefined(
+        (await payload.db.updateOne({
+          collection: 'pages',
+          id: page.id,
+          select: {
+            slug: true,
+            additional: true,
+          },
+          data: {
+            slug: 'new-slug',
+          },
+        })) as any,
+      )
+
+      expect(consoleCount).toHaveBeenCalledTimes(1) // Should be 1 single sql call if the optimization is used. If not, this would be 2 calls
+      consoleCount.mockRestore()
+
+      expect(res.slug).toEqual('new-slug')
+      expect(res.additional).toEqual('value')
+      expect(res.id).toEqual(page.id)
+      expect(Object.keys(res)).toHaveLength(3)
+
+      // Do full find without select just to ensure that the update worked
+      const fullPage: any = await payload.findByID({
+        collection: 'pages',
+        id: page.id,
+      })
+
+      delete fullPage.createdAt
+      delete fullPage.updatedAt
+      delete fullPage.array
+      delete fullPage.content
+
+      expect(fullPage).toEqual({
+        id: page.id,
+        slug: 'new-slug',
+        additional: 'value',
+        relatedPage: null,
+        blocks: [
+          {
+            id: '123',
+            blockType: 'some',
+            blockName: null,
+            other: 'value',
+            title: 'Test Block',
+          },
+        ],
       })
     })
   })
@@ -102,14 +172,16 @@ function removeEmptyAndUndefined(obj: any): any {
   if (obj !== null && typeof obj === 'object') {
     const cleanedEntries = Object.entries(obj)
       .map(([key, value]) => [key, removeEmptyAndUndefined(value)])
-      .filter(
-        ([, value]) =>
+      .filter(([, value]) => {
+        return (
           value !== undefined &&
+          value !== null &&
           !(
             typeof value === 'object' &&
             (Array.isArray(value) ? value.length === 0 : Object.keys(value).length === 0)
-          ),
-      )
+          )
+        )
+      })
 
     return cleanedEntries.length > 0 ? Object.fromEntries(cleanedEntries) : undefined
   }
