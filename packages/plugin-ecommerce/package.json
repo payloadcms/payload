@@ -123,7 +123,7 @@
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.2",
     "payload": "workspace:*",
-    "stripe": "^10.2.0"
+    "stripe": "18.3.0"
   },
   "peerDependencies": {
     "payload": "workspace:*",

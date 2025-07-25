@@ -2,7 +2,7 @@ import type { Media, Product } from '@/payload-types'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { GridTileImage } from '@/components/Grid/tile'
-import { Gallery } from '@/components/product/Gallery'
+import { Gallery, GalleryImage } from '@/components/product/Gallery'
 import { ProductDescription } from '@/components/product/ProductDescription'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
@@ -63,7 +63,13 @@ export default async function ProductPage({ params }: Args) {
 
   if (!product) return notFound()
 
-  const gallery = product.gallery?.filter((image) => typeof image === 'object')
+  const gallery: GalleryImage[] =
+    product.gallery
+      ?.filter((image) => typeof image === 'object')
+      .map((image) => ({
+        image: image as Media,
+        variantID: undefined,
+      })) || []
 
   const metaImage = typeof product.meta?.image === 'object' ? product.meta?.image : undefined
   const hasStock = product.enableVariants
@@ -87,7 +93,12 @@ export default async function ProductPage({ params }: Args) {
       if (typeof variant !== 'object') continue
 
       if (variant.gallery && variant.gallery.length > 0) {
-        const variantGallery = variant.gallery.filter((image) => typeof image === 'object')
+        const variantGallery = variant.gallery
+          .filter((image) => typeof image === 'object')
+          .map((image) => ({
+            image: image as Media,
+            variantID: variant.id,
+          }))
 
         gallery.push(...variantGallery)
       }
@@ -133,7 +144,7 @@ export default async function ProductPage({ params }: Args) {
                 <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden" />
               }
             >
-              {gallery?.length && <Gallery images={gallery} />}
+              {gallery?.length && <Gallery gallery={gallery} />}
             </Suspense>
           </div>
 

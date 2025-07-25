@@ -46,7 +46,7 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
       // API version can only be the latest, stripe recommends ts ignoring it
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore - ignoring since possible versions are not type safe, only the latest version is recognised
-      apiVersion: apiVersion || '2025-03-31.basil',
+      apiVersion: apiVersion || '2025-06-30.preview',
       appInfo: appInfo || {
         name: 'Stripe Payload Plugin',
         url: 'https://payloadcms.com',
@@ -81,16 +81,19 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
         }
       })
 
-      const shippingAddress = JSON.stringify(shippingAddressFromData)
+      const shippingAddressAsString = JSON.stringify(shippingAddressFromData)
 
       const paymentIntent = await stripe.paymentIntents.create({
         amount,
+        automatic_payment_methods: {
+          enabled: true,
+        },
         currency,
         customer: customer.id,
         metadata: {
           cartID: cart.id,
           cartItemsSnapshot: JSON.stringify(flattenedCart),
-          shippingAddress,
+          shippingAddress: shippingAddressAsString,
         },
       })
 

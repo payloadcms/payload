@@ -42,16 +42,6 @@ export const BeforeDashboard: React.FC = () => {
           {' for more details.'}
         </li>
         <li>
-          {/* <Link to="/admin/collections/products">Link each of your products</Link> */}
-          {' to Stripe by selecting the corresponding product using the dropdown under '}
-          <i>Product Details</i>.
-        </li>
-        <li>
-          If you created this repo using Payload Cloud, head over to GitHub and clone it to your
-          local machine. It will be under the <i>GitHub Scope</i> that you selected when creating
-          this project.
-        </li>
-        <li>
           {'Modify your '}
           <a
             href="https://payloadcms.com/docs/configuration/collections"
@@ -77,9 +67,6 @@ export const BeforeDashboard: React.FC = () => {
             Getting Started
           </a>
           {' docs.'}
-        </li>
-        <li>
-          Commit and push your changes to the repository to trigger a redeployment of your project.
         </li>
       </ul>
       {'Pro Tip: This block is a '}
