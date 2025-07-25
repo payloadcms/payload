@@ -4,6 +4,9 @@ import { authenticated } from '@/access/authenticated'
 import { beforeChangeAddress } from './beforeChange'
 
 export const Addresses: CollectionOverride = {
+  admin: {
+    group: 'Ecommerce',
+  },
   access: {
     create: authenticated,
     delete: ownerOrAdminAddress,

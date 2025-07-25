@@ -31,6 +31,7 @@ export const Pages: CollectionConfig = {
     update: admins,
   },
   admin: {
+    group: 'Content',
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data }) => {

@@ -44,6 +44,7 @@ export const en: GenericTranslationsObject = {
     product: 'Product',
     productRequired: 'A product is required.',
     products: 'Products',
+    purchasedAt: 'Purchased at',
     quantity: 'Quantity',
     refunded: 'Refunded',
     shippingAddress: 'Shipping address',

@@ -218,6 +218,10 @@ export const ecommercePlugin =
         customersSlug: collectionSlugMap.customers,
         enableVariants,
         ordersSlug: collectionSlugMap.orders,
+        overrides:
+          sanitizedPluginConfig.transactions === true
+            ? undefined
+            : sanitizedPluginConfig.transactions.transactionsCollection,
         paymentMethods,
         productsSlug: collectionSlugMap.products,
         variantsSlug: collectionSlugMap.variants,

@@ -4,6 +4,9 @@ import { CollectionOverride } from '@payloadcms/plugin-ecommerce/types'
 import { Field } from 'payload'
 
 export const VariantsCollection: CollectionOverride = {
+  admin: {
+    group: 'Ecommerce',
+  },
   versions: {
     drafts: {
       autosave: true,
