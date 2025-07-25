@@ -5,6 +5,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Array } from './collections/Array.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
+import { CustomListDrawer } from './collections/CustomListDrawer/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
 import { DisableBulkEdit } from './collections/DisableBulkEdit.js'
@@ -185,6 +186,7 @@ export default buildConfigWithDefaults({
     Placeholder,
     UseAsTitleGroupField,
     DisableBulkEdit,
+    CustomListDrawer,
   ],
   globals: [
     GlobalHidden,

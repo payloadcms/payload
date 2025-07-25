@@ -248,11 +248,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
-  sessions: {
-    id: string;
-    createdAt?: string | null;
-    expiresAt: string;
-  }[];
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -270,11 +272,13 @@ export interface PartialDisableLocalStrategy {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
-  sessions: {
-    id: string;
-    createdAt?: string | null;
-    expiresAt: string;
-  }[];
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -316,11 +320,13 @@ export interface PublicUser {
   _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
-  sessions: {
-    id: string;
-    createdAt?: string | null;
-    expiresAt: string;
-  }[];
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**

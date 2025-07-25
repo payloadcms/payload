@@ -18,8 +18,9 @@ import type {
   PluginImportExportTranslations,
 } from '../../translations/index.js'
 
-import { useImportExport } from '../ImportExportProvider/index.js'
+import { buildDisabledFieldRegex } from '../../utilities/buildDisabledFieldRegex.js'
 import './index.scss'
+import { useImportExport } from '../ImportExportProvider/index.js'
 
 const baseClass = 'preview'
 
@@ -46,12 +47,11 @@ export const Preview = () => {
     (collection) => collection.slug === collectionSlug,
   )
 
-  const disabledFieldsUnderscored = React.useMemo(() => {
-    return (
-      collectionConfig?.admin?.custom?.['plugin-import-export']?.disabledFields?.map((f: string) =>
-        f.replace(/\./g, '_'),
-      ) ?? []
-    )
+  const disabledFieldRegexes: RegExp[] = React.useMemo(() => {
+    const disabledFieldPaths =
+      collectionConfig?.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
+
+    return disabledFieldPaths.map(buildDisabledFieldRegex)
   }, [collectionConfig])
 
   const isCSV = format === 'csv'
@@ -68,6 +68,7 @@ export const Preview = () => {
             collectionSlug,
             draft,
             fields,
+            format,
             limit,
             locale,
             sort,
@@ -101,17 +102,27 @@ export const Preview = () => {
           Array.isArray(fields) && fields.length > 0
             ? fields.flatMap((field) => {
                 const regex = fieldToRegex(field)
-                return allKeys.filter((key) => regex.test(key))
+                return allKeys.filter(
+                  (key) =>
+                    regex.test(key) &&
+                    !disabledFieldRegexes.some((disabledRegex) => disabledRegex.test(key)),
+                )
               })
             : allKeys.filter(
                 (key) =>
-                  !defaultMetaFields.includes(key) && !disabledFieldsUnderscored.includes(key),
+                  !defaultMetaFields.includes(key) &&
+                  !disabledFieldRegexes.some((regex) => regex.test(key)),
               )
 
         const fieldKeys =
           Array.isArray(fields) && fields.length > 0
-            ? selectedKeys // strictly only what was selected
-            : [...selectedKeys, ...defaultMetaFields.filter((key) => allKeys.includes(key))]
+            ? selectedKeys // strictly use selected fields only
+            : [
+                ...selectedKeys,
+                ...defaultMetaFields.filter(
+                  (key) => allKeys.includes(key) && !selectedKeys.includes(key),
+                ),
+              ]
 
         // Build columns based on flattened keys
         const newColumns: Column[] = fieldKeys.map((key) => ({
@@ -150,9 +161,10 @@ export const Preview = () => {
   }, [
     collectionConfig,
     collectionSlug,
-    disabledFieldsUnderscored,
+    disabledFieldRegexes,
     draft,
     fields,
+    format,
     i18n,
     limit,
     locale,
