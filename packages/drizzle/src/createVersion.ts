@@ -24,7 +24,7 @@ export async function createVersion<T extends TypeWithID>(
     updatedAt,
     versionData,
   }: CreateVersionArgs<T>,
-) {
+): Promise<TypeWithVersion<T>> {
   const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
   const defaultTableName = toSnakeCase(collection.slug)

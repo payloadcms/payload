@@ -2,10 +2,10 @@ import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
 import { count, sql } from 'drizzle-orm'
 
-import type { CountDistinct, SQLiteAdapter } from './types.js'
+import type { BaseSQLiteAdapter, CountDistinct } from './types.js'
 
 export const countDistinct: CountDistinct = async function countDistinct(
-  this: SQLiteAdapter,
+  this: BaseSQLiteAdapter,
   { column, db, joins, tableName, where },
 ) {
   // When we don't have any joins - use a simple COUNT(*) query.

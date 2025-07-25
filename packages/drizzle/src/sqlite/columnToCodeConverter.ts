@@ -1,4 +1,4 @@
-import type { ColumnToCodeConverter } from '@payloadcms/drizzle/types'
+import type { ColumnToCodeConverter } from '../types.js'
 
 export const columnToCodeConverter: ColumnToCodeConverter = ({
   adapter,
