@@ -12,6 +12,7 @@ export const compatabilityOptions = {
   },
   documentdb: {
     disableIndexHints: true,
+    useJoinAggregations: false,
   },
   firestore: {
     disableIndexHints: true,
