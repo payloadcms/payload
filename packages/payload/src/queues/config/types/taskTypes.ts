@@ -127,7 +127,7 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
   },
 ) => Promise<TTaskOutput>
 
-export type ShouldRestoreFn = (args: {
+export type TaskCallbackArgs = {
   /**
    * Input data passed to the task
    */
@@ -135,7 +135,10 @@ export type ShouldRestoreFn = (args: {
   job: Job
   req: PayloadRequest
   taskStatus: SingleTaskStatus<string>
-}) => boolean | Promise<boolean>
+}
+
+export type ShouldRestoreFn = (args: TaskCallbackArgs) => boolean | Promise<boolean>
+export type TaskCallbackFn = (args: TaskCallbackArgs) => Promise<void> | void
 
 export type RetryConfig = {
   /**
@@ -220,11 +223,11 @@ export type TaskConfig<
   /**
    * Function to be executed if the task fails.
    */
-  onFail?: () => Promise<void> | void
+  onFail?: TaskCallbackFn
   /**
    * Function to be executed if the task succeeds.
    */
-  onSuccess?: () => Promise<void> | void
+  onSuccess?: TaskCallbackFn
   /**
    * Define the output field schema - payload will generate a type for this schema.
    */
