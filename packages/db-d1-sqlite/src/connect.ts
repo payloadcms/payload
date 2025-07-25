@@ -3,7 +3,6 @@ import type { Connect, Migration } from 'payload'
 
 import { D1Database } from '@miniflare/d1'
 import { pushDevSchema } from '@payloadcms/drizzle'
-import { sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/d1'
 
 import type { SQLiteD1Adapter } from './types.js'

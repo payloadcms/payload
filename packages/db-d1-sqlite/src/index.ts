@@ -47,7 +47,6 @@ import {
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
-  execute,
   init,
   insert,
   requireDrizzleKit,
@@ -59,6 +58,7 @@ import { fileURLToPath } from 'url'
 import type { Args, SQLiteD1Adapter } from './types.js'
 
 import { connect } from './connect.js'
+import { execute } from './execute.js'
 
 const filename = fileURLToPath(import.meta.url)
 
@@ -125,11 +125,12 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       tableNameMap: new Map<string, string>(),
       tables: {},
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      execute,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       transactionOptions: args.transactionOptions || undefined,
       updateJobs,
       updateMany,
       versionsSuffix: args.versionsSuffix || '_v',
-
       // DatabaseAdapter
       beginTransaction: args.transactionOptions ? beginTransaction : defaultBeginTransaction(),
       commitTransaction,
@@ -161,7 +162,6 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       deleteWhere,
       destroy,
       dropDatabase,
-      execute,
       find,
       findGlobal,
       findGlobalVersions,
