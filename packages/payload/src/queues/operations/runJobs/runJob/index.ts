@@ -89,9 +89,11 @@ export const runJob = async ({
   }
 
   // Workflow has completed successfully
+  // Do not update the job log here, as that would result in unnecessary db calls when using postgres.
+  // Solely updating simple fields here will result in optimized db calls.
+  // Job log modifications are already updated at the end of the runTask function.
   await updateJob({
     completedAt: getCurrentDate().toISOString(),
-    log: job.log,
     processing: false,
     totalTried: (job.totalTried ?? 0) + 1,
   })
