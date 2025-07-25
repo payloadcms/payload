@@ -2,9 +2,9 @@ import type { Args } from '../index.js'
 
 /**
  * Each key is a mongo-compatible database and the value
- * is the recommended `mongooseAdapter` settings for compatability.
+ * is the recommended `mongooseAdapter` settings for compatibility.
  */
-export const compatabilityOptions = {
+export const compatibilityOptions = {
   cosmosdb: {
     transactionOptions: false,
     useJoinAggregations: false,
@@ -12,6 +12,7 @@ export const compatabilityOptions = {
   },
   documentdb: {
     disableIndexHints: true,
+    useJoinAggregations: false,
   },
   firestore: {
     disableIndexHints: true,
