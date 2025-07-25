@@ -18,9 +18,9 @@ import type {
 
 export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
-export type ClientComponentProps = {
+export type ClientComponentProps<FieldT = ClientBlock | ClientField | ClientTab> = {
   customComponents?: FormField['customComponents']
-  field: ClientBlock | ClientField | ClientTab
+  field: FieldT
   forceRender?: boolean
   permissions?: SanitizedFieldPermissions
   readOnly?: boolean
@@ -68,12 +68,15 @@ export type FieldPaths = {
   path: string
 }
 
-export type ServerComponentProps = {
-  clientField: ClientFieldWithOptionalType
+export type ServerComponentProps<
+  ServerFieldT extends Field = Field,
+  ClientFieldT extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = {
+  clientField: ClientFieldT
   clientFieldSchemaMap: ClientFieldSchemaMap
   collectionSlug: string
   data: Data
-  field: Field
+  field: ServerFieldT
   /**
    * The fieldSchemaMap that is created before form state is built is made available here.
    */

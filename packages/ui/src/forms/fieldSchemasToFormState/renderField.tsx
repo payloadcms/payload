@@ -1,6 +1,15 @@
 import type {
+  ArrayField,
+  ArrayFieldClient,
+  ArrayRowLabelClientProps,
+  ArrayRowLabelServerPropsOnly,
+  BlockRowLabelClientProps,
+  BlockRowLabelServerPropsOnly,
+  BlocksField,
+  BlocksFieldClient,
   ClientComponentProps,
   ClientField,
+  Field,
   FieldPaths,
   FlattenedBlock,
   ServerComponentProps,
@@ -10,10 +19,9 @@ import { getTranslation } from '@payloadcms/translations'
 import { createClientField, MissingEditorProp } from 'payload'
 import { fieldIsHiddenOrDisabled } from 'payload/shared'
 
-import type { RenderFieldMethod } from './types.js'
+import type { RenderFieldArgs, RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 import { FieldDescription, WatchCondition } from '../../exports/client/index.js'
 
@@ -24,7 +32,7 @@ const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Fil
   'Filter',
 ]
 
-export const renderField: RenderFieldMethod = ({
+const getFieldProps = <ClientFieldT extends ClientField, ServerFieldT extends Field>({
   id,
   clientFieldSchemaMap,
   collectionSlug,
@@ -34,35 +42,29 @@ export const renderField: RenderFieldMethod = ({
   fieldState,
   formState,
   indexPath,
-  lastRenderedPath,
-  mockRSCs,
   operation,
   parentPath,
   parentSchemaPath,
   path,
   permissions,
   preferences,
-  renderAllFields,
   req,
   schemaPath,
   siblingData,
-}) => {
-  const requiresRender = renderAllFields || !lastRenderedPath || lastRenderedPath !== path
-
-  if (!requiresRender && fieldConfig.type !== 'array' && fieldConfig.type !== 'blocks') {
-    return
-  }
-
+}: RenderFieldArgs): {
+  clientProps: ClientComponentProps<ClientFieldT> & FieldPaths
+  serverProps: ServerComponentProps<ServerFieldT, ClientFieldT>
+} => {
   const clientField = clientFieldSchemaMap
-    ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
-    : createClientField({
+    ? (clientFieldSchemaMap.get(schemaPath) as ClientFieldT)
+    : createClientField<ClientFieldT>({
         defaultIDType: req.payload.config.db.defaultIDType,
         field: fieldConfig,
         i18n: req.i18n,
         importMap: req.payload.importMap,
       })
 
-  const clientProps: ClientComponentProps & Partial<FieldPaths> = {
+  const clientProps: ClientComponentProps<ClientFieldT> & FieldPaths = {
     field: clientField,
     path,
     permissions,
@@ -74,19 +76,18 @@ export const renderField: RenderFieldMethod = ({
     clientProps.customComponents = fieldState.customComponents
   }
 
-  // fields with subfields
   if (['array', 'blocks', 'collapsible', 'group', 'row', 'tabs'].includes(fieldConfig.type)) {
     clientProps.indexPath = indexPath
     clientProps.parentPath = parentPath
     clientProps.parentSchemaPath = parentSchemaPath
   }
 
-  const serverProps: ServerComponentProps = {
+  const serverProps: ServerComponentProps<ServerFieldT, ClientFieldT> = {
     id,
     clientField,
     clientFieldSchemaMap,
     data,
-    field: fieldConfig,
+    field: fieldConfig as ServerFieldT,
     fieldSchemaMap,
     permissions,
     // TODO: Should we pass explicit values? initialValue, value, valid
@@ -103,8 +104,24 @@ export const renderField: RenderFieldMethod = ({
     value: 'name' in fieldConfig && data?.[fieldConfig.name],
   }
 
+  return {
+    clientProps,
+    serverProps,
+  }
+}
+
+export const renderField: RenderFieldMethod = (args) => {
+  const { fieldConfig, fieldState, lastRenderedPath, mockRSCs, path, renderAllFields, req } = args
+  const requiresRender = renderAllFields || !lastRenderedPath || lastRenderedPath !== path
+
+  if (!requiresRender && fieldConfig.type !== 'array' && fieldConfig.type !== 'blocks') {
+    return
+  }
+
   switch (fieldConfig.type) {
     case 'array': {
+      const { clientProps, serverProps } = getFieldProps<ArrayFieldClient, ArrayField>(args)
+
       fieldState?.rows?.forEach((row, rowIndex) => {
         const rowLastRenderedPath = row.lastRenderedPath
 
@@ -126,17 +143,17 @@ export const renderField: RenderFieldMethod = ({
 
           row.customComponents.RowLabel = !mockRSCs
             ? RenderServerComponent({
-                clientProps,
-                Component: fieldConfig.admin.components.RowLabel,
-                importMap: req.payload.importMap,
-                key: `${rowIndex}`,
-                serverProps: {
-                  ...serverProps,
+                clientProps: {
+                  ...clientProps,
                   rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
                     rowIndex + 1,
                   ).padStart(2, '0')}`,
                   rowNumber: rowIndex + 1,
-                },
+                } satisfies ArrayRowLabelClientProps,
+                Component: fieldConfig.admin.components.RowLabel,
+                importMap: req.payload.importMap,
+                key: `${rowIndex}`,
+                serverProps: serverProps satisfies ArrayRowLabelServerPropsOnly,
               })
             : 'Mock'
         }
@@ -146,6 +163,8 @@ export const renderField: RenderFieldMethod = ({
     }
 
     case 'blocks': {
+      const { clientProps, serverProps } = getFieldProps<BlocksFieldClient, BlocksField>(args)
+
       fieldState?.rows?.forEach((row, rowIndex) => {
         const rowLastRenderedPath = row.lastRenderedPath
 
@@ -172,21 +191,21 @@ export const renderField: RenderFieldMethod = ({
           if (!fieldState.rows[rowIndex]?.customComponents) {
             fieldState.rows[rowIndex].customComponents = {}
           }
-
           fieldState.rows[rowIndex].customComponents.RowLabel = !mockRSCs
             ? RenderServerComponent({
-                clientProps,
-                Component: blockConfig.admin.components.Label,
-                importMap: req.payload.importMap,
-                key: `${rowIndex}`,
-                serverProps: {
-                  ...serverProps,
+                clientProps: {
+                  ...clientProps,
                   blockType: row.blockType,
+                  readOnly: Boolean(fieldConfig.admin.readOnly),
                   rowLabel: `${getTranslation(blockConfig.labels.singular, req.i18n)} ${String(
                     rowIndex + 1,
                   ).padStart(2, '0')}`,
                   rowNumber: rowIndex + 1,
-                },
+                } satisfies BlockRowLabelClientProps,
+                Component: blockConfig.admin.components.Label,
+                importMap: req.payload.importMap,
+                key: `${rowIndex}`,
+                serverProps: serverProps satisfies BlockRowLabelServerPropsOnly,
               })
             : 'Mock'
         }
@@ -204,6 +223,9 @@ export const renderField: RenderFieldMethod = ({
    * Set the `lastRenderedPath` equal to the new path of the field, this will prevent it from being rendered again
    */
   fieldState.lastRenderedPath = path
+
+  const { clientProps, serverProps } = getFieldProps(args)
+  const clientField = clientProps.field
 
   if (fieldIsHiddenOrDisabled(clientField)) {
     return
