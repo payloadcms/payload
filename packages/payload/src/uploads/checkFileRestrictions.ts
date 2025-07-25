@@ -4,6 +4,7 @@ import type { checkFileRestrictionsParams, FileAllowList } from './types.js'
 
 import { ValidationError } from '../errors/index.js'
 import { validateMimeType } from '../utilities/validateMimeType.js'
+import { detectSvgFromXml } from './detectSvgFromXml.js'
 
 /**
  * Restricted file types and their extensions.
@@ -69,7 +70,17 @@ export const checkFileRestrictions = async ({
 
   // Secondary mimetype check to assess file type from buffer
   if (configMimeTypes.length > 0) {
-    const detected = await fileTypeFromBuffer(file.data)
+    let detected = await fileTypeFromBuffer(file.data)
+
+    // Handle SVG files that are detected as XML due to <?xml declarations
+    if (
+      detected?.mime === 'application/xml' &&
+      configMimeTypes.some((type) => type.includes('svg')) &&
+      detectSvgFromXml(file.data)
+    ) {
+      detected = { ext: 'svg' as any, mime: 'image/svg+xml' as any }
+    }
+
     const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)
 
     if (detected && !passesMimeTypeCheck) {
