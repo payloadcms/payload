@@ -75,12 +75,10 @@ export const checkFileRestrictions = async ({
     // Handle SVG files that are detected as XML due to <?xml declarations
     if (
       detected?.mime === 'application/xml' &&
-      configMimeTypes.some((type) => type.includes('svg'))
+      configMimeTypes.some((type) => type.includes('svg')) &&
+      detectSvgFromXml(file.data)
     ) {
-      const isSvg = detectSvgFromXml(file.data)
-      if (isSvg) {
-        detected = { ext: 'svg' as any, mime: 'image/svg+xml' as any }
-      }
+      detected = { ext: 'svg' as any, mime: 'image/svg+xml' as any }
     }
 
     const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)
