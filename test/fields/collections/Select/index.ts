@@ -273,6 +273,56 @@ const SelectFields: CollectionConfig = {
             )
           : options,
     },
+    {
+      name: 'selectSoft',
+      type: 'select',
+      soft: true,
+      admin: {
+        isClearable: true,
+      },
+      options: [
+        {
+          label: 'Country One',
+          value: 'country-one',
+        },
+        {
+          label: 'Country Two',
+          value: 'country-two',
+        },
+        {
+          label: 'Country Three',
+          value: 'country-three',
+        },
+      ],
+    },
+    {
+      name: 'selectSoftHasMany',
+      type: 'select',
+      soft: true,
+      hasMany: true,
+      admin: {
+        isClearable: true,
+        isSortable: true,
+      },
+      options: [
+        {
+          label: 'Language One',
+          value: 'lang-one',
+        },
+        {
+          label: 'Language Two',
+          value: 'lang-two',
+        },
+        {
+          label: 'Language Three',
+          value: 'lang-three',
+        },
+        {
+          label: 'Language Four',
+          value: 'lang-four',
+        },
+      ],
+    },
   ],
 }
 
