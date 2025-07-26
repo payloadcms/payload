@@ -25,6 +25,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         description,
         isSortable = true,
         placeholder,
+        populateDocumentTitleOnly,
         sortOptions,
       } = {},
       hasMany,
@@ -208,6 +209,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       minRows={field?.minRows}
       path={path}
       placeholder={placeholder}
+      populateDocumentTitleOnly={populateDocumentTitleOnly}
       readOnly={readOnly || disabled}
       relationTo={relationTo}
       required={required}

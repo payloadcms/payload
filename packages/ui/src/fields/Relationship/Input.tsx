@@ -60,6 +60,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     onChange,
     path,
     placeholder,
+    populateDocumentTitleOnly,
     readOnly,
     relationTo,
     required,
@@ -413,11 +414,21 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       })
 
       if (idsToLoad.length > 0) {
+        const collection = getEntityConfig({ collectionSlug: relation })
+        const fieldToSelect = collection?.admin?.useAsTitle || 'id'
+
         const query = {
           depth: 0,
           draft: true,
           limit: idsToLoad.length,
           locale,
+          // NOTE: Populate full document by default for backwards compatibility
+          // Only use select when populateDocumentTitleOnly is true
+          ...(populateDocumentTitleOnly === true && {
+            select: {
+              [fieldToSelect]: true,
+            },
+          }),
           where: {
             id: {
               in: idsToLoad,
@@ -436,8 +447,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             },
             method: 'POST',
           })
-
-          const collection = getEntityConfig({ collectionSlug: relation })
           let docs = []
 
           if (response.ok) {
