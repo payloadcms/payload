@@ -15,6 +15,9 @@ export const Uploads: CollectionConfig = {
       type: 'join',
       collection: 'posts',
       on: 'upload',
+      admin: {
+        disableRowTypes: false,
+      },
     },
   ],
   upload: {
