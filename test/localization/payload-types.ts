@@ -192,22 +192,7 @@ export interface BlocksField {
   id: string;
   content?:
     | {
-        content?:
-          | {
-              text?: string | null;
-              id?: string | null;
-              blockName?: string | null;
-              blockType: 'textBlock';
-            }[]
-          | null;
-        array?:
-          | {
-              link?: {
-                label?: string | null;
-              };
-              id?: string | null;
-            }[]
-          | null;
+        myText?: string | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'blockInsideBlock';
@@ -858,27 +843,7 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
         blockInsideBlock?:
           | T
           | {
-              content?:
-                | T
-                | {
-                    textBlock?:
-                      | T
-                      | {
-                          text?: T;
-                          id?: T;
-                          blockName?: T;
-                        };
-                  };
-              array?:
-                | T
-                | {
-                    link?:
-                      | T
-                      | {
-                          label?: T;
-                        };
-                    id?: T;
-                  };
+              myText?: T;
               id?: T;
               blockName?: T;
             };
