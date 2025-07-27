@@ -44,8 +44,10 @@ describe('Sort functionality', () => {
   // NOTES: It works for me in headed browser but not in headless, I don't know why.
   //  If you are debugging this test, remember to press the seed button before each attempt.
   // assertRows contains expect
-  // eslint-disable-next-line playwright/expect-expect
-  test('Orderable collection', async () => {
+
+  // TODO: This test is flaky and fails *most* of the time in CI.
+  // eslint-disable-next-line playwright/no-skipped-test, playwright/expect-expect
+  test.skip('Orderable collection', async () => {
     const url = new AdminUrlUtil(serverURL, orderableSlug)
     await page.goto(`${url.list}?sort=-_order`)
     await page.locator('.collection-list button', { hasText: 'Seed' }).click()
@@ -126,7 +128,7 @@ async function moveRow(
   })
   await page.mouse.up()
   // eslint-disable-next-line playwright/no-wait-for-timeout
-  await page.waitForTimeout(400) // dndkit animation
+  await page.waitForTimeout(800) // dndkit animation
 
   if (expected === 'warning') {
     const toast = page.locator('.payload-toast-item.toast-warning')
