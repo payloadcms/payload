@@ -128,7 +128,7 @@ async function moveRow(
   })
   await page.mouse.up()
   // eslint-disable-next-line playwright/no-wait-for-timeout
-  await page.waitForTimeout(800) // dndkit animation
+  await page.waitForTimeout(400) // dndkit animation
 
   if (expected === 'warning') {
     const toast = page.locator('.payload-toast-item.toast-warning')
