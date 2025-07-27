@@ -112,9 +112,14 @@ export const sanitizeQueryValue = ({
 
   if (field.type === 'date' && operator !== 'exists') {
     if (typeof val === 'string') {
-      formattedValue = new Date(val).toISOString()
-      if (Number.isNaN(Date.parse(formattedValue))) {
-        return { operator, value: undefined }
+      if (val === 'null' || val === '') {
+        formattedValue = null
+      } else {
+        const date = new Date(val)
+        if (Number.isNaN(date.getTime())) {
+          return { operator, value: undefined }
+        }
+        formattedValue = date.toISOString()
       }
     } else if (typeof val === 'number') {
       formattedValue = new Date(val).toISOString()

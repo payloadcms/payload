@@ -13,11 +13,12 @@ import { deleteOperation } from '../operations/delete.js'
 
 export const deleteHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { depth, overrideLock, populate, select, where } = req.query as {
+  const { depth, overrideLock, populate, select, trash, where } = req.query as {
     depth?: string
     overrideLock?: string
     populate?: Record<string, unknown>
     select?: Record<string, unknown>
+    trash?: string
     where?: Where
   }
 
@@ -28,6 +29,7 @@ export const deleteHandler: PayloadHandler = async (req) => {
     populate: sanitizePopulateParam(populate),
     req,
     select: sanitizeSelectParam(select),
+    trash: trash === 'true',
     where: where!,
   })
 

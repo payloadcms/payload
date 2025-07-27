@@ -20,6 +20,7 @@ export type DocumentDrawerProps = {
   readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
+  readonly redirectAfterRestore?: boolean
 } & Pick<DocumentDrawerContextProps, 'onDelete' | 'onDuplicate' | 'onSave'> &
   Pick<DrawerProps, 'Header'>
 
