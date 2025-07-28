@@ -293,6 +293,32 @@ export const Posts: CollectionConfig = {
       name: 'file',
       type: 'text',
     },
+    {
+      name: 'shouldDisableListFilter',
+      type: 'text',
+      admin: {
+        disableListFilter: false,
+      },
+      access: {
+        read: ({ req }) => Boolean(req.user),
+      },
+    },
+    {
+      name: 'groupWithReadAccessFunction',
+      type: 'group',
+      access: {
+        read: ({ req }) => Boolean(req.user),
+      },
+      fields: [
+        {
+          name: 'shouldDisableNestedListFilter',
+          type: 'text',
+          admin: {
+            disableListFilter: false,
+          },
+        },
+      ],
+    },
   ],
   labels: {
     plural: slugPluralLabel,

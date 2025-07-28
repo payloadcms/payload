@@ -39,6 +39,14 @@ type Args = {
   existingFieldNames?: Set<string>
   fields: Field[]
   /**
+   * Allows parent fields to disable the list filter for child fields.
+   * This is useful for fields that are not intended to be used in list filters,
+   * such as fields that have read access functions where all children fields should be omitted from the list filter.
+   *
+   * @default false
+   */
+  forceDisableListFilter?: boolean
+  /**
    * Used to prevent unnecessary sanitization of fields that are not top-level.
    */
   isTopLevelField?: boolean
@@ -72,6 +80,7 @@ export const sanitizeFields = async ({
   config,
   existingFieldNames = new Set(),
   fields,
+  forceDisableListFilter: _forceDisableListFilter = false,
   isTopLevelField = true,
   joinPath = '',
   joins,
@@ -259,6 +268,14 @@ export const sanitizeFields = async ({
       field.admin = {}
     }
 
+    let forceDisableListFilter = _forceDisableListFilter
+    if (('access' in field && typeof field.access?.read === 'function') || forceDisableListFilter) {
+      if (fieldAffectsData) {
+        field.admin.disableListFilter = true
+      }
+      forceDisableListFilter = true
+    }
+
     // Make sure that the richText field has an editor
     if (field.type === 'richText') {
       const sanitizeRichText = async (_config: SanitizedConfig) => {
@@ -322,6 +339,7 @@ export const sanitizeFields = async ({
           config,
           existingFieldNames: new Set(),
           fields: block.fields,
+          forceDisableListFilter,
           isTopLevelField: false,
           parentIsLocalized: (parentIsLocalized || field.localized)!,
           requireFieldLevelRichTextEditor,
@@ -337,6 +355,7 @@ export const sanitizeFields = async ({
         config,
         existingFieldNames: fieldAffectsData ? new Set() : existingFieldNames,
         fields: field.fields,
+        forceDisableListFilter,
         isTopLevelField: isTopLevelField && !fieldAffectsData,
         joinPath: fieldAffectsData ? `${joinPath ? joinPath + '.' : ''}${field.name}` : joinPath,
         joins,
@@ -373,6 +392,7 @@ export const sanitizeFields = async ({
           config,
           existingFieldNames: isNamedTab ? new Set() : existingFieldNames,
           fields: tab.fields,
+          forceDisableListFilter,
           isTopLevelField: isTopLevelField && !isNamedTab,
           joinPath: isNamedTab ? `${joinPath ? joinPath + '.' : ''}${tab.name}` : joinPath,
           joins,

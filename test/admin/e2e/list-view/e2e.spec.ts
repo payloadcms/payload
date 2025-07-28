@@ -749,6 +749,27 @@ describe('List View', () => {
       ).toBeHidden()
     })
 
+    test('should not show field filter for fields with read access functions', async () => {
+      await page.goto(postsUrl.list)
+      await openListFilters(page, {})
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const initialField = page.locator('.condition__field')
+      await initialField.click()
+
+      await expect(
+        initialField.locator('.rs__option', {
+          hasText: 'Should Disable List Filter',
+        }),
+      ).toBeHidden()
+
+      await expect(
+        initialField.locator('.rs__option', {
+          hasText: 'Group With Read Access Function',
+        }),
+      ).toBeHidden()
+    })
+
     test('should simply disable field filter when admin.disableListFilter is true but still exists in the query', async () => {
       await page.goto(
         `${postsUrl.list}${qs.stringify(
