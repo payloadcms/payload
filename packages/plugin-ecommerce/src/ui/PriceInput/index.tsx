@@ -37,7 +37,7 @@ export const PriceInput: React.FC<Props> = (args) => {
       label={label}
       onChange={(value) => setValue(value)}
       supportedCurrencies={currenciesConfig?.supportedCurrencies}
-      value={value || 0}
+      value={value}
     />
   )
 }

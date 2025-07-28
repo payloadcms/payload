@@ -39,8 +39,13 @@ export const variantsFields: (props: Props) => Field[] = ({
       name: 'variants',
       type: 'join',
       admin: {
-        condition: ({ enableVariants }) => Boolean(enableVariants),
-        defaultColumns: ['title', 'options', 'inventory', 'prices'],
+        condition: ({ enableVariants, variantTypes }) => {
+          const enabledVariants = Boolean(enableVariants)
+          const hasManyVariantTypes = Array.isArray(variantTypes) && variantTypes.length > 0
+
+          return enabledVariants && hasManyVariantTypes
+        },
+        defaultColumns: ['title', 'options', 'inventory', 'prices', '_status'],
         disableListColumn: true,
       },
       collection: variantsSlug,

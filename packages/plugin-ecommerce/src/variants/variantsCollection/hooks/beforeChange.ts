@@ -9,7 +9,7 @@ export const variantsCollectionBeforeChange: (args: Props) => CollectionBeforeCh
   ({ productsSlug, variantOptionsSlug }) =>
   async ({ data, req }) => {
     if (data?.options?.length && data.options.length > 0) {
-      const titleArray = []
+      const titleArray: string[] = []
       const productID = data.product
       const product = await req.payload.findByID({
         id: productID,
@@ -21,7 +21,9 @@ export const variantsCollectionBeforeChange: (args: Props) => CollectionBeforeCh
         },
       })
 
-      titleArray.push(product.title)
+      if (product.title && typeof product.title === 'string') {
+        titleArray.push(product.title)
+      }
 
       for (const option of data.options) {
         const variantOption = await req.payload.findByID({
@@ -37,7 +39,9 @@ export const variantsCollectionBeforeChange: (args: Props) => CollectionBeforeCh
           continue
         }
 
-        titleArray.push(variantOption.label)
+        if (variantOption.label && typeof variantOption.label === 'string') {
+          titleArray.push(variantOption.label)
+        }
       }
 
       data.title = titleArray.join(' — ')

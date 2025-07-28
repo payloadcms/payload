@@ -26,6 +26,13 @@ export const amountField: (props: Props) => NumberField = ({
     ...overrides,
     admin: {
       components: {
+        Cell: {
+          clientProps: {
+            currenciesConfig,
+            currency,
+          },
+          path: '@payloadcms/plugin-ecommerce/ui#PriceCell',
+        },
         Field: {
           clientProps: {
             currenciesConfig,
