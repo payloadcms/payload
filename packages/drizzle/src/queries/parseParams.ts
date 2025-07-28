@@ -219,7 +219,10 @@ export function parseParams({
 
                 if (
                   operator === 'like' &&
-                  (field.type === 'number' || table[columnName].columnType === 'PgUUID')
+                  (field.type === 'number' ||
+                    field.type === 'relationship' ||
+                    field.type === 'upload' ||
+                    table[columnName].columnType === 'PgUUID')
                 ) {
                   operator = 'equals'
                 }

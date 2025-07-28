@@ -117,6 +117,7 @@ export const buildFormState = async (
     initialBlockFormState,
     mockRSCs,
     operation,
+    readOnly,
     renderAllFields,
     req,
     req: {
@@ -219,6 +220,7 @@ export const buildFormState = async (
     permissions: docPermissions?.fields || {},
     preferences: docPreferences || { fields: {} },
     previousFormState: formState,
+    readOnly,
     renderAllFields,
     renderFieldFn: renderField,
     req,

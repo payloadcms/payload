@@ -61,6 +61,11 @@ export const Pages: CollectionConfig = {
           name: 'value',
           type: 'text',
           defaultValue: 'group value',
+          // custom: {
+          //   'plugin-import-export': {
+          //     disabled: true,
+          //   },
+          // },
         },
         {
           name: 'ignore',
@@ -215,6 +220,21 @@ export const Pages: CollectionConfig = {
       type: 'relationship',
       relationTo: ['users', 'posts'],
       hasMany: true,
+    },
+    {
+      type: 'collapsible',
+      label: 'Collapsible Field',
+      fields: [
+        {
+          name: 'textFieldInCollapsible',
+          type: 'text',
+          // custom: {
+          //   'plugin-import-export': {
+          //     disabled: true,
+          //   },
+          // },
+        },
+      ],
     },
   ],
 }
