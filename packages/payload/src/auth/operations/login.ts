@@ -211,11 +211,11 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       where: whereConstraint,
     })
 
-    let user = await payload.db.findOne<any>({
+    let user = (await payload.db.findOne<TypedUser>({
       collection: collectionConfig.slug,
       req,
       where: whereConstraint,
-    })
+    })) as TypedUser
 
     checkLoginPermission({
       loggingInWithUsername: Boolean(canLoginWithUsername && sanitizedUsername),

@@ -588,6 +588,59 @@ describe('Auth', () => {
         })
 
         it('should lock the user after too many parallel attempts', async () => {
+          const tryLoginAttempts = 100
+          const users = await Promise.allSettled(
+            Array.from({ length: tryLoginAttempts }, () => tryLogin()),
+          )
+
+          expect(users).toHaveLength(tryLoginAttempts)
+
+          // Expect min. 8 locked message max. 2 incorrect messages.
+          const lockedMessages = users.filter(
+            (result) =>
+              result.status === 'fulfilled' && result.value?.errors?.[0]?.message === lockedMessage,
+          )
+          const incorrectMessages = users.filter(
+            (result) =>
+              result.status === 'fulfilled' &&
+              result.value?.errors?.[0]?.message === incorrectMessage,
+          )
+
+          const userResult = await payload.find({
+            collection: slug,
+            limit: 1,
+            showHiddenFields: true,
+            where: {
+              email: {
+                equals: userEmail,
+              },
+            },
+          })
+
+          const { lockUntil, loginAttempts } = userResult.docs[0]!
+
+          // loginAttempts does not have to be exactly the same amount of login attempts. If this ran sequentially, login attempts would stop
+          // incrementing after maxLoginAttempts is reached. Since this is run in parallel, it can increment more than maxLoginAttempts, but it is not
+          // expected to and can be less depending on the timing.
+          expect(loginAttempts).toBeGreaterThan(3)
+          expect(lockUntil).toBeDefined()
+
+          expect(incorrectMessages.length).toBeLessThanOrEqual(2)
+          expect(lockedMessages.length).toBeGreaterThanOrEqual(tryLoginAttempts - 2)
+
+          const successfulLogin = await tryLogin(true)
+
+          expect(successfulLogin.errors?.[0].message).toBe(
+            'This user is locked due to having too many failed login attempts.',
+          )
+        })
+
+        it.skip('test', async () => {
+          const user = tryLogin(true)
+          //await me()
+          //succed!
+
+          // 20 sec
           const [...users] = await Promise.allSettled([
             tryLogin(),
             tryLogin(),
@@ -600,6 +653,9 @@ describe('Auth', () => {
             tryLogin(),
             tryLogin(),
           ])
+
+          //await me()
+          //expect me to return false
 
           // Expect min. 8 locked message max. 2 incorrect messages.
           const lockedMessages = users.filter(

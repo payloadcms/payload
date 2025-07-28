@@ -21,9 +21,12 @@ export const incrementLoginAttempts = async ({
     auth: { lockTime, maxLoginAttempts },
   } = collection
 
+  let updatedLockUntil: null | string | undefined = undefined // null is a valid value
+  let updatedLoginAttempts: null | number = null
+
   if (user.lockUntil && !isUserLocked(new Date(user.lockUntil))) {
     // Expired lock, restart count at 1
-    await payload.db.updateOne({
+    const updatedUser = await payload.db.updateOne({
       id: user.id,
       collection: collection.slug,
       data: {
@@ -31,9 +34,14 @@ export const incrementLoginAttempts = async ({
         loginAttempts: 1,
       },
       req,
-      returning: false,
+      select: {
+        lockUntil: true,
+        loginAttempts: true,
+      },
     })
-    user.lockUntil = null
+    updatedLockUntil = updatedUser.lockUntil
+    updatedLoginAttempts = updatedUser.loginAttempts
+    user.lockUntil = updatedLockUntil
   } else {
     const data: JsonObject = {
       loginAttempts: {
@@ -49,35 +57,30 @@ export const incrementLoginAttempts = async ({
       data.lockUntil = lockUntil
     }
 
-    await payload.db.updateOne({
+    const updatedUser = await payload.db.updateOne({
       id: user.id,
       collection: collection.slug,
       data,
-      returning: false,
-    })
-  }
-
-  // Fetch updated user to get latest lockUntil and loginAttempts in case there were parallel updates
-
-  const { lockUntil: updatedLockUntil, loginAttempts: updatedLoginAttempts } =
-    (await payload.db.findOne({
-      collection: collection.slug,
       select: {
         lockUntil: true,
         loginAttempts: true,
       },
-      where: {
-        id: {
-          equals: user.id,
-        },
-      },
-    })) as unknown as TypedUser
+    })
 
+    updatedLockUntil = updatedUser.lockUntil
+    updatedLoginAttempts = updatedUser.loginAttempts
+  }
+
+  if (updatedLoginAttempts === null || typeof updatedLockUntil === 'undefined') {
+    throw new Error('Failed to update login attempts or lockUntil for user')
+  }
+
+  // Check updated latest lockUntil and loginAttempts in case there were parallel updates
   const reachedMaxAttemptsForCurrentUser =
     typeof updatedLoginAttempts === 'number' && updatedLoginAttempts - 1 >= maxLoginAttempts
 
   const reachedMaxAttemptsForNextUser =
-    typeof user.loginAttempts === 'number' && updatedLoginAttempts >= maxLoginAttempts
+    typeof updatedLoginAttempts === 'number' && updatedLoginAttempts >= maxLoginAttempts
 
   if (reachedMaxAttemptsForCurrentUser) {
     user.lockUntil = updatedLockUntil
@@ -99,5 +102,10 @@ export const incrementLoginAttempts = async ({
       },
       returning: false,
     })
+
+    if (reachedMaxAttemptsForCurrentUser) {
+      user.lockUntil = newLockUntil
+    }
+    // Remove all active sessions that have been created in a 10 second window
   }
 }
