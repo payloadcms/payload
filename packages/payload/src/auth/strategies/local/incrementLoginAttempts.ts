@@ -26,7 +26,7 @@ export const incrementLoginAttempts = async ({
 
   const currentTime = Date.now()
 
-  let updatedLockUntil: null | string | undefined = undefined // null is a valid value
+  let updatedLockUntil: null | string = null
   let updatedLoginAttempts: null | number = null
 
   if (user.lockUntil && !isUserLocked(new Date(user.lockUntil))) {
@@ -76,7 +76,7 @@ export const incrementLoginAttempts = async ({
     updatedLoginAttempts = updatedUser.loginAttempts
   }
 
-  if (updatedLoginAttempts === null || typeof updatedLockUntil === 'undefined') {
+  if (updatedLoginAttempts === null) {
     throw new Error('Failed to update login attempts or lockUntil for user')
   }
 
