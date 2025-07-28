@@ -3,7 +3,6 @@ import type { PayloadRequest } from '../../../types/index.js'
 
 import { type JsonObject, type Payload, type TypedUser } from '../../../index.js'
 import { isUserLocked } from '../../isUserLocked.js'
-import { removeExpiredSessions } from '../../removeExpiredSessions.js'
 
 type Args = {
   collection: SanitizedCollectionConfig
@@ -133,7 +132,7 @@ export const incrementLoginAttempts = async ({
       })
       if (currentUser?.sessions?.length) {
         // Does not hurt also removing expired sessions
-        currentUser.sessions = removeExpiredSessions(currentUser.sessions).filter((session) => {
+        currentUser.sessions = currentUser.sessions.filter((session) => {
           const sessionCreatedAt = new Date(session.createdAt)
           const twentySecondsAgo = new Date(currentTime - 20000)
 
