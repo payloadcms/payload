@@ -3,6 +3,8 @@ import type { CollectionSlug, ServerProps, ViewTypes } from 'payload'
 import { headers as getHeaders } from 'next/headers.js'
 import { redirect } from 'next/navigation.js'
 
+import type { MultiTenantPluginConfig } from '../../types.js'
+
 import { getGlobalViewRedirect } from '../../utilities/getGlobalViewRedirect.js'
 
 type Args = {
@@ -10,9 +12,12 @@ type Args = {
   collectionSlug: CollectionSlug
   docID?: number | string
   globalSlugs: string[]
+  tenantArrayFieldName: string
+  tenantArrayTenantFieldName: string
   tenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig<any>>['userHasAccessToAllTenants']
   viewType: ViewTypes
 } & ServerProps
 
@@ -27,9 +32,12 @@ export const GlobalViewRedirect = async (args: Args) => {
       headers,
       payload: args.payload,
       tenantFieldName: args.tenantFieldName,
+      tenantsArrayFieldName: args.tenantArrayFieldName,
+      tenantsArrayTenantFieldName: args.tenantArrayTenantFieldName,
       tenantsCollectionSlug: args.tenantsCollectionSlug,
       useAsTitle: args.useAsTitle,
       user: args.user,
+      userHasAccessToAllTenants: args.userHasAccessToAllTenants,
       view: args.viewType,
     })
 

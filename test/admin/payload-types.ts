@@ -93,6 +93,7 @@ export interface Config {
     placeholder: Placeholder;
     'use-as-title-group-field': UseAsTitleGroupField;
     'disable-bulk-edit': DisableBulkEdit;
+    'custom-list-drawer': CustomListDrawer;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -125,6 +126,7 @@ export interface Config {
     placeholder: PlaceholderSelect<false> | PlaceholderSelect<true>;
     'use-as-title-group-field': UseAsTitleGroupFieldSelect<false> | UseAsTitleGroupFieldSelect<true>;
     'disable-bulk-edit': DisableBulkEditSelect<false> | DisableBulkEditSelect<true>;
+    'custom-list-drawer': CustomListDrawerSelect<false> | CustomListDrawerSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -567,6 +569,15 @@ export interface DisableBulkEdit {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-list-drawer".
+ */
+export interface CustomListDrawer {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -675,6 +686,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'disable-bulk-edit';
         value: string | DisableBulkEdit;
+      } | null)
+    | ({
+        relationTo: 'custom-list-drawer';
+        value: string | CustomListDrawer;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1071,6 +1086,14 @@ export interface UseAsTitleGroupFieldSelect<T extends boolean = true> {
  * via the `definition` "disable-bulk-edit_select".
  */
 export interface DisableBulkEditSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-list-drawer_select".
+ */
+export interface CustomListDrawerSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
 }

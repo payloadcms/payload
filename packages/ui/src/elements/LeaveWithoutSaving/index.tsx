@@ -12,7 +12,12 @@ import { usePreventLeave } from './usePreventLeave.js'
 
 const modalSlug = 'leave-without-saving'
 
-export const LeaveWithoutSaving: React.FC = () => {
+type LeaveWithoutSavingProps = {
+  onConfirm?: () => Promise<void> | void
+  onPrevent?: (nextHref: null | string) => void
+}
+
+export const LeaveWithoutSaving: React.FC<LeaveWithoutSavingProps> = ({ onConfirm, onPrevent }) => {
   const { closeModal, openModal } = useModal()
   const modified = useFormModified()
   const { isValid } = useForm()
@@ -22,23 +27,34 @@ export const LeaveWithoutSaving: React.FC = () => {
 
   const prevent = Boolean((modified || !isValid) && user)
 
-  const onPrevent = useCallback(() => {
+  const handlePrevent = useCallback(() => {
+    const activeHref = (document.activeElement as HTMLAnchorElement)?.href || null
+    if (onPrevent) {
+      onPrevent(activeHref)
+    }
     openModal(modalSlug)
-  }, [openModal])
+  }, [openModal, onPrevent])
 
   const handleAccept = useCallback(() => {
     closeModal(modalSlug)
   }, [closeModal])
 
-  usePreventLeave({ hasAccepted, onAccept: handleAccept, onPrevent, prevent })
+  usePreventLeave({ hasAccepted, onAccept: handleAccept, onPrevent: handlePrevent, prevent })
 
   const onCancel: OnCancel = useCallback(() => {
     closeModal(modalSlug)
   }, [closeModal])
 
-  const onConfirm = useCallback(() => {
+  const handleConfirm = useCallback(async () => {
+    if (onConfirm) {
+      try {
+        await onConfirm()
+      } catch (err) {
+        console.error('Error in LeaveWithoutSaving onConfirm:', err)
+      }
+    }
     setHasAccepted(true)
-  }, [])
+  }, [onConfirm])
 
   return (
     <ConfirmationModal
@@ -48,7 +64,7 @@ export const LeaveWithoutSaving: React.FC = () => {
       heading={t('general:leaveWithoutSaving')}
       modalSlug={modalSlug}
       onCancel={onCancel}
-      onConfirm={onConfirm}
+      onConfirm={handleConfirm}
     />
   )
 }

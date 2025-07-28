@@ -67,7 +67,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     }
   }, [code, config.localization, selectedLocalesFromProps])
 
-  const { id: originalDocID, collectionSlug, globalSlug } = useDocumentInfo()
+  const { id: originalDocID, collectionSlug, globalSlug, isTrashed } = useDocumentInfo()
   const { startRouteTransition } = useRouteTransition()
 
   const { collectionConfig, globalConfig } = useMemo(() => {
@@ -252,7 +252,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             </div>
             <div className={`${baseClass}__version-to-version`}>
               {VersionToCreatedAtLabel}
-              {canUpdate && (
+              {canUpdate && !isTrashed && (
                 <Restore
                   className={`${baseClass}__restore`}
                   collectionConfig={collectionConfig}
@@ -272,6 +272,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         collectionConfig={collectionConfig}
         globalConfig={globalConfig}
         id={originalDocID}
+        isTrashed={isTrashed}
         versionToCreatedAtFormatted={versionToCreatedAtFormatted}
         versionToID={versionToID}
         versionToUseAsTitle={versionToUseAsTitle}

@@ -45,9 +45,15 @@ export type ListQuery = {
    * Use `transformColumnsToPreferences` and `transformColumnsToSearchParams` to convert it back and forth
    */
   columns?: ColumnsFromURL
+  /*
+   * A string representing the field to group by, e.g. `category`
+   * A leading hyphen represents descending order, e.g. `-category`
+   */
+  groupBy?: string
   limit?: number
   page?: number
   preset?: number | string
+  queryByGroup?: Record<string, ListQuery>
   /*
     When provided, is automatically injected into the `where` object
   */
@@ -59,6 +65,10 @@ export type ListQuery = {
 export type BuildTableStateArgs = {
   collectionSlug: string | string[]
   columns?: ColumnPreference[]
+  data?: PaginatedDocs
+  /**
+   * @deprecated Use `data` instead
+   */
   docs?: PaginatedDocs['docs']
   enableRowSelections?: boolean
   orderableFieldName: string
