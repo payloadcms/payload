@@ -419,6 +419,7 @@ export const renderDocument = async ({
               i18n={i18n}
               payload={payload}
               permissions={permissions}
+              user={user}
             />
           )}
           <HydrateAuthProvider permissions={permissions} />

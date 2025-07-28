@@ -25,6 +25,7 @@ export const DocumentTab: React.FC<
     permissions,
     Pill,
     Pill_Component,
+    user,
   } = props
 
   const { config } = payload
@@ -77,6 +78,7 @@ export const DocumentTab: React.FC<
                 i18n,
                 payload,
                 permissions,
+                user,
               } satisfies ServerProps,
             })}
           </Fragment>
