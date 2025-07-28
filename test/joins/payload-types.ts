@@ -127,6 +127,7 @@ export interface Config {
     };
     'categories-versions': {
       relatedVersions: 'versions';
+      relatedVersionsMany: 'versions';
     };
     'self-joins': {
       joins: 'self-joins';
@@ -520,6 +521,11 @@ export interface CategoriesVersion {
   id: string;
   title?: string | null;
   relatedVersions?: {
+    docs?: (string | Version)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  relatedVersionsMany?: {
     docs?: (string | Version)[];
     hasNextPage?: boolean;
     totalDocs?: number;
@@ -1140,6 +1146,7 @@ export interface VersionsSelect<T extends boolean = true> {
 export interface CategoriesVersionsSelect<T extends boolean = true> {
   title?: T;
   relatedVersions?: T;
+  relatedVersionsMany?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

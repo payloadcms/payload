@@ -183,12 +183,15 @@ describe('Join Field', () => {
     const button = joinField.locator('button.doc-drawer__toggler.relationship-table__add-new')
     await expect(button).toBeVisible()
     await button.click()
+
     const drawer = page.locator('[id^=doc-drawer_hidden-posts_1_]')
     await expect(drawer).toBeVisible()
     const titleField = drawer.locator('#field-title')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test Hidden Post')
-    await drawer.locator('button[id="action-save"]').click()
+
+    await saveDocAndAssert(page, '[id^=doc-drawer_hidden-posts_1_] button#action-save')
+
     await expect(joinField.locator('.relationship-table tbody tr.row-2')).toBeVisible()
   })
 
@@ -239,7 +242,7 @@ describe('Join Field', () => {
     const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
     const actionColumn = joinField.locator('tbody tr td:nth-child(2)').first()
-    const toggler = actionColumn.locator('button.doc-drawer__toggler')
+    const toggler = actionColumn.locator('button.drawer-link__doc-drawer-toggler')
     await expect(toggler).toBeVisible()
     const link = actionColumn.locator('a')
     await expect(link).toBeHidden()
@@ -252,7 +255,7 @@ describe('Join Field', () => {
     })
 
     const newActionColumn = joinField.locator('tbody tr td:nth-child(2)').first()
-    const newToggler = newActionColumn.locator('button.doc-drawer__toggler')
+    const newToggler = newActionColumn.locator('button.drawer-link__doc-drawer-toggler')
     await expect(newToggler).toBeVisible()
     const newLink = newActionColumn.locator('a')
     await expect(newLink).toBeHidden()
@@ -305,12 +308,9 @@ describe('Join Field', () => {
 
     await expect(joinField.locator('tbody tr')).toHaveCount(3)
 
-    const addButton = joinField.locator(
-      '.relationship-table__actions button.drawer-link__doc-drawer-toggler',
-      {
-        hasText: exactText('Add new'),
-      },
-    )
+    const addButton = joinField.locator('.relationship-table__actions button.doc-drawer__toggler', {
+      hasText: exactText('Add new'),
+    })
 
     await expect(addButton).toBeVisible()
 
@@ -325,7 +325,8 @@ describe('Join Field', () => {
     const titleField = drawer.locator('#field-title')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test Post 4')
-    await drawer.locator('button[id="action-save"]').click()
+
+    await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] button#action-save')
     await expect(drawer).toBeHidden()
 
     await expect(
@@ -352,15 +353,17 @@ describe('Join Field', () => {
     const titleField = drawer.locator('#field-title')
     await expect(titleField).toBeVisible()
 
-    const updatedTitle = 'Test Post 1 Updated'
-
+    const updatedTitle = 'Test Post 1 (Updated)'
     await titleField.fill(updatedTitle)
-    await drawer.locator('button[id="action-save"]').click()
+
+    await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] button#action-save')
+    await drawer.locator('.doc-drawer__header-close').click()
     await expect(drawer).toBeHidden()
+
     await expect(joinField.locator('tbody .row-1')).toContainText(updatedTitle)
   })
 
-  test('should edit joined document when autosave is enabled', async () => {
+  test('should edit joined document and update relationship table when autosave is enabled', async () => {
     const categoryVersionsDoc = await payload.create({
       collection: categoriesVersionsSlug,
       data: {
@@ -450,8 +453,10 @@ describe('Join Field', () => {
     await expect(titleField).toBeVisible()
     await titleField.fill('Test polymorphic Post')
     await expect(drawer.locator('#field-polymorphic')).toContainText('example')
-    await drawer.locator('button[id="action-save"]').click()
+
+    await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] button#action-save')
     await expect(drawer).toBeHidden()
+
     await expect(joinField.locator('tbody .row-1')).toContainText('Test polymorphic Post')
   })
   test('should create join collection from polymorphic, hasMany relationships', async () => {
@@ -465,8 +470,10 @@ describe('Join Field', () => {
     await expect(titleField).toBeVisible()
     await titleField.fill('Test polymorphic Post')
     await expect(drawer.locator('#field-polymorphics')).toContainText('example')
-    await drawer.locator('button[id="action-save"]').click()
+
+    await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] button#action-save')
     await expect(drawer).toBeHidden()
+
     await expect(joinField.locator('tbody .row-1')).toContainText('Test polymorphic Post')
   })
   test('should create join collection from polymorphic localized relationships', async () => {
@@ -480,8 +487,10 @@ describe('Join Field', () => {
     await expect(titleField).toBeVisible()
     await titleField.fill('Test polymorphic Post')
     await expect(drawer.locator('#field-localizedPolymorphic')).toContainText('example')
-    await drawer.locator('button[id="action-save"]').click()
+
+    await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] button#action-save')
     await expect(drawer).toBeHidden()
+
     await expect(joinField.locator('tbody .row-1')).toContainText('Test polymorphic Post')
   })
   test('should create join collection from polymorphic, hasMany, localized relationships', async () => {
@@ -495,8 +504,10 @@ describe('Join Field', () => {
     await expect(titleField).toBeVisible()
     await titleField.fill('Test polymorphic Post')
     await expect(drawer.locator('#field-localizedPolymorphics')).toContainText('example')
-    await drawer.locator('button[id="action-save"]').click()
+
+    await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] button#action-save')
     await expect(drawer).toBeHidden()
+
     await expect(joinField.locator('tbody .row-1')).toContainText('Test polymorphic Post')
   })
 
@@ -513,12 +524,9 @@ describe('Join Field', () => {
     await expect(joinField).toBeVisible()
 
     // TODO: change this to edit the first row in the join table
-    const addButton = joinField.locator(
-      '.relationship-table__actions button.drawer-link__doc-drawer-toggler',
-      {
-        hasText: exactText('Add new'),
-      },
-    )
+    const addButton = joinField.locator('.relationship-table__actions button.doc-drawer__toggler', {
+      hasText: exactText('Add new'),
+    })
 
     await expect(addButton).toBeVisible()
 
@@ -534,6 +542,7 @@ describe('Join Field', () => {
     await titleField.fill('Edited title for upload')
     await drawer.locator('button[id="action-save"]').click()
     await expect(drawer).toBeHidden()
+
     await expect(
       joinField.locator('tbody tr td:nth-child(2)', {
         hasText: exactText('Edited title for upload'),
@@ -586,6 +595,7 @@ describe('Join Field', () => {
     await expect(
       joinField.locator('.relationship-table tbody .row-1 .cell-collection .pill__label'),
     ).toHaveText('Example Page')
+
     await expect(
       joinField.locator('.relationship-table tbody .row-1 .cell-title .drawer-link__cell'),
     ).toHaveText('Some new page')
