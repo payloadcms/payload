@@ -190,7 +190,19 @@ export const renderListView = async (
       }
     }
 
-    let data: PaginatedDocs | undefined
+    let data: PaginatedDocs = {
+      // no results default
+      docs: [],
+      hasNextPage: false,
+      hasPrevPage: false,
+      limit: query.limit,
+      nextPage: null,
+      page: 1,
+      pagingCounter: 0,
+      prevPage: null,
+      totalDocs: 0,
+      totalPages: 0,
+    }
     let Table: React.ReactNode | React.ReactNode[] = null
     let columnState: Column[] = []
 
@@ -209,22 +221,29 @@ export const renderListView = async (
         where: whereWithMergedSearch,
       }))
     } else {
-      data = await req.payload.find({
-        collection: collectionSlug,
-        depth: 0,
-        draft: true,
-        fallbackLocale: false,
-        includeLockStatus: true,
-        limit: query?.limit ? Number(query.limit) : undefined,
-        locale: req.locale,
-        overrideAccess: false,
-        page: query?.page ? Number(query.page) : undefined,
-        req,
-        sort: query?.sort,
-        trash: query?.trash === true,
-        user,
-        where: whereWithMergedSearch,
-      })
+      try {
+        data = await req.payload.find({
+          collection: collectionSlug,
+          depth: 0,
+          draft: true,
+          fallbackLocale: false,
+          includeLockStatus: true,
+          limit: query?.limit ? Number(query.limit) : undefined,
+          locale: req.locale,
+          overrideAccess: false,
+          page: query?.page ? Number(query.page) : undefined,
+          req,
+          sort: query?.sort,
+          trash: query?.trash === true,
+          user,
+          where: whereWithMergedSearch,
+        })
+      } catch (err) {
+        req.payload.logger.error({
+          err,
+          msg: `There was an error fetching the list view data for collection ${collectionSlug}`,
+        })
+      }
       ;({ columnState, Table } = renderTable({
         clientCollectionConfig: clientConfig.collections.find((c) => c.slug === collectionSlug),
         collectionConfig,

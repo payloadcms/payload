@@ -160,7 +160,7 @@ export async function validateSearchParam({
         let fieldAccess: any
 
         if (versionFields) {
-          fieldAccess = policies[entityType]![entitySlug]!
+          fieldAccess = policies[entityType]![entitySlug]!.fields
 
           if (segments[0] === 'parent' || segments[0] === 'version') {
             segments.shift()
