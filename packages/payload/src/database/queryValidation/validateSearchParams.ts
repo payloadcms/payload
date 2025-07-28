@@ -162,7 +162,7 @@ export async function validateSearchParam({
         if (versionFields) {
           fieldAccess = policies[entityType]![entitySlug]!.fields
 
-          if (segments[0] === 'parent' || segments[0] === 'version') {
+          if (segments[0] === 'parent' || segments[0] === 'version' || segments[0] === 'snapshot') {
             segments.shift()
           }
         } else {
