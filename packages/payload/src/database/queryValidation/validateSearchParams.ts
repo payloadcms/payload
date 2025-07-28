@@ -169,23 +169,20 @@ export async function validateSearchParam({
           fieldAccess = policies[entityType]![entitySlug]!.fields
         }
 
-        segments.forEach((segment) => {
-          if (fieldAccess[segment]) {
-            if ('fields' in fieldAccess[segment]) {
-              fieldAccess = fieldAccess[segment].fields
-            } else if (
-              'blocks' in fieldAccess[segment] ||
-              'blockReferences' in fieldAccess[segment]
-            ) {
-              fieldAccess = fieldAccess[segment]
-            } else {
-              fieldAccess = fieldAccess[segment]
+        if (segments.length) {
+          segments.forEach((segment) => {
+            if (fieldAccess[segment]) {
+              if ('fields' in fieldAccess[segment]) {
+                fieldAccess = fieldAccess[segment].fields
+              } else {
+                fieldAccess = fieldAccess[segment]
+              }
             }
-          }
-        })
+          })
 
-        if (!fieldAccess?.read?.permission) {
-          errors.push({ path: fieldPath })
+          if (!fieldAccess?.read?.permission) {
+            errors.push({ path: fieldPath })
+          }
         }
       }
 
