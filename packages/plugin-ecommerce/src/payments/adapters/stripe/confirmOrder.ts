@@ -16,7 +16,6 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
     const { apiVersion, appInfo, secretKey } = props || {}
 
     const customerEmail = data.customerEmail
-    const user = req.user
 
     const paymentIntentID = data.paymentIntentID as string
 
@@ -88,6 +87,8 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         throw new Error('Cart items snapshot not found or invalid in the PaymentIntent metadata')
       }
 
+      console.log('Creating order ')
+
       const order = await payload.create({
         collection: ordersSlug,
         data: {
@@ -112,8 +113,8 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
 
       return {
         message: 'Payment initiated successfully',
-        order,
         orderID: order.id,
+        transactionID: transaction.id,
       }
     } catch (error) {
       payload.logger.error(error, 'Error initiating payment with Stripe')

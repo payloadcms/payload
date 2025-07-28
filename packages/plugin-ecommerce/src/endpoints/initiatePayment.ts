@@ -199,6 +199,7 @@ export const initiatePaymentHandler: InitiatePayment =
           collection: productsSlug,
           depth: 0,
           select: {
+            inventory: true,
             [priceField]: true,
           },
         })

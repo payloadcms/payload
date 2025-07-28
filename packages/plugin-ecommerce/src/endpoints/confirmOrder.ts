@@ -151,135 +151,137 @@ export const confirmOrderHandler: ConfirmOrderHandler =
     }
 
     try {
-      if (Array.isArray(cart.items) && cart.items.length > 0) {
-        for (const item of cart.items) {
-          // Target field to check the price based on the currency so we can validate the total
-          const priceField = `priceIn${currency.toUpperCase()}`
-          const quantity = item.quantity || 1
+      // if (Array.isArray(cart.items) && cart.items.length > 0) {
+      //   for (const item of cart.items) {
+      //     // Target field to check the price based on the currency so we can validate the total
+      //     const priceField = `priceIn${currency.toUpperCase()}`
+      //     const quantity = item.quantity || 1
 
-          // If the item has a product but no variant, we assume the product has a price in the specified currency
-          if (item.product) {
-            const id = typeof item.product === 'object' ? item.product.id : item.product
+      //     // If the item has a product but no variant, we assume the product has a price in the specified currency
+      //     if (item.product) {
+      //       const id = typeof item.product === 'object' ? item.product.id : item.product
 
-            const product = await payload.findByID({
-              id,
-              collection: productsSlug,
-              depth: 0,
-              select: {
-                [priceField]: true,
-              },
-            })
+      //       const product = await payload.findByID({
+      //         id,
+      //         collection: productsSlug,
+      //         depth: 0,
+      //         select: {
+      //           [priceField]: true,
+      //         },
+      //       })
 
-            if (!product) {
-              payload.logger.error(
-                `Product with ID ${item.product} not found.`,
-                'Error validating product',
-              )
+      //       if (!product) {
+      //         payload.logger.error(
+      //           `Product with ID ${item.product} not found.`,
+      //           'Error validating product',
+      //         )
 
-              return Response.json(
-                {
-                  message: `Product with ID ${item.product} not found.`,
-                },
-                {
-                  status: 404,
-                },
-              )
-            }
+      //         return Response.json(
+      //           {
+      //             message: `Product with ID ${item.product} not found.`,
+      //           },
+      //           {
+      //             status: 404,
+      //           },
+      //         )
+      //       }
 
-            // Run product validation only if the item does not have a variant, each variant will have its own inventory and price
-            if (!item.variant) {
-              try {
-                if (productsValidation) {
-                  await productsValidation({
-                    currenciesConfig,
-                    currency,
-                    product,
-                    quantity,
-                  })
-                } else {
-                  await defaultProductsValidation({
-                    currenciesConfig,
-                    currency,
-                    product,
-                    quantity,
-                  })
-                }
-              } catch (error) {
-                payload.logger.error(error, 'Error validating product.')
-                return Response.json(
-                  {
-                    message: error,
-                  },
-                  {
-                    status: 400,
-                  },
-                )
-              }
-            }
+      //       // Run product validation only if the item does not have a variant, each variant will have its own inventory and price
+      //       if (!item.variant) {
+      //         try {
+      //           if (productsValidation) {
+      //             await productsValidation({
+      //               currenciesConfig,
+      //               currency,
+      //               product,
+      //               quantity,
+      //             })
+      //           } else {
+      //             await defaultProductsValidation({
+      //               currenciesConfig,
+      //               currency,
+      //               product,
+      //               quantity,
+      //             })
+      //           }
+      //         } catch (error) {
+      //           payload.logger.error(error, 'Error validating product.')
+      //           return Response.json(
+      //             {
+      //               message: error,
+      //             },
+      //             {
+      //               status: 400,
+      //             },
+      //           )
+      //         }
+      //       }
 
-            if (item.variant) {
-              const id = typeof item.variant === 'object' ? item.variant.id : item.variant
+      //       if (item.variant) {
+      //         const id = typeof item.variant === 'object' ? item.variant.id : item.variant
 
-              const variant = await payload.findByID({
-                id,
-                collection: variantsSlug,
-                depth: 0,
-                select: {
-                  inventory: true,
-                  [priceField]: true,
-                },
-              })
+      //         const variant = await payload.findByID({
+      //           id,
+      //           collection: variantsSlug,
+      //           depth: 0,
+      //           select: {
+      //             inventory: true,
+      //             [priceField]: true,
+      //           },
+      //         })
 
-              if (!variant) {
-                payload.logger.error(
-                  `Variant with ID ${item.variant} not found.`,
-                  'Error validating variant',
-                )
+      //         if (!variant) {
+      //           payload.logger.error(
+      //             `Variant with ID ${item.variant} not found.`,
+      //             'Error validating variant',
+      //           )
 
-                return Response.json(
-                  {
-                    message: `Variant with ID ${item.variant} not found.`,
-                  },
-                  {
-                    status: 404,
-                  },
-                )
-              }
+      //           return Response.json(
+      //             {
+      //               message: `Variant with ID ${item.variant} not found.`,
+      //             },
+      //             {
+      //               status: 404,
+      //             },
+      //           )
+      //         }
 
-              try {
-                if (productsValidation) {
-                  await productsValidation({
-                    currenciesConfig,
-                    currency,
-                    product,
-                    quantity,
-                    variant,
-                  })
-                } else {
-                  await defaultProductsValidation({
-                    currenciesConfig,
-                    currency,
-                    product,
-                    quantity,
-                    variant,
-                  })
-                }
-              } catch (error) {
-                payload.logger.error(error, 'Error validating product or variant.')
+      //         try {
+      //           if (productsValidation) {
+      //             await productsValidation({
+      //               currenciesConfig,
+      //               currency,
+      //               product,
+      //               quantity,
+      //               variant,
+      //             })
+      //           } else {
+      //             await defaultProductsValidation({
+      //               currenciesConfig,
+      //               currency,
+      //               product,
+      //               quantity,
+      //               variant,
+      //             })
+      //           }
+      //         } catch (error) {
+      //           payload.logger.error(error, 'Error validating product or variant.')
 
-                return Response.json(
-                  {
-                    message: error,
-                  },
-                  {
-                    status: 400,
-                  },
-                )
-              }
-            }
-          }
-        }
-      }
+      //           return Response.json(
+      //             {
+      //               message: error,
+      //             },
+      //             {
+      //               status: 400,
+      //             },
+      //           )
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
+
+      console.log('going into payment provider')
 
       const paymentResponse = await paymentMethod.confirmOrder({
         customersSlug,
@@ -292,13 +294,53 @@ export const confirmOrderHandler: ConfirmOrderHandler =
         transactionsSlug,
       })
 
-      if (paymentResponse) {
-        // Start decrementing the inventory for each product and variant in the cart
+      console.log({ paymentResponse })
+
+      if (paymentResponse.transactionID) {
+        const transaction = await payload.findByID({
+          id: paymentResponse.transactionID,
+          collection: transactionsSlug,
+          depth: 0,
+          select: {
+            id: true,
+            items: true,
+          },
+        })
+
+        if (transaction && Array.isArray(transaction.items) && transaction.items.length > 0) {
+          for (const item of transaction.items) {
+            if (item.variant) {
+              await payload.update({
+                id: typeof item.variant === 'object' ? item.variant.id : item.variant,
+                collection: variantsSlug,
+                data: {
+                  inventory: {
+                    $inc: item.quantity * -1,
+                  },
+                },
+              })
+            } else if (item.product) {
+              await payload.update({
+                id: typeof item.product === 'object' ? item.product.id : item.product,
+                collection: productsSlug,
+                data: {
+                  inventory: {
+                    $inc: item.quantity * -1,
+                  },
+                },
+              })
+            }
+          }
+        }
+      }
+
+      if ('paymentResponse.transactionID' in paymentResponse && paymentResponse.transactionID) {
+        delete (paymentResponse as Partial<typeof paymentResponse>).transactionID
       }
 
       return Response.json(paymentResponse)
     } catch (error) {
-      payload.logger.error(error, 'Error initiating payment')
+      payload.logger.error(error, 'Error confirming order.')
 
       return Response.json(
         {
