@@ -27,7 +27,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
             req.headers
               .get('cookie')
               ?.split(';')
-              .filter((cookie) => !cookie.trim().startsWith('payload-'))
+              .filter((cookie) => !cookie.trim().startsWith(req.payload.config.cookiePrefix))
               .join(';') || '',
         }
 
