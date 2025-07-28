@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { CollectionSlug, Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -53,7 +53,7 @@ describe('trash', () => {
     })
 
     restrictedCollectionDoc = await payload.create({
-      collection: restrictedCollectionSlug,
+      collection: restrictedCollectionSlug as CollectionSlug,
       data: {
         title: 'With Access Control one',
       },
@@ -93,7 +93,7 @@ describe('trash', () => {
     it('should not allow bulk soft-deleting documents when restricted by delete access', async () => {
       await expect(
         payload.update({
-          collection: restrictedCollectionSlug,
+          collection: restrictedCollectionSlug as CollectionSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
@@ -116,7 +116,7 @@ describe('trash', () => {
     it('should not allow soft-deleting a document when restricted by delete access', async () => {
       await expect(
         payload.update({
-          collection: restrictedCollectionSlug,
+          collection: restrictedCollectionSlug as CollectionSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
@@ -183,10 +183,75 @@ describe('trash', () => {
           trash: false, // Normal query should return it now
         })
 
-        const restored = result.docs.find((doc) => doc.id === postsDocTwo.id)
+        const restored = result.docs.find(
+          (doc) => (doc.id as number | string) === (postsDocTwo.id as number | string),
+        )
 
         expect(restored).toBeDefined()
         expect(restored?.deletedAt).toBeNull()
+      })
+    })
+
+    describe('findDistinct', () => {
+      it('should return all unique values for a field (excluding soft-deleted docs by default)', async () => {
+        // Add a duplicate title
+        await payload.create({
+          collection: postsSlug,
+          data: { title: 'Doc one' },
+        })
+
+        const result = await payload.findDistinct({
+          collection: postsSlug,
+          field: 'title',
+        })
+
+        const titles = result.values.map((v) => v.title)
+
+        // Expect only distinct titles of non-trashed docs
+        expect(titles).toContain('Doc one')
+        expect(titles).not.toContain('Doc two') // because it's soft-deleted
+        expect(titles).toHaveLength(1)
+      })
+
+      it('should include soft-deleted docs when trash: true', async () => {
+        const result = await payload.findDistinct({
+          collection: postsSlug,
+          field: 'title',
+          trash: true,
+        })
+
+        const titles = result.values.map((v) => v.title)
+
+        expect(titles).toContain('Doc one')
+        expect(titles).toContain('Doc two') // soft-deleted doc
+      })
+
+      it('should return only distinct values from soft-deleted docs when where[deletedAt][exists]=true', async () => {
+        const result = await payload.findDistinct({
+          collection: postsSlug,
+          field: 'title',
+          trash: true,
+          where: {
+            deletedAt: { exists: true },
+          },
+        })
+
+        const titles = result.values.map((v) => v.title)
+        expect(titles).toEqual(['Doc two']) // Only the soft-deleted doc
+      })
+
+      it('should respect where filters when retrieving distinct values', async () => {
+        const result = await payload.findDistinct({
+          collection: postsSlug,
+          field: 'title',
+          trash: true,
+          where: {
+            title: { equals: 'Doc two' },
+          },
+        })
+
+        const titles = result.values.map((v) => v.title)
+        expect(titles).toEqual(['Doc two'])
       })
     })
 
