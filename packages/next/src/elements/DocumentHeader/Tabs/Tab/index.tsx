@@ -1,4 +1,11 @@
-import type { DocumentTabConfig, DocumentTabServerProps, ServerProps } from 'payload'
+import type {
+  DocumentTabConfig,
+  DocumentTabServerPropsOnly,
+  PayloadRequest,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+  SanitizedPermissions,
+} from 'payload'
 import type React from 'react'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -9,27 +16,26 @@ import './index.scss'
 
 export const baseClass = 'doc-tab'
 
-export const DocumentTab: React.FC<
-  { readonly Pill_Component?: React.FC } & DocumentTabConfig & DocumentTabServerProps
+export const DefaultDocumentTab: React.FC<
+  {
+    apiURL?: string
+    collectionConfig?: SanitizedCollectionConfig
+    globalConfig?: SanitizedGlobalConfig
+    path?: string
+    permissions?: SanitizedPermissions
+    req: PayloadRequest
+    tabConfig: DocumentTabConfig
+  } & { readonly Pill_Component?: React.FC }
 > = (props) => {
   const {
     apiURL,
     collectionConfig,
     globalConfig,
-    href: tabHref,
-    i18n,
-    isActive: tabIsActive,
-    label,
-    newTab,
-    payload,
     permissions,
-    Pill,
     Pill_Component,
-    user,
+    req,
+    tabConfig: { href: tabHref, isActive: tabIsActive, label, newTab, Pill },
   } = props
-
-  const { config } = payload
-  const { routes } = config
 
   let href = typeof tabHref === 'string' ? tabHref : ''
   let isActive = typeof tabIsActive === 'boolean' ? tabIsActive : false
@@ -39,7 +45,7 @@ export const DocumentTab: React.FC<
       apiURL,
       collection: collectionConfig,
       global: globalConfig,
-      routes,
+      routes: req.payload.config.routes,
     })
   }
 
@@ -52,13 +58,13 @@ export const DocumentTab: React.FC<
   const labelToRender =
     typeof label === 'function'
       ? label({
-          t: i18n.t,
+          t: req.i18n.t,
         })
       : label
 
   return (
     <DocumentTabLink
-      adminRoute={routes.admin}
+      adminRoute={req.payload.config.routes.admin}
       ariaLabel={labelToRender}
       baseClass={baseClass}
       href={href}
@@ -73,13 +79,14 @@ export const DocumentTab: React.FC<
             {RenderServerComponent({
               Component: Pill,
               Fallback: Pill_Component,
-              importMap: payload.importMap,
+              importMap: req.payload.importMap,
               serverProps: {
-                i18n,
-                payload,
+                i18n: req.i18n,
+                payload: req.payload,
                 permissions,
-                user,
-              } satisfies ServerProps,
+                req,
+                user: req.user,
+              } satisfies DocumentTabServerPropsOnly,
             })}
           </Fragment>
         ) : null}

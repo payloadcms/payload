@@ -1,10 +1,9 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
-  Payload,
+  PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
-  UntypedUser,
 } from 'payload'
 
 import { Gutter, RenderTitle } from '@payloadcms/ui'
@@ -19,12 +18,10 @@ export const DocumentHeader: React.FC<{
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   hideTabs?: boolean
-  i18n: I18n
-  payload: Payload
   permissions: SanitizedPermissions
-  user: UntypedUser
+  req: PayloadRequest
 }> = (props) => {
-  const { collectionConfig, globalConfig, hideTabs, i18n, payload, permissions, user } = props
+  const { collectionConfig, globalConfig, hideTabs, permissions, req } = props
 
   return (
     <Gutter className={baseClass}>
@@ -33,10 +30,8 @@ export const DocumentHeader: React.FC<{
         <DocumentTabs
           collectionConfig={collectionConfig}
           globalConfig={globalConfig}
-          i18n={i18n}
-          payload={payload}
           permissions={permissions}
-          user={user}
+          req={req}
         />
       )}
     </Gutter>

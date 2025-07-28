@@ -1,19 +1,17 @@
-import type { I18n } from '@payloadcms/translations'
 import type {
   DocumentTabClientProps,
   DocumentTabServerPropsOnly,
-  Payload,
+  PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
-  UntypedUser,
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
 import { ShouldRenderTabs } from './ShouldRenderTabs.js'
-import { DocumentTab } from './Tab/index.js'
+import { DefaultDocumentTab } from './Tab/index.js'
 import { getTabs } from './tabs/index.js'
 import './index.scss'
 
@@ -22,13 +20,10 @@ const baseClass = 'doc-tabs'
 export const DocumentTabs: React.FC<{
   collectionConfig: SanitizedCollectionConfig
   globalConfig: SanitizedGlobalConfig
-  i18n: I18n
-  payload: Payload
   permissions: SanitizedPermissions
-  user: UntypedUser
-}> = (props) => {
-  const { collectionConfig, globalConfig, i18n, payload, permissions, user } = props
-  const { config } = payload
+  req: PayloadRequest
+}> = ({ collectionConfig, globalConfig, permissions, req }) => {
+  const { config } = req.payload
 
   const tabs = getTabs({
     collectionConfig,
@@ -40,43 +35,46 @@ export const DocumentTabs: React.FC<{
       <div className={baseClass}>
         <div className={`${baseClass}__tabs-container`}>
           <ul className={`${baseClass}__tabs`}>
-            {tabs?.map(({ tab, viewPath }, index) => {
-              const { condition } = tab || {}
+            {tabs?.map(({ tab: tabConfig, viewPath }, index) => {
+              const { condition } = tabConfig || {}
 
               const meetsCondition =
-                !condition || condition({ collectionConfig, config, globalConfig, permissions })
+                !condition ||
+                condition({ collectionConfig, config, globalConfig, permissions, req })
 
               if (!meetsCondition) {
                 return null
               }
 
-              if (tab?.Component) {
+              if (tabConfig?.Component) {
                 return RenderServerComponent({
                   clientProps: {
                     path: viewPath,
                   } satisfies DocumentTabClientProps,
-                  Component: tab.Component,
-                  importMap: payload.importMap,
+                  Component: tabConfig.Component,
+                  importMap: req.payload.importMap,
                   key: `tab-${index}`,
                   serverProps: {
                     collectionConfig,
                     globalConfig,
-                    i18n,
-                    payload,
+                    i18n: req.i18n,
+                    payload: req.payload,
                     permissions,
-                    user,
+                    req,
+                    user: req.user,
                   } satisfies DocumentTabServerPropsOnly,
                 })
               }
 
               return (
-                <DocumentTab
+                <DefaultDocumentTab
+                  collectionConfig={collectionConfig}
+                  globalConfig={globalConfig}
                   key={`tab-${index}`}
                   path={viewPath}
-                  {...{
-                    ...props,
-                    ...tab,
-                  }}
+                  permissions={permissions}
+                  req={req}
+                  tabConfig={tabConfig}
                 />
               )
             })}
