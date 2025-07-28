@@ -3,6 +3,7 @@ import type { PayloadRequest } from '../../../types/index.js'
 
 import { type JsonObject, type Payload, type TypedUser } from '../../../index.js'
 import { isUserLocked } from '../../isUserLocked.js'
+import { removeExpiredSessions } from '../../removeExpiredSessions.js'
 
 type Args = {
   collection: SanitizedCollectionConfig
@@ -11,6 +12,8 @@ type Args = {
   user: TypedUser
 }
 
+// Note: this function does not use req in most updates, as we want those to be visible in parallel requests that are on a different
+// transaction. At the same time, we want updates from parallel requests to be visible here.
 export const incrementLoginAttempts = async ({
   collection,
   payload,
@@ -20,6 +23,8 @@ export const incrementLoginAttempts = async ({
   const {
     auth: { lockTime, maxLoginAttempts },
   } = collection
+
+  const currentTime = Date.now()
 
   let updatedLockUntil: null | string | undefined = undefined // null is a valid value
   let updatedLoginAttempts: null | number = null
@@ -53,7 +58,7 @@ export const incrementLoginAttempts = async ({
       typeof user.loginAttempts === 'number' && user.loginAttempts + 1 >= maxLoginAttempts
     // Lock the account if at max attempts and not already locked
     if (willReachMaxAttempts) {
-      const lockUntil = new Date(Date.now() + lockTime).toISOString()
+      const lockUntil = new Date(currentTime + lockTime).toISOString()
       data.lockUntil = lockUntil
     }
 
@@ -92,7 +97,7 @@ export const incrementLoginAttempts = async ({
     (!updatedLockUntil || !isUserLocked(new Date(updatedLockUntil)))
   ) {
     // If lockUntil reached max login attempts due to multiple parallel attempts but user was not locked yet,
-    const newLockUntil = new Date(Date.now() + lockTime).toISOString()
+    const newLockUntil = new Date(currentTime + lockTime).toISOString()
 
     await payload.db.updateOne({
       id: user.id,
@@ -106,6 +111,45 @@ export const incrementLoginAttempts = async ({
     if (reachedMaxAttemptsForCurrentUser) {
       user.lockUntil = newLockUntil
     }
-    // Remove all active sessions that have been created in a 10 second window
+
+    if (collection.auth.useSessions) {
+      // Remove all active sessions that have been created in a 20 second window. This protects
+      // against brute force attacks - example: 99 incorrect, 1 correct parallel login attempts.
+      // The correct login attempt will be finished first, as it's faster due to not having to perform
+      // an additional db update here.
+      // However, this request (the incorrect login attempt request) can kill the successful login attempt here.
+
+      // Fetch user sessions separately (do not do this in the updateOne select in order to preserve the returning: true db call optimization)
+      const currentUser = await payload.db.findOne<TypedUser>({
+        collection: collection.slug,
+        select: {
+          sessions: true,
+        },
+        where: {
+          id: {
+            equals: user.id,
+          },
+        },
+      })
+      if (currentUser?.sessions?.length) {
+        // Does not hurt also removing expired sessions
+        currentUser.sessions = removeExpiredSessions(currentUser.sessions).filter((session) => {
+          const sessionCreatedAt = new Date(session.createdAt)
+          const twentySecondsAgo = new Date(currentTime - 20000)
+
+          // Remove sessions created within the last 20 seconds
+          return sessionCreatedAt <= twentySecondsAgo
+        })
+
+        user.sessions = currentUser.sessions
+
+        await payload.db.updateOne({
+          id: user.id,
+          collection: collection.slug,
+          data: user,
+          returning: false,
+        })
+      }
+    }
   }
 }
