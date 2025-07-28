@@ -23,6 +23,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     link,
     onClick: onClickFromProps,
     rowData,
+    viewType,
   } = props
 
   const { i18n } = useTranslation()
@@ -63,7 +64,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     wrapElementProps.href = collectionConfig?.slug
       ? formatAdminURL({
           adminRoute,
-          path: `/collections/${collectionConfig?.slug}/${encodeURIComponent(rowData.id)}`,
+          path: `/collections/${collectionConfig?.slug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(rowData.id)}`,
         })
       : ''
   }

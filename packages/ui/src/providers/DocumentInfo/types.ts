@@ -35,11 +35,13 @@ export type DocumentInfoProps = {
   readonly initialState?: FormState
   readonly isEditing?: boolean
   readonly isLocked: boolean
+  readonly isTrashed?: boolean
   readonly lastUpdateTime: number
   readonly mostRecentVersionIsAutosaved: boolean
   readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
+  readonly redirectAfterRestore?: boolean
   readonly unpublishedVersionCount: number
   readonly Upload?: React.ReactNode
   readonly versionCount: number
@@ -49,6 +51,11 @@ export type DocumentInfoContext = {
   currentEditor?: ClientUser | null | number | string
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   documentIsLocked?: boolean
+  documentLockState: React.RefObject<{
+    hasShownLockedModal: boolean
+    isLocked: boolean
+    user: ClientUser | number | string
+  } | null>
   getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
   incrementVersionCount: () => void

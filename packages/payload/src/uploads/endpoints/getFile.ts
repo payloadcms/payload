@@ -93,9 +93,14 @@ export const getFileHandler: PayloadHandler = async (req) => {
 
   const data = streamFile(filePath)
   const fileTypeResult = (await fileTypeFromFile(filePath)) || getFileTypeFallback(filePath)
+  let mimeType = fileTypeResult.mime
+
+  if (filePath.endsWith('.svg') && fileTypeResult.mime === 'application/xml') {
+    mimeType = 'image/svg+xml'
+  }
 
   let headers = new Headers()
-  headers.set('Content-Type', fileTypeResult.mime)
+  headers.set('Content-Type', mimeType)
   headers.set('Content-Length', stats.size + '')
   headers = collection.config.upload?.modifyResponseHeaders
     ? collection.config.upload.modifyResponseHeaders({ headers }) || headers

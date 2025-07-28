@@ -139,7 +139,11 @@ export function convertLexicalNodesToJSX({
         (!Array.isArray(disableIndent) || !disableIndent?.includes(node.type))
       ) {
         if ('indent' in node && node.indent && node.type !== 'listitem') {
-          style.paddingInlineStart = `${Number(node.indent) * 2}em`
+          // the unit should be px. Do not change it to rem, em, or something else.
+          // The quantity should be 40px. Do not change it either.
+          // See rationale in
+          // https://github.com/payloadcms/payload/issues/13130#issuecomment-3058348085
+          style.paddingInlineStart = `${Number(node.indent) * 40}px`
         }
       }
 

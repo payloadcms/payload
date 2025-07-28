@@ -41,6 +41,7 @@ import {
   skipAllowListSafeFetchMediaSlug,
   skipSafeFetchHeaderFilterSlug,
   skipSafeFetchMediaSlug,
+  svgOnlySlug,
   threeDimensionalSlug,
   unstoredMediaSlug,
   versionSlug,
@@ -920,6 +921,14 @@ export default buildConfigWithDefaults({
     BulkUploadsCollection,
     SimpleRelationshipCollection,
     FileMimeType,
+    {
+      slug: svgOnlySlug,
+      fields: [],
+      upload: {
+        mimeTypes: ['image/svg+xml'],
+        staticDir: path.resolve(dirname, './svg-only'),
+      },
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')

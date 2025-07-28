@@ -196,6 +196,9 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       description={description}
       Error={Error}
       filterOptions={filterOptions}
+      formatDisplayedOptions={
+        isPolymorphic ? undefined : (options) => options.map((opt) => opt.options).flat()
+      }
       isSortable={isSortable}
       Label={Label}
       label={label}

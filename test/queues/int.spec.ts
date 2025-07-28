@@ -1,7 +1,13 @@
-import type { JobTaskStatus, Payload, SanitizedConfig } from 'payload'
-
 import path from 'path'
+import {
+  _internal_jobSystemGlobals,
+  _internal_resetJobSystemGlobals,
+  type JobTaskStatus,
+  type Payload,
+  type SanitizedConfig,
+} from 'payload'
 import { migrateCLI } from 'payload'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -9,6 +15,7 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { clearAndSeedEverything } from './seed.js'
+import { waitUntilAutorunIsDone } from './utilities.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -25,10 +32,25 @@ describe('Queues', () => {
   })
 
   afterAll(async () => {
+    // Ensure no new crons are scheduled
+    _internal_jobSystemGlobals.shouldAutoRun = false
+    _internal_jobSystemGlobals.shouldAutoSchedule = false
+    // Wait 3 seconds to ensure all currently-running crons are done. If we shut down the db while a function is running, it can cause issues
+    // Cron function runs may persist after a test has finished
+    await wait(3000)
+    // Now we can destroy the payload instance
     await payload.destroy()
+    _internal_resetJobSystemGlobals()
+  })
+
+  afterEach(() => {
+    _internal_resetJobSystemGlobals()
   })
 
   beforeEach(async () => {
+    // Set autorun to false during seed process to ensure no crons are scheduled, which may affect the tests
+    _internal_jobSystemGlobals.shouldAutoRun = false
+    _internal_jobSystemGlobals.shouldAutoSchedule = false
     await clearAndSeedEverything(payload)
     const data = await restClient
       .POST('/users/login', {
@@ -43,10 +65,12 @@ describe('Queues', () => {
       token = data.token
     }
     payload.config.jobs.deleteJobOnComplete = true
+    _internal_jobSystemGlobals.shouldAutoRun = true
+    _internal_jobSystemGlobals.shouldAutoSchedule = true
   })
 
   it('will run access control on jobs runner', async () => {
-    const response = await restClient.GET('/payload-jobs/run', {
+    const response = await restClient.GET('/payload-jobs/run?silent=true', {
       headers: {
         // Authorization: `JWT ${token}`,
       },
@@ -55,7 +79,7 @@ describe('Queues', () => {
   })
 
   it('will return 200 from jobs runner', async () => {
-    const response = await restClient.GET('/payload-jobs/run', {
+    const response = await restClient.GET('/payload-jobs/run?silent=true', {
       headers: {
         Authorization: `JWT ${token}`,
       },
@@ -109,7 +133,7 @@ describe('Queues', () => {
     expect(retrievedPost.jobStep1Ran).toBeFalsy()
     expect(retrievedPost.jobStep2Ran).toBeFalsy()
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const postAfterJobs = await payload.findByID({
       collection: 'posts',
@@ -139,7 +163,7 @@ describe('Queues', () => {
     expect(retrievedPost.jobStep1Ran).toBeFalsy()
     expect(retrievedPost.jobStep2Ran).toBeFalsy()
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const postAfterJobs = await payload.findByID({
       collection: 'posts',
@@ -163,7 +187,7 @@ describe('Queues', () => {
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run()
+      const response = await payload.jobs.run({ silent: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -198,7 +222,7 @@ describe('Queues', () => {
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run()
+      const response = await payload.jobs.run({ silent: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -221,7 +245,7 @@ describe('Queues', () => {
     expect(jobAfterRun.input.amountRetried).toBe(2)
   })
 
-  it('ensure workflows dont limit retries if no retries property is sett', async () => {
+  it('ensure workflows dont limit retries if no retries property is set', async () => {
     payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'workflowNoRetriesSet',
@@ -233,7 +257,7 @@ describe('Queues', () => {
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run()
+      const response = await payload.jobs.run({ silent: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -268,7 +292,7 @@ describe('Queues', () => {
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run()
+      const response = await payload.jobs.run({ silent: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -303,7 +327,7 @@ describe('Queues', () => {
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run()
+      const response = await payload.jobs.run({ silent: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -338,7 +362,7 @@ describe('Queues', () => {
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run()
+      const response = await payload.jobs.run({ silent: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -373,7 +397,7 @@ describe('Queues', () => {
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run()
+      const response = await payload.jobs.run({ silent: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -409,7 +433,7 @@ describe('Queues', () => {
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run()
+      const response = await payload.jobs.run({silent: true})
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -453,7 +477,7 @@ describe('Queues', () => {
       !firstGotNoJobs ||
       new Date().getTime() - firstGotNoJobs.getTime() < 3000
     ) {
-      const response = await payload.jobs.run()
+      const response = await payload.jobs.run({ silent: true })
 
       if (response.noJobsRemaining) {
         if (hasJobsRemaining) {
@@ -537,6 +561,7 @@ describe('Queues', () => {
 
     await payload.jobs.run({
       sequential: true,
+      silent: true,
     })
 
     const allSimples = await payload.find({
@@ -569,6 +594,7 @@ describe('Queues', () => {
 
     await payload.jobs.run({
       sequential: true,
+      silent: true,
       processingOrder: '-createdAt',
     })
 
@@ -604,6 +630,7 @@ describe('Queues', () => {
 
     await payload.jobs.run({
       sequential: true,
+      silent: true,
       queue: 'lifo',
     })
 
@@ -626,7 +653,7 @@ describe('Queues', () => {
       },
     })
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -635,29 +662,6 @@ describe('Queues', () => {
 
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples.docs[0]?.title).toBe('hello!')
-  })
-
-  it('can create and autorun jobs', async () => {
-    await payload.jobs.queue({
-      workflow: 'inlineTaskTest',
-      queue: 'autorunSecond',
-      input: {
-        message: 'hello!',
-      },
-    })
-
-    // Do not call payload.jobs.run()
-
-    // Autorun runs every second - so should definitely be done if we wait 2 seconds
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    const allSimples = await payload.find({
-      collection: 'simple',
-      limit: 100,
-    })
-
-    expect(allSimples.totalDocs).toBe(1)
-    expect(allSimples?.docs?.[0]?.title).toBe('hello!')
   })
 
   it('should respect deleteJobOnComplete true default configuration', async () => {
@@ -671,7 +675,7 @@ describe('Queues', () => {
     const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(before?.id).toBe(id)
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(after).toBeNull()
@@ -686,7 +690,7 @@ describe('Queues', () => {
     const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(before?.id).toBe(id)
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(after?.id).toBe(id)
@@ -704,7 +708,7 @@ describe('Queues', () => {
     const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(before?.id).toBe(id)
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(after?.id).toBe(id)
@@ -718,7 +722,7 @@ describe('Queues', () => {
       },
     })
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -739,7 +743,7 @@ describe('Queues', () => {
       },
     })
 
-    await restClient.GET('/payload-jobs/run', {
+    await restClient.GET('/payload-jobs/run?silent=true', {
       headers: {
         Authorization: `JWT ${token}`,
       },
@@ -877,7 +881,7 @@ describe('Queues', () => {
       })
     }
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -903,6 +907,7 @@ describe('Queues', () => {
     }
 
     await payload.jobs.run({
+      silent: true,
       limit: numberOfTasks,
     })
 
@@ -926,7 +931,7 @@ describe('Queues', () => {
       })
     }
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -950,6 +955,7 @@ describe('Queues', () => {
 
     await payload.jobs.run({
       limit: 42,
+      silent: true,
     })
 
     const allSimples = await payload.find({
@@ -985,7 +991,7 @@ describe('Queues', () => {
       })
     }
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -1017,7 +1023,7 @@ describe('Queues', () => {
       },
     })
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -1036,7 +1042,7 @@ describe('Queues', () => {
       },
     })
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -1066,6 +1072,7 @@ describe('Queues', () => {
 
     await payload.jobs.runByID({
       id: lastJobID,
+      silent: true,
     })
 
     const allSimples = await payload.find({
@@ -1108,6 +1115,7 @@ describe('Queues', () => {
     }
 
     await payload.jobs.run({
+      silent: true,
       where: {
         id: {
           equals: lastJobID,
@@ -1150,6 +1158,7 @@ describe('Queues', () => {
     }
 
     await payload.jobs.run({
+      silent: true,
       where: {
         'input.message': {
           equals: 'from single task 2',
@@ -1188,7 +1197,7 @@ describe('Queues', () => {
       },
     })
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -1229,7 +1238,7 @@ describe('Queues', () => {
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run()
+      const response = await payload.jobs.run({ silent: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -1262,7 +1271,7 @@ describe('Queues', () => {
       workflow: 'longRunning',
       input: {},
     })
-    void payload.jobs.run().catch((_ignored) => {})
+    void payload.jobs.run({ silent: true }).catch((_ignored) => {})
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
     // Should be in processing - cancel job
@@ -1296,7 +1305,7 @@ describe('Queues', () => {
       workflow: 'longRunning',
       input: {},
     })
-    void payload.jobs.run().catch((_ignored) => {})
+    void payload.jobs.run({ silent: true }).catch((_ignored) => {})
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
     // Cancel all jobs
@@ -1335,7 +1344,7 @@ describe('Queues', () => {
       input: {},
     })
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
@@ -1356,7 +1365,7 @@ describe('Queues', () => {
       input: {},
     })
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
@@ -1379,7 +1388,7 @@ describe('Queues', () => {
       },
     })
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
@@ -1408,7 +1417,7 @@ describe('Queues', () => {
       },
     })
 
-    await payload.jobs.run()
+    await payload.jobs.run({ silent: true })
 
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
@@ -1433,6 +1442,29 @@ describe('Queues', () => {
       expect(logEntry).toBeDefined()
       expect((logEntry?.output as any)?.simpleID).toBe(simpleDoc?.id)
     }
+  })
+
+  it('can create and autorun jobs', async () => {
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTest',
+      queue: 'autorunSecond',
+      input: {
+        message: 'hello!',
+      },
+    })
+
+    await waitUntilAutorunIsDone({
+      payload,
+      queue: 'autorunSecond',
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples?.docs?.[0]?.title).toBe('hello!')
   })
 })
 

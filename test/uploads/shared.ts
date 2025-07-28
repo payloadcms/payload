@@ -38,3 +38,4 @@ export const constructorOptionsSlug = 'constructor-options'
 export const bulkUploadsSlug = 'bulk-uploads'
 
 export const fileMimeTypeSlug = 'file-mime-type'
+export const svgOnlySlug = 'svg-only'

@@ -9,6 +9,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -27,6 +28,7 @@ export type Arguments = {
   select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
+  trash?: boolean
   where?: Where
 }
 
@@ -44,6 +46,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     select: incomingSelect,
     showHiddenFields,
     sort,
+    trash = false,
     where,
   } = args
 
@@ -71,7 +74,16 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       where: where!,
     })
 
-    const fullWhere = combineQueries(where!, accessResults)
+    let fullWhere = combineQueries(where!, accessResults)
+
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      deletedAtPath: 'version.deletedAt',
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
+
     sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
 
     const select = sanitizeSelect({

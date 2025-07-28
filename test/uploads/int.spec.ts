@@ -26,6 +26,7 @@ import {
   skipAllowListSafeFetchMediaSlug,
   skipSafeFetchHeaderFilterSlug,
   skipSafeFetchMediaSlug,
+  svgOnlySlug,
   unstoredMediaSlug,
   usersSlug,
 } from './shared.js'
@@ -371,6 +372,21 @@ describe('Collections - Uploads', () => {
   })
 
   describe('Local API', () => {
+    describe('create', () => {
+      it('should create documents when passing filePath', async () => {
+        const expectedPath = path.join(dirname, './svg-only')
+
+        const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
+        const doc = await payload.create({
+          collection: svgOnlySlug as CollectionSlug,
+          data: {},
+          filePath: svgFilePath,
+        })
+
+        expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+      })
+    })
+
     describe('update', () => {
       it('should remove existing media on re-upload - by ID', async () => {
         // Create temp file

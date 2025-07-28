@@ -118,6 +118,7 @@ export interface Config {
     'bulk-uploads': BulkUpload;
     'simple-relationship': SimpleRelationship;
     'file-mime-type': FileMimeType;
+    'svg-only': SvgOnly;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -176,6 +177,7 @@ export interface Config {
     'bulk-uploads': BulkUploadsSelect<false> | BulkUploadsSelect<true>;
     'simple-relationship': SimpleRelationshipSelect<false> | SimpleRelationshipSelect<true>;
     'file-mime-type': FileMimeTypeSelect<false> | FileMimeTypeSelect<true>;
+    'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1605,6 +1607,24 @@ export interface FileMimeType {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "svg-only".
+ */
+export interface SvgOnly {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -1837,6 +1857,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'file-mime-type';
         value: string | FileMimeType;
+      } | null)
+    | ({
+        relationTo: 'svg-only';
+        value: string | SvgOnly;
       } | null)
     | ({
         relationTo: 'users';
@@ -3347,6 +3371,23 @@ export interface FileMimeTypeSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "svg-only_select".
+ */
+export interface SvgOnlySelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -3409,6 +3450,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
