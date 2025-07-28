@@ -30,7 +30,10 @@ export type DocumentTogglerProps = {
   readonly collectionSlug: string
   readonly disabled?: boolean
   readonly drawerSlug?: string
-  readonly id?: number | string
+  /**
+   * The `id` HTML attribute for the toggler button.
+   */
+  readonly id?: string
   readonly onClick?: () => void
 } & Readonly<HTMLAttributes<HTMLButtonElement>>
 
@@ -56,7 +59,18 @@ export type UseDocumentDrawer = (args: {
   id?: number | string
   overrideEntityVisibility?: boolean
 }) => [
-  React.FC<Omit<DocumentDrawerProps, 'collectionSlug' | 'id'>>, // drawer
-  React.FC<Omit<DocumentTogglerProps, 'collectionSlug' | 'id'>>, // toggler
+  // drawer
+  React.FC<
+    {
+      children?: React.ReactNode
+    } & Omit<DocumentDrawerProps, 'collectionSlug' | 'id'>
+  >,
+  // toggler
+  React.FC<
+    {
+      children?: React.ReactNode
+    } & Omit<DocumentTogglerProps, 'collectionSlug' | 'id'>
+  >,
+  // context
   UseDocumentDrawerContext,
 ]

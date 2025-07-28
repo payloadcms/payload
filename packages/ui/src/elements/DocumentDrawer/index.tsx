@@ -140,7 +140,7 @@ export const useDocumentDrawer: UseDocumentDrawer = ({
         {...props}
         collectionSlug={collectionSlug}
         drawerSlug={drawerSlug}
-        id={id}
+        id={id?.toString()}
       />
     )
   }, [id, drawerSlug, collectionSlug])

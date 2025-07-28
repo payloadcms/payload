@@ -9,7 +9,7 @@ import {
   type Where,
 } from 'payload'
 import { hoistQueryParamsToAnd, transformColumnsToPreferences } from 'payload/shared'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
@@ -52,6 +52,8 @@ type RelationshipTableComponentProps = {
   readonly relationTo: string | string[]
 }
 
+export type OnDrawerOpen = (id?: string) => void
+
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const {
     AfterInput,
@@ -84,13 +86,14 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const { permissions } = useAuth()
 
-  const [idToOpen, setIdToOpen] = useState<string | undefined>(undefined)
+  const openDrawerWhenRelationChanges = useRef(false)
 
-  const [DocumentDrawer, DrawerToggler, { closeDrawer, isDrawerOpen, openDrawer }] =
-    useDocumentDrawer({
-      id: idToOpen,
-      collectionSlug: selectedCollection,
-    })
+  const [currentDrawerID, setCurrentDrawerID] = useState<string | undefined>(undefined)
+
+  const [DocumentDrawer, , { closeDrawer, isDrawerOpen, openDrawer }] = useDocumentDrawer({
+    id: currentDrawerID,
+    collectionSlug: selectedCollection,
+  })
 
   const [isLoadingTable, setIsLoadingTable] = useState(!disableTable)
 
@@ -221,9 +224,34 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         ...data,
         docs: newDocs,
       })
+
+      setCurrentDrawerID(undefined)
     },
     [data, renderTable],
   )
+
+  const onDrawerOpen = useCallback<OnDrawerOpen>((id) => {
+    openDrawerWhenRelationChanges.current = true
+
+    if (id) {
+      setCurrentDrawerID(id)
+    } else {
+      setCurrentDrawerID(undefined)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (openDrawerWhenRelationChanges.current) {
+      openDrawerWhenRelationChanges.current = false
+      openDrawer()
+    }
+  }, [openDrawer])
+
+  useEffect(() => {
+    if (!isDrawerOpen) {
+      setCurrentDrawerID(undefined)
+    }
+  }, [isDrawerOpen])
 
   const canCreate =
     allowCreate !== false &&
@@ -331,7 +359,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                 <TableColumnsProvider
                   collectionSlug={isPolymorphic ? relationTo[0] : relationTo}
                   columnState={columnState}
-                  LinkedCellOverride={<DrawerLink DrawerToggler={DrawerToggler} />}
+                  LinkedCellOverride={
+                    <DrawerLink currentDrawerID={currentDrawerID} onDrawerOpen={onDrawerOpen} />
+                  }
                 >
                   <AnimateHeight
                     className={`${baseClass}__columns`}
