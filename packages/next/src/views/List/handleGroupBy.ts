@@ -22,6 +22,7 @@ export const handleGroupBy = async ({
   enableRowSelections,
   query,
   req,
+  trash = false,
   user,
   where: whereWithMergedSearch,
 }: {
@@ -34,6 +35,7 @@ export const handleGroupBy = async ({
   enableRowSelections?: boolean
   query?: ListQuery
   req: PayloadRequest
+  trash?: boolean
   user: any
   where: Where
 }): Promise<{
@@ -88,6 +90,7 @@ export const handleGroupBy = async ({
     populate,
     req,
     sort: query?.groupBy,
+    trash,
     where: whereWithMergedSearch,
   })
 
@@ -127,6 +130,7 @@ export const handleGroupBy = async ({
         // Note: if we wanted to enable table-by-table sorting, we could use this:
         // sort: query?.queryByGroup?.[valueOrRelationshipID]?.sort,
         sort: query?.sort,
+        trash,
         user,
         where: {
           ...(whereWithMergedSearch || {}),
