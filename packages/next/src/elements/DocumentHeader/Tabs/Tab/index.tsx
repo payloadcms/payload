@@ -16,25 +16,22 @@ import './index.scss'
 
 export const baseClass = 'doc-tab'
 
-export const DefaultDocumentTab: React.FC<
-  {
-    apiURL?: string
-    collectionConfig?: SanitizedCollectionConfig
-    globalConfig?: SanitizedGlobalConfig
-    path?: string
-    permissions?: SanitizedPermissions
-    req: PayloadRequest
-    tabConfig: DocumentTabConfig
-  } & { readonly Pill_Component?: React.FC }
-> = (props) => {
+export const DefaultDocumentTab: React.FC<{
+  apiURL?: string
+  collectionConfig?: SanitizedCollectionConfig
+  globalConfig?: SanitizedGlobalConfig
+  path?: string
+  permissions?: SanitizedPermissions
+  req: PayloadRequest
+  tabConfig: { readonly Pill_Component?: React.FC } & DocumentTabConfig
+}> = (props) => {
   const {
     apiURL,
     collectionConfig,
     globalConfig,
     permissions,
-    Pill_Component,
     req,
-    tabConfig: { href: tabHref, isActive: tabIsActive, label, newTab, Pill },
+    tabConfig: { href: tabHref, isActive: tabIsActive, label, newTab, Pill, Pill_Component },
   } = props
 
   let href = typeof tabHref === 'string' ? tabHref : ''
