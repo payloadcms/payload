@@ -73,10 +73,11 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     const parsedURL = url.parse(args.req.url!)
     const isGraphQL = parsedURL.pathname === config.routes.graphQL
 
-    let user = await req.payload.db.findOne<any>({
-      collection: collectionConfig.slug,
-      req,
-      where: { id: { equals: args.req.user.id } },
+    const user = await args.req.payload.findByID({
+      id: args.req.user.id,
+      collection: args.req.user.collection,
+      depth: isGraphQL ? 0 : args.collection.config.auth.depth,
+      req: args.req,
     })
 
     const sid = args.req.user._sid
@@ -86,7 +87,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
         throw new Forbidden(args.req.t)
       }
 
-      const existingSession = user.sessions.find(({ id }: { id: number }) => id === sid)
+      const existingSession = user.sessions.find(({ id }) => id === sid)
 
       const now = new Date()
       const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
@@ -96,20 +97,12 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
         id: user.id,
         collection: collectionConfig.slug,
         data: {
-          ...user,
           sessions: removeExpiredSessions(user.sessions),
         },
         req,
         returning: false,
       })
     }
-
-    user = await req.payload.findByID({
-      id: user.id,
-      collection: collectionConfig.slug,
-      depth: isGraphQL ? 0 : args.collection.config.auth.depth,
-      req: args.req,
-    })
 
     if (user) {
       user.collection = args.req.user.collection
