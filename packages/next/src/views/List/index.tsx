@@ -145,25 +145,6 @@ export const renderListView = async (
       })
     }
 
-    let whereCondition = mergeListSearchAndWhere({
-      collectionConfig,
-      search: typeof query?.search === 'string' ? query.search : undefined,
-      where: combineWhereConstraints([query?.where, baseListFilter]),
-    })
-
-    if (query?.trash === true) {
-      whereCondition = {
-        and: [
-          whereCondition,
-          {
-            deletedAt: {
-              exists: true,
-            },
-          },
-        ],
-      }
-    }
-
     let queryPreset: QueryPreset | undefined
     let queryPresetPermissions: SanitizedCollectionPermission | undefined
 
