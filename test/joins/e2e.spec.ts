@@ -305,9 +305,12 @@ describe('Join Field', () => {
 
     await expect(joinField.locator('tbody tr')).toHaveCount(3)
 
-    const addButton = joinField.locator('.relationship-table__actions button.doc-drawer__toggler', {
-      hasText: exactText('Add new'),
-    })
+    const addButton = joinField.locator(
+      '.relationship-table__actions button.drawer-link__doc-drawer-toggler',
+      {
+        hasText: exactText('Add new'),
+      },
+    )
 
     await expect(addButton).toBeVisible()
 
@@ -339,7 +342,7 @@ describe('Join Field', () => {
     await expect(joinField).toBeVisible()
 
     const editButton = joinField.locator(
-      'tbody tr:first-child td:nth-child(2) button.doc-drawer__toggler',
+      'tbody tr:first-child td:nth-child(2) button.drawer-link__doc-drawer-toggler',
     )
 
     await expect(editButton).toBeVisible()
@@ -379,7 +382,7 @@ describe('Join Field', () => {
     await expect(joinField).toBeVisible()
 
     const editButton = joinField.locator(
-      'tbody tr:first-child td:nth-child(2) button.doc-drawer__toggler',
+      'tbody tr:first-child td:nth-child(2) button.drawer-link__doc-drawer-toggler',
     )
 
     await expect(editButton).toBeVisible()
@@ -413,7 +416,7 @@ describe('Join Field', () => {
     await expect(rows).toHaveCount(expectedRows)
 
     const editButton = joinField.locator(
-      'tbody tr:first-child td:nth-child(2) button.doc-drawer__toggler',
+      'tbody tr:first-child td:nth-child(2) button.drawer-link__doc-drawer-toggler',
     )
     await expect(editButton).toBeVisible()
     await editButton.click()
@@ -510,9 +513,12 @@ describe('Join Field', () => {
     await expect(joinField).toBeVisible()
 
     // TODO: change this to edit the first row in the join table
-    const addButton = joinField.locator('.relationship-table__actions button.doc-drawer__toggler', {
-      hasText: exactText('Add new'),
-    })
+    const addButton = joinField.locator(
+      '.relationship-table__actions button.drawer-link__doc-drawer-toggler',
+      {
+        hasText: exactText('Add new'),
+      },
+    )
 
     await expect(addButton).toBeVisible()
 

@@ -19,7 +19,7 @@ export const DrawerLink: React.FC<{
     <div className="drawer-link">
       <DefaultCell {...cellProps} className="drawer-link__cell" link={false} onClick={null} />
       <button
-        className="drawer-link__button"
+        className="drawer-link__doc-drawer-toggler"
         onClick={() => {
           onDrawerOpen(cellProps.rowData.id)
         }}
