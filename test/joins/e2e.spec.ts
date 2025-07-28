@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -13,7 +14,7 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-  throttleTest,
+  // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
@@ -134,9 +135,11 @@ describe('Join Field', () => {
       limit: 1,
     })
     const category = result.docs[0]
+
     if (!category) {
       throw new Error('No category found')
     }
+
     // seed additional posts to test defaultLimit (5)
     await payload.create({
       collection: postsSlug,
@@ -145,6 +148,7 @@ describe('Join Field', () => {
         category: category.id,
       },
     })
+
     await payload.create({
       collection: postsSlug,
       data: {
@@ -152,6 +156,7 @@ describe('Join Field', () => {
         category: category.id,
       },
     })
+
     await payload.create({
       collection: postsSlug,
       data: {
@@ -159,6 +164,7 @@ describe('Join Field', () => {
         category: category.id,
       },
     })
+
     await navigateToDoc(page, categoriesURL)
     const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField.locator('.row-1 > .cell-title')).toContainText('z')
@@ -318,6 +324,7 @@ describe('Join Field', () => {
     await titleField.fill('Test Post 4')
     await drawer.locator('button[id="action-save"]').click()
     await expect(drawer).toBeHidden()
+
     await expect(
       joinField.locator('tbody tr td:nth-child(2)', {
         hasText: exactText('Test Post 4'),
@@ -325,23 +332,75 @@ describe('Join Field', () => {
     ).toBeVisible()
   })
 
-  test('should update relationship table when document is updated', async () => {
+  test('should edit joined document and update relationship table', async () => {
     await page.goto(categoriesURL.edit(categoryID))
+
     const joinField = page.locator('#field-group__relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
+
     const editButton = joinField.locator(
       'tbody tr:first-child td:nth-child(2) button.doc-drawer__toggler',
     )
+
     await expect(editButton).toBeVisible()
     await editButton.click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
     const titleField = drawer.locator('#field-title')
     await expect(titleField).toBeVisible()
-    await titleField.fill('Test Post 1 Updated')
+
+    const updatedTitle = 'Test Post 1 Updated'
+
+    await titleField.fill(updatedTitle)
     await drawer.locator('button[id="action-save"]').click()
     await expect(drawer).toBeHidden()
-    await expect(joinField.locator('tbody .row-1')).toContainText('Test Post 1 Updated')
+    await expect(joinField.locator('tbody .row-1')).toContainText(updatedTitle)
+  })
+
+  test('should edit joined document when autosave is enabled', async () => {
+    const categoryVersionsDoc = await payload.create({
+      collection: categoriesVersionsSlug,
+      data: {
+        title: 'Test Category (With Versions)',
+      },
+    })
+
+    await payload.create({
+      collection: versionsSlug,
+      data: {
+        title: 'Test Post',
+        categoryVersion: categoryVersionsDoc.id,
+      },
+    })
+
+    await page.goto(categoriesVersionsURL.edit(categoryVersionsDoc.id))
+
+    const joinField = page.locator('#field-relatedVersions.field-type.join')
+    await expect(joinField).toBeVisible()
+
+    const editButton = joinField.locator(
+      'tbody tr:first-child td:nth-child(2) button.doc-drawer__toggler',
+    )
+
+    await expect(editButton).toBeVisible()
+    await editButton.click()
+    const drawer = page.locator('[id^=doc-drawer_versions_1_]')
+    await expect(drawer).toBeVisible()
+    const titleField = drawer.locator('#field-title')
+    await expect(titleField).toBeVisible()
+
+    const updatedTitle = 'Test Post (Updated)'
+
+    await titleField.fill(updatedTitle)
+
+    await waitForAutoSaveToRunAndComplete(drawer)
+
+    // drawer should remain open after autosave
+    await expect(drawer).toBeVisible()
+
+    await drawer.locator('.doc-drawer__header-close').click()
+    await expect(drawer).toBeHidden()
+    await expect(joinField.locator('tbody .row-1')).toContainText(updatedTitle)
   })
 
   test('should update relationship table when document is deleted', async () => {
@@ -559,7 +618,6 @@ describe('Join Field', () => {
   })
 
   test('should fetch draft documents in joins', async () => {
-    // create category-versions document
     const categoryVersionsDoc = await payload.create({
       collection: categoriesVersionsSlug,
       data: {
@@ -567,7 +625,6 @@ describe('Join Field', () => {
       },
     })
 
-    // create versions document
     const versionDoc = await payload.create({
       collection: versionsSlug,
       data: {
@@ -576,7 +633,6 @@ describe('Join Field', () => {
       },
     })
 
-    // update versions document with draft data
     await payload.update({
       id: versionDoc.id,
       collection: versionsSlug,

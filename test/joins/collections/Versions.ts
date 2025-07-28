@@ -4,6 +4,10 @@ import { versionsSlug } from '../shared.js'
 
 export const Versions: CollectionConfig = {
   slug: versionsSlug,
+  labels: {
+    singular: 'Post With Versions',
+    plural: 'Posts With Versions',
+  },
   fields: [
     {
       name: 'title',
@@ -28,6 +32,8 @@ export const Versions: CollectionConfig = {
     },
   ],
   versions: {
-    drafts: true,
+    drafts: {
+      autosave: true,
+    },
   },
 }
