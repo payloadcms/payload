@@ -1516,6 +1516,16 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/storage-r2:
+    dependencies:
+      '@payloadcms/plugin-cloud-storage':
+        specifier: workspace:*
+        version: link:../plugin-cloud-storage
+    devDependencies:
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/storage-s3:
     dependencies:
       '@aws-sdk/client-s3':
