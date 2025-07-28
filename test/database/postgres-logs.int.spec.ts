@@ -88,4 +88,87 @@ describePostgres('database - postgres logs', () => {
     expect(consoleCount).toHaveBeenCalledTimes(2) // Should be 2 sql call if the optimization is used (update + find). If not, this would be 5 calls
     consoleCount.mockRestore()
   })
+
+  it('ensure deleteMany is done in single db query - no where query', async () => {
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'Some title',
+        number: 5,
+      },
+    })
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'Some title 2',
+        number: 5,
+      },
+    })
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'Some title 2',
+        number: 5,
+      },
+    })
+    // Count every console log
+    const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+
+    await payload.db.deleteMany({
+      collection: 'posts',
+      where: {},
+    })
+
+    expect(consoleCount).toHaveBeenCalledTimes(1)
+    consoleCount.mockRestore()
+
+    const allPosts = await payload.find({
+      collection: 'posts',
+    })
+
+    expect(allPosts.docs).toHaveLength(0)
+  })
+
+  it('ensure deleteMany is done in single db query while respecting where query', async () => {
+    const doc1 = await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'Some title',
+        number: 5,
+      },
+    })
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'Some title 2',
+        number: 5,
+      },
+    })
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'Some title 2',
+        number: 5,
+      },
+    })
+    // Count every console log
+    const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+
+    await payload.db.deleteMany({
+      collection: 'posts',
+      where: {
+        title: { equals: 'Some title 2' },
+      },
+    })
+
+    expect(consoleCount).toHaveBeenCalledTimes(1)
+    consoleCount.mockRestore()
+
+    const allPosts = await payload.find({
+      collection: 'posts',
+    })
+
+    expect(allPosts.docs).toHaveLength(1)
+    expect(allPosts.docs[0].id).toEqual(doc1.id)
+  })
 })

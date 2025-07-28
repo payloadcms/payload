@@ -17,6 +17,7 @@ import {
 } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { Forbidden } from '../../index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
@@ -197,6 +198,13 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     } else if (canLoginWithUsername && sanitizedUsername) {
       whereConstraint = usernameConstraint
     }
+
+    // Exclude trashed users
+    whereConstraint = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash: false,
+      where: whereConstraint,
+    })
 
     let user = await payload.db.findOne<any>({
       collection: collectionConfig.slug,

@@ -19,13 +19,16 @@ const baseClass = 'table'
 
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
+  readonly BeforeTable?: React.ReactNode
   readonly collection: ClientCollectionConfig
   readonly columns?: Column[]
   readonly data: Record<string, unknown>[]
+  readonly heading?: React.ReactNode
 }
 
 export const OrderableTable: React.FC<Props> = ({
   appearance = 'default',
+  BeforeTable,
   collection,
   columns,
   data: initialData,
@@ -163,6 +166,7 @@ export const OrderableTable: React.FC<Props> = ({
         .filter(Boolean)
         .join(' ')}
     >
+      {BeforeTable}
       <DraggableSortable ids={rowIds} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
         <table cellPadding="0" cellSpacing="0">
           <thead>
