@@ -30,23 +30,33 @@ export type DocumentTogglerProps = {
   readonly collectionSlug: string
   readonly disabled?: boolean
   readonly drawerSlug?: string
-  readonly id?: string
+  readonly id?: number | string
   readonly onClick?: () => void
 } & Readonly<HTMLAttributes<HTMLButtonElement>>
 
+export type UseDocumentDrawerContext = {
+  closeDrawer: () => void
+  drawerDepth: number
+  drawerSlug: string
+  isDrawerOpen: boolean
+  openDrawer: () => void
+  toggleDrawer: () => void
+}
+
 export type UseDocumentDrawer = (args: {
+  /**
+   * The slug of the collection to which the document belongs.
+   */
   collectionSlug: string
+  /**
+   * The ID of the document to be edited.
+   * When provided, will be fetched and displayed in the drawer.
+   * If omitted, will render the "create new" view for the given collection.
+   */
   id?: number | string
   overrideEntityVisibility?: boolean
 }) => [
   React.FC<Omit<DocumentDrawerProps, 'collectionSlug' | 'id'>>, // drawer
   React.FC<Omit<DocumentTogglerProps, 'collectionSlug' | 'id'>>, // toggler
-  {
-    closeDrawer: () => void
-    drawerDepth: number
-    drawerSlug: string
-    isDrawerOpen: boolean
-    openDrawer: () => void
-    toggleDrawer: () => void
-  },
+  UseDocumentDrawerContext,
 ]

@@ -23,12 +23,14 @@ export const Versions: CollectionConfig = {
       name: 'categoryVersion',
       relationTo: 'categories-versions',
       type: 'relationship',
+      label: 'Category With Versions',
     },
     {
       name: 'categoryVersions',
       relationTo: 'categories-versions',
       type: 'relationship',
       hasMany: true,
+      label: 'Categories With Versions (Has Many)',
     },
   ],
   versions: {

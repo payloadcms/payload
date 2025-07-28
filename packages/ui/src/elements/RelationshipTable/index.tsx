@@ -28,8 +28,8 @@ import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { AddNewButton } from './AddNewButton.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
-import './index.scss'
 import { RelationshipTablePagination } from './Pagination.js'
+import './index.scss'
 
 const baseClass = 'relationship-table'
 
@@ -69,30 +69,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   } = props
   const [Table, setTable] = useState<React.ReactNode>(null)
   const { config, getEntityConfig } = useConfig()
-
-  const { permissions } = useAuth()
-
-  const [initialData] = useState<PaginatedDocs>(() => {
-    if (initialDataFromProps) {
-      return {
-        ...initialDataFromProps,
-        docs: Array.isArray(initialDataFromProps.docs)
-          ? initialDataFromProps.docs.reduce((acc, doc) => {
-              if (typeof doc === 'string') {
-                return [
-                  ...acc,
-                  {
-                    id: doc,
-                  },
-                ]
-              }
-              return [...acc, doc]
-            }, [])
-          : [],
-      }
-    }
-  })
-
   const { i18n, t } = useTranslation()
 
   const [query, setQuery] = useState<ListQuery>()
@@ -105,8 +81,40 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const [selectedCollection, setSelectedCollection] = useState(
     isPolymorphic ? undefined : relationTo,
   )
+
+  const { permissions } = useAuth()
+
+  const [idToOpen, setIdToOpen] = useState<string | undefined>(undefined)
+
+  const [DocumentDrawer, DrawerToggler, { closeDrawer, isDrawerOpen, openDrawer }] =
+    useDocumentDrawer({
+      id: idToOpen,
+      collectionSlug: selectedCollection,
+    })
+
   const [isLoadingTable, setIsLoadingTable] = useState(!disableTable)
-  const [data, setData] = useState<PaginatedDocs>(initialData)
+
+  const [data, setData] = useState<PaginatedDocs>(() =>
+    initialDataFromProps
+      ? {
+          ...initialDataFromProps,
+          docs: Array.isArray(initialDataFromProps.docs)
+            ? initialDataFromProps.docs.reduce((acc, doc) => {
+                if (typeof doc === 'string') {
+                  return [
+                    ...acc,
+                    {
+                      id: doc,
+                    },
+                  ]
+                }
+                return [...acc, doc]
+              }, [])
+            : [],
+        }
+      : undefined,
+  )
+
   const [columnState, setColumnState] = useState<Column[]>()
 
   const { getTableState } = useServerFunctions()
@@ -183,35 +191,26 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     handleTableRender(query, disableTable)
   }, [query, disableTable])
 
-  const [DocumentDrawer, , { closeDrawer, isDrawerOpen, openDrawer }] = useDocumentDrawer({
-    collectionSlug: selectedCollection,
-  })
-
   const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
-    (args) => {
-      const foundDocIndex = data?.docs?.findIndex((doc) => doc.id === args.doc.id)
+    ({ doc, operation }) => {
+      if (operation === 'create') {
+        closeDrawer()
+      }
+
+      const foundDocIndex = data?.docs?.findIndex((d) => d.id === doc.id)
       const withNewOrUpdatedData: PaginatedDocs = { docs: [] } as PaginatedDocs
 
       if (foundDocIndex !== -1) {
         const newDocs = [...data.docs]
-        newDocs[foundDocIndex] = args.doc
+        newDocs[foundDocIndex] = doc
         withNewOrUpdatedData.docs = newDocs
       } else {
-        withNewOrUpdatedData.docs = [args.doc, ...data.docs]
+        withNewOrUpdatedData.docs = [doc, ...data.docs]
       }
 
       void renderTable(withNewOrUpdatedData)
     },
-    [data?.docs, renderTable],
-  )
-
-  const onDrawerCreate = useCallback<DocumentDrawerProps['onSave']>(
-    (args) => {
-      closeDrawer()
-
-      void onDrawerSave(args)
-    },
-    [closeDrawer, onDrawerSave],
+    [data?.docs, renderTable, closeDrawer],
   )
 
   const onDrawerDelete = useCallback<DocumentDrawerProps['onDelete']>(
@@ -332,9 +331,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                 <TableColumnsProvider
                   collectionSlug={isPolymorphic ? relationTo[0] : relationTo}
                   columnState={columnState}
-                  LinkedCellOverride={
-                    <DrawerLink onDrawerDelete={onDrawerDelete} onDrawerSave={onDrawerSave} />
-                  }
+                  LinkedCellOverride={<DrawerLink DrawerToggler={DrawerToggler} />}
                 >
                   <AnimateHeight
                     className={`${baseClass}__columns`}
@@ -356,7 +353,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         </Fragment>
       )}
       {AfterInput}
-      <DocumentDrawer initialData={initialDrawerData} onSave={onDrawerCreate} />
+      <DocumentDrawer
+        initialData={initialDrawerData}
+        onDelete={onDrawerDelete}
+        onSave={onDrawerSave}
+      />
     </div>
   )
 }
