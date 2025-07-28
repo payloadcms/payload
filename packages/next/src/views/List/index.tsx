@@ -206,22 +206,22 @@ export const renderListView = async (
     let Table: React.ReactNode | React.ReactNode[] = null
     let columnState: Column[] = []
 
-    if (collectionConfig.admin.groupBy && query.groupBy) {
-      ;({ columnState, data, Table } = await handleGroupBy({
-        clientConfig,
-        collectionConfig,
-        collectionSlug,
-        columns: collectionPreferences?.columns,
-        customCellProps,
-        drawerSlug,
-        enableRowSelections,
-        query,
-        req,
-        user,
-        where: whereWithMergedSearch,
-      }))
-    } else {
-      try {
+    try {
+      if (collectionConfig.admin.groupBy && query.groupBy) {
+        ;({ columnState, data, Table } = await handleGroupBy({
+          clientConfig,
+          collectionConfig,
+          collectionSlug,
+          columns: collectionPreferences?.columns,
+          customCellProps,
+          drawerSlug,
+          enableRowSelections,
+          query,
+          req,
+          user,
+          where: whereWithMergedSearch,
+        }))
+      } else {
         data = await req.payload.find({
           collection: collectionSlug,
           depth: 0,
@@ -238,27 +238,27 @@ export const renderListView = async (
           user,
           where: whereWithMergedSearch,
         })
-      } catch (err) {
-        req.payload.logger.error({
-          err,
-          msg: `There was an error fetching the list view data for collection ${collectionSlug}`,
-        })
+        ;({ columnState, Table } = renderTable({
+          clientCollectionConfig: clientConfig.collections.find((c) => c.slug === collectionSlug),
+          collectionConfig,
+          columns: collectionPreferences?.columns,
+          customCellProps,
+          data,
+          drawerSlug,
+          enableRowSelections,
+          i18n: req.i18n,
+          orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
+          payload: req.payload,
+          query,
+          useAsTitle: collectionConfig.admin.useAsTitle,
+          viewType,
+        }))
       }
-      ;({ columnState, Table } = renderTable({
-        clientCollectionConfig: clientConfig.collections.find((c) => c.slug === collectionSlug),
-        collectionConfig,
-        columns: collectionPreferences?.columns,
-        customCellProps,
-        data,
-        drawerSlug,
-        enableRowSelections,
-        i18n: req.i18n,
-        orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
-        payload: req.payload,
-        query,
-        useAsTitle: collectionConfig.admin.useAsTitle,
-        viewType,
-      }))
+    } catch (err) {
+      req.payload.logger.error({
+        err,
+        msg: `There was an error fetching the list view data for collection ${collectionSlug}`,
+      })
     }
 
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
