@@ -13,6 +13,7 @@ export const PostsCollection: CollectionConfig = {
     groupBy: true,
     defaultColumns: ['title', 'category', 'createdAt', 'updatedAt'],
   },
+  trash: true,
   fields: [
     {
       name: 'title',

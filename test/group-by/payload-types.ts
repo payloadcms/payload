@@ -143,6 +143,7 @@ export interface Post {
   tab1Field?: string | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -298,6 +299,7 @@ export interface PostsSelect<T extends boolean = true> {
   tab1Field?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

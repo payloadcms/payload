@@ -205,6 +205,7 @@ export const renderListView = async (
         enableRowSelections,
         query,
         req,
+        trash: query?.trash === true,
         user,
         where: whereWithMergedSearch,
       }))
