@@ -416,9 +416,8 @@ export const renderDocument = async ({
             <DocumentHeader
               collectionConfig={collectionConfig}
               globalConfig={globalConfig}
-              i18n={i18n}
-              payload={payload}
               permissions={permissions}
+              req={req}
             />
           )}
           <HydrateAuthProvider permissions={permissions} />

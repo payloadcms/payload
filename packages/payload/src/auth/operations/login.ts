@@ -50,6 +50,11 @@ type CheckLoginPermissionArgs = {
   user: any
 }
 
+/**
+ * Throws an error if the user is locked or does not exist.
+ * This does not check the login attempts, only the lock status. Whoever increments login attempts
+ * is responsible for locking the user properly, not whoever checks the login permission.
+ */
 export const checkLoginPermission = ({
   loggingInWithUsername,
   req,
@@ -59,7 +64,7 @@ export const checkLoginPermission = ({
     throw new AuthenticationError(req.t, Boolean(loggingInWithUsername))
   }
 
-  if (isUserLocked(new Date(user.lockUntil).getTime())) {
+  if (isUserLocked(new Date(user.lockUntil))) {
     throw new LockedAuth(req.t)
   }
 }
@@ -206,11 +211,11 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       where: whereConstraint,
     })
 
-    let user = await payload.db.findOne<any>({
+    let user = (await payload.db.findOne<TypedUser>({
       collection: collectionConfig.slug,
       req,
       where: whereConstraint,
-    })
+    })) as TypedUser
 
     checkLoginPermission({
       loggingInWithUsername: Boolean(canLoginWithUsername && sanitizedUsername),
@@ -230,9 +235,16 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       if (maxLoginAttemptsEnabled) {
         await incrementLoginAttempts({
           collection: collectionConfig,
-          doc: user,
           payload: req.payload,
           req,
+          user,
+        })
+
+        // Re-check login permissions and max attempts after incrementing attempts, in case parallel updates occurred
+        checkLoginPermission({
+          loggingInWithUsername: Boolean(canLoginWithUsername && sanitizedUsername),
+          req,
+          user,
         })
       }
 
@@ -241,6 +253,30 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
 
     if (collectionConfig.auth.verify && user._verified === false) {
       throw new UnverifiedEmail({ t: req.t })
+    }
+
+    /*
+     * Correct password accepted - re‑check that the account didn't
+     * get locked by parallel bad attempts in the meantime.
+     */
+    if (maxLoginAttemptsEnabled) {
+      const { lockUntil, loginAttempts } = (await payload.db.findOne<TypedUser>({
+        collection: collectionConfig.slug,
+        req,
+        select: {
+          lockUntil: true,
+          loginAttempts: true,
+        },
+        where: { id: { equals: user.id } },
+      }))!
+
+      user.lockUntil = lockUntil
+      user.loginAttempts = loginAttempts
+
+      checkLoginPermission({
+        req,
+        user,
+      })
     }
 
     const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
