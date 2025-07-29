@@ -2,7 +2,7 @@ import type { RelationshipFieldSingleValidation, SingleRelationshipField } from 
 
 import { APIError } from 'payload'
 
-import type { TenantFieldConfigOverrides } from '../../types.js'
+import type { RootTenantFieldConfigOverrides } from '../../types.js'
 
 import { defaults } from '../../defaults.js'
 import { getCollectionIDType } from '../../utilities/getCollectionIDType.js'
@@ -11,7 +11,7 @@ import { getTenantFromCookie } from '../../utilities/getTenantFromCookie.js'
 type Args = {
   debug?: boolean
   name: string
-  overrides?: TenantFieldConfigOverrides
+  overrides?: RootTenantFieldConfigOverrides
   tenantsCollectionSlug: string
   unique: boolean
 }
