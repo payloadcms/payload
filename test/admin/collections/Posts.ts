@@ -293,6 +293,13 @@ export const Posts: CollectionConfig = {
       name: 'file',
       type: 'text',
     },
+    {
+      name: 'noReadAccessField',
+      type: 'text',
+      access: {
+        read: () => false,
+      },
+    },
   ],
   labels: {
     plural: slugPluralLabel,
