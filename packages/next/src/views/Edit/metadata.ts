@@ -16,6 +16,7 @@ export const generateEditViewMetadata: GenerateEditViewMetadata = async ({
   globalConfig,
   i18n,
   isEditing,
+  isReadOnly = false,
   view = 'default',
 }): Promise<Metadata> => {
   const { t } = i18n
@@ -26,11 +27,17 @@ export const generateEditViewMetadata: GenerateEditViewMetadata = async ({
       ? getTranslation(globalConfig.label, i18n)
       : ''
 
+  const verb = isReadOnly
+    ? t('general:viewing')
+    : isEditing
+      ? t('general:editing')
+      : t('general:creating')
+
   const metaToUse: MetaConfig = {
     ...(config.admin.meta || {}),
-    description: `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`,
+    description: `${verb} - ${entityLabel}`,
     keywords: `${entityLabel}, Payload, CMS`,
-    title: `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`,
+    title: `${verb} - ${entityLabel}`,
   }
 
   const ogToUse: MetaConfig['openGraph'] = {

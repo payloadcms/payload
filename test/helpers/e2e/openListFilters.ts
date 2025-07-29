@@ -2,11 +2,15 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
+/**
+ * Opens the list filters drawer in the list view. If it's already open, does nothing.
+ * Return the filter container locator for further interactions.
+ */
 export const openListFilters = async (
   page: Page,
   {
-    togglerSelector = '.list-controls__toggle-where',
-    filterContainerSelector = '.list-controls__where',
+    togglerSelector = '#toggle-list-filters',
+    filterContainerSelector = '#list-controls-where',
   }: {
     filterContainerSelector?: string
     togglerSelector?: string

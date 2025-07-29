@@ -30,6 +30,7 @@ export type RenderFieldArgs = {
   permissions: SanitizedFieldPermissions
   preferences: DocumentPreferences
   previousFieldState: FieldState
+  readOnly?: boolean
   renderAllFields: boolean
   req: PayloadRequest
   schemaPath: string

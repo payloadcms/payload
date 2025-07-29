@@ -16,6 +16,7 @@ import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
+import { GroupByBuilder } from '../GroupByBuilder/index.js'
 import { Pill } from '../Pill/index.js'
 import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
@@ -81,7 +82,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   const hasWhereParam = useRef(Boolean(query?.where))
 
   const shouldInitializeWhereOpened = validateWhereQuery(query?.where)
-  const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
+
+  const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'group-by' | 'sort' | 'where'>(
     shouldInitializeWhereOpened ? 'where' : undefined,
   )
 
@@ -121,6 +123,24 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     }
   }, [t, listSearchableFields, i18n, searchLabel])
 
+<<<<<<< HEAD
+=======
+  let listMenuItems: React.ReactNode[] = listMenuItemsFromProps
+
+  if (
+    collectionConfig.enableQueryPresets &&
+    !disableQueryPresets &&
+    queryPresetMenuItems?.length > 0
+  ) {
+    // Cannot push or unshift into `listMenuItemsFromProps` as it will mutate the original array
+    listMenuItems = [
+      ...queryPresetMenuItems,
+      listMenuItemsFromProps?.length > 0 ? <PopupList.Divider key="divider" /> : null,
+      ...(listMenuItemsFromProps || []),
+    ]
+  }
+
+>>>>>>> main
   return (
     <div className={baseClass}>
       {collectionConfig?.enableQueryPresets && !disableQueryPresets && (
@@ -139,6 +159,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             label={searchLabelTranslated.current}
             searchQueryParam={query?.search}
           />
+<<<<<<< HEAD
         </div>
         <div className={`${baseClass}__buttons`}>
           {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
@@ -196,6 +217,133 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             </Popup>
           )}
         </div>
+=======
+          {activePreset && hasModifiedPreset ? (
+            <div className={`${baseClass}__modified`}>Modified</div>
+          ) : null}
+          <div className={`${baseClass}__buttons`}>
+            <div className={`${baseClass}__buttons-wrap`}>
+              {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
+              {enableColumns && (
+                <Pill
+                  aria-controls={`${baseClass}-columns`}
+                  aria-expanded={visibleDrawer === 'columns'}
+                  className={`${baseClass}__toggle-columns`}
+                  icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
+                  id="toggle-columns"
+                  onClick={() =>
+                    setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
+                  }
+                  pillStyle="light"
+                  size="small"
+                >
+                  {t('general:columns')}
+                </Pill>
+              )}
+              {enableFilters && (
+                <Pill
+                  aria-controls={`${baseClass}-where`}
+                  aria-expanded={visibleDrawer === 'where'}
+                  className={`${baseClass}__toggle-where`}
+                  icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
+                  id="toggle-list-filters"
+                  onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
+                  pillStyle="light"
+                  size="small"
+                >
+                  {t('general:filters')}
+                </Pill>
+              )}
+              {enableSort && (
+                <Pill
+                  aria-controls={`${baseClass}-sort`}
+                  aria-expanded={visibleDrawer === 'sort'}
+                  className={`${baseClass}__toggle-sort`}
+                  icon={<ChevronIcon />}
+                  onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
+                  pillStyle="light"
+                  size="small"
+                >
+                  {t('general:sort')}
+                </Pill>
+              )}
+              {!disableQueryPresets && (
+                <ActiveQueryPreset
+                  activePreset={activePreset}
+                  openPresetListDrawer={openPresetListDrawer}
+                  resetPreset={resetPreset}
+                />
+              )}
+              {collectionConfig.admin.groupBy && (
+                <Pill
+                  aria-controls={`${baseClass}-group-by`}
+                  aria-expanded={visibleDrawer === 'group-by'}
+                  className={`${baseClass}__toggle-group-by`}
+                  icon={<ChevronIcon direction={visibleDrawer === 'group-by' ? 'up' : 'down'} />}
+                  id="toggle-group-by"
+                  onClick={() =>
+                    setVisibleDrawer(visibleDrawer !== 'group-by' ? 'group-by' : undefined)
+                  }
+                  pillStyle="light"
+                  size="small"
+                >
+                  {t('general:groupByLabel', {
+                    label: '',
+                  })}
+                </Pill>
+              )}
+              {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
+                <Popup
+                  button={<Dots ariaLabel={t('general:moreOptions')} />}
+                  className={`${baseClass}__popup`}
+                  horizontalAlign="right"
+                  id="list-menu"
+                  size="medium"
+                  verticalAlign="bottom"
+                >
+                  {listMenuItems.map((item, i) => (
+                    <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
+                  ))}
+                </Popup>
+              )}
+            </div>
+          </div>
+        </div>
+        {enableColumns && (
+          <AnimateHeight
+            className={`${baseClass}__columns`}
+            height={visibleDrawer === 'columns' ? 'auto' : 0}
+            id={`${baseClass}-columns`}
+          >
+            <ColumnSelector collectionSlug={collectionConfig.slug} />
+          </AnimateHeight>
+        )}
+        <AnimateHeight
+          className={`${baseClass}__where`}
+          height={visibleDrawer === 'where' ? 'auto' : 0}
+          id={`${baseClass}-where`}
+        >
+          <WhereBuilder
+            collectionPluralLabel={collectionConfig.labels?.plural}
+            collectionSlug={collectionConfig.slug}
+            fields={collectionConfig.fields}
+            renderedFilters={renderedFilters}
+            resolvedFilterOptions={resolvedFilterOptions}
+          />
+        </AnimateHeight>
+        {collectionConfig.admin.groupBy && (
+          <AnimateHeight
+            className={`${baseClass}__group-by`}
+            height={visibleDrawer === 'group-by' ? 'auto' : 0}
+            id={`${baseClass}-group-by`}
+          >
+            <GroupByBuilder
+              collectionSlug={collectionConfig.slug}
+              fields={collectionConfig.fields}
+            />
+          </AnimateHeight>
+        )}
+>>>>>>> main
       </div>
       {enableColumns && (
         <AnimateHeight

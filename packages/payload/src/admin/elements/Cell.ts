@@ -22,6 +22,7 @@ import type {
   UploadFieldClient,
 } from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
+import type { ViewTypes } from '../types.js'
 
 export type RowData = Record<string, any>
 
@@ -82,6 +83,7 @@ export type DefaultCellComponentProps<
     rowData: RowData
   }) => void
   rowData: RowData
+  viewType?: ViewTypes
 }
 
 export type DefaultServerCellComponentProps<
