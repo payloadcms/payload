@@ -75,6 +75,7 @@ export const testEslintConfig = [
             'createFolder',
             'createFolderFromDoc',
             'assertURLParams',
+            'uploadImage',
           ],
         },
       ],
