@@ -21,7 +21,6 @@ import { StickyToolbar } from '../../elements/StickyToolbar/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
-import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
@@ -68,8 +67,6 @@ export function DefaultListView(props: ListViewClientProps) {
     allowCreate !== undefined
       ? allowCreate && hasCreatePermissionFromProps
       : hasCreatePermissionFromProps
-
-  const { user } = useAuth()
 
   const {
     config: {
