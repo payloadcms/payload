@@ -39,6 +39,7 @@ import {
   relationSlug,
   restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
+  skipSafeFetchHeaderFilterSlug,
   skipSafeFetchMediaSlug,
   svgOnlySlug,
   threeDimensionalSlug,
@@ -463,6 +464,15 @@ export default buildConfigWithDefaults({
       upload: {
         skipSafeFetch: true,
         staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
+      slug: skipSafeFetchHeaderFilterSlug,
+      fields: [],
+      upload: {
+        skipSafeFetch: true,
+        staticDir: path.resolve(dirname, './media'),
+        externalFileHeaderFilter: (headers) => headers, // Keep all headers including cookies
       },
     },
     {

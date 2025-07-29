@@ -83,6 +83,7 @@ export interface Config {
     media: Media;
     'allow-list-media': AllowListMedia;
     'skip-safe-fetch-media': SkipSafeFetchMedia;
+    'skip-safe-fetch-header-filter': SkipSafeFetchHeaderFilter;
     'skip-allow-list-safe-fetch-media': SkipAllowListSafeFetchMedia;
     'restrict-file-types': RestrictFileType;
     'no-restrict-file-types': NoRestrictFileType;
@@ -141,6 +142,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'allow-list-media': AllowListMediaSelect<false> | AllowListMediaSelect<true>;
     'skip-safe-fetch-media': SkipSafeFetchMediaSelect<false> | SkipSafeFetchMediaSelect<true>;
+    'skip-safe-fetch-header-filter': SkipSafeFetchHeaderFilterSelect<false> | SkipSafeFetchHeaderFilterSelect<true>;
     'skip-allow-list-safe-fetch-media': SkipAllowListSafeFetchMediaSelect<false> | SkipAllowListSafeFetchMediaSelect<true>;
     'restrict-file-types': RestrictFileTypesSelect<false> | RestrictFileTypesSelect<true>;
     'no-restrict-file-types': NoRestrictFileTypesSelect<false> | NoRestrictFileTypesSelect<true>;
@@ -817,6 +819,24 @@ export interface AllowListMedia {
  * via the `definition` "skip-safe-fetch-media".
  */
 export interface SkipSafeFetchMedia {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-safe-fetch-header-filter".
+ */
+export interface SkipSafeFetchHeaderFilter {
   id: string;
   updatedAt: string;
   createdAt: string;
@@ -1699,6 +1719,10 @@ export interface PayloadLockedDocument {
         value: string | SkipSafeFetchMedia;
       } | null)
     | ({
+        relationTo: 'skip-safe-fetch-header-filter';
+        value: string | SkipSafeFetchHeaderFilter;
+      } | null)
+    | ({
         relationTo: 'skip-allow-list-safe-fetch-media';
         value: string | SkipAllowListSafeFetchMedia;
       } | null)
@@ -2521,6 +2545,23 @@ export interface AllowListMediaSelect<T extends boolean = true> {
  * via the `definition` "skip-safe-fetch-media_select".
  */
 export interface SkipSafeFetchMediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-safe-fetch-header-filter_select".
+ */
+export interface SkipSafeFetchHeaderFilterSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3409,6 +3450,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
