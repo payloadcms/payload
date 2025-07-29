@@ -279,6 +279,10 @@ export const multiTenantPlugin =
           tenantsCollectionSlug,
         })
 
+        const overrides = pluginConfig.collections[collection.slug]?.tenantFieldOverrides
+          ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
+          : pluginConfig.tenantField || {}
+
         /**
          * Add tenant field to enabled collections
          */
@@ -286,9 +290,9 @@ export const multiTenantPlugin =
           0,
           0,
           tenantField({
-            ...(pluginConfig?.tenantField || {}),
             name: tenantFieldName,
             debug: pluginConfig.debug,
+            overrides,
             tenantsCollectionSlug,
             unique: isGlobal,
           }),
