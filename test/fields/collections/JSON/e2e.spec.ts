@@ -138,7 +138,7 @@ describe('JSON', () => {
     const originalHeight = boundingBox!.height
 
     // click the button to set custom JSON
-    await page.locator('#set-custom-json').click({ delay: 200 })
+    await page.locator('#set-custom-json').click({ delay: 1000 })
 
     const newBoundingBox = await page
       .locator('.json-field:not(.read-only) #field-customJSON')
