@@ -88,17 +88,16 @@ const config = buildConfig({
     // ...
     livePreview: {
       // highlight-start
-      url: ({
-        data,
-        collectionConfig,
-        locale
-      }) => `${data.tenant.url}${ // Multi-tenant top-level domain
-        collectionConfig.slug === 'posts' ? `/posts/${data.slug}` : `${data.slug !== 'home' : `/${data.slug}` : ''}`
-      }${locale ? `?locale=${locale?.code}` : ''}`, // Localization query param
+      url: ({ data, collectionConfig, locale }) =>
+        `${data.tenant.url}${
+          collectionConfig.slug === 'posts'
+            ? `/posts/${data.slug}`
+            : `${data.slug !== 'home' ? `/${data.slug}` : ''}`
+        }${locale ? `?locale=${locale?.code}` : ''}`, // Localization query param
       collections: ['pages'],
     },
     // highlight-end
-  }
+  },
 })
 ```
 
