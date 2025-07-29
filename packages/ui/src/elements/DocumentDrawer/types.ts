@@ -60,13 +60,13 @@ export type UseDocumentDrawer = (args: {
   React.FC<
     {
       children?: React.ReactNode
-    } & Omit<DocumentDrawerProps, 'collectionSlug' | 'id'>
+    } & Omit<DocumentDrawerProps, 'collectionSlug' | 'operation'>
   >,
   // toggler
   React.FC<
     {
       children?: React.ReactNode
-    } & Omit<DocumentTogglerProps, 'collectionSlug' | 'id'>
+    } & Omit<DocumentTogglerProps, 'collectionSlug' | 'operation'>
   >,
   // context
   UseDocumentDrawerContext,
