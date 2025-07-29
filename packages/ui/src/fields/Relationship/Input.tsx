@@ -636,6 +636,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const prevValue = useRef(value)
   const isFirstRenderRef = useRef(true)
+
   // ///////////////////////////////////
   // Ensure we have an option for each value
   // ///////////////////////////////////
