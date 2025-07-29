@@ -282,7 +282,6 @@ export const etTranslations: DefaultTranslationsObject = {
     deleted: 'Kustutatud',
     deletedAt: 'Kustutatud',
     deletedCountSuccessfully: 'Kustutatud {{count}} {{label}} edukalt.',
-    deletedSuccessfully: 'Edukalt kustutatud.',
     deletedSuccessfully: 'Kustutatud edukalt.',
     deleteLabel: 'Kustuta {{label}}',
     deletePermanently: 'Jäta prügikasti vahele ja kustuta lõplikult',
