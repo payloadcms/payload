@@ -29,7 +29,8 @@ import {
 } from '../locked-documents/config.js'
 import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
 import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
-import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/index.js'
+import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
+import { getJobStatsGlobal } from '../queues/config/global.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
@@ -313,7 +314,28 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   // Need to add default jobs collection before locked documents collections
   if (config.jobs.enabled) {
-    let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
+    // Check for schedule property in both tasks and workflows
+    const hasScheduleProperty =
+      (config?.jobs?.tasks?.length && config.jobs.tasks.some((task) => task.schedule)) ||
+      (config?.jobs?.workflows?.length &&
+        config.jobs.workflows.some((workflow) => workflow.schedule))
+
+    if (hasScheduleProperty) {
+      config.jobs.scheduling = true
+      // Add payload-jobs-stats global for tracking when a job of a specific slug was last run
+      ;(config.globals ??= []).push(
+        await sanitizeGlobal(
+          config as unknown as Config,
+          getJobStatsGlobal(config as unknown as Config),
+          richTextSanitizationPromises,
+          validRelationships,
+        ),
+      )
+
+      config.jobs.stats = true
+    }
+
+    let defaultJobsCollection = getDefaultJobsCollection(config.jobs)
 
     if (typeof config.jobs.jobsCollectionOverrides === 'function') {
       defaultJobsCollection = config.jobs.jobsCollectionOverrides({
@@ -342,7 +364,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       validRelationships,
     )
 
-    configWithDefaults.collections!.push(sanitizedJobsCollection)
+    ;(config.collections ??= []).push(sanitizedJobsCollection)
   }
 
   if (config.folders !== false && folderEnabledCollections.length) {

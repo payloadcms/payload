@@ -36,7 +36,8 @@
 
     .pill-selector,
     .where-builder,
-    .sort-complex {
+    .sort-complex,
+    .group-by-builder {
       margin-top: base(1);
     }
 
@@ -90,7 +91,8 @@
 
       &__toggle-columns,
       &__toggle-where,
-      &__toggle-sort {
+      &__toggle-sort,
+      &__toggle-group-by {
         flex: 1;
       }
     }

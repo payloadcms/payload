@@ -20,6 +20,7 @@ import type {
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
 import { TaskError } from '../../../errors/index.js'
+import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { getTaskHandlerFromConfig } from './importHandlerPath.js'
 
 const ObjectId = (ObjectIdImport.default ||
@@ -54,7 +55,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         task,
       }: Parameters<RunInlineTaskFunction>[1] & Parameters<RunTaskFunction<string>>[1],
     ) => {
-      const executedAt = new Date()
+      const executedAt = getCurrentDate()
 
       let taskConfig: TaskConfig | undefined
       if (!isInline) {
@@ -186,7 +187,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
 
       ;(job.log ??= []).push({
         id: new ObjectId().toHexString(),
-        completedAt: new Date().toISOString(),
+        completedAt: getCurrentDate().toISOString(),
         executedAt: executedAt.toISOString(),
         input,
         output,

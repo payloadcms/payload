@@ -1,14 +1,15 @@
 #!/bin/bash
 
-severity=${1:-"critical"}
-audit_json=$(pnpm audit --prod --json)
+severity=${1:-"high"}
 output_file="audit_output.json"
 
 echo "Auditing for ${severity} vulnerabilities..."
 
+audit_json=$(pnpm audit --prod --json)
+
 echo "${audit_json}" | jq --arg severity "${severity}" '
   .advisories | to_entries |
-  map(select(.value.patched_versions != "<0.0.0" and .value.severity == $severity) |
+  map(select(.value.patched_versions != "<0.0.0" and (.value.severity == $severity or ($severity == "high" and .value.severity == "critical"))) |
     {
       package: .value.module_name,
       vulnerable: .value.vulnerable_versions,

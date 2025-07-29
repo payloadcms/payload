@@ -144,6 +144,9 @@ export interface BaseDatabaseAdapter {
     }
   }
 
+  /**
+   * Updates a global that exists. If the global doesn't exist yet, this will not work - you should use `createGlobal` instead.
+   */
   updateGlobal: UpdateGlobal
 
   updateGlobalVersion: UpdateGlobalVersion

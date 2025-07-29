@@ -490,12 +490,15 @@ describe('Join Field', () => {
     await page.goto(foldersURL.edit(rootFolderID))
     const joinField = page.locator('#field-children.field-type.join')
     await expect(joinField).toBeVisible()
+
     await expect(
       joinField.locator('.relationship-table tbody .row-1 .cell-collection .pill__label'),
     ).toHaveText('Folder')
+
     await expect(
       joinField.locator('.relationship-table tbody .row-3 .cell-collection .pill__label'),
     ).toHaveText('Example Post')
+
     await expect(
       joinField.locator('.relationship-table tbody .row-5 .cell-collection .pill__label'),
     ).toHaveText('Example Page')
