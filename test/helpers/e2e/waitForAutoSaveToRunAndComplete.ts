@@ -1,11 +1,11 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 import { POLL_TOPASS_TIMEOUT } from 'playwright.config.js'
 
 export async function waitForAutoSaveToRunAndComplete(
-  page: Page,
+  page: Locator | Page,
   expectation: 'error' | 'success' = 'success',
 ) {
   await expect(async () => {

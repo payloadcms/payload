@@ -144,6 +144,7 @@ export const handleGroupBy = async ({
 
       if (
         groupByField?.type === 'relationship' &&
+        potentiallyPopulatedRelationship &&
         typeof potentiallyPopulatedRelationship === 'object'
       ) {
         heading =

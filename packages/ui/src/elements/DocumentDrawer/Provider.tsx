@@ -26,7 +26,7 @@ export type DocumentDrawerContextProps = {
   }) => Promise<FormState | void> | void
 }
 
-export type DocumentDrawerContextType = DocumentDrawerContextProps
+export type DocumentDrawerContextType = {} & DocumentDrawerContextProps
 
 export const DocumentDrawerCallbacksContext = createContext({} as DocumentDrawerContextType)
 
