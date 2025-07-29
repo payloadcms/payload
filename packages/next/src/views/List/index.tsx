@@ -41,6 +41,10 @@ type RenderListViewArgs = {
   query: ListQuery
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
+  /**
+   * @experimental This prop is subject to change in future releases.
+   */
+  trash?: boolean
 } & AdminViewServerProps
 
 /**
@@ -67,6 +71,7 @@ export const renderListView = async (
     params,
     query: queryFromArgs,
     searchParams,
+    trash,
     viewType,
   } = args
 
@@ -154,7 +159,7 @@ export const renderListView = async (
       where: combineWhereConstraints([query?.where, baseListFilter]),
     })
 
-    if (query?.trash === true) {
+    if (trash === true) {
       whereWithMergedSearch = {
         and: [
           whereWithMergedSearch,
@@ -205,7 +210,7 @@ export const renderListView = async (
         enableRowSelections,
         query,
         req,
-        trash: query?.trash === true,
+        trash,
         user,
         where: whereWithMergedSearch,
       }))
@@ -222,7 +227,7 @@ export const renderListView = async (
         page: query?.page ? Number(query.page) : undefined,
         req,
         sort: query?.sort,
-        trash: query?.trash === true,
+        trash,
         user,
         where: whereWithMergedSearch,
       })

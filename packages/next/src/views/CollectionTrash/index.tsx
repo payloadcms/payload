@@ -19,17 +19,14 @@ type RenderTrashViewArgs = {
   redirectAfterRestore?: boolean
 } & AdminViewServerProps
 
-export const TrashView: React.FC<
-  { query?: any } & Omit<RenderTrashViewArgs, 'enableRowSelections'>
-> = async (args) => {
+export const TrashView: React.FC<Omit<RenderTrashViewArgs, 'enableRowSelections'>> = async (
+  args,
+) => {
   try {
     const { List: TrashList } = await renderListView({
       ...args,
       enableRowSelections: true,
-      query: {
-        ...(args.query || {}),
-        trash: true, // force trash view
-      },
+      trash: true,
       viewType: 'trash',
     })
 
