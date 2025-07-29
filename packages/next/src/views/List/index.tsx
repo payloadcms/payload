@@ -1,20 +1,19 @@
-import type {
-  AdminViewServerProps,
-  CollectionPreferences,
-  Column,
-  ColumnPreference,
-  ListQuery,
-  ListViewClientProps,
-  ListViewServerPropsOnly,
-  PaginatedDocs,
-  QueryPreset,
-  SanitizedCollectionPermission,
-} from 'payload'
-
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
+import {
+  type AdminViewServerProps,
+  type CollectionPreferences,
+  type Column,
+  type ColumnPreference,
+  type ListQuery,
+  type ListViewClientProps,
+  type ListViewServerPropsOnly,
+  type PaginatedDocs,
+  type QueryPreset,
+  type SanitizedCollectionPermission,
+} from 'payload'
 import {
   combineWhereConstraints,
   formatAdminURL,
@@ -190,6 +189,8 @@ export const renderListView = async (
       }
     }
 
+    let Table: React.ReactNode | React.ReactNode[] = null
+    let columnState: Column[] = []
     let data: PaginatedDocs = {
       // no results default
       docs: [],
@@ -203,8 +204,6 @@ export const renderListView = async (
       totalDocs: 0,
       totalPages: 0,
     }
-    let Table: React.ReactNode | React.ReactNode[] = null
-    let columnState: Column[] = []
 
     try {
       if (collectionConfig.admin.groupBy && query.groupBy) {
@@ -256,10 +255,14 @@ export const renderListView = async (
         }))
       }
     } catch (err) {
-      req.payload.logger.error({
-        err,
-        msg: `There was an error fetching the list view data for collection ${collectionSlug}`,
-      })
+      if (err.name !== 'QueryError') {
+        // QueryErrors are expected when a user filters by a field they do not have access to
+        req.payload.logger.error({
+          err,
+          msg: `There was an error fetching the list view data for collection ${collectionSlug}`,
+        })
+        throw err
+      }
     }
 
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
