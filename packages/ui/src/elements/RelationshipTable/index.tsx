@@ -103,7 +103,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           ...initialDataFromProps,
           docs: Array.isArray(initialDataFromProps.docs)
             ? initialDataFromProps.docs.reduce((acc, doc) => {
-                if (typeof doc === 'string') {
+                if (typeof doc === 'string' || typeof doc === 'number') {
                   return [
                     ...acc,
                     {
@@ -111,6 +111,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     },
                   ]
                 }
+
                 return [...acc, doc]
               }, [])
             : [],
