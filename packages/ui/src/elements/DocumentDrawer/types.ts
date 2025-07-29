@@ -1,4 +1,4 @@
-import type { Data, FormState } from 'payload'
+import type { Data, FormState, Operation } from 'payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
@@ -30,11 +30,8 @@ export type DocumentTogglerProps = {
   readonly collectionSlug: string
   readonly disabled?: boolean
   readonly drawerSlug?: string
-  /**
-   * The `id` HTML attribute for the toggler button.
-   */
-  readonly id?: string
   readonly onClick?: () => void
+  readonly operation: Operation
 } & Readonly<HTMLAttributes<HTMLButtonElement>>
 
 export type UseDocumentDrawerContext = {

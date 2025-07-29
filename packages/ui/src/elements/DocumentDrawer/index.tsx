@@ -31,13 +31,13 @@ const formatDocumentDrawerSlug = ({
 }) => `doc-drawer_${collectionSlug}_${depth}${id ? `_${id}` : ''}_${uuid}`
 
 export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
-  id,
   children,
   className,
   collectionSlug,
   disabled,
   drawerSlug,
   onClick,
+  operation,
   ...rest
 }) => {
   const { t } = useTranslation()
@@ -45,7 +45,7 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
 
   return (
     <DrawerToggler
-      aria-label={t(!id ? 'fields:addNewLabel' : 'general:editLabel', {
+      aria-label={t(operation === 'create' ? 'fields:addNewLabel' : 'general:editLabel', {
         label: collectionConfig?.labels.singular,
       })}
       className={[className, `${documentDrawerBaseClass}__toggler`].filter(Boolean).join(' ')}
@@ -140,7 +140,7 @@ export const useDocumentDrawer: UseDocumentDrawer = ({
         {...props}
         collectionSlug={collectionSlug}
         drawerSlug={drawerSlug}
-        id={id?.toString()}
+        operation={!id ? 'create' : 'update'}
       />
     )
   }, [id, drawerSlug, collectionSlug])
