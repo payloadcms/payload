@@ -630,6 +630,7 @@ test.describe('Group By', () => {
     await firstTable.locator('.list-selection__button[aria-label="Delete"]').click()
 
     const modalId = `[id^="${category1Id}-confirm-delete-many-docs"]`
+    await expect(page.locator(modalId)).toBeVisible()
 
     // Confirm trash (skip permanent delete)
     await page.locator(`${modalId} #confirm-action`).click()

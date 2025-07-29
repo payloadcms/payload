@@ -66,6 +66,9 @@ describe('Live Preview', () => {
     const context = await browser.newContext()
     page = await context.newPage()
 
+    initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
+
     user = await payload
       .login({
         collection: 'users',
@@ -75,10 +78,6 @@ describe('Live Preview', () => {
         },
       })
       ?.then((res) => res.user) // TODO: this type is wrong
-
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {
