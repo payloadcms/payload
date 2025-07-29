@@ -74,9 +74,9 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         return
       }
 
-      let disableFormModication = false
+      let disableFormModification = false
       if (isPolymorphic) {
-        disableFormModication =
+        disableFormModification =
           Array.isArray(value) &&
           Array.isArray(newValue) &&
           value.length === newValue.length &&
@@ -85,7 +85,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
             return val.value === newVal.value && val.relationTo === newVal.relationTo
           })
       } else {
-        disableFormModication =
+        disableFormModification =
           Array.isArray(value) &&
           Array.isArray(newValue) &&
           value.length === newValue.length &&
@@ -99,7 +99,8 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
           return val.value
         }
       })
-      setValue(dataToSet, disableFormModication)
+
+      setValue(dataToSet, disableFormModification)
     },
     [isPolymorphic, setValue, value],
   )
@@ -111,19 +112,19 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         return
       }
 
-      let disableFormModication = false
+      let disableFormModification = false
       if (isPolymorphic) {
-        disableFormModication =
+        disableFormModification =
           value &&
           newValue &&
           (value as PolymorphicRelationValue).value === newValue.value &&
           (value as PolymorphicRelationValue).relationTo === newValue.relationTo
       } else {
-        disableFormModication = value && newValue && value === newValue.value
+        disableFormModification = value && newValue && value === newValue.value
       }
 
       const dataToSet = isPolymorphic ? newValue : newValue.value
-      setValue(dataToSet, disableFormModication)
+      setValue(dataToSet, disableFormModification)
     },
     [isPolymorphic, setValue, value],
   )
