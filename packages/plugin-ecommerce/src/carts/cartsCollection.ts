@@ -93,23 +93,7 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
         },
       ],
     },
-    {
-      name: 'test',
-      type: 'group',
-      fields: [
-        {
-          name: 'child',
-          type: 'array',
-          fields: [
-            {
-              name: 'child2',
-              type: 'text',
-              defaultValue: 'fewef',
-            },
-          ],
-        },
-      ],
-    },
+
     ...(enableCoupons && currenciesConfig
       ? [
           {
@@ -187,15 +171,16 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
           amountField({
             currenciesConfig,
             overrides: {
-              name: 'totalDiscount',
+              name: 'total',
               label: ({ t }) =>
                 // @ts-expect-error - translations are not typed in plugins yet
-                t('plugin-ecommerce:totalDiscount'),
+                t('plugin-ecommerce:total'),
             },
           }),
         ]
       : []),
     cartItemsField({
+      currenciesConfig,
       enableCoupons,
       enableVariants,
       overrides: {
@@ -233,7 +218,7 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
     hooks: {
       beforeChange: [
         // This hook can be used to update the subtotal before saving the cart
-        updateSubtotalHook({ productsSlug, variantsSlug }),
+        beforeChangeCart({ couponsSlug, productsSlug, variantsSlug }),
         ...(overrides?.hooks?.beforeChange || []),
       ],
       ...overrides?.hooks,

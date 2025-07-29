@@ -8,13 +8,14 @@ type RemoveCoupon = (props: Props) => Endpoint['handler']
 
 type Props = {
   cartsSlug?: string
+  couponsSlug?: string
 }
 
 /**
  * Handles the endpoint for removing a coupon from a cart.
  */
 export const removeCouponHandler: RemoveCoupon =
-  ({ cartsSlug = 'carts' }) =>
+  ({ cartsSlug = 'carts', couponsSlug = 'coupons' }) =>
   async (req) => {
     await addDataAndFileToRequest(req)
 
@@ -35,22 +36,52 @@ export const removeCouponHandler: RemoveCoupon =
       )
     }
 
+    const couponsQuery = await payload.find({
+      collection: couponsSlug,
+      where: {
+        identifier: {
+          equals: couponCode,
+        },
+      },
+    })
+
+    const coupon = couponsQuery.docs[0]
+
+    if (!coupon) {
+      return Response.json(
+        {
+          message: 'Coupon code is invalid.',
+        },
+        {
+          status: 400,
+        },
+      )
+    }
+
     const newCart: Cart = { ...cart }
 
     // Remove cart-level coupon
-    if (newCart.coupons && newCart.coupons.length > 0) {
-      newCart.coupons = newCart.coupons.filter((coupon) => coupon.identifier !== couponCode)
+    if (newCart.discount?.discountLines && newCart.discount.discountLines.length > 0) {
+      newCart.discount.discountLines = newCart.discount.discountLines.filter(
+        (discountLine) => discountLine.coupon !== coupon.id,
+      )
     }
 
     // Remove item-level coupons
     if (newCart.items && newCart.items.length > 0) {
       newCart.items = newCart.items.map((item: CartItem) => {
-        if (item.coupons && item.coupons.length > 0) {
+        if (item.discount?.discountLines && item.discount.discountLines.length > 0) {
           return {
             ...item,
-            coupons: item.coupons.filter((coupon) => coupon.identifier !== couponCode),
+            discount: {
+              ...item.discount,
+              discountLines: item.discount.discountLines.filter(
+                (discountLine) => discountLine.coupon !== coupon.id,
+              ),
+            },
           }
         }
+
         return item
       })
     }

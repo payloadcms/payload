@@ -10,6 +10,7 @@ import { couponsCollection } from './coupons/couponsCollection.js'
 import { applyCouponHandler } from './endpoints/applyCoupon.js'
 import { confirmOrderHandler } from './endpoints/confirmOrder.js'
 import { initiatePaymentHandler } from './endpoints/initiatePayment.js'
+import { removeCouponHandler } from './endpoints/removeCoupon.js'
 import { ordersCollection } from './orders/ordersCollection.js'
 import { productsCollection } from './products/productsCollection.js'
 import { transactionsCollection } from './transactions/transactionsCollection.js'
@@ -257,6 +258,12 @@ export const ecommercePlugin =
         handler: applyCouponHandler({ cartsSlug: collectionSlugMap.carts }),
         method: 'post',
         path: `/apply-coupon`,
+      })
+
+      incomingConfig.endpoints.push({
+        handler: removeCouponHandler({ cartsSlug: collectionSlugMap.carts }),
+        method: 'post',
+        path: `/remove-coupon`,
       })
     }
 

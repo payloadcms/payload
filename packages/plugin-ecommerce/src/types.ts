@@ -16,7 +16,13 @@ export type CollectionOverride = { fields?: FieldsOverride } & Partial<
 >
 
 export type CartItem = {
-  coupons?: Array<Coupon>
+  discount?: {
+    amount?: number
+    discountLines?: {
+      coupon?: Coupon | DefaultDocumentIDType
+      id?: string
+    }[]
+  }
   id: DefaultDocumentIDType
   product: DefaultDocumentIDType | TypedCollection['products']
   quantity: number
@@ -24,9 +30,15 @@ export type CartItem = {
 }
 
 type DefaultCartType = {
-  coupons?: Array<Coupon>
   currency?: string
   customer?: DefaultDocumentIDType | TypedCollection['customers']
+  discount?: {
+    amount?: number
+    discountLines?: {
+      coupon?: Coupon | DefaultDocumentIDType
+      id?: string
+    }[]
+  }
   id: DefaultDocumentIDType
   items: CartItem[]
   subtotal?: number

@@ -1,8 +1,15 @@
-import type { BasePayload, Endpoint, TypedCollection, TypedUser } from 'payload'
+import type {
+  BasePayload,
+  Endpoint,
+  JsonObject,
+  TypedCollection,
+  TypedUser,
+  TypeWithID,
+} from 'payload'
 
 import { addDataAndFileToRequest } from 'payload'
 
-import type { CartItem, Coupon } from '../types.js'
+import type { Cart, CartItem, Coupon } from '../types.js'
 
 type ApplyCoupon = (props: Props) => Endpoint['handler']
 
@@ -12,33 +19,72 @@ type Props = {
   transactionsSlug?: string
 }
 
+function isProductEligible(coupon: Coupon, product: (JsonObject & TypeWithID) | number | string) {
+  return coupon.eligbleProducts.some((eligbleProduct) => {
+    const eligbleProductId =
+      typeof eligbleProduct === 'object' ? String(eligbleProduct.id) : String(eligbleProduct)
+    const productId = typeof product === 'object' ? String(product.id) : String(product)
+
+    return eligbleProductId === productId
+  })
+}
+
 async function validateCoupon({
+  cartsSlug,
   coupon,
   couponsSlug,
   payload,
   user,
 }: {
+  cartsSlug: string
   coupon: TypedCollection['coupons']
   couponsSlug: string
   payload: BasePayload
   user: TypedUser
 }) {
-  const cart = user?.cart?.docs?.[0]
+  const cartId = user?.cart?.docs?.[0]?.id
+  if (!cartId) {
+    return 'You do not have a cart to apply the coupon to.'
+  }
+
+  const cart = (await payload.findByID({
+    id: cartId,
+    collection: cartsSlug,
+  })) as Cart | undefined
+
+  if (!cart) {
+    return 'Cart not found.'
+  }
 
   if (coupon.maxClaims && coupon.maxClaims > coupon.numberOfClaims) {
-    return 'Coupon has reached the maximum amount of claims'
+    return 'Coupon has reached the maximum amount of claims.'
   }
 
   if (coupon.validFrom && new Date(coupon.validFrom).getTime() > new Date().getTime()) {
-    return 'Coupon is not valid yet'
+    return 'Coupon is not valid yet.'
   }
 
   if (coupon.validTo && new Date(coupon.validTo).getTime() < new Date().getTime()) {
-    return 'Coupon has expired'
+    return 'Coupon has expired.'
+  }
+
+  if (cart?.discount?.discountLines?.some((line) => line.coupon === coupon.id)) {
+    return 'Coupon has already been applied to the cart.'
+  }
+
+  if (
+    cart.items?.some((item: CartItem) =>
+      item.discount?.discountLines?.some((line) => {
+        return line.coupon === coupon.id
+      }),
+    )
+  ) {
+    return 'Coupon has already been applied to one of the items in the cart.'
   }
 
   if (coupon.eligbleCustomers) {
     const errorMessage = 'You are not eligble to claim this coupon.'
+
     if (!user) {
       return errorMessage
     }
@@ -58,11 +104,7 @@ async function validateCoupon({
   }
 
   if (coupon.eligbleProducts) {
-    if (
-      !cart.items.some((item: CartItem) =>
-        coupon.eligbleProducts.some((product: any) => product.id === item.product),
-      )
-    ) {
+    if (!cart.items.some((item: CartItem) => isProductEligible(coupon as Coupon, item.product))) {
       return 'Coupon is not valid for the products in your cart.'
     }
   }
@@ -100,7 +142,7 @@ export const applyCouponHandler: ApplyCoupon =
     if (!foundCoupon) {
       return Response.json(
         {
-          message: 'coupon not found',
+          message: 'Coupon does not exist.',
         },
         {
           status: 400,
@@ -108,7 +150,13 @@ export const applyCouponHandler: ApplyCoupon =
       )
     }
 
-    const isCouponValid = await validateCoupon({ coupon: foundCoupon, couponsSlug, payload, user })
+    const isCouponValid = await validateCoupon({
+      cartsSlug,
+      coupon: foundCoupon,
+      couponsSlug,
+      payload,
+      user,
+    })
 
     if (isCouponValid !== true) {
       return Response.json(
@@ -129,9 +177,9 @@ export const applyCouponHandler: ApplyCoupon =
       newData = {
         ...newData,
         discount: {
-          amount: newData.discount.amount ?? 0, // will be calculated in updateSubTotalHook
+          ...newData.discount,
           discountLines: [
-            // ...(newData.discount?.discountLines ?? []),
+            ...(newData.discount?.discountLines ?? []),
             {
               amount: 0, // will be calculated in updateSubTotalHook
               coupon: foundCoupon.id,
@@ -143,18 +191,20 @@ export const applyCouponHandler: ApplyCoupon =
       newData = { ...cart }
       newData.items = newData.items.map((item: CartItem) => {
         // check if coupon applies to this product
-        if (foundCoupon.eligbleProducts.includes(item.product)) {
+
+        if (isProductEligible(foundCoupon, item.product)) {
           return {
             ...item,
             discount: {
+              ...item.discount,
+              amount: 0, // will be calculated in updateSubTotalHook
               discountLines: [
-                // ...(item.discount?.discountLines ?? []),
+                ...(item.discount?.discountLines ?? []),
                 {
                   amount: 0, // will be calculated in updateSubTotalHook
                   coupon: foundCoupon.id,
                 },
               ],
-              total: 0, // will be calculated in updateSubTotalHook
             },
           }
         }
@@ -169,7 +219,8 @@ export const applyCouponHandler: ApplyCoupon =
         collection: cartsSlug,
         data: newData,
       })
-      return Response.json({ newData, result })
+      console.dir({ newData, result }, { depth: null })
+      return Response.json(result)
     } catch (error) {
       payload.logger.error(error, 'Error applying coupon.')
 

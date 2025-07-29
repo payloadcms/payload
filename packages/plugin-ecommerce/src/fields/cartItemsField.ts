@@ -41,7 +41,7 @@ export const cartItemsField: (props?: Props) => ArrayField = (props) => {
   const {
     couponsSlug = 'coupons',
     currenciesConfig,
-    enableCoupons = false,
+    enableCoupons = true,
     enableVariants = false,
     individualPrices,
     overrides,
@@ -96,7 +96,7 @@ export const cartItemsField: (props?: Props) => ArrayField = (props) => {
                       type: 'relationship',
                       hasMany: false,
                       label: 'Coupons',
-                      relationTo: 'coupons',
+                      relationTo: couponsSlug,
                     },
 
                     amountField({

@@ -7,7 +7,5 @@ export function getCouponDiscountValue(baseAmount: number, coupon: any) {
     return coupon.value * -1
   }
 
-  console.log({ baseAmount, coupon })
-
   return baseAmount * (coupon.value / 100) * -1
 }
