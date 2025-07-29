@@ -18,6 +18,7 @@ export const openListFilters = async (
 ): Promise<{
   filterContainer: Locator
 }> => {
+  await expect(page.locator(filterContainerSelector)).toBeVisible()
   const filterContainer = page.locator(filterContainerSelector).first()
 
   const isAlreadyOpen = await filterContainer.isVisible()
