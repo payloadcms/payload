@@ -144,7 +144,8 @@ export const handleGroupBy = async ({
 
       if (
         groupByField?.type === 'relationship' &&
-        typeof potentiallyPopulatedRelationship === 'object'
+        typeof potentiallyPopulatedRelationship === 'object' &&
+        potentiallyPopulatedRelationship !== null
       ) {
         heading =
           potentiallyPopulatedRelationship[relationshipConfig.admin.useAsTitle || 'id'] ||
