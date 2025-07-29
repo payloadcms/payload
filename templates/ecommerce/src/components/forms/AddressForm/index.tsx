@@ -37,10 +37,19 @@ type AddressFormValues = {
 type Props = {
   addressID?: Config['db']['defaultIDType']
   initialData?: Omit<Address, 'country' | 'id' | 'updatedAt' | 'createdAt'> & { country?: string }
-  callback?: () => void
+  callback?: (data: Partial<Address>) => void
+  /**
+   * If true, the form will not submit to the API.
+   */
+  skipSubmission?: boolean
 }
 
-export const AddressForm: React.FC<Props> = ({ addressID, initialData, callback }) => {
+export const AddressForm: React.FC<Props> = ({
+  addressID,
+  initialData,
+  callback,
+  skipSubmission,
+}) => {
   const {
     register,
     handleSubmit,
@@ -56,17 +65,19 @@ export const AddressForm: React.FC<Props> = ({ addressID, initialData, callback 
     async (data: AddressFormValues) => {
       const newData = deepMergeSimple(initialData || {}, data)
 
-      if (addressID) {
-        await updateAddress(addressID, newData)
-      } else {
-        await createAddress(newData)
+      if (!skipSubmission) {
+        if (addressID) {
+          await updateAddress(addressID, newData)
+        } else {
+          await createAddress(newData)
+        }
       }
 
       if (callback) {
-        callback()
+        callback(newData)
       }
     },
-    [addressID, initialData, callback],
+    [addressID, initialData, callback, skipSubmission],
   )
 
   return (

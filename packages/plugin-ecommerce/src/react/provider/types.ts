@@ -155,10 +155,6 @@ export type EcommerceContext = {
     paymentMethodID: string,
     options?: { additionalData: Record<string, unknown> },
   ) => Promise<unknown>
-  /**
-   *
-   */
-  paymentData?: Record<string, unknown>
   paymentMethods: PaymentAdapterClient[]
   /**
    * Remove an item from the cart by its index ID.

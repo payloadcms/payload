@@ -20,6 +20,7 @@ type Props = {
   setAddress: React.Dispatch<React.SetStateAction<Address | undefined>>
   heading?: string
   description?: string
+  setSubmit?: React.Dispatch<React.SetStateAction<() => void | Promise<void>>>
 }
 
 export const CheckoutAddresses: React.FC<Props> = ({
@@ -30,7 +31,13 @@ export const CheckoutAddresses: React.FC<Props> = ({
   const { addresses } = useAddresses()
 
   if (!addresses || addresses.length === 0) {
-    return <p>No addresses found. Please add an address.</p>
+    return (
+      <div>
+        <p>No addresses found. Please add an address.</p>
+
+        <CreateAddressModal />
+      </div>
+    )
   }
 
   return (

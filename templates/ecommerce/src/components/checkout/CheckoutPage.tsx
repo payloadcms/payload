@@ -18,9 +18,12 @@ import { cssVariables } from '@/cssVariables'
 import { CheckoutForm } from '@/components/forms/CheckoutForm'
 import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/react'
 import { CheckoutAddresses } from '@/components/checkout/CheckoutAddresses'
+import { CreateAddressModal } from '@/components/addresses/CreateAddressModal'
 import { Address } from '@/payload-types'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AddressItem } from '@/components/addresses/AddressItem'
+import { FormItem } from '@/components/forms/FormItem'
+import { toast } from 'sonner'
 
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
 const stripe = loadStripe(apiKey)
@@ -36,10 +39,11 @@ export const CheckoutPage: React.FC = () => {
    */
   const [email, setEmail] = useState('')
   const [emailEditable, setEmailEditable] = useState(true)
-  const { paymentData, initiatePayment, selectedPaymentMethod, paymentMethods } = usePayments()
+  const [paymentData, setPaymentData] = useState<null | Record<string, unknown>>(null)
+  const { initiatePayment, selectedPaymentMethod, paymentMethods } = usePayments()
   const { addresses } = useAddresses()
-  const [shippingAddress, setShippingAddress] = useState<Address>()
-  const [billingAddress, setBillingAddress] = useState<Address>()
+  const [shippingAddress, setShippingAddress] = useState<Partial<Address>>()
+  const [billingAddress, setBillingAddress] = useState<Partial<Address>>()
   const [billingAddressSameAsShipping, setBillingAddressSameAsShipping] = useState(true)
 
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
@@ -47,8 +51,6 @@ export const CheckoutPage: React.FC = () => {
   const canGoToPayment = Boolean(
     (email || user) && billingAddress && (billingAddressSameAsShipping || shippingAddress),
   )
-
-  console.log({ canGoToPayment, billingAddress, user, email, shippingAddress, paymentData })
 
   // On initial load wait for addresses to be loaded and check to see if we can prefill a default one
   useEffect(() => {
@@ -74,13 +76,29 @@ export const CheckoutPage: React.FC = () => {
 
   const initiatePaymentIntent = useCallback(
     async (paymentID: string) => {
-      const paymentIntent = await initiatePayment(paymentID, {
-        additionalData: {
-          ...(email ? { customerEmail: email } : {}),
-          billingAddress,
-          shippingAddress: billingAddressSameAsShipping ? billingAddress : shippingAddress,
-        },
-      })
+      try {
+        const paymentData = (await initiatePayment(paymentID, {
+          additionalData: {
+            ...(email ? { customerEmail: email } : {}),
+            billingAddress,
+            shippingAddress: billingAddressSameAsShipping ? billingAddress : shippingAddress,
+          },
+        })) as Record<string, unknown>
+
+        if (paymentData) {
+          setPaymentData(paymentData)
+        }
+      } catch (error) {
+        const errorData = error instanceof Error ? JSON.parse(error.message) : {}
+        let errorMessage = 'An error occurred while initiating payment.'
+
+        if (errorData?.cause?.code === 'OutOfStock') {
+          errorMessage = 'One or more items in your cart are out of stock.'
+        }
+
+        setError(errorMessage)
+        toast.error(errorMessage)
+      }
     },
     [billingAddress, billingAddressSameAsShipping, shippingAddress],
   )
@@ -97,22 +115,24 @@ export const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-stretch justify-stretch md:flex-row grow">
-      <div className="basis-full lg:basis-2/3 flex flex-col gap-8 md:pr-6 lg:pr-8 pt-8">
+    <div className="flex flex-col items-stretch justify-stretch my-8 md:flex-row grow gap-10 md:gap-6 lg:gap-8">
+      <div className="basis-full lg:basis-2/3 flex flex-col gap-8 justify-stretch">
         <h2 className="font-medium text-3xl">Contact</h2>
         {!user && (
-          <div className="prose dark:prose-invert bg-accent dark:bg-black rounded-sm p-4 grow w-full flex items-center">
-            <Button asChild className="no-underline text-inherit" variant="outline">
-              <Link href="/login">Log in</Link>
-            </Button>
-            <p className="mt-0">
-              <span className="mx-2">or</span>
-              <Link href="/create-account">create an account</Link>
-            </p>
+          <div className=" bg-accent dark:bg-black rounded-lg p-4 w-full flex items-center">
+            <div className="prose dark:prose-invert">
+              <Button asChild className="no-underline text-inherit" variant="outline">
+                <Link href="/login">Log in</Link>
+              </Button>
+              <p className="mt-0">
+                <span className="mx-2">or</span>
+                <Link href="/create-account">create an account</Link>
+              </p>
+            </div>
           </div>
         )}
         {user ? (
-          <div className="bg-accent dark:bg-black rounded-sm p-4 w-full">
+          <div className="bg-accent dark:bg-black rounded-lg p-4 ">
             <div>
               <p>{user.email}</p>{' '}
               <p>
@@ -124,10 +144,11 @@ export const CheckoutPage: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-accent dark:bg-black rounded-sm p-4 w-full">
+          <div className="bg-accent dark:bg-black rounded-lg p-4 ">
             <div>
               <p className="mb-4">Enter your email to checkout as a guest.</p>
-              <div className="max-w-sm mb-4">
+
+              <FormItem className="mb-6">
                 <Label htmlFor="email">Email Address</Label>
                 <Input
                   disabled={!emailEditable}
@@ -137,7 +158,8 @@ export const CheckoutPage: React.FC = () => {
                   required
                   type="email"
                 />
-              </div>
+              </FormItem>
+
               <Button
                 disabled={!email || !emailEditable}
                 onClick={(e) => {
@@ -172,15 +194,23 @@ export const CheckoutPage: React.FC = () => {
               address={billingAddress}
             />
           </div>
-        ) : (
+        ) : user ? (
           <CheckoutAddresses heading="Billing address" setAddress={setBillingAddress} />
+        ) : (
+          <CreateAddressModal
+            disabled={!email || Boolean(emailEditable)}
+            callback={(address) => {
+              setBillingAddress(address)
+            }}
+            skipSubmission={true}
+          />
         )}
 
         <div className="flex gap-4 items-center">
           <Checkbox
             id="shippingTheSameAsBilling"
             checked={billingAddressSameAsShipping}
-            disabled={Boolean(paymentData)}
+            disabled={Boolean(paymentData || (!user && (!email || Boolean(emailEditable))))}
             onCheckedChange={(state) => {
               setBillingAddressSameAsShipping(state as boolean)
             }}
@@ -208,11 +238,19 @@ export const CheckoutPage: React.FC = () => {
                   address={shippingAddress}
                 />
               </div>
-            ) : (
+            ) : user ? (
               <CheckoutAddresses
                 heading="Shipping address"
                 description="Please select a shipping address."
                 setAddress={setShippingAddress}
+              />
+            ) : (
+              <CreateAddressModal
+                callback={(address) => {
+                  setShippingAddress(address)
+                }}
+                disabled={!email || Boolean(emailEditable)}
+                skipSubmission={true}
               />
             )}
           </>
@@ -288,7 +326,7 @@ export const CheckoutPage: React.FC = () => {
       </div>
 
       {!cartIsEmpty && (
-        <div className="basis-full lg:basis-1/3 lg:pl-8 p-8 border-l bg-primary/5 flex flex-col gap-8">
+        <div className="basis-full lg:basis-1/3 lg:pl-8 p-8 border-none bg-primary/5 flex flex-col gap-8 rounded-lg">
           <h2 className="text-3xl font-medium">Your cart</h2>
           {cart?.items?.map((item, index) => {
             if (typeof item.product === 'object' && item.product) {

@@ -87,8 +87,6 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         throw new Error('Cart items snapshot not found or invalid in the PaymentIntent metadata')
       }
 
-      console.log('Creating order ')
-
       const order = await payload.create({
         collection: ordersSlug,
         data: {

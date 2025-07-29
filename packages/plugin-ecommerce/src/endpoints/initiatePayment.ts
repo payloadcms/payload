@@ -227,9 +227,15 @@ export const initiatePaymentHandler: InitiatePayment =
             })
           }
         } catch (error) {
+          payload.logger.error(
+            error,
+            'Error validating product or variant during payment initiation.',
+          )
+
           return Response.json(
             {
               message: error,
+              ...(error instanceof Error ? { cause: error.cause } : {}),
             },
             {
               status: 400,
@@ -280,6 +286,11 @@ export const initiatePaymentHandler: InitiatePayment =
               })
             }
           } catch (error) {
+            payload.logger.error(
+              error,
+              'Error validating product or variant during payment initiation.',
+            )
+
             return Response.json(
               {
                 message: error,
