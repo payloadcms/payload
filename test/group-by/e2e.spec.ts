@@ -236,6 +236,26 @@ test.describe('Group By', () => {
     await expect(page.locator('.group-by-header')).toHaveCount(0)
   })
 
+  test('should group by relationships even when their values are null', async () => {
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'My Post',
+        category: null,
+      },
+    })
+
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
   test('should sort the group-by field globally', async () => {
     await page.goto(url.list)
 
