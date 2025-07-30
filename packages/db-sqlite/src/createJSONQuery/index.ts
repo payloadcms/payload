@@ -67,7 +67,7 @@ const createConstraint = ({
   return `EXISTS (
   SELECT 1
   FROM json_each(${alias}.value -> '${pathSegments[0]}') AS ${newAlias}
-  WHERE COALESCE(${newAlias}.value${pathSegments.length > 1 ? ` ->> '${pathSegments[1]}'` : ''}, '') ${formattedOperator} '${formattedValue}'
+  WHERE COALESCE(${newAlias}.value ->> '${pathSegments[1]}', '') ${formattedOperator} '${formattedValue}'
   )`
 }
 
