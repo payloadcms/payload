@@ -239,6 +239,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         }),
         args: {
           draft: { type: GraphQLBoolean },
+          trash: { type: GraphQLBoolean },
           where: { type: collection.graphQL.whereInputType },
           ...(config.localization
             ? {

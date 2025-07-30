@@ -5,6 +5,24 @@
     width: 100%;
     display: flex;
     --doc-sidebar-width: 325px;
+    --sidebar-gutter-h-right: var(--gutter-h);
+    --sidebar-gutter-h-left: calc(var(--base) * 2);
+    --main-gutter-h-left: var(--gutter-h);
+    --main-gutter-h-right: calc(var(--base) * 2);
+
+    [dir='rtl'] &:not(&--force-sidebar-wrap) {
+      --sidebar-gutter-h-left: var(--gutter-h);
+      --sidebar-gutter-h-right: calc(var(--base) * 2);
+      --main-gutter-h-left: calc(var(--base) * 2);
+      --main-gutter-h-right: var(--gutter-h);
+    }
+
+    &--force-sidebar-wrap {
+      --sidebar-gutter-h-left: var(--gutter-h);
+      --sidebar-gutter-h-right: var(--gutter-h);
+      --main-gutter-h-left: var(--gutter-h);
+      --main-gutter-h-right: var(--gutter-h);
+    }
 
     &--has-sidebar {
       .document-fields {
@@ -13,18 +31,18 @@
         }
 
         &__edit {
+          padding-left: var(--main-gutter-h-left);
+          padding-right: var(--main-gutter-h-right);
           [dir='ltr'] & {
             top: 0;
             right: 0;
             border-right: 1px solid var(--theme-elevation-100);
-            padding-right: calc(var(--base) * 2);
           }
 
           [dir='rtl'] & {
             top: 0;
             left: 0;
             border-left: 1px solid var(--theme-elevation-100);
-            padding-left: calc(var(--base) * 2);
           }
         }
 
@@ -74,8 +92,8 @@
       flex-direction: column;
       gap: var(--base);
       padding-top: calc(var(--base) * 1.5);
-      padding-left: calc(var(--base) * 2);
-      padding-right: var(--gutter-h);
+      padding-left: var(--sidebar-gutter-h-left);
+      padding-right: var(--sidebar-gutter-h-right);
       padding-bottom: var(--spacing-view-bottom);
     }
 
@@ -106,7 +124,6 @@
 
         &__sidebar-fields {
           padding-top: 0;
-          padding-left: var(--gutter-h);
           padding-bottom: 0;
         }
       }
@@ -114,6 +131,16 @@
 
     @include mid-break {
       display: block;
+      [dir='rtl'] &:not(&--force-sidebar-wrap) {
+        --sidebar-gutter-h-left: var(--gutter-h);
+        --sidebar-gutter-h-right: var(--gutter-h);
+        --main-gutter-h-left: var(--gutter-h);
+        --main-gutter-h-right: var(--gutter-h);
+      }
+      --main-gutter-h-left: var(--gutter-h);
+      --main-gutter-h-right: var(--gutter-h);
+      --sidebar-gutter-h-left: var(--gutter-h);
+      --sidebar-gutter-h-right: var(--gutter-h);
 
       &--has-sidebar {
         .document-fields {
@@ -124,12 +151,10 @@
           &__edit {
             [dir='ltr'] & {
               border-right: 0;
-              padding-right: var(--gutter-h);
             }
 
             [dir='rtl'] & {
               border-left: 0;
-              padding-left: var(--gutter-h);
             }
           }
 
@@ -160,18 +185,8 @@
 
       &__sidebar-fields {
         padding-top: 0;
-        padding-left: var(--gutter-h);
-        padding-right: var(--gutter-h);
         padding-bottom: 0;
         gap: base(0.5);
-
-        [dir='ltr'] & {
-          padding-right: var(--gutter-h);
-        }
-
-        [dir='rtl'] & {
-          padding-left: var(--gutter-h);
-        }
       }
 
       &__sidebar {

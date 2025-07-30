@@ -224,6 +224,7 @@ export const renderListView = async (
           req,
           trash,
           user,
+          viewType,
           where: whereWithMergedSearch,
         }))
       } else {
