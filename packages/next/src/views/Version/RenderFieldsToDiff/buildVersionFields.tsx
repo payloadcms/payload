@@ -17,10 +17,15 @@ import {
   type SanitizedFieldPermissions,
   type VersionField,
 } from 'payload'
-import { fieldIsID, fieldShouldBeLocalized, getUniqueListBy, tabHasName } from 'payload/shared'
+import {
+  fieldIsID,
+  fieldShouldBeLocalized,
+  getFieldPaths,
+  getUniqueListBy,
+  tabHasName,
+} from 'payload/shared'
 
 import { diffComponents } from './fields/index.js'
-import { getFieldPathsModified } from './utilities/getFieldPathsModified.js'
 
 export type BuildVersionFieldsArgs = {
   clientSchemaMap: ClientFieldSchemaMap
@@ -84,7 +89,7 @@ export const buildVersionFields = ({
       continue
     }
 
-    const { indexPath, path, schemaPath } = getFieldPathsModified({
+    const { indexPath, path, schemaPath } = getFieldPaths({
       field,
       index: fieldIndex,
       parentIndexPath,
@@ -285,7 +290,7 @@ const buildVersionField = ({
         indexPath: tabIndexPath,
         path: tabPath,
         schemaPath: tabSchemaPath,
-      } = getFieldPathsModified({
+      } = getFieldPaths({
         field: tabAsField,
         index: tabIndex,
         parentIndexPath: indexPath,
@@ -305,8 +310,12 @@ const buildVersionField = ({
           nestingLevel: nestingLevel + 1,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentIsLocalized: parentIsLocalized || tab.localized,
-          parentPath: isNamedTab ? tabPath : path,
-          parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+          parentPath: isNamedTab ? tabPath : 'name' in field ? path : parentPath,
+          parentSchemaPath: isNamedTab
+            ? tabSchemaPath
+            : 'name' in field
+              ? schemaPath
+              : parentSchemaPath,
           req,
           selectedLocales,
           versionFromSiblingData: 'name' in tab ? valueFrom?.[tab.name] : valueFrom,
@@ -346,8 +355,8 @@ const buildVersionField = ({
           nestingLevel: nestingLevel + 1,
           parentIndexPath: 'name' in field ? '' : indexPath,
           parentIsLocalized: parentIsLocalized || field.localized,
-          parentPath: path + '.' + i,
-          parentSchemaPath: schemaPath,
+          parentPath: ('name' in field ? path : parentPath) + '.' + i,
+          parentSchemaPath: 'name' in field ? schemaPath : parentSchemaPath,
           req,
           selectedLocales,
           versionFromSiblingData: fromRow,
@@ -432,8 +441,8 @@ const buildVersionField = ({
         nestingLevel: nestingLevel + 1,
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
-        parentPath: path + '.' + i,
-        parentSchemaPath: schemaPath + '.' + toBlock.slug,
+        parentPath: ('name' in field ? path : parentPath) + '.' + i,
+        parentSchemaPath: ('name' in field ? schemaPath : parentSchemaPath) + '.' + toBlock.slug,
         req,
         selectedLocales,
         versionFromSiblingData: fromRow,

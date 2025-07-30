@@ -366,6 +366,7 @@ export interface Diff {
               textInNamedTab1InBlock?: string | null;
             };
             textInUnnamedTab2InBlock?: string | null;
+            textInRowInUnnamedTab2InBlock?: string | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'TabsBlock';
@@ -958,6 +959,7 @@ export interface DiffSelect<T extends boolean = true> {
                     textInNamedTab1InBlock?: T;
                   };
               textInUnnamedTab2InBlock?: T;
+              textInRowInUnnamedTab2InBlock?: T;
               id?: T;
               blockName?: T;
             };
