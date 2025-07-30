@@ -6,6 +6,7 @@ import { amountField } from '../fields/amountField.js'
 import { cartItemsField } from '../fields/cartItemsField.js'
 import { currencyField } from '../fields/currencyField.js'
 import { beforeChangeCart } from './beforeChange.js'
+import { statusBeforeRead } from './statusBeforeRead.js'
 
 type Props = {
   currenciesConfig?: CurrenciesConfig
@@ -52,6 +53,9 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
     {
       name: 'purchasedAt',
       type: 'date',
+      admin: {
+        date: { pickerAppearance: 'dayAndTime' },
+      },
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
         t('plugin-ecommerce:purchasedAt'),
@@ -59,28 +63,33 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
     {
       name: 'status',
       type: 'select',
-      defaultValue: 'open',
-      interfaceName: 'CartStatus',
+      admin: {
+        readOnly: true,
+      },
+      hooks: {
+        afterRead: [statusBeforeRead],
+      },
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
         t('plugin-ecommerce:status'),
       options: [
         {
           // @ts-expect-error - translations are not typed in plugins yet
-          label: ({ t }) => t('plugin-ecommerce:open'),
-          value: 'open',
+          label: ({ t }) => t('plugin-ecommerce:active'),
+          value: 'active',
+        },
+        {
+          // @ts-expect-error - translations are not typed in plugins yet
+          label: ({ t }) => t('plugin-ecommerce:purchased'),
+          value: 'purchased',
         },
         {
           // @ts-expect-error - translations are not typed in plugins yet
           label: ({ t }) => t('plugin-ecommerce:abandoned'),
           value: 'abandoned',
         },
-        {
-          // @ts-expect-error - translations are not typed in plugins yet
-          label: ({ t }) => t('plugin-ecommerce:completed'),
-          value: 'completed',
-        },
       ],
+      virtual: true,
     },
     ...(currenciesConfig
       ? [

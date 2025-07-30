@@ -33,16 +33,21 @@ export const ProductsCollection: CollectionOverride = {
     group: 'Ecommerce',
     defaultColumns: ['title', 'enableVariants', '_status', 'variants.variants'],
     livePreview: {
-      url: ({ data }) => {
+      url: ({ data, req }) => {
         const path = generatePreviewPath({
-          path: `/product/${typeof data?.slug === 'string' ? data.slug : ''}`,
+          slug: typeof data?.slug === 'string' ? data.slug : '',
+          collection: 'products',
+          req,
         })
-        return `${process.env.NEXT_PUBLIC_SERVER_URL}${path}`
+
+        return path
       },
     },
-    preview: (doc) =>
+    preview: (data, { req }) =>
       generatePreviewPath({
-        path: `/product/${typeof doc?.slug === 'string' ? doc.slug : ''}`,
+        slug: typeof data?.slug === 'string' ? data.slug : '',
+        collection: 'products',
+        req,
       }),
     useAsTitle: 'title',
   },

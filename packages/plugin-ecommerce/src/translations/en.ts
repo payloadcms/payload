@@ -4,6 +4,7 @@ export const en: GenericTranslationsObject = {
   $schema: './translation-schema.json',
   'plugin-ecommerce': {
     abandoned: 'Abandoned',
+    active: 'Active',
     addressCity: 'City',
     addressCompany: 'Company',
     addressCountry: 'Country',
@@ -49,6 +50,7 @@ export const en: GenericTranslationsObject = {
       'This price will also be used for sorting and filtering products. If you have variants enabled then you can enter the lowest or average price to help with search and filtering, but this price will not be used for checkout.',
     productRequired: 'A product is required.',
     products: 'Products',
+    purchased: 'Purchased',
     purchasedAt: 'Purchased at',
     quantity: 'Quantity',
     refunded: 'Refunded',

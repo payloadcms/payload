@@ -20,7 +20,7 @@ export const ownerOrAdminCart: (props?: Props) => Access =
       return false
     }
 
-    // We need to fetch the caart data to check if the customer matches the user
+    // We need to fetch the cart data to check if the customer matches the user
     // This is because the cart may not have a customer field if it was created by a guest
     const cartData = await payload.findByID({
       id,
@@ -28,6 +28,7 @@ export const ownerOrAdminCart: (props?: Props) => Access =
       depth: 0,
       select: {
         customer: true,
+        purchasedAt: true,
       },
     })
 

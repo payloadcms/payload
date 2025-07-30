@@ -21,6 +21,8 @@ export default async function SearchPage({ searchParams }: Props) {
 
   const products = await payload.find({
     collection: 'products',
+    draft: false,
+    overrideAccess: false,
     select: {
       title: true,
       slug: true,
@@ -33,6 +35,11 @@ export default async function SearchPage({ searchParams }: Props) {
       ? {
           where: {
             and: [
+              {
+                _status: {
+                  equals: 'published',
+                },
+              },
               ...(searchValue
                 ? [
                     {
@@ -86,7 +93,7 @@ export default async function SearchPage({ searchParams }: Props) {
       {products?.docs.length > 0 ? (
         <Grid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.docs.map((product) => {
-            return <ProductGridItem key={product.slug} product={product} />
+            return <ProductGridItem key={product.id} product={product} />
           })}
         </Grid>
       ) : null}

@@ -558,12 +558,12 @@ export const seed = async ({
 
   payload.logger.info(`— Seeding carts...`)
 
+  // This cart is open as it's created now
   const openCart = await payload.create({
     collection: 'carts',
     data: {
       customer: customer.id,
       currency: 'USD',
-      status: 'open',
       items: [
         {
           product: productHoodie.id,
@@ -574,11 +574,14 @@ export const seed = async ({
     },
   })
 
+  const oldTimestamp = new Date('2023-01-01T00:00:00Z').toISOString()
+
+  // Cart is abandoned because it was created long in the past
   const abandonedCart = await payload.create({
     collection: 'carts',
     data: {
       currency: 'USD',
-      status: 'abandoned',
+      createdAt: oldTimestamp,
       items: [
         {
           product: productMousepad.id,
@@ -588,12 +591,13 @@ export const seed = async ({
     },
   })
 
+  // Cart is purchased because it has a purchasedAt date
   const completedCart = await payload.create({
     collection: 'carts',
     data: {
       customer: customer.id,
       currency: 'USD',
-      status: 'completed',
+      purchasedAt: new Date().toISOString(),
       subtotal: 7499,
       items: [
         {

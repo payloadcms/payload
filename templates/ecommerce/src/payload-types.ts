@@ -8,11 +8,6 @@
 
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CartStatus".
- */
-export type CartStatus = ('open' | 'abandoned' | 'completed') | null;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "OrderStatus".
  */
 export type OrderStatus = ('processing' | 'completed' | 'cancelled' | 'refunded') | null;
@@ -296,7 +291,7 @@ export interface Cart {
   id: string;
   customer?: (string | null) | User;
   purchasedAt?: string | null;
-  status?: CartStatus;
+  status?: ('open' | 'purchased' | 'cancelled') | null;
   currency?: 'USD' | null;
   subtotal?: number | null;
   items?:

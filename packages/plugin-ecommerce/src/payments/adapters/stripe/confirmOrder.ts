@@ -100,6 +100,16 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         },
       })
 
+      const timestamp = new Date().toISOString()
+
+      await payload.update({
+        id: cartID,
+        collection: 'carts',
+        data: {
+          purchasedAt: timestamp,
+        },
+      })
+
       await payload.update({
         id: transaction.id,
         collection: transactionsSlug,

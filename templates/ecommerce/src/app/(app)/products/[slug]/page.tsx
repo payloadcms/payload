@@ -146,7 +146,7 @@ export default async function ProductPage({ params }: Args) {
                 <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden" />
               }
             >
-              {gallery?.length && <Gallery gallery={gallery} />}
+              {Boolean(gallery?.length) && <Gallery gallery={gallery} />}
             </Suspense>
           </div>
 
@@ -207,12 +207,17 @@ const queryProductBySlug = async ({ slug }: { slug: string }) => {
     depth: 3,
     draft,
     limit: 1,
-    overrideAccess: false,
+    overrideAccess: draft,
+    pagination: false,
     where: {
-      slug: {
-        equals: slug,
-      },
-      ...(draft ? {} : { _status: { equals: 'published' } }),
+      and: [
+        {
+          slug: {
+            equals: slug,
+          },
+        },
+        ...(draft ? [] : [{ _status: { equals: 'published' } }]),
+      ],
     },
     populate: {
       variants: {
