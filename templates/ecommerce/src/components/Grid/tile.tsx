@@ -1,16 +1,11 @@
 import type { Media as MediaType } from '@/payload-types'
 
 import { Media } from '@/components/Media'
-import { Label } from '@/components/Label'
+import { Label } from '@/components/Grid/Label'
 import clsx from 'clsx'
 import React from 'react'
 
-export function GridTileImage({
-  active,
-  isInteractive = true,
-  label,
-  ...props
-}: {
+type Props = {
   active?: boolean
   isInteractive?: boolean
   label?: {
@@ -19,7 +14,14 @@ export function GridTileImage({
     title: string
   }
   media: MediaType
-}) {
+}
+
+export const GridTileImage: React.FC<Props> = ({
+  active,
+  isInteractive = true,
+  label,
+  ...props
+}) => {
   return (
     <div
       className={clsx(

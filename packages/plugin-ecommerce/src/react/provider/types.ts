@@ -161,10 +161,6 @@ export type EcommerceContext = {
     paymentMethodID: string,
     options?: { additionalData: Record<string, unknown> },
   ) => Promise<unknown>
-  /**
-   *
-   */
-  paymentData?: Record<string, unknown>
   paymentMethods: PaymentAdapterClient[]
   /**
    * removes coupon from cart or cartItem, depending on the appliesTo of that coupon.

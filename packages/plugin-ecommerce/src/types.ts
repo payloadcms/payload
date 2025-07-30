@@ -101,8 +101,8 @@ type InitiatePayment = (args: {
 type ConfirmOrderReturnType = {
   [key: string]: any // Allows for additional data to be returned, such as payment method specific data
   message: string
-  order: TypedCollection['orders']
   orderID: DefaultDocumentIDType
+  transactionID: DefaultDocumentIDType
 }
 
 type ConfirmOrder = (args: {

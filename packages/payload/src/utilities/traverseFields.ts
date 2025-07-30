@@ -28,7 +28,7 @@ const traverseArrayOrBlocksField = ({
   fillEmpty: boolean
   leavesFirst: boolean
   parentIsLocalized: boolean
-  parentPath?: string
+  parentPath: string
   parentRef?: unknown
 }) => {
   if (fillEmpty) {
@@ -403,7 +403,18 @@ export const traverseFields = ({
         currentRef &&
         typeof currentRef === 'object'
       ) {
-        if (fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! })) {
+        // TODO: `?? field.localized ?? false` shouldn't be necessary, but right now it
+        // is so that all fields are correctly traversed in copyToLocale and
+        // therefore pass the localization integration tests.
+        // I tried replacing the `!parentIsLocalized` condition with `parentIsLocalized === false`
+        // in `fieldShouldBeLocalized`, but several tests failed. We must be calling it with incorrect
+        // parameters somewhere.
+        if (
+          fieldShouldBeLocalized({
+            field,
+            parentIsLocalized: parentIsLocalized ?? field.localized ?? false,
+          })
+        ) {
           if (Array.isArray(currentRef)) {
             return
           }
@@ -423,6 +434,7 @@ export const traverseFields = ({
               fillEmpty,
               leavesFirst,
               parentIsLocalized: true,
+              parentPath,
               parentRef: currentParentRef,
             })
           }
@@ -436,6 +448,7 @@ export const traverseFields = ({
             fillEmpty,
             leavesFirst,
             parentIsLocalized: parentIsLocalized!,
+            parentPath,
             parentRef: currentParentRef,
           })
         }

@@ -16,9 +16,6 @@ import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
 
 import { Page, Product } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
-import { admins } from '@/access/admins'
-import { adminsOrPublished } from '@/access/adminsOrPublished'
-import { anyone } from '@/access/anyone'
 import { ProductsCollection } from '@/collections/Products'
 import { CartsCollection } from '@/collections/Carts'
 import { TransactionsCollection } from '@/collections/Transactions'
@@ -42,6 +39,9 @@ export const plugins: Plugin[] = [
   redirectsPlugin({
     collections: ['pages', 'products'],
     overrides: {
+      admin: {
+        group: 'Content',
+      },
       // @ts-expect-error - This is a valid override, mapped fields don't resolve to the same type
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
@@ -73,7 +73,15 @@ export const plugins: Plugin[] = [
     fields: {
       payment: false,
     },
+    formSubmissionOverrides: {
+      admin: {
+        group: 'Content',
+      },
+    },
     formOverrides: {
+      admin: {
+        group: 'Content',
+      },
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
           if ('name' in field && field.name === 'confirmationMessage') {
@@ -99,6 +107,9 @@ export const plugins: Plugin[] = [
     collections: ['products'],
     beforeSync: beforeSyncWithSearch,
     searchOverrides: {
+      admin: {
+        group: 'Content',
+      },
       fields: ({ defaultFields }) => {
         return [...defaultFields, ...searchFields]
       },

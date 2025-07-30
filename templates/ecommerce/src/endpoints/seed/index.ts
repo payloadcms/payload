@@ -12,7 +12,7 @@ import { home } from './home'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
 import { imageHero1 } from './image-hero-1'
-import { Address, Transaction } from '@/payload-types'
+import { Address, Transaction, VariantOption } from '@/payload-types'
 
 const collections: CollectionSlug[] = [
   'categories',
@@ -276,17 +276,20 @@ export const seed = async ({
     },
   })
 
-  const [small, medium, large, xlarge] = await Promise.all(
-    sizeVariantOptions.map((option) => {
-      return payload.create({
-        collection: 'variantOptions',
-        data: {
-          ...option,
-          variantType: sizeVariantType.id,
-        },
-      })
-    }),
-  )
+  const sizeVariantOptionsResults: VariantOption[] = []
+
+  for (const option of sizeVariantOptions) {
+    const result = await payload.create({
+      collection: 'variantOptions',
+      data: {
+        ...option,
+        variantType: sizeVariantType.id,
+      },
+    })
+    sizeVariantOptionsResults.push(result)
+  }
+
+  const [small, medium, large, xlarge] = sizeVariantOptionsResults
 
   const colorVariantType = await payload.create({
     collection: 'variantTypes',
@@ -440,12 +443,19 @@ export const seed = async ({
         payload.create({
           collection: 'variants',
           depth: 0,
-          data: JSON.parse(
-            JSON.stringify(variantHoodieData)
-              .replace(/"\{\{VARIANT_OPTION_1\}\}"/g, String(blackVariantOptionID))
-              .replace(/"\{\{VARIANT_OPTION_2\}\}"/g, String(id))
-              .replace(/"\{\{PRODUCT\}\}"/g, String(hoodieID)),
-          ),
+          data: {
+            ...JSON.parse(
+              JSON.stringify(variantHoodieData)
+                .replace(/"\{\{VARIANT_OPTION_1\}\}"/g, String(blackVariantOptionID))
+                .replace(/"\{\{VARIANT_OPTION_2\}\}"/g, String(id))
+                .replace(/"\{\{PRODUCT\}\}"/g, String(hoodieID)),
+            ),
+            ...(id === mediumVariantOptionID
+              ? {
+                  inventory: 0, // intentionally set medium variant to 0 inventory
+                }
+              : {}),
+          },
         }),
     ),
   )

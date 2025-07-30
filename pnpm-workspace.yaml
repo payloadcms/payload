@@ -1,10 +1,9 @@
 packages:
-  # all packages in direct subdirs of packages/
   - 'packages/*'
   - 'tools/*'
   - 'test'
   - 'templates/blank'
   - 'templates/website'
   - 'templates/ecommerce'
-  # exclude packages that are inside test directories
-  # - '!**/test/**'
+
+updateNotifier: false

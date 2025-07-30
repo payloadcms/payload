@@ -78,12 +78,6 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
   const { apiRoute = '/api', cartsFetchQuery = {}, serverURL = '' } = api || {}
   const baseAPIURL = `${serverURL}${apiRoute}`
 
-  /**
-   * The payment data received from the payment initiation process, this is then threaded through to the payment confirmation process.
-   * Useful for storing things like payment intent IDs, session IDs, etc.
-   */
-  const [paymentData, setPaymentData] = useState<EcommerceContextType['paymentData']>()
-
   const [user, setUser] = useState<null | TypedUser>(null)
 
   const [addresses, setAddresses] = useState<TypedCollection['addresses'][]>()
@@ -517,37 +511,43 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
           currency: selectedCurrency.code,
         }
 
-        const response = await fetch(fetchURL, {
-          body: JSON.stringify({
-            ...data,
-            ...(options?.additionalData || {}),
-          }),
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          method: 'POST',
-        })
+        try {
+          const response = await fetch(fetchURL, {
+            body: JSON.stringify({
+              ...data,
+              ...(options?.additionalData || {}),
+            }),
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
+          })
 
-        if (!response.ok) {
-          const errorText = await response.text()
-          throw new Error(`Failed to initiate payment: ${errorText}`)
+          if (!response.ok) {
+            const responseError = await response.text()
+            throw new Error(responseError)
+          }
+
+          const responseData = await response.json()
+
+          if (responseData.error) {
+            throw new Error(responseData.error)
+          }
+
+          return responseData
+        } catch (error) {
+          if (debug) {
+            // eslint-disable-next-line no-console
+            console.error('Error initiating payment:', error)
+          }
+          throw new Error(error instanceof Error ? error.message : 'Failed to initiate payment')
         }
-
-        const responseData = await response.json()
-
-        if (responseData.error) {
-          throw new Error(`Payment initiation error: ${responseData.error}`)
-        }
-
-        setPaymentData(responseData)
-
-        return responseData
       } else {
         throw new Error(`Payment method "${paymentMethodID}" does not support payment initiation`)
       }
     },
-    [baseAPIURL, cartID, paymentMethods, selectedCurrency.code],
+    [baseAPIURL, cartID, debug, paymentMethods, selectedCurrency.code],
   )
 
   const confirmOrder = useCallback<EcommerceContextType['initiatePayment']>(
@@ -568,7 +568,6 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         const data = {
           cartID,
           currency: selectedCurrency.code,
-          ...paymentData,
         }
 
         const response = await fetch(fetchURL, {
@@ -584,25 +583,22 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         })
 
         if (!response.ok) {
-          const errorText = await response.text()
-          throw new Error(`Failed to confirm order: ${errorText}`)
+          const responseError = await response.text()
+          throw new Error(responseError)
         }
 
         const responseData = await response.json()
 
         if (responseData.error) {
-          throw new Error(`Order confirmation error: ${responseData.error}`)
+          throw new Error(responseData.error)
         }
-
-        // Clear the payment data
-        setPaymentData(undefined)
 
         return responseData
       } else {
         throw new Error(`Payment method "${paymentMethodID}" does not support order confirmation`)
       }
     },
-    [baseAPIURL, cartID, paymentData, paymentMethods, selectedCurrency.code],
+    [baseAPIURL, cartID, paymentMethods, selectedCurrency.code],
   )
 
   const getUser = useCallback(async () => {
@@ -860,7 +856,6 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         decrementItem,
         incrementItem,
         initiatePayment,
-        paymentData,
         paymentMethods,
         removeCoupon,
         removeItem,
@@ -953,14 +948,13 @@ export const useCart = () => {
 }
 
 export const usePayments = () => {
-  const { confirmOrder, initiatePayment, paymentData, paymentMethods, selectedPaymentMethod } =
-    useEcommerce()
+  const { confirmOrder, initiatePayment, paymentMethods, selectedPaymentMethod } = useEcommerce()
 
   if (!initiatePayment) {
     throw new Error('usePayments must be used within an EcommerceProvider')
   }
 
-  return { confirmOrder, initiatePayment, paymentData, paymentMethods, selectedPaymentMethod }
+  return { confirmOrder, initiatePayment, paymentMethods, selectedPaymentMethod }
 }
 
 export const useAddresses = () => {

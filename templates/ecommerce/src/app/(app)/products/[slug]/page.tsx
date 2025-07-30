@@ -1,8 +1,8 @@
 import type { Media, Product } from '@/payload-types'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
-import { GridTileImage } from '@/components/Grid/tile'
-import { Gallery } from '@/components/product/Gallery'
+import { GridTileImage } from '@/components/Grid/Tile'
+import { Gallery, GalleryImage } from '@/components/product/Gallery'
 import { ProductDescription } from '@/components/product/ProductDescription'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
@@ -12,49 +12,51 @@ import { notFound } from 'next/navigation'
 import React, { Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { ChevronLeftIcon } from 'lucide-react'
-
-/* export async function generateMetadata({
-  params,
-}: {
-  params: { handle: string }
-}): Promise<Metadata> {
-  const product = await queryProductBySlug(params.handle)
-
-  if (!product) return notFound()
-
-  const { altText: alt, height, url, width } = product.featuredImage || {}
-  const indexable = !product.tags.includes(HIDDEN_PRODUCT_TAG)
-
-  return {
-    description: product.seo.description || product.description,
-    openGraph: url
-      ? {
-          images: [
-            {
-              alt,
-              height,
-              url,
-              width,
-            },
-          ],
-        }
-      : null,
-    robots: {
-      follow: indexable,
-      googleBot: {
-        follow: indexable,
-        index: indexable,
-      },
-      index: indexable,
-    },
-    title: product.seo.title || product.title,
-  }
-} */
+import { Metadata } from 'next'
 
 type Args = {
   params: Promise<{
     slug: string
   }>
+}
+
+export async function generateMetadata({ params }: Args): Promise<Metadata> {
+  const { slug } = await params
+  const product = await queryProductBySlug({ slug })
+
+  if (!product) return notFound()
+
+  const gallery: Media[] = product.gallery?.filter((image) => typeof image === 'object') || []
+
+  const metaImage = typeof product.meta?.image === 'object' ? product.meta?.image : undefined
+  const canIndex = product._status === 'published'
+
+  const seoImage = metaImage || (gallery.length ? gallery[0] : undefined)
+
+  return {
+    description: product.meta?.description || '',
+    openGraph: seoImage?.url
+      ? {
+          images: [
+            {
+              alt: seoImage?.alt,
+              height: seoImage.height!,
+              url: seoImage?.url,
+              width: seoImage.width!,
+            },
+          ],
+        }
+      : null,
+    robots: {
+      follow: canIndex,
+      googleBot: {
+        follow: canIndex,
+        index: canIndex,
+      },
+      index: canIndex,
+    },
+    title: product.meta?.title || product.title,
+  }
 }
 
 export default async function ProductPage({ params }: Args) {
@@ -63,7 +65,13 @@ export default async function ProductPage({ params }: Args) {
 
   if (!product) return notFound()
 
-  const gallery = product.gallery?.filter((image) => typeof image === 'object')
+  const gallery: GalleryImage[] =
+    product.gallery
+      ?.filter((image) => typeof image === 'object')
+      .map((image) => ({
+        image: image as Media,
+        variantID: undefined,
+      })) || []
 
   const metaImage = typeof product.meta?.image === 'object' ? product.meta?.image : undefined
   const hasStock = product.enableVariants
@@ -87,7 +95,12 @@ export default async function ProductPage({ params }: Args) {
       if (typeof variant !== 'object') continue
 
       if (variant.gallery && variant.gallery.length > 0) {
-        const variantGallery = variant.gallery.filter((image) => typeof image === 'object')
+        const variantGallery = variant.gallery
+          .filter((image) => typeof image === 'object')
+          .map((image) => ({
+            image: image as Media,
+            variantID: variant.id,
+          }))
 
         gallery.push(...variantGallery)
       }
@@ -126,14 +139,14 @@ export default async function ProductPage({ params }: Args) {
             All products
           </Link>
         </Button>
-        <div className="flex flex-col rounded-lg border p-8 md:py-12 lg:flex-row lg:gap-8 bg-primary-foreground">
+        <div className="flex flex-col gap-12 rounded-lg border p-8 md:py-12 lg:flex-row lg:gap-8 bg-primary-foreground">
           <div className="h-full w-full basis-full lg:basis-1/2">
             <Suspense
               fallback={
                 <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden" />
               }
             >
-              {gallery?.length && <Gallery images={gallery} />}
+              {gallery?.length && <Gallery gallery={gallery} />}
             </Suspense>
           </div>
 

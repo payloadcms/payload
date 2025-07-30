@@ -23,7 +23,7 @@ export function HeaderClient({ header }: Props) {
 
   return (
     <div className="relative z-20 border-b">
-      <nav className="flex items-end justify-between container pt-2">
+      <nav className="flex items-center md:items-end justify-between container pt-2">
         <div className="block flex-none md:hidden">
           <Suspense fallback={null}>
             <MobileMenu menu={menu} />

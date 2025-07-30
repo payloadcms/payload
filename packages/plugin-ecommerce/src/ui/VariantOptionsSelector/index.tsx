@@ -15,6 +15,7 @@ export const VariantOptionsSelector: React.FC<Props> = async (props) => {
     id: data.product,
     collection: 'products',
     depth: 0,
+    draft: true,
     select: {
       variants: true,
       variantTypes: true,

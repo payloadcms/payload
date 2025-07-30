@@ -16,7 +16,6 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
     const { apiVersion, appInfo, secretKey } = props || {}
 
     const customerEmail = data.customerEmail
-    const user = req.user
 
     const paymentIntentID = data.paymentIntentID as string
 
@@ -112,8 +111,8 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
 
       return {
         message: 'Payment initiated successfully',
-        order,
         orderID: order.id,
+        transactionID: transaction.id,
       }
     } catch (error) {
       payload.logger.error(error, 'Error initiating payment with Stripe')

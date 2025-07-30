@@ -5,7 +5,7 @@ import type { Address } from '@/payload-types'
 import { CreateAddressModal } from '@/components/addresses/CreateAddressModal'
 
 type Props = {
-  address: Omit<Address, 'country'> & { country?: string } // Allow address to be partial and entirely optional as this is entirely for display purposes
+  address: Partial<Omit<Address, 'country'>> & { country?: string } // Allow address to be partial and entirely optional as this is entirely for display purposes
   /**
    * Completely override the default actions
    */

@@ -6,7 +6,7 @@ import { useMemo } from 'react'
 import type { CurrenciesConfig } from '../../types.js'
 
 import './index.css'
-import { convertFromBaseValue } from '../PriceInput/utilities.js'
+import { convertFromBaseValue } from '../utilities.js'
 
 type Props = {
   currenciesConfig: CurrenciesConfig

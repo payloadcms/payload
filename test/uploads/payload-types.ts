@@ -84,6 +84,9 @@ export interface Config {
     'allow-list-media': AllowListMedia;
     'skip-safe-fetch-media': SkipSafeFetchMedia;
     'skip-allow-list-safe-fetch-media': SkipAllowListSafeFetchMedia;
+    'restrict-file-types': RestrictFileType;
+    'no-restrict-file-types': NoRestrictFileType;
+    'no-restrict-file-mime-types': NoRestrictFileMimeType;
     'animated-type-media': AnimatedTypeMedia;
     enlarge: Enlarge;
     'without-enlarge': WithoutEnlarge;
@@ -113,6 +116,8 @@ export interface Config {
     'constructor-options': ConstructorOption;
     'bulk-uploads': BulkUpload;
     'simple-relationship': SimpleRelationship;
+    'file-mime-type': FileMimeType;
+    'svg-only': SvgOnly;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -137,6 +142,9 @@ export interface Config {
     'allow-list-media': AllowListMediaSelect<false> | AllowListMediaSelect<true>;
     'skip-safe-fetch-media': SkipSafeFetchMediaSelect<false> | SkipSafeFetchMediaSelect<true>;
     'skip-allow-list-safe-fetch-media': SkipAllowListSafeFetchMediaSelect<false> | SkipAllowListSafeFetchMediaSelect<true>;
+    'restrict-file-types': RestrictFileTypesSelect<false> | RestrictFileTypesSelect<true>;
+    'no-restrict-file-types': NoRestrictFileTypesSelect<false> | NoRestrictFileTypesSelect<true>;
+    'no-restrict-file-mime-types': NoRestrictFileMimeTypesSelect<false> | NoRestrictFileMimeTypesSelect<true>;
     'animated-type-media': AnimatedTypeMediaSelect<false> | AnimatedTypeMediaSelect<true>;
     enlarge: EnlargeSelect<false> | EnlargeSelect<true>;
     'without-enlarge': WithoutEnlargeSelect<false> | WithoutEnlargeSelect<true>;
@@ -166,6 +174,8 @@ export interface Config {
     'constructor-options': ConstructorOptionsSelect<false> | ConstructorOptionsSelect<true>;
     'bulk-uploads': BulkUploadsSelect<false> | BulkUploadsSelect<true>;
     'simple-relationship': SimpleRelationshipSelect<false> | SimpleRelationshipSelect<true>;
+    'file-mime-type': FileMimeTypeSelect<false> | FileMimeTypeSelect<true>;
+    'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -825,6 +835,60 @@ export interface SkipSafeFetchMedia {
  * via the `definition` "skip-allow-list-safe-fetch-media".
  */
 export interface SkipAllowListSafeFetchMedia {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restrict-file-types".
+ */
+export interface RestrictFileType {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-restrict-file-types".
+ */
+export interface NoRestrictFileType {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-restrict-file-mime-types".
+ */
+export interface NoRestrictFileMimeType {
   id: string;
   updatedAt: string;
   createdAt: string;
@@ -1504,6 +1568,43 @@ export interface SimpleRelationship {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-mime-type".
+ */
+export interface FileMimeType {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "svg-only".
+ */
+export interface SvgOnly {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -1600,6 +1701,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'skip-allow-list-safe-fetch-media';
         value: string | SkipAllowListSafeFetchMedia;
+      } | null)
+    | ({
+        relationTo: 'restrict-file-types';
+        value: string | RestrictFileType;
+      } | null)
+    | ({
+        relationTo: 'no-restrict-file-types';
+        value: string | NoRestrictFileType;
+      } | null)
+    | ({
+        relationTo: 'no-restrict-file-mime-types';
+        value: string | NoRestrictFileMimeType;
       } | null)
     | ({
         relationTo: 'animated-type-media';
@@ -1716,6 +1829,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'simple-relationship';
         value: string | SimpleRelationship;
+      } | null)
+    | ({
+        relationTo: 'file-mime-type';
+        value: string | FileMimeType;
+      } | null)
+    | ({
+        relationTo: 'svg-only';
+        value: string | SvgOnly;
       } | null)
     | ({
         relationTo: 'users';
@@ -2417,6 +2538,57 @@ export interface SkipSafeFetchMediaSelect<T extends boolean = true> {
  * via the `definition` "skip-allow-list-safe-fetch-media_select".
  */
 export interface SkipAllowListSafeFetchMediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restrict-file-types_select".
+ */
+export interface RestrictFileTypesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-restrict-file-types_select".
+ */
+export interface NoRestrictFileTypesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-restrict-file-mime-types_select".
+ */
+export interface NoRestrictFileMimeTypesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3137,6 +3309,41 @@ export interface SimpleRelationshipSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-mime-type_select".
+ */
+export interface FileMimeTypeSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "svg-only_select".
+ */
+export interface SvgOnlySelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

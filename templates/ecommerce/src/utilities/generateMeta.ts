@@ -28,9 +28,9 @@ export const generateMeta = async (args: { doc: Page | Product }): Promise<Metad
             },
           ]
         : undefined,
-      title: doc?.meta?.title || 'Payload',
+      title: doc?.meta?.title || doc?.title || 'Payload',
       url: Array.isArray(doc?.slug) ? doc?.slug.join('/') : '/',
     }),
-    title: doc?.meta?.title || 'Payload',
+    title: doc?.meta?.title || doc?.title || 'Payload',
   }
 }

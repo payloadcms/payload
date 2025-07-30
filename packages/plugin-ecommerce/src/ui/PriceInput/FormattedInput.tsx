@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Currency } from '../../types.js'
 
 import { USD } from '../../currencies/index.js'
-import { convertFromBaseValue, convertToBaseValue } from './utilities.js'
+import { convertFromBaseValue, convertToBaseValue } from '../utilities.js'
 
 interface Props {
   currency: string
@@ -16,7 +16,7 @@ interface Props {
   error?: string
   id?: string
   label?: StaticLabel
-  onChange: (value: number) => void
+  onChange: (value: null | number) => void
   placeholder?: string
   supportedCurrencies: Currency[]
   value: number
@@ -46,48 +46,63 @@ export const FormattedInput: React.FC<Props> = ({
         (supportedCurrency) => supportedCurrency.code === currencyFromProps,
       )
 
-      return foundCurrency ?? USD
+      return foundCurrency ?? supportedCurrencies[0] ?? USD
     }
 
-    return USD
+    return supportedCurrencies[0] ?? USD
   }, [currencyFromProps, supportedCurrencies])
 
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false
-      setDisplayValue(convertFromBaseValue({ baseValue: value, currency }))
+
+      if (value === undefined || value === null) {
+        setDisplayValue('')
+      } else {
+        setDisplayValue(convertFromBaseValue({ baseValue: value, currency }))
+      }
     }
   }, [currency, value, currencyFromProps])
 
   const updateValue = useCallback(
     (inputValue: string) => {
+      if (inputValue === '') {
+        onChangeFromProps(null)
+
+        return
+      }
+
       const baseValue = convertToBaseValue({ currency, displayValue: inputValue })
+
       onChangeFromProps(baseValue)
     },
     [currency, onChangeFromProps],
   )
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const inputValue = e.target.value
 
-    if (!/^\d*(?:\.\d*)?$/.test(inputValue) && inputValue !== '') {
-      return
-    }
+      if (!/^\d*(?:\.\d*)?$/.test(inputValue) && inputValue !== '') {
+        return
+      }
 
-    setDisplayValue(inputValue)
+      setDisplayValue(inputValue)
 
-    // Clear any existing timer
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current)
-    }
+      // Clear any existing timer
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current)
+      }
 
-    // Only update the base value after a delay to avoid formatting while typing
-    debounceTimer.current = setTimeout(() => {
-      updateValue(inputValue)
-    }, 500)
-  }
+      // Only update the base value after a delay to avoid formatting while typing
+      debounceTimer.current = setTimeout(() => {
+        updateValue(inputValue)
+      }, 500)
+    },
+    [updateValue, setDisplayValue],
+  )
 
-  const handleInputBlur = () => {
+  const handleInputBlur = useCallback(() => {
     if (displayValue === '') {
       return
     }
@@ -104,8 +119,9 @@ export const FormattedInput: React.FC<Props> = ({
     if (value != baseValue) {
       onChangeFromProps(baseValue)
     }
+
     setDisplayValue(formattedValue)
-  }
+  }, [currency, displayValue, onChangeFromProps, value])
 
   return (
     <div className={`field-type number ${baseClass}`}>

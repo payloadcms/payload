@@ -30,6 +30,7 @@ export const ProductsCollection: CollectionOverride = {
     update: admins,
   },
   admin: {
+    group: 'Ecommerce',
     defaultColumns: ['title', 'enableVariants', '_status', 'variants.variants'],
     livePreview: {
       url: ({ data }) => {

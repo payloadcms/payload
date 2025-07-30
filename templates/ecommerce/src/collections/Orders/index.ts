@@ -4,6 +4,9 @@ import { CollectionOverride } from '@payloadcms/plugin-ecommerce/types'
 import { Field, PolymorphicRelationshipField } from 'payload'
 
 export const OrdersCollection: CollectionOverride = {
+  admin: {
+    group: 'Ecommerce',
+  },
   access: {
     create: admins,
     delete: ownerOrAdminOrder(),

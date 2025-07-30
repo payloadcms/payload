@@ -15,11 +15,13 @@ type Props = {
   searchParams: Promise<SearchParams>
 }
 
-export default async function SearchPage({ searchParams }: Props) {
+export default async function ShopPage({ searchParams }: Props) {
   const payload = await getPayload({ config: configPromise })
 
   const products = await payload.find({
     collection: 'products',
+    draft: false,
+    overrideAccess: false,
     select: {
       title: true,
       slug: true,
@@ -32,6 +34,9 @@ export default async function SearchPage({ searchParams }: Props) {
       variants: {
         priceInUSD: true,
       },
+    },
+    where: {
+      _status: { equals: 'published' },
     },
   })
 

@@ -54,6 +54,9 @@ export default async function SearchCategoryPage({
             },
           ],
         },
+        {
+          _status: { equals: 'published' },
+        },
       ],
     },
     select: {
@@ -64,6 +67,8 @@ export default async function SearchCategoryPage({
       priceInUSD: true,
       variants: true,
     },
+    draft: false,
+    overrideAccess: false,
     populate: {
       variants: {
         priceInUSD: true,
