@@ -24,6 +24,7 @@ import {
   relationSlug,
   restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
+  skipSafeFetchHeaderFilterSlug,
   skipSafeFetchMediaSlug,
   svgOnlySlug,
   unstoredMediaSlug,
@@ -564,6 +565,68 @@ describe('Collections - Uploads', () => {
         })
 
         expect(doc.docs[0].image).toBeFalsy()
+      })
+    })
+
+    describe('cookie filtering', () => {
+      it('should filter out payload cookies when externalFileHeaderFilter is not defined', async () => {
+        const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
+          '; ',
+        )
+
+        const fetchSpy = jest.spyOn(global, 'fetch')
+
+        await payload.create({
+          collection: skipSafeFetchMediaSlug,
+          data: {
+            filename: 'fat-head-nate.png',
+            url: 'https://www.payload.marketing/fat-head-nate.png',
+          },
+          req: {
+            headers: new Headers({
+              cookie: testCookies,
+            }),
+          },
+        })
+
+        const [[, options]] = fetchSpy.mock.calls
+        const cookieHeader = options.headers.cookie
+
+        expect(cookieHeader).not.toContain('payload-token=123')
+        expect(cookieHeader).not.toContain('payload-something=789')
+        expect(cookieHeader).toContain('other-cookie=456')
+
+        fetchSpy.mockRestore()
+      })
+
+      it('should keep all cookies when externalFileHeaderFilter is defined', async () => {
+        const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
+          '; ',
+        )
+
+        const fetchSpy = jest.spyOn(global, 'fetch')
+
+        await payload.create({
+          collection: skipSafeFetchHeaderFilterSlug,
+          data: {
+            filename: 'fat-head-nate.png',
+            url: 'https://www.payload.marketing/fat-head-nate.png',
+          },
+          req: {
+            headers: new Headers({
+              cookie: testCookies,
+            }),
+          },
+        })
+
+        const [[, options]] = fetchSpy.mock.calls
+        const cookieHeader = options.headers.cookie
+
+        expect(cookieHeader).toContain('other-cookie=456')
+        expect(cookieHeader).toContain('payload-token=123')
+        expect(cookieHeader).toContain('payload-something=789')
+
+        fetchSpy.mockRestore()
       })
     })
 

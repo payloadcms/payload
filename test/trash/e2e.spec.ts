@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import * as path from 'path'
 import { mapAsync } from 'payload'
 import { fileURLToPath } from 'url'
@@ -536,6 +537,47 @@ describe('Trash', () => {
             return deletedPosts.docs.length
           })
           .toBe(0)
+      })
+
+      test('Should properly filter trashed docs through where query builder', async () => {
+        const createdDocs: Post[] = []
+
+        // Create 2 "Test Post" docs
+        await mapAsync([...Array(2)], async (item, index) => {
+          const doc = await createTrashedPostDoc({
+            title: `Test Post ${index + 1}`,
+          })
+          createdDocs.push(doc)
+        })
+
+        // Create 2 "Some Post" docs
+        await mapAsync([...Array(2)], async (item, index) => {
+          const doc = await createTrashedPostDoc({
+            title: `Some Post ${index + 1}`,
+          })
+          createdDocs.push(doc)
+        })
+
+        await page.goto(postsUrl.trash)
+
+        await addListFilter({
+          page,
+          fieldLabel: 'Title',
+          operatorLabel: 'is like',
+          value: 'Test',
+        })
+
+        await expect(page.locator('.cell-title', { hasText: 'Test Post' })).toHaveCount(2)
+        await expect(page.locator('.cell-title', { hasText: 'Some Post' })).toHaveCount(0)
+
+        // Cleanup: permanently delete the created docs
+        await mapAsync(createdDocs, async (doc) => {
+          await payload.delete({
+            collection: postsSlug,
+            id: doc.id,
+            trash: true, // Force permanent delete
+          })
+        })
       })
     })
 

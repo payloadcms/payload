@@ -57,17 +57,6 @@ test.describe('Group By', () => {
         password: devUser.password,
       },
     })
-
-    // Fetch category IDs from already-seeded data
-    const categories = await payload.find({
-      collection: 'categories',
-      limit: 1,
-      sort: 'title',
-      where: { title: { equals: 'Category 1' } },
-    })
-
-    const [category1] = categories.docs
-    category1Id = category1?.id as number | string
   })
 
   beforeEach(async () => {
@@ -234,6 +223,26 @@ test.describe('Group By', () => {
     await expect(groupByContainer.locator('#field-direction input')).toBeDisabled()
     await expect(page.locator('.table-wrap')).toHaveCount(1)
     await expect(page.locator('.group-by-header')).toHaveCount(0)
+  })
+
+  test('should group by relationships even when their values are null', async () => {
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'My Post',
+        category: null,
+      },
+    })
+
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
   })
 
   test('should sort the group-by field globally', async () => {
@@ -629,7 +638,12 @@ test.describe('Group By', () => {
     await firstTable.locator('.row-1 .cell-_select input').check()
     await firstTable.locator('.list-selection__button[aria-label="Delete"]').click()
 
-    const modalId = `[id^="${category1Id}-confirm-delete-many-docs"]`
+    const firstGroupID = await firstTable
+      .locator('.group-by-header__heading')
+      .getAttribute('data-group-id')
+
+    const modalId = `[id^="${firstGroupID}-confirm-delete-many-docs"]`
+    await expect(page.locator(modalId)).toBeVisible()
 
     // Confirm trash (skip permanent delete)
     await page.locator(`${modalId} #confirm-action`).click()
