@@ -1,4 +1,4 @@
-import type { CreateJSONQueryArgs } from '@payloadcms/drizzle/types'
+import type { CreateJSONQueryArgs } from '../../types.js'
 
 type FromArrayArgs = {
   isRoot?: true
@@ -74,7 +74,7 @@ export const createJSONQuery = ({
   treatAsArray,
   value,
 }: CreateJSONQueryArgs): string => {
-  if (treatAsArray?.includes(pathSegments[1]!) && table) {
+  if (treatAsArray?.includes(pathSegments[1]) && table) {
     return fromArray({
       operator,
       pathSegments,

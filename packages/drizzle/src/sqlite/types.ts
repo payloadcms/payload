@@ -1,8 +1,6 @@
-import type { Client, Config, ResultSet } from '@libsql/client'
-import type { extendDrizzleTable, Operators } from '@payloadcms/drizzle'
-import type { BaseSQLiteAdapter, BaseSQLiteArgs } from '@payloadcms/drizzle/sqlite'
-import type { BuildQueryJoinAliases, DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { Client, ResultSet } from '@libsql/client'
 import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
+import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
   AnySQLiteColumn,
@@ -13,6 +11,10 @@ import type {
 } from 'drizzle-orm/sqlite-core'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { Payload, PayloadRequest } from 'payload'
+
+import type { Operators } from '../queries/operatorMap.js'
+import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
+import type { extendDrizzleTable } from '../utilities/extendDrizzleTable.js'
 
 type SQLiteSchema = {
   relations: Record<string, GenericRelation>
@@ -26,7 +28,7 @@ type SQLiteSchemaHookArgs = {
 
 export type SQLiteSchemaHook = (args: SQLiteSchemaHookArgs) => Promise<SQLiteSchema> | SQLiteSchema
 
-export type Args = {
+export type BaseSQLiteArgs = {
   /**
    * Transform the schema after it's built.
    * You can use it to customize the schema with features that aren't supported by Payload.
@@ -52,12 +54,23 @@ export type Args = {
    * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
    */
   beforeSchemaInit?: SQLiteSchemaHook[]
-  /**
-   * Store blocks as JSON column instead of storing them in relational structure.
-   */
-  blocksAsJSON?: boolean
-  client: Config
-} & BaseSQLiteArgs
+  /** Generated schema from payload generate:db-schema file path */
+  generateSchemaOutputFile?: string
+  idType?: 'number' | 'uuid'
+  localesSuffix?: string
+  logger?: DrizzleConfig['logger']
+  migrationDir?: string
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
+  push?: boolean
+  relationshipsSuffix?: string
+  schemaName?: string
+  transactionOptions?: false | SQLiteTransactionConfig
+  versionsSuffix?: string
+}
 
 export type GenericColumns = {
   [x: string]: AnySQLiteColumn
@@ -86,11 +99,11 @@ export type DeleteWhere = (args: {
   where: SQL
 }) => Promise<void>
 
-export type DropDatabase = (args: { adapter: SQLiteAdapter }) => Promise<void>
+export type DropDatabase = (args: { adapter: BaseSQLiteAdapter }) => Promise<void>
 
 export type Execute<T> = (args: {
-  db?: LibSQLDatabase
-  drizzle?: LibSQLDatabase
+  db?: DrizzleD1Database | LibSQLDatabase
+  drizzle?: DrizzleD1Database | LibSQLDatabase
   raw?: string
   sql?: SQL<unknown>
 }) => SQLiteRaw<Promise<T>> | SQLiteRaw<ResultSet>
@@ -126,12 +139,44 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
 
 type Drizzle = { $client: Client } & LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
 
-export type SQLiteAdapter = {
+export type BaseSQLiteAdapter = {
+  afterSchemaInit: SQLiteSchemaHook[]
+  autoIncrement: boolean
+  beforeSchemaInit: SQLiteSchemaHook[]
   client: Client
-  clientConfig: Args['client']
-  drizzle: Drizzle
-} & BaseSQLiteAdapter &
-  SQLiteDrizzleAdapter
+  countDistinct: CountDistinct
+  defaultDrizzleSnapshot: any
+  deleteWhere: DeleteWhere
+  dropDatabase: DropDatabase
+  execute: Execute<unknown>
+  /**
+   * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
+   * Used for returning properly formed errors from unique fields
+   */
+  fieldConstraints: Record<string, Record<string, string>>
+  idType: BaseSQLiteArgs['idType']
+  initializing: Promise<void>
+  insert: Insert
+  localesSuffix?: string
+  logger: DrizzleConfig['logger']
+  operators: Operators
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
+  push: boolean
+  rejectInitializing: () => void
+  relations: Record<string, GenericRelation>
+  relationshipsSuffix?: string
+  resolveInitializing: () => void
+  schema: Record<string, GenericRelation | GenericTable>
+  schemaName?: BaseSQLiteArgs['schemaName']
+  tableNameMap: Map<string, string>
+  tables: Record<string, GenericTable>
+  transactionOptions: SQLiteTransactionConfig
+  versionsSuffix?: string
+} & SQLiteDrizzleAdapter
 
 export type IDType = 'integer' | 'numeric' | 'text'
 
@@ -196,35 +241,4 @@ export type MigrateDownArgs = {
    * The `PayloadRequest` object that contains the current transaction
    */
   req: PayloadRequest
-}
-
-declare module 'payload' {
-  export interface DatabaseAdapter
-    extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
-      DrizzleAdapter {
-    beginTransaction: (options?: SQLiteTransactionConfig) => Promise<null | number | string>
-    drizzle: Drizzle
-    /**
-     * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
-     * Used for returning properly formed errors from unique fields
-     */
-    fieldConstraints: Record<string, Record<string, string>>
-    idType: Args['idType']
-    initializing: Promise<void>
-    localesSuffix?: string
-    logger: DrizzleConfig['logger']
-    prodMigrations?: {
-      down: (args: MigrateDownArgs) => Promise<void>
-      name: string
-      up: (args: MigrateUpArgs) => Promise<void>
-    }[]
-    push: boolean
-    rejectInitializing: () => void
-    relationshipsSuffix?: string
-    resolveInitializing: () => void
-    schema: Record<string, GenericRelation | GenericTable>
-    tableNameMap: Map<string, string>
-    transactionOptions: SQLiteTransactionConfig
-    versionsSuffix?: string
-  }
 }

@@ -1,12 +1,14 @@
-import type { Client, Config, ResultSet } from '@libsql/client'
-import type { extendDrizzleTable, Operators } from '@payloadcms/drizzle'
+import type { Client, ResultSet } from '@libsql/client'
+import type { D1Database, D1Options, DatabaseBinding } from '@miniflare/d1'
+const o: D1Options = {}
+import type { extendDrizzleTable } from '@payloadcms/drizzle'
 import type { BaseSQLiteAdapter, BaseSQLiteArgs } from '@payloadcms/drizzle/sqlite'
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
+import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
   AnySQLiteColumn,
-  SQLiteColumn,
   SQLiteInsertOnConflictDoUpdateConfig,
   SQLiteTableWithColumns,
   SQLiteTransactionConfig,
@@ -27,36 +29,7 @@ type SQLiteSchemaHookArgs = {
 export type SQLiteSchemaHook = (args: SQLiteSchemaHookArgs) => Promise<SQLiteSchema> | SQLiteSchema
 
 export type Args = {
-  /**
-   * Transform the schema after it's built.
-   * You can use it to customize the schema with features that aren't supported by Payload.
-   * Examples may include: composite indices, generated columns, vectors
-   */
-  afterSchemaInit?: SQLiteSchemaHook[]
-  /**
-   * Enable this flag if you want to thread your own ID to create operation data, for example:
-   * ```ts
-   * // doc created with id 1
-   * const doc = await payload.create({ collection: 'posts', data: {id: 1, title: "my title"}})
-   * ```
-   */
-  allowIDOnCreate?: boolean
-  /**
-   * Enable [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for Primary Keys.
-   * This ensures that the same ID cannot be reused from previously deleted rows.
-   */
-  autoIncrement?: boolean
-  /**
-   * Transform the schema before it's built.
-   * You can use it to preserve an existing database schema and if there are any collissions Payload will override them.
-   * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
-   */
-  beforeSchemaInit?: SQLiteSchemaHook[]
-  /**
-   * Store blocks as JSON column instead of storing them in relational structure.
-   */
-  blocksAsJSON?: boolean
-  client: Config
+  binding: DatabaseBinding
 } & BaseSQLiteArgs
 
 export type GenericColumns = {
@@ -73,7 +46,6 @@ export type GenericTable = SQLiteTableWithColumns<{
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
 export type CountDistinct = (args: {
-  column?: SQLiteColumn<any>
   db: LibSQLDatabase
   joins: BuildQueryJoinAliases
   tableName: string
@@ -86,7 +58,7 @@ export type DeleteWhere = (args: {
   where: SQL
 }) => Promise<void>
 
-export type DropDatabase = (args: { adapter: SQLiteAdapter }) => Promise<void>
+export type DropDatabase = (args: { adapter: SQLiteD1Adapter }) => Promise<void>
 
 export type Execute<T> = (args: {
   db?: LibSQLDatabase
@@ -124,11 +96,11 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
   ? T['schema']
   : GeneratedDatabaseSchema['schemaUntyped']
 
-type Drizzle = { $client: Client } & LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
+type Drizzle = { $client: D1Database } & DrizzleD1Database<Record<string, any>>
 
-export type SQLiteAdapter = {
-  client: Client
-  clientConfig: Args['client']
+export type SQLiteD1Adapter = {
+  binding: Args['binding']
+  client: D1Database
   drizzle: Drizzle
 } & BaseSQLiteAdapter &
   SQLiteDrizzleAdapter

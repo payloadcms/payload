@@ -9,7 +9,7 @@ import { findMany } from './find/findMany.js'
 export async function findOne<T extends TypeWithID>(
   this: DrizzleAdapter,
   { collection, draftsEnabled, joins, locale, req, select, where }: FindOneArgs,
-): Promise<T> {
+): Promise<null | T> {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))

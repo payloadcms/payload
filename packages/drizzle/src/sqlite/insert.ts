@@ -1,9 +1,9 @@
-import type { Insert, SQLiteAdapter } from './types.js'
+import type { BaseSQLiteAdapter, Insert } from './types.js'
 
 export const insert: Insert = async function (
   // Here 'this' is not a parameter. See:
   // https://www.typescriptlang.org/docs/handbook/2/classes.html#this-parameters
-  this: SQLiteAdapter,
+  this: BaseSQLiteAdapter,
   { db, onConflictDoUpdate, tableName, values },
 ): Promise<Record<string, unknown>[]> {
   const table = this.tables[tableName]
