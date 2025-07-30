@@ -95,7 +95,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       throw new NotFound(req.t)
     }
 
-    const parentDocID = rawVersion.parent
+    const { parent: parentDocID, version: versionToRestoreWithLocales } = rawVersion
 
     // /////////////////////////////////////
     // Access
@@ -117,6 +117,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       where: combineQueries({ id: { equals: parentDocID } }, accessResults),
     }
 
+    // Get the document from the non versioned collection
     const doc = await req.payload.db.findOne(findOneArgs)
 
     if (!doc && !hasWherePolicy) {
@@ -136,7 +137,6 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // /////////////////////////////////////
     // fetch previousDoc
     // /////////////////////////////////////
-
     const prevDocWithLocales = await getLatestCollectionVersion({
       id: parentDocID,
       config: collectionConfig,
@@ -145,6 +145,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       req,
     })
 
+    // originalDoc with hoisted localized data
     const originalDoc = await afterRead({
       collection: collectionConfig,
       context: req.context,
@@ -159,7 +160,22 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       showHiddenFields: true,
     })
 
-    let data = rawVersion.version
+    // version data with hoisted localized data
+    const prevVersionDoc = await afterRead({
+      collection: collectionConfig,
+      context: req.context,
+      depth: 0,
+      doc: deepCopyObjectSimple(versionToRestoreWithLocales),
+      draft: draftArg,
+      fallbackLocale: null,
+      global: null,
+      locale: locale!,
+      overrideAccess: true,
+      req,
+      showHiddenFields: true,
+    })
+
+    let data = deepCopyObjectSimple(prevVersionDoc)
 
     // /////////////////////////////////////
     // beforeValidate - Fields
@@ -223,7 +239,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       context: req.context,
       data: { ...data, id: parentDocID },
       doc: originalDoc,
-      docWithLocales: prevDocWithLocales,
+      docWithLocales: versionToRestoreWithLocales,
       global: null,
       operation: 'update',
       overrideAccess,
@@ -245,7 +261,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     result = await req.payload.db.updateOne({
       id: parentDocID,
       collection: collectionConfig.slug,
-      data,
+      data: result,
       req,
       select,
     })
