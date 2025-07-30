@@ -25,6 +25,8 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
 
   const options = {
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   const data = {

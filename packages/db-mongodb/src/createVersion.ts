@@ -29,6 +29,8 @@ export const createVersion: CreateVersion = async function createVersion(
 
   const options = {
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   const data = {

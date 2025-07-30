@@ -17,6 +17,8 @@ export const create: Create = async function create(
 
   const options: CreateOptions = {
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   let doc

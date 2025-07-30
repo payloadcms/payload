@@ -24,6 +24,8 @@ export const createGlobal: CreateGlobal = async function createGlobal(
 
   const options: CreateOptions = {
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   let [result] = (await Model.create([data], options)) as any
