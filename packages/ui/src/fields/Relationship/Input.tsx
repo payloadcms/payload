@@ -59,7 +59,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     onChange,
     path,
     placeholder,
-    populateDocumentTitleOnly,
     readOnly,
     relationTo,
     required,
@@ -424,13 +423,9 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
           draft: true,
           limit: idsToLoad.length,
           locale,
-          // NOTE: Populate full document by default for backwards compatibility
-          // Only use select when populateDocumentTitleOnly is true
-          ...(populateDocumentTitleOnly === true && {
-            select: {
-              [fieldToSelect]: true,
-            },
-          }),
+          select: {
+            [fieldToSelect]: true,
+          },
           where: {
             id: {
               in: idsToLoad,

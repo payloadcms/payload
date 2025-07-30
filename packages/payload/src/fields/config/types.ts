@@ -1208,19 +1208,10 @@ type RelationshipAdmin = {
   } & Admin['components']
   isSortable?: boolean
   placeholder?: LabelFunction | string
-  populateDocumentTitleOnly?: boolean
 } & Admin
 
 type RelationshipAdminClient = AdminClient &
-  Pick<
-    RelationshipAdmin,
-    | 'allowCreate'
-    | 'allowEdit'
-    | 'appearance'
-    | 'isSortable'
-    | 'placeholder'
-    | 'populateDocumentTitleOnly'
-  >
+  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'appearance' | 'isSortable' | 'placeholder'>
 
 export type PolymorphicRelationshipField = {
   admin?: {
