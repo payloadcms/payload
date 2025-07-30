@@ -274,6 +274,7 @@ export interface Post {
   wavelengths?: ('fm' | 'am') | null;
   selectField?: ('option1' | 'option2')[] | null;
   file?: string | null;
+  noReadAccessField?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -822,6 +823,7 @@ export interface PostsSelect<T extends boolean = true> {
   wavelengths?: T;
   selectField?: T;
   file?: T;
+  noReadAccessField?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

@@ -60,6 +60,10 @@ const createConstraint = ({
     formattedOperator = '='
   }
 
+  if (pathSegments.length === 1) {
+    return `EXISTS (SELECT 1 FROM json_each("${pathSegments[0]}") AS ${newAlias} WHERE ${newAlias}.value ${formattedOperator} '${formattedValue}')`
+  }
+
   return `EXISTS (
   SELECT 1
   FROM json_each(${alias}.value -> '${pathSegments[0]}') AS ${newAlias}
@@ -68,21 +72,38 @@ const createConstraint = ({
 }
 
 export const createJSONQuery = ({
+  column,
   operator,
   pathSegments,
+  rawColumn,
   table,
   treatAsArray,
+  treatRootAsArray,
   value,
 }: CreateJSONQueryArgs): string => {
+  if ((operator === 'in' || operator === 'not_in') && Array.isArray(value)) {
+    let sql = ''
+    for (const [i, v] of value.entries()) {
+      sql = `${sql}${createJSONQuery({ column, operator: operator === 'in' ? 'equals' : 'not_equals', pathSegments, rawColumn, table, treatAsArray, treatRootAsArray, value: v })} ${i === value.length - 1 ? '' : ` ${operator === 'in' ? 'OR' : 'AND'} `}`
+    }
+    return sql
+  }
+
   if (treatAsArray?.includes(pathSegments[1]!) && table) {
     return fromArray({
       operator,
       pathSegments,
       table,
       treatAsArray,
-      value,
+      value: value as CreateConstraintArgs['value'],
     })
   }
 
-  return createConstraint({ alias: table, operator, pathSegments, treatAsArray, value })
+  return createConstraint({
+    alias: table,
+    operator,
+    pathSegments,
+    treatAsArray,
+    value: value as CreateConstraintArgs['value'],
+  })
 }
