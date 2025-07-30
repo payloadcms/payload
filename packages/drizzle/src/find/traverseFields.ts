@@ -505,20 +505,26 @@ export const traverseFields = ({
               const field = getFieldByPath({ fields: collectioConfig.flattenedFields, path })
 
               if (field && field.field.type === 'select' && field.field.hasMany) {
-                const tableName = adapter.tableNameMap.get(
+                let tableName = adapter.tableNameMap.get(
                   `${toSnakeCase(collection)}_${toSnakeCase(path)}`,
                 )
+                let parentTable = getTableName(table)
+
+                if (adapter.schemaName) {
+                  tableName = `"${adapter.schemaName}"."${tableName}"`
+                  parentTable = `"${adapter.schemaName}"."${parentTable}"`
+                }
 
                 if (adapter.name === 'postgres') {
                   selectFields[path] = sql
                     .raw(
-                      `(select jsonb_agg(${tableName}.value) from ${tableName} where ${tableName}.parent_id = ${getTableName(table)}.id)`,
+                      `(select jsonb_agg(${tableName}.value) from ${tableName} where ${tableName}.parent_id = ${parentTable}.id)`,
                     )
                     .as(path)
                 } else {
                   selectFields[path] = sql
                     .raw(
-                      `(select json_group_array(${tableName}.value) from ${tableName} where ${tableName}.parent_id = ${getTableName(table)}.id)`,
+                      `(select json_group_array(${tableName}.value) from ${tableName} where ${tableName}.parent_id = ${parentTable}.id)`,
                     )
                     .as(path)
                 }
@@ -531,7 +537,7 @@ export const traverseFields = ({
                   column: `"${path}"`,
                   operator,
                   pathSegments: [field.field.name],
-                  table: getTableName(table),
+                  table: parentTable,
                   value,
                 })
                 ref[path] = { $raw: query }
