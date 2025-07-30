@@ -5,6 +5,7 @@ import type {
   PaginatedDocs,
   PayloadRequest,
   SanitizedCollectionConfig,
+  ViewTypes,
   Where,
 } from 'payload'
 
@@ -24,6 +25,7 @@ export const handleGroupBy = async ({
   req,
   trash = false,
   user,
+  viewType,
   where: whereWithMergedSearch,
 }: {
   clientConfig: ClientConfig
@@ -37,6 +39,7 @@ export const handleGroupBy = async ({
   req: PayloadRequest
   trash?: boolean
   user: any
+  viewType?: ViewTypes
   where: Where
 }): Promise<{
   columnState: Column[]
@@ -178,6 +181,7 @@ export const handleGroupBy = async ({
           payload: req.payload,
           query,
           useAsTitle: collectionConfig.admin.useAsTitle,
+          viewType,
         })
 
         // Only need to set `columnState` once, using the first table's column state
