@@ -270,6 +270,7 @@ export type EnableFoldersOptions = {
 }
 
 export type BaseListFilter = (args: {
+  context: 'list' | 'relationship'
   limit: number
   locale?: TypedLocale
   page: number
@@ -279,8 +280,27 @@ export type BaseListFilter = (args: {
 
 export type CollectionAdminOptions = {
   /**
-   * Define a default base filter for this collection's List view, which will be merged into any filters that the user performs.
-   * @link https://payloadcms.com/docs/collections#base-list-filter
+   * Define a default base filter for this collection's in the admin panel,
+   * which will be merged into any filters that the user performs.
+   * This is useful to be used by plugins like multi-tenant. For instance,
+   * A user can have access to multiple tenants, but should only see the one
+   * they have active or selected in the different places in the admin panel,
+   * such as the List View, or the relationships within the Lexical editor.
+   */
+  baseFilter?: BaseListFilter
+  /**
+   * @deprecated Use `baseFilter` instead.
+   *
+   * This property will only be used if it is defined while `baseFilter`
+   * is not. If `baseFilter` is defined, it will be used regardless of
+   * whether `baseListFilter` is defined or not.
+   *
+   * Previously, we considered the List View to be the only place we might
+   * want to apply a base filter in the admin panel, for example for the
+   * multi-tenant plugin, hence the name `baseListFilter`.
+   * But there are other places where you might want to apply the base filter,
+   * for example in the Lexical editor relationships. Therefore, we renamed
+   * it to `baseFilter`, and preserved the old name for backwards compatibility.
    */
   baseListFilter?: BaseListFilter
   /**
