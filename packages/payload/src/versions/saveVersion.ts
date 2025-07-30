@@ -156,12 +156,14 @@ export const saveVersion = async ({
 
         snapshotData._status = 'draft'
 
+        const snapshotDate = new Date().toISOString()
+
         const updatedArgs = {
           ...createVersionArgs,
-          createdAt: now,
+          createdAt: snapshotDate,
           returning: false,
           snapshot: true,
-          updatedAt: now,
+          updatedAt: snapshotDate,
           versionData: snapshotData,
         } as CreateGlobalVersionArgs & CreateVersionArgs
 
