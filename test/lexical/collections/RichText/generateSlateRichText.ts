@@ -71,10 +71,10 @@ export function generateSlateRichText() {
       type: 'ul',
       children: [
         {
-          // This node is untyped, because I want to test this scenario:
-          // https://github.com/payloadcms/payload/pull/13202
           children: [
             {
+              // This node is untyped, because I want to test this scenario:
+              // https://github.com/payloadcms/payload/pull/13202
               children: [
                 {
                   text: 'This editor is built ',
