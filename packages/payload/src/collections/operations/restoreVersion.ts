@@ -11,6 +11,7 @@ import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
+import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -159,6 +160,22 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     })
 
     let data = rawVersion.version
+
+    // /////////////////////////////////////
+    // beforeValidate - Fields
+    // /////////////////////////////////////
+
+    data = await beforeValidate({
+      id: parentDocID,
+      collection: collectionConfig,
+      context: req.context,
+      data,
+      doc: originalDoc,
+      global: null,
+      operation: 'update',
+      overrideAccess,
+      req,
+    })
 
     // /////////////////////////////////////
     // beforeValidate - Collection
