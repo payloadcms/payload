@@ -20,12 +20,14 @@ export const pricesField: (props: Props) => GroupField[] = ({
 
   const fields: GroupField[] = currencies.map((currency) => {
     const name = `priceIn${currency.code}`
-    const label = `Price (${currency.code})`
 
     const path = conditionalPath ? `${conditionalPath}.${name}Enabled` : `${name}Enabled`
 
     return {
       type: 'group',
+      admin: {
+        description: 'Prices for this product in different currencies.',
+      },
       fields: [
         {
           type: 'row',
@@ -50,6 +52,9 @@ export const pricesField: (props: Props) => GroupField[] = ({
                 name,
                 admin: {
                   condition: (_, siblingData) => Boolean(siblingData?.[path]),
+                  description: ({ t }) =>
+                    // @ts-expect-error - translations are not typed in plugins yet
+                    t('plugin-ecommerce:productPriceDescription'),
                 },
                 // @ts-expect-error - translations are not typed in plugins yet
                 label: ({ t }) => t('plugin-ecommerce:priceIn', { currency: currency.code }),

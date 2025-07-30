@@ -45,6 +45,8 @@ export const en: GenericTranslationsObject = {
     priceSetInVariants: 'Price set in variants.',
     processing: 'Processing',
     product: 'Product',
+    productPriceDescription:
+      'This price will also be used for sorting and filtering products. If you have variants enabled then you can enter the lowest or average price to help with search and filtering, but this price will not be used for checkout.',
     productRequired: 'A product is required.',
     products: 'Products',
     purchasedAt: 'Purchased at',

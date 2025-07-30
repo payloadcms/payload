@@ -16,7 +16,7 @@ async function CategoryList() {
 
   return (
     <div>
-      <h3 className="hidden text-xs text-neutral-500 md:block dark:text-neutral-400">Category</h3>
+      <h3 className="text-xs mb-2 text-neutral-500 dark:text-neutral-400">Category</h3>
 
       <ul>
         {categories.docs.map((category) => {

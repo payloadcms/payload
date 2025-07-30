@@ -8,6 +8,7 @@
 # testing
 /coverage
 .playwright
+playwright-report/
 
 # next.js
 /.next/
@@ -38,3 +39,4 @@ yarn-error.log*
 next-env.d.ts
 
 media
+

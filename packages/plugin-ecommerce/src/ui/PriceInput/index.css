@@ -24,5 +24,12 @@
 
   .formattedPriceInput {
     padding: 0.5rem 0.5rem 0.5rem 1.75rem;
+    min-width: 2rem;
+    width: fit-content;
+    max-width: 10rem;
+  }
+
+  .formattedPriceDescription {
+    max-width: 46rem;
   }
 }

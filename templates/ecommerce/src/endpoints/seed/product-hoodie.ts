@@ -47,6 +47,8 @@ export const productHoodie: Partial<Product> = {
   gallery: ['{{IMAGE_1}}', '{{IMAGE_2}}', '{{IMAGE_3}}'],
   title: 'Hoodie',
   slug: 'hoodie',
+  priceInUSDEnabled: true,
+  priceInUSD: 4999,
   relatedProducts: ['{{RELATED_PRODUCT_1}}'],
 }
 

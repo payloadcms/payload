@@ -1,8 +1,6 @@
 'use client'
 import type { DefaultCellComponentProps, TypedCollection } from 'payload'
 
-import './index.scss'
-
 import { useTranslation } from '@payloadcms/ui'
 
 import type { CurrenciesConfig, Currency } from '../../types.js'

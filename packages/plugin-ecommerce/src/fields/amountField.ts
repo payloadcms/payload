@@ -42,6 +42,7 @@ export const amountField: (props: Props) => NumberField = ({
         },
         ...overrides?.admin?.components,
       },
+      description: 'test',
       ...overrides?.admin,
     },
   }

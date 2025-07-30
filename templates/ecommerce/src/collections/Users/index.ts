@@ -23,30 +23,6 @@ export const Users: CollectionConfig = {
     useAsTitle: 'name',
   },
   auth: {
-    forgotPassword: {
-      generateEmailHTML: (args) => {
-        const req = args?.req
-        const token = args?.token
-        const user = req?.user
-
-        // Use the token provided to allow your user to reset their password
-        const resetPasswordURL = `${process.env.NEXT_PUBLIC_SERVER_URL}/reset-password?token=${token}`
-        const email = (user as User).email
-        return `
-          <!doctype html>
-          <html>
-            <body>
-              <h1>Here is my custom email template!</h1>
-              <p>Hello, ${email}!</p>
-              <p>Click below to reset your password.</p>
-              <p>
-                <a href="${resetPasswordURL}">${resetPasswordURL}</a>
-              </p>
-            </body>
-          </html>
-        `
-      },
-    },
     tokenExpiration: 1209600,
   },
   fields: [
@@ -57,11 +33,11 @@ export const Users: CollectionConfig = {
     {
       name: 'roles',
       type: 'select',
-      access: {
-        create: admins,
-        read: admins,
-        update: admins,
-      },
+      // access: {
+      //   create: admins,
+      //   read: admins,
+      //   update: admins,
+      // },
       defaultValue: ['customer'],
       hasMany: true,
       hooks: {

@@ -1,9 +1,6 @@
-'use client'
-import type { NumberFieldClientProps } from 'payload'
+import type { NumberFieldServerProps } from 'payload'
 
-import { useField, useFormFields } from '@payloadcms/ui'
-
-import './index.scss'
+import './index.css'
 
 import type { CurrenciesConfig, Currency } from '../../types.js'
 
@@ -13,31 +10,33 @@ type Props = {
   currenciesConfig: CurrenciesConfig
   currency?: Currency
   path: string
-} & NumberFieldClientProps
+} & NumberFieldServerProps
 
 export const PriceInput: React.FC<Props> = (args) => {
   const {
+    clientField: { label },
     currenciesConfig,
     currency: currencyFromProps,
-    field: { label },
+    field,
+    i18n: { t },
+    i18n,
     path,
   } = args
 
-  const { setValue, value } = useField<number>({ path })
-  const parentPath = path.split('.').slice(0, -1).join('.')
-  const currencyPath = parentPath ? `${parentPath}.currency` : 'currency'
-
-  const currencyFromSelectField = useFormFields(([fields, dispatch]) => fields[currencyPath])
-
-  const currencyCode = currencyFromProps?.code ?? (currencyFromSelectField?.value as string)
+  const description = field.admin?.description
+    ? typeof field.admin.description === 'function'
+      ? // @ts-expect-error - weird type issue on 't' here
+        field.admin.description({ i18n, t })
+      : field.admin.description
+    : undefined
 
   return (
     <FormattedInput
-      currency={currencyCode}
+      currency={currencyFromProps}
+      description={description}
       label={label}
-      onChange={(value) => setValue(value)}
+      path={path}
       supportedCurrencies={currenciesConfig?.supportedCurrencies}
-      value={value}
     />
   )
 }

@@ -1,11 +1,16 @@
 'use client'
 
+import { cn } from '@/utilities/cn'
 import { createUrl } from '@/utilities/createUrl'
 import { SearchIcon } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
 
-export function Search() {
+type Props = {
+  className?: string
+}
+
+export const Search: React.FC<Props> = ({ className }) => {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -26,7 +31,7 @@ export function Search() {
   }
 
   return (
-    <form className="max-w-xl relative w-full lg:w-80 xl:w-full" onSubmit={onSubmit}>
+    <form className={cn('relative w-full', className)} onSubmit={onSubmit}>
       <input
         autoComplete="off"
         className="w-full rounded-lg border bg-white px-4 py-2 text-sm text-black placeholder:text-neutral-500 dark:border-neutral-800 dark:bg-black dark:text-white dark:placeholder:text-neutral-400"
@@ -45,7 +50,7 @@ export function Search() {
 
 export function SearchSkeleton() {
   return (
-    <form className="max-w-xl relative w-full lg:w-80 xl:w-full">
+    <form className=" relative w-full ">
       <input
         className="w-full rounded-lg border bg-white px-4 py-2 text-sm text-black placeholder:text-neutral-500 dark:border-neutral-800 dark:bg-black dark:text-white dark:placeholder:text-neutral-400"
         placeholder="Search for products..."

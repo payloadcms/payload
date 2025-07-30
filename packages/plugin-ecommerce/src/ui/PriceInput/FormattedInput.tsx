@@ -1,8 +1,8 @@
 'use client'
 
-import type { StaticLabel } from 'payload'
+import type { StaticDescription, StaticLabel } from 'payload'
 
-import { FieldLabel } from '@payloadcms/ui'
+import { FieldDescription, FieldLabel, useField, useFormFields } from '@payloadcms/ui'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { Currency } from '../../types.js'
@@ -11,15 +11,15 @@ import { USD } from '../../currencies/index.js'
 import { convertFromBaseValue, convertToBaseValue } from '../utilities.js'
 
 interface Props {
-  currency: string
+  currency?: Currency
+  description?: StaticDescription
   disabled?: boolean
   error?: string
   id?: string
   label?: StaticLabel
-  onChange: (value: null | number) => void
+  path: string
   placeholder?: string
   supportedCurrencies: Currency[]
-  value: number
 }
 
 const baseClass = 'formattedPrice'
@@ -27,30 +27,38 @@ const baseClass = 'formattedPrice'
 export const FormattedInput: React.FC<Props> = ({
   id,
   currency: currencyFromProps,
+  description,
   disabled = false,
   label,
-  onChange: onChangeFromProps,
+  path,
   placeholder = '0.00',
   supportedCurrencies,
-  value,
 }) => {
+  const { setValue, value } = useField<number>({ path })
   const [displayValue, setDisplayValue] = useState<string>('')
 
   const inputRef = useRef<HTMLInputElement>(null)
   const isFirstRender = useRef(true)
   const debounceTimer = useRef<NodeJS.Timeout | null>(null)
 
+  const parentPath = path.split('.').slice(0, -1).join('.')
+  const currencyPath = parentPath ? `${parentPath}.currency` : 'currency'
+
+  const currencyFromSelectField = useFormFields(([fields, _]) => fields[currencyPath])
+
+  const currencyCode = currencyFromProps?.code ?? (currencyFromSelectField?.value as string)
+
   const currency = useMemo<Currency>(() => {
-    if (currencyFromProps && supportedCurrencies) {
+    if (currencyCode && supportedCurrencies) {
       const foundCurrency = supportedCurrencies.find(
-        (supportedCurrency) => supportedCurrency.code === currencyFromProps,
+        (supportedCurrency) => supportedCurrency.code === currencyCode,
       )
 
       return foundCurrency ?? supportedCurrencies[0] ?? USD
     }
 
     return supportedCurrencies[0] ?? USD
-  }, [currencyFromProps, supportedCurrencies])
+  }, [currencyCode, supportedCurrencies])
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -67,16 +75,16 @@ export const FormattedInput: React.FC<Props> = ({
   const updateValue = useCallback(
     (inputValue: string) => {
       if (inputValue === '') {
-        onChangeFromProps(null)
+        setValue(null)
 
         return
       }
 
       const baseValue = convertToBaseValue({ currency, displayValue: inputValue })
 
-      onChangeFromProps(baseValue)
+      setValue(baseValue)
     },
-    [currency, onChangeFromProps],
+    [currency, setValue],
   )
 
   const handleInputChange = useCallback(
@@ -117,11 +125,11 @@ export const FormattedInput: React.FC<Props> = ({
     const formattedValue = convertFromBaseValue({ baseValue, currency })
 
     if (value != baseValue) {
-      onChangeFromProps(baseValue)
+      setValue(baseValue)
     }
 
     setDisplayValue(formattedValue)
-  }, [currency, displayValue, onChangeFromProps, value])
+  }, [currency, displayValue, setValue, value])
 
   return (
     <div className={`field-type number ${baseClass}`}>
@@ -145,6 +153,11 @@ export const FormattedInput: React.FC<Props> = ({
           value={displayValue}
         />
       </div>
+      <FieldDescription
+        className={`${baseClass}Description`}
+        description={description}
+        path={path}
+      />
     </div>
   )
 }

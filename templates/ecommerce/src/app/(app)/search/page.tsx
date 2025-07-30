@@ -78,8 +78,13 @@ export default async function SearchPage({ searchParams }: Props) {
           <span className="font-bold">&quot;{searchValue}&quot;</span>
         </p>
       ) : null}
+
+      {!searchValue && products.docs?.length === 0 && (
+        <p className="mb-4">No products found. Please try different filters.</p>
+      )}
+
       {products?.docs.length > 0 ? (
-        <Grid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <Grid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.docs.map((product) => {
             return <ProductGridItem key={product.slug} product={product} />
           })}

@@ -398,12 +398,16 @@ test.describe('Frontend', () => {
       data,
     })
 
+    console.log({ response })
+
     const login = await request.post(`${baseURL}/api/users/login`, {
       data: {
         email,
         password,
       },
     })
+
+    console.log({ login })
   }
 
   async function createVariantsAndProducts(page: Page, request: any) {
