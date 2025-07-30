@@ -57,17 +57,6 @@ test.describe('Group By', () => {
         password: devUser.password,
       },
     })
-
-    // Fetch category IDs from already-seeded data
-    const categories = await payload.find({
-      collection: 'categories',
-      limit: 1,
-      sort: 'title',
-      where: { title: { equals: 'Category 1' } },
-    })
-
-    const [category1] = categories.docs
-    category1Id = category1?.id as number | string
   })
 
   beforeEach(async () => {
@@ -649,7 +638,12 @@ test.describe('Group By', () => {
     await firstTable.locator('.row-1 .cell-_select input').check()
     await firstTable.locator('.list-selection__button[aria-label="Delete"]').click()
 
-    const modalId = `[id^="${category1Id}-confirm-delete-many-docs"]`
+    const firstGroupID = await firstTable
+      .locator('.group-by-header__heading')
+      .getAttribute('data-group-id')
+
+    const modalId = `[id^="${firstGroupID}-confirm-delete-many-docs"]`
+    await expect(page.locator(modalId)).toBeVisible()
 
     // Confirm trash (skip permanent delete)
     await page.locator(`${modalId} #confirm-action`).click()
