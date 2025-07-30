@@ -10,6 +10,7 @@ import { CreateSimpleRetries0Task } from './tasks/CreateSimpleRetries0Task.js'
 import { CreateSimpleRetriesUndefinedTask } from './tasks/CreateSimpleRetriesUndefinedTask.js'
 import { CreateSimpleTask } from './tasks/CreateSimpleTask.js'
 import { CreateSimpleWithDuplicateMessageTask } from './tasks/CreateSimpleWithDuplicateMessageTask.js'
+import { DoNothingTask } from './tasks/DoNothingTask.js'
 import { ExternalTask } from './tasks/ExternalTask.js'
 import { ReturnCustomErrorTask } from './tasks/ReturnCustomErrorTask.js'
 import { ReturnErrorTask } from './tasks/ReturnErrorTask.js'
@@ -141,6 +142,7 @@ export const getConfig: () => Partial<Config> = () => ({
       ThrowErrorTask,
       ReturnErrorTask,
       ReturnCustomErrorTask,
+      DoNothingTask,
     ],
     workflows: [
       updatePostWorkflow,
