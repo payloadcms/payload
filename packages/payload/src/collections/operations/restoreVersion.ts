@@ -128,6 +128,8 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       select: incomingSelect,
     })
 
+    // Ensure updatedAt date is always updated
+    ;(rawVersion.version as any).updatedAt = new Date().toISOString()
     let result = await req.payload.db.updateOne({
       id: parentDocID,
       collection: collectionConfig.slug,
