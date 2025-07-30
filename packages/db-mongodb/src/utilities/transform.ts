@@ -554,8 +554,5 @@ export const transform = ({
     if (!data.updatedAt) {
       data.updatedAt = currentDate
     }
-    if (!data.createdAt) {
-      data.createdAt = currentDate
-    }
   }
 }

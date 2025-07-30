@@ -23,6 +23,10 @@ export const create: Create = async function create(
 
   let doc
 
+  if (!data.createdAt) {
+    data.createdAt = new Date().toISOString()
+  }
+
   transform({
     adapter: this,
     data,

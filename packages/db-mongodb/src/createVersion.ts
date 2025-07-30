@@ -43,6 +43,9 @@ export const createVersion: CreateVersion = async function createVersion(
     updatedAt,
     version: versionData,
   }
+  if (!data.createdAt) {
+    data.createdAt = new Date().toISOString()
+  }
 
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
 

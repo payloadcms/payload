@@ -14,6 +14,10 @@ export const createGlobal: CreateGlobal = async function createGlobal(
 ) {
   const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug })
 
+  if (!data.createdAt) {
+    ;(data as any).createdAt = new Date().toISOString()
+  }
+
   transform({
     adapter: this,
     data,

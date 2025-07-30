@@ -224,6 +224,12 @@ describe('database', () => {
       const createdAtDate = new Date(result.createdAt)
 
       expect(createdAtDate.getMilliseconds()).toBeDefined()
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
     })
 
     it('should allow createdAt to be set in create', async () => {
@@ -243,9 +249,15 @@ describe('database', () => {
 
       expect(result.createdAt).toStrictEqual(createdAt)
       expect(doc.createdAt).toStrictEqual(createdAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
     })
 
-    it('updatedAt cannot be set in create', async () => {
+    it('should allow updatedAt to be set in create', async () => {
       const updatedAt = new Date('2022-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
         collection: postsSlug,
@@ -255,7 +267,180 @@ describe('database', () => {
         },
       })
 
-      expect(result.updatedAt).not.toStrictEqual(updatedAt)
+      expect(result.updatedAt).toStrictEqual(updatedAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
+    })
+    it('should allow createdAt to be set in update', async () => {
+      const post = await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'hello',
+        },
+      })
+      const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
+
+      const result: any = await payload.db.updateOne({
+        collection: postsSlug,
+        id: post.id,
+        data: {
+          createdAt,
+        },
+      })
+
+      const doc = await payload.findByID({
+        id: result.id,
+        collection: postsSlug,
+      })
+
+      expect(doc.createdAt).toStrictEqual(createdAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
+    })
+
+    it('should allow updatedAt to be set in update', async () => {
+      const post = await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'hello',
+        },
+      })
+      const updatedAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
+
+      const result: any = await payload.db.updateOne({
+        collection: postsSlug,
+        id: post.id,
+        data: {
+          updatedAt,
+        },
+      })
+
+      const doc = await payload.findByID({
+        id: result.id,
+        collection: postsSlug,
+      })
+
+      expect(doc.updatedAt).toStrictEqual(updatedAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
+    })
+
+    it('should allow createdAt to be set in updateVersion', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: {
+          title: 'hello',
+        },
+      })
+      await payload.update({
+        collection: 'categories',
+        id: category.id,
+        data: {
+          title: 'hello2',
+        },
+      })
+      const versions = await payload.findVersions({
+        collection: 'categories',
+        depth: 0,
+        sort: '-createdAt',
+      })
+      const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
+
+      for (const version of versions.docs) {
+        await payload.db.updateVersion({
+          id: version.id,
+          collection: 'categories',
+          versionData: {
+            ...version.version,
+            createdAt,
+          },
+        })
+      }
+
+      const updatedVersions = await payload.findVersions({
+        collection: 'categories',
+        depth: 0,
+        sort: '-createdAt',
+      })
+      expect(updatedVersions.docs).toHaveLength(2)
+      for (const version of updatedVersions.docs) {
+        expect(version.createdAt).toStrictEqual(createdAt)
+      }
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: 'categories',
+        where: {},
+      })
+      await payload.db.deleteVersions({
+        collection: 'categories',
+        where: {},
+      })
+    })
+
+    it('should allow updatedAt to be set in updateVersion', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: {
+          title: 'hello',
+        },
+      })
+      await payload.update({
+        collection: 'categories',
+        id: category.id,
+        data: {
+          title: 'hello2',
+        },
+      })
+      const versions = await payload.findVersions({
+        collection: 'categories',
+        depth: 0,
+        sort: '-createdAt',
+      })
+      const updatedAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
+
+      for (const version of versions.docs) {
+        await payload.db.updateVersion({
+          id: version.id,
+          collection: 'categories',
+          versionData: {
+            ...version.version,
+            updatedAt,
+          },
+        })
+      }
+
+      const updatedVersions = await payload.findVersions({
+        collection: 'categories',
+        depth: 0,
+        sort: '-updatedAt',
+      })
+      expect(updatedVersions.docs).toHaveLength(2)
+      for (const version of updatedVersions.docs) {
+        expect(version.updatedAt).toStrictEqual(updatedAt)
+      }
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: 'categories',
+        where: {},
+      })
+      await payload.db.deleteVersions({
+        collection: 'categories',
+        where: {},
+      })
     })
   })
 

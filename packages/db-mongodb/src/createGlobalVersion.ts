@@ -39,6 +39,9 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     updatedAt,
     version: versionData,
   }
+  if (!data.createdAt) {
+    data.createdAt = new Date().toISOString()
+  }
 
   const fields = buildVersionGlobalFields(this.payload.config, globalConfig)
 
