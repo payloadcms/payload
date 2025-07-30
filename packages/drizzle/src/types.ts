@@ -161,10 +161,11 @@ export type CreateJSONQueryArgs = {
   column?: Column | string
   operator: string
   pathSegments: string[]
+  rawColumn?: SQL<unknown>
   table?: string
   treatAsArray?: string[]
   treatRootAsArray?: boolean
-  value: boolean | number | string
+  value: boolean | number | number[] | string | string[]
 }
 
 /**

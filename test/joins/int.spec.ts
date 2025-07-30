@@ -356,6 +356,56 @@ describe('Joins Field', () => {
     expect(result.docs[0]?.documentsAndFolders.docs).toHaveLength(1)
   })
 
+  it('should allow join where query on hasMany select fields', async () => {
+    const folderDoc = await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'scopedFolder',
+        folderType: ['folderPoly1', 'folderPoly2'],
+      },
+    })
+
+    await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'childFolder',
+        folderType: ['folderPoly1'],
+        folder: folderDoc.id,
+      },
+    })
+
+    const findFolder = await payload.find({
+      collection: 'payload-folders',
+      where: {
+        id: {
+          equals: folderDoc.id,
+        },
+      },
+      joins: {
+        documentsAndFolders: {
+          limit: 100_000,
+          sort: 'name',
+          where: {
+            and: [
+              {
+                relationTo: {
+                  equals: 'payload-folders',
+                },
+              },
+              {
+                folderType: {
+                  in: ['folderPoly1'],
+                },
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    expect(findFolder?.docs[0]?.documentsAndFolders?.docs).toHaveLength(1)
+  })
+
   it('should filter joins using where query', async () => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
