@@ -301,6 +301,9 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         user.sessions.push(session)
       }
 
+      // Ensure updatedAt date is always updated
+      user.updatedAt = new Date().toISOString()
+
       await payload.db.updateOne({
         id: user.id,
         collection: collectionConfig.slug,
