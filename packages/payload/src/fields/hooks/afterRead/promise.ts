@@ -115,9 +115,10 @@ export const promise = async ({
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
   let removedFieldValue = false
+  const fieldAffectsDataResult = fieldAffectsData(field)
 
   if (
-    fieldAffectsData(field) &&
+    fieldAffectsDataResult &&
     field.hidden &&
     typeof siblingDoc[field.name!] !== 'undefined' &&
     !showHiddenFields
@@ -141,7 +142,7 @@ export const promise = async ({
 
   const shouldHoistLocalizedValue: boolean = Boolean(
     flattenLocales &&
-      fieldAffectsData(field) &&
+      fieldAffectsDataResult &&
       typeof siblingDoc[field.name!] === 'object' &&
       siblingDoc[field.name!] !== null &&
       fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! }) &&
@@ -149,7 +150,7 @@ export const promise = async ({
       req.payload.config.localization,
   )
 
-  if (shouldHoistLocalizedValue) {
+  if (fieldAffectsDataResult && shouldHoistLocalizedValue) {
     // replace actual value with localized value before sanitizing
     // { [locale]: fields } -> fields
     const value = siblingDoc[field.name!][locale!]
@@ -188,7 +189,7 @@ export const promise = async ({
     case 'group': {
       // Fill groups with empty objects so fields with hooks within groups can populate
       // themselves virtually as necessary
-      if (fieldAffectsData(field) && typeof siblingDoc[field.name] === 'undefined') {
+      if (fieldAffectsDataResult && typeof siblingDoc[field.name] === 'undefined') {
         siblingDoc[field.name] = {}
       }
 
@@ -235,7 +236,7 @@ export const promise = async ({
     }
   }
 
-  if (fieldAffectsData(field)) {
+  if (fieldAffectsDataResult) {
     // Execute hooks
     if (triggerHooks && field.hooks?.afterRead) {
       for (const hook of field.hooks.afterRead) {
@@ -622,7 +623,7 @@ export const promise = async ({
     }
 
     case 'group': {
-      if (fieldAffectsData(field)) {
+      if (fieldAffectsDataResult) {
         let groupDoc = siblingDoc[field.name] as JsonObject
 
         if (typeof siblingDoc[field.name] !== 'object') {
