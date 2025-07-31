@@ -27,10 +27,10 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
-import { blocksCollectionSlug } from './collections/Blocks/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
 import { richTextSlug } from './collections/RichText/index.js'
 import {
+  arrayWithFallbackCollectionSlug,
   defaultLocale,
   englishTitle,
   localizedDraftsSlug,
@@ -59,6 +59,7 @@ let urlRelationshipLocalized: AdminUrlUtil
 let urlCannotCreateDefaultLocale: AdminUrlUtil
 let urlPostsWithDrafts: AdminUrlUtil
 let urlArray: AdminUrlUtil
+let arrayWithFallbackURL: AdminUrlUtil
 
 const title = 'english title'
 const spanishTitle = 'spanish title'
@@ -84,6 +85,7 @@ describe('Localization', () => {
     urlCannotCreateDefaultLocale = new AdminUrlUtil(serverURL, 'cannot-create-default-locale')
     urlPostsWithDrafts = new AdminUrlUtil(serverURL, localizedDraftsSlug)
     urlArray = new AdminUrlUtil(serverURL, arrayCollectionSlug)
+    arrayWithFallbackURL = new AdminUrlUtil(serverURL, arrayWithFallbackCollectionSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -590,14 +592,14 @@ describe('Localization', () => {
 
   describe('fallback checkbox', () => {
     test('should show fallback checkbox for non-default locale', async () => {
-      await createLocalizedArrayItem(page, urlArray)
+      await createLocalizedArrayItem(page, arrayWithFallbackURL)
 
       const fallbackCheckbox = page.locator('text=Fallback to default locale')
       await expect(fallbackCheckbox).toBeVisible()
     })
 
     test('should save document successfully when fallback checkbox is checked', async () => {
-      await createLocalizedArrayItem(page, urlArray)
+      await createLocalizedArrayItem(page, arrayWithFallbackURL)
 
       const checkbox = page.locator('#field-items input[type="checkbox"]')
       // have to uncheck and check again to allow save
@@ -610,7 +612,7 @@ describe('Localization', () => {
     })
 
     test('should save correct data when fallback checkbox is checked', async () => {
-      await createLocalizedArrayItem(page, urlArray)
+      await createLocalizedArrayItem(page, arrayWithFallbackURL)
 
       const checkbox = page.locator('#field-items input[type="checkbox"]')
       // have to uncheck and check again to allow save
@@ -621,7 +623,7 @@ describe('Localization', () => {
       await saveDocAndAssert(page)
 
       const id = page.url().split('/').pop()
-      const apiURL = `${serverURL}/api/${arrayCollectionSlug}/${id}`
+      const apiURL = `${serverURL}/api/${arrayWithFallbackCollectionSlug}/${id}`
       await page.goto(apiURL)
       const data = await page.evaluate(() => {
         return JSON.parse(document.querySelector('body')?.innerText || '{}')

@@ -387,7 +387,6 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         localized={localized}
         path={path}
         readOnly={readOnly}
-        required={required}
       />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable

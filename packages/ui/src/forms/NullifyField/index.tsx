@@ -8,13 +8,15 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useForm } from '../Form/context.js'
+import './index.scss'
+
+const baseClass = 'nullify-locale-field'
 
 type NullifyLocaleFieldProps = {
   readonly fieldValue?: [] | null | number
   readonly localized: boolean
   readonly path: string
   readonly readOnly?: boolean
-  readonly required: boolean
 }
 
 export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
@@ -22,7 +24,6 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
   localized,
   path,
   readOnly = false,
-  required,
 }) => {
   const { code: currentLocale } = useLocale()
   const {
@@ -31,11 +32,6 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
   const [checked, setChecked] = React.useState<boolean>(typeof fieldValue !== 'number')
   const { t } = useTranslation()
   const { dispatchFields, setModified } = useForm()
-
-  if (readOnly || !required) {
-    // do not render when field is read-only or not required
-    return null
-  }
 
   if (!localized || !localization) {
     // hide when field is not localized or localization is not enabled
@@ -77,18 +73,22 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
   }
 
   return (
-    <Banner>
-      <CheckboxField
-        checked={checked}
-        field={{
-          name: '',
-          label: t('general:fallbackToDefaultLocale'),
-        }}
-        id={`field-${path.replace(/\./g, '__')}`}
-        onChange={onChange}
-        path={path}
-        schemaPath=""
-      />
+    <Banner className={baseClass}>
+      {!fieldValue && readOnly ? (
+        t('general:fallbackToDefaultLocale')
+      ) : (
+        <CheckboxField
+          checked={checked}
+          field={{
+            name: '',
+            label: t('general:fallbackToDefaultLocale'),
+          }}
+          id={`field-${path.replace(/\./g, '__')}`}
+          onChange={onChange}
+          path={path}
+          schemaPath=""
+        />
+      )}
     </Banner>
   )
 }
