@@ -38,6 +38,7 @@ export const mergeServerFormState = ({
     newState[path] = {
       ...currentState[path],
       ...incomingField,
+      errorPaths: incomingField.errorPaths || [],
     }
 
     /**
