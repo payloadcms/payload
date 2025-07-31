@@ -470,7 +470,7 @@ export const promise = async ({
             })
           }
         })
-      } else if (shouldHoistLocalizedValue) {
+      } else if (shouldHoistLocalizedValue && !rows) {
         siblingDoc[field.name] = null
       } else if (field.hidden !== true || showHiddenFields === true) {
         siblingDoc[field.name] = []
@@ -577,7 +577,7 @@ export const promise = async ({
             })
           }
         })
-      } else if (shouldHoistLocalizedValue) {
+      } else if (shouldHoistLocalizedValue && rows === null) {
         siblingDoc[field.name] = null
       } else if (field.hidden !== true || showHiddenFields === true) {
         siblingDoc[field.name] = []
