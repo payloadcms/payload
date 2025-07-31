@@ -65,18 +65,14 @@ const Context = createContext<ContextType>({
 
 export const TenantSelectionProviderClient = ({
   children,
+  initialTenantOptions,
   initialValue,
-  tenantCookie,
-  tenantOptions: tenantOptionsFromProps,
   tenantsCollectionSlug,
-  useAsTitle,
 }: {
   children: React.ReactNode
+  initialTenantOptions: OptionObject[]
   initialValue?: number | string
-  tenantCookie?: string
-  tenantOptions: OptionObject[]
   tenantsCollectionSlug: string
-  useAsTitle: string
 }) => {
   const [selectedTenantID, setSelectedTenantID] = React.useState<number | string | undefined>(
     initialValue,
@@ -86,8 +82,10 @@ export const TenantSelectionProviderClient = ({
   const { user } = useAuth()
   const { config } = useConfig()
   const userID = React.useMemo(() => user?.id, [user?.id])
+  const prevUserID = React.useRef(userID)
+  const userChanged = userID !== prevUserID.current
   const [tenantOptions, setTenantOptions] = React.useState<OptionObject[]>(
-    () => tenantOptionsFromProps,
+    () => initialTenantOptions,
   )
   const selectedTenantLabel = React.useMemo(
     () => tenantOptions.find((option) => option.value === selectedTenantID)?.label,
@@ -113,15 +111,15 @@ export const TenantSelectionProviderClient = ({
           // users with multiple tenants can clear the tenant selection
           setSelectedTenantID(undefined)
           deleteCookie()
-        } else {
+        } else if (tenantOptions[0]) {
           // if there is only one tenant, force the selection of that tenant
-          setSelectedTenantID(tenantOptions[0]?.value)
-          setCookie(String(tenantOptions[0]?.value))
+          setSelectedTenantID(tenantOptions[0].value)
+          setCookie(String(tenantOptions[0].value))
         }
       } else if (!tenantOptions.find((option) => option.value === id)) {
         // if the tenant is not valid, set the first tenant as selected
-        if (tenantOptions?.[0]?.value) {
-          setTenant({ id: tenantOptions[0].value, refresh: true })
+        if (tenantOptions[0]?.value) {
+          setTenant({ id: tenantOptions[0]?.value, refresh: true })
         } else {
           setTenant({ id: undefined, refresh: true })
         }
@@ -140,7 +138,7 @@ export const TenantSelectionProviderClient = ({
   const syncTenants = React.useCallback(async () => {
     try {
       const req = await fetch(
-        `${config.serverURL}${config.routes.api}/${tenantsCollectionSlug}?select[${useAsTitle}]=true&limit=0&depth=0`,
+        `${config.serverURL}${config.routes.api}/${tenantsCollectionSlug}/populate-tenant-options`,
         {
           credentials: 'include',
           method: 'GET',
@@ -149,18 +147,18 @@ export const TenantSelectionProviderClient = ({
 
       const result = await req.json()
 
-      if (result.docs) {
-        setTenantOptions(
-          result.docs.map((doc: Record<string, number | string>) => ({
-            label: doc[useAsTitle],
-            value: doc.id,
-          })),
-        )
+      if (result.tenantOptions && userID) {
+        setTenantOptions(result.tenantOptions)
+
+        if (result.tenantOptions.length === 1) {
+          setSelectedTenantID(result.tenantOptions[0].value)
+          setCookie(String(result.tenantOptions[0].value))
+        }
       }
     } catch (e) {
       toast.error(`Error fetching tenants`)
     }
-  }, [config.serverURL, config.routes.api, tenantsCollectionSlug, useAsTitle])
+  }, [config.serverURL, config.routes.api, tenantsCollectionSlug, setCookie, userID])
 
   const updateTenants = React.useCallback<ContextType['updateTenants']>(
     ({ id, label }) => {
@@ -182,44 +180,21 @@ export const TenantSelectionProviderClient = ({
   )
 
   React.useEffect(() => {
-    if (userID && !tenantCookie) {
-      if (tenantOptionsFromProps.length === 1) {
-        // Users with no cookie set and only 1 tenant should set that tenant automatically
-        setTenant({ id: tenantOptionsFromProps[0]?.value, refresh: true })
-        setTenantOptions(tenantOptionsFromProps)
-      } else if (
-        (!tenantOptions || tenantOptions.length === 0) &&
-        tenantOptionsFromProps.length > 0
-      ) {
-        // If there are no tenant options, set them from the props
-        setTenantOptions(tenantOptionsFromProps)
+    if (userChanged) {
+      if (userID) {
+        // user logging in
+        void syncTenants()
+      } else {
+        // user logging out
+        setSelectedTenantID(undefined)
+        deleteCookie()
+        if (tenantOptions.length > 0) {
+          setTenantOptions([])
+        }
       }
-    } else if (userID && tenantCookie) {
-      if ((!tenantOptions || tenantOptions.length === 0) && tenantOptionsFromProps.length > 0) {
-        // If there are no tenant options, set them from the props
-        setTenantOptions(tenantOptionsFromProps)
-      }
+      prevUserID.current = userID
     }
-  }, [
-    initialValue,
-    selectedTenantID,
-    tenantCookie,
-    userID,
-    setTenant,
-    tenantOptionsFromProps,
-    tenantOptions,
-  ])
-
-  React.useEffect(() => {
-    if (!userID && tenantCookie) {
-      // User is not logged in, but has a tenant cookie, delete it
-      deleteCookie()
-      setSelectedTenantID(undefined)
-    } else if (userID) {
-      // User changed, refresh
-      router.refresh()
-    }
-  }, [userID, tenantCookie, deleteCookie, router])
+  }, [userID, userChanged, syncTenants, deleteCookie, tenantOptions])
 
   return (
     <span

@@ -107,7 +107,7 @@ export const bin = async () => {
   }
 
   if (script === 'jobs:run') {
-    const payload = await getPayload({ config })
+    const payload = await getPayload({ config }) // Do not setup crons here - this bin script can set up its own crons
     const limit = args.limit ? parseInt(args.limit, 10) : undefined
     const queue = args.queue ? args.queue : undefined
     const allQueues = !!args.allQueues
@@ -133,7 +133,7 @@ export const bin = async () => {
 
       await payload.destroy() // close database connections after running jobs so process can exit cleanly
 
-      return
+      process.exit(0)
     }
   }
 

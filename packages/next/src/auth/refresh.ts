@@ -9,7 +9,7 @@ import { getExistingAuthToken } from '../utilities/getExistingAuthToken.js'
 import { setPayloadAuthCookie } from '../utilities/setPayloadAuthCookie.js'
 
 export async function refresh({ config }: { config: any }) {
-  const payload = await getPayload({ config })
+  const payload = await getPayload({ config, cron: true })
   const headers = await nextHeaders()
   const result = await payload.auth({ headers })
 

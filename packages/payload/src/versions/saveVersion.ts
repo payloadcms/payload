@@ -16,6 +16,7 @@ type Args = {
   draft?: boolean
   global?: SanitizedGlobalConfig
   id?: number | string
+  operation?: 'create' | 'restoreVersion' | 'update'
   payload: Payload
   publishSpecificLocale?: string
   req?: PayloadRequest
@@ -30,6 +31,7 @@ export const saveVersion = async ({
   docWithLocales: doc,
   draft,
   global,
+  operation,
   payload,
   publishSpecificLocale,
   req,
@@ -126,7 +128,7 @@ export const saveVersion = async ({
       const createVersionArgs = {
         autosave: Boolean(autosave),
         collectionSlug: undefined as string | undefined,
-        createdAt: now,
+        createdAt: operation === 'restoreVersion' ? versionData.createdAt : now,
         globalSlug: undefined as string | undefined,
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,

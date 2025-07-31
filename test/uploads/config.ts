@@ -11,7 +11,10 @@ import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/ind
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWithSearchQueries/index.js'
 import { AdminUploadControl } from './collections/AdminUploadControl/index.js'
+import { BulkUploadsCollection } from './collections/BulkUploads/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
+import { FileMimeType } from './collections/FileMimeType/index.js'
+import { SimpleRelationshipCollection } from './collections/SimpleRelationship/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
 import {
@@ -23,16 +26,22 @@ import {
   enlargeSlug,
   focalNoSizesSlug,
   hideFileInputOnCreateSlug,
+  imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
   mediaWithoutRelationPreviewSlug,
   mediaWithRelationPreviewSlug,
+  noRestrictFileMimeTypesSlug,
+  noRestrictFileTypesSlug,
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
+  restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
+  skipSafeFetchHeaderFilterSlug,
   skipSafeFetchMediaSlug,
+  svgOnlySlug,
   threeDimensionalSlug,
   unstoredMediaSlug,
   versionSlug,
@@ -297,6 +306,26 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: imageSizesOnlySlug,
+      fields: [],
+      upload: {
+        crop: false,
+        focalPoint: false,
+        imageSizes: [
+          {
+            name: 'sizeOne',
+            height: 300,
+            width: 400,
+          },
+          {
+            name: 'sizeTwo',
+            height: 400,
+            width: 300,
+          },
+        ],
+      },
+    },
+    {
       slug: focalNoSizesSlug,
       fields: [],
       upload: {
@@ -438,11 +467,41 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: skipSafeFetchHeaderFilterSlug,
+      fields: [],
+      upload: {
+        skipSafeFetch: true,
+        staticDir: path.resolve(dirname, './media'),
+        externalFileHeaderFilter: (headers) => headers, // Keep all headers including cookies
+      },
+    },
+    {
       slug: skipAllowListSafeFetchMediaSlug,
       fields: [],
       upload: {
         skipSafeFetch: [{ protocol: 'http', hostname: '127.0.0.1', port: '', search: '' }],
         staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
+      slug: restrictFileTypesSlug,
+      fields: [],
+      upload: {
+        allowRestrictedFileTypes: false,
+      },
+    },
+    {
+      slug: noRestrictFileTypesSlug,
+      fields: [],
+      upload: {
+        allowRestrictedFileTypes: true,
+      },
+    },
+    {
+      slug: noRestrictFileMimeTypesSlug,
+      fields: [],
+      upload: {
+        mimeTypes: ['text/html'],
       },
     },
     {
@@ -857,6 +916,17 @@ export default buildConfigWithDefaults({
           limitInputPixels: 100, // set lower than the collection upload fileSize limit default to test
         },
         staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    BulkUploadsCollection,
+    SimpleRelationshipCollection,
+    FileMimeType,
+    {
+      slug: svgOnlySlug,
+      fields: [],
+      upload: {
+        mimeTypes: ['image/svg+xml'],
+        staticDir: path.resolve(dirname, './svg-only'),
       },
     },
   ],

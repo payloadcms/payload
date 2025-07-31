@@ -8,6 +8,7 @@ import React from 'react'
 import { toast } from 'sonner'
 
 import { useConfig } from '../../providers/Config/index.js'
+import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { Drawer, useDrawerDepth } from '../Drawer/index.js'
@@ -77,7 +78,9 @@ export function BulkUploadDrawer() {
     <Drawer gutter={false} Header={null} slug={drawerSlug}>
       <FormsManagerProvider>
         <UploadControlsProvider>
-          <DrawerContent />
+          <EditDepthProvider>
+            <DrawerContent />
+          </EditDepthProvider>
         </UploadControlsProvider>
       </FormsManagerProvider>
     </Drawer>
@@ -86,61 +89,57 @@ export function BulkUploadDrawer() {
 
 type BulkUploadContext = {
   collectionSlug: string
-  currentActivePath: string
   drawerSlug: string
   initialFiles: FileList
   maxFiles: number
   onCancel: () => void
   onSuccess: (newDocs: JsonObject[], errorCount: number) => void
   setCollectionSlug: (slug: string) => void
-  setCurrentActivePath: (path: string) => void
   setInitialFiles: (files: FileList) => void
   setMaxFiles: (maxFiles: number) => void
   setOnCancel: (onCancel: BulkUploadContext['onCancel']) => void
-  setOnSuccess: (path: string, onSuccess: BulkUploadContext['onSuccess']) => void
+  setOnSuccess: (onSuccess: BulkUploadContext['onSuccess']) => void
 }
 
 const Context = React.createContext<BulkUploadContext>({
   collectionSlug: '',
-  currentActivePath: undefined,
   drawerSlug: '',
   initialFiles: undefined,
   maxFiles: undefined,
   onCancel: () => null,
   onSuccess: () => null,
   setCollectionSlug: () => null,
-  setCurrentActivePath: () => null,
   setInitialFiles: () => null,
   setMaxFiles: () => null,
   setOnCancel: () => null,
   setOnSuccess: () => null,
 })
-export function BulkUploadProvider({ children }: { readonly children: React.ReactNode }) {
+export function BulkUploadProvider({
+  children,
+  drawerSlugPrefix,
+}: {
+  readonly children: React.ReactNode
+  readonly drawerSlugPrefix?: string
+}) {
   const [collection, setCollection] = React.useState<string>()
-  const [onSuccessFunctionMap, setOnSuccessFunctionMap] =
-    React.useState<Record<string, BulkUploadContext['onSuccess']>>()
+  const [onSuccessFunction, setOnSuccessFunction] = React.useState<BulkUploadContext['onSuccess']>()
   const [onCancelFunction, setOnCancelFunction] = React.useState<BulkUploadContext['onCancel']>()
   const [initialFiles, setInitialFiles] = React.useState<FileList>(undefined)
   const [maxFiles, setMaxFiles] = React.useState<number>(undefined)
-  const [currentActivePath, setCurrentActivePath] = React.useState<string>(undefined)
-  const drawerSlug = useBulkUploadDrawerSlug()
+  const drawerSlug = `${drawerSlugPrefix ? `${drawerSlugPrefix}-` : ''}${useBulkUploadDrawerSlug()}`
 
   const setCollectionSlug: BulkUploadContext['setCollectionSlug'] = (slug) => {
     setCollection(slug)
   }
 
-  const setOnSuccess: BulkUploadContext['setOnSuccess'] = React.useCallback((path, onSuccess) => {
-    setOnSuccessFunctionMap((prev) => ({
-      ...prev,
-      [path]: onSuccess,
-    }))
-  }, [])
+  const setOnSuccess: BulkUploadContext['setOnSuccess'] = (onSuccess) => {
+    setOnSuccessFunction(() => onSuccess)
+  }
 
   return (
     <Context
       value={{
         collectionSlug: collection,
-        currentActivePath,
         drawerSlug,
         initialFiles,
         maxFiles,
@@ -150,13 +149,11 @@ export function BulkUploadProvider({ children }: { readonly children: React.Reac
           }
         },
         onSuccess: (docIDs, errorCount) => {
-          if (onSuccessFunctionMap && Object.hasOwn(onSuccessFunctionMap, currentActivePath)) {
-            const onSuccessFunction = onSuccessFunctionMap[currentActivePath]
+          if (typeof onSuccessFunction === 'function') {
             onSuccessFunction(docIDs, errorCount)
           }
         },
         setCollectionSlug,
-        setCurrentActivePath,
         setInitialFiles,
         setMaxFiles,
         setOnCancel: setOnCancelFunction,

@@ -93,6 +93,7 @@ export interface Config {
     placeholder: Placeholder;
     'use-as-title-group-field': UseAsTitleGroupField;
     'disable-bulk-edit': DisableBulkEdit;
+    'custom-list-drawer': CustomListDrawer;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -125,6 +126,7 @@ export interface Config {
     placeholder: PlaceholderSelect<false> | PlaceholderSelect<true>;
     'use-as-title-group-field': UseAsTitleGroupFieldSelect<false> | UseAsTitleGroupFieldSelect<true>;
     'disable-bulk-edit': DisableBulkEditSelect<false> | DisableBulkEditSelect<true>;
+    'custom-list-drawer': CustomListDrawerSelect<false> | CustomListDrawerSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -272,6 +274,7 @@ export interface Post {
   wavelengths?: ('fm' | 'am') | null;
   selectField?: ('option1' | 'option2')[] | null;
   file?: string | null;
+  noReadAccessField?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -293,6 +296,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -560,6 +570,15 @@ export interface DisableBulkEdit {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-list-drawer".
+ */
+export interface CustomListDrawer {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -668,6 +687,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'disable-bulk-edit';
         value: string | DisableBulkEdit;
+      } | null)
+    | ({
+        relationTo: 'custom-list-drawer';
+        value: string | CustomListDrawer;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -800,6 +823,7 @@ export interface PostsSelect<T extends boolean = true> {
   wavelengths?: T;
   selectField?: T;
   file?: T;
+  noReadAccessField?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -820,6 +844,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1057,6 +1088,14 @@ export interface UseAsTitleGroupFieldSelect<T extends boolean = true> {
  * via the `definition` "disable-bulk-edit_select".
  */
 export interface DisableBulkEditSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-list-drawer_select".
+ */
+export interface CustomListDrawerSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
 }

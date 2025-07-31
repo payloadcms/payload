@@ -364,8 +364,8 @@ describe('@payloadcms/plugin-import-export', () => {
       const expectedPath = path.join(dirname, './uploads', doc.filename as string)
       const data = await readCSV(expectedPath)
 
-      expect(data[0].blocks_0_blockType).toStrictEqual('hero')
-      expect(data[0].blocks_1_blockType).toStrictEqual('content')
+      expect(data[0].blocks_0_hero_blockType).toStrictEqual('hero')
+      expect(data[0].blocks_1_content_blockType).toStrictEqual('content')
     })
 
     it('should create a csv of all fields when fields is empty', async () => {
@@ -465,6 +465,29 @@ describe('@payloadcms/plugin-import-export', () => {
       const data = await readJSON(expectedPath)
 
       expect(data[0].title).toStrictEqual('JSON 0')
+    })
+
+    it('should download an existing export JSON file', async () => {
+      const response = await restClient.POST('/exports/download', {
+        body: JSON.stringify({
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title'],
+            format: 'json',
+            sort: 'title',
+          },
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      expect(response.status).toBe(200)
+      expect(response.headers.get('content-type')).toMatch(/application\/json/)
+
+      const data = await response.json()
+
+      expect(Array.isArray(data)).toBe(true)
+      expect(['string', 'number']).toContain(typeof data[0].id)
+      expect(typeof data[0].title).toBe('string')
     })
 
     it('should create an export with every field when no fields are defined', async () => {
@@ -569,9 +592,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].hasOnePolymorphic_relationTo).toBe('posts')
 
       // hasManyPolymorphic
-      expect(data[0].hasManyPolymorphic_0_value_id).toBeDefined()
+      expect(data[0].hasManyPolymorphic_0_id).toBeDefined()
       expect(data[0].hasManyPolymorphic_0_relationTo).toBe('users')
-      expect(data[0].hasManyPolymorphic_1_value_id).toBeDefined()
+      expect(data[0].hasManyPolymorphic_1_id).toBeDefined()
       expect(data[0].hasManyPolymorphic_1_relationTo).toBe('posts')
     })
 
@@ -629,8 +652,8 @@ describe('@payloadcms/plugin-import-export', () => {
       const expectedPath = path.join(dirname, './uploads', doc.filename as string)
       const data = await readCSV(expectedPath)
 
-      expect(data[0].blocks_0_blockType).toStrictEqual('hero')
-      expect(data[0].blocks_1_blockType).toStrictEqual('content')
+      expect(data[0].blocks_0_hero_blockType).toStrictEqual('hero')
+      expect(data[0].blocks_1_content_blockType).toStrictEqual('content')
     })
   })
 })

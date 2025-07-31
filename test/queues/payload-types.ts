@@ -106,6 +106,7 @@ export interface Config {
       ThrowError: TaskThrowError;
       ReturnError: TaskReturnError;
       ReturnCustomError: TaskReturnCustomError;
+      DoNothingTask: TaskDoNothingTask;
       inline: {
         input: unknown;
         output: unknown;
@@ -204,6 +205,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -269,7 +277,8 @@ export interface PayloadJob {
           | 'ExternalTask'
           | 'ThrowError'
           | 'ReturnError'
-          | 'ReturnCustomError';
+          | 'ReturnCustomError'
+          | 'DoNothingTask';
         taskID: string;
         input?:
           | {
@@ -338,6 +347,7 @@ export interface PayloadJob {
         | 'ThrowError'
         | 'ReturnError'
         | 'ReturnCustomError'
+        | 'DoNothingTask'
       )
     | null;
   queue?: string | null;
@@ -446,6 +456,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -622,6 +639,16 @@ export interface TaskReturnError {
 export interface TaskReturnCustomError {
   input: {
     errorMessage: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskDoNothingTask".
+ */
+export interface TaskDoNothingTask {
+  input: {
+    message: string;
   };
   output?: unknown;
 }

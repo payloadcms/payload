@@ -8,6 +8,7 @@ import { traverseFields } from './traverseFields.js'
 type Args = {
   adapter: DrizzleAdapter
   data: Record<string, unknown>
+  enableAtomicWrites?: boolean
   fields: FlattenedField[]
   parentIsLocalized?: boolean
   path?: string
@@ -17,6 +18,7 @@ type Args = {
 export const transformForWrite = ({
   adapter,
   data,
+  enableAtomicWrites,
   fields,
   parentIsLocalized,
   path = '',
@@ -48,6 +50,7 @@ export const transformForWrite = ({
     blocksToDelete: rowToInsert.blocksToDelete,
     columnPrefix: '',
     data,
+    enableAtomicWrites,
     fieldPrefix: '',
     fields,
     locales: rowToInsert.locales,

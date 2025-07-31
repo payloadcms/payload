@@ -46,7 +46,7 @@ export const SortBy: SelectFieldClientComponent = (props) => {
     if (option && (!displayedValue || displayedValue.value !== value)) {
       setDisplayedValue(option)
     }
-  }, [value, fieldOptions])
+  }, [displayedValue, fieldOptions, value])
 
   useEffect(() => {
     if (id || !query?.sort || value) {

@@ -6,6 +6,7 @@ import type {
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewComponent,
+  LivePreviewConfig,
   PayloadComponent,
   RenderDocumentVersionsProperties,
 } from 'payload'
@@ -64,6 +65,7 @@ export const renderDocument = async ({
   redirectAfterCreate,
   redirectAfterDelete,
   redirectAfterDuplicate,
+  redirectAfterRestore,
   searchParams,
   versions,
   viewType,
@@ -73,6 +75,7 @@ export const renderDocument = async ({
   readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
+  readonly redirectAfterRestore?: boolean
   versions?: RenderDocumentVersionsProperties
 } & AdminViewServerProps): Promise<{
   data: Data
@@ -91,7 +94,6 @@ export const renderDocument = async ({
       payload: {
         config,
         config: {
-          admin: { livePreview: livePreviewConfig },
           routes: { admin: adminRoute, api: apiRoute },
           serverURL,
         },
@@ -108,20 +110,35 @@ export const renderDocument = async ({
 
   // Fetch the doc required for the view
   let doc =
-    initialData ||
-    (await getDocumentData({
-      id: idFromArgs,
-      collectionSlug,
-      globalSlug,
-      locale,
-      payload,
-      req,
-      user,
-    }))
+    !idFromArgs && !globalSlug
+      ? initialData || null
+      : await getDocumentData({
+          id: idFromArgs,
+          collectionSlug,
+          globalSlug,
+          locale,
+          payload,
+          req,
+          segments,
+          user,
+        })
 
   if (isEditing && !doc) {
-    throw new Error('not-found')
+    // If it's a collection document that doesn't exist, redirect to collection list
+    if (collectionSlug) {
+      const redirectURL = formatAdminURL({
+        adminRoute,
+        path: `/collections/${collectionSlug}?notFound=${encodeURIComponent(idFromArgs)}`,
+        serverURL,
+      })
+      redirect(redirectURL)
+    } else {
+      // For globals or other cases, keep the 404 behavior
+      throw new Error('not-found')
+    }
   }
+
+  const isTrashedDoc = typeof doc?.deletedAt === 'string'
 
   const [
     docPreferences,
@@ -191,6 +208,7 @@ export const renderDocument = async ({
       globalSlug,
       locale: locale?.code,
       operation,
+      readOnly: isTrashedDoc,
       renderAllFields: true,
       req,
       schemaPath: collectionSlug || globalSlug,
@@ -329,21 +347,36 @@ export const renderDocument = async ({
     viewType,
   }
 
+  const isLivePreviewEnabled = Boolean(
+    config.admin?.livePreview?.collections?.includes(collectionSlug) ||
+      config.admin?.livePreview?.globals?.includes(globalSlug) ||
+      collectionConfig?.admin?.livePreview ||
+      globalConfig?.admin?.livePreview,
+  )
+
+  const livePreviewConfig: LivePreviewConfig = {
+    ...(isLivePreviewEnabled ? config.admin.livePreview : {}),
+    ...(collectionConfig?.admin?.livePreview || {}),
+    ...(globalConfig?.admin?.livePreview || {}),
+  }
+
   const livePreviewURL =
-    typeof livePreviewConfig?.url === 'function'
-      ? await livePreviewConfig.url({
-          collectionConfig,
-          data: doc,
-          globalConfig,
-          locale,
-          req,
-          /**
-           * @deprecated
-           * Use `req.payload` instead. This will be removed in the next major version.
-           */
-          payload: initPageResult.req.payload,
-        })
-      : livePreviewConfig?.url
+    operation !== 'create'
+      ? typeof livePreviewConfig?.url === 'function'
+        ? await livePreviewConfig.url({
+            collectionConfig,
+            data: doc,
+            globalConfig,
+            locale,
+            req,
+            /**
+             * @deprecated
+             * Use `req.payload` instead. This will be removed in the next major version.
+             */
+            payload: initPageResult.req.payload,
+          })
+        : livePreviewConfig?.url
+      : ''
 
   return {
     data: doc,
@@ -363,28 +396,29 @@ export const renderDocument = async ({
         initialState={formState}
         isEditing={isEditing}
         isLocked={isLocked}
+        isTrashed={isTrashedDoc}
         key={locale?.code}
         lastUpdateTime={lastUpdateTime}
         mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
         redirectAfterCreate={redirectAfterCreate}
         redirectAfterDelete={redirectAfterDelete}
         redirectAfterDuplicate={redirectAfterDuplicate}
+        redirectAfterRestore={redirectAfterRestore}
         unpublishedVersionCount={unpublishedVersionCount}
         versionCount={versionCount}
       >
         <LivePreviewProvider
           breakpoints={livePreviewConfig?.breakpoints}
+          isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
           isLivePreviewing={entityPreferences?.value?.editViewType === 'live-preview'}
-          operation={operation}
           url={livePreviewURL}
         >
           {showHeader && !drawerSlug && (
             <DocumentHeader
               collectionConfig={collectionConfig}
               globalConfig={globalConfig}
-              i18n={i18n}
-              payload={payload}
               permissions={permissions}
+              req={req}
             />
           )}
           <HydrateAuthProvider permissions={permissions} />

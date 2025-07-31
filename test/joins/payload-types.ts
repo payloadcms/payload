@@ -519,6 +519,7 @@ export interface Version {
  */
 export interface CategoriesVersion {
   id: string;
+  title?: string | null;
   relatedVersions?: {
     docs?: (string | Version)[];
     hasNextPage?: boolean;
@@ -804,6 +805,7 @@ export interface FolderInterface {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  folderType?: ('folderPoly1' | 'folderPoly2')[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1142,6 +1144,7 @@ export interface VersionsSelect<T extends boolean = true> {
  * via the `definition` "categories-versions_select".
  */
 export interface CategoriesVersionsSelect<T extends boolean = true> {
+  title?: T;
   relatedVersions?: T;
   relatedVersionsMany?: T;
   updatedAt?: T;
@@ -1349,6 +1352,7 @@ export interface PayloadFoldersSelect<T extends boolean = true> {
   name?: T;
   folder?: T;
   documentsAndFolders?: T;
+  folderType?: T;
   updatedAt?: T;
   createdAt?: T;
 }

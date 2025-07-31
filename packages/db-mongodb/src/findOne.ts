@@ -10,6 +10,7 @@ import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
+import { resolveJoins } from './utilities/resolveJoins.js'
 import { transform } from './utilities/transform.js'
 
 export const findOne: FindOne = async function findOne(
@@ -65,6 +66,16 @@ export const findOne: FindOne = async function findOne(
   } else {
     ;(options as Record<string, unknown>).projection = projection
     doc = await Model.findOne(query, {}, options)
+  }
+
+  if (doc && !this.useJoinAggregations) {
+    await resolveJoins({
+      adapter: this,
+      collectionSlug,
+      docs: [doc] as Record<string, unknown>[],
+      joins,
+      locale,
+    })
   }
 
   if (!doc) {

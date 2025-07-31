@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url'
 import { ensureCompilationIsDone } from '../../../helpers.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
-import { LexicalHelpers } from './utils.js'
+import { LexicalHelpers } from '../utils.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -55,7 +55,9 @@ describe('Lexical Fully Featured', () => {
     await lexical.drawer.getByText('Paste URL').click()
     await lexical.drawer
       .locator('.file-field__remote-file')
-      .fill('https://payloadcms.com/images/universal-truth.jpg')
+      .fill(
+        'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
+      )
     await lexical.drawer.getByText('Add file').click()
     await lexical.save('drawer')
     await expect(lexical.decorator).toHaveCount(3)

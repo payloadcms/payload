@@ -61,6 +61,11 @@ describe('Field Validations', () => {
       const result = text(val, { ...options, minLength: 10 })
       expect(result).toBe(true)
     })
+    it('should validate minLength with empty string', () => {
+      const val = ''
+      const result = text(val, { ...options, required: false, minLength: 1 })
+      expect(result).toBe('validation:longerThanMin')
+    })
     it('should validate an array of texts', async () => {
       const val = ['test']
       const result = text(val, { ...options, hasMany: true })

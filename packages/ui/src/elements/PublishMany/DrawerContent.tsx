@@ -22,7 +22,9 @@ type PublishManyDrawerContentProps = {
   ids: (number | string)[]
   onSuccess?: () => void
   selectAll: boolean
+  where?: Where
 } & PublishManyProps
+
 export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
   const {
     collection,
@@ -31,15 +33,18 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
     ids,
     onSuccess,
     selectAll,
+    where,
   } = props
 
   const { clearRouteCache } = useRouteCache()
+
   const {
     config: {
       routes: { api },
       serverURL,
     },
   } = useConfig()
+
   const { code: locale } = useLocale()
 
   const router = useRouter()
@@ -59,6 +64,10 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
       },
     ]
 
+    if (where) {
+      whereConstraints.push(where)
+    }
+
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
       search: searchParams.get('search'),
@@ -73,7 +82,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
       whereConstraints.push(
         (parseSearchParams(searchParams)?.where as Where) || {
           id: {
-            exists: true,
+            not_equals: '',
           },
         },
       )
@@ -93,7 +102,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
       },
       { addQueryPrefix: true },
     )
-  }, [collection, searchParams, selectAll, ids, locale])
+  }, [collection, searchParams, selectAll, ids, locale, where])
 
   const handlePublish = useCallback(async () => {
     await requests
