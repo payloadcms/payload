@@ -1,6 +1,7 @@
 'use client'
 
 import { Price } from '@/components/Price'
+import { XIcon } from '@payloadcms/ui'
 import {
   Sheet,
   SheetContent,
@@ -15,18 +16,40 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
 
 import { DeleteItemButton } from './DeleteItemButton'
 import { EditItemQuantityButton } from './EditItemQuantityButton'
 import { OpenCartButton } from './OpenCart'
 import { Button } from '@/components/ui/button'
 import { Product } from '@/payload-types'
+import { Input } from '../ui/input'
+import { FormError } from '../forms/FormError'
+
+interface CouponFormData {
+  couponCode: string
+}
 
 export function CartModal() {
-  const { cart } = useCart()
+  const { cart, applyCoupon, removeItem, removeCoupon } = useCart()
   const [isOpen, setIsOpen] = useState(false)
 
+  const discountLines = useMemo(() => {
+    const lineDiscount = cart?.items?.flatMap((item) => {
+      return item.discount?.discountLines || []
+    })
+
+    return [...(lineDiscount ?? []), ...(cart?.discount?.discountLines ?? [])]
+  }, [])
+
   const pathname = usePathname()
+  const {
+    formState: { errors, isLoading },
+    handleSubmit,
+    setError,
+    reset,
+    register,
+  } = useForm<CouponFormData>()
 
   // useEffect(() => {
   //   // Open cart modal when quantity changes.
@@ -45,6 +68,25 @@ export function CartModal() {
     // Close the cart modal when the pathname changes.
     setIsOpen(false)
   }, [pathname])
+
+  const onSubmit = async ({ couponCode }: { couponCode: string }) => {
+    if (!cart) {
+      console.error('Cart is not available')
+      return
+    }
+
+    try {
+      await applyCoupon(couponCode, cart.id)
+      reset()
+    } catch (error) {
+      console.error('Error applying coupon:', error)
+      console.log({ message: error.message })
+      setError('couponCode', {
+        message: error.message || 'An error occurred while applying the coupon',
+      })
+      return
+    }
+  }
 
   const totalQuantity = useMemo(() => {
     if (!cart || !cart.items || !cart.items.length) return undefined
@@ -158,15 +200,77 @@ export function CartModal() {
                 })}
               </ul>
 
+              {!!cart && (
+                <div className="px-4">
+                  <form onSubmit={handleSubmit(onSubmit)} className="flex gap-4">
+                    <Input
+                      className="flex-grow"
+                      type="text"
+                      {...register('couponCode', { required: true })}
+                    ></Input>
+                    <Button disabled={isLoading} type="submit">
+                      Apply
+                    </Button>
+                  </form>
+                  {!!errors.couponCode && (
+                    <FormError className="mt-2" message={errors.couponCode.message} />
+                  )}
+                </div>
+              )}
               <div className="px-4">
                 <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
                   {typeof cart?.subtotal === 'number' && (
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
-                      <p>Total</p>
+                      <p>Subtotal</p>
                       <Price
                         amount={cart?.subtotal}
                         className="text-right text-base text-black dark:text-white"
                       />
+                    </div>
+                  )}
+
+                  {!!cart?.discount?.totalAmount && (
+                    <div className="mb-3">
+                      <div className="mb-3 flex items-center justify-between">
+                        <p>Discount</p>
+                        <Price
+                          amount={cart?.discount.totalAmount}
+                          className="text-right text-base text-black dark:text-white"
+                        />
+                      </div>
+
+                      <div className="mb-3 flex items-center justify-between">
+                        <p>Total</p>
+                        <Price
+                          amount={cart?.total}
+                          className="text-right text-base text-black dark:text-white"
+                        />
+                      </div>
+
+                      <p className="mb-2">Applied coupons</p>
+
+                      <div className="flex flex-wrap gap-2">
+                        {discountLines?.map((item) => {
+                          return (
+                            <div
+                              key={item.id}
+                              className="p-2 mb-2 flex justify-between border rounded-lg gap-2 flex-auto"
+                            >
+                              <p>{item.coupon.title}</p>
+                              <div className="flex items-center gap-2 cursor-pointer">
+                                <Price amount={item.amount} />
+
+                                <button
+                                  className="cursor-pointer"
+                                  onClick={() => removeCoupon(item.coupon.identifier, cart.id)}
+                                >
+                                  <XIcon />
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
                   )}
 
