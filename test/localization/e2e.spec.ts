@@ -594,7 +594,9 @@ describe('Localization', () => {
     test('should show fallback checkbox for non-default locale', async () => {
       await createLocalizedArrayItem(page, arrayWithFallbackURL)
 
-      const fallbackCheckbox = page.locator('text=Fallback to default locale')
+      const fallbackCheckbox = page.locator('#field-items', {
+        hasText: 'Fallback to default locale',
+      })
       await expect(fallbackCheckbox).toBeVisible()
     })
 
@@ -637,8 +639,14 @@ describe('Localization', () => {
       const dataAll = await page.evaluate(() => {
         return JSON.parse(document.querySelector('body')?.innerText || '{}')
       })
-      // should not see fallback data when querying all locales, should be null
-      await expect.poll(() => dataAll.items.es).toBeNull()
+      // should not see fallback data when querying all locales
+      // - sql it will be undefined
+      // - mongodb it will be null
+      await expect
+        .poll(() => {
+          return !dataAll.items?.es
+        })
+        .toBeTruthy()
     })
   })
 
