@@ -269,14 +269,18 @@ export type EnableFoldersOptions = {
   debug?: boolean
 }
 
-export type BaseListFilter = (args: {
-  context: 'list' | 'relationship'
+export type BaseFilter = (args: {
   limit: number
   locale?: TypedLocale
   page: number
   req: PayloadRequest
   sort: string
 }) => null | Promise<null | Where> | Where
+
+/**
+ * @deprecated Use `BaseFilter` instead.
+ */
+export type BaseListFilter = BaseFilter
 
 export type CollectionAdminOptions = {
   /**
@@ -287,13 +291,10 @@ export type CollectionAdminOptions = {
    * they have active or selected in the different places in the admin panel,
    * such as the List View, or the relationships within the Lexical editor.
    */
-  baseFilter?: BaseListFilter
+  baseFilter?: BaseFilter
   /**
-   * @deprecated Use `baseFilter` instead.
-   *
-   * This property will only be used if it is defined while `baseFilter`
-   * is not. If `baseFilter` is defined, it will be used regardless of
-   * whether `baseListFilter` is defined or not.
+   * @deprecated Use `baseFilter` instead. This property will be
+   * overwritten by `baseFilter` if `baseFilter` is defined.
    *
    * Previously, we considered the List View to be the only place we might
    * want to apply a base filter in the admin panel, for example for the
@@ -302,7 +303,7 @@ export type CollectionAdminOptions = {
    * for example in the Lexical editor relationships. Therefore, we renamed
    * it to `baseFilter`, and preserved the old name for backwards compatibility.
    */
-  baseListFilter?: BaseListFilter
+  baseListFilter?: BaseFilter
   /**
    * Custom admin components
    */

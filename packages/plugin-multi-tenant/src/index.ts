@@ -16,7 +16,7 @@ import { filterUsersBySelectedTenant } from './list-filters/filterUsersBySelecte
 import { translations } from './translations/index.js'
 import { addCollectionAccess } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
-import { combineListFilters } from './utilities/combineListFilters.js'
+import { combineFilters } from './utilities/combineFilters.js'
 
 export const multiTenantPlugin =
   <ConfigType>(pluginConfig: MultiTenantPluginConfig<ConfigType>) =>
@@ -144,8 +144,10 @@ export const multiTenantPlugin =
         adminUsersCollection.admin = {}
       }
 
-      adminUsersCollection.admin.baseListFilter = combineListFilters({
-        baseListFilter: adminUsersCollection.admin?.baseListFilter,
+      const baseFilter =
+        adminUsersCollection.admin?.baseFilter ?? adminUsersCollection.admin?.baseListFilter
+      adminUsersCollection.admin.baseFilter = combineFilters({
+        baseFilter,
         customFilter: (args) =>
           filterUsersBySelectedTenant({
             req: args.req,
@@ -207,8 +209,9 @@ export const multiTenantPlugin =
             collection.admin = {}
           }
 
-          collection.admin.baseListFilter = combineListFilters({
-            baseListFilter: collection.admin?.baseListFilter,
+          const baseFilter = collection.admin?.baseFilter ?? collection.admin?.baseListFilter
+          collection.admin.baseFilter = combineFilters({
+            baseFilter,
             customFilter: (args) =>
               filterTenantsBySelectedTenant({
                 req: args.req,
@@ -291,8 +294,9 @@ export const multiTenantPlugin =
             collection.admin = {}
           }
 
-          collection.admin.baseListFilter = combineListFilters({
-            baseListFilter: collection.admin?.baseListFilter,
+          const baseFilter = collection.admin?.baseFilter ?? collection.admin?.baseListFilter
+          collection.admin.baseFilter = combineFilters({
+            baseFilter,
             customFilter: (args) =>
               filterDocumentsBySelectedTenant({
                 req: args.req,

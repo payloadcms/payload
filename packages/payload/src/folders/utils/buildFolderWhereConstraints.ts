@@ -28,8 +28,9 @@ export async function buildFolderWhereConstraints({
     }),
   ]
 
-  if (typeof collectionConfig.admin?.baseListFilter === 'function') {
-    const baseListFilterConstraint = await collectionConfig.admin.baseListFilter({
+  const baseFilterFn = collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
+  if (typeof baseFilterFn === 'function') {
+    const baseFilterConstraint = await baseFilterFn({
       limit: 0,
       locale: localeCode,
       page: 1,
@@ -39,8 +40,8 @@ export async function buildFolderWhereConstraints({
         (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : 'id'),
     })
 
-    if (baseListFilterConstraint) {
-      constraints.push(baseListFilterConstraint)
+    if (baseFilterConstraint) {
+      constraints.push(baseFilterConstraint)
     }
   }
 

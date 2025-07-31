@@ -122,17 +122,19 @@ export const renderListView = async (
       throw new Error('not-found')
     }
 
-    if (typeof collectionConfig.admin?.baseListFilter === 'function') {
-      const baseListFilter = await collectionConfig.admin.baseListFilter({
+    const baseFilterFn =
+      collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
+    if (baseFilterFn) {
+      const baseFilterResult = await baseFilterFn({
         limit: query.limit,
         page: query.page,
         req,
         sort: query.sort,
       })
 
-      if (baseListFilter) {
+      if (baseFilterResult) {
         query.where = {
-          and: [query.where, baseListFilter].filter(Boolean),
+          and: [query.where, baseFilterResult].filter(Boolean),
         }
       }
     }

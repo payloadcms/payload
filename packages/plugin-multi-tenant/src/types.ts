@@ -30,7 +30,21 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
        */
       isGlobal?: boolean
       /**
-       * Set to `false` if you want to manually apply the baseListFilter
+       * Set to `false` if you want to manually apply the baseFilter
+       *
+       * @default true
+       */
+      useBaseFilter?: boolean
+      /**
+       * @deprecated Use `useBaseFilter` instead. This property will be
+       * overwritten by `useBaseFilter` if `useBaseFilter` is defined.
+       *
+       * Previously, we considered the List View to be the only place we might
+       * want to apply a base filter in the admin panel, for example for the
+       * multi-tenant plugin, hence the name `useBaseListFilter`.
+       * But there are other places where you might want to apply the base filter,
+       * for example in the Lexical editor relationships. Therefore, we renamed
+       * it to `useBaseFilter`, and preserved the old name for backwards compatibility.       *
        *
        * @default true
        */
