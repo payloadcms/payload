@@ -3,6 +3,7 @@
     margin-bottom: 0;
     .field-type.checkbox {
       display: flex;
+      flex-direction: column;
       margin: 0;
     }
 
