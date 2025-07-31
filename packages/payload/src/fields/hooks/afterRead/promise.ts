@@ -111,11 +111,11 @@ export const promise = async ({
     parentSchemaPath,
   })
 
+  const fieldAffectsDataResult = fieldAffectsData(field)
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
   let removedFieldValue = false
-  const fieldAffectsDataResult = fieldAffectsData(field)
 
   if (
     fieldAffectsDataResult &&
