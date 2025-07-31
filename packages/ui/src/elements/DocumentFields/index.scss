@@ -17,7 +17,8 @@
       --main-gutter-h-right: var(--gutter-h);
     }
 
-    &--force-sidebar-wrap {
+    &--force-sidebar-wrap,
+    &:has(.document-fields__sidebar-wrap .render-fields:empty) {
       --sidebar-gutter-h-left: var(--gutter-h);
       --sidebar-gutter-h-right: var(--gutter-h);
       --main-gutter-h-left: var(--gutter-h);
@@ -25,9 +26,19 @@
     }
 
     &--has-sidebar {
+      --main-width: 66.66%;
+      --main-border: 1px solid var(--theme-elevation-100);
+      --main-field-margin: calc(var(--base) * -2);
+
+      &:has(.document-fields__sidebar-wrap .render-fields:empty) {
+        --main-width: 100%;
+        --main-border: none;
+        --main-field-margin: initial;
+      }
+
       .document-fields {
         &__main {
-          width: 66.66%;
+          width: var(--main-width);
         }
 
         &__edit {
@@ -36,20 +47,20 @@
           [dir='ltr'] & {
             top: 0;
             right: 0;
-            border-right: 1px solid var(--theme-elevation-100);
+            border-right: var(--main-border);
           }
 
           [dir='rtl'] & {
             top: 0;
             left: 0;
-            border-left: 1px solid var(--theme-elevation-100);
+            border-left: var(--main-border);
           }
         }
 
         &__fields {
           & > .tabs-field,
           & > .group-field {
-            margin-right: calc(var(--base) * -2);
+            margin-right: var(--main-field-margin);
           }
         }
       }
@@ -70,12 +81,21 @@
     }
 
     &__sidebar-wrap {
-      position: sticky;
-      top: var(--doc-controls-height);
-      width: 33.33%;
-      height: calc(100vh - var(--doc-controls-height));
-      min-width: var(--doc-sidebar-width);
-      flex-shrink: 0;
+      &:has(.render-fields:empty) {
+        --sidebar-wrap-width: 0;
+        --sidebar-wrap-min-width: 0;
+        --sidebar-wrap-position: initial;
+        --sidebar-wrap-top: initial;
+        --sidebar-wrap-height: initial;
+        --sidebar-wrap-flex-shrink: initial;
+      }
+
+      position: var(--sidebar-wrap-position, sticky);
+      top: var(--sidebar-wrap-top, 0);
+      width: var(--sidebar-wrap-width, 33.33%);
+      height: var(--sidebar-wrap-height, calc(100vh - var(--doc-controls-height)));
+      min-width: var(--sidebar-wrap-min-width, var(--doc-sidebar-width));
+      flex-shrink: var(--sidebar-wrap-flex-shrink, 0);
     }
 
     &__sidebar {
