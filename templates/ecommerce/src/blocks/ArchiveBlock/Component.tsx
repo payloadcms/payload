@@ -1,7 +1,7 @@
 import type { Product, ArchiveBlock as ArchiveBlockProps } from '@/payload-types'
 
 import configPromise from '@payload-config'
-import { getPayload } from 'payload'
+import { DefaultDocumentIDType, getPayload } from 'payload'
 import React from 'react'
 import { RichText } from '@/components/RichText'
 
@@ -9,7 +9,7 @@ import { CollectionArchive } from '@/components/CollectionArchive'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
-    id?: string
+    id?: DefaultDocumentIDType
   }
 > = async (props) => {
   const { id, categories, introContent, limit: limitFromProps, populateBy, selectedDocs } = props

@@ -1,5 +1,3 @@
-import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
-
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
 import {

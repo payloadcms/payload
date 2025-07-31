@@ -291,7 +291,7 @@ export interface Cart {
   id: string;
   customer?: (string | null) | User;
   purchasedAt?: string | null;
-  status?: ('open' | 'purchased' | 'cancelled') | null;
+  status?: ('active' | 'purchased' | 'abandoned') | null;
   currency?: 'USD' | null;
   subtotal?: number | null;
   items?:

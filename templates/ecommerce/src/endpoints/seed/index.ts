@@ -1,17 +1,15 @@
 import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from 'payload'
 
-import { contactForm as contactFormData } from './contact-form'
-import { contact as contactPageData } from './contact-page'
-import { productMousepad as productMousepadData } from './product-mousepad'
-import { productHat as productHatData, variantHat as variantHatData } from './product-hat'
-import {
-  productHoodie as productHoodieData,
-  variantHoodie as variantHoodieData,
-} from './product-hoodie'
-import { home } from './home'
-import { image1 } from './image-1'
-import { image2 } from './image-2'
-import { imageHero1 } from './image-hero-1'
+import { contactFormData } from './contact-form'
+import { contactPageData } from './contact-page'
+import { productMousepadData } from './product-mousepad'
+import { productHatData, productHatVariant } from './product-hat'
+import { productHoodieData, productHoodieVariant } from './product-hoodie'
+import { homePageData } from './home'
+import { image1Data } from './image-1'
+import { image2Data } from './image-2'
+import { image3Data } from './image-3'
+import { imageHero1Data } from './image-hero-1'
 import { Address, Transaction, VariantOption } from '@/payload-types'
 
 const collections: CollectionSlug[] = [
@@ -22,9 +20,9 @@ const collections: CollectionSlug[] = [
   'forms',
   'form-submissions',
   'search',
+  'variants',
   'variantOptions',
   'variantTypes',
-  'variants',
   'carts',
   'transactions',
   'addresses',
@@ -105,15 +103,12 @@ export const seed = async ({
     ),
   )
 
-  await Promise.all(
-    collections.map((collection) => payload.db.deleteMany({ collection, req, where: {} })),
-  )
-
-  await Promise.all(
-    collections
-      .filter((collection) => Boolean(payload.collections[collection].config.versions))
-      .map((collection) => payload.db.deleteVersions({ collection, req, where: {} })),
-  )
+  for (const collection of collections) {
+    await payload.db.deleteMany({ collection, req, where: {} })
+    if (payload.collections[collection].config.versions) {
+      await payload.db.deleteVersions({ collection, req, where: {} })
+    }
+  }
 
   payload.logger.info(`— Seeding customer and customer data...`)
 
@@ -146,10 +141,10 @@ export const seed = async ({
 
   const [
     customer,
-    image1Doc,
-    image2Doc,
-    image3Doc,
-    imageHomeDoc,
+    image1,
+    image2,
+    image3,
+    imageHome,
     accessoriesCategory,
     tshirtsCategory,
     hatsCategory,
@@ -166,22 +161,22 @@ export const seed = async ({
     }),
     payload.create({
       collection: 'media',
-      data: image1,
+      data: image1Data,
       file: image1Buffer,
     }),
     payload.create({
       collection: 'media',
-      data: image2,
+      data: image2Data,
       file: image2Buffer,
     }),
     payload.create({
       collection: 'media',
-      data: image2,
+      data: image3Data,
       file: image3Buffer,
     }),
     payload.create({
       collection: 'media',
-      data: imageHero1,
+      data: imageHero1Data,
       file: hero1Buffer,
     }),
 
@@ -241,31 +236,6 @@ export const seed = async ({
     }),
   ])
 
-  let customerID: number | string = customer.id
-
-  let image1ID: number | string = image1Doc.id
-  let image2ID: number | string = image2Doc.id
-  let image3ID: number | string = image3Doc.id
-  let imageHomeID: number | string = imageHomeDoc.id
-
-  let accessoriesID: number | string = accessoriesCategory.id
-  let tshirtsID: number | string = tshirtsCategory.id
-  let hatsID: number | string = hatsCategory.id
-  let hoodiesID: number | string = hoodiesCategory.id
-
-  if (payload.db.defaultIDType === 'text') {
-    image1ID = `"${image1Doc.id}"`
-    image2ID = `"${image2Doc.id}"`
-    image3ID = `"${image3Doc.id}"`
-    imageHomeID = `"${imageHomeDoc.id}"`
-    customerID = `"${customerID}"`
-
-    accessoriesID = `"${accessoriesCategory.id}"`
-    tshirtsID = `"${tshirtsCategory.id}"`
-    hatsID = `"${hatsCategory.id}"`
-    hoodiesID = `"${hoodiesCategory.id}"`
-  }
-
   payload.logger.info(`— Seeding variant types and options...`)
 
   const sizeVariantType = await payload.create({
@@ -311,103 +281,58 @@ export const seed = async ({
     }),
   )
 
-  let sizeVariantTypeID: number | string = sizeVariantType.id
-  let colorVariantTypeID: number | string = colorVariantType.id
-
-  let smallVariantOptionID: number | string = small.id
-  let mediumVariantOptionID: number | string = medium.id
-  let largeVariantOptionID: number | string = large.id
-  let xlargeVariantOptionID: number | string = xlarge.id
-
-  let blackVariantOptionID: number | string = black.id
-  let whiteVariantOptionID: number | string = white.id
-
-  if (payload.db.defaultIDType === 'text') {
-    sizeVariantTypeID = `"${sizeVariantType.id}"`
-    colorVariantTypeID = `"${colorVariantType.id}"`
-
-    smallVariantOptionID = `"${small.id}"`
-    mediumVariantOptionID = `"${medium.id}"`
-    largeVariantOptionID = `"${large.id}"`
-    xlargeVariantOptionID = `"${xlarge.id}"`
-
-    blackVariantOptionID = `"${black.id}"`
-    whiteVariantOptionID = `"${white.id}"`
-  }
-
   payload.logger.info(`— Seeding products...`)
 
   const productMousepad = await payload.create({
     collection: 'products',
     depth: 0,
-    data: JSON.parse(
-      JSON.stringify(productMousepadData)
-        .replace(/"\{\{IMAGE_1\}\}"/g, String(image1ID))
-        .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID))
-        .replace(/"\{\{IMAGE_3\}\}"/g, String(image3ID))
-        .replace(/"\{\{CATEGORY_1\}\}"/g, String(accessoriesID)),
-    ),
+    data: productMousepadData({
+      galleryImages: [image1, image2, image3],
+      metaImage: image1,
+      categories: [accessoriesCategory],
+    }),
   })
-
-  let mousePadID: number | string = productMousepad.id
-
-  if (payload.db.defaultIDType === 'text') {
-    mousePadID = `"${mousePadID}"`
-  }
 
   const productHat = await payload.create({
     collection: 'products',
     depth: 0,
-    data: JSON.parse(
-      JSON.stringify(productHatData)
-        .replace(/"\{\{IMAGE_1\}\}"/g, String(image1ID))
-        .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID))
-        .replace(/"\{\{IMAGE_3\}\}"/g, String(image3ID))
-        .replace(/"\{\{CATEGORY_1\}\}"/g, String(hatsID))
-        .replace(/"\{\{VARIANT_TYPE_COLOR\}\}"/g, String(colorVariantTypeID))
-        .replace(/"\{\{RELATED_PRODUCT_1\}\}"/g, String(mousePadID)),
-    ),
+    data: productHatData({
+      galleryImages: [image1, image2, image3],
+      metaImage: image1,
+      variantTypes: [colorVariantType],
+      categories: [hatsCategory],
+      relatedProducts: [productMousepad],
+    }),
   })
-
-  let hatID: number | string = productHat.id
-
-  if (payload.db.defaultIDType === 'text') {
-    hatID = `"${hatID}"`
-  }
 
   const variantHatWhite = await payload.create({
     collection: 'variants',
     depth: 0,
-    data: JSON.parse(
-      JSON.stringify(variantHatData)
-        .replace(/"\{\{VARIANT_OPTION\}\}"/g, String(whiteVariantOptionID))
-        .replace(/"\{\{PRODUCT\}\}"/g, String(hatID)),
-    ),
+    data: productHatVariant({
+      product: productHat,
+      variantOptions: [white],
+    }),
   })
 
   const variantHatBlack = await payload.create({
     collection: 'variants',
     depth: 0,
-    data: JSON.parse(
-      JSON.stringify(variantHatData)
-        .replace(/"\{\{VARIANT_OPTION\}\}"/g, String(blackVariantOptionID))
-        .replace(/"\{\{PRODUCT\}\}"/g, String(hatID)),
-    ),
+    data: productHatVariant({
+      product: productHat,
+      variantOptions: [black],
+    }),
   })
 
   const productHoodie = await payload.create({
     collection: 'products',
     depth: 0,
-    data: JSON.parse(
-      JSON.stringify(productHoodieData)
-        .replace(/"\{\{IMAGE_1\}\}"/g, String(image1ID))
-        .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID))
-        .replace(/"\{\{IMAGE_3\}\}"/g, String(image3ID))
-        .replace(/"\{\{CATEGORY_1\}\}"/g, String(hoodiesID))
-        .replace(/"\{\{VARIANT_TYPE_COLOR\}\}"/g, String(colorVariantTypeID))
-        .replace(/"\{\{VARIANT_TYPE_SIZE\}\}"/g, String(sizeVariantTypeID))
-        .replace(/"\{\{RELATED_PRODUCT_1\}\}"/g, String(hatID)),
-    ),
+    data: productHoodieData({
+      galleryImages: [image1, image2, image3],
+      metaImage: image1,
+      variantTypes: [colorVariantType, sizeVariantType],
+      categories: [hoodiesCategory],
+      relatedProducts: [productHat],
+    }),
   })
 
   let hoodieID: number | string = productHoodie.id
@@ -422,41 +347,29 @@ export const seed = async ({
     largeWhiteHoodieVariant,
     xlargeWhiteHoodieVariant,
   ] = await Promise.all(
-    [smallVariantOptionID, mediumVariantOptionID, largeVariantOptionID, xlargeVariantOptionID].map(
-      (id) =>
-        payload.create({
-          collection: 'variants',
-          depth: 0,
-          data: JSON.parse(
-            JSON.stringify(variantHoodieData)
-              .replace(/"\{\{VARIANT_OPTION_1\}\}"/g, String(whiteVariantOptionID))
-              .replace(/"\{\{VARIANT_OPTION_2\}\}"/g, String(id))
-              .replace(/"\{\{PRODUCT\}\}"/g, String(hoodieID)),
-          ),
+    [small, medium, large, xlarge].map((variantOption) =>
+      payload.create({
+        collection: 'variants',
+        depth: 0,
+        data: productHoodieVariant({
+          product: productHoodie,
+          variantOptions: [variantOption, white],
         }),
+      }),
     ),
   )
 
   await Promise.all(
-    [smallVariantOptionID, mediumVariantOptionID, largeVariantOptionID, xlargeVariantOptionID].map(
-      (id) =>
-        payload.create({
-          collection: 'variants',
-          depth: 0,
-          data: {
-            ...JSON.parse(
-              JSON.stringify(variantHoodieData)
-                .replace(/"\{\{VARIANT_OPTION_1\}\}"/g, String(blackVariantOptionID))
-                .replace(/"\{\{VARIANT_OPTION_2\}\}"/g, String(id))
-                .replace(/"\{\{PRODUCT\}\}"/g, String(hoodieID)),
-            ),
-            ...(id === mediumVariantOptionID
-              ? {
-                  inventory: 0, // intentionally set medium variant to 0 inventory
-                }
-              : {}),
-          },
+    [small, medium, large, xlarge].map((variantOption) =>
+      payload.create({
+        collection: 'variants',
+        depth: 0,
+        data: productHoodieVariant({
+          product: productHoodie,
+          variantOptions: [variantOption, black],
+          ...(variantOption.value === 'medium' ? { inventory: 0 } : {}),
         }),
+      }),
     ),
   )
 
@@ -465,14 +378,8 @@ export const seed = async ({
   const contactForm = await payload.create({
     collection: 'forms',
     depth: 0,
-    data: JSON.parse(JSON.stringify(contactFormData)),
+    data: contactFormData(),
   })
-
-  let contactFormID: number | string = contactForm.id
-
-  if (payload.db.defaultIDType === 'text') {
-    contactFormID = `"${contactFormID}"`
-  }
 
   payload.logger.info(`— Seeding pages...`)
 
@@ -480,21 +387,17 @@ export const seed = async ({
     payload.create({
       collection: 'pages',
       depth: 0,
-      data: JSON.parse(
-        JSON.stringify(home)
-          .replace(/"\{\{IMAGE_1\}\}"/g, String(imageHomeID))
-          .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID)),
-      ),
+      data: homePageData({
+        contentImage: imageHome,
+        metaImage: image1,
+      }),
     }),
     payload.create({
       collection: 'pages',
       depth: 0,
-      data: JSON.parse(
-        JSON.stringify(contactPageData).replace(
-          /"\{\{CONTACT_FORM_ID\}\}"/g,
-          String(contactFormID),
-        ),
-      ),
+      data: contactPageData({
+        contactForm: contactForm,
+      }),
     }),
   ])
 

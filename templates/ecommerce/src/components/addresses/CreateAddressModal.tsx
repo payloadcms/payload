@@ -11,9 +11,10 @@ import {
 } from '@/components/ui/dialog'
 import { AddressForm } from '@/components/forms/AddressForm'
 import { Address } from '@/payload-types'
+import { DefaultDocumentIDType } from 'payload'
 
 type Props = {
-  addressID?: string
+  addressID?: DefaultDocumentIDType
   initialData?: Partial<Omit<Address, 'country'>> & { country?: string }
   buttonText?: string
   modalTitle?: string

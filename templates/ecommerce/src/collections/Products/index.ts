@@ -110,14 +110,22 @@ export const ProductsCollection: CollectionOverride = {
           {
             fields: [
               ...defaultFields,
-
               {
                 name: 'relatedProducts',
                 type: 'relationship',
                 filterOptions: ({ id }) => {
+                  if (id) {
+                    return {
+                      id: {
+                        not_in: [id],
+                      },
+                    }
+                  }
+
+                  // ID comes back as undefined during seeding so we need to handle that case
                   return {
                     id: {
-                      not_in: [id],
+                      exists: true,
                     },
                   }
                 },

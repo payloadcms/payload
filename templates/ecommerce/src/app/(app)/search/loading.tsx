@@ -1,4 +1,4 @@
-import { Grid } from '@/components/Grid'
+import { Grid } from '@/components/grid'
 import React from 'react'
 
 export default function Loading() {

@@ -1,6 +1,6 @@
-import type { Media } from '@/payload-types'
+import { RequiredDataFromCollectionSlug } from 'payload'
 
-export const image1: Omit<Media, 'createdAt' | 'id' | 'updatedAt'> = {
+export const image1Data: RequiredDataFromCollectionSlug<'media'> = {
   alt: 'Curving abstract shapes with an orange and blue gradient',
   caption: {
     root: {

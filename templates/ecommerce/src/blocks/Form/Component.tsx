@@ -11,6 +11,7 @@ import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical
 import { buildInitialFormState } from './buildInitialFormState'
 import { fields } from './fields'
 import { getClientSideURL } from '@/utilities/getURL'
+import { DefaultDocumentIDType } from 'payload'
 
 export type Value = unknown
 
@@ -32,7 +33,7 @@ export type FormBlockType = {
 
 export const FormBlock: React.FC<
   {
-    id?: string
+    id?: DefaultDocumentIDType
   } & FormBlockType
 > = (props) => {
   const {

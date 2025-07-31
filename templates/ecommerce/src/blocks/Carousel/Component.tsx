@@ -1,14 +1,14 @@
 import type { Product, CarouselBlock as CarouselBlockProps } from '@/payload-types'
 
 import configPromise from '@payload-config'
-import { getPayload } from 'payload'
+import { DefaultDocumentIDType, getPayload } from 'payload'
 import React from 'react'
 
 import { CarouselClient } from './Component.client'
 
 export const CarouselBlock: React.FC<
   CarouselBlockProps & {
-    id?: string
+    id?: DefaultDocumentIDType
   }
 > = async (props) => {
   const { id, categories, limit = 3, populateBy, selectedDocs } = props
@@ -20,8 +20,8 @@ export const CarouselBlock: React.FC<
 
     const flattenedCategories = categories?.length
       ? categories.map((category) => {
-          if (typeof category === 'string') return category
-          else return category.id
+          if (typeof category === 'object') return category.id
+          else return category
         })
       : null
 
