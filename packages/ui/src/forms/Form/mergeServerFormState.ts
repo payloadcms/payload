@@ -38,7 +38,14 @@ export const mergeServerFormState = ({
     newState[path] = {
       ...currentState[path],
       ...incomingField,
-      errorPaths: incomingField.errorPaths || [],
+    }
+
+    if (
+      currentState[path] &&
+      'errorPaths' in currentState[path] &&
+      !('errorPaths' in incomingField)
+    ) {
+      newState[path].errorPaths = []
     }
 
     /**
