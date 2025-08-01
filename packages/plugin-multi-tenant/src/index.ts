@@ -285,7 +285,9 @@ export const multiTenantPlugin =
           }),
         )
 
-        if (pluginConfig.collections[collection.slug]?.useBaseListFilter !== false) {
+        const { useBaseFilter, useBaseListFilter } = pluginConfig.collections[collection.slug] || {}
+
+        if (useBaseFilter ?? useBaseListFilter ?? true) {
           /**
            * Add list filter to enabled collections
            * - filters results by selected tenant

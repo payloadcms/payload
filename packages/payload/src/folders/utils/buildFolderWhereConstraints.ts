@@ -28,21 +28,20 @@ export async function buildFolderWhereConstraints({
     }),
   ]
 
-  const baseFilterFn = collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
-  if (typeof baseFilterFn === 'function') {
-    const baseFilterConstraint = await baseFilterFn({
-      limit: 0,
-      locale: localeCode,
-      page: 1,
-      req,
-      sort:
-        sort ||
-        (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : 'id'),
-    })
+  const baseFilterConstraint = await (
+    collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
+  )?.({
+    limit: 0,
+    locale: localeCode,
+    page: 1,
+    req,
+    sort:
+      sort ||
+      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : 'id'),
+  })
 
-    if (baseFilterConstraint) {
-      constraints.push(baseFilterConstraint)
-    }
+  if (baseFilterConstraint) {
+    constraints.push(baseFilterConstraint)
   }
 
   if (folderID) {

@@ -285,7 +285,6 @@ export type BaseListFilter = BaseFilter
 export type CollectionAdminOptions = {
   /**
    * Defines a default base filter which will be applied in the following parts of the admin panel:
-   *
    * - List View
    * - Relationship fields for internal links within the Lexical editor
    *
@@ -452,10 +451,6 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Use `true` to enable with default options
    */
   auth?: boolean | IncomingAuthType
-  /**
-   * The name of the collection
-   */
-  baseFilterOptions?: string
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
   /**
