@@ -299,10 +299,9 @@ export type CollectionAdminOptions = {
    * `baseFilter` will take precedence. This property remains only
    * for backward compatibility and may be removed in a future version.
    *
-   * Originally, this was intended to filter only the List View in the admin panel.
-   * However, base filtering is required in other areas such as internal link
-   * relationships in the Lexical editor.
-   *
+   * Originally, `baseListFilter` was intended to filter only the List View
+   * in the admin panel. However, base filtering is often required in other areas
+   * such as internal link relationships in the Lexical editor.
    */
   baseListFilter?: BaseListFilter
   /**
