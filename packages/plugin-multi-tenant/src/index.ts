@@ -7,6 +7,7 @@ import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { MultiTenantPluginConfig } from './types.js'
 
 import { defaults } from './defaults.js'
+import { getTenantOptionsEndpoint } from './endpoints/getTenantOptionsEndpoint.js'
 import { tenantField } from './fields/tenantField/index.js'
 import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
 import { addTenantCleanup } from './hooks/afterTenantDelete.js'
@@ -251,6 +252,17 @@ export const multiTenantPlugin =
             },
           },
         })
+
+        collection.endpoints = [
+          ...(collection.endpoints || []),
+          getTenantOptionsEndpoint<ConfigType>({
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
+            tenantsCollectionSlug,
+            useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
+            userHasAccessToAllTenants,
+          }),
+        ]
       } else if (pluginConfig.collections?.[collection.slug]) {
         const isGlobal = Boolean(pluginConfig.collections[collection.slug]?.isGlobal)
 
@@ -333,8 +345,11 @@ export const multiTenantPlugin =
      */
     incomingConfig.admin.components.providers.push({
       clientProps: {
+        tenantsArrayFieldName,
+        tenantsArrayTenantFieldName,
         tenantsCollectionSlug: tenantCollection.slug,
         useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
+        userHasAccessToAllTenants,
       },
       path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelectionProvider',
     })
@@ -349,8 +364,11 @@ export const multiTenantPlugin =
           basePath,
           globalSlugs: globalCollectionSlugs,
           tenantFieldName,
+          tenantsArrayFieldName,
+          tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
           useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
+          userHasAccessToAllTenants,
         },
       })
     }

@@ -7,6 +7,7 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 import type { Props } from './types.js'
 
+import { useRelatedCollections } from '../../hooks/useRelatedCollections.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -16,7 +17,6 @@ import { Popup } from '../Popup/index.js'
 import * as PopupList from '../Popup/PopupButtonList/index.js'
 import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
-import { useRelatedCollections } from './useRelatedCollections.js'
 
 const baseClass = 'relationship-add-new'
 

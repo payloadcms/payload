@@ -3001,6 +3001,21 @@ describe('database', () => {
     }
   })
 
+  it('should allow to query like by ID with draft: true', async () => {
+    const category = await payload.create({
+      collection: 'categories',
+      data: { title: 'category123' },
+    })
+    const res = await payload.find({
+      collection: 'categories',
+      draft: true,
+      // eslint-disable-next-line jest/no-conditional-in-test
+      where: { id: { like: typeof category.id === 'number' ? `${category.id}` : category.id } },
+    })
+    expect(res.docs).toHaveLength(1)
+    expect(res.docs[0].id).toBe(category.id)
+  })
+
   it('should allow incremental number update', async () => {
     const post = await payload.create({ collection: 'posts', data: { number: 1, title: 'post' } })
 

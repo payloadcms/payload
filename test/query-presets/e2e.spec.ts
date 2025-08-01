@@ -58,6 +58,10 @@ describe('Query Presets', () => {
     context = await browser.newContext()
     page = await context.newPage()
 
+    initPageConsoleErrorCatch(page)
+
+    await ensureCompilationIsDone({ page, serverURL })
+
     user = await payload
       .login({
         collection: 'users',
@@ -80,10 +84,6 @@ describe('Query Presets', () => {
         depth: 0,
       })
       ?.then((res) => res.docs[0])
-
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {
@@ -196,7 +196,8 @@ describe('Query Presets', () => {
 
     await page.locator('#confirm-delete-preset #confirm-action').click()
 
-    const regex = /columns=/
+    // columns can either be omitted or an empty string after being cleared
+    const regex = /columns=(?:\[\]|$)/
 
     await page.waitForURL((url) => !regex.test(url.search), {
       timeout: TEST_TIMEOUT_LONG,

@@ -85,7 +85,14 @@ export const CreateFirstUserClient: React.FC<{
   return (
     <Form
       action={`${serverURL}${apiRoute}/${userSlug}/first-register`}
-      initialState={initialState}
+      initialState={{
+        ...initialState,
+        'confirm-password': {
+          ...initialState['confirm-password'],
+          valid: initialState['confirm-password']['valid'] || false,
+          value: initialState['confirm-password']['value'] || '',
+        },
+      }}
       method="POST"
       onChange={[onChange]}
       onSuccess={handleFirstRegister}
