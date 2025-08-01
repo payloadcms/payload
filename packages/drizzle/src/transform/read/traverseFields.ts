@@ -171,6 +171,14 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
             return arrayResult
           }, {})
+          // Fallback to [] locales without data
+          if (config.localization) {
+            for (const locale of config.localization.localeCodes) {
+              if (!result[field.name][locale]) {
+                result[field.name][locale] = []
+              }
+            }
+          }
         } else {
           result[field.name] = fieldData.reduce((acc, row, i) => {
             if (row._uuid) {
