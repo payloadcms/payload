@@ -42,6 +42,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
     return null
   }
 
+  //
   const isTrashView = collectionConfig?.trash && viewType === 'trash'
 
   return (
@@ -65,7 +66,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
         !disableBulkEdit && !isTrashView && (
           <Fragment key="bulk-actions">
             <EditMany_v4
-              collection={collectionConfig}
+              collection={collectionConfig!}
               count={count}
               ids={selectedIDs}
               modalPrefix={modalPrefix}
@@ -74,7 +75,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               where={where}
             />
             <PublishMany_v4
-              collection={collectionConfig}
+              collection={collectionConfig!}
               count={count}
               ids={selectedIDs}
               modalPrefix={modalPrefix}
@@ -83,7 +84,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               where={where}
             />
             <UnpublishMany_v4
-              collection={collectionConfig}
+              collection={collectionConfig!}
               count={count}
               ids={selectedIDs}
               modalPrefix={modalPrefix}
@@ -98,7 +99,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
         ),
         !disableBulkDelete && (
           <DeleteMany
-            collection={collectionConfig}
+            collection={collectionConfig!}
             key="bulk-delete"
             modalPrefix={modalPrefix}
             viewType={viewType}

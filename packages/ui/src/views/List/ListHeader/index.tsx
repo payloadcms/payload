@@ -81,7 +81,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
           <CloseModalButton
             className={`${drawerBaseClass}__header-close`}
             key="close-button"
-            slug={drawerSlug}
+            slug={drawerSlug!}
           />,
         ]}
         AfterListHeaderContent={
@@ -92,7 +92,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
         }
         className={`${drawerBaseClass}__header`}
         title={getTranslation(
-          getEntityConfig({ collectionSlug: selectedOption.value })?.labels?.plural,
+          getEntityConfig({ collectionSlug: selectedOption!.value })?.labels?.plural,
           i18n,
         )}
         TitleActions={[
@@ -123,7 +123,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
           <DefaultListPill
             collectionConfig={collectionConfig}
             key="list-header-default-button"
-            viewType={viewType}
+            viewType={viewType!}
           />
         ),
         collectionConfig.folders && config.folders && (
@@ -131,14 +131,14 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             collectionConfig={collectionConfig}
             folderCollectionSlug={config.folders.slug}
             key="list-header-by-folder-button"
-            viewType={viewType}
+            viewType={viewType!}
           />
         ),
         isTrashEnabled && (
           <TrashPill
             collectionConfig={collectionConfig}
             key="list-header-trash-button"
-            viewType={viewType}
+            viewType={viewType!}
           />
         ),
       ].filter(Boolean)}

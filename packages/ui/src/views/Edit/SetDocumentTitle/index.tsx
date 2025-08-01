@@ -30,8 +30,8 @@ export const SetDocumentTitle: React.FC<{
 
   const title = formatDocTitle({
     collectionConfig,
-    data: { id: '', [useAsTitle]: field?.value || '' },
-    dateFormat: dateFormatFromConfig,
+    data: { id: '', [useAsTitle!]: field?.value || '' },
+    dateFormat: dateFormatFromConfig!,
     fallback,
     globalConfig,
     i18n,
