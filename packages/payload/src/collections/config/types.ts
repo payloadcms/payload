@@ -284,26 +284,27 @@ export type BaseListFilter = BaseFilter
 
 export type CollectionAdminOptions = {
   /**
-   * Define a default base filter for this collection's in the admin panel,
-   * which will be merged into any filters that the user performs.
-   * This is useful to be used by plugins like multi-tenant. For instance,
-   * A user can have access to multiple tenants, but should only see the one
-   * they have active or selected in the different places in the admin panel,
-   * such as the List View, or the relationships within the Lexical editor.
+   * Defines a default base filter which will be applied in the following parts of the admin panel:
+   *
+   * - List View
+   * - Relationship fields for internal links within the Lexical editor
+   *
+   * This is especially useful for plugins like multi-tenant. For example,
+   * a user may have access to multiple tenants, but should only see content
+   * related to the currently active or selected tenant in those places.
    */
   baseFilter?: BaseFilter
   /**
-   * @deprecated Use `baseFilter` instead. This property will be
-   * overwritten by `baseFilter` if `baseFilter` is defined.
+   * @deprecated Use `baseFilter` instead. If both are defined,
+   * `baseFilter` will take precedence. This property remains only
+   * for backward compatibility and may be removed in a future version.
    *
-   * Previously, we considered the List View to be the only place we might
-   * want to apply a base filter in the admin panel, for example for the
-   * multi-tenant plugin, hence the name `baseListFilter`.
-   * But there are other places where you might want to apply the base filter,
-   * for example in the Lexical editor relationships. Therefore, we renamed
-   * it to `baseFilter`, and preserved the old name for backwards compatibility.
+   * Originally, this was intended to filter only the List View in the admin panel.
+   * However, base filtering is required in other areas such as internal link
+   * relationships in the Lexical editor.
+   *
    */
-  baseListFilter?: BaseFilter
+  baseListFilter?: BaseListFilter
   /**
    * Custom admin components
    */

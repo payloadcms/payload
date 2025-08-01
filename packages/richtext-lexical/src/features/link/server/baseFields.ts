@@ -117,13 +117,20 @@ export const getBaseFields = (
       type: 'relationship',
       filterOptions:
         !enabledCollections && !disabledCollections
-          ? ({ relationTo, user }) => {
-              const hidden = config.collections.find(({ slug }) => slug === relationTo)?.admin
-                .hidden
+          ? async ({ relationTo, req, user }) => {
+              const admin = config.collections.find(({ slug }) => slug === relationTo)?.admin
+              const baseFilter = await (admin?.baseFilter ?? admin?.baseListFilter)?.({
+                limit: 0,
+                page: 1,
+                req,
+                sort: 'id',
+              })
+
+              const hidden = admin?.hidden
               if (typeof hidden === 'function' && hidden({ user } as { user: TypedUser })) {
                 return false
               }
-              return true
+              return baseFilter ?? true
             }
           : null,
       label: ({ t }) => t('fields:chooseDocumentToLink'),
