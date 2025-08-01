@@ -407,7 +407,7 @@ describe('Collections - Uploads', () => {
       })
 
       it('should upload svg files', async () => {
-        const expectedPath = path.join(dirname, './collections/SVGFiles/with-any-image-type')
+        const expectedPath = path.join(dirname, './with-any-image-type')
 
         const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
         const doc = await payload.create({
