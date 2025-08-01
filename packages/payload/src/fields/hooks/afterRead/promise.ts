@@ -402,7 +402,7 @@ export const promise = async ({
         }
       }
 
-      if (Array.isArray(rows)) {
+      if (Array.isArray(rows) && rows.length > 0) {
         rows.forEach((row, rowIndex) => {
           traverseFields({
             blockData,
@@ -470,7 +470,7 @@ export const promise = async ({
             })
           }
         })
-      } else if (shouldHoistLocalizedValue && !rows) {
+      } else if (shouldHoistLocalizedValue && (!rows || rows.length === 0)) {
         siblingDoc[field.name] = null
       } else if (field.hidden !== true || showHiddenFields === true) {
         siblingDoc[field.name] = []
@@ -481,7 +481,7 @@ export const promise = async ({
     case 'blocks': {
       const rows = siblingDoc[field.name]
 
-      if (Array.isArray(rows)) {
+      if (Array.isArray(rows) && rows.length > 0) {
         rows.forEach((row, rowIndex) => {
           const blockTypeToMatch = (row as JsonObject).blockType
 
@@ -577,7 +577,7 @@ export const promise = async ({
             })
           }
         })
-      } else if (shouldHoistLocalizedValue && rows === null) {
+      } else if (shouldHoistLocalizedValue && (!rows || rows.length === 0)) {
         siblingDoc[field.name] = null
       } else if (field.hidden !== true || showHiddenFields === true) {
         siblingDoc[field.name] = []

@@ -1213,11 +1213,52 @@ describe('Localization', () => {
           data: {
             items: [],
           },
-          fallbackLocale: 'none',
+          fallbackLocale: false,
           locale: spanishLocale,
         })
 
-        expect(updatedSpanishDoc.items).toStrictEqual([])
+        expect(updatedSpanishDoc.items).toStrictEqual(null)
+      })
+
+      it('should allow optional fallback data', async () => {
+        const englishDoc = await payload.create({
+          collection: arrayCollectionSlug,
+          data: {
+            items: [
+              {
+                text: englishTitle,
+              },
+            ],
+          },
+          locale: defaultLocale,
+        })
+
+        await payload.update({
+          id: englishDoc.id,
+          collection: arrayCollectionSlug,
+          data: {
+            items: [],
+          },
+          locale: spanishLocale,
+        })
+
+        const docWithoutFallback = await payload.findByID({
+          id: englishDoc.id,
+          collection: arrayCollectionSlug,
+          locale: spanishLocale,
+        })
+
+        // eslint-disable-next-line jest/no-conditional-in-test
+        if (['firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE!)) {
+          expect(docWithoutFallback.items).toStrictEqual(null)
+        } else {
+          // TODO: build out compatability with SQL databases
+          // Currently SQL databases always fallback since the localized values are joined in.
+          // The join only has 2 states, undefined or the localized value of the requested locale.
+          // If the localized value is not in the DB, there is no way to know if the value should fallback or not so we fallback if fallbackLocale is truthy.
+          // In MongoDB the value can be set to null, which allows us to know that the value should fallback.
+          expect(docWithoutFallback.items).toStrictEqual(englishDoc.items)
+        }
       })
 
       it('should use fallback value if setting null', async () => {
