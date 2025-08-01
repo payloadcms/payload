@@ -39,3 +39,4 @@ export const bulkUploadsSlug = 'bulk-uploads'
 
 export const fileMimeTypeSlug = 'file-mime-type'
 export const svgOnlySlug = 'svg-only'
+export const anyImagesSlug = 'any-images'
