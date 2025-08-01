@@ -34,7 +34,7 @@ jobs:
 
       - name: Slack notification on failure
         if: failure()
-        uses: slackapi/slack-github-action@v2.1.0
+        uses: slackapi/slack-github-action@v2.1.1
         with:
           webhook: ${{ inputs.debug == 'true' && secrets.SLACK_TEST_WEBHOOK_URL || secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
