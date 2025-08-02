@@ -22,6 +22,8 @@ import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   apiKeysSlug,
+  customVerificationTokenSlug,
+  expectedVerificationToken,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
@@ -362,6 +364,60 @@ describe('Auth', () => {
 
         const afterVerifyResult = await payload.find({
           collection: publicUsersSlug,
+          limit: 1,
+          showHiddenFields: true,
+          where: {
+            email: {
+              equals: emailToVerify,
+            },
+          },
+        })
+
+        const { _verificationToken: afterToken, _verified: afterVerified } =
+          afterVerifyResult.docs[0]
+        expect(afterVerified).toBe(true)
+        expect(afterToken).toBeNull()
+      })
+
+      it('should allow custom verification token of a user', async () => {
+        const emailToVerify = 'verify@me.com'
+        const response = await restClient.POST(`/${customVerificationTokenSlug}`, {
+          body: JSON.stringify({
+            email: emailToVerify,
+            password,
+            roles: ['editor'],
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+
+        expect(response.status).toBe(201)
+
+        const userResult = await payload.find({
+          collection: customVerificationTokenSlug,
+          limit: 1,
+          showHiddenFields: true,
+          where: {
+            email: {
+              equals: emailToVerify,
+            },
+          },
+        })
+
+        const { _verificationToken, _verified } = userResult.docs[0]
+
+        expect(_verified).toBe(false)
+        expect(_verificationToken).toBe(expectedVerificationToken)
+
+        const verificationResponse = await restClient.POST(
+          `/${customVerificationTokenSlug}/verify/${_verificationToken}`,
+        )
+
+        expect(verificationResponse.status).toBe(200)
+
+        const afterVerifyResult = await payload.find({
+          collection: customVerificationTokenSlug,
           limit: 1,
           showHiddenFields: true,
           where: {
