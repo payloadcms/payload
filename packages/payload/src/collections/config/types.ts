@@ -85,6 +85,7 @@ export type HookOperationType =
   | 'readDistinct'
   | 'refresh'
   | 'resetPassword'
+  | 'restoreVersion'
   | 'update'
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>

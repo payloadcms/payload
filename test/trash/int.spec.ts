@@ -709,6 +709,35 @@ describe('trash', () => {
         ).rejects.toThrow(/Cannot restore a version of a trashed document/i)
       })
     })
+
+    describe('count operation', () => {
+      it('should return total count of non-soft-deleted documents by default (trash: false)', async () => {
+        const result = await payload.count({
+          collection: postsSlug,
+        })
+
+        expect(result.totalDocs).toEqual(1) // Only postsDocOne
+      })
+
+      it('should return total count of all documents including soft-deleted when trash: true', async () => {
+        const result = await payload.count({
+          collection: postsSlug,
+          trash: true,
+        })
+
+        expect(result.totalDocs).toEqual(2)
+      })
+
+      it('should return count of only soft-deleted documents when where[deletedAt][exists]=true', async () => {
+        const result = await payload.count({
+          collection: postsSlug,
+          trash: true,
+          where: { deletedAt: { exists: true } },
+        })
+
+        expect(result.totalDocs).toEqual(1) // Only postsDocTwo
+      })
+    })
   })
 
   describe('REST API', () => {
@@ -1053,6 +1082,30 @@ describe('trash', () => {
         expect(body.message ?? body.errors?.[0]?.message).toMatch(
           'Cannot restore a version of a trashed document',
         )
+      })
+    })
+
+    describe('count endpoint', () => {
+      it('should return count of non-soft-deleted docs by default (trash=false)', async () => {
+        const res = await restClient.GET(`/${postsSlug}/count`)
+        expect(res.status).toBe(200)
+        const data = await res.json()
+        expect(data.totalDocs).toEqual(1)
+      })
+
+      it('should return count of all docs including soft-deleted when trash=true', async () => {
+        const res = await restClient.GET(`/${postsSlug}/count?trash=true`)
+        expect(res.status).toBe(200)
+        const data = await res.json()
+        expect(data.totalDocs).toEqual(2)
+      })
+
+      it('should return count of only soft-deleted docs with trash=true & where[deletedAt][exists]=true', async () => {
+        const res = await restClient.GET(
+          `/${postsSlug}/count?trash=true&where[deletedAt][exists]=true`,
+        )
+        const data = await res.json()
+        expect(data.totalDocs).toEqual(1)
       })
     })
   })
@@ -1630,6 +1683,53 @@ describe('trash', () => {
         expect(restoreRes.errors?.[0]?.message).toMatch(
           /Cannot restore a version of a trashed document/i,
         )
+      })
+    })
+
+    describe('count query', () => {
+      it('should return count of non-soft-deleted documents by default (trash=false)', async () => {
+        const query = `
+          query {
+            countPosts {
+              totalDocs
+            }
+          }
+        `
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((r) => r.json())
+
+        expect(res.data.countPosts.totalDocs).toBe(1)
+      })
+
+      it('should return count of all documents including soft-deleted when trash=true', async () => {
+        const query = `
+          query {
+            countPosts(trash: true) {
+              totalDocs
+            }
+          }
+        `
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((r) => r.json())
+
+        expect(res.data.countPosts.totalDocs).toBe(2)
+      })
+
+      it('should return count of only soft-deleted docs with where[deletedAt][exists]=true', async () => {
+        const query = `
+          query {
+            countPosts(trash: true, where: { deletedAt: { exists: true } }) {
+              totalDocs
+            }
+          }
+        `
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((r) => r.json())
+
+        expect(res.data.countPosts.totalDocs).toBe(1)
       })
     })
   })
