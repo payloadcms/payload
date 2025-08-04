@@ -49,6 +49,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     Description,
     Error,
     filterOptions,
+    formatDisplayedOptions,
     hasMany,
     initialValue,
     isSortable = true,
@@ -100,9 +101,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
 
   const valueRef = useRef(value)
-  // the line below seems odd
-
-  valueRef.current = value
 
   const [DocumentDrawer, , { isDrawerOpen, openDrawer }] = useDocumentDrawer({
     id: currentlyOpenRelationship.id,
@@ -415,11 +413,17 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       })
 
       if (idsToLoad.length > 0) {
+        const collection = getEntityConfig({ collectionSlug: relation })
+        const fieldToSelect = collection?.admin?.useAsTitle || 'id'
+
         const query = {
           depth: 0,
           draft: true,
           limit: idsToLoad.length,
           locale,
+          select: {
+            [fieldToSelect]: true,
+          },
           where: {
             id: {
               in: idsToLoad,
@@ -438,8 +442,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             },
             method: 'POST',
           })
-
-          const collection = getEntityConfig({ collectionSlug: relation })
           let docs = []
 
           if (response.ok) {
@@ -474,11 +476,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       const docID = args.doc.id
 
       if (hasMany) {
-        const currentValue = valueRef.current
-          ? Array.isArray(valueRef.current)
-            ? valueRef.current
-            : [valueRef.current]
-          : []
+        const currentValue = value ? (Array.isArray(value) ? value : [value]) : []
 
         const valuesToSet = currentValue.map((option: ValueWithRelation) => {
           return {
@@ -492,7 +490,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         onChange({ relationTo: args.collectionConfig.slug, value: docID })
       }
     },
-    [i18n, config, hasMany, onChange],
+    [i18n, config, hasMany, onChange, value],
   )
 
   const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(
@@ -508,8 +506,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
       if (hasMany) {
         onChange(
-          valueRef.current
-            ? (valueRef.current as ValueWithRelation[]).concat({
+          value
+            ? value.concat({
                 relationTo: args.collectionConfig.slug,
                 value: args.doc.id,
               })
@@ -522,7 +520,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         })
       }
     },
-    [i18n, config, hasMany, onChange],
+    [i18n, config, hasMany, onChange, value],
   )
 
   const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
@@ -537,8 +535,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
       if (hasMany) {
         onChange(
-          valueRef.current
-            ? (valueRef.current as ValueWithRelation[]).filter((option) => {
+          value
+            ? value.filter((option) => {
                 return option.value !== args.id
               })
             : null,
@@ -549,7 +547,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
       return
     },
-    [i18n, config, hasMany, onChange],
+    [i18n, config, hasMany, onChange, value],
   )
 
   const filterOption = useCallback((item: Option, searchFilter: string) => {
@@ -642,6 +640,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const prevValue = useRef(value)
   const isFirstRenderRef = useRef(true)
+
   // ///////////////////////////////////
   // Ensure we have an option for each value
   // ///////////////////////////////////
@@ -670,6 +669,12 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       openDrawerWhenRelationChanges.current = false
     }
   }, [openDrawer, currentlyOpenRelationship])
+
+  useEffect(() => {
+    // needed to sync the ref value when other fields influence the value
+    // i.e. when a drawer is opened and the value is set
+    valueRef.current = value
+  }, [value])
 
   const valueToRender = findOptionsByValue({ allowEdit, options, value })
 
@@ -742,14 +747,18 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                   ? (selected) => {
                       if (hasMany) {
                         if (selected === null) {
+                          valueRef.current = []
                           onChange([])
                         } else {
+                          valueRef.current = selected as ValueWithRelation[]
                           onChange(selected as ValueWithRelation[])
                         }
                       } else if (hasMany === false) {
                         if (selected === null) {
+                          valueRef.current = null
                           onChange(null)
                         } else {
+                          valueRef.current = selected as ValueWithRelation
                           onChange(selected as ValueWithRelation)
                         }
                       }
@@ -822,7 +831,11 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                       }),
                 })
               }}
-              options={options}
+              options={
+                typeof formatDisplayedOptions === 'function'
+                  ? formatDisplayedOptions(options)
+                  : options
+              }
               placeholder={placeholder}
               showError={showError}
               value={valueToRender ?? null}

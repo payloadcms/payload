@@ -22,7 +22,14 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
 
     const headers = uploadConfig.externalFileHeaderFilter
       ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
-      : { cookie: req.headers.get('cookie')! }
+      : {
+          cookie:
+            req.headers
+              .get('cookie')
+              ?.split(';')
+              .filter((cookie) => !cookie.trim().startsWith(req.payload.config.cookiePrefix))
+              .join(';') || '',
+        }
 
     // Check if URL is allowed because of skipSafeFetch allowList
     const skipSafeFetch: boolean =

@@ -4,14 +4,14 @@
   .clickable-arrow {
     cursor: pointer;
     @extend %btn-reset;
-    width: base(2);
-    height: base(2);
+    width: base(1.5);
+    height: base(1.5);
     display: flex;
     justify-content: center;
     align-content: center;
     align-items: center;
     outline: 0;
-    padding: base(0.5);
+    padding: base(0.25);
     color: var(--theme-elevation-800);
     line-height: base(1);
 

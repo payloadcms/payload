@@ -1192,6 +1192,24 @@ describe('Relationships', () => {
       expect(result.docs[0]!.id).toBe(doc.id)
     })
 
+    it('should allow querying polymorphic in an array', async () => {
+      const director = await payload.create({
+        collection: 'directors',
+        data: { name: 'direcotr' },
+      })
+      const movie = await payload.create({
+        collection: 'movies',
+        data: { array: [{ polymorphic: { relationTo: 'directors', value: director.id } }] },
+      })
+
+      const res = await payload.find({
+        collection: 'movies',
+        where: { 'array.polymorphic': { equals: { value: director.id, relationTo: 'directors' } } },
+      })
+      expect(res.docs).toHaveLength(1)
+      expect(res.docs[0].id).toBe(movie.id)
+    })
+
     it('should allow querying hasMany in array', async () => {
       const director = await payload.create({
         collection: 'directors',

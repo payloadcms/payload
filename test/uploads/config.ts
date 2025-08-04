@@ -39,7 +39,9 @@ import {
   relationSlug,
   restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
+  skipSafeFetchHeaderFilterSlug,
   skipSafeFetchMediaSlug,
+  svgOnlySlug,
   threeDimensionalSlug,
   unstoredMediaSlug,
   versionSlug,
@@ -462,6 +464,15 @@ export default buildConfigWithDefaults({
       upload: {
         skipSafeFetch: true,
         staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
+      slug: skipSafeFetchHeaderFilterSlug,
+      fields: [],
+      upload: {
+        skipSafeFetch: true,
+        staticDir: path.resolve(dirname, './media'),
+        externalFileHeaderFilter: (headers) => headers, // Keep all headers including cookies
       },
     },
     {
@@ -910,6 +921,14 @@ export default buildConfigWithDefaults({
     BulkUploadsCollection,
     SimpleRelationshipCollection,
     FileMimeType,
+    {
+      slug: svgOnlySlug,
+      fields: [],
+      upload: {
+        mimeTypes: ['image/svg+xml'],
+        staticDir: path.resolve(dirname, './svg-only'),
+      },
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
