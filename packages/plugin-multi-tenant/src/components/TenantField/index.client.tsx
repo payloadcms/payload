@@ -68,7 +68,6 @@ export const TenantField = (args: Props) => {
         <div className={`${baseClass}__wrapper`}>
           <RelationshipField {...args} />
         </div>
-        <div className={`${baseClass}__hr`} />
       </div>
     )
   }
