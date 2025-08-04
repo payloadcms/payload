@@ -36,6 +36,7 @@ export const tenantField = ({
     },
     disableListColumn: true,
     disableListFilter: true,
+    position: 'sidebar',
   },
   hasMany: false,
   hooks: {
