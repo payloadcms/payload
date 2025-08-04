@@ -1,9 +1,8 @@
 'use client'
 
-import type { OptionObject } from 'payload'
-
 import { toast, useAuth, useConfig } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
+import { generateCookie, type OptionObject } from 'payload'
 import React, { createContext } from 'react'
 
 type ContextType = {
@@ -63,6 +62,26 @@ const Context = createContext<ContextType>({
   updateTenants: () => null,
 })
 
+const setCookie = (value?: string) => {
+  document.cookie = generateCookie<string>({
+    name: 'payload-tenant',
+    maxAge: 60 * 60 * 24 * 365, // 1 year in seconds
+    path: '/',
+    returnCookieAsObject: false,
+    value: value || '',
+  })
+}
+
+const deleteCookie = () => {
+  document.cookie = generateCookie<string>({
+    name: 'payload-tenant',
+    maxAge: -1,
+    path: '/',
+    returnCookieAsObject: false,
+    value: '',
+  })
+}
+
 export const TenantSelectionProviderClient = ({
   children,
   initialTenantOptions,
@@ -81,6 +100,7 @@ export const TenantSelectionProviderClient = ({
   const [entityType, setEntityType] = React.useState<'document' | 'global' | undefined>(undefined)
   const { user } = useAuth()
   const { config } = useConfig()
+  const router = useRouter()
   const userID = React.useMemo(() => user?.id, [user?.id])
   const prevUserID = React.useRef(userID)
   const userChanged = userID !== prevUserID.current
@@ -92,22 +112,10 @@ export const TenantSelectionProviderClient = ({
     [selectedTenantID, tenantOptions],
   )
 
-  const router = useRouter()
-
-  const setCookie = React.useCallback((value?: string) => {
-    const expires = '; expires=Fri, 31 Dec 9999 23:59:59 GMT'
-    document.cookie = 'payload-tenant=' + (value || '') + expires + '; path=/'
-  }, [])
-
-  const deleteCookie = React.useCallback(() => {
-    // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
-    document.cookie = 'payload-tenant=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/'
-  }, [])
-
   const setTenant = React.useCallback<ContextType['setTenant']>(
     ({ id, refresh }) => {
       if (id === undefined) {
-        if (tenantOptions.length > 1) {
+        if (tenantOptions.length > 1 || tenantOptions.length === 0) {
           // users with multiple tenants can clear the tenant selection
           setSelectedTenantID(undefined)
           deleteCookie()
@@ -132,7 +140,7 @@ export const TenantSelectionProviderClient = ({
         router.refresh()
       }
     },
-    [deleteCookie, entityType, router, setCookie, tenantOptions],
+    [entityType, router, tenantOptions],
   )
 
   const syncTenants = React.useCallback(async () => {
@@ -158,7 +166,7 @@ export const TenantSelectionProviderClient = ({
     } catch (e) {
       toast.error(`Error fetching tenants`)
     }
-  }, [config.serverURL, config.routes.api, tenantsCollectionSlug, setCookie, userID])
+  }, [config.serverURL, config.routes.api, tenantsCollectionSlug, userID])
 
   const updateTenants = React.useCallback<ContextType['updateTenants']>(
     ({ id, label }) => {
@@ -194,7 +202,17 @@ export const TenantSelectionProviderClient = ({
       }
       prevUserID.current = userID
     }
-  }, [userID, userChanged, syncTenants, deleteCookie, tenantOptions])
+  }, [userID, userChanged, syncTenants, tenantOptions])
+
+  /**
+   * If there is no initial value, clear the tenant and refresh the router.
+   * Needed for stale tenantIDs set as a cookie.
+   */
+  React.useEffect(() => {
+    if (!initialValue) {
+      setTenant({ id: undefined, refresh: true })
+    }
+  }, [initialValue, setTenant])
 
   return (
     <span
