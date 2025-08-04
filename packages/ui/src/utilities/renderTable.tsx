@@ -12,6 +12,7 @@ import type {
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
+  ViewTypes,
 } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
@@ -83,6 +84,7 @@ export const renderTable = ({
   renderRowTypes,
   tableAppearance,
   useAsTitle,
+  viewType,
 }: {
   clientCollectionConfig?: ClientCollectionConfig
   clientConfig?: ClientConfig
@@ -90,7 +92,7 @@ export const renderTable = ({
   collections?: string[]
   columns?: CollectionPreferences['columns']
   customCellProps?: Record<string, unknown>
-  data: PaginatedDocs
+  data?: PaginatedDocs | undefined
   drawerSlug?: string
   enableRowSelections: boolean
   groupByFieldPath?: string
@@ -104,6 +106,7 @@ export const renderTable = ({
   renderRowTypes?: boolean
   tableAppearance?: 'condensed' | 'default'
   useAsTitle: CollectionConfig['admin']['useAsTitle']
+  viewType?: ViewTypes
 }): {
   columnState: Column[]
   Table: React.ReactNode
@@ -175,6 +178,7 @@ export const renderTable = ({
     | 'payload'
     | 'serverFields'
     | 'useAsTitle'
+    | 'viewType'
   > = {
     clientFields,
     columns,
@@ -185,6 +189,7 @@ export const renderTable = ({
     payload,
     serverFields,
     useAsTitle,
+    viewType,
   }
 
   if (isPolymorphic) {
@@ -192,14 +197,14 @@ export const renderTable = ({
       ...sharedArgs,
       collectionSlug: undefined,
       dataType: 'polymorphic',
-      docs: data.docs,
+      docs: data?.docs || [],
     })
   } else {
     columnState = buildColumnState({
       ...sharedArgs,
       collectionSlug: clientCollectionConfig.slug,
       dataType: 'monomorphic',
-      docs: data.docs,
+      docs: data?.docs || [],
     })
   }
 
@@ -216,7 +221,7 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: i18n.t('version:type'),
-      renderedCells: data.docs.map((doc, i) => (
+      renderedCells: (data?.docs || []).map((doc, i) => (
         <Pill key={i} size="small">
           {getTranslation(
             collections
@@ -240,7 +245,9 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: <SelectAll />,
-      renderedCells: data.docs.map((_, i) => <SelectRow key={i} rowData={data.docs[i]} />),
+      renderedCells: (data?.docs || []).map((_, i) => (
+        <SelectRow key={i} rowData={data?.docs[i]} />
+      )),
     } as Column)
   }
 
@@ -255,14 +262,14 @@ export const renderTable = ({
             .join(' ')}
           key={key}
         >
-          <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
+          <SelectionProvider docs={data?.docs || []} totalDocs={data?.totalDocs || 0}>
             <GroupByHeader
               collectionConfig={clientCollectionConfig}
               groupByFieldPath={groupByFieldPath}
               groupByValue={groupByValue}
               heading={heading}
             />
-            <Table appearance={tableAppearance} columns={columnsToUse} data={data.docs} />
+            <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
             <GroupByPageControls
               collectionConfig={clientCollectionConfig}
               data={data}
@@ -280,7 +287,7 @@ export const renderTable = ({
       // key is required since Next.js 15.2.0 to prevent React key error
       Table: (
         <div className="table-wrap" key={key}>
-          <Table appearance={tableAppearance} columns={columnsToUse} data={data.docs} />
+          <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
         </div>
       ),
     }
@@ -296,7 +303,7 @@ export const renderTable = ({
       hidden: true,
     },
     Heading: <SortHeader />,
-    renderedCells: data.docs.map((_, i) => <SortRow key={i} />),
+    renderedCells: (data?.docs || []).map((_, i) => <SortRow key={i} />),
   } as Column)
 
   return {
@@ -308,7 +315,7 @@ export const renderTable = ({
           appearance={tableAppearance}
           collection={clientCollectionConfig}
           columns={columnsToUse}
-          data={data.docs}
+          data={data?.docs || []}
         />
       </div>
     ),

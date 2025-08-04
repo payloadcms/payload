@@ -1,20 +1,19 @@
-import type {
-  AdminViewServerProps,
-  CollectionPreferences,
-  Column,
-  ColumnPreference,
-  ListQuery,
-  ListViewClientProps,
-  ListViewServerPropsOnly,
-  PaginatedDocs,
-  QueryPreset,
-  SanitizedCollectionPermission,
-} from 'payload'
-
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
+import {
+  type AdminViewServerProps,
+  type CollectionPreferences,
+  type Column,
+  type ColumnPreference,
+  type ListQuery,
+  type ListViewClientProps,
+  type ListViewServerPropsOnly,
+  type PaginatedDocs,
+  type QueryPreset,
+  type SanitizedCollectionPermission,
+} from 'payload'
 import {
   combineWhereConstraints,
   formatAdminURL,
@@ -41,6 +40,10 @@ type RenderListViewArgs = {
   query: ListQuery
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
+  /**
+   * @experimental This prop is subject to change in future releases.
+   */
+  trash?: boolean
 } & AdminViewServerProps
 
 /**
@@ -67,6 +70,8 @@ export const renderListView = async (
     params,
     query: queryFromArgs,
     searchParams,
+    trash,
+    viewType,
   } = args
 
   const {
@@ -147,11 +152,24 @@ export const renderListView = async (
     let queryPreset: QueryPreset | undefined
     let queryPresetPermissions: SanitizedCollectionPermission | undefined
 
-    const whereWithMergedSearch = mergeListSearchAndWhere({
+    let whereWithMergedSearch = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
       where: combineWhereConstraints([query?.where, baseListFilter]),
     })
+
+    if (trash === true) {
+      whereWithMergedSearch = {
+        and: [
+          whereWithMergedSearch,
+          {
+            deletedAt: {
+              exists: true,
+            },
+          },
+        ],
+      }
+    }
 
     if (collectionPreferences?.preset) {
       try {
@@ -176,54 +194,81 @@ export const renderListView = async (
       }
     }
 
-    let data: PaginatedDocs | undefined
     let Table: React.ReactNode | React.ReactNode[] = null
     let columnState: Column[] = []
+    let data: PaginatedDocs = {
+      // no results default
+      docs: [],
+      hasNextPage: false,
+      hasPrevPage: false,
+      limit: query.limit,
+      nextPage: null,
+      page: 1,
+      pagingCounter: 0,
+      prevPage: null,
+      totalDocs: 0,
+      totalPages: 0,
+    }
 
-    if (collectionConfig.admin.groupBy && query.groupBy) {
-      ;({ columnState, data, Table } = await handleGroupBy({
-        clientConfig,
-        collectionConfig,
-        collectionSlug,
-        columns: collectionPreferences?.columns,
-        customCellProps,
-        drawerSlug,
-        enableRowSelections,
-        query,
-        req,
-        user,
-        where: whereWithMergedSearch,
-      }))
-    } else {
-      data = await req.payload.find({
-        collection: collectionSlug,
-        depth: 0,
-        draft: true,
-        fallbackLocale: false,
-        includeLockStatus: true,
-        limit: query?.limit ? Number(query.limit) : undefined,
-        locale: req.locale,
-        overrideAccess: false,
-        page: query?.page ? Number(query.page) : undefined,
-        req,
-        sort: query?.sort,
-        user,
-        where: whereWithMergedSearch,
-      })
-      ;({ columnState, Table } = renderTable({
-        clientCollectionConfig: clientConfig.collections.find((c) => c.slug === collectionSlug),
-        collectionConfig,
-        columns: collectionPreferences?.columns,
-        customCellProps,
-        data,
-        drawerSlug,
-        enableRowSelections,
-        i18n: req.i18n,
-        orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
-        payload: req.payload,
-        query,
-        useAsTitle: collectionConfig.admin.useAsTitle,
-      }))
+    try {
+      if (collectionConfig.admin.groupBy && query.groupBy) {
+        ;({ columnState, data, Table } = await handleGroupBy({
+          clientConfig,
+          collectionConfig,
+          collectionSlug,
+          columns: collectionPreferences?.columns,
+          customCellProps,
+          drawerSlug,
+          enableRowSelections,
+          query,
+          req,
+          trash,
+          user,
+          viewType,
+          where: whereWithMergedSearch,
+        }))
+      } else {
+        data = await req.payload.find({
+          collection: collectionSlug,
+          depth: 0,
+          draft: true,
+          fallbackLocale: false,
+          includeLockStatus: true,
+          limit: query?.limit ? Number(query.limit) : undefined,
+          locale: req.locale,
+          overrideAccess: false,
+          page: query?.page ? Number(query.page) : undefined,
+          req,
+          sort: query?.sort,
+          trash,
+          user,
+          where: whereWithMergedSearch,
+        })
+        ;({ columnState, Table } = renderTable({
+          clientCollectionConfig: clientConfig.collections.find((c) => c.slug === collectionSlug),
+          collectionConfig,
+          columns: collectionPreferences?.columns,
+          customCellProps,
+          data,
+          drawerSlug,
+          enableRowSelections,
+          i18n: req.i18n,
+          orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
+          payload: req.payload,
+          query,
+          useAsTitle: collectionConfig.admin.useAsTitle,
+          viewType,
+        }))
+      }
+    } catch (err) {
+      if (err.name !== 'QueryError') {
+        // QueryErrors are expected when a user filters by a field they do not have access to
+        req.payload.logger.error({
+          err,
+          msg: `There was an error fetching the list view data for collection ${collectionSlug}`,
+        })
+        throw err
+      }
     }
 
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
@@ -244,6 +289,7 @@ export const renderListView = async (
     })
 
     const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
+    const hasDeletePermission = permissions?.collections?.[collectionSlug]?.delete
 
     // Check if there's a notFound query parameter (document ID that wasn't found)
     const notFoundDocId = typeof searchParams?.notFound === 'string' ? searchParams.notFound : null
@@ -267,6 +313,7 @@ export const renderListView = async (
       clientProps: {
         collectionSlug,
         hasCreatePermission,
+        hasDeletePermission,
         newDocumentURL,
       },
       collectionConfig,
@@ -303,6 +350,7 @@ export const renderListView = async (
                 disableQueryPresets,
                 enableRowSelections,
                 hasCreatePermission,
+                hasDeletePermission,
                 listPreferences: collectionPreferences,
                 newDocumentURL,
                 queryPreset,
@@ -310,6 +358,7 @@ export const renderListView = async (
                 renderedFilters,
                 resolvedFilterOptions,
                 Table,
+                viewType,
               } satisfies ListViewClientProps,
               Component: collectionConfig?.admin?.components?.views?.list?.Component,
               Fallback: DefaultListView,

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, Where } from 'payload'
+import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -9,6 +9,7 @@ import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
 
+import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -19,6 +20,8 @@ import { requests } from '../../utilities/api.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
+import { Translation } from '../Translation/index.js'
+import './index.scss'
 
 export type Props = {
   collection: ClientCollectionConfig
@@ -30,10 +33,12 @@ export type Props = {
    * When multiple PublishMany components are rendered on the page, this will differentiate them.
    */
   title?: string
+  viewType?: ViewTypes
 }
 
 export const DeleteMany: React.FC<Props> = (props) => {
-  const { collection: { slug } = {}, modalPrefix } = props
+  const { viewType } = props
+  const { collection: { slug, trash } = {}, modalPrefix } = props
 
   const { permissions } = useAuth()
   const { count, selectAll, selectedIDs, toggleAll } = useSelection()
@@ -51,6 +56,18 @@ export const DeleteMany: React.FC<Props> = (props) => {
   if (selectAll === SelectAllStatus.None || !hasDeletePermission) {
     return null
   }
+
+  const baseWhere = parseSearchParams(searchParams)?.where as Where
+
+  const finalWhere =
+    viewType === 'trash'
+      ? {
+          and: [
+            ...(Array.isArray(baseWhere?.and) ? baseWhere.and : baseWhere ? [baseWhere] : []),
+            { deletedAt: { exists: true } },
+          ],
+        }
+      : baseWhere
 
   return (
     <React.Fragment>
@@ -79,7 +96,9 @@ export const DeleteMany: React.FC<Props> = (props) => {
             totalCount: selectingAll ? count : ids.length,
           },
         }}
-        where={parseSearchParams(searchParams)?.where as Where}
+        trash={trash}
+        viewType={viewType}
+        where={finalWhere}
       />
     </React.Fragment>
   )
@@ -122,6 +141,8 @@ type DeleteMany_v4Props = {
       totalCount?: number
     }
   }
+  trash?: boolean
+  viewType?: ViewTypes
   /**
    * Optionally pass a where clause to filter the documents to be deleted.
    * This will be ignored if multiple relations are selected.
@@ -142,6 +163,8 @@ export function DeleteMany_v4({
   modalPrefix,
   search,
   selections,
+  trash,
+  viewType,
   where,
 }: DeleteMany_v4Props) {
   const { t } = useTranslation()
@@ -158,6 +181,7 @@ export function DeleteMany_v4({
   const { i18n } = useTranslation()
   const { openModal } = useModal()
 
+  const [deletePermanently, setDeletePermanently] = React.useState(false)
   const confirmManyDeleteDrawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}confirm-delete-many-docs`
 
   const handleDelete = React.useCallback(async () => {
@@ -173,43 +197,66 @@ export function DeleteMany_v4({
         if (all) {
           // selecting all documents with optional where filter
           if (deletingOneCollection && where) {
-            whereConstraint = where
+            whereConstraint =
+              viewType === 'trash'
+                ? {
+                    and: [
+                      ...(Array.isArray(where.and) ? where.and : [where]),
+                      { deletedAt: { exists: true } },
+                    ],
+                  }
+                : where
           } else {
-            whereConstraint = {
-              id: {
-                not_equals: '',
-              },
-            }
+            whereConstraint =
+              viewType === 'trash'
+                ? {
+                    and: [{ id: { not_equals: '' } }, { deletedAt: { exists: true } }],
+                  }
+                : {
+                    id: { not_equals: '' },
+                  }
           }
         } else {
           // selecting specific documents
           whereConstraint = {
-            id: {
-              in: ids,
-            },
+            and: [
+              { id: { in: ids } },
+              ...(viewType === 'trash' ? [{ deletedAt: { exists: true } }] : []),
+            ],
           }
         }
 
-        const deleteManyResponse = await requests.delete(
-          `${serverURL}${api}/${relationTo}${qs.stringify(
-            {
-              limit: 0,
-              locale,
-              where: mergeListSearchAndWhere({
-                collectionConfig,
-                search,
-                where: whereConstraint,
-              }),
-            },
-            { addQueryPrefix: true },
-          )}`,
+        const url = `${serverURL}${api}/${relationTo}${qs.stringify(
           {
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
-            },
+            limit: 0,
+            locale,
+            where: mergeListSearchAndWhere({
+              collectionConfig,
+              search,
+              where: whereConstraint,
+            }),
+            ...(viewType === 'trash' ? { trash: true } : {}),
           },
-        )
+          { addQueryPrefix: true },
+        )}`
+
+        const deleteManyResponse =
+          viewType === 'trash' || deletePermanently || !collectionConfig.trash
+            ? await requests.delete(url, {
+                headers: {
+                  'Accept-Language': i18n.language,
+                  'Content-Type': 'application/json',
+                },
+              })
+            : await requests.patch(url, {
+                body: JSON.stringify({
+                  deletedAt: new Date().toISOString(),
+                }),
+                headers: {
+                  'Accept-Language': i18n.language,
+                  'Content-Type': 'application/json',
+                },
+              })
 
         try {
           const { plural, singular } = collectionConfig.labels
@@ -219,8 +266,23 @@ export function DeleteMany_v4({
           const successLabel = deletedDocs > 1 ? plural : singular
 
           if (deleteManyResponse.status < 400 || deletedDocs > 0) {
+            const wasTrashed = collectionConfig.trash && !deletePermanently && viewType !== 'trash'
+
+            let successKey:
+              | 'general:deletedCountSuccessfully'
+              | 'general:permanentlyDeletedCountSuccessfully'
+              | 'general:trashedCountSuccessfully'
+
+            if (wasTrashed) {
+              successKey = 'general:trashedCountSuccessfully'
+            } else if (viewType === 'trash' || deletePermanently) {
+              successKey = 'general:permanentlyDeletedCountSuccessfully'
+            } else {
+              successKey = 'general:deletedCountSuccessfully'
+            }
+
             toast.success(
-              t('general:deletedCountSuccessfully', {
+              t(successKey, {
                 count: deletedDocs,
                 label: getTranslation(successLabel, i18n),
               }),
@@ -262,7 +324,20 @@ export function DeleteMany_v4({
     if (typeof afterDelete === 'function') {
       afterDelete(result)
     }
-  }, [selections, afterDelete, collections, locale, search, serverURL, api, i18n, where, t])
+  }, [
+    selections,
+    afterDelete,
+    collections,
+    deletePermanently,
+    locale,
+    search,
+    serverURL,
+    api,
+    i18n,
+    viewType,
+    where,
+    t,
+  ])
 
   const { label: labelString, labelCount } = Object.entries(selections).reduce(
     (acc, [key, value], index, array) => {
@@ -309,10 +384,43 @@ export function DeleteMany_v4({
         {t('general:delete')}
       </ListSelectionButton>
       <ConfirmationModal
-        body={t('general:aboutToDeleteCount', {
-          count: labelCount,
-          label: labelString,
-        })}
+        body={
+          <React.Fragment>
+            <p>
+              {trash ? (
+                viewType === 'trash' ? (
+                  <Translation
+                    elements={{
+                      '0': ({ children }) => <strong>{children}</strong>,
+                      '1': ({ children }) => <strong>{children}</strong>,
+                    }}
+                    i18nKey="general:aboutToPermanentlyDeleteTrash"
+                    t={t}
+                    variables={{
+                      count: labelCount ?? 0,
+                      label: labelString,
+                    }}
+                  />
+                ) : (
+                  t('general:aboutToTrashCount', { count: labelCount, label: labelString })
+                )
+              ) : (
+                t('general:aboutToDeleteCount', { count: labelCount, label: labelString })
+              )}
+            </p>
+            {trash && viewType !== 'trash' && (
+              <div className="delete-documents__checkbox">
+                <CheckboxInput
+                  checked={deletePermanently}
+                  id="delete-forever"
+                  label={t('general:deletePermanently')}
+                  name="delete-forever"
+                  onToggle={(e) => setDeletePermanently(e.target.checked)}
+                />
+              </div>
+            )}
+          </React.Fragment>
+        }
         confirmingLabel={t('general:deleting')}
         heading={t('general:confirmDeletion')}
         modalSlug={confirmManyDeleteDrawerSlug}

@@ -47,8 +47,19 @@ describe('Sort functionality', () => {
   // eslint-disable-next-line playwright/expect-expect
   test('Orderable collection', async () => {
     const url = new AdminUrlUtil(serverURL, orderableSlug)
-    await page.goto(`${url.list}?sort=-_order`)
+    await page.goto(url.list)
+
+    const joinFieldResolvePromise = page.waitForResponse(
+      (response) => response.url().includes('/api/orderable-join') && response.status() === 200,
+    )
+    const seedResponsePromise = page.waitForResponse(
+      (response) => response.url().includes('/api/seed') && response.status() === 200,
+    )
     await page.locator('.collection-list button', { hasText: 'Seed' }).click()
+    await seedResponsePromise
+    await joinFieldResolvePromise
+    await page.goto(`${url.list}?sort=-_order`)
+
     // SORT BY ORDER ASCENDING
     await page.locator('.sort-header button').nth(0).click()
     await assertRows(0, 'A', 'B', 'C', 'D')

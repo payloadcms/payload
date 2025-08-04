@@ -38,6 +38,7 @@ test.describe('Group By', () => {
   let serverURL: string
   let payload: PayloadTestSDK<Config>
   let user: any
+  let category1Id: number | string
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -222,6 +223,26 @@ test.describe('Group By', () => {
     await expect(groupByContainer.locator('#field-direction input')).toBeDisabled()
     await expect(page.locator('.table-wrap')).toHaveCount(1)
     await expect(page.locator('.group-by-header')).toHaveCount(0)
+  })
+
+  test('should group by relationships even when their values are null', async () => {
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'My Post',
+        category: null,
+      },
+    })
+
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
   })
 
   test('should sort the group-by field globally', async () => {
@@ -603,5 +624,44 @@ test.describe('Group By', () => {
         hasText: exactText('Bulk edit across all pages'),
       }),
     ).toHaveCount(0)
+  })
+
+  test('should show trashed docs in trash view when group-by is active', async () => {
+    await page.goto(url.list)
+
+    // Enable group-by on Category
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+    await expect(page.locator('.table-wrap')).toHaveCount(2) // We expect 2 groups initially
+
+    // Trash the first document in the first group
+    const firstTable = page.locator('.table-wrap').first()
+    await firstTable.locator('.row-1 .cell-_select input').check()
+    await firstTable.locator('.list-selection__button[aria-label="Delete"]').click()
+
+    const firstGroupID = await firstTable
+      .locator('.group-by-header__heading')
+      .getAttribute('data-group-id')
+
+    const modalId = `[id^="${firstGroupID}-confirm-delete-many-docs"]`
+    await expect(page.locator(modalId)).toBeVisible()
+
+    // Confirm trash (skip permanent delete)
+    await page.locator(`${modalId} #confirm-action`).click()
+    await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+      '1 Post moved to trash.',
+    )
+
+    // Go to the trash view
+    await page.locator('#trash-view-pill').click()
+    await expect(page).toHaveURL(/\/posts\/trash(\?|$)/)
+
+    // Re-enable group-by on Category in trash view
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+    await expect(page.locator('.table-wrap')).toHaveCount(1) // Should only have Category 1 (or the trashed doc's category)
+
+    // Ensure the trashed doc is visible
+    await expect(
+      page.locator('.table-wrap tbody tr td.cell-title', { hasText: 'Find me' }),
+    ).toBeVisible()
   })
 })

@@ -5,6 +5,7 @@ import type {
   PaginatedDocs,
   PayloadRequest,
   SanitizedCollectionConfig,
+  ViewTypes,
   Where,
 } from 'payload'
 
@@ -22,7 +23,9 @@ export const handleGroupBy = async ({
   enableRowSelections,
   query,
   req,
+  trash = false,
   user,
+  viewType,
   where: whereWithMergedSearch,
 }: {
   clientConfig: ClientConfig
@@ -34,7 +37,9 @@ export const handleGroupBy = async ({
   enableRowSelections?: boolean
   query?: ListQuery
   req: PayloadRequest
+  trash?: boolean
   user: any
+  viewType?: ViewTypes
   where: Where
 }): Promise<{
   columnState: Column[]
@@ -88,6 +93,7 @@ export const handleGroupBy = async ({
     populate,
     req,
     sort: query?.groupBy,
+    trash,
     where: whereWithMergedSearch,
   })
 
@@ -127,6 +133,7 @@ export const handleGroupBy = async ({
         // Note: if we wanted to enable table-by-table sorting, we could use this:
         // sort: query?.queryByGroup?.[valueOrRelationshipID]?.sort,
         sort: query?.sort,
+        trash,
         user,
         where: {
           ...(whereWithMergedSearch || {}),
@@ -140,6 +147,7 @@ export const handleGroupBy = async ({
 
       if (
         groupByField?.type === 'relationship' &&
+        potentiallyPopulatedRelationship &&
         typeof potentiallyPopulatedRelationship === 'object'
       ) {
         heading =
@@ -173,6 +181,7 @@ export const handleGroupBy = async ({
           payload: req.payload,
           query,
           useAsTitle: collectionConfig.admin.useAsTitle,
+          viewType,
         })
 
         // Only need to set `columnState` once, using the first table's column state

@@ -80,10 +80,12 @@ export function DefaultEditView({
     initialState,
     isEditing,
     isInitializing,
+    isTrashed,
     lastUpdateTime,
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
+    redirectAfterRestore,
     savedDocumentData,
     setCurrentEditor,
     setDocumentIsLocked,
@@ -97,6 +99,7 @@ export function DefaultEditView({
     drawerSlug,
     onDelete,
     onDuplicate,
+    onRestore,
     onSave: onSaveFromContext,
   } = useDocumentDrawerContext()
 
@@ -471,7 +474,7 @@ export function DefaultEditView({
         <Form
           action={action}
           className={`${baseClass}__form`}
-          disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission}
+          disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission || isTrashed}
           disableValidationOnSubmit={!validateBeforeSubmit}
           initialState={!isInitializing && initialState}
           isDocumentForm={true}
@@ -526,6 +529,7 @@ export function DefaultEditView({
               collectionSlug={collectionConfig?.slug}
               globalSlug={globalConfig?.slug}
               id={id}
+              isTrashed={isTrashed}
               pluralLabel={collectionConfig?.labels?.plural}
               useAsTitle={collectionConfig?.admin?.useAsTitle}
             />
@@ -546,7 +550,7 @@ export function DefaultEditView({
               SaveDraftButton,
             }}
             data={savedDocumentData}
-            disableActions={disableActions || isFolderCollection}
+            disableActions={disableActions || isFolderCollection || isTrashed}
             disableCreate={disableCreate}
             EditMenuItems={EditMenuItems}
             hasPublishPermission={hasPublishPermission}
@@ -554,9 +558,11 @@ export function DefaultEditView({
             id={id}
             isEditing={isEditing}
             isInDrawer={isInDrawer}
+            isTrashed={isTrashed}
             onDelete={onDelete}
             onDrawerCreateNew={clearDoc}
             onDuplicate={onDuplicate}
+            onRestore={onRestore}
             onSave={onSave}
             onTakeOver={() =>
               handleTakeOver(
@@ -576,6 +582,7 @@ export function DefaultEditView({
             readOnlyForIncomingUser={isReadOnlyForIncomingUser}
             redirectAfterDelete={redirectAfterDelete}
             redirectAfterDuplicate={redirectAfterDuplicate}
+            redirectAfterRestore={redirectAfterRestore}
             slug={collectionConfig?.slug || globalConfig?.slug}
             user={currentEditor}
           />
@@ -637,7 +644,8 @@ export function DefaultEditView({
                 docPermissions={docPermissions}
                 fields={docConfig.fields}
                 forceSidebarWrap={isLivePreviewing}
-                readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
+                isTrashed={isTrashed}
+                readOnly={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
                 schemaPathSegments={schemaPathSegments}
               />
               {AfterDocument}

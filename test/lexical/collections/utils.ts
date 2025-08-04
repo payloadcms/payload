@@ -8,6 +8,27 @@ export class LexicalHelpers {
     this.page = page
   }
 
+  async addLine(
+    type: 'check' | 'h1' | 'h2' | 'ordered' | 'paragraph' | 'unordered',
+    text: string,
+    indent: number,
+    startWithEnter = true,
+  ) {
+    if (startWithEnter) {
+      await this.page.keyboard.press('Enter')
+    }
+    await this.slashCommand(type)
+    // Outdent 10 times to be sure we are at the beginning of the line
+    for (let i = 0; i < 10; i++) {
+      await this.page.keyboard.press('Shift+Tab')
+    }
+    const adjustedIndent = ['check', 'ordered', 'unordered'].includes(type) ? indent - 1 : indent
+    for (let i = 0; i < adjustedIndent; i++) {
+      await this.page.keyboard.press('Tab')
+    }
+    await this.page.keyboard.type(text)
+  }
+
   async save(container: 'document' | 'drawer') {
     if (container === 'drawer') {
       await this.drawer.getByText('Save').click()
@@ -19,7 +40,7 @@ export class LexicalHelpers {
 
   async slashCommand(
     // prettier-ignore
-    command: 'block' | 'check' | 'code' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' |'h6' | 'inline' 
+    command: 'block' | 'check' | 'code' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' |'h6' | 'inline'
     | 'link' | 'ordered' | 'paragraph' | 'quote' | 'relationship' | 'unordered' | 'upload',
   ) {
     await this.page.keyboard.press(`/`)

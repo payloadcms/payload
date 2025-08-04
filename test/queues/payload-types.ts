@@ -88,20 +88,14 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {
-    'payload-jobs-stats': PayloadJobsStat;
-  };
-  globalsSelect: {
-    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
-  };
+  globals: {};
+  globalsSelect: {};
   locale: null;
   user: User & {
     collection: 'users';
   };
   jobs: {
     tasks: {
-      EverySecond: TaskEverySecond;
-      EverySecondMax2: TaskEverySecondMax2;
       UpdatePost: MyUpdatePostType;
       UpdatePostStep2: TaskUpdatePostStep2;
       CreateSimple: TaskCreateSimple;
@@ -112,6 +106,7 @@ export interface Config {
       ThrowError: TaskThrowError;
       ReturnError: TaskReturnError;
       ReturnCustomError: TaskReturnCustomError;
+      DoNothingTask: TaskDoNothingTask;
       inline: {
         input: unknown;
         output: unknown;
@@ -210,6 +205,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -266,8 +268,6 @@ export interface PayloadJob {
         completedAt: string;
         taskSlug:
           | 'inline'
-          | 'EverySecond'
-          | 'EverySecondMax2'
           | 'UpdatePost'
           | 'UpdatePostStep2'
           | 'CreateSimple'
@@ -277,7 +277,8 @@ export interface PayloadJob {
           | 'ExternalTask'
           | 'ThrowError'
           | 'ReturnError'
-          | 'ReturnCustomError';
+          | 'ReturnCustomError'
+          | 'DoNothingTask';
         taskID: string;
         input?:
           | {
@@ -336,8 +337,6 @@ export interface PayloadJob {
   taskSlug?:
     | (
         | 'inline'
-        | 'EverySecond'
-        | 'EverySecondMax2'
         | 'UpdatePost'
         | 'UpdatePostStep2'
         | 'CreateSimple'
@@ -348,20 +347,12 @@ export interface PayloadJob {
         | 'ThrowError'
         | 'ReturnError'
         | 'ReturnCustomError'
+        | 'DoNothingTask'
       )
     | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
-  meta?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -465,6 +456,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -495,7 +493,6 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   queue?: T;
   waitUntil?: T;
   processing?: T;
-  meta?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -530,54 +527,6 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-jobs-stats".
- */
-export interface PayloadJobsStat {
-  id: string;
-  stats?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-jobs-stats_select".
- */
-export interface PayloadJobsStatsSelect<T extends boolean = true> {
-  stats?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskEverySecond".
- */
-export interface TaskEverySecond {
-  input: {
-    message: string;
-  };
-  output?: unknown;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskEverySecondMax2".
- */
-export interface TaskEverySecondMax2 {
-  input: {
-    message: string;
-  };
-  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -690,6 +639,16 @@ export interface TaskReturnError {
 export interface TaskReturnCustomError {
   input: {
     errorMessage: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskDoNothingTask".
+ */
+export interface TaskDoNothingTask {
+  input: {
+    message: string;
   };
   output?: unknown;
 }

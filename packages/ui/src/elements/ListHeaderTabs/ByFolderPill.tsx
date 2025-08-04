@@ -1,8 +1,7 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, ViewTypes } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 
 import { useConfig } from '../../providers/Config/index.js'
@@ -10,20 +9,20 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import './index.scss'
 
-const baseClass = 'list-folder-pills'
+const baseClass = 'list-pills'
 
-type ListFolderPillsProps = {
+type ByFolderPillProps = {
   readonly collectionConfig: ClientCollectionConfig
   readonly folderCollectionSlug: string
-  readonly viewType: 'folders' | 'list'
+  readonly viewType: ViewTypes
 }
 
-export function ListFolderPills({
+export function ByFolderPill({
   collectionConfig,
   folderCollectionSlug,
   viewType,
-}: ListFolderPillsProps) {
-  const { i18n, t } = useTranslation()
+}: ByFolderPillProps) {
+  const { t } = useTranslation()
   const { config } = useConfig()
 
   if (!folderCollectionSlug) {
@@ -41,7 +40,7 @@ export function ListFolderPills({
           .filter(Boolean)
           .join(' ')}
         disabled={viewType === 'folders'}
-        el={viewType === 'list' ? 'link' : 'div'}
+        el={viewType === 'list' || viewType === 'trash' ? 'link' : 'div'}
         to={formatAdminURL({
           adminRoute: config.routes.admin,
           path: `/collections/${collectionConfig.slug}/${folderCollectionSlug}`,
@@ -49,21 +48,6 @@ export function ListFolderPills({
         })}
       >
         {t('folder:byFolder')}
-      </Button>
-      <Button
-        buttonStyle="tab"
-        className={[`${baseClass}__button`, viewType === 'list' && `${baseClass}__button--active`]
-          .filter(Boolean)
-          .join(' ')}
-        disabled={viewType === 'list'}
-        el={viewType === 'folders' ? 'link' : 'div'}
-        to={formatAdminURL({
-          adminRoute: config.routes.admin,
-          path: `/collections/${collectionConfig.slug}`,
-          serverURL: config.serverURL,
-        })}
-      >
-        {t('general:all')} {getTranslation(collectionConfig?.labels?.plural, i18n)}
       </Button>
     </div>
   )
