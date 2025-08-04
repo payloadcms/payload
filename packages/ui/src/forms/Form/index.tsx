@@ -384,8 +384,12 @@ export const Form: React.FC<FormProps> = (props) => {
 
           if (redirect) {
             startRouteTransition(() => router.push(redirect))
-          } else if (!disableSuccessStatus) {
-            successToast(json.message || t('general:submissionSuccessful'))
+          } else {
+            // Refresh the router to invalidate the client-side cache of the current page.
+            router.refresh()
+            if (!disableSuccessStatus) {
+              successToast(json.message || t('general:submissionSuccessful'))
+            }
           }
         } else {
           setProcessing(false)
