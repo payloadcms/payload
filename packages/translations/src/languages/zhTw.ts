@@ -13,7 +13,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: '請先建立第一位使用者。',
     changePassword: '變更密碼',
     checkYourEmailForPasswordReset:
-      '如果這個電子郵件地址有對應的帳戶，您將會收到重設密碼的說明。請檢查垃圾郵件或廣告信匣以免錯過郵件。',
+      '如果這個電子郵件地址有對應的帳戶，您將會收到重設密碼的說明。請檢查垃圾郵件或垃圾郵件匣以免錯過郵件。',
     confirmGeneration: '確認產生',
     confirmPassword: '確認密碼',
     createFirstUser: '建立第一位使用者',
