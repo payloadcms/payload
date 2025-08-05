@@ -68,6 +68,9 @@ export type FieldPaths = {
   path: string
 }
 
+/**
+ * TODO: This should be renamed to `FieldComponentServerProps` or similar
+ */
 export type ServerComponentProps = {
   clientField: ClientFieldWithOptionalType
   clientFieldSchemaMap: ClientFieldSchemaMap

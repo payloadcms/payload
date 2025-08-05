@@ -11,6 +11,7 @@ import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/ind
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWithSearchQueries/index.js'
 import { AdminUploadControl } from './collections/AdminUploadControl/index.js'
+import { AnyImageTypeCollection } from './collections/AnyImageType/index.js'
 import { BulkUploadsCollection } from './collections/BulkUploads/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
 import { FileMimeType } from './collections/FileMimeType/index.js'
@@ -39,7 +40,9 @@ import {
   relationSlug,
   restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
+  skipSafeFetchHeaderFilterSlug,
   skipSafeFetchMediaSlug,
+  svgOnlySlug,
   threeDimensionalSlug,
   unstoredMediaSlug,
   versionSlug,
@@ -465,6 +468,15 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: skipSafeFetchHeaderFilterSlug,
+      fields: [],
+      upload: {
+        skipSafeFetch: true,
+        staticDir: path.resolve(dirname, './media'),
+        externalFileHeaderFilter: (headers) => headers, // Keep all headers including cookies
+      },
+    },
+    {
       slug: skipAllowListSafeFetchMediaSlug,
       fields: [],
       upload: {
@@ -702,6 +714,7 @@ export default buildConfigWithDefaults({
     },
     Uploads1,
     Uploads2,
+    AnyImageTypeCollection,
     AdminThumbnailFunction,
     AdminThumbnailWithSearchQueries,
     AdminThumbnailSize,
@@ -910,6 +923,14 @@ export default buildConfigWithDefaults({
     BulkUploadsCollection,
     SimpleRelationshipCollection,
     FileMimeType,
+    {
+      slug: svgOnlySlug,
+      fields: [],
+      upload: {
+        mimeTypes: ['image/svg+xml'],
+        staticDir: path.resolve(dirname, './svg-only'),
+      },
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')

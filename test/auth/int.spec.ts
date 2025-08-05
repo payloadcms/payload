@@ -262,6 +262,42 @@ describe('Auth', () => {
         expect(data.user.custom).toBe('Goodbye, world!')
       })
 
+      it('keeps apiKey encrypted in DB after refresh operation', async () => {
+        const apiKey = '987e6543-e21b-12d3-a456-426614174999'
+        const user = await payload.create({
+          collection: slug,
+          data: { email: 'user@example.com', password: 'Password123', apiKey, enableAPIKey: true },
+        })
+        const { token } = await payload.login({
+          collection: 'users',
+          data: { email: 'user@example.com', password: 'Password123' },
+        })
+        await restClient.POST('/users/refresh-token', {
+          headers: { Authorization: `JWT ${token}` },
+        })
+        const raw = await payload.db.findOne<any>({
+          collection: 'users',
+          req: { locale: 'en' } as any,
+          where: { id: { equals: user.id } },
+        })
+        expect(raw?.apiKey).not.toContain('-') // still ciphertext
+      })
+
+      it('returns a user with decrypted apiKey after refresh', async () => {
+        const { token } = await payload.login({
+          collection: 'users',
+          data: { email: 'user@example.com', password: 'Password123' },
+        })
+
+        const res = await restClient
+          .POST('/users/refresh-token', {
+            headers: { Authorization: `JWT ${token}` },
+          })
+          .then((r) => r.json())
+
+        expect(res.user.apiKey).toMatch(/[0-9a-f-]{36}/) // UUID string
+      })
+
       it('should allow a user to be created', async () => {
         const response = await restClient.POST(`/${slug}`, {
           body: JSON.stringify({
@@ -498,13 +534,21 @@ describe('Auth', () => {
       describe('Account Locking', () => {
         const userEmail = 'lock@me.com'
 
-        const tryLogin = async () => {
-          await restClient.POST(`/${slug}/login`, {
-            body: JSON.stringify({
-              email: userEmail,
-              password: 'bad',
-            }),
+        const tryLogin = async (success?: boolean) => {
+          const res = await restClient.POST(`/${slug}/login`, {
+            body: JSON.stringify(
+              success
+                ? {
+                    email: userEmail,
+                    password,
+                  }
+                : {
+                    email: userEmail,
+                    password: 'bad',
+                  },
+            ),
           })
+          return await res.json()
         }
 
         beforeAll(async () => {
@@ -530,10 +574,32 @@ describe('Auth', () => {
           })
         })
 
+        beforeEach(async () => {
+          await payload.db.updateOne({
+            collection: slug,
+            data: {
+              lockUntil: null,
+              loginAttempts: 0,
+            },
+            where: {
+              email: {
+                equals: userEmail,
+              },
+            },
+          })
+        })
+
+        const lockedMessage = 'This user is locked due to having too many failed login attempts.'
+        const incorrectMessage = 'The email or password provided is incorrect.'
+
         it('should lock the user after too many attempts', async () => {
-          await tryLogin()
-          await tryLogin()
-          await tryLogin() // Let it call multiple times, therefore the unlock condition has no bug.
+          const user1 = await tryLogin()
+          const user2 = await tryLogin()
+          const user3 = await tryLogin() // Let it call multiple times, therefore the unlock condition has no bug.
+
+          expect(user1.errors[0].message).toBe(incorrectMessage)
+          expect(user2.errors[0].message).toBe(incorrectMessage)
+          expect(user3.errors[0].message).toBe(lockedMessage)
 
           const userResult = await payload.find({
             collection: slug,
@@ -546,10 +612,98 @@ describe('Auth', () => {
             },
           })
 
-          const { lockUntil, loginAttempts } = userResult.docs[0]
+          const { lockUntil, loginAttempts } = userResult.docs[0]!
 
           expect(loginAttempts).toBe(2)
           expect(lockUntil).toBeDefined()
+
+          const successfulLogin = await tryLogin(true)
+          expect(successfulLogin.errors?.[0].message).toBe(
+            'This user is locked due to having too many failed login attempts.',
+          )
+        })
+
+        it('should lock the user after too many parallel attempts', async () => {
+          const tryLoginAttempts = 100
+          const users = await Promise.allSettled(
+            Array.from({ length: tryLoginAttempts }, () => tryLogin()),
+          )
+
+          expect(users).toHaveLength(tryLoginAttempts)
+
+          // Expect min. 8 locked message max. 2 incorrect messages.
+          const lockedMessages = users.filter(
+            (result) =>
+              result.status === 'fulfilled' && result.value?.errors?.[0]?.message === lockedMessage,
+          )
+          const incorrectMessages = users.filter(
+            (result) =>
+              result.status === 'fulfilled' &&
+              result.value?.errors?.[0]?.message === incorrectMessage,
+          )
+
+          const userResult = await payload.find({
+            collection: slug,
+            limit: 1,
+            showHiddenFields: true,
+            where: {
+              email: {
+                equals: userEmail,
+              },
+            },
+          })
+
+          const { lockUntil, loginAttempts } = userResult.docs[0]!
+
+          // loginAttempts does not have to be exactly the same amount of login attempts. If this ran sequentially, login attempts would stop
+          // incrementing after maxLoginAttempts is reached. Since this is run in parallel, it can increment more than maxLoginAttempts, but it is not
+          // expected to and can be less depending on the timing.
+          expect(loginAttempts).toBeGreaterThan(3)
+          expect(lockUntil).toBeDefined()
+
+          expect(incorrectMessages.length).toBeLessThanOrEqual(2)
+          expect(lockedMessages.length).toBeGreaterThanOrEqual(tryLoginAttempts - 2)
+
+          const successfulLogin = await tryLogin(true)
+
+          expect(successfulLogin.errors?.[0].message).toBe(
+            'This user is locked due to having too many failed login attempts.',
+          )
+        })
+
+        it('ensure that login session expires if max login attempts is reached within narrow time-frame', async () => {
+          const tryLoginAttempts = 5
+
+          // If there are 100 parallel login attempts, 99 incorrect and 1 correct one, we do not want the correct one to be able to consistently be able
+          // to login successfully.
+          const user = await tryLogin(true)
+          const firstMeResponse = await restClient.GET(`/${slug}/me`, {
+            headers: {
+              Authorization: `JWT ${user.token}`,
+            },
+          })
+
+          expect(firstMeResponse.status).toBe(200)
+
+          const firstMeData = await firstMeResponse.json()
+
+          expect(firstMeData.token).toBeDefined()
+          expect(firstMeData.user.email).toBeDefined()
+
+          await Promise.allSettled(Array.from({ length: tryLoginAttempts }, () => tryLogin()))
+
+          const secondMeResponse = await restClient.GET(`/${slug}/me`, {
+            headers: {
+              Authorization: `JWT ${user.token}`,
+            },
+          })
+
+          expect(secondMeResponse.status).toBe(200)
+
+          const secondMeData = await secondMeResponse.json()
+
+          expect(secondMeData.user).toBeNull()
+          expect(secondMeData.token).not.toBeDefined()
         })
 
         it('should unlock account once lockUntil period is over', async () => {

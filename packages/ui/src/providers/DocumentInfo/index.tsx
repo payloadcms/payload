@@ -113,6 +113,16 @@ const DocumentInfo: React.FC<
     'idle',
   )
 
+  const documentLockState = useRef<{
+    hasShownLockedModal: boolean
+    isLocked: boolean
+    user: ClientUser | number | string
+  } | null>({
+    hasShownLockedModal: false,
+    isLocked: false,
+    user: null,
+  })
+
   const updateUploadStatus = useCallback(
     (status: 'failed' | 'idle' | 'uploading') => {
       setUploadStatus(status)
@@ -344,6 +354,7 @@ const DocumentInfo: React.FC<
     docConfig,
     docPermissions,
     documentIsLocked,
+    documentLockState,
     getDocPermissions,
     getDocPreferences,
     hasPublishedDoc,

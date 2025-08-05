@@ -14,6 +14,10 @@ export type DocumentDrawerContextProps = {
     collectionConfig?: ClientCollectionConfig
     doc: TypeWithID
   }) => Promise<void> | void
+  readonly onRestore?: (args: {
+    collectionConfig?: ClientCollectionConfig
+    id: string
+  }) => Promise<void> | void
   readonly onSave?: (args: {
     collectionConfig?: ClientCollectionConfig
     doc: TypeWithID
@@ -22,7 +26,7 @@ export type DocumentDrawerContextProps = {
   }) => Promise<FormState | void> | void
 }
 
-export type DocumentDrawerContextType = DocumentDrawerContextProps
+export type DocumentDrawerContextType = {} & DocumentDrawerContextProps
 
 export const DocumentDrawerCallbacksContext = createContext({} as DocumentDrawerContextType)
 

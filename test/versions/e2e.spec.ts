@@ -42,9 +42,9 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
+import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
-import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   autosaveCollectionSlug,
@@ -1775,6 +1775,18 @@ describe('Versions', () => {
       await expect(upload.locator('.html-diff__diff-new .upload-diff__info')).toHaveText(
         String(uploadDocs?.docs?.[1]?.filename),
       )
+    })
+
+    test('does not render diff for fields with read access control false', async () => {
+      await navigateToDiffVersionView()
+
+      const hiddenField1 = page.locator(
+        '[data-field-path="blocks.2.textInUnnamedTab2InBlockAccessFalse"]',
+      )
+      await expect(hiddenField1).toBeHidden()
+
+      const hiddenField2 = page.locator('[data-field-path="textCannotRead"]')
+      await expect(hiddenField2).toBeHidden()
     })
   })
 
