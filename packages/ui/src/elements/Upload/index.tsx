@@ -189,8 +189,8 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       setValue(newFile)
       setShowUrlInput(false)
       setUploadControlFileUrl('')
-      setUploadControlFileName(null)
-      setUploadControlFile(null)
+      setUploadControlFileName(null!)
+      setUploadControlFile(null!)
 
       if (typeof onChange === 'function') {
         onChange(newFile)
@@ -223,21 +223,21 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   const handleFileSelection = useCallback(
     (files: FileList) => {
       const fileToUpload = files?.[0]
-      handleFileChange(fileToUpload)
+      handleFileChange(fileToUpload!)
     },
     [handleFileChange],
   )
 
   const handleFileRemoval = useCallback(() => {
     setRemovedFile(true)
-    handleFileChange(null)
+    handleFileChange(null!)
     setFileSrc('')
     setFileUrl('')
-    resetUploadEdits()
+    resetUploadEdits!()
     setShowUrlInput(false)
     setUploadControlFileUrl('')
-    setUploadControlFileName(null)
-    setUploadControlFile(null)
+    setUploadControlFileName(null!)
+    setUploadControlFile(null!)
   }, [
     handleFileChange,
     resetUploadEdits,
@@ -249,7 +249,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   const onEditsSave = useCallback(
     (args: UploadEdits) => {
       setModified(true)
-      updateUploadEdits(args)
+      updateUploadEdits!(args)
     },
     [setModified, updateUploadEdits],
   )
@@ -259,7 +259,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       return
     }
 
-    setUploadStatus('uploading')
+    setUploadStatus!('uploading')
     try {
       // Attempt client-side fetch
       const clientResponse = await fetch(fileUrl)
@@ -273,13 +273,13 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       const file = new File([blob], fileName, { type: blob.type })
 
       handleFileChange(file)
-      setUploadStatus('idle')
+      setUploadStatus!('idle')
       return // Exit if client-side fetch succeeds
     } catch (_clientError) {
       if (!useServerSideFetch) {
         // If server-side fetch is not enabled, show client-side error
         toast.error('Failed to fetch the file.')
-        setUploadStatus('failed')
+        setUploadStatus!('failed')
         return
       }
     }
@@ -298,10 +298,10 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       const file = new File([blob], fileName, { type: blob.type })
 
       handleFileChange(file)
-      setUploadStatus('idle')
+      setUploadStatus!('idle')
     } catch (_serverError) {
       toast.error('The provided URL is not allowed.')
-      setUploadStatus('failed')
+      setUploadStatus!('failed')
     }
   }, [
     api,
@@ -338,7 +338,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   const canRemoveUpload =
     docPermissions?.update && 'delete' in docPermissions && docPermissions?.delete
 
-  const hasImageSizes = uploadConfig?.imageSizes?.length > 0
+  const hasImageSizes = (uploadConfig?.imageSizes?.length ?? 0) > 0
   const hasResizeOptions = Boolean(uploadConfig?.resizeOptions)
   // Explicity check if set to true, default is undefined
   const focalPointEnabled = uploadConfig?.focalPoint === true
@@ -426,8 +426,8 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                         onClick={() => {
                           setShowUrlInput(true)
                           setUploadControlFileUrl('')
-                          setUploadControlFile(null)
-                          setUploadControlFileName(null)
+                          setUploadControlFile(null!)
+                          setUploadControlFileName(null!)
                         }}
                         size="small"
                       >
@@ -478,8 +478,8 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 onClick={() => {
                   setShowUrlInput(false)
                   setUploadControlFileUrl('')
-                  setUploadControlFile(null)
-                  setUploadControlFileName(null)
+                  setUploadControlFile(null!)
+                  setUploadControlFileName(null!)
                 }}
                 round
                 tooltip={t('general:cancel')}
@@ -491,7 +491,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
               <div className={`${baseClass}__thumbnail-wrap`}>
                 <Thumbnail
                   collectionSlug={collectionSlug}
-                  fileSrc={isImage(value.type) ? fileSrc : null}
+                  fileSrc={isImage(value.type) ? fileSrc : null!}
                 />
               </div>
               <div className={`${baseClass}__file-adjustments`}>

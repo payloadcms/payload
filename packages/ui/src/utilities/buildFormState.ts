@@ -2,6 +2,7 @@ import type {
   BuildFormStateArgs,
   ClientConfig,
   ClientUser,
+  Data,
   ErrorResult,
   FormState,
   ServerFunction,
@@ -55,7 +56,7 @@ export const buildFormStateHandler: ServerFunction<
   try {
     // If we have a user slug, test it against the functions
     if (incomingUserSlug) {
-      const adminAccessFunction = req.payload.collections[incomingUserSlug].config.access?.admin
+      const adminAccessFunction = req.payload.collections[incomingUserSlug]!.config.access?.admin
 
       // Run the admin access function from the config if it exists
       if (adminAccessFunction) {
@@ -157,7 +158,7 @@ export const buildFormState = async (
   })
 
   const id = collectionSlug ? idFromArgs : undefined
-  const fieldOrEntityConfig = schemaMap.get(schemaPath)
+  const fieldOrEntityConfig = schemaMap.get(schemaPath!)
 
   if (!fieldOrEntityConfig) {
     throw new Error(`Could not find "${schemaPath}" in the fieldSchemaMap`)
@@ -181,7 +182,7 @@ export const buildFormState = async (
     data = reduceFieldsToValues(formState, true)
   }
 
-  let documentData = undefined
+  let documentData: Data | undefined = undefined
   if (documentFormState) {
     documentData = reduceFieldsToValues(documentFormState, true)
   }
@@ -221,10 +222,10 @@ export const buildFormState = async (
     preferences: docPreferences || { fields: {} },
     previousFormState: formState,
     readOnly,
-    renderAllFields,
+    renderAllFields: renderAllFields!,
     renderFieldFn: renderField,
     req,
-    schemaPath,
+    schemaPath: schemaPath!,
     select,
     selectMode,
     skipValidation,
