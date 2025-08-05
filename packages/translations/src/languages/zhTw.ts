@@ -86,7 +86,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     emailOrPasswordIncorrect: '電子郵件或密碼錯誤。',
     followingFieldsInvalid_one: '以下欄位無效：',
     followingFieldsInvalid_other: '以下欄位無效：',
-    incorrectCollection: '集合名稱錯誤',
+    incorrectCollection: '集合不正確',
     insufficientClipboardPermissions: '無法存取剪貼簿。請確認您的剪貼簿權限。',
     invalidClipboardData: '剪貼簿資料無效。',
     invalidFileType: '不支援的檔案類型',
@@ -207,7 +207,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     aboutToPermanentlyDeleteTrash:
       '您即將從垃圾桶中永久刪除 <0>{{count}}</0> 個 <1>{{label}}</1>。確定要繼續？',
     aboutToRestore: '您即將還原 {{label}} <1>{{title}}</1>。確定要繼續？',
-    aboutToRestoreAsDraft: '您即將以草稿形式還原 {{label}} <1>{{title}}</1>。確定要繼續？',
+    aboutToRestoreAsDraft: '您即將以草稿狀態還原 {{label}} <1>{{title}}</1>。確定要繼續？',
     aboutToRestoreAsDraftCount: '您即將還原 {{count}} 個 {{label}} 為草稿',
     aboutToRestoreCount: '您即將還原 {{count}} 個 {{label}}',
     aboutToTrash: '您即將將 {{label}} <1>{{title}}</1> 移至垃圾桶。確定要繼續？',
