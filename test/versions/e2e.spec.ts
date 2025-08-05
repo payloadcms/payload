@@ -1776,6 +1776,18 @@ describe('Versions', () => {
         String(uploadDocs?.docs?.[1]?.filename),
       )
     })
+
+    test('does not render diff for fields with read access control false', async () => {
+      await navigateToDiffVersionView()
+
+      const hiddenField1 = page.locator(
+        '[data-field-path="blocks.2.textInUnnamedTab2InBlockAccessFalse"]',
+      )
+      await expect(hiddenField1).toBeHidden()
+
+      const hiddenField2 = page.locator('[data-field-path="textCannotRead"]')
+      await expect(hiddenField2).toBeHidden()
+    })
   })
 
   describe('Scheduled publish', () => {
