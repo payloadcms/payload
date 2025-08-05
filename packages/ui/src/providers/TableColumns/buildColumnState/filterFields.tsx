@@ -31,7 +31,7 @@ export const filterFields = <T extends ClientField | Field>(incomingFields: T[])
     acc.push(formattedField)
 
     return acc
-  }, [])
+  }, [] as T[])
 
   return fields
 }

@@ -105,7 +105,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
 
   if (idFieldIndex > -1) {
     const idField = sortedFieldMap.splice(idFieldIndex, 1)[0]
-    sortedFieldMap.unshift(idField)
+    sortedFieldMap.unshift(idField!)
   }
 
   const useAsTitleFieldIndex = useAsTitle
@@ -114,7 +114,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
 
   if (useAsTitleFieldIndex > -1) {
     const useAsTitleField = sortedFieldMap.splice(useAsTitleFieldIndex, 1)[0]
-    sortedFieldMap.unshift(useAsTitleField)
+    sortedFieldMap.unshift(useAsTitleField!)
   }
 
   const sortTo = columns
@@ -125,7 +125,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     _sortedFieldMap = sortFieldMap<Field>(_sortedFieldMap, sortTo) // TODO: think of a way to avoid this additional sort
   }
 
-  const activeColumnsIndices = []
+  const activeColumnsIndices: number[] = []
 
   const sorted: Column[] = sortedFieldMap?.reduce((acc, clientField, colIndex) => {
     if (fieldIsHiddenOrDisabled(clientField) && !fieldIsID(clientField)) {
@@ -158,22 +158,22 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     const isActive = isColumnActive({
       accessor,
       activeColumnsIndices,
-      column: columnPref,
-      columns,
+      column: columnPref!,
+      columns: columns!,
     })
 
     if (isActive && !activeColumnsIndices.includes(colIndex)) {
       activeColumnsIndices.push(colIndex)
     }
 
-    let CustomLabel = undefined
+    let CustomLabel: React.ReactNode | undefined = undefined
 
     if (dataType === 'monomorphic') {
       const CustomLabelToRender =
         serverField &&
         'admin' in serverField &&
-        'components' in serverField.admin &&
-        'Label' in serverField.admin.components &&
+        'components' in serverField.admin! &&
+        'Label' in serverField.admin.components! &&
         serverField.admin.components.Label !== undefined // let it return `null`
           ? serverField.admin.components.Label
           : undefined
@@ -189,7 +189,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
       > = {
         clientField,
         collectionSlug,
-        field: serverField,
+        field: serverField!,
         i18n,
         payload,
       }
@@ -250,7 +250,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
               isLinkedColumn: enableLinkedCell && colIndex === activeColumnsIndices[0],
               payload,
               rowIndex,
-              serverField,
+              serverField: serverField!,
               viewType,
             })
           })
@@ -260,7 +260,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     acc.push(column)
 
     return acc
-  }, [])
+  }, [] as Column[])
 
   if (beforeRows) {
     sorted.unshift(...beforeRows)
