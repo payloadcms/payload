@@ -125,21 +125,7 @@ export interface Post {
   id: string;
   title?: string | null;
   category?: (string | null) | Category;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  date?: string | null;
   tab1Field?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -295,7 +281,7 @@ export interface PayloadMigration {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
-  content?: T;
+  date?: T;
   tab1Field?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
-
 import { categoriesSlug } from '../Categories/index.js'
 
 export const postsSlug = 'posts'
@@ -25,11 +23,8 @@ export const PostsCollection: CollectionConfig = {
       relationTo: categoriesSlug,
     },
     {
-      name: 'content',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures],
-      }),
+      name: 'date',
+      type: 'date',
     },
     {
       type: 'tabs',
