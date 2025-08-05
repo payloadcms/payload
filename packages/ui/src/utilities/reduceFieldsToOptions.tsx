@@ -39,7 +39,7 @@ export const reduceFieldsToOptions = ({
 
       tabs.forEach((tab) => {
         if (typeof tab.label !== 'boolean') {
-          const localizedTabLabel = getTranslation(tab.label, i18n)
+          const localizedTabLabel = getTranslation(tab.label!, i18n)
 
           const labelWithPrefix = labelPrefix
             ? labelPrefix + ' > ' + localizedTabLabel
@@ -170,20 +170,23 @@ export const reduceFieldsToOptions = ({
       const operatorKeys = new Set()
 
       const fieldOperators =
-        'hasMany' in field && field.hasMany ? arrayOperators : fieldTypes[field.type].operators
+        'hasMany' in field && field.hasMany ? arrayOperators : fieldTypes[field.type]!.operators
 
-      const operators = fieldOperators.reduce((acc, operator) => {
-        if (!operatorKeys.has(operator.value)) {
-          operatorKeys.add(operator.value)
-          const operatorKey = `operators:${operator.label}` as ClientTranslationKeys
-          acc.push({
-            ...operator,
-            label: i18n.t(operatorKey),
-          })
-        }
+      const operators = fieldOperators.reduce(
+        (acc, operator) => {
+          if (!operatorKeys.has(operator.value)) {
+            operatorKeys.add(operator.value)
+            const operatorKey = `operators:${operator.label}` as ClientTranslationKeys
+            acc.push({
+              ...operator,
+              label: i18n.t(operatorKey),
+            })
+          }
 
-        return acc
-      }, [])
+          return acc
+        },
+        [] as Array<{ label: string; value: string }>,
+      )
 
       const localizedLabel = getTranslation(field.label || '', i18n)
 
@@ -202,6 +205,7 @@ export const reduceFieldsToOptions = ({
         value: fieldPath,
         ...fieldTypes[field.type],
         field,
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         operators,
       }
 
@@ -209,5 +213,5 @@ export const reduceFieldsToOptions = ({
       return reduced
     }
     return reduced
-  }, [])
+  }, [] as ReducedField[])
 }

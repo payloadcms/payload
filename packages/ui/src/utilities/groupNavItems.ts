@@ -45,7 +45,7 @@ export function groupNavItems(
       }
 
       if (permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read) {
-        const translatedGroup = getTranslation(entityToGroup.entity.admin.group, i18n)
+        const translatedGroup = getTranslation(entityToGroup.entity.admin.group!, i18n)
 
         const labelOrFunction =
           'labels' in entityToGroup.entity
@@ -97,7 +97,7 @@ export function groupNavItems(
         entities: [],
         label: i18n.t('general:globals'),
       },
-    ],
+    ] as NavGroupType[],
   )
 
   return result.filter((group) => group.entities.length > 0)

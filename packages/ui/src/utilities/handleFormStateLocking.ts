@@ -82,7 +82,7 @@ export const handleFormStateLocking = async ({
         // Should only update doc if the incoming / current user is also the owner of the locked doc
         if (updateLastEdited && req.user && lockOwnerID === req.user.id) {
           await req.payload.db.updateOne({
-            id: lockedDocument.docs[0].id,
+            id: lockedDocument.docs[0]!.id,
             collection: 'payload-locked-documents',
             data: {},
             returning: false,
@@ -133,8 +133,8 @@ export const handleFormStateLocking = async ({
               : undefined,
             globalSlug: globalSlug ? globalSlug : undefined,
             user: {
-              relationTo: req.user.collection,
-              value: req.user.id,
+              relationTo: req.user!.collection,
+              value: req.user!.id,
             },
           },
           returning: false,
@@ -143,11 +143,11 @@ export const handleFormStateLocking = async ({
         result = {
           isLocked: true,
           lastEditedAt: new Date().toISOString(),
-          user: req.user,
+          user: req.user!,
         }
       }
     }
   }
 
-  return result
+  return result!
 }
