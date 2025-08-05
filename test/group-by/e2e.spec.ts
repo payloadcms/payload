@@ -245,7 +245,27 @@ test.describe('Group By', () => {
     ).toBeVisible()
   })
 
-  test('should group by checkbox fields', async () => {
+  test('should group by date fields even when their values are null', async () => {
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'My Post',
+        date: null,
+      },
+    })
+
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Date', fieldPath: 'date' })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(1)
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by boolean values', async () => {
     await Promise.all([
       await payload.create({
         collection: postsSlug,

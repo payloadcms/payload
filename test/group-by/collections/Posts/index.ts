@@ -27,6 +27,10 @@ export const PostsCollection: CollectionConfig = {
       type: 'checkbox',
     },
     {
+      name: 'date',
+      type: 'date',
+    },
+    {
       type: 'tabs',
       tabs: [
         {

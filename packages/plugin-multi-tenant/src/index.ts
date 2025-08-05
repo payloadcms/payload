@@ -10,10 +10,8 @@ import { defaults } from './defaults.js'
 import { getTenantOptionsEndpoint } from './endpoints/getTenantOptionsEndpoint.js'
 import { tenantField } from './fields/tenantField/index.js'
 import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
+import { filterDocumentsByTenants } from './filters/filterDocumentsByTenants.js'
 import { addTenantCleanup } from './hooks/afterTenantDelete.js'
-import { filterDocumentsBySelectedTenant } from './list-filters/filterDocumentsBySelectedTenant.js'
-import { filterTenantsBySelectedTenant } from './list-filters/filterTenantsBySelectedTenant.js'
-import { filterUsersBySelectedTenant } from './list-filters/filterUsersBySelectedTenant.js'
 import { translations } from './translations/index.js'
 import { addCollectionAccess } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
@@ -148,7 +146,8 @@ export const multiTenantPlugin =
       adminUsersCollection.admin.baseListFilter = combineListFilters({
         baseListFilter: adminUsersCollection.admin?.baseListFilter,
         customFilter: (args) =>
-          filterUsersBySelectedTenant({
+          filterDocumentsByTenants({
+            filterFieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
             req: args.req,
             tenantsArrayFieldName,
             tenantsArrayTenantFieldName,
@@ -211,8 +210,11 @@ export const multiTenantPlugin =
           collection.admin.baseListFilter = combineListFilters({
             baseListFilter: collection.admin?.baseListFilter,
             customFilter: (args) =>
-              filterTenantsBySelectedTenant({
+              filterDocumentsByTenants({
+                filterFieldName: 'id',
                 req: args.req,
+                tenantsArrayFieldName,
+                tenantsArrayTenantFieldName,
                 tenantsCollectionSlug,
               }),
           })
@@ -306,9 +308,11 @@ export const multiTenantPlugin =
           collection.admin.baseListFilter = combineListFilters({
             baseListFilter: collection.admin?.baseListFilter,
             customFilter: (args) =>
-              filterDocumentsBySelectedTenant({
+              filterDocumentsByTenants({
+                filterFieldName: tenantFieldName,
                 req: args.req,
-                tenantFieldName,
+                tenantsArrayFieldName,
+                tenantsArrayTenantFieldName,
                 tenantsCollectionSlug,
               }),
           })

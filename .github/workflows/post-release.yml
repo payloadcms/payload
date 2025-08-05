@@ -17,6 +17,9 @@ env:
 
 jobs:
   post_release:
+    permissions:
+      issues: write
+      pull-requests: write
     runs-on: ubuntu-24.04
     if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
