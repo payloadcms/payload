@@ -105,7 +105,7 @@ export const renderTable = ({
   query?: ListQuery
   renderRowTypes?: boolean
   tableAppearance?: 'condensed' | 'default'
-  useAsTitle: CollectionConfig['admin']['useAsTitle']
+  useAsTitle: NonNullable<CollectionConfig['admin']>['useAsTitle']
   viewType?: ViewTypes
 }): {
   columnState: Column[]
@@ -124,10 +124,10 @@ export const renderTable = ({
     clientFields = []
     serverFields = []
     for (const collection of collections) {
-      const clientCollectionConfig = clientConfig.collections.find(
+      const clientCollectionConfig = clientConfig?.collections.find(
         (each) => each.slug === collection,
       )
-      for (const field of filterFields(clientCollectionConfig.fields)) {
+      for (const field of filterFields(clientCollectionConfig!.fields)) {
         if (fieldAffectsData(field)) {
           if (clientFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
             continue
@@ -137,7 +137,7 @@ export const renderTable = ({
         clientFields.push(field)
       }
 
-      const serverCollectionConfig = payload.collections[collection].config
+      const serverCollectionConfig = payload.collections[collection]!.config
       for (const field of filterFields(serverCollectionConfig.fields)) {
         if (fieldAffectsData(field)) {
           if (serverFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
@@ -166,7 +166,7 @@ export const renderTable = ({
         isPolymorphic ? clientFields : filterFields(clientFields),
         useAsTitle,
         isPolymorphic ? [] : clientCollectionConfig?.admin?.defaultColumns,
-      )
+      )!
 
   const sharedArgs: Pick<
     BuildColumnStateArgs,
@@ -202,7 +202,7 @@ export const renderTable = ({
   } else {
     columnState = buildColumnState({
       ...sharedArgs,
-      collectionSlug: clientCollectionConfig.slug,
+      collectionSlug: clientCollectionConfig!.slug,
       dataType: 'monomorphic',
       docs: data?.docs || [],
     })
@@ -225,8 +225,8 @@ export const renderTable = ({
         <Pill key={i} size="small">
           {getTranslation(
             collections
-              ? payload.collections[doc.relationTo].config.labels.singular
-              : clientCollectionConfig.labels.singular,
+              ? payload.collections[doc.relationTo]!.config.labels.singular
+              : clientCollectionConfig!.labels.singular,
             i18n,
           )}
         </Pill>
@@ -265,14 +265,14 @@ export const renderTable = ({
           <SelectionProvider docs={data?.docs || []} totalDocs={data?.totalDocs || 0}>
             <GroupByHeader
               collectionConfig={clientCollectionConfig}
-              groupByFieldPath={groupByFieldPath}
-              groupByValue={groupByValue}
-              heading={heading}
+              groupByFieldPath={groupByFieldPath!}
+              groupByValue={groupByValue!}
+              heading={heading!}
             />
             <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
             <GroupByPageControls
-              collectionConfig={clientCollectionConfig}
-              data={data}
+              collectionConfig={clientCollectionConfig!}
+              data={data!}
               groupByValue={groupByValue}
             />
           </SelectionProvider>
@@ -313,7 +313,7 @@ export const renderTable = ({
       <div className="table-wrap" key={key}>
         <OrderableTable
           appearance={tableAppearance}
-          collection={clientCollectionConfig}
+          collection={clientCollectionConfig!}
           columns={columnsToUse}
           data={data?.docs || []}
         />

@@ -30,7 +30,7 @@ export const schedulePublishHandler = async ({
     throw new Error('Unauthorized')
   }
 
-  const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
+  const adminAccessFunction = payload.collections[incomingUserSlug]!.config.access?.admin
 
   // Run the admin access function from the config if it exists
   if (adminAccessFunction) {

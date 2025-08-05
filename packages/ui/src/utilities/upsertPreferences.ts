@@ -88,8 +88,8 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
       data: {
         key,
         user: {
-          collection: req.user.collection,
-          value: req.user.id,
+          collection: req.user!.collection,
+          value: req.user!.id,
         },
         value: incomingValue,
       },
@@ -101,12 +101,12 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
     let mergedPrefs: T
 
     if (typeof customMerge === 'function') {
-      mergedPrefs = customMerge(existingPrefs.value, incomingValue, defaultMerge)
+      mergedPrefs = customMerge(existingPrefs.value!, incomingValue, defaultMerge)
     } else {
       // Strings are valid JSON, i.e. `locale` saved as a string to the locale preferences
       mergedPrefs =
         typeof incomingValue === 'object'
-          ? defaultMerge<T>(existingPrefs.value, incomingValue)
+          ? defaultMerge<T>(existingPrefs.value!, incomingValue)
           : incomingValue
     }
 
@@ -118,8 +118,8 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
           data: {
             key,
             user: {
-              collection: req.user.collection,
-              value: req.user.id,
+              collection: req.user!.collection,
+              value: req.user!.id,
             },
             value: mergedPrefs,
           },
@@ -131,5 +131,5 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
     }
   }
 
-  return newPrefs
+  return newPrefs!
 }
