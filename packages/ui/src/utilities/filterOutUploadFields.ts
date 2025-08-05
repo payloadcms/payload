@@ -16,5 +16,7 @@ export const filterOutUploadFields = (fields: FieldWithPathClient[]): FieldWithP
     'sizes',
   ]
 
-  return fields.filter((field) => !baseUploadFieldNames.includes('name' in field && field.name))
+  return fields.filter(
+    (field) => !baseUploadFieldNames.includes(('name' in field && field.name) as string),
+  )
 }
