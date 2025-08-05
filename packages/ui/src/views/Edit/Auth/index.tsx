@@ -55,17 +55,17 @@ export const Auth: React.FC<Props> = (props) => {
   let showPasswordFields = true
   let showUnlock = true
   const hasPasswordFieldOverride =
-    typeof docPermissions.fields === 'object' && 'password' in docPermissions.fields
+    typeof docPermissions!.fields === 'object' && 'password' in docPermissions!.fields
   const hasLoginFieldOverride =
-    typeof docPermissions.fields === 'object' &&
-    ('username' in docPermissions.fields || 'email' in docPermissions.fields)
+    typeof docPermissions!.fields === 'object' &&
+    ('username' in docPermissions!.fields || 'email' in docPermissions!.fields)
 
   if (hasPasswordFieldOverride) {
     const { permissions: passwordPermissions } = getFieldPermissions({
       field: { name: 'password', type: 'text' },
       operation,
       parentName: '',
-      permissions: docPermissions?.fields,
+      permissions: docPermissions!.fields,
     })
 
     if (operation === 'create') {
@@ -87,14 +87,14 @@ export const Auth: React.FC<Props> = (props) => {
       field: { name: 'email', type: 'text' },
       operation: 'read',
       parentName: '',
-      permissions: docPermissions?.fields,
+      permissions: docPermissions!.fields,
     })
 
     const { operation: usernamePermission } = getFieldPermissions({
       field: { name: 'username', type: 'text' },
       operation: 'read',
       parentName: '',
-      permissions: docPermissions?.fields,
+      permissions: docPermissions!.fields,
     })
 
     if (hasEmailAndUsernameFields) {
@@ -203,7 +203,7 @@ export const Auth: React.FC<Props> = (props) => {
             loginWithUsername={loginWithUsername}
             operation={operation}
             permissions={docPermissions?.fields}
-            readOnly={readOnly || isTrashed}
+            readOnly={readOnly || isTrashed!}
             t={t}
           />
           {(changingPassword || requirePassword) && (!disableLocalStrategy || !enableFields) && (

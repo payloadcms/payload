@@ -54,13 +54,13 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   const { config } = useConfig()
   const { t } = useTranslation()
   const { closeModal, openModal } = useModal()
-  const items = getSelectedItems()
+  const items = getSelectedItems?.() || []
 
   const groupedSelections: GroupedSelections = items.reduce((acc, item) => {
     if (item) {
       if (acc[item.relationTo]) {
-        acc[item.relationTo].ids.push(extractID(item.value))
-        acc[item.relationTo].totalCount += 1
+        acc[item.relationTo]!.ids?.push(extractID(item.value))
+        acc[item.relationTo]!.totalCount += 1
       } else {
         acc[item.relationTo] = {
           ids: [extractID(item.value)],
@@ -87,7 +87,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   }
 
   const ids = singleNonFolderCollectionSelected
-    ? groupedSelections[Object.keys(groupedSelections)[0]]?.ids || []
+    ? groupedSelections[Object.keys(groupedSelections)[0]!]?.ids || []
     : []
 
   return (
@@ -103,15 +103,15 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
       SelectionActions={[
         !disableBulkEdit && ids.length && (
           <Fragment key="bulk-actions">
-            <EditMany_v4 collection={collectionConfig} count={count} ids={ids} selectAll={false} />
+            <EditMany_v4 collection={collectionConfig!} count={count} ids={ids} selectAll={false} />
             <PublishMany_v4
-              collection={collectionConfig}
+              collection={collectionConfig!}
               count={count}
               ids={ids}
               selectAll={false}
             />
             <UnpublishMany_v4
-              collection={collectionConfig}
+              collection={collectionConfig!}
               count={count}
               ids={ids}
               selectAll={false}
@@ -121,7 +121,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
         count === 1 && !singleNonFolderCollectionSelected && (
           <EditFolderAction
             folderCollectionSlug={folderCollectionSlug}
-            id={groupedSelections[folderCollectionSlug].ids[0]}
+            id={groupedSelections[folderCollectionSlug]!.ids![0]!}
             key="edit-folder-action"
           />
         ),
@@ -144,11 +144,11 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               folderFieldName={folderFieldName}
               fromFolderID={folderID}
               fromFolderName={currentFolder?.value?._folderOrDocumentTitle}
-              itemsToMove={getSelectedItems()}
+              itemsToMove={items}
               onConfirm={async ({ id, name }) => {
                 await moveToFolder({
-                  itemsToMove: getSelectedItems(),
-                  toFolderID: id,
+                  itemsToMove: items,
+                  toFolderID: id!,
                 })
 
                 if (id) {
