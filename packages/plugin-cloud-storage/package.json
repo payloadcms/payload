@@ -43,11 +43,7 @@
   },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "files": [
-    "dist",
-    "*.js",
-    "*.d.ts"
-  ],
+  "files": ["dist", "*.js", "*.d.ts"],
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc ",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
@@ -59,7 +55,6 @@
     "test": "echo \"No tests available.\""
   },
   "dependencies": {
-    "@payloadcms/ui": "workspace:*",
     "find-node-modules": "^2.1.3",
     "range-parser": "^1.2.1"
   },
@@ -67,9 +62,11 @@
     "@types/find-node-modules": "^2.1.2",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
+    "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*"
   },
   "peerDependencies": {
+    "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*",
     "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
     "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
