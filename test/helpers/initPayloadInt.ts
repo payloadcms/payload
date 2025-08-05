@@ -13,15 +13,16 @@ export async function initPayloadInt<TInitializePayload extends boolean | undefi
   dirname: string,
   testSuiteNameOverride?: string,
   initializePayload?: TInitializePayload,
+  configFile?: string,
 ): Promise<
   TInitializePayload extends false
     ? { config: SanitizedConfig }
     : { config: SanitizedConfig; payload: Payload; restClient: NextRESTClient }
 > {
   const testSuiteName = testSuiteNameOverride ?? path.basename(dirname)
-  await runInit(testSuiteName, false, true)
-  console.log('importing config', path.resolve(dirname, 'config.ts'))
-  const { default: config } = await import(path.resolve(dirname, 'config.ts'))
+  await runInit(testSuiteName, false, true, configFile)
+  console.log('importing config', path.resolve(dirname, configFile ?? 'config.ts'))
+  const { default: config } = await import(path.resolve(dirname, configFile ?? 'config.ts'))
 
   if (initializePayload === false) {
     return { config: await config } as any

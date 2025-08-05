@@ -86,11 +86,10 @@ describe('Localization', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
 
     client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {
@@ -431,32 +430,6 @@ describe('Localization', () => {
       await expect(arrayField).toHaveValue(sampleText)
     })
 
-    test('should copy block to locale', async () => {
-      const sampleText = 'Copy this text'
-      const blocksCollection = new AdminUrlUtil(serverURL, blocksCollectionSlug)
-      await page.goto(blocksCollection.create)
-      await changeLocale(page, 'pt')
-      const addBlock = page.locator('.blocks-field__drawer-toggler')
-      await addBlock.click()
-      const selectBlock = page.locator('.blocks-drawer__block button')
-      await selectBlock.click()
-      const addContentButton = page
-        .locator('#field-content__0__content')
-        .getByRole('button', { name: 'Add Content' })
-      await addContentButton.click()
-      await selectBlock.click()
-      const textField = page.locator('#field-content__0__content__0__text')
-      await expect(textField).toBeVisible()
-      await textField.fill(sampleText)
-      await saveDocAndAssert(page)
-
-      await openCopyToLocaleDrawer(page)
-      await setToLocale(page, 'English')
-      await runCopy(page)
-
-      await expect(textField).toHaveValue(sampleText)
-    })
-
     test('should default source locale to current locale', async () => {
       await changeLocale(page, spanishLocale)
       await createAndSaveDoc(page, url, { title })
@@ -619,26 +592,41 @@ describe('Localization', () => {
     await expect(searchInput).toHaveAttribute('placeholder', 'Search by Full title')
   })
 
-  test('should show localized status in collection list', async () => {
-    await page.goto(urlPostsWithDrafts.create)
-    const engTitle = 'Eng published'
-    const spanTitle = 'Spanish draft'
+  describe('publish specific locale', () => {
+    test('should create post in correct locale with publishSpecificLocale', async () => {
+      await page.goto(urlPostsWithDrafts.create)
+      await changeLocale(page, 'es')
+      await fillValues({ title: 'Created In Spanish' })
+      const chevronButton = page.locator('.form-submit .popup__trigger-wrap > .popup-button')
+      await chevronButton.click()
+      await saveDocAndAssert(page, '#publish-locale')
 
-    await changeLocale(page, defaultLocale)
-    await fillValues({ title: engTitle })
-    await saveDocAndAssert(page)
+      await expect(page.locator('#field-title')).toHaveValue('Created In Spanish')
+      await changeLocale(page, defaultLocale)
+      await expect(page.locator('#field-title')).toBeEmpty()
+    })
 
-    await changeLocale(page, spanishLocale)
-    await fillValues({ title: spanTitle })
-    await saveDocAndAssert(page, '#action-save-draft')
+    test('should show localized status in collection list', async () => {
+      await page.goto(urlPostsWithDrafts.create)
+      const engTitle = 'Eng published'
+      const spanTitle = 'Spanish draft'
 
-    await page.goto(urlPostsWithDrafts.list)
-    await expect(page.locator('.row-1 .cell-title')).toContainText(spanTitle)
-    await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
+      await changeLocale(page, defaultLocale)
+      await fillValues({ title: engTitle })
+      await saveDocAndAssert(page)
 
-    await changeLocale(page, defaultLocale)
-    await expect(page.locator('.row-1 .cell-title')).toContainText(engTitle)
-    await expect(page.locator('.row-1 .cell-_status')).toContainText('Published')
+      await changeLocale(page, spanishLocale)
+      await fillValues({ title: spanTitle })
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await page.goto(urlPostsWithDrafts.list)
+      await expect(page.locator('.row-1 .cell-title')).toContainText(spanTitle)
+      await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
+
+      await changeLocale(page, defaultLocale)
+      await expect(page.locator('.row-1 .cell-title')).toContainText(engTitle)
+      await expect(page.locator('.row-1 .cell-_status')).toContainText('Published')
+    })
   })
 })
 

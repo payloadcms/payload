@@ -53,6 +53,7 @@ export type AdminViewServerPropsOnly = {
   readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
+  readonly redirectAfterRestore?: boolean
 } & ServerProps
 
 export type AdminViewServerProps = AdminViewClientProps & AdminViewServerPropsOnly
@@ -92,6 +93,7 @@ export type ViewTypes =
   | 'folders'
   | 'list'
   | 'reset'
+  | 'trash'
   | 'verify'
   | 'version'
 

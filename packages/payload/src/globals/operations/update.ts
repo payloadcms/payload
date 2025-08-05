@@ -283,6 +283,7 @@ export const updateOperation = async <
         draft: shouldSaveDraft,
         global: globalConfig,
         locale,
+        operation: 'update',
         payload,
         publishSpecificLocale,
         req,

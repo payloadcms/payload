@@ -11,17 +11,18 @@ import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import { devUser } from '../credentials.js'
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
+import { navigateToDoc, navigateToTrashedDoc } from '../helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from '../helpers/e2e/preferences.js'
+import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
-import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   ensureDeviceIsCentered,
   ensureDeviceIsLeftAligned,
   goToCollectionLivePreview,
   goToGlobalLivePreview,
+  goToTrashedLivePreview,
   selectLivePreviewBreakpoint,
   selectLivePreviewZoom,
   toggleLivePreview,
@@ -31,6 +32,7 @@ import {
   desktopBreakpoint,
   mobileBreakpoint,
   pagesSlug,
+  postsSlug,
   renderedPageTitleID,
   ssrAutosavePagesSlug,
   ssrPagesSlug,
@@ -46,6 +48,7 @@ describe('Live Preview', () => {
   let serverURL: string
 
   let pagesURLUtil: AdminUrlUtil
+  let postsURLUtil: AdminUrlUtil
   let ssrPagesURLUtil: AdminUrlUtil
   let ssrAutosavePostsURLUtil: AdminUrlUtil
   let payload: PayloadTestSDK<Config>
@@ -56,11 +59,15 @@ describe('Live Preview', () => {
     ;({ serverURL, payload } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     pagesURLUtil = new AdminUrlUtil(serverURL, pagesSlug)
+    postsURLUtil = new AdminUrlUtil(serverURL, postsSlug)
     ssrPagesURLUtil = new AdminUrlUtil(serverURL, ssrPagesSlug)
     ssrAutosavePostsURLUtil = new AdminUrlUtil(serverURL, ssrAutosavePagesSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
+
+    initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
 
     user = await payload
       .login({
@@ -71,10 +78,6 @@ describe('Live Preview', () => {
         },
       })
       ?.then((res) => res.user) // TODO: this type is wrong
-
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {
@@ -359,6 +362,29 @@ describe('Live Preview', () => {
     })
 
     await saveDocAndAssert(page)
+  })
+
+  test('trash — has live-preview toggle', async () => {
+    await navigateToTrashedDoc(page, postsURLUtil)
+
+    const livePreviewToggler = page.locator('button#live-preview-toggler')
+
+    await expect(() => expect(livePreviewToggler).toBeTruthy()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
+  test('trash - renders iframe', async () => {
+    await goToTrashedLivePreview(page, postsURLUtil)
+    const iframe = page.locator('iframe.live-preview-iframe')
+    await expect(iframe).toBeVisible()
+  })
+
+  test('trash - fields should stay read-only', async () => {
+    await goToTrashedLivePreview(page, postsURLUtil)
+
+    const titleField = page.locator('#field-title')
+    await expect(titleField).toBeDisabled()
   })
 
   test('global — renders toggler', async () => {

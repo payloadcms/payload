@@ -296,11 +296,16 @@ query {
         sort: "createdAt"
         limit: 5
         where: { author: { equals: "66e3431a3f23e684075aaeb9" } }
+        """
+        Optionally pass count: true if you want to retrieve totalDocs
+        """
+        count: true -- s
       ) {
         docs {
           title
         }
         hasNextPage
+        totalDocs
       }
     }
   }

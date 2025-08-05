@@ -549,6 +549,14 @@ export interface BlockField {
           }
       )[]
     | null;
+  readOnly?:
+    | {
+        title?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'readOnlyBlock';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2218,6 +2226,17 @@ export interface BlockFieldsSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  readOnly?:
+    | T
+    | {
+        readOnlyBlock?:
+          | T
+          | {
+              title?: T;
               id?: T;
               blockName?: T;
             };

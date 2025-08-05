@@ -62,6 +62,7 @@ type RenderDocumentBaseArgs = {
   redirectAfterCreate?: boolean
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
+  redirectAfterRestore?: boolean
   searchParams?: Params
   /**
    * Properties specific to the versions view

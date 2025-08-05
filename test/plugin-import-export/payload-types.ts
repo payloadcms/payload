@@ -242,6 +242,7 @@ export interface Page {
           }
       )[]
     | null;
+  textFieldInCollapsible?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -579,6 +580,7 @@ export interface PagesSelect<T extends boolean = true> {
   excerpt?: T;
   hasOnePolymorphic?: T;
   hasManyPolymorphic?: T;
+  textFieldInCollapsible?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

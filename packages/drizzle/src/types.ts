@@ -89,6 +89,7 @@ export type TransactionPg = PgTransaction<
 export type DrizzleTransaction = TransactionPg | TransactionSQLite
 
 export type CountDistinct = (args: {
+  column?: PgColumn<any> | SQLiteColumn<any>
   db: DrizzleTransaction | LibSQLDatabase | PostgresDB
   joins: BuildQueryJoinAliases
   tableName: string
@@ -160,10 +161,11 @@ export type CreateJSONQueryArgs = {
   column?: Column | string
   operator: string
   pathSegments: string[]
+  rawColumn?: SQL<unknown>
   table?: string
   treatAsArray?: string[]
   treatRootAsArray?: boolean
-  value: boolean | number | string
+  value: boolean | number | number[] | string | string[]
 }
 
 /**
