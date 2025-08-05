@@ -65,6 +65,7 @@ export function DefaultEditView({
     BeforeFields,
     collectionSlug,
     currentEditor,
+    data,
     disableActions,
     disableCreate,
     disableLeaveWithoutSaving,
@@ -86,7 +87,6 @@ export function DefaultEditView({
     redirectAfterDelete,
     redirectAfterDuplicate,
     redirectAfterRestore,
-    savedDocumentData,
     setCurrentEditor,
     setDocumentIsLocked,
     unlockDocument,
@@ -549,7 +549,7 @@ export function DefaultEditView({
               SaveButton,
               SaveDraftButton,
             }}
-            data={savedDocumentData}
+            data={data}
             disableActions={disableActions || isFolderCollection || isTrashed}
             disableCreate={disableCreate}
             EditMenuItems={EditMenuItems}
@@ -612,14 +612,14 @@ export function DefaultEditView({
                           className={`${baseClass}__auth`}
                           collectionSlug={collectionConfig.slug}
                           disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
-                          email={savedDocumentData?.email}
+                          email={data?.email}
                           loginWithUsername={auth?.loginWithUsername}
                           operation={operation}
                           readOnly={!hasSavePermission}
                           requirePassword={!id}
                           setValidateBeforeSubmit={setValidateBeforeSubmit}
                           useAPIKey={auth.useAPIKey}
-                          username={savedDocumentData?.username}
+                          username={data?.username}
                           verify={auth.verify}
                         />
                       )}
