@@ -18,7 +18,7 @@
     }
 
     &--force-sidebar-wrap,
-    &:has(.document-fields__sidebar-wrap .render-fields:empty) {
+    &:has(.document-fields__sidebar-wrap .document-fields__sidebar-fields > .render-fields:empty) {
       --sidebar-gutter-h-left: var(--gutter-h);
       --sidebar-gutter-h-right: var(--gutter-h);
       --main-gutter-h-left: var(--gutter-h);
@@ -30,7 +30,9 @@
       --main-border: 1px solid var(--theme-elevation-100);
       --main-field-margin: calc(var(--base) * -2);
 
-      &:has(.document-fields__sidebar-wrap .render-fields:empty) {
+      &:has(
+          .document-fields__sidebar-wrap .document-fields__sidebar-fields > .render-fields:empty
+        ) {
         --main-width: 100%;
         --main-border: none;
         --main-field-margin: initial;
@@ -81,7 +83,7 @@
     }
 
     &__sidebar-wrap {
-      &:has(.render-fields:empty) {
+      &:has(.document-fields__sidebar-fields > .render-fields:empty) {
         --sidebar-wrap-width: 0;
         --sidebar-wrap-min-width: 0;
         --sidebar-wrap-position: initial;

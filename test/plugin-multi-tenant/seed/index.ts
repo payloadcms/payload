@@ -26,6 +26,14 @@ export const seed: Config['onInit'] = async (payload) => {
       domain: 'anchorbar.com',
     },
   })
+  const publicTenant = await payload.create({
+    collection: tenantsSlug,
+    data: {
+      name: 'Public Tenant',
+      domain: 'public.com',
+      isPublic: true,
+    },
+  })
 
   // Create blue dog menu items
   await payload.create({
@@ -70,6 +78,22 @@ export const seed: Config['onInit'] = async (payload) => {
     data: {
       name: 'Pulled Pork Nachos',
       tenant: steelCatTenant.id,
+    },
+  })
+
+  // Public tenant menu items
+  await payload.create({
+    collection: menuItemsSlug,
+    data: {
+      name: 'Free Pizza',
+      tenant: publicTenant.id,
+    },
+  })
+  await payload.create({
+    collection: menuItemsSlug,
+    data: {
+      name: 'Free Dogs',
+      tenant: publicTenant.id,
     },
   })
 

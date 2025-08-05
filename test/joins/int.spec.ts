@@ -969,6 +969,37 @@ describe('Joins Field', () => {
       expect(unlimited.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
     })
 
+    it('should return totalDocs with count: true', async () => {
+      const queryWithLimit = `query {
+    Categories(where: {
+            name: { equals: "paginate example" }
+          }) {
+          docs {
+            relatedPosts(
+              sort: "createdAt",
+              limit: 4,
+              count: true
+            ) {
+              docs {
+                title
+              }
+              hasNextPage
+              totalDocs
+            }
+          }
+        }
+      }`
+      const pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs).toHaveLength(4)
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[0].title).toStrictEqual(
+        'test 0',
+      )
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(true)
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.totalDocs).toStrictEqual(15)
+    })
+
     it('should have simple paginate with page for joins', async () => {
       let queryWithLimit = `query {
     Categories(where: {
