@@ -3,13 +3,7 @@ import type { ReactSelectOption } from '@payloadcms/ui'
 import type { ViewTypes } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import {
-  ConfirmationModal,
-  SelectInput,
-  Translation,
-  useModal,
-  useTranslation,
-} from '@payloadcms/ui'
+import { ConfirmationModal, SelectInput, useModal, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import type {
@@ -20,7 +14,6 @@ import type {
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
 import './index.scss'
 
-const confirmSwitchTenantSlug = 'confirm-switch-tenant'
 const confirmLeaveWithoutSavingSlug = 'confirm-leave-without-saving'
 
 export const TenantSelector = ({ label, viewType }: { label: string; viewType?: ViewTypes }) => {
@@ -33,20 +26,6 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
   const [tenantSelection, setTenantSelection] = React.useState<
     ReactSelectOption | ReactSelectOption[]
   >()
-
-  const selectedValue = React.useMemo(() => {
-    if (selectedTenantID) {
-      return options.find((option) => option.value === selectedTenantID)
-    }
-    return undefined
-  }, [options, selectedTenantID])
-
-  const newSelectedValue = React.useMemo(() => {
-    if (tenantSelection && 'value' in tenantSelection) {
-      return options.find((option) => option.value === tenantSelection.value)
-    }
-    return undefined
-  }, [options, tenantSelection])
 
   const switchTenant = React.useCallback(
     (option: ReactSelectOption | ReactSelectOption[] | undefined) => {
@@ -66,19 +45,13 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
         return
       }
 
-      if (entityType !== 'document') {
-        if (entityType === 'global' && modified) {
-          // If the entityType is 'global' and there are unsaved changes, prompt for confirmation
-          setTenantSelection(option)
-          openModal(confirmLeaveWithoutSavingSlug)
-        } else {
-          // If the entityType is not 'document', switch tenant without confirmation
-          switchTenant(option)
-        }
-      } else {
-        // non-unique documents should always prompt for confirmation
+      if (entityType === 'global' && modified) {
+        // If the entityType is 'global' and there are unsaved changes, prompt for confirmation
         setTenantSelection(option)
-        openModal(confirmSwitchTenantSlug)
+        openModal(confirmLeaveWithoutSavingSlug)
+      } else {
+        // If the entityType is not 'document', switch tenant without confirmation
+        switchTenant(option)
       }
     },
     [selectedTenantID, entityType, modified, switchTenant, openModal],
@@ -98,33 +71,6 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
         options={options}
         path="setTenant"
         value={selectedTenantID as string | undefined}
-      />
-
-      <ConfirmationModal
-        body={
-          <Translation
-            elements={{
-              0: ({ children }) => {
-                return <b>{children}</b>
-              },
-            }}
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            i18nKey="plugin-multi-tenant:confirm-tenant-switch--body"
-            t={t}
-            variables={{
-              fromTenant: selectedValue?.label,
-              toTenant: newSelectedValue?.label,
-            }}
-          />
-        }
-        heading={t('plugin-multi-tenant:confirm-tenant-switch--heading', {
-          tenantLabel: getTranslation(label, i18n),
-        })}
-        modalSlug={confirmSwitchTenantSlug}
-        onConfirm={() => {
-          switchTenant(tenantSelection)
-        }}
       />
 
       <ConfirmationModal

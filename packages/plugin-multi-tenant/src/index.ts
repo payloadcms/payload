@@ -278,6 +278,8 @@ export const multiTenantPlugin =
           tenantEnabledCollectionSlugs: collectionSlugs,
           tenantEnabledGlobalSlugs: globalCollectionSlugs,
           tenantFieldName,
+          tenantsArrayFieldName,
+          tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
         })
 
@@ -291,6 +293,8 @@ export const multiTenantPlugin =
             ...(pluginConfig?.tenantField || {}),
             name: tenantFieldName,
             debug: pluginConfig.debug,
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
             tenantsCollectionSlug,
             unique: isGlobal,
           }),
