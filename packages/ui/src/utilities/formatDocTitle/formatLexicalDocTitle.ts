@@ -5,7 +5,7 @@ type SerializedLexicalEditor = {
 }
 
 export function isSerializedLexicalEditor(value: unknown): value is SerializedLexicalEditor {
-  return typeof value === 'object' && 'root' in value
+  return typeof value === 'object' && 'root' in value!
 }
 
 export function formatLexicalDocTitle(
