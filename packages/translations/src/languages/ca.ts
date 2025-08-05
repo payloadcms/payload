@@ -144,7 +144,7 @@ export const caTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Afegeix nou {{label}}',
     addRelationship: 'Afegeix relació',
     addUpload: 'Afegeix pujada',
-    block: 'bloc',
+    block: 'Bloc',
     blocks: 'blocs',
     blockType: 'Tipus de bloc',
     chooseBetweenCustomTextOrDocument:
@@ -326,7 +326,7 @@ export const caTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Agrupa per {{label}}',
     import: 'Importar',
     isEditing: 'esta editant',
-    item: 'element',
+    item: 'Element',
     items: 'articles',
     language: 'Idioma',
     lastModified: 'Última modificació',

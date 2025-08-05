@@ -328,7 +328,7 @@ export const enTranslations = {
     groupByLabel: 'Group by {{label}}',
     import: 'Import',
     isEditing: 'is editing',
-    item: 'item',
+    item: 'Item',
     items: 'items',
     language: 'Language',
     lastModified: 'Last Modified',
