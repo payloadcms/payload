@@ -38,7 +38,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   for (let i = 0; i < result.docs.length; i++) {
     const id = result.docs[i].parent
-    console.log(result.docs[i])
     const localeStatus = result.docs[i].localeStatus || {}
     if (locale && localeStatus[locale]) {
       result.docs[i].status = localeStatus[locale]
