@@ -688,7 +688,7 @@ export type AuthCollection = {
 }
 
 export type TypeWithID = {
-  deletedAt?: string
+  deletedAt?: null | string
   docId?: any
   id: number | string
 }
@@ -696,7 +696,7 @@ export type TypeWithID = {
 export type TypeWithTimestamps = {
   [key: string]: unknown
   createdAt: string
-  deletedAt?: string
+  deletedAt?: null | string
   id: number | string
   updatedAt: string
 }
