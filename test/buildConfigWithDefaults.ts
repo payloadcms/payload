@@ -1,5 +1,6 @@
 import type { Config, SanitizedConfig } from 'payload'
 
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import {
   AlignFeature,
   BlockquoteFeature,
@@ -30,6 +31,7 @@ import { de } from 'payload/i18n/de'
 import { en } from 'payload/i18n/en'
 import { es } from 'payload/i18n/es'
 import sharp from 'sharp'
+import { file } from 'tempy'
 
 import { databaseAdapter } from './databaseAdapter.js'
 import { reInitEndpoint } from './helpers/reInitEndpoint.js'
@@ -39,6 +41,7 @@ import { testEmailAdapter } from './testEmailAdapter.js'
 // process.env.POSTGRES_URL = 'postgres://postgres:postgres@127.0.0.1:5432/payloadtests'
 // process.env.PAYLOAD_DATABASE = 'postgres'
 // process.env.PAYLOAD_DATABASE = 'sqlite'
+process.env.DATABASE_URI = 'file:./.db'
 
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
@@ -47,7 +50,12 @@ export async function buildConfigWithDefaults(
   },
 ): Promise<SanitizedConfig> {
   const config: Config = {
-    db: databaseAdapter,
+    // db: databaseAdapter,
+    db: sqliteAdapter({
+      client: {
+        url: process.env.DATABASE_URI || '',
+      },
+    }),
     editor: lexicalEditor({
       features: [
         ParagraphFeature(),

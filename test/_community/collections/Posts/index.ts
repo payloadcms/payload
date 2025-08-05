@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { defaultColors, lexicalEditor, TextStateFeature } from '@payloadcms/richtext-lexical'
 
 export const postsSlug = 'posts'
 
@@ -18,7 +18,15 @@ export const PostsCollection: CollectionConfig = {
       name: 'content',
       type: 'richText',
       editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures],
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          TextStateFeature({
+            state: {
+              color: { ...defaultColors.text },
+              backgroundColor: { ...defaultColors.background },
+            },
+          }),
+        ],
       }),
     },
   ],
