@@ -87,6 +87,7 @@ export interface Config {
     'localized-sort': LocalizedSort;
     'blocks-same-name': BlocksSameName;
     'localized-within-localized': LocalizedWithinLocalized;
+    'array-with-fallback-fields': ArrayWithFallbackField;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -113,6 +114,7 @@ export interface Config {
     'localized-sort': LocalizedSortSelect<false> | LocalizedSortSelect<true>;
     'blocks-same-name': BlocksSameNameSelect<false> | BlocksSameNameSelect<true>;
     'localized-within-localized': LocalizedWithinLocalizedSelect<false> | LocalizedWithinLocalizedSelect<true>;
+    'array-with-fallback-fields': ArrayWithFallbackFieldsSelect<false> | ArrayWithFallbackFieldsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -388,7 +390,7 @@ export interface ArrayField {
   id: string;
   items?:
     | {
-        text: string;
+        text?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -710,6 +712,25 @@ export interface LocalizedWithinLocalized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-with-fallback-fields".
+ */
+export interface ArrayWithFallbackField {
+  id: string;
+  items: {
+    text?: string | null;
+    id?: string | null;
+  }[];
+  itemsReadOnly?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -794,6 +815,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'localized-within-localized';
         value: string | LocalizedWithinLocalized;
+      } | null)
+    | ({
+        relationTo: 'array-with-fallback-fields';
+        value: string | ArrayWithFallbackField;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1358,6 +1383,26 @@ export interface LocalizedWithinLocalizedSelect<T extends boolean = true> {
     | T
     | {
         shouldNotBeLocalized?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-with-fallback-fields_select".
+ */
+export interface ArrayWithFallbackFieldsSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  itemsReadOnly?:
+    | T
+    | {
+        text?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;

@@ -10,7 +10,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
-import { removeExpiredSessions } from '../removeExpiredSessions.js'
+import { removeExpiredSessions } from '../sessions.js'
 
 export type Result = {
   exp: number

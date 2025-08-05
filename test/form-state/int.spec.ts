@@ -309,6 +309,7 @@ describe('Form State', () => {
   it('should merge array rows without losing rows added to local state', () => {
     const currentState: FormState = {
       array: {
+        errorPaths: [],
         rows: [
           {
             id: '1',
@@ -358,6 +359,7 @@ describe('Form State', () => {
     // Row 2 should still exist
     expect(newState).toStrictEqual({
       array: {
+        errorPaths: [],
         passesCondition: true,
         valid: true,
         rows: [
