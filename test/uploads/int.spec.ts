@@ -14,6 +14,7 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   allowListMediaSlug,
+  anyImagesSlug,
   enlargeSlug,
   focalNoSizesSlug,
   focalOnlySlug,
@@ -384,6 +385,38 @@ describe('Collections - Uploads', () => {
         })
 
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+      })
+
+      it('should create documents when passing file', async () => {
+        const expectedPath = path.join(dirname, './with-any-image-type')
+
+        const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
+        const fileBuffer = fs.readFileSync(svgFilePath)
+        const doc = await payload.create({
+          collection: anyImagesSlug as CollectionSlug,
+          data: {},
+          file: {
+            data: fileBuffer,
+            mimetype: 'image/svg+xml',
+            name: 'svgWithXml.svg',
+            size: fileBuffer.length,
+          },
+        })
+
+        expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+      })
+
+      it('should upload svg files', async () => {
+        const expectedPath = path.join(dirname, './with-any-image-type')
+
+        const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
+        const doc = await payload.create({
+          collection: anyImagesSlug as CollectionSlug,
+          data: {},
+          filePath: svgFilePath,
+        })
+        expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+        expect(doc.mimeType).toEqual('image/svg+xml')
       })
     })
 
