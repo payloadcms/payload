@@ -11,6 +11,8 @@ export const draftCollectionSlug = 'draft-posts'
 export const draftWithValidateCollectionSlug = 'draft-with-validate-posts'
 export const draftWithMaxCollectionSlug = 'draft-with-max-posts'
 
+export const draftWithChangeHookCollectionSlug = 'draft-posts-with-change-hook'
+
 export const postCollectionSlug = 'posts'
 
 export const diffCollectionSlug = 'diff'
@@ -29,6 +31,7 @@ export const textCollectionSlug = 'text'
 export const collectionSlugs = [
   autosaveCollectionSlug,
   draftCollectionSlug,
+  draftWithChangeHookCollectionSlug,
   postCollectionSlug,
   diffCollectionSlug,
   mediaCollectionSlug,
