@@ -125,6 +125,7 @@ export interface Post {
   id: string;
   title?: string | null;
   category?: (string | null) | Category;
+  checkbox?: boolean | null;
   date?: string | null;
   tab1Field?: string | null;
   updatedAt: string;
@@ -281,6 +282,7 @@ export interface PayloadMigration {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  checkbox?: T;
   date?: T;
   tab1Field?: T;
   updatedAt?: T;

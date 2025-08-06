@@ -163,6 +163,16 @@ export const handleGroupBy = async ({
         })
       }
 
+      if (groupByField.type === 'checkbox') {
+        if (valueOrRelationshipID === true) {
+          heading = req.i18n.t('general:true')
+        }
+
+        if (valueOrRelationshipID === false) {
+          heading = req.i18n.t('general:false')
+        }
+      }
+
       if (groupData.docs && groupData.docs.length > 0) {
         const { columnState: newColumnState, Table: NewTable } = renderTable({
           clientCollectionConfig,

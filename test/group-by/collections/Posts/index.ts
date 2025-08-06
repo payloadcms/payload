@@ -23,6 +23,10 @@ export const PostsCollection: CollectionConfig = {
       relationTo: categoriesSlug,
     },
     {
+      name: 'checkbox',
+      type: 'checkbox',
+    },
+    {
       name: 'date',
       type: 'date',
     },
