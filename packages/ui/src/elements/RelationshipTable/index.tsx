@@ -144,6 +144,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           }))
         : undefined
 
+      const renderRowTypes =
+        typeof field.admin.disableRowTypes === 'boolean'
+          ? !field.admin.disableRowTypes
+          : Array.isArray(relationTo)
+
       const {
         data: newData,
         state: newColumnState,
@@ -159,7 +164,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             : `_${field.collection}_${field.name}_order`,
         parent,
         query: newQuery,
-        renderRowTypes: true,
+        renderRowTypes,
         tableAppearance: 'condensed',
       })
 
@@ -172,6 +177,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       field.defaultLimit,
       field.defaultSort,
       field.admin.defaultColumns,
+      field.admin.disableRowTypes,
       field.collection,
       field.name,
       field.orderable,
