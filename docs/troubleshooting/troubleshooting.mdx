@@ -6,9 +6,106 @@ desc: Troubleshooting Common Issues in Payload
 keywords: admin, components, custom, customize, documentation, Content Management System, cms, headless, javascript, node, react, nextjs, troubleshooting
 ---
 
-## Common Issues
+## Dependency mismatches
 
-### "Unauthorized, you must be logged in to make this request" when attempting to log in
+All `payload` and `@payloadcms/*` packages must be on exactly the same version and installed only once.
+
+When two copies—or two different versions—of any of these packages (or of `react` / `react-dom`) appear in your dependency graph, you can see puzzling runtime errors. The most frequent is a broken React context:
+
+```bash
+TypeError: Cannot destructure property 'config' of...
+```
+
+This happens because one package imports a hook (most commonly `useConfig`) from version A while the context provider comes from version B. The fix is always the same: make sure every payload-related and React package resolves to one identical version in one location.
+
+### Confirm whether duplicates exist
+
+**pnpm built-in inspection:**
+
+```bash
+pnpm why @payloadcms/ui
+```
+
+This prints the dependency tree and shows which versions are being installed. If you see more than one distinct version—or the same version listed under different paths—you have duplication.
+
+**Manual check (works with any package manager):**
+
+```bash
+find node_modules -name package.json \
+     -exec grep -H '"name": "@payloadcms/ui"' {} \;
+```
+
+Most of these hits are likely symlinks created by pnpm. Edit the matching package.json files (temporarily add a comment or change a description) to confirm whether they point to the same physical folder or to multiple copies.
+
+Perform the same two checks for react and react-dom; a second copy of React can cause identical symptoms.
+
+#### If no duplicates are found
+
+`@payloadcms/ui` intentionally contains two bundles of itself, so you may see dual paths even when everything is correct. Inside the Payload Admin UI you must import only:
+
+- `@payloadcms/ui`
+- `@payloadcms/ui/rsc`
+- `@payloadcms/ui/shared`
+
+Any other deep import such as `@payloadcms/ui/elements/Button` should **only** be used in your own frontend, outside of the Payload Admin Panel. Those deep entries are published un-bundled to help you tree-shake and ship a smaller client bundle if you only need a few components from `@payloadcms/ui`.
+
+### Fixing depedendency issues
+
+These steps assume `pnpm`, which the Payload team recommends and uses internally. The principles apply to other package managers like npm and yarn as well. Do note that yarn 1.x is not supported by Payload.
+
+**1. Pin every critical package to an exact version.**
+
+In package.json remove `^` or `~` from all versions of:
+
+- `payload`
+- `@payloadcms/*`
+- `react`
+- `react-dom`
+
+Prefixes allow your package manager to float to a newer minor/patch release, causing mismatches.
+
+**2. Delete node_modules/.**
+
+Old packages often linger even after you change versions or removed them from your package.json. Deleting node_modules ensures a clean slate.
+
+**3. Re-install dependencies.**
+
+```bash
+pnpm install
+```
+
+#### If the error persists
+
+**(pnpm only) Clean the global store**
+
+```bash
+pnpm store prune
+```
+
+**Delete the lockfile (pnpm-lock.yaml, package-lock.json, or yarn.lock)**
+
+Make sure you delete the lockfile **and** the node_modules folder at the same time, then run `pnpm install`. This forces a fresh, consistent resolution for all packages. It will also update all packages with dynamic versions to the latest version.
+
+While it's best practice to manage dependencies in such a way where the lockfile can easily be re-generated (often this is the easiest way to resolve dependency issues), this may break your project if you have not tested the latest versions of your dependencies.
+
+If you are using a version control system, make sure to commit your lockfile after this step.
+
+**Deduplicate anything that slipped through:**
+
+```bash
+pnpm dedupe
+```
+
+**Still stuck?**
+
+- Switch to `pnpm` if you are on npm. Its symlinked store helps reducing accidental duplication.
+- Inspect the lockfile directly for peer-dependency violations.
+- Check project-level .npmrc / .pnpmfile.cjs overrides.
+- Run [Syncpack](https://www.npmjs.com/package/syncpack) to enforce identical versions of every `@payloadcms/*`, `react`, and `react-dom` reference.
+
+Absolute last resort: add Webpack aliases so that all imports of a given package resolve to the same path (e.g. `resolve.alias['react'] = path.resolve('./node_modules/react')`). Keep this only until you can fix the underlying version skew.
+
+## "Unauthorized, you must be logged in to make this request" when attempting to log in
 
 This means that your auth cookie is not being set or accepted correctly upon logging in. To resolve check the following settings in your Payload Config:
 
@@ -23,57 +120,3 @@ To further investigate the issue:
 - Go to the login screen. Open your inspector. Go to the Network tab.
 - Log in and then find the login request that should appear in your network panel. Click the login request.
 - The login request should have a Set-Cookie header on the response, and the cookie should be getting set successfully. If it is not, most browsers generally have a little yellow ⚠️ symbol that you can hover over to see why the cookie was rejected.
-
-### Errors due to dependency management
-
-All `payload` and `@payloadcms/*` packages need to be on the same version and be installed only once. If you have mismatching versions or multiple copies of the same package installed, you may run into issues.
-
-The most common issues are React hooks no longer working, as one package may use a hook from one version of `payloadcms/ui`, while the provider of that hook is from another version of `@payloadcms/ui`. Most of the time, this results in the following error, as the `useConfig` hook is the most commonly used hook: `TypeError: Cannot destructure property 'config' of...`.
-
-In order to check if you have multiple copies of the same package installed, you can run the following command in your terminal:
-
-```bash
-pnpm why @payloadcms/ui
-```
-
-This will show you the dependency tree for the `@payloadcms/ui` package, and you can see if there are multiple versions installed. This command does not always show you whether you have multiple copies of the same package installed, so you may also want to check your `node_modules` directory manually:
-
-```bash
-find node_modules -name package.json -exec grep -H '"name": "@payloadcms/ui"' {} \;
-```
-
-As most of these results may be symlinks that reference the same package, you can modify the package.json to figure out if they are actually different versions. The same issue may also occur with `react` and `react-dom`, so you may want to check those as well.
-
-<Banner type="info">
-  Do note that `@payloadcms/ui` actually ships with 2 versions of `@payloadcms/ui` in the same package. Only the following imports can be used within the Payload Admin UI:
-
-- `@payloadcms/ui`
-- `@payloadcms/ui/rsc`
-- `@payloadcms/ui/shared`
-
-All the remaining exports, such as `@payloadcms/ui/elements/...` should **only** be used in your own frontend, outside of the Payload Admin Panel. These exports contain the unbundled version of `@payloadcms/ui` which can help reduce bundle size in your own frontend, if you only need a few components from `@payloadcms/ui`.
-
-</Banner>
-
-#### Fixing dependency issues
-
-If you are using mismatching or multiple versions of the same `payload` / `@payloadcms/*` / `react` / `react-dom` package, try the following steps:
-
-1. In your package.json, remove the `^` or `~` from the version of all `payload`, `@payloadcms/*`, `react` and `react-dom` packages. This will ensure that you are always using the exact same version. These prefixes often cause your package manager to install different versions of the same package, which can lead to issues. The payload team recommends not using these prefixes _at all_, as those are mostly useful for npm libraries.
-2. Delete your `node_modules` directory. This directory can be easily regenerated by your package manager. Often, when you delete old packages, your package manager won't actually remove them from the `node_modules` directory, which can lead to issues.
-3. Run your package manager's install command (e.g. `pnpm install`) to regenerate the `node_modules` directory
-
-If this issue still happens, do the following:
-
-1. (If using pnpm, run `pnpm store prune` to remove old packages from the store)
-2. Delete the lockfile (e.g. `package-lock.json` or `pnpm-lock.yaml`). This often fixes all dependency mismatch errors. It will also update all packages with dynamic versions to the latest version. While it's best practice to manage dependencies in such a way where the lockfile can easily be re-generated (often this is the easiest way to resolve dependency issues), this may break your project if you have not tested the latest versions of your dependencies. If you are using a version control system, make sure to commit your changes before
-3. Run your package manager's install command again (e.g. `pnpm install`).
-4. If you are still having issues, try running `pnpm dedupe` to remove duplicate packages from the dependency tree. This may help resolve issues with mismatched versions of the same package.
-
-If the issue still occurs and you're using a package manager other than pnpm, we suggest switching to pnpm. This is what the payload team uses internally, and its symlinking often helps with deduplicating packages.
-
-You may also need to manually inspect your lockfile and adjust versions of your packages to ensure peer dependencies are met. Sometimes, certain combinations of dependencies and their peer dependencies may cause pnpm to install multiple copies of the same package. Additionally, you may want to inspect your `.npmrc` (if present) and adjust your pnpm settings there.
-
-Another tool that may help deduplicating packages and fixing dependency issues is [Syncpack](https://www.npmjs.com/package/syncpack).
-
-As a last resort, you can try using webpack aliases to force certain packages to use a specific version.
