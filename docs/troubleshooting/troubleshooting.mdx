@@ -16,11 +16,15 @@ When two copies—or two different versions—of any of these packages (or of `r
 TypeError: Cannot destructure property 'config' of...
 ```
 
-This happens because one package imports a hook (most commonly `useConfig`) from version A while the context provider comes from version B. The fix is always the same: make sure every payload-related and React package resolves to one identical version in one location.
+This happens because one package imports a hook (most commonly `useConfig`) from _version A_ while the context provider comes from _version B_. The fix is always the same: make sure every Payload-related and React package resolves to the same module.
 
 ### Confirm whether duplicates exist
 
-**pnpm built-in inspection:**
+The first thing to do is to confirm whether duplicative dependencies do in fact exist.
+
+There are two ways to do this:
+
+1. Using pnpm's built-in inspection tool
 
 ```bash
 pnpm why @payloadcms/ui
@@ -28,7 +32,7 @@ pnpm why @payloadcms/ui
 
 This prints the dependency tree and shows which versions are being installed. If you see more than one distinct version—or the same version listed under different paths—you have duplication.
 
-**Manual check (works with any package manager):**
+2. Manual check (works with any package manager)
 
 ```bash
 find node_modules -name package.json \
@@ -53,7 +57,7 @@ Any other deep import such as `@payloadcms/ui/elements/Button` should **only** b
 
 These steps assume `pnpm`, which the Payload team recommends and uses internally. The principles apply to other package managers like npm and yarn as well. Do note that yarn 1.x is not supported by Payload.
 
-**1. Pin every critical package to an exact version.**
+1. Pin every critical package to an exact version
 
 In package.json remove `^` or `~` from all versions of:
 
@@ -64,11 +68,11 @@ In package.json remove `^` or `~` from all versions of:
 
 Prefixes allow your package manager to float to a newer minor/patch release, causing mismatches.
 
-**2. Delete node_modules/.**
+2. Delete node_modules
 
 Old packages often linger even after you change versions or removed them from your package.json. Deleting node_modules ensures a clean slate.
 
-**3. Re-install dependencies.**
+3. Re-install dependencies
 
 ```bash
 pnpm install
@@ -76,13 +80,15 @@ pnpm install
 
 #### If the error persists
 
-**(pnpm only) Clean the global store**
+1. Clean the global store (pnpm only)
 
 ```bash
 pnpm store prune
 ```
 
-**Delete the lockfile (pnpm-lock.yaml, package-lock.json, or yarn.lock)**
+2. Delete the lockfile
+
+Depending on your package manager, this could be `pnpm-lock.yaml`, `package-lock.json`, or `yarn.lock`.
 
 Make sure you delete the lockfile **and** the node_modules folder at the same time, then run `pnpm install`. This forces a fresh, consistent resolution for all packages. It will also update all packages with dynamic versions to the latest version.
 
@@ -90,7 +96,7 @@ While it's best practice to manage dependencies in such a way where the lockfile
 
 If you are using a version control system, make sure to commit your lockfile after this step.
 
-**Deduplicate anything that slipped through:**
+3. Deduplicate anything that slipped through
 
 ```bash
 pnpm dedupe
