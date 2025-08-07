@@ -1,8 +1,6 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { CollectionConfig, Config } from 'payload'
 
-import { deepMergeSimple } from 'payload'
-
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { MultiTenantPluginConfig } from './types.js'
 
@@ -180,8 +178,8 @@ export const multiTenantPlugin =
            * - filters results by selected tenant
            */
           collection.admin = collection.admin || {}
-          collection.admin.baseListFilter = combineListFilters({
-            baseListFilter: collection.admin.baseListFilter,
+          collection.admin.baseFilter = combineFilters({
+            baseFilter: collection.admin?.baseFilter ?? collection.admin?.baseListFilter,
             customFilter: (args) =>
               filterDocumentsByTenants({
                 filterFieldName: tenantFieldName,
