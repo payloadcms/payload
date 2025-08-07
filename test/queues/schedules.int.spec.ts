@@ -69,7 +69,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
 
   it('can auto-schedule through local API and autorun jobs', async () => {
     // Do not call payload.jobs.queue() - the `EverySecond` task should be scheduled here
-    await payload.jobs.handleSchedules()
+    await payload.jobs.handleSchedules({ queue: 'autorunSecond' })
 
     // Do not call payload.jobs.run{silent: true})
 
@@ -88,9 +88,50 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
   })
 
+  it('can auto-schedule through local API and autorun jobs when passing allQueues', async () => {
+    // Do not call payload.jobs.queue() - the `EverySecond` task should be scheduled here
+    await payload.jobs.handleSchedules({ queue: 'autorunSecond', allQueues: true })
+
+    // Do not call payload.jobs.run{silent: true})
+
+    await waitUntilAutorunIsDone({
+      payload,
+      queue: 'autorunSecond',
+      onlyScheduled: true,
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
+  })
+
+  it('should not auto-schedule through local API and autorun jobs when not passing queue and schedule is not set on the default queue', async () => {
+    // Do not call payload.jobs.queue() - the `EverySecond` task should be scheduled here
+    await payload.jobs.handleSchedules()
+
+    // Do not call payload.jobs.run{silent: true})
+
+    await waitUntilAutorunIsDone({
+      payload,
+      queue: 'autorunSecond',
+      onlyScheduled: true,
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(0)
+  })
+
   it('can auto-schedule through handleSchedules REST API and autorun jobs', async () => {
     // Do not call payload.jobs.queue() - the `EverySecond` task should be scheduled here
-    await restClient.GET('/payload-jobs/handle-schedules', {
+    await restClient.GET('/payload-jobs/handle-schedules?queue=autorunSecond', {
       headers: {
         Authorization: `JWT ${token}`,
       },
@@ -115,7 +156,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
 
   it('can auto-schedule through run REST API and autorun jobs', async () => {
     // Do not call payload.jobs.queue() - the `EverySecond` task should be scheduled here
-    await restClient.GET('/payload-jobs/run?silent=true', {
+    await restClient.GET('/payload-jobs/run?silent=true&allQueues=true', {
       headers: {
         Authorization: `JWT ${token}`,
       },
@@ -161,7 +202,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
   it('ensure scheduler does not schedule more jobs than needed if executed sequentially', async () => {
     await withoutAutoRun(async () => {
       for (let i = 0; i < 3; i++) {
-        await payload.jobs.handleSchedules()
+        await payload.jobs.handleSchedules({ allQueues: true })
       }
     })
 
@@ -192,7 +233,7 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
         })
       }
       for (let i = 0; i < 3; i++) {
-        await payload.jobs.handleSchedules()
+        await payload.jobs.handleSchedules({ allQueues: true })
       }
     })
 
@@ -271,8 +312,8 @@ describe('Queues - scheduling, without automatic scheduling handling', () => {
     for (let i = 0; i < 3; i++) {
       await withoutAutoRun(async () => {
         // Call it twice to test that it only schedules one
-        await payload.jobs.handleSchedules()
-        await payload.jobs.handleSchedules()
+        await payload.jobs.handleSchedules({ allQueues: true })
+        await payload.jobs.handleSchedules({ allQueues: true })
       })
       // Advance time to satisfy the waitUntil of newly scheduled jobs
       timeTravel(20)
