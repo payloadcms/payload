@@ -40,7 +40,6 @@ export const multiTenantPlugin =
       pluginConfig?.tenantsArrayField?.arrayFieldName || defaults.tenantsArrayFieldName
     const tenantsArrayTenantFieldName =
       pluginConfig?.tenantsArrayField?.arrayTenantFieldName || defaults.tenantsArrayTenantFieldName
-    const tenantSelectorLabel = pluginConfig.tenantSelectorLabel || defaults.tenantSelectorLabel
     const basePath = pluginConfig.basePath || defaults.basePath
 
     /**
@@ -67,37 +66,6 @@ export const multiTenantPlugin =
     }
     if (!incomingConfig.collections) {
       incomingConfig.collections = []
-    }
-
-    /**
-     * Add tenant selector localized labels
-     */
-    if (typeof tenantSelectorLabel === 'object') {
-      if (!incomingConfig.i18n) {
-        incomingConfig.i18n = {}
-      }
-      Object.entries(tenantSelectorLabel).forEach(([_locale, label]) => {
-        const locale = _locale as AcceptedLanguages
-        if (!incomingConfig.i18n) {
-          incomingConfig.i18n = {}
-        }
-        if (!incomingConfig.i18n.translations) {
-          incomingConfig.i18n.translations = {}
-        }
-        if (!(locale in incomingConfig.i18n.translations)) {
-          incomingConfig.i18n.translations[locale] = {}
-        }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        if (!('multiTenant' in incomingConfig.i18n.translations[locale])) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          incomingConfig.i18n.translations[locale].multiTenant = {}
-        }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        incomingConfig.i18n.translations[locale].multiTenant.selectorLabel = label
-      })
     }
 
     /**
@@ -458,7 +426,7 @@ export const multiTenantPlugin =
      */
     incomingConfig.admin.components.beforeNavLinks.push({
       clientProps: {
-        label: tenantSelectorLabel,
+        label: pluginConfig.tenantSelectorLabel || undefined,
       },
       path: '@payloadcms/plugin-multi-tenant/client#TenantSelector',
     })
@@ -466,22 +434,30 @@ export const multiTenantPlugin =
     /**
      * Merge plugin translations
      */
-
-    const simplifiedTranslations = Object.entries(translations).reduce(
-      (acc, [key, value]) => {
-        acc[key] = value.translations
-        return acc
-      },
-      {} as Record<string, PluginDefaultTranslationsObject>,
-    )
-
-    incomingConfig.i18n = {
-      ...incomingConfig.i18n,
-      translations: deepMergeSimple(
-        simplifiedTranslations,
-        incomingConfig.i18n?.translations ?? {},
-      ),
+    if (!incomingConfig.i18n) {
+      incomingConfig.i18n = {}
     }
+    Object.entries(translations).forEach(([locale, pluginI18nObject]) => {
+      const typedLocale = locale as AcceptedLanguages
+      if (!incomingConfig.i18n!.translations) {
+        incomingConfig.i18n!.translations = {}
+      }
+      if (!(typedLocale in incomingConfig.i18n!.translations)) {
+        incomingConfig.i18n!.translations[typedLocale] = {}
+      }
+      if (!('plugin-multi-tenant' in incomingConfig.i18n!.translations[typedLocale]!)) {
+        ;(incomingConfig.i18n!.translations[typedLocale] as PluginDefaultTranslationsObject)[
+          'plugin-multi-tenant'
+        ] = {} as PluginDefaultTranslationsObject['plugin-multi-tenant']
+      }
+
+      ;(incomingConfig.i18n!.translations[typedLocale] as PluginDefaultTranslationsObject)[
+        'plugin-multi-tenant'
+      ] = {
+        ...pluginI18nObject.translations['plugin-multi-tenant'],
+        ...(pluginConfig.i18n?.translations?.[typedLocale] || {}),
+      }
+    })
 
     return incomingConfig
   }

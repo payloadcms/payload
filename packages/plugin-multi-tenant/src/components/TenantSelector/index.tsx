@@ -64,13 +64,10 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
   return (
     <div className="tenant-selector">
       <SelectInput
-        isClearable={
-          viewType &&
-          (['collection-folders', 'folders', 'list'] satisfies ViewTypes[] as ViewTypes[]).includes(
-            viewType,
-          )
+        isClearable={viewType === 'list'}
+        label={
+          label ? getTranslation(label, i18n) : t('plugin-multi-tenant:nav-tenantSelector-label')
         }
-        label={getTranslation(label, i18n)}
         name="setTenant"
         onChange={onChange}
         options={options}

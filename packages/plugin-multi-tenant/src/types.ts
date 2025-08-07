@@ -81,6 +81,33 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    */
   enabled?: boolean
   /**
+   * Localization for the plugin
+   */
+  i18n?: {
+    translations: {
+      [key in AcceptedLanguages]?: {
+        /**
+         * @default 'You are about to change ownership from <0>{{fromTenant}}</0> to <0>{{toTenant}}</0>'
+         */
+        'confirm-modal-tenant-switch--body'?: string
+        /**
+         * `tenantLabel` defaults to the value of the `nav-tenantSelector-label` translation
+         *
+         * @default 'Confirm {{tenantLabel}} change'
+         */
+        'confirm-modal-tenant-switch--heading'?: string
+        /**
+         * @default 'Assigned Tenant'
+         */
+        'field-assignedTenant-label'?: string
+        /**
+         * @default 'Tenant'
+         */
+        'nav-tenantSelector-label'?: string
+      }
+    }
+  }
+  /**
    * Field configuration for the field added to all tenant enabled collections
    */
   tenantField?: RootTenantFieldConfigOverrides
@@ -136,6 +163,8 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Customize tenant selector label
    *
    * Either a string or an object where the keys are i18n codes and the values are the string labels
+   *
+   * @deprecated Use `i18n.translations` instead.
    */
   tenantSelectorLabel?:
     | Partial<{
