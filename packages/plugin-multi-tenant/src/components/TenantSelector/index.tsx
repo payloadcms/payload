@@ -64,12 +64,24 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
   return (
     <div className="tenant-selector">
       <SelectInput
-        isClearable={viewType === 'list'}
+        isClearable={
+          viewType &&
+          (['collection-folders', 'folders', 'list'] satisfies ViewTypes[] as ViewTypes[]).includes(
+            viewType,
+          )
+        }
         label={getTranslation(label, i18n)}
         name="setTenant"
         onChange={onChange}
         options={options}
         path="setTenant"
+        readOnly={
+          entityType !== 'global' &&
+          viewType &&
+          !(
+            ['collection-folders', 'folders', 'list'] satisfies ViewTypes[] as ViewTypes[]
+          ).includes(viewType)
+        }
         value={selectedTenantID as string | undefined}
       />
 

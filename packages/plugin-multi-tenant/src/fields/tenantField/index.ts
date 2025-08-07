@@ -1,10 +1,9 @@
 import { type RelationshipField } from 'payload'
-import { APIError } from 'payload'
 
 import { defaults } from '../../defaults.js'
-import { filterDocumentsByTenants } from '../../filters/filterDocumentsByTenants.js'
 import { getCollectionIDType } from '../../utilities/getCollectionIDType.js'
 import { getTenantFromCookie } from '../../utilities/getTenantFromCookie.js'
+import { getUserTenantIDs } from '../../utilities/getUserTenantIDs.js'
 
 type Args = {
   access?: RelationshipField['access']
@@ -67,19 +66,19 @@ export const tenantField = ({
     return null
   },
   filterOptions: ({ req }) => {
-    const tenantFilterResult = filterDocumentsByTenants({
-      filterFieldName: 'id',
-      req,
+    const userAssignedTenants = getUserTenantIDs(req.user, {
       tenantsArrayFieldName,
       tenantsArrayTenantFieldName,
-      tenantsCollectionSlug,
     })
-
-    if (tenantFilterResult === null) {
-      return true
+    if (userAssignedTenants.length > 0) {
+      return {
+        id: {
+          in: userAssignedTenants,
+        },
+      }
     }
 
-    return tenantFilterResult
+    return true
   },
   hasMany: false,
   index: true,

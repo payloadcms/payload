@@ -1,12 +1,4 @@
-import type {
-  Access,
-  AccessArgs,
-  AccessResult,
-  AllOperations,
-  CollectionConfig,
-  TypedUser,
-  Where,
-} from 'payload'
+import type { Access, AccessArgs, AccessResult, CollectionConfig, TypedUser, Where } from 'payload'
 
 import type { MultiTenantPluginConfig, UserWithTenantsField } from '../types.js'
 
@@ -18,7 +10,6 @@ type Args<ConfigType> = {
   adminUsersSlug: string
   collection: CollectionConfig
   fieldName: string
-  operation: AllOperations
   tenantsArrayFieldName?: string
   tenantsArrayTenantFieldName?: string
   userHasAccessToAllTenants: Required<

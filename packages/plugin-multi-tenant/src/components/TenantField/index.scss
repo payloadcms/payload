@@ -10,13 +10,6 @@
 .document-fields__main {
   .render-fields {
     .tenantField {
-      background-image: repeating-linear-gradient(
-        -110deg,
-        var(--theme-elevation-50) 0px,
-        var(--theme-elevation-50) 2px,
-        transparent 1px,
-        transparent 5px
-      );
       width: calc(100% + var(--tenant-gutter-h-right) + var(--tenant-gutter-h-left));
       margin-left: calc(-1 * var(--tenant-gutter-h-left));
       border-bottom: 1px solid var(--theme-elevation-100);
@@ -31,11 +24,11 @@
       [dir='rtl'] & {
         margin-right: calc(-1 * var(--tenant-gutter-h-right));
         background-image: repeating-linear-gradient(
-          110deg,
+          -120deg,
           var(--theme-elevation-50) 0px,
           var(--theme-elevation-50) 1px,
           transparent 1px,
-          transparent 10px
+          transparent 5px
         );
       }
 

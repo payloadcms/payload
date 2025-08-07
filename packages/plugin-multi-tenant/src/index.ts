@@ -174,6 +174,70 @@ export const multiTenantPlugin =
     )
 
     /**
+     * The folders collection is added AFTER the plugin is initialized
+     * so if they added the folder slug to the plugin collections,
+     * we can assume that they have folders enabled
+     */
+    const foldersSlug = incomingConfig.folders
+      ? incomingConfig.folders.slug || 'payload-folders'
+      : 'payload-folders'
+
+    if (collectionSlugs.includes(foldersSlug)) {
+      incomingConfig.folders = incomingConfig.folders || {}
+      incomingConfig.folders.collectionOverrides = incomingConfig.folders.collectionOverrides || []
+      incomingConfig.folders.collectionOverrides.push(({ collection }) => {
+        /**
+         * Add tenant field to enabled collections
+         */
+        const folderTenantField = tenantField({
+          ...(pluginConfig?.tenantField || {}),
+          name: tenantFieldName,
+          debug: pluginConfig.debug,
+          tenantsArrayFieldName,
+          tenantsArrayTenantFieldName,
+          tenantsCollectionSlug,
+          unique: false,
+        })
+        collection.fields.unshift(folderTenantField)
+
+        if (pluginConfig.collections[foldersSlug]?.useBaseListFilter !== false) {
+          /**
+           * Add list filter to enabled collections
+           * - filters results by selected tenant
+           */
+          collection.admin = collection.admin || {}
+          collection.admin.baseListFilter = combineListFilters({
+            baseListFilter: collection.admin.baseListFilter,
+            customFilter: (args) =>
+              filterDocumentsByTenants({
+                filterFieldName: tenantFieldName,
+                req: args.req,
+                tenantsArrayFieldName,
+                tenantsArrayTenantFieldName,
+                tenantsCollectionSlug,
+              }),
+          })
+        }
+
+        if (pluginConfig.collections[foldersSlug]?.useTenantAccess !== false) {
+          /**
+           * Add access control constraint to tenant enabled folders collection
+           */
+          addCollectionAccess({
+            adminUsersSlug: adminUsersCollection.slug,
+            collection,
+            fieldName: tenantFieldName,
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
+            userHasAccessToAllTenants,
+          })
+        }
+
+        return collection
+      })
+    }
+
+    /**
      * Modify collections
      */
     incomingConfig.collections.forEach((collection) => {
