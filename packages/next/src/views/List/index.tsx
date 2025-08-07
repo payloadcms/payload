@@ -138,16 +138,14 @@ export const renderListView = async (
       throw new Error('not-found')
     }
 
-    let baseListFilter = undefined
-
-    if (typeof collectionConfig.admin?.baseListFilter === 'function') {
-      baseListFilter = await collectionConfig.admin.baseListFilter({
-        limit: query.limit,
-        page: query.page,
-        req,
-        sort: query.sort,
-      })
-    }
+    const baseFilterConstraint = await (
+      collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
+    )?.({
+      limit: query.limit,
+      page: query.page,
+      req,
+      sort: query.sort,
+    })
 
     let queryPreset: QueryPreset | undefined
     let queryPresetPermissions: SanitizedCollectionPermission | undefined
@@ -155,7 +153,7 @@ export const renderListView = async (
     let whereWithMergedSearch = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
-      where: combineWhereConstraints([query?.where, baseListFilter]),
+      where: combineWhereConstraints([query?.where, baseFilterConstraint]),
     })
 
     if (trash === true) {

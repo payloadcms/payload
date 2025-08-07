@@ -1168,6 +1168,7 @@ export type {
   AfterRefreshHook as CollectionAfterRefreshHook,
   AuthCollection,
   AuthOperationsFromCollectionSlug,
+  BaseFilter,
   BaseListFilter,
   BeforeChangeHook as CollectionBeforeChangeHook,
   BeforeDeleteHook as CollectionBeforeDeleteHook,

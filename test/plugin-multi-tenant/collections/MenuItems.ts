@@ -90,5 +90,9 @@ export const MenuItems: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    {
+      name: 'content',
+      type: 'richText',
+    },
   ],
 }
