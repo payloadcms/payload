@@ -44,7 +44,14 @@ export default buildConfigWithDefaults({
           isGlobal: true,
         },
       },
-      tenantSelectorLabel: { en: 'Site', es: 'Site in es' },
+      i18n: {
+        translations: {
+          en: {
+            'field-assignedTenant-label': 'Currently Assigned Site',
+            'nav-tenantSelector-label': 'Filter By Site',
+          },
+        },
+      },
     }),
   ],
   typescript: {

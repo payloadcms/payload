@@ -92,7 +92,9 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
     <div className="tenant-selector">
       <SelectInput
         isClearable={viewType === 'list'}
-        label={getTranslation(label, i18n)}
+        label={
+          label ? getTranslation(label, i18n) : t('plugin-multi-tenant:nav-tenantSelector-label')
+        }
         name="setTenant"
         onChange={onChange}
         options={options}
@@ -110,7 +112,7 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
             }}
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-expect-error
-            i18nKey="plugin-multi-tenant:confirm-tenant-switch--body"
+            i18nKey="plugin-multi-tenant:confirm-modal-tenant-switch--body"
             t={t}
             variables={{
               fromTenant: selectedValue?.label,
@@ -118,8 +120,10 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
             }}
           />
         }
-        heading={t('plugin-multi-tenant:confirm-tenant-switch--heading', {
-          tenantLabel: getTranslation(label, i18n),
+        heading={t('plugin-multi-tenant:confirm-modal-tenant-switch--heading', {
+          tenantLabel: label
+            ? getTranslation(label, i18n)
+            : t('plugin-multi-tenant:nav-tenantSelector-label'),
         })}
         modalSlug={confirmSwitchTenantSlug}
         onConfirm={() => {
