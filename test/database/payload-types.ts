@@ -67,6 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    noTimeStamps: NoTimeStamp;
     categories: Category;
     simple: Simple;
     'categories-custom-id': CategoriesCustomId;
@@ -94,6 +95,7 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    noTimeStamps: NoTimeStampsSelect<false> | NoTimeStampsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     simple: SimpleSelect<false> | SimpleSelect<true>;
     'categories-custom-id': CategoriesCustomIdSelect<false> | CategoriesCustomIdSelect<true>;
@@ -162,6 +164,14 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "noTimeStamps".
+ */
+export interface NoTimeStamp {
+  id: string;
+  title?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -618,6 +628,10 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'noTimeStamps';
+        value: string | NoTimeStamp;
+      } | null)
+    | ({
         relationTo: 'categories';
         value: string | Category;
       } | null)
@@ -742,6 +756,13 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "noTimeStamps_select".
+ */
+export interface NoTimeStampsSelect<T extends boolean = true> {
+  title?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

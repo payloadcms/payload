@@ -42,6 +42,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   upsertTarget,
   where,
 }: Args): Promise<T> => {
+  if (operation === 'create' && !data.createdAt) {
+    data.createdAt = new Date().toISOString()
+  }
+
   let insertedRow: Record<string, unknown> = { id }
   if (id && shouldUseOptimizedUpsertRow({ data, fields })) {
     const { row } = transformForWrite({
