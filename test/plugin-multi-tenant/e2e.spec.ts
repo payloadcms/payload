@@ -311,6 +311,31 @@ test.describe('Multi Tenant', () => {
         confirmationModal.getByText('You are about to change ownership from Blue Dog to Steel Cat'),
       ).toBeVisible()
     })
+    test('should filter internal links in Lexical editor', async () => {
+      await loginClientSide({
+        page,
+        serverURL,
+        data: credentials.admin,
+      })
+      await selectTenant({
+        page,
+        tenant: 'Blue Dog',
+      })
+      await page.goto(menuItemsURL.create)
+      const editor = page.locator('[data-lexical-editor="true"]')
+      await editor.focus()
+      await page.keyboard.type('Hello World')
+      await page.keyboard.down('Shift')
+      for (let i = 0; i < 'World'.length; i++) {
+        await page.keyboard.press('ArrowLeft')
+      }
+      await page.keyboard.up('Shift')
+      await page.locator('.toolbar-popup__button-link').click()
+      await page.locator('.radio-input__styled-radio').last().click()
+      await page.locator('.drawer__content').locator('.rs__input').click()
+      await expect(page.getByText('Chorizo Con Queso')).toBeVisible()
+      await expect(page.getByText('Pretzel Bites')).toBeHidden()
+    })
   })
 
   test.describe('Globals', () => {
