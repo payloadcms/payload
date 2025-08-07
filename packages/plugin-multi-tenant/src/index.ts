@@ -183,6 +183,9 @@ export const multiTenantPlugin =
       : 'payload-folders'
 
     if (collectionSlugs.includes(foldersSlug)) {
+      const overrides = pluginConfig.collections[foldersSlug]?.tenantFieldOverrides
+        ? pluginConfig.collections[foldersSlug]?.tenantFieldOverrides
+        : pluginConfig.tenantField || {}
       incomingConfig.folders = incomingConfig.folders || {}
       incomingConfig.folders.collectionOverrides = incomingConfig.folders.collectionOverrides || []
       incomingConfig.folders.collectionOverrides.push(({ collection }) => {
@@ -193,6 +196,7 @@ export const multiTenantPlugin =
           ...(pluginConfig?.tenantField || {}),
           name: tenantFieldName,
           debug: pluginConfig.debug,
+          overrides,
           tenantsArrayFieldName,
           tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
@@ -347,6 +351,10 @@ export const multiTenantPlugin =
           tenantsCollectionSlug,
         })
 
+        const overrides = pluginConfig.collections[collection.slug]?.tenantFieldOverrides
+          ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
+          : pluginConfig.tenantField || {}
+
         /**
          * Add tenant field to enabled collections
          */
@@ -354,9 +362,9 @@ export const multiTenantPlugin =
           0,
           0,
           tenantField({
-            ...(pluginConfig?.tenantField || {}),
             name: tenantFieldName,
             debug: pluginConfig.debug,
+            overrides,
             tenantsArrayFieldName,
             tenantsArrayTenantFieldName,
             tenantsCollectionSlug,
