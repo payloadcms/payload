@@ -2,7 +2,7 @@ import type { forgotPasswordOperation } from '../../auth/operations/forgotPasswo
 import type { loginOperation } from '../../auth/operations/login.js'
 import type { refreshOperation } from '../../auth/operations/refresh.js'
 import type { resetPasswordOperation } from '../../auth/operations/resetPassword.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, restoreVersionOperation } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { SanitizedCollectionConfig, SelectFromCollectionSlug } from '../config/types.js'
 import type { countOperation } from './count.js'
@@ -36,6 +36,7 @@ export type AfterOperationMap<TOperationGeneric extends CollectionSlug> = {
   login: typeof loginOperation<TOperationGeneric>
   refresh: typeof refreshOperation
   resetPassword: typeof resetPasswordOperation<TOperationGeneric>
+  restoreVersion: typeof restoreVersionOperation
   update: typeof updateOperation<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
   updateByID: typeof updateByIDOperation<
     TOperationGeneric,
@@ -107,6 +108,11 @@ export type AfterOperationArg<TOperationGeneric extends CollectionSlug> = {
       args: Parameters<AfterOperationMap<TOperationGeneric>['resetPassword']>[0]
       operation: 'resetPassword'
       result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['resetPassword']>>
+    }
+  | {
+      args: Parameters<AfterOperationMap<TOperationGeneric>['restoreVersion']>[0]
+      operation: 'restoreVersion'
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['restoreVersion']>>
     }
   | {
       args: Parameters<AfterOperationMap<TOperationGeneric>['update']>[0]

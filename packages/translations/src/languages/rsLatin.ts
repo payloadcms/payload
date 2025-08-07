@@ -558,7 +558,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     currentPublishedVersion: 'Trenutna Objavljena Verzija',
     draft: 'Nacrt',
     draftSavedSuccessfully: 'Nacrt uspešno sačuvan.',
-    lastSavedAgo: 'Zadnji put sačuvano pre {{distance}',
+    lastSavedAgo: 'Zadnji put sačuvano pre {{distance}}',
     modifiedOnly: 'Samo izmenjen',
     moreVersions: 'Više verzija...',
     noFurtherVersionsFound: 'Nisu pronađene naredne verzije',

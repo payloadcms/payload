@@ -45,12 +45,10 @@ The following options are available:
 
 | Path              | Description                                                                                                                                           |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`url`** \*      | String, or function that returns a string, pointing to your front-end application. This value is used as the iframe `src`. [More details](#url).      |
+| **`url`**         | String, or function that returns a string, pointing to your front-end application. This value is used as the iframe `src`. [More details](#url).      |
 | **`breakpoints`** | Array of breakpoints to be used as “device sizes” in the preview window. Each item appears as an option in the toolbar. [More details](#breakpoints). |
 | **`collections`** | Array of collection slugs to enable Live Preview on.                                                                                                  |
 | **`globals`**     | Array of global slugs to enable Live Preview on.                                                                                                      |
-
-_\* An asterisk denotes that a property is required._
 
 ### URL
 
@@ -88,17 +86,16 @@ const config = buildConfig({
     // ...
     livePreview: {
       // highlight-start
-      url: ({
-        data,
-        collectionConfig,
-        locale
-      }) => `${data.tenant.url}${ // Multi-tenant top-level domain
-        collectionConfig.slug === 'posts' ? `/posts/${data.slug}` : `${data.slug !== 'home' : `/${data.slug}` : ''}`
-      }${locale ? `?locale=${locale?.code}` : ''}`, // Localization query param
+      url: ({ data, collectionConfig, locale }) =>
+        `${data.tenant.url}${
+          collectionConfig.slug === 'posts'
+            ? `/posts/${data.slug}`
+            : `${data.slug !== 'home' ? `/${data.slug}` : ''}`
+        }${locale ? `?locale=${locale?.code}` : ''}`, // Localization query param
       collections: ['pages'],
     },
     // highlight-end
-  }
+  },
 })
 ```
 

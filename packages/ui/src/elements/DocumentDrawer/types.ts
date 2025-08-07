@@ -1,4 +1,4 @@
-import type { Data, FormState } from 'payload'
+import type { Data, FormState, Operation } from 'payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
@@ -30,23 +30,44 @@ export type DocumentTogglerProps = {
   readonly collectionSlug: string
   readonly disabled?: boolean
   readonly drawerSlug?: string
-  readonly id?: string
   readonly onClick?: () => void
+  readonly operation: Operation
 } & Readonly<HTMLAttributes<HTMLButtonElement>>
 
+export type UseDocumentDrawerContext = {
+  closeDrawer: () => void
+  drawerDepth: number
+  drawerSlug: string
+  isDrawerOpen: boolean
+  openDrawer: () => void
+  toggleDrawer: () => void
+}
+
 export type UseDocumentDrawer = (args: {
+  /**
+   * The slug of the collection to which the document belongs.
+   */
   collectionSlug: string
+  /**
+   * The ID of the document to be edited.
+   * When provided, will be fetched and displayed in the drawer.
+   * If omitted, will render the "create new" view for the given collection.
+   */
   id?: number | string
   overrideEntityVisibility?: boolean
 }) => [
-  React.FC<Omit<DocumentDrawerProps, 'collectionSlug' | 'id'>>, // drawer
-  React.FC<Omit<DocumentTogglerProps, 'collectionSlug' | 'id'>>, // toggler
-  {
-    closeDrawer: () => void
-    drawerDepth: number
-    drawerSlug: string
-    isDrawerOpen: boolean
-    openDrawer: () => void
-    toggleDrawer: () => void
-  },
+  // drawer
+  React.FC<
+    {
+      children?: React.ReactNode
+    } & Omit<DocumentDrawerProps, 'collectionSlug' | 'operation'>
+  >,
+  // toggler
+  React.FC<
+    {
+      children?: React.ReactNode
+    } & Omit<DocumentTogglerProps, 'collectionSlug' | 'operation'>
+  >,
+  // context
+  UseDocumentDrawerContext,
 ]

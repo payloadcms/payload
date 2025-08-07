@@ -40,6 +40,14 @@ export const mergeServerFormState = ({
       ...incomingField,
     }
 
+    if (
+      currentState[path] &&
+      'errorPaths' in currentState[path] &&
+      !('errorPaths' in incomingField)
+    ) {
+      newState[path].errorPaths = []
+    }
+
     /**
      * Intelligently merge the rows array to ensure changes to local state are not lost while the request was pending
      * For example, the server response could come back with a row which has been deleted on the client

@@ -134,6 +134,7 @@ export interface Tenant {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  isPublic?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -274,6 +275,7 @@ export interface TenantsSelect<T extends boolean = true> {
   name?: T;
   domain?: T;
   users?: T;
+  isPublic?: T;
   updatedAt?: T;
   createdAt?: T;
 }
