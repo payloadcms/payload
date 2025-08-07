@@ -91,10 +91,18 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
          */
         'confirm-modal-tenant-switch--body'?: string
         /**
+         * `tenantLabel` defaults to the value of the `nav-tenantSelector-label` translation
+         *
          * @default 'Confirm {{tenantLabel}} change'
          */
         'confirm-modal-tenant-switch--heading'?: string
+        /**
+         * @default 'Assigned Tenant'
+         */
         'field-assignedTenant-label'?: string
+        /**
+         * @default 'Tenant'
+         */
         'nav-tenantSelector-label'?: string
       }
     }
