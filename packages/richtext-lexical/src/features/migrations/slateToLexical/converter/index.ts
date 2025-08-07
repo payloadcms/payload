@@ -124,7 +124,7 @@ export function convertTextNode(node: SlateNode): SerializedTextNode {
     format: convertNodeToFormat(node),
     mode: 'normal',
     style: '',
-    text: node.text ?? "",
+    text: node.text ?? '',
     version: 1,
   }
 }
