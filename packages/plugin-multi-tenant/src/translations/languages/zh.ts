@@ -2,9 +2,11 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const zhTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-tenant-switch--body': '您即将将所有权从<0>{{fromTenant}}</0>更改为<0>{{toTenant}}</0>',
-    'confirm-tenant-switch--heading': '确认更改{{tenantLabel}}',
-    'field-assignedTentant-label': '指定租户',
+    'confirm-modal-tenant-switch--body':
+      '您即将从<0>{{fromTenant}}</0>更改为<0>{{toTenant}}</0>的所有权',
+    'confirm-modal-tenant-switch--heading': '确认更改{{tenantLabel}}',
+    'field-assignedTenant-label': '指定租户',
+    'nav-tenantSelector-label': '租户',
   },
 }
 

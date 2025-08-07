@@ -175,7 +175,7 @@ export interface User {
  */
 export interface FoodItem {
   id: string;
-  tenant?: (string | null) | Tenant;
+  tenant: string | Tenant;
   name: string;
   content?: {
     root: {
@@ -201,7 +201,7 @@ export interface FoodItem {
  */
 export interface FoodMenu {
   id: string;
-  tenant?: (string | null) | Tenant;
+  tenant: string | Tenant;
   title: string;
   description?: string | null;
   menuItems?:
