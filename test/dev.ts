@@ -11,6 +11,7 @@ import { loadEnv } from 'payload/node'
 import { parse } from 'url'
 
 import { getNextRootDir } from './helpers/getNextRootDir.js'
+import startDatabases from './helpers/startDatabases.js'
 import startMemoryDB from './helpers/startMemoryDB.js'
 import { runInit } from './runInit.js'
 import { child } from './safelyRunScript.js'
@@ -78,6 +79,13 @@ if (shouldStartMemoryDB) {
 // This is needed to forward the environment variables to the next process that were created after loadEnv()
 // for example process.env.MONGODB_MEMORY_SERVER_URI otherwise app.prepare() will clear them
 nextEnvImport.updateInitialEnv(process.env)
+
+// Auto-start PostgreSQL + PostGIS container when using PostgreSQL (after updateInitialEnv)
+if (process.env.PAYLOAD_DATABASE === 'postgres') {
+  await startDatabases()
+  // Update env again with the new POSTGRES_URL
+  nextEnvImport.updateInitialEnv(process.env)
+}
 
 // Open the admin if the -o flag is passed
 if (args.o) {
