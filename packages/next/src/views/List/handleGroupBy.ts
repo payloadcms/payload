@@ -143,7 +143,7 @@ export const handleGroupBy = async ({
         },
       })
 
-      let heading = valueOrRelationshipID || req.i18n.t('general:noValue')
+      let heading = valueOrRelationshipID
 
       if (
         groupByField?.type === 'relationship' &&
@@ -155,12 +155,22 @@ export const handleGroupBy = async ({
           valueOrRelationshipID
       }
 
-      if (groupByField.type === 'date') {
+      if (groupByField.type === 'date' && valueOrRelationshipID) {
         heading = formatDate({
-          date: String(heading),
+          date: String(valueOrRelationshipID),
           i18n: req.i18n,
           pattern: clientConfig.admin.dateFormat,
         })
+      }
+
+      if (groupByField.type === 'checkbox') {
+        if (valueOrRelationshipID === true) {
+          heading = req.i18n.t('general:true')
+        }
+
+        if (valueOrRelationshipID === false) {
+          heading = req.i18n.t('general:false')
+        }
       }
 
       if (groupData.docs && groupData.docs.length > 0) {
@@ -174,7 +184,7 @@ export const handleGroupBy = async ({
           enableRowSelections,
           groupByFieldPath,
           groupByValue: valueOrRelationshipID,
-          heading,
+          heading: heading || req.i18n.t('general:noValue'),
           i18n: req.i18n,
           key: `table-${valueOrRelationshipID}`,
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,

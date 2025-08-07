@@ -1,24 +1,24 @@
-import type { BaseListFilter, Where } from 'payload'
+import type { BaseFilter, Where } from 'payload'
 
 type Args = {
-  baseListFilter?: BaseListFilter
-  customFilter: BaseListFilter
+  baseFilter?: BaseFilter
+  customFilter: BaseFilter
 }
 /**
- * Combines a base list filter with a tenant list filter
+ * Combines a base filter with a tenant list filter
  *
  * Combines where constraints inside of an AND operator
  */
-export const combineListFilters =
-  ({ baseListFilter, customFilter }: Args): BaseListFilter =>
+export const combineFilters =
+  ({ baseFilter, customFilter }: Args): BaseFilter =>
   async (args) => {
     const filterConstraints = []
 
-    if (typeof baseListFilter === 'function') {
-      const baseListFilterResult = await baseListFilter(args)
+    if (typeof baseFilter === 'function') {
+      const baseFilterResult = await baseFilter(args)
 
-      if (baseListFilterResult) {
-        filterConstraints.push(baseListFilterResult)
+      if (baseFilterResult) {
+        filterConstraints.push(baseFilterResult)
       }
     }
 
