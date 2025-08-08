@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Account } from '../../graphics/Account/index.js'
 import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Hamburger } from '../Hamburger/index.js'
 import { Link } from '../Link/index.js'
@@ -37,6 +38,8 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
     },
   } = useConfig()
 
+  const locale = useLocale()
+
   const { navOpen } = useNav()
 
   const customControlsRef = useRef<HTMLDivElement>(null)
@@ -60,6 +63,8 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
   }, [Actions])
 
   const ActionComponents = Actions ? Object.values(Actions) : []
+
+  const addLocaleToURL = localization && locale.code ? `?locale=${locale.code}` : ''
 
   return (
     <header className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}>
@@ -96,7 +101,7 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
             <Link
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
-              href={formatAdminURL({ adminRoute, path: accountRoute })}
+              href={formatAdminURL({ adminRoute, path: accountRoute }) + addLocaleToURL}
               prefetch={false}
               tabIndex={0}
             >
