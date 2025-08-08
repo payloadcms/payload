@@ -90,9 +90,9 @@ export const getFolderResultsComponentAndData = async ({
   for (const activeCollectionSlug of activeCollectionSlugs) {
     if (activeCollectionSlug === payload.config.folders.slug) {
       const folderCollectionConstraints = await buildFolderWhereConstraints({
-        collectionConfig: payload.collections[activeCollectionSlug].config,
+        collectionConfig: payload.collections[activeCollectionSlug]!.config,
         folderID,
-        localeCode: req?.locale,
+        localeCode: req?.locale as string | undefined,
         req,
         search: typeof req?.query?.search === 'string' ? req.query.search : undefined,
         sort,
@@ -141,16 +141,16 @@ export const getFolderResultsComponentAndData = async ({
       }
 
       const collectionConstraints = await buildFolderWhereConstraints({
-        collectionConfig: payload.collections[activeCollectionSlug].config,
+        collectionConfig: payload.collections[activeCollectionSlug]!.config,
         folderID,
-        localeCode: req?.locale,
+        localeCode: req?.locale as string | undefined,
         req,
         search: typeof req?.query?.search === 'string' ? req.query.search : undefined,
         sort,
       })
 
       if (collectionConstraints) {
-        documentWhere.or.push(collectionConstraints)
+        documentWhere.or?.push(collectionConstraints)
       }
     }
   }
@@ -164,7 +164,7 @@ export const getFolderResultsComponentAndData = async ({
     sort,
   })
 
-  let FolderResultsComponent = null
+  let FolderResultsComponent: null | React.ReactNode = null
 
   if (displayAs === 'grid') {
     FolderResultsComponent = (
@@ -192,7 +192,7 @@ export const getFolderResultsComponentAndData = async ({
   }
 
   return {
-    breadcrumbs: folderData.breadcrumbs,
+    breadcrumbs: folderData.breadcrumbs!,
     documents: folderData.documents,
     folderAssignedCollections: folderData.folderAssignedCollections,
     FolderResultsComponent,

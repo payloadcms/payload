@@ -31,7 +31,7 @@ export const reduceFieldsToValuesWithValidation = (
   Object.keys(fields).forEach((key) => {
     if (ignoreDisableFormData === true || !fields[key]?.disableFormData) {
       state.data[key] = fields[key]?.value
-      if (!fields[key].valid) {
+      if (!fields[key]!.valid) {
         state.valid = false
       }
     }
