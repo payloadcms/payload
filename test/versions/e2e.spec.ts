@@ -1287,7 +1287,8 @@ describe('Versions', () => {
     })
 
     test('- with autosave - should apply hooks to form state after autosave runs', async () => {
-      await page.goto(autosaveURL.create)
+      const url = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      await page.goto(url.create)
       const titleField = page.locator('#field-title')
       await titleField.fill('Initial')
       await waitForAutoSaveToRunAndComplete(page)

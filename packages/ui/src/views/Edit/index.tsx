@@ -280,7 +280,7 @@ export function DefaultEditView({
 
       setLastUpdateTime(updatedAt)
 
-      if (!setMostRecentVersionIsAutosaved) {
+      if (!setMostRecentVersionIsAutosaved && autosaveEnabled) {
         incrementVersionCount()
         setMostRecentVersionIsAutosaved(true)
         setUnpublishedVersionCount((prev) => prev + 1)
@@ -317,7 +317,7 @@ export function DefaultEditView({
 
       await getDocPermissions(json)
 
-      if ((id || globalSlug) && !autosaveEnabled) {
+      if (id || globalSlug) {
         const docPreferences = await getDocPreferences()
 
         const { state } = await getFormState({
@@ -352,18 +352,22 @@ export function DefaultEditView({
       user,
       collectionSlug,
       userSlug,
-      incrementVersionCount,
+      setLastUpdateTime,
+      setMostRecentVersionIsAutosaved,
+      autosaveEnabled,
       setData,
       onSaveFromContext,
-      redirectAfterCreate,
       isEditing,
       depth,
+      redirectAfterCreate,
       getDocPermissions,
       globalSlug,
-      autosaveEnabled,
       refreshCookieAsync,
+      incrementVersionCount,
+      setUnpublishedVersionCount,
       adminRoute,
       locale,
+      startRouteTransition,
       router,
       resetUploadEdits,
       getDocPreferences,
@@ -373,9 +377,6 @@ export function DefaultEditView({
       schemaPathSegments,
       isLockingEnabled,
       setDocumentIsLocked,
-      startRouteTransition,
-      setUnpublishedVersionCount,
-      setMostRecentVersionIsAutosaved,
     ],
   )
 

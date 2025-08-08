@@ -20,7 +20,6 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
-import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
 import './index.scss'
 
@@ -136,33 +135,25 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
             method = 'POST'
           }
 
-          if (modifiedRef.current && url) {
-            const { data, valid } = reduceFieldsToValuesWithValidation(formStateRef.current, true)
+          if (!submitted && modifiedRef.current && url) {
+            await submit({
+              action: url,
+              method,
+              overrides: {
+                _status: 'draft',
+              },
+              // disableFormWhileProcessing: false
+              // setProcessing: false,
+              // showToast: false,
+              skipValidation: versionsConfig?.drafts && !versionsConfig?.drafts?.validate,
+            })
 
-            data._status = 'draft'
+            const newDate = new Date()
 
-            const skipSubmission =
-              submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
+            // We need to log the time in order to figure out if we need to trigger the state off later
+            endTimestamp = newDate.getTime()
 
-            if (!skipSubmission) {
-              await submit({
-                action: url,
-                method,
-                overrides: {
-                  _status: 'draft',
-                },
-                // disableFormWhileProcessing: false
-                // setProcessing: false,
-                skipValidation: versionsConfig?.drafts && !versionsConfig?.drafts?.validate,
-              })
-
-              const newDate = new Date()
-
-              // We need to log the time in order to figure out if we need to trigger the state off later
-              endTimestamp = newDate.getTime()
-
-              hideIndicator()
-            }
+            hideIndicator()
           }
         }
       },
