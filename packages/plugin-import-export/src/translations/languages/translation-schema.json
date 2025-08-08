@@ -49,6 +49,9 @@
         "field-name-label": {
           "type": "string"
         },
+        "field-page-label": {
+          "type": "string"
+        },
         "field-selectionToUse-label": {
           "type": "string"
         },
