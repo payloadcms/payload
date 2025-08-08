@@ -25,7 +25,7 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
   parentIsLocalized,
   versionValue: valueTo,
 }) => {
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { selectedLocales } = useSelectedLocales()
   const { config } = useConfig()
 
@@ -73,7 +73,9 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
               })
 
               const rowNumber = String(i + 1).padStart(2, '0')
-              const rowLabel = fieldIsArrayType(field) ? `Item ${rowNumber}` : `Block ${rowNumber}`
+              const rowLabel = fieldIsArrayType(field)
+                ? `${t('general:item')} ${rowNumber}`
+                : `${t('fields:block')} ${rowNumber}`
 
               return (
                 <div className={`${baseClass}__row`} key={i}>

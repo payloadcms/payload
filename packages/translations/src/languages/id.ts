@@ -147,7 +147,7 @@ export const idTranslations = {
     addNewLabel: 'Tambah {{label}} baru',
     addRelationship: 'Tambah Hubungan',
     addUpload: 'Tambah Unggahan',
-    block: 'blok',
+    block: 'Blok',
     blocks: 'blok',
     blockType: 'Tipe Blok',
     chooseBetweenCustomTextOrDocument:
@@ -329,7 +329,7 @@ export const idTranslations = {
     groupByLabel: 'Kelompokkan berdasarkan {{label}}',
     import: 'Impor',
     isEditing: 'sedang mengedit',
-    item: 'item',
+    item: 'Item',
     items: 'item',
     language: 'Bahasa',
     lastModified: 'Terakhir Diubah',

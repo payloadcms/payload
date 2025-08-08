@@ -324,7 +324,7 @@ export const plTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Grupuj według {{label}}',
     import: 'Import',
     isEditing: 'edytuje',
-    item: 'przedmiot',
+    item: 'Przedmiot',
     items: 'przedmioty',
     language: 'Język',
     lastModified: 'Ostatnio zmodyfikowany',

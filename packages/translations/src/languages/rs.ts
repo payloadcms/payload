@@ -144,7 +144,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Додај нови {{label}}',
     addRelationship: 'Додај релацију',
     addUpload: 'Додај учитавање',
-    block: 'блокирање',
+    block: 'Блокирање',
     blocks: 'блокирања',
     blockType: 'Врста блокирања',
     chooseBetweenCustomTextOrDocument:
@@ -326,7 +326,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Grupiši po {{label}}',
     import: 'Uvoz',
     isEditing: 'уређује',
-    item: 'artikal',
+    item: 'Artikal',
     items: 'artikli',
     language: 'Језик',
     lastModified: 'Задња промена',

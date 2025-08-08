@@ -143,7 +143,7 @@ export const csTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Přidat nový {{label}}',
     addRelationship: 'Přidat vztah',
     addUpload: 'Přidat nahrávání',
-    block: 'blok',
+    block: 'Blok',
     blocks: 'bloky',
     blockType: 'Typ bloku',
     chooseBetweenCustomTextOrDocument:
@@ -323,7 +323,7 @@ export const csTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Seskupit podle {{label}}',
     import: 'Import',
     isEditing: 'upravuje',
-    item: 'položka',
+    item: 'Položka',
     items: 'položky',
     language: 'Jazyk',
     lastModified: 'Naposledy změněno',

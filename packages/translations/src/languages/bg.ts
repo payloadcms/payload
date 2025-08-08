@@ -143,7 +143,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Добави нов {{label}}',
     addRelationship: 'Добави отношение',
     addUpload: 'Качи',
-    block: 'блок',
+    block: 'Блок',
     blocks: 'блокове',
     blockType: 'Тип блок',
     chooseBetweenCustomTextOrDocument:
@@ -324,7 +324,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Групирай по {{label}}',
     import: 'Внос',
     isEditing: 'редактира',
-    item: 'артикул',
+    item: 'Aртикул',
     items: 'артикули',
     language: 'Език',
     lastModified: 'Последно променено',

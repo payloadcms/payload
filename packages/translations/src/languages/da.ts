@@ -142,7 +142,7 @@ export const daTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Tilføj ny {{label}}',
     addRelationship: 'Tilføj forhold',
     addUpload: 'Tilføj upload',
-    block: 'blok',
+    block: 'Blok',
     blocks: 'blokke',
     blockType: 'Blok type',
     chooseBetweenCustomTextOrDocument:
@@ -323,7 +323,7 @@ export const daTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Gruppér efter {{label}}',
     import: 'Import',
     isEditing: 'redigerer',
-    item: 'vare',
+    item: 'Vare',
     items: 'elementer',
     language: 'Sprog',
     lastModified: 'Sidst ændret',
