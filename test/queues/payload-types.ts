@@ -132,6 +132,7 @@ export interface Config {
       subTaskFails: WorkflowSubTaskFails;
       longRunning: WorkflowLongRunning;
       parallelTask: WorkflowParallelTask;
+      fastParallelTask: WorkflowFastParallelTask;
     };
   };
 }
@@ -332,6 +333,7 @@ export interface PayloadJob {
         | 'subTaskFails'
         | 'longRunning'
         | 'parallelTask'
+        | 'fastParallelTask'
       )
     | null;
   taskSlug?:
@@ -817,6 +819,15 @@ export interface WorkflowLongRunning {
  * via the `definition` "WorkflowParallelTask".
  */
 export interface WorkflowParallelTask {
+  input: {
+    amount: number;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowFastParallelTask".
+ */
+export interface WorkflowFastParallelTask {
   input: {
     amount: number;
   };
