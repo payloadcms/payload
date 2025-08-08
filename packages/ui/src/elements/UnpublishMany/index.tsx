@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
@@ -15,14 +15,14 @@ export type UnpublishManyProps = {
 }
 
 export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
-  const { count, selectAll, selected, toggleAll } = useSelection()
+  const { count, selectAll, selectedIDs, toggleAll } = useSelection()
 
   return (
     <UnpublishMany_v4
       {...props}
       count={count}
-      ids={Array.from(selected.keys())}
-      onSuccess={() => toggleAll(false)}
+      ids={selectedIDs}
+      onSuccess={() => toggleAll()}
       selectAll={selectAll === SelectAllStatus.AllAvailable}
     />
   )
@@ -32,8 +32,13 @@ export const UnpublishMany_v4: React.FC<
   {
     count: number
     ids: (number | string)[]
+    /**
+     * When multiple UnpublishMany components are rendered on the page, this will differentiate them.
+     */
+    modalPrefix?: string
     onSuccess?: () => void
     selectAll: boolean
+    where?: Where
   } & UnpublishManyProps
 > = (props) => {
   const {
@@ -41,8 +46,10 @@ export const UnpublishMany_v4: React.FC<
     collection: { slug, versions } = {},
     count,
     ids,
+    modalPrefix,
     onSuccess,
     selectAll,
+    where,
   } = props
 
   const { t } = useTranslation()
@@ -52,7 +59,7 @@ export const UnpublishMany_v4: React.FC<
   const collectionPermissions = permissions?.collections?.[slug]
   const hasPermission = collectionPermissions?.update
 
-  const drawerSlug = `unpublish-${slug}`
+  const drawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}unpublish-${slug}`
 
   if (!versions?.drafts || count === 0 || !hasPermission) {
     return null
@@ -74,6 +81,7 @@ export const UnpublishMany_v4: React.FC<
         ids={ids}
         onSuccess={onSuccess}
         selectAll={selectAll}
+        where={where}
       />
     </React.Fragment>
   )

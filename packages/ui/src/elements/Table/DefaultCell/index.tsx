@@ -10,6 +10,7 @@ import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
 import { getDisplayedFieldValue } from '../../../utilities/getDisplayedFieldValue.js'
+import { isValidReactElement } from '../../../utilities/isValidReactElement.js'
 import { Link } from '../../Link/index.js'
 import { CodeCell } from './fields/Code/index.js'
 import { cellComponents } from './fields/index.js'
@@ -24,6 +25,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     link,
     onClick: onClickFromProps,
     rowData,
+    viewType,
   } = props
 
   const { i18n } = useTranslation()
@@ -68,9 +70,9 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     WrapElement = Link
     wrapElementProps.href = collectionConfig?.slug
       ? formatAdminURL({
-          adminRoute,
-          path: `/collections/${collectionConfig?.slug}/${encodeURIComponent(rowData.id)}${addLocaleToURL}`,
-        })
+        adminRoute,
+        path: `/collections/${collectionConfig?.slug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(rowData.id)}${addLocaleToURL}`,
+      })
       : ''
   }
 
@@ -112,7 +114,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   let CellComponent: React.ReactNode = null
 
   // Handle JSX labels before using DefaultCellComponent
-  if (React.isValidElement(displayedValue)) {
+  if (isValidReactElement(displayedValue)) {
     CellComponent = displayedValue
   } else if (DefaultCellComponent) {
     CellComponent = <DefaultCellComponent cellData={cellData} rowData={rowData} {...props} />

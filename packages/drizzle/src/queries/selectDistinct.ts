@@ -14,6 +14,7 @@ import type { BuildQueryJoinAliases } from './buildQuery.js'
 type Args = {
   adapter: DrizzleAdapter
   db: DrizzleAdapter['drizzle'] | DrizzleTransaction
+  forceRun?: boolean
   joins: BuildQueryJoinAliases
   query?: (args: { query: SQLiteSelect }) => SQLiteSelect
   selectFields: Record<string, GenericColumn>
@@ -27,13 +28,14 @@ type Args = {
 export const selectDistinct = ({
   adapter,
   db,
+  forceRun,
   joins,
   query: queryModifier = ({ query }) => query,
   selectFields,
   tableName,
   where,
 }: Args): QueryPromise<{ id: number | string }[] & Record<string, GenericColumn>> => {
-  if (Object.keys(joins).length > 0) {
+  if (forceRun || Object.keys(joins).length > 0) {
     let query: SQLiteSelect
     const table = adapter.tables[tableName]
 
@@ -54,8 +56,8 @@ export const selectDistinct = ({
       query = query.where(where)
     }
 
-    joins.forEach(({ condition, table }) => {
-      query = query.leftJoin(table, condition)
+    joins.forEach(({ type, condition, table }) => {
+      query = query[type ?? 'leftJoin'](table, condition)
     })
 
     return queryModifier({

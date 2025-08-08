@@ -5,6 +5,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Array } from './collections/Array.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
+import { CustomListDrawer } from './collections/CustomListDrawer/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
 import { DisableBulkEdit } from './collections/DisableBulkEdit.js'
@@ -83,6 +84,10 @@ export default buildConfigWithDefaults({
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
+        collections: {
+          Component: '/components/views/CustomView/index.js#CustomView',
+          path: '/collections',
+        },
         CustomDefaultView: {
           Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
           path: '/custom-default-view',
@@ -181,6 +186,7 @@ export default buildConfigWithDefaults({
     Placeholder,
     UseAsTitleGroupField,
     DisableBulkEdit,
+    CustomListDrawer,
   ],
   globals: [
     GlobalHidden,

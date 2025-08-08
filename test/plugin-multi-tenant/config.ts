@@ -32,11 +32,14 @@ export default buildConfigWithDefaults({
   plugins: [
     multiTenantPlugin<ConfigType>({
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
+      useTenantsCollectionAccess: false,
       tenantField: {
         access: {},
       },
       collections: {
-        [menuItemsSlug]: {},
+        [menuItemsSlug]: {
+          useTenantAccess: false,
+        },
         [menuSlug]: {
           isGlobal: true,
         },

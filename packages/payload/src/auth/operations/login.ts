@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid'
-
 import type {
   AuthOperationsFromCollectionSlug,
   Collection,
@@ -17,13 +15,14 @@ import {
 } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { Forbidden } from '../../index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { isUserLocked } from '../isUserLocked.js'
 import { jwtSign } from '../jwt.js'
-import { removeExpiredSessions } from '../removeExpiredSessions.js'
+import { addSessionToUser } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
@@ -49,6 +48,11 @@ type CheckLoginPermissionArgs = {
   user: any
 }
 
+/**
+ * Throws an error if the user is locked or does not exist.
+ * This does not check the login attempts, only the lock status. Whoever increments login attempts
+ * is responsible for locking the user properly, not whoever checks the login permission.
+ */
 export const checkLoginPermission = ({
   loggingInWithUsername,
   req,
@@ -58,7 +62,7 @@ export const checkLoginPermission = ({
     throw new AuthenticationError(req.t, Boolean(loggingInWithUsername))
   }
 
-  if (isUserLocked(new Date(user.lockUntil).getTime())) {
+  if (isUserLocked(new Date(user.lockUntil))) {
     throw new LockedAuth(req.t)
   }
 }
@@ -198,11 +202,18 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       whereConstraint = usernameConstraint
     }
 
-    let user = await payload.db.findOne<any>({
+    // Exclude trashed users
+    whereConstraint = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash: false,
+      where: whereConstraint,
+    })
+
+    let user = (await payload.db.findOne<TypedUser>({
       collection: collectionConfig.slug,
       req,
       where: whereConstraint,
-    })
+    })) as TypedUser
 
     checkLoginPermission({
       loggingInWithUsername: Boolean(canLoginWithUsername && sanitizedUsername),
@@ -214,7 +225,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     user._strategy = 'local-jwt'
 
     const authResult = await authenticateLocalStrategy({ doc: user, password })
-
     user = sanitizeInternalFields(user)
 
     const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0
@@ -223,9 +233,16 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       if (maxLoginAttemptsEnabled) {
         await incrementLoginAttempts({
           collection: collectionConfig,
-          doc: user,
           payload: req.payload,
           req,
+          user,
+        })
+
+        // Re-check login permissions and max attempts after incrementing attempts, in case parallel updates occurred
+        checkLoginPermission({
+          loggingInWithUsername: Boolean(canLoginWithUsername && sanitizedUsername),
+          req,
+          user,
         })
       }
 
@@ -236,37 +253,45 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       throw new UnverifiedEmail({ t: req.t })
     }
 
+    /*
+     * Correct password accepted - re‑check that the account didn't
+     * get locked by parallel bad attempts in the meantime.
+     */
+    if (maxLoginAttemptsEnabled) {
+      const { lockUntil, loginAttempts } = (await payload.db.findOne<TypedUser>({
+        collection: collectionConfig.slug,
+        req,
+        select: {
+          lockUntil: true,
+          loginAttempts: true,
+        },
+        where: { id: { equals: user.id } },
+      }))!
+
+      user.lockUntil = lockUntil
+      user.loginAttempts = loginAttempts
+
+      checkLoginPermission({
+        req,
+        user,
+      })
+    }
+
     const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
       collectionConfig,
       email: sanitizedEmail!,
       user,
     }
 
-    if (collectionConfig.auth.useSessions) {
-      // Add session to user
-      const newSessionID = uuid()
-      const now = new Date()
-      const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
-      const expiresAt = new Date(now.getTime() + tokenExpInMs)
+    const { sid } = await addSessionToUser({
+      collectionConfig,
+      payload,
+      req,
+      user,
+    })
 
-      const session = { id: newSessionID, createdAt: now, expiresAt }
-
-      if (!user.sessions?.length) {
-        user.sessions = [session]
-      } else {
-        user.sessions = removeExpiredSessions(user.sessions)
-        user.sessions.push(session)
-      }
-
-      await payload.db.updateOne({
-        id: user.id,
-        collection: collectionConfig.slug,
-        data: user,
-        req,
-        returning: false,
-      })
-
-      fieldsToSignArgs.sid = newSessionID
+    if (sid) {
+      fieldsToSignArgs.sid = sid
     }
 
     const fieldsToSign = getFieldsToSign(fieldsToSignArgs)

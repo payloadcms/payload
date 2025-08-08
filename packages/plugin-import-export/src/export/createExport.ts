@@ -5,6 +5,7 @@ import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
 import { Readable } from 'stream'
 
+import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
 import { flattenObject } from './flattenObject.js'
 import { getCustomFieldFunctions } from './getCustomFieldFunctions.js'
 import { getFilename } from './getFilename.js'
@@ -63,7 +64,7 @@ export const createExport = async (args: CreateExportArgs) => {
   } = args
 
   if (debug) {
-    req.payload.logger.info({
+    req.payload.logger.debug({
       message: 'Starting export process with args:',
       collectionSlug,
       drafts,
@@ -83,7 +84,7 @@ export const createExport = async (args: CreateExportArgs) => {
   const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
 
   if (debug) {
-    req.payload.logger.info({ message: 'Export configuration:', name, isCSV, locale })
+    req.payload.logger.debug({ message: 'Export configuration:', name, isCSV, locale })
   }
 
   const findArgs = {
@@ -101,43 +102,87 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   if (debug) {
-    req.payload.logger.info({ message: 'Find arguments:', findArgs })
+    req.payload.logger.debug({ message: 'Find arguments:', findArgs })
   }
 
   const toCSVFunctions = getCustomFieldFunctions({
     fields: collectionConfig.flattenedFields,
-    select,
   })
+
+  const disabledFields =
+    collectionConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
+
+  const disabledRegexes: RegExp[] = disabledFields.map(buildDisabledFieldRegex)
+
+  const filterDisabledCSV = (row: Record<string, unknown>): Record<string, unknown> => {
+    const filtered: Record<string, unknown> = {}
+
+    for (const [key, value] of Object.entries(row)) {
+      const isDisabled = disabledRegexes.some((regex) => regex.test(key))
+      if (!isDisabled) {
+        filtered[key] = value
+      }
+    }
+
+    return filtered
+  }
+
+  const filterDisabledJSON = (doc: any, parentPath = ''): any => {
+    if (Array.isArray(doc)) {
+      return doc.map((item) => filterDisabledJSON(item, parentPath))
+    }
+
+    if (typeof doc !== 'object' || doc === null) {
+      return doc
+    }
+
+    const filtered: Record<string, any> = {}
+    for (const [key, value] of Object.entries(doc)) {
+      const currentPath = parentPath ? `${parentPath}.${key}` : key
+
+      // Only remove if this exact path is disabled
+      const isDisabled = disabledFields.includes(currentPath)
+
+      if (!isDisabled) {
+        filtered[key] = filterDisabledJSON(value, currentPath)
+      }
+    }
+
+    return filtered
+  }
 
   if (download) {
     if (debug) {
-      req.payload.logger.info('Pre-scanning all columns before streaming')
+      req.payload.logger.debug('Pre-scanning all columns before streaming')
     }
 
-    const allColumnsSet = new Set<string>()
     const allColumns: string[] = []
-    let scanPage = 1
-    let hasMore = true
 
-    while (hasMore) {
-      const result = await payload.find({ ...findArgs, page: scanPage })
+    if (isCSV) {
+      const allColumnsSet = new Set<string>()
+      let scanPage = 1
+      let hasMore = true
 
-      result.docs.forEach((doc) => {
-        const flat = flattenObject({ doc, fields, toCSVFunctions })
-        Object.keys(flat).forEach((key) => {
-          if (!allColumnsSet.has(key)) {
-            allColumnsSet.add(key)
-            allColumns.push(key)
-          }
+      while (hasMore) {
+        const result = await payload.find({ ...findArgs, page: scanPage })
+
+        result.docs.forEach((doc) => {
+          const flat = filterDisabledCSV(flattenObject({ doc, fields, toCSVFunctions }))
+          Object.keys(flat).forEach((key) => {
+            if (!allColumnsSet.has(key)) {
+              allColumnsSet.add(key)
+              allColumns.push(key)
+            }
+          })
         })
-      })
 
-      hasMore = result.hasNextPage
-      scanPage += 1
-    }
+        hasMore = result.hasNextPage
+        scanPage += 1
+      }
 
-    if (debug) {
-      req.payload.logger.info(`Discovered ${allColumns.length} columns`)
+      if (debug) {
+        req.payload.logger.debug(`Discovered ${allColumns.length} columns`)
+      }
     }
 
     const encoder = new TextEncoder()
@@ -149,36 +194,61 @@ export const createExport = async (args: CreateExportArgs) => {
         const result = await payload.find({ ...findArgs, page: streamPage })
 
         if (debug) {
-          req.payload.logger.info(`Streaming batch ${streamPage} with ${result.docs.length} docs`)
+          req.payload.logger.debug(`Streaming batch ${streamPage} with ${result.docs.length} docs`)
         }
 
         if (result.docs.length === 0) {
+          // Close JSON array properly if JSON
+          if (!isCSV) {
+            this.push(encoder.encode(']'))
+          }
           this.push(null)
           return
         }
 
-        const batchRows = result.docs.map((doc) => flattenObject({ doc, fields, toCSVFunctions }))
+        if (isCSV) {
+          // --- CSV Streaming ---
+          const batchRows = result.docs.map((doc) =>
+            filterDisabledCSV(flattenObject({ doc, fields, toCSVFunctions })),
+          )
 
-        const paddedRows = batchRows.map((row) => {
-          const fullRow: Record<string, unknown> = {}
-          for (const col of allColumns) {
-            fullRow[col] = row[col] ?? ''
+          const paddedRows = batchRows.map((row) => {
+            const fullRow: Record<string, unknown> = {}
+            for (const col of allColumns) {
+              fullRow[col] = row[col] ?? ''
+            }
+            return fullRow
+          })
+
+          const csvString = stringify(paddedRows, {
+            header: isFirstBatch,
+            columns: allColumns,
+          })
+
+          this.push(encoder.encode(csvString))
+        } else {
+          // --- JSON Streaming ---
+          const batchRows = result.docs.map((doc) => filterDisabledJSON(doc))
+
+          // Convert each filtered/flattened row into JSON string
+          const batchJSON = batchRows.map((row) => JSON.stringify(row)).join(',')
+
+          if (isFirstBatch) {
+            this.push(encoder.encode('[' + batchJSON))
+          } else {
+            this.push(encoder.encode(',' + batchJSON))
           }
-          return fullRow
-        })
+        }
 
-        const csvString = stringify(paddedRows, {
-          header: isFirstBatch,
-          columns: allColumns,
-        })
-
-        this.push(encoder.encode(csvString))
         isFirstBatch = false
         streamPage += 1
 
         if (!result.hasNextPage) {
           if (debug) {
-            req.payload.logger.info('Stream complete - no more pages')
+            req.payload.logger.debug('Stream complete - no more pages')
+          }
+          if (!isCSV) {
+            this.push(encoder.encode(']'))
           }
           this.push(null) // End the stream
         }
@@ -195,7 +265,7 @@ export const createExport = async (args: CreateExportArgs) => {
 
   // Non-download path (buffered export)
   if (debug) {
-    req.payload.logger.info('Starting file generation')
+    req.payload.logger.debug('Starting file generation')
   }
 
   const outputData: string[] = []
@@ -212,13 +282,15 @@ export const createExport = async (args: CreateExportArgs) => {
     })
 
     if (debug) {
-      req.payload.logger.info(
+      req.payload.logger.debug(
         `Processing batch ${findArgs.page} with ${result.docs.length} documents`,
       )
     }
 
     if (isCSV) {
-      const batchRows = result.docs.map((doc) => flattenObject({ doc, fields, toCSVFunctions }))
+      const batchRows = result.docs.map((doc) =>
+        filterDisabledCSV(flattenObject({ doc, fields, toCSVFunctions })),
+      )
 
       // Track discovered column keys
       batchRows.forEach((row) => {
@@ -232,8 +304,8 @@ export const createExport = async (args: CreateExportArgs) => {
 
       rows.push(...batchRows)
     } else {
-      const jsonInput = result.docs.map((doc) => JSON.stringify(doc))
-      outputData.push(jsonInput.join(',\n'))
+      const batchRows = result.docs.map((doc) => filterDisabledJSON(doc))
+      outputData.push(batchRows.map((doc) => JSON.stringify(doc)).join(',\n'))
     }
 
     hasNextPage = result.hasNextPage
@@ -259,12 +331,12 @@ export const createExport = async (args: CreateExportArgs) => {
 
   const buffer = Buffer.from(format === 'json' ? `[${outputData.join(',')}]` : outputData.join(''))
   if (debug) {
-    req.payload.logger.info(`${format} file generation complete`)
+    req.payload.logger.debug(`${format} file generation complete`)
   }
 
   if (!id) {
     if (debug) {
-      req.payload.logger.info('Creating new export file')
+      req.payload.logger.debug('Creating new export file')
     }
     req.file = {
       name,
@@ -274,7 +346,7 @@ export const createExport = async (args: CreateExportArgs) => {
     }
   } else {
     if (debug) {
-      req.payload.logger.info(`Updating existing export with id: ${id}`)
+      req.payload.logger.debug(`Updating existing export with id: ${id}`)
     }
     await req.payload.update({
       id,
@@ -290,6 +362,6 @@ export const createExport = async (args: CreateExportArgs) => {
     })
   }
   if (debug) {
-    req.payload.logger.info('Export process completed successfully')
+    req.payload.logger.debug('Export process completed successfully')
   }
 }

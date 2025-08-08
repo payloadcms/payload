@@ -60,7 +60,7 @@ The following operators are available for use in queries:
 <Banner type="success">
   **Tip:** If you know your users will be querying on certain fields a lot, add
   `index: true` to the Field Config. This will speed up searches using that
-  field immensely.
+  field immensely. [More details](../database/indexes).
 </Banner>
 
 ### And / Or Logic
@@ -192,3 +192,130 @@ const getPosts = async () => {
   // Continue to handle the response below...
 }
 ```
+
+## Performance
+
+There are several ways to optimize your queries. Many of these options directly impact overall database overhead, response sizes, and/or computational load and can significantly improve performance.
+
+When building queries, combine as many of these strategies together as possible to ensure your queries are as performant as they can be.
+
+<Banner type="success">
+  For more performance tips, see the [Performance
+  documentation](../performance/overview).
+</Banner>
+
+### Indexes
+
+Build [Indexes](../database/indexes) for fields that are often queried or sorted by.
+
+When your query runs, the database will not search the entire document to find that one field, but will instead use the index to quickly locate the data.
+
+This is done by adding `index: true` to the Field Config for that field:
+
+```ts
+// In your collection configuration
+{
+  name: 'posts',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      // highlight-start
+      index: true, // Add an index to the title field
+      // highlight-end
+    },
+    // Other fields...
+  ],
+}
+```
+
+To learn more, see the [Indexes documentation](../database/indexes).
+
+### Depth
+
+Set the [Depth](./depth) to only the level that you need to avoid populating unnecessary related documents.
+
+Relationships will only populate down to the specified depth, and any relationships beyond that depth will only return the ID of the related document.
+
+```ts
+const posts = await payload.find({
+  collection: 'posts',
+  where: { ... },
+  // highlight-start
+  depth: 0, // Only return the IDs of related documents
+  // highlight-end
+})
+```
+
+To learn more, see the [Depth documentation](./depth).
+
+### Limit
+
+Set the [Limit](./pagination#limit) if you can reliably predict the number of matched documents, such as when querying on a unique field.
+
+```ts
+const posts = await payload.find({
+  collection: 'posts',
+  where: {
+    slug: {
+      equals: 'unique-post-slug',
+    },
+  },
+  // highlight-start
+  limit: 1, // Only expect one document to be returned
+  // highlight-end
+})
+```
+
+<Banner type="success">
+  **Tip:** Use in combination with `pagination: false` for best performance when
+  querying by unique fields.
+</Banner>
+
+To learn more, see the [Limit documentation](./pagination#limit).
+
+### Select
+
+Use the [Select API](./select) to only process and return the fields you need.
+
+This will reduce the amount of data returned from the request, and also skip processing of any fields that are not selected, such as running their field hooks.
+
+```ts
+const posts = await payload.find({
+  collection: 'posts',
+  where: { ... },
+  // highlight-start
+  select: [{
+    title: true,
+  }],
+  // highlight-end
+```
+
+This is a basic example, but there are many ways to use the Select API, including selecting specific fields, excluding fields, etc.
+
+To learn more, see the [Select documentation](./select).
+
+### Pagination
+
+[Disable Pagination](./pagination#disabling-pagination) if you can reliably predict the number of matched documents, such as when querying on a unique field.
+
+```ts
+const posts = await payload.find({
+  collection: 'posts',
+  where: {
+    slug: {
+      equals: 'unique-post-slug',
+    },
+  },
+  // highlight-start
+  pagination: false, // Return all matched documents without pagination
+  // highlight-end
+})
+```
+
+<Banner type="success">
+  **Tip:** Use in combination with `limit: 1` for best performance when querying
+  by unique fields.
+</Banner>
+
+To learn more, see the [Pagination documentation](./pagination).

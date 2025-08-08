@@ -18,12 +18,12 @@ export const generateLabelFromValue = ({
   value: PopulatedRelationshipValue
 }): string => {
   let relatedDoc: TypeWithID
+  let relationTo: string = field.relationTo as string
   let valueToReturn: string = ''
-
-  const relationTo: string = 'relationTo' in value ? value.relationTo : (field.relationTo as string)
 
   if (typeof value === 'object' && 'relationTo' in value) {
     relatedDoc = value.value
+    relationTo = value.relationTo
   } else {
     // Non-polymorphic relationship
     relatedDoc = value

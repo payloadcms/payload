@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     categories: Category;
+    simple: Simple;
     'categories-custom-id': CategoriesCustomId;
     posts: Post;
     'error-on-unnamed-fields': ErrorOnUnnamedField;
@@ -94,6 +95,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    simple: SimpleSelect<false> | SimpleSelect<true>;
     'categories-custom-id': CategoriesCustomIdSelect<false> | CategoriesCustomIdSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'error-on-unnamed-fields': ErrorOnUnnamedFieldsSelect<false> | ErrorOnUnnamedFieldsSelect<true>;
@@ -174,6 +176,17 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple".
+ */
+export interface Simple {
+  id: string;
+  text?: string | null;
+  number?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories-custom-id".
  */
 export interface CategoriesCustomId {
@@ -232,6 +245,12 @@ export interface Post {
         blockType: 'block-first';
       }[]
     | null;
+  group?: {
+    text?: string | null;
+  };
+  tab?: {
+    text?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -603,6 +622,10 @@ export interface PayloadLockedDocument {
         value: string | Category;
       } | null)
     | ({
+        relationTo: 'simple';
+        value: string | Simple;
+      } | null)
+    | ({
         relationTo: 'categories-custom-id';
         value: number | CategoriesCustomId;
       } | null)
@@ -732,6 +755,16 @@ export interface CategoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple_select".
+ */
+export interface SimpleSelect<T extends boolean = true> {
+  text?: T;
+  number?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories-custom-id_select".
  */
 export interface CategoriesCustomIdSelect<T extends boolean = true> {
@@ -803,6 +836,16 @@ export interface PostsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  group?:
+    | T
+    | {
+        text?: T;
+      };
+  tab?:
+    | T
+    | {
+        text?: T;
       };
   updatedAt?: T;
   createdAt?: T;

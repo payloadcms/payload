@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
@@ -15,14 +15,14 @@ export type PublishManyProps = {
 }
 
 export const PublishMany: React.FC<PublishManyProps> = (props) => {
-  const { count, selectAll, selected, toggleAll } = useSelection()
+  const { count, selectAll, selectedIDs, toggleAll } = useSelection()
 
   return (
     <PublishMany_v4
       {...props}
       count={count}
-      ids={Array.from(selected.keys())}
-      onSuccess={() => toggleAll(false)}
+      ids={selectedIDs}
+      onSuccess={() => toggleAll()}
       selectAll={selectAll === SelectAllStatus.AllAvailable}
     />
   )
@@ -31,17 +31,25 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
 type PublishMany_v4Props = {
   count: number
   ids: (number | string)[]
+  /**
+   * When multiple PublishMany components are rendered on the page, this will differentiate them.
+   */
+  modalPrefix?: string
   onSuccess?: () => void
   selectAll: boolean
+  where?: Where
 } & PublishManyProps
+
 export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
   const {
     collection,
     collection: { slug, versions } = {},
     count,
     ids,
+    modalPrefix,
     onSuccess,
     selectAll,
+    where,
   } = props
 
   const { permissions } = useAuth()
@@ -52,7 +60,7 @@ export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
   const collectionPermissions = permissions?.collections?.[slug]
   const hasPermission = collectionPermissions?.update
 
-  const drawerSlug = `publish-${slug}`
+  const drawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}publish-${slug}`
 
   if (!versions?.drafts || count === 0 || !hasPermission) {
     return null
@@ -74,6 +82,7 @@ export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
         ids={ids}
         onSuccess={onSuccess}
         selectAll={selectAll}
+        where={where}
       />
     </React.Fragment>
   )

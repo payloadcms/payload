@@ -242,6 +242,7 @@ export interface Page {
           }
       )[]
     | null;
+  textFieldInCollapsible?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -264,7 +265,7 @@ export interface Post {
 export interface Export {
   id: string;
   name?: string | null;
-  format: 'csv' | 'json';
+  format?: ('csv' | 'json') | null;
   limit?: number | null;
   sort?: string | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
@@ -300,7 +301,7 @@ export interface Export {
 export interface ExportsTask {
   id: string;
   name?: string | null;
-  format: 'csv' | 'json';
+  format?: ('csv' | 'json') | null;
   limit?: number | null;
   sort?: string | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
@@ -579,6 +580,7 @@ export interface PagesSelect<T extends boolean = true> {
   excerpt?: T;
   hasOnePolymorphic?: T;
   hasManyPolymorphic?: T;
+  textFieldInCollapsible?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -717,7 +719,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface TaskCreateCollectionExport {
   input: {
     name?: string | null;
-    format: 'csv' | 'json';
+    format?: ('csv' | 'json') | null;
     limit?: number | null;
     sort?: string | null;
     locale?: ('all' | 'en' | 'es' | 'de') | null;

@@ -94,7 +94,7 @@ export const buildFormStateHandler: ServerFunction<
     }
 
     if (err.message === 'Unauthorized') {
-      return null
+      throw new Error('Unauthorized')
     }
 
     return formatErrors(err)
@@ -117,6 +117,7 @@ export const buildFormState = async (
     initialBlockFormState,
     mockRSCs,
     operation,
+    readOnly,
     renderAllFields,
     req,
     req: {
@@ -219,6 +220,7 @@ export const buildFormState = async (
     permissions: docPermissions?.fields || {},
     preferences: docPreferences || { fields: {} },
     previousFormState: formState,
+    readOnly,
     renderAllFields,
     renderFieldFn: renderField,
     req,
