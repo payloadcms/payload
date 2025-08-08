@@ -18,7 +18,7 @@ import type {
   Context as FormContextType,
   FormProps,
   GetDataByPath,
-  SubmitOptions,
+  Submit,
 } from './types.js'
 
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
@@ -199,8 +199,8 @@ export const Form: React.FC<FormProps> = (props) => {
     return isValid
   }, [collectionSlug, config, dispatchFields, id, operation, t, user, documentForm])
 
-  const submit = useCallback(
-    async (options: SubmitOptions = {}, e): Promise<void> => {
+  const submit = useCallback<Submit>(
+    async (options, e) => {
       const {
         action: actionArg = action,
         method: methodToUse = method,
@@ -217,6 +217,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // create new toast promise which will resolve manually later
       let errorToast, successToast
+
       const promise = new Promise((resolve, reject) => {
         successToast = resolve
         errorToast = reject
@@ -290,6 +291,7 @@ export const Form: React.FC<FormProps> = (props) => {
         skipValidation || disableValidationOnSubmit ? true : await contextRef.current.validateForm()
 
       setIsValid(isValid)
+
       // If not valid, prevent submission
       if (!isValid) {
         errorToast(t('error:correctInvalidFields'))
@@ -366,6 +368,7 @@ export const Form: React.FC<FormProps> = (props) => {
         if (isJSON) {
           json = await res.json()
         }
+
         if (res.status < 400) {
           if (typeof onSuccess === 'function') {
             const newFormState = await onSuccess(json)
@@ -379,6 +382,7 @@ export const Form: React.FC<FormProps> = (props) => {
               })
             }
           }
+
           setSubmitted(false)
           setProcessing(false)
 
@@ -392,6 +396,7 @@ export const Form: React.FC<FormProps> = (props) => {
           setSubmitted(true)
 
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
+
           if (json.message) {
             errorToast(json.message)
             return

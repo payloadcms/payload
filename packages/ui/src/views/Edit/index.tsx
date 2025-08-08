@@ -88,10 +88,13 @@ export function DefaultEditView({
     redirectAfterDuplicate,
     redirectAfterRestore,
     setCurrentEditor,
+    setData,
     setDocumentIsLocked,
+    setLastUpdateTime,
+    setMostRecentVersionIsAutosaved,
+    setUnpublishedVersionCount,
     unlockDocument,
     updateDocumentEditor,
-    updateSavedDocumentData,
   } = useDocumentInfo()
 
   const {
@@ -237,7 +240,7 @@ export function DefaultEditView({
             setDocumentIsLocked(false)
             setCurrentEditor(null)
           } catch (err) {
-            console.error('Failed to unlock before leave', err)
+            console.error('Failed to unlock before leave', err) // eslint-disable-line no-console
           }
         }
       }
@@ -261,10 +264,12 @@ export function DefaultEditView({
 
       const document = json?.doc || json?.result
 
+      const updatedAt = document?.updatedAt || new Date().toISOString()
+
       reportUpdate({
         id,
         entitySlug,
-        updatedAt: document?.updatedAt || new Date().toISOString(),
+        updatedAt,
       })
 
       // If we're editing the doc of the logged-in user,
@@ -273,10 +278,16 @@ export function DefaultEditView({
         void refreshCookieAsync()
       }
 
-      incrementVersionCount()
+      setLastUpdateTime(updatedAt)
 
-      if (typeof updateSavedDocumentData === 'function') {
-        void updateSavedDocumentData(document || {})
+      if (!setMostRecentVersionIsAutosaved) {
+        incrementVersionCount()
+        setMostRecentVersionIsAutosaved(true)
+        setUnpublishedVersionCount((prev) => prev + 1)
+      }
+
+      if (typeof setData === 'function') {
+        void setData(document || {})
       }
 
       if (typeof onSaveFromContext === 'function') {
@@ -342,7 +353,7 @@ export function DefaultEditView({
       collectionSlug,
       userSlug,
       incrementVersionCount,
-      updateSavedDocumentData,
+      setData,
       onSaveFromContext,
       redirectAfterCreate,
       isEditing,
@@ -363,6 +374,8 @@ export function DefaultEditView({
       isLockingEnabled,
       setDocumentIsLocked,
       startRouteTransition,
+      setUnpublishedVersionCount,
+      setMostRecentVersionIsAutosaved,
     ],
   )
 

@@ -76,6 +76,7 @@ export type SubmitOptions = {
 }
 
 export type DispatchFields = React.Dispatch<any>
+
 export type Submit = (
   options?: SubmitOptions,
   e?: React.FormEvent<HTMLFormElement>,
