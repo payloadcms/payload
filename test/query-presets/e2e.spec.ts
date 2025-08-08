@@ -58,6 +58,10 @@ describe('Query Presets', () => {
     context = await browser.newContext()
     page = await context.newPage()
 
+    initPageConsoleErrorCatch(page)
+
+    await ensureCompilationIsDone({ page, serverURL })
+
     user = await payload
       .login({
         collection: 'users',
@@ -80,10 +84,6 @@ describe('Query Presets', () => {
         depth: 0,
       })
       ?.then((res) => res.docs[0])
-
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {

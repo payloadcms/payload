@@ -367,6 +367,7 @@ export interface Diff {
               textInNamedTab1InBlock?: string | null;
             };
             textInUnnamedTab2InBlock?: string | null;
+            textInUnnamedTab2InBlockAccessFalse?: string | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'TabsBlock';
@@ -469,6 +470,7 @@ export interface Diff {
   };
   textInUnnamedTab2?: string | null;
   text?: string | null;
+  textCannotRead?: string | null;
   textArea?: string | null;
   upload?: (string | null) | Media;
   uploadHasMany?: (string | Media)[] | null;
@@ -960,6 +962,7 @@ export interface DiffSelect<T extends boolean = true> {
                     textInNamedTab1InBlock?: T;
                   };
               textInUnnamedTab2InBlock?: T;
+              textInUnnamedTab2InBlockAccessFalse?: T;
               id?: T;
               blockName?: T;
             };
@@ -994,6 +997,7 @@ export interface DiffSelect<T extends boolean = true> {
       };
   textInUnnamedTab2?: T;
   text?: T;
+  textCannotRead?: T;
   textArea?: T;
   upload?: T;
   uploadHasMany?: T;

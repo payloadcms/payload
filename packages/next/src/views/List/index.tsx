@@ -40,6 +40,10 @@ type RenderListViewArgs = {
   query: ListQuery
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
+  /**
+   * @experimental This prop is subject to change in future releases.
+   */
+  trash?: boolean
 } & AdminViewServerProps
 
 /**
@@ -66,6 +70,7 @@ export const renderListView = async (
     params,
     query: queryFromArgs,
     searchParams,
+    trash,
     viewType,
   } = args
 
@@ -133,16 +138,14 @@ export const renderListView = async (
       throw new Error('not-found')
     }
 
-    let baseListFilter = undefined
-
-    if (typeof collectionConfig.admin?.baseListFilter === 'function') {
-      baseListFilter = await collectionConfig.admin.baseListFilter({
-        limit: query.limit,
-        page: query.page,
-        req,
-        sort: query.sort,
-      })
-    }
+    const baseFilterConstraint = await (
+      collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
+    )?.({
+      limit: query.limit,
+      page: query.page,
+      req,
+      sort: query.sort,
+    })
 
     let queryPreset: QueryPreset | undefined
     let queryPresetPermissions: SanitizedCollectionPermission | undefined
@@ -150,10 +153,10 @@ export const renderListView = async (
     let whereWithMergedSearch = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
-      where: combineWhereConstraints([query?.where, baseListFilter]),
+      where: combineWhereConstraints([query?.where, baseFilterConstraint]),
     })
 
-    if (query?.trash === true) {
+    if (trash === true) {
       whereWithMergedSearch = {
         and: [
           whereWithMergedSearch,
@@ -217,8 +220,9 @@ export const renderListView = async (
           enableRowSelections,
           query,
           req,
-          trash: query?.trash === true,
+          trash,
           user,
+          viewType,
           where: whereWithMergedSearch,
         }))
       } else {
@@ -234,7 +238,7 @@ export const renderListView = async (
           page: query?.page ? Number(query.page) : undefined,
           req,
           sort: query?.sort,
-          trash: query?.trash === true,
+          trash,
           user,
           where: whereWithMergedSearch,
         })

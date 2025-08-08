@@ -44,8 +44,8 @@ describe('i18n', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
-    initPageConsoleErrorCatch(page)
 
+    initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {

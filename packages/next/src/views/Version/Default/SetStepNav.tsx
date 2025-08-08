@@ -15,7 +15,7 @@ export const SetStepNav: React.FC<{
   readonly isTrashed?: boolean
   versionToCreatedAtFormatted?: string
   versionToID?: string
-  versionToUseAsTitle?: string
+  versionToUseAsTitle?: Record<string, string> | string
 }> = ({
   id,
   collectionConfig,
@@ -54,7 +54,7 @@ export const SetStepNav: React.FC<{
             ? versionToUseAsTitle?.[locale.code] || docLabel
             : versionToUseAsTitle
       } else if (useAsTitle === 'id') {
-        docLabel = versionToID
+        docLabel = String(id)
       }
 
       const docBasePath: `/${string}` = isTrashed
