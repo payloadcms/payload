@@ -144,7 +144,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
               },
               // disableFormWhileProcessing: false
               // setProcessing: false,
-              // showToast: false,
+              disableSuccessStatus: true,
               skipValidation: versionsConfig?.drafts && !versionsConfig?.drafts?.validate,
             })
 

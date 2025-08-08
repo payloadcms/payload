@@ -203,10 +203,13 @@ export const Form: React.FC<FormProps> = (props) => {
     async (options, e) => {
       const {
         action: actionArg = action,
+        disableSuccessStatus: disableSuccessStatusFromArgs,
         method: methodToUse = method,
         overrides: overridesFromArgs = {},
         skipValidation,
       } = options
+
+      const disableToast = disableSuccessStatusFromArgs ?? disableSuccessStatus
 
       if (disabled) {
         if (e) {
@@ -226,7 +229,7 @@ export const Form: React.FC<FormProps> = (props) => {
       const hasFormSubmitAction =
         actionArg || typeof action === 'string' || typeof action === 'function'
 
-      if (redirect || disableSuccessStatus || !hasFormSubmitAction) {
+      if (redirect || disableToast || !hasFormSubmitAction) {
         // Do not show submitting toast, as the promise toast may never disappear under these conditions.
         // Instead, make successToast() or errorToast() throw toast.success / toast.error
         successToast = (data) => toast.success(data)
@@ -388,7 +391,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
           if (redirect) {
             startRouteTransition(() => router.push(redirect))
-          } else if (!disableSuccessStatus) {
+          } else if (!disableToast) {
             successToast(json.message || t('general:submissionSuccessful'))
           }
         } else {

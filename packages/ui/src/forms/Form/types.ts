@@ -70,6 +70,7 @@ export type FormProps = {
 
 export type SubmitOptions = {
   action?: string
+  disableSuccessStatus?: boolean
   method?: string
   overrides?: ((formState) => FormData) | Record<string, unknown>
   skipValidation?: boolean
