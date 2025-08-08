@@ -24,6 +24,7 @@ export const Status: React.FC = () => {
     hasPublishedDoc,
     incrementVersionCount,
     isTrashed,
+    savedDocumentData: doc,
     setHasPublishedDoc,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
@@ -47,7 +48,7 @@ export const Status: React.FC = () => {
   const unPublishModalSlug = `confirm-un-publish-${id}`
   const revertModalSlug = `confirm-revert-${id}`
 
-  let statusToRender: 'changed' | 'draft' | 'published'
+  let statusToRender: 'changed' | 'draft' | 'published' = 'draft'
 
   const collectionConfig = getEntityConfig({ collectionSlug })
   const globalConfig = getEntityConfig({ globalSlug })
@@ -56,18 +57,13 @@ export const Status: React.FC = () => {
   const autosaveEnabled =
     typeof docConfig?.versions?.drafts === 'object' ? docConfig.versions.drafts.autosave : false
 
-  if (unpublishedVersionCount > 0 && hasPublishedDoc) {
-    if (autosaveEnabled) {
-      statusToRender = 'changed'
-    } else {
-      statusToRender = 'draft'
+  if (autosaveEnabled) {
+    if (hasPublishedDoc) {
+      statusToRender = unpublishedVersionCount > 0 ? 'changed' : 'published'
     }
-  } else if (!hasPublishedDoc) {
-    statusToRender = 'draft'
-  } else if (hasPublishedDoc && unpublishedVersionCount <= 0) {
-    statusToRender = 'published'
+  } else {
+    statusToRender = doc._status || 'draft'
   }
-
   const displayStatusKey = isTrashed
     ? hasPublishedDoc
       ? 'previouslyPublished'
