@@ -339,14 +339,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     }
   }, [isFormSubmitting])
 
-  useEffect(() => {
-    console.log(filename.length)
-    if (!filename || filename.length === 0 || filename === '') {
-      const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
-      setFilename(fileName)
-    }
-  }, [filename])
-
   const canRemoveUpload =
     docPermissions?.update && 'delete' in docPermissions && docPermissions?.delete
 
@@ -511,7 +503,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 <input
                   className={`${baseClass}__filename`}
                   onChange={handleFileNameChange}
-                  required
                   title={filename || value.name}
                   type="text"
                   value={filename || value.name}
