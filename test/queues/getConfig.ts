@@ -19,6 +19,7 @@ import { UpdatePostStep2Task } from './tasks/UpdatePostStep2Task.js'
 import { UpdatePostTask } from './tasks/UpdatePostTask.js'
 import { externalWorkflow } from './workflows/externalWorkflow.js'
 import { failsImmediatelyWorkflow } from './workflows/failsImmediately.js'
+import { fastParallelTaskWorkflow } from './workflows/fastParallelTaskWokflow.js'
 import { inlineTaskTestWorkflow } from './workflows/inlineTaskTest.js'
 import { inlineTaskTestDelayedWorkflow } from './workflows/inlineTaskTestDelayed.js'
 import { longRunningWorkflow } from './workflows/longRunning.js'
@@ -164,6 +165,7 @@ export const getConfig: () => Partial<Config> = () => ({
       subTaskFailsWorkflow,
       longRunningWorkflow,
       parallelTaskWorkflow,
+      fastParallelTaskWorkflow,
     ],
   },
   editor: lexicalEditor(),
