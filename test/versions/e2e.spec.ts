@@ -1285,6 +1285,15 @@ describe('Versions', () => {
       // Remove listener
       page.removeListener('dialog', acceptAlert)
     })
+
+    test('- with autosave - should apply hooks to form state after autosave runs', async () => {
+      await page.goto(autosaveURL.create)
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+      await waitForAutoSaveToRunAndComplete(page)
+      const computedTitleField = page.locator('#field-computedTitle')
+      await expect(computedTitleField).toHaveValue('Initial')
+    })
   })
 
   describe('Globals - publish individual locale', () => {

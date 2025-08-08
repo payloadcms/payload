@@ -197,6 +197,7 @@ export interface Post {
 export interface AutosavePost {
   id: string;
   title: string;
+  computedTitle?: string | null;
   description: string;
   updatedAt: string;
   createdAt: string;
@@ -785,6 +786,7 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
+  computedTitle?: T;
   description?: T;
   updatedAt?: T;
   createdAt?: T;
