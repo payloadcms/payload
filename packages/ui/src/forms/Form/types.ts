@@ -70,9 +70,22 @@ export type FormProps = {
 
 export type SubmitOptions = {
   action?: string
+  /**
+   * When true, will disable the form while it is processing.
+   * @default true
+   */
+  disableFormWhileProcessing?: boolean
+  /**
+   * When true, will disable the success toast after form submission.
+   * @default false
+   */
   disableSuccessStatus?: boolean
   method?: string
   overrides?: ((formState) => FormData) | Record<string, unknown>
+  /**
+   * When true, will skip validation before submitting the form.
+   * @default false
+   */
   skipValidation?: boolean
 }
 

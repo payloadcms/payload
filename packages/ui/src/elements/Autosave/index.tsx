@@ -138,11 +138,11 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
           if (!submitted && modifiedRef.current && url) {
             await submit({
               action: url,
+              disableFormWhileProcessing: false,
               method,
               overrides: {
                 _status: 'draft',
               },
-              // disableFormWhileProcessing: false
               // setProcessing: false,
               disableSuccessStatus: true,
               skipValidation: versionsConfig?.drafts && !versionsConfig?.drafts?.validate,

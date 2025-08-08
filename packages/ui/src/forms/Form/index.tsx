@@ -203,6 +203,7 @@ export const Form: React.FC<FormProps> = (props) => {
     async (options, e) => {
       const {
         action: actionArg = action,
+        disableFormWhileProcessing = true,
         disableSuccessStatus: disableSuccessStatusFromArgs,
         method: methodToUse = method,
         overrides: overridesFromArgs = {},
@@ -251,8 +252,10 @@ export const Form: React.FC<FormProps> = (props) => {
         e.preventDefault()
       }
 
-      setProcessing(true)
-      setDisabled(true)
+      if (disableFormWhileProcessing) {
+        setProcessing(true)
+        setDisabled(true)
+      }
 
       if (waitForAutocomplete) {
         await wait(100)
