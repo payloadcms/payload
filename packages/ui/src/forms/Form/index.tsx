@@ -19,6 +19,7 @@ import type {
   FormProps,
   GetDataByPath,
   Submit,
+  SubmitOptions,
 } from './types.js'
 
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
@@ -208,7 +209,7 @@ export const Form: React.FC<FormProps> = (props) => {
         method: methodToUse = method,
         overrides: overridesFromArgs = {},
         skipValidation,
-      } = options
+      } = options || ({} as SubmitOptions)
 
       const disableToast = disableSuccessStatusFromArgs ?? disableSuccessStatus
 
