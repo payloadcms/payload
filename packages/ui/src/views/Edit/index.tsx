@@ -65,6 +65,7 @@ export function DefaultEditView({
     BeforeFields,
     collectionSlug,
     currentEditor,
+    data,
     disableActions,
     disableCreate,
     disableLeaveWithoutSaving,
@@ -86,12 +87,14 @@ export function DefaultEditView({
     redirectAfterDelete,
     redirectAfterDuplicate,
     redirectAfterRestore,
-    savedDocumentData,
     setCurrentEditor,
+    setData,
     setDocumentIsLocked,
+    setLastUpdateTime,
+    setMostRecentVersionIsAutosaved,
+    setUnpublishedVersionCount,
     unlockDocument,
     updateDocumentEditor,
-    updateSavedDocumentData,
   } = useDocumentInfo()
 
   const {
@@ -237,7 +240,7 @@ export function DefaultEditView({
             setDocumentIsLocked(false)
             setCurrentEditor(null)
           } catch (err) {
-            console.error('Failed to unlock before leave', err)
+            console.error('Failed to unlock before leave', err) // eslint-disable-line no-console
           }
         }
       }
@@ -261,10 +264,12 @@ export function DefaultEditView({
 
       const document = json?.doc || json?.result
 
+      const updatedAt = document?.updatedAt || new Date().toISOString()
+
       reportUpdate({
         id,
         entitySlug,
-        updatedAt: document?.updatedAt || new Date().toISOString(),
+        updatedAt,
       })
 
       // If we're editing the doc of the logged-in user,
@@ -273,10 +278,16 @@ export function DefaultEditView({
         void refreshCookieAsync()
       }
 
-      incrementVersionCount()
+      setLastUpdateTime(updatedAt)
 
-      if (typeof updateSavedDocumentData === 'function') {
-        void updateSavedDocumentData(document || {})
+      if (!setMostRecentVersionIsAutosaved && autosaveEnabled) {
+        incrementVersionCount()
+        setMostRecentVersionIsAutosaved(true)
+        setUnpublishedVersionCount((prev) => prev + 1)
+      }
+
+      if (typeof setData === 'function') {
+        void setData(document || {})
       }
 
       if (typeof onSaveFromContext === 'function') {
@@ -306,7 +317,7 @@ export function DefaultEditView({
 
       await getDocPermissions(json)
 
-      if ((id || globalSlug) && !autosaveEnabled) {
+      if (id || globalSlug) {
         const docPreferences = await getDocPreferences()
 
         const { state } = await getFormState({
@@ -341,18 +352,22 @@ export function DefaultEditView({
       user,
       collectionSlug,
       userSlug,
-      incrementVersionCount,
-      updateSavedDocumentData,
+      setLastUpdateTime,
+      setMostRecentVersionIsAutosaved,
+      autosaveEnabled,
+      setData,
       onSaveFromContext,
-      redirectAfterCreate,
       isEditing,
       depth,
+      redirectAfterCreate,
       getDocPermissions,
       globalSlug,
-      autosaveEnabled,
       refreshCookieAsync,
+      incrementVersionCount,
+      setUnpublishedVersionCount,
       adminRoute,
       locale,
+      startRouteTransition,
       router,
       resetUploadEdits,
       getDocPreferences,
@@ -362,7 +377,6 @@ export function DefaultEditView({
       schemaPathSegments,
       isLockingEnabled,
       setDocumentIsLocked,
-      startRouteTransition,
     ],
   )
 
@@ -549,7 +563,7 @@ export function DefaultEditView({
               SaveButton,
               SaveDraftButton,
             }}
-            data={savedDocumentData}
+            data={data}
             disableActions={disableActions || isFolderCollection || isTrashed}
             disableCreate={disableCreate}
             EditMenuItems={EditMenuItems}
@@ -612,14 +626,14 @@ export function DefaultEditView({
                           className={`${baseClass}__auth`}
                           collectionSlug={collectionConfig.slug}
                           disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
-                          email={savedDocumentData?.email}
+                          email={data?.email}
                           loginWithUsername={auth?.loginWithUsername}
                           operation={operation}
                           readOnly={!hasSavePermission}
                           requirePassword={!id}
                           setValidateBeforeSubmit={setValidateBeforeSubmit}
                           useAPIKey={auth.useAPIKey}
-                          username={savedDocumentData?.username}
+                          username={data?.username}
                           verify={auth.verify}
                         />
                       )}

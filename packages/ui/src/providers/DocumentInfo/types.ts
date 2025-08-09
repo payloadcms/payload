@@ -49,6 +49,7 @@ export type DocumentInfoProps = {
 
 export type DocumentInfoContext = {
   currentEditor?: ClientUser | null | number | string
+  data?: Data
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   documentIsLocked?: boolean
   documentLockState: React.RefObject<{
@@ -61,21 +62,26 @@ export type DocumentInfoContext = {
   incrementVersionCount: () => void
   isInitializing: boolean
   preferencesKey?: string
+  /**
+   * @deprecated This property is deprecated and will be removed in v4.
+   * Use `data` instead.
+   */
   savedDocumentData?: Data
   setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>
+  setData: (data: Data) => void
   setDocFieldPreferences: (
     field: string,
     fieldPreferences: { [key: string]: unknown } & Partial<InsideFieldsPreferences>,
   ) => void
   setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
   /**
-   *
    * @deprecated This property is deprecated and will be removed in v4.
-   * This is for performance reasons. Use the `DocumentTitleContext` instead.
+   * This is for performance reasons. Use the `DocumentTitleContext` instead
+   * via the `useDocumentTitle` hook.
    * @example
    * ```tsx
    * import { useDocumentTitle } from '@payloadcms/ui'
-   * const { setDocumentTitle }  = useDocumentTitle()
+   * const { setDocumentTitle } = useDocumentTitle()
    * ```
    */
   setDocumentTitle: React.Dispatch<React.SetStateAction<string>>
@@ -86,17 +92,22 @@ export type DocumentInfoContext = {
   setUploadStatus?: (status: 'failed' | 'idle' | 'uploading') => void
   /**
    * @deprecated This property is deprecated and will be removed in v4.
-   * This is for performance reasons. Use the `DocumentTitleContext` instead.
+   * This is for performance reasons. Use the `DocumentTitleContext` instead
+   * via the `useDocumentTitle` hook.
    * @example
    * ```tsx
    * import { useDocumentTitle } from '@payloadcms/ui'
-   * const { title }  = useDocumentTitle()
+   * const { title } = useDocumentTitle()
    * ```
    */
   title: string
   unlockDocument: (docID: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number
   updateDocumentEditor: (docID: number | string, slug: string, user: ClientUser) => Promise<void>
+  /**
+   * @deprecated This property is deprecated and will be removed in v4.
+   * Use `setData` instead.
+   */
   updateSavedDocumentData: (data: Data) => void
   uploadStatus?: 'failed' | 'idle' | 'uploading'
   versionCount: number
