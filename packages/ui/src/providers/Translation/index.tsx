@@ -40,9 +40,9 @@ const Context = createContext<ContextType<any, any>>({
     t: (key) => key,
     translations: {} as any,
   },
-  languageOptions: undefined,
+  languageOptions: undefined!,
   switchLanguage: undefined,
-  t: (key) => undefined,
+  t: (key) => undefined!,
 })
 
 type Props = {
@@ -104,9 +104,9 @@ export const TranslationProvider: React.FC<Props> = ({
     <Context
       value={{
         i18n: {
-          dateFNS,
+          dateFNS: dateFNS!,
           dateFNSKey,
-          fallbackLanguage: fallbackLang,
+          fallbackLanguage: fallbackLang!,
           language,
           t: nextT,
           translations,

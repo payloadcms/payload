@@ -50,7 +50,7 @@ const getTheme = (
 
   document.documentElement.setAttribute('data-theme', theme)
 
-  return { theme, themeFromCookies }
+  return { theme, themeFromCookies: themeFromCookies! }
 }
 
 export const defaultTheme = 'light'
@@ -100,7 +100,7 @@ export const ThemeProvider: React.FC<{
     [cookieKey],
   )
 
-  return <Context value={{ autoMode, setTheme, theme }}>{children}</Context>
+  return <Context value={{ autoMode: autoMode!, setTheme, theme }}>{children}</Context>
 }
 
 export const useTheme = (): ThemeContext => use(Context)
