@@ -54,6 +54,14 @@ const AutosavePosts: CollectionConfig = {
       localized: true,
     },
     {
+      name: 'computedTitle',
+      label: 'Computed Title',
+      type: 'text',
+      hooks: {
+        beforeChange: [({ data }) => data?.title],
+      },
+    },
+    {
       name: 'description',
       label: 'Description',
       type: 'textarea',
