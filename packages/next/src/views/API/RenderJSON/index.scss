@@ -1,17 +1,17 @@
 @import '~@payloadcms/ui/scss';
 
-$tab-width: 16px;
+$tab-width: 24px;
 
 @layer payload-default {
   .query-inspector {
-    --tab-width: 16px;
+    --tab-width: 24px;
 
     &__json-children {
       position: relative;
 
       &--nested {
         & li {
-          // padding-left: var(--tab-width);
+          padding-left: 8px;
         }
       }
 
@@ -28,7 +28,7 @@ $tab-width: 16px;
     &__row-line {
       &--nested {
         .query-inspector__json-children {
-          padding-left: calc(var(--base) * 2);
+          padding-left: var(--tab-width);
         }
       }
     }
@@ -47,10 +47,16 @@ $tab-width: 16px;
       border-bottom-right-radius: 0;
       position: relative;
       display: flex;
+      column-gap: 14px;
       row-gap: 10px;
       align-items: center;
       left: 0;
       width: calc(100% + 3px);
+      background-color: var(--theme-elevation-50);
+
+      &:not(.query-inspector__list-toggle--empty) {
+        margin-left: calc(var(--tab-width) * -1 - 10px);
+      }
 
       svg .stroke {
         stroke: var(--theme-elevation-400);
@@ -67,9 +73,6 @@ $tab-width: 16px;
     }
 
     &__toggle-row-icon {
-      position: absolute;
-      margin-left: calc(var(--tab-width) * -1 - 8px);
-
       &--open {
         transform: rotate(0deg);
       }
@@ -105,9 +108,8 @@ $tab-width: 16px;
     &__results {
       & > .query-inspector__row-line--nested {
         & > .query-inspector__list-toggle {
-          .query-inspector__bracket--position-start {
-            padding-left: var(--tab-width);
-          }
+          margin-left: 0;
+          column-gap: 6px;
 
           .query-inspector__toggle-row-icon {
             margin-left: -4px;
@@ -116,6 +118,10 @@ $tab-width: 16px;
 
         & > .query-inspector__json-children {
           padding-left: calc(var(--base) * 1);
+        }
+
+        & > .query-inspector__bracket--nested > .query-inspector__bracket--position-end {
+          padding-left: 16px;
         }
       }
     }
