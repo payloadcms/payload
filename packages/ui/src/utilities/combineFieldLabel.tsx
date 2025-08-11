@@ -25,7 +25,7 @@ export const combineFieldLabel = ({
       <span style={{ display: 'inline-block' }}>
         <RenderCustomComponent
           CustomComponent={CustomLabel}
-          Fallback={<FieldLabel label={'label' in field && field.label} />}
+          Fallback={<FieldLabel label={('label' in field! && field.label) as string} />}
         />
       </span>
     </Fragment>

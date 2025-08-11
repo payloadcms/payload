@@ -15,10 +15,10 @@ export type UploadEditsContext = {
 }
 
 const Context = React.createContext<UploadEditsContext>({
-  getUploadEdits: () => undefined,
-  resetUploadEdits: undefined,
-  updateUploadEdits: undefined,
-  uploadEdits: undefined,
+  getUploadEdits: () => undefined!,
+  resetUploadEdits: undefined!,
+  updateUploadEdits: undefined!,
+  uploadEdits: undefined!,
 })
 
 export const UploadEditsProvider = ({ children, initialUploadEdits }: UploadEditsProviderProps) => {

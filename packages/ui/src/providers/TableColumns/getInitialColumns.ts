@@ -1,4 +1,10 @@
-import type { ClientField, CollectionConfig, CollectionPreferences, Field } from 'payload'
+import type {
+  ClientField,
+  CollectionConfig,
+  CollectionPreferences,
+  ColumnPreference,
+  Field,
+} from 'payload'
 
 import { fieldAffectsData } from 'payload/shared'
 
@@ -6,30 +12,33 @@ const getRemainingColumns = <T extends ClientField[] | Field[]>(
   fields: T,
   useAsTitle: string,
 ): CollectionPreferences['columns'] =>
-  fields?.reduce((remaining, field) => {
-    if (fieldAffectsData(field) && field.name === useAsTitle) {
-      return remaining
-    }
+  fields?.reduce(
+    (remaining, field) => {
+      if (fieldAffectsData(field) && field.name === useAsTitle) {
+        return remaining
+      }
 
-    if (!fieldAffectsData(field) && 'fields' in field) {
-      return [...remaining, ...getRemainingColumns(field.fields, useAsTitle)]
-    }
+      if (!fieldAffectsData(field) && 'fields' in field) {
+        return [...remaining!, ...getRemainingColumns(field.fields, useAsTitle)]
+      }
 
-    if (field.type === 'tabs' && 'tabs' in field) {
-      return [
-        ...remaining,
-        ...field.tabs.reduce(
-          (tabFieldColumns, tab) => [
-            ...tabFieldColumns,
-            ...('name' in tab ? [tab.name] : getRemainingColumns(tab.fields, useAsTitle)),
-          ],
-          [],
-        ),
-      ]
-    }
+      if (field.type === 'tabs' && 'tabs' in field) {
+        return [
+          ...remaining,
+          ...field.tabs.reduce(
+            (tabFieldColumns, tab) => [
+              ...tabFieldColumns,
+              ...('name' in tab ? [tab.name] : getRemainingColumns(tab.fields, useAsTitle)),
+            ],
+            [],
+          ),
+        ]
+      }
 
-    return [...remaining, field.name]
-  }, [])
+      return [...remaining, field.name]
+    },
+    [] as CollectionPreferences['columns'],
+  )
 
 /**
  * Returns the initial columns to display in the table based on the following criteria:
@@ -38,10 +47,10 @@ const getRemainingColumns = <T extends ClientField[] | Field[]>(
  */
 export const getInitialColumns = <T extends ClientField[] | Field[]>(
   fields: T,
-  useAsTitle: CollectionConfig['admin']['useAsTitle'],
-  defaultColumns: CollectionConfig['admin']['defaultColumns'],
+  useAsTitle: NonNullable<CollectionConfig['admin']>['useAsTitle'],
+  defaultColumns: NonNullable<CollectionConfig['admin']>['defaultColumns'],
 ): CollectionPreferences['columns'] => {
-  let initialColumns = []
+  let initialColumns: ColumnPreference[] = []
 
   if (Array.isArray(defaultColumns) && defaultColumns.length >= 1) {
     initialColumns = defaultColumns

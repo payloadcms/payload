@@ -97,18 +97,20 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const {
     breakpoints: { s: smallBreak },
-  } = useWindowInfo()
+  } = useWindowInfo!()
 
   const docs = React.useMemo(() => {
     if (isUploadCollection) {
-      return data.docs.map((doc) => {
-        return {
-          ...doc,
-          filesize: formatFilesize(doc.filesize),
-        }
-      })
+      return (
+        data?.docs.map((doc) => {
+          return {
+            ...doc,
+            filesize: formatFilesize(doc.filesize),
+          }
+        }) ?? []
+      )
     } else {
-      return data?.docs
+      return data?.docs ?? []
     }
   }, [data?.docs, isUploadCollection])
 
@@ -146,7 +148,7 @@ export function DefaultListView(props: ListViewClientProps) {
     <Fragment>
       <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
         <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
-          <SelectionProvider docs={docs} totalDocs={data?.totalDocs}>
+          <SelectionProvider docs={docs} totalDocs={data?.totalDocs ?? 0}>
             {BeforeList}
             <Gutter className={`${baseClass}__wrap`}>
               <CollectionListHeader
@@ -158,7 +160,7 @@ export function DefaultListView(props: ListViewClientProps) {
                       Fallback={
                         <ViewDescription
                           collectionSlug={collectionSlug}
-                          description={collectionConfig?.admin?.description}
+                          description={collectionConfig?.admin?.description ?? ''}
                         />
                       }
                     />
@@ -169,11 +171,11 @@ export function DefaultListView(props: ListViewClientProps) {
                 hasCreatePermission={hasCreatePermission}
                 hasDeletePermission={hasDeletePermission}
                 i18n={i18n}
-                isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
+                isBulkUploadEnabled={isBulkUploadEnabled! && !upload.hideFileInputOnCreate}
                 isTrashEnabled={isTrashEnabled}
                 newDocumentURL={newDocumentURL}
                 openBulkUpload={openBulkUpload}
-                smallBreak={smallBreak}
+                smallBreak={smallBreak!}
                 viewType={viewType}
               />
               <ListControls
@@ -211,7 +213,7 @@ export function DefaultListView(props: ListViewClientProps) {
                   {hasCreatePermission && newDocumentURL && viewType !== 'trash' && (
                     <Fragment>
                       {isInDrawer ? (
-                        <Button el="button" onClick={() => openModal(createNewDrawerSlug)}>
+                        <Button el="button" onClick={() => openModal(createNewDrawerSlug!)}>
                           {i18n.t('general:createNewLabel', {
                             label: getTranslation(labels?.singular, i18n),
                           })}
@@ -261,7 +263,7 @@ export function DefaultListView(props: ListViewClientProps) {
           </SelectionProvider>
         </div>
       </TableColumnsProvider>
-      {docs?.length > 0 && isGroupingBy && data.totalPages > 1 && (
+      {docs?.length > 0 && isGroupingBy && data?.totalPages && data.totalPages > 1 && (
         <StickyToolbar>
           <PageControls collectionConfig={collectionConfig} />
         </StickyToolbar>

@@ -16,7 +16,7 @@ import type {
 
 import React, { createContext, useCallback } from 'react'
 
-import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
+import type { buildFormStateHandler, BuildFormStateResult } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
 import type { CopyDataFromLocaleArgs } from '../../utilities/copyDataFromLocale.js'
 import type { getFolderResultsComponentAndDataHandler } from '../../utilities/getFolderResultsComponentAndData.js'
@@ -132,10 +132,10 @@ export const ServerFunctionsProvider: React.FC<{
 
   const getDocumentSlots = useCallback<GetDocumentSlots>(
     async (args) =>
-      await serverFunction({
+      (await serverFunction({
         name: 'render-document-slots',
         args,
-      }),
+      })) as DocumentSlots,
     [serverFunction],
   )
 
@@ -148,7 +148,7 @@ export const ServerFunctionsProvider: React.FC<{
           const result = (await serverFunction({
             name: 'schedule-publish',
             args: { ...rest },
-          })) as Awaited<ReturnType<typeof schedulePublishHandler>> // TODO: infer this type when `strictNullChecks` is enabled
+          })) as Awaited<ReturnType<typeof schedulePublishHandler>> // TODO: return types should be automatically inferred
 
           if (!remoteSignal?.aborted) {
             return result
@@ -178,7 +178,7 @@ export const ServerFunctionsProvider: React.FC<{
           const result = (await serverFunction({
             name: 'form-state',
             args: { fallbackLocale: false, ...rest },
-          })) as Awaited<ReturnType<typeof buildFormStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
+          })) as Awaited<ReturnType<typeof buildFormStateHandler>> // TODO: return types should be automatically inferred
 
           if (!remoteSignal?.aborted) {
             return result
@@ -188,7 +188,7 @@ export const ServerFunctionsProvider: React.FC<{
         console.error(_err) // eslint-disable-line no-console
       }
 
-      return { state: null }
+      return { state: null! } as BuildFormStateResult
     },
     [serverFunction],
   )
@@ -202,7 +202,7 @@ export const ServerFunctionsProvider: React.FC<{
           const result = (await serverFunction({
             name: 'table-state',
             args: { fallbackLocale: false, ...rest },
-          })) as Awaited<ReturnType<typeof buildTableStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
+          })) as Awaited<ReturnType<typeof buildTableStateHandler>> // TODO: return types should be automatically inferred
 
           if (!remoteSignal?.aborted) {
             return result
@@ -218,8 +218,9 @@ export const ServerFunctionsProvider: React.FC<{
   )
 
   const renderDocument = useCallback<RenderDocumentServerFunctionHookFn>(
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     async (args) => {
-      const { signal: remoteSignal, ...rest } = args || {}
+      const { signal: _remoteSignal, ...rest } = args || {}
       try {
         const result = (await serverFunction({
           name: 'render-document',
@@ -227,7 +228,7 @@ export const ServerFunctionsProvider: React.FC<{
             fallbackLocale: false,
             ...rest,
           } as Parameters<RenderDocumentServerFunctionHookFn>[0],
-        })) as Awaited<ReturnType<RenderDocumentServerFunctionHookFn>> // TODO: infer this type when `strictNullChecks` is enabled
+        })) as Awaited<ReturnType<RenderDocumentServerFunctionHookFn>> // TODO: return types should be automatically inferred
 
         return result
       } catch (_err) {
@@ -238,6 +239,7 @@ export const ServerFunctionsProvider: React.FC<{
   )
 
   const copyDataFromLocale = useCallback<CopyDataFromLocaleClient>(
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     async (args) => {
       const { signal: remoteSignal, ...rest } = args || {}
 
@@ -258,6 +260,7 @@ export const ServerFunctionsProvider: React.FC<{
   )
 
   const getFolderResultsComponentAndData = useCallback<GetFolderResultsComponentAndDataClient>(
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     async (args) => {
       const { signal: remoteSignal, ...rest } = args || {}
 

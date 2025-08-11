@@ -36,16 +36,16 @@ type SelectionContext = {
 }
 
 const Context = createContext({
-  count: undefined,
+  count: undefined!,
   getQueryParams: (additionalParams?: Where) => '',
   getSelectedIds: () => [],
-  selectAll: undefined,
+  selectAll: undefined!,
   selected: new Map(),
   selectedIDs: [],
   setSelection: (id: number | string) => {},
   toggleAll: (toggleAll: boolean) => {},
-  totalDocs: undefined,
-} satisfies SelectionContext)
+  totalDocs: undefined!,
+} as SelectionContext)
 
 type Props = {
   readonly children: React.ReactNode
@@ -55,7 +55,7 @@ type Props = {
 }
 
 const reduceActiveSelections = (selected: Map<number | string, boolean>): (number | string)[] => {
-  const ids = []
+  const ids: (number | string)[] = []
 
   for (const [key, value] of selected) {
     if (value) {
@@ -153,7 +153,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
           },
         }
       } else {
-        const ids = []
+        const ids: (number | string)[] = []
 
         for (const [key, value] of selected) {
           if (value) {

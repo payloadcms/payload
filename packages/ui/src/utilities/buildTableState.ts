@@ -42,6 +42,7 @@ type BuildTableStateErrorResult = {
 
 export type BuildTableStateResult = BuildTableStateErrorResult | BuildTableStateSuccessResult
 
+// @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
 export const buildTableStateHandler: ServerFunction<
   BuildTableStateArgs,
   Promise<BuildTableStateResult>
@@ -96,7 +97,7 @@ const buildTableState = async (
 
   // If we have a user slug, test it against the functions
   if (incomingUserSlug) {
-    const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
+    const adminAccessFunction = payload.collections[incomingUserSlug]?.config.access?.admin
 
     // Run the admin access function from the config if it exists
     if (adminAccessFunction) {
@@ -130,21 +131,21 @@ const buildTableState = async (
     importMap: payload.importMap,
   })
 
-  let collectionConfig: SanitizedCollectionConfig
-  let clientCollectionConfig: ClientCollectionConfig
+  let collectionConfig!: SanitizedCollectionConfig
+  let clientCollectionConfig!: ClientCollectionConfig
 
   if (!Array.isArray(collectionSlug)) {
     if (req.payload.collections[collectionSlug]) {
       collectionConfig = req.payload.collections[collectionSlug].config
       clientCollectionConfig = clientConfig.collections.find(
         (collection) => collection.slug === collectionSlug,
-      )
+      )!
     }
   }
 
   const collectionPreferences = await upsertPreferences<CollectionPreferences>({
     key: Array.isArray(collectionSlug)
-      ? `${parent.collectionSlug}-${parent.joinPath}`
+      ? `${parent?.collectionSlug}-${parent?.joinPath}`
       : `collection-${collectionSlug}`,
     req,
     value: {
@@ -154,7 +155,7 @@ const buildTableState = async (
     },
   })
 
-  let data: PaginatedDocs = dataFromArgs
+  let data: PaginatedDocs = dataFromArgs!
 
   // lookup docs, if desired, i.e. within `join` field which initialize with `depth: 0`
 
@@ -170,8 +171,8 @@ const buildTableState = async (
       const segments = parent.joinPath.split('.')
 
       for (let i = 0; i < segments.length; i++) {
-        currentSelectRef[segments[i]] = i === segments.length - 1 ? true : {}
-        currentSelectRef = currentSelectRef[segments[i]]
+        currentSelectRef[segments[i]!] = i === segments.length - 1 ? true : {}
+        currentSelectRef = currentSelectRef[segments[i]!]
       }
 
       const joinQuery: { limit?: number; page?: number; sort?: string; where?: Where } = {
@@ -203,9 +204,9 @@ const buildTableState = async (
 
       for (let i = 0; i < segments.length; i++) {
         if (i === segments.length - 1) {
-          data = parentDoc[segments[i]]
+          data = parentDoc[segments[i]!]
         } else {
-          parentDoc = parentDoc[segments[i]]
+          parentDoc = parentDoc[segments[i]!]
         }
       }
     } else {
@@ -231,7 +232,7 @@ const buildTableState = async (
     collections: Array.isArray(collectionSlug) ? collectionSlug : undefined,
     columns,
     data,
-    enableRowSelections,
+    enableRowSelections: enableRowSelections!,
     i18n: req.i18n,
     orderableFieldName,
     payload,
@@ -239,7 +240,7 @@ const buildTableState = async (
     renderRowTypes,
     tableAppearance,
     useAsTitle: Array.isArray(collectionSlug)
-      ? payload.collections[collectionSlug[0]]?.config?.admin?.useAsTitle
+      ? payload.collections[collectionSlug[0]!]?.config?.admin?.useAsTitle
       : collectionConfig?.admin?.useAsTitle,
   })
 

@@ -60,7 +60,7 @@ function iterateFields(
                   fromLocaleData[field.name][index],
                   item,
                   req,
-                  parentIsLocalized || field.localized,
+                  parentIsLocalized || field.localized!,
                 )
               }
             })
@@ -100,7 +100,7 @@ function iterateFields(
                   fromLocaleData[field.name][index],
                   blockData,
                   req,
-                  parentIsLocalized || field.localized,
+                  parentIsLocalized || field.localized!,
                 )
               }
             })
@@ -143,7 +143,7 @@ function iterateFields(
               fromLocaleData[field.name],
               toLocaleData[field.name],
               req,
-              parentIsLocalized || field.localized,
+              parentIsLocalized || field.localized!,
             )
           } else {
             iterateFields(field.fields, fromLocaleData, toLocaleData, req, parentIsLocalized)
@@ -252,7 +252,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
 
   // If we have a user slug, test it against the functions
   if (incomingUserSlug) {
-    const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
+    const adminAccessFunction = payload.collections[incomingUserSlug]!.config.access?.admin
 
     // Run the admin access function from the config if it exists
     if (adminAccessFunction) {
@@ -278,8 +278,8 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           // `select` would allow us to select only the fields we need in the future
         })
       : payload.findByID({
-          id: docID,
-          collection: collectionSlug,
+          id: docID!,
+          collection: collectionSlug!,
           depth: 0,
           joins: false,
           locale: fromLocale,
@@ -297,8 +297,8 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           // `select` would allow us to select only the fields we need in the future
         })
       : payload.findByID({
-          id: docID,
-          collection: collectionSlug,
+          id: docID!,
+          collection: collectionSlug!,
           depth: 0,
           joins: false,
           locale: toLocale,
@@ -318,7 +318,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
 
   const fields = globalSlug
     ? globals[globalSlug].config.fields
-    : collections[collectionSlug].config.fields
+    : collections[collectionSlug]!.config.fields
 
   const fromLocaleDataWithoutID = fromLocaleData.value
   const toLocaleDataWithoutID = toLocaleData.value

@@ -10,5 +10,5 @@ export const findLocaleFromCode = (
     return null
   }
 
-  return localizationConfig.locales.find((el) => el?.code === locale)
+  return localizationConfig.locales.find((el) => el?.code === locale)!
 }

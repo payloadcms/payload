@@ -10,7 +10,7 @@ export type UploadControlsContext = {
   uploadControlFileUrl: string
 }
 
-const Context = createContext<UploadControlsContext>(undefined)
+const Context = createContext<UploadControlsContext>(undefined!)
 
 export const UploadControlsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [uploadControlFileName, setUploadControlFileName] = useState<null | string>(null)

@@ -1,9 +1,10 @@
 'use client'
 
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { FolderListViewClientProps } from 'payload'
+import type { ClientCollectionConfig, FolderListViewClientProps } from 'payload'
 
 import { useDndMonitor } from '@dnd-kit/core'
+import { IWindowInfoContext } from '@faceless-ui/window-info/dist/WindowInfoProvider/context.js'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
@@ -31,8 +32,8 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { FolderProvider, useFolder } from '../../providers/Folders/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
-import { useRouteCache } from '../../providers/RouteCache/index.js'
 import './index.scss'
+import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
@@ -62,7 +63,7 @@ export function DefaultCollectionFolderView({
       breadcrumbs={breadcrumbs}
       documents={documents}
       folderFieldName={folderFieldName}
-      folderID={folderID}
+      folderID={folderID!}
       FolderResultsComponent={FolderResultsComponent}
       search={search}
       sort={sort}
@@ -126,7 +127,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
   const { startRouteTransition } = useRouteTransition()
   const { clearRouteCache } = useRouteCache()
 
-  const collectionConfig = getEntityConfig({ collectionSlug })
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
   const { labels, upload } = collectionConfig
   const isUploadCollection = Boolean(upload)
@@ -134,7 +135,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
 
   const {
     breakpoints: { s: smallBreak },
-  } = useWindowInfo()
+  } = useWindowInfo!()
 
   const onDragEnd = React.useCallback(
     async (event: DragEndEvent) => {
@@ -142,10 +143,10 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
         return
       }
 
-      if (event.over.data.current.type === 'folder' && 'id' in event.over.data.current) {
+      if (event.over.data.current!.type === 'folder' && 'id' in event.over.data.current!) {
         try {
           await moveToFolder({
-            itemsToMove: getSelectedItems(),
+            itemsToMove: getSelectedItems!(),
             toFolderID: event.over.data.current.id,
           })
         } catch (error) {
@@ -172,7 +173,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
   React.useEffect(() => {
     if (!drawerDepth) {
       setStepNav([
-        !breadcrumbs.length
+        !breadcrumbs?.length
           ? {
               label: (
                 <div className={`${baseClass}__step-nav-icon-label`} key="root">
@@ -210,10 +211,10 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                 </DroppableBreadcrumb>
               ),
             },
-        ...breadcrumbs.map((crumb, crumbIndex) => {
+        ...breadcrumbs!.map((crumb, crumbIndex) => {
           return {
             label:
-              crumbIndex === breadcrumbs.length - 1 ? (
+              crumbIndex === breadcrumbs!.length - 1 ? (
                 crumb.name
               ) : (
                 <DroppableBreadcrumb
@@ -253,7 +254,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
     startRouteTransition,
   ])
 
-  const totalDocsAndSubfolders = documents.length + subfolders.length
+  const totalDocsAndSubfolders = documents!.length + subfolders!.length
 
   return (
     <Fragment>
@@ -269,7 +270,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                   disableBulkDelete={disableBulkDelete}
                   disableBulkEdit={collectionConfig.disableBulkEdit ?? disableBulkEdit}
                   folderAssignedCollections={
-                    Array.isArray(folderType) ? folderType : [collectionSlug]
+                    Array.isArray(folderType) ? folderType : [collectionSlug!]
                   }
                   key="list-selection"
                 />
@@ -305,7 +306,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                   buttonLabel={t('general:createNew')}
                   collectionSlugs={allowCreateCollectionSlugs}
                   folderAssignedCollections={
-                    Array.isArray(folderType) ? folderType : [collectionSlug]
+                    Array.isArray(folderType) ? folderType : [collectionSlug!]
                   }
                   key="create-new-button"
                   onCreateSuccess={clearRouteCache}
@@ -313,9 +314,9 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                 />
               ),
               <ListBulkUploadButton
-                collectionSlug={collectionSlug}
-                hasCreatePermission={allowCreateCollectionSlugs.includes(collectionSlug)}
-                isBulkUploadEnabled={isBulkUploadEnabled}
+                collectionSlug={collectionSlug!}
+                hasCreatePermission={allowCreateCollectionSlugs.includes(collectionSlug!)}
+                isBulkUploadEnabled={isBulkUploadEnabled!}
                 key="bulk-upload-button"
               />,
             ].filter(Boolean)}
@@ -346,19 +347,19 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                     buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
                     collectionSlugs={[folderCollectionConfig.slug]}
                     folderAssignedCollections={
-                      Array.isArray(folderType) ? folderType : [collectionSlug]
+                      Array.isArray(folderType) ? folderType : [collectionSlug!]
                     }
                     key="create-folder"
                     onCreateSuccess={clearRouteCache}
                     slugPrefix="create-folder--no-results"
                   />
                 ),
-                allowCreateCollectionSlugs.includes(collectionSlug) && (
+                allowCreateCollectionSlugs.includes(collectionSlug!) && (
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
-                    collectionSlugs={[collectionSlug]}
+                    collectionSlugs={[collectionSlug!]}
                     folderAssignedCollections={
-                      Array.isArray(folderType) ? folderType : [collectionSlug]
+                      Array.isArray(folderType) ? folderType : [collectionSlug!]
                     }
                     key="create-document"
                     onCreateSuccess={clearRouteCache}

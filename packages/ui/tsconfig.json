@@ -3,6 +3,7 @@
   "compilerOptions": {
     /* TODO: remove the following lines */
     "strict": false,
+    "strictNullChecks": true,
   },
   "references": [{ "path": "../payload" }, { "path": "../translations" }]
 }

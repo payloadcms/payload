@@ -64,8 +64,8 @@ export const traverseFields = ({
           const block =
             typeof _block === 'string'
               ? config.blocksMap
-                ? config.blocksMap[_block]
-                : config.blocks.find((block) => typeof block !== 'string' && block.slug === _block)
+                ? config.blocksMap[_block]!
+                : config.blocks.find((block) => typeof block !== 'string' && block.slug === _block)!
               : _block
 
           const blockSchemaPath = `${schemaPath}.${block.slug}`
@@ -161,7 +161,7 @@ export const traverseFields = ({
               ? {
                   fields: clientFields,
                 }
-              : clientFields[0],
+              : clientFields[0]!,
           )
         }
         break

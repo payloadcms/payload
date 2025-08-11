@@ -59,7 +59,7 @@ export function DefaultBrowseByFolderView({
       breadcrumbs={breadcrumbs}
       documents={documents}
       folderFieldName={folderFieldName}
-      folderID={folderID}
+      folderID={folderID!}
       FolderResultsComponent={FolderResultsComponent}
       search={search}
       subfolders={subfolders}
@@ -105,7 +105,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
   const { clearRouteCache } = useRouteCache()
   const {
     breakpoints: { s: smallBreak },
-  } = useWindowInfo()
+  } = useWindowInfo!()
   const { setPreference } = usePreferences()
   const {
     activeCollectionFolderSlugs: visibleCollectionSlugs,
@@ -129,9 +129,9 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
   const [activeView, setActiveView] = React.useState<'grid' | 'list'>(viewPreference || 'grid')
   const [searchPlaceholder] = React.useState(() => {
     const locationLabel =
-      breadcrumbs.length === 0
+      breadcrumbs?.length === 0
         ? getTranslation(folderCollectionConfig.labels?.plural, i18n)
-        : breadcrumbs[breadcrumbs.length - 1].name
+        : breadcrumbs![breadcrumbs!.length - 1]!.name
     return t('folder:searchByNameInFolder', {
       folderName: locationLabel,
     })
@@ -143,9 +143,9 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
         return
       }
 
-      if (event.over.data.current.type === 'folder' && 'id' in event.over.data.current) {
+      if (event.over.data.current?.type === 'folder' && 'id' in event.over.data.current) {
         await moveToFolder({
-          itemsToMove: getSelectedItems(),
+          itemsToMove: getSelectedItems!(),
           toFolderID: event.over.data.current.id || null,
         })
         clearRouteCache()
@@ -154,10 +154,10 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
     [moveToFolder, getSelectedItems, clearRouteCache],
   )
 
-  const totalDocsAndSubfolders = documents.length + subfolders.length
-  const listHeaderTitle = !breadcrumbs.length
+  const totalDocsAndSubfolders = documents!.length + subfolders!.length
+  const listHeaderTitle = !breadcrumbs!.length
     ? t('folder:browseByFolder')
-    : breadcrumbs[breadcrumbs.length - 1].name
+    : breadcrumbs![breadcrumbs!.length - 1]!.name
   const noResultsLabel = visibleCollectionSlugs.reduce((acc, slug, index, array) => {
     const collectionConfig = getEntityConfig({ collectionSlug: slug })
     if (index === 0) {
@@ -182,7 +182,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
   React.useEffect(() => {
     if (!drawerDepth) {
       setStepNav([
-        !breadcrumbs.length
+        !breadcrumbs?.length
           ? {
               label: (
                 <div className={`${baseClass}__step-nav-icon-label`} key="root">
@@ -204,7 +204,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                   key="root"
                   onClick={() => {
                     startRouteTransition(() => {
-                      router.push(getFolderRoute(null))
+                      router.push(getFolderRoute())
                     })
                   }}
                 >
@@ -213,10 +213,10 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                 </DroppableBreadcrumb>
               ),
             },
-        ...breadcrumbs.map((crumb, crumbIndex) => {
+        ...breadcrumbs!.map((crumb, crumbIndex) => {
           return {
             label:
-              crumbIndex === breadcrumbs.length - 1 ? (
+              crumbIndex === breadcrumbs!.length - 1 ? (
                 crumb.name
               ) : (
                 <DroppableBreadcrumb
@@ -225,7 +225,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                   key={crumb.id}
                   onClick={() => {
                     startRouteTransition(() => {
-                      router.push(getFolderRoute(crumb.id))
+                      router.push(getFolderRoute(crumb.id!))
                     })
                   }}
                 >
@@ -254,7 +254,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                 <ListSelection
                   disableBulkDelete={disableBulkDelete}
                   disableBulkEdit={disableBulkEdit}
-                  folderAssignedCollections={folderAssignedCollections}
+                  folderAssignedCollections={folderAssignedCollections!}
                   key="list-selection"
                 />
               ),
@@ -294,17 +294,17 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
             <>
               {activeView === 'grid' ? (
                 <div>
-                  {subfolders.length ? (
+                  {subfolders?.length ? (
                     <>
                       <ItemCardGrid items={subfolders} title={'Folders'} type="folder" />
                     </>
                   ) : null}
 
-                  {documents.length ? (
+                  {documents?.length ? (
                     <>
                       <ItemCardGrid
                         items={documents}
-                        subfolderCount={subfolders.length}
+                        subfolderCount={subfolders!.length}
                         title={'Documents'}
                         type="file"
                       />

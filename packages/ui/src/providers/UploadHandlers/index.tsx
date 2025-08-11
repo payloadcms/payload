@@ -24,7 +24,7 @@ export const UploadHandlersProvider = ({ children }) => {
   )
 
   const getUploadHandler: UploadHandlersContext['getUploadHandler'] = ({ collectionSlug }) => {
-    return uploadHandlers.get(collectionSlug)
+    return uploadHandlers.get(collectionSlug)!
   }
 
   const setUploadHandler: UploadHandlersContext['setUploadHandler'] = ({
