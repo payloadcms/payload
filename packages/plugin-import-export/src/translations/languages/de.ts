@@ -12,6 +12,7 @@ export const deTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Grenze',
     'field-locale-label': 'Ort',
     'field-name-label': 'Dateiname',
+    'field-page-label': 'Seite',
     'field-selectionToUse-label': 'Auswahl zur Verwendung',
     'field-sort-label': 'Sortieren nach',
     'selectionToUse-allDocuments': 'Verwenden Sie alle Dokumente.',

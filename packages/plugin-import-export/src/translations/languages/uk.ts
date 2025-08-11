@@ -12,6 +12,7 @@ export const ukTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Обмеження',
     'field-locale-label': 'Локалізація',
     'field-name-label': 'Назва файлу',
+    'field-page-label': 'Сторінка',
     'field-selectionToUse-label': 'Вибір для використання',
     'field-sort-label': 'Сортувати за',
     'selectionToUse-allDocuments': 'Використовуйте всі документи',

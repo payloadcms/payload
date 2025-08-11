@@ -12,6 +12,7 @@ export const trTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Sınır',
     'field-locale-label': 'Yerel',
     'field-name-label': 'Dosya adı',
+    'field-page-label': 'Sayfa',
     'field-selectionToUse-label': 'Kullanılacak seçim',
     'field-sort-label': 'Sırala',
     'selectionToUse-allDocuments': 'Tüm belgeleri kullanın',

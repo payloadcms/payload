@@ -12,6 +12,7 @@ export const myTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'ကန့်သတ်ချက်',
     'field-locale-label': 'Tempatan',
     'field-name-label': 'ဖိုင်နာမည်',
+    'field-page-label': 'စာမျက်နှာ',
     'field-selectionToUse-label': 'Pilihan untuk digunakan',
     'field-sort-label': 'စီမံအလိုက်',
     'selectionToUse-allDocuments': 'Gunakan semua dokumen',

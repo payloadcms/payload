@@ -12,6 +12,7 @@ export const hrTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Ograničenje',
     'field-locale-label': 'Lokalitet',
     'field-name-label': 'Naziv datoteke',
+    'field-page-label': 'Stranica',
     'field-selectionToUse-label': 'Odabir za upotrebu',
     'field-sort-label': 'Sortiraj po',
     'selectionToUse-allDocuments': 'Koristite sve dokumente',

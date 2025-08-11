@@ -12,6 +12,7 @@ export const faTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'محدودیت',
     'field-locale-label': 'محلی',
     'field-name-label': 'نام فایل',
+    'field-page-label': 'صفحه',
     'field-selectionToUse-label': 'انتخاب برای استفاده',
     'field-sort-label': 'مرتب سازی بر اساس',
     'selectionToUse-allDocuments': 'از تمام مستندات استفاده کنید',

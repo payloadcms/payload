@@ -12,6 +12,7 @@ export const hyTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Սահմանափակում',
     'field-locale-label': 'Լոկալ',
     'field-name-label': 'Ֆայլի անվանումը',
+    'field-page-label': 'Էջ',
     'field-selectionToUse-label': 'Օգտագործման ընտրություն',
     'field-sort-label': 'Դասավորել ըստ',
     'selectionToUse-allDocuments': 'Օգտագործեք բոլոր փաստաթղթերը',
