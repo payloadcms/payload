@@ -9,7 +9,12 @@ export const buildIndexName = ({
   name: string
   number?: number
 }): string => {
-  const indexName = `${name}${number ? `_${number}` : ''}_idx`
+  let indexName = `${name}${number ? `_${number}` : ''}_idx`
+
+  if (indexName.length > 60) {
+    // Trim to 60 chars, but keep the "_idx" suffix
+    indexName = `${indexName.slice(0, 60 - 4)}_idx`
+  }
 
   if (!adapter.indexes.has(indexName)) {
     adapter.indexes.add(indexName)
