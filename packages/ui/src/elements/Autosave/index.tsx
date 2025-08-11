@@ -20,6 +20,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
+import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
 import './index.scss'
 
@@ -42,7 +43,14 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     },
   } = useConfig()
 
-  const { docConfig, lastUpdateTime } = useDocumentInfo()
+  const {
+    docConfig,
+    incrementVersionCount,
+    lastUpdateTime,
+    mostRecentVersionIsAutosaved,
+    setMostRecentVersionIsAutosaved,
+    setUnpublishedVersionCount,
+  } = useDocumentInfo()
 
   const { isValid, setBackgroundProcessing, submit } = useForm()
 
@@ -135,18 +143,31 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
             method = 'POST'
           }
 
-          if (!submitted && modifiedRef.current && url) {
-            await submit({
+          const { valid } = reduceFieldsToValuesWithValidation(formStateRef.current, true)
+
+          const skipSubmission =
+            submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
+
+          if (!skipSubmission && modifiedRef.current && url) {
+            const result = await submit({
               action: url,
+              context: {
+                incrementVersionCount: false,
+              },
               disableFormWhileProcessing: false,
+              disableSuccessStatus: true,
               method,
               overrides: {
                 _status: 'draft',
               },
-              // setProcessing: false,
-              disableSuccessStatus: true,
               skipValidation: versionsConfig?.drafts && !versionsConfig?.drafts?.validate,
             })
+
+            if (result && result?.res?.ok && !mostRecentVersionIsAutosaved) {
+              incrementVersionCount()
+              setMostRecentVersionIsAutosaved(true)
+              setUnpublishedVersionCount((prev) => prev + 1)
+            }
 
             const newDate = new Date()
 

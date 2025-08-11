@@ -204,6 +204,7 @@ export const Form: React.FC<FormProps> = (props) => {
     async (options, e) => {
       const {
         action: actionArg = action,
+        context,
         disableFormWhileProcessing = true,
         disableSuccessStatus: disableSuccessStatusFromArgs,
         method: methodToUse = method,
@@ -378,7 +379,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
         if (res.status < 400) {
           if (typeof onSuccess === 'function') {
-            const newFormState = await onSuccess(json)
+            const newFormState = await onSuccess(json, context)
 
             if (newFormState) {
               dispatchFields({
@@ -455,6 +456,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
           errorToast(message)
         }
+
+        return { formState: contextRef.current.fields, res }
       } catch (err) {
         console.error('Error submitting form', err) // eslint-disable-line no-console
         setProcessing(false)

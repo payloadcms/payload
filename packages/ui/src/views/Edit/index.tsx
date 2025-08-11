@@ -83,7 +83,6 @@ export function DefaultEditView({
     isInitializing,
     isTrashed,
     lastUpdateTime,
-    mostRecentVersionIsAutosaved,
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
@@ -92,8 +91,6 @@ export function DefaultEditView({
     setData,
     setDocumentIsLocked,
     setLastUpdateTime,
-    setMostRecentVersionIsAutosaved,
-    setUnpublishedVersionCount,
     unlockDocument,
     updateDocumentEditor,
   } = useDocumentInfo()
@@ -260,7 +257,7 @@ export function DefaultEditView({
   ])
 
   const onSave = useCallback(
-    async (json): Promise<FormState> => {
+    async (json, context?: Record<string, unknown>): Promise<FormState> => {
       const controller = handleAbortRef(abortOnSaveRef)
 
       const document = json?.doc || json?.result
@@ -281,13 +278,7 @@ export function DefaultEditView({
 
       setLastUpdateTime(updatedAt)
 
-      if (autosaveEnabled) {
-        if (!mostRecentVersionIsAutosaved) {
-          incrementVersionCount()
-          setMostRecentVersionIsAutosaved(true)
-          setUnpublishedVersionCount((prev) => prev + 1)
-        }
-      } else {
+      if (context?.incrementVersionCount !== false) {
         incrementVersionCount()
       }
 
@@ -300,6 +291,7 @@ export function DefaultEditView({
 
         void onSaveFromContext({
           ...json,
+          context,
           operation,
           updatedAt:
             operation === 'update'
@@ -358,8 +350,6 @@ export function DefaultEditView({
       collectionSlug,
       userSlug,
       setLastUpdateTime,
-      setMostRecentVersionIsAutosaved,
-      autosaveEnabled,
       setData,
       onSaveFromContext,
       isEditing,
@@ -369,7 +359,6 @@ export function DefaultEditView({
       globalSlug,
       refreshCookieAsync,
       incrementVersionCount,
-      setUnpublishedVersionCount,
       adminRoute,
       locale,
       startRouteTransition,
