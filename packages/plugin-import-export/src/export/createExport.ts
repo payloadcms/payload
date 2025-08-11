@@ -91,11 +91,13 @@ export const createExport = async (args: CreateExportArgs) => {
     req.payload.logger.debug({ message: 'Export configuration:', name, isCSV, locale })
   }
 
+  let documentsFetched = 0 // Keep track of the number of documents fetched
+
   const findArgs = {
     collection: collectionSlug,
     depth: 1,
     draft: drafts === 'yes',
-    limit: 100,
+    limit: limit || 100,
     locale,
     overrideAccess: false,
     page: 0,
@@ -164,7 +166,10 @@ export const createExport = async (args: CreateExportArgs) => {
 
     if (isCSV) {
       const allColumnsSet = new Set<string>()
-      let scanPage = 1
+
+      // Use the incoming page value here, defaulting to 1 if undefined
+      let scanPage = page || 1
+
       let hasMore = true
 
       while (hasMore) {
@@ -181,7 +186,13 @@ export const createExport = async (args: CreateExportArgs) => {
         })
 
         hasMore = result.hasNextPage
-        scanPage += 1
+        scanPage += 1 // Increment page for next batch
+
+        documentsFetched += result.docs.length // Increment total documents fetched
+
+        if (limit && documentsFetched >= limit) {
+          break
+        } // Stop if limit reached
       }
 
       if (debug) {
@@ -191,7 +202,9 @@ export const createExport = async (args: CreateExportArgs) => {
 
     const encoder = new TextEncoder()
     let isFirstBatch = true
-    let streamPage = 1
+
+    // Use the incoming page value here, defaulting to 1 if undefined
+    let streamPage = page || 1
 
     const stream = new Readable({
       async read() {
@@ -245,7 +258,19 @@ export const createExport = async (args: CreateExportArgs) => {
         }
 
         isFirstBatch = false
-        streamPage += 1
+        streamPage += 1 // Increment stream page for the next batch
+
+        // Check if the total fetched documents have reached the limit
+        documentsFetched += result.docs.length
+        if (limit && documentsFetched >= limit) {
+          if (debug) {
+            req.payload.logger.debug('Limit reached, stopping stream')
+          }
+          if (!isCSV) {
+            this.push(encoder.encode(']'))
+          }
+          this.push(null) // End the stream
+        }
 
         if (!result.hasNextPage) {
           if (debug) {
@@ -276,18 +301,21 @@ export const createExport = async (args: CreateExportArgs) => {
   const rows: Record<string, unknown>[] = []
   const columnsSet = new Set<string>()
   const columns: string[] = []
-  let page = 1
+
+  // Start from the incoming page value, defaulting to 1 if undefined
+  let currentPage = page || 1
+
   let hasNextPage = true
 
   while (hasNextPage) {
     const result = await payload.find({
       ...findArgs,
-      page,
+      page: currentPage,
     })
 
     if (debug) {
       req.payload.logger.debug(
-        `Processing batch ${findArgs.page} with ${result.docs.length} documents`,
+        `Processing batch ${currentPage} with ${result.docs.length} documents`,
       )
     }
 
@@ -313,9 +341,16 @@ export const createExport = async (args: CreateExportArgs) => {
     }
 
     hasNextPage = result.hasNextPage
-    page += 1
+    currentPage += 1
+
+    // Stop once limit is reached
+    documentsFetched += result.docs.length
+    if (limit && documentsFetched >= limit) {
+      break
+    }
   }
 
+  // Prepare final output
   if (isCSV) {
     const paddedRows = rows.map((row) => {
       const fullRow: Record<string, unknown> = {}

@@ -83,10 +83,13 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
               name: 'page',
               type: 'number',
               admin: {
+                components: {
+                  Field: '@payloadcms/plugin-import-export/rsc#Page',
+                },
                 condition: ({ limit }) => {
+                  // Show the page field only if limit is set
                   return typeof limit === 'number' && limit !== 0
                 },
-                width: '180px',
               },
               defaultValue: 1,
               // @ts-expect-error - this is not correctly typed in plugins right now
