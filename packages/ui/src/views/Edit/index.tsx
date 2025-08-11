@@ -83,6 +83,7 @@ export function DefaultEditView({
     isInitializing,
     isTrashed,
     lastUpdateTime,
+    mostRecentVersionIsAutosaved,
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
@@ -280,10 +281,14 @@ export function DefaultEditView({
 
       setLastUpdateTime(updatedAt)
 
-      if (!setMostRecentVersionIsAutosaved && autosaveEnabled) {
+      if (autosaveEnabled) {
+        if (!mostRecentVersionIsAutosaved) {
+          incrementVersionCount()
+          setMostRecentVersionIsAutosaved(true)
+          setUnpublishedVersionCount((prev) => prev + 1)
+        }
+      } else {
         incrementVersionCount()
-        setMostRecentVersionIsAutosaved(true)
-        setUnpublishedVersionCount((prev) => prev + 1)
       }
 
       if (typeof setData === 'function') {
