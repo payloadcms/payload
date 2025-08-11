@@ -209,6 +209,7 @@ const sanitizeDate = ({
 
 type Args = {
   $inc?: Record<string, number>
+  $push?: Record<string, { $each: any[] } | any>
   /** instance of the adapter */
   adapter: MongooseAdapter
   /** data to transform, can be an array of documents or a single document */
@@ -398,6 +399,7 @@ const stripFields = ({
 
 export const transform = ({
   $inc,
+  $push,
   adapter,
   data,
   fields,
@@ -412,7 +414,16 @@ export const transform = ({
 
   if (Array.isArray(data)) {
     for (const item of data) {
-      transform({ $inc, adapter, data: item, fields, globalSlug, operation, validateRelationships })
+      transform({
+        $inc,
+        $push,
+        adapter,
+        data: item,
+        fields,
+        globalSlug,
+        operation,
+        validateRelationships,
+      })
     }
     return
   }
@@ -466,6 +477,26 @@ export const transform = ({
       const value = ref[field.name]
       if (value && typeof value === 'object' && '$inc' in value && typeof value.$inc === 'number') {
         $inc[`${parentPath}${field.name}`] = value.$inc
+        delete ref[field.name]
+      }
+    }
+
+    if (
+      $push &&
+      field.type === 'array' &&
+      operation === 'write' &&
+      field.name in ref &&
+      ref[field.name]
+    ) {
+      const value = ref[field.name]
+      if (value && typeof value === 'object' && '$push' in value) {
+        const push = value.$push
+
+        if (Array.isArray(push)) {
+          $push[`${parentPath}${field.name}`] = { $each: push }
+        } else if (typeof push === 'object') {
+          $push[`${parentPath}${field.name}`] = push
+        }
         delete ref[field.name]
       }
     }

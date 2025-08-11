@@ -29,7 +29,7 @@ import {
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 
-import type { Global2 } from './payload-types.js'
+import type { Global2, Post } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -3019,7 +3019,7 @@ describe('database', () => {
   it('should allow incremental number update', async () => {
     const post = await payload.create({ collection: 'posts', data: { number: 1, title: 'post' } })
 
-    const res = await payload.db.updateOne({
+    const res = (await payload.db.updateOne({
       data: {
         number: {
           $inc: 10,
@@ -3027,11 +3027,11 @@ describe('database', () => {
       },
       collection: 'posts',
       where: { id: { equals: post.id } },
-    })
+    })) as unknown as Post
 
     expect(res.number).toBe(11)
 
-    const res2 = await payload.db.updateOne({
+    const res2 = (await payload.db.updateOne({
       data: {
         number: {
           $inc: -3,
@@ -3039,9 +3039,75 @@ describe('database', () => {
       },
       collection: 'posts',
       where: { id: { equals: post.id } },
-    })
+    })) as unknown as Post
 
     expect(res2.number).toBe(8)
+  })
+
+  it('should allow atomic array updates using $push', async () => {
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        arrayWithIDs: [
+          {
+            text: 'some text',
+          },
+        ],
+        title: 'post',
+      },
+    })
+
+    const res = (await payload.db.updateOne({
+      data: {
+        arrayWithIDs: {
+          $push: {
+            text: 'some text 2',
+          },
+        },
+      },
+      collection: 'posts',
+      where: { id: { equals: post.id } },
+    })) as unknown as Post
+
+    expect(res.arrayWithIDs).toHaveLength(2)
+    expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
+    expect(res.arrayWithIDs?.[1]?.text).toBe('some text 2')
+  })
+
+  it('should allow atomic array updates using $push with multiple values', async () => {
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        arrayWithIDs: [
+          {
+            text: 'some text',
+          },
+        ],
+        title: 'post',
+      },
+    })
+
+    const res = (await payload.db.updateOne({
+      data: {
+        arrayWithIDs: {
+          $push: [
+            {
+              text: 'some text 2',
+            },
+            {
+              text: 'some text 3',
+            },
+          ],
+        },
+      },
+      collection: 'posts',
+      where: { id: { equals: post.id } },
+    })) as unknown as Post
+
+    expect(res.arrayWithIDs).toHaveLength(3)
+    expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
+    expect(res.arrayWithIDs?.[1]?.text).toBe('some text 2')
+    expect(res.arrayWithIDs?.[2]?.text).toBe('some text 3')
   })
 
   it('should support x3 nesting blocks', async () => {
