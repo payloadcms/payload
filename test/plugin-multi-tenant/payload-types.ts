@@ -177,6 +177,21 @@ export interface FoodItem {
   id: string;
   tenant?: (string | null) | Tenant;
   name: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -315,6 +330,7 @@ export interface UsersSelect<T extends boolean = true> {
 export interface FoodItemsSelect<T extends boolean = true> {
   tenant?: T;
   name?: T;
+  content?: T;
   updatedAt?: T;
   createdAt?: T;
 }

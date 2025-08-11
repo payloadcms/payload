@@ -245,6 +245,75 @@ test.describe('Group By', () => {
     ).toBeVisible()
   })
 
+  test('should group by date fields even when their values are null', async () => {
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'My Post',
+        date: null,
+      },
+    })
+
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Date', fieldPath: 'date' })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(1)
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by boolean values', async () => {
+    await Promise.all([
+      await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'Null Post',
+          checkbox: null,
+        },
+      }),
+      await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'True Post',
+          checkbox: true,
+        },
+      }),
+      await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'False Post',
+          checkbox: false,
+        },
+      }),
+    ])
+
+    await page.goto(url.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Checkbox',
+      fieldPath: 'checkbox',
+    })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+
+    await expect(page.locator('.group-by-header')).toHaveCount(3)
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('True') }),
+    ).toBeVisible()
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('False') }),
+    ).toBeVisible()
+  })
+
   test('should sort the group-by field globally', async () => {
     await page.goto(url.list)
 
