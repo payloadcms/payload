@@ -22,11 +22,3 @@ Planned for the future:
 - Designed email templates
 
 ## Stripe
-
-You need to log into your Stripe dashboard and get your publishable and private keys for the env var. Once that's ready you should setup the stripe CLI locally and run `stripe login`, then the following command to setup webhooks:
-
-```bash
-stripe listen --forward-to localhost:3000/api/stripe/webhooks
-```
-
-This will give you the webhooks secret for testing locally too
