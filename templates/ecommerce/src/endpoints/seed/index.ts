@@ -19,7 +19,6 @@ const collections: CollectionSlug[] = [
   'products',
   'forms',
   'form-submissions',
-  'search',
   'variants',
   'variantOptions',
   'variantTypes',

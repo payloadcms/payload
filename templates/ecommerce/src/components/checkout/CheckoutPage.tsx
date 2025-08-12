@@ -132,7 +132,7 @@ export const CheckoutPage: React.FC = () => {
           </div>
         )}
         {user ? (
-          <div className="bg-accent dark:bg-black rounded-lg p-4 ">
+          <div className="bg-accent dark:bg-card rounded-lg p-4 ">
             <div>
               <p>{user.email}</p>{' '}
               <p>
