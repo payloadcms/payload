@@ -93,7 +93,7 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   }
 
   let draft = versionDocs[0]
-
+  console.log('replaceWithDraftIfAvailable', versionDocs[0])
   if (!draft) {
     return doc
   }
@@ -109,6 +109,12 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   // handle when .version wasn't selected due to projection
   if (!draft.version) {
     draft.version = {} as T
+  }
+
+  // Lift locale status from version data if available
+  const localeStatus = draft.localeStatus || {}
+  if (locale && localeStatus[locale]) {
+    ;(draft.version as { _status?: string })['_status'] = localeStatus[locale]
   }
 
   // Disregard all other draft content at this point,
