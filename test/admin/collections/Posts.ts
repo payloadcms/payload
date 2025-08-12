@@ -2,8 +2,8 @@ import type { CollectionConfig } from 'payload'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 
-import { slugPluralLabel, slugSingularLabel } from '../shared.js'
-import { postsCollectionSlug } from '../slugs.js'
+import { customTabAdminDescription, slugPluralLabel, slugSingularLabel } from '../shared.js'
+import { postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
 
 export const Posts: CollectionConfig = {
   slug: postsCollectionSlug,
@@ -33,6 +33,11 @@ export const Posts: CollectionConfig = {
           },
         },
       ],
+      listMenuItems: [
+        {
+          path: '/components/ListMenuItems/index.js#ListMenuItemsExample',
+        },
+      ],
       afterList: [
         {
           path: '/components/Banner/index.js#Banner',
@@ -49,6 +54,16 @@ export const Posts: CollectionConfig = {
           },
         },
       ],
+      edit: {
+        beforeDocumentControls: [
+          '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
+          '/components/BeforeDocumentControls/CustomSaveButton/index.js#CustomSaveButton',
+        ],
+      },
+    },
+    pagination: {
+      defaultLimit: 5,
+      limits: [5, 10, 15],
     },
     meta: {
       description: 'This is a custom meta description for posts',
@@ -100,66 +115,80 @@ export const Posts: CollectionConfig = {
             },
           ],
           label: 'Tab 1',
+          admin: {
+            description: customTabAdminDescription,
+          },
+        },
+        {
+          label: 'Tab 2',
+          fields: [],
+          admin: {
+            description: () => `t:${customTabAdminDescription}`,
+          },
         },
       ],
     },
     {
-      name: 'arrayOfFields',
-      type: 'array',
-      admin: {
-        initCollapsed: true,
-      },
-      fields: [
-        {
-          name: 'optional',
-          type: 'text',
-        },
-        {
-          name: 'innerArrayOfFields',
-          type: 'array',
-          fields: [
-            {
-              name: 'innerOptional',
-              type: 'text',
-            },
-          ],
-        },
-      ],
+      name: 'someTextField',
+      type: 'text',
     },
     {
-      name: 'group',
+      name: 'namedGroup',
       type: 'group',
       fields: [
         {
-          name: 'defaultValueField',
-          type: 'text',
-          defaultValue: 'testing',
-        },
-        {
-          name: 'title',
+          name: 'someTextField',
           type: 'text',
         },
       ],
     },
     {
-      name: 'someBlock',
-      type: 'blocks',
-      blocks: [
+      type: 'group',
+      label: 'Unnamed group',
+      fields: [
         {
-          slug: 'textBlock',
+          name: 'textFieldInUnnamedGroup',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'groupWithCustomCell',
+      type: 'group',
+      admin: {
+        components: {
+          Cell: '/components/CustomGroupCell/index.js#CustomGroupCell',
+        },
+      },
+      fields: [
+        {
+          name: 'nestedTextFieldInGroupWithCustomCell',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'namedTab',
           fields: [
             {
-              name: 'textFieldForBlock',
+              name: 'nestedTextFieldInNamedTab',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          label: 'unnamedTab',
+          fields: [
+            {
+              name: 'nestedTextFieldInUnnamedTab',
               type: 'text',
             },
           ],
         },
       ],
-    },
-    {
-      name: 'defaultValueField',
-      type: 'text',
-      defaultValue: 'testing',
     },
     {
       name: 'relationship',
@@ -170,12 +199,51 @@ export const Posts: CollectionConfig = {
       relationTo: 'posts',
     },
     {
+      name: 'users',
+      type: 'relationship',
+      admin: {
+        position: 'sidebar',
+      },
+      relationTo: 'users',
+    },
+    {
       name: 'customCell',
       type: 'text',
       admin: {
         components: {
           Cell: '/components/CustomCell/index.js#CustomCell',
         },
+      },
+    },
+    {
+      name: 'upload',
+      type: 'upload',
+      relationTo: uploadCollectionSlug,
+    },
+    {
+      name: 'hiddenField',
+      type: 'text',
+      hidden: true,
+    },
+    {
+      name: 'adminHiddenField',
+      type: 'text',
+      admin: {
+        hidden: true,
+      },
+    },
+    {
+      name: 'disableListColumnText',
+      type: 'text',
+      admin: {
+        disableListColumn: true,
+      },
+    },
+    {
+      name: 'disableListFilterText',
+      type: 'text',
+      admin: {
+        disableListFilter: true,
       },
     },
     {
@@ -188,6 +256,48 @@ export const Posts: CollectionConfig = {
         description:
           'This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.',
         position: 'sidebar',
+      },
+    },
+    {
+      type: 'radio',
+      name: 'wavelengths',
+      defaultValue: 'fm',
+      options: [
+        {
+          label: 'FM',
+          value: 'fm',
+        },
+        {
+          label: 'AM',
+          value: 'am',
+        },
+      ],
+    },
+    {
+      type: 'select',
+      name: 'selectField',
+      hasMany: true,
+      defaultValue: ['option1', 'option2'],
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option1',
+        },
+        {
+          label: 'Option 2',
+          value: 'option2',
+        },
+      ],
+    },
+    {
+      name: 'file',
+      type: 'text',
+    },
+    {
+      name: 'noReadAccessField',
+      type: 'text',
+      access: {
+        read: () => false,
       },
     },
   ],

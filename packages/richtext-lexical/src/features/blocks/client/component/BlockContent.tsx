@@ -49,7 +49,7 @@ const BlockComponentContext = createContext<BlockComponentContextType>({
   initialState: false,
 })
 
-export const useBlockComponentContext = () => React.useContext(BlockComponentContext)
+export const useBlockComponentContext = () => React.use(BlockComponentContext)
 
 /**
  * The actual content of the Block. This should be INSIDE a Form component,
@@ -99,7 +99,7 @@ export const BlockContent: React.FC<Props> = (props) => {
   )
 
   return CustomBlock ? (
-    <BlockComponentContext.Provider
+    <BlockComponentContext
       value={{
         BlockCollapsible: CollapsibleWithErrorProps,
         EditButton,
@@ -110,7 +110,7 @@ export const BlockContent: React.FC<Props> = (props) => {
     >
       {CustomBlock}
       <BlockDrawer />
-    </BlockComponentContext.Provider>
+    </BlockComponentContext>
   ) : (
     <CollapsibleWithErrorProps>
       <RenderFields

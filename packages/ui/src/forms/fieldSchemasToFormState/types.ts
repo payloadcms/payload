@@ -21,6 +21,8 @@ export type RenderFieldArgs = {
   formState: FormState
   id?: number | string
   indexPath: string
+  lastRenderedPath: string
+  mockRSCs?: boolean
   operation: Operation
   parentPath: string
   parentSchemaPath: string
@@ -28,6 +30,8 @@ export type RenderFieldArgs = {
   permissions: SanitizedFieldPermissions
   preferences: DocumentPreferences
   previousFieldState: FieldState
+  readOnly?: boolean
+  renderAllFields: boolean
   req: PayloadRequest
   schemaPath: string
   siblingData: Data

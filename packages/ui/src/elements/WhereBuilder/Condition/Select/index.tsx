@@ -1,28 +1,20 @@
 'use client'
-import type { Option, OptionObject } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from './types.js'
+import type { SelectFilterProps as Props } from './types.js'
 
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
-
-const formatOptions = (options: Option[]): OptionObject[] =>
-  options.map((option) => {
-    if (typeof option === 'object' && (option.value || option.value === '')) {
-      return option
-    }
-
-    return {
-      label: option,
-      value: option,
-    } as OptionObject
-  })
+import { formatOptions } from './formatOptions.js'
 
 export const Select: React.FC<Props> = ({
   disabled,
+  field: {
+    admin: { placeholder },
+  },
+  isClearable,
   onChange,
   operator,
   options: optionsFromProps,
@@ -53,6 +45,7 @@ export const Select: React.FC<Props> = ({
   const onSelect = React.useCallback(
     (selectedOption) => {
       let newValue
+
       if (!selectedOption) {
         newValue = null
       } else if (isMulti) {
@@ -83,9 +76,11 @@ export const Select: React.FC<Props> = ({
   return (
     <ReactSelect
       disabled={disabled}
+      isClearable={isClearable}
       isMulti={isMulti}
       onChange={onSelect}
       options={options.map((option) => ({ ...option, label: getTranslation(option.label, i18n) }))}
+      placeholder={placeholder}
       value={valueToRender}
     />
   )

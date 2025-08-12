@@ -26,7 +26,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
       localized,
       required,
     },
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -44,11 +44,13 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    path,
     setValue,
     showError,
     value = [null, null],
   } = useField<[number, number]>({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -81,7 +83,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
         baseClass,
         className,
         showError && 'error',
-        readOnly && 'read-only',
+        (readOnly || disabled) && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -105,7 +107,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
-              disabled={readOnly}
+              disabled={readOnly || disabled}
               id={`field-longitude-${path?.replace(/\./g, '__')}`}
               name={`${path}.longitude`}
               onChange={(e) => handleChange(e, 0)}
@@ -138,7 +140,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
-              disabled={readOnly}
+              disabled={readOnly || disabled}
               id={`field-latitude-${path?.replace(/\./g, '__')}`}
               name={`${path}.latitude`}
               onChange={(e) => handleChange(e, 1)}

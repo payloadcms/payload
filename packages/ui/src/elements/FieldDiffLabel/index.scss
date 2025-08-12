@@ -1,0 +1,11 @@
+@layer payload-default {
+  .field-diff-label {
+    margin-bottom: calc(var(--base) * 0.35);
+    font-weight: 600;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    align-items: center;
+    line-height: normal;
+  }
+}

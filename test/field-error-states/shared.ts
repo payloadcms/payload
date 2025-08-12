@@ -8,6 +8,7 @@ export const collectionSlugs: {
   validateDraftsOnAutosave: 'validate-drafts-on-autosave',
   prevValue: 'prev-value',
   prevValueRelation: 'prev-value-relation',
+  errorFields: 'error-fields',
 }
 
 export const globalSlugs: {

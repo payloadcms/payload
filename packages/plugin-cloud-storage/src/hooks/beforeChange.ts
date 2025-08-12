@@ -29,7 +29,7 @@ export const getBeforeChangeHook =
           if (typeof originalDoc.sizes === 'object') {
             filesToDelete = filesToDelete.concat(
               Object.values(originalDoc?.sizes || []).map(
-                (resizedFileData) => resizedFileData?.filename,
+                (resizedFileData) => resizedFileData?.filename as string,
               ),
             )
           }
@@ -44,7 +44,13 @@ export const getBeforeChangeHook =
         }
 
         const promises = files.map(async (file) => {
-          await adapter.handleUpload({ collection, data, file, req })
+          await adapter.handleUpload({
+            clientUploadContext: file.clientUploadContext,
+            collection,
+            data,
+            file,
+            req,
+          })
         })
 
         await Promise.all(promises)

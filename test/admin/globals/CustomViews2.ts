@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
+import { customTabComponent, overriddenDefaultRouteTabLabel } from '../shared.js'
 import { customGlobalViews2GlobalSlug } from '../slugs.js'
 
 export const CustomGlobalViews2: GlobalConfig = {
@@ -8,6 +9,17 @@ export const CustomGlobalViews2: GlobalConfig = {
     components: {
       views: {
         edit: {
+          api: {
+            // Override the default tab component for the default route
+            tab: {
+              Component: {
+                path: '/components/CustomTabComponent/index.js#CustomTabComponent',
+                clientProps: {
+                  label: overriddenDefaultRouteTabLabel,
+                },
+              },
+            },
+          },
           default: {
             Component: '/components/views/CustomEditDefault/index.js#CustomDefaultEditView',
           },
@@ -20,9 +32,19 @@ export const CustomGlobalViews2: GlobalConfig = {
             path: '/custom-tab-view',
           },
           myCustomViewWithCustomTab: {
-            Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
+            Component: {
+              path: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
+              clientProps: {
+                label: customTabComponent,
+              },
+            },
             tab: {
-              Component: '/components/CustomTabComponent/index.js#CustomTabComponent',
+              Component: {
+                path: '/components/CustomTabComponent/index.js#CustomTabComponent',
+                clientProps: {
+                  label: customTabComponent,
+                },
+              },
             },
             path: '/custom-tab-component',
           },

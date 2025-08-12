@@ -25,6 +25,9 @@ export const i18n: Partial<GenericLanguages> = {
   es: {
     label: 'Encabezado {{headingLevel}}',
   },
+  et: {
+    label: 'Pealkiri {{headingLevel}}',
+  },
   fa: {
     label: '[SKIPPED]',
   },
@@ -78,6 +81,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   sk: {
     label: 'Nadpis {{headingLevel}}',
+  },
+  sl: {
+    label: 'Naslov {{headingLevel}}',
   },
   sv: {
     label: 'Rubrik {{headingLevel}}',

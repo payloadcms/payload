@@ -1,4 +1,4 @@
-export const timestamp = (label) => {
+export const timestamp = (label: string) => {
   if (!process.env.PAYLOAD_TIME) {
     process.env.PAYLOAD_TIME = String(new Date().getTime())
   }

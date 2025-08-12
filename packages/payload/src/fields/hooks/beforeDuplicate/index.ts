@@ -2,7 +2,6 @@ import type { SanitizedCollectionConfig } from '../../../collections/config/type
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 
-import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T extends JsonObject> = {
@@ -28,20 +27,20 @@ export const beforeDuplicate = async <T extends JsonObject>({
   overrideAccess,
   req,
 }: Args<T>): Promise<T> => {
-  const newDoc = deepCopyObjectSimple(doc)
-
   await traverseFields({
     id,
     collection,
     context,
-    doc: newDoc,
-    fields: collection?.fields,
+    doc,
+    fields: collection!.fields,
     overrideAccess,
-    path: [],
+    parentIndexPath: '',
+    parentIsLocalized: false,
+    parentPath: '',
+    parentSchemaPath: '',
     req,
-    schemaPath: [],
-    siblingDoc: newDoc,
+    siblingDoc: doc!,
   })
 
-  return newDoc
+  return doc!
 }

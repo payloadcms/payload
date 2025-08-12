@@ -20,12 +20,15 @@ export const sanitizeFallbackLocale = ({
   locale,
   localization,
 }: Args): null | string => {
-  const hasFallbackLocale =
-    fallbackLocale === undefined || fallbackLocale === null
-      ? localization && localization.fallback
-      : fallbackLocale
-        ? !['false', 'none', 'null'].includes(fallbackLocale)
-        : false
+  let hasFallbackLocale = false
+
+  if (fallbackLocale === undefined || fallbackLocale === null) {
+    hasFallbackLocale = Boolean(localization && localization.fallback)
+  }
+
+  if (fallbackLocale && !['false', 'none', 'null'].includes(fallbackLocale)) {
+    hasFallbackLocale = true
+  }
 
   if (hasFallbackLocale) {
     if (!fallbackLocale) {

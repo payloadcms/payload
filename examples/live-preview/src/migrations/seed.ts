@@ -1,8 +1,9 @@
 import type { MigrateUpArgs } from '@payloadcms/db-mongodb'
 
 import type { Page } from '../payload-types'
+import { DefaultDocumentIDType } from 'payload'
 
-export const home: Partial<Page> = {
+export const home = (id: DefaultDocumentIDType): Partial<Page> => ({
   slug: 'home',
   richText: [
     {
@@ -36,16 +37,31 @@ export const home: Partial<Page> = {
           type: 'link',
           children: [{ text: 'Live Preview' }],
           newTab: true,
-          url: 'https://payloadcms.com/docs/live-preview',
+          url: 'https://payloadcms.com/docs/live-preview/overview',
         },
         {
           text: ' you can edit this page in the admin panel and see the changes reflected here in real time.',
         },
+        ...(id
+          ? [
+              {
+                text: ' To get started, visit ',
+              },
+              {
+                type: 'link',
+                children: [{ text: 'this page' }],
+                linkType: 'custom',
+                newTab: true,
+                url: `/admin/collections/pages/${id}/preview`,
+              },
+              { text: '.' },
+            ]
+          : []),
       ],
     },
   ],
   title: 'Home',
-}
+})
 
 export const examplePage: Partial<Page> = {
   slug: 'example-page',
@@ -83,11 +99,18 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     data: examplePage as any, // eslint-disable-line
   })
 
-  const homepageJSON = JSON.parse(JSON.stringify(home))
-
-  const { id: homePageID } = await payload.create({
+  const { id: ogHomePageID } = await payload.create({
     collection: 'pages',
-    data: homepageJSON,
+    data: {
+      title: 'Home',
+      richText: [],
+    },
+  })
+
+  const { id: homePageID } = await payload.update({
+    id: ogHomePageID,
+    collection: 'pages',
+    data: home(ogHomePageID),
   })
 
   await payload.updateGlobal({
@@ -121,7 +144,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
             type: 'custom',
             label: 'Dashboard',
             reference: undefined,
-            url: 'http://localhost:3000/admin',
+            url: '/admin',
           },
         },
       ],

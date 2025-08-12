@@ -2,6 +2,8 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { Payload } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
+import { preferencesCollectionSlug } from './config.js'
+
 type Args = {
   collectionConfig: SanitizedCollectionConfig
   /**
@@ -14,25 +16,33 @@ type Args = {
 export const deleteUserPreferences = async ({ collectionConfig, ids, payload, req }: Args) => {
   if (collectionConfig.auth) {
     await payload.db.deleteMany({
-      collection: 'payload-preferences',
+      collection: preferencesCollectionSlug,
       req,
       where: {
-        and: [
+        or: [
           {
-            'user.value': { in: ids },
+            and: [
+              {
+                'user.value': { in: ids },
+              },
+              {
+                'user.relationTo': { equals: collectionConfig.slug },
+              },
+            ],
           },
           {
-            'user.relationTo': { equals: collectionConfig.slug },
+            key: { in: ids.map((id) => `collection-${collectionConfig.slug}-${id}`) },
           },
         ],
       },
     })
+  } else {
+    await payload.db.deleteMany({
+      collection: preferencesCollectionSlug,
+      req,
+      where: {
+        key: { in: ids.map((id) => `collection-${collectionConfig.slug}-${id}`) },
+      },
+    })
   }
-  await payload.db.deleteMany({
-    collection: 'payload-preferences',
-    req,
-    where: {
-      key: { in: ids.map((id) => `collection-${collectionConfig.slug}-${id}`) },
-    },
-  })
 }

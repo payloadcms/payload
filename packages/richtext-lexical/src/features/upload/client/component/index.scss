@@ -1,4 +1,4 @@
-@import '../../../../scss/styles';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .lexical-upload {
@@ -136,11 +136,6 @@
       text-align: left;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    &--selected {
-      box-shadow: $focus-box-shadow;
-      outline: none;
     }
 
     @include small-break {

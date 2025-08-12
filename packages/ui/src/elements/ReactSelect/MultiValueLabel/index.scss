@@ -13,6 +13,11 @@
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
+
+      &--editable {
+        cursor: text;
+        outline: var(--accessibility-outline);
+      }
     }
 
     &:focus-visible {

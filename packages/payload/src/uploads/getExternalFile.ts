@@ -2,6 +2,8 @@ import type { PayloadRequest } from '../types/index.js'
 import type { File, FileData, UploadConfig } from './types.js'
 
 import { APIError } from '../errors/index.js'
+import { isURLAllowed } from '../utilities/isURLAllowed.js'
+import { safeFetch } from './safeFetch.js'
 
 type Args = {
   data: FileData
@@ -20,13 +22,44 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
 
     const headers = uploadConfig.externalFileHeaderFilter
       ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
-      : { cookie: req.headers?.get('cookie') }
+      : {
+          cookie:
+            req.headers
+              .get('cookie')
+              ?.split(';')
+              .filter((cookie) => !cookie.trim().startsWith(req.payload.config.cookiePrefix))
+              .join(';') || '',
+        }
 
-    const res = await fetch(fileURL, {
-      credentials: 'include',
-      headers,
-      method: 'GET',
-    })
+    // Check if URL is allowed because of skipSafeFetch allowList
+    const skipSafeFetch: boolean =
+      uploadConfig.skipSafeFetch === true
+        ? uploadConfig.skipSafeFetch
+        : Array.isArray(uploadConfig.skipSafeFetch) &&
+          isURLAllowed(fileURL, uploadConfig.skipSafeFetch)
+
+    // Check if URL is allowed because of pasteURL allowList
+    const isAllowedPasteUrl: boolean | undefined =
+      uploadConfig.pasteURL &&
+      uploadConfig.pasteURL.allowList &&
+      isURLAllowed(fileURL, uploadConfig.pasteURL.allowList)
+
+    let res
+    if (skipSafeFetch || isAllowedPasteUrl) {
+      // Allowed
+      res = await fetch(fileURL, {
+        credentials: 'include',
+        headers,
+        method: 'GET',
+      })
+    } else {
+      // Default
+      res = await safeFetch(fileURL, {
+        credentials: 'include',
+        headers,
+        method: 'GET',
+      })
+    }
 
     if (!res.ok) {
       throw new APIError(`Failed to fetch file from ${fileURL}`, res.status)
@@ -37,7 +70,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
     return {
       name: filename,
       data: Buffer.from(data),
-      mimetype: res.headers.get('content-type') || undefined,
+      mimetype: res.headers.get('content-type') || undefined!,
       size: Number(res.headers.get('content-length')) || 0,
     }
   }

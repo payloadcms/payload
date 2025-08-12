@@ -16,7 +16,7 @@ export const replaceDoubleCurlys = (str: string, variables?: EmailVariables): st
           return variables.map(({ field, value }) => `${field} : ${value}`).join(' <br /> ')
         } else if (variable === '*:table') {
           return keyValuePairToHtmlTable(
-            variables.reduce((acc, { field, value }) => {
+            variables.reduce<Record<string, string>>((acc, { field, value }) => {
               acc[field] = value
               return acc
             }, {}),

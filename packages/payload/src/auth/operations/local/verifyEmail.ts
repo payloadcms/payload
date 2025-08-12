@@ -12,7 +12,7 @@ export type Options<T extends CollectionSlug> = {
   token: string
 }
 
-async function localVerifyEmail<T extends CollectionSlug>(
+export async function verifyEmailLocal<T extends CollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<boolean> {
@@ -32,5 +32,3 @@ async function localVerifyEmail<T extends CollectionSlug>(
     token,
   })
 }
-
-export const verifyEmail = localVerifyEmail

@@ -3,6 +3,7 @@ import type { ClientUser } from 'payload'
 
 import React, { useEffect } from 'react'
 
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { isClientUserObject } from '../../utilities/isClientUserObject.js'
 import { Button } from '../Button/index.js'
@@ -37,6 +38,7 @@ export const DocumentLocked: React.FC<{
 }> = ({ handleGoBack, isActive, onReadOnly, onTakeOver, updatedAt, user }) => {
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()
+  const { startRouteTransition } = useRouteTransition()
 
   useEffect(() => {
     if (isActive) {
@@ -47,7 +49,13 @@ export const DocumentLocked: React.FC<{
   }, [isActive, openModal, closeModal])
 
   return (
-    <Modal className={baseClass} onClose={handleGoBack} slug={modalSlug}>
+    <Modal
+      className={baseClass}
+      onClose={() => {
+        startRouteTransition(() => handleGoBack())
+      }}
+      slug={modalSlug}
+    >
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
           <h1>{t('general:documentLocked')}</h1>
@@ -65,7 +73,9 @@ export const DocumentLocked: React.FC<{
           <Button
             buttonStyle="secondary"
             id={`${modalSlug}-go-back`}
-            onClick={handleGoBack}
+            onClick={() => {
+              startRouteTransition(() => handleGoBack())
+            }}
             size="large"
           >
             {t('general:goBack')}

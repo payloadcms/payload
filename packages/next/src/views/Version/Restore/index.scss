@@ -1,9 +1,10 @@
-@import '../../.././scss/styles.scss';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .restore-version {
     cursor: pointer;
     display: flex;
+    min-width: max-content;
 
     .popup-button {
       display: flex;
@@ -24,7 +25,11 @@
       }
     }
 
-    &__button {
+    .btn {
+      margin-block: 0;
+    }
+
+    &__restore-as-draft-button {
       border-top-right-radius: 0px;
       border-bottom-right-radius: 0px;
       margin-right: 2px;

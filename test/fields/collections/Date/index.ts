@@ -25,6 +25,16 @@ const DateFields: CollectionConfig = {
       },
     },
     {
+      name: 'timeOnlyWithMiliseconds',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'timeOnly',
+          displayFormat: 'h:mm.ss.SSS aa',
+        },
+      },
+    },
+    {
       name: 'timeOnlyWithCustomFormat',
       type: 'date',
       admin: {
@@ -60,6 +70,70 @@ const DateFields: CollectionConfig = {
           pickerAppearance: 'monthOnly',
         },
       },
+    },
+    {
+      name: 'defaultWithTimezone',
+      type: 'date',
+      timezone: true,
+    },
+    {
+      name: 'dayAndTimeWithTimezone',
+      type: 'date',
+      required: true,
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+        description: 'This date here should be required.',
+      },
+      timezone: true,
+    },
+    {
+      type: 'blocks',
+      name: 'timezoneBlocks',
+      blocks: [
+        {
+          slug: 'dateBlock',
+          fields: [
+            {
+              name: 'dayAndTime',
+              type: 'date',
+              admin: {
+                date: {
+                  pickerAppearance: 'dayAndTime',
+                },
+              },
+              timezone: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'array',
+      name: 'timezoneArray',
+      fields: [
+        {
+          name: 'dayAndTime',
+          type: 'date',
+          admin: {
+            date: {
+              pickerAppearance: 'dayAndTime',
+            },
+          },
+          timezone: true,
+        },
+      ],
+    },
+    {
+      type: 'array',
+      name: 'array',
+      fields: [
+        {
+          name: 'date',
+          type: 'date',
+        },
+      ],
     },
   ],
 }

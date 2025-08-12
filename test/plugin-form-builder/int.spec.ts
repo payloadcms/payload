@@ -70,9 +70,7 @@ describe('@payloadcms/plugin-form-builder', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('plugin collections', () => {

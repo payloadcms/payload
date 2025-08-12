@@ -4,8 +4,11 @@ import type {
   RadioField,
   SanitizedConfig,
   TextField,
-  User,
+  TextFieldSingleValidation,
+  TypedUser,
 } from 'payload'
+
+import type { LinkFields } from '../nodes/types.js'
 
 import { validateUrl, validateUrlMinimal } from '../../../lexical/utils/url.js'
 
@@ -67,6 +70,10 @@ export const getBaseFields = (
       hooks: {
         beforeChange: [
           ({ value }) => {
+            if (!value) {
+              return
+            }
+
             if (!validateUrl(value)) {
               return encodeURIComponent(value)
             }
@@ -76,12 +83,14 @@ export const getBaseFields = (
       },
       label: ({ t }) => t('fields:enterURL'),
       required: true,
-      // @ts-expect-error - TODO: fix this
-      validate: (value: string) => {
+      validate: ((value: string, options) => {
+        if ((options?.siblingData as LinkFields)?.linkType === 'internal') {
+          return // no validation needed, as no url should exist for internal links
+        }
         if (!validateUrlMinimal(value)) {
           return 'Invalid URL'
         }
-      },
+      }) as TextFieldSingleValidation,
     },
   ]
 
@@ -92,27 +101,39 @@ export const getBaseFields = (
       value: 'internal',
     })
     ;(baseFields[2] as TextField).admin = {
-      condition: ({ linkType }) => linkType !== 'internal',
+      condition: (_data, _siblingData) => {
+        return _siblingData.linkType !== 'internal'
+      },
     }
 
     baseFields.push({
       name: 'doc',
       admin: {
-        condition: ({ linkType }) => {
-          return linkType === 'internal'
+        condition: (_data, _siblingData) => {
+          return _siblingData.linkType === 'internal'
         },
       },
       // when admin.hidden is a function we need to dynamically call hidden with the user to know if the collection should be shown
       type: 'relationship',
       filterOptions:
         !enabledCollections && !disabledCollections
-          ? ({ relationTo, user }) => {
-              const hidden = config.collections.find(({ slug }) => slug === relationTo)?.admin
-                .hidden
-              if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
+          ? async ({ relationTo, req, user }) => {
+              const admin = config.collections.find(({ slug }) => slug === relationTo)?.admin
+
+              const hidden = admin?.hidden
+              if (typeof hidden === 'function' && hidden({ user } as { user: TypedUser })) {
                 return false
               }
-              return true
+
+              const baseFilter = admin?.baseFilter ?? admin?.baseListFilter
+              return (
+                (await baseFilter?.({
+                  limit: 0,
+                  page: 1,
+                  req,
+                  sort: 'id',
+                })) ?? true
+              )
             }
           : null,
       label: ({ t }) => t('fields:chooseDocumentToLink'),

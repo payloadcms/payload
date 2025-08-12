@@ -13,6 +13,7 @@ export const index = deepMerge(
     rules: {
       ...reactHooks.configs.recommended.rules,
       '@eslint-react/hooks-extra/no-direct-set-state-in-use-effect': 'off',
+      '@eslint-react/naming-convention/use-state': 'off',
     },
   },
   {

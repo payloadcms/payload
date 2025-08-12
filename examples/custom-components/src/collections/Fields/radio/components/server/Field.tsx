@@ -3,7 +3,18 @@ import type React from 'react'
 
 import { RadioGroupField } from '@payloadcms/ui'
 
-export const CustomRadioFieldServer: RadioFieldServerComponent = (props) => {
-  const path = (props?.path || props?.field?.name || '') as string
-  return <RadioGroupField field={props?.clientField} path={path} />
+export const CustomRadioFieldServer: RadioFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <RadioGroupField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
 }

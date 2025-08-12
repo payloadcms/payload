@@ -1,12 +1,16 @@
+import type { Field } from '../../fields/config/types.js'
+import type { TypedUser } from '../../index.js'
 import type { TaskConfig } from '../../queues/config/types/taskTypes.js'
 import type { SchedulePublishTaskInput } from './types.js'
 
 type Args = {
+  adminUserSlug: string
   collections: string[]
   globals: string[]
 }
 
 export const getSchedulePublishTask = ({
+  adminUserSlug,
   collections,
   globals,
 }: Args): TaskConfig<{ input: SchedulePublishTaskInput; output: object }> => {
@@ -14,6 +18,20 @@ export const getSchedulePublishTask = ({
     slug: 'schedulePublish',
     handler: async ({ input, req }) => {
       const _status = input?.type === 'publish' || !input?.type ? 'published' : 'draft'
+
+      const userID = input.user
+
+      let user: null | TypedUser = null
+
+      if (userID) {
+        user = (await req.payload.findByID({
+          id: userID,
+          collection: adminUserSlug,
+          depth: 0,
+        })) as TypedUser
+
+        user.collection = adminUserSlug
+      }
 
       let publishSpecificLocale: string
 
@@ -35,7 +53,9 @@ export const getSchedulePublishTask = ({
             _status,
           },
           depth: 0,
-          publishSpecificLocale,
+          overrideAccess: user === null,
+          publishSpecificLocale: publishSpecificLocale!,
+          user,
         })
       }
 
@@ -46,7 +66,9 @@ export const getSchedulePublishTask = ({
             _status,
           },
           depth: 0,
-          publishSpecificLocale,
+          overrideAccess: user === null,
+          publishSpecificLocale: publishSpecificLocale!,
+          user,
         })
       }
 
@@ -65,15 +87,24 @@ export const getSchedulePublishTask = ({
         name: 'locale',
         type: 'text',
       },
-      {
-        name: 'doc',
-        type: 'relationship',
-        relationTo: collections,
-      },
+      ...(collections.length > 0
+        ? [
+            {
+              name: 'doc',
+              type: 'relationship',
+              relationTo: collections,
+            } satisfies Field,
+          ]
+        : []),
       {
         name: 'global',
         type: 'select',
         options: globals,
+      },
+      {
+        name: 'user',
+        type: 'relationship',
+        relationTo: adminUserSlug,
       },
     ],
   }

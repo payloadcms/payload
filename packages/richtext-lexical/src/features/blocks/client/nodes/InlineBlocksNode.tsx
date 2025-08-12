@@ -18,24 +18,30 @@ const InlineBlockComponent = React.lazy(() =>
 )
 
 export class InlineBlockNode extends ServerInlineBlockNode {
-  static clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
+  static override clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
     return super.clone(node)
   }
 
-  static getType(): string {
+  static override getType(): string {
     return super.getType()
   }
 
-  static importJSON(serializedNode: SerializedInlineBlockNode): InlineBlockNode {
+  static override importJSON(serializedNode: SerializedInlineBlockNode): InlineBlockNode {
     const node = $createInlineBlockNode(serializedNode.fields)
     return node
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
-    return <InlineBlockComponent formData={this.getFields()} nodeKey={this.getKey()} />
+  override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
+    return (
+      <InlineBlockComponent
+        cacheBuster={this.getCacheBuster()}
+        formData={this.getFields()}
+        nodeKey={this.getKey()}
+      />
+    )
   }
 
-  exportJSON(): SerializedInlineBlockNode {
+  override exportJSON(): SerializedInlineBlockNode {
     return super.exportJSON()
   }
 }

@@ -1,3 +1,9 @@
-import type { CustomComponent } from '../../config/types.js'
+import type { ServerProps } from '../../config/types.js'
 
-export type CustomPublishButton = CustomComponent
+export type PublishButtonClientProps = {
+  label?: string
+}
+
+export type PublishButtonServerPropsOnly = {} & ServerProps
+
+export type PublishButtonServerProps = PublishButtonClientProps & PublishButtonServerPropsOnly

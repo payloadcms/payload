@@ -4,7 +4,6 @@ import type { PgTable } from 'drizzle-orm/pg-core'
 import type { SQLiteTable } from 'drizzle-orm/sqlite-core'
 import type { Payload } from 'payload'
 
-import { GenericTable } from '@payloadcms/drizzle/types'
 import { sql } from 'drizzle-orm'
 
 import { isMongoose } from './isMongoose.js'
@@ -117,7 +116,13 @@ export async function createSnapshot(
   collectionSlugs: string[],
 ) {
   if (isMongoose(_payload) && 'collections' in _payload.db) {
-    const mongooseCollections = _payload.db.collections[collectionSlugs[0]].db.collections
+    const firstCollectionSlug = collectionSlugs?.[0]
+
+    if (!firstCollectionSlug?.length) {
+      throw new Error('No collection slugs provided to reset the database.')
+    }
+
+    const mongooseCollections = _payload.db.collections[firstCollectionSlug]?.db.collections
 
     await createMongooseSnapshot(mongooseCollections, snapshotKey)
   } else {

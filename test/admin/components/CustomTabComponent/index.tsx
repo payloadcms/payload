@@ -1,16 +1,20 @@
-import type { DocumentTabComponent } from 'payload'
+import type { DocumentTabServerProps } from 'payload'
 
 import React from 'react'
 
 import { CustomTabComponentClient } from './client.js'
 import './index.scss'
 
-export const CustomTabComponent: DocumentTabComponent = (props) => {
-  const { path } = props
+type CustomTabComponentProps = {
+  label: string
+} & DocumentTabServerProps
+
+export function CustomTabComponent(props: CustomTabComponentProps) {
+  const { label, path } = props
 
   return (
     <li className="custom-doc-tab">
-      <CustomTabComponentClient path={path} />
+      <CustomTabComponentClient label={label} path={path} />
     </li>
   )
 }

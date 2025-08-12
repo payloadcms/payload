@@ -2,7 +2,7 @@
 
 import type { Theme } from '@/providers/Theme/types'
 
-import React, { createContext, useCallback, useContext, useState } from 'react'
+import React, { createContext, useCallback, use, useState } from 'react'
 
 import canUseDOM from '@/utilities/canUseDOM'
 
@@ -27,11 +27,7 @@ export const HeaderThemeProvider = ({ children }: { children: React.ReactNode })
     setThemeState(themeToSet)
   }, [])
 
-  return (
-    <HeaderThemeContext.Provider value={{ headerTheme, setHeaderTheme }}>
-      {children}
-    </HeaderThemeContext.Provider>
-  )
+  return <HeaderThemeContext value={{ headerTheme, setHeaderTheme }}>{children}</HeaderThemeContext>
 }
 
-export const useHeaderTheme = (): ContextType => useContext(HeaderThemeContext)
+export const useHeaderTheme = (): ContextType => use(HeaderThemeContext)

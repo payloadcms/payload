@@ -1,10 +1,10 @@
-import type { AdminViewProps } from 'payload'
+import type { DocumentViewServerProps } from 'payload'
 
 import React from 'react'
 
 import { customParamViewTitle } from '../../../shared.js'
 
-export const CustomTabWithParamView: React.FC<AdminViewProps> = ({ params }) => {
+export function CustomTabWithParamView({ params }: DocumentViewServerProps) {
   const paramValue = params?.segments?.[4]
 
   return (

@@ -1,19 +1,24 @@
-export { BlockquoteJSXConverter } from './components/RichText/converter/converters/blockquote.js'
-export { HeadingJSXConverter } from './components/RichText/converter/converters/heading.js'
-export { HorizontalRuleJSXConverter } from './components/RichText/converter/converters/horizontalRule.js'
-export { LinebreakJSXConverter } from './components/RichText/converter/converters/linebreak.js'
-export { LinkJSXConverter } from './components/RichText/converter/converters/link.js'
-export { ListJSXConverter } from './components/RichText/converter/converters/list.js'
-export { ParagraphJSXConverter } from './components/RichText/converter/converters/paragraph.js'
-export { TableJSXConverter } from './components/RichText/converter/converters/table.js'
-export { TextJSXConverter } from './components/RichText/converter/converters/text.js'
-export { UploadJSXConverter } from './components/RichText/converter/converters/upload.js'
+export {
+  type JSXConvertersFunction,
+  RichText,
+} from '../../features/converters/lexicalToJSX/Component/index.js'
+export { BlockquoteJSXConverter } from '../../features/converters/lexicalToJSX/converter/converters/blockquote.js'
+export { HeadingJSXConverter } from '../../features/converters/lexicalToJSX/converter/converters/heading.js'
+export { HorizontalRuleJSXConverter } from '../../features/converters/lexicalToJSX/converter/converters/horizontalRule.js'
+export { LinebreakJSXConverter } from '../../features/converters/lexicalToJSX/converter/converters/linebreak.js'
+export { LinkJSXConverter } from '../../features/converters/lexicalToJSX/converter/converters/link.js'
+export { ListJSXConverter } from '../../features/converters/lexicalToJSX/converter/converters/list.js'
+export { ParagraphJSXConverter } from '../../features/converters/lexicalToJSX/converter/converters/paragraph.js'
+export { TabJSXConverter } from '../../features/converters/lexicalToJSX/converter/converters/tab.js'
+export { TableJSXConverter } from '../../features/converters/lexicalToJSX/converter/converters/table.js'
 
-export { defaultJSXConverters } from './components/RichText/converter/defaultConverters.js'
-export { convertLexicalNodesToJSX } from './components/RichText/converter/index.js'
+export { TextJSXConverter } from '../../features/converters/lexicalToJSX/converter/converters/text.js'
+
+export { UploadJSXConverter } from '../../features/converters/lexicalToJSX/converter/converters/upload.js'
+export { defaultJSXConverters } from '../../features/converters/lexicalToJSX/converter/defaultConverters.js'
+export { convertLexicalNodesToJSX } from '../../features/converters/lexicalToJSX/converter/index.js'
 export type {
   JSXConverter,
   JSXConverters,
   SerializedLexicalNodeWithParent,
-} from './components/RichText/converter/types.js'
-export { type JSXConvertersFunction, RichText } from './components/RichText/index.js'
+} from '../../features/converters/lexicalToJSX/converter/types.js'

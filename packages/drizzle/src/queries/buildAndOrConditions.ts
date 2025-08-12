@@ -3,15 +3,18 @@ import type { FlattenedField, Where } from 'payload'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
+import type { QueryContext } from './parseParams.js'
 
 import { parseParams } from './parseParams.js'
 
 export function buildAndOrConditions({
   adapter,
   aliasTable,
+  context,
   fields,
   joins,
   locale,
+  parentIsLocalized,
   selectFields,
   selectLocale,
   tableName,
@@ -20,10 +23,12 @@ export function buildAndOrConditions({
   adapter: DrizzleAdapter
   aliasTable?: Table
   collectionSlug?: string
+  context: QueryContext
   fields: FlattenedField[]
   globalSlug?: string
   joins: BuildQueryJoinAliases
   locale?: string
+  parentIsLocalized: boolean
   selectFields: Record<string, GenericColumn>
   selectLocale?: boolean
   tableName: string
@@ -39,9 +44,11 @@ export function buildAndOrConditions({
       const result = parseParams({
         adapter,
         aliasTable,
+        context,
         fields,
         joins,
         locale,
+        parentIsLocalized,
         selectFields,
         selectLocale,
         tableName,

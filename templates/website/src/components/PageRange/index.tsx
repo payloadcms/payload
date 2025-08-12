@@ -14,7 +14,7 @@ const defaultCollectionLabels = {
 
 export const PageRange: React.FC<{
   className?: string
-  collection?: string
+  collection?: keyof typeof defaultCollectionLabels
   collectionLabels?: {
     plural?: string
     singular?: string
@@ -39,7 +39,10 @@ export const PageRange: React.FC<{
   if (totalDocs && indexEnd > totalDocs) indexEnd = totalDocs
 
   const { plural, singular } =
-    collectionLabelsFromProps || defaultCollectionLabels[collection || ''] || defaultLabels || {}
+    collectionLabelsFromProps ||
+    (collection ? defaultCollectionLabels[collection] : undefined) ||
+    defaultLabels ||
+    {}
 
   return (
     <div className={[className, 'font-semibold'].filter(Boolean).join(' ')}>

@@ -23,18 +23,29 @@ export type RelationshipToDelete = {
   path: string
 }
 
+export type TextToDelete = {
+  locale?: string
+  path: string
+}
+
+export type NumberToDelete = {
+  locale?: string
+  path: string
+}
+
 export type RowToInsert = {
   arrays: {
     [tableName: string]: ArrayRowToInsert[]
   }
   blocks: {
-    [blockType: string]: BlockRowToInsert[]
+    [tableName: string]: BlockRowToInsert[]
   }
   blocksToDelete: Set<string>
   locales: {
     [locale: string]: Record<string, unknown>
   }
   numbers: Record<string, unknown>[]
+  numbersToDelete: NumberToDelete[]
   relationships: Record<string, unknown>[]
   relationshipsToDelete: RelationshipToDelete[]
   row: Record<string, unknown>
@@ -42,4 +53,5 @@ export type RowToInsert = {
     [tableName: string]: Record<string, unknown>[]
   }
   texts: Record<string, unknown>[]
+  textsToDelete: TextToDelete[]
 }

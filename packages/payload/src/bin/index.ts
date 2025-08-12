@@ -1,9 +1,9 @@
+// @ts-strict-ignore
+/* eslint-disable no-console */
 import { Cron } from 'croner'
 import minimist from 'minimist'
 import { pathToFileURL } from 'node:url'
 import path from 'path'
-
-import type { BinScript } from '../config/types.js'
 
 import { findConfig } from '../config/find.js'
 import payload, { getPayload } from '../index.js'
@@ -11,7 +11,18 @@ import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
 import { info } from './info.js'
 import { loadEnv } from './loadEnv.js'
-import { migrate } from './migrate.js'
+import { migrate, availableCommands as migrateCommands } from './migrate.js'
+
+// Note: this does not account for any user bin scripts
+const availableScripts = [
+  'generate:db-schema',
+  'generate:importmap',
+  'generate:types',
+  'info',
+  'jobs:run',
+  'run',
+  ...migrateCommands,
+] as const
 
 export const bin = async () => {
   loadEnv()
@@ -35,7 +46,7 @@ export const bin = async () => {
 
     // Modify process.argv to remove 'run' and the script path
     const originalArgv = process.argv
-    process.argv = [process.argv[0], process.argv[1], ...args._.slice(2)]
+    process.argv = [process.argv[0]!, process.argv[1]!, ...args._.slice(2)]
 
     try {
       await import(pathToFileURL(absoluteScriptPath).toString())
@@ -58,13 +69,23 @@ export const bin = async () => {
   }
 
   const userBinScript = Array.isArray(config.bin)
-    ? config.bin.find(({ key }) => key === script)
+    ? config.bin.find(({ key }: { key: string }) => key === script)
     : false
 
   if (userBinScript) {
     try {
-      const script: BinScript = await import(pathToFileURL(userBinScript.scriptPath).toString())
-      await script(config)
+      const module = await import(pathToFileURL(userBinScript.scriptPath).toString())
+
+      if (!module.script || typeof module.script !== 'function') {
+        console.error(
+          `Could not find "script" function export for script ${userBinScript.key} in ${userBinScript.scriptPath}`,
+        )
+      } else {
+        await module.script(config).catch((err: unknown) => {
+          console.log(`Script ${userBinScript.key} failed, details:`)
+          console.error(err)
+        })
+      }
     } catch (err) {
       console.log(`Could not find associated bin script for the ${userBinScript.key} command`)
       console.error(err)
@@ -86,13 +107,15 @@ export const bin = async () => {
   }
 
   if (script === 'jobs:run') {
-    const payload = await getPayload({ config })
+    const payload = await getPayload({ config }) // Do not setup crons here - this bin script can set up its own crons
     const limit = args.limit ? parseInt(args.limit, 10) : undefined
     const queue = args.queue ? args.queue : undefined
+    const allQueues = !!args.allQueues
 
     if (args.cron) {
       new Cron(args.cron, async () => {
         await payload.jobs.run({
+          allQueues,
           limit,
           queue,
         })
@@ -102,10 +125,15 @@ export const bin = async () => {
 
       return
     } else {
-      return await payload.jobs.run({
+      await payload.jobs.run({
+        allQueues,
         limit,
         queue,
       })
+
+      await payload.destroy() // close database connections after running jobs so process can exit cleanly
+
+      process.exit(0)
     }
   }
 
@@ -133,6 +161,8 @@ export const bin = async () => {
     process.exit(0)
   }
 
-  console.error(`Unknown script: "${script}".`)
+  console.error(script ? `Unknown command: "${script}"` : 'Please provide a command to run')
+  console.log(`\nAvailable commands:\n${availableScripts.map((c) => `  - ${c}`).join('\n')}`)
+
   process.exit(1)
 }

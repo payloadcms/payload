@@ -23,6 +23,9 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
     case 'enum': {
       let options: string[]
       if ('locale' in column) {
+        if (!locales?.length) {
+          throw new Error('Locales must be defined for locale columns')
+        }
         options = locales
       } else {
         options = column.options

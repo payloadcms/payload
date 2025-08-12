@@ -51,6 +51,25 @@ export const ListDrawer: React.FC<ListDrawerProps> = (props) => {
   )
 }
 
+/**
+ * Returns an array containing the ListDrawer component, the ListDrawerToggler component, and an object with state and methods for controlling the drawer.
+ * @example
+ * import { useListDrawer } from '@payloadcms/ui'
+ *
+ * // inside a React component
+ * const [ListDrawer, ListDrawerToggler, { closeDrawer, openDrawer }] = useListDrawer({
+ *   collectionSlugs: ['users'],
+ *   selectedCollection: 'users',
+ * })
+ *
+ * // inside the return statement
+ * return (
+ *    <>
+ *      <ListDrawer />
+ *      <ListDrawerToggler onClick={openDrawer}>Open List Drawer</ListDrawerToggler>
+ *    </>
+ * )
+ */
 export const useListDrawer: UseListDrawer = ({
   collectionSlugs: collectionSlugsFromProps,
   filterOptions,

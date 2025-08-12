@@ -1,9 +1,8 @@
-import type { PayloadRequest } from 'payload'
+import type { PayloadHandler } from 'payload'
 
 import { PayloadIcon } from '@payloadcms/ui/shared'
 import fs from 'fs/promises'
 import { ImageResponse } from 'next/og.js'
-import { NextResponse } from 'next/server.js'
 import path from 'path'
 import React from 'react'
 import { fileURLToPath } from 'url'
@@ -17,11 +16,11 @@ export const runtime = 'nodejs'
 
 export const contentType = 'image/png'
 
-export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
+export const generateOGImage: PayloadHandler = async (req) => {
   const config = req.payload.config
 
   if (config.admin.meta.defaultOGImageType === 'off') {
-    return NextResponse.json({ error: `Open Graph images are disabled` }, { status: 400 })
+    return Response.json({ error: `Open Graph images are disabled` }, { status: 400 })
   }
 
   try {
@@ -77,6 +76,6 @@ export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
     )
   } catch (e: any) {
     req.payload.logger.error(`Error generating Open Graph image: ${e.message}`)
-    return NextResponse.json({ error: `Internal Server Error: ${e.message}` }, { status: 500 })
+    return Response.json({ error: `Internal Server Error: ${e.message}` }, { status: 500 })
   }
 }

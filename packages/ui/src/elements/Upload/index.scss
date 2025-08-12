@@ -13,7 +13,7 @@
 
     .tooltip.error-message {
       z-index: 3;
-      bottom: calc(100% - #{base(0.5)});
+      bottom: calc(100% - #{calc(var(--base) * 0.5)});
     }
 
     &__file-selected {
@@ -58,30 +58,19 @@
       display: flex;
       gap: calc(var(--base) / 2);
       flex-wrap: wrap;
+    }
 
-      & button {
-        cursor: pointer;
-        background-color: var(--theme-elevation-150);
-        border: none;
-        border-radius: $style-radius-m;
-        padding: base(0.25) base(0.5);
-        text-wrap: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-
-        &:hover {
-          background-color: var(--theme-elevation-100);
-        }
-      }
+    &__upload-actions {
+      margin-top: calc(var(--base) * 0.5);
     }
 
     &__previewDrawer {
       & h2 {
-        margin: 0 base(1) 0 0;
-        text-wrap: nowrap;
+        margin: 0 var(--base) 0 0;
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: calc(100% - base(2));
+        max-width: calc(100% - calc(var(--base) * 2));
       }
     }
 
@@ -93,7 +82,7 @@
     &__dropzoneContent {
       display: flex;
       flex-wrap: wrap;
-      gap: base(0.4);
+      gap: calc(var(--base) * 0.4);
       justify-content: space-between;
       width: 100%;
     }
@@ -101,6 +90,7 @@
     &__dropzoneButtons {
       display: flex;
       gap: calc(var(--base) * 0.5);
+      align-items: center;
     }
 
     &__orText {

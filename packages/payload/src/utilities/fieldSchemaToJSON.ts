@@ -1,5 +1,8 @@
+import type { ClientConfig } from '../config/client.js'
 import type { ClientField } from '../fields/config/client.js'
-import type { FieldTypes } from '../fields/config/types.js'
+import type { Field, FieldTypes } from '../fields/config/types.js'
+
+import { fieldAffectsData } from '../fields/config/types.js'
 
 export type FieldSchemaJSON = {
   blocks?: FieldSchemaJSON // TODO: conditionally add based on `type`
@@ -11,7 +14,10 @@ export type FieldSchemaJSON = {
   type: FieldTypes
 }[]
 
-export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
+export const fieldSchemaToJSON = (
+  fields: (ClientField | Field)[],
+  config: ClientConfig,
+): FieldSchemaJSON => {
   return fields.reduce((acc, field) => {
     let result = acc
 
@@ -20,13 +26,16 @@ export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
         acc.push({
           name: field.name,
           type: field.type,
-          fields: fieldSchemaToJSON([
-            ...field.fields,
-            {
-              name: 'id',
-              type: 'text',
-            },
-          ]),
+          fields: fieldSchemaToJSON(
+            [
+              ...field.fields,
+              {
+                name: 'id',
+                type: 'text',
+              },
+            ],
+            config,
+          ),
         })
 
         break
@@ -35,34 +44,42 @@ export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
         acc.push({
           name: field.name,
           type: field.type,
-          blocks: field.blocks.reduce((acc, block) => {
-            acc[block.slug] = {
-              fields: fieldSchemaToJSON([
-                ...block.fields,
-                {
-                  name: 'id',
-                  type: 'text',
-                },
-              ]),
+          blocks: (field.blockReferences ?? field.blocks).reduce((acc, _block) => {
+            const block = typeof _block === 'string' ? config.blocksMap[_block]! : _block
+            ;(acc as any)[block.slug] = {
+              fields: fieldSchemaToJSON(
+                [
+                  ...block.fields,
+                  {
+                    name: 'id',
+                    type: 'text',
+                  },
+                ],
+                config,
+              ),
             }
 
             return acc
-          }, {}),
+          }, {} as FieldSchemaJSON),
         })
 
         break
 
       case 'collapsible': // eslint-disable no-fallthrough
       case 'row':
-        result = result.concat(fieldSchemaToJSON(field.fields))
+        result = result.concat(fieldSchemaToJSON(field.fields, config))
         break
 
       case 'group':
-        acc.push({
-          name: field.name,
-          type: field.type,
-          fields: fieldSchemaToJSON(field.fields),
-        })
+        if (fieldAffectsData(field)) {
+          acc.push({
+            name: field.name,
+            type: field.type,
+            fields: fieldSchemaToJSON(field.fields, config),
+          })
+        } else {
+          result = result.concat(fieldSchemaToJSON(field.fields, config))
+        }
 
         break
 
@@ -72,25 +89,25 @@ export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
           name: field.name,
           type: field.type,
           hasMany: 'hasMany' in field ? Boolean(field.hasMany) : false, // TODO: type this
-          relationTo: field.relationTo,
+          relationTo: field.relationTo as string,
         })
 
         break
 
       case 'tabs': {
-        let tabFields = []
+        let tabFields: FieldSchemaJSON = []
 
         field.tabs.forEach((tab) => {
           if ('name' in tab) {
             tabFields.push({
               name: tab.name,
               type: field.type,
-              fields: fieldSchemaToJSON(tab.fields),
+              fields: fieldSchemaToJSON(tab.fields, config),
             })
             return
           }
 
-          tabFields = tabFields.concat(fieldSchemaToJSON(tab.fields))
+          tabFields = tabFields.concat(fieldSchemaToJSON(tab.fields, config))
         })
 
         result = result.concat(tabFields)
@@ -108,5 +125,5 @@ export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
     }
 
     return result
-  }, [])
+  }, [] as FieldSchemaJSON)
 }

@@ -1,0 +1,32 @@
+---
+title: Building without a DB connection
+label: Building without a DB connection
+order: 10
+desc: You don't want to have a DB connection while building your Docker container? Learn how to prevent that!
+keywords: deployment, production, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+One of the most common problems when building a site for production, especially with Docker - is the DB connection requirement.
+
+The important note is that Payload by itself does not have this requirement, But [Next.js' SSG ](https://nextjs.org/docs/pages/building-your-application/rendering/static-site-generation) does if any of your route segments have SSG enabled (which is default, unless you opted out or used a [Dynamic API](https://nextjs.org/docs/app/deep-dive/caching#dynamic-apis)) and use the Payload Local API.
+
+Solutions:
+
+## Using the experimental-build-mode Next.js build flag
+
+You can run Next.js build using the `pnpm next build --experimental-build-mode compile` command to only compile the code without static generation, which does not require a DB connection. In that case, your pages will be rendered dynamically, but after that, you can still generate static pages using the `pnpm next build --experimental-build-mode generate` command when you have a DB connection.
+
+When running `pnpm next build --experimental-build-mode compile`, environment variables prefixed with `NEXT_PUBLIC` will not be inlined and will be `undefined` on the client. To make these variables available, either run `pnpm next build --experimental-build-mode generate` if a DB connection is available, or use `pnpm next build --experimental-build-mode generate-env` if you do not have a DB connection.
+
+[Next.js documentation](https://nextjs.org/docs/pages/api-reference/cli/next#next-build-options)
+
+## Opting-out of SSG
+
+You can opt out of SSG by adding this all the route segment files:
+
+```ts
+export const dynamic = 'force-dynamic'
+```
+
+**Note that it will disable static optimization and your site will be slower**.
+More on [Next.js documentation](https://nextjs.org/docs/app/deep-dive/caching#opting-out-2)

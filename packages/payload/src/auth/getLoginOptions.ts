@@ -7,7 +7,7 @@ export const getLoginOptions = (
   canLoginWithUsername: boolean
 } => {
   return {
-    canLoginWithEmail: !loginWithUsername || loginWithUsername.allowEmailLogin,
+    canLoginWithEmail: !loginWithUsername || loginWithUsername.allowEmailLogin!,
     canLoginWithUsername: Boolean(loginWithUsername),
   }
 }

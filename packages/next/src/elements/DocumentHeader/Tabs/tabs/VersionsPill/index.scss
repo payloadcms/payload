@@ -1,0 +1,9 @@
+@layer payload-default {
+  .pill-version-count {
+    line-height: calc(var(--base) * 0.8);
+    min-width: calc(var(--base) * 0.8);
+    text-align: center;
+    background-color: var(--theme-elevation-100);
+    border-radius: var(--style-radius-s);
+  }
+}

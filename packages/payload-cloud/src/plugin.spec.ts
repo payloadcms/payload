@@ -5,9 +5,19 @@ import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailer from 'nodemailer'
 import { defaults } from 'payload'
 
-import { payloadCloudPlugin } from './plugin.js'
+// TO-DO: this would be needed for the TO-DO tests below.
+// maybe we have to use jest.unstable_mockModule? (already tried)
+// jest.mock('./plugin.ts', () => ({
+//   // generateRandomString: jest.fn<() => string>().mockReturnValue('instance'),
+//   generateRandomString: jest.fn().mockReturnValue('instance'),
+// }))
 
-const mockedPayload: Payload = jest.fn() as unknown as Payload
+const mockedPayload: Payload = {
+  updateGlobal: jest.fn(),
+  findGlobal: jest.fn().mockReturnValue('instance'),
+} as unknown as Payload
+
+import { payloadCloudPlugin } from './plugin.js'
 
 describe('plugin', () => {
   let createTransportSpy: jest.Spied<any>
@@ -163,6 +173,78 @@ describe('plugin', () => {
           }),
         )
       })
+    })
+  })
+
+  describe('autoRun and cronJobs', () => {
+    beforeEach(() => {
+      process.env.PAYLOAD_CLOUD = 'true'
+      process.env.PAYLOAD_CLOUD_EMAIL_API_KEY = 'test-key'
+      process.env.PAYLOAD_CLOUD_DEFAULT_DOMAIN = 'test-domain.com'
+    })
+
+    test('should always set global instance identifier', async () => {
+      const plugin = payloadCloudPlugin()
+      const config = await plugin(createConfig())
+
+      const globalInstance = config.globals?.find(
+        (global) => global.slug === 'payload-cloud-instance',
+      )
+
+      expect(globalInstance).toBeDefined()
+      expect(globalInstance?.fields).toStrictEqual([
+        {
+          name: 'instance',
+          type: 'text',
+          required: true,
+        },
+      ]),
+        expect(globalInstance?.admin?.hidden).toStrictEqual(true)
+    })
+    // TO-DO: I managed to mock findGlobal, but not generateRandomString
+    test.skip('if autoRun is not set, should return default cron job', async () => {
+      const plugin = payloadCloudPlugin()
+      const config = await plugin(createConfig())
+      const DEFAULT_CRON_JOB = {
+        cron: '* * * * *',
+        limit: 10,
+        queue: 'default (every minute)',
+      }
+      if (typeof config.jobs?.autoRun !== 'function') {
+        throw new Error('autoRun should be a function')
+      }
+      const cronConfig = await config.jobs!.autoRun!(mockedPayload)
+      expect(cronConfig).toStrictEqual([DEFAULT_CRON_JOB])
+    })
+    // TO-DO: I managed to mock findGlobal, but not generateRandomString
+    // Either way when mocking the plugin part this test has little if any importance
+    test.skip('if autoRun is a function, should return the result of the function', async () => {
+      const plugin = payloadCloudPlugin()
+      const config = await plugin(
+        createConfig({
+          jobs: {
+            tasks: [],
+            autoRun: async () => {
+              return [
+                {
+                  cron: '1 2 3 4 5',
+                  limit: 5,
+                  queue: 'test-queue',
+                },
+                {},
+              ]
+            },
+          },
+        }),
+      )
+      expect(config.jobs?.autoRun).toStrictEqual([
+        {
+          cron: '1 2 3 4 5',
+          limit: 5,
+          queue: 'test-queue',
+        },
+        {},
+      ])
     })
   })
 })

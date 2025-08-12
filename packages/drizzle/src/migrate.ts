@@ -42,30 +42,33 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
       limit: 0,
       sort: '-name',
     }))
+
+    if (migrationsInDB.find((m) => m.batch === -1)) {
+      const { confirm: runMigrations } = await prompts(
+        {
+          name: 'confirm',
+          type: 'confirm',
+          initial: false,
+          message:
+            "It looks like you've run Payload in dev mode, meaning you've dynamically pushed changes to your database.\n\n" +
+            "If you'd like to run migrations, data loss will occur. Would you like to proceed?",
+        },
+        {
+          onCancel: () => {
+            process.exit(0)
+          },
+        },
+      )
+
+      if (!runMigrations) {
+        process.exit(0)
+      }
+      // ignore the dev migration so that the latest batch number increments correctly
+      migrationsInDB = migrationsInDB.filter((m) => m.batch !== -1)
+    }
+
     if (Number(migrationsInDB?.[0]?.batch) > 0) {
       latestBatch = Number(migrationsInDB[0]?.batch)
-    }
-  }
-
-  if (migrationsInDB.find((m) => m.batch === -1)) {
-    const { confirm: runMigrations } = await prompts(
-      {
-        name: 'confirm',
-        type: 'confirm',
-        initial: false,
-        message:
-          "It looks like you've run Payload in dev mode, meaning you've dynamically pushed changes to your database.\n\n" +
-          "If you'd like to run migrations, data loss will occur. Would you like to proceed?",
-      },
-      {
-        onCancel: () => {
-          process.exit(0)
-        },
-      },
-    )
-
-    if (!runMigrations) {
-      process.exit(0)
     }
   }
 

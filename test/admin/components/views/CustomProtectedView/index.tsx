@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { Button } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
@@ -10,7 +10,7 @@ import { settingsGlobalSlug } from '../../../slugs.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-export const CustomProtectedView: React.FC<AdminViewProps> = async ({ initPageResult }) => {
+export async function CustomProtectedView({ initPageResult }: AdminViewServerProps) {
   const {
     req: {
       payload: {

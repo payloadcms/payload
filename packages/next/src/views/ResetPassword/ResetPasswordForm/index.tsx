@@ -9,26 +9,13 @@ import {
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import { type FormState } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 type Args = {
   readonly token: string
-}
-
-const initialState: FormState = {
-  'confirm-password': {
-    initialValue: '',
-    valid: false,
-    value: '',
-  },
-  password: {
-    initialValue: '',
-    valid: false,
-    value: '',
-  },
 }
 
 export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
@@ -60,6 +47,24 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
       )
     }
   }, [adminRoute, fetchFullUser, history, loginRoute])
+
+  const initialState: FormState = {
+    'confirm-password': {
+      initialValue: '',
+      valid: false,
+      value: '',
+    },
+    password: {
+      initialValue: '',
+      valid: false,
+      value: '',
+    },
+    token: {
+      initialValue: token,
+      valid: true,
+      value: token,
+    },
+  }
 
   return (
     <Form

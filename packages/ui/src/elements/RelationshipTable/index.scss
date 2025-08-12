@@ -18,6 +18,16 @@
       padding-bottom: var(--base);
     }
 
+    &__add-new-polymorphic-wrapper {
+      display: inline-flex;
+    }
+
+    &__add-new-polymorphic .btn__label {
+      display: flex;
+      text-wrap: nowrap;
+      align-items: center;
+    }
+
     .table {
       table {
         width: 100%;

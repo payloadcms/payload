@@ -1,7 +1,7 @@
 ---
 title: Customizing CSS & SCSS
 label: Customizing CSS
-order: 80
+order: 50
 desc: Customize the Payload Admin Panel further by adding your own CSS or SCSS style sheet to the configuration, powerful theme and design options are waiting for you.
 keywords: admin, css, scss, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
@@ -29,8 +29,10 @@ Here is an example of how you might target the Dashboard View and change the bac
 ```
 
 <Banner type="warning">
-  **Note:**
-  If you are building [Custom Components](./components), it is best to import your own stylesheets directly into your components, rather than using the global stylesheet. You can continue to use the [CSS library](#css-library) as needed.
+  **Note:** If you are building [Custom
+  Components](../custom-components/overview), it is best to import your own
+  stylesheets directly into your components, rather than using the global
+  stylesheet. You can continue to use the [CSS library](#css-library) as needed.
 </Banner>
 
 ### Specificity rules
@@ -40,9 +42,10 @@ All Payload CSS is encapsulated inside CSS layers under `@layer payload-default`
 We have also provided a layer `@layer payload` if you want to use layers and ensure that your styles are applied after payload.
 
 To override existing styles in a way that the previous rules of specificity would be respected you can use the default layer like so
+
 ```css
 @layer payload-default {
-  // my styles within the payload specificity
+  // my styles within the Payload specificity
 }
 ```
 
@@ -77,8 +80,8 @@ The following variables are defined and can be overridden:
 For an up-to-date, comprehensive list of all available variables, please refer to the [Source Code](https://github.com/payloadcms/payload/blob/main/packages/ui/src/scss).
 
 <Banner type="warning">
-  **Warning:**
-  If you're overriding colors or theme elevations, make sure to consider how [your changes will affect dark mode](#dark-mode).
+  **Warning:** If you're overriding colors or theme elevations, make sure to
+  consider how [your changes will affect dark mode](#dark-mode).
 </Banner>
 
 #### Dark Mode

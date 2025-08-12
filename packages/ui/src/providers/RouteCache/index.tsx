@@ -1,17 +1,22 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation.js'
-import React, { createContext, useCallback, useContext, useEffect } from 'react'
+import React, { createContext, use, useCallback, useEffect } from 'react'
 
 export type RouteCacheContext = {
+  cachingEnabled: boolean
   clearRouteCache: () => void
 }
 
 const Context = createContext<RouteCacheContext>({
+  cachingEnabled: true,
   clearRouteCache: () => {},
 })
 
-export const RouteCache: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const RouteCache: React.FC<{ cachingEnabled?: boolean; children: React.ReactNode }> = ({
+  cachingEnabled = true,
+  children,
+}) => {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -20,10 +25,12 @@ export const RouteCache: React.FC<{ children: React.ReactNode }> = ({ children }
   }, [router])
 
   useEffect(() => {
-    clearRouteCache()
-  }, [pathname, clearRouteCache])
+    if (cachingEnabled) {
+      clearRouteCache()
+    }
+  }, [pathname, clearRouteCache, cachingEnabled])
 
-  return <Context.Provider value={{ clearRouteCache }}>{children}</Context.Provider>
+  return <Context value={{ cachingEnabled, clearRouteCache }}>{children}</Context>
 }
 
-export const useRouteCache = () => useContext(Context)
+export const useRouteCache = () => use(Context)

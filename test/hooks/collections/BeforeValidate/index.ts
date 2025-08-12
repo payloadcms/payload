@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { beforeValidateSlug } from '../../collectionSlugs.js'
+import { beforeValidateSlug } from '../../shared.js'
 
 export const BeforeValidateCollection: CollectionConfig = {
   slug: beforeValidateSlug,

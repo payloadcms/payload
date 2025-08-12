@@ -2,13 +2,18 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+import type { CollectionConfig } from 'payload'
+
 import type { LocalizedPost } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { ArrayCollection } from './collections/Array/index.js'
+import { ArrayWithFallbackCollection } from './collections/ArrayWithFallback/index.js'
 import { BlocksCollection } from './collections/Blocks/index.js'
 import { Group } from './collections/Group/index.js'
+import { LocalizedDateFields } from './collections/LocalizedDateFields/index.js'
+import { LocalizedDrafts } from './collections/LocalizedDrafts/index.js'
 import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized/index.js'
 import { NestedArray } from './collections/NestedArray/index.js'
 import { NestedFields } from './collections/NestedFields/index.js'
@@ -18,9 +23,11 @@ import { RichTextCollection } from './collections/RichText/index.js'
 import { Tab } from './collections/Tab/index.js'
 import {
   blocksWithLocalizedSameName,
+  cannotCreateDefaultLocale,
   defaultLocale,
   englishTitle,
   hungarianLocale,
+  localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -34,7 +41,6 @@ import {
   withLocalizedRelSlug,
   withRequiredLocalizedFields,
 } from './shared.js'
-
 export type LocalizedPostAllLocale = {
   title: {
     en?: string
@@ -42,7 +48,7 @@ export type LocalizedPostAllLocale = {
   }
 } & LocalizedPost
 
-const openAccess = {
+const openAccess: CollectionConfig['access'] = {
   create: () => true,
   delete: () => true,
   read: () => true,
@@ -60,9 +66,19 @@ export default buildConfigWithDefaults({
     BlocksCollection,
     NestedArray,
     NestedFields,
+    LocalizedDrafts,
+    LocalizedDateFields,
     {
+      admin: {
+        listSearchableFields: 'name',
+      },
       auth: true,
       fields: [
+        {
+          name: 'name',
+          label: { en: 'Full name' },
+          type: 'text',
+        },
         {
           name: 'relation',
           relationTo: localizedPostsSlug,
@@ -80,6 +96,7 @@ export default buildConfigWithDefaults({
       fields: [
         {
           name: 'title',
+          label: { en: 'Full title' },
           index: true,
           localized: true,
           type: 'text',
@@ -258,14 +275,14 @@ export default buildConfigWithDefaults({
         // Relation multiple relationTo
         {
           name: 'localizedRelationMultiRelationTo',
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
         // Relation multiple relationTo hasMany
         {
           name: 'localizedRelationMultiRelationToHasMany',
           hasMany: true,
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
       ],
@@ -289,14 +306,14 @@ export default buildConfigWithDefaults({
         {
           name: 'relationMultiRelationTo',
           localized: true,
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
         {
           name: 'relationMultiRelationToHasMany',
           hasMany: true,
           localized: true,
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
         {
@@ -317,14 +334,17 @@ export default buildConfigWithDefaults({
       slug: relationshipLocalizedSlug,
     },
     {
-      access: openAccess,
+      access: {
+        ...openAccess,
+        create: ({ req }) => req.locale !== defaultLocale,
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
         },
       ],
-      slug: 'dummy',
+      slug: cannotCreateDefaultLocale,
     },
     NestedToArrayAndBlock,
     Group,
@@ -378,6 +398,7 @@ export default buildConfigWithDefaults({
       ],
     },
     LocalizedWithinLocalized,
+    ArrayWithFallbackCollection,
   ],
   globals: [
     {
@@ -408,9 +429,16 @@ export default buildConfigWithDefaults({
     },
   ],
   localization: {
+    filterAvailableLocales: ({ locales }) => {
+      return locales.filter((locale) => locale.code !== 'xx')
+    },
     defaultLocale,
     fallback: true,
     locales: [
+      {
+        code: 'xx',
+        label: 'FILTERED',
+      },
       {
         code: defaultLocale,
         label: 'English',
@@ -452,6 +480,14 @@ export default buildConfigWithDefaults({
       collection,
       data: {
         title: englishTitle,
+      },
+    })
+
+    await payload.create({
+      collection: localizedDateFieldsSlug,
+      data: {
+        localizedDate: new Date().toISOString(),
+        date: new Date().toISOString(),
       },
     })
 
@@ -524,7 +560,7 @@ export default buildConfigWithDefaults({
         relationship: localizedRelation.id,
       },
     })
-    await payload.create({
+    const relationshipLocalized = await payload.create({
       collection: relationshipLocalizedSlug,
       data: {
         arrayField: [
@@ -541,6 +577,15 @@ export default buildConfigWithDefaults({
         relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
       },
       locale: 'en',
+    })
+
+    await payload.update({
+      collection: relationshipLocalizedSlug,
+      id: relationshipLocalized.id,
+      data: {
+        relationMultiRelationTo: { relationTo: collection, value: localizedPost.id },
+      },
+      locale: 'es',
     })
 
     console.log('SEED 5')

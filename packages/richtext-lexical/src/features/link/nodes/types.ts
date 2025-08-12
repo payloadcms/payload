@@ -3,7 +3,7 @@ import type { DefaultDocumentIDType, JsonValue } from 'payload'
 
 export type LinkFields = {
   [key: string]: JsonValue
-  doc: {
+  doc?: {
     relationTo: string
     value:
       | {
@@ -15,12 +15,15 @@ export type LinkFields = {
   } | null
   linkType: 'custom' | 'internal'
   newTab: boolean
-  url: string
+  url?: string
 }
 
 export type SerializedLinkNode<T extends SerializedLexicalNode = SerializedLexicalNode> = Spread<
   {
     fields: LinkFields
+    /**
+     * @todo make required in 4.0 and type AutoLinkNode differently
+     */
     id?: string // optional if AutoLinkNode
     type: 'link'
   },

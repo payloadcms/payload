@@ -2,7 +2,7 @@
 
 import { useSearchParams as useNextSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
-import React, { createContext, useContext } from 'react'
+import React, { createContext, use } from 'react'
 
 export type SearchParamsContext = {
   searchParams: qs.ParsedQs
@@ -50,7 +50,7 @@ export const SearchParamsProvider: React.FC<{ children?: React.ReactNode }> = ({
     [searchParams],
   )
 
-  return <Context.Provider value={{ searchParams, stringifyParams }}>{children}</Context.Provider>
+  return <Context value={{ searchParams, stringifyParams }}>{children}</Context>
 }
 
 /**
@@ -66,4 +66,4 @@ export const SearchParamsProvider: React.FC<{ children?: React.ReactNode }> = ({
  * const parsedSearchParams = parseSearchParams(searchParams)
  * ```
  */
-export const useSearchParams = (): SearchParamsContext => useContext(Context)
+export const useSearchParams = (): SearchParamsContext => use(Context)

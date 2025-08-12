@@ -1,5 +1,15 @@
 import type { DocumentEvent, FieldSchemaJSON } from 'payload'
 
+export type CollectionPopulationRequestHandler = ({
+  apiPath,
+  endpoint,
+  serverURL,
+}: {
+  apiPath: string
+  endpoint: string
+  serverURL: string
+}) => Promise<Response>
+
 export type LivePreviewArgs = {}
 
 export type LivePreview = void

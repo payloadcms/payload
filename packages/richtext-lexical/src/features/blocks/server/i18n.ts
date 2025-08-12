@@ -73,6 +73,15 @@ export const i18n: Partial<GenericLanguages> = {
     },
     label: 'Bloques',
   },
+  et: {
+    inlineBlocks: {
+      create: 'Loo {{label}}',
+      edit: 'Muuda {{label}}',
+      label: 'Sisseehitatud plokid',
+      remove: 'Eemalda {{label}}',
+    },
+    label: 'Plokk',
+  },
   fa: {
     inlineBlocks: {
       create: 'ایجاد {{برچسب}}',
@@ -235,6 +244,15 @@ export const i18n: Partial<GenericLanguages> = {
     },
     label: 'Bloky',
   },
+  sl: {
+    inlineBlocks: {
+      create: 'Ustvari {{oznaka}}',
+      edit: 'Uredi {{label}}',
+      label: 'Vrstični bloki',
+      remove: 'Odstrani {{label}}',
+    },
+    label: 'Bloki',
+  },
   sv: {
     inlineBlocks: {
       create: 'Skapa {{label}}',
@@ -287,7 +305,7 @@ export const i18n: Partial<GenericLanguages> = {
       label: '内联块',
       remove: '删除{{label}}',
     },
-    label: '块',
+    label: '区块',
   },
   'zh-TW': {
     inlineBlocks: {

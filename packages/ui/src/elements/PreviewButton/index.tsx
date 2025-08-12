@@ -1,29 +1,31 @@
 'use client'
+import type { PreviewButtonClientProps } from 'payload'
+
 import React from 'react'
 
-import { Button } from '../Button/index.js'
+import { ExternalLinkIcon } from '../../icons/ExternalLink/index.js'
 import { usePreviewURL } from './usePreviewURL.js'
+import './index.scss'
 
 const baseClass = 'preview-btn'
 
-export const PreviewButton: React.FC = () => {
+export function PreviewButton(props: PreviewButtonClientProps) {
   const { generatePreviewURL, label } = usePreviewURL()
 
   return (
-    <Button
-      buttonStyle="secondary"
+    <button
+      aria-label={label}
       className={baseClass}
-      icon={'link'}
-      iconPosition="left"
-      // disabled={disabled}
-      onClick={() =>
+      id="preview-button"
+      onClick={() => {
         generatePreviewURL({
           openPreviewWindow: true,
         })
-      }
-      size="medium"
+      }}
+      title={label}
+      type="button"
     >
-      {label}
-    </Button>
+      <ExternalLinkIcon />
+    </button>
   )
 }

@@ -31,7 +31,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
       required,
     },
     onMount,
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -47,11 +47,13 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    path,
     setValue,
     showError,
     value,
   } = useField({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -64,7 +66,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         baseClass,
         className,
         showError && 'error',
-        readOnly && 'read-only',
+        (readOnly || disabled) && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -84,10 +86,10 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         {BeforeInput}
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}
-          onChange={readOnly ? () => null : (val) => setValue(val)}
+          onChange={readOnly || disabled ? () => null : (val) => setValue(val)}
           onMount={onMount}
           options={editorOptions}
-          readOnly={readOnly}
+          readOnly={readOnly || disabled}
           value={(value as string) || ''}
         />
         {AfterInput}

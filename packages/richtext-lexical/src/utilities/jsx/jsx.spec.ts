@@ -15,6 +15,13 @@ describe('jsx', () => {
         },
       },
       {
+        input: "key='value'",
+        output: {
+          key: 'value',
+        },
+        inputFromOutput: 'key="value"',
+      },
+      {
         input: 'key={[1, 2, 3]}',
         output: {
           key: [1, 2, 3],

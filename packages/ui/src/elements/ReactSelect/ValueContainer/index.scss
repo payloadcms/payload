@@ -4,6 +4,14 @@
   .value-container {
     flex-grow: 1;
     min-width: 0;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    gap: calc(var(--base) / 2);
+
+    &__label {
+      color: var(--theme-elevation-550);
+    }
 
     .rs__value-container {
       overflow: visible;

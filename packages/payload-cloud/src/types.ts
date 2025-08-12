@@ -54,6 +54,13 @@ export interface PayloadCloudEmailOptions {
 }
 
 export interface PluginOptions {
+  /**
+   * Enable additional debug logging
+   *
+   * @default false
+   */
+  debug?: boolean
+
   /** Payload Cloud Email
    * @default true
    */
@@ -64,6 +71,14 @@ export interface PluginOptions {
         skipVerify?: boolean
       }
     | false
+
+  /**
+   *
+   * Configures whether cron jobs defined in config.jobs.autoRun will be run or not
+   *
+   * @default true
+   */
+  enableAutoRun?: boolean
 
   /**
    * Payload Cloud API endpoint

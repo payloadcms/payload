@@ -25,6 +25,7 @@ export const SelectMany: React.FC<{
         }
       }}
       pillStyle="white"
+      size="small"
     >
       {`Select ${count}`}
     </Pill>

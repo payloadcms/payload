@@ -2,7 +2,7 @@
 
 import type { Permissions } from 'payload/auth'
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, use, useEffect, useState } from 'react'
 
 import type { User } from '../../../../payload-types'
 import type { AuthContext, Create, ForgotPassword, Login, Logout, ResetPassword } from './types'
@@ -163,7 +163,7 @@ export const AuthProvider: React.FC<{ api?: 'gql' | 'rest'; children: React.Reac
   )
 
   return (
-    <Context.Provider
+    <Context
       value={{
         create,
         forgotPassword,
@@ -177,10 +177,10 @@ export const AuthProvider: React.FC<{ api?: 'gql' | 'rest'; children: React.Reac
       }}
     >
       {children}
-    </Context.Provider>
+    </Context>
   )
 }
 
-type UseAuth<T = User> = () => AuthContext  
+type UseAuth<T = User> = () => AuthContext
 
-export const useAuth: UseAuth = () => useContext(Context)
+export const useAuth: UseAuth = () => use(Context)

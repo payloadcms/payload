@@ -24,6 +24,10 @@ export const customNestedViewTitle = 'Custom Nested View'
 
 export const customEditLabel = 'Custom Edit Label'
 
+export const customTabComponent = 'Custom Tab Component'
+
+export const overriddenDefaultRouteTabLabel = 'Custom Tab Component Default View'
+
 export const customTabLabel = 'Custom Tab Label'
 
 export const customTabViewPath = '/custom-tab-component'
@@ -43,6 +47,8 @@ export const customRootViewMetaTitle = 'Custom Root View Meta Title'
 export const customDefaultTabMetaTitle = 'Custom Default Tab Meta Title'
 
 export const customVersionsTabMetaTitle = 'Custom Versions Tab Meta Title'
+
+export const customTabAdminDescription = 'Custom Tab Admin Description'
 
 export const customViewMetaTitle = 'Custom Tab Meta Title'
 

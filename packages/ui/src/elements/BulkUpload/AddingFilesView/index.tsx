@@ -1,7 +1,5 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
-
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { reduceFieldsToValues } from 'payload/shared'
@@ -31,6 +29,8 @@ export function AddingFilesView() {
     hasPublishPermission,
     hasSavePermission,
     hasSubmitted,
+    resetUploadEdits,
+    updateUploadEdits,
   } = useFormsManager()
   const activeForm = forms[activeIndex]
   const { getEntityConfig } = useConfig()
@@ -38,7 +38,7 @@ export function AddingFilesView() {
   const { user } = useAuth()
   const { openModal } = useModal()
 
-  const collection = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   return (
     <div className={baseClass}>
@@ -47,7 +47,7 @@ export function AddingFilesView() {
       <div className={`${baseClass}__editView`}>
         <DrawerHeader
           onClose={() => openModal(discardBulkUploadModalSlug)}
-          title={getTranslation(collection.labels.singular, i18n)}
+          title={getTranslation(collectionConfig.labels.singular, i18n)}
         />
         {activeForm ? (
           <DocumentInfoProvider
@@ -68,8 +68,13 @@ export function AddingFilesView() {
             Upload={documentSlots.Upload}
             versionCount={0}
           >
-            <ActionsBar />
-            <EditForm submitted={hasSubmitted} />
+            <ActionsBar collectionConfig={collectionConfig} />
+            <EditForm
+              resetUploadEdits={resetUploadEdits}
+              submitted={hasSubmitted}
+              updateUploadEdits={updateUploadEdits}
+              uploadEdits={activeForm?.uploadEdits}
+            />
           </DocumentInfoProvider>
         ) : null}
       </div>

@@ -11,7 +11,12 @@ export const validOperators = [
   'less_than',
   'less_than_equal',
   'like',
+  'not_like',
   'within',
   'intersects',
   'near',
 ] as const
+
+export type Operator = (typeof validOperators)[number]
+
+export const validOperatorSet = new Set<Operator>(validOperators)

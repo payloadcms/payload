@@ -54,6 +54,8 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
     // First, search for an existing document in Payload
     const payloadQuery = await payload.find({
       collection: collectionSlug,
+      limit: 1,
+      pagination: false,
       where: {
         stripeID: {
           equals: stripeID,
@@ -95,6 +97,8 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
           if (stripeDoc?.email) {
             const authQuery = await payload.find({
               collection: collectionSlug,
+              limit: 1,
+              pagination: false,
               where: {
                 email: {
                   equals: stripeDoc.email,

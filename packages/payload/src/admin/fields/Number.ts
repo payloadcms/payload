@@ -6,12 +6,15 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -24,14 +27,18 @@ type NumberFieldBaseClientProps = {
   readonly validate?: NumberFieldValidation
 }
 
+type NumberFieldBaseServerProps = Pick<FieldPaths, 'path'>
+
 export type NumberFieldClientProps = ClientFieldBase<NumberFieldClientWithoutType> &
   NumberFieldBaseClientProps
 
-export type NumberFieldServerProps = ServerFieldBase<NumberField, NumberFieldClientWithoutType>
+export type NumberFieldServerProps = NumberFieldBaseServerProps &
+  ServerFieldBase<NumberField, NumberFieldClientWithoutType>
 
 export type NumberFieldServerComponent = FieldServerComponent<
   NumberField,
-  NumberFieldClientWithoutType
+  NumberFieldClientWithoutType,
+  NumberFieldBaseServerProps
 >
 
 export type NumberFieldClientComponent = FieldClientComponent<
@@ -62,3 +69,10 @@ export type NumberFieldErrorServerComponent = FieldErrorServerComponent<
 
 export type NumberFieldErrorClientComponent =
   FieldErrorClientComponent<NumberFieldClientWithoutType>
+
+export type NumberFieldDiffServerComponent = FieldDiffServerComponent<
+  NumberField,
+  NumberFieldClient
+>
+
+export type NumberFieldDiffClientComponent = FieldDiffClientComponent<NumberFieldClient>

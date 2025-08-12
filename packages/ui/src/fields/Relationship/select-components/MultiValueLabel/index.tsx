@@ -25,7 +25,7 @@ export const MultiValueLabel: React.FC<
 > = (props) => {
   const {
     data: { allowEdit, label, relationTo, value },
-    selectProps: { customProps: { draggableProps, onDocumentDrawerOpen } = {} } = {},
+    selectProps: { customProps: { draggableProps, onDocumentOpen } = {} } = {},
   } = props
 
   const { permissions } = useAuth()
@@ -49,12 +49,13 @@ export const MultiValueLabel: React.FC<
           <button
             aria-label={`Edit ${label}`}
             className={`${baseClass}__drawer-toggler`}
-            onClick={() => {
+            onClick={(event) => {
               setShowTooltip(false)
-              onDocumentDrawerOpen({
+              onDocumentOpen({
                 id: value,
                 collectionSlug: relationTo,
                 hasReadPermission,
+                openInNewTab: event.metaKey || event.ctrlKey,
               })
             }}
             onKeyDown={(e) => {

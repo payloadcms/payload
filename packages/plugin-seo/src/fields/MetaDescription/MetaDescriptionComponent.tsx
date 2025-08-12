@@ -1,6 +1,6 @@
 'use client'
 
-import type { FieldType, Options } from '@payloadcms/ui'
+import type { FieldType } from '@payloadcms/ui'
 import type { TextareaFieldClientProps } from 'payload'
 
 import {
@@ -8,6 +8,7 @@ import {
   TextareaInput,
   useConfig,
   useDocumentInfo,
+  useDocumentTitle,
   useField,
   useForm,
   useLocale,
@@ -38,7 +39,6 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
       required,
     },
     hasGenerateDescriptionFn,
-    path,
     readOnly,
   } = props
 
@@ -54,19 +54,19 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const locale = useLocale()
   const { getData } = useForm()
   const docInfo = useDocumentInfo()
+  const { title } = useDocumentTitle()
 
   const maxLength = maxLengthFromProps || maxLengthDefault
   const minLength = minLengthFromProps || minLengthDefault
 
   const {
-    customComponents: { AfterInput, BeforeInput, Label },
+    customComponents: { AfterInput, BeforeInput, Label } = {},
     errorMessage,
+    path,
     setValue,
     showError,
     value,
-  }: FieldType<string> = useField({
-    path,
-  } as Options)
+  }: FieldType<string> = useField()
 
   const regenerateDescription = useCallback(async () => {
     if (!hasGenerateDescriptionFn) {
@@ -85,9 +85,9 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
-        initialState: reduceToSerializableFields(docInfo.initialState),
+        initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
         locale: typeof locale === 'object' ? locale?.code : locale,
-        title: docInfo.title,
+        title,
       } satisfies Omit<
         Parameters<GenerateDescription>[0],
         'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
@@ -114,10 +114,10 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
     docInfo.hasSavePermission,
     docInfo.initialData,
     docInfo.initialState,
-    docInfo.title,
     getData,
     locale,
     setValue,
+    title,
   ])
 
   return (

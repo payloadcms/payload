@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback } from 'react'
 import { TextFieldClientProps } from 'payload'
 
 import { useField, Button, TextInput, FieldLabel, useFormFields, useForm } from '@payloadcms/ui'
@@ -27,21 +27,18 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
 
   const { value, setValue } = useField<string>({ path: path || field.name })
 
-  const { dispatchFields } = useForm()
+  const { dispatchFields, getDataByPath } = useForm()
 
-  // The value of the checkbox
-  // We're using separate useFormFields to minimise re-renders
-  const checkboxValue = useFormFields(([fields]) => {
+  const isLocked = useFormFields(([fields]) => {
     return fields[checkboxFieldPath]?.value as string
   })
 
-  // The value of the field we're listening to for the slug
-  const targetFieldValue = useFormFields(([fields]) => {
-    return fields[fieldToUse]?.value as string
-  })
+  const handleGenerate = useCallback(
+    (e: React.MouseEvent<Element>) => {
+      e.preventDefault()
 
-  useEffect(() => {
-    if (checkboxValue) {
+      const targetFieldValue = getDataByPath(fieldToUse) as string
+
       if (targetFieldValue) {
         const formattedSlug = formatSlug(targetFieldValue)
 
@@ -49,39 +46,41 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
       } else {
         if (value !== '') setValue('')
       }
-    }
-  }, [targetFieldValue, checkboxValue, setValue, value])
+    },
+    [setValue, value, fieldToUse, getDataByPath],
+  )
 
   const handleLock = useCallback(
-    (e) => {
+    (e: React.MouseEvent<Element>) => {
       e.preventDefault()
 
       dispatchFields({
         type: 'UPDATE',
         path: checkboxFieldPath,
-        value: !checkboxValue,
+        value: !isLocked,
       })
     },
-    [checkboxValue, checkboxFieldPath, dispatchFields],
+    [isLocked, checkboxFieldPath, dispatchFields],
   )
-
-  const readOnly = readOnlyFromProps || checkboxValue
 
   return (
     <div className="field-type slug-field-component">
       <div className="label-wrapper">
         <FieldLabel htmlFor={`field-${path}`} label={label} />
-
+        {!isLocked && (
+          <Button className="lock-button" buttonStyle="none" onClick={handleGenerate}>
+            Generate
+          </Button>
+        )}
         <Button className="lock-button" buttonStyle="none" onClick={handleLock}>
-          {checkboxValue ? 'Unlock' : 'Lock'}
+          {isLocked ? 'Unlock' : 'Lock'}
         </Button>
       </div>
-
       <TextInput
         value={value}
         onChange={setValue}
         path={path || field.name}
-        readOnly={Boolean(readOnly)}
+        readOnly={Boolean(readOnlyFromProps || isLocked)}
       />
     </div>
   )

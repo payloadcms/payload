@@ -24,14 +24,26 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
 
   const columnBuilderArgsArray: string[] = []
 
-  if (column.type === 'timestamp') {
-    columnBuilderArgsArray.push(`mode: '${column.mode}'`)
-    if (column.withTimezone) {
-      columnBuilderArgsArray.push('withTimezone: true')
+  switch (column.type) {
+    case 'bit':
+    case 'halfvec':
+    case 'sparsevec':
+    case 'vector': {
+      if (column.dimensions) {
+        columnBuilderArgsArray.push(`dimensions: ${column.dimensions}`)
+      }
+      break
     }
+    case 'timestamp': {
+      columnBuilderArgsArray.push(`mode: '${column.mode}'`)
+      if (column.withTimezone) {
+        columnBuilderArgsArray.push('withTimezone: true')
+      }
 
-    if (typeof column.precision === 'number') {
-      columnBuilderArgsArray.push(`precision: ${column.precision}`)
+      if (typeof column.precision === 'number') {
+        columnBuilderArgsArray.push(`precision: ${column.precision}`)
+      }
+      break
     }
   }
 

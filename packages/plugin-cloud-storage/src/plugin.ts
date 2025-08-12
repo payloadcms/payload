@@ -1,6 +1,6 @@
 import type { Config } from 'payload'
 
-import type { PluginOptions } from './types.js'
+import type { AllowList, PluginOptions } from './types.js'
 
 import { getFields } from './fields/getFields.js'
 import { getAfterDeleteHook } from './hooks/afterDelete.js'
@@ -60,6 +60,55 @@ export const cloudStoragePlugin =
 
           if (!options.disablePayloadAccessControl) {
             handlers.push(adapter.staticHandler)
+            // Else if disablePayloadAccessControl: true and clientUploads is used
+            // Build the "proxied" handler that responses only when the file was requested by client upload in addDataAndFileToRequest
+          } else if (adapter.clientUploads) {
+            handlers.push((req, args) => {
+              if ('clientUploadContext' in args.params) {
+                return adapter.staticHandler(req, args)
+              }
+            })
+          }
+
+          const getSkipSafeFetchSetting = (): AllowList | boolean => {
+            if (options.disablePayloadAccessControl) {
+              return true
+            }
+            const isBooleanTrueSkipSafeFetch =
+              typeof existingCollection.upload === 'object' &&
+              existingCollection.upload.skipSafeFetch === true
+
+            const isAllowListSkipSafeFetch =
+              typeof existingCollection.upload === 'object' &&
+              Array.isArray(existingCollection.upload.skipSafeFetch)
+
+            if (isBooleanTrueSkipSafeFetch) {
+              return true
+            } else if (isAllowListSkipSafeFetch) {
+              const existingSkipSafeFetch =
+                typeof existingCollection.upload === 'object' &&
+                Array.isArray(existingCollection.upload.skipSafeFetch)
+                  ? existingCollection.upload.skipSafeFetch
+                  : []
+
+              const hasExactLocalhostMatch = existingSkipSafeFetch.some((entry) => {
+                const entryKeys = Object.keys(entry)
+                return entryKeys.length === 1 && entry.hostname === 'localhost'
+              })
+
+              const localhostEntry =
+                process.env.NODE_ENV !== 'production' && !hasExactLocalhostMatch
+                  ? [{ hostname: 'localhost' }]
+                  : []
+
+              return [...existingSkipSafeFetch, ...localhostEntry]
+            }
+
+            if (process.env.NODE_ENV !== 'production') {
+              return [{ hostname: 'localhost' }]
+            }
+
+            return false
           }
 
           return {
@@ -84,6 +133,7 @@ export const cloudStoragePlugin =
                   ? options.disableLocalStorage
                   : true,
               handlers,
+              skipSafeFetch: getSkipSafeFetchSetting(),
             },
           }
         }

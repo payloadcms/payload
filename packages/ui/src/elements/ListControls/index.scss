@@ -19,23 +19,25 @@
       }
     }
 
+    &__custom-control {
+      padding: 0;
+      border-radius: 0;
+    }
+
+    &__modified {
+      color: var(--theme-elevation-500);
+    }
+
     &__buttons-wrap {
       display: flex;
       align-items: center;
-      gap: base(0.2);
-
-      .pill {
-        background-color: var(--theme-elevation-150);
-
-        &:hover {
-          background-color: var(--theme-elevation-100);
-        }
-      }
+      gap: calc(var(--base) / 4);
     }
 
-    .column-selector,
+    .pill-selector,
     .where-builder,
-    .sort-complex {
+    .sort-complex,
+    .group-by-builder {
       margin-top: base(1);
     }
 
@@ -81,7 +83,7 @@
         width: 100%;
       }
 
-      .column-selector,
+      .pill-selector,
       .where-builder,
       .sort-complex {
         margin-top: calc(var(--base) / 2);
@@ -89,7 +91,8 @@
 
       &__toggle-columns,
       &__toggle-where,
-      &__toggle-sort {
+      &__toggle-sort,
+      &__toggle-group-by {
         flex: 1;
       }
     }

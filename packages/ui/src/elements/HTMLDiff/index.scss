@@ -1,0 +1,170 @@
+@import '../../scss/styles.scss';
+@import './colors.scss';
+
+@layer payload-default {
+  .html-diff {
+    font-size: base(0.7);
+    letter-spacing: 0.02em;
+
+    &-no-value {
+      color: var(--theme-elevation-400);
+    }
+
+    pre {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    // Apply background color to parents that have children with diffs
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    blockquote,
+    pre,
+    h6 {
+      &:not([data-enable-match='false']) {
+        &:has([data-match-type='create']) {
+          position: relative;
+          z-index: 1;
+          &::before {
+            content: '';
+            position: absolute;
+            top: -(base(0.5));
+            bottom: -(base(0.5));
+            left: -10px;
+            right: -(base(0.5));
+            display: block;
+            background-color: var(--diff-create-parent-bg);
+            color: var(--diff-create-parent-color);
+            z-index: -1; /* Place behind the text */
+          }
+        }
+
+        &:has([data-match-type='delete']) {
+          position: relative;
+          z-index: 1;
+          &::before {
+            content: '';
+            position: absolute;
+            top: -(base(0.5));
+            bottom: -(base(0.5));
+            left: -(base(0.5));
+            right: -10px;
+            display: block;
+            background-color: var(--diff-delete-parent-bg);
+            color: var(--diff-delete-parent-color);
+            z-index: -1; /* Place behind the text */
+          }
+        }
+      }
+    }
+
+    li {
+      &:not([data-enable-match='false']) {
+        &:has([data-match-type='create']) {
+          position: relative;
+          z-index: 1;
+          &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -10px;
+            right: -(base(0.5));
+            display: block;
+            background-color: var(--diff-create-parent-bg);
+            color: var(--diff-create-parent-color);
+            z-index: -1; /* Place behind the text */
+          }
+        }
+
+        &:has([data-match-type='delete']) {
+          position: relative;
+          z-index: 1;
+          &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -(base(0.5));
+            right: -10px;
+            display: block;
+            background-color: var(--diff-delete-parent-bg);
+            color: var(--diff-delete-parent-color);
+            z-index: -1; /* Place behind the text */
+          }
+        }
+      }
+    }
+
+    li::marker {
+      color: var(--theme-text);
+    }
+
+    [data-match-type='delete']:not([data-enable-match='false']):not(
+        :is([data-enable-match='false'] *)
+      ) {
+      color: var(--diff-delete-pill-color);
+      text-decoration-color: var(--diff-delete-pill-color);
+      text-decoration-line: line-through;
+      background-color: var(--diff-delete-pill-bg);
+      border-radius: 4px;
+      text-decoration-thickness: 1px;
+    }
+
+    a[data-match-type='delete']
+      :not([data-enable-match='false'])
+      :not(:is([data-enable-match='false'] *)) {
+      color: var(--diff-delete-link-color);
+    }
+
+    // :not(img) required to increase specificity
+    a[data-match-type='create']:not(img)
+      :not([data-enable-match='false'])
+      :not(:is([data-enable-match='false'] *)) {
+      color: var(--diff-create-link-color);
+    }
+
+    [data-match-type='create']:not(img):not([data-enable-match='false']):not(
+        :is([data-enable-match='false'] *)
+      ) {
+      background-color: var(--diff-create-pill-bg);
+      color: var(--diff-create-pill-color);
+      border-radius: 4px;
+    }
+
+    .html-diff {
+      &-create-inline-wrapper,
+      &-delete-inline-wrapper {
+        display: inline-flex;
+      }
+
+      &-create-block-wrapper,
+      &-delete-block-wrapper {
+        display: flex;
+      }
+
+      &-create-inline-wrapper,
+      &-delete-inline-wrapper,
+      &-create-block-wrapper,
+      &-delete-block-wrapper {
+        position: relative;
+        align-items: center;
+        flex-direction: row;
+
+        &::after {
+          position: absolute;
+          top: 0;
+          left: 0;
+          display: block;
+          width: 100%;
+          height: 100%;
+          content: '';
+        }
+      }
+    }
+  }
+}

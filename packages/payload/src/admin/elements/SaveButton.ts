@@ -1,3 +1,9 @@
-import type { CustomComponent } from '../../config/types.js'
+import type { ServerProps } from '../../config/types.js'
 
-export type CustomSaveButton = CustomComponent
+export type SaveButtonClientProps = {
+  label?: string
+}
+
+export type SaveButtonServerPropsOnly = {} & ServerProps
+
+export type SaveButtonServerProps = SaveButtonClientProps & SaveButtonServerPropsOnly

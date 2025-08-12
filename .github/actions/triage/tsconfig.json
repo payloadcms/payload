@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "es5",
     "lib": ["es2020.string"],
     "noEmit": true,
     "strict": true,

@@ -1,4 +1,4 @@
-@import '../../../../scss/styles.scss';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .lexical-relationship {
@@ -41,11 +41,6 @@
     &__wrap {
       flex-grow: 1;
       overflow: hidden;
-    }
-
-    &--selected {
-      box-shadow: $focus-box-shadow;
-      outline: none;
     }
 
     &__doc-drawer-toggler {

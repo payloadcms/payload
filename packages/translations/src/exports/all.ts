@@ -3,19 +3,27 @@ import type { SupportedLanguages } from '../types.js'
 import { ar } from '../languages/ar.js'
 import { az } from '../languages/az.js'
 import { bg } from '../languages/bg.js'
+import { bnBd } from '../languages/bnBd.js'
+import { bnIn } from '../languages/bnIn.js'
+import { ca } from '../languages/ca.js'
 import { cs } from '../languages/cs.js'
 import { da } from '../languages/da.js'
 import { de } from '../languages/de.js'
 import { en } from '../languages/en.js'
 import { es } from '../languages/es.js'
+import { et } from '../languages/et.js'
 import { fa } from '../languages/fa.js'
 import { fr } from '../languages/fr.js'
 import { he } from '../languages/he.js'
 import { hr } from '../languages/hr.js'
 import { hu } from '../languages/hu.js'
+import { hy } from '../languages/hy.js'
+import { id } from '../languages/id.js'
 import { it } from '../languages/it.js'
 import { ja } from '../languages/ja.js'
 import { ko } from '../languages/ko.js'
+import { lt } from '../languages/lt.js'
+import { lv } from '../languages/lv.js'
 import { my } from '../languages/my.js'
 import { nb } from '../languages/nb.js'
 import { nl } from '../languages/nl.js'
@@ -39,19 +47,28 @@ export const translations = {
   ar,
   az,
   bg,
+  'bn-BD': bnBd,
+  'bn-IN': bnIn,
+  ca,
   cs,
   da,
   de,
   en,
   es,
+  et,
   fa,
   fr,
   he,
   hr,
   hu,
+  hy,
+
+  id,
   it,
   ja,
   ko,
+  lt,
+  lv,
   my,
   nb,
   nl,

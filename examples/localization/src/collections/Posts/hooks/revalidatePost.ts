@@ -7,10 +7,11 @@ import type { Post } from '../../../payload-types'
 export const revalidatePost: CollectionAfterChangeHook<Post> = ({
   doc,
   previousDoc,
-  req: { payload },
+  req: { payload, i18n },
 }) => {
+  const locale = i18n.language
   if (doc._status === 'published') {
-    const path = `/posts/${doc.slug}`
+    const path = `/${locale}/posts/${doc.slug}`
 
     payload.logger.info(`Revalidating post at path: ${path}`)
 
@@ -19,7 +20,7 @@ export const revalidatePost: CollectionAfterChangeHook<Post> = ({
 
   // If the post was previously published, we need to revalidate the old path
   if (previousDoc._status === 'published' && doc._status !== 'published') {
-    const oldPath = `/posts/${previousDoc.slug}`
+    const oldPath = `/${locale}/posts/${previousDoc.slug}`
 
     payload.logger.info(`Revalidating old post at path: ${oldPath}`)
 

@@ -15,11 +15,11 @@ import {
 import { $isParagraphNode, $isTextNode } from 'lexical'
 
 import {
+  $convertFromMarkdownString,
   $convertToMarkdownString,
   type ElementTransformer,
   type Transformer,
 } from '../../packages/@lexical/markdown/index.js'
-import { $convertFromMarkdownString } from '../../utilities/jsx/lexicalMarkdownCopy.js'
 
 // Very primitive table setup
 const TABLE_ROW_REG_EXP = /^\|(.+)\|\s?$/
@@ -48,7 +48,10 @@ export const TableMarkdownTransformer: (props: {
       for (const cell of row.getChildren()) {
         // It's TableCellNode, so it's just to make flow happy
         if ($isTableCellNode(cell)) {
-          rowOutput.push($convertToMarkdownString(allTransformers, cell).replace(/\n/g, '\\n'))
+          rowOutput.push(
+            $convertToMarkdownString(allTransformers, cell).replace(/\n/g, '\\n').trim(),
+          )
+
           if (cell.__headerState === TableCellHeaderStates.ROW) {
             isHeaderRow = true
           }
@@ -65,8 +68,12 @@ export const TableMarkdownTransformer: (props: {
   },
   regExp: TABLE_ROW_REG_EXP,
   replace: (parentNode, _1, match) => {
+    const match0 = match[0]
+    if (!match0) {
+      return
+    }
     // Header row
-    if (TABLE_ROW_DIVIDER_REG_EXP.test(match[0])) {
+    if (TABLE_ROW_DIVIDER_REG_EXP.test(match0)) {
       const table = parentNode.getPreviousSibling()
       if (!table || !$isTableNode(table)) {
         return
@@ -91,7 +98,7 @@ export const TableMarkdownTransformer: (props: {
       return
     }
 
-    const matchCells = mapToTableCells(match[0], allTransformers)
+    const matchCells = mapToTableCells(match0, allTransformers)
 
     if (matchCells == null) {
       return
@@ -136,7 +143,7 @@ export const TableMarkdownTransformer: (props: {
       table.append(tableRow)
 
       for (let i = 0; i < maxCells; i++) {
-        tableRow.append(i < cells.length ? cells[i] : $createTableCell('', allTransformers))
+        tableRow.append(i < cells.length ? cells[i]! : $createTableCell('', allTransformers))
       }
     }
 

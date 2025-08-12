@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { radioFieldsSlug } from '../../slugs.js'
+import { CustomJSXLabel } from './CustomJSXLabel.js'
 
 const RadioFields: CollectionConfig = {
   slug: radioFieldsSlug,
@@ -23,6 +24,26 @@ const RadioFields: CollectionConfig = {
         },
         {
           label: 'Value Three',
+          value: 'three',
+        },
+      ],
+    },
+    {
+      name: 'radioWithJsxLabelOption',
+      label: 'Radio with JSX label option',
+      type: 'radio',
+      defaultValue: 'three',
+      options: [
+        {
+          label: 'Value One',
+          value: 'one',
+        },
+        {
+          label: 'Value Two',
+          value: 'two',
+        },
+        {
+          label: CustomJSXLabel,
           value: 'three',
         },
       ],

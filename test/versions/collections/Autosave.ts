@@ -18,6 +18,7 @@ const AutosavePosts: CollectionConfig = {
       autosave: {
         interval: 2000,
       },
+      schedulePublish: true,
     },
   },
   access: {
@@ -51,6 +52,14 @@ const AutosavePosts: CollectionConfig = {
       required: true,
       unique: true,
       localized: true,
+    },
+    {
+      name: 'computedTitle',
+      label: 'Computed Title',
+      type: 'text',
+      hooks: {
+        beforeChange: [({ data }) => data?.title],
+      },
     },
     {
       name: 'description',

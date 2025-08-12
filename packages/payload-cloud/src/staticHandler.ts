@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import type { Readable } from 'stream'
 
 import type { CollectionCachingConfig, PluginOptions, StaticHandler } from './types.js'
 
@@ -8,10 +9,23 @@ import { getStorageClient } from './utilities/getStorageClient.js'
 interface Args {
   cachingOptions?: PluginOptions['uploadCaching']
   collection: CollectionConfig
+  debug?: boolean
+}
+
+// Type guard for NodeJS.Readable streams
+const isNodeReadableStream = (body: unknown): body is Readable => {
+  return (
+    typeof body === 'object' &&
+    body !== null &&
+    'pipe' in body &&
+    typeof (body as any).pipe === 'function' &&
+    'destroy' in body &&
+    typeof (body as any).destroy === 'function'
+  )
 }
 
 // Convert a stream into a promise that resolves with a Buffer
-const streamToBuffer = async (readableStream) => {
+const streamToBuffer = async (readableStream: any) => {
   const chunks = []
   for await (const chunk of readableStream) {
     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
@@ -19,7 +33,7 @@ const streamToBuffer = async (readableStream) => {
   return Buffer.concat(chunks)
 }
 
-export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHandler => {
+export const getStaticHandler = ({ cachingOptions, collection, debug }: Args): StaticHandler => {
   let maxAge = 86400 // 24 hours default
   let collCacheConfig: CollectionCachingConfig | undefined
   if (cachingOptions !== false) {
@@ -52,8 +66,21 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
         Key: key,
       })
 
-      if (!object.Body) {
+      if (!object.Body || !object.ContentType || !object.ETag) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
+
+      // On error, manually destroy stream to close socket
+      if (object.Body && isNodeReadableStream(object.Body)) {
+        const stream = object.Body
+        stream.on('error', (err) => {
+          req.payload.logger.error({
+            err,
+            key,
+            msg: 'Error streaming S3 object, destroying stream',
+          })
+          stream.destroy()
+        })
       }
 
       const bodyBuffer = await streamToBuffer(object.Body)
@@ -68,25 +95,32 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
         status: 200,
       })
     } catch (err: unknown) {
-      /**
-       * If object key does not found, the getObject function attempts a ListBucket operation.
-       * Because of permissions, this will throw very specific error that we can catch and handle.
-       */
-      if (
-        err instanceof Error &&
-        err.name === 'AccessDenied' &&
-        err.message?.includes('s3:ListBucket') &&
-        'type' in err &&
-        err.type === 'S3ServiceException'
-      ) {
-        req.payload.logger.error({
-          collectionSlug: collection.slug,
-          err,
-          msg: `Requested file not found in cloud storage: ${params.filename}`,
-          params,
-          requestedKey: key,
-        })
-        return new Response(null, { status: 404, statusText: 'Not Found' })
+      // Handle each error explicitly
+      if (err instanceof Error) {
+        /**
+         * Note: If AccessDenied comes back, it typically means that the object key is not found.
+         * The AWS SDK throws this because it attempts an s3:ListBucket operation under the hood
+         * if it does not find the object key, which we have disallowed in our bucket policy.
+         */
+        if (err.name === 'AccessDenied') {
+          req.payload.logger.warn({
+            awsErr: debug ? err : err.name,
+            collectionSlug: collection.slug,
+            msg: `Requested file not found in cloud storage: ${params.filename}`,
+            params,
+            requestedKey: key,
+          })
+          return new Response(null, { status: 404, statusText: 'Not Found' })
+        } else if (err.name === 'NoSuchKey') {
+          req.payload.logger.warn({
+            awsErr: debug ? err : err.name,
+            collectionSlug: collection.slug,
+            msg: `Requested file not found in cloud storage: ${params.filename}`,
+            params,
+            requestedKey: key,
+          })
+          return new Response(null, { status: 404, statusText: 'Not Found' })
+        }
       }
 
       req.payload.logger.error({

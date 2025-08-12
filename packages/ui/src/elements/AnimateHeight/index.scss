@@ -1,8 +1,10 @@
-.rah-static {
-  interpolate-size: allow-keywords;
-  height: 0;
+@layer payload-default {
+  .rah-static {
+    interpolate-size: allow-keywords;
+    height: 0;
 
-  &--height-auto {
-    height: auto;
+    &--height-auto {
+      height: auto;
+    }
   }
 }

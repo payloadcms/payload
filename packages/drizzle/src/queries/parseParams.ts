@@ -1,25 +1,30 @@
 import type { SQL, Table } from 'drizzle-orm'
-import type { FlattenedField, Operator, Where } from 'payload'
+import type { FlattenedField, Operator, Sort, Where } from 'payload'
 
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { QueryError } from 'payload'
-import { validOperators } from 'payload/shared'
+import { validOperatorSet } from 'payload/shared'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
+import { DistinctSymbol } from '../utilities/rawConstraint.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
+export type QueryContext = { rawSort?: SQL; sort: Sort }
+
 type Args = {
   adapter: DrizzleAdapter
   aliasTable?: Table
+  context: QueryContext
   fields: FlattenedField[]
   joins: BuildQueryJoinAliases
-  locale: string
+  locale?: string
+  parentIsLocalized: boolean
   selectFields: Record<string, GenericColumn>
   selectLocale?: boolean
   tableName: string
@@ -29,9 +34,11 @@ type Args = {
 export function parseParams({
   adapter,
   aliasTable,
+  context,
   fields,
   joins,
   locale,
+  parentIsLocalized,
   selectFields,
   selectLocale,
   tableName,
@@ -55,9 +62,11 @@ export function parseParams({
           const builtConditions = buildAndOrConditions({
             adapter,
             aliasTable,
+            context,
             fields,
             joins,
             locale,
+            parentIsLocalized,
             selectFields,
             selectLocale,
             tableName,
@@ -73,7 +82,7 @@ export function parseParams({
           const pathOperators = where[relationOrPath]
           if (typeof pathOperators === 'object') {
             for (let operator of Object.keys(pathOperators)) {
-              if (validOperators.includes(operator as Operator)) {
+              if (validOperatorSet.has(operator as Operator)) {
                 const val = where[relationOrPath][operator]
 
                 const {
@@ -92,12 +101,24 @@ export function parseParams({
                   fields,
                   joins,
                   locale,
+                  parentIsLocalized,
                   pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
                   selectFields,
                   selectLocale,
                   tableName,
                   value: val,
                 })
+
+                const resolvedColumn =
+                  rawColumn ||
+                  (aliasTable && tableName === getNameFromDrizzleTable(table)
+                    ? aliasTable[columnName]
+                    : table[columnName])
+
+                if (val === DistinctSymbol) {
+                  selectFields['_selected'] = resolvedColumn
+                  break
+                }
 
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
                   if (typeof value === 'string' && value.indexOf('%') > -1) {
@@ -108,7 +129,8 @@ export function parseParams({
                 })
 
                 if (
-                  ['json', 'richText'].includes(field.type) &&
+                  (['json', 'richText'].includes(field.type) ||
+                    (field.type === 'blocks' && adapter.blocksAsJSON)) &&
                   Array.isArray(pathSegments) &&
                   pathSegments.length > 1
                 ) {
@@ -157,6 +179,7 @@ export function parseParams({
                     like: { operator: 'like', wildcard: '%' },
                     not_equals: { operator: '<>', wildcard: '' },
                     not_in: { operator: 'not in', wildcard: '' },
+                    not_like: { operator: 'not like', wildcard: '%' },
                   }
 
                   let formattedValue = val
@@ -171,11 +194,15 @@ export function parseParams({
                     formattedValue = ''
                   }
 
-                  constraints.push(
-                    sql.raw(
-                      `${table[columnName].name}${jsonQuery} ${operatorKeys[operator].operator} ${formattedValue}`,
-                    ),
-                  )
+                  let jsonQuerySelector = `${table[columnName].name}${jsonQuery}`
+
+                  if (adapter.name === 'sqlite' && operator === 'not_like') {
+                    jsonQuerySelector = `COALESCE(${table[columnName].name}${jsonQuery}, '')`
+                  }
+
+                  const rawSQLQuery = `${jsonQuerySelector} ${operatorKeys[operator].operator} ${formattedValue}`
+
+                  constraints.push(sql.raw(rawSQLQuery))
 
                   break
                 }
@@ -192,7 +219,10 @@ export function parseParams({
 
                 if (
                   operator === 'like' &&
-                  (field.type === 'number' || table[columnName].columnType === 'PgUUID')
+                  (field.type === 'number' ||
+                    field.type === 'relationship' ||
+                    field.type === 'upload' ||
+                    table[columnName].columnType === 'PgUUID')
                 ) {
                   operator = 'equals'
                 }
@@ -266,12 +296,6 @@ export function parseParams({
                   break
                 }
 
-                const resolvedColumn =
-                  rawColumn ||
-                  (aliasTable && tableName === getNameFromDrizzleTable(table)
-                    ? aliasTable[columnName]
-                    : table[columnName])
-
                 if (queryOperator === 'not_equals' && queryValue !== null) {
                   constraints.push(
                     or(
@@ -319,12 +343,24 @@ export function parseParams({
 
                     case 'near': {
                       const [lng, lat, maxDistance, minDistance] = queryValue as number[]
+                      const geoConstraints: SQL[] = []
 
-                      let constraint = sql`ST_DWithin(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857), ${maxDistance})`
-                      if (typeof minDistance === 'number' && !Number.isNaN(minDistance)) {
-                        constraint = sql`${constraint} AND ST_Distance(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857)) >= ${minDistance}`
+                      if (typeof maxDistance === 'number' && !Number.isNaN(maxDistance)) {
+                        geoConstraints.push(
+                          sql`ST_DWithin(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857), ${maxDistance})`,
+                        )
                       }
-                      constraints.push(constraint)
+
+                      if (typeof minDistance === 'number' && !Number.isNaN(minDistance)) {
+                        geoConstraints.push(
+                          sql`ST_Distance(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857)) >= ${minDistance}`,
+                        )
+                      }
+                      if (geoConstraints.length) {
+                        context.sort = relationOrPath
+                        context.rawSort = sql`${table[columnName]} <-> ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`
+                        constraints.push(and(...geoConstraints))
+                      }
                       break
                     }
 
@@ -341,7 +377,25 @@ export function parseParams({
                   break
                 }
 
-                constraints.push(adapter.operators[queryOperator](resolvedColumn, queryValue))
+                const orConditions: SQL<unknown>[] = []
+                let resolvedQueryValue = queryValue
+                if (
+                  operator === 'in' &&
+                  Array.isArray(queryValue) &&
+                  queryValue.some((v) => v === null)
+                ) {
+                  orConditions.push(isNull(resolvedColumn))
+                  resolvedQueryValue = queryValue.filter((v) => v !== null)
+                }
+                let constraint = adapter.operators[queryOperator](
+                  resolvedColumn,
+                  resolvedQueryValue,
+                )
+                if (orConditions.length) {
+                  orConditions.push(constraint)
+                  constraint = or(...orConditions)
+                }
+                constraints.push(constraint)
               }
             }
           }

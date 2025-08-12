@@ -1,10 +1,14 @@
-import type { FormState } from 'payload'
+import type { FormState, UploadEdits } from 'payload'
+
+import { v4 as uuidv4 } from 'uuid'
 
 export type State = {
   activeIndex: number
   forms: {
     errorCount: number
+    formID: string
     formState: FormState
+    uploadEdits?: UploadEdits
   }[]
   totalErrorCount: number
 }
@@ -14,6 +18,14 @@ type Action =
       count: number
       index: number
       type: 'UPDATE_ERROR_COUNT'
+    }
+  | {
+      errorCount: number
+      formState: FormState
+      index: number
+      type: 'UPDATE_FORM'
+      updatedFields?: Record<string, unknown>
+      uploadEdits?: UploadEdits
     }
   | {
       files: FileList
@@ -40,6 +52,7 @@ export function formsManagementReducer(state: State, action: Action): State {
       for (let i = 0; i < action.files.length; i++) {
         newForms[i] = {
           errorCount: 0,
+          formID: crypto.randomUUID ? crypto.randomUUID() : uuidv4(),
           formState: {
             ...(action.initialState || {}),
             file: {
@@ -48,6 +61,7 @@ export function formsManagementReducer(state: State, action: Action): State {
               value: action.files[i],
             },
           },
+          uploadEdits: {},
         }
       }
 
@@ -96,6 +110,29 @@ export function formsManagementReducer(state: State, action: Action): State {
       return {
         ...state,
         forms,
+        totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
+      }
+    }
+    case 'UPDATE_FORM': {
+      const updatedForms = [...state.forms]
+      updatedForms[action.index].errorCount = action.errorCount
+
+      // Merge the existing formState with the new formState
+      updatedForms[action.index] = {
+        ...updatedForms[action.index],
+        formState: {
+          ...updatedForms[action.index].formState,
+          ...action.formState,
+        },
+        uploadEdits: {
+          ...updatedForms[action.index].uploadEdits,
+          ...action.uploadEdits,
+        },
+      }
+
+      return {
+        ...state,
+        forms: updatedForms,
         totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
       }
     }

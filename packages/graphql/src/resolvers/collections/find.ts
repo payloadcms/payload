@@ -15,6 +15,7 @@ export type Resolver = (
     page?: number
     pagination?: boolean
     sort?: string
+    trash?: boolean
     where?: Where
   },
   context: {
@@ -57,6 +58,7 @@ export function findResolver(collection: Collection): Resolver {
       pagination: args.pagination,
       req,
       sort: args.sort,
+      trash: args.trash,
       where: args.where,
     }
 

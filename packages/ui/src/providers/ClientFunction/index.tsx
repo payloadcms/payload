@@ -35,21 +35,19 @@ export const ClientFunctionProvider: React.FC<{ children: React.ReactNode }> = (
   }, [])
 
   return (
-    <ModifyClientFunctionContext.Provider
+    <ModifyClientFunctionContext
       value={{
         addClientFunction,
         removeClientFunction,
       }}
     >
-      <ClientFunctionsContext.Provider value={clientFunctions}>
-        {children}
-      </ClientFunctionsContext.Provider>
-    </ModifyClientFunctionContext.Provider>
+      <ClientFunctionsContext value={clientFunctions}>{children}</ClientFunctionsContext>
+    </ModifyClientFunctionContext>
   )
 }
 
 export const useAddClientFunction = (key: string, func: any) => {
-  const { addClientFunction, removeClientFunction } = React.useContext(ModifyClientFunctionContext)
+  const { addClientFunction, removeClientFunction } = React.use(ModifyClientFunctionContext)
 
   React.useEffect(() => {
     addClientFunction({
@@ -67,5 +65,5 @@ export const useAddClientFunction = (key: string, func: any) => {
 }
 
 export const useClientFunctions = () => {
-  return React.useContext(ClientFunctionsContext)
+  return React.use(ClientFunctionsContext)
 }

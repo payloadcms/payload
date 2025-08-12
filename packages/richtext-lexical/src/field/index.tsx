@@ -2,7 +2,7 @@
 
 import type { RichTextFieldClient } from 'payload'
 
-import { ShimmerEffect } from '@payloadcms/ui'
+import { ShimmerEffect, useConfig } from '@payloadcms/ui'
 import React, { lazy, Suspense, useEffect, useState } from 'react'
 
 import type { FeatureProviderClient } from '../features/typesClient.js'
@@ -21,11 +21,14 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
   const {
     admin = {},
     clientFeatures,
+    featureClientImportMap,
     featureClientSchemaMap,
     field,
     lexicalEditorConfig = defaultEditorLexicalConfig,
     schemaPath,
   } = props
+
+  const { config } = useConfig()
 
   const [finalSanitizedEditorConfig, setFinalSanitizedEditorConfig] =
     useState<null | SanitizedClientEditorConfig>(null)
@@ -50,6 +53,8 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
       : defaultEditorLexicalConfig
 
     const resolvedClientFeatures = loadClientFeatures({
+      config,
+      featureClientImportMap,
       featureClientSchemaMap,
       field: field as RichTextFieldClient,
       schemaPath: schemaPath ?? field.name,
@@ -67,8 +72,10 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     admin,
     finalSanitizedEditorConfig,
     clientFeatures,
+    featureClientImportMap,
     featureClientSchemaMap,
     field,
+    config,
     schemaPath,
   ]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate
 

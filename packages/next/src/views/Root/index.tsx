@@ -1,19 +1,24 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { formatAdminURL } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
-import React, { Fragment } from 'react'
+import {
+  type AdminViewClientProps,
+  type AdminViewServerPropsOnly,
+  type ImportMap,
+  parseDocumentID,
+  type SanitizedConfig,
+} from 'payload'
+import { formatAdminURL } from 'payload/shared'
+import React from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { initPage } from '../../utilities/initPage/index.js'
-import { getViewFromConfig } from './getViewFromConfig.js'
-
-export { generatePageMetadata } from './meta.js'
+import { getCustomViewByRoute } from './getCustomViewByRoute.js'
+import { getRouteData } from './getRouteData.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -48,24 +53,60 @@ export const RootPage = async ({
   } = config
 
   const params = await paramsPromise
+
   const currentRoute = formatAdminURL({
     adminRoute,
-    path: `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
+    path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
   })
 
   const segments = Array.isArray(params.segments) ? params.segments : []
 
   const searchParams = await searchParamsPromise
 
-  const { DefaultView, initPageOptions, serverProps, templateClassName, templateType } =
-    getViewFromConfig({
-      adminRoute,
+  // Redirect `${adminRoute}/collections` to `${adminRoute}`
+  if (segments.length === 1 && segments[0] === 'collections') {
+    const { viewKey } = getCustomViewByRoute({
       config,
-      currentRoute,
-      importMap,
-      searchParams,
-      segments,
+      currentRoute: '/collections',
     })
+
+    // Only redirect if there's NO custom view configured for /collections
+    if (!viewKey) {
+      redirect(adminRoute)
+    }
+  }
+
+  // Redirect `${adminRoute}/globals` to `${adminRoute}`
+  if (segments.length === 1 && segments[0] === 'globals') {
+    const { viewKey } = getCustomViewByRoute({
+      config,
+      currentRoute: '/globals',
+    })
+
+    // Only redirect if there's NO custom view configured for /globals
+    if (!viewKey) {
+      redirect(adminRoute)
+    }
+  }
+
+  const {
+    browseByFolderSlugs,
+    DefaultView,
+    documentSubViewType,
+    folderID: folderIDParam,
+    initPageOptions,
+    serverProps,
+    templateClassName,
+    templateType,
+    viewType,
+  } = getRouteData({
+    adminRoute,
+    config,
+    currentRoute,
+    importMap,
+    searchParams,
+    segments,
+  })
 
   const initPageResult = await initPage(initPageOptions)
 
@@ -78,6 +119,10 @@ export const RootPage = async ({
       })
       ?.then((doc) => !!doc))
 
+  /**
+   * This function is responsible for handling the case where the view is not found.
+   * The current route did not match any default views or custom route views.
+   */
   if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
     if (initPageResult?.req?.user) {
       notFound()
@@ -121,39 +166,61 @@ export const RootPage = async ({
     importMap,
   })
 
+  const payload = initPageResult?.req.payload
+  const folderID = payload.config.folders
+    ? parseDocumentID({
+        id: folderIDParam,
+        collectionSlug: payload.config.folders.slug,
+        payload,
+      })
+    : undefined
+
   const RenderedView = RenderServerComponent({
-    clientProps: { clientConfig },
+    clientProps: {
+      browseByFolderSlugs,
+      clientConfig,
+      documentSubViewType,
+      viewType,
+    } satisfies AdminViewClientProps,
     Component: DefaultView.payloadComponent,
     Fallback: DefaultView.Component,
     importMap,
     serverProps: {
       ...serverProps,
       clientConfig,
+      docID: initPageResult?.docID,
+      folderID,
       i18n: initPageResult?.req.i18n,
       importMap,
       initPageResult,
       params,
       payload: initPageResult?.req.payload,
       searchParams,
-    },
+    } satisfies AdminViewServerPropsOnly,
   })
 
   return (
-    <Fragment>
-      {!templateType && <Fragment>{RenderedView}</Fragment>}
+    <React.Fragment>
+      {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
       {templateType === 'minimal' && (
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
       )}
       {templateType === 'default' && (
         <DefaultTemplate
+          collectionSlug={initPageResult?.collectionConfig?.slug}
+          docID={initPageResult?.docID}
+          documentSubViewType={documentSubViewType}
+          globalSlug={initPageResult?.globalConfig?.slug}
           i18n={initPageResult?.req.i18n}
           locale={initPageResult?.locale}
           params={params}
           payload={initPageResult?.req.payload}
           permissions={initPageResult?.permissions}
+          req={initPageResult?.req}
           searchParams={searchParams}
           user={initPageResult?.req.user}
           viewActions={serverProps.viewActions}
+          viewType={viewType}
           visibleEntities={{
             // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
             // which this caused as soon as initPageResult.visibleEntities is passed in
@@ -164,6 +231,6 @@ export const RootPage = async ({
           {RenderedView}
         </DefaultTemplate>
       )}
-    </Fragment>
+    </React.Fragment>
   )
 }

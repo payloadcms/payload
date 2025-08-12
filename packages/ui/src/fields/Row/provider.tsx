@@ -1,5 +1,5 @@
 'use client'
-import React, { createContext, useContext } from 'react'
+import React, { createContext, use } from 'react'
 
 export const Context = createContext(false)
 
@@ -7,7 +7,7 @@ export const RowProvider: React.FC<{ children?: React.ReactNode; withinRow?: boo
   children,
   withinRow = true,
 }) => {
-  return <Context.Provider value={withinRow}>{children}</Context.Provider>
+  return <Context value={withinRow}>{children}</Context>
 }
 
-export const useRow = (): boolean => useContext(Context)
+export const useRow = (): boolean => use(Context)

@@ -5,15 +5,7 @@ import { headers } from 'next/headers'
 
 export const maxDuration = 60 // This function can run for a maximum of 60 seconds
 
-export async function POST(
-  req: Request & {
-    cookies: {
-      get: (name: string) => {
-        value: string
-      }
-    }
-  },
-): Promise<Response> {
+export async function POST(): Promise<Response> {
   const payload = await getPayload({ config })
   const requestHeaders = await headers()
 
@@ -32,7 +24,8 @@ export async function POST(
     await seed({ payload, req: payloadReq })
 
     return Response.json({ success: true })
-  } catch {
+  } catch (e) {
+    payload.logger.error({ err: e, message: 'Error seeding data' })
     return new Response('Error seeding data.', { status: 500 })
   }
 }

@@ -3,6 +3,7 @@
 import type { GroupFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { groupHasName } from 'payload/shared'
 import React, { useMemo } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
@@ -16,9 +17,9 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
+import './index.scss'
 import { useRow } from '../Row/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
-import './index.scss'
 import { useTabs } from '../Tabs/provider.js'
 import { GroupProvider, useGroup } from './provider.js'
 
@@ -27,21 +28,28 @@ const baseClass = 'group-field'
 export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
     field,
-    field: { name, admin: { className, description, hideGutter } = {}, fields, label },
+    field: { admin: { className, description, hideGutter } = {}, fields, label },
+    indexPath,
+    parentPath,
+    parentSchemaPath,
     path,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
   } = props
-  const schemaPath = schemaPathFromProps ?? name
+
+  const schemaPath =
+    schemaPathFromProps ?? (field.type === 'group' && groupHasName(field) ? field.name : path)
 
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()
   const isWithinGroup = useGroup()
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
+
   const { customComponents: { AfterInput, BeforeInput, Description, Label } = {}, errorPaths } =
     useField({ path })
+
   const submitted = useFormSubmitted()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0
@@ -99,15 +107,28 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
             </div>
           )}
           {BeforeInput}
-          <RenderFields
-            fields={fields}
-            margins="small"
-            parentIndexPath=""
-            parentPath={path}
-            parentSchemaPath={schemaPath}
-            permissions={permissions === true ? permissions : permissions?.fields}
-            readOnly={readOnly}
-          />
+          {/* Render an unnamed group differently */}
+          {groupHasName(field) ? (
+            <RenderFields
+              fields={fields}
+              margins="small"
+              parentIndexPath=""
+              parentPath={path}
+              parentSchemaPath={schemaPath}
+              permissions={permissions === true ? permissions : permissions?.fields}
+              readOnly={readOnly}
+            />
+          ) : (
+            <RenderFields
+              fields={fields}
+              margins="small"
+              parentIndexPath={indexPath}
+              parentPath={parentPath}
+              parentSchemaPath={parentSchemaPath}
+              permissions={permissions}
+              readOnly={readOnly}
+            />
+          )}
         </div>
       </GroupProvider>
       {AfterInput}

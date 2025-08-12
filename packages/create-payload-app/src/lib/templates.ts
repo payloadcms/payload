@@ -2,7 +2,7 @@ import type { ProjectTemplate } from '../types.js'
 
 import { error, info } from '../utils/log.js'
 
-export function validateTemplate(templateName: string): boolean {
+export function validateTemplate({ templateName }: { templateName: string }): boolean {
   const validTemplates = getValidTemplates()
   if (!validTemplates.map((t) => t.name).includes(templateName)) {
     error(`'${templateName}' is not a valid template.`)

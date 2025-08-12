@@ -1,7 +1,6 @@
 'use client'
 import type { FormProps, UserWithToken } from '@payloadcms/ui'
 import type {
-  ClientCollectionConfig,
   DocumentPreferences,
   FormState,
   LoginWithUsernameOptions,
@@ -45,10 +44,10 @@ export const CreateFirstUserClient: React.FC<{
 
   const abortOnChangeRef = React.useRef<AbortController>(null)
 
-  const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
       const response = await getFormState({
@@ -57,8 +56,9 @@ export const CreateFirstUserClient: React.FC<{
         docPreferences,
         formState: prevFormState,
         operation: 'create',
-        schemaPath: `_${userSlug}.auth`,
+        schemaPath: userSlug,
         signal: controller.signal,
+        skipValidation: !submitted,
       })
 
       abortOnChangeRef.current = null
@@ -85,7 +85,14 @@ export const CreateFirstUserClient: React.FC<{
   return (
     <Form
       action={`${serverURL}${apiRoute}/${userSlug}/first-register`}
-      initialState={initialState}
+      initialState={{
+        ...initialState,
+        'confirm-password': {
+          ...initialState['confirm-password'],
+          valid: initialState['confirm-password']['valid'] || false,
+          value: initialState['confirm-password']['value'] || '',
+        },
+      }}
       method="POST"
       onChange={[onChange]}
       onSuccess={handleFirstRegister}

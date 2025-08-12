@@ -1,0 +1,17 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .folder-view-toggle-button {
+    padding: 0;
+    background-color: transparent;
+
+    &--active {
+      background-color: var(--theme-elevation-150);
+    }
+
+    .btn__icon {
+      border: none;
+      padding: 0;
+    }
+  }
+}

@@ -7,10 +7,6 @@ import type { StripePluginConfig } from '../types.js'
 
 import { deepen } from '../utilities/deepen.js'
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY
-// api version can only be the latest, stripe recommends ts ignoring it
-const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
-
 type HookArgsWithCustomCollection = {
   collection: CollectionConfig
 } & Omit<Parameters<CollectionBeforeChangeHook>[0], 'collection'>
@@ -66,6 +62,11 @@ export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async 
           }
 
           try {
+            // api version can only be the latest, stripe recommends ts ignoring it
+            const stripe = new Stripe(pluginConfig?.stripeSecretKey || '', {
+              apiVersion: '2022-08-01',
+            })
+
             const stripeResource = await stripe?.[syncConfig?.stripeResourceType]?.update(
               data.stripeID,
               syncedFields,

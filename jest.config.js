@@ -13,6 +13,9 @@ const esModules = [
   'path-exists',
   'qs-esm',
   'uint8array-extras',
+  '@faceless-ui/window-info',
+  '@faceless-ui/modal',
+  '@faceless-ui/scroll-info',
 ].join('|')
 
 import path from 'path'

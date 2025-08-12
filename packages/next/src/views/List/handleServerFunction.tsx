@@ -1,5 +1,4 @@
-import type { ListPreferences } from '@payloadcms/ui'
-import type { ListQuery, PayloadRequest, VisibleEntities } from 'payload'
+import type { CollectionPreferences, ListQuery, ServerFunction, VisibleEntities } from 'payload'
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
@@ -9,28 +8,32 @@ import { renderListView } from './index.js'
 
 type RenderListResult = {
   List: React.ReactNode
-  preferences: ListPreferences
+  preferences: CollectionPreferences
 }
 
-export const renderListHandler = async (args: {
-  collectionSlug: string
-  disableActions?: boolean
-  disableBulkDelete?: boolean
-  disableBulkEdit?: boolean
-  documentDrawerSlug: string
-  drawerSlug?: string
-  enableRowSelections: boolean
-  overrideEntityVisibility?: boolean
-  query: ListQuery
-  redirectAfterDelete: boolean
-  redirectAfterDuplicate: boolean
-  req: PayloadRequest
-}): Promise<RenderListResult> => {
+export const renderListHandler: ServerFunction<
+  {
+    collectionSlug: string
+    disableActions?: boolean
+    disableBulkDelete?: boolean
+    disableBulkEdit?: boolean
+    disableQueryPresets?: boolean
+    documentDrawerSlug: string
+    drawerSlug?: string
+    enableRowSelections: boolean
+    overrideEntityVisibility?: boolean
+    query: ListQuery
+    redirectAfterDelete: boolean
+    redirectAfterDuplicate: boolean
+  },
+  Promise<RenderListResult>
+> = async (args) => {
   const {
     collectionSlug,
     disableActions,
     disableBulkDelete,
     disableBulkEdit,
+    disableQueryPresets,
     drawerSlug,
     enableRowSelections,
     overrideEntityVisibility,
@@ -89,7 +92,7 @@ export const renderListHandler = async (args: {
     importMap: payload.importMap,
   })
 
-  const preferencesKey = `${collectionSlug}-list`
+  const preferencesKey = `collection-${collectionSlug}`
 
   const preferences = await payload
     .find({
@@ -116,7 +119,7 @@ export const renderListHandler = async (args: {
         ],
       },
     })
-    .then((res) => res.docs[0]?.value as ListPreferences)
+    .then((res) => res.docs[0]?.value as CollectionPreferences)
 
   const visibleEntities: VisibleEntities = {
     collections: payload.config.collections
@@ -136,13 +139,13 @@ export const renderListHandler = async (args: {
     disableActions,
     disableBulkDelete,
     disableBulkEdit,
+    disableQueryPresets,
     drawerSlug,
     enableRowSelections,
+    i18n,
     importMap: payload.importMap,
     initPageResult: {
-      collectionConfig: payload.config.collections.find(
-        (collection) => collection.slug === collectionSlug,
-      ),
+      collectionConfig: payload?.collections?.[collectionSlug]?.config,
       cookies,
       globalConfig: payload.config.globals.find((global) => global.slug === collectionSlug),
       languageOptions: undefined, // TODO
@@ -155,10 +158,12 @@ export const renderListHandler = async (args: {
     params: {
       segments: ['collections', collectionSlug],
     },
+    payload,
     query,
     redirectAfterDelete,
     redirectAfterDuplicate,
     searchParams: {},
+    viewType: 'list',
   })
 
   return {

@@ -1,16 +1,22 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
+import { getPayload } from 'payload'
+import configPromise from '@payload-config'
 
-import type { MainMenu } from '../../payload-types'
+import type { MainMenu } from '@payload-types'
 
-import { getCachedGlobal } from '../../utilities/getGlobals'
 import { CMSLink } from '../CMSLink'
 import { Gutter } from '../Gutter'
 import classes from './index.module.scss'
 
 export async function Header() {
-  const header: MainMenu = await getCachedGlobal('main-menu', 1)()
+  const payload = await getPayload({ config: configPromise })
+
+  const header: MainMenu = await payload.findGlobal({
+    slug: 'main-menu',
+    depth: 1,
+  })
 
   const navItems = header?.navItems || []
 

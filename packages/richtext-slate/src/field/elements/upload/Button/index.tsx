@@ -1,5 +1,7 @@
 'use client'
 
+import type { ListDrawerProps } from '@payloadcms/ui'
+
 import { useListDrawer, useTranslation } from '@payloadcms/ui'
 import React, { Fragment, useCallback } from 'react'
 import { ReactEditor, useSlate } from 'slate-react'
@@ -41,12 +43,12 @@ const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
     uploads: true,
   })
 
-  const onSelect = useCallback(
-    ({ collectionSlug, docID }) => {
+  const onSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    ({ collectionSlug, doc }) => {
       insertUpload(editor, {
         relationTo: collectionSlug,
         value: {
-          id: docID,
+          id: doc.id,
         },
       })
       closeDrawer()

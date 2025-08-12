@@ -22,7 +22,7 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
       fields: collection.fields.filter((field) => !('name' in field) || field.name !== 'id'),
       ...(flatten && {
         flattenedFields: collection.flattenedFields.filter((each) => each.name !== 'id'),
-      }),
+      })!,
     },
     {
       name: 'createdAt',

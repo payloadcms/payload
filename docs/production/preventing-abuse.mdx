@@ -28,7 +28,7 @@ To securely allow headless operation you will need to configure the allowed orig
 
 ## Limiting GraphQL Complexity
 
-Because GraphQL gives the power of query writing outside a server's control, someone with bad intentions might write a maliciously complex query and bog down your server. To prevent resource-intensive GraphQL requests, Payload provides a way specify complexity limits which are based on a complexity score that is calculated for each request.
+Because GraphQL gives the power of query writing outside a server's control, someone with bad intentions might write a maliciously complex query and bog down your server. To prevent resource-intensive GraphQL requests, Payload provides a way to specify complexity limits. These limits are based on a complexity score calculated for each request.
 
 Any GraphQL request that is calculated to be too expensive is rejected. On the Payload Config, in `graphQL` you can set the `maxComplexity` value as an integer. For reference, the default complexity value for each added field is 1, and all `relationship` and `upload` fields are assigned a value of 10.
 

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, type ReactNode, useContext } from 'react'
+import React, { createContext, type ReactNode, use } from 'react'
 
 interface SlateProps {
   schemaPath: string
@@ -15,11 +15,11 @@ export function SlatePropsProvider({
   children: ReactNode
   schemaPath: string
 }) {
-  return <SlatePropsContext.Provider value={{ schemaPath }}>{children}</SlatePropsContext.Provider>
+  return <SlatePropsContext value={{ schemaPath }}>{children}</SlatePropsContext>
 }
 
 export function useSlateProps() {
-  const context = useContext(SlatePropsContext)
+  const context = use(SlatePropsContext)
   if (!context) {
     throw new Error('useSlateProps must be used within SlatePropsProvider')
   }

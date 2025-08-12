@@ -5,5 +5,5 @@ import { TextField } from '@payloadcms/ui'
 import React from 'react'
 
 export const CustomTextFieldClient: TextFieldClientComponent = (props) => {
-  return <TextField field={props?.field} path={props?.path} />
+  return <TextField {...props} />
 }

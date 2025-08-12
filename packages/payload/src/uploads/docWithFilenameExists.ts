@@ -7,7 +7,11 @@ type Args = {
   req: PayloadRequest
 }
 
-const docWithFilenameExists = async ({ collectionSlug, filename, req }: Args): Promise<boolean> => {
+export const docWithFilenameExists = async ({
+  collectionSlug,
+  filename,
+  req,
+}: Args): Promise<boolean> => {
   const doc = await req.payload.db.findOne({
     collection: collectionSlug,
     req,
@@ -23,5 +27,3 @@ const docWithFilenameExists = async ({ collectionSlug, filename, req }: Args): P
 
   return false
 }
-
-export default docWithFilenameExists

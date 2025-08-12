@@ -31,7 +31,7 @@ export const DynamicFieldSelector: React.FC<
 
           return null
         })
-        .filter(Boolean)
+        .filter((field) => field !== null)
       setOptions(allNonPaymentFields)
     }
   }, [fields, getDataByPath])
@@ -40,9 +40,8 @@ export const DynamicFieldSelector: React.FC<
     <SelectField
       {...props}
       field={{
-        name: props?.field?.name,
-        options,
         ...(props.field || {}),
+        options,
       }}
     />
   )

@@ -3,7 +3,6 @@
 @layer payload-default {
   .paginator {
     display: flex;
-    margin-bottom: $baseline;
 
     &__page {
       cursor: pointer;
@@ -25,15 +24,16 @@
 
     &__page {
       @extend %btn-reset;
-      width: base(2);
-      height: base(2);
+      width: base(1.5);
+      height: base(1.5);
       display: flex;
       justify-content: center;
       align-content: center;
       outline: 0;
+      border-radius: var(--style-radius-s);
       padding: base(0.5);
       color: var(--theme-elevation-800);
-      line-height: base(1);
+      line-height: 0.9;
 
       &:focus-visible {
         outline: var(--accessibility-outline);

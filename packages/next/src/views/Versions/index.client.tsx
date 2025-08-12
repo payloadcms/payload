@@ -1,8 +1,7 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload'
+import type { Column, SanitizedCollectionConfig } from 'payload'
 
 import {
-  type Column,
   LoadingOverlayToggle,
   Pagination,
   PerPage,

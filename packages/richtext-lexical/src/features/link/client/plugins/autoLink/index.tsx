@@ -53,8 +53,8 @@ export function createLinkMatcherWithRegExp(
 }
 
 function findFirstMatch(text: string, matchers: LinkMatcher[]): LinkMatcherResult | null {
-  for (let i = 0; i < matchers.length; i++) {
-    const match = matchers[i](text)
+  for (const matcher of matchers) {
+    const match = matcher(text)
 
     if (match != null) {
       return match
@@ -66,8 +66,8 @@ function findFirstMatch(text: string, matchers: LinkMatcher[]): LinkMatcherResul
 
 const PUNCTUATION_OR_SPACE = /[.,;\s]/
 
-function isSeparator(char: string): boolean {
-  return PUNCTUATION_OR_SPACE.test(char)
+function isSeparator(char: string | undefined): boolean {
+  return char !== undefined && PUNCTUATION_OR_SPACE.test(char)
 }
 
 function endsWithSeparator(textContent: string): boolean {
@@ -124,13 +124,13 @@ function isContentAroundIsValid(
   nodes: TextNode[],
 ): boolean {
   const contentBeforeIsValid =
-    matchStart > 0 ? isSeparator(text[matchStart - 1]) : isPreviousNodeValid(nodes[0])
+    matchStart > 0 ? isSeparator(text[matchStart - 1]) : isPreviousNodeValid(nodes[0]!)
   if (!contentBeforeIsValid) {
     return false
   }
 
   const contentAfterIsValid =
-    matchEnd < text.length ? isSeparator(text[matchEnd]) : isNextNodeValid(nodes[nodes.length - 1])
+    matchEnd < text.length ? isSeparator(text[matchEnd]) : isNextNodeValid(nodes[nodes.length - 1]!)
   return contentAfterIsValid
 }
 
@@ -153,7 +153,7 @@ function extractMatchingNodes(
   const currentNodes = [...nodes]
 
   while (currentNodes.length > 0) {
-    const currentNode = currentNodes[0]
+    const currentNode = currentNodes[0]!
     const currentNodeText = currentNode.getTextContent()
     const currentNodeLength = currentNodeText.length
     const currentNodeStart = currentOffset
@@ -187,22 +187,24 @@ function $createAutoLinkNode_(
 
   const linkNode = $createAutoLinkNode({ fields })
   if (nodes.length === 1) {
-    let remainingTextNode = nodes[0]
-    let linkTextNode
+    const remainingTextNode = nodes[0]!
+    let linkTextNode: TextNode | undefined
     if (startIndex === 0) {
-      ;[linkTextNode, remainingTextNode] = remainingTextNode.splitText(endIndex)
+      ;[linkTextNode] = remainingTextNode.splitText(endIndex)
     } else {
-      ;[, linkTextNode, remainingTextNode] = remainingTextNode.splitText(startIndex, endIndex)
+      ;[, linkTextNode] = remainingTextNode.splitText(startIndex, endIndex)
     }
-    const textNode = $createTextNode(match.text)
-    textNode.setFormat(linkTextNode.getFormat())
-    textNode.setDetail(linkTextNode.getDetail())
-    textNode.setStyle(linkTextNode.getStyle())
-    linkNode.append(textNode)
-    linkTextNode.replace(linkNode)
+    if (linkTextNode) {
+      const textNode = $createTextNode(match.text)
+      textNode.setFormat(linkTextNode.getFormat())
+      textNode.setDetail(linkTextNode.getDetail())
+      textNode.setStyle(linkTextNode.getStyle())
+      linkNode.append(textNode)
+      linkTextNode.replace(linkNode)
+    }
     return remainingTextNode
   } else if (nodes.length > 1) {
-    const firstTextNode = nodes[0]
+    const firstTextNode = nodes[0]!
     let offset = firstTextNode.getTextContent().length
     let firstLinkTextNode
     if (startIndex === 0) {
@@ -212,8 +214,7 @@ function $createAutoLinkNode_(
     }
     const linkNodes: LexicalNode[] = []
     let remainingTextNode
-    for (let i = 1; i < nodes.length; i++) {
-      const currentNode = nodes[i]
+    nodes.forEach((currentNode) => {
       const currentNodeText = currentNode.getTextContent()
       const currentNodeLength = currentNodeText.length
       const currentNodeStart = offset
@@ -223,30 +224,35 @@ function $createAutoLinkNode_(
           linkNodes.push(currentNode)
         } else {
           const [linkTextNode, endNode] = currentNode.splitText(endIndex - currentNodeStart)
-          linkNodes.push(linkTextNode)
+          if (linkTextNode) {
+            linkNodes.push(linkTextNode)
+          }
           remainingTextNode = endNode
         }
       }
       offset += currentNodeLength
-    }
-    const selection = $getSelection()
-    const selectedTextNode = selection ? selection.getNodes().find($isTextNode) : undefined
-    const textNode = $createTextNode(firstLinkTextNode.getTextContent())
-    textNode.setFormat(firstLinkTextNode.getFormat())
-    textNode.setDetail(firstLinkTextNode.getDetail())
-    textNode.setStyle(firstLinkTextNode.getStyle())
-    linkNode.append(textNode, ...linkNodes)
-    // it does not preserve caret position if caret was at the first text node
-    // so we need to restore caret position
-    if (selectedTextNode && selectedTextNode === firstLinkTextNode) {
-      if ($isRangeSelection(selection)) {
-        textNode.select(selection.anchor.offset, selection.focus.offset)
-      } else if ($isNodeSelection(selection)) {
-        textNode.select(0, textNode.getTextContent().length)
+    })
+
+    if (firstLinkTextNode) {
+      const selection = $getSelection()
+      const selectedTextNode = selection ? selection.getNodes().find($isTextNode) : undefined
+      const textNode = $createTextNode(firstLinkTextNode.getTextContent())
+      textNode.setFormat(firstLinkTextNode.getFormat())
+      textNode.setDetail(firstLinkTextNode.getDetail())
+      textNode.setStyle(firstLinkTextNode.getStyle())
+      linkNode.append(textNode, ...linkNodes)
+      // it does not preserve caret position if caret was at the first text node
+      // so we need to restore caret position
+      if (selectedTextNode && selectedTextNode === firstLinkTextNode) {
+        if ($isRangeSelection(selection)) {
+          textNode.select(selection.anchor.offset, selection.focus.offset)
+        } else if ($isNodeSelection(selection)) {
+          textNode.select(0, textNode.getTextContent().length)
+        }
       }
+      firstLinkTextNode.replace(linkNode)
+      return remainingTextNode
     }
-    firstLinkTextNode.replace(linkNode)
-    return remainingTextNode
   }
   return undefined
 }
@@ -357,7 +363,7 @@ function handleBadNeighbors(
 
   if ($isAutoLinkNode(previousSibling)) {
     const isEmailURI = previousSibling.getFields()?.url
-      ? previousSibling.getFields()?.url?.startsWith('mailto:')
+      ? (previousSibling.getFields()?.url?.startsWith('mailto:') ?? false)
       : false
     if (!startsWithSeparator(text) || startsWithTLD(text, isEmailURI)) {
       previousSibling.append(textNode)
@@ -378,7 +384,7 @@ function replaceWithChildren(node: ElementNode): LexicalNode[] {
   const childrenLength = children.length
 
   for (let j = childrenLength - 1; j >= 0; j--) {
-    node.insertAfter(children[j])
+    node.insertAfter(children[j]!)
   }
 
   node.remove()

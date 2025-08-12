@@ -1,0 +1,9 @@
+@layer payload-default {
+  .tabs-diff {
+    // Space between each tab or tab locale
+    &__tab:not(:first-of-type),
+    &__tab-locale:not(:first-of-type) {
+      margin-top: var(--base);
+    }
+  }
+}
