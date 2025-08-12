@@ -10,6 +10,8 @@ import type {
 import type React from 'react'
 import type { Dispatch } from 'react'
 
+import type { AcceptValues } from './mergeServerFormState.js'
+
 export type Preferences = {
   [key: string]: unknown
 }
@@ -69,6 +71,7 @@ export type FormProps = {
 )
 
 export type SubmitOptions = {
+  acceptValues?: AcceptValues
   action?: string
   /**
    * @experimental - Note: this property is experimental and may change in the future. Use as your own discretion.
@@ -113,7 +116,13 @@ export type CreateFormData = (
    * If mergeOverrideData true, the data will be merged with the existing data in the form state.
    * @default true
    */
-  options?: { mergeOverrideData?: boolean },
+  options?: {
+    /**
+     * If provided, will use this instead of of derived data from the current form state.
+     */
+    data?: Data
+    mergeOverrideData?: boolean
+  },
 ) => FormData | Promise<FormData>
 
 export type GetFields = () => FormState
@@ -175,7 +184,8 @@ export type ADD_ROW = {
 }
 
 export type MERGE_SERVER_STATE = {
-  acceptValues?: boolean
+  acceptValues?: AcceptValues
+  formStateAtTimeOfRequest?: FormState
   prevStateRef: React.RefObject<FormState>
   serverState: FormState
   type: 'MERGE_SERVER_STATE'
