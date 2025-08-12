@@ -4,8 +4,17 @@ import type { FormState } from 'payload'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 
 type Args = {
-  acceptValues?: boolean
+  acceptValues?:
+    | {
+        /**
+         * If true, will accept all values, except for those that have changed locally since the request was made.
+         * This is useful for autosave, for example, where hooks may have modified the fields value while you were still making changes.
+         */
+        overrideLocalChanges?: boolean
+      }
+    | boolean
   currentState?: FormState
+  formStateAtTimeOfRequest?: FormState
   incomingState: FormState
 }
 
@@ -21,6 +30,7 @@ type Args = {
 export const mergeServerFormState = ({
   acceptValues,
   currentState = {},
+  formStateAtTimeOfRequest,
   incomingState,
 }: Args): FormState => {
   const newState = { ...currentState }
@@ -30,7 +40,19 @@ export const mergeServerFormState = ({
       continue
     }
 
-    if (!acceptValues && !incomingField.addedByServer) {
+    if (
+      !incomingField.addedByServer &&
+      (acceptValues === true ||
+        /**
+         * This makes it possible to keep local changes to a field if it has changed since the request was made.
+         * This is useful for autosave, for example, where hooks may have modified the fields value while you were still making changes.
+         * For normal submits, when the form goes disabled, we can accept all values outright. But for autosave in the background, we want to protect local changes.
+         */
+        (typeof acceptValues === 'object' &&
+          acceptValues !== null &&
+          acceptValues?.overrideLocalChanges === false &&
+          currentState[path]?.value !== formStateAtTimeOfRequest?.[path]?.value))
+    ) {
       delete incomingField.value
       delete incomingField.initialValue
     }

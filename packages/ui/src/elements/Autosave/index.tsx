@@ -157,6 +157,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
               disableFormWhileProcessing: false,
               disableSuccessStatus: true,
               method,
+              overrideLocalChanges: false,
               overrides: {
                 _status: 'draft',
               },

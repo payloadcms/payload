@@ -16,7 +16,7 @@ const AutosavePosts: CollectionConfig = {
     maxPerDoc: 35,
     drafts: {
       autosave: {
-        interval: 2000,
+        interval: 100,
       },
       schedulePublish: true,
     },

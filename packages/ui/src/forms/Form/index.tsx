@@ -208,6 +208,7 @@ export const Form: React.FC<FormProps> = (props) => {
         disableFormWhileProcessing = true,
         disableSuccessStatus: disableSuccessStatusFromArgs,
         method: methodToUse = method,
+        overrideLocalChanges,
         overrides: overridesFromArgs = {},
         skipValidation,
       } = options || ({} as SubmitOptions)
@@ -317,12 +318,12 @@ export const Form: React.FC<FormProps> = (props) => {
         overrides = overridesFromArgs
       }
 
+      const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
+        contextRef.current.fields,
+      )
+
       // If submit handler comes through via props, run that
       if (onSubmit) {
-        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
-          contextRef.current.fields,
-        )
-
         const data = reduceFieldsToValues(serializableFields, true)
 
         for (const [key, value] of Object.entries(overrides)) {
@@ -384,7 +385,10 @@ export const Form: React.FC<FormProps> = (props) => {
             if (newFormState) {
               dispatchFields({
                 type: 'MERGE_SERVER_STATE',
-                acceptValues: true,
+                acceptValues: {
+                  overrideLocalChanges,
+                },
+                formStateAtTimeOfRequest: serializableFields,
                 prevStateRef: prevFormState,
                 serverState: newFormState,
               })

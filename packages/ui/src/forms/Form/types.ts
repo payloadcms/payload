@@ -86,6 +86,11 @@ export type SubmitOptions = {
    */
   disableSuccessStatus?: boolean
   method?: string
+  /**
+   * If true, will override any local changes made to the form state.
+   * This is useful for autosave, for example, where hooks may have modified the fields value while you were still making changes.
+   */
+  overrideLocalChanges?: boolean
   overrides?: ((formState) => FormData) | Record<string, unknown>
   /**
    * When true, will skip validation before submitting the form.
@@ -175,7 +180,16 @@ export type ADD_ROW = {
 }
 
 export type MERGE_SERVER_STATE = {
-  acceptValues?: boolean
+  acceptValues?:
+    | {
+        /**
+         * If true, will accept all values, except for those that have changed locally since the request was made.
+         * This is useful for autosave, for example, where hooks may have modified the fields value while you were still making changes.
+         */
+        overrideLocalChanges?: boolean
+      }
+    | boolean
+  formStateAtTimeOfRequest?: FormState
   prevStateRef: React.RefObject<FormState>
   serverState: FormState
   type: 'MERGE_SERVER_STATE'
