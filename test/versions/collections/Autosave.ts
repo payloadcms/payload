@@ -67,6 +67,16 @@ const AutosavePosts: CollectionConfig = {
       type: 'textarea',
       required: true,
     },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
   ],
 }
 

@@ -318,19 +318,17 @@ export const Form: React.FC<FormProps> = (props) => {
         overrides = overridesFromArgs
       }
 
-      const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
-        contextRef.current.fields,
-      )
+      const formStateCopy = deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields)
 
       // If submit handler comes through via props, run that
       if (onSubmit) {
-        const data = reduceFieldsToValues(serializableFields, true)
+        const data = reduceFieldsToValues(formStateCopy, true)
 
         for (const [key, value] of Object.entries(overrides)) {
           data[key] = value
         }
 
-        onSubmit(serializableFields, data)
+        onSubmit(formStateCopy, data)
       }
 
       if (!hasFormSubmitAction) {
@@ -343,6 +341,7 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       const formData = await contextRef.current.createFormData(overrides, {
+        formState: formStateCopy,
         mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
       })
 
@@ -386,7 +385,7 @@ export const Form: React.FC<FormProps> = (props) => {
               dispatchFields({
                 type: 'MERGE_SERVER_STATE',
                 acceptValues,
-                formStateAtTimeOfRequest: serializableFields,
+                formStateAtTimeOfRequest: formStateCopy,
                 prevStateRef: prevFormState,
                 serverState: newFormState,
               })
@@ -505,8 +504,8 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const createFormData = useCallback<CreateFormData>(
-    async (overrides, { mergeOverrideData = true }) => {
-      let data = reduceFieldsToValues(contextRef.current.fields, true)
+    async (overrides, { formState, mergeOverrideData = true }) => {
+      let data = reduceFieldsToValues(formState || contextRef.current.fields, true)
 
       let file = data?.file
 

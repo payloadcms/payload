@@ -116,7 +116,14 @@ export type CreateFormData = (
    * If mergeOverrideData true, the data will be merged with the existing data in the form state.
    * @default true
    */
-  options?: { mergeOverrideData?: boolean },
+  options?: {
+    /**
+     * If provided, will use this form state to create the FormData.
+     * Otherwise, will use the current form state on the form state ref.
+     */
+    formState?: FormState
+    mergeOverrideData?: boolean
+  },
 ) => FormData | Promise<FormData>
 
 export type GetFields = () => FormState
