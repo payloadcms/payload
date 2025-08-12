@@ -98,6 +98,7 @@ export interface Config {
     'externally-served-media': ExternallyServedMedia;
     'uploads-1': Uploads1;
     'uploads-2': Uploads2;
+    'any-images': AnyImage;
     'admin-thumbnail-function': AdminThumbnailFunction;
     'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQuery;
     'admin-thumbnail-size': AdminThumbnailSize;
@@ -157,6 +158,7 @@ export interface Config {
     'externally-served-media': ExternallyServedMediaSelect<false> | ExternallyServedMediaSelect<true>;
     'uploads-1': Uploads1Select<false> | Uploads1Select<true>;
     'uploads-2': Uploads2Select<false> | Uploads2Select<true>;
+    'any-images': AnyImagesSelect<false> | AnyImagesSelect<true>;
     'admin-thumbnail-function': AdminThumbnailFunctionSelect<false> | AdminThumbnailFunctionSelect<true>;
     'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQueriesSelect<false> | AdminThumbnailWithSearchQueriesSelect<true>;
     'admin-thumbnail-size': AdminThumbnailSizeSelect<false> | AdminThumbnailSizeSelect<true>;
@@ -1315,6 +1317,24 @@ export interface AdminThumbnailSize {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "any-images".
+ */
+export interface AnyImage {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "admin-thumbnail-function".
  */
 export interface AdminThumbnailFunction {
@@ -1777,6 +1797,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'uploads-2';
         value: string | Uploads2;
+      } | null)
+    | ({
+        relationTo: 'any-images';
+        value: string | AnyImage;
       } | null)
     | ({
         relationTo: 'admin-thumbnail-function';
@@ -3021,6 +3045,23 @@ export interface Uploads2Select<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "any-images_select".
+ */
+export interface AnyImagesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "admin-thumbnail-function_select".
  */
 export interface AdminThumbnailFunctionSelect<T extends boolean = true> {
@@ -3450,6 +3491,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
