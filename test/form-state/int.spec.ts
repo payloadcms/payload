@@ -566,7 +566,58 @@ describe('Form State', () => {
     expect(newState === currentState).toBe(true)
   })
 
-  it('should not accept values from the server if they have been modified locally since the request was made', () => {
+  it('should accept all values from the server regardless of local modifications, e.g. on submit', () => {
+    const currentState = {
+      title: {
+        value: 'Test Post (modified on the client)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+      computedTitle: {
+        value: 'Test Post (computed on the client)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+    }
+
+    const formStateAtTimeOfRequest = {
+      ...currentState,
+      title: {
+        value: 'Test Post (modified on the client 2)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+    }
+
+    const incomingStateFromServer = {
+      title: {
+        value: 'Test Post (modified on the server)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+      computedTitle: {
+        value: 'Test Post (computed on the server)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+    }
+
+    const newState = mergeServerFormState({
+      acceptValues: true,
+      currentState,
+      formStateAtTimeOfRequest,
+      incomingState: incomingStateFromServer,
+    })
+
+    expect(newState).toStrictEqual(incomingStateFromServer)
+  })
+
+  it('should not accept values from the server if they have been modified locally since the request was made, e.g. on autosave', () => {
     const currentState = {
       title: {
         value: 'Test Post (modified on the client 1)',
