@@ -10,6 +10,8 @@ import type {
 import type React from 'react'
 import type { Dispatch } from 'react'
 
+import type { AcceptValues } from './mergeServerFormState.js'
+
 export type Preferences = {
   [key: string]: unknown
 }
@@ -69,6 +71,7 @@ export type FormProps = {
 )
 
 export type SubmitOptions = {
+  acceptValues?: AcceptValues
   action?: string
   /**
    * @experimental - Note: this property is experimental and may change in the future. Use as your own discretion.
@@ -86,11 +89,6 @@ export type SubmitOptions = {
    */
   disableSuccessStatus?: boolean
   method?: string
-  /**
-   * If true, will override any local changes made to the form state.
-   * This is useful for autosave, for example, where hooks may have modified the fields value while you were still making changes.
-   */
-  overrideLocalChanges?: boolean
   overrides?: ((formState) => FormData) | Record<string, unknown>
   /**
    * When true, will skip validation before submitting the form.
@@ -180,15 +178,7 @@ export type ADD_ROW = {
 }
 
 export type MERGE_SERVER_STATE = {
-  acceptValues?:
-    | {
-        /**
-         * If true, will accept all values, except for those that have changed locally since the request was made.
-         * This is useful for autosave, for example, where hooks may have modified the fields value while you were still making changes.
-         */
-        overrideLocalChanges?: boolean
-      }
-    | boolean
+  acceptValues?: AcceptValues
   formStateAtTimeOfRequest?: FormState
   prevStateRef: React.RefObject<FormState>
   serverState: FormState

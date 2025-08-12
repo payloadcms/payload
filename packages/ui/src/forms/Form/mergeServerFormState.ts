@@ -3,16 +3,23 @@ import type { FormState } from 'payload'
 
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 
+/**
+ * If true, will accept all values from the server, overriding any current values in local state.
+ * Can also provide an options object for more granular control.
+ */
+export type AcceptValues =
+  | {
+      /**
+       * When `false`, will accept the values from the server _UNLESS_ the value has been modified locally since the request was made.
+       * This is useful for autosave, for example, where hooks may have modified the field's value on the server while you were still making changes.
+       * @default undefined
+       */
+      overrideLocalChanges?: boolean
+    }
+  | boolean
+
 type Args = {
-  acceptValues?:
-    | {
-        /**
-         * If true, will accept all values, except for those that have changed locally since the request was made.
-         * This is useful for autosave, for example, where hooks may have modified the fields value while you were still making changes.
-         */
-        overrideLocalChanges?: boolean
-      }
-    | boolean
+  acceptValues?: AcceptValues
   currentState?: FormState
   formStateAtTimeOfRequest?: FormState
   incomingState: FormState
@@ -40,14 +47,15 @@ export const mergeServerFormState = ({
       continue
     }
 
+    /**
+     * If it's a new field added by the server, always accept the value.
+     * Otherwise, only accept the values if explicitly requested, e.g. on submit.
+     * Can also control this granularly by only accepting unmodified values, e.g. for autosave.
+     */
     if (
       !incomingField.addedByServer &&
       (acceptValues === true ||
-        /**
-         * This makes it possible to keep local changes to a field if it has changed since the request was made.
-         * This is useful for autosave, for example, where hooks may have modified the fields value while you were still making changes.
-         * For normal submits, when the form goes disabled, we can accept all values outright. But for autosave in the background, we want to protect local changes.
-         */
+        // See `acceptValues` type definition for more details
         (typeof acceptValues === 'object' &&
           acceptValues !== null &&
           acceptValues?.overrideLocalChanges === false &&

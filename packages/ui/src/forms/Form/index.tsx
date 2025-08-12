@@ -203,12 +203,12 @@ export const Form: React.FC<FormProps> = (props) => {
   const submit = useCallback<Submit>(
     async (options, e) => {
       const {
+        acceptValues = true,
         action: actionArg = action,
         context,
         disableFormWhileProcessing = true,
         disableSuccessStatus: disableSuccessStatusFromArgs,
         method: methodToUse = method,
-        overrideLocalChanges,
         overrides: overridesFromArgs = {},
         skipValidation,
       } = options || ({} as SubmitOptions)
@@ -385,9 +385,7 @@ export const Form: React.FC<FormProps> = (props) => {
             if (newFormState) {
               dispatchFields({
                 type: 'MERGE_SERVER_STATE',
-                acceptValues: {
-                  overrideLocalChanges,
-                },
+                acceptValues,
                 formStateAtTimeOfRequest: serializableFields,
                 prevStateRef: prevFormState,
                 serverState: newFormState,
