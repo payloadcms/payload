@@ -1,7 +1,7 @@
-import type { Config, Field, FilterOptionsProps, RelationshipField, SanitizedConfig } from 'payload'
+import type { Config, Field, RelationshipField, SanitizedConfig } from 'payload'
 
-import { getCollectionIDType } from './getCollectionIDType.js'
-import { getTenantFromCookie } from './getTenantFromCookie.js'
+import { defaults } from '../defaults.js'
+import { filterDocumentsByTenants } from '../filters/filterDocumentsByTenants.js'
 
 type AddFilterOptionsToFieldsArgs = {
   config: Config | SanitizedConfig
@@ -9,6 +9,8 @@ type AddFilterOptionsToFieldsArgs = {
   tenantEnabledCollectionSlugs: string[]
   tenantEnabledGlobalSlugs: string[]
   tenantFieldName: string
+  tenantsArrayFieldName: string
+  tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
 }
 
@@ -18,6 +20,8 @@ export function addFilterOptionsToFields({
   tenantEnabledCollectionSlugs,
   tenantEnabledGlobalSlugs,
   tenantFieldName,
+  tenantsArrayFieldName = defaults.tenantsArrayFieldName,
+  tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
 }: AddFilterOptionsToFieldsArgs) {
   fields.forEach((field) => {
@@ -33,7 +37,14 @@ export function addFilterOptionsToFields({
           )
         }
         if (tenantEnabledCollectionSlugs.includes(field.relationTo)) {
-          addFilter({ field, tenantEnabledCollectionSlugs, tenantFieldName, tenantsCollectionSlug })
+          addFilter({
+            field,
+            tenantEnabledCollectionSlugs,
+            tenantFieldName,
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
+            tenantsCollectionSlug,
+          })
         }
       } else {
         field.relationTo.map((relationTo) => {
@@ -47,6 +58,8 @@ export function addFilterOptionsToFields({
               field,
               tenantEnabledCollectionSlugs,
               tenantFieldName,
+              tenantsArrayFieldName,
+              tenantsArrayTenantFieldName,
               tenantsCollectionSlug,
             })
           }
@@ -66,6 +79,8 @@ export function addFilterOptionsToFields({
         tenantEnabledCollectionSlugs,
         tenantEnabledGlobalSlugs,
         tenantFieldName,
+        tenantsArrayFieldName,
+        tenantsArrayTenantFieldName,
         tenantsCollectionSlug,
       })
     }
@@ -85,6 +100,8 @@ export function addFilterOptionsToFields({
             tenantEnabledCollectionSlugs,
             tenantEnabledGlobalSlugs,
             tenantFieldName,
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
             tenantsCollectionSlug,
           })
         }
@@ -99,6 +116,8 @@ export function addFilterOptionsToFields({
           tenantEnabledCollectionSlugs,
           tenantEnabledGlobalSlugs,
           tenantFieldName,
+          tenantsArrayFieldName,
+          tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
         })
       })
@@ -110,12 +129,16 @@ type AddFilterArgs = {
   field: RelationshipField
   tenantEnabledCollectionSlugs: string[]
   tenantFieldName: string
+  tenantsArrayFieldName: string
+  tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
 }
 function addFilter({
   field,
   tenantEnabledCollectionSlugs,
   tenantFieldName,
+  tenantsArrayFieldName = defaults.tenantsArrayFieldName,
+  tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
 }: AddFilterArgs) {
   // User specified filter
@@ -135,14 +158,16 @@ function addFilter({
     }
 
     // Custom tenant filter
-    const tenantFilterResults = filterOptionsByTenant({
-      ...args,
-      tenantFieldName,
+    const tenantFilterResults = filterDocumentsByTenants({
+      filterFieldName: tenantFieldName,
+      req: args.req,
+      tenantsArrayFieldName,
+      tenantsArrayTenantFieldName,
       tenantsCollectionSlug,
     })
 
-    // If the tenant filter returns true, just use the original filter
-    if (tenantFilterResults === true) {
+    // If the tenant filter returns null, meaning no tenant filter, just use the original filter
+    if (tenantFilterResults === null) {
       return originalFilterResult
     }
 
@@ -154,41 +179,5 @@ function addFilter({
     return {
       and: [originalFilterResult, tenantFilterResults],
     }
-  }
-}
-
-type Args = {
-  tenantFieldName?: string
-  tenantsCollectionSlug: string
-} & FilterOptionsProps
-const filterOptionsByTenant = ({
-  req,
-  tenantFieldName = 'tenant',
-  tenantsCollectionSlug,
-}: Args) => {
-  const idType = getCollectionIDType({
-    collectionSlug: tenantsCollectionSlug,
-    payload: req.payload,
-  })
-  const selectedTenant = getTenantFromCookie(req.headers, idType)
-  if (!selectedTenant) {
-    return true
-  }
-
-  return {
-    or: [
-      // ie a related collection that doesn't have a tenant field
-      {
-        [tenantFieldName]: {
-          exists: false,
-        },
-      },
-      // related collections that have a tenant field
-      {
-        [tenantFieldName]: {
-          equals: selectedTenant,
-        },
-      },
-    ],
   }
 }

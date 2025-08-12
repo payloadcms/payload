@@ -2,10 +2,11 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const hyTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-tenant-switch--body':
-      'Դուք պատրաստ եք փոխել գերեցդիմատնին ընկերությունը <0>{{fromTenant}}</0>-ից <0>{{toTenant}}</0>-ին',
-    'confirm-tenant-switch--heading': 'Հաստատեք {{tenantLabel}} փոփոխությունը',
-    'field-assignedTentant-label': 'Հանձնարարված վարձակալ',
+    'confirm-modal-tenant-switch--body':
+      'Դուք պատրաստվում եք փոխել սեփականությունը <0>{{fromTenant}}</0>-ից <0>{{toTenant}}</0>-ին:',
+    'confirm-modal-tenant-switch--heading': 'Հաստատեք {{tenantLabel}}֊ի փոփոխությունը',
+    'field-assignedTenant-label': 'Հանձնարարված վարձակալ',
+    'nav-tenantSelector-label': 'Տենանտ',
   },
 }
 

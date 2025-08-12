@@ -43,7 +43,7 @@ const collectionTenantReadAccess: Access = ({ req }) => {
   } as Where
 }
 
-const collectionTenantUpdateAccess: Access = ({ req }) => {
+const collectionTenantUpdateAndDeleteAccess: Access = ({ req }) => {
   // admins can update all tenants
   if (req?.user?.roles?.includes('admin')) {
     return true
@@ -73,12 +73,10 @@ export const MenuItems: CollectionConfig = {
   access: {
     read: collectionTenantReadAccess,
     create: ({ req }) => {
-      return Boolean(req?.user?.roles?.includes('admin'))
+      return Boolean(req?.user?.roles?.includes('admin') || req.user?.tenants?.length)
     },
-    update: collectionTenantUpdateAccess,
-    delete: ({ req }) => {
-      return Boolean(req?.user?.roles?.includes('admin'))
-    },
+    update: collectionTenantUpdateAndDeleteAccess,
+    delete: collectionTenantUpdateAndDeleteAccess,
   },
   admin: {
     useAsTitle: 'name',

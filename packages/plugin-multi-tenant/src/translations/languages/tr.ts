@@ -2,10 +2,11 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const trTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-tenant-switch--body':
-      "Sahipliği <0>{{fromTenant}}</0>'den <0>{{toTenant}}</0>'e değiştirmek üzeresiniz.",
-    'confirm-tenant-switch--heading': '{{tenantLabel}} değişikliğini onayla',
-    'field-assignedTentant-label': 'Atanan Kiracı',
+    'confirm-modal-tenant-switch--body':
+      "<0>{{fromTenant}}</0>'den <0>{{toTenant}}</0>'ye sahipliği değiştirmek üzeresiniz.",
+    'confirm-modal-tenant-switch--heading': '{{tenantLabel}} değişikliğini onayla',
+    'field-assignedTenant-label': 'Atanan Kiracı',
+    'nav-tenantSelector-label': 'Kiracı',
   },
 }
 

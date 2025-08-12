@@ -2,10 +2,11 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const huTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-tenant-switch--body':
-      'Ön azon van, hogy megváltoztassa a tulajdonjogot <0>{{fromTenant}}</0>-ről <0>{{toTenant}}</0>-re.',
-    'confirm-tenant-switch--heading': 'Erősítse meg a(z) {{tenantLabel}} változtatást',
-    'field-assignedTentant-label': 'Kijelölt Bérlő',
+    'confirm-modal-tenant-switch--body':
+      'Közel áll ahhoz, hogy megváltoztassa a tulajdonságot <0>{{fromTenant}}</0> -ból <0>{{toTenant}}</0> -ba.',
+    'confirm-modal-tenant-switch--heading': 'Erősítse meg a {{tenantLabel}} változást',
+    'field-assignedTenant-label': 'Kijelölt Bérlő',
+    'nav-tenantSelector-label': 'Bérlő',
   },
 }
 
