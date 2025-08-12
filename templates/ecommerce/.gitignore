@@ -9,6 +9,7 @@
 /coverage
 .playwright
 playwright-report/
+playwright-report/index.html
 
 # next.js
 /.next/
