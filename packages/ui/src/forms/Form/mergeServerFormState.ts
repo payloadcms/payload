@@ -54,7 +54,7 @@ export const mergeServerFormState = ({
      */
     if (
       !incomingField.addedByServer &&
-      (acceptValues === true ||
+      (!acceptValues ||
         // See `acceptValues` type definition for more details
         (typeof acceptValues === 'object' &&
           acceptValues !== null &&
