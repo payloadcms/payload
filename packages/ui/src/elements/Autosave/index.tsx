@@ -100,7 +100,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  export const handleAutosaveOld = useEffectEvent(() => {
+  const handleAutosave = useEffectEvent(() => {
     autosaveTimeoutRef.current = undefined
     // We need to log the time in order to figure out if we need to trigger the state off later
     let startTimestamp = undefined
