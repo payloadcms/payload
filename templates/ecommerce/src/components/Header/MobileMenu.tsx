@@ -13,12 +13,10 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { useAuth } from '@/providers/Auth'
-import { MenuIcon, XIcon } from 'lucide-react'
+import { MenuIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import React, { Suspense, useEffect, useState } from 'react'
-
-import { Search, SearchSkeleton } from './Search'
+import React, { useEffect, useState } from 'react'
 
 interface Props {
   menu: Header['navItems']
@@ -61,11 +59,6 @@ export function MobileMenu({ menu }: Props) {
         </SheetHeader>
 
         <div className="py-4">
-          <div className="mb-4 w-full">
-            <Suspense fallback={<SearchSkeleton />}>
-              <Search />
-            </Suspense>
-          </div>
           {menu?.length ? (
             <ul className="flex w-full flex-col">
               {menu.map((item) => (

@@ -27,7 +27,7 @@ export const Search: React.FC<Props> = ({ className }) => {
       newParams.delete('q')
     }
 
-    router.push(createUrl('/search', newParams))
+    router.push(createUrl('/shop', newParams))
   }
 
   return (
@@ -40,20 +40,6 @@ export const Search: React.FC<Props> = ({ className }) => {
         name="search"
         placeholder="Search for products..."
         type="text"
-      />
-      <div className="absolute right-0 top-0 mr-3 flex h-full items-center">
-        <SearchIcon className="h-4" />
-      </div>
-    </form>
-  )
-}
-
-export function SearchSkeleton() {
-  return (
-    <form className=" relative w-full ">
-      <input
-        className="w-full rounded-lg border bg-white px-4 py-2 text-sm text-black placeholder:text-neutral-500 dark:border-neutral-800 dark:bg-black dark:text-white dark:placeholder:text-neutral-400"
-        placeholder="Search for products..."
       />
       <div className="absolute right-0 top-0 mr-3 flex h-full items-center">
         <SearchIcon className="h-4" />
