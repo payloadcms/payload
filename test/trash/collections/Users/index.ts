@@ -7,6 +7,7 @@ export const Users: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
   },
+  trash: true,
   auth: true,
   fields: [
     {

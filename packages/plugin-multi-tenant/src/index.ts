@@ -10,14 +10,12 @@ import { defaults } from './defaults.js'
 import { getTenantOptionsEndpoint } from './endpoints/getTenantOptionsEndpoint.js'
 import { tenantField } from './fields/tenantField/index.js'
 import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
+import { filterDocumentsByTenants } from './filters/filterDocumentsByTenants.js'
 import { addTenantCleanup } from './hooks/afterTenantDelete.js'
-import { filterDocumentsBySelectedTenant } from './list-filters/filterDocumentsBySelectedTenant.js'
-import { filterTenantsBySelectedTenant } from './list-filters/filterTenantsBySelectedTenant.js'
-import { filterUsersBySelectedTenant } from './list-filters/filterUsersBySelectedTenant.js'
 import { translations } from './translations/index.js'
 import { addCollectionAccess } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
-import { combineListFilters } from './utilities/combineListFilters.js'
+import { combineFilters } from './utilities/combineFilters.js'
 
 export const multiTenantPlugin =
   <ConfigType>(pluginConfig: MultiTenantPluginConfig<ConfigType>) =>
@@ -42,7 +40,6 @@ export const multiTenantPlugin =
       pluginConfig?.tenantsArrayField?.arrayFieldName || defaults.tenantsArrayFieldName
     const tenantsArrayTenantFieldName =
       pluginConfig?.tenantsArrayField?.arrayTenantFieldName || defaults.tenantsArrayTenantFieldName
-    const tenantSelectorLabel = pluginConfig.tenantSelectorLabel || defaults.tenantSelectorLabel
     const basePath = pluginConfig.basePath || defaults.basePath
 
     /**
@@ -69,37 +66,6 @@ export const multiTenantPlugin =
     }
     if (!incomingConfig.collections) {
       incomingConfig.collections = []
-    }
-
-    /**
-     * Add tenant selector localized labels
-     */
-    if (typeof tenantSelectorLabel === 'object') {
-      if (!incomingConfig.i18n) {
-        incomingConfig.i18n = {}
-      }
-      Object.entries(tenantSelectorLabel).forEach(([_locale, label]) => {
-        const locale = _locale as AcceptedLanguages
-        if (!incomingConfig.i18n) {
-          incomingConfig.i18n = {}
-        }
-        if (!incomingConfig.i18n.translations) {
-          incomingConfig.i18n.translations = {}
-        }
-        if (!(locale in incomingConfig.i18n.translations)) {
-          incomingConfig.i18n.translations[locale] = {}
-        }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        if (!('multiTenant' in incomingConfig.i18n.translations[locale])) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          incomingConfig.i18n.translations[locale].multiTenant = {}
-        }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        incomingConfig.i18n.translations[locale].multiTenant.selectorLabel = label
-      })
     }
 
     /**
@@ -145,10 +111,13 @@ export const multiTenantPlugin =
         adminUsersCollection.admin = {}
       }
 
-      adminUsersCollection.admin.baseListFilter = combineListFilters({
-        baseListFilter: adminUsersCollection.admin?.baseListFilter,
+      const baseFilter =
+        adminUsersCollection.admin?.baseFilter ?? adminUsersCollection.admin?.baseListFilter
+      adminUsersCollection.admin.baseFilter = combineFilters({
+        baseFilter,
         customFilter: (args) =>
-          filterUsersBySelectedTenant({
+          filterDocumentsByTenants({
+            filterFieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
             req: args.req,
             tenantsArrayFieldName,
             tenantsArrayTenantFieldName,
@@ -208,11 +177,15 @@ export const multiTenantPlugin =
             collection.admin = {}
           }
 
-          collection.admin.baseListFilter = combineListFilters({
-            baseListFilter: collection.admin?.baseListFilter,
+          const baseFilter = collection.admin?.baseFilter ?? collection.admin?.baseListFilter
+          collection.admin.baseFilter = combineFilters({
+            baseFilter,
             customFilter: (args) =>
-              filterTenantsBySelectedTenant({
+              filterDocumentsByTenants({
+                filterFieldName: 'id',
                 req: args.req,
+                tenantsArrayFieldName,
+                tenantsArrayTenantFieldName,
                 tenantsCollectionSlug,
               }),
           })
@@ -279,6 +252,10 @@ export const multiTenantPlugin =
           tenantsCollectionSlug,
         })
 
+        const overrides = pluginConfig.collections[collection.slug]?.tenantFieldOverrides
+          ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
+          : pluginConfig.tenantField || {}
+
         /**
          * Add tenant field to enabled collections
          */
@@ -286,15 +263,17 @@ export const multiTenantPlugin =
           0,
           0,
           tenantField({
-            ...(pluginConfig?.tenantField || {}),
             name: tenantFieldName,
             debug: pluginConfig.debug,
+            overrides,
             tenantsCollectionSlug,
             unique: isGlobal,
           }),
         )
 
-        if (pluginConfig.collections[collection.slug]?.useBaseListFilter !== false) {
+        const { useBaseFilter, useBaseListFilter } = pluginConfig.collections[collection.slug] || {}
+
+        if (useBaseFilter ?? useBaseListFilter ?? true) {
           /**
            * Add list filter to enabled collections
            * - filters results by selected tenant
@@ -303,12 +282,15 @@ export const multiTenantPlugin =
             collection.admin = {}
           }
 
-          collection.admin.baseListFilter = combineListFilters({
-            baseListFilter: collection.admin?.baseListFilter,
+          const baseFilter = collection.admin?.baseFilter ?? collection.admin?.baseListFilter
+          collection.admin.baseFilter = combineFilters({
+            baseFilter,
             customFilter: (args) =>
-              filterDocumentsBySelectedTenant({
+              filterDocumentsByTenants({
+                filterFieldName: tenantFieldName,
                 req: args.req,
-                tenantFieldName,
+                tenantsArrayFieldName,
+                tenantsArrayTenantFieldName,
                 tenantsCollectionSlug,
               }),
           })
@@ -372,7 +354,7 @@ export const multiTenantPlugin =
      */
     incomingConfig.admin.components.beforeNavLinks.push({
       clientProps: {
-        label: tenantSelectorLabel,
+        label: pluginConfig.tenantSelectorLabel || undefined,
       },
       path: '@payloadcms/plugin-multi-tenant/client#TenantSelector',
     })
@@ -380,22 +362,30 @@ export const multiTenantPlugin =
     /**
      * Merge plugin translations
      */
-
-    const simplifiedTranslations = Object.entries(translations).reduce(
-      (acc, [key, value]) => {
-        acc[key] = value.translations
-        return acc
-      },
-      {} as Record<string, PluginDefaultTranslationsObject>,
-    )
-
-    incomingConfig.i18n = {
-      ...incomingConfig.i18n,
-      translations: deepMergeSimple(
-        simplifiedTranslations,
-        incomingConfig.i18n?.translations ?? {},
-      ),
+    if (!incomingConfig.i18n) {
+      incomingConfig.i18n = {}
     }
+    Object.entries(translations).forEach(([locale, pluginI18nObject]) => {
+      const typedLocale = locale as AcceptedLanguages
+      if (!incomingConfig.i18n!.translations) {
+        incomingConfig.i18n!.translations = {}
+      }
+      if (!(typedLocale in incomingConfig.i18n!.translations)) {
+        incomingConfig.i18n!.translations[typedLocale] = {}
+      }
+      if (!('plugin-multi-tenant' in incomingConfig.i18n!.translations[typedLocale]!)) {
+        ;(incomingConfig.i18n!.translations[typedLocale] as PluginDefaultTranslationsObject)[
+          'plugin-multi-tenant'
+        ] = {} as PluginDefaultTranslationsObject['plugin-multi-tenant']
+      }
+
+      ;(incomingConfig.i18n!.translations[typedLocale] as PluginDefaultTranslationsObject)[
+        'plugin-multi-tenant'
+      ] = {
+        ...pluginI18nObject.translations['plugin-multi-tenant'],
+        ...(pluginConfig.i18n?.translations?.[typedLocale] || {}),
+      }
+    })
 
     return incomingConfig
   }

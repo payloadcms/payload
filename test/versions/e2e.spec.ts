@@ -1285,6 +1285,44 @@ describe('Versions', () => {
       // Remove listener
       page.removeListener('dialog', acceptAlert)
     })
+
+    test('- with autosave - applies afterChange hooks to form state after autosave runs', async () => {
+      const url = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      await page.goto(url.create)
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+      await waitForAutoSaveToRunAndComplete(page)
+      const computedTitleField = page.locator('#field-computedTitle')
+      await expect(computedTitleField).toHaveValue('Initial')
+    })
+
+    test('- with autosave - does not display success toast after autosave complete', async () => {
+      const url = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      await page.goto(url.create)
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+
+      let hasDisplayedToast = false
+
+      const startTime = Date.now()
+      const timeout = 5000
+      const interval = 100
+
+      while (Date.now() - startTime < timeout) {
+        const isHidden = await page.locator('.payload-toast-item').isHidden()
+        console.log(`Toast is hidden: ${isHidden}`)
+
+        // eslint-disable-next-line playwright/no-conditional-in-test
+        if (!isHidden) {
+          hasDisplayedToast = true
+          break
+        }
+
+        await wait(interval)
+      }
+
+      expect(hasDisplayedToast).toBe(false)
+    })
   })
 
   describe('Globals - publish individual locale', () => {
@@ -1775,6 +1813,18 @@ describe('Versions', () => {
       await expect(upload.locator('.html-diff__diff-new .upload-diff__info')).toHaveText(
         String(uploadDocs?.docs?.[1]?.filename),
       )
+    })
+
+    test('does not render diff for fields with read access control false', async () => {
+      await navigateToDiffVersionView()
+
+      const hiddenField1 = page.locator(
+        '[data-field-path="blocks.2.textInUnnamedTab2InBlockAccessFalse"]',
+      )
+      await expect(hiddenField1).toBeHidden()
+
+      const hiddenField2 = page.locator('[data-field-path="textCannotRead"]')
+      await expect(hiddenField2).toBeHidden()
     })
   })
 
