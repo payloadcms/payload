@@ -47,7 +47,7 @@ export const versionSnapshotField: CheckboxField = {
 
 export function buildLocaleStatusField(config: SanitizedConfig): Field[] {
   if (!config.localization || !config.localization.locales) {
-    throw new Error('localeStatusFields called without localization config.')
+    return []
   }
 
   return config.localization.locales.map((locale) => {
