@@ -100,12 +100,11 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const handleAutosave = useEffectEvent(() => {
+  export const handleAutosaveOld = useEffectEvent(() => {
     autosaveTimeoutRef.current = undefined
     // We need to log the time in order to figure out if we need to trigger the state off later
     let startTimestamp = undefined
     let endTimestamp = undefined
-
     const hideIndicator = () => {
       // If request was faster than minimum animation time, animate the difference
       if (endTimestamp - startTimestamp < minimumAnimationTime) {
@@ -119,62 +118,137 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
         stopAutoSaveIndicator()
       }
     }
-
     queueTask(
       async () => {
         if (modified) {
           startTimestamp = new Date().getTime()
-
           setSaving(true)
-
           let url: string
           let method: string
           let entitySlug: string
-
           if (collection && id) {
             entitySlug = collection.slug
             url = `${serverURL}${api}/${entitySlug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`
             method = 'PATCH'
           }
-
           if (globalDoc) {
             entitySlug = globalDoc.slug
             url = `${serverURL}${api}/globals/${entitySlug}?draft=true&autosave=true&locale=${localeRef.current}`
             method = 'POST'
           }
 
-          const { valid } = reduceFieldsToValuesWithValidation(formStateRef.current, true)
+          if (url) {
+            if (modifiedRef.current) {
+              const { data, valid } = reduceFieldsToValuesWithValidation(formStateRef.current, true)
 
-          const skipSubmission =
-            submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
+              data._status = 'draft'
 
-          if (!skipSubmission && modifiedRef.current && url) {
-            const result = await submit({
-              action: url,
-              context: {
-                incrementVersionCount: false,
-              },
-              disableFormWhileProcessing: false,
-              disableSuccessStatus: true,
-              method,
-              overrides: {
-                _status: 'draft',
-              },
-              skipValidation: versionsConfig?.drafts && !versionsConfig?.drafts?.validate,
-            })
+              const skipSubmission =
+                submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
 
-            if (result && result?.res?.ok && !mostRecentVersionIsAutosaved) {
-              incrementVersionCount()
-              setMostRecentVersionIsAutosaved(true)
-              setUnpublishedVersionCount((prev) => prev + 1)
+              if (!skipSubmission) {
+                let res
+
+                try {
+                  res = await fetch(url, {
+                    body: JSON.stringify(data),
+                    credentials: 'include',
+                    headers: {
+                      'Accept-Language': i18n.language,
+                      'Content-Type': 'application/json',
+                    },
+                    method,
+                  })
+                } catch (_err) {
+                  // Swallow Error
+                }
+
+                const newDate = new Date()
+                // We need to log the time in order to figure out if we need to trigger the state off later
+                endTimestamp = newDate.getTime()
+
+                const json = await res.json()
+
+                if (res.status === 200) {
+                  setLastUpdateTime(newDate.getTime())
+
+                  reportUpdate({
+                    id,
+                    entitySlug,
+                    updatedAt: newDate.toISOString(),
+                  })
+
+                  // if onSaveFromDocumentDrawer is defined, call it
+                  if (typeof onSaveFromDocumentDrawer === 'function') {
+                    void onSaveFromDocumentDrawer({
+                      ...json,
+                      operation: 'update',
+                    })
+                  }
+
+                  if (!mostRecentVersionIsAutosaved) {
+                    incrementVersionCount()
+                    setMostRecentVersionIsAutosaved(true)
+                    setUnpublishedVersionCount((prev) => prev + 1)
+                  }
+                }
+
+                if (versionsConfig?.drafts && versionsConfig?.drafts?.validate && json?.errors) {
+                  if (Array.isArray(json.errors)) {
+                    const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+                      ([fieldErrs, nonFieldErrs], err) => {
+                        const newFieldErrs = []
+                        const newNonFieldErrs = []
+
+                        if (err?.message) {
+                          newNonFieldErrs.push(err)
+                        }
+
+                        if (Array.isArray(err?.data)) {
+                          err.data.forEach((dataError) => {
+                            if (dataError?.field) {
+                              newFieldErrs.push(dataError)
+                            } else {
+                              newNonFieldErrs.push(dataError)
+                            }
+                          })
+                        }
+
+                        return [
+                          [...fieldErrs, ...newFieldErrs],
+                          [...nonFieldErrs, ...newNonFieldErrs],
+                        ]
+                      },
+                      [[], []],
+                    )
+
+                    dispatchFields({
+                      type: 'ADD_SERVER_ERRORS',
+                      errors: fieldErrors,
+                    })
+
+                    nonFieldErrors.forEach((err) => {
+                      toast.error(err.message || i18n.t('error:unknown'))
+                    })
+
+                    setIsValid(false)
+                    hideIndicator()
+                    return
+                  }
+                } else {
+                  // If it's not an error then we can update the document data inside the context
+                  const document = json?.doc || json?.result
+
+                  // Manually update the data since this function doesn't fire the `submit` function from useForm
+                  if (document) {
+                    setIsValid(true)
+                    updateSavedDocumentData(document)
+                  }
+                }
+
+                hideIndicator()
+              }
             }
-
-            const newDate = new Date()
-
-            // We need to log the time in order to figure out if we need to trigger the state off later
-            endTimestamp = newDate.getTime()
-
-            hideIndicator()
           }
         }
       },
