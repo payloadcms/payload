@@ -5,7 +5,9 @@ import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 import { dequal } from 'dequal/lite'
 import { reduceFieldsToValues, versionDefaults } from 'payload/shared'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
+import { useDocumentDrawerContext } from '../../elements/DocumentDrawer/Provider.js'
 import {
   useAllFormFields,
   useForm,
@@ -16,6 +18,7 @@ import { useDebounce } from '../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useQueues } from '../../hooks/useQueues.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -48,11 +51,17 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     incrementVersionCount,
     lastUpdateTime,
     mostRecentVersionIsAutosaved,
+    setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
+    updateSavedDocumentData,
   } = useDocumentInfo()
 
-  const { isValid, setBackgroundProcessing, submit } = useForm()
+  const { reportUpdate } = useDocumentEvents()
+
+  const { onSave: onSaveFromDocumentDrawer } = useDocumentDrawerContext()
+
+  const { dispatchFields, isValid, setBackgroundProcessing, setIsValid, submit } = useForm()
 
   const [formState] = useAllFormFields()
   const modified = useFormModified()
@@ -101,6 +110,95 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const handleAutosave = useEffectEvent(() => {
+    autosaveTimeoutRef.current = undefined
+    // We need to log the time in order to figure out if we need to trigger the state off later
+    let startTimestamp = undefined
+    let endTimestamp = undefined
+
+    const hideIndicator = () => {
+      // If request was faster than minimum animation time, animate the difference
+      if (endTimestamp - startTimestamp < minimumAnimationTime) {
+        autosaveTimeoutRef.current = setTimeout(
+          () => {
+            setSaving(false)
+          },
+          minimumAnimationTime - (endTimestamp - startTimestamp),
+        )
+      } else {
+        stopAutoSaveIndicator()
+      }
+    }
+
+    queueTask(
+      async () => {
+        if (modified) {
+          startTimestamp = new Date().getTime()
+
+          setSaving(true)
+
+          let url: string
+          let method: string
+          let entitySlug: string
+
+          if (collection && id) {
+            entitySlug = collection.slug
+            url = `${serverURL}${api}/${entitySlug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`
+            method = 'PATCH'
+          }
+
+          if (globalDoc) {
+            entitySlug = globalDoc.slug
+            url = `${serverURL}${api}/globals/${entitySlug}?draft=true&autosave=true&locale=${localeRef.current}`
+            method = 'POST'
+          }
+
+          const { valid } = reduceFieldsToValuesWithValidation(formStateRef.current, true)
+
+          const skipSubmission =
+            submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
+
+          if (!skipSubmission && modifiedRef.current && url) {
+            const result = await submit({
+              action: url,
+              context: {
+                incrementVersionCount: false,
+              },
+              disableFormWhileProcessing: false,
+              disableSuccessStatus: true,
+              method,
+              overrides: {
+                _status: 'draft',
+              },
+              skipValidation: versionsConfig?.drafts && !versionsConfig?.drafts?.validate,
+            })
+
+            if (result && result?.res?.ok && !mostRecentVersionIsAutosaved) {
+              incrementVersionCount()
+              setMostRecentVersionIsAutosaved(true)
+              setUnpublishedVersionCount((prev) => prev + 1)
+            }
+
+            const newDate = new Date()
+
+            // We need to log the time in order to figure out if we need to trigger the state off later
+            endTimestamp = newDate.getTime()
+
+            hideIndicator()
+          }
+        }
+      },
+      {
+        afterProcess: () => {
+          setBackgroundProcessing(false)
+        },
+        beforeProcess: () => {
+          setBackgroundProcessing(true)
+        },
+      },
+    )
+  })
+
+  const handleAutosaveOld = useEffectEvent(() => {
     autosaveTimeoutRef.current = undefined
     // We need to log the time in order to figure out if we need to trigger the state off later
     let startTimestamp = undefined
@@ -289,7 +387,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
     previousDebouncedData.current = formData
 
-    handleAutosave()
+    handleAutosaveOld()
   }, [debouncedFormState])
 
   /**
