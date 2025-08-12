@@ -118,10 +118,9 @@ export type CreateFormData = (
    */
   options?: {
     /**
-     * If provided, will use this form state to create the FormData.
-     * Otherwise, will use the current form state on the form state ref.
+     * If provided, will use this instead of of derived data from the current form state.
      */
-    formState?: FormState
+    data?: Data
     mergeOverrideData?: boolean
   },
 ) => FormData | Promise<FormData>
