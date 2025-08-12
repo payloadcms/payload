@@ -104,6 +104,12 @@ export type EcommerceContext = {
    * This is used to manage shipping and billing addresses.
    */
   addresses?: TypedCollection['addresses'][]
+
+  /**
+   * Apply coupon to cart or cartItem, depending on the appliesTo of that coupon.
+   * Takes a unique coupon code as body.
+   */
+  applyCoupon: (couponCode: string, cartID: DefaultDocumentIDType) => Promise<void>
   /**
    * The current data of the cart.
    */
@@ -156,6 +162,11 @@ export type EcommerceContext = {
     options?: { additionalData: Record<string, unknown> },
   ) => Promise<unknown>
   paymentMethods: PaymentAdapterClient[]
+  /**
+   * removes coupon from cart or cartItem, depending on the appliesTo of that coupon.
+   * Takes a unique coupon code as body.
+   */
+  removeCoupon: (couponCode: string, cartID: DefaultDocumentIDType) => Promise<void>
   /**
    * Remove an item from the cart by its index ID.
    */

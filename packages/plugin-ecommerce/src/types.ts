@@ -16,6 +16,13 @@ export type CollectionOverride = { fields?: FieldsOverride } & Partial<
 >
 
 export type CartItem = {
+  discount?: {
+    amount?: number
+    discountLines?: {
+      coupon?: Coupon | DefaultDocumentIDType
+      id?: string
+    }[]
+  }
   id: DefaultDocumentIDType
   product: DefaultDocumentIDType | TypedCollection['products']
   quantity: number
@@ -25,12 +32,34 @@ export type CartItem = {
 type DefaultCartType = {
   currency?: string
   customer?: DefaultDocumentIDType | TypedCollection['customers']
+  discount?: {
+    amount?: number
+    discountLines?: {
+      coupon?: Coupon | DefaultDocumentIDType
+      id?: string
+    }[]
+  }
   id: DefaultDocumentIDType
   items: CartItem[]
   subtotal?: number
 }
 
 export type Cart = DefaultCartType
+
+export type Coupon = {
+  appliesTo: 'cart' | 'product'
+  eligbleCustomers: Array<DefaultDocumentIDType | TypedCollection['customers']>
+  eligbleProducts: Array<DefaultDocumentIDType | TypedCollection['products']>
+  id: DefaultDocumentIDType
+  identifier: string
+  maxClaims?: number
+  numberOfClaims: number
+  title: string
+  type: 'flat' | 'percentage'
+  validFrom?: string
+  validTo?: string
+  value: number
+}
 
 type InitiatePaymentReturnType = {
   [key: string]: any // Allows for additional data to be returned, such as payment method specific data
@@ -354,6 +383,12 @@ export type EcommercePluginConfig = {
    * Defaults to true.
    */
   carts?: boolean | CartsConfig
+  /**
+   * Enable/disable coupons feature.
+   *
+   * Defaults to true.
+   */
+  coupons?: boolean
   /**
    * Configure supported currencies and default settings.
    *

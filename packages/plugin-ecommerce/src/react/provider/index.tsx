@@ -9,6 +9,7 @@ import type { ContextProps, EcommerceContext as EcommerceContextType } from './t
 
 const defaultContext: EcommerceContextType = {
   addItem: async () => {},
+  applyCoupon: async () => {},
   clearCart: async () => {},
   confirmOrder: async () => {},
   createAddress: async () => {},
@@ -33,6 +34,7 @@ const defaultContext: EcommerceContextType = {
   incrementItem: async () => {},
   initiatePayment: async () => {},
   paymentMethods: [],
+  removeCoupon: async () => {},
   removeItem: async () => {},
   setCurrency: () => {},
   updateAddress: async () => {},
@@ -105,6 +107,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     const baseQuery = {
       depth: 0,
       populate: {
+        items: {
+          discount: true,
+        },
         products: {
           [priceField]: true,
         },
@@ -114,8 +119,10 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         },
       },
       select: {
+        discount: true,
         items: true,
         subtotal: true,
+        total: true,
       },
     }
 
@@ -178,6 +185,60 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       return data as TypedCollection['carts']
     },
     [baseAPIURL, cartQuery, cartsSlug],
+  )
+
+  const applyCoupon = useCallback(
+    async (couponCode: string, cartID: DefaultDocumentIDType) => {
+      const response = await fetch(`/api/apply-coupon`, {
+        body: JSON.stringify({
+          couponCode,
+        }),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      })
+      if (!response.ok) {
+        const errorText = await response.json()
+        throw new Error(errorText.message || 'Failed to apply coupon')
+      }
+      const data = await response.json()
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      const cart = await getCart(cartID)
+      setCart(cart)
+    },
+    [getCart, setCart],
+  )
+
+  const removeCoupon = useCallback(
+    async (couponCode: string, cartID: DefaultDocumentIDType) => {
+      const response = await fetch(`/api/remove-coupon`, {
+        body: JSON.stringify({
+          couponCode,
+        }),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      })
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to remove coupon: ${errorText}`)
+      }
+      const data = await response.json()
+      if (data.error) {
+        throw new Error(`Remove coupon error: ${data.error}`)
+      }
+
+      const cart = await getCart(cartID)
+      setCart(cart)
+    },
+    [getCart, setCart],
   )
 
   const updateCart = useCallback(
@@ -785,6 +846,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       value={{
         addItem,
         addresses,
+        applyCoupon,
         cart,
         clearCart,
         confirmOrder,
@@ -795,6 +857,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         incrementItem,
         initiatePayment,
         paymentMethods,
+        removeCoupon,
         removeItem,
         selectedPaymentMethod,
         setCurrency,
@@ -857,13 +920,31 @@ export const useCurrency = () => {
 }
 
 export const useCart = () => {
-  const { addItem, cart, clearCart, decrementItem, incrementItem, removeItem } = useEcommerce()
+  const {
+    addItem,
+    applyCoupon,
+    cart,
+    clearCart,
+    decrementItem,
+    incrementItem,
+    removeCoupon,
+    removeItem,
+  } = useEcommerce()
 
   if (!addItem) {
     throw new Error('useCart must be used within an EcommerceProvider')
   }
 
-  return { addItem, cart, clearCart, decrementItem, incrementItem, removeItem }
+  return {
+    addItem,
+    applyCoupon,
+    cart,
+    clearCart,
+    decrementItem,
+    incrementItem,
+    removeCoupon,
+    removeItem,
+  }
 }
 
 export const usePayments = () => {

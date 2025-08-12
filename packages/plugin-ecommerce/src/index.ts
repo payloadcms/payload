@@ -6,8 +6,11 @@ import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from './ty
 
 import { addressesCollection } from './addresses/addressesCollection.js'
 import { cartsCollection } from './carts/cartsCollection.js'
+import { couponsCollection } from './coupons/couponsCollection.js'
+import { applyCouponHandler } from './endpoints/applyCoupon.js'
 import { confirmOrderHandler } from './endpoints/confirmOrder.js'
 import { initiatePaymentHandler } from './endpoints/initiatePayment.js'
+import { removeCouponHandler } from './endpoints/removeCoupon.js'
 import { ordersCollection } from './orders/ordersCollection.js'
 import { productsCollection } from './products/productsCollection.js'
 import { transactionsCollection } from './transactions/transactionsCollection.js'
@@ -116,6 +119,7 @@ export const ecommercePlugin =
         const carts = cartsCollection({
           currenciesConfig,
           customersSlug: collectionSlugMap.customers,
+          enableCoupons: sanitizedPluginConfig.coupons,
           enableVariants: Boolean(productsConfig.variants),
           overrides:
             sanitizedPluginConfig.carts === true
@@ -236,6 +240,35 @@ export const ecommercePlugin =
 
     if (!incomingConfig.i18n?.translations) {
       incomingConfig.i18n.translations = {}
+    }
+
+    if (sanitizedPluginConfig.coupons) {
+      if (!Array.isArray(incomingConfig.endpoints)) {
+        incomingConfig.endpoints = []
+      }
+
+      const coupons = couponsCollection({
+        customersSlug: collectionSlugMap.customers,
+        overrides:
+          typeof sanitizedPluginConfig.coupons === 'boolean'
+            ? undefined
+            : sanitizedPluginConfig.coupons,
+        productsSlug: collectionSlugMap.products,
+      })
+
+      incomingConfig.collections.push(coupons)
+
+      incomingConfig.endpoints.push({
+        handler: applyCouponHandler({ cartsSlug: collectionSlugMap.carts }),
+        method: 'post',
+        path: `/apply-coupon`,
+      })
+
+      incomingConfig.endpoints.push({
+        handler: removeCouponHandler({ cartsSlug: collectionSlugMap.carts }),
+        method: 'post',
+        path: `/remove-coupon`,
+      })
     }
 
     incomingConfig.i18n.translations = deepMergeSimple(

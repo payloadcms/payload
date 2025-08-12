@@ -92,6 +92,7 @@ export const plugins: Plugin[] = [
     transactions: {
       transactionsCollection: TransactionsCollection,
     },
+    coupons: true,
     products: {
       variants: {
         variantsCollection: VariantsCollection,
