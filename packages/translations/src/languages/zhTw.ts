@@ -25,14 +25,14 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     failedToUnlock: '解除鎖定失敗',
     forceUnlock: '強制解除鎖定',
     forgotPassword: '忘記密碼',
-    forgotPasswordEmailInstructions:
-      '請輸入您的電子郵件。您將會收到一封包含密碼重設指示的郵件。',
+    forgotPasswordEmailInstructions: '請輸入您的電子郵件。您將會收到一封包含密碼重設指示的郵件。',
     forgotPasswordQuestion: '忘記密碼？',
     forgotPasswordUsernameInstructions:
       '請輸入您的使用者名稱。重設密碼的指示將會寄送至該帳號所綁定的電子郵件。',
     generate: '產生',
     generateNewAPIKey: '產生新的 API 金鑰',
-    generatingNewAPIKeyWillInvalidate: '產生新的 API 金鑰將會使原本的金鑰<1>失效</1>。確定要繼續嗎？',
+    generatingNewAPIKeyWillInvalidate:
+      '產生新的 API 金鑰將會使原本的金鑰<1>失效</1>。確定要繼續嗎？',
     lockUntil: '鎖定至',
     logBackIn: '重新登入',
     loggedIn: '若要使用其他使用者登入，請先<0>登出</0>。',
@@ -187,8 +187,10 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     moveFolder: '移動資料夾',
     moveItemsToFolderConfirmation:
       '您即將移動 <1>{{count}} 個 {{label}}</1> 到 <2>{{toFolder}}</2>。確定要繼續？',
-    moveItemsToRootConfirmation: '您即將移動 <1>{{count}} 個 {{label}}</1> 到根資料夾。確定要繼續？',
-    moveItemToFolderConfirmation: '您即將移動 <1>{{title}}</1> 到 <2>{{toFolder}}</2>。確定要繼續？',
+    moveItemsToRootConfirmation:
+      '您即將移動 <1>{{count}} 個 {{label}}</1> 到根資料夾。確定要繼續？',
+    moveItemToFolderConfirmation:
+      '您即將移動 <1>{{title}}</1> 到 <2>{{toFolder}}</2>。確定要繼續？',
     moveItemToRootConfirmation: '您即將移動 <1>{{title}}</1> 到根資料夾。確定要繼續？',
     movingFromFolder: '正在從 {{fromFolder}} 移動 {{title}}',
     newFolder: '新增資料夾',
@@ -390,8 +392,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     success: '成功',
     successfullyCreated: '已成功建立 {{label}}。',
     successfullyDuplicated: '已成功複製 {{label}}。',
-    successfullyReindexed:
-      '已成功重新索引 {{collections}} 中 {{total}} 筆文件中的 {{count}} 筆。',
+    successfullyReindexed: '已成功重新索引 {{collections}} 中 {{total}} 筆文件中的 {{count}} 筆。',
     takeOver: '接手編輯',
     thisLanguage: '中文（繁體）',
     time: '時間',
