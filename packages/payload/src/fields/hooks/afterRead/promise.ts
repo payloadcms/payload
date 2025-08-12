@@ -238,7 +238,7 @@ export const promise = async ({
 
   if (fieldAffectsDataResult) {
     // Execute hooks
-    if (triggerHooks && field.hooks?.afterRead) {
+    if (triggerHooks && 'hooks' in field && field.hooks?.afterRead) {
       for (const hook of field.hooks.afterRead) {
         const shouldRunHookOnAllLocales =
           fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! }) &&
