@@ -118,6 +118,7 @@ export const createClientCollectionConfig = ({
     if (serverOnlyCollectionProperties.includes(key as any)) {
       continue
     }
+
     switch (key) {
       case 'admin':
         if (!collection.admin) {
