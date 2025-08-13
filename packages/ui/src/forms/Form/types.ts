@@ -82,7 +82,7 @@ export type SubmitOptions<T = Record<string, unknown>> = {
   acceptValues?: AcceptValues
   action?: string
   /**
-   * @experimental - Note: this property is experimental and may change in the future. Use as your own discretion.
+   * @experimental - Note: this property is experimental and may change in the future. Use at your own discretion.
    * If you want to pass additional data to the onSuccess callback, you can use this context object.
    */
   context?: T
@@ -111,7 +111,7 @@ export type Submit = <T extends Record<string, unknown>>(
   options?: SubmitOptions<T>,
   e?: React.FormEvent<HTMLFormElement>,
 ) => Promise</**
- * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use as your own discretion.
+ * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use at your own discretion.
  * Returns the form state and the response from the server.
  */
 { formState?: FormState; res: Response } | void>

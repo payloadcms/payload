@@ -41,7 +41,6 @@ export const mergeServerFormState = ({
   isSubmit,
 }: Args): FormState => {
   const newState = { ...currentState }
-
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
     if (!(path in currentState) && !incomingField.addedByServer) {
       continue
@@ -50,7 +49,7 @@ export const mergeServerFormState = ({
     /**
      * If it's a new field added by the server, always accept the value.
      * Otherwise, only accept the values if explicitly requested, e.g. on submit.
-     * Can also control this granularly by only accepting unmodified values, e.g. for autosave.
+     * Or control this granularly by only accepting values for unmodified fields, e.g. for autosave.
      */
     if (
       !incomingField.addedByServer &&
@@ -68,10 +67,6 @@ export const mergeServerFormState = ({
     newState[path] = {
       ...currentState[path],
       ...incomingField,
-    }
-
-    if (isSubmit) {
-      delete newState[path]?.isModified
     }
 
     if (
@@ -118,6 +113,12 @@ export const mergeServerFormState = ({
     // Strip away the `addedByServer` property from the client
     // This will prevent it from being passed back to the server
     delete newState[path].addedByServer
+
+    // On submit, clear the `isModified` flag from all fields
+    // This will allow unmodified fields to accept values from the server on autosave submit
+    if (isSubmit) {
+      delete newState[path].isModified
+    }
   }
 
   // Return the original object reference if the state is unchanged

@@ -120,9 +120,11 @@ export type BuildFormStateArgs = {
   mockRSCs?: boolean
   operation?: 'create' | 'update'
   readOnly?: boolean
-  /*
-    If true, will render field components within their state object
-  */
+  /**
+   * If true, will render field components within their state object.
+   * Performance optimization: Setting to `false` ensures that only fields that have changed paths will re-render, e.g. new array rows, etc.
+   * For example, you only need to render ALL fields on initial render, not on every onChange.
+   */
   renderAllFields?: boolean
   req: PayloadRequest
   returnLockStatus?: boolean
