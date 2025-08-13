@@ -185,6 +185,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     fieldState.fieldSchema = field
   }
 
+  if (previousFormState?.[path] && 'isModified' in previousFormState[path]) {
+    fieldState.isModified = previousFormState[path].isModified
+  }
+
   if (fieldAffectsData(field) && !fieldIsHiddenOrDisabled(field)) {
     fieldPermissions =
       parentPermissions === true

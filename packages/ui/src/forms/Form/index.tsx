@@ -264,13 +264,11 @@ export const Form: React.FC<FormProps> = (props) => {
         await wait(100)
       }
 
-      /**
-       * Take copies of the current form state and data here. This will ensure it is consistent across invocations.
-       * For example, it is possible for the form state ref to change in the background while this submit function is running.
-       * TODO: can we send the `formStateCopy` through `reduceFieldsToValues` to even greater consistency? Doing this currently breaks uploads.
-       */
-      const formStateCopy = deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields)
       const data = reduceFieldsToValues(contextRef.current.fields, true)
+
+      const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
+        contextRef.current.fields,
+      )
 
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
@@ -280,7 +278,7 @@ export const Form: React.FC<FormProps> = (props) => {
           await priorOnChange
 
           const result = await beforeSubmitFn({
-            formState: formStateCopy,
+            formState: serializableFormState,
           })
 
           revalidatedFormState = result
@@ -328,7 +326,7 @@ export const Form: React.FC<FormProps> = (props) => {
           data[key] = value
         }
 
-        onSubmit(formStateCopy, data)
+        onSubmit(contextRef.current.fields, data)
       }
 
       if (!hasFormSubmitAction) {
@@ -381,6 +379,7 @@ export const Form: React.FC<FormProps> = (props) => {
           if (typeof onSuccess === 'function') {
             const newFormState = await onSuccess(json, {
               context,
+              previousFormState: serializableFormState,
             })
 
             if (newFormState) {
