@@ -605,7 +605,6 @@ describe('Form State', () => {
     const newState = mergeServerFormState({
       acceptValues: true,
       currentState,
-      isSubmit: true,
       incomingState: incomingStateFromServer,
     })
 
@@ -657,7 +656,6 @@ describe('Form State', () => {
     const newState = mergeServerFormState({
       acceptValues: { overrideLocalChanges: false },
       currentState,
-      isSubmit: true,
       incomingState: incomingStateFromServer,
     })
 
@@ -665,7 +663,7 @@ describe('Form State', () => {
       ...currentState,
       title: {
         ...currentState.title,
-        isModified: false,
+        isModified: true,
       },
       computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
     })

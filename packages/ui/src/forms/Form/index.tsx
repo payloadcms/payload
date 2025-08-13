@@ -385,7 +385,6 @@ export const Form: React.FC<FormProps> = (props) => {
               dispatchFields({
                 type: 'MERGE_SERVER_STATE',
                 acceptValues,
-                isSubmit: true,
                 prevStateRef: prevFormState,
                 serverState: newFormState,
               })

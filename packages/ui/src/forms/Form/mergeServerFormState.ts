@@ -22,7 +22,6 @@ type Args = {
   acceptValues?: AcceptValues
   currentState?: FormState
   incomingState: FormState
-  isSubmit?: boolean
 }
 
 /**
@@ -38,7 +37,6 @@ export const mergeServerFormState = ({
   acceptValues,
   currentState = {},
   incomingState,
-  isSubmit,
 }: Args): FormState => {
   const newState = { ...currentState }
 
@@ -64,11 +62,6 @@ export const mergeServerFormState = ({
     ) {
       delete incomingField.value
       delete incomingField.initialValue
-
-      // On submit, clear the `isModified` flag
-      if (isSubmit) {
-        currentState[path].isModified = false
-      }
     }
 
     newState[path] = {
