@@ -1,9 +1,6 @@
 import type {
-  ArrayField,
-  BlocksField,
   BuildFormStateArgs,
   ClientFieldSchemaMap,
-  CollapsedPreferences,
   Data,
   DocumentPreferences,
   Field,
@@ -153,6 +150,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   } = args
 
   if (!args.clientFieldSchemaMap && args.renderFieldFn) {
+    // eslint-disable-next-line no-console
     console.warn(
       'clientFieldSchemaMap is not passed to addFieldStatePromise - this will reduce performance',
     )

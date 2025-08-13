@@ -203,6 +203,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const submit = useCallback<Submit>(
     async (options, e) => {
       const {
+        acceptValues = true,
         action: actionArg = action,
         context,
         disableFormWhileProcessing = true,
@@ -263,19 +264,23 @@ export const Form: React.FC<FormProps> = (props) => {
         await wait(100)
       }
 
+      /**
+       * Take copies of the current form state and data here. This will ensure it is consistent.
+       * For example, it is possible for the form state ref to change in the background while this submit function is running.
+       * TODO: can we send the `formStateCopy` through `reduceFieldsToValues` to even greater consistency? Doing this currently breaks uploads.
+       */
+      const formStateCopy = deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields)
+      const data = reduceFieldsToValues(contextRef.current.fields, true)
+
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
         let revalidatedFormState: FormState
-
-        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
-          contextRef.current.fields,
-        )
 
         await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
           await priorOnChange
 
           const result = await beforeSubmitFn({
-            formState: serializableFields,
+            formState: formStateCopy,
           })
 
           revalidatedFormState = result
@@ -319,17 +324,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // If submit handler comes through via props, run that
       if (onSubmit) {
-        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
-          contextRef.current.fields,
-        )
-
-        const data = reduceFieldsToValues(serializableFields, true)
-
         for (const [key, value] of Object.entries(overrides)) {
           data[key] = value
         }
 
-        onSubmit(serializableFields, data)
+        onSubmit(formStateCopy, data)
       }
 
       if (!hasFormSubmitAction) {
@@ -342,6 +341,7 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       const formData = await contextRef.current.createFormData(overrides, {
+        data,
         mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
       })
 
@@ -384,7 +384,8 @@ export const Form: React.FC<FormProps> = (props) => {
             if (newFormState) {
               dispatchFields({
                 type: 'MERGE_SERVER_STATE',
-                acceptValues: true,
+                acceptValues,
+                formStateAtTimeOfRequest: formStateCopy,
                 prevStateRef: prevFormState,
                 serverState: newFormState,
               })
@@ -503,8 +504,8 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const createFormData = useCallback<CreateFormData>(
-    async (overrides, { mergeOverrideData = true }) => {
-      let data = reduceFieldsToValues(contextRef.current.fields, true)
+    async (overrides, { data: dataFromArgs, mergeOverrideData = true }) => {
+      let data = dataFromArgs || reduceFieldsToValues(contextRef.current.fields, true)
 
       let file = data?.file
 

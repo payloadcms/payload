@@ -1,5 +1,12 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ArrayField, CollectionSlug, Field, RelationshipField, TypedUser } from 'payload'
+import type {
+  ArrayField,
+  CollectionSlug,
+  Field,
+  RelationshipField,
+  SingleRelationshipField,
+  TypedUser,
+} from 'payload'
 
 export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
@@ -30,6 +37,11 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
        */
       isGlobal?: boolean
       /**
+       * Overrides for the tenant field, will override the entire tenantField configuration
+       */
+      tenantFieldOverrides?: CollectionTenantFieldConfigOverrides
+      /**
+       * Set to `false` if you want to manually apply the baseListFilter
        * Set to `false` if you want to manually apply the baseFilter
        *
        * @default true
@@ -69,17 +81,36 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    */
   enabled?: boolean
   /**
+   * Localization for the plugin
+   */
+  i18n?: {
+    translations: {
+      [key in AcceptedLanguages]?: {
+        /**
+         * @default 'You are about to change ownership from <0>{{fromTenant}}</0> to <0>{{toTenant}}</0>'
+         */
+        'confirm-modal-tenant-switch--body'?: string
+        /**
+         * `tenantLabel` defaults to the value of the `nav-tenantSelector-label` translation
+         *
+         * @default 'Confirm {{tenantLabel}} change'
+         */
+        'confirm-modal-tenant-switch--heading'?: string
+        /**
+         * @default 'Assigned Tenant'
+         */
+        'field-assignedTenant-label'?: string
+        /**
+         * @default 'Tenant'
+         */
+        'nav-tenantSelector-label'?: string
+      }
+    }
+  }
+  /**
    * Field configuration for the field added to all tenant enabled collections
    */
-  tenantField?: {
-    access?: RelationshipField['access']
-    /**
-     * The name of the field added to all tenant enabled collections
-     *
-     * @default 'tenant'
-     */
-    name?: string
-  }
+  tenantField?: RootTenantFieldConfigOverrides
   /**
    * Field configuration for the field added to the users collection
    *
@@ -132,6 +163,8 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Customize tenant selector label
    *
    * Either a string or an object where the keys are i18n codes and the values are the string labels
+   *
+   * @deprecated Use `i18n.translations` instead.
    */
   tenantSelectorLabel?:
     | Partial<{
@@ -165,6 +198,30 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    */
   useUsersTenantFilter?: boolean
 }
+
+export type RootTenantFieldConfigOverrides = Partial<
+  Omit<
+    SingleRelationshipField,
+    | '_sanitized'
+    | 'hasMany'
+    | 'hidden'
+    | 'index'
+    | 'localized'
+    | 'max'
+    | 'maxRows'
+    | 'min'
+    | 'minRows'
+    | 'relationTo'
+    | 'required'
+    | 'type'
+    | 'unique'
+    | 'virtual'
+  >
+>
+
+export type CollectionTenantFieldConfigOverrides = Partial<
+  Omit<RootTenantFieldConfigOverrides, 'name'>
+>
 
 export type Tenant<IDType = number | string> = {
   id: IDType

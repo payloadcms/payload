@@ -1286,12 +1286,31 @@ describe('Versions', () => {
       page.removeListener('dialog', acceptAlert)
     })
 
-    test('- with autosave - applies afterChange hooks to form state after autosave runs', async () => {
+    test('- with autosave - applies field hooks to form state after autosave runs', async () => {
       const url = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       await page.goto(url.create)
       const titleField = page.locator('#field-title')
       await titleField.fill('Initial')
+
       await waitForAutoSaveToRunAndComplete(page)
+
+      const computedTitleField = page.locator('#field-computedTitle')
+      await expect(computedTitleField).toHaveValue('Initial')
+    })
+
+    test('- with autosave - does not override local changes to form state after autosave runs', async () => {
+      const url = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      await page.goto(url.create)
+      const titleField = page.locator('#field-title')
+
+      // press slower than the autosave interval, but not faster than the response and processing
+      await titleField.pressSequentially('Initial', {
+        delay: 150,
+      })
+
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await expect(titleField).toHaveValue('Initial')
       const computedTitleField = page.locator('#field-computedTitle')
       await expect(computedTitleField).toHaveValue('Initial')
     })
