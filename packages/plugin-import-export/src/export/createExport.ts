@@ -92,6 +92,11 @@ export const createExport = async (args: CreateExportArgs) => {
     req.payload.logger.debug({ message: 'Export configuration:', name, isCSV, locale })
   }
 
+  const batchSize = 100 // fixed per request
+
+  const hardLimit =
+    typeof incomingLimit === 'number' && incomingLimit > 0 ? incomingLimit : undefined
+
   const { totalDocs } = await payload.count({
     collection: collectionSlug,
     user,
@@ -99,21 +104,7 @@ export const createExport = async (args: CreateExportArgs) => {
     overrideAccess: false,
   })
 
-  const defaultBatchSize = 100
-
-  // Validate incomingLimit: must be a multiple of 100, else default to 100
-  let limit = incomingLimit ?? defaultBatchSize
-  const hardLimit = typeof incomingLimit === 'number' ? incomingLimit : undefined
-
-  // If user requested limit is greater than totalDocs, fallback to 100
-  if (limit > totalDocs) {
-    limit = defaultBatchSize
-  }
-
-  // Calculate total pages with the adjusted batch size
-  const totalPages = Math.ceil(totalDocs / limit)
-
-  // Clamp the requested page to totalPages
+  const totalPages = Math.max(1, Math.ceil(totalDocs / batchSize))
   const requestedPage = page || 1
   const adjustedPage = requestedPage > totalPages ? 1 : requestedPage
 
@@ -121,7 +112,7 @@ export const createExport = async (args: CreateExportArgs) => {
     collection: collectionSlug,
     depth: 1,
     draft: drafts === 'yes',
-    limit,
+    limit: batchSize,
     locale,
     overrideAccess: false,
     page: 0, // The page will be incremented manually in the loop
@@ -189,7 +180,7 @@ export const createExport = async (args: CreateExportArgs) => {
     const limitErrorMsg = validateLimitValue(
       incomingLimit,
       req.t,
-      defaultBatchSize, // step i.e. 100
+      batchSize, // step i.e. 100
     )
     if (limitErrorMsg) {
       throw new APIError(limitErrorMsg)
@@ -203,15 +194,19 @@ export const createExport = async (args: CreateExportArgs) => {
       // Use the incoming page value here, defaulting to 1 if undefined
       let scanPage = adjustedPage
       let hasMore = true
-
       let fetched = 0
+      const maxDocs = typeof hardLimit === 'number' ? hardLimit : Number.POSITIVE_INFINITY
 
       while (hasMore) {
-        const remaining = hardLimit ? hardLimit - fetched : limit
+        const remaining = Math.max(0, maxDocs - fetched)
+        if (remaining === 0) {
+          break
+        }
+
         const result = await payload.find({
           ...findArgs,
           page: scanPage,
-          limit: Math.min(limit, remaining),
+          limit: Math.min(batchSize, remaining),
         })
 
         result.docs.forEach((doc) => {
@@ -226,7 +221,7 @@ export const createExport = async (args: CreateExportArgs) => {
 
         fetched += result.docs.length
         scanPage += 1 // Increment page for next batch
-        hasMore = result.hasNextPage && (!hardLimit || fetched < hardLimit)
+        hasMore = result.hasNextPage && fetched < maxDocs
       }
 
       if (debug) {
@@ -236,17 +231,26 @@ export const createExport = async (args: CreateExportArgs) => {
 
     const encoder = new TextEncoder()
     let isFirstBatch = true
-    // Use the incoming page value here, defaulting to 1 if undefined
     let streamPage = adjustedPage
     let fetched = 0
+    const maxDocs = typeof hardLimit === 'number' ? hardLimit : Number.POSITIVE_INFINITY
 
     const stream = new Readable({
       async read() {
-        const remaining = hardLimit ? hardLimit - fetched : limit
+        const remaining = Math.max(0, maxDocs - fetched)
+
+        if (remaining === 0) {
+          if (!isCSV) {
+            this.push(encoder.encode(']'))
+          }
+          this.push(null)
+          return
+        }
+
         const result = await payload.find({
           ...findArgs,
           page: streamPage,
-          limit: Math.min(limit, remaining),
+          limit: Math.min(batchSize, remaining),
         })
 
         if (debug) {
@@ -300,7 +304,7 @@ export const createExport = async (args: CreateExportArgs) => {
         isFirstBatch = false
         streamPage += 1 // Increment stream page for the next batch
 
-        if (!result.hasNextPage || (hardLimit && fetched >= hardLimit)) {
+        if (!result.hasNextPage || fetched >= maxDocs) {
           if (debug) {
             req.payload.logger.debug('Stream complete - no more pages')
           }
@@ -334,13 +338,19 @@ export const createExport = async (args: CreateExportArgs) => {
   let currentPage = adjustedPage
   let fetched = 0
   let hasNextPage = true
+  const maxDocs = typeof hardLimit === 'number' ? hardLimit : Number.POSITIVE_INFINITY
 
   while (hasNextPage) {
-    const remaining = hardLimit ? hardLimit - fetched : limit // if hardLimit exists, only fetch remaining
+    const remaining = Math.max(0, maxDocs - fetched)
+
+    if (remaining === 0) {
+      break
+    }
+
     const result = await payload.find({
       ...findArgs,
       page: currentPage,
-      limit: Math.min(limit, remaining),
+      limit: Math.min(batchSize, remaining),
     })
 
     if (debug) {
@@ -371,7 +381,7 @@ export const createExport = async (args: CreateExportArgs) => {
     }
 
     fetched += result.docs.length
-    hasNextPage = result.hasNextPage && (!hardLimit || fetched < hardLimit)
+    hasNextPage = result.hasNextPage && fetched < maxDocs
     currentPage += 1 // Increment page for next batch
   }
 
