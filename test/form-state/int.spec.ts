@@ -609,7 +609,13 @@ describe('Form State', () => {
       incomingState: incomingStateFromServer,
     })
 
-    expect(newState).toStrictEqual(incomingStateFromServer)
+    expect(newState).toStrictEqual({
+      ...incomingStateFromServer,
+      title: {
+        ...incomingStateFromServer.title,
+        isModified: true,
+      },
+    })
   })
 
   it('should not accept values from the server if they have been modified locally since the request was made, e.g. on autosave', () => {
@@ -657,7 +663,10 @@ describe('Form State', () => {
 
     expect(newState).toStrictEqual({
       ...currentState,
-      title,
+      title: {
+        ...currentState.title,
+        isModified: false,
+      },
       computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
     })
   })
