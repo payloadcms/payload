@@ -20,7 +20,6 @@ export const shouldUseOptimizedUpsertRow = ({
     }
 
     if (
-      field.type === 'array' ||
       field.type === 'blocks' ||
       ((field.type === 'text' ||
         field.type === 'relationship' ||
@@ -32,6 +31,17 @@ export const shouldUseOptimizedUpsertRow = ({
         Array.isArray(field.relationTo)) ||
       field.localized
     ) {
+      return false
+    }
+
+    if (field.type === 'array') {
+      if (typeof value === 'object' && '$push' in value && value.$push) {
+        return shouldUseOptimizedUpsertRow({
+          // Only check first row - this function cares about field definitions. Each array row will have the same field definitions.
+          data: Array.isArray(value.$push) ? value.$push?.[0] : value.$push,
+          fields: field.flattenedFields,
+        })
+      }
       return false
     }
 

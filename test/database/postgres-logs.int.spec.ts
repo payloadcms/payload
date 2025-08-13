@@ -5,6 +5,8 @@ import assert from 'assert'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import type { Post } from './payload-types.js'
+
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -170,5 +172,50 @@ describePostgres('database - postgres logs', () => {
 
     expect(allPosts.docs).toHaveLength(1)
     expect(allPosts.docs[0].id).toEqual(doc1.id)
+  })
+
+  it('ensure array update using $push is done in single db call', async () => {
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        arrayWithIDs: [
+          {
+            text: 'some text',
+          },
+        ],
+        title: 'post',
+      },
+    })
+    const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+
+    await payload.db.updateOne({
+      data: {
+        arrayWithIDs: {
+          $push: {
+            text: 'some text 2',
+            id: '689c2f4d970fc3809aecbc71',
+          },
+        },
+      },
+      collection: 'posts',
+      id: post.id,
+      returning: false,
+    })
+
+    // 2 Updates:
+    // 1. updatedAt for posts row. //TODO: Skip this once updatedAt PR is merged
+    // 2. arrayWithIDs.$push for posts row
+    expect(consoleCount).toHaveBeenCalledTimes(2)
+    consoleCount.mockRestore()
+
+    const updatedPost = (await payload.db.findOne({
+      collection: 'posts',
+      where: { id: { equals: post.id } },
+    })) as unknown as Post
+
+    expect(updatedPost.title).toBe('post')
+    expect(updatedPost.arrayWithIDs).toHaveLength(2)
+    expect(updatedPost.arrayWithIDs?.[0]?.text).toBe('some text')
+    expect(updatedPost.arrayWithIDs?.[1]?.text).toBe('some text 2')
   })
 })

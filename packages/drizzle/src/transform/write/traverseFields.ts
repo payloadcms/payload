@@ -4,13 +4,7 @@ import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
-import type {
-  ArrayRowToInsert,
-  BlockRowToInsert,
-  NumberToDelete,
-  RelationshipToDelete,
-  TextToDelete,
-} from './types.js'
+import type { NumberToDelete, RelationshipToDelete, RowToInsert, TextToDelete } from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
 import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
@@ -23,16 +17,20 @@ import { transformTexts } from './texts.js'
 
 type Args = {
   adapter: DrizzleAdapter
-  arrays: {
-    [tableName: string]: ArrayRowToInsert[]
-  }
+  /**
+   * This will delete the array table and then re-insert all the new array rows.
+   */
+  arrays: RowToInsert['arrays']
+  /**
+   * Array rows to push to the existing array. This will simply create
+   * a new row in the array table.
+   */
+  arraysToPush: RowToInsert['arraysToPush']
   /**
    * This is the name of the base table
    */
   baseTableName: string
-  blocks: {
-    [blockType: string]: BlockRowToInsert[]
-  }
+  blocks: RowToInsert['blocks']
   blocksToDelete: Set<string>
   /**
    * A snake-case field prefix, representing prior fields
@@ -82,6 +80,7 @@ type Args = {
 export const traverseFields = ({
   adapter,
   arrays,
+  arraysToPush,
   baseTableName,
   blocks,
   blocksToDelete,
@@ -129,10 +128,6 @@ export const traverseFields = ({
     if (field.type === 'array') {
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
 
-      if (!arrays[arrayTableName]) {
-        arrays[arrayTableName] = []
-      }
-
       if (isLocalized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
@@ -157,19 +152,33 @@ export const traverseFields = ({
                 textsToDelete,
                 withinArrayOrBlockLocale: localeKey,
               })
-
+              if (!arrays[arrayTableName]) {
+                arrays[arrayTableName] = []
+              }
               arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
             }
           })
         }
       } else {
+        let value = data[field.name]
+        let push = false
+        if (
+          // TODO do this for localized as well in DRY way
+
+          typeof value === 'object' &&
+          '$push' in value
+        ) {
+          value = Array.isArray(value.$push) ? value.$push : [value.$push]
+          push = true
+        }
+
         const newRows = transformArray({
           adapter,
           arrayTableName,
           baseTableName,
           blocks,
           blocksToDelete,
-          data: data[field.name],
+          data: value,
           field,
           numbers,
           numbersToDelete,
@@ -183,7 +192,17 @@ export const traverseFields = ({
           withinArrayOrBlockLocale,
         })
 
-        arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
+        if (push) {
+          if (!arraysToPush[arrayTableName]) {
+            arraysToPush[arrayTableName] = []
+          }
+          arraysToPush[arrayTableName] = arraysToPush[arrayTableName].concat(newRows)
+        } else {
+          if (!arrays[arrayTableName]) {
+            arrays[arrayTableName] = []
+          }
+          arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
+        }
       }
 
       return
@@ -264,6 +283,7 @@ export const traverseFields = ({
             traverseFields({
               adapter,
               arrays,
+              arraysToPush,
               baseTableName,
               blocks,
               blocksToDelete,
@@ -298,6 +318,7 @@ export const traverseFields = ({
           traverseFields({
             adapter,
             arrays,
+            arraysToPush,
             baseTableName,
             blocks,
             blocksToDelete,

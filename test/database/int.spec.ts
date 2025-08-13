@@ -3044,7 +3044,7 @@ describe('database', () => {
     expect(res2.number).toBe(8)
   })
 
-  it('should allow atomic array updates using $push', async () => {
+  it('should allow atomic array updates using $push with single value', async () => {
     const post = await payload.create({
       collection: 'posts',
       data: {
@@ -3062,11 +3062,12 @@ describe('database', () => {
         arrayWithIDs: {
           $push: {
             text: 'some text 2',
+            id: '689c2f4d970fc3809aecbc71',
           },
         },
       },
       collection: 'posts',
-      where: { id: { equals: post.id } },
+      id: post.id,
     })) as unknown as Post
 
     expect(res.arrayWithIDs).toHaveLength(2)
@@ -3092,16 +3093,18 @@ describe('database', () => {
         arrayWithIDs: {
           $push: [
             {
+              id: '689c2f4d970fc3809aecbc71',
               text: 'some text 2',
             },
             {
+              id: '689c2f4d970fc3809aecbc72',
               text: 'some text 3',
             },
           ],
         },
       },
       collection: 'posts',
-      where: { id: { equals: post.id } },
+      id: post.id,
     })) as unknown as Post
 
     expect(res.arrayWithIDs).toHaveLength(3)
