@@ -1,13 +1,9 @@
 'use client'
 // TODO: abstract the `next/navigation` dependency out from this component
-import type { ClientCollectionConfig, ClientGlobalConfig, FormState } from 'payload'
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'
-import {
-  deepCopyObjectSimpleWithoutReactComponents,
-  reduceFieldsToValues,
-  versionDefaults,
-} from 'payload/shared'
+import { reduceFieldsToValues, versionDefaults } from 'payload/shared'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 
 import {
@@ -154,7 +150,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
           if (!skipSubmission && modifiedRef.current && url) {
             const result = await submit<{
-              formState: FormState
               incrementVersionCount: boolean
             }>({
               acceptValues: {
@@ -162,7 +157,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
               },
               action: url,
               context: {
-                formState: deepCopyObjectSimpleWithoutReactComponents(formStateRef.current),
                 incrementVersionCount: false,
               },
               disableFormWhileProcessing: false,
