@@ -49,7 +49,7 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
               admin: {
                 // Hide if a forced format is set via plugin config
                 condition: () => !pluginConfig?.format,
-                width: '180px',
+                width: '33.3333%',
               },
               defaultValue: (() => {
                 // Default to plugin-defined format, otherwise 'csv'
@@ -75,7 +75,17 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
               admin: {
                 placeholder: 'No limit',
                 step: 100,
-                width: '180px',
+                width: '33.3333%',
+              },
+              validate: (value: null | number | undefined) => {
+                if (typeof value !== 'number' || value < 0) {
+                  return 'Invalid limit'
+                }
+                if (value !== null && value % 100 !== 0) {
+                  return 'Limit must be a multiple of 100'
+                }
+
+                return true
               },
               // @ts-expect-error - this is not correctly typed in plugins right now
               label: ({ t }) => t('plugin-import-export:field-limit-label'),
@@ -91,11 +101,17 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
                   // Show the page field only if limit is set
                   return typeof limit === 'number' && limit !== 0
                 },
+                width: '33.3333%',
               },
               defaultValue: 1,
               // @ts-expect-error - this is not correctly typed in plugins right now
               label: ({ t }) => t('plugin-import-export:field-page-label'),
             },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
             {
               name: 'sort',
               type: 'text',
@@ -107,11 +123,6 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
               // @ts-expect-error - this is not correctly typed in plugins right now
               label: ({ t }) => t('plugin-import-export:field-sort-label'),
             },
-          ],
-        },
-        {
-          type: 'row',
-          fields: [
             ...(localeField ? [localeField] : []),
             {
               name: 'drafts',
