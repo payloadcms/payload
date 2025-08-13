@@ -12,8 +12,8 @@ export const buildIndexName = ({
   let indexName = `${name}${number ? `_${number}` : ''}_idx`
 
   if (indexName.length > 60) {
-    // Trim to 60 chars, but keep the "_idx" suffix
-    indexName = `${indexName.slice(0, 60 - 4)}_idx`
+    const suffix = `${number ? `_${number}` : ''}_idx`
+    indexName = `${name.slice(0, 60 - suffix.length)}${suffix}`
   }
 
   if (!adapter.indexes.has(indexName)) {
