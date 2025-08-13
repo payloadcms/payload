@@ -26,6 +26,15 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       posts.push(post)
     }
     // create pages
+    for (let i = 0; i < 195; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Doc ${i}`,
+        },
+      })
+    }
+
     for (let i = 0; i < 5; i++) {
       await payload.create({
         collection: 'pages',
