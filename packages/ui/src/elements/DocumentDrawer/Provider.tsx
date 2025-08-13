@@ -20,6 +20,11 @@ export type DocumentDrawerContextProps = {
   }) => Promise<void> | void
   readonly onSave?: (args: {
     collectionConfig?: ClientCollectionConfig
+    /**
+     * @experimental - Note: this property is experimental and may change in the future. Use as your own discretion.
+     * If you want to pass additional data to the onSuccess callback, you can use this context object.
+     */
+    context?: Record<string, unknown>
     doc: TypeWithID
     operation: 'create' | 'update'
     result: Data

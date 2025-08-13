@@ -2,19 +2,48 @@
 
 @layer payload-default {
   .list-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
     &__wrap {
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      gap: base(0.5);
       background-color: var(--theme-elevation-50);
       border-radius: var(--style-radius-m);
-      padding: base(0.6);
-      gap: base(0.6);
+    }
+
+    &__search {
+      display: flex;
+      background-color: var(--theme-elevation-50);
+      border-radius: var(--style-radius-m);
+      gap: base(0.4);
+      flex-grow: 1;
+      position: relative;
+
+      .icon {
+        flex-shrink: 0;
+      }
+    }
+
+    .icon--search {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translate3d(0, -50%, 0);
+      inset-inline-start: base(0.4);
+      z-index: 1;
+      pointer-events: none;
     }
 
     .search-filter {
       flex-grow: 1;
 
       input {
+        height: 46px;
+        padding-left: 36px;
         margin: 0;
       }
     }
@@ -24,14 +53,11 @@
       border-radius: 0;
     }
 
-    &__modified {
-      color: var(--theme-elevation-500);
-    }
-
-    &__buttons-wrap {
+    &__buttons {
       display: flex;
       align-items: center;
       gap: calc(var(--base) / 4);
+      padding-right: 10px;
     }
 
     .pill-selector,
@@ -43,44 +69,30 @@
 
     @include small-break {
       &__wrap {
-        flex-wrap: wrap;
-        background-color: unset;
-        padding: 0;
-        position: relative;
-      }
-
-      .icon--search {
-        position: absolute;
-        top: base(0.4);
-        inset-inline-start: base(0.4);
-        z-index: 1;
+        flex-direction: column;
+        align-items: stretch;
+        background-color: transparent;
+        border-radius: 0;
       }
 
       .search-filter {
         width: 100%;
+
         input {
-          padding: base(0.4) base(2);
+          height: 40px;
+          padding: 0 base(1.5);
         }
       }
 
-      &__buttons-wrap {
-        [dir='ltr'] & {
-          margin-right: 0;
-        }
-
-        [dir='rtl'] & {
-          margin-left: 0;
-        }
+      &__buttons {
+        padding-right: 0;
+        margin: 0;
+        width: 100%;
 
         .pill {
           padding: base(0.2) base(0.2) base(0.2) base(0.4);
           justify-content: space-between;
         }
-      }
-
-      &__buttons {
-        margin: 0;
-        width: 100%;
       }
 
       .pill-selector,

@@ -14,7 +14,7 @@ import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Config } from './payload-types.js'
+import type { Config, Post } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -38,7 +38,6 @@ test.describe('Group By', () => {
   let serverURL: string
   let payload: PayloadTestSDK<Config>
   let user: any
-  let category1Id: number | string
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -695,42 +694,80 @@ test.describe('Group By', () => {
     ).toHaveCount(0)
   })
 
-  test('should show trashed docs in trash view when group-by is active', async () => {
-    await page.goto(url.list)
+  test.describe('Trash', () => {
+    test('should show trashed docs in trash view when group-by is active', async () => {
+      await page.goto(url.list)
 
-    // Enable group-by on Category
-    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
-    await expect(page.locator('.table-wrap')).toHaveCount(2) // We expect 2 groups initially
+      // Enable group-by on Category
+      await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+      await expect(page.locator('.table-wrap')).toHaveCount(2) // We expect 2 groups initially
 
-    // Trash the first document in the first group
-    const firstTable = page.locator('.table-wrap').first()
-    await firstTable.locator('.row-1 .cell-_select input').check()
-    await firstTable.locator('.list-selection__button[aria-label="Delete"]').click()
+      // Trash the first document in the first group
+      const firstTable = page.locator('.table-wrap').first()
+      await firstTable.locator('.row-1 .cell-_select input').check()
+      await firstTable.locator('.list-selection__button[aria-label="Delete"]').click()
 
-    const firstGroupID = await firstTable
-      .locator('.group-by-header__heading')
-      .getAttribute('data-group-id')
+      const firstGroupID = await firstTable
+        .locator('.group-by-header__heading')
+        .getAttribute('data-group-id')
 
-    const modalId = `[id^="${firstGroupID}-confirm-delete-many-docs"]`
-    await expect(page.locator(modalId)).toBeVisible()
+      const modalId = `[id^="${firstGroupID}-confirm-delete-many-docs"]`
+      await expect(page.locator(modalId)).toBeVisible()
 
-    // Confirm trash (skip permanent delete)
-    await page.locator(`${modalId} #confirm-action`).click()
-    await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-      '1 Post moved to trash.',
-    )
+      // Confirm trash (skip permanent delete)
+      await page.locator(`${modalId} #confirm-action`).click()
+      await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+        '1 Post moved to trash.',
+      )
 
-    // Go to the trash view
-    await page.locator('#trash-view-pill').click()
-    await expect(page).toHaveURL(/\/posts\/trash(\?|$)/)
+      // Go to the trash view
+      await page.locator('#trash-view-pill').click()
+      await expect(page).toHaveURL(/\/posts\/trash(\?|$)/)
 
-    // Re-enable group-by on Category in trash view
-    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
-    await expect(page.locator('.table-wrap')).toHaveCount(1) // Should only have Category 1 (or the trashed doc's category)
+      // Re-enable group-by on Category in trash view
+      await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+      await expect(page.locator('.table-wrap')).toHaveCount(1) // Should only have Category 1 (or the trashed doc's category)
 
-    // Ensure the trashed doc is visible
-    await expect(
-      page.locator('.table-wrap tbody tr td.cell-title', { hasText: 'Find me' }),
-    ).toBeVisible()
+      // Ensure the trashed doc is visible
+      await expect(
+        page.locator('.table-wrap tbody tr td.cell-title', { hasText: 'Find me' }),
+      ).toBeVisible()
+    })
+
+    test('should properly clear group-by in trash view', async () => {
+      await createTrashedPostDoc({ title: 'Trashed Post 1' })
+      await page.goto(url.trash)
+
+      // Enable group-by on Title
+      await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
+      await expect(page.locator('.table-wrap')).toHaveCount(1)
+      await expect(page.locator('.group-by-header')).toHaveText('Trashed Post 1')
+
+      await page.locator('#group-by--reset').click()
+      await expect(page.locator('.group-by-header')).toBeHidden()
+    })
+
+    test('should properly navigate to trashed doc edit view from group-by in trash view', async () => {
+      await createTrashedPostDoc({ title: 'Trashed Post 1' })
+      await page.goto(url.trash)
+
+      // Enable group-by on Title
+      await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
+      await expect(page.locator('.table-wrap')).toHaveCount(1)
+      await expect(page.locator('.group-by-header')).toHaveText('Trashed Post 1')
+
+      await page.locator('.table-wrap tbody tr td.cell-title a').click()
+      await expect(page).toHaveURL(/\/posts\/trash\/\d+/)
+    })
   })
+
+  async function createTrashedPostDoc(data: Partial<Post>): Promise<Post> {
+    return payload.create({
+      collection: postsSlug,
+      data: {
+        ...data,
+        deletedAt: new Date().toISOString(), // Set the post as trashed
+      },
+    }) as unknown as Promise<Post>
+  }
 })

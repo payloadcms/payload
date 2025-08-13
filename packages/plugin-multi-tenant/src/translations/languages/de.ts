@@ -2,10 +2,11 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const deTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-tenant-switch--body':
-      'Sie sind dabei, den Besitz von <0>{{fromTenant}}</0> auf <0>{{toTenant}}</0> zu übertragen.',
-    'confirm-tenant-switch--heading': 'Bestätigen Sie die Änderung von {{tenantLabel}}.',
-    'field-assignedTentant-label': 'Zugewiesener Mandant',
+    'confirm-modal-tenant-switch--body':
+      'Sie sind dabei, den Besitz von <0>{{fromTenant}}</0> zu <0>{{toTenant}}</0> zu ändern.',
+    'confirm-modal-tenant-switch--heading': 'Bestätigung der Änderung von {{tenantLabel}}',
+    'field-assignedTenant-label': 'Zugewiesener Mandant',
+    'nav-tenantSelector-label': 'Mieter',
   },
 }
 
