@@ -13,6 +13,7 @@ import type {
   TaskType,
 } from '../../../config/types/taskTypes.js'
 import type {
+  JobLog,
   SingleTaskStatus,
   WorkflowConfig,
   WorkflowTypes,
@@ -185,7 +186,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         await taskConfig.onSuccess()
       }
 
-      ;(job.log ??= []).push({
+      const newLogItem: JobLog = {
         id: new ObjectId().toHexString(),
         completedAt: getCurrentDate().toISOString(),
         executedAt: executedAt.toISOString(),
@@ -195,10 +196,12 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         state: 'succeeded',
         taskID,
         taskSlug,
-      })
+      }
 
       await updateJob({
-        log: job.log,
+        log: {
+          $push: newLogItem,
+        } as any,
       })
 
       return output
