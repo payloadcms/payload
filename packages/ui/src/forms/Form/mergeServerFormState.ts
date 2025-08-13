@@ -43,10 +43,6 @@ export const mergeServerFormState = ({
   // deep copy each
   const newState = { ...currentState }
 
-  if (isSubmit) {
-    console.log(incomingState)
-  }
-
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
     if (!(path in currentState) && !incomingField.addedByServer) {
       continue
