@@ -38,7 +38,18 @@ const isNodeReadableStream = (body: AWS.GetObjectOutput['Body']): body is Readab
   )
 }
 
-const destroyStream = (object: AWS.GetObjectOutput | undefined) => {
+const abortRequestAndDestroyStream = ({
+  abortController,
+  object,
+}: {
+  abortController: AbortController
+  object?: AWS.GetObjectOutput
+}) => {
+  try {
+    abortController.abort()
+  } catch {
+    /* noop */
+  }
   if (object?.Body && isNodeReadableStream(object.Body)) {
     object.Body.destroy()
   }
@@ -54,15 +65,10 @@ export const getHandler = ({
     let object: AWS.GetObjectOutput | undefined = undefined
     let streamed = false
 
-    const s3AbortController = new AbortController()
+    const abortController = new AbortController()
     if (req.signal) {
       req.signal.addEventListener('abort', () => {
-        try {
-          s3AbortController.abort()
-        } catch {
-          /* noop */
-        }
-        destroyStream(object)
+        abortRequestAndDestroyStream({ abortController, object })
       })
     }
 
@@ -97,7 +103,7 @@ export const getHandler = ({
           Bucket: bucket,
           Key: key,
         },
-        { abortSignal: s3AbortController.signal },
+        { abortSignal: abortController.signal },
       )
 
       if (!object.Body) {
@@ -144,12 +150,7 @@ export const getHandler = ({
           key,
           msg: 'Error while streaming S3 object (aborting)',
         })
-        try {
-          s3AbortController.abort()
-        } catch {
-          /* noop */
-        }
-        stream.destroy(err)
+        abortRequestAndDestroyStream({ abortController, object })
       })
 
       streamed = true
@@ -162,12 +163,7 @@ export const getHandler = ({
       return new Response('Internal Server Error', { status: 500 })
     } finally {
       if (!streamed) {
-        try {
-          s3AbortController.abort()
-        } catch {
-          /* noop */
-        }
-        destroyStream(object)
+        abortRequestAndDestroyStream({ abortController, object })
       }
     }
   }
