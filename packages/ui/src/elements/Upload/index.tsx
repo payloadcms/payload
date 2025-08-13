@@ -34,6 +34,10 @@ const validate = (value) => {
     return 'A file is required.'
   }
 
+  if (value && (!value.name || value.name === '')) {
+    return 'A file name is required.'
+  }
+
   return true
 }
 
