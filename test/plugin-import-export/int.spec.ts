@@ -87,6 +87,51 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].updatedAt).toBeDefined()
     })
 
+    it('should create a file for collection csv with all documents when limit 0', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+          limit: 0,
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data).toHaveLength(250)
+    })
+
+    it('should create a file for collection csv with all documents when no limit', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data).toHaveLength(250)
+    })
+
     it('should create a file for collection csv from limit and page 1', async () => {
       let doc = await payload.create({
         collection: 'exports',

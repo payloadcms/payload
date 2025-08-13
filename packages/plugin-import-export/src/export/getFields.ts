@@ -1,7 +1,9 @@
+import type { TFunction } from '@payloadcms/translations'
 import type { Config, Field, SelectField } from 'payload'
 
 import type { ImportExportPluginConfig } from '../types.js'
 
+import { validateLimitValue } from '../utilities/validateLimitValue.js'
 import { getFilename } from './getFilename.js'
 
 export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfig): Field[] => {
@@ -77,15 +79,8 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
                 step: 100,
                 width: '33.3333%',
               },
-              validate: (value: null | number | undefined) => {
-                if (value && value < 0) {
-                  return 'Invalid limit'
-                }
-                if (value && value % 100 !== 0) {
-                  return 'Limit must be a multiple of 100'
-                }
-
-                return true
+              validate: (value: null | number | undefined, { req }: { req: { t: TFunction } }) => {
+                return validateLimitValue(value, req.t) ?? true
               },
               // @ts-expect-error - this is not correctly typed in plugins right now
               label: ({ t }) => t('plugin-import-export:field-limit-label'),

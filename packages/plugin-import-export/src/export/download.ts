@@ -15,28 +15,18 @@ export const download = async (req: PayloadRequest, debug = false) => {
       throw new APIError('Request data is required.')
     }
 
-    const { collectionSlug, limit } = body.data || {}
+    const { collectionSlug } = body.data || {}
 
     req.payload.logger.info(`Download request received ${collectionSlug}`)
     body.data.user = req.user
 
-    if (limit && limit < 0) {
-      const error = new APIError('Invalid limit')
-      req.payload.logger.error(error)
-      throw error
-    }
-
-    if (limit && limit % 100 !== 0) {
-      const error = new APIError('Limit must be a multiple of 100')
-      req.payload.logger.error(error)
-      throw error
-    }
-
-    return createExport({
+    const res = await createExport({
       download: true,
       input: { ...body.data, debug },
       req,
-    }) as Promise<Response>
+    })
+
+    return res as Response
   } catch (err) {
     // Return JSON for front-end toast
     return new Response(

@@ -6,6 +6,7 @@ import { APIError } from 'payload'
 import { Readable } from 'stream'
 
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
+import { validateLimitValue } from '../utilities/validateLimitValue.js'
 import { flattenObject } from './flattenObject.js'
 import { getCustomFieldFunctions } from './getCustomFieldFunctions.js'
 import { getFilename } from './getFilename.js'
@@ -183,6 +184,15 @@ export const createExport = async (args: CreateExportArgs) => {
   if (download) {
     if (debug) {
       req.payload.logger.debug('Pre-scanning all columns before streaming')
+    }
+
+    const limitErrorMsg = validateLimitValue(
+      incomingLimit,
+      req.t,
+      defaultBatchSize, // step i.e. 100
+    )
+    if (limitErrorMsg) {
+      throw new APIError(limitErrorMsg)
     }
 
     const allColumns: string[] = []
