@@ -78,10 +78,10 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
                 width: '33.3333%',
               },
               validate: (value: null | number | undefined) => {
-                if (typeof value !== 'number' || value < 0) {
+                if (value && value < 0) {
                   return 'Invalid limit'
                 }
-                if (value !== null && value % 100 !== 0) {
+                if (value && value % 100 !== 0) {
                   return 'Limit must be a multiple of 100'
                 }
 

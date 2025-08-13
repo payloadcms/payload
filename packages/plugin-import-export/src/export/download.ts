@@ -20,13 +20,13 @@ export const download = async (req: PayloadRequest, debug = false) => {
     req.payload.logger.info(`Download request received ${collectionSlug}`)
     body.data.user = req.user
 
-    if (typeof limit !== 'number' || limit < 0) {
+    if (limit && limit < 0) {
       const error = new APIError('Invalid limit')
       req.payload.logger.error(error)
       throw error
     }
 
-    if (limit !== null && limit % 100 !== 0) {
+    if (limit && limit % 100 !== 0) {
       const error = new APIError('Limit must be a multiple of 100')
       req.payload.logger.error(error)
       throw error
