@@ -131,6 +131,7 @@ describe('Uploads', () => {
     svgOnlyURL = new AdminUrlUtil(serverURL, svgOnlySlug)
 
     const context = await browser.newContext()
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     page = await context.newPage()
 
     const { consoleErrors, collectErrors, stopCollectingErrors } = initPageConsoleErrorCatch(page, {
@@ -212,6 +213,22 @@ describe('Uploads', () => {
     await page.locator('.doc-drawer__header-close').click()
 
     await expect(filename).toContainText('test-image.png')
+  })
+
+  test('should copy the file url field to the clipboard', async () => {
+    const mediaDoc = (
+      await payload.find({
+        collection: mediaSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0]
+
+    await page.goto(mediaURL.edit(mediaDoc!.id))
+    await page.locator('.copy-to-clipboard').click()
+    const clipbaordContent = await page.evaluate(() => navigator.clipboard.readText())
+    expect(clipbaordContent).toBe(mediaDoc?.url)
   })
 
   test('should create file upload', async () => {
