@@ -16,7 +16,7 @@ const AutosavePosts: CollectionConfig = {
     maxPerDoc: 35,
     drafts: {
       autosave: {
-        interval: 2000,
+        interval: 100,
       },
       schedulePublish: true,
     },
@@ -66,6 +66,16 @@ const AutosavePosts: CollectionConfig = {
       label: 'Description',
       type: 'textarea',
       required: true,
+    },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
     },
   ],
 }

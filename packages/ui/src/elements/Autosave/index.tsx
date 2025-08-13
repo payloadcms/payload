@@ -150,6 +150,9 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
           if (!skipSubmission && modifiedRef.current && url) {
             const result = await submit({
+              acceptValues: {
+                overrideLocalChanges: false,
+              },
               action: url,
               context: {
                 incrementVersionCount: false,

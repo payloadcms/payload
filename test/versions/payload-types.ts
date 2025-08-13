@@ -199,6 +199,12 @@ export interface AutosavePost {
   title: string;
   computedTitle?: string | null;
   description: string;
+  array?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -788,6 +794,12 @@ export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
   computedTitle?: T;
   description?: T;
+  array?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
