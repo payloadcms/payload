@@ -162,6 +162,11 @@ export const getHandler = ({
       return new Response('Internal Server Error', { status: 500 })
     } finally {
       if (!streamed) {
+        try {
+          s3AbortController.abort()
+        } catch {
+          /* noop */
+        }
         destroyStream(object)
       }
     }
