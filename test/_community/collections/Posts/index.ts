@@ -15,6 +15,12 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'slug',
+      type: 'text',
+      localized: true,
+      index: true,
+    },
+    {
       name: 'content',
       type: 'richText',
       editor: lexicalEditor({

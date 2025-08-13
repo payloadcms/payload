@@ -7,6 +7,7 @@ import { devUser } from '../credentials.js'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
+import locales from './locales.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -24,6 +25,11 @@ export default buildConfigWithDefaults({
     // ...add more globals here
     MenuGlobal,
   ],
+  localization: {
+    fallback: false,
+    locales: locales,
+    defaultLocale: 'en',
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
