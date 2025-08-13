@@ -272,8 +272,6 @@ export const Form: React.FC<FormProps> = (props) => {
       const formStateCopy = deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields)
       const data = reduceFieldsToValues(contextRef.current.fields, true)
 
-      console.log({ formStateCopy })
-
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
         let revalidatedFormState: FormState

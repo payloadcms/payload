@@ -63,15 +63,15 @@ export const mergeServerFormState = ({
     ) {
       delete incomingField.value
       delete incomingField.initialValue
-
-      if (isSubmit) {
-        delete currentState[path]?.isModified
-      }
     }
 
     newState[path] = {
       ...currentState[path],
       ...incomingField,
+    }
+
+    if (isSubmit) {
+      delete newState[path]?.isModified
     }
 
     if (
@@ -118,10 +118,6 @@ export const mergeServerFormState = ({
     // Strip away the `addedByServer` property from the client
     // This will prevent it from being passed back to the server
     delete newState[path].addedByServer
-  }
-
-  if (isSubmit) {
-    console.log({ currentState })
   }
 
   // Return the original object reference if the state is unchanged
