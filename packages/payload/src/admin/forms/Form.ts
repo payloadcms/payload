@@ -57,6 +57,12 @@ export type FieldState = {
   filterOptions?: FilterOptionsResult
   initialValue?: unknown
   /**
+   * Used to prevent autosave form state from overriding local changes.
+   * Every time a field is changed locally, this flag is set to true.
+   * After merging server form state, this flag is reset.
+   */
+  isModified?: boolean
+  /**
    * The path of the field when its custom components were last rendered.
    * This is used to denote if a field has been rendered, and if so,
    * what path it was rendered under last.
@@ -65,6 +71,10 @@ export type FieldState = {
    * from the current path of a given field, the field's components will be re-rendered.
    */
   lastRenderedPath?: string
+  /**
+   * Indicates whether the value of this field has been changed by the server, e.g. during a beforeChange hook for a computed value.
+   */
+  modifiedByServer?: boolean
   passesCondition?: boolean
   rows?: Row[]
   /**

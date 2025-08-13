@@ -21,8 +21,8 @@ export type AcceptValues =
 type Args = {
   acceptValues?: AcceptValues
   currentState?: FormState
-  formStateAtTimeOfRequest?: FormState
   incomingState: FormState
+  isSubmit?: boolean
 }
 
 /**
@@ -37,8 +37,8 @@ type Args = {
 export const mergeServerFormState = ({
   acceptValues,
   currentState = {},
-  formStateAtTimeOfRequest,
   incomingState,
+  isSubmit,
 }: Args): FormState => {
   const newState = { ...currentState }
 
@@ -59,10 +59,14 @@ export const mergeServerFormState = ({
         (typeof acceptValues === 'object' &&
           acceptValues !== null &&
           acceptValues?.overrideLocalChanges === false &&
-          currentState[path]?.value !== formStateAtTimeOfRequest?.[path]?.value))
+          currentState[path]?.isModified))
     ) {
       delete incomingField.value
       delete incomingField.initialValue
+
+      if (isSubmit) {
+        delete incomingField.isModified
+      }
     }
 
     newState[path] = {

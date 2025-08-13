@@ -1,7 +1,7 @@
 /* eslint-disable react-compiler/react-compiler -- TODO: fix */
 'use client'
 
-import type { ClientUser, DocumentViewClientProps, FormState } from 'payload'
+import type { ClientUser, DocumentViewClientProps } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
@@ -256,10 +256,13 @@ export function DefaultEditView({
     user?.id,
   ])
 
-  const onSave = useCallback(
-    async (json, context?: Record<string, unknown>): Promise<FormState> => {
+  const onSave = useCallback<FormProps['onSuccess']>(
+    async (json, options) => {
+      const { context } = options || {}
+
       const controller = handleAbortRef(abortOnSaveRef)
 
+      // @ts-expect-error can ignore
       const document = json?.doc || json?.result
 
       const updatedAt = document?.updatedAt || new Date().toISOString()
@@ -290,9 +293,10 @@ export function DefaultEditView({
         const operation = id ? 'update' : 'create'
 
         void onSaveFromContext({
-          ...json,
+          ...(json as Record<string, unknown>),
           context,
           operation,
+          // @ts-expect-error todo: this is not right, should be under `doc`
           updatedAt:
             operation === 'update'
               ? new Date().toISOString()

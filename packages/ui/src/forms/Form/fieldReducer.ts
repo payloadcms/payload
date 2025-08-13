@@ -189,13 +189,13 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'MERGE_SERVER_STATE': {
-      const { acceptValues, formStateAtTimeOfRequest, prevStateRef, serverState } = action
+      const { acceptValues, isSubmit, prevStateRef, serverState } = action
 
       const newState = mergeServerFormState({
         acceptValues,
         currentState: state || {},
-        formStateAtTimeOfRequest,
         incomingState: serverState,
+        isSubmit,
       })
 
       prevStateRef.current = newState
@@ -385,6 +385,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
             return {
               ...field,
               [key]: value,
+              ...(key === 'value' ? { isModified: true } : {}),
             }
           }
 
