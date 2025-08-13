@@ -198,7 +198,7 @@ export const Status: React.FC = () => {
               />
             </React.Fragment>
           )}
-          {!isTrashed && canUpdate && statusToRender === 'changed' && (
+          {!isTrashed && canUpdate && statusToRender === 'changed' || statusToRender === 'draft' && (
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button

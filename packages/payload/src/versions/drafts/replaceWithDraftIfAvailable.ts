@@ -93,7 +93,7 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   }
 
   let draft = versionDocs[0]
-  console.log('replaceWithDraftIfAvailable', versionDocs[0])
+
   if (!draft) {
     return doc
   }

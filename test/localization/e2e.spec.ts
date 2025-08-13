@@ -685,6 +685,11 @@ describe('Localization', () => {
       await saveDocAndAssert(page, '#action-save-draft')
 
       await page.goto(urlPostsWithDrafts.list)
+
+      const columns = page.getByRole('button', { name: 'Columns' })
+      await columns.click()
+      await page.locator('#_status').click()
+
       await expect(page.locator('.row-1 .cell-title')).toContainText(spanTitle)
       await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
 
