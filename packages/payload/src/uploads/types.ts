@@ -253,6 +253,13 @@ export type UploadConfig = {
       }
     | false
   /**
+   * Preserves file extensions with the safeFileNames option. Limits file names to 3 characters
+   * if true or a custom length if a number, trimming from the start of the extension.
+   * 
+   * @default false (extension is not preserved)
+   */
+  preserveExtension?: boolean | number
+  /**
    * Sharp resize options for the original image.
    * @link https://sharp.pixelplumbing.com/api-resize#resize
    * @default undefined
