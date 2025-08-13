@@ -329,7 +329,7 @@ const buildVersionField = ({
           versionFromSiblingData: 'name' in tab ? valueFrom?.[tab.name] : valueFrom,
           versionToSiblingData: 'name' in tab ? valueTo?.[tab.name] : valueTo,
         }).versionFields,
-        label: tab.label,
+        label: typeof tab.label === 'function' ? tab.label({ i18n, t: i18n.t }) : tab.label,
       }
       if (tabVersion?.fields?.length) {
         baseVersionField.tabs.push(tabVersion)
