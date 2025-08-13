@@ -19,6 +19,7 @@ import { UpdatePostStep2Task } from './tasks/UpdatePostStep2Task.js'
 import { UpdatePostTask } from './tasks/UpdatePostTask.js'
 import { externalWorkflow } from './workflows/externalWorkflow.js'
 import { failsImmediatelyWorkflow } from './workflows/failsImmediately.js'
+import { fastParallelTaskWorkflow } from './workflows/fastParallelTaskWorkflow.js'
 import { inlineTaskTestWorkflow } from './workflows/inlineTaskTest.js'
 import { inlineTaskTestDelayedWorkflow } from './workflows/inlineTaskTestDelayed.js'
 import { longRunningWorkflow } from './workflows/longRunning.js'
@@ -36,7 +37,6 @@ import { updatePostJSONWorkflow } from './workflows/updatePostJSON.js'
 import { workflowAndTasksRetriesUndefinedWorkflow } from './workflows/workflowAndTasksRetriesUndefined.js'
 import { workflowRetries2TasksRetries0Workflow } from './workflows/workflowRetries2TasksRetries0.js'
 import { workflowRetries2TasksRetriesUndefinedWorkflow } from './workflows/workflowRetries2TasksRetriesUndefined.js'
-
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Needs to be a function to prevent object reference issues due to duplicative configs
@@ -163,6 +163,7 @@ export const getConfig: () => Partial<Config> = () => ({
       subTaskWorkflow,
       subTaskFailsWorkflow,
       longRunningWorkflow,
+      fastParallelTaskWorkflow,
       parallelTaskWorkflow,
     ],
   },
