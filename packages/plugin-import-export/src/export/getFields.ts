@@ -11,7 +11,7 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
       name: 'locale',
       type: 'select',
       admin: {
-        width: '180px',
+        width: '25%',
       },
       defaultValue: 'all',
       // @ts-expect-error - this is not correctly typed in plugins right now
@@ -137,7 +137,7 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
                       collectionConfig?.versions?.drafts,
                   )
                 },
-                width: '180px',
+                width: '25%',
               },
               defaultValue: 'yes',
               // @ts-expect-error - this is not correctly typed in plugins right now
