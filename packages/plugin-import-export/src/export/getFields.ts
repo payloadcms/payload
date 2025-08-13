@@ -74,6 +74,7 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
               type: 'number',
               admin: {
                 placeholder: 'No limit',
+                step: 100,
                 width: '180px',
               },
               // @ts-expect-error - this is not correctly typed in plugins right now
