@@ -40,15 +40,12 @@ export const mergeServerFormState = ({
   incomingState,
   isSubmit,
 }: Args): FormState => {
-  // deep copy each
   const newState = { ...currentState }
 
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
     if (!(path in currentState) && !incomingField.addedByServer) {
       continue
     }
-
-    const currentField = { ...currentState[path] }
 
     /**
      * If it's a new field added by the server, always accept the value.
@@ -63,23 +60,27 @@ export const mergeServerFormState = ({
         (typeof acceptValues === 'object' &&
           acceptValues !== null &&
           acceptValues?.overrideLocalChanges === false &&
-          currentField.isModified))
+          currentState[path].isModified))
     ) {
       delete incomingField.value
       delete incomingField.initialValue
 
       // On submit, clear the `isModified` flag
       if (isSubmit) {
-        currentField.isModified = false
+        currentState[path].isModified = false
       }
     }
 
     newState[path] = {
-      ...currentField,
+      ...currentState[path],
       ...incomingField,
     }
 
-    if (currentField && 'errorPaths' in currentField && !('errorPaths' in incomingField)) {
+    if (
+      currentState[path] &&
+      'errorPaths' in currentState[path] &&
+      !('errorPaths' in incomingField)
+    ) {
       newState[path].errorPaths = []
     }
 
@@ -90,16 +91,16 @@ export const mergeServerFormState = ({
      * Note: read `currentState` and not `newState` here, as the `rows` property have already been merged above
      */
     if (Array.isArray(incomingField.rows) && path in currentState) {
-      newState[path].rows = [...(currentField?.rows || [])] // shallow copy to avoid mutating the original array
+      newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
 
       incomingField.rows.forEach((row) => {
-        const indexInCurrentState = currentField.rows?.findIndex(
+        const indexInCurrentState = currentState[path].rows?.findIndex(
           (existingRow) => existingRow.id === row.id,
         )
 
         if (indexInCurrentState > -1) {
           newState[path].rows[indexInCurrentState] = {
-            ...currentField.rows[indexInCurrentState],
+            ...currentState[path].rows[indexInCurrentState],
             ...row,
           }
         }
