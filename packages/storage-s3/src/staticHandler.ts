@@ -62,9 +62,7 @@ export const getHandler = ({
         } catch {
           /* noop */
         }
-        if (object?.Body && isNodeReadableStream(object.Body)) {
-          object.Body.destroy()
-        }
+        destroyStream(object)
       })
     }
 
