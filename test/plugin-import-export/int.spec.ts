@@ -598,6 +598,35 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].hasManyPolymorphic_1_relationTo).toBe('posts')
     })
 
+    it('should export hasMany monomorphic relationship fields to CSV', async () => {
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields: ['id', 'hasManyMonomorphic'],
+          format: 'csv',
+          where: {
+            title: { contains: 'Monomorphic' },
+          },
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // hasManyMonomorphic
+      expect(data[0].hasManyMonomorphic_0_id).toBeDefined()
+      expect(data[0].hasManyMonomorphic_0_relationTo).toBeUndefined()
+      expect(data[0].hasManyMonomorphic_0_title).toBeUndefined()
+    })
+
     // disabled so we don't always run a massive test
     it.skip('should create a file from a large set of collection documents', async () => {
       const allPromises = []

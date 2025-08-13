@@ -28,6 +28,17 @@ export const flattenObject = ({
 
             const itemPrefix = blockType ? `${newKey}_${index}_${blockType}` : `${newKey}_${index}`
 
+            // Case: hasMany monomorphic relationships
+            if (
+              typeof item === 'object' &&
+              item !== null &&
+              'id' in item && // populated doc shape
+              !('relationTo' in item) // ensure not polymorphic
+            ) {
+              row[`${itemPrefix}_id`] = (item as { id: number | string }).id
+              return
+            }
+
             // Case: hasMany polymorphic relationships
             if (
               'relationTo' in item &&

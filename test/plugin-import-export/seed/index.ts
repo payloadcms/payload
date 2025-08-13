@@ -159,6 +159,16 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       })
     }
 
+    for (let i = 0; i < 2; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Monomorphic ${i}`,
+          hasManyMonomorphic: [posts[1]?.id ?? ''],
+        },
+      })
+    }
+
     for (let i = 0; i < 5; i++) {
       await payload.create({
         collection: 'pages',

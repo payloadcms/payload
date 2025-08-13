@@ -242,6 +242,7 @@ export interface Page {
           }
       )[]
     | null;
+  hasManyMonomorphic?: (string | Post)[] | null;
   textFieldInCollapsible?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -580,6 +581,7 @@ export interface PagesSelect<T extends boolean = true> {
   excerpt?: T;
   hasOnePolymorphic?: T;
   hasManyPolymorphic?: T;
+  hasManyMonomorphic?: T;
   textFieldInCollapsible?: T;
   updatedAt?: T;
   createdAt?: T;
