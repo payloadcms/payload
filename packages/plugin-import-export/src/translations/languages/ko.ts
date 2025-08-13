@@ -12,6 +12,7 @@ export const koTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': '한계',
     'field-locale-label': '지역',
     'field-name-label': '파일 이름',
+    'field-page-label': '페이지',
     'field-selectionToUse-label': '사용할 선택',
     'field-sort-label': '정렬 방식',
     'selectionToUse-allDocuments': '모든 문서를 사용하십시오.',

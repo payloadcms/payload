@@ -15,6 +15,7 @@ import React, { useEffect, useState } from 'react'
 
 import { reduceFields } from '../FieldsToExport/reduceFields.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
+import './index.scss'
 
 const baseClass = 'sort-by-fields'
 
@@ -71,7 +72,7 @@ export const SortBy: SelectFieldClientComponent = (props) => {
   }
 
   return (
-    <div className={baseClass} style={{ '--field-width': '33%' } as React.CSSProperties}>
+    <div className={baseClass}>
       <FieldLabel label={props.field.label} path={props.path} />
       <ReactSelect
         className={baseClass}

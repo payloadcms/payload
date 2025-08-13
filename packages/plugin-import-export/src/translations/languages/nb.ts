@@ -12,6 +12,7 @@ export const nbTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Begrensning',
     'field-locale-label': 'Lokal',
     'field-name-label': 'Filnavn',
+    'field-page-label': 'Side',
     'field-selectionToUse-label': 'Valg til bruk',
     'field-sort-label': 'Sorter etter',
     'selectionToUse-allDocuments': 'Bruk alle dokumentene',

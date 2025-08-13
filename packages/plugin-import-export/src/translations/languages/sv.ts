@@ -12,6 +12,7 @@ export const svTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Begränsning',
     'field-locale-label': 'Lokal',
     'field-name-label': 'Filnamn',
+    'field-page-label': 'Sida',
     'field-selectionToUse-label': 'Val att använda',
     'field-sort-label': 'Sortera efter',
     'selectionToUse-allDocuments': 'Använd alla dokument',

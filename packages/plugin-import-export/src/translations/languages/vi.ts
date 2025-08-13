@@ -12,6 +12,7 @@ export const viTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Giới hạn',
     'field-locale-label': 'Địa phương',
     'field-name-label': 'Tên tệp',
+    'field-page-label': 'Trang',
     'field-selectionToUse-label': 'Lựa chọn để sử dụng',
     'field-sort-label': 'Sắp xếp theo',
     'selectionToUse-allDocuments': 'Sử dụng tất cả các tài liệu',

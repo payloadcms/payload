@@ -12,6 +12,7 @@ export const heTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'הגבלה',
     'field-locale-label': 'מקום',
     'field-name-label': 'שם הקובץ',
+    'field-page-label': 'עמוד',
     'field-selectionToUse-label': 'בחירה לשימוש',
     'field-sort-label': 'מיין לפי',
     'selectionToUse-allDocuments': 'השתמש בכל המסמכים',

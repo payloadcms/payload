@@ -87,6 +87,129 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].updatedAt).toBeDefined()
     })
 
+    it('should create a file for collection csv with all documents when limit 0', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+          limit: 0,
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data).toHaveLength(250)
+    })
+
+    it('should create a file for collection csv with all documents when no limit', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data).toHaveLength(250)
+    })
+
+    it('should create a file for collection csv from limit and page 1', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+          limit: 100,
+          page: 1,
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].id).toBeDefined()
+      expect(data[0].title).toStrictEqual('Polymorphic 4')
+    })
+
+    it('should create a file for collection csv from limit and page 2', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+          limit: 100,
+          page: 2,
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].id).toBeDefined()
+      expect(data[0].title).toStrictEqual('Doc 149')
+    })
+
+    it('should not create a file for collection csv when limit < 0', async () => {
+      await expect(
+        payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            format: 'csv',
+            limit: -1,
+          },
+        }),
+      ).rejects.toThrow(/Limit/)
+    })
+
+    it('should not create a file for collection csv when limit is not a multiple of 100', async () => {
+      await expect(
+        payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            format: 'csv',
+            limit: 99,
+          },
+        }),
+      ).rejects.toThrow(/Limit/)
+    })
+
     it('should create a file for collection csv with draft data', async () => {
       const draftPage = await payload.create({
         collection: 'pages',

@@ -12,6 +12,7 @@ export const lvTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Limits',
     'field-locale-label': 'Lokalizācija',
     'field-name-label': 'Faila nosaukums',
+    'field-page-label': 'Lapa',
     'field-selectionToUse-label': 'Izvēles lietošana',
     'field-sort-label': 'Kārtot pēc',
     'selectionToUse-allDocuments': 'Izmantojiet visus dokumentus',

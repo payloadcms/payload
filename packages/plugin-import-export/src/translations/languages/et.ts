@@ -12,6 +12,7 @@ export const etTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Piirang',
     'field-locale-label': 'Lokaal',
     'field-name-label': 'Faili nimi',
+    'field-page-label': 'Leht',
     'field-selectionToUse-label': 'Valiku kasutamine',
     'field-sort-label': 'Sorteeri järgi',
     'selectionToUse-allDocuments': 'Kasutage kõiki dokumente',
