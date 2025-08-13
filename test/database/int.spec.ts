@@ -3062,7 +3062,7 @@ describe('database', () => {
         arrayWithIDs: {
           $push: {
             text: 'some text 2',
-            id: '689c2f4d970fc3809aecbc71',
+            id: new mongoose.Types.ObjectId().toHexString(),
           },
         },
       },
@@ -3093,11 +3093,11 @@ describe('database', () => {
         arrayWithIDs: {
           $push: [
             {
-              id: '689c2f4d970fc3809aecbc71',
+              id: new mongoose.Types.ObjectId().toHexString(),
               text: 'some text 2',
             },
             {
-              id: '689c2f4d970fc3809aecbc72',
+              id: new mongoose.Types.ObjectId().toHexString(),
               text: 'some text 3',
             },
           ],

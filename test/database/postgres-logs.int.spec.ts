@@ -2,6 +2,7 @@ import type { Payload } from 'payload'
 
 /* eslint-disable jest/require-top-level-describe */
 import assert from 'assert'
+import mongoose from 'mongoose'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -171,7 +172,7 @@ describePostgres('database - postgres logs', () => {
     })
 
     expect(allPosts.docs).toHaveLength(1)
-    expect(allPosts.docs[0].id).toEqual(doc1.id)
+    expect(allPosts.docs[0]?.id).toEqual(doc1.id)
   })
 
   it('ensure array update using $push is done in single db call', async () => {
@@ -193,7 +194,7 @@ describePostgres('database - postgres logs', () => {
         arrayWithIDs: {
           $push: {
             text: 'some text 2',
-            id: '689c2f4d970fc3809aecbc71',
+            id: new mongoose.Types.ObjectId().toHexString(),
           },
         },
       },
