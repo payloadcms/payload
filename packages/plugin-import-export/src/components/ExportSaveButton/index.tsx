@@ -109,7 +109,6 @@ export const ExportSaveButton: React.FC = () => {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
     } catch (error: any) {
-      console.error('Error downloading file:', error)
       toast.error(error.message || 'Error downloading file')
     }
   }

@@ -15,12 +15,21 @@ export const download = async (req: PayloadRequest, debug = false) => {
       throw new APIError('Request data is required.')
     }
 
-    req.payload.logger.info(`Download request received ${body.data.collectionSlug}`)
+    const { collectionSlug, limit } = body.data || {}
 
+    req.payload.logger.info(`Download request received ${collectionSlug}`)
     body.data.user = req.user
 
-    if (typeof body.data.limit === 'number' && body.data.limit % 100 !== 0) {
-      throw new APIError(`Limit must be a multiple of 100`)
+    if (typeof limit !== 'number' || limit < 0) {
+      const error = new APIError('Invalid limit')
+      req.payload.logger.error(error)
+      throw error
+    }
+
+    if (limit !== null && limit % 100 !== 0) {
+      const error = new APIError('Limit must be a multiple of 100')
+      req.payload.logger.error(error)
+      throw error
     }
 
     return createExport({
@@ -29,7 +38,7 @@ export const download = async (req: PayloadRequest, debug = false) => {
       req,
     }) as Promise<Response>
   } catch (err) {
-    // Catch the error and send JSON with message explicitly
+    // Return JSON for front-end toast
     return new Response(
       JSON.stringify({ errors: [{ message: (err as Error).message || 'Something went wrong' }] }),
       { headers: { 'Content-Type': 'application/json' }, status: 400 },
