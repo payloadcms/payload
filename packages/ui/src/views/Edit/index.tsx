@@ -296,7 +296,7 @@ export function DefaultEditView({
           ...(json as Record<string, unknown>),
           context,
           operation,
-          // @ts-expect-error todo: this is not right, should be under `doc`
+          // @ts-expect-error todo: this is not right, should be under `doc`?
           updatedAt:
             operation === 'update'
               ? new Date().toISOString()

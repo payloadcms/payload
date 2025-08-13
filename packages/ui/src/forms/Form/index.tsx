@@ -265,12 +265,14 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       /**
-       * Take copies of the current form state and data here. This will ensure it is consistent.
+       * Take copies of the current form state and data here. This will ensure it is consistent across invocations.
        * For example, it is possible for the form state ref to change in the background while this submit function is running.
        * TODO: can we send the `formStateCopy` through `reduceFieldsToValues` to even greater consistency? Doing this currently breaks uploads.
        */
       const formStateCopy = deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields)
       const data = reduceFieldsToValues(contextRef.current.fields, true)
+
+      console.log({ formStateCopy })
 
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {

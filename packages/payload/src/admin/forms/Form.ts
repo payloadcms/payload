@@ -71,10 +71,6 @@ export type FieldState = {
    * from the current path of a given field, the field's components will be re-rendered.
    */
   lastRenderedPath?: string
-  /**
-   * Indicates whether the value of this field has been changed by the server, e.g. during a beforeChange hook for a computed value.
-   */
-  modifiedByServer?: boolean
   passesCondition?: boolean
   rows?: Row[]
   /**
