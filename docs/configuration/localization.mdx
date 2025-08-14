@@ -143,16 +143,16 @@ import { buildConfig } from 'payload'
 export default buildConfig({
   // ...
   experimental: {
-    statusLocalization: true, // enable experimental status localization
+    localizeStatus: true,
   },
 })
 ```
 
 The following experimental options are available related to localization:
 
-| Option                   | Description                                                                                                                                                                                 |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`statusLocalization`** | **Boolean.** When `true`, shows document status per locale in the admin panel instead of always showing the latest overall status. Opt-in for backwards compatibility. Defaults to `false`. |
+| Option               | Description                                                                                                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`localizeStatus`** | **Boolean.** When `true`, shows document status per locale in the admin panel instead of always showing the latest overall status. Opt-in for backwards compatibility. Defaults to `false`. |
 
 ## Field Localization
 
