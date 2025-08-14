@@ -98,22 +98,25 @@ export const fieldSchemaToJSON = (
         acc.push({
           name: field.name,
           type: field.type,
-          blocks: field.blocks?.reduce((acc, block) => {
-            ;(acc as any)[block.slug] = {
-              fields: fieldSchemaToJSON(
-                [
-                  ...block.fields,
-                  {
-                    name: 'id',
-                    type: 'text',
-                  },
-                ],
-                config,
-              ),
-            }
+          blocks:
+            'blocks' in field
+              ? field.blocks?.reduce((acc, block) => {
+                  ;(acc as any)[block.slug] = {
+                    fields: fieldSchemaToJSON(
+                      [
+                        ...block.fields,
+                        {
+                          name: 'id',
+                          type: 'text',
+                        },
+                      ],
+                      config,
+                    ),
+                  }
 
-            return acc
-          }, {} as FieldSchemaJSON),
+                  return acc
+                }, {} as FieldSchemaJSON)
+              : undefined,
         })
 
         break
