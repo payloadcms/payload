@@ -74,7 +74,7 @@ const buildTableState = async (
   const {
     collectionSlug,
     columns,
-    docs: docsFromArgs,
+    data: dataFromArgs,
     enableRowSelections,
     orderableFieldName,
     parent,
@@ -154,12 +154,11 @@ const buildTableState = async (
     },
   })
 
-  let docs = docsFromArgs
-  let data: PaginatedDocs
+  let data: PaginatedDocs = dataFromArgs
 
   // lookup docs, if desired, i.e. within `join` field which initialize with `depth: 0`
 
-  if (!docs || query) {
+  if (!data?.docs || query) {
     if (Array.isArray(collectionSlug)) {
       if (!parent) {
         throw new APIError('Unexpected array of collectionSlug, parent must be provided')
@@ -205,7 +204,6 @@ const buildTableState = async (
       for (let i = 0; i < segments.length; i++) {
         if (i === segments.length - 1) {
           data = parentDoc[segments[i]]
-          docs = data.docs
         } else {
           parentDoc = parentDoc[segments[i]]
         }
@@ -223,7 +221,6 @@ const buildTableState = async (
         user: req.user,
         where: query?.where,
       })
-      docs = data.docs
     }
   }
 
@@ -233,11 +230,12 @@ const buildTableState = async (
     collectionConfig,
     collections: Array.isArray(collectionSlug) ? collectionSlug : undefined,
     columns,
-    docs,
+    data,
     enableRowSelections,
     i18n: req.i18n,
     orderableFieldName,
     payload,
+    query,
     renderRowTypes,
     tableAppearance,
     useAsTitle: Array.isArray(collectionSlug)

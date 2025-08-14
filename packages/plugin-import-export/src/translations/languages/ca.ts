@@ -12,6 +12,7 @@ export const caTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Límit',
     'field-locale-label': 'Local',
     'field-name-label': 'Nom del fitxer',
+    'field-page-label': 'Pàgina',
     'field-selectionToUse-label': 'Selecció per utilitzar',
     'field-sort-label': 'Ordena per',
     'selectionToUse-allDocuments': 'Utilitzeu tots els documents',

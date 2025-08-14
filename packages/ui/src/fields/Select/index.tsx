@@ -112,10 +112,10 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       Error={Error}
       filterOption={
         selectFilterOptions
-          ? ({ value }) =>
+          ? ({ label, value }, search) =>
               selectFilterOptions?.some(
                 (option) => (typeof option === 'string' ? option : option.value) === value,
-              )
+              ) && label.toLowerCase().includes(search.toLowerCase())
           : undefined
       }
       hasMany={hasMany}

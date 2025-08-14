@@ -56,8 +56,8 @@ export const selectDistinct = ({
       query = query.where(where)
     }
 
-    joins.forEach(({ condition, table }) => {
-      query = query.leftJoin(table, condition)
+    joins.forEach(({ type, condition, table }) => {
+      query = query[type ?? 'leftJoin'](table, condition)
     })
 
     return queryModifier({

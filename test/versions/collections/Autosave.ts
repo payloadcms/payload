@@ -16,7 +16,7 @@ const AutosavePosts: CollectionConfig = {
     maxPerDoc: 35,
     drafts: {
       autosave: {
-        interval: 2000,
+        interval: 100,
       },
       schedulePublish: true,
     },
@@ -54,10 +54,28 @@ const AutosavePosts: CollectionConfig = {
       localized: true,
     },
     {
+      name: 'computedTitle',
+      label: 'Computed Title',
+      type: 'text',
+      hooks: {
+        beforeChange: [({ data }) => data?.title],
+      },
+    },
+    {
       name: 'description',
       label: 'Description',
       type: 'textarea',
       required: true,
+    },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
     },
   ],
 }

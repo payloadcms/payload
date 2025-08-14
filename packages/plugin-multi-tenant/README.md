@@ -36,11 +36,11 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
        */
       isGlobal?: boolean
       /**
-       * Set to `false` if you want to manually apply the baseListFilter
+       * Set to `false` if you want to manually apply the baseFilter
        *
        * @default true
        */
-      useBaseListFilter?: boolean
+      useBaseFilter?: boolean
       /**
        * Set to `false` if you want to handle collection access manually without the multi-tenant constraints applied
        *

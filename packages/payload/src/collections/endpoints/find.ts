@@ -14,7 +14,7 @@ import { findOperation } from '../operations/find.js'
 
 export const findHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { depth, draft, joins, limit, page, pagination, populate, select, sort, where } =
+  const { depth, draft, joins, limit, page, pagination, populate, select, sort, trash, where } =
     req.query as {
       depth?: string
       draft?: string
@@ -25,6 +25,7 @@ export const findHandler: PayloadHandler = async (req) => {
       populate?: Record<string, unknown>
       select?: Record<string, unknown>
       sort?: string
+      trash?: string
       where?: Where
     }
 
@@ -40,6 +41,7 @@ export const findHandler: PayloadHandler = async (req) => {
     req,
     select: sanitizeSelectParam(select),
     sort: typeof sort === 'string' ? sort.split(',') : undefined,
+    trash: trash === 'true',
     where,
   })
 

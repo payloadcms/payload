@@ -28,6 +28,7 @@ export const Preview = () => {
   const { collection } = useImportExport()
   const { config } = useConfig()
   const { value: where } = useField({ path: 'where' })
+  const { value: page } = useField({ path: 'page' })
   const { value: limit } = useField<number>({ path: 'limit' })
   const { value: fields } = useField<string[]>({ path: 'fields' })
   const { value: sort } = useField({ path: 'sort' })
@@ -68,8 +69,10 @@ export const Preview = () => {
             collectionSlug,
             draft,
             fields,
+            format,
             limit,
             locale,
+            page,
             sort,
             where,
           }),
@@ -115,8 +118,13 @@ export const Preview = () => {
 
         const fieldKeys =
           Array.isArray(fields) && fields.length > 0
-            ? selectedKeys // strictly only what was selected
-            : [...selectedKeys, ...defaultMetaFields.filter((key) => allKeys.includes(key))]
+            ? selectedKeys // strictly use selected fields only
+            : [
+                ...selectedKeys,
+                ...defaultMetaFields.filter(
+                  (key) => allKeys.includes(key) && !selectedKeys.includes(key),
+                ),
+              ]
 
         // Build columns based on flattened keys
         const newColumns: Column[] = fieldKeys.map((key) => ({
@@ -158,9 +166,11 @@ export const Preview = () => {
     disabledFieldRegexes,
     draft,
     fields,
+    format,
     i18n,
     limit,
     locale,
+    page,
     sort,
     where,
   ])

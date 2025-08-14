@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
 import * as path from 'path'
 import { mapAsync } from 'payload'
 import { wait } from 'payload/shared'
@@ -257,10 +258,7 @@ describe('Locked Documents', () => {
       await page.locator('.list-selection__button[aria-label="Publish"]').click()
       await page.locator('#publish-posts #confirm-action').click()
 
-      const paginator = page.locator('.paginator')
-
-      await paginator.locator('button').nth(1).click()
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
+      await goToNextPage(page)
       await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
     })
 
@@ -313,10 +311,7 @@ describe('Locked Documents', () => {
       await expect(page.locator('.row-1 .cell-text')).toContainText(bulkText)
       await expect(page.locator('.row-2 .cell-text')).toContainText(bulkText)
 
-      const paginator = page.locator('.paginator')
-
-      await paginator.locator('button').nth(1).click()
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
+      await goToNextPage(page)
       await expect(page.locator('.row-1 .cell-text')).toContainText('hello')
     })
   })

@@ -12,6 +12,7 @@ export const rsTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Ograničenje',
     'field-locale-label': 'Локалитет',
     'field-name-label': 'Ime datoteke',
+    'field-page-label': 'Strana',
     'field-selectionToUse-label': 'Izbor za upotrebu',
     'field-sort-label': 'Sortiraj po',
     'selectionToUse-allDocuments': 'Koristite sve dokumente',

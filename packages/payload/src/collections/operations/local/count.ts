@@ -42,6 +42,15 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   req?: Partial<PayloadRequest>
   /**
+   * When set to `true`, the query will include both normal and trashed documents.
+   * To query only trashed documents, pass `trash: true` and combine with a `where` clause filtering by `deletedAt`.
+   * By default (`false`), the query will only include normal documents and exclude those with a `deletedAt` field.
+   *
+   * This argument has no effect unless `trash` is enabled on the collection.
+   * @default false
+   */
+  trash?: boolean
+  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
@@ -55,7 +64,13 @@ export async function countLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<{ totalDocs: number }> {
-  const { collection: collectionSlug, disableErrors, overrideAccess = true, where } = options
+  const {
+    collection: collectionSlug,
+    disableErrors,
+    overrideAccess = true,
+    trash = false,
+    where,
+  } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -70,6 +85,7 @@ export async function countLocal<TSlug extends CollectionSlug>(
     disableErrors,
     overrideAccess,
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    trash,
     where,
   })
 }

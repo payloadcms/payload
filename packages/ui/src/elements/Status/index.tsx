@@ -23,6 +23,7 @@ export const Status: React.FC = () => {
     globalSlug,
     hasPublishedDoc,
     incrementVersionCount,
+    isTrashed,
     setHasPublishedDoc,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
@@ -54,6 +55,12 @@ export const Status: React.FC = () => {
   } else if (hasPublishedDoc && unpublishedVersionCount <= 0) {
     statusToRender = 'published'
   }
+
+  const displayStatusKey = isTrashed
+    ? hasPublishedDoc
+      ? 'previouslyPublished'
+      : 'previouslyDraft'
+    : statusToRender
 
   const performAction = useCallback(
     async (action: 'revert' | 'unpublish') => {
@@ -158,12 +165,12 @@ export const Status: React.FC = () => {
     return (
       <div
         className={baseClass}
-        title={`${t('version:status')}: ${t(`version:${statusToRender}`)}`}
+        title={`${t('version:status')}: ${t(`version:${displayStatusKey}`)}`}
       >
         <div className={`${baseClass}__value-wrap`}>
           <span className={`${baseClass}__label`}>{t('version:status')}:&nbsp;</span>
-          <span className={`${baseClass}__value`}>{t(`version:${statusToRender}`)}</span>
-          {canUpdate && statusToRender === 'published' && (
+          <span className={`${baseClass}__value`}>{t(`version:${displayStatusKey}`)}</span>
+          {!isTrashed && canUpdate && statusToRender === 'published' && (
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
@@ -183,7 +190,7 @@ export const Status: React.FC = () => {
               />
             </React.Fragment>
           )}
-          {canUpdate && statusToRender === 'changed' && (
+          {!isTrashed && canUpdate && statusToRender === 'changed' && (
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
