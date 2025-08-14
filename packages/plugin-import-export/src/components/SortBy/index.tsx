@@ -13,6 +13,7 @@ import {
 } from '@payloadcms/ui'
 import React, { useEffect, useMemo, useState } from 'react'
 
+import { applySortOrder, stripSortDash } from '../../utilities/sortHelpers.js'
 import { reduceFields } from '../FieldsToExport/reduceFields.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
 import './index.scss'
@@ -46,15 +47,9 @@ export const SortBy: SelectFieldClientComponent = (props) => {
     [collectionConfig?.fields],
   )
 
-  // Remove a leading '-' from a sort value (e.g. "-title" -> "title")
-  const stripDash = (v?: null | string) => (v ? v.replace(/^-/, '') : '')
-
-  // Apply order to a base field (e.g. ("title","desc") -> "-title")
-  const applyOrder = (field: string, order: string) => (order === 'desc' ? `-${field}` : field)
-
   // Normalize the stored value for display (strip the '-') and pick the option
   useEffect(() => {
-    const clean = stripDash(sortRaw)
+    const clean = stripSortDash(sortRaw)
     if (!clean) {
       setDisplayedValue(null)
       return
@@ -77,7 +72,7 @@ export const SortBy: SelectFieldClientComponent = (props) => {
       return
     }
 
-    const clean = stripDash(query.sort as string)
+    const clean = stripSortDash(query.sort as string)
     const option = fieldOptions.find((f) => f.value === clean)
     if (option) {
       setDisplayedValue(option)
@@ -91,7 +86,7 @@ export const SortBy: SelectFieldClientComponent = (props) => {
       setDisplayedValue(null)
     } else {
       setDisplayedValue(option)
-      const next = applyOrder(option.value, String(sortOrder))
+      const next = applySortOrder(option.value, String(sortOrder) as 'asc' | 'desc')
       setSort(next)
     }
   }

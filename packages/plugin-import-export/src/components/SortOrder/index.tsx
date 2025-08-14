@@ -5,6 +5,7 @@ import type { SelectFieldClientComponent } from 'payload'
 import { FieldLabel, ReactSelect, useDocumentInfo, useField, useListQuery } from '@payloadcms/ui'
 import React, { useEffect, useMemo, useState } from 'react'
 
+import { applySortOrder, stripSortDash } from '../../utilities/sortHelpers.js'
 import './index.scss'
 
 const baseClass = 'sort-order-field'
@@ -19,14 +20,8 @@ const options = [
 
 const defaultOption: OrderOption = options[0]
 
-// Remove a leading '-' from a sort value (e.g. "-title" -> "title")
-const stripDash = (v?: null | string) => (v ? v.replace(/^-/, '') : '')
-
-// Apply order to a base field (e.g. ("title","desc") -> "-title")
-const applyOrder = (field: string, order: Order) => (order === 'desc' ? `-${field}` : field)
-
 // Safely coerce query.sort to a string (ignore arrays)
-const asString = (v: unknown): string | undefined => {
+const normalizeSortParam = (v: unknown): string | undefined => {
   if (typeof v === 'string') {
     return v
   }
@@ -61,17 +56,17 @@ export const SortOrder: SelectFieldClientComponent = (props) => {
     if (id) {
       return
     }
-    const qs = asString(query?.sort)
+    const qs = normalizeSortParam(query?.sort)
     if (!qs) {
       return
     }
 
     const isDesc = qs.startsWith('-')
-    const base = stripDash(qs)
+    const base = stripSortDash(qs)
     const order: Order = isDesc ? 'desc' : 'asc'
 
     setOrder(order)
-    setSort(applyOrder(base, order))
+    setSort(applySortOrder(base, order))
   }, [id, query?.sort, setOrder, setSort])
 
   // Keep the select's displayed option in sync with the stored order
@@ -86,9 +81,9 @@ export const SortOrder: SelectFieldClientComponent = (props) => {
     const next = option?.value ?? 'asc'
     setOrder(next)
 
-    const base = stripDash(sortRaw)
+    const base = stripSortDash(sortRaw)
     if (base) {
-      setSort(applyOrder(base, next))
+      setSort(applySortOrder(base, next))
     }
 
     setDisplayed(option ?? defaultOption)
