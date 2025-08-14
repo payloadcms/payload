@@ -137,7 +137,7 @@ export const saveVersion = async ({
       if (
         localizationEnabled &&
         payload.config.localization !== false &&
-        payload.config.localization.enableStatusLocalization
+        payload.config.experimental?.localizeStatus
       ) {
         const allLocales = (
           (payload.config.localization && payload.config.localization?.locales) ||

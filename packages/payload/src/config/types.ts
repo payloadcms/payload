@@ -486,12 +486,6 @@ export type BaseLocalizationConfig = {
    * @default 'all'
    */
   defaultLocalePublishOption?: 'active' | 'all'
-  /**
-   * Enable localization of the status of the document.
-   * If enabled, the status will reflect the current locale throughout the Admin UI.
-   * @default false
-   */
-  enableStatusLocalization?: boolean
   /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale`
    *
    * If false, then no requests will fallback unless a fallbackLocale is specified in the request.
@@ -725,6 +719,14 @@ export type ImportMapGenerators = Array<
     imports: Imports
   }) => void
 >
+
+/**
+ * Experimental features.
+ * These may be unstable and may change or be removed in future releases.
+ */
+export type ExperimentalConfig = {
+  localizeStatus?: boolean
+}
 
 export type AfterErrorHook = (
   args: AfterErrorHookArgs,
@@ -1024,6 +1026,12 @@ export type Config = {
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
+   * Configure experimental features for Payload.
+   *
+   * These features may be unstable and may change or be removed in future releases.
+   */
+  experimental?: ExperimentalConfig
+  /**
    * Options for folder view within the admin panel
    * @experimental this feature may change in minor versions until it is fully stable
    */
@@ -1291,6 +1299,7 @@ export type SanitizedConfig = {
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
+  experimental?: ExperimentalConfig
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
   jobs: SanitizedJobsConfig

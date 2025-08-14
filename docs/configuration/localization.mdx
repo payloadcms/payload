@@ -78,13 +78,12 @@ export default buildConfig({
 
 The following options are available:
 
-| Option                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`locales`**                  | Array of all the languages that you would like to support. [More details](#locales)                                                                                                                                                                                                                                                                                                                                               |
-| **`defaultLocale`**            | Required string that matches one of the locale codes from the array provided. By default, if no locale is specified, documents will be returned in this locale.                                                                                                                                                                                                                                                                   |
-| **`enableStatusLocalization`** | **Boolean.** When `true`, shows document status per locale in the admin panel instead of always showing the latest overall status. Opt-in for backwards compatibility. Defaults to `false`.                                                                                                                                                                                                                                       |
-| **`fallback`**                 | Boolean enabling "fallback" locale functionality. If a document is requested in a locale, but a field does not have a localized value corresponding to the requested locale, then if this property is enabled, the document will automatically fall back to the fallback locale value. If this property is not enabled, the value will not be populated unless a fallback is explicitly provided in the request. True by default. |
-| **`filterAvailableLocales`**   | A function that is called with the array of `locales` and the `req`, it should return locales to show in admin UI selector. [See more](#filter-available-options).                                                                                                                                                                                                                                                                |
+| Option                       | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`locales`**                | Array of all the languages that you would like to support. [More details](#locales)                                                                                                                                                                                                                                                                                                                                               |
+| **`defaultLocale`**          | Required string that matches one of the locale codes from the array provided. By default, if no locale is specified, documents will be returned in this locale.                                                                                                                                                                                                                                                                   |
+| **`fallback`**               | Boolean enabling "fallback" locale functionality. If a document is requested in a locale, but a field does not have a localized value corresponding to the requested locale, then if this property is enabled, the document will automatically fall back to the fallback locale value. If this property is not enabled, the value will not be populated unless a fallback is explicitly provided in the request. True by default. |
+| **`filterAvailableLocales`** | A function that is called with the array of `locales` and the `req`, it should return locales to show in admin UI selector. [See more](#filter-available-options).                                                                                                                                                                                                                                                                |
 
 ### Locales
 
@@ -131,6 +130,29 @@ localization: {
 ```
 
 Since the filtering happens at the root level of the application and its result is not calculated every time you navigate to a new page, you may want to call `router.refresh` in a custom component that watches when values that affect the result change. In the example above, you would want to do this when `supportedLocales` changes on the tenant document.
+
+## Experimental Options
+
+Experimental options are features that may not be fully stable and may change or be removed in future releases.
+
+These options can be enabled in your Payload Config under the `experimental` key. You can set them like this:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  experimental: {
+    statusLocalization: true, // enable experimental status localization
+  },
+})
+```
+
+The following experimental options are available related to localization:
+
+| Option                   | Description                                                                                                                                                                                 |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`statusLocalization`** | **Boolean.** When `true`, shows document status per locale in the admin panel instead of always showing the latest overall status. Opt-in for backwards compatibility. Defaults to `false`. |
 
 ## Field Localization
 

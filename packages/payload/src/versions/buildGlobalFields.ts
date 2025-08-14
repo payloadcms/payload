@@ -57,7 +57,7 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
         }),
       })
 
-      if (config.localization.enableStatusLocalization) {
+      if (config.experimental.localizeStatus) {
         const localeStatusFields = buildLocaleStatusField(config)
 
         fields.push({
