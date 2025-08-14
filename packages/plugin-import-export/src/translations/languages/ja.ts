@@ -12,6 +12,7 @@ export const jaTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': '制限',
     'field-locale-label': 'ロケール',
     'field-name-label': 'ファイル名',
+    'field-page-label': 'ページ',
     'field-selectionToUse-label': '使用する選択',
     'field-sort-label': '並び替える',
     'selectionToUse-allDocuments': 'すべての文書を使用してください。',

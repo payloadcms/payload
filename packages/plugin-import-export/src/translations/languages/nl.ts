@@ -12,6 +12,7 @@ export const nlTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Limiet',
     'field-locale-label': 'Lokale',
     'field-name-label': 'Bestandsnaam',
+    'field-page-label': 'Pagina',
     'field-selectionToUse-label': 'Selectie om te gebruiken',
     'field-sort-label': 'Sorteer op',
     'selectionToUse-allDocuments': 'Gebruik alle documenten',

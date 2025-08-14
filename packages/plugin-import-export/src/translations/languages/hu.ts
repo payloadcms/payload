@@ -12,6 +12,7 @@ export const huTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Korlát',
     'field-locale-label': 'Helyszín',
     'field-name-label': 'Fájlnév',
+    'field-page-label': 'Oldal',
     'field-selectionToUse-label': 'Használatra kiválasztva',
     'field-sort-label': 'Rendezés szerint',
     'selectionToUse-allDocuments': 'Használjon minden dokumentumot',

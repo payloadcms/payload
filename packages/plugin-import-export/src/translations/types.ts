@@ -13,6 +13,7 @@ export type PluginLanguage = Language<{
     'field-limit-label': string
     'field-locale-label': string
     'field-name-label': string
+    'field-page-label': string
     'field-selectionToUse-label': string
     'field-sort-label': string
     'selectionToUse-allDocuments': string

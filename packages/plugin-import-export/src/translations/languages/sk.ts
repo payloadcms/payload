@@ -12,6 +12,7 @@ export const skTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Limit',
     'field-locale-label': 'Lokalita',
     'field-name-label': 'Názov súboru',
+    'field-page-label': 'Stránka',
     'field-selectionToUse-label': 'Výber na použitie',
     'field-sort-label': 'Triediť podľa',
     'selectionToUse-allDocuments': 'Použite všetky dokumenty',

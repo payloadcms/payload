@@ -12,6 +12,7 @@ export const zhTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': '限制',
     'field-locale-label': '语言环境',
     'field-name-label': '文件名',
+    'field-page-label': '页面',
     'field-selectionToUse-label': '选择范围',
     'field-sort-label': '排序方式',
     'selectionToUse-allDocuments': '使用所有文档',
