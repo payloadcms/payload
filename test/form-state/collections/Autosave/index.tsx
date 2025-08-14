@@ -12,6 +12,13 @@ export const AutosavePostsCollection: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
+    {
+      name: 'computedTitle',
+      type: 'text',
+      hooks: {
+        beforeChange: [({ data }) => data?.title],
+      },
+    },
   ],
   versions: {
     drafts: {

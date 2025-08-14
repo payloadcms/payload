@@ -42,6 +42,13 @@ import './index.scss'
 
 const baseClass = 'collection-edit'
 
+export type OnSaveContext = {
+  formState?: FormState
+  getDocPermissions?: boolean
+  incrementVersionCount?: boolean
+  renderAllFields?: boolean
+}
+
 // This component receives props only on _pages_
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
@@ -257,7 +264,7 @@ export function DefaultEditView({
   ])
 
   const onSave = useCallback(
-    async (json, context?: Record<string, unknown>): Promise<FormState> => {
+    async (json, context?: OnSaveContext): Promise<FormState> => {
       const controller = handleAbortRef(abortOnSaveRef)
 
       const document = json?.doc || json?.result
@@ -325,9 +332,10 @@ export function DefaultEditView({
           data: document,
           docPermissions,
           docPreferences,
+          formState: context?.formState,
           globalSlug,
           operation,
-          renderAllFields: true,
+          renderAllFields: context?.renderAllFields ?? true,
           returnLockStatus: false,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,

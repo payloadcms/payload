@@ -6,6 +6,8 @@ import { dequal } from 'dequal/lite'
 import { reduceFieldsToValues, versionDefaults } from 'payload/shared'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 
+import type { OnSaveContext } from '../../views/Edit/index.js'
+
 import {
   useAllFormFields,
   useForm,
@@ -155,9 +157,11 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
               },
               action: url,
               context: {
+                formState: formStateRef.current,
                 getDocPermissions: false,
                 incrementVersionCount: false,
-              },
+                renderAllFields: false,
+              } satisfies OnSaveContext,
               disableFormWhileProcessing: false,
               disableSuccessStatus: true,
               method,
