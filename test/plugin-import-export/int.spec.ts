@@ -103,11 +103,15 @@ describe('@payloadcms/plugin-import-export', () => {
         id: doc.id,
       })
 
+      const { totalDocs: totalNumberOfDocs } = await payload.count({
+        collection: 'pages',
+      })
+
       expect(doc.filename).toBeDefined()
       const expectedPath = path.join(dirname, './uploads', doc.filename as string)
       const data = await readCSV(expectedPath)
 
-      expect(data).toHaveLength(250)
+      expect(data).toHaveLength(totalNumberOfDocs)
     })
 
     it('should create a file for collection csv with all documents when no limit', async () => {
@@ -125,11 +129,15 @@ describe('@payloadcms/plugin-import-export', () => {
         id: doc.id,
       })
 
+      const { totalDocs: totalNumberOfDocs } = await payload.count({
+        collection: 'pages',
+      })
+
       expect(doc.filename).toBeDefined()
       const expectedPath = path.join(dirname, './uploads', doc.filename as string)
       const data = await readCSV(expectedPath)
 
-      expect(data).toHaveLength(250)
+      expect(data).toHaveLength(totalNumberOfDocs)
     })
 
     it('should create a file for collection csv from limit and page 1', async () => {
@@ -174,12 +182,21 @@ describe('@payloadcms/plugin-import-export', () => {
         id: doc.id,
       })
 
+      // query pages with the same limit and page as the export made above
+      const pages = await payload.find({
+        collection: 'pages',
+        limit: 100,
+        page: 2,
+      })
+
+      const firstDocOnPage2 = pages.docs?.[0]
+
       expect(doc.filename).toBeDefined()
       const expectedPath = path.join(dirname, './uploads', doc.filename as string)
       const data = await readCSV(expectedPath)
 
       expect(data[0].id).toBeDefined()
-      expect(data[0].title).toStrictEqual('Doc 149')
+      expect(data[0].title).toStrictEqual(firstDocOnPage2?.title)
     })
 
     it('should not create a file for collection csv when limit < 0', async () => {
