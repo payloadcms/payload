@@ -155,6 +155,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
               },
               action: url,
               context: {
+                getDocPermissions: false,
                 incrementVersionCount: false,
               },
               disableFormWhileProcessing: false,

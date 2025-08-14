@@ -8,6 +8,7 @@ import { assertElementStaysVisible } from 'helpers/e2e/assertElementStaysVisible
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { Config, Post } from './payload-types.js'
@@ -21,6 +22,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { autosavePostsSlug } from './collections/Autosave/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 const { describe, beforeEach, afterEach } = test
@@ -36,11 +38,13 @@ let serverURL: string
 test.describe('Form State', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
+  let autosavePostsUrl: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
+    autosavePostsUrl = new AdminUrlUtil(serverURL, autosavePostsSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -294,6 +298,108 @@ test.describe('Form State', () => {
     // Reset CPU throttling
     await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 1 })
     await cdpSession.detach()
+  })
+
+  test('should render computed values after save', async () => {
+    await page.goto(postsUrl.create)
+    const titleField = page.locator('#field-title')
+    const computedTitleField = page.locator('#field-computedTitle')
+
+    await titleField.fill('Test Title')
+
+    await expect(computedTitleField).toHaveValue('')
+
+    await saveDocAndAssert(page)
+
+    await expect(computedTitleField).toHaveValue('Test Title')
+  })
+
+  test('should fetch new doc permissions after save', async () => {
+    const doc = await createPost({ title: 'Initial Title' })
+    await page.goto(postsUrl.edit(doc.id))
+    const titleField = page.locator('#field-title')
+    await expect(titleField).toBeEnabled()
+
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/posts/access/${doc.id}`,
+      async () => {
+        await titleField.fill('Updated Title')
+        await wait(500)
+        await page.click('#action-save', { delay: 100 })
+      },
+      {
+        allowedNumberOfRequests: 2,
+        minimumNumberOfRequests: 2,
+        timeout: 3000,
+      },
+    )
+
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/posts/access/${doc.id}`,
+      async () => {
+        await titleField.fill('Updated Title 2')
+        await wait(500)
+        await page.click('#action-save', { delay: 100 })
+      },
+      {
+        minimumNumberOfRequests: 2,
+        allowedNumberOfRequests: 2,
+        timeout: 3000,
+      },
+    )
+  })
+
+  test('autosave - should not fetch new doc permissions on every autosave', async () => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: {
+        title: 'Initial Title',
+      },
+    })
+
+    await page.goto(autosavePostsUrl.edit(doc.id))
+    const titleField = page.locator('#field-title')
+    await expect(titleField).toBeEnabled()
+
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      async () => {
+        await titleField.fill('Updated Title')
+      },
+      {
+        allowedNumberOfRequests: 0,
+        timeout: 3000,
+      },
+    )
+
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      async () => {
+        await titleField.fill('Updated Title Again')
+      },
+      {
+        allowedNumberOfRequests: 0,
+        timeout: 3000,
+      },
+    )
+
+    // save manually and ensure the permissions are fetched again
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      async () => {
+        await page.click('#action-save', { delay: 100 })
+      },
+      {
+        allowedNumberOfRequests: 2,
+        minimumNumberOfRequests: 2,
+        timeout: 3000,
+      },
+    )
   })
 
   describe('Throttled tests', () => {

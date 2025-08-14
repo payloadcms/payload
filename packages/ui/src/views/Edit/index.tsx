@@ -312,7 +312,9 @@ export function DefaultEditView({
         resetUploadEdits()
       }
 
-      await getDocPermissions(json)
+      if (context?.getDocPermissions !== false) {
+        await getDocPermissions(json)
+      }
 
       if (id || globalSlug) {
         const docPreferences = await getDocPreferences()
