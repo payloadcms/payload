@@ -15,6 +15,7 @@ export const huTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Oldal',
     'field-selectionToUse-label': 'Használatra kiválasztva',
     'field-sort-label': 'Rendezés szerint',
+    'field-sort-order-label': 'Rendezési sorrend',
     'selectionToUse-allDocuments': 'Használjon minden dokumentumot',
     'selectionToUse-currentFilters': 'Használja az aktuális szűrőket',
     'selectionToUse-currentSelection': 'Használja a jelenlegi kiválasztást',

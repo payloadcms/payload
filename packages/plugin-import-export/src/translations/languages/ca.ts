@@ -15,6 +15,7 @@ export const caTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Pàgina',
     'field-selectionToUse-label': 'Selecció per utilitzar',
     'field-sort-label': 'Ordena per',
+    'field-sort-order-label': 'Ordre de classificació',
     'selectionToUse-allDocuments': 'Utilitzeu tots els documents',
     'selectionToUse-currentFilters': 'Utilitza els filtres actuals',
     'selectionToUse-currentSelection': 'Utilitza la selecció actual',
