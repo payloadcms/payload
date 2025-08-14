@@ -12,6 +12,7 @@ export const ltTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Ribos',
     'field-locale-label': 'Lokalė',
     'field-name-label': 'Failo pavadinimas',
+    'field-page-label': 'Puslapis',
     'field-selectionToUse-label': 'Naudojimo pasirinkimas',
     'field-sort-label': 'Rūšiuoti pagal',
     'selectionToUse-allDocuments': 'Naudokite visus dokumentus.',

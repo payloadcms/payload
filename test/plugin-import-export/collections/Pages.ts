@@ -222,6 +222,12 @@ export const Pages: CollectionConfig = {
       hasMany: true,
     },
     {
+      name: 'hasManyMonomorphic',
+      type: 'relationship',
+      relationTo: 'posts',
+      hasMany: true,
+    },
+    {
       type: 'collapsible',
       label: 'Collapsible Field',
       fields: [

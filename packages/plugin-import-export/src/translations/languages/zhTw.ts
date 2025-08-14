@@ -12,6 +12,7 @@ export const zhTwTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': '筆數上限',
     'field-locale-label': '語言地區',
     'field-name-label': '檔案名稱',
+    'field-page-label': '頁面',
     'field-selectionToUse-label': '使用的選取範圍',
     'field-sort-label': '排序方式',
     'selectionToUse-allDocuments': '使用所有文件',

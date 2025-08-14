@@ -12,6 +12,7 @@ export const thTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'จำกัด',
     'field-locale-label': 'ที่ตั้ง',
     'field-name-label': 'ชื่อไฟล์',
+    'field-page-label': 'หน้า',
     'field-selectionToUse-label': 'การเลือกใช้',
     'field-sort-label': 'เรียงตาม',
     'selectionToUse-allDocuments': 'ใช้เอกสารทั้งหมด',

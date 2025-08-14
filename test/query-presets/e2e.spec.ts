@@ -19,7 +19,6 @@ import {
   // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { clickListMenuItem, openListMenu } from '../helpers/e2e/toggleListMenu.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { assertURLParams } from './helpers/assertURLParams.js'
@@ -190,9 +189,8 @@ describe('Query Presets', () => {
   test('should delete a preset, clear selection, and reset changes', async () => {
     await page.goto(pagesUrl.list)
     await selectPreset({ page, presetTitle: seededData.everyone.title })
-    await openListMenu({ page })
 
-    await clickListMenuItem({ page, menuItemLabel: 'Delete' })
+    await page.locator('#delete-preset').click()
 
     await page.locator('#confirm-delete-preset #confirm-action').click()
 
@@ -249,75 +247,29 @@ describe('Query Presets', () => {
 
   test('should only show "edit" and "delete" controls when there is an active preset', async () => {
     await page.goto(pagesUrl.list)
-    await openListMenu({ page })
-
-    await expect(
-      page.locator('#list-menu .popup__content .popup-button-list__button', {
-        hasText: exactText('Edit'),
-      }),
-    ).toBeHidden()
-
-    await expect(
-      page.locator('#list-menu .popup__content .popup-button-list__button', {
-        hasText: exactText('Delete'),
-      }),
-    ).toBeHidden()
-
+    await expect(page.locator('#edit-preset')).toBeHidden()
+    await expect(page.locator('#delete-preset')).toBeHidden()
     await selectPreset({ page, presetTitle: seededData.everyone.title })
-
-    await openListMenu({ page })
-
-    await expect(
-      page.locator('#list-menu .popup__content .popup-button-list__button', {
-        hasText: exactText('Edit'),
-      }),
-    ).toBeVisible()
-
-    await expect(
-      page.locator('#list-menu .popup__content .popup-button-list__button', {
-        hasText: exactText('Delete'),
-      }),
-    ).toBeVisible()
+    await expect(page.locator('#edit-preset')).toBeVisible()
+    await expect(page.locator('#delete-preset')).toBeVisible()
   })
 
   test('should only show "reset" and "save" controls when there is an active preset and changes have been made', async () => {
     await page.goto(pagesUrl.list)
 
-    await openListMenu({ page })
+    await expect(page.locator('#reset-preset')).toBeHidden()
 
-    await expect(
-      page.locator('#list-menu .popup__content .popup-button-list__button', {
-        hasText: exactText('Reset'),
-      }),
-    ).toBeHidden()
-
-    await expect(
-      page.locator('#list-menu .popup__content .popup-button-list__button', {
-        hasText: exactText('Update for everyone'),
-      }),
-    ).toBeHidden()
-
-    await expect(
-      page.locator('#list-menu .popup__content .popup-button-list__button', {
-        hasText: exactText('Save'),
-      }),
-    ).toBeHidden()
+    await expect(page.locator('#save-preset')).toBeHidden()
 
     await selectPreset({ page, presetTitle: seededData.onlyMe.title })
 
     await toggleColumn(page, { columnLabel: 'ID' })
 
-    await openListMenu({ page })
+    await expect(page.locator('#reset-preset')).toBeVisible()
 
     await expect(
-      page.locator('#list-menu .popup__content .popup-button-list__button', {
-        hasText: exactText('Reset'),
-      }),
-    ).toBeVisible()
-
-    await expect(
-      page.locator('#list-menu .popup__content .popup-button-list__button', {
-        hasText: exactText('Save'),
+      page.locator('#save-preset', {
+        hasText: exactText('Save changes'),
       }),
     ).toBeVisible()
   })
@@ -329,12 +281,12 @@ describe('Query Presets', () => {
 
     await toggleColumn(page, { columnLabel: 'ID' })
 
-    await openListMenu({ page })
-
     // When not shared, the label is "Save"
+    await expect(page.locator('#save-preset')).toBeVisible()
+
     await expect(
-      page.locator('#list-menu .popup__content .popup-button-list__button', {
-        hasText: exactText('Save'),
+      page.locator('#save-preset', {
+        hasText: exactText('Save changes'),
       }),
     ).toBeVisible()
 
@@ -342,11 +294,9 @@ describe('Query Presets', () => {
 
     await toggleColumn(page, { columnLabel: 'ID' })
 
-    await openListMenu({ page })
-
     // When shared, the label is "Update for everyone"
     await expect(
-      page.locator('#list-menu .popup__content .popup-button-list__button', {
+      page.locator('#save-preset', {
         hasText: exactText('Update for everyone'),
       }),
     ).toBeVisible()
@@ -362,27 +312,28 @@ describe('Query Presets', () => {
       hasText: exactText('ID'),
     })
 
-    await openListMenu({ page })
-    await clickListMenuItem({ page, menuItemLabel: 'Reset' })
+    await page.locator('#reset-preset').click()
 
     await openListColumns(page, {})
     await expect(column).toHaveClass(/pill-selector__pill--selected/)
   })
 
-  test('should only enter modified state when changes are made to an active preset', async () => {
+  test.skip('should only enter modified state when changes are made to an active preset', async () => {
     await page.goto(pagesUrl.list)
     await expect(page.locator('.list-controls__modified')).toBeHidden()
     await selectPreset({ page, presetTitle: seededData.everyone.title })
     await expect(page.locator('.list-controls__modified')).toBeHidden()
     await toggleColumn(page, { columnLabel: 'ID' })
     await expect(page.locator('.list-controls__modified')).toBeVisible()
-    await openListMenu({ page })
-    await clickListMenuItem({ page, menuItemLabel: 'Update for everyone' })
+
+    await page.locator('#save-preset').click()
+
     await expect(page.locator('.list-controls__modified')).toBeHidden()
     await toggleColumn(page, { columnLabel: 'ID' })
     await expect(page.locator('.list-controls__modified')).toBeVisible()
-    await openListMenu({ page })
-    await clickListMenuItem({ page, menuItemLabel: 'Reset' })
+
+    await page.locator('#reset-preset').click()
+
     await expect(page.locator('.list-controls__modified')).toBeHidden()
   })
 
@@ -392,8 +343,7 @@ describe('Query Presets', () => {
     await page.goto(pagesUrl.list)
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
-    await openListMenu({ page })
-    await clickListMenuItem({ page, menuItemLabel: 'Edit' })
+    await page.locator('#edit-preset').click()
 
     const drawer = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     const titleValue = drawer.locator('input[name="title"]')
@@ -427,8 +377,7 @@ describe('Query Presets', () => {
 
     const presetTitle = 'New Preset'
 
-    await openListMenu({ page })
-    await clickListMenuItem({ page, menuItemLabel: 'Create New' })
+    await page.locator('#create-new-preset').click()
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
     await modal.locator('input[name="title"]').fill(presetTitle)

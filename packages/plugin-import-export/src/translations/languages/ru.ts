@@ -12,6 +12,7 @@ export const ruTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Лимит',
     'field-locale-label': 'Локаль',
     'field-name-label': 'Имя файла',
+    'field-page-label': 'Страница',
     'field-selectionToUse-label': 'Выбор использования',
     'field-sort-label': 'Сортировать по',
     'selectionToUse-allDocuments': 'Используйте все документы',

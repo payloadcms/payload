@@ -12,6 +12,7 @@ export const arTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'حد',
     'field-locale-label': 'موقع',
     'field-name-label': 'اسم الملف',
+    'field-page-label': 'صفحة',
     'field-selectionToUse-label': 'اختيار للاستخدام',
     'field-sort-label': 'ترتيب حسب',
     'selectionToUse-allDocuments': 'استخدم جميع الوثائق',

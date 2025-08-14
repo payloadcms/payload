@@ -12,6 +12,7 @@ export const azTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Hədd',
     'field-locale-label': 'Yerli',
     'field-name-label': 'Fayl adı',
+    'field-page-label': 'Səhifə',
     'field-selectionToUse-label': 'İstifadə etmək üçün seçim',
     'field-sort-label': 'Sırala',
     'selectionToUse-allDocuments': 'Bütün sənədlərdən istifadə edin',

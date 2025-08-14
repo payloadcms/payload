@@ -12,6 +12,7 @@ export const roTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Limită',
     'field-locale-label': 'Localizare',
     'field-name-label': 'Numele fișierului',
+    'field-page-label': 'Pagina',
     'field-selectionToUse-label': 'Selectarea pentru utilizare',
     'field-sort-label': 'Sortează după',
     'selectionToUse-allDocuments': 'Utilizați toate documentele.',
