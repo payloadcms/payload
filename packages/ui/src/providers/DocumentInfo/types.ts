@@ -14,6 +14,8 @@ import type {
 
 import React from 'react'
 
+import type { GetDocPermissions } from './useGetDocPermissions.js'
+
 export type DocumentInfoProps = {
   readonly action?: string
   readonly AfterDocument?: React.ReactNode
@@ -57,7 +59,7 @@ export type DocumentInfoContext = {
     isLocked: boolean
     user: ClientUser | number | string
   } | null>
-  getDocPermissions: (data?: Data) => Promise<void>
+  getDocPermissions: GetDocPermissions
   getDocPreferences: () => Promise<DocumentPreferences>
   incrementVersionCount: () => void
   isInitializing: boolean

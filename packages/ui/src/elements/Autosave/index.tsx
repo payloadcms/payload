@@ -3,8 +3,14 @@
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'
-import { reduceFieldsToValues, versionDefaults } from 'payload/shared'
+import {
+  deepCopyObjectSimpleWithoutReactComponents,
+  reduceFieldsToValues,
+  versionDefaults,
+} from 'payload/shared'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
+
+import type { OnSaveContext } from '../../views/Edit/index.js'
 
 import {
   useAllFormFields,
@@ -149,15 +155,16 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
             submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
 
           if (!skipSubmission && modifiedRef.current && url) {
-            const result = await submit<{
-              incrementVersionCount: boolean
-            }>({
+            const result = await submit<any, OnSaveContext>({
               acceptValues: {
                 overrideLocalChanges: false,
               },
               action: url,
               context: {
-                incrementVersionCount: false,
+                formState: deepCopyObjectSimpleWithoutReactComponents(formStateRef.current),
+                getDocPermissions: false,
+                incrementVersionCount: !mostRecentVersionIsAutosaved,
+                renderAllFields: false,
               },
               disableFormWhileProcessing: false,
               disableSuccessStatus: true,
@@ -169,7 +176,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
             })
 
             if (result && result?.res?.ok && !mostRecentVersionIsAutosaved) {
-              incrementVersionCount()
               setMostRecentVersionIsAutosaved(true)
               setUnpublishedVersionCount((prev) => prev + 1)
             }

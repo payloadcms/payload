@@ -9,6 +9,7 @@ import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
 import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { Config, Post } from './payload-types.js'
@@ -312,6 +313,94 @@ test.describe('Form State', () => {
     await saveDocAndAssert(page)
 
     await expect(computedTitleField).toHaveValue('Test Title')
+  })
+
+  test('should fetch new doc permissions after save', async () => {
+    const doc = await createPost({ title: 'Initial Title' })
+    await page.goto(postsUrl.edit(doc.id))
+    const titleField = page.locator('#field-title')
+    await expect(titleField).toBeEnabled()
+
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/posts/access/${doc.id}`,
+      async () => {
+        await titleField.fill('Updated Title')
+        await wait(500)
+        await page.click('#action-save', { delay: 100 })
+      },
+      {
+        allowedNumberOfRequests: 2,
+        minimumNumberOfRequests: 2,
+        timeout: 3000,
+      },
+    )
+
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/posts/access/${doc.id}`,
+      async () => {
+        await titleField.fill('Updated Title 2')
+        await wait(500)
+        await page.click('#action-save', { delay: 100 })
+      },
+      {
+        minimumNumberOfRequests: 2,
+        allowedNumberOfRequests: 2,
+        timeout: 3000,
+      },
+    )
+  })
+
+  test('autosave - should not fetch new doc permissions on every autosave', async () => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: {
+        title: 'Initial Title',
+      },
+    })
+
+    await page.goto(autosavePostsUrl.edit(doc.id))
+    const titleField = page.locator('#field-title')
+    await expect(titleField).toBeEnabled()
+
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      async () => {
+        await titleField.fill('Updated Title')
+      },
+      {
+        allowedNumberOfRequests: 0,
+        timeout: 3000,
+      },
+    )
+
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      async () => {
+        await titleField.fill('Updated Title Again')
+      },
+      {
+        allowedNumberOfRequests: 0,
+        timeout: 3000,
+      },
+    )
+
+    // save manually and ensure the permissions are fetched again
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      async () => {
+        await page.click('#action-save', { delay: 100 })
+      },
+      {
+        allowedNumberOfRequests: 2,
+        minimumNumberOfRequests: 2,
+        timeout: 3000,
+      },
+    )
   })
 
   test('autosave - should render computed values after autosave', async () => {
