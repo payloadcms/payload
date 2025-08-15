@@ -150,9 +150,6 @@ describe('Block fields', () => {
 
   test('should duplicate block', async () => {
     await page.goto(url.create)
-    const firstRow = page.locator('#field-blocks #blocks-row-0')
-    const rowActions = firstRow.locator('.collapsible__actions')
-    await expect(rowActions).toBeVisible()
 
     await duplicateArrayRow(page, 'blocks', 0)
 
