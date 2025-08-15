@@ -16,6 +16,7 @@ export type PluginLanguage = Language<{
     'field-page-label': string
     'field-selectionToUse-label': string
     'field-sort-label': string
+    'field-sort-order-label': string
     'selectionToUse-allDocuments': string
     'selectionToUse-currentFilters': string
     'selectionToUse-currentSelection': string

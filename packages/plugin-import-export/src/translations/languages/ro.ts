@@ -15,6 +15,7 @@ export const roTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Pagina',
     'field-selectionToUse-label': 'Selectarea pentru utilizare',
     'field-sort-label': 'Sortează după',
+    'field-sort-order-label': 'Ordine de sortare',
     'selectionToUse-allDocuments': 'Utilizați toate documentele.',
     'selectionToUse-currentFilters': 'Utilizați filtrele curente',
     'selectionToUse-currentSelection': 'Utilizați selecția curentă',

@@ -11,8 +11,9 @@ import {
   useField,
   useListQuery,
 } from '@payloadcms/ui'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
+import { applySortOrder, stripSortDash } from '../../utilities/sortHelpers.js'
 import { reduceFields } from '../FieldsToExport/reduceFields.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
 import './index.scss'
@@ -21,12 +22,19 @@ const baseClass = 'sort-by-fields'
 
 export const SortBy: SelectFieldClientComponent = (props) => {
   const { id } = useDocumentInfo()
-  const { setValue, value } = useField<string>()
+
+  // The "sort" text field that stores 'title' or '-title'
+  const { setValue: setSort, value: sortRaw } = useField<string>()
+
+  // Sibling order field ('asc' | 'desc') used when writing sort on change
+  const { value: sortOrder = 'asc' } = useField<string>({ path: 'sortOrder' })
+
   const { value: collectionSlug } = useField<string>({ path: 'collectionSlug' })
   const { query } = useListQuery()
   const { getEntityConfig } = useConfig()
   const { collection } = useImportExport()
 
+  // ReactSelect's displayed option
   const [displayedValue, setDisplayedValue] = useState<{
     id: string
     label: ReactNode
@@ -34,40 +42,52 @@ export const SortBy: SelectFieldClientComponent = (props) => {
   } | null>(null)
 
   const collectionConfig = getEntityConfig({ collectionSlug: collectionSlug ?? collection })
-  const fieldOptions = reduceFields({ fields: collectionConfig?.fields })
+  const fieldOptions = useMemo(
+    () => reduceFields({ fields: collectionConfig?.fields }),
+    [collectionConfig?.fields],
+  )
 
-  // Sync displayedValue with value from useField
+  // Normalize the stored value for display (strip the '-') and pick the option
   useEffect(() => {
-    if (!value) {
+    const clean = stripSortDash(sortRaw)
+    if (!clean) {
       setDisplayedValue(null)
       return
     }
 
-    const option = fieldOptions.find((field) => field.value === value)
-    if (option && (!displayedValue || displayedValue.value !== value)) {
+    const option = fieldOptions.find((f) => f.value === clean)
+    if (option && (!displayedValue || displayedValue.value !== clean)) {
       setDisplayedValue(option)
     }
-  }, [displayedValue, fieldOptions, value])
+  }, [sortRaw, fieldOptions, displayedValue])
 
+  // Sync the visible select from list-view query sort,
+  // but no need to write to the "sort" field here — SortOrder owns initial combined value.
   useEffect(() => {
-    if (id || !query?.sort || value) {
+    if (id || !query?.sort || sortRaw) {
       return
     }
 
-    const option = fieldOptions.find((field) => field.value === query.sort)
+    if (!query.sort) {
+      return
+    }
+
+    const clean = stripSortDash(query.sort as string)
+    const option = fieldOptions.find((f) => f.value === clean)
     if (option) {
-      setValue(option.value)
       setDisplayedValue(option)
     }
-  }, [fieldOptions, id, query?.sort, value, setValue])
+  }, [id, query?.sort, sortRaw, fieldOptions])
 
+  // When user selects a different field, store it with the current order applied
   const onChange = (option: { id: string; label: ReactNode; value: string } | null) => {
     if (!option) {
-      setValue('')
+      setSort('')
       setDisplayedValue(null)
     } else {
-      setValue(option.value)
       setDisplayedValue(option)
+      const next = applySortOrder(option.value, String(sortOrder) as 'asc' | 'desc')
+      setSort(next)
     }
   }
 

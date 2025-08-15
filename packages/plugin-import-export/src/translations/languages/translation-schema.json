@@ -58,6 +58,9 @@
         "field-sort-label": {
           "type": "string"
         },
+        "field-sort-order-label": {
+          "type": "string"
+        },
         "no": {
           "type": "string"
         },
@@ -96,6 +99,7 @@
         "field-name-label",
         "field-selectionToUse-label",
         "field-sort-label",
+        "field-sort-order-label",
         "no",
         "preview",
         "selectionToUse-allDocuments",
