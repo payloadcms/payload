@@ -38,6 +38,8 @@ export const updateOne: UpdateOne = async function updateOne(
       select,
     }),
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   const query = await buildQuery({

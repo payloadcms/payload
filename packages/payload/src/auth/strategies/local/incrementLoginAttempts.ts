@@ -142,6 +142,9 @@ export const incrementLoginAttempts = async ({
 
         user.sessions = currentUser.sessions
 
+        // Ensure updatedAt date is always updated
+        user.updatedAt = new Date().toISOString()
+
         await payload.db.updateOne({
           id: user.id,
           collection: collection.slug,
