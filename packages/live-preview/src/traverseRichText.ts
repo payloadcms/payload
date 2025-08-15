@@ -5,14 +5,14 @@ import type { PopulationsByCollection } from './types.js'
 import { traverseFields } from './traverseFields.js'
 
 export const traverseRichText = ({
-  blocksFieldSchema,
+  blocksSchemaMap,
   externallyUpdatedRelationship,
   incomingData,
   localeChanged,
   populationsByCollection,
   result,
 }: {
-  blocksFieldSchema?: FieldSchemaJSON
+  blocksSchemaMap?: Record<string, FieldSchemaJSON>
   externallyUpdatedRelationship?: DocumentEvent
   incomingData: any
   localeChanged: boolean
@@ -30,7 +30,7 @@ export const traverseRichText = ({
       }
 
       return traverseRichText({
-        blocksFieldSchema,
+        blocksSchemaMap,
         externallyUpdatedRelationship,
         incomingData: item,
         localeChanged,
@@ -54,23 +54,26 @@ export const traverseRichText = ({
 
     // If the incoming data is a block, we need to handle it differently
     if (incomingData.type === 'block') {
-      const incomingBlockJSON = blocksFieldSchema?.[incomingData.fields.blockType]
-      if (incomingBlockJSON?.fields) {
+      const blockFieldSchema = blocksSchemaMap?.[incomingData.fields.blockType]
+      if (blockFieldSchema) {
+        const incomingBlockFields = incomingData.fields
+
         result.type = 'block'
         result.version = 2
         result.format = ''
         result.fields = {}
 
         traverseFields({
+          blocksSchemaMap,
           externallyUpdatedRelationship,
-          fieldSchema: incomingBlockJSON.fields,
-          incomingData: incomingData.fields,
+          fieldSchema: blockFieldSchema,
+          incomingData: incomingBlockFields,
           localeChanged,
           populationsByCollection,
           result: result.fields,
         })
 
-        result.fields.blockType = incomingData.fields.blockType
+        result.fields.blockType = incomingBlockFields.blockType
         return result
       }
     }
@@ -121,7 +124,7 @@ export const traverseRichText = ({
         }
       } else {
         result[key] = traverseRichText({
-          blocksFieldSchema,
+          blocksSchemaMap,
           externallyUpdatedRelationship,
           incomingData: incomingData[key],
           localeChanged,

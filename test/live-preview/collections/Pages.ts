@@ -88,7 +88,7 @@ export const Pages: CollectionConfig = {
               editor: lexicalEditor({
                 features: ({ defaultFeatures }) => [
                   ...defaultFeatures,
-                  BlocksFeature({ blocks: [MediaBlock] }),
+                  BlocksFeature({ blocks: ['mediaBlock'] }),
                 ],
               }),
             },

@@ -94,34 +94,6 @@ export const fieldSchemaToJSON = (
 
         break
 
-      case 'richText': {
-        acc.push({
-          name: field.name,
-          type: field.type,
-          blocks:
-            'blocks' in field
-              ? field.blocks?.reduce((acc, block) => {
-                  ;(acc as any)[block.slug] = {
-                    fields: fieldSchemaToJSON(
-                      [
-                        ...block.fields,
-                        {
-                          name: 'id',
-                          type: 'text',
-                        },
-                      ],
-                      config,
-                    ),
-                  }
-
-                  return acc
-                }, {} as FieldSchemaJSON)
-              : undefined,
-        })
-
-        break
-      }
-
       case 'tabs': {
         let tabFields: FieldSchemaJSON = []
 

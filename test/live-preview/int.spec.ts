@@ -21,6 +21,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 let schemaJSON: FieldSchemaJSON
+let blocksSchemaMap: Record<string, FieldSchemaJSON>
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -40,7 +41,7 @@ describe('Collections - Live Preview', () => {
   let media: Media
 
   beforeAll(async () => {
-    ; ({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     tenant = await payload.create({
       collection: tenantsSlug,
@@ -99,6 +100,21 @@ describe('Collections - Live Preview', () => {
       throw new Error("Couldn't find client fields for 'pages' collection")
     }
     schemaJSON = fieldSchemaToJSON(clientFields, clientConfig)
+    blocksSchemaMap = Object.fromEntries(
+      (clientConfig.blocks || []).map((b) => [
+        b.slug,
+        fieldSchemaToJSON(
+          [
+            ...b.fields,
+            {
+              name: 'id',
+              type: 'text',
+            },
+          ],
+          clientConfig,
+        ),
+      ]),
+    )
   })
 
   afterAll(async () => {
@@ -951,6 +967,7 @@ describe('Collections - Live Preview', () => {
     const merge1 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
+      blocksSchemaMap,
       incomingData: {
         ...initialData,
         richTextLexical: {

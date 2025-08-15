@@ -1292,9 +1292,7 @@ export type RichTextFieldClient<
   TValue extends object = any,
   TAdapterProps = any,
   TExtraProperties = object,
-> = {
-  blocks?: ClientBlock[]
-} & FieldBaseClient &
+> = FieldBaseClient &
   Pick<RichTextField<TValue, TAdapterProps, TExtraProperties>, 'maxDepth' | 'type'> &
   TExtraProperties
 

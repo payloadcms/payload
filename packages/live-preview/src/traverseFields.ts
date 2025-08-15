@@ -5,6 +5,7 @@ import type { PopulationsByCollection } from './types.js'
 import { traverseRichText } from './traverseRichText.js'
 
 export const traverseFields = <T extends Record<string, any>>(args: {
+  blocksSchemaMap?: Record<string, FieldSchemaJSON>
   externallyUpdatedRelationship?: DocumentEvent
   fieldSchema: FieldSchemaJSON
   incomingData: T
@@ -13,6 +14,7 @@ export const traverseFields = <T extends Record<string, any>>(args: {
   result: Record<string, any>
 }): void => {
   const {
+    blocksSchemaMap,
     externallyUpdatedRelationship,
     fieldSchema: fieldSchemas,
     incomingData,
@@ -46,6 +48,7 @@ export const traverseFields = <T extends Record<string, any>>(args: {
               }
 
               traverseFields({
+                blocksSchemaMap,
                 externallyUpdatedRelationship,
                 fieldSchema: fieldSchema.fields!,
                 incomingData: incomingRow,
@@ -80,6 +83,7 @@ export const traverseFields = <T extends Record<string, any>>(args: {
               }
 
               traverseFields({
+                blocksSchemaMap,
                 externallyUpdatedRelationship,
                 fieldSchema: incomingBlockJSON!.fields!,
                 incomingData: incomingBlock,
@@ -104,6 +108,7 @@ export const traverseFields = <T extends Record<string, any>>(args: {
           }
 
           traverseFields({
+            blocksSchemaMap,
             externallyUpdatedRelationship,
             fieldSchema: fieldSchema.fields!,
             incomingData: incomingData[fieldName] || {},
@@ -283,7 +288,7 @@ export const traverseFields = <T extends Record<string, any>>(args: {
           break
         case 'richText':
           result[fieldName] = traverseRichText({
-            blocksFieldSchema: fieldSchema.blocks,
+            blocksSchemaMap,
             externallyUpdatedRelationship,
             incomingData: incomingData[fieldName],
             localeChanged,

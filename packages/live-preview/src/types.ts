@@ -23,6 +23,7 @@ export type PopulationsByCollection = {
 }
 
 export type LivePreviewMessageEvent<T> = MessageEvent<{
+  blocksSchemaMap?: Record<string, FieldSchemaJSON>
   data: T
   externallyUpdatedRelationship?: DocumentEvent
   fieldSchemaJSON: FieldSchemaJSON

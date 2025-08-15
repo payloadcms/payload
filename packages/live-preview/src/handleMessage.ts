@@ -6,6 +6,7 @@ import { isLivePreviewEvent } from './isLivePreviewEvent.js'
 import { mergeData } from './mergeData.js'
 
 const _payloadLivePreview: {
+  blocksSchemaMap?: Record<string, FieldSchemaJSON>
   fieldSchema: FieldSchemaJSON | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   previousData: any
@@ -35,7 +36,8 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
   const { apiRoute, depth, event, initialData, requestHandler, serverURL } = args
 
   if (isLivePreviewEvent(event, serverURL)) {
-    const { data, externallyUpdatedRelationship, fieldSchemaJSON, locale } = event.data
+    const { blocksSchemaMap, data, externallyUpdatedRelationship, fieldSchemaJSON, locale } =
+      event.data
 
     if (!_payloadLivePreview?.fieldSchema && fieldSchemaJSON) {
       _payloadLivePreview.fieldSchema = fieldSchemaJSON
@@ -50,8 +52,13 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
       return initialData
     }
 
+    if (!_payloadLivePreview.blocksSchemaMap && blocksSchemaMap) {
+      _payloadLivePreview.blocksSchemaMap = blocksSchemaMap
+    }
+
     const mergedData = await mergeData<T>({
       apiRoute,
+      blocksSchemaMap: _payloadLivePreview.blocksSchemaMap,
       depth,
       externallyUpdatedRelationship,
       fieldSchema: _payloadLivePreview.fieldSchema,

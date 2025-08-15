@@ -20,6 +20,7 @@ const baseClass = 'live-preview-window'
 export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   const {
     appIsReady,
+    blocksSchemaMap,
     breakpoint,
     fieldSchemaJSON,
     iframeHasLoaded,
@@ -64,6 +65,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
 
       const message = {
         type: 'payload-live-preview',
+        blocksSchemaMap: shouldSendSchema ? blocksSchemaMap : undefined,
         data: values,
         externallyUpdatedRelationship: mostRecentUpdate,
         fieldSchemaJSON: shouldSendSchema ? fieldSchemaJSON : undefined,
