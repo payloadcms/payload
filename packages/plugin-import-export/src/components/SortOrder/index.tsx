@@ -3,9 +3,9 @@
 import type { SelectFieldClientComponent } from 'payload'
 
 import { FieldLabel, ReactSelect, useDocumentInfo, useField, useListQuery } from '@payloadcms/ui'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
-import { applySortOrder, stripSortDash } from '../../utilities/sortHelpers.js'
+import { applySortOrder, normalizeQueryParam, stripSortDash } from '../../utilities/sortHelpers.js'
 import './index.scss'
 
 const baseClass = 'sort-order-field'
@@ -19,17 +19,6 @@ const options = [
 ] as const
 
 const defaultOption: OrderOption = options[0]
-
-// Safely coerce query.sort to a string (ignore arrays)
-const normalizeSortParam = (v: unknown): string | undefined => {
-  if (typeof v === 'string') {
-    return v
-  }
-  if (Array.isArray(v) && typeof v[0] === 'string') {
-    return v[0]
-  }
-  return undefined
-}
 
 export const SortOrder: SelectFieldClientComponent = (props) => {
   const { id } = useDocumentInfo()
@@ -51,23 +40,51 @@ export const SortOrder: SelectFieldClientComponent = (props) => {
   )
   const [displayed, setDisplayed] = useState<null | OrderOption>(currentOption)
 
-  // Derive from list-view query.sort if present
+  // One-time init guard so clearing `sort` doesn't rehydrate from query again
+  const didInitRef = useRef(false)
+
+  // Derive from list-view query.sort if present; otherwise fall back to groupBy
   useEffect(() => {
+    if (didInitRef.current) {
+      return
+    }
+
+    // Existing export -> don't initialize here
     if (id) {
-      return
-    }
-    const qs = normalizeSortParam(query?.sort)
-    if (!qs) {
+      didInitRef.current = true
       return
     }
 
-    const isDesc = qs.startsWith('-')
-    const base = stripSortDash(qs)
-    const order: Order = isDesc ? 'desc' : 'asc'
+    // If sort already has a value, treat as initialized
+    if (typeof sortRaw === 'string' && sortRaw.length > 0) {
+      didInitRef.current = true
+      return
+    }
 
-    setOrder(order)
-    setSort(applySortOrder(base, order))
-  }, [id, query?.sort, setOrder, setSort])
+    const qsSort = normalizeQueryParam(query?.sort)
+    const qsGroupBy = normalizeQueryParam(query?.groupBy)
+
+    if (qsSort) {
+      const isDesc = qsSort.startsWith('-')
+      const base = stripSortDash(qsSort)
+      const order: Order = isDesc ? 'desc' : 'asc'
+      setOrder(order)
+      setSort(applySortOrder(base, order)) // combined: 'title' or '-title'
+      didInitRef.current = true
+      return
+    }
+
+    // Fallback: groupBy (always ascending)
+    if (qsGroupBy) {
+      setOrder('asc')
+      setSort(applySortOrder(qsGroupBy, 'asc')) // write 'groupByField' (no dash)
+      didInitRef.current = true
+      return
+    }
+
+    // Nothing to initialize
+    didInitRef.current = true
+  }, [id, query?.sort, query?.groupBy, sortRaw, setOrder, setSort])
 
   // Keep the select's displayed option in sync with the stored order
   useEffect(() => {

@@ -125,6 +125,8 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
                 components: {
                   Field: '@payloadcms/plugin-import-export/rsc#SortOrder',
                 },
+                // Only show when `sort` has a value
+                condition: ({ sort }) => typeof sort === 'string' && sort.trim().length > 0,
               },
               // @ts-expect-error - this is not correctly typed in plugins right now
               label: ({ t }) => t('plugin-import-export:field-sort-order-label'),

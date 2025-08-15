@@ -11,9 +11,9 @@ import {
   useField,
   useListQuery,
 } from '@payloadcms/ui'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
-import { applySortOrder, stripSortDash } from '../../utilities/sortHelpers.js'
+import { applySortOrder, normalizeQueryParam, stripSortDash } from '../../utilities/sortHelpers.js'
 import { reduceFields } from '../FieldsToExport/reduceFields.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
 import './index.scss'
@@ -28,6 +28,8 @@ export const SortBy: SelectFieldClientComponent = (props) => {
 
   // Sibling order field ('asc' | 'desc') used when writing sort on change
   const { value: sortOrder = 'asc' } = useField<string>({ path: 'sortOrder' })
+  // Needed so we can initialize sortOrder when SortOrder component is hidden
+  const { setValue: setSortOrder } = useField<'asc' | 'desc'>({ path: 'sortOrder' })
 
   const { value: collectionSlug } = useField<string>({ path: 'collectionSlug' })
   const { query } = useListQuery()
@@ -61,23 +63,49 @@ export const SortBy: SelectFieldClientComponent = (props) => {
     }
   }, [sortRaw, fieldOptions, displayedValue])
 
-  // Sync the visible select from list-view query sort,
-  // but no need to write to the "sort" field here — SortOrder owns initial combined value.
+  // One-time init guard so clearing `sort` doesn't rehydrate from query again
+  const didInitRef = useRef(false)
+
+  // Sync the visible select from list-view query sort (preferred) or groupBy (fallback)
+  // and initialize both `sort` and `sortOrder` here as SortOrder may be hidden by admin.condition.
   useEffect(() => {
-    if (id || !query?.sort || sortRaw) {
+    if (didInitRef.current) {
+      return
+    }
+    if (id) {
+      didInitRef.current = true
+      return
+    }
+    if (typeof sortRaw === 'string' && sortRaw.length > 0) {
+      // Already initialized elsewhere
+      didInitRef.current = true
       return
     }
 
-    if (!query.sort) {
+    const qsSort = normalizeQueryParam(query?.sort)
+    const qsGroupBy = normalizeQueryParam(query?.groupBy)
+
+    const source = qsSort ?? qsGroupBy
+    if (!source) {
+      didInitRef.current = true
       return
     }
 
-    const clean = stripSortDash(query.sort as string)
-    const option = fieldOptions.find((f) => f.value === clean)
+    const isDesc = !!qsSort && qsSort.startsWith('-')
+    const base = stripSortDash(source)
+    const order: 'asc' | 'desc' = isDesc ? 'desc' : 'asc'
+
+    // Write BOTH fields so preview/export have the right values even if SortOrder is hidden
+    setSort(applySortOrder(base, order))
+    setSortOrder(order)
+
+    const option = fieldOptions.find((f) => f.value === base)
     if (option) {
       setDisplayedValue(option)
     }
-  }, [id, query?.sort, sortRaw, fieldOptions])
+
+    didInitRef.current = true
+  }, [id, query?.groupBy, query?.sort, sortRaw, fieldOptions, setSort, setSortOrder])
 
   // When user selects a different field, store it with the current order applied
   const onChange = (option: { id: string; label: ReactNode; value: string } | null) => {
