@@ -331,5 +331,7 @@ test/databaseAdapter.js
 test/.localstack
 test/google-cloud-storage
 test/azurestoragedata/
+/media-without-delete-access
+
 
 licenses.csv
