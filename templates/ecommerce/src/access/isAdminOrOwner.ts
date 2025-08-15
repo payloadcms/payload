@@ -1,7 +1,9 @@
 import type { Access } from 'payload'
 
-export const ownerOrAdminAddress: Access = async ({ id, data, req: { user } }) => {
-  if (user?.roles && user?.roles.length && user?.roles?.includes('admin')) {
+import { checkRole } from '@/access/utilities'
+
+export const isAdminOrOwner: Access = ({ req: { user } }) => {
+  if (user && checkRole(['admin'], user)) {
     return true
   }
 

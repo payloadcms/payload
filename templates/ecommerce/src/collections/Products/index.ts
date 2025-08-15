@@ -1,5 +1,3 @@
-import { admins } from '@/access/admins'
-import { adminsOrPublished } from '@/access/adminsOrPublished'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Content } from '@/blocks/Content/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
@@ -23,14 +21,7 @@ import {
 import { Field } from 'payload'
 
 export const ProductsCollection: CollectionOverride = {
-  access: {
-    create: admins,
-    delete: admins,
-    read: adminsOrPublished,
-    update: admins,
-  },
   admin: {
-    group: 'Ecommerce',
     defaultColumns: ['title', 'enableVariants', '_status', 'variants.variants'],
     livePreview: {
       url: ({ data, req }) => {
@@ -61,11 +52,6 @@ export const ProductsCollection: CollectionOverride = {
     priceInUSD: true,
     inventory: true,
     meta: true,
-  },
-  versions: {
-    drafts: {
-      autosave: true,
-    },
   },
   fields: ({ defaultFields }) => {
     const fields: Field[] = [

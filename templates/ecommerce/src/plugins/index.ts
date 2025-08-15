@@ -10,13 +10,12 @@ import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
 import { Page, Product } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 import { ProductsCollection } from '@/collections/Products'
-import { CartsCollection } from '@/collections/Carts'
-import { TransactionsCollection } from '@/collections/Transactions'
-import { OrdersCollection } from '@/collections/Orders'
-import { VariantOptionsCollection } from '@/collections/VariantOptions'
-import { VariantTypesCollection } from '@/collections/VariantTypes'
 import { VariantsCollection } from '@/collections/Variants'
-import { Addresses } from '@/collections/Addresses'
+import { isAdminOrOwner } from '@/access/isAdminOrOwner'
+import { isAdminOrPublished } from '@/access/isAdminOrPublished'
+import { isAdmin } from '@/access/isAdmin'
+import { isAdminField } from '@/access/isAdminField'
+import { isCustomerField } from '@/access/isCustomerField'
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Ecommerce Template` : 'Payload Ecommerce Template'
@@ -68,11 +67,15 @@ export const plugins: Plugin[] = [
     },
   }),
   ecommercePlugin({
+    access: {
+      isAdmin: isAdmin,
+      isAdminField: isAdminField,
+      isAdminOrOwner: isAdminOrOwner,
+      isAdminOrPublished: isAdminOrPublished,
+      isCustomerField: isCustomerField,
+    },
     customers: {
       slug: 'users',
-    },
-    addresses: {
-      collectionOverride: Addresses,
     },
     payments: {
       paymentMethods: [
@@ -83,20 +86,9 @@ export const plugins: Plugin[] = [
         }),
       ],
     },
-    carts: {
-      cartsCollection: CartsCollection,
-    },
-    orders: {
-      ordersCollection: OrdersCollection,
-    },
-    transactions: {
-      transactionsCollection: TransactionsCollection,
-    },
     products: {
       variants: {
         variantsCollection: VariantsCollection,
-        variantOptionsCollection: VariantOptionsCollection,
-        variantTypesCollection: VariantTypesCollection,
       },
       productsCollection: ProductsCollection,
     },

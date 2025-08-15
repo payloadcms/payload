@@ -1,8 +1,10 @@
 import type {
+  Access,
   CollectionConfig,
   DefaultDocumentIDType,
   Endpoint,
   Field,
+  FieldAccess,
   GroupField,
   PayloadRequest,
   SelectType,
@@ -342,7 +344,52 @@ export type CollectionSlugMap = {
   variantTypes: string
 }
 
+export type AccessConfig = {
+  /**
+   * Limited to only admin users.
+   */
+  isAdmin: Access
+  /**
+   * Limited to only admin users, specifically for Field level access control.
+   */
+  isAdminField: FieldAccess
+  /**
+   * Is the owner of the document via the `customer` field or is an admin.
+   */
+  isAdminOrOwner: Access
+  /**
+   * The document is published or user is admin.
+   */
+  isAdminOrPublished: Access
+  /**
+   * Authenticated users only. Defaults to the example function.
+   *
+   * @example
+   * authenticated: ({ req }) => !!req?.user
+   */
+  isAuthenticated?: Access
+  /**
+   * Limited to customers only, specifically for Field level access control.
+   */
+  isCustomerField: FieldAccess
+  /**
+   * Public access. Defaults to the example function.
+   *
+   * @example
+   * public: () => true
+   */
+  isPublic?: Access
+}
+
 export type EcommercePluginConfig = {
+  /**
+   * Customise the access control for the plugin.
+   *
+   * @example
+   * ```ts
+   * ```
+   */
+  access: AccessConfig
   /**
    * Enable the addresses collection to allow customers, transactions and orders to have multiple addresses for shipping and billing. Accepts an override to customise the addresses collection.
    * Defaults to supporting a default set of countries.
@@ -372,11 +419,16 @@ export type EcommercePluginConfig = {
    */
   customers: CustomersConfig
   /**
-   * Enable tracking of inventory for products and variants.
+   * Enable tracking of inventory for products and variants. Accepts a config object to override the default collection settings.
    *
    * Defaults to true.
    */
   inventory?: boolean | InventoryConfig
+  /**
+   * Enables orders and accepts a config object to override the default collection settings.
+   *
+   * Defaults to true.
+   */
   orders?: boolean | OrdersConfig
   /**
    * Enable tracking of payments. Accepts a config object to override the default collection settings.
@@ -384,6 +436,11 @@ export type EcommercePluginConfig = {
    * Defaults to true when the paymentMethods array is provided.
    */
   payments?: PaymentsConfig
+  /**
+   * Enables products and variants. Accepts a config object to override the product collection and each variant collection type.
+   *
+   * Defaults to true.
+   */
   products?: boolean | ProductsConfig
   /**
    * Enable tracking of transactions. Accepts a config object to override the default collection settings.
@@ -394,10 +451,14 @@ export type EcommercePluginConfig = {
 }
 
 export type SanitizedEcommercePluginConfig = {
+  access: Required<AccessConfig>
   addresses: { addressFields: Field[] } & Omit<AddressesConfig, 'addressFields'>
   currencies: Required<CurrenciesConfig>
   inventory?: InventoryConfig
   payments: {
     paymentMethods: [] | PaymentAdapter[]
   }
-} & Omit<Required<EcommercePluginConfig>, 'addresses' | 'currencies' | 'inventory' | 'payments'>
+} & Omit<
+  Required<EcommercePluginConfig>,
+  'access' | 'addresses' | 'currencies' | 'inventory' | 'payments'
+>

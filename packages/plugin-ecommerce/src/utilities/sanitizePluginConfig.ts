@@ -76,5 +76,11 @@ export const sanitizePluginConfig = ({ pluginConfig }: Props): SanitizedEcommerc
     config.payments.paymentMethods = []
   }
 
+  config.access = {
+    isAuthenticated: ({ req: { user } }) => !!user,
+    isPublic: () => true,
+    ...pluginConfig.access,
+  }
+
   return config as SanitizedEcommercePluginConfig
 }

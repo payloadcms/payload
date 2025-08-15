@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { CurrenciesConfig, FieldsOverride, PaymentAdapter } from '../types.js'
+import type { AccessConfig, CurrenciesConfig, FieldsOverride, PaymentAdapter } from '../types.js'
 
 import { amountField } from '../fields/amountField.js'
 import { cartItemsField } from '../fields/cartItemsField.js'
@@ -25,6 +25,7 @@ type Props = {
    * Enable variants in the transactions collection.
    */
   enableVariants?: boolean
+  isAdmin: NonNullable<AccessConfig['isAdmin']>
   /**
    * Slug of the orders collection, defaults to 'orders'.
    */
@@ -48,6 +49,7 @@ export const transactionsCollection: (props?: Props) => CollectionConfig = (prop
     currenciesConfig,
     customersSlug = 'users',
     enableVariants = false,
+    isAdmin,
     ordersSlug = 'orders',
     overrides,
     paymentMethods,
@@ -152,11 +154,15 @@ export const transactionsCollection: (props?: Props) => CollectionConfig = (prop
     slug: 'transactions',
     ...overrides,
     access: {
-      read: () => true,
-      ...(overrides?.access || []),
+      create: isAdmin,
+      delete: isAdmin,
+      read: isAdmin,
+      update: isAdmin,
+      ...overrides?.access,
     },
     admin: {
       defaultColumns: ['createdAt', 'customer', 'order', 'amount', 'status'],
+      group: 'Ecommerce',
       ...overrides?.admin,
     },
     fields,

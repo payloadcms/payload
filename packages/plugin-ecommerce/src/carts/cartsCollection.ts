@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { CurrenciesConfig, FieldsOverride } from '../types.js'
+import type { AccessConfig, CurrenciesConfig, FieldsOverride } from '../types.js'
 
 import { amountField } from '../fields/amountField.js'
 import { cartItemsField } from '../fields/cartItemsField.js'
@@ -19,6 +19,8 @@ type Props = {
    * Defaults to false.
    */
   enableVariants?: boolean
+  isOwnerOrAdmin: NonNullable<AccessConfig['isAdminOrOwner']>
+  isPublic: NonNullable<AccessConfig['isPublic']>
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   /**
    * Slug of the products collection, defaults to 'products'.
@@ -35,6 +37,8 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
     currenciesConfig,
     customersSlug = 'users',
     enableVariants = false,
+    isOwnerOrAdmin,
+    isPublic,
     overrides,
     productsSlug = 'products',
     variantsSlug = 'variants',
@@ -136,7 +140,15 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
     slug: 'carts',
     timestamps: true,
     ...overrides,
+    access: {
+      create: isPublic,
+      delete: isOwnerOrAdmin,
+      read: isOwnerOrAdmin,
+      update: isOwnerOrAdmin,
+      ...overrides?.access,
+    },
     admin: {
+      group: 'Ecommerce',
       useAsTitle: 'createdAt',
       ...overrides?.admin,
     },

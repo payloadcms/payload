@@ -31,6 +31,8 @@ export const ecommercePlugin =
      */
     const collectionSlugMap = getCollectionSlugMap({ sanitizedPluginConfig })
 
+    const accessConfig = sanitizedPluginConfig.access
+
     // Ensure collections exists
     if (!incomingConfig.collections) {
       incomingConfig.collections = []
@@ -57,6 +59,9 @@ export const ecommercePlugin =
       const addresses = addressesCollection({
         addressFields,
         customersSlug: collectionSlugMap.customers,
+        isAuthenticated: accessConfig.isAuthenticated,
+        isCustomerField: accessConfig.isCustomerField,
+        isOwnerOrAdmin: accessConfig.isAdminOrOwner,
         overrides: collectionOverrides,
         supportedCountries,
       })
@@ -81,17 +86,23 @@ export const ecommercePlugin =
         const variants = variantsCollection({
           currenciesConfig,
           inventory: sanitizedPluginConfig.inventory,
+          isAdmin: accessConfig.isAdmin,
+          isAdminOrPublished: accessConfig.isAdminOrPublished,
           overrides: overrides?.variantsCollection,
           productsSlug: collectionSlugMap.products,
           variantOptionsSlug: collectionSlugMap.variantOptions,
         })
 
         const variantTypes = variantTypesCollection({
+          isAdmin: accessConfig.isAdmin,
+          isPublic: accessConfig.isPublic,
           overrides: overrides?.variantTypesCollection,
           variantOptionsSlug: collectionSlugMap.variantOptions,
         })
 
         const variantOptions = variantOptionsCollection({
+          isAdmin: accessConfig.isAdmin,
+          isPublic: accessConfig.isPublic,
           overrides: overrides?.variantOptionsCollection,
           variantTypesSlug: collectionSlugMap.variantTypes,
         })
@@ -108,6 +119,8 @@ export const ecommercePlugin =
         ...('productsCollection' in productsConfig && productsConfig.productsCollection
           ? { overrides: productsConfig.productsCollection }
           : {}),
+        isAdmin: accessConfig.isAdmin,
+        isAdminOrPublished: accessConfig.isAdminOrPublished,
       })
 
       incomingConfig.collections.push(products)
@@ -117,6 +130,8 @@ export const ecommercePlugin =
           currenciesConfig,
           customersSlug: collectionSlugMap.customers,
           enableVariants: Boolean(productsConfig.variants),
+          isOwnerOrAdmin: accessConfig.isAdminOrOwner,
+          isPublic: accessConfig.isPublic,
           overrides:
             sanitizedPluginConfig.carts === true
               ? undefined
@@ -135,6 +150,9 @@ export const ecommercePlugin =
         currenciesConfig,
         customersSlug: collectionSlugMap.customers,
         enableVariants,
+        isAdmin: accessConfig.isAdmin,
+        isAdminField: accessConfig.isAdminField,
+        isAdminOrOwner: accessConfig.isAdminOrOwner,
         overrides:
           sanitizedPluginConfig.orders === true
             ? undefined
@@ -217,6 +235,7 @@ export const ecommercePlugin =
         currenciesConfig,
         customersSlug: collectionSlugMap.customers,
         enableVariants,
+        isAdmin: accessConfig.isAdmin,
         ordersSlug: collectionSlugMap.orders,
         overrides:
           sanitizedPluginConfig.transactions === true

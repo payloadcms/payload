@@ -1,6 +1,11 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { CurrenciesConfig, FieldsOverride, InventoryConfig } from '../../types.js'
+import type {
+  AccessConfig,
+  CurrenciesConfig,
+  FieldsOverride,
+  InventoryConfig,
+} from '../../types.js'
 
 import { inventoryField } from '../../fields/inventoryField.js'
 import { pricesField } from '../../fields/pricesField.js'
@@ -13,6 +18,8 @@ type Props = {
    * Enables inventory tracking for variants. Defaults to true.
    */
   inventory?: InventoryConfig
+  isAdmin: NonNullable<AccessConfig['isAdmin']>
+  isAdminOrPublished: NonNullable<AccessConfig['isAdminOrPublished']>
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   /**
    * Slug of the products collection, defaults to 'products'.
@@ -28,6 +35,8 @@ export const variantsCollection: (props: Props) => CollectionConfig = (props) =>
   const {
     currenciesConfig,
     inventory = true,
+    isAdmin,
+    isAdminOrPublished,
     overrides,
     productsSlug = 'products',
     variantOptionsSlug = 'variantOptions',
@@ -100,8 +109,15 @@ export const variantsCollection: (props: Props) => CollectionConfig = (props) =>
   const baseConfig: CollectionConfig = {
     slug: 'variants',
     ...overrides,
+    access: {
+      create: isAdmin,
+      delete: isAdmin,
+      read: isAdminOrPublished,
+      update: isAdmin,
+      ...overrides?.access,
+    },
     admin: {
-      // group: false,
+      group: 'Ecommerce',
       useAsTitle: 'title',
       ...overrides?.admin,
     },
@@ -112,6 +128,11 @@ export const variantsCollection: (props: Props) => CollectionConfig = (props) =>
         beforeChange({ productsSlug, variantOptionsSlug }),
         ...(overrides?.hooks?.beforeChange || []),
       ],
+    },
+    versions: {
+      drafts: {
+        autosave: true,
+      },
     },
   }
 

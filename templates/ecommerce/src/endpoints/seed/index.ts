@@ -184,12 +184,6 @@ export const seed = async ({
       data: {
         title: 'Accessories',
         slug: 'accessories',
-        breadcrumbs: [
-          {
-            label: 'Accessories',
-            url: '/accessories',
-          },
-        ],
       },
     }),
 
@@ -198,12 +192,6 @@ export const seed = async ({
       data: {
         title: 'T-Shirts',
         slug: 'tshirts',
-        breadcrumbs: [
-          {
-            label: 'T-Shirts',
-            url: '/tshirts',
-          },
-        ],
       },
     }),
 
@@ -212,12 +200,6 @@ export const seed = async ({
       data: {
         title: 'Hats',
         slug: 'hats',
-        breadcrumbs: [
-          {
-            label: 'Hats',
-            url: '/hats',
-          },
-        ],
       },
     }),
     payload.create({
@@ -225,12 +207,6 @@ export const seed = async ({
       data: {
         title: 'Hoodies',
         slug: 'hoodies',
-        breadcrumbs: [
-          {
-            label: 'Hoodies',
-            url: '/hoodies',
-          },
-        ],
       },
     }),
   ])

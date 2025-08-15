@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { CurrenciesConfig, FieldsOverride } from '../types.js'
+import type { AccessConfig, CurrenciesConfig, FieldsOverride } from '../types.js'
 
 import { amountField } from '../fields/amountField.js'
 import { cartItemsField } from '../fields/cartItemsField.js'
@@ -17,6 +17,9 @@ type Props = {
    */
   customersSlug?: string
   enableVariants?: boolean
+  isAdmin: NonNullable<AccessConfig['isAdmin']>
+  isAdminField: NonNullable<AccessConfig['isAdminField']>
+  isAdminOrOwner: NonNullable<AccessConfig['isAdminOrOwner']>
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   /**
    * Slug of the products collection, defaults to 'products'.
@@ -38,6 +41,9 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
     currenciesConfig,
     customersSlug = 'users',
     enableVariants = false,
+    isAdmin,
+    isAdminField,
+    isAdminOrOwner,
     overrides,
     productsSlug = 'products',
     transactionsSlug = 'transactions',
@@ -64,6 +70,11 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
     {
       name: 'transactions',
       type: 'relationship',
+      access: {
+        create: isAdminField,
+        read: isAdminField,
+        update: isAdminField,
+      },
       hasMany: true,
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
@@ -146,7 +157,15 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
     slug: 'orders',
     timestamps: true,
     ...overrides,
+    access: {
+      create: isAdmin,
+      delete: isAdmin,
+      read: isAdminOrOwner,
+      update: isAdmin,
+      ...overrides?.access,
+    },
     admin: {
+      group: 'Ecommerce',
       useAsTitle: 'createdAt',
       ...overrides?.admin,
     },
