@@ -77,7 +77,7 @@ export const sanitizePluginConfig = ({ pluginConfig }: Props): SanitizedEcommerc
   }
 
   config.access = {
-    isAuthenticated: ({ req: { user } }) => !!user,
+    isAuthenticated: ({ req: { user } }) => Boolean(user),
     isPublic: () => true,
     ...pluginConfig.access,
   }

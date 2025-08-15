@@ -40,7 +40,7 @@ export const productsCollection: (props: Props) => CollectionConfig = (props) =>
   } = props || {}
   const fieldsOverride = overrides?.fields
 
-  const defaultFields: Field[] = [
+  const defaultFields = [
     ...(inventory
       ? [
           inventoryField({
@@ -52,18 +52,14 @@ export const productsCollection: (props: Props) => CollectionConfig = (props) =>
           }),
         ]
       : []),
-  ]
-
-  const baseFields = [
-    ...defaultFields,
     ...(enableVariants ? variantsFields({ variantsSlug, variantTypesSlug }) : []),
     ...(currenciesConfig ? [...pricesField({ currenciesConfig })] : []),
   ]
 
   const fields =
     fieldsOverride && typeof fieldsOverride === 'function'
-      ? fieldsOverride({ defaultFields: baseFields })
-      : baseFields
+      ? fieldsOverride({ defaultFields })
+      : defaultFields
 
   const baseConfig: CollectionConfig = {
     slug: 'products',

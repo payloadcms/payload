@@ -69,10 +69,10 @@ export const CheckoutForm: React.FC<Props> = ({ customerEmail, billingAddress })
                 'orderID' in confirmResult &&
                 confirmResult.orderID
               ) {
+                const redirectUrl = `/orders/${confirmResult.orderID}${customerEmail ? `?email=${customerEmail}` : ''}`
+
                 // Clear the cart after successful payment
                 clearCart()
-
-                const redirectUrl = `/orders/${confirmResult.orderID}${customerEmail ? `?email=${customerEmail}` : ''}`
 
                 // Redirect to order confirmation page
                 router.push(redirectUrl)

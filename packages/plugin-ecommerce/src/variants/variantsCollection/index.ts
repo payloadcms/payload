@@ -69,8 +69,7 @@ export const variantsCollection: (props: Props) => CollectionConfig = (props) =>
       // enabled on the parent product
       // - separate select inputs, each showing only a specific variant (w/ options)
       // - it will save data to the DB as IDs in this relationship field
-      // and needs a validate function as well which enforces that the options are fully specified,
-      // and accurate
+      // and needs a validate function as well which enforces that the options are fully specified, and accurate
       name: 'options',
       type: 'relationship',
       admin: {
