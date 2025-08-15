@@ -7,6 +7,7 @@ import { addBlock } from 'helpers/e2e/addBlock.js'
 import { assertElementStaysVisible } from 'helpers/e2e/assertElementStaysVisible.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
+import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -21,6 +22,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { autosavePostsSlug } from './collections/Autosave/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 const { describe, beforeEach, afterEach } = test
@@ -36,11 +38,13 @@ let serverURL: string
 test.describe('Form State', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
+  let autosavePostsUrl: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
+    autosavePostsUrl = new AdminUrlUtil(serverURL, autosavePostsSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -294,6 +298,59 @@ test.describe('Form State', () => {
     // Reset CPU throttling
     await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 1 })
     await cdpSession.detach()
+  })
+
+  test('should render computed values after save', async () => {
+    await page.goto(postsUrl.create)
+    const titleField = page.locator('#field-title')
+    const computedTitleField = page.locator('#field-computedTitle')
+
+    await titleField.fill('Test Title')
+
+    await expect(computedTitleField).toHaveValue('')
+
+    await saveDocAndAssert(page)
+
+    await expect(computedTitleField).toHaveValue('Test Title')
+  })
+
+  test('autosave - should render computed values after autosave', async () => {
+    await page.goto(autosavePostsUrl.create)
+    const titleField = page.locator('#field-title')
+    const computedTitleField = page.locator('#field-computedTitle')
+
+    await titleField.fill('Test Title')
+
+    await waitForAutoSaveToRunAndComplete(page)
+
+    await expect(computedTitleField).toHaveValue('Test Title')
+  })
+
+  test('autosave - should not overwrite computed values that are being actively edited', async () => {
+    await page.goto(autosavePostsUrl.create)
+    const titleField = page.locator('#field-title')
+    const computedTitleField = page.locator('#field-computedTitle')
+
+    await titleField.fill('Test Title')
+
+    await expect(computedTitleField).toHaveValue('Test Title')
+
+    // Put cursor at end of text
+    await computedTitleField.evaluate((el: HTMLInputElement) => {
+      el.focus()
+      el.setSelectionRange(el.value.length, el.value.length)
+    })
+
+    await computedTitleField.pressSequentially(' - Edited', { delay: 100 })
+
+    await waitForAutoSaveToRunAndComplete(page)
+
+    await expect(computedTitleField).toHaveValue('Test Title - Edited')
+
+    // but then when editing another field, the computed field should update
+    await titleField.fill('Test Title 2')
+    await waitForAutoSaveToRunAndComplete(page)
+    await expect(computedTitleField).toHaveValue('Test Title 2')
   })
 
   describe('Throttled tests', () => {

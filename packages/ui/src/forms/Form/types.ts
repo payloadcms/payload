@@ -54,7 +54,15 @@ export type FormProps = {
   log?: boolean
   onChange?: ((args: { formState: FormState; submitted?: boolean }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
-  onSuccess?: (json: unknown, context?: Record<string, unknown>) => Promise<FormState | void> | void
+  onSuccess?: (
+    json: unknown,
+    options?: {
+      /**
+       * Arbitrary context passed to the onSuccess callback.
+       */
+      context?: Record<string, unknown>
+    },
+  ) => Promise<FormState | void> | void
   redirect?: string
   submitted?: boolean
   uuid?: string
@@ -70,14 +78,14 @@ export type FormProps = {
     }
 )
 
-export type SubmitOptions = {
+export type SubmitOptions<T = Record<string, unknown>> = {
   acceptValues?: AcceptValues
   action?: string
   /**
-   * @experimental - Note: this property is experimental and may change in the future. Use as your own discretion.
+   * @experimental - Note: this property is experimental and may change in the future. Use at your own discretion.
    * If you want to pass additional data to the onSuccess callback, you can use this context object.
    */
-  context?: Record<string, unknown>
+  context?: T
   /**
    * When true, will disable the form while it is processing.
    * @default true
@@ -99,11 +107,11 @@ export type SubmitOptions = {
 
 export type DispatchFields = React.Dispatch<any>
 
-export type Submit = (
-  options?: SubmitOptions,
+export type Submit = <T extends Record<string, unknown>>(
+  options?: SubmitOptions<T>,
   e?: React.FormEvent<HTMLFormElement>,
 ) => Promise</**
- * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use as your own discretion.
+ * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use at your own discretion.
  * Returns the form state and the response from the server.
  */
 { formState?: FormState; res: Response } | void>
@@ -185,7 +193,6 @@ export type ADD_ROW = {
 
 export type MERGE_SERVER_STATE = {
   acceptValues?: AcceptValues
-  formStateAtTimeOfRequest?: FormState
   prevStateRef: React.RefObject<FormState>
   serverState: FormState
   type: 'MERGE_SERVER_STATE'
