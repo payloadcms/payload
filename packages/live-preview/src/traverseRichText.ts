@@ -1,15 +1,21 @@
-import type { DocumentEvent } from 'payload'
+import type { DocumentEvent, FieldSchemaJSON } from 'payload'
 
 import type { PopulationsByCollection } from './types.js'
 
+import { traverseFields } from './traverseFields.js'
+
 export const traverseRichText = ({
+  blocksSchemaMap,
   externallyUpdatedRelationship,
   incomingData,
+  localeChanged,
   populationsByCollection,
   result,
 }: {
+  blocksSchemaMap?: Record<string, FieldSchemaJSON>
   externallyUpdatedRelationship?: DocumentEvent
   incomingData: any
+  localeChanged: boolean
   populationsByCollection: PopulationsByCollection
   result: any
 }): any => {
@@ -24,8 +30,10 @@ export const traverseRichText = ({
       }
 
       return traverseRichText({
+        blocksSchemaMap,
         externallyUpdatedRelationship,
         incomingData: item,
+        localeChanged,
         populationsByCollection,
         result: result[index],
       })
@@ -43,6 +51,32 @@ export const traverseRichText = ({
         delete result[key]
       }
     })
+
+    // If the incoming data is a block, we need to handle it differently
+    if (incomingData.type === 'block') {
+      const blockFieldSchema = blocksSchemaMap?.[incomingData.fields.blockType]
+      if (blockFieldSchema) {
+        const incomingBlockFields = incomingData.fields
+
+        result.type = 'block'
+        result.version = 2
+        result.format = ''
+        result.fields = {}
+
+        traverseFields({
+          blocksSchemaMap,
+          externallyUpdatedRelationship,
+          fieldSchema: blockFieldSchema,
+          incomingData: incomingBlockFields,
+          localeChanged,
+          populationsByCollection,
+          result: result.fields,
+        })
+
+        result.fields.blockType = incomingBlockFields.blockType
+        return result
+      }
+    }
 
     // Iterate over the keys of `incomingData` and populate `result`
     Object.keys(incomingData).forEach((key) => {
@@ -90,8 +124,10 @@ export const traverseRichText = ({
         }
       } else {
         result[key] = traverseRichText({
+          blocksSchemaMap,
           externallyUpdatedRelationship,
           incomingData: incomingData[key],
+          localeChanged,
           populationsByCollection,
           result: result[key],
         })
