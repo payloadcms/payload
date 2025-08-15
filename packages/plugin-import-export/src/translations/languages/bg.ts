@@ -12,6 +12,7 @@ export const bgTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Лимит',
     'field-locale-label': 'Регион',
     'field-name-label': 'Име на файла',
+    'field-page-label': 'Страница',
     'field-selectionToUse-label': 'Избор за използване',
     'field-sort-label': 'Сортирай по',
     'selectionToUse-allDocuments': 'Използвайте всички документи',

@@ -12,6 +12,7 @@ export const daTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Begrænsning',
     'field-locale-label': 'Lokale',
     'field-name-label': 'Filnavn',
+    'field-page-label': 'Side',
     'field-selectionToUse-label': 'Valg til brug',
     'field-sort-label': 'Sorter efter',
     'selectionToUse-allDocuments': 'Brug alle dokumenter',

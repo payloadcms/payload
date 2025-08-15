@@ -12,6 +12,7 @@ export const slTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Omejitev',
     'field-locale-label': 'Lokalno',
     'field-name-label': 'Ime datoteke',
+    'field-page-label': 'Stran',
     'field-selectionToUse-label': 'Izbor za uporabo',
     'field-sort-label': 'Razvrsti po',
     'selectionToUse-allDocuments': 'Uporabite vse dokumente',

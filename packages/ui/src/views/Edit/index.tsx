@@ -1,7 +1,7 @@
 /* eslint-disable react-compiler/react-compiler -- TODO: fix */
 'use client'
 
-import type { ClientUser, DocumentViewClientProps, FormState } from 'payload'
+import type { ClientUser, DocumentViewClientProps } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
@@ -65,6 +65,7 @@ export function DefaultEditView({
     BeforeFields,
     collectionSlug,
     currentEditor,
+    data,
     disableActions,
     disableCreate,
     disableLeaveWithoutSaving,
@@ -86,12 +87,12 @@ export function DefaultEditView({
     redirectAfterDelete,
     redirectAfterDuplicate,
     redirectAfterRestore,
-    savedDocumentData,
     setCurrentEditor,
+    setData,
     setDocumentIsLocked,
+    setLastUpdateTime,
     unlockDocument,
     updateDocumentEditor,
-    updateSavedDocumentData,
   } = useDocumentInfo()
 
   const {
@@ -237,7 +238,7 @@ export function DefaultEditView({
             setDocumentIsLocked(false)
             setCurrentEditor(null)
           } catch (err) {
-            console.error('Failed to unlock before leave', err)
+            console.error('Failed to unlock before leave', err) // eslint-disable-line no-console
           }
         }
       }
@@ -255,16 +256,21 @@ export function DefaultEditView({
     user?.id,
   ])
 
-  const onSave = useCallback(
-    async (json): Promise<FormState> => {
+  const onSave = useCallback<FormProps['onSuccess']>(
+    async (json, options) => {
+      const { context } = options || {}
+
       const controller = handleAbortRef(abortOnSaveRef)
 
+      // @ts-expect-error can ignore
       const document = json?.doc || json?.result
+
+      const updatedAt = document?.updatedAt || new Date().toISOString()
 
       reportUpdate({
         id,
         entitySlug,
-        updatedAt: document?.updatedAt || new Date().toISOString(),
+        updatedAt,
       })
 
       // If we're editing the doc of the logged-in user,
@@ -273,18 +279,24 @@ export function DefaultEditView({
         void refreshCookieAsync()
       }
 
-      incrementVersionCount()
+      setLastUpdateTime(updatedAt)
 
-      if (typeof updateSavedDocumentData === 'function') {
-        void updateSavedDocumentData(document || {})
+      if (context?.incrementVersionCount !== false) {
+        incrementVersionCount()
+      }
+
+      if (typeof setData === 'function') {
+        void setData(document || {})
       }
 
       if (typeof onSaveFromContext === 'function') {
         const operation = id ? 'update' : 'create'
 
         void onSaveFromContext({
-          ...json,
+          ...(json as Record<string, unknown>),
+          context,
           operation,
+          // @ts-expect-error todo: this is not right, should be under `doc`?
           updatedAt:
             operation === 'update'
               ? new Date().toISOString()
@@ -306,7 +318,7 @@ export function DefaultEditView({
 
       await getDocPermissions(json)
 
-      if ((id || globalSlug) && !autosaveEnabled) {
+      if (id || globalSlug) {
         const docPreferences = await getDocPreferences()
 
         const { state } = await getFormState({
@@ -341,18 +353,19 @@ export function DefaultEditView({
       user,
       collectionSlug,
       userSlug,
-      incrementVersionCount,
-      updateSavedDocumentData,
+      setLastUpdateTime,
+      setData,
       onSaveFromContext,
-      redirectAfterCreate,
       isEditing,
       depth,
+      redirectAfterCreate,
       getDocPermissions,
       globalSlug,
-      autosaveEnabled,
       refreshCookieAsync,
+      incrementVersionCount,
       adminRoute,
       locale,
+      startRouteTransition,
       router,
       resetUploadEdits,
       getDocPreferences,
@@ -362,7 +375,6 @@ export function DefaultEditView({
       schemaPathSegments,
       isLockingEnabled,
       setDocumentIsLocked,
-      startRouteTransition,
     ],
   )
 
@@ -389,13 +401,11 @@ export function DefaultEditView({
         formState: prevFormState,
         globalSlug,
         operation,
-        skipValidation: !submitted,
-        // Performance optimization: Setting it to false ensure that only fields that have explicit requireRender set in the form state will be rendered (e.g. new array rows).
-        // We only want to render ALL fields on initial render, not in onChange.
         renderAllFields: false,
         returnLockStatus: isLockingEnabled,
         schemaPath: schemaPathSegments.join('.'),
         signal: controller.signal,
+        skipValidation: !submitted,
         updateLastEdited,
       })
 
@@ -549,7 +559,7 @@ export function DefaultEditView({
               SaveButton,
               SaveDraftButton,
             }}
-            data={savedDocumentData}
+            data={data}
             disableActions={disableActions || isFolderCollection || isTrashed}
             disableCreate={disableCreate}
             EditMenuItems={EditMenuItems}
@@ -612,14 +622,14 @@ export function DefaultEditView({
                           className={`${baseClass}__auth`}
                           collectionSlug={collectionConfig.slug}
                           disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
-                          email={savedDocumentData?.email}
+                          email={data?.email}
                           loginWithUsername={auth?.loginWithUsername}
                           operation={operation}
                           readOnly={!hasSavePermission}
                           requirePassword={!id}
                           setValidateBeforeSubmit={setValidateBeforeSubmit}
                           useAPIKey={auth.useAPIKey}
-                          username={savedDocumentData?.username}
+                          username={data?.username}
                           verify={auth.verify}
                         />
                       )}

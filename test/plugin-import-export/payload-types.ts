@@ -242,6 +242,7 @@ export interface Page {
           }
       )[]
     | null;
+  hasManyMonomorphic?: (string | Post)[] | null;
   textFieldInCollapsible?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -267,6 +268,7 @@ export interface Export {
   name?: string | null;
   format?: ('csv' | 'json') | null;
   limit?: number | null;
+  page?: number | null;
   sort?: string | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
   drafts?: ('yes' | 'no') | null;
@@ -303,6 +305,7 @@ export interface ExportsTask {
   name?: string | null;
   format?: ('csv' | 'json') | null;
   limit?: number | null;
+  page?: number | null;
   sort?: string | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
   drafts?: ('yes' | 'no') | null;
@@ -580,6 +583,7 @@ export interface PagesSelect<T extends boolean = true> {
   excerpt?: T;
   hasOnePolymorphic?: T;
   hasManyPolymorphic?: T;
+  hasManyMonomorphic?: T;
   textFieldInCollapsible?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -603,6 +607,7 @@ export interface ExportsSelect<T extends boolean = true> {
   name?: T;
   format?: T;
   limit?: T;
+  page?: T;
   sort?: T;
   locale?: T;
   drafts?: T;
@@ -630,6 +635,7 @@ export interface ExportsTasksSelect<T extends boolean = true> {
   name?: T;
   format?: T;
   limit?: T;
+  page?: T;
   sort?: T;
   locale?: T;
   drafts?: T;
@@ -721,6 +727,7 @@ export interface TaskCreateCollectionExport {
     name?: string | null;
     format?: ('csv' | 'json') | null;
     limit?: number | null;
+    page?: number | null;
     sort?: string | null;
     locale?: ('all' | 'en' | 'es' | 'de') | null;
     drafts?: ('yes' | 'no') | null;

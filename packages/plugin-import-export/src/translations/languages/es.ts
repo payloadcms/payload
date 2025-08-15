@@ -12,6 +12,7 @@ export const esTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Límite',
     'field-locale-label': 'Localidad',
     'field-name-label': 'Nombre del archivo',
+    'field-page-label': 'Página',
     'field-selectionToUse-label': 'Selección para usar',
     'field-sort-label': 'Ordenar por',
     'selectionToUse-allDocuments': 'Utilice todos los documentos',

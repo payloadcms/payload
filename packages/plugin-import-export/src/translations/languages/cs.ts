@@ -12,6 +12,7 @@ export const csTranslations: PluginDefaultTranslationsObject = {
     'field-limit-label': 'Limita',
     'field-locale-label': 'Místní',
     'field-name-label': 'Název souboru',
+    'field-page-label': 'Stránka',
     'field-selectionToUse-label': 'Výběr k použití',
     'field-sort-label': 'Seřadit podle',
     'selectionToUse-allDocuments': 'Použijte všechny dokumenty',

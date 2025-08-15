@@ -873,6 +873,7 @@ export class BasePayload {
               this.config.jobs.scheduling
             ) {
               await this.jobs.handleSchedules({
+                allQueues: cronConfig.allQueues,
                 queue: cronConfig.queue,
               })
             }
@@ -891,6 +892,7 @@ export class BasePayload {
             }
 
             await this.jobs.run({
+              allQueues: cronConfig.allQueues,
               limit: cronConfig.limit ?? DEFAULT_LIMIT,
               queue: cronConfig.queue,
               silent: cronConfig.silent,
@@ -1168,6 +1170,7 @@ export type {
   AfterRefreshHook as CollectionAfterRefreshHook,
   AuthCollection,
   AuthOperationsFromCollectionSlug,
+  BaseFilter,
   BaseListFilter,
   BeforeChangeHook as CollectionBeforeChangeHook,
   BeforeDeleteHook as CollectionBeforeDeleteHook,
