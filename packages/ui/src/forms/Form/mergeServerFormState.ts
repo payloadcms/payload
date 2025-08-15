@@ -21,7 +21,6 @@ export type AcceptValues =
 type Args = {
   acceptValues?: AcceptValues
   currentState?: FormState
-  formStateAtTimeOfRequest?: FormState
   incomingState: FormState
 }
 
@@ -37,7 +36,6 @@ type Args = {
 export const mergeServerFormState = ({
   acceptValues,
   currentState = {},
-  formStateAtTimeOfRequest,
   incomingState,
 }: Args): FormState => {
   const newState = { ...currentState }
@@ -49,8 +47,9 @@ export const mergeServerFormState = ({
 
     /**
      * If it's a new field added by the server, always accept the value.
-     * Otherwise, only accept the values if explicitly requested, e.g. on submit.
-     * Can also control this granularly by only accepting unmodified values, e.g. for autosave.
+     * Otherwise:
+     *   a. accept all values when explicitly requested, e.g. on submit
+     *   b. only accept values for unmodified fields, e.g. on autosave
      */
     if (
       !incomingField.addedByServer &&
@@ -59,7 +58,7 @@ export const mergeServerFormState = ({
         (typeof acceptValues === 'object' &&
           acceptValues !== null &&
           acceptValues?.overrideLocalChanges === false &&
-          currentState[path]?.value !== formStateAtTimeOfRequest?.[path]?.value))
+          currentState[path].isModified))
     ) {
       delete incomingField.value
       delete incomingField.initialValue

@@ -8,6 +8,7 @@ import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
+import type { FormOnSuccess } from '../../forms/Form/types.js'
 import type { LockedState } from '../../utilities/buildFormState.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
@@ -263,8 +264,10 @@ export function DefaultEditView({
     user?.id,
   ])
 
-  const onSave = useCallback(
-    async (json, context?: OnSaveContext): Promise<FormState> => {
+  const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
+    async (json, options) => {
+      const { context } = options || {}
+
       const controller = handleAbortRef(abortOnSaveRef)
 
       const document = json?.doc || json?.result
@@ -297,9 +300,10 @@ export function DefaultEditView({
         const operation = id ? 'update' : 'create'
 
         void onSaveFromContext({
-          ...json,
+          ...(json as Record<string, unknown>),
           context,
           operation,
+          // @ts-expect-error todo: this is not right, should be under `doc`?
           updatedAt:
             operation === 'update'
               ? new Date().toISOString()
@@ -407,13 +411,11 @@ export function DefaultEditView({
         formState: prevFormState,
         globalSlug,
         operation,
-        skipValidation: !submitted,
-        // Performance optimization: Setting it to false ensure that only fields that have explicit requireRender set in the form state will be rendered (e.g. new array rows).
-        // We only want to render ALL fields on initial render, not in onChange.
         renderAllFields: false,
         returnLockStatus: isLockingEnabled,
         schemaPath: schemaPathSegments.join('.'),
         signal: controller.signal,
+        skipValidation: !submitted,
         updateLastEdited,
       })
 

@@ -7,6 +7,7 @@ import { addBlock } from 'helpers/e2e/addBlock.js'
 import { assertElementStaysVisible } from 'helpers/e2e/assertElementStaysVisible.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
+import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -400,6 +401,45 @@ test.describe('Form State', () => {
         timeout: 3000,
       },
     )
+  })
+
+  test('autosave - should render computed values after autosave', async () => {
+    await page.goto(autosavePostsUrl.create)
+    const titleField = page.locator('#field-title')
+    const computedTitleField = page.locator('#field-computedTitle')
+
+    await titleField.fill('Test Title')
+
+    await waitForAutoSaveToRunAndComplete(page)
+
+    await expect(computedTitleField).toHaveValue('Test Title')
+  })
+
+  test('autosave - should not overwrite computed values that are being actively edited', async () => {
+    await page.goto(autosavePostsUrl.create)
+    const titleField = page.locator('#field-title')
+    const computedTitleField = page.locator('#field-computedTitle')
+
+    await titleField.fill('Test Title')
+
+    await expect(computedTitleField).toHaveValue('Test Title')
+
+    // Put cursor at end of text
+    await computedTitleField.evaluate((el: HTMLInputElement) => {
+      el.focus()
+      el.setSelectionRange(el.value.length, el.value.length)
+    })
+
+    await computedTitleField.pressSequentially(' - Edited', { delay: 100 })
+
+    await waitForAutoSaveToRunAndComplete(page)
+
+    await expect(computedTitleField).toHaveValue('Test Title - Edited')
+
+    // but then when editing another field, the computed field should update
+    await titleField.fill('Test Title 2')
+    await waitForAutoSaveToRunAndComplete(page)
+    await expect(computedTitleField).toHaveValue('Test Title 2')
   })
 
   describe('Throttled tests', () => {
