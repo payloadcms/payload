@@ -50,11 +50,17 @@ export const updateOne: UpdateOne = async function updateOne(
 
   let result
 
-  const $inc: Record<string, number> = {}
   let updateData: UpdateQuery<any> = data
-  transform({ $inc, adapter: this, data, fields, operation: 'write' })
+
+  const $inc: Record<string, number> = {}
+  const $push: Record<string, { $each: any[] } | any> = {}
+
+  transform({ $inc, $push, adapter: this, data, fields, operation: 'write' })
   if (Object.keys($inc).length) {
     updateData = { $inc, $set: updateData }
+  }
+  if (Object.keys($push).length) {
+    updateData = { $push, $set: updateData }
   }
 
   try {

@@ -27,6 +27,7 @@ export const transformForWrite = ({
   // Split out the incoming data into rows to insert / delete
   const rowToInsert: RowToInsert = {
     arrays: {},
+    arraysToPush: {},
     blocks: {},
     blocksToDelete: new Set(),
     locales: {},
@@ -45,6 +46,7 @@ export const transformForWrite = ({
   traverseFields({
     adapter,
     arrays: rowToInsert.arrays,
+    arraysToPush: rowToInsert.arraysToPush,
     baseTableName: tableName,
     blocks: rowToInsert.blocks,
     blocksToDelete: rowToInsert.blocksToDelete,

@@ -44,7 +44,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 }: Args): Promise<T> => {
   let insertedRow: Record<string, unknown> = { id }
   if (id && shouldUseOptimizedUpsertRow({ data, fields })) {
-    const { row } = transformForWrite({
+    const { arraysToPush, row } = transformForWrite({
       adapter,
       data,
       enableAtomicWrites: true,
@@ -54,11 +54,27 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     const drizzle = db as LibSQLDatabase
 
+    // First, handle $push arrays
+
+    if (arraysToPush && Object.keys(arraysToPush)?.length) {
+      await insertArrays({
+        adapter,
+        arrays: [arraysToPush],
+        db,
+        parentRows: [insertedRow],
+        uuidMap: {},
+      })
+    }
+
+    // Then, handle regular row update
+
     if (ignoreResult) {
-      await drizzle
-        .update(adapter.tables[tableName])
-        .set(row)
-        .where(eq(adapter.tables[tableName].id, id))
+      if (row && Object.keys(row).length) {
+        await drizzle
+          .update(adapter.tables[tableName])
+          .set(row)
+          .where(eq(adapter.tables[tableName].id, id))
+      }
       return ignoreResult === 'idOnly' ? ({ id } as T) : null
     }
 
@@ -73,6 +89,22 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     const findManyKeysLength = Object.keys(findManyArgs).length
     const hasOnlyColumns = Object.keys(findManyArgs.columns || {}).length > 0
+
+    if (!row || !Object.keys(row).length) {
+      // Nothing to update => just fetch current row and return
+      findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
+
+      const doc = await db.query[tableName].findFirst(findManyArgs)
+
+      return transform<T>({
+        adapter,
+        config: adapter.payload.config,
+        data: doc,
+        fields,
+        joinQuery: false,
+        tableName,
+      })
+    }
 
     if (findManyKeysLength === 0 || hasOnlyColumns) {
       // Optimization - No need for joins => can simply use returning(). This is optimal for very simple collections
@@ -429,9 +461,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     await insertArrays({
       adapter,
-      arrays: [rowToInsert.arrays],
+      arrays: [rowToInsert.arrays, rowToInsert.arraysToPush],
       db,
-      parentRows: [insertedRow],
+      parentRows: [insertedRow, insertedRow],
       uuidMap: arraysBlocksUUIDMap,
     })
 
