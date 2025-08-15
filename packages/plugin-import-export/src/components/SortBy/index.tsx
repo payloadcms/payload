@@ -13,7 +13,7 @@ import {
 } from '@payloadcms/ui'
 import React, { useEffect, useMemo, useState } from 'react'
 
-import { applySortOrder, stripSortDash } from '../../utilities/sortHelpers.js'
+import { applySortOrder, normalizeQueryParam, stripSortDash } from '../../utilities/sortHelpers.js'
 import { reduceFields } from '../FieldsToExport/reduceFields.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
 import './index.scss'
@@ -61,23 +61,27 @@ export const SortBy: SelectFieldClientComponent = (props) => {
     }
   }, [sortRaw, fieldOptions, displayedValue])
 
-  // Sync the visible select from list-view query sort,
+  // Sync the visible select from list-view query sort (preferred) or groupBy (fallback)
   // but no need to write to the "sort" field here — SortOrder owns initial combined value.
   useEffect(() => {
-    if (id || !query?.sort || sortRaw) {
+    if (id || sortRaw) {
       return
     }
 
-    if (!query.sort) {
+    const qsSort = normalizeQueryParam(query?.sort)
+    const qsGroupBy = normalizeQueryParam(query?.groupBy)
+
+    const source = qsSort ?? qsGroupBy
+    if (!source) {
       return
     }
 
-    const clean = stripSortDash(query.sort as string)
+    const clean = stripSortDash(source)
     const option = fieldOptions.find((f) => f.value === clean)
     if (option) {
       setDisplayedValue(option)
     }
-  }, [id, query?.sort, sortRaw, fieldOptions])
+  }, [id, query?.groupBy, query?.sort, sortRaw, fieldOptions])
 
   // When user selects a different field, store it with the current order applied
   const onChange = (option: { id: string; label: ReactNode; value: string } | null) => {

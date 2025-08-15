@@ -5,7 +5,7 @@ import type { SelectFieldClientComponent } from 'payload'
 import { FieldLabel, ReactSelect, useDocumentInfo, useField, useListQuery } from '@payloadcms/ui'
 import React, { useEffect, useMemo, useState } from 'react'
 
-import { applySortOrder, stripSortDash } from '../../utilities/sortHelpers.js'
+import { applySortOrder, normalizeQueryParam, stripSortDash } from '../../utilities/sortHelpers.js'
 import './index.scss'
 
 const baseClass = 'sort-order-field'
@@ -19,17 +19,6 @@ const options = [
 ] as const
 
 const defaultOption: OrderOption = options[0]
-
-// Safely coerce query.sort to a string (ignore arrays)
-const normalizeSortParam = (v: unknown): string | undefined => {
-  if (typeof v === 'string') {
-    return v
-  }
-  if (Array.isArray(v) && typeof v[0] === 'string') {
-    return v[0]
-  }
-  return undefined
-}
 
 export const SortOrder: SelectFieldClientComponent = (props) => {
   const { id } = useDocumentInfo()
@@ -51,23 +40,30 @@ export const SortOrder: SelectFieldClientComponent = (props) => {
   )
   const [displayed, setDisplayed] = useState<null | OrderOption>(currentOption)
 
-  // Derive from list-view query.sort if present
+  // Derive from list-view query.sort if present; otherwise fall back to groupBy
   useEffect(() => {
     if (id) {
       return
     }
-    const qs = normalizeSortParam(query?.sort)
-    if (!qs) {
+
+    const qsSort = normalizeQueryParam(query?.sort)
+    const qsGroupBy = normalizeQueryParam(query?.groupBy)
+
+    if (qsSort) {
+      const isDesc = qsSort.startsWith('-')
+      const base = stripSortDash(qsSort)
+      const order: Order = isDesc ? 'desc' : 'asc'
+      setOrder(order)
+      setSort(applySortOrder(base, order)) // combined: 'title' or '-title'
       return
     }
 
-    const isDesc = qs.startsWith('-')
-    const base = stripSortDash(qs)
-    const order: Order = isDesc ? 'desc' : 'asc'
-
-    setOrder(order)
-    setSort(applySortOrder(base, order))
-  }, [id, query?.sort, setOrder, setSort])
+    // Fallback: groupBy (always ascending)
+    if (qsGroupBy) {
+      setOrder('asc')
+      setSort(applySortOrder(qsGroupBy, 'asc')) // write 'groupByField' (no dash)
+    }
+  }, [id, query?.sort, query?.groupBy, setOrder, setSort])
 
   // Keep the select's displayed option in sync with the stored order
   useEffect(() => {
