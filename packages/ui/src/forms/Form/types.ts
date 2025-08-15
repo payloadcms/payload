@@ -80,14 +80,14 @@ export type FormProps = {
     }
 )
 
-export type SubmitOptions<T = Record<string, unknown>> = {
+export type SubmitOptions<C = Record<string, unknown>> = {
   acceptValues?: AcceptValues
   action?: string
   /**
    * @experimental - Note: this property is experimental and may change in the future. Use at your own discretion.
    * If you want to pass additional data to the onSuccess callback, you can use this context object.
    */
-  context?: T
+  context?: C
   /**
    * When true, will disable the form while it is processing.
    * @default true
@@ -109,14 +109,14 @@ export type SubmitOptions<T = Record<string, unknown>> = {
 
 export type DispatchFields = React.Dispatch<any>
 
-export type Submit = <T extends Record<string, unknown>>(
-  options?: SubmitOptions<T>,
+export type Submit = <T extends Response, C extends Record<string, unknown>>(
+  options?: SubmitOptions<C>,
   e?: React.FormEvent<HTMLFormElement>,
 ) => Promise</**
  * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use at your own discretion.
  * Returns the form state and the response from the server.
  */
-{ formState?: FormState; res: Response } | void>
+{ formState?: FormState; res: T } | void>
 
 export type ValidateForm = () => Promise<boolean>
 
