@@ -3,6 +3,12 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { assertToastErrors } from 'helpers/assertToastErrors.js'
+import {
+  addArrayRow,
+  duplicateArrayRow,
+  openArrayRowActions,
+  removeArrayRow,
+} from 'helpers/e2e/arrays.js'
 import { copyPasteField } from 'helpers/e2e/copyPasteField.js'
 import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import path from 'path'
@@ -89,7 +95,7 @@ describe('Array', () => {
   test('should render RowLabel using a component', async () => {
     const label = 'custom row label as component'
     await loadCreatePage()
-    await page.locator('#field-rowLabelAsComponent >> .array-field__add-row').click()
+    await addArrayRow(page, 'rowLabelAsComponent')
     await expect(page.locator('#field-rowLabelAsComponent__0__title')).toBeVisible()
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
@@ -119,7 +125,7 @@ describe('Array', () => {
     const label = 'test custom row label'
     const updatedLabel = 'updated custom row label'
     await loadCreatePage()
-    await page.locator('#field-rowLabelAsComponent >> .array-field__add-row').click()
+    await addArrayRow(page, 'rowLabelAsComponent')
 
     await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
 
@@ -130,14 +136,7 @@ describe('Array', () => {
     await expect(customRowLabel).toBeVisible()
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
 
-    const rowActionsButton = page.locator('#rowLabelAsComponent-row-0 .array-actions__button')
-    await rowActionsButton.click()
-
-    const duplicateButton = page.locator(
-      '#rowLabelAsComponent-row-0 .popup__scroll-container .array-actions__duplicate',
-    )
-    await expect(duplicateButton).toBeVisible()
-    await duplicateButton.click()
+    await duplicateArrayRow(page, 'rowLabelAsComponent', 0)
 
     await expect(page.locator('#rowLabelAsComponent-row-1')).toBeVisible()
     await expect(
@@ -157,8 +156,7 @@ describe('Array', () => {
 
   test('should render default array field within custom component', async () => {
     await loadCreatePage()
-
-    await page.locator('#field-customArrayField >> .array-field__add-row').click()
+    await addArrayRow(page, 'customArrayField')
     await expect(page.locator('#field-customArrayField__0__text')).toBeVisible()
   })
 
@@ -169,7 +167,7 @@ describe('Array', () => {
 
   test('should fail min rows validation when rows are present', async () => {
     await loadCreatePage()
-    await page.locator('#field-arrayWithMinRows >> .array-field__add-row').click()
+    await addArrayRow(page, 'arrayWithMinRows')
 
     // Ensure new array row is visible and fields are rendered
     await expect(page.locator('#arrayWithMinRows-row-0')).toBeVisible()
@@ -210,12 +208,9 @@ describe('Array', () => {
       await wait(300)
 
       // Add 3 rows
-      await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
-      await wait(300)
-      await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
-      await wait(300)
-      await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
-      await wait(300)
+      await addArrayRow(page, 'potentiallyEmptyArray')
+      await addArrayRow(page, 'potentiallyEmptyArray')
+      await addArrayRow(page, 'potentiallyEmptyArray')
 
       // Fill out row 1
       await page.locator('#field-potentiallyEmptyArray__0__text').fill(assertText0)
@@ -230,16 +225,8 @@ describe('Array', () => {
         .locator('#field-potentiallyEmptyArray__2__groupInRow__textInGroupInRow')
         .fill(assertGroupText3)
 
-      // Remove row 1
-      await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
-      await page
-        .locator('#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__remove')
-        .click()
-      // Remove row 2
-      await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
-      await page
-        .locator('#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__remove')
-        .click()
+      await removeArrayRow(page, 'potentiallyEmptyArray', 0)
+      await removeArrayRow(page, 'potentiallyEmptyArray', 1)
 
       // Save document
       await saveDocAndAssert(page)
@@ -251,11 +238,7 @@ describe('Array', () => {
       const input = page.locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow')
       await expect(input).toHaveValue(assertGroupText3)
 
-      // Duplicate row
-      await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
-      await page
-        .locator('#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__duplicate')
-        .click()
+      await duplicateArrayRow(page, 'potentiallyEmptyArray', 0)
 
       // Update duplicated row group field text
       await page
@@ -270,11 +253,7 @@ describe('Array', () => {
         page.locator('#field-potentiallyEmptyArray__1__groupInRow__textInGroupInRow'),
       ).toHaveValue(`${assertGroupText3} duplicate`)
 
-      // Remove row 1
-      await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
-      await page
-        .locator('#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__remove')
-        .click()
+      await removeArrayRow(page, 'potentiallyEmptyArray', 0)
 
       // Save document
       await saveDocAndAssert(page)
@@ -361,11 +340,8 @@ describe('Array', () => {
     await arrayOption.click()
     await wait(200)
 
-    const addRowButton = page.locator('#field-items > .array-field__add-row')
+    await addArrayRow(page, 'items')
 
-    await expect(addRowButton).toBeVisible()
-
-    await addRowButton.click()
     await wait(200)
 
     const targetInput = page.locator('#field-items__0__text')
@@ -389,7 +365,7 @@ describe('Array', () => {
   test('should initialize array rows with collapsed state', async () => {
     await page.goto(url.create)
 
-    await page.locator('#field-collapsedArray >> .array-field__add-row').click()
+    await addArrayRow(page, 'collapsedArray')
 
     const row = page.locator(`#collapsedArray-row-0`)
     const toggler = row.locator('button.collapsible__toggle')
@@ -401,7 +377,7 @@ describe('Array', () => {
   test('should not collapse array rows on input change', async () => {
     await page.goto(url.create)
 
-    await page.locator('#field-collapsedArray >> .array-field__add-row').click()
+    await addArrayRow(page, 'collapsedArray')
 
     const row = page.locator(`#collapsedArray-row-0`)
     const toggler = row.locator('button.collapsible__toggle')
@@ -599,10 +575,8 @@ describe('Array', () => {
       await page.goto(url.create)
 
       const field = page.locator('#field-items')
-      const addSubArrayBtn = field.locator(
-        '#field-items__0__subArray > button.array-field__add-row',
-      )
-      await addSubArrayBtn.click()
+
+      await addArrayRow(page, 'items__0__subArray')
 
       const textInputRowOne = field.locator('#field-items__0__subArray__0__text')
       await expect(textInputRowOne).toBeVisible()
@@ -633,18 +607,10 @@ describe('Array', () => {
 
       const field = page.locator('#field-items')
 
-      const addSubArrayBtn = field.locator(
-        '#field-items__0__subArray > button.array-field__add-row',
-      )
-      await expect(addSubArrayBtn).toBeVisible()
-      await addSubArrayBtn.click()
-      await addSubArrayBtn.click()
+      await addArrayRow(page, 'items__0__subArray')
+      await addArrayRow(page, 'items__0__subArray')
 
-      const addSubArrayBtn2 = field.locator(
-        '#field-items__1__subArray > button.array-field__add-row',
-      )
-      await expect(addSubArrayBtn2).toBeVisible()
-      await addSubArrayBtn2.click()
+      await addArrayRow(page, 'items__1__subArray')
 
       const subArrayContainer = field.locator(
         '#field-items__0__subArray > div.array-field__draggable-rows > div',
