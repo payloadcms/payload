@@ -10,4 +10,4 @@ without-meta-data
 svg-only
 /media-gif
 /custom-file-name-media
-media-without-delete-access
+/media-without-delete-access
