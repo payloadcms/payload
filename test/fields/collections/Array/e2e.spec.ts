@@ -3,13 +3,8 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { assertToastErrors } from 'helpers/assertToastErrors.js'
-import {
-  addArrayRow,
-  duplicateArrayRow,
-  openArrayRowActions,
-  removeArrayRow,
-} from 'helpers/e2e/arrays.js'
 import { copyPasteField } from 'helpers/e2e/copyPasteField.js'
+import { addArrayRow, duplicateArrayRow, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
 import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import path from 'path'
 import { wait } from 'payload/shared'

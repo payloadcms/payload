@@ -2,7 +2,7 @@ import type { BrowserContext, Page } from '@playwright/test'
 import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
-import { addArrayRow } from 'helpers/e2e/arrays.js'
+import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { upsertPreferences } from 'helpers/e2e/preferences.js'

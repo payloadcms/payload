@@ -3,11 +3,11 @@ import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 import type { FormState } from 'payload'
 
 import { expect, test } from '@playwright/test'
-import { addBlock } from 'helpers/e2e/addBlock.js'
-import { addArrayRow, removeArrayRow } from 'helpers/e2e/arrays.js'
 import { assertElementStaysVisible } from 'helpers/e2e/assertElementStaysVisible.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
+import { addArrayRow, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
+import { addBlock } from 'helpers/e2e/fields/blocks/index.js'
 import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
@@ -308,10 +308,6 @@ test.describe('Form State', () => {
     await saveDocAndAssert(page)
 
     await expect(computedTitleField).toHaveValue('Test Title')
-
-    // also test arrays, as these have a different merge strategy
-    // to do this delete row, ensure it is gone, save doc, check that it is back
-    // deleteRow
   })
 
   test('autosave - should render computed values after autosave', async () => {

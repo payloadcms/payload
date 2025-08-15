@@ -1,11 +1,9 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { addBlock } from 'helpers/e2e/addBlock.js'
-import { addArrayRowBelow, duplicateArrayRow, openArrayRowActions } from 'helpers/e2e/arrays.js'
 import { copyPasteField } from 'helpers/e2e/copyPasteField.js'
-import { openBlocksDrawer } from 'helpers/e2e/openBlocksDrawer.js'
-import { reorderBlocks } from 'helpers/e2e/reorderBlocks.js'
+import { addArrayRowBelow, duplicateArrayRow } from 'helpers/e2e/fields/array/index.js'
+import { addBlock, openBlocksDrawer, reorderBlocks } from 'helpers/e2e/fields/blocks/index.js'
 import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
 import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import path from 'path'

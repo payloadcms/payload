@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { addArrayRow } from 'helpers/e2e/arrays.js'
+import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'

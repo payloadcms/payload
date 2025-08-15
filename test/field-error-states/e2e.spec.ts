@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
-import { addArrayRow, openArrayRowActions, removeArrayRow } from 'helpers/e2e/arrays.js'
+import { addArrayRow, openArrayRowActions, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
