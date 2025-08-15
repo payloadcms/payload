@@ -2,7 +2,7 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FlattenedField } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
-import { versionSnapshotField } from './baseFields.js'
+import { buildLocaleStatusField, versionSnapshotField } from './baseFields.js'
 
 export const buildVersionGlobalFields = <T extends boolean = false>(
   config: SanitizedConfig,
@@ -56,6 +56,23 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
           return locale.code
         }),
       })
+
+      if (config.experimental.localizeStatus) {
+        const localeStatusFields = buildLocaleStatusField(config)
+
+        fields.push({
+          name: 'localeStatus',
+          type: 'group',
+          admin: {
+            disableBulkEdit: true,
+            disabled: true,
+          },
+          fields: localeStatusFields,
+          ...(flatten && {
+            flattenedFields: localeStatusFields as FlattenedField[],
+          })!,
+        })
+      }
     }
 
     fields.push({
