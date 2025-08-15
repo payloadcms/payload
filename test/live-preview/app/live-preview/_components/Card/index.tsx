@@ -1,12 +1,13 @@
-import LinkWithDefault from 'next/link.js'
+'use client'
+
+import LinkImport from 'next/link.js'
+const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 import React, { Fragment } from 'react'
 
 import type { Post } from '../../../../payload-types.js'
 
 import { Media } from '../Media/index.js'
 import classes from './index.module.scss'
-
-const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
 
 export const Card: React.FC<{
   alignItems?: 'center'
@@ -27,10 +28,10 @@ export const Card: React.FC<{
     title: titleFromProps,
   } = props
 
-  const { slug, categories, meta, title } = doc || {}
+  const { slug, meta, title } = doc || {}
   const { description, image: metaImage } = meta || {}
 
-  const hasCategories = categories && Array.isArray(categories) && categories.length > 0
+  const hasCategories = false // Categories are not available in this Post type
   const titleToUse = titleFromProps || title
   const sanitizedDescription = description?.replace(/\s/g, ' ') // replace non-breaking space with white space
   const href = `/live-preview/${relationTo}/${slug}`
@@ -48,28 +49,6 @@ export const Card: React.FC<{
         )}
       </Link>
       <div className={classes.content}>
-        {showCategories && hasCategories && (
-          <div className={classes.leader}>
-            {showCategories && hasCategories && (
-              <div>
-                {categories?.map((category, index) => {
-                  const titleFromCategory = typeof category === 'string' ? category : category.title
-
-                  const categoryTitle = titleFromCategory || 'Untitled category'
-
-                  const isLast = index === categories.length - 1
-
-                  return (
-                    <Fragment key={index}>
-                      {categoryTitle}
-                      {!isLast && <Fragment>, &nbsp;</Fragment>}
-                    </Fragment>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )}
         {titleToUse && (
           <h4 className={classes.title}>
             <Link className={classes.titleLink} href={href}>

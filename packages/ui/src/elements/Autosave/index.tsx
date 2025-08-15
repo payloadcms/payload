@@ -3,7 +3,11 @@
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'
-import { reduceFieldsToValues, versionDefaults } from 'payload/shared'
+import {
+  deepCopyObjectSimpleWithoutReactComponents,
+  reduceFieldsToValues,
+  versionDefaults,
+} from 'payload/shared'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 
 import type { OnSaveContext } from '../../views/Edit/index.js'
@@ -157,9 +161,9 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
               },
               action: url,
               context: {
-                formState: formStateRef.current,
+                formState: deepCopyObjectSimpleWithoutReactComponents(formStateRef.current),
                 getDocPermissions: false,
-                incrementVersionCount: false,
+                incrementVersionCount: !mostRecentVersionIsAutosaved,
                 renderAllFields: false,
               },
               disableFormWhileProcessing: false,
@@ -172,7 +176,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
             })
 
             if (result && result?.res?.ok && !mostRecentVersionIsAutosaved) {
-              incrementVersionCount()
               setMostRecentVersionIsAutosaved(true)
               setUnpublishedVersionCount((prev) => prev + 1)
             }

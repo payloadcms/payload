@@ -2,12 +2,10 @@
 
 import type { ElementType } from 'react'
 
-import LinkWithDefault from 'next/link.js'
+import Link from 'next/link.js'
 import React from 'react'
 
 import classes from './index.module.scss'
-
-const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
 
 export type Props = {
   appearance?: 'default' | 'none' | 'primary' | 'secondary'
