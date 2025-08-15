@@ -43,7 +43,33 @@ export async function queryDocumentsAndFoldersFromJoin({
       documentsAndFolders: {
         limit: 100_000_000,
         sort: 'name',
-        where: combineWhereConstraints([folderWhere, documentWhere], 'or'),
+        where: combineWhereConstraints(
+          [
+            combineWhereConstraints(
+              [
+                folderWhere,
+                {
+                  deletedAt: {
+                    exists: false,
+                  },
+                },
+              ],
+              'and',
+            ),
+            combineWhereConstraints(
+              [
+                documentWhere,
+                {
+                  deletedAt: {
+                    exists: false,
+                  },
+                },
+              ],
+              'and',
+            ),
+          ],
+          'or',
+        ),
       },
     },
     limit: 1,
