@@ -149,7 +149,12 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
             submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
 
           if (!skipSubmission && modifiedRef.current && url) {
-            const result = await submit({
+            const result = await submit<{
+              incrementVersionCount: boolean
+            }>({
+              acceptValues: {
+                overrideLocalChanges: false,
+              },
               action: url,
               context: {
                 incrementVersionCount: false,

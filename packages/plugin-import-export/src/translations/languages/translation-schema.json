@@ -49,10 +49,16 @@
         "field-name-label": {
           "type": "string"
         },
+        "field-page-label": {
+          "type": "string"
+        },
         "field-selectionToUse-label": {
           "type": "string"
         },
         "field-sort-label": {
+          "type": "string"
+        },
+        "field-sort-order-label": {
           "type": "string"
         },
         "no": {
@@ -93,6 +99,7 @@
         "field-name-label",
         "field-selectionToUse-label",
         "field-sort-label",
+        "field-sort-order-label",
         "no",
         "preview",
         "selectionToUse-allDocuments",

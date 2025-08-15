@@ -384,6 +384,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
             return {
               ...field,
               [key]: value,
+              ...(key === 'value' ? { isModified: true } : {}),
             }
           }
 
@@ -395,6 +396,15 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const newState = {
         ...state,
         [action.path]: newField,
+      }
+
+      // reset `isModified` in all other fields
+      if ('value' in action) {
+        for (const [path, field] of Object.entries(newState)) {
+          if (path !== action.path && 'isModified' in field) {
+            delete newState[path].isModified
+          }
+        }
       }
 
       return newState

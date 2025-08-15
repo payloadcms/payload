@@ -182,11 +182,13 @@ export const buildFormState = async (
   }
 
   let documentData = undefined
+
   if (documentFormState) {
     documentData = reduceFieldsToValues(documentFormState, true)
   }
 
   let blockData = initialBlockData
+
   if (initialBlockFormState) {
     blockData = reduceFieldsToValues(initialBlockFormState, true)
   }
