@@ -83,7 +83,9 @@ export const mergeServerFormState = ({
      * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
      * Note: read `currentState` and not `newState` here, as the `rows` property have already been merged above
      */
-    if (Array.isArray(incomingField.rows) && path in currentState) {
+    if (acceptValues) {
+      newState[path].rows = incomingField.rows
+    } else if (Array.isArray(incomingField.rows) && path in currentState) {
       newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
 
       incomingField.rows.forEach((row) => {
@@ -114,6 +116,7 @@ export const mergeServerFormState = ({
     // This will prevent it from being passed back to the server
     delete newState[path].addedByServer
   }
+  console.log(newState, incomingState, currentState)
 
   // Return the original object reference if the state is unchanged
   // This will avoid unnecessary re-renders and dependency updates
