@@ -13,6 +13,14 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'computedTitle',
+      type: 'text',
+      hooks: {
+        beforeChange: [({ data }) => data?.title],
+      },
+      label: 'Computed Title',
+    },
+    {
       name: 'renderTracker',
       type: 'text',
       admin: {
