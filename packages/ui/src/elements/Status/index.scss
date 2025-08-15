@@ -12,10 +12,13 @@
 
     &__value-wrap {
       white-space: nowrap;
+      display: flex;
+      align-items: center;
     }
 
     &__action {
       text-decoration: underline;
+      padding: 0;
     }
   }
 }

@@ -11,6 +11,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
+import { PopupList } from '../Popup/index.js'
 import './index.scss'
 
 const baseClass = 'status'
@@ -34,14 +35,18 @@ export const Status: React.FC = () => {
 
   const {
     config: {
+      localization,
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
   const { reset: resetForm } = useForm()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
+
+  const [action, setAction] = React.useState<'unpublish' | 'unpublishCurrentLocale'>()
 
   const unPublishModalSlug = `confirm-un-publish-${id}`
   const revertModalSlug = `confirm-revert-${id}`
@@ -62,8 +67,31 @@ export const Status: React.FC = () => {
       : 'previouslyDraft'
     : statusToRender
 
+  const entityConfig = React.useMemo(() => {
+    if (collectionSlug) {
+      return getEntityConfig({ collectionSlug })
+    }
+    if (globalSlug) {
+      return getEntityConfig({ globalSlug })
+    }
+  }, [collectionSlug, globalSlug, getEntityConfig])
+
+  const isLocalized =
+    localization &&
+    Boolean(entityConfig?.fields?.some((field) => 'localized' in field && field.localized))
+
+  const activeLocale =
+    localization &&
+    localization?.locales.find((l) => (typeof l === 'string' ? l === locale : l.code === locale))
+
+  const activeLocaleLabel =
+    activeLocale &&
+    (typeof activeLocale.label === 'string'
+      ? activeLocale.label
+      : (activeLocale.label?.[locale] ?? undefined))
+
   const performAction = useCallback(
-    async (action: 'revert' | 'unpublish') => {
+    async (action: 'revert' | 'unpublish' | 'unpublishCurrentLocale') => {
       let url
       let method
       let body
@@ -177,16 +205,51 @@ export const Status: React.FC = () => {
                 buttonStyle="none"
                 className={`${baseClass}__action`}
                 id={`action-unpublish`}
-                onClick={() => toggleModal(unPublishModalSlug)}
+                onClick={() => {
+                  setAction('unpublish')
+                  toggleModal(unPublishModalSlug)
+                }}
+                size="xsmall"
+                SubMenuPopupContent={
+                  isLocalized
+                    ? ({ close }) => {
+                        return (
+                          <React.Fragment>
+                            <PopupList.ButtonGroup key="unpublish-locale">
+                              <PopupList.Button
+                                id="unpublish-locale"
+                                onClick={() => [
+                                  setAction('unpublishCurrentLocale'),
+                                  ,
+                                  toggleModal(unPublishModalSlug),
+                                  close(),
+                                ]}
+                              >
+                                {t('version:unpublishIn', { locale: activeLocaleLabel })}
+                              </PopupList.Button>
+                            </PopupList.ButtonGroup>
+                          </React.Fragment>
+                        )
+                      }
+                    : undefined
+                }
               >
                 {t('version:unpublish')}
               </Button>
               <ConfirmationModal
-                body={t('version:aboutToUnpublish')}
+                body={
+                  action === 'unpublish'
+                    ? t('version:aboutToUnpublish')
+                    : t('version:aboutToUnpublishLocale', { locale: activeLocaleLabel })
+                }
                 confirmingLabel={t('version:unpublishing')}
-                heading={t('version:confirmUnpublish')}
+                heading={
+                  action === 'unpublish'
+                    ? t('version:confirmUnpublish')
+                    : t('version:confirmUnpublishLocale', { locale: activeLocaleLabel })
+                }
                 modalSlug={unPublishModalSlug}
-                onConfirm={() => performAction('unpublish')}
+                onConfirm={() => performAction(action)}
               />
             </React.Fragment>
           )}

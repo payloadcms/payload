@@ -543,6 +543,7 @@ export const enTranslations = {
     aboutToRevertToPublished:
       "You are about to revert this document's changes to its published state. Are you sure?",
     aboutToUnpublish: 'You are about to unpublish this document. Are you sure?',
+    aboutToUnpublishLocale: 'You are about to unpublish this document in {{locale}}. Are you sure?',
     aboutToUnpublishSelection:
       'You are about to unpublish all {{label}} in the selection. Are you sure?',
     autosave: 'Autosave',
@@ -557,6 +558,7 @@ export const enTranslations = {
     confirmPublish: 'Confirm publish',
     confirmRevertToSaved: 'Confirm revert to saved',
     confirmUnpublish: 'Confirm unpublish',
+    confirmUnpublishLocale: 'Confirm unpublish in {{locale}}',
     confirmVersionRestoration: 'Confirm Version Restoration',
     currentDocumentStatus: 'Current {{docStatus}} document',
     currentDraft: 'Current Draft',
@@ -598,6 +600,7 @@ export const enTranslations = {
     specificVersion: 'Specific Version',
     status: 'Status',
     unpublish: 'Unpublish',
+    unpublishIn: 'Unpublish in {{locale}}',
     unpublishing: 'Unpublishing...',
     version: 'Version',
     versionAgo: '{{distance}} ago',
