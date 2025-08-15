@@ -77,9 +77,13 @@ If you wish to use your own MongoDB database for the `test` directory instead of
 
 ### Using Postgres
 
-If you have postgres installed on your system, you can also run the test suites using postgres. By default, mongodb is used.
+Our test suites supports automatic PostgreSQL + PostGIS setup using Docker. No local PostgreSQL installation required. By default, mongodb is used.
 
-To do that, simply set the `PAYLOAD_DATABASE` environment variable to `postgres`.
+To use postgres, simply set the `PAYLOAD_DATABASE` environment variable to `postgres`.
+
+```bash
+PAYLOAD_DATABASE=postgres pnpm dev {suite}
+```
 
 ### Running the e2e and int tests
 
