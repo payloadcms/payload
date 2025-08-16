@@ -181,8 +181,13 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         output = taskHandlerResult.output
       }
 
-      if (taskConfig?.onSuccess) {
-        await taskConfig.onSuccess()
+      if (taskConfig?.onSuccess && taskStatus) {
+        await taskConfig.onSuccess({
+          input: input!,
+          job,
+          req,
+          taskStatus,
+        })
       }
 
       ;(job.log ??= []).push({
