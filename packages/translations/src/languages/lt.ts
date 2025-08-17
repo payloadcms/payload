@@ -145,7 +145,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Pridėti naują {{label}}',
     addRelationship: 'Pridėti santykį',
     addUpload: 'Pridėti Įkelti',
-    block: 'blokas',
+    block: 'Blokas',
     blocks: 'blokai',
     blockType: 'Blokas Tipas',
     chooseBetweenCustomTextOrDocument:
@@ -329,7 +329,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Grupuoti pagal {{label}}',
     import: 'Importas',
     isEditing: 'redaguoja',
-    item: 'daiktas',
+    item: 'Daiktas',
     items: 'elementai',
     language: 'Kalba',
     lastModified: 'Paskutinį kartą modifikuota',

@@ -15,6 +15,7 @@ export const etTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Leht',
     'field-selectionToUse-label': 'Valiku kasutamine',
     'field-sort-label': 'Sorteeri järgi',
+    'field-sort-order-label': 'Sorteerimise järjekord',
     'selectionToUse-allDocuments': 'Kasutage kõiki dokumente',
     'selectionToUse-currentFilters': 'Kasuta praeguseid filtreid',
     'selectionToUse-currentSelection': 'Kasuta praegust valikut',

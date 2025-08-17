@@ -100,7 +100,14 @@ export const getHandler = ({
 
       let headers = new Headers(incomingHeaders)
 
-      headers.append('Content-Length', String(object.ContentLength))
+      // Only include Content-Length when it’s present and strictly numeric.
+      // This prevents "Parse Error: Invalid character in Content-Length" when providers (e.g., MinIO)
+      // return undefined or a non-numeric value.
+      const contentLength = String(object.ContentLength);
+      if (contentLength && !isNaN(Number(contentLength))) {
+        headers.append('Content-Length', contentLength);
+      }
+
       headers.append('Content-Type', String(object.ContentType))
       headers.append('Accept-Ranges', String(object.AcceptRanges))
       headers.append('ETag', String(object.ETag))

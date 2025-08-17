@@ -143,7 +143,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Pievienot jaunu {{label}}',
     addRelationship: 'Pievienot saistību',
     addUpload: 'Pievienot augšupielādi',
-    block: 'bloks',
+    block: 'Bloks',
     blocks: 'bloki',
     blockType: 'Bloka tips',
     chooseBetweenCustomTextOrDocument:
@@ -327,7 +327,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Grupēt pēc {{label}}',
     import: 'Imports',
     isEditing: 'redzē',
-    item: 'vienība',
+    item: 'Vienība',
     items: 'vienības',
     language: 'Valoda',
     lastModified: 'Pēdējoreiz mainīts',

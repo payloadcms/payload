@@ -10,6 +10,7 @@ export const Pages: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'title',
+    groupBy: true,
   },
   versions: {
     drafts: true,

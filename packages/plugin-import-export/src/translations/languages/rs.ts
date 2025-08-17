@@ -15,6 +15,7 @@ export const rsTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Strana',
     'field-selectionToUse-label': 'Izbor za upotrebu',
     'field-sort-label': 'Sortiraj po',
+    'field-sort-order-label': 'Redoslijed sortiranja',
     'selectionToUse-allDocuments': 'Koristite sve dokumente',
     'selectionToUse-currentFilters': 'Koristite trenutne filtere',
     'selectionToUse-currentSelection': 'Koristite trenutni izbor',

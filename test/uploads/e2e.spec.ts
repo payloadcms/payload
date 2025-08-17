@@ -40,6 +40,7 @@ import {
   listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
+  mediaWithoutDeleteAccessSlug,
   relationPreviewSlug,
   relationSlug,
   svgOnlySlug,
@@ -89,6 +90,7 @@ let stopCollectingErrorsFromPage: () => boolean
 let bulkUploadsURL: AdminUrlUtil
 let fileMimeTypeURL: AdminUrlUtil
 let svgOnlyURL: AdminUrlUtil
+let mediaWithoutDeleteAccessURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -129,6 +131,7 @@ describe('Uploads', () => {
     bulkUploadsURL = new AdminUrlUtil(serverURL, bulkUploadsSlug)
     fileMimeTypeURL = new AdminUrlUtil(serverURL, fileMimeTypeSlug)
     svgOnlyURL = new AdminUrlUtil(serverURL, svgOnlySlug)
+    mediaWithoutDeleteAccessURL = new AdminUrlUtil(serverURL, mediaWithoutDeleteAccessSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -1598,5 +1601,23 @@ describe('Uploads', () => {
     await expect(filename).toHaveValue('image-as-pdf.pdf')
 
     await saveDocAndAssert(page, '#action-save', 'error')
+  })
+
+  test('should be able to replace the file even if the user doesnt have delete access', async () => {
+    const docID = (await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 }))
+      .docs[0]?.id as string
+    await page.goto(mediaWithoutDeleteAccessURL.edit(docID))
+    const removeButton = page.locator('.file-details__remove')
+    await expect(removeButton).toBeVisible()
+    await removeButton.click()
+    await expect(page.locator('input[type="file"]')).toBeAttached()
+    await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
+    const filename = page.locator('.file-field__filename')
+    await expect(filename).toHaveValue('test-image.jpg')
+    await saveDocAndAssert(page)
+    const filenameFromAPI = (
+      await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 })
+    ).docs[0]?.filename
+    expect(filenameFromAPI).toBe('test-image.jpg')
   })
 })
