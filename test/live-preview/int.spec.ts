@@ -984,6 +984,8 @@ describe('Collections - Live Preview', () => {
                 fields: {
                   id: 123,
                   media: media.id,
+                  invertBackground: false,
+                  position: 'fullscreen',
                   blockType: 'mediaBlock',
                 },
               },
@@ -1000,7 +1002,10 @@ describe('Collections - Live Preview', () => {
 
     expect(merge1.richTextLexical.root.children).toHaveLength(1)
     expect(merge1.richTextLexical.root.children[0].type).toEqual('block')
+    expect(merge1.richTextLexical.root.children[0].fields.blockType).toEqual('mediaBlock')
     expect(merge1.richTextLexical.root.children[0].fields.media).toMatchObject(media)
+    expect(merge1.richTextLexical.root.children[0].fields.invertBackground).toEqual(false)
+    expect(merge1.richTextLexical.root.children[0].fields.position).toEqual('fullscreen')
   })
 
   it('— relationships - does not re-populate existing rich text relationships', async () => {

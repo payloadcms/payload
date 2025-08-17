@@ -52,16 +52,18 @@ export const traverseRichText = ({
       }
     })
 
-    // If the incoming data is a block, we need to handle it differently
+    // If the incoming data is a block and we have the field definition for the block we use that to traverse the fields
     if (incomingData.type === 'block') {
       const blockFieldSchema = blocksSchemaMap?.[incomingData.fields.blockType]
       if (blockFieldSchema) {
-        const incomingBlockFields = incomingData.fields
+        const { fields: incomingBlockFields, ...rest } = incomingData
 
-        result.type = 'block'
-        result.version = 2
-        result.format = ''
-        result.fields = {}
+        result = {
+          ...rest,
+          fields: {
+            blockType: incomingBlockFields.blockType,
+          },
+        }
 
         traverseFields({
           blocksSchemaMap,
@@ -73,7 +75,6 @@ export const traverseRichText = ({
           result: result.fields,
         })
 
-        result.fields.blockType = incomingBlockFields.blockType
         return result
       }
     }
