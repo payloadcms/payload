@@ -12,11 +12,12 @@ const _payloadLivePreview: {
   previousData: any
 } = {
   /**
-   * For performance reasons, `fieldSchemaJSON` will only be sent once on the initial message
-   * We need to cache this value so that it can be used across subsequent messages
-   * To do this, save `fieldSchemaJSON` when it arrives as a global variable
-   * Send this cached value to `mergeData`, instead of `eventData.fieldSchemaJSON` directly
+   * For performance reasons, `fieldSchemaJSON` and `blocksSchemaMap` will only be sent once on the initial message
+   * We need to cache these values so that they can be used across subsequent messages
+   * To do this, save `fieldSchemaJSON` and `blocksSchemaMap` when it arrives as global variables
+   * Send these cached values to `mergeData`, instead of `eventData.fieldSchemaJSON` and `eventData.blocksSchemaMap` directly
    */
+  blocksSchemaMap: undefined,
   fieldSchema: undefined,
   /**
    * Each time the data is merged, cache the result as a `previousData` variable
@@ -42,6 +43,9 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
     if (!_payloadLivePreview?.fieldSchema && fieldSchemaJSON) {
       _payloadLivePreview.fieldSchema = fieldSchemaJSON
     }
+    if (!_payloadLivePreview.blocksSchemaMap && blocksSchemaMap) {
+      _payloadLivePreview.blocksSchemaMap = blocksSchemaMap
+    }
 
     if (!_payloadLivePreview?.fieldSchema) {
       // eslint-disable-next-line no-console
@@ -50,10 +54,6 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
       )
 
       return initialData
-    }
-
-    if (!_payloadLivePreview.blocksSchemaMap && blocksSchemaMap) {
-      _payloadLivePreview.blocksSchemaMap = blocksSchemaMap
     }
 
     const mergedData = await mergeData<T>({
