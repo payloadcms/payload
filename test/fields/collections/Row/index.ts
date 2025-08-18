@@ -51,6 +51,49 @@ const RowFields: CollectionConfig = {
       type: 'row',
       fields: [
         {
+          name: 'leftColumn',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'leftTextBlock',
+              fields: [
+                {
+                  name: 'leftText',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+          required: true,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          name: 'rightColumn',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'rightTextBlock',
+              fields: [
+                {
+                  name: 'rightText',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+          required: true,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
           name: 'field_with_width_30_percent',
           label: 'Field with 30% width',
           type: 'text',

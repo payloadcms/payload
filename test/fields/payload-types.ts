@@ -1120,6 +1120,18 @@ export interface RowField {
   title: string;
   field_with_width_a?: string | null;
   field_with_width_b?: string | null;
+  leftColumn: {
+    leftText?: string | null;
+    id?: string | null;
+    blockName?: string | null;
+    blockType: 'leftTextBlock';
+  }[];
+  rightColumn: {
+    rightText?: string | null;
+    id?: string | null;
+    blockName?: string | null;
+    blockType: 'rightTextBlock';
+  }[];
   field_with_width_30_percent?: string | null;
   field_with_width_60_percent?: string | null;
   field_with_width_20_percent?: string | null;
@@ -2751,6 +2763,28 @@ export interface RowFieldsSelect<T extends boolean = true> {
   title?: T;
   field_with_width_a?: T;
   field_with_width_b?: T;
+  leftColumn?:
+    | T
+    | {
+        leftTextBlock?:
+          | T
+          | {
+              leftText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  rightColumn?:
+    | T
+    | {
+        rightTextBlock?:
+          | T
+          | {
+              rightText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   field_with_width_30_percent?: T;
   field_with_width_60_percent?: T;
   field_with_width_20_percent?: T;
