@@ -207,9 +207,9 @@ describe('Conditional Logic', () => {
 
     await addArrayRow(page, 'arrayOne')
 
-    await addArrayRow(page, 'arrayOne-row-0')
+    await addArrayRow(page, 'arrayOne__0__arrayTwo')
 
-    await addArrayRow(page, 'arrayOne-0-arrayTwo-row-0')
+    await addArrayRow(page, 'arrayOne__0__arrayTwo__0__arrayThree')
 
     const numberField = page.locator('#field-arrayOne__0__arrayTwo__0__arrayThree__0__numberField')
 

@@ -12,7 +12,7 @@ export const duplicateArrayRow = async (page: Page, fieldName: string, rowIndex:
 
   await page
     .locator(
-      `#field-${fieldName} #array-row-${rowIndex} .array-actions__action.array-actions__duplicate`,
+      `#field-${fieldName} #${fieldName}-row-${rowIndex} .array-actions__action.array-actions__duplicate`,
     )
     .click()
 

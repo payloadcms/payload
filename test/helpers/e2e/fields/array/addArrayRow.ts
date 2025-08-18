@@ -5,15 +5,19 @@ import { expect } from 'playwright/test'
 
 import { openArrayRowActions } from './openArrayRowActions.js'
 
-/**
- * Adds an array row to the end of the array using the primary "Add Row" button.
- */
-export const addArrayRow = async (page: Page, fieldName: string) => {
+export const addArrayRowDirect = async (page: Page, fieldName: string) => {
   const addRowButton = page.locator(`#field-${fieldName} > .array-field__add-row`)
 
   await expect(addRowButton).toBeVisible()
 
-  await addRowButton.click()
+  await page.locator(`#field-${fieldName} > .array-field__add-row`).click()
+}
+
+/**
+ * Adds an array row to the end of the array using the primary "Add Row" button.
+ */
+export const addArrayRow = async (page: Page, fieldName: string) => {
+  await addArrayRowDirect(page, fieldName)
 
   await wait(300)
 

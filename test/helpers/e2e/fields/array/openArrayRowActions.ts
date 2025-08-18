@@ -8,18 +8,22 @@ import { expect } from 'playwright/test'
  */
 export const openArrayRowActions = async (page: Page, fieldName: string, rowIndex: number) => {
   const rowActions = page.locator(
-    `#field-${fieldName} #array-row-${rowIndex} .array-actions__action`,
+    `#field-${fieldName} #${fieldName}-row-${rowIndex} .array-actions`,
   )
 
   if (await rowActions.isVisible()) {
     return
   }
 
-  const rowActionsButton = page.locator(
-    `#field-${fieldName} #array-row-${rowIndex} .array-actions__button`,
-  )
+  const rowActionsButton = rowActions.locator(`.array-actions__button`)
 
   await rowActionsButton.click()
 
-  await expect(rowActions).toBeVisible()
+  const popupContent = rowActions.locator('.popup__content')
+
+  if (await popupContent.isVisible()) {
+    return
+  }
+
+  await expect(popupContent).toBeVisible()
 }
