@@ -33,10 +33,6 @@
         width: calc(var(--base) * 1.2);
         height: calc(var(--base) * 1.2);
 
-        svg {
-          max-width: 1rem;
-        }
-
         &:hover {
           background-color: var(--theme-elevation-200);
         }
@@ -51,6 +47,7 @@
       display: flex;
       gap: var(--base);
       margin-left: auto;
+      white-space: nowrap;
     }
 
     @include mid-break {

@@ -1,12 +1,21 @@
 import type {
+  BeforeDocumentControlsServerPropsOnly,
   DefaultServerFunctionArgs,
   DocumentSlots,
+  EditMenuItemsServerPropsOnly,
   PayloadRequest,
+  PreviewButtonServerPropsOnly,
+  PublishButtonServerPropsOnly,
   SanitizedCollectionConfig,
   SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
+  SaveButtonServerPropsOnly,
+  SaveDraftButtonServerPropsOnly,
+  ServerFunction,
   ServerProps,
   StaticDescription,
+  ViewDescriptionClientProps,
+  ViewDescriptionServerPropsOnly,
 } from 'payload'
 
 import { ViewDescription } from '@payloadcms/ui'
@@ -36,6 +45,28 @@ export const renderDocumentSlots: (args: {
     // TODO: Add remaining serverProps
   }
 
+  const BeforeDocumentControls =
+    collectionConfig?.admin?.components?.edit?.beforeDocumentControls ||
+    globalConfig?.admin?.components?.elements?.beforeDocumentControls
+
+  if (BeforeDocumentControls) {
+    components.BeforeDocumentControls = RenderServerComponent({
+      Component: BeforeDocumentControls,
+      importMap: req.payload.importMap,
+      serverProps: serverProps satisfies BeforeDocumentControlsServerPropsOnly,
+    })
+  }
+
+  const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
+
+  if (EditMenuItems) {
+    components.EditMenuItems = RenderServerComponent({
+      Component: EditMenuItems,
+      importMap: req.payload.importMap,
+      serverProps: serverProps satisfies EditMenuItemsServerPropsOnly,
+    })
+  }
+
   const CustomPreviewButton =
     collectionConfig?.admin?.components?.edit?.PreviewButton ||
     globalConfig?.admin?.components?.elements?.PreviewButton
@@ -44,7 +75,7 @@ export const renderDocumentSlots: (args: {
     components.PreviewButton = RenderServerComponent({
       Component: CustomPreviewButton,
       importMap: req.payload.importMap,
-      serverProps,
+      serverProps: serverProps satisfies PreviewButtonServerPropsOnly,
     })
   }
 
@@ -64,11 +95,14 @@ export const renderDocumentSlots: (args: {
 
   if (hasDescription) {
     components.Description = RenderServerComponent({
-      clientProps: { description: staticDescription },
+      clientProps: {
+        collectionSlug: collectionConfig?.slug,
+        description: staticDescription,
+      } satisfies ViewDescriptionClientProps,
       Component: CustomDescription,
       Fallback: ViewDescription,
       importMap: req.payload.importMap,
-      serverProps,
+      serverProps: serverProps satisfies ViewDescriptionServerPropsOnly,
     })
   }
 
@@ -82,9 +116,10 @@ export const renderDocumentSlots: (args: {
         components.PublishButton = RenderServerComponent({
           Component: CustomPublishButton,
           importMap: req.payload.importMap,
-          serverProps,
+          serverProps: serverProps satisfies PublishButtonServerPropsOnly,
         })
       }
+
       const CustomSaveDraftButton =
         collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
         globalConfig?.admin?.components?.elements?.SaveDraftButton
@@ -97,7 +132,7 @@ export const renderDocumentSlots: (args: {
         components.SaveDraftButton = RenderServerComponent({
           Component: CustomSaveDraftButton,
           importMap: req.payload.importMap,
-          serverProps,
+          serverProps: serverProps satisfies SaveDraftButtonServerPropsOnly,
         })
       }
     } else {
@@ -109,7 +144,7 @@ export const renderDocumentSlots: (args: {
         components.SaveButton = RenderServerComponent({
           Component: CustomSaveButton,
           importMap: req.payload.importMap,
-          serverProps,
+          serverProps: serverProps satisfies SaveButtonServerPropsOnly,
         })
       }
     }
@@ -123,11 +158,19 @@ export const renderDocumentSlots: (args: {
     })
   }
 
+  if (collectionConfig?.upload && collectionConfig.upload.admin?.components?.controls) {
+    components.UploadControls = RenderServerComponent({
+      Component: collectionConfig.upload.admin.components.controls,
+      importMap: req.payload.importMap,
+      serverProps,
+    })
+  }
+
   return components
 }
 
-export const renderDocumentSlotsHandler = async (
-  args: { collectionSlug: string } & DefaultServerFunctionArgs,
+export const renderDocumentSlotsHandler: ServerFunction<{ collectionSlug: string }> = async (
+  args,
 ) => {
   const { collectionSlug, req } = args
 

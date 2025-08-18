@@ -13,17 +13,14 @@ export const emailFieldsSlug = 'email-fields'
 export const groupFieldsSlug = 'group-fields'
 export const indexedFieldsSlug = 'indexed-fields'
 export const jsonFieldsSlug = 'json-fields'
-export const lexicalFieldsSlug = 'lexical-fields'
-export const lexicalLocalizedFieldsSlug = 'lexical-localized-fields'
-export const lexicalMigrateFieldsSlug = 'lexical-migrate-fields'
-export const lexicalRelationshipFieldsSlug = 'lexical-relationship-fields'
+
 export const numberFieldsSlug = 'number-fields'
 export const pointFieldsSlug = 'point-fields'
 export const radioFieldsSlug = 'radio-fields'
 export const relationshipFieldsSlug = 'relationship-fields'
-export const richTextFieldsSlug = 'rich-text-fields'
 export const rowFieldsSlug = 'row-fields'
 export const selectFieldsSlug = 'select-fields'
+export const selectVersionsFieldsSlug = 'select-versions-fields'
 export const tabsFieldsSlug = 'tabs-fields'
 export const tabsFields2Slug = 'tabs-fields-2'
 export const textFieldsSlug = 'text-fields'
@@ -48,14 +45,10 @@ export const collectionSlugs = [
   groupFieldsSlug,
   indexedFieldsSlug,
   jsonFieldsSlug,
-  lexicalFieldsSlug,
-  lexicalMigrateFieldsSlug,
-  lexicalRelationshipFieldsSlug,
   numberFieldsSlug,
   pointFieldsSlug,
   radioFieldsSlug,
   relationshipFieldsSlug,
-  richTextFieldsSlug,
   rowFieldsSlug,
   selectFieldsSlug,
   tabsFieldsSlug,

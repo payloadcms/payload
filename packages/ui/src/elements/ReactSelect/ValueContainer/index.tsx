@@ -16,6 +16,9 @@ export const ValueContainer: React.FC<ValueContainerProps<Option, any>> = (props
 
   return (
     <div className={baseClass} ref={customProps?.droppableRef}>
+      {customProps?.valueContainerLabel && (
+        <span className={`${baseClass}__label`}>{customProps?.valueContainerLabel}</span>
+      )}
       <SelectComponents.ValueContainer {...props} />
     </div>
   )

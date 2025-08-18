@@ -8,7 +8,7 @@ import type { Collection1 } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { collection1Slug, versionedRelationshipFieldSlug } from './collectionSlugs.js'
+import { collection1Slug, versionedRelationshipFieldSlug } from './slugs.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -33,9 +33,7 @@ describe('Relationship Fields', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('Versioned Relationship Field', () => {

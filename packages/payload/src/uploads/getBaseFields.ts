@@ -12,7 +12,7 @@ type GenerateURLArgs = {
 }
 const generateURL = ({ collectionSlug, config, filename }: GenerateURLArgs) => {
   if (filename) {
-    return `${config.serverURL || ''}${config.routes.api || ''}/${collectionSlug}/file/${encodeURIComponent(filename)}`
+    return `${config.serverURL || ''}${config.routes?.api || ''}/${collectionSlug}/file/${encodeURIComponent(filename)}`
   }
   return undefined
 }
@@ -137,7 +137,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       hooks: {
         afterRead: [
           ({ data, value }) => {
-            if (value && !data.filename) {
+            if (value && !data?.filename) {
               return value
             }
 
@@ -203,14 +203,14 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               hooks: {
                 afterRead: [
                   ({ data, value }) => {
-                    if (value && size.height && size.width && !data.filename) {
+                    if (value && size.height && size.width && !data?.filename) {
                       return value
                     }
 
                     const sizeFilename = data?.sizes?.[size.name]?.filename
 
                     if (sizeFilename) {
-                      return `${config.serverURL}${config.routes.api}/${collection.slug}/file/${sizeFilename}`
+                      return `${config.serverURL}${config.routes?.api}/${collection.slug}/file/${sizeFilename}`
                     }
 
                     return null

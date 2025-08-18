@@ -21,7 +21,7 @@ export const availableCommands = [
   'migrate:refresh',
   'migrate:reset',
   'migrate:status',
-  'migration:fresh',
+  'migrate:fresh',
 ]
 
 const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
@@ -64,6 +64,7 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
   // Barebones instance to access database adapter
   await payload.init({
     config,
+    disableDBConnect: args[0] === 'migrate:create',
     disableOnInit: true,
     ...prettySyncLogger,
   })
@@ -95,7 +96,8 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
           skipEmpty,
         })
       } catch (err) {
-        throw new Error(`Error creating migration: ${err.message}`)
+        const error = err instanceof Error ? err.message : 'Unknown error'
+        throw new Error(`Error creating migration: ${error}`)
       }
       break
     case 'migrate:down':

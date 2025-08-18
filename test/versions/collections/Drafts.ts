@@ -125,9 +125,11 @@ const DraftPosts: CollectionConfig = {
   ],
   versions: {
     drafts: {
-      schedulePublish: true,
+      schedulePublish: {
+        timeFormat: 'HH:mm',
+      },
     },
-    maxPerDoc: 35,
+    maxPerDoc: 0,
   },
 }
 

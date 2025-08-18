@@ -38,14 +38,14 @@ export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
     try {
       payload.logger.info({ msg: `Migrating down: ${migrationFile.name}` })
       await initTransaction(req)
-      const session = payload.db.sessions?.[await req.transactionID]
+      const session = payload.db.sessions?.[await req.transactionID!]
       await migrationFile.down({ payload, req, session })
       payload.logger.info({
         msg: `Migrated down:  ${migrationFile.name} (${Date.now() - start}ms)`,
       })
       // Waiting for implementation here
       await payload.delete({
-        id: migration.id,
+        id: migration.id!,
         collection: 'payload-migrations',
         req,
       })

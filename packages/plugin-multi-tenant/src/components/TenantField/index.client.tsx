@@ -2,10 +2,9 @@
 
 import type { RelationshipFieldClientProps } from 'payload'
 
-import { RelationshipField, useField } from '@payloadcms/ui'
+import { RelationshipField, useField, useFormModified } from '@payloadcms/ui'
 import React from 'react'
 
-import { SELECT_ALL } from '../../constants.js'
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
 import './index.scss'
 
@@ -17,34 +16,51 @@ type Props = {
 } & RelationshipFieldClientProps
 
 export const TenantField = (args: Props) => {
-  const { debug, path, unique } = args
-  const { setValue, value } = useField<number | string>({ path })
-  const { options, selectedTenantID, setPreventRefreshOnChange, setTenant } = useTenantSelection()
+  const { debug, unique } = args
+  const { setValue, value } = useField<number | string>()
+  const modified = useFormModified()
+  const {
+    options,
+    selectedTenantID,
+    setEntityType: setEntityType,
+    setModified,
+    setTenant,
+  } = useTenantSelection()
 
   const hasSetValueRef = React.useRef(false)
 
   React.useEffect(() => {
-    if (!hasSetValueRef.current && value) {
+    if (!hasSetValueRef.current) {
       // set value on load
-      setTenant({ id: value, refresh: unique })
+      if (value && value !== selectedTenantID) {
+        setTenant({ id: value, refresh: unique })
+      } else {
+        // in the document view, the tenant field should always have a value
+        const defaultValue = selectedTenantID || options[0]?.value
+        setTenant({ id: defaultValue, refresh: unique })
+      }
       hasSetValueRef.current = true
-    } else if (selectedTenantID && selectedTenantID === SELECT_ALL && options?.[0]?.value) {
-      // in the document view, the tenant field should always have a value
-      setTenant({ id: options[0].value, refresh: unique })
-    } else if ((!value || value !== selectedTenantID) && selectedTenantID) {
-      // Update the field value when the tenant is changed
-      setValue(selectedTenantID)
+    } else if (!value || value !== selectedTenantID) {
+      // Update the field on the document value when the tenant is changed
+      setValue(selectedTenantID, !value || value === selectedTenantID)
     }
   }, [value, selectedTenantID, setTenant, setValue, options, unique])
 
   React.useEffect(() => {
-    if (!unique) {
-      setPreventRefreshOnChange(true)
-    }
+    setEntityType(unique ? 'global' : 'document')
     return () => {
-      setPreventRefreshOnChange(false)
+      setEntityType(undefined)
     }
-  }, [unique, setPreventRefreshOnChange])
+  }, [unique, setEntityType])
+
+  React.useEffect(() => {
+    // sync form modified state with the tenant selection provider context
+    setModified(modified)
+
+    return () => {
+      setModified(false)
+    }
+  }, [modified, setModified])
 
   if (debug) {
     return (

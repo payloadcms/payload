@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@octokit/webhooks-types": "^7.5.1",
-    "@swc/jest": "^0.2.36",
+    "@swc/jest": "^0.2.37",
     "@types/jest": "^27.5.2",
     "@types/node": "^20.16.5",
     "@typescript-eslint/eslint-plugin": "^4.33.0",

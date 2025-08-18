@@ -2,14 +2,13 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import { v4 as uuid } from 'uuid'
-
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { seed } from './seed.js'
 import {
   apiKeysSlug,
   namedSaveToJWTValue,
-  partialDisableLocaleStrategiesSlug,
+  partialDisableLocalStrategiesSlug,
   publicUsersSlug,
   saveToJWTKey,
   slug,
@@ -185,7 +184,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: partialDisableLocaleStrategiesSlug,
+      slug: partialDisableLocalStrategiesSlug,
       auth: {
         disableLocalStrategy: {
           // optionalPassword: true,
@@ -201,6 +200,17 @@ export default buildConfigWithDefaults({
         // hash
         // login_attempts
         // lock_until
+      ],
+    },
+    {
+      slug: 'disable-local-strategy-password',
+      auth: { disableLocalStrategy: true },
+      fields: [
+        {
+          name: 'password',
+          type: 'text',
+          required: true,
+        },
       ],
     },
     {
@@ -252,33 +262,7 @@ export default buildConfigWithDefaults({
       ],
     },
   ],
-  onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        custom: 'Hello, world!',
-        email: devUser.email,
-        password: devUser.password,
-        roles: ['admin'],
-      },
-    })
-
-    await payload.create({
-      collection: apiKeysSlug,
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
-
-    await payload.create({
-      collection: apiKeysSlug,
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
-  },
+  onInit: seed,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

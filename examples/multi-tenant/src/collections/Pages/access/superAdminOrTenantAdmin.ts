@@ -5,7 +5,7 @@ import { Access } from 'payload'
 /**
  * Tenant admins and super admins can will be allowed access
  */
-export const superAdminOrTeanantAdminAccess: Access = ({ req }) => {
+export const superAdminOrTenantAdminAccess: Access = ({ req }) => {
   if (!req.user) {
     return false
   }
@@ -14,9 +14,12 @@ export const superAdminOrTeanantAdminAccess: Access = ({ req }) => {
     return true
   }
 
-  return {
-    tenant: {
-      in: getUserTenantIDs(req.user, 'tenant-admin'),
-    },
+  const adminTenantAccessIDs = getUserTenantIDs(req.user, 'tenant-admin')
+  const requestedTenant = req?.data?.tenant
+
+  if (requestedTenant && adminTenantAccessIDs.includes(requestedTenant)) {
+    return true
   }
+
+  return false
 }

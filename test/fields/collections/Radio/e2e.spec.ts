@@ -54,7 +54,7 @@ describe('Radio', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -74,5 +74,17 @@ describe('Radio', () => {
     await expect(page.locator('label[for="field-radio-one"] .radio-input__label')).toHaveText(
       'Value One',
     )
+  })
+
+  test('should show custom JSX label in list', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('.cell-radioWithJsxLabelOption svg#payload-logo')).toBeVisible()
+  })
+
+  test('should show custom JSX label while editing', async () => {
+    await page.goto(url.create)
+    await expect(
+      page.locator('label[for="field-radioWithJsxLabelOption-three"] svg#payload-logo'),
+    ).toBeVisible()
   })
 })

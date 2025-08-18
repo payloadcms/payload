@@ -76,7 +76,7 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 - #### Posts
 
-  Posts are used to generated blog posts, news articles, or any other type of content that is published over time. All posts are layout builder enabled so you can generate unique layouts for each post using layout-building blocks, see [Layout Builder](#layout-builder) for more details. Posts are also draft-enabled so you can preview them before publishing them to your website, see [Draft Preview](#draft-preview) for more details.
+  Posts are used to generate blog posts, news articles, or any other type of content that is published over time. All posts are layout builder enabled so you can generate unique layouts for each post using layout-building blocks, see [Layout Builder](#layout-builder) for more details. Posts are also draft-enabled so you can preview them before publishing them to your website, see [Draft Preview](#draft-preview) for more details.
 
 - #### Pages
 
@@ -142,7 +142,7 @@ In addition to draft previews you can also enable live preview to view your end 
 
 ## On-demand Revalidation
 
-We've added hooks to collections and globals so that all of your pages, posts, or footer or header, change they will automatically be updated in the frontend via on-demand revalidation supported by Nextjs.
+We've added hooks to collections and globals so that all of your pages, posts, footer, or header changes will automatically be updated in the frontend via on-demand revalidation supported by Nextjs.
 
 > Note: if an image has been changed, for example it's been cropped, you will need to republish the page it's used on in order to be able to revalidate the Nextjs image cache.
 
@@ -173,7 +173,7 @@ Core features:
 - [Next.js App Router](https://nextjs.org)
 - [TypeScript](https://www.typescriptlang.org)
 - [React Hook Form](https://react-hook-form.com)
-- [Payload Admin Bar](https://github.com/payloadcms/payload-admin-bar)
+- [Payload Admin Bar](https://github.com/payloadcms/payload/tree/main/packages/admin-bar)
 - [TailwindCSS styling](https://tailwindcss.com/)
 - [shadcn/ui components](https://ui.shadcn.com/)
 - User Accounts and Authentication

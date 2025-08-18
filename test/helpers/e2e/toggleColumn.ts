@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
@@ -12,21 +12,30 @@ export const toggleColumn = async (
     columnContainerSelector,
     columnLabel,
     targetState: targetStateFromArgs,
+    columnName,
+    expectURLChange = true,
   }: {
     columnContainerSelector?: string
     columnLabel: string
+    columnName?: string
+    expectURLChange?: boolean
     targetState?: 'off' | 'on'
     togglerSelector?: string
   },
-): Promise<any> => {
-  const columnContainer = await openListColumns(page, { togglerSelector, columnContainerSelector })
+): Promise<{
+  columnContainer: Locator
+}> => {
+  const { columnContainer } = await openListColumns(page, {
+    togglerSelector,
+    columnContainerSelector,
+  })
 
-  const column = columnContainer.locator(`.column-selector .column-selector__column`, {
+  const column = columnContainer.locator(`.pill-selector .pill-selector__pill`, {
     hasText: exactText(columnLabel),
   })
 
   const isActiveBeforeClick = await column.evaluate((el) =>
-    el.classList.contains('column-selector__column--active'),
+    el.classList.contains('pill-selector__pill--selected'),
   )
 
   const targetState =
@@ -34,20 +43,45 @@ export const toggleColumn = async (
 
   await expect(column).toBeVisible()
 
-  if (
-    (isActiveBeforeClick && targetState === 'off') ||
-    (!isActiveBeforeClick && targetState === 'on')
-  ) {
+  const requiresToggle =
+    (isActiveBeforeClick && targetState === 'off') || (!isActiveBeforeClick && targetState === 'on')
+
+  if (requiresToggle) {
     await column.click()
   }
 
   if (targetState === 'off') {
     // no class
-    await expect(column).not.toHaveClass(/column-selector__column--active/)
+    await expect(column).not.toHaveClass(/pill-selector__pill--selected/)
   } else {
     // has class
-    await expect(column).toHaveClass(/column-selector__column--active/)
+    await expect(column).toHaveClass(/pill-selector__pill--selected/)
   }
 
-  return column
+  if (expectURLChange && columnName && requiresToggle) {
+    await waitForColumnInURL({ page, columnName, state: targetState })
+  }
+
+  return { columnContainer }
+}
+
+export const waitForColumnInURL = async ({
+  page,
+  columnName,
+  state,
+}: {
+  columnName: string
+  page: Page
+  state: 'off' | 'on'
+}): Promise<void> => {
+  await page.waitForURL(/.*\?.*/)
+
+  const identifier = `${state === 'off' ? '-' : ''}${columnName}`
+
+  // Test that the identifier is in the URL
+  // It must appear in the `columns` query parameter, i.e. after `columns=...` and before the next `&`
+  // It must also appear in it entirety to prevent partially matching other values, i.e. between quotation marks
+  const regex = new RegExp(`columns=([^&]*${encodeURIComponent(`"${identifier}"`)}[^&]*)`)
+
+  await page.waitForURL(regex)
 }

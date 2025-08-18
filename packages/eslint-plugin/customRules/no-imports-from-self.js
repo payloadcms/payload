@@ -18,11 +18,11 @@ export const rule = {
     return {
       ImportDeclaration(node) {
         const importPath = node.source.value
-        const pkgName = getPackageName(context, packageName)
-        if (pkgName && importPath.startsWith(pkgName)) {
+        packageName = getPackageName(context, packageName)
+        if (packageName && importPath.startsWith(packageName)) {
           context.report({
             node,
-            message: `Package "${pkgName}" should not import from itself. Use relative instead.`,
+            message: `Package "${packageName}" should not import from itself. Use relative instead.`,
           })
         }
       },
@@ -41,8 +41,7 @@ function getPackageName(context, packageName) {
     return packageName
   }
 
-  const fileName = context.getFilename()
-  const pkg = findNearestPackageJson(path.dirname(fileName))
+  const pkg = findNearestPackageJson(path.dirname(context.filename))
   if (pkg) {
     return pkg.name
   }

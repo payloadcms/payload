@@ -7,13 +7,20 @@ keywords: live preview, frontend, react, next.js, vue, nuxt.js, svelte, hook, us
 ---
 
 <Banner type="info">
-  Server-side Live Preview is only for front-end frameworks that support the concept of Server Components, i.e. [React Server Components](https://react.dev/reference/rsc/server-components). If your front-end application is built with a client-side framework like the [Next.js Pages Router](https://nextjs.org/docs/pages), [React Router](https://reactrouter.com), [Vue 3](https://vuejs.org), etc., see [client-side Live Preview](./client).
+  Server-side Live Preview is only for front-end frameworks that support the
+  concept of Server Components, i.e. [React Server
+  Components](https://react.dev/reference/rsc/server-components). If your
+  front-end application is built with a client-side framework like the [Next.js
+  Pages Router](https://nextjs.org/docs/pages), [React
+  Router](https://reactrouter.com), [Vue 3](https://vuejs.org), etc., see
+  [client-side Live Preview](./client).
 </Banner>
 
 Server-side Live Preview works by making a roundtrip to the server every time your document is saved, i.e. draft save, autosave, or publish. While using Live Preview, the Admin Panel emits a new `window.postMessage` event which your front-end application can use to invoke this process. In Next.js, this means simply calling `router.refresh()` which will hydrate the HTML using new data straight from the [Local API](../local-api/overview).
 
 <Banner type="warning">
-  It is recommended that you enable [Autosave](../versions/autosave) alongside Live Preview to make the experience feel more responsive.
+  It is recommended that you enable [Autosave](../versions/autosave) alongside
+  Live Preview to make the experience feel more responsive.
 </Banner>
 
 If your front-end application is built with [React](#react), you can use the `RefreshRouteOnChange` function that Payload provides. In the future, all other major frameworks like Vue and Svelte will be officially supported. If you are using any of these frameworks today, you can still integrate with Live Preview yourself using the underlying tooling that Payload provides. See [building your own router refresh component](#building-your-own-router-refresh-component) for more information.
@@ -43,7 +50,8 @@ export default async function Page() {
   const page = await payload.findByID({
     collection: 'pages',
     id: '123',
-    draft: true
+    draft: true,
+    trash: true, // add this if trash is enabled in your collection and want to preview trashed documents
   })
 
   return (
@@ -87,10 +95,10 @@ npm install @payloadcms/live-preview
 
 This package provides the following functions:
 
-| Path                  | Description                                                                                                                                |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`ready`**           | Sends a `window.postMessage` event to the Admin Panel to indicate that the front-end is ready to receive messages.                         |
-| **`isDocumentEvent`** | Checks if a `MessageEvent` originates from the Admin Panel and is a document-level event, i.e. draft save, autosave, publish, etc.         |
+| Path                  | Description                                                                                                                        |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **`ready`**           | Sends a `window.postMessage` event to the Admin Panel to indicate that the front-end is ready to receive messages.                 |
+| **`isDocumentEvent`** | Checks if a `MessageEvent` originates from the Admin Panel and is a document-level event, i.e. draft save, autosave, publish, etc. |
 
 With these functions, you can build your own hook using your front-end framework of choice:
 

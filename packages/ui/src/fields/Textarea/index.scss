@@ -6,20 +6,18 @@
     display: flex;
     flex-direction: column;
 
-    .textarea-outer {
+    textarea {
       @include formInput();
-      display: flex;
+      overflow-y: auto;
       resize: vertical;
       min-height: base(3);
-      height: 100%;
+      height: auto;
+      display: flex;
+    }
 
-      // Scrollbar for giant content
-      max-height: calc(100vh - $top-header-offset - calc(#{base(5)}));
-      overflow: hidden;
-
-      @include mid-break {
-        max-height: 60vh;
-      }
+    textarea:not(:empty) {
+      field-sizing: content;
+      min-height: calc(var(--rows) * var(--base) + var(--base) * 0.8 + 2px);
     }
 
     &.read-only {
@@ -27,79 +25,12 @@
         @include readOnly;
       }
     }
-
-    // This element takes exactly the same dimensions as the clone
-    .textarea-inner {
-      display: block;
-      position: relative;
-      line-height: inherit;
-      flex-grow: 1;
-      background: none;
-      outline: none;
-    }
-
-    // Unstyle the textarea, the border is rendered on .textarea-outer
-    .textarea-element {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      height: 100%;
-      border: inherit;
-      padding: inherit;
-      font: inherit;
-      line-height: inherit;
-      color: inherit;
-      background: none;
-      overflow: auto;
-      resize: none;
-      outline: none;
-      text-transform: inherit;
-
-      &::-webkit-scrollbar {
-        display: none;
-      }
-      &[data-rtl='true'] {
-        direction: rtl;
-      }
-    }
-
-    // Clone of textarea with same height
-    .textarea-clone {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      pointer-events: none;
-      white-space: pre-wrap;
-      overflow-wrap: break-word;
-      visibility: hidden;
-      z-index: 0;
-      line-height: inherit;
-    }
-
-    .textarea-clone::before {
-      content: attr(data-value) ' ';
-      visibility: hidden;
-      opacity: 0;
-      white-space: pre-wrap;
-      overflow-wrap: break-word;
-    }
-
-    .textarea-clone::after {
-      content: attr(data-after);
-      opacity: 0.5;
-    }
-
-    @include mid-break {
-      padding: 0;
-    }
   }
 
   html[data-theme='light'] {
     .field-type.textarea {
       &.error {
-        .textarea-outer {
+        textarea {
           @include lightInputError;
         }
       }
@@ -109,7 +40,7 @@
   html[data-theme='dark'] {
     .field-type.textarea {
       &.error {
-        .textarea-outer {
+        textarea {
           @include darkInputError;
         }
       }

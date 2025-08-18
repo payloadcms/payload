@@ -1,6 +1,6 @@
 'use client'
 
-import type { FieldType, Options } from '@payloadcms/ui'
+import type { FieldType } from '@payloadcms/ui'
 import type { TextFieldClientProps } from 'payload'
 
 import {
@@ -8,6 +8,7 @@ import {
   TextInput,
   useConfig,
   useDocumentInfo,
+  useDocumentTitle,
   useField,
   useForm,
   useLocale,
@@ -31,11 +32,16 @@ type MetaTitleProps = {
 
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
-    field: { label, maxLength: maxLengthFromProps, minLength: minLengthFromProps, required },
+    field: {
+      label,
+      localized,
+      maxLength: maxLengthFromProps,
+      minLength: minLengthFromProps,
+      required,
+    },
     hasGenerateTitleFn,
-    path,
     readOnly,
-  } = props || {}
+  } = props
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
@@ -46,17 +52,22 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     },
   } = useConfig()
 
-  const field: FieldType<string> = useField({ path } as Options)
-  const { customComponents: { AfterInput, BeforeInput, Label } = {} } = field
+  const {
+    customComponents: { AfterInput, BeforeInput, Label } = {},
+    errorMessage,
+    path,
+    setValue,
+    showError,
+    value,
+  }: FieldType<string> = useField()
 
   const locale = useLocale()
   const { getData } = useForm()
   const docInfo = useDocumentInfo()
+  const { title } = useDocumentTitle()
 
   const minLength = minLengthFromProps || minLengthDefault
   const maxLength = maxLengthFromProps || maxLengthDefault
-
-  const { errorMessage, setValue, showError, value } = field
 
   const regenerateTitle = useCallback(async () => {
     if (!hasGenerateTitleFn) {
@@ -75,9 +86,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
-        initialState: reduceToSerializableFields(docInfo.initialState),
+        initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
         locale: typeof locale === 'object' ? locale?.code : locale,
-        title: docInfo.title,
+        title,
       } satisfies Omit<
         Parameters<GenerateTitle>[0],
         'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
@@ -104,10 +115,10 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     docInfo.hasSavePermission,
     docInfo.initialData,
     docInfo.initialState,
-    docInfo.title,
     getData,
     locale,
     setValue,
+    title,
   ])
 
   return (
@@ -123,7 +134,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          {Label ?? <FieldLabel label={label} path={path} required={required} />}
+          {Label ?? (
+            <FieldLabel label={label} localized={localized} path={path} required={required} />
+          )}
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;

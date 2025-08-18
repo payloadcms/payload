@@ -47,7 +47,7 @@ export const CreateFirstUserClient: React.FC<{
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
       const response = await getFormState({
@@ -58,6 +58,7 @@ export const CreateFirstUserClient: React.FC<{
         operation: 'create',
         schemaPath: userSlug,
         signal: controller.signal,
+        skipValidation: !submitted,
       })
 
       abortOnChangeRef.current = null
@@ -84,7 +85,14 @@ export const CreateFirstUserClient: React.FC<{
   return (
     <Form
       action={`${serverURL}${apiRoute}/${userSlug}/first-register`}
-      initialState={initialState}
+      initialState={{
+        ...initialState,
+        'confirm-password': {
+          ...initialState['confirm-password'],
+          valid: initialState['confirm-password']['valid'] || false,
+          value: initialState['confirm-password']['value'] || '',
+        },
+      }}
       method="POST"
       onChange={[onChange]}
       onSuccess={handleFirstRegister}

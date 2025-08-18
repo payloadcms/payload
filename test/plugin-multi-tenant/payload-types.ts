@@ -6,10 +6,66 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     tenants: Tenant;
     users: User;
@@ -74,9 +130,11 @@ export interface Tenant {
   name: string;
   domain: string;
   users?: {
-    docs?: (string | User)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | User)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  isPublic?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -102,6 +160,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -112,6 +177,21 @@ export interface FoodItem {
   id: string;
   tenant?: (string | null) | Tenant;
   name: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -210,6 +290,7 @@ export interface TenantsSelect<T extends boolean = true> {
   name?: T;
   domain?: T;
   users?: T;
+  isPublic?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -234,6 +315,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -242,6 +330,7 @@ export interface UsersSelect<T extends boolean = true> {
 export interface FoodItemsSelect<T extends boolean = true> {
   tenant?: T;
   name?: T;
+  content?: T;
   updatedAt?: T;
   createdAt?: T;
 }

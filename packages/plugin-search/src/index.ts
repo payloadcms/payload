@@ -1,13 +1,12 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, Config } from 'payload'
+import type { CollectionAfterChangeHook, Config } from 'payload'
 
-import type { SearchPluginConfig, SearchPluginConfigWithLocales } from './types.js'
+import type { SanitizedSearchPluginConfig, SearchPluginConfig } from './types.js'
 
 import { deleteFromSearch } from './Search/hooks/deleteFromSearch.js'
 import { syncWithSearch } from './Search/hooks/syncWithSearch.js'
 import { generateSearchCollection } from './Search/index.js'
 
 type CollectionAfterChangeHookArgs = Parameters<CollectionAfterChangeHook>[0]
-type CollectionAfterDeleteHookArgs = Parameters<CollectionAfterDeleteHook>[0]
 
 export const searchPlugin =
   (incomingPluginConfig: SearchPluginConfig) =>
@@ -35,9 +34,8 @@ export const searchPlugin =
           .map((collection) => [collection.slug, collection.labels]),
       )
 
-      const pluginConfig: SearchPluginConfigWithLocales = {
+      const pluginConfig: SanitizedSearchPluginConfig = {
         // write any config defaults here
-        apiBasePath: config.routes?.api,
         deleteDrafts: true,
         labels,
         locales,
@@ -68,14 +66,9 @@ export const searchPlugin =
                     })
                   },
                 ],
-                afterDelete: [
-                  ...(existingHooks?.afterDelete || []),
-                  async (args: CollectionAfterDeleteHookArgs) => {
-                    await deleteFromSearch({
-                      ...args,
-                      pluginConfig,
-                    })
-                  },
+                beforeDelete: [
+                  ...(existingHooks?.beforeDelete || []),
+                  deleteFromSearch(pluginConfig),
                 ],
               },
             }

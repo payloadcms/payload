@@ -1,20 +1,27 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
+/**
+ * Opens the list filters drawer in the list view. If it's already open, does nothing.
+ * Return the filter container locator for further interactions.
+ */
 export const openListFilters = async (
   page: Page,
   {
-    togglerSelector = '.list-controls__toggle-where',
-    filterContainerSelector = '.list-controls__where',
+    togglerSelector = '#toggle-list-filters',
+    filterContainerSelector = '#list-controls-where',
   }: {
     filterContainerSelector?: string
     togglerSelector?: string
   },
-) => {
-  const columnContainer = page.locator(filterContainerSelector).first()
+): Promise<{
+  filterContainer: Locator
+}> => {
+  await expect(page.locator(togglerSelector)).toBeVisible()
+  const filterContainer = page.locator(filterContainerSelector).first()
 
-  const isAlreadyOpen = await columnContainer.isVisible()
+  const isAlreadyOpen = await filterContainer.isVisible()
 
   if (!isAlreadyOpen) {
     await page.locator(togglerSelector).first().click()
@@ -22,5 +29,5 @@ export const openListFilters = async (
 
   await expect(page.locator(`${filterContainerSelector}.rah-static--height-auto`)).toBeVisible()
 
-  return columnContainer
+  return { filterContainer }
 }

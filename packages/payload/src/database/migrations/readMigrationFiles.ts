@@ -28,7 +28,7 @@ export const readMigrationFiles = async ({
     .readdirSync(payload.db.migrationDir)
     .sort()
     .filter((f) => {
-      return (f.endsWith('.ts') || f.endsWith('.js')) && !f.includes('index.')
+      return (f.endsWith('.ts') || f.endsWith('.js')) && f !== 'index.js' && f !== 'index.ts'
     })
     .map((file) => {
       return path.resolve(payload.db.migrationDir, file)
@@ -46,7 +46,7 @@ export const readMigrationFiles = async ({
       }
 
       const result: Migration = {
-        name: path.basename(filePath).split('.')?.[0],
+        name: path.basename(filePath).split('.')[0]!,
         down: migration.down,
         up: migration.up,
       }

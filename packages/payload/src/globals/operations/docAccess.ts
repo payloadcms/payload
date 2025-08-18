@@ -26,6 +26,7 @@ export const docAccessOperation = async (args: Arguments): Promise<SanitizedGlob
     const shouldCommit = await initTransaction(req)
     const result = await getEntityPolicies({
       type: 'global',
+      blockPolicies: {},
       entity: globalConfig,
       operations: globalOperations,
       req,
@@ -39,7 +40,7 @@ export const docAccessOperation = async (args: Arguments): Promise<SanitizedGlob
       },
     })
 
-    return sanitizedPermissions?.globals?.[globalConfig.slug]
+    return sanitizedPermissions.globals![globalConfig.slug]!
   } catch (e: unknown) {
     await killTransaction(req)
     throw e

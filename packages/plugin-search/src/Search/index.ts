@@ -1,14 +1,14 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { SearchPluginConfigWithLocales } from '../types.js'
+import type { SanitizedSearchPluginConfig } from '../types.js'
+import type { ReindexButtonServerProps } from './ui/ReindexButton/types.js'
 
 import { generateReindexHandler } from '../utilities/generateReindexHandler.js'
 
 // all settings can be overridden by the config
 export const generateSearchCollection = (
-  pluginConfig: SearchPluginConfigWithLocales,
+  pluginConfig: SanitizedSearchPluginConfig,
 ): CollectionConfig => {
-  const apiBasePath = pluginConfig?.apiBasePath || '/api'
   const searchSlug = pluginConfig?.searchOverrides?.slug || 'search'
   const searchCollections = pluginConfig?.collections || []
   const collectionLabels = pluginConfig?.labels
@@ -55,6 +55,10 @@ export const generateSearchCollection = (
     },
   ]
 
+  if (!collectionLabels) {
+    throw new Error('collectionLabels is required')
+  }
+
   const newConfig: CollectionConfig = {
     ...(pluginConfig?.searchOverrides || {}),
     slug: searchSlug,
@@ -71,11 +75,10 @@ export const generateSearchCollection = (
               {
                 path: '@payloadcms/plugin-search/client#ReindexButton',
                 serverProps: {
-                  apiBasePath,
                   collectionLabels,
                   searchCollections,
                   searchSlug,
-                },
+                } satisfies ReindexButtonServerProps,
               },
             ],
           },

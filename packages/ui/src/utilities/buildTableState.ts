@@ -2,16 +2,17 @@ import type {
   BuildTableStateArgs,
   ClientCollectionConfig,
   ClientConfig,
+  CollectionPreferences,
+  Column,
   ErrorResult,
-  ListPreferences,
   PaginatedDocs,
   SanitizedCollectionConfig,
+  ServerFunction,
+  Where,
 } from 'payload'
 
-import { formatErrors } from 'payload'
+import { APIError, formatErrors } from 'payload'
 import { isNumber } from 'payload/shared'
-
-import type { Column } from '../elements/Table/index.js'
 
 import { getClientConfig } from './getClientConfig.js'
 import { renderFilters, renderTable } from './renderTable.js'
@@ -21,7 +22,7 @@ type BuildTableStateSuccessResult = {
   clientConfig?: ClientConfig
   data: PaginatedDocs
   errors?: never
-  preferences: ListPreferences
+  preferences: CollectionPreferences
   renderedFilters: Map<string, React.ReactNode>
   state: Column[]
   Table: React.ReactNode
@@ -41,9 +42,10 @@ type BuildTableStateErrorResult = {
 
 export type BuildTableStateResult = BuildTableStateErrorResult | BuildTableStateSuccessResult
 
-export const buildTableStateHandler = async (
-  args: BuildTableStateArgs,
-): Promise<BuildTableStateResult> => {
+export const buildTableStateHandler: ServerFunction<
+  BuildTableStateArgs,
+  Promise<BuildTableStateResult>
+> = async (args) => {
   const { req } = args
 
   try {
@@ -66,14 +68,16 @@ export const buildTableStateHandler = async (
   }
 }
 
-export const buildTableState = async (
+const buildTableState = async (
   args: BuildTableStateArgs,
 ): Promise<BuildTableStateSuccessResult> => {
   const {
     collectionSlug,
     columns,
-    docs: docsFromArgs,
+    data: dataFromArgs,
     enableRowSelections,
+    orderableFieldName,
+    parent,
     query,
     renderRowTypes,
     req,
@@ -129,15 +133,19 @@ export const buildTableState = async (
   let collectionConfig: SanitizedCollectionConfig
   let clientCollectionConfig: ClientCollectionConfig
 
-  if (req.payload.collections[collectionSlug]) {
-    collectionConfig = req.payload.collections[collectionSlug].config
-    clientCollectionConfig = clientConfig.collections.find(
-      (collection) => collection.slug === collectionSlug,
-    )
+  if (!Array.isArray(collectionSlug)) {
+    if (req.payload.collections[collectionSlug]) {
+      collectionConfig = req.payload.collections[collectionSlug].config
+      clientCollectionConfig = clientConfig.collections.find(
+        (collection) => collection.slug === collectionSlug,
+      )
+    }
   }
 
-  const listPreferences = await upsertPreferences<ListPreferences>({
-    key: `${collectionSlug}-list`,
+  const collectionPreferences = await upsertPreferences<CollectionPreferences>({
+    key: Array.isArray(collectionSlug)
+      ? `${parent.collectionSlug}-${parent.joinPath}`
+      : `collection-${collectionSlug}`,
     req,
     value: {
       columns,
@@ -146,45 +154,104 @@ export const buildTableState = async (
     },
   })
 
-  let docs = docsFromArgs
-  let data: PaginatedDocs
+  let data: PaginatedDocs = dataFromArgs
 
   // lookup docs, if desired, i.e. within `join` field which initialize with `depth: 0`
 
-  if (!docs || query) {
-    data = await payload.find({
-      collection: collectionSlug,
-      depth: 0,
-      limit: query?.limit ? parseInt(query.limit, 10) : undefined,
-      overrideAccess: false,
-      page: query?.page ? parseInt(query.page, 10) : undefined,
-      sort: query?.sort,
-      user: req.user,
-      where: query?.where,
-    })
+  if (!data?.docs || query) {
+    if (Array.isArray(collectionSlug)) {
+      if (!parent) {
+        throw new APIError('Unexpected array of collectionSlug, parent must be provided')
+      }
 
-    docs = data.docs
+      const select = {}
+      let currentSelectRef = select
+
+      const segments = parent.joinPath.split('.')
+
+      for (let i = 0; i < segments.length; i++) {
+        currentSelectRef[segments[i]] = i === segments.length - 1 ? true : {}
+        currentSelectRef = currentSelectRef[segments[i]]
+      }
+
+      const joinQuery: { limit?: number; page?: number; sort?: string; where?: Where } = {
+        sort: query?.sort as string,
+        where: query?.where,
+      }
+
+      if (query) {
+        if (!Number.isNaN(Number(query.limit))) {
+          joinQuery.limit = Number(query.limit)
+        }
+
+        if (!Number.isNaN(Number(query.page))) {
+          joinQuery.limit = Number(query.limit)
+        }
+      }
+
+      let parentDoc = await payload.findByID({
+        id: parent.id,
+        collection: parent.collectionSlug,
+        depth: 1,
+        joins: {
+          [parent.joinPath]: joinQuery,
+        },
+        overrideAccess: false,
+        select,
+        user: req.user,
+      })
+
+      for (let i = 0; i < segments.length; i++) {
+        if (i === segments.length - 1) {
+          data = parentDoc[segments[i]]
+        } else {
+          parentDoc = parentDoc[segments[i]]
+        }
+      }
+    } else {
+      data = await payload.find({
+        collection: collectionSlug,
+        depth: 0,
+        draft: true,
+        limit: query?.limit,
+        locale: req.locale,
+        overrideAccess: false,
+        page: query?.page,
+        sort: query?.sort,
+        user: req.user,
+        where: query?.where,
+      })
+    }
   }
 
   const { columnState, Table } = renderTable({
     clientCollectionConfig,
+    clientConfig,
     collectionConfig,
-    columnPreferences: undefined, // TODO, might not be needed
+    collections: Array.isArray(collectionSlug) ? collectionSlug : undefined,
     columns,
-    docs,
+    data,
     enableRowSelections,
     i18n: req.i18n,
+    orderableFieldName,
     payload,
+    query,
     renderRowTypes,
     tableAppearance,
-    useAsTitle: collectionConfig.admin.useAsTitle,
+    useAsTitle: Array.isArray(collectionSlug)
+      ? payload.collections[collectionSlug[0]]?.config?.admin?.useAsTitle
+      : collectionConfig?.admin?.useAsTitle,
   })
 
-  const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
+  let renderedFilters
+
+  if (collectionConfig) {
+    renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
+  }
 
   return {
     data,
-    preferences: listPreferences,
+    preferences: collectionPreferences,
     renderedFilters,
     state: columnState,
     Table,

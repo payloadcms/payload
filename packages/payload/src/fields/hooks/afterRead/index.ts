@@ -55,8 +55,8 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     showHiddenFields,
   } = args
 
-  const fieldPromises = []
-  const populationPromises = []
+  const fieldPromises: Promise<void>[] = []
+  const populationPromises: Promise<void>[] = []
 
   let depth =
     incomingDepth || incomingDepth === 0
@@ -77,17 +77,19 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     draft,
     fallbackLocale,
     fieldPromises,
-    fields: collection?.fields || global?.fields,
-    findMany,
+    fields: (collection?.fields || global?.fields)!,
+    findMany: findMany!,
     flattenLocales,
     global,
     locale,
     overrideAccess,
-    path: [],
+    parentIndexPath: '',
+    parentIsLocalized: false,
+    parentPath: '',
+    parentSchemaPath: '',
     populate,
     populationPromises,
     req,
-    schemaPath: [],
     select,
     selectMode: select ? getSelectMode(select) : undefined,
     showHiddenFields,

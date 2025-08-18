@@ -59,8 +59,8 @@ export const fetchAPIFileUpload: FetchAPIFileUpload = async ({ options, request 
     debugLog(uploadOptions, 'Request is not eligible for file upload!')
     return {
       error: new APIError('Request is not eligible for file upload', 500),
-      fields: undefined,
-      files: undefined,
+      fields: undefined!,
+      files: undefined!,
     }
   } else {
     return processMultipart({ options: uploadOptions, request })

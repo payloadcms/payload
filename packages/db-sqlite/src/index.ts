@@ -18,6 +18,7 @@ import {
   deleteVersions,
   destroy,
   find,
+  findDistinct,
   findGlobal,
   findGlobalVersions,
   findMigrationDir,
@@ -34,10 +35,13 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateJobs,
+  updateMany,
   updateOne,
   updateVersion,
+  upsert,
 } from '@payloadcms/drizzle'
-import { like } from 'drizzle-orm'
+import { like, notLike } from 'drizzle-orm'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 import { fileURLToPath } from 'url'
 
@@ -56,15 +60,12 @@ import { init } from './init.js'
 import { insert } from './insert.js'
 import { requireDrizzleKit } from './requireDrizzleKit.js'
 
-export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
-
-export { sql } from 'drizzle-orm'
-
 const filename = fileURLToPath(import.meta.url)
 
 export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   const sqliteIDType = args.idType || 'number'
   const payloadIDType = sqliteIDType === 'uuid' ? 'text' : 'number'
+  const allowIDOnCreate = args.allowIDOnCreate ?? false
 
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
@@ -81,21 +82,27 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       ...operatorMap,
       contains: like,
       like,
+      not_like: notLike,
     } as unknown as Operators
 
     return createDatabaseAdapter<SQLiteAdapter>({
       name: 'sqlite',
       afterSchemaInit: args.afterSchemaInit ?? [],
+      allowIDOnCreate,
       autoIncrement: args.autoIncrement ?? false,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
+      blocksAsJSON: args.blocksAsJSON ?? false,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       client: undefined,
       clientConfig: args.client,
       defaultDrizzleSnapshot,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       drizzle: undefined,
       features: {
         json: true,
       },
       fieldConstraints: {},
+      findDistinct,
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'sqlite-core',
@@ -108,6 +115,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       logger: args.logger,
       operators,
       prodMigrations: args.prodMigrations,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       push: args.push,
       rawRelations: {},
       rawTables: {},
@@ -118,7 +126,10 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       sessions: {},
       tableNameMap: new Map<string, string>(),
       tables: {},
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       transactionOptions: args.transactionOptions || undefined,
+      updateJobs,
+      updateMany,
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
@@ -155,6 +166,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       find,
       findGlobal,
       findGlobalVersions,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
       indexes: new Set<string>(),
@@ -170,20 +182,47 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       packageName: '@payloadcms/db-sqlite',
       payload,
       queryDrafts,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       resolveInitializing,
       rollbackTransaction,
       updateGlobal,
       updateGlobalVersion,
       updateOne,
       updateVersion,
-      upsert: updateOne,
+      upsert,
     })
   }
 
   return {
+    name: 'sqlite',
+    allowIDOnCreate,
     defaultIDType: payloadIDType,
     init: adapter,
   }
 }
+
+/**
+ * @todo deprecate /types subpath export in 4.0
+ */
+export type {
+  Args as SQLiteAdapterArgs,
+  CountDistinct,
+  DeleteWhere,
+  DropDatabase,
+  Execute,
+  GeneratedDatabaseSchema,
+  GenericColumns,
+  GenericRelation,
+  GenericTable,
+  IDType,
+  Insert,
+  MigrateDownArgs,
+  MigrateUpArgs,
+  SQLiteAdapter,
+  SQLiteSchemaHook,
+} from './types.js'
+
+export { sql } from 'drizzle-orm'

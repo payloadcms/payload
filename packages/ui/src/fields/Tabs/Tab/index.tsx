@@ -14,31 +14,40 @@ import './index.scss'
 const baseClass = 'tabs-field__tab-button'
 
 type TabProps = {
+  readonly hidden?: boolean
   readonly isActive?: boolean
   readonly parentPath: string
   readonly setIsActive: () => void
   readonly tab: ClientTab
 }
 
-export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, tab }) => {
+export const TabComponent: React.FC<TabProps> = ({
+  hidden,
+  isActive,
+  parentPath,
+  setIsActive,
+  tab,
+}) => {
   const { i18n } = useTranslation()
   const [errorCount, setErrorCount] = useState(undefined)
 
   const path = [
-    ...(parentPath ? parentPath.split('.') : []),
+    // removes parent 'tabs' path segment, i.e. `_index-0`
+    ...(parentPath ? parentPath.split('.').slice(0, -1) : []),
     ...(tabHasName(tab) ? [tab.name] : []),
-  ].join('.')
+  ]
 
   const fieldHasErrors = errorCount > 0
 
   return (
     <React.Fragment>
-      <WatchChildErrors fields={tab.fields} path={path.split('.')} setErrorCount={setErrorCount} />
+      <WatchChildErrors fields={tab.fields} path={path} setErrorCount={setErrorCount} />
       <button
         className={[
           baseClass,
           fieldHasErrors && `${baseClass}--has-error`,
           isActive && `${baseClass}--active`,
+          hidden && `${baseClass}--hidden`,
         ]
           .filter(Boolean)
           .join(' ')}

@@ -1,6 +1,6 @@
 # Payload Draft Preview Example
 
-The [Payload Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview/payload) demonstrates how to implement draft preview in [Payload](https://github.com/payloadcms/payload) using [Versions](https://payloadcms.com/docs/versions/overview) and [Drafts](https://payloadcms.com/docs/versions/drafts). Draft preview allows you to see content on your front-end before it is published.
+The [Payload Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview/payload) demonstrates how to implement [Draft Preview](https://payloadcms.com/docs/admin/preview#draft-preview) in [Payload](https://github.com/payloadcms/payload) using [Versions](https://payloadcms.com/docs/versions/overview) and [Drafts](https://payloadcms.com/docs/versions/drafts). With Draft Preview, you can navigate to your front-end application and enter "draft mode", where your queries are modified to fetch draft content instead of published content. This is useful for seeing how your content will look before being published.
 
 ## Quick Start
 
@@ -68,7 +68,7 @@ If your front-end is statically generated then you may also want to regenerate t
 
 ### Admin Bar
 
-You might also want to render an admin bar on your front-end so that logged-in users can quickly navigate between the front-end and Payload as they're editing. For React apps, check out the official [Payload Admin Bar](https://github.com/payloadcms/payload-admin-bar). For other frameworks, simply hit the `/me` route with `credentials: 'include'` and render your own admin bar if the user is logged in.
+You might also want to render an admin bar on your front-end so that logged-in users can quickly navigate between the front-end and Payload as they're editing. For React apps, check out the official [Payload Admin Bar](https://github.com/payloadcms/payload/tree/main/packages/admin-bar). For other frameworks, simply hit the `/me` route with `credentials: 'include'` and render your own admin bar if the user is logged in.
 
 ### CORS
 

@@ -4,6 +4,8 @@ import type { UIField, UIFieldClient } from '../../fields/config/types.js'
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
@@ -32,3 +34,7 @@ export type UIFieldServerComponent = FieldServerComponent<
   UIFieldClientWithoutType,
   UIFieldBaseServerProps
 >
+
+export type UIFieldDiffServerComponent = FieldDiffServerComponent<UIField, UIFieldClient>
+
+export type UIFieldDiffClientComponent = FieldDiffClientComponent<UIFieldClient>

@@ -1,5 +1,7 @@
 'use client'
 
+import type { DocumentTabClientProps } from 'payload'
+
 import { useConfig } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import { useParams } from 'next/navigation.js'
@@ -7,9 +9,11 @@ import React from 'react'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-export const CustomTabComponentClient: React.FC<{
-  readonly path: string
-}> = ({ path }) => {
+type CustomTabComponentClientProps = {
+  label: string
+} & DocumentTabClientProps
+
+export function CustomTabComponentClient({ label, path }: CustomTabComponentClientProps) {
   const {
     config: {
       routes: { admin: adminRoute },
@@ -18,7 +22,7 @@ export const CustomTabComponentClient: React.FC<{
 
   const params = useParams()
 
-  const baseRoute = (params.segments.slice(0, 3) as string[]).join('/')
+  const baseRoute = (params.segments?.slice(0, 3) as string[]).join('/')
 
-  return <Link href={`${adminRoute}/${baseRoute}${path}`}>Custom Tab Component</Link>
+  return <Link href={`${adminRoute}/${baseRoute}${path}`}>{label}</Link>
 }

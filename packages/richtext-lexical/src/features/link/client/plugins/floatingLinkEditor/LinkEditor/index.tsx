@@ -250,8 +250,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     setNotLink,
     config.routes.admin,
     config.routes.api,
-    config.collections,
     config.serverURL,
+    getEntityConfig,
     t,
     i18n,
     locale?.code,
@@ -408,7 +408,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
               linkParent = getSelectedNode(selection).getParent()
             } else {
               if (selectedNodes.length) {
-                linkParent = selectedNodes[0].getParent()
+                linkParent = selectedNodes[0]?.getParent() ?? null
               }
             }
 

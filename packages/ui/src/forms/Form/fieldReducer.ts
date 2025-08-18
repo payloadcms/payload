@@ -3,10 +3,11 @@ import type { FormField, FormState, Row } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import { deepCopyObjectSimple, deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
+import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
 
 import type { FieldAction } from './types.js'
 
+import { mergeServerFormState } from './mergeServerFormState.js'
 import { flattenRows, separateRows } from './rows.js'
 
 const ObjectId = (ObjectIdImport.default ||
@@ -27,9 +28,11 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const newRow: Row = {
         id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
-        blockType: blockType || undefined,
-        collapsed: false,
         isLoading: true,
+      }
+
+      if (blockType) {
+        newRow.blockType = blockType
       }
 
       withNewRow.splice(rowIndex, 0, newRow)
@@ -53,14 +56,12 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [`${path}.${rowIndex}.id`]: {
           initialValue: newRow.id,
           passesCondition: true,
-          requiresRender: true,
           valid: true,
           value: newRow.id,
         },
         [path]: {
           ...state[path],
           disableFormData: true,
-          requiresRender: true,
           rows: withNewRow,
           value: siblingRows.length,
         },
@@ -136,12 +137,22 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const { remainingFields, rows } = separateRows(path, state)
       const rowsMetadata = [...(state[path].rows || [])]
 
-      const duplicateRowMetadata = deepCopyObjectSimple(rowsMetadata[rowIndex])
+      const duplicateRowMetadata = deepCopyObjectSimpleWithoutReactComponents(
+        rowsMetadata[rowIndex],
+      )
+
       if (duplicateRowMetadata.id) {
         duplicateRowMetadata.id = new ObjectId().toHexString()
       }
 
+      if (rowsMetadata[rowIndex]?.customComponents?.RowLabel) {
+        duplicateRowMetadata.customComponents = {
+          RowLabel: rowsMetadata[rowIndex].customComponents.RowLabel,
+        }
+      }
+
       const duplicateRowState = deepCopyObjectSimpleWithoutReactComponents(rows[rowIndex])
+
       if (duplicateRowState.id) {
         duplicateRowState.id.value = new ObjectId().toHexString()
         duplicateRowState.id.initialValue = new ObjectId().toHexString()
@@ -169,7 +180,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: true,
-          requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
         },
@@ -178,30 +188,41 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       return newState
     }
 
+    case 'MERGE_SERVER_STATE': {
+      const { acceptValues, prevStateRef, serverState } = action
+
+      const newState = mergeServerFormState({
+        acceptValues,
+        currentState: state || {},
+        incomingState: serverState,
+      })
+
+      prevStateRef.current = newState
+
+      return newState
+    }
+
     case 'MOVE_ROW': {
       const { moveFromIndex, moveToIndex, path } = action
-      const { remainingFields, rows } = separateRows(path, state)
 
-      // copy the row to move
-      const copyOfMovingRow = rows[moveFromIndex]
-      // delete the row by index
-      rows.splice(moveFromIndex, 1)
-      // insert row copyOfMovingRow back in
-      rows.splice(moveToIndex, 0, copyOfMovingRow)
+      // Handle moving rows on the top-level, i.e. `array.0.text` -> `array.1.text`
+      const { remainingFields, rows: topLevelRows } = separateRows(path, state)
+      const copyOfMovingRow = topLevelRows[moveFromIndex]
+      topLevelRows.splice(moveFromIndex, 1)
+      topLevelRows.splice(moveToIndex, 0, copyOfMovingRow)
 
       // modify array/block internal row state (i.e. collapsed, blockType)
-      const rowStateCopy = [...(state[path]?.rows || [])]
-      const movingRowState = { ...rowStateCopy[moveFromIndex] }
-      rowStateCopy.splice(moveFromIndex, 1)
-      rowStateCopy.splice(moveToIndex, 0, movingRowState)
+      const rowsWithinField = [...(state[path]?.rows || [])]
+      const copyOfMovingRow2 = { ...rowsWithinField[moveFromIndex] }
+      rowsWithinField.splice(moveFromIndex, 1)
+      rowsWithinField.splice(moveToIndex, 0, copyOfMovingRow2)
 
       const newState = {
         ...remainingFields,
-        ...flattenRows(path, rows),
+        ...flattenRows(path, topLevelRows),
         [path]: {
           ...state[path],
-          requiresRender: true,
-          rows: rowStateCopy,
+          rows: rowsWithinField,
         },
       }
 
@@ -229,7 +250,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: rows.length > 0,
-          requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
         },
@@ -284,19 +304,38 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         // ..
         // This is a performance enhancement for saving
         // large documents with hundreds of fields
-        const newState = {}
+        const newState: FormState = {}
 
-        Object.entries(action.state).forEach(([path, field]) => {
+        for (const [path, newField] of Object.entries(action.state)) {
           const oldField = state[path]
-          const newField = field
+
+          if (newField.valid !== false) {
+            newField.valid = true
+          }
+          if (newField.passesCondition !== false) {
+            newField.passesCondition = true
+          }
 
           if (!dequal(oldField, newField)) {
             newState[path] = newField
           } else if (oldField) {
             newState[path] = oldField
           }
-        })
+        }
+
         return newState
+      }
+
+      // TODO: Remove this in 4.0 - this is a temporary fix to prevent a breaking change
+      if (action.sanitize) {
+        for (const field of Object.values(action.state)) {
+          if (field.valid !== false) {
+            field.valid = true
+          }
+          if (field.passesCondition !== false) {
+            field.passesCondition = true
+          }
+        }
       }
       // If we're not optimizing, just set the state to the new state
       return action.state
@@ -345,17 +384,27 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
             return {
               ...field,
               [key]: value,
+              ...(key === 'value' ? { isModified: true } : {}),
             }
           }
 
           return field
         },
-        state[action.path] || ({} as FormField),
+        state?.[action.path] || ({} as FormField),
       )
 
       const newState = {
         ...state,
         [action.path]: newField,
+      }
+
+      // reset `isModified` in all other fields
+      if ('value' in action) {
+        for (const [path, field] of Object.entries(newState)) {
+          if (path !== action.path && 'isModified' in field) {
+            delete newState[path].isModified
+          }
+        }
       }
 
       return newState

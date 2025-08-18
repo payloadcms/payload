@@ -5,6 +5,7 @@ import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
   AnySQLiteColumn,
+  SQLiteColumn,
   SQLiteInsertOnConflictDoUpdateConfig,
   SQLiteTableWithColumns,
   SQLiteTransactionConfig,
@@ -32,6 +33,14 @@ export type Args = {
    */
   afterSchemaInit?: SQLiteSchemaHook[]
   /**
+   * Enable this flag if you want to thread your own ID to create operation data, for example:
+   * ```ts
+   * // doc created with id 1
+   * const doc = await payload.create({ collection: 'posts', data: {id: 1, title: "my title"}})
+   * ```
+   */
+  allowIDOnCreate?: boolean
+  /**
    * Enable [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for Primary Keys.
    * This ensures that the same ID cannot be reused from previously deleted rows.
    */
@@ -42,6 +51,10 @@ export type Args = {
    * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
    */
   beforeSchemaInit?: SQLiteSchemaHook[]
+  /**
+   * Store blocks as JSON column instead of storing them in relational structure.
+   */
+  blocksAsJSON?: boolean
   client: Config
   /** Generated schema from payload generate:db-schema file path */
   generateSchemaOutputFile?: string
@@ -75,6 +88,7 @@ export type GenericTable = SQLiteTableWithColumns<{
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
 export type CountDistinct = (args: {
+  column?: SQLiteColumn<any>
   db: LibSQLDatabase
   joins: BuildQueryJoinAliases
   tableName: string

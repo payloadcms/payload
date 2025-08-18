@@ -1,5 +1,7 @@
 'use client'
 
+import type { SaveDraftButtonClientProps } from 'payload'
+
 import React, { useCallback, useRef } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
@@ -14,13 +16,14 @@ import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'save-draft'
 
-export const SaveDraftButton: React.FC = () => {
+export function SaveDraftButton(props: SaveDraftButtonClientProps) {
   const {
     config: {
       routes: { api },
       serverURL,
     },
   } = useConfig()
+
   const { id, collectionSlug, globalSlug, setUnpublishedVersionCount, uploadStatus } =
     useDocumentInfo()
 

@@ -1,7 +1,14 @@
-import type { BuildFormStateArgs, ClientConfig, ClientUser, ErrorResult, FormState } from 'payload'
+import type {
+  BuildFormStateArgs,
+  ClientConfig,
+  ClientUser,
+  ErrorResult,
+  FormState,
+  ServerFunction,
+} from 'payload'
 
 import { formatErrors } from 'payload'
-import { reduceFieldsToValues } from 'payload/shared'
+import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
 import { renderField } from '../forms/fieldSchemasToFormState/renderField.js'
@@ -36,9 +43,10 @@ type BuildFormStateErrorResult = {
 
 export type BuildFormStateResult = BuildFormStateErrorResult | BuildFormStateSuccessResult
 
-export const buildFormStateHandler = async (
-  args: BuildFormStateArgs,
-): Promise<BuildFormStateResult> => {
+export const buildFormStateHandler: ServerFunction<
+  BuildFormStateArgs,
+  Promise<BuildFormStateResult>
+> = async (args) => {
   const { req } = args
 
   const incomingUserSlug = req.user?.collection
@@ -86,7 +94,7 @@ export const buildFormStateHandler = async (
     }
 
     if (err.message === 'Unauthorized') {
-      return null
+      throw new Error('Unauthorized')
     }
 
     return formatErrors(err)
@@ -102,9 +110,14 @@ export const buildFormState = async (
     data: incomingData,
     docPermissions,
     docPreferences,
+    documentFormState,
     formState,
     globalSlug,
+    initialBlockData,
+    initialBlockFormState,
+    mockRSCs,
     operation,
+    readOnly,
     renderAllFields,
     req,
     req: {
@@ -114,8 +127,12 @@ export const buildFormState = async (
     },
     returnLockStatus,
     schemaPath = collectionSlug || globalSlug,
+    select,
+    skipValidation,
     updateLastEdited,
   } = args
+
+  const selectMode = select ? getSelectMode(select) : undefined
 
   let data = incomingData
 
@@ -164,6 +181,18 @@ export const buildFormState = async (
     data = reduceFieldsToValues(formState, true)
   }
 
+  let documentData = undefined
+
+  if (documentFormState) {
+    documentData = reduceFieldsToValues(documentFormState, true)
+  }
+
+  let blockData = initialBlockData
+
+  if (initialBlockFormState) {
+    blockData = reduceFieldsToValues(initialBlockFormState, true)
+  }
+
   /**
    * When building state for sub schemas we need to adjust:
    * - `fields`
@@ -184,16 +213,23 @@ export const buildFormState = async (
     clientFieldSchemaMap: clientSchemaMap,
     collectionSlug,
     data,
+    documentData,
     fields,
     fieldSchemaMap: schemaMap,
+    initialBlockData: blockData,
+    mockRSCs,
     operation,
     permissions: docPermissions?.fields || {},
     preferences: docPreferences || { fields: {} },
     previousFormState: formState,
+    readOnly,
     renderAllFields,
     renderFieldFn: renderField,
     req,
     schemaPath,
+    select,
+    selectMode,
+    skipValidation,
   })
 
   // Maintain form state of auth / upload fields

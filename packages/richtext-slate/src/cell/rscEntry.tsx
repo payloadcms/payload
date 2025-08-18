@@ -1,11 +1,9 @@
 import type { DefaultServerCellComponentProps, Payload } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import { formatAdminURL } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
+import { Link } from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const RscEntrySlateCell: React.FC<
   {

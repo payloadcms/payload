@@ -1,31 +1,38 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient, SupportedLanguages } from '@payloadcms/translations'
 import type { ClientConfig, ImportMap, SanitizedConfig } from 'payload'
 
 import { createClientConfig } from 'payload'
 import { cache } from 'react'
 
-let cachedClientConfig = global._payload_clientConfig
+let cachedClientConfigs = global._payload_clientConfigs as Record<
+  keyof SupportedLanguages,
+  ClientConfig
+>
 
-if (!cachedClientConfig) {
-  cachedClientConfig = global._payload_clientConfig = null
+if (!cachedClientConfigs) {
+  cachedClientConfigs = global._payload_clientConfigs = {} as Record<
+    keyof SupportedLanguages,
+    ClientConfig
+  >
 }
 
 export const getClientConfig = cache(
   (args: { config: SanitizedConfig; i18n: I18nClient; importMap: ImportMap }): ClientConfig => {
-    if (cachedClientConfig && !global._payload_doNotCacheClientConfig) {
-      return cachedClientConfig
+    const { config, i18n, importMap } = args
+    const currentLanguage = i18n.language
+
+    if (cachedClientConfigs[currentLanguage] && !global._payload_doNotCacheClientConfig) {
+      return cachedClientConfigs[currentLanguage]
     }
 
-    const { config, i18n, importMap } = args
-
-    cachedClientConfig = createClientConfig({
+    const cachedClientConfig = createClientConfig({
       config,
       i18n,
       importMap,
     })
 
-    global._payload_clientConfig = cachedClientConfig
-
+    cachedClientConfigs[currentLanguage] = cachedClientConfig
+    global._payload_clientConfigs = cachedClientConfigs
     global._payload_doNotCacheClientConfig = false
 
     return cachedClientConfig

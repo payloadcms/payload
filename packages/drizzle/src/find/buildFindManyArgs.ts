@@ -11,6 +11,7 @@ type BuildFindQueryArgs = {
   adapter: DrizzleAdapter
   collectionSlug?: string
   depth: number
+  draftsEnabled?: boolean
   fields: FlattenedField[]
   joinQuery?: JoinQuery
   /**
@@ -35,6 +36,7 @@ export const buildFindManyArgs = ({
   adapter,
   collectionSlug,
   depth,
+  draftsEnabled,
   fields,
   joinQuery,
   joins = [],
@@ -42,7 +44,7 @@ export const buildFindManyArgs = ({
   select,
   tableName,
   versions,
-}: BuildFindQueryArgs): Record<string, unknown> => {
+}: BuildFindQueryArgs): Result => {
   const result: Result = {
     extras: {},
     with: {},
@@ -80,6 +82,7 @@ export const buildFindManyArgs = ({
     currentArgs: result,
     currentTableName: tableName,
     depth,
+    draftsEnabled,
     fields,
     joinQuery,
     joins,
@@ -129,6 +132,13 @@ export const buildFindManyArgs = ({
     (!select || Object.keys(_locales.columns).length > 1)
   ) {
     result.with._locales = _locales
+  }
+
+  // Delete properties that are empty
+  for (const key of Object.keys(result)) {
+    if (!Object.keys(result[key]).length) {
+      delete result[key]
+    }
   }
 
   return result

@@ -14,6 +14,8 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -72,3 +74,10 @@ export type TextareaFieldErrorServerComponent = FieldErrorServerComponent<
 
 export type TextareaFieldErrorClientComponent =
   FieldErrorClientComponent<TextareaFieldClientWithoutType>
+
+export type TextareaFieldDiffServerComponent = FieldDiffServerComponent<
+  TextareaField,
+  TextareaFieldClient
+>
+
+export type TextareaFieldDiffClientComponent = FieldDiffClientComponent<TextareaFieldClient>

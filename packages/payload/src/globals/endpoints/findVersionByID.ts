@@ -15,7 +15,7 @@ export const findVersionByIDHandler: PayloadHandler = async (req) => {
   const depth = searchParams.get('depth')
 
   const result = await findVersionByIDOperation({
-    id: req.routeParams.id as string,
+    id: req.routeParams!.id as string,
     depth: isNumber(depth) ? Number(depth) : undefined,
     globalConfig,
     populate: sanitizePopulateParam(req.query.populate),

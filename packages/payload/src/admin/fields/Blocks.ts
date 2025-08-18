@@ -14,6 +14,8 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -80,3 +82,10 @@ export type BlocksFieldErrorServerComponent = FieldErrorServerComponent<
 
 export type BlocksFieldErrorClientComponent =
   FieldErrorClientComponent<BlocksFieldClientWithoutType>
+
+export type BlocksFieldDiffServerComponent = FieldDiffServerComponent<
+  BlocksField,
+  BlocksFieldClient
+>
+
+export type BlocksFieldDiffClientComponent = FieldDiffClientComponent<BlocksFieldClient>

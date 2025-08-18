@@ -5,7 +5,7 @@ import type {
   LexicalNodeReplacement,
   TextFormatType,
 } from 'lexical'
-import type { RichTextFieldClient } from 'payload'
+import type { ClientConfig, RichTextFieldClient } from 'payload'
 import type React from 'react'
 import type { JSX } from 'react'
 
@@ -33,6 +33,8 @@ export type FeatureProviderClient<
   clientFeatureProps: BaseClientFeatureProps<UnSanitizedClientFeatureProps>
   feature:
     | ((props: {
+        config: ClientConfig
+        featureClientImportMap: Record<string, any>
         featureClientSchemaMap: FeatureClientSchemaMap
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ClientFeatureProviderMap

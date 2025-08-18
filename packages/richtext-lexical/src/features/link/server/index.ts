@@ -10,10 +10,11 @@ import type {
 import escapeHTML from 'escape-html'
 import { sanitizeFields } from 'payload'
 
+import type { NodeWithHooks } from '../../typesServer.js'
 import type { ClientProps } from '../client/index.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
-import { convertLexicalNodesToHTML } from '../../converters/html/converter/index.js'
+import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
 import { LinkMarkdownTransformer } from '../markdownTransformer.js'
 import { AutoLinkNode } from '../nodes/AutoLinkNode.js'
@@ -46,6 +47,16 @@ export type ExclusiveLinkCollectionsProps =
     }
 
 export type LinkFeatureServerProps = {
+  /**
+   * Disables the automatic creation of links from URLs pasted into the editor, as well
+   * as auto link nodes.
+   *
+   * If set to 'creationOnly', only the creation of new auto link nodes will be disabled.
+   * Existing auto link nodes will still be editable.
+   *
+   * @default false
+   */
+  disableAutoLinks?: 'creationOnly' | true
   /**
    * A function or array defining additional fields for the link feature. These will be
    * displayed in the link editor drawer.
@@ -130,6 +141,7 @@ export const LinkFeature = createServerFeature<
       clientFeatureProps: {
         defaultLinkType,
         defaultLinkURL,
+        disableAutoLinks: props.disableAutoLinks,
         disabledCollections: props.disabledCollections,
         enabledCollections: props.enabledCollections,
       } as ClientProps,
@@ -148,55 +160,54 @@ export const LinkFeature = createServerFeature<
       i18n,
       markdownTransformers: [LinkMarkdownTransformer],
       nodes: [
-        createNode({
-          converters: {
-            html: {
-              converter: async ({
-                converters,
-                currentDepth,
-                depth,
-                draft,
-                node,
-                overrideAccess,
-                parent,
-                req,
-                showHiddenFields,
-              }) => {
-                const childrenText = await convertLexicalNodesToHTML({
-                  converters,
-                  currentDepth,
-                  depth,
-                  draft,
-                  lexicalNodes: node.children,
-                  overrideAccess,
-                  parent: {
-                    ...node,
+        props?.disableAutoLinks === true
+          ? null
+          : createNode({
+              converters: {
+                html: {
+                  converter: async ({
+                    converters,
+                    currentDepth,
+                    depth,
+                    draft,
+                    node,
+                    overrideAccess,
                     parent,
+                    req,
+                    showHiddenFields,
+                  }) => {
+                    const childrenText = await convertLexicalNodesToHTML({
+                      converters,
+                      currentDepth,
+                      depth,
+                      draft,
+                      lexicalNodes: node.children,
+                      overrideAccess,
+                      parent: {
+                        ...node,
+                        parent,
+                      },
+                      req,
+                      showHiddenFields,
+                    })
+
+                    let href: string = node.fields.url ?? ''
+                    if (node.fields.linkType === 'internal') {
+                      href =
+                        typeof node.fields.doc?.value !== 'object'
+                          ? String(node.fields.doc?.value)
+                          : String(node.fields.doc?.value?.id)
+                    }
+
+                    return `<a href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${childrenText}</a>`
                   },
-                  req,
-                  showHiddenFields,
-                })
-
-                const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
-                const target: string = node.fields.newTab ? ' target="_blank"' : ''
-
-                let href: string = node.fields.url ?? ''
-                if (node.fields.linkType === 'internal') {
-                  href =
-                    typeof node.fields.doc?.value !== 'object'
-                      ? String(node.fields.doc?.value)
-                      : String(node.fields.doc?.value?.id)
-                }
-
-                return `<a href="${href}"${target}${rel}>${childrenText}</a>`
+                  nodeTypes: [AutoLinkNode.getType()],
+                },
               },
-              nodeTypes: [AutoLinkNode.getType()],
-            },
-          },
-          node: AutoLinkNode,
-          // Since AutoLinkNodes are just internal links, they need no hooks or graphQL population promises
-          validations: [linkValidation(props, sanitizedFieldsWithoutText)],
-        }),
+              node: AutoLinkNode,
+              // Since AutoLinkNodes are just internal links, they need no hooks or graphQL population promises
+              validations: [linkValidation(props, sanitizedFieldsWithoutText)],
+            }),
         createNode({
           converters: {
             html: {
@@ -225,16 +236,13 @@ export const LinkFeature = createServerFeature<
                   req,
                   showHiddenFields,
                 })
-
-                const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
-                const target: string = node.fields.newTab ? ' target="_blank"' : ''
 
                 const href: string =
                   node.fields.linkType === 'custom'
                     ? escapeHTML(node.fields.url)
                     : (node.fields.doc?.value as string)
 
-                return `<a href="${href}"${target}${rel}>${childrenText}</a>`
+                return `<a href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${childrenText}</a>`
               },
               nodeTypes: [LinkNode.getType()],
             },
@@ -249,7 +257,7 @@ export const LinkFeature = createServerFeature<
           node: LinkNode,
           validations: [linkValidation(props, sanitizedFieldsWithoutText)],
         }),
-      ],
+      ].filter(Boolean) as Array<NodeWithHooks>,
       sanitizedServerFeatureProps: props,
     }
   },

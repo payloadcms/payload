@@ -95,8 +95,8 @@ export class ServerBlockNode extends DecoratorBlockNode {
     return false
   }
 
-  override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
-    return null
+  override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
+    return null as unknown as JSX.Element
   }
 
   override exportDOM(): DOMExportOutput {

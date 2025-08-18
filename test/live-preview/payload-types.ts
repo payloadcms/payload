@@ -6,10 +6,66 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     users: User;
     pages: Page;
@@ -19,6 +75,7 @@ export interface Config {
     tenants: Tenant;
     categories: Category;
     media: Media;
+    'collection-level-config': CollectionLevelConfig;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -33,6 +90,7 @@ export interface Config {
     tenants: TenantsSelect<false> | TenantsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'collection-level-config': CollectionLevelConfigSelect<false> | CollectionLevelConfigSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -90,6 +148,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -135,6 +200,9 @@ export interface Page {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -169,6 +237,9 @@ export interface Page {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -202,12 +273,18 @@ export interface Page {
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -367,6 +444,9 @@ export interface Post {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -401,6 +481,9 @@ export interface Post {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -434,12 +517,18 @@ export interface Post {
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -456,6 +545,7 @@ export interface Post {
   };
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -510,6 +600,9 @@ export interface Ssr {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -544,6 +637,9 @@ export interface Ssr {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -577,12 +673,18 @@ export interface Ssr {
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -641,6 +743,9 @@ export interface SsrAutosave {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -675,6 +780,9 @@ export interface SsrAutosave {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -708,12 +816,18 @@ export interface SsrAutosave {
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -729,6 +843,18 @@ export interface SsrAutosave {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Live Preview is enabled on this collection's own config, not the root config.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-level-config".
+ */
+export interface CollectionLevelConfig {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -768,6 +894,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'collection-level-config';
+        value: string | CollectionLevelConfig;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -825,6 +955,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1052,6 +1189,7 @@ export interface PostsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1293,6 +1431,15 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-level-config_select".
+ */
+export interface CollectionLevelConfigSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -1345,6 +1492,9 @@ export interface Header {
               } | null);
           url?: string | null;
           label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
           appearance?: ('default' | 'primary' | 'secondary') | null;
         };
         id?: string | null;
@@ -1375,6 +1525,9 @@ export interface Footer {
               } | null);
           url?: string | null;
           label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
           appearance?: ('default' | 'primary' | 'secondary') | null;
         };
         id?: string | null;

@@ -1,13 +1,10 @@
 import type { forgotPasswordOperation } from '../../auth/operations/forgotPassword.js'
 import type { loginOperation } from '../../auth/operations/login.js'
 import type { refreshOperation } from '../../auth/operations/refresh.js'
-import type { CollectionSlug } from '../../index.js'
+import type { resetPasswordOperation } from '../../auth/operations/resetPassword.js'
+import type { CollectionSlug, restoreVersionOperation } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
-import type {
-  AfterOperationHook,
-  SanitizedCollectionConfig,
-  SelectFromCollectionSlug,
-} from '../config/types.js'
+import type { SanitizedCollectionConfig, SelectFromCollectionSlug } from '../config/types.js'
 import type { countOperation } from './count.js'
 import type { countVersionsOperation } from './countVersions.js'
 import type { createOperation } from './create.js'
@@ -15,6 +12,7 @@ import type { deleteOperation } from './delete.js'
 import type { deleteByIDOperation } from './deleteByID.js'
 import type { findOperation } from './find.js'
 import type { findByIDOperation } from './findByID.js'
+import type { findDistinctOperation } from './findDistinct.js'
 import type { updateOperation } from './update.js'
 import type { updateByIDOperation } from './updateByID.js'
 
@@ -33,9 +31,12 @@ export type AfterOperationMap<TOperationGeneric extends CollectionSlug> = {
     boolean,
     SelectFromCollectionSlug<TOperationGeneric>
   >
+  findDistinct: typeof findDistinctOperation
   forgotPassword: typeof forgotPasswordOperation
   login: typeof loginOperation<TOperationGeneric>
   refresh: typeof refreshOperation
+  resetPassword: typeof resetPasswordOperation<TOperationGeneric>
+  restoreVersion: typeof restoreVersionOperation
   update: typeof updateOperation<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
   updateByID: typeof updateByIDOperation<
     TOperationGeneric,
@@ -84,6 +85,11 @@ export type AfterOperationArg<TOperationGeneric extends CollectionSlug> = {
       result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['findByID']>>
     }
   | {
+      args: Parameters<AfterOperationMap<TOperationGeneric>['findDistinct']>[0]
+      operation: 'findDistinct'
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['findDistinct']>>
+    }
+  | {
       args: Parameters<AfterOperationMap<TOperationGeneric>['forgotPassword']>[0]
       operation: 'forgotPassword'
       result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['forgotPassword']>>
@@ -97,6 +103,16 @@ export type AfterOperationArg<TOperationGeneric extends CollectionSlug> = {
       args: Parameters<AfterOperationMap<TOperationGeneric>['refresh']>[0]
       operation: 'refresh'
       result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['refresh']>>
+    }
+  | {
+      args: Parameters<AfterOperationMap<TOperationGeneric>['resetPassword']>[0]
+      operation: 'resetPassword'
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['resetPassword']>>
+    }
+  | {
+      args: Parameters<AfterOperationMap<TOperationGeneric>['restoreVersion']>[0]
+      operation: 'restoreVersion'
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['restoreVersion']>>
     }
   | {
       args: Parameters<AfterOperationMap<TOperationGeneric>['update']>[0]
@@ -125,10 +141,8 @@ export const buildAfterOperation = async <
 
   let newResult = result as OperationResult<TOperationGeneric, O>
 
-  await args.collection.config.hooks.afterOperation.reduce(
-    async (priorHook, hook: AfterOperationHook<TOperationGeneric>) => {
-      await priorHook
-
+  if (args.collection.config.hooks?.afterOperation?.length) {
+    for (const hook of args.collection.config.hooks.afterOperation) {
       const hookResult = await hook({
         args,
         collection,
@@ -140,9 +154,8 @@ export const buildAfterOperation = async <
       if (hookResult !== undefined) {
         newResult = hookResult as OperationResult<TOperationGeneric, O>
       }
-    },
-    Promise.resolve(),
-  )
+    }
+  }
 
   return newResult
 }

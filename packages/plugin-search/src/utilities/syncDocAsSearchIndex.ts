@@ -56,7 +56,7 @@ export const syncDocAsSearchIndex = async ({
           `Error gathering default priority for ${searchSlug} documents related to ${collection}`,
         )
       }
-    } else {
+    } else if (priority !== undefined) {
       defaultPriority = priority
     }
   }
@@ -64,18 +64,17 @@ export const syncDocAsSearchIndex = async ({
   const doSync = syncDrafts || (!syncDrafts && status !== 'draft')
 
   try {
-    if (operation === 'create') {
-      if (doSync) {
-        await payload.create({
-          collection: searchSlug,
-          data: {
-            ...dataToSave,
-            priority: defaultPriority,
-          },
-          locale: syncLocale,
-          req,
-        })
-      }
+    if (operation === 'create' && doSync) {
+      await payload.create({
+        collection: searchSlug,
+        data: {
+          ...dataToSave,
+          priority: defaultPriority,
+        },
+        depth: 0,
+        locale: syncLocale,
+        req,
+      })
     }
 
     if (operation === 'update') {
@@ -110,6 +109,7 @@ export const syncDocAsSearchIndex = async ({
             const duplicativeDocIDs = duplicativeDocs.map(({ id }) => id)
             await payload.delete({
               collection: searchSlug,
+              depth: 0,
               req,
               where: { id: { in: duplicativeDocIDs } },
             })
@@ -134,6 +134,7 @@ export const syncDocAsSearchIndex = async ({
                   ...dataToSave,
                   priority: foundDoc.priority || defaultPriority,
                 },
+                depth: 0,
                 locale: syncLocale,
                 req,
               })
@@ -142,15 +143,46 @@ export const syncDocAsSearchIndex = async ({
             }
           }
           if (deleteDrafts && status === 'draft') {
-            // do not include draft docs in search results, so delete the record
-            try {
-              await payload.delete({
-                id: searchDocID,
-                collection: searchSlug,
-                req,
-              })
-            } catch (err: unknown) {
-              payload.logger.error({ err, msg: `Error deleting ${searchSlug} document.` })
+            // Check to see if there's a published version of the doc
+            // We don't want to remove the search doc if there is a published version but a new draft has been created
+            const {
+              docs: [docWithPublish],
+            } = await payload.find({
+              collection,
+              depth: 0,
+              draft: false,
+              limit: 1,
+              locale: syncLocale,
+              pagination: false,
+              req,
+              where: {
+                and: [
+                  {
+                    _status: {
+                      equals: 'published',
+                    },
+                  },
+                  {
+                    id: {
+                      equals: id,
+                    },
+                  },
+                ],
+              },
+            })
+
+            if (!docWithPublish) {
+              // do not include draft docs in search results, so delete the record
+              try {
+                await payload.delete({
+                  id: searchDocID,
+                  collection: searchSlug,
+                  depth: 0,
+                  req,
+                })
+              } catch (err: unknown) {
+                payload.logger.error({ err, msg: `Error deleting ${searchSlug} document.` })
+              }
             }
           }
         } else if (doSync) {
@@ -161,6 +193,7 @@ export const syncDocAsSearchIndex = async ({
                 ...dataToSave,
                 priority: defaultPriority,
               },
+              depth: 0,
               locale: syncLocale,
               req,
             })

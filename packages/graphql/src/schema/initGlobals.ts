@@ -45,6 +45,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
       config,
       fields,
       graphqlResult,
+      parentIsLocalized: false,
       parentName: formattedName,
     })
     graphqlResult.globals.graphQL[slug] = {

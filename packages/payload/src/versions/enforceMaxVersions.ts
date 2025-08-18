@@ -1,4 +1,5 @@
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { DeleteVersionsArgs } from '../database/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload, PayloadRequest, Where } from '../types/index.js'
 
@@ -14,13 +15,13 @@ type Args = {
 export const enforceMaxVersions = async ({
   id,
   collection,
-  global,
+  global: globalConfig,
   max,
   payload,
   req,
 }: Args): Promise<void> => {
   const entityType = collection ? 'collection' : 'global'
-  const slug = collection ? collection.slug : global?.slug
+  const slug = collection ? collection.slug : globalConfig?.slug
 
   try {
     const where: Where = {}
@@ -42,9 +43,9 @@ export const enforceMaxVersions = async ({
       })
 
       ;[oldestAllowedDoc] = query.docs
-    } else if (global) {
+    } else if (globalConfig) {
       const query = await payload.db.findGlobalVersions({
-        global: global.slug,
+        global: globalConfig.slug,
         limit: 1,
         pagination: false,
         req,
@@ -69,13 +70,18 @@ export const enforceMaxVersions = async ({
         }
       }
 
-      await payload.db.deleteVersions({
-        collection: slug,
-        req,
-        where: deleteQuery,
-      })
+      const deleteVersionsArgs: DeleteVersionsArgs = { req, where: deleteQuery }
+
+      if (globalConfig) {
+        deleteVersionsArgs.globalSlug = slug
+      } else {
+        deleteVersionsArgs.collection = slug
+      }
+
+      await payload.db.deleteVersions(deleteVersionsArgs)
     }
   } catch (err) {
+    payload.logger.error(err)
     payload.logger.error(
       `There was an error cleaning up old versions for the ${entityType} ${slug}`,
     )

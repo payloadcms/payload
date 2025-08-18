@@ -1,54 +1,57 @@
+'use client'
 import type { ClientField } from 'payload'
 
-import { ChevronIcon, Pill, useTranslation } from '@payloadcms/ui'
+import { ChevronIcon, FieldDiffLabel, useConfig, useTranslation } from '@payloadcms/ui'
 import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
 import React, { useState } from 'react'
 
-import Label from '../Label/index.js'
 import './index.scss'
 import { countChangedFields, countChangedFieldsInRows } from '../utilities/countChangedFields.js'
 
 const baseClass = 'diff-collapser'
 
-type Props =
+type Props = {
+  hideGutter?: boolean
+  initCollapsed?: boolean
+  Label: React.ReactNode
+  locales: string[] | undefined
+  parentIsLocalized: boolean
+  valueTo: unknown
+} & (
   | {
       // fields collapser
       children: React.ReactNode
-      comparison: unknown
       field?: never
       fields: ClientField[]
-      initCollapsed?: boolean
       isIterable?: false
-      label: React.ReactNode
-      locales: string[] | undefined
-      version: unknown
+      valueFrom: unknown
     }
   | {
       // iterable collapser
       children: React.ReactNode
-      comparison?: unknown
       field: ClientField
       fields?: never
-      initCollapsed?: boolean
       isIterable: true
-      label: React.ReactNode
-      locales: string[] | undefined
-      version: unknown
+      valueFrom?: unknown
     }
+)
 
 export const DiffCollapser: React.FC<Props> = ({
   children,
-  comparison,
   field,
   fields,
+  hideGutter = false,
   initCollapsed = false,
   isIterable = false,
-  label,
+  Label,
   locales,
-  version,
+  parentIsLocalized,
+  valueFrom,
+  valueTo,
 }) => {
   const { t } = useTranslation()
   const [isCollapsed, setIsCollapsed] = useState(initCollapsed)
+  const { config } = useConfig()
 
   let changeCount = 0
 
@@ -58,8 +61,8 @@ export const DiffCollapser: React.FC<Props> = ({
         'DiffCollapser: field must be an array or blocks field when isIterable is true',
       )
     }
-    const comparisonRows = comparison ?? []
-    const versionRows = version ?? []
+    const comparisonRows = valueFrom ?? []
+    const versionRows = valueTo ?? []
 
     if (!Array.isArray(comparisonRows) || !Array.isArray(versionRows)) {
       throw new Error(
@@ -69,44 +72,50 @@ export const DiffCollapser: React.FC<Props> = ({
 
     changeCount = countChangedFieldsInRows({
       comparisonRows,
+      config,
       field,
       locales,
+      parentIsLocalized,
       versionRows,
     })
   } else {
     changeCount = countChangedFields({
-      comparison,
+      comparison: valueFrom,
+      config,
       fields,
       locales,
-      version,
+      parentIsLocalized,
+      version: valueTo,
     })
   }
 
   const contentClassNames = [
     `${baseClass}__content`,
     isCollapsed && `${baseClass}__content--is-collapsed`,
+    hideGutter && `${baseClass}__content--hide-gutter`,
   ]
     .filter(Boolean)
     .join(' ')
 
   return (
     <div className={baseClass}>
-      <Label>
+      <FieldDiffLabel>
         <button
           aria-label={isCollapsed ? 'Expand' : 'Collapse'}
           className={`${baseClass}__toggle-button`}
           onClick={() => setIsCollapsed(!isCollapsed)}
           type="button"
         >
-          <ChevronIcon direction={isCollapsed ? 'right' : 'down'} />
+          <div className={`${baseClass}__label`}>{Label}</div>
+
+          <ChevronIcon direction={isCollapsed ? 'right' : 'down'} size={'small'} />
         </button>
-        <span className={`${baseClass}__label`}>{label}</span>
-        {changeCount > 0 && (
-          <Pill className={`${baseClass}__field-change-count`} pillStyle="light-gray" size="small">
+        {changeCount > 0 && isCollapsed && (
+          <span className={`${baseClass}__field-change-count`}>
             {t('version:changedFieldsCount', { count: changeCount })}
-          </Pill>
+          </span>
         )}
-      </Label>
+      </FieldDiffLabel>
       <div className={contentClassNames}>{children}</div>
     </div>
   )

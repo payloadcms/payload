@@ -4,11 +4,13 @@ import type {
   FormField,
   FormState,
   Row,
-  User,
+  TypedUser,
   ValidationFieldError,
 } from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
+
+import type { AcceptValues } from './mergeServerFormState.js'
 
 export type Preferences = {
   [key: string]: unknown
@@ -26,6 +28,10 @@ export type FormProps = {
    */
   disableValidationOnSubmit?: boolean
   /**
+   * If you don't want the form to be a <form> element, you can pass a string here to use as the wrapper element.
+   */
+  el?: string
+  /**
    * By default, the form will get the field schema (not data) from the current document. If you pass this in, you can override that behavior.
    * This is very useful for sub-forms, where the form's field schema is not necessarily the field schema of the current document (e.g. for the Blocks
    * feature of the Lexical Rich Text field)
@@ -37,11 +43,26 @@ export type FormProps = {
     errorToast: (value: string) => void,
   ) => void
   initialState?: FormState
+  /**
+   * Determines if this Form is the main, top-level Form of a document. If set to true, the
+   * Form's children will be wrapped in a DocumentFormContext, which lets you access this document
+   * Form's data and fields from any child component - even if that child component is wrapped in a child
+   * Form (e.g. a lexical block).
+   */
+  isDocumentForm?: boolean
   isInitializing?: boolean
   log?: boolean
-  onChange?: ((args: { formState: FormState }) => Promise<FormState>)[]
+  onChange?: ((args: { formState: FormState; submitted?: boolean }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
-  onSuccess?: (json: unknown) => Promise<FormState | void> | void
+  onSuccess?: (
+    json: unknown,
+    options?: {
+      /**
+       * Arbitrary context passed to the onSuccess callback.
+       */
+      context?: Record<string, unknown>
+    },
+  ) => Promise<FormState | void> | void
   redirect?: string
   submitted?: boolean
   uuid?: string
@@ -57,27 +78,61 @@ export type FormProps = {
     }
 )
 
-export type SubmitOptions = {
+export type SubmitOptions<T = Record<string, unknown>> = {
+  acceptValues?: AcceptValues
   action?: string
+  /**
+   * @experimental - Note: this property is experimental and may change in the future. Use at your own discretion.
+   * If you want to pass additional data to the onSuccess callback, you can use this context object.
+   */
+  context?: T
+  /**
+   * When true, will disable the form while it is processing.
+   * @default true
+   */
+  disableFormWhileProcessing?: boolean
+  /**
+   * When true, will disable the success toast after form submission.
+   * @default false
+   */
+  disableSuccessStatus?: boolean
   method?: string
   overrides?: ((formState) => FormData) | Record<string, unknown>
+  /**
+   * When true, will skip validation before submitting the form.
+   * @default false
+   */
   skipValidation?: boolean
 }
 
 export type DispatchFields = React.Dispatch<any>
-export type Submit = (
-  options?: SubmitOptions,
+
+export type Submit = <T extends Record<string, unknown>>(
+  options?: SubmitOptions<T>,
   e?: React.FormEvent<HTMLFormElement>,
-) => Promise<void>
+) => Promise</**
+ * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use at your own discretion.
+ * Returns the form state and the response from the server.
+ */
+{ formState?: FormState; res: Response } | void>
+
 export type ValidateForm = () => Promise<boolean>
+
 export type CreateFormData = (
   overrides?: Record<string, unknown>,
   /**
    * If mergeOverrideData true, the data will be merged with the existing data in the form state.
    * @default true
    */
-  options?: { mergeOverrideData?: boolean },
-) => FormData
+  options?: {
+    /**
+     * If provided, will use this instead of of derived data from the current form state.
+     */
+    data?: Data
+    mergeOverrideData?: boolean
+  },
+) => FormData | Promise<FormData>
+
 export type GetFields = () => FormState
 export type GetField = (path: string) => FormField
 export type GetData = () => Data
@@ -91,6 +146,11 @@ export type Reset = (data: unknown) => Promise<void>
 
 export type REPLACE_STATE = {
   optimize?: boolean
+  /**
+   * If `sanitize` is true, default values will be set for form field properties that are not present in the incoming state.
+   * For example, `valid` will be set to true if it is not present in the incoming state.
+   */
+  sanitize?: boolean
   state: FormState
   type: 'REPLACE_STATE'
 }
@@ -104,7 +164,7 @@ export type MODIFY_CONDITION = {
   path: string
   result: boolean
   type: 'MODIFY_CONDITION'
-  user: User
+  user: TypedUser
 }
 
 export type UPDATE = {
@@ -129,6 +189,13 @@ export type ADD_ROW = {
   rowIndex?: number
   subFieldState?: FormState
   type: 'ADD_ROW'
+}
+
+export type MERGE_SERVER_STATE = {
+  acceptValues?: AcceptValues
+  prevStateRef: React.RefObject<FormState>
+  serverState: FormState
+  type: 'MERGE_SERVER_STATE'
 }
 
 export type REPLACE_ROW = {
@@ -173,6 +240,7 @@ export type FieldAction =
   | ADD_ROW
   | ADD_SERVER_ERRORS
   | DUPLICATE_ROW
+  | MERGE_SERVER_STATE
   | MODIFY_CONDITION
   | MOVE_ROW
   | REMOVE
@@ -215,6 +283,20 @@ export type Context = {
   getFields: GetFields
   getSiblingData: GetSiblingData
   initializing: boolean
+  /**
+   * Tracks wether the form state passes validation.
+   * For example the state could be submitted but invalid as field errors have been returned.
+   */
+  isValid: boolean
+  moveFieldRow: ({
+    moveFromIndex,
+    moveToIndex,
+    path,
+  }: {
+    moveFromIndex: number
+    moveToIndex: number
+    path: string
+  }) => void
   removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
     blockType,
@@ -231,7 +313,13 @@ export type Context = {
   }) => void
   replaceState: (state: FormState) => void
   reset: Reset
+  /**
+   * If the form has started processing in the background (e.g.
+   * if autosave is running), this will be true.
+   */
+  setBackgroundProcessing: SetProcessing
   setDisabled: (disabled: boolean) => void
+  setIsValid: (processing: boolean) => void
   setModified: SetModified
   setProcessing: SetProcessing
   setSubmitted: SetSubmitted

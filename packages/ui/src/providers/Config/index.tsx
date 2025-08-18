@@ -6,9 +6,10 @@ import type {
   ClientGlobalConfig,
   CollectionSlug,
   GlobalSlug,
+  UnsanitizedClientConfig,
 } from 'payload'
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 type GetEntityConfigFn = {
   // Overload #1: collectionSlug only
@@ -39,16 +40,40 @@ export type ClientConfigContext = {
 
 const RootConfigContext = createContext<ClientConfigContext | undefined>(undefined)
 
+function sanitizeClientConfig(
+  unSanitizedConfig: ClientConfig | UnsanitizedClientConfig,
+): ClientConfig {
+  if (!unSanitizedConfig?.blocks?.length || (unSanitizedConfig as ClientConfig).blocksMap) {
+    ;(unSanitizedConfig as ClientConfig).blocksMap = {}
+    return unSanitizedConfig as ClientConfig
+  }
+  const sanitizedConfig: ClientConfig = { ...unSanitizedConfig } as ClientConfig
+
+  sanitizedConfig.blocksMap = {}
+
+  for (const block of unSanitizedConfig.blocks) {
+    sanitizedConfig.blocksMap[block.slug] = block
+  }
+
+  return sanitizedConfig
+}
+
 export const ConfigProvider: React.FC<{
   readonly children: React.ReactNode
-  readonly config: ClientConfig
+  readonly config: ClientConfig | UnsanitizedClientConfig
 }> = ({ children, config: configFromProps }) => {
-  const [config, setConfig] = useState<ClientConfig>(configFromProps)
+  const [config, setConfig] = useState<ClientConfig>(() => sanitizeClientConfig(configFromProps))
+
+  const isFirstRenderRef = useRef(true)
 
   // Need to update local config state if config from props changes, for HMR.
   // That way, config changes will be updated in the UI immediately without needing a refresh.
   useEffect(() => {
-    setConfig(configFromProps)
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false
+      return
+    }
+    setConfig(sanitizeClientConfig(configFromProps))
   }, [configFromProps])
 
   // Build lookup maps for collections and globals so we can do O(1) lookups by slug
@@ -79,11 +104,9 @@ export const ConfigProvider: React.FC<{
     [collectionsBySlug, globalsBySlug],
   )
 
-  return (
-    <RootConfigContext.Provider value={{ config, getEntityConfig, setConfig }}>
-      {children}
-    </RootConfigContext.Provider>
-  )
+  const value = useMemo(() => ({ config, getEntityConfig, setConfig }), [config, getEntityConfig])
+
+  return <RootConfigContext value={value}>{children}</RootConfigContext>
 }
 
-export const useConfig = (): ClientConfigContext => useContext(RootConfigContext)
+export const useConfig = (): ClientConfigContext => use(RootConfigContext)

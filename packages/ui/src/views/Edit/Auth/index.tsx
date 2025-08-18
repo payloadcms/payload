@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { getFieldPermissions } from 'payload/shared'
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { Props } from './types.js'
@@ -42,7 +43,7 @@ export const Auth: React.FC<Props> = (props) => {
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
-  const { docPermissions, isEditing, isInitializing } = useDocumentInfo()
+  const { docPermissions, isEditing, isInitializing, isTrashed } = useDocumentInfo()
 
   const {
     config: {
@@ -51,15 +52,66 @@ export const Auth: React.FC<Props> = (props) => {
     },
   } = useConfig()
 
-  const hasPermissionToUnlock: boolean = useMemo(() => {
-    const collection = permissions?.collections?.[collectionSlug]
+  let showPasswordFields = true
+  let showUnlock = true
+  const hasPasswordFieldOverride =
+    typeof docPermissions.fields === 'object' && 'password' in docPermissions.fields
+  const hasLoginFieldOverride =
+    typeof docPermissions.fields === 'object' &&
+    ('username' in docPermissions.fields || 'email' in docPermissions.fields)
 
-    if (collection) {
-      return Boolean('unlock' in collection ? collection.unlock : undefined)
+  if (hasPasswordFieldOverride) {
+    const { permissions: passwordPermissions } = getFieldPermissions({
+      field: { name: 'password', type: 'text' },
+      operation,
+      parentName: '',
+      permissions: docPermissions?.fields,
+    })
+
+    if (operation === 'create') {
+      showPasswordFields =
+        passwordPermissions === true ||
+        (typeof passwordPermissions === 'object' && passwordPermissions.create)
+    } else {
+      showPasswordFields =
+        passwordPermissions === true ||
+        (typeof passwordPermissions === 'object' && passwordPermissions.update)
     }
+  }
 
-    return false
-  }, [permissions, collectionSlug])
+  if (hasLoginFieldOverride) {
+    const hasEmailAndUsernameFields =
+      loginWithUsername && (loginWithUsername.requireEmail || loginWithUsername.allowEmailLogin)
+
+    const { operation: emailPermission } = getFieldPermissions({
+      field: { name: 'email', type: 'text' },
+      operation: 'read',
+      parentName: '',
+      permissions: docPermissions?.fields,
+    })
+
+    const { operation: usernamePermission } = getFieldPermissions({
+      field: { name: 'username', type: 'text' },
+      operation: 'read',
+      parentName: '',
+      permissions: docPermissions?.fields,
+    })
+
+    if (hasEmailAndUsernameFields) {
+      showUnlock = usernamePermission || emailPermission
+    } else if (loginWithUsername && !hasEmailAndUsernameFields) {
+      showUnlock = usernamePermission
+    } else {
+      showUnlock = emailPermission
+    }
+  }
+
+  const enableFields =
+    (!disableLocalStrategy ||
+      (typeof disableLocalStrategy === 'object' && disableLocalStrategy.enableFields === true)) &&
+    (showUnlock || showPasswordFields)
+
+  const disabled = readOnly || isInitializing || isTrashed
 
   const apiKeyPermissions =
     docPermissions?.fields === true ? true : docPermissions?.fields?.enableAPIKey
@@ -73,11 +125,20 @@ export const Auth: React.FC<Props> = (props) => {
     readOnly || (apiKeyPermissions !== true && !apiKeyPermissions?.update)
 
   const canReadApiKey = apiKeyPermissions === true || apiKeyPermissions?.read
-  const canReadEnableAPIKey = apiKeyPermissions === true || apiKeyPermissions?.read
+
+  const hasPermissionToUnlock: boolean = useMemo(() => {
+    const collection = permissions?.collections?.[collectionSlug]
+
+    if (collection) {
+      return Boolean('unlock' in collection ? collection.unlock : undefined)
+    }
+
+    return false
+  }, [permissions, collectionSlug])
 
   const handleChangePassword = useCallback(
-    (showPasswordFields: boolean) => {
-      if (showPasswordFields) {
+    (changingPassword: boolean) => {
+      if (changingPassword) {
         setValidateBeforeSubmit(true)
 
         dispatchFields({
@@ -99,7 +160,7 @@ export const Auth: React.FC<Props> = (props) => {
         dispatchFields({ type: 'REMOVE', path: 'confirm-password' })
       }
 
-      setChangingPassword(showPasswordFields)
+      setChangingPassword(changingPassword)
     },
     [dispatchFields, t, setValidateBeforeSubmit],
   )
@@ -130,24 +191,22 @@ export const Auth: React.FC<Props> = (props) => {
     }
   }, [modified])
 
-  if (disableLocalStrategy && !useAPIKey) {
+  if (disableLocalStrategy && !enableFields && !useAPIKey) {
     return null
   }
 
-  const disabled = readOnly || isInitializing
-
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
-      {!disableLocalStrategy && (
+      {enableFields && (
         <React.Fragment>
           <EmailAndUsernameFields
             loginWithUsername={loginWithUsername}
             operation={operation}
             permissions={docPermissions?.fields}
-            readOnly={readOnly}
+            readOnly={readOnly || isTrashed}
             t={t}
           />
-          {(changingPassword || requirePassword) && (
+          {(changingPassword || requirePassword) && (!disableLocalStrategy || !enableFields) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField
                 autoComplete="new-password"
@@ -162,7 +221,7 @@ export const Auth: React.FC<Props> = (props) => {
                 path="password"
                 schemaPath="password"
               />
-              <ConfirmPasswordField disabled={readOnly} />
+              <ConfirmPasswordField disabled={readOnly || isTrashed} />
             </div>
           )}
           <div className={`${baseClass}__controls`}>
@@ -176,21 +235,24 @@ export const Auth: React.FC<Props> = (props) => {
                 {t('general:cancel')}
               </Button>
             )}
-            {!changingPassword && !requirePassword && (
-              <Button
-                buttonStyle="secondary"
-                disabled={disabled}
-                id="change-password"
-                onClick={() => handleChangePassword(true)}
-                size="medium"
-              >
-                {t('authentication:changePassword')}
-              </Button>
-            )}
+            {!changingPassword &&
+              !requirePassword &&
+              !disableLocalStrategy &&
+              showPasswordFields && (
+                <Button
+                  buttonStyle="secondary"
+                  disabled={disabled}
+                  id="change-password"
+                  onClick={() => handleChangePassword(true)}
+                  size="medium"
+                >
+                  {t('authentication:changePassword')}
+                </Button>
+              )}
             {operation === 'update' && hasPermissionToUnlock && (
               <Button
                 buttonStyle="secondary"
-                disabled={disabled}
+                disabled={disabled || !showUnlock}
                 onClick={() => void unlock()}
                 size="medium"
               >
@@ -202,18 +264,20 @@ export const Auth: React.FC<Props> = (props) => {
       )}
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
-          {canReadEnableAPIKey && (
-            <CheckboxField
-              field={{
-                name: 'enableAPIKey',
-                admin: { disabled, readOnly: enableAPIKeyReadOnly },
-                label: t('authentication:enableAPIKey'),
-              }}
-              path="enableAPIKey"
-              schemaPath={`${collectionSlug}.enableAPIKey`}
-            />
+          {canReadApiKey && (
+            <Fragment>
+              <CheckboxField
+                field={{
+                  name: 'enableAPIKey',
+                  admin: { disabled, readOnly: enableAPIKeyReadOnly },
+                  label: t('authentication:enableAPIKey'),
+                }}
+                path="enableAPIKey"
+                schemaPath={`${collectionSlug}.enableAPIKey`}
+              />
+              <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />
+            </Fragment>
           )}
-          {canReadApiKey && <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />}
         </div>
       )}
       {verify && isEditing && (

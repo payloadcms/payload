@@ -85,7 +85,7 @@ function ToolbarGroupComponent({
         }
         return
       }
-      const item = activeItems[0]
+      const item = activeItems[0]!
 
       let label = item.key
       if (item.label) {

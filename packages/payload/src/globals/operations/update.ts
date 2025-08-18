@@ -15,7 +15,7 @@ import type {
   SelectFromGlobalSlug,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -26,6 +26,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 
@@ -69,7 +70,7 @@ export const updateOperation = async <
     publishSpecificLocale,
     req: { fallbackLocale, locale, payload },
     req,
-    select,
+    select: incomingSelect,
     showHiddenFields,
   } = args
 
@@ -98,7 +99,7 @@ export const updateOperation = async <
     // Retrieve document
     // /////////////////////////////////////
 
-    const query: Where = overrideAccess ? undefined : (accessResults as Where)
+    const query: Where = overrideAccess ? undefined! : (accessResults as Where)
 
     // /////////////////////////////////////
     // 2. Retrieve document
@@ -106,7 +107,7 @@ export const updateOperation = async <
     const globalVersion = await getLatestGlobalVersion({
       slug,
       config: globalConfig,
-      locale,
+      locale: locale!,
       payload,
       req,
       where: query,
@@ -128,13 +129,13 @@ export const updateOperation = async <
       context: req.context,
       depth: 0,
       doc: deepCopyObjectSimple(globalJSON),
-      draft: draftArg,
-      fallbackLocale,
+      draft: draftArg!,
+      fallbackLocale: fallbackLocale!,
       global: globalConfig,
-      locale,
+      locale: locale!,
       overrideAccess: true,
       req,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // ///////////////////////////////////////////
@@ -159,7 +160,7 @@ export const updateOperation = async <
       doc: originalDoc,
       global: globalConfig,
       operation: 'update',
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
     })
 
@@ -167,35 +168,35 @@ export const updateOperation = async <
     // beforeValidate - Global
     // /////////////////////////////////////
 
-    await globalConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      data =
-        (await hook({
-          context: req.context,
-          data,
-          global: globalConfig,
-          originalDoc,
-          req,
-        })) || data
-    }, Promise.resolve())
+    if (globalConfig.hooks?.beforeValidate?.length) {
+      for (const hook of globalConfig.hooks.beforeValidate) {
+        data =
+          (await hook({
+            context: req.context,
+            data,
+            global: globalConfig,
+            originalDoc,
+            req,
+          })) || data
+      }
+    }
 
     // /////////////////////////////////////
     // beforeChange - Global
     // /////////////////////////////////////
 
-    await globalConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      data =
-        (await hook({
-          context: req.context,
-          data,
-          global: globalConfig,
-          originalDoc,
-          req,
-        })) || data
-    }, Promise.resolve())
+    if (globalConfig.hooks?.beforeChange?.length) {
+      for (const hook of globalConfig.hooks.beforeChange) {
+        data =
+          (await hook({
+            context: req.context,
+            data,
+            global: globalConfig,
+            originalDoc,
+            req,
+          })) || data
+      }
+    }
 
     // /////////////////////////////////////
     // beforeChange - Fields
@@ -243,7 +244,18 @@ export const updateOperation = async <
     // Update
     // /////////////////////////////////////
 
+    const select = sanitizeSelect({
+      fields: globalConfig.flattenedFields,
+      forceSelect: globalConfig.forceSelect,
+      select: incomingSelect,
+    })
+
     if (!shouldSaveDraft) {
+      // Ensure global has createdAt
+      if (!result.createdAt) {
+        result.createdAt = new Date().toISOString()
+      }
+
       if (globalExists) {
         result = await payload.db.updateGlobal({
           slug,
@@ -270,6 +282,7 @@ export const updateOperation = async <
         docWithLocales: result,
         draft: shouldSaveDraft,
         global: globalConfig,
+        operation: 'update',
         payload,
         publishSpecificLocale,
         req,
@@ -303,34 +316,34 @@ export const updateOperation = async <
     result = await afterRead({
       collection: null,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: result,
-      draft: draftArg,
+      draft: draftArg!,
       fallbackLocale: null,
       global: globalConfig,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////
     // afterRead - Global
     // /////////////////////////////////////
 
-    await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          context: req.context,
-          doc: result,
-          global: globalConfig,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (globalConfig.hooks?.afterRead?.length) {
+      for (const hook of globalConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            context: req.context,
+            doc: result,
+            global: globalConfig,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterChange - Fields
@@ -351,18 +364,19 @@ export const updateOperation = async <
     // afterChange - Global
     // /////////////////////////////////////
 
-    await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          context: req.context,
-          doc: result,
-          global: globalConfig,
-          previousDoc: originalDoc,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (globalConfig.hooks?.afterChange?.length) {
+      for (const hook of globalConfig.hooks.afterChange) {
+        result =
+          (await hook({
+            context: req.context,
+            data,
+            doc: result,
+            global: globalConfig,
+            previousDoc: originalDoc,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // Return results

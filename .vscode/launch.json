@@ -64,6 +64,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm tsx --no-deprecation test/dev.ts query-presets",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Query Presets",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm tsx --no-deprecation test/dev.ts login-with-username",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Login-With-Username",
@@ -112,6 +119,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm tsx --no-deprecation test/dev.ts folder-view",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Folder View",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm tsx --no-deprecation test/dev.ts localization",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Localization",
@@ -122,6 +136,13 @@
       "command": "pnpm tsx --no-deprecation test/dev.ts locked-documents",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Locked Documents",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "pnpm tsx --no-deprecation test/dev.ts trash",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Trash",
       "request": "launch",
       "type": "node-terminal"
     },

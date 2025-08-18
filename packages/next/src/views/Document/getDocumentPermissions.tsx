@@ -31,7 +31,7 @@ export const getDocumentPermissions = async (args: {
   if (collectionConfig) {
     try {
       docPermissions = await docAccessOperation({
-        id: id?.toString(),
+        id,
         collection: {
           config: collectionConfig,
         },
@@ -46,7 +46,7 @@ export const getDocumentPermissions = async (args: {
 
       if (collectionConfig.versions?.drafts) {
         hasPublishPermission = await docAccessOperation({
-          id: id?.toString(),
+          id,
           collection: {
             config: collectionConfig,
           },

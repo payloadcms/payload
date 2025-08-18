@@ -1,12 +1,12 @@
 ---
 title: Stripe Plugin
 label: Stripe
-order: 40
+order: 110
 desc: Easily accept payments with Stripe
 keywords: plugins, stripe, payments, ecommerce
 ---
 
-[![npm](https://img.shields.io/npm/v/@payloadcms/plugin-stripe)](https://www.npmjs.com/package/@payloadcms/plugin-stripe)
+![https://www.npmjs.com/package/@payloadcms/plugin-stripe](https://img.shields.io/npm/v/@payloadcms/plugin-stripe)
 
 With this plugin you can easily integrate [Stripe](https://stripe.com) into Payload. Simply provide your Stripe credentials and this plugin will open up a two-way communication channel between the two platforms. This enables you to easily sync data back and forth, as well as proxy the Stripe REST API through Payload's [Access Control](../access-control/overview). Use this plugin to completely offload billing to Stripe and retain full control over your application's data.
 
@@ -18,9 +18,10 @@ The beauty of this plugin is the entirety of your application's content and busi
 
 <Banner type="info">
   This plugin is completely open-source and the [source code can be found
-  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-stripe). If you need help,
-  check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a
-  bug, please [open a new
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-stripe).
+  If you need help, check out our [Community
+  Help](https://payloadcms.com/community-help). If you think you've found a bug,
+  please [open a new
   issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20stripe&template=bug_report.md&title=plugin-stripe%3A)
   with as much detail as possible.
 </Banner>
@@ -65,14 +66,14 @@ export default config
 
 | Option                         | Type               | Default     | Description                                                                                                              |
 | ------------------------------ | ------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `stripeSecretKey` *            | string             | `undefined` | Your Stripe secret key                                                                                                   |
+| `stripeSecretKey` \*           | string             | `undefined` | Your Stripe secret key                                                                                                   |
 | `stripeWebhooksEndpointSecret` | string             | `undefined` | Your Stripe webhook endpoint secret                                                                                      |
 | `rest`                         | boolean            | `false`     | When `true`, opens the `/api/stripe/rest` endpoint                                                                       |
 | `webhooks`                     | object or function | `undefined` | Either a function to handle all webhooks events, or an object of Stripe webhook handlers, keyed to the name of the event |
 | `sync`                         | array              | `undefined` | An array of sync configs                                                                                                 |
 | `logs`                         | boolean            | `false`     | When `true`, logs sync events to the console as they happen                                                              |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 ## Endpoints
 
@@ -111,14 +112,16 @@ If you need to proxy the API server-side, use the [stripeProxy](#node) function.
 <Banner type="info">
   **Note:**
 
-  The `/api` part of these routes may be different based on the settings defined in your Payload
-  config.
+The `/api` part of these routes may be different based on the settings defined in your Payload
+config.
+
 </Banner>
 
 <Banner type="warning">
   **Warning:**
 
-  Opening the REST proxy endpoint in production is a potential security risk. Authenticated users will have open access to the Stripe REST API. In production, open your own endpoint and use the [stripeProxy](#node) function to proxy the Stripe API server-side.
+Opening the REST proxy endpoint in production is a potential security risk. Authenticated users will have open access to the Stripe REST API. In production, open your own endpoint and use the [stripeProxy](#node) function to proxy the Stripe API server-side.
+
 </Banner>
 
 ## Webhooks
@@ -182,7 +185,9 @@ On the server you should interface with Stripe directly using the [stripe](https
 import Stripe from 'stripe'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
-const stripe = new Stripe(stripeSecretKey, { apiVersion: '2022-08-01' })
+const stripe = new Stripe(stripeSecretKey, {
+  apiVersion: '2022-08-01',
+})
 
 export const MyFunction = async () => {
   try {
@@ -234,8 +239,9 @@ This option will setup a basic sync between Payload collections and Stripe resou
 <Banner type="info">
   **Note:**
 
-  If you wish to enable a _two-way_ sync, be sure to setup [`webhooks`](#webhooks) and pass the
-  `stripeWebhooksEndpointSecret` through your config.
+If you wish to enable a _two-way_ sync, be sure to setup [`webhooks`](#webhooks) and pass the
+`stripeWebhooksEndpointSecret` through your config.
+
 </Banner>
 
 ```ts
@@ -270,10 +276,11 @@ export default config
 <Banner type="warning">
   **Note:**
 
-  Due to limitations in the Stripe API, this currently only works with top-level fields. This is
-  because every Stripe object is a separate entity, making it difficult to abstract into a simple
-  reusable library. In the future, we may find a pattern around this. But for now, cases like that
-  will need to be hard-coded.
+Due to limitations in the Stripe API, this currently only works with top-level fields. This is
+because every Stripe object is a separate entity, making it difficult to abstract into a simple
+reusable library. In the future, we may find a pattern around this. But for now, cases like that
+will need to be hard-coded.
+
 </Banner>
 
 Using `sync` will do the following:
@@ -302,7 +309,3 @@ import {
   ...
 } from '@payloadcms/plugin-stripe/types';
 ```
-
-## Examples
-
-The [Templates Directory](https://github.com/payloadcms/payload/tree/main/templates) contains an official [E-commerce Template](https://github.com/payloadcms/payload/tree/main/templates/ecommerce) which demonstrates exactly how to configure this plugin in Payload and implement it on your front-end. You can also check out [How to Build An E-Commerce Site With Next.js](https://payloadcms.com/blog/how-to-build-an-e-commerce-site-with-nextjs) post for a bit more context around this template.

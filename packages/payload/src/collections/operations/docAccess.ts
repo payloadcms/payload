@@ -39,6 +39,7 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
     const result = await getEntityPolicies({
       id,
       type: 'collection',
+      blockPolicies: {},
       entity: config,
       operations: collectionOperations,
       req,
@@ -50,7 +51,7 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
       },
     })
 
-    return sanitizedPermissions?.collections?.[config.slug]
+    return sanitizedPermissions.collections![config.slug]!
   } catch (e: unknown) {
     await killTransaction(req)
     throw e

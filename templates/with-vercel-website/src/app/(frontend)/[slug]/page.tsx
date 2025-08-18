@@ -2,12 +2,10 @@ import type { Metadata } from 'next'
 
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
-import { getPayload } from 'payload'
+import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
 import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
 import { homeStatic } from '@/endpoints/seed/home-static'
-
-import type { Page as PageType } from '@/payload-types'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
@@ -50,7 +48,7 @@ export default async function Page({ params: paramsPromise }: Args) {
   const { slug = 'home' } = await paramsPromise
   const url = '/' + slug
 
-  let page: PageType | null
+  let page: RequiredDataFromCollectionSlug<'pages'> | null
 
   page = await queryPageBySlug({
     slug,
@@ -81,7 +79,7 @@ export default async function Page({ params: paramsPromise }: Args) {
   )
 }
 
-export async function generateMetadata({ params: paramsPromise }): Promise<Metadata> {
+export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug = 'home' } = await paramsPromise
   const page = await queryPageBySlug({
     slug,

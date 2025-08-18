@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -7,7 +7,12 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../../../helpers.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+  // throttleTest,
+} from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
@@ -26,6 +31,7 @@ let client: RESTClient
 let page: Page
 let serverURL: string
 let url: AdminUrlUtil
+let context: BrowserContext
 
 const toggleConditionAndCheckField = async (toggleLocator: string, fieldLocator: string) => {
   const toggle = page.locator(toggleLocator)
@@ -52,7 +58,7 @@ describe('Conditional Logic', () => {
 
     url = new AdminUrlUtil(serverURL, conditionalLogicSlug)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
@@ -60,15 +66,23 @@ describe('Conditional Logic', () => {
   })
 
   beforeEach(async () => {
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Fast 4G',
+    // })
+
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
+
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -161,20 +175,70 @@ describe('Conditional Logic', () => {
 
   test('should not render fields when adding array or blocks rows until form state returns', async () => {
     await page.goto(url.create)
-    const addRowButton = page.locator('.array-field__add-row')
-    const fieldWithConditionSelector = 'input#field-arrayWithConditionalField__0__textWithCondition'
-    await addRowButton.click()
+    await page.locator('#field-arrayWithConditionalField .array-field__add-row').click()
+    const shimmer = '#field-arrayWithConditionalField .collapsible__content > .shimmer-effect'
 
+    await expect(page.locator(shimmer)).toBeVisible()
+
+    await expect(page.locator(shimmer)).toBeHidden()
+
+    // Do not use `waitForSelector` here, as it will wait for the selector to appear, not disappear
+    // eslint-disable-next-line playwright/no-wait-for-selector
     const wasFieldAttached = await page
-      .waitForSelector(fieldWithConditionSelector, {
+      .waitForSelector('input#field-arrayWithConditionalField__0__textWithCondition', {
         state: 'attached',
         timeout: 100, // A small timeout to catch any transient rendering
       })
       .catch(() => false) // If it doesn't appear, this resolves to `false`
 
     expect(wasFieldAttached).toBeFalsy()
+
     const fieldToToggle = page.locator('input#field-enableConditionalFields')
     await fieldToToggle.click()
-    await expect(page.locator(fieldWithConditionSelector)).toBeVisible()
+
+    await expect(
+      page.locator('input#field-arrayWithConditionalField__0__textWithCondition'),
+    ).toBeVisible()
+  })
+
+  test('should render field based on path argument', async () => {
+    await page.goto(url.create)
+
+    const arrayOneButton = page.locator('#field-arrayOne .array-field__add-row')
+    await arrayOneButton.click()
+
+    const arrayTwoButton = page.locator('#arrayOne-row-0 .array-field__add-row')
+    await arrayTwoButton.click()
+
+    const arrayThreeButton = page.locator('#arrayOne-0-arrayTwo-row-0 .array-field__add-row')
+    await arrayThreeButton.click()
+
+    const numberField = page.locator('#field-arrayOne__0__arrayTwo__0__arrayThree__0__numberField')
+
+    await expect(numberField).toBeHidden()
+
+    const selectField = page.locator('#field-arrayOne__0__arrayTwo__0__selectOptions')
+
+    await selectField.click({ delay: 100 })
+    const options = page.locator('.rs__option')
+
+    await options.locator('text=Option Two').click()
+
+    await expect(numberField).toBeVisible()
+  })
+
+  test('should render field based on operation argument', async () => {
+    await page.goto(url.create)
+
+    const textField = page.locator('#field-text')
+    const fieldWithOperationCondition = page.locator('#field-fieldWithOperationCondition')
+
+    await textField.fill('some text')
+
+    await expect(fieldWithOperationCondition).toBeVisible()
+
+    await saveDocAndAssert(page)
+
+    await expect(fieldWithOperationCondition).toBeHidden()
   })
 })
