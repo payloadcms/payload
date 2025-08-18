@@ -35,6 +35,11 @@ let context: BrowserContext
 let payload: PayloadTestSDK<Config>
 let serverURL: string
 
+const removeArrayRow = async (page, field: string, rowIndex: number) => {
+  await page.locator(`#field-${field} #array-row-${rowIndex} .array-actions__button`).click()
+  await page.locator(`#field-${field} #array-row-${rowIndex} .array-actions__remove`).click()
+}
+
 test.describe('Form State', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
@@ -312,6 +317,18 @@ test.describe('Form State', () => {
     await saveDocAndAssert(page)
 
     await expect(computedTitleField).toHaveValue('Test Title')
+
+    // Now test array rows, as their merge logic is different
+
+    await page.locator('#field-array #array-row-0').isVisible()
+
+    await removeArrayRow(page, 'array', 0)
+
+    await page.locator('#field-array .array-row-0').isHidden()
+
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('#field-array #array-row-0')).toBeVisible()
   })
 
   test('autosave - should render computed values after autosave', async () => {
