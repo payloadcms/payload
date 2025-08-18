@@ -23,7 +23,7 @@ export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ childr
 
   const transitionProgressRef = useRef(transitionProgress)
 
-  const timerID = useRef(null)
+  const timerID = useRef<NodeJS.Timeout | null>(null)
 
   const initiateProgress = useCallback(() => {
     timerID.current = setInterval(() => {

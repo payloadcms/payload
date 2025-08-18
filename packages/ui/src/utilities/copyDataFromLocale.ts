@@ -318,7 +318,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
 
   const fields = globalSlug
     ? globals[globalSlug].config.fields
-    : collections[collectionSlug]!.config.fields
+    : collections[collectionSlug!]!.config.fields
 
   const fromLocaleDataWithoutID = fromLocaleData.value
   const toLocaleDataWithoutID = toLocaleData.value
@@ -339,8 +339,8 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
         user,
       })
     : await payload.update({
-        id: docID,
-        collection: collectionSlug,
+        id: docID!,
+        collection: collectionSlug!,
         data,
         locale: toLocale,
         overrideAccess: false,

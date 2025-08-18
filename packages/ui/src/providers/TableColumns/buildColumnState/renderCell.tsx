@@ -54,7 +54,7 @@ export function renderCell({
     collectionSlug,
     customCellProps,
     field: clientField,
-    rowData: undefined,
+    rowData: undefined!,
     viewType,
   }
 
@@ -64,7 +64,7 @@ export function renderCell({
 
   const cellClientProps: DefaultCellComponentProps = {
     ...baseCellClientProps,
-    cellData: 'name' in clientField ? findValueFromPath(doc, accessor) : undefined,
+    cellData: 'name' in clientField ? findValueFromPath(doc, accessor!) : undefined,
     link: isLinkedColumn,
     rowData: doc,
   }
@@ -72,7 +72,7 @@ export function renderCell({
   const cellServerProps: DefaultServerCellComponentProps = {
     cellData: cellClientProps.cellData,
     className: baseCellClientProps.className,
-    collectionConfig: payload.collections[collectionSlug].config,
+    collectionConfig: payload.collections[collectionSlug]!.config,
     collectionSlug,
     columnIndex,
     customCellProps: baseCellClientProps.customCellProps,
@@ -84,7 +84,7 @@ export function renderCell({
     rowData: doc,
   }
 
-  let CustomCell = null
+  let CustomCell: null | React.ReactNode = null
 
   if (serverField?.type === 'richText') {
     if (!serverField?.editor) {

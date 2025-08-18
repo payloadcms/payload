@@ -194,6 +194,7 @@ export const ServerFunctionsProvider: React.FC<{
   )
 
   const getTableState = useCallback<GetTableStateClient>(
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     async (args) => {
       const { signal: remoteSignal, ...rest } = args || {}
 

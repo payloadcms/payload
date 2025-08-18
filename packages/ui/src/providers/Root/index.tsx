@@ -21,7 +21,6 @@ import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
 import { ClickOutsideProvider } from '../../providers/ClickOutside/index.js'
-import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
@@ -37,6 +36,7 @@ import { ThemeProvider } from '../Theme/index.js'
 import { ToastContainer } from '../ToastContainer/index.js'
 import { TranslationProvider } from '../Translation/index.js'
 import { UploadHandlersProvider } from '../UploadHandlers/index.js'
+import { WindowInfoProvider as WindowInfoProviderBase } from '../WindowInfo/index.js'
 
 type Props = {
   readonly children: React.ReactNode
@@ -72,6 +72,7 @@ export const RootProvider: React.FC<Props> = ({
   user,
 }) => {
   const dndContextID = React.useId()
+  const WindowInfoProvider = WindowInfoProviderBase!
 
   return (
     <ClickOutsideProvider>
@@ -87,7 +88,7 @@ export const RootProvider: React.FC<Props> = ({
                   fallbackLang={fallbackLang}
                   language={languageCode}
                   languageOptions={languageOptions}
-                  switchLanguageServerAction={switchLanguageServerAction}
+                  switchLanguageServerAction={switchLanguageServerAction!}
                   translations={translations}
                 >
                   <WindowInfoProvider
