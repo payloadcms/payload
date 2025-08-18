@@ -161,31 +161,11 @@ const result = await payload.find({
   showHiddenFields: true,
 })
 ```
-### Pagination & limits
 
-By default, Local API `find` uses the collection’s pagination settings. If no `limit` is provided, the per-page default comes from your Collection’s `pagination.defaultLimit` (defaults to **10**). See [Collection Config → pagination](../configuration/collections).
-
-To return **all** matched documents (disable pagination), either:
-
-- pass `limit: 0` (disables pagination), or
-- set `pagination: false`.
-
-```ts
-// Use the collection default (pagination.defaultLimit, defaults to 10)
-const page = await payload.find({
-  collection: 'posts',
-})
-
-// Return all matched documents (no pagination)
-const all = await payload.find({
-  collection: 'posts',
-  limit: 0,           // disables pagination
-  // or: pagination: false
-})
-
-```
-> See also: [Pagination](/docs/queries/pagination) and [Querying your Documents](/docs/queries/overview).
-
+<Banner type="info">
+  `pagination`, `page`, and `limit` are three related properties [documented
+  here](/docs/queries/pagination).
+</Banner>
 
 ### Find by ID#collection-find-by-id
 
