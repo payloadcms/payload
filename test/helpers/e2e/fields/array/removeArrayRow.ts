@@ -10,7 +10,7 @@ export const removeArrayRow = async (page: Page, fieldName: string, rowIndex: nu
 
   await page
     .locator(
-      `#field-${fieldName} #array-row-${rowIndex} .array-actions__action.array-actions__remove`,
+      `#field-${fieldName} #${fieldName}-row-${rowIndex} .array-actions__action.array-actions__remove`,
     )
     .click()
 

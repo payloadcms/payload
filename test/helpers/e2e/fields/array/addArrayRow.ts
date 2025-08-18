@@ -5,12 +5,15 @@ import { expect } from 'playwright/test'
 
 import { openArrayRowActions } from './openArrayRowActions.js'
 
+/**
+ * Does not wait after adding the row. Simply clicks the primary "Add Row" button.
+ */
 export const addArrayRowDirect = async (page: Page, fieldName: string) => {
-  const addRowButton = page.locator(`#field-${fieldName} > .array-field__add-row`)
+  const addRowButton = page.locator(`#field-${fieldName} > .array-field__add-row`).first()
 
   await expect(addRowButton).toBeVisible()
 
-  await page.locator(`#field-${fieldName} > .array-field__add-row`).click()
+  await addRowButton.click()
 }
 
 /**
@@ -31,8 +34,9 @@ export const addArrayRowBelow = async (page: Page, fieldName: string, rowIndex: 
   await openArrayRowActions(page, fieldName, rowIndex)
 
   const addBelowButton = page.locator(
-    `#field-${fieldName} #array-row-${rowIndex} .array-actions__action.array-actions__add`,
+    `#field-${fieldName} #${fieldName}-row-${rowIndex} .array-actions__action.array-actions__add`,
   )
+
   await expect(addBelowButton).toBeVisible()
 
   await addBelowButton.click()
