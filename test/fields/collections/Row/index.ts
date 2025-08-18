@@ -51,49 +51,6 @@ const RowFields: CollectionConfig = {
       type: 'row',
       fields: [
         {
-          name: 'leftColumn',
-          type: 'blocks',
-          blocks: [
-            {
-              slug: 'leftTextBlock',
-              fields: [
-                {
-                  name: 'leftText',
-                  type: 'text',
-                },
-              ],
-            },
-          ],
-          required: true,
-          admin: {
-            width: '50%',
-          },
-        },
-        {
-          name: 'rightColumn',
-          type: 'blocks',
-          blocks: [
-            {
-              slug: 'rightTextBlock',
-              fields: [
-                {
-                  name: 'rightText',
-                  type: 'text',
-                },
-              ],
-            },
-          ],
-          required: true,
-          admin: {
-            width: '50%',
-          },
-        },
-      ],
-    },
-    {
-      type: 'row',
-      fields: [
-        {
           name: 'field_with_width_30_percent',
           label: 'Field with 30% width',
           type: 'text',
@@ -176,6 +133,47 @@ const RowFields: CollectionConfig = {
           name: 'field_20_percent_width_within_row_d',
           admin: {
             width: '20%',
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'leftColumn',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'leftTextBlock',
+              fields: [
+                {
+                  name: 'leftText',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          name: 'rightColumn',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'rightTextBlock',
+              fields: [
+                {
+                  name: 'rightText',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+          admin: {
+            width: '50%',
           },
         },
       ],

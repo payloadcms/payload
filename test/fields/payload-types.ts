@@ -1120,18 +1120,6 @@ export interface RowField {
   title: string;
   field_with_width_a?: string | null;
   field_with_width_b?: string | null;
-  leftColumn: {
-    leftText?: string | null;
-    id?: string | null;
-    blockName?: string | null;
-    blockType: 'leftTextBlock';
-  }[];
-  rightColumn: {
-    rightText?: string | null;
-    id?: string | null;
-    blockName?: string | null;
-    blockType: 'rightTextBlock';
-  }[];
   field_with_width_30_percent?: string | null;
   field_with_width_60_percent?: string | null;
   field_with_width_20_percent?: string | null;
@@ -1141,6 +1129,22 @@ export interface RowField {
   no_set_width_within_row_b?: string | null;
   no_set_width_within_row_c?: string | null;
   field_20_percent_width_within_row_d?: string | null;
+  leftColumn?:
+    | {
+        leftText?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'leftTextBlock';
+      }[]
+    | null;
+  rightColumn?:
+    | {
+        rightText?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'rightTextBlock';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2763,6 +2767,15 @@ export interface RowFieldsSelect<T extends boolean = true> {
   title?: T;
   field_with_width_a?: T;
   field_with_width_b?: T;
+  field_with_width_30_percent?: T;
+  field_with_width_60_percent?: T;
+  field_with_width_20_percent?: T;
+  field_within_collapsible_a?: T;
+  field_within_collapsible_b?: T;
+  field_20_percent_width_within_row_a?: T;
+  no_set_width_within_row_b?: T;
+  no_set_width_within_row_c?: T;
+  field_20_percent_width_within_row_d?: T;
   leftColumn?:
     | T
     | {
@@ -2785,15 +2798,6 @@ export interface RowFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
-  field_with_width_30_percent?: T;
-  field_with_width_60_percent?: T;
-  field_with_width_20_percent?: T;
-  field_within_collapsible_a?: T;
-  field_within_collapsible_b?: T;
-  field_20_percent_width_within_row_a?: T;
-  no_set_width_within_row_b?: T;
-  no_set_width_within_row_c?: T;
-  field_20_percent_width_within_row_d?: T;
   updatedAt?: T;
   createdAt?: T;
 }
