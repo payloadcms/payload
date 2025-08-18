@@ -83,7 +83,15 @@ export const PostsCollection: CollectionConfig = {
       },
       hooks: {
         beforeChange: [
-          ({ value }) => (!value?.length ? [{ text: 'This is a computed value' }] : value),
+          ({ value }) =>
+            !value?.length
+              ? [
+                  {
+                    defaultTextField: 'This is a computed value.',
+                    customTextField: 'This is a computed value.',
+                  },
+                ]
+              : value,
         ],
       },
       fields: [

@@ -329,6 +329,14 @@ test.describe('Form State', () => {
     await saveDocAndAssert(page)
 
     await expect(page.locator('#field-array #array-row-0')).toBeVisible()
+
+    await expect(
+      page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
+    ).toHaveValue('This is a computed value.')
+
+    await expect(
+      page.locator('#field-array #array-row-0 #field-array__0__defaultTextField'),
+    ).toHaveValue('This is a computed value.')
   })
 
   test('autosave - should render computed values after autosave', async () => {

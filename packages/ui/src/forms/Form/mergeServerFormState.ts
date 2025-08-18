@@ -84,9 +84,7 @@ export const mergeServerFormState = ({
      * Note: read `currentState` and not `newState` here, as the `rows` property have already been merged above
      */
     if (Array.isArray(incomingField.rows)) {
-      if (acceptValues === true) {
-        newState[path].rows = incomingField.rows
-      } else if (path in currentState) {
+      if (path in currentState) {
         newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
 
         incomingField.rows.forEach((row) => {
