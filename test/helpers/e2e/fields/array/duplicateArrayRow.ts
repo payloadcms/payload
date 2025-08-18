@@ -7,7 +7,7 @@ import { openArrayRowActions } from './openArrayRowActions.js'
 /**
  * Duplicates the array row at the specified index.
  */
-export const duplicateArrayRow = async (page: Page, fieldName: string, rowIndex: number) => {
+export const duplicateArrayRow = async (page: Page, fieldName: string, rowIndex: number = 0) => {
   await openArrayRowActions(page, fieldName, rowIndex)
 
   await page

@@ -151,7 +151,7 @@ describe('Block fields', () => {
   test('should duplicate block', async () => {
     await page.goto(url.create)
 
-    await duplicateArrayRow(page, 'blocks', 0)
+    await duplicateArrayRow(page, 'blocks')
 
     const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
     expect(await blocks.count()).toEqual(5)

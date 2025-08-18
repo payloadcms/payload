@@ -8,19 +8,15 @@ import { openArrayRowActions } from './openArrayRowActions.js'
 /**
  * Does not wait after adding the row. Simply clicks the primary "Add Row" button.
  */
-export const addArrayRowDirect = async (page: Page, fieldName: string) => {
-  const addRowButton = page.locator(`#field-${fieldName} > .array-field__add-row`).first()
-
-  await expect(addRowButton).toBeVisible()
-
-  await addRowButton.click()
+export const addArrayRowAsync = async (page: Page, fieldName: string) => {
+  await page.locator(`#field-${fieldName} > .array-field__add-row`).first().click()
 }
 
 /**
  * Adds an array row to the end of the array using the primary "Add Row" button.
  */
 export const addArrayRow = async (page: Page, fieldName: string) => {
-  await addArrayRowDirect(page, fieldName)
+  await addArrayRowAsync(page, fieldName)
 
   await wait(300)
 

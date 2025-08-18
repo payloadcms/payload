@@ -131,7 +131,7 @@ describe('Array', () => {
     await expect(customRowLabel).toBeVisible()
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
 
-    await duplicateArrayRow(page, 'rowLabelAsComponent', 0)
+    await duplicateArrayRow(page, 'rowLabelAsComponent')
 
     await expect(page.locator('#rowLabelAsComponent-row-1')).toBeVisible()
     await expect(
@@ -233,7 +233,7 @@ describe('Array', () => {
       const input = page.locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow')
       await expect(input).toHaveValue(assertGroupText3)
 
-      await duplicateArrayRow(page, 'potentiallyEmptyArray', 0)
+      await duplicateArrayRow(page, 'potentiallyEmptyArray')
 
       // Update duplicated row group field text
       await page
