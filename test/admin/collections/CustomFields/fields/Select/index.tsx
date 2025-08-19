@@ -11,10 +11,14 @@ export const CustomSelect: SelectFieldClientComponent = (props) => {
   const [options, setOptions] = React.useState<Option[]>([])
 
   React.useEffect(() => {
-    setOptions([
-      { label: 'Label 1', value: 'value1' },
-      { label: 'Label 2', value: 'value2' },
-    ])
+    const fetchOptions = () => {
+      const fetchedOptions: Option[] = [
+        { label: 'Label 1', value: 'value1' },
+        { label: 'Label 2', value: 'value2' },
+      ]
+      setOptions(fetchedOptions)
+    }
+    void fetchOptions()
   }, [])
 
   const onChange = (val: string | string[]) => {
