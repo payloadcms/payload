@@ -19,6 +19,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuListGroupLabel: 'Списъци',
     toolbarItemsActive: '{{count}} активни',
   },
+  ca: {
+    placeholder: "Comença a escriure o prem '/' per a comandes...",
+    slashMenuBasicGroupLabel: 'Bàsic',
+    slashMenuListGroupLabel: 'Llistes',
+    toolbarItemsActive: '{{count}} actiu',
+  },
   cs: {
     placeholder: "Začněte psát nebo stiskněte '/' pro příkazy...",
     slashMenuBasicGroupLabel: 'Základní',
@@ -85,6 +91,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuListGroupLabel: 'Listák',
     toolbarItemsActive: '{{count}} aktív',
   },
+  hy: {
+    placeholder: "Սկսեք գրել կամ սեղմեք '/' հրամանների համար...",
+    slashMenuBasicGroupLabel: 'Հիմնական',
+    slashMenuListGroupLabel: 'Ցուցակներ',
+    toolbarItemsActive: '{{count}} ակտիվ',
+  },
   it: {
     placeholder: "Inizia a digitare, oppure premi '/' per i comandi...",
     slashMenuBasicGroupLabel: 'Base',
@@ -102,6 +114,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuBasicGroupLabel: '기본적인',
     slashMenuListGroupLabel: '목록',
     toolbarItemsActive: '{{count}} 활성화된',
+  },
+  lt: {
+    placeholder: "Pradėkite rašyti arba paspauskite '/' komandoms...",
+    slashMenuBasicGroupLabel: 'Pagrindinis',
+    slashMenuListGroupLabel: 'Sąrašai',
+    toolbarItemsActive: '{{count}} aktyvus',
   },
   my: {
     placeholder: "Mula menaip, atau tekan '/' untuk arahan...",
