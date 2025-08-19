@@ -56,7 +56,7 @@ export const generateFileData = async <T>({
 
   const { sharp } = req.payload.config
 
-  let file = req.file
+  const file = req.file
 
   const uploadEdits = parseUploadEditsFromReqOrIncomingData({
     data,
@@ -79,34 +79,6 @@ export const generateFileData = async <T>({
   } = collectionConfig.upload
 
   const staticPath = staticDir
-
-  const incomingFileData = isDuplicating ? originalDoc : data
-
-  if (!file && uploadEdits && incomingFileData) {
-    const { filename, url } = incomingFileData as unknown as FileData
-
-    if (filename && (filename.includes('../') || filename.includes('..\\'))) {
-      throw new Forbidden(req.t)
-    }
-
-    try {
-      if (url && url.startsWith('/') && !disableLocalStorage) {
-        const filePath = `${staticPath}/${filename}`
-        const response = await getFileByPath(filePath)
-        file = response
-        overwriteExistingFiles = true
-      } else if (filename && url) {
-        file = await getExternalFile({
-          data: incomingFileData as unknown as FileData,
-          req,
-          uploadConfig: collectionConfig.upload,
-        })
-        overwriteExistingFiles = true
-      }
-    } catch (err: unknown) {
-      throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
-    }
-  }
 
   if (isDuplicating) {
     overwriteExistingFiles = false
