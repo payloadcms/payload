@@ -143,7 +143,7 @@ export const viTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Thêm mới: {{label}}',
     addRelationship: 'Thêm mối quan hệ (relationship)',
     addUpload: 'Thêm tải lên (upload)',
-    block: 'block',
+    block: 'Block',
     blocks: 'blocks',
     blockType: 'Block Type',
     chooseBetweenCustomTextOrDocument:
@@ -325,7 +325,7 @@ export const viTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Nhóm theo {{label}}',
     import: 'Nhập khẩu',
     isEditing: 'đang chỉnh sửa',
-    item: 'mặt hàng',
+    item: 'Mặt hàng',
     items: 'mặt hàng',
     language: 'Ngôn ngữ',
     lastModified: 'Chỉnh sửa lần cuối vào lúc',

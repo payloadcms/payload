@@ -90,7 +90,7 @@ export const SetStepNav: React.FC<{
           }),
         },
         {
-          label: 'Versions',
+          label: t('version:versions'),
           url: formatAdminURL({
             adminRoute,
             path: `${docBasePath}/versions`,
@@ -118,7 +118,7 @@ export const SetStepNav: React.FC<{
           }),
         },
         {
-          label: 'Versions',
+          label: t('version:versions'),
           url: formatAdminURL({
             adminRoute,
             path: `/globals/${globalSlug}/versions`,

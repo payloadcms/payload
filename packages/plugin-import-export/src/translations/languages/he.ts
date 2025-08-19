@@ -15,6 +15,7 @@ export const heTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'עמוד',
     'field-selectionToUse-label': 'בחירה לשימוש',
     'field-sort-label': 'מיין לפי',
+    'field-sort-order-label': 'סדר מיון',
     'selectionToUse-allDocuments': 'השתמש בכל המסמכים',
     'selectionToUse-currentFilters': 'השתמש במסננים הנוכחיים',
     'selectionToUse-currentSelection': 'השתמש בבחירה הנוכחית',

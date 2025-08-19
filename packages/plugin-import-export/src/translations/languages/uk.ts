@@ -15,6 +15,7 @@ export const ukTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Сторінка',
     'field-selectionToUse-label': 'Вибір для використання',
     'field-sort-label': 'Сортувати за',
+    'field-sort-order-label': 'Сортувати за порядком',
     'selectionToUse-allDocuments': 'Використовуйте всі документи',
     'selectionToUse-currentFilters': 'Використовувати поточні фільтри',
     'selectionToUse-currentSelection': 'Використовуйте поточний вибір',

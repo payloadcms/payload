@@ -145,7 +145,7 @@ export const enTranslations = {
     addNewLabel: 'Add new {{label}}',
     addRelationship: 'Add Relationship',
     addUpload: 'Add Upload',
-    block: 'block',
+    block: 'Block',
     blocks: 'blocks',
     blockType: 'Block Type',
     chooseBetweenCustomTextOrDocument:
@@ -329,7 +329,7 @@ export const enTranslations = {
     groupByLabel: 'Group by {{label}}',
     import: 'Import',
     isEditing: 'is editing',
-    item: 'item',
+    item: 'Item',
     items: 'items',
     language: 'Language',
     lastModified: 'Last Modified',

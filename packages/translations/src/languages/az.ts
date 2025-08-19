@@ -143,7 +143,7 @@ export const azTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Yeni {{label}} əlavə et',
     addRelationship: 'Relationship əlavə et',
     addUpload: 'Yükləmə əlavə et',
-    block: 'blok',
+    block: 'Blok',
     blocks: 'bloklar',
     blockType: 'Blok Növü',
     chooseBetweenCustomTextOrDocument:
@@ -328,7 +328,7 @@ export const azTranslations: DefaultTranslationsObject = {
     groupByLabel: '{{label}} ilə qruplaşdırın',
     import: 'İdxal',
     isEditing: 'redaktə edir',
-    item: 'əşya',
+    item: 'Əşya',
     items: 'maddələr',
     language: 'Dil',
     lastModified: 'Son dəyişdirildi',

@@ -15,6 +15,7 @@ export const azTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Səhifə',
     'field-selectionToUse-label': 'İstifadə etmək üçün seçim',
     'field-sort-label': 'Sırala',
+    'field-sort-order-label': 'Sıralama',
     'selectionToUse-allDocuments': 'Bütün sənədlərdən istifadə edin',
     'selectionToUse-currentFilters': 'Cari filtrlərdən istifadə edin',
     'selectionToUse-currentSelection': 'Cari seçimi istifadə edin',

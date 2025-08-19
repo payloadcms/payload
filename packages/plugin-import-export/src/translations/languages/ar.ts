@@ -15,6 +15,7 @@ export const arTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'صفحة',
     'field-selectionToUse-label': 'اختيار للاستخدام',
     'field-sort-label': 'ترتيب حسب',
+    'field-sort-order-label': 'ترتيب',
     'selectionToUse-allDocuments': 'استخدم جميع الوثائق',
     'selectionToUse-currentFilters': 'استخدم الفلاتر الحالية',
     'selectionToUse-currentSelection': 'استخدم الاختيار الحالي',

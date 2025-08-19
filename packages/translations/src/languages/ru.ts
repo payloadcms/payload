@@ -328,7 +328,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Группировать по {{label}}',
     import: 'Импорт',
     isEditing: 'редактирует',
-    item: 'предмет',
+    item: 'Предмет',
     items: 'предметы',
     language: 'Язык',
     lastModified: 'Последнее изменение',

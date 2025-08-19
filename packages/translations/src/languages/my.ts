@@ -328,7 +328,7 @@ export const myTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Berkumpulkan mengikut {{label}}',
     import: 'သွင်းကုန်',
     isEditing: 'ပြင်ဆင်နေသည်',
-    item: 'barang',
+    item: 'Barang',
     items: 'barang-barang',
     language: 'ဘာသာစကား',
     lastModified: 'နောက်ဆုံးပြင်ဆင်ထားသည်။',

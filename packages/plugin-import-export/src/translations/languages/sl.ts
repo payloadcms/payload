@@ -15,6 +15,7 @@ export const slTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Stran',
     'field-selectionToUse-label': 'Izbor za uporabo',
     'field-sort-label': 'Razvrsti po',
+    'field-sort-order-label': 'Razvrsti po vrstnem redu',
     'selectionToUse-allDocuments': 'Uporabite vse dokumente',
     'selectionToUse-currentFilters': 'Uporabite trenutne filtre.',
     'selectionToUse-currentSelection': 'Uporabi trenutno izbiro',

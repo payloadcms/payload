@@ -35,6 +35,7 @@ import './index.scss'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { BlockRow } from './BlockRow.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
@@ -45,6 +46,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
+    field,
     field: {
       name,
       type,
@@ -294,6 +296,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
   const showRequired = readOnly && rows.length === 0
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -305,6 +309,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
+      style={styles}
     >
       {showError && (
         <RenderCustomComponent

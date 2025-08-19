@@ -15,6 +15,7 @@ export const ptTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Página',
     'field-selectionToUse-label': 'Seleção para usar',
     'field-sort-label': 'Ordenar por',
+    'field-sort-order-label': 'Ordem de classificação',
     'selectionToUse-allDocuments': 'Use todos os documentos',
     'selectionToUse-currentFilters': 'Use os filtros atuais',
     'selectionToUse-currentSelection': 'Use a seleção atual',

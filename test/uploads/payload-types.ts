@@ -120,6 +120,7 @@ export interface Config {
     'simple-relationship': SimpleRelationship;
     'file-mime-type': FileMimeType;
     'svg-only': SvgOnly;
+    'media-without-delete-access': MediaWithoutDeleteAccess;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -180,6 +181,7 @@ export interface Config {
     'simple-relationship': SimpleRelationshipSelect<false> | SimpleRelationshipSelect<true>;
     'file-mime-type': FileMimeTypeSelect<false> | FileMimeTypeSelect<true>;
     'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
+    'media-without-delete-access': MediaWithoutDeleteAccessSelect<false> | MediaWithoutDeleteAccessSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1646,6 +1648,24 @@ export interface SvgOnly {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-delete-access".
+ */
+export interface MediaWithoutDeleteAccess {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -1886,6 +1906,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'svg-only';
         value: string | SvgOnly;
+      } | null)
+    | ({
+        relationTo: 'media-without-delete-access';
+        value: string | MediaWithoutDeleteAccess;
       } | null)
     | ({
         relationTo: 'users';
@@ -3417,6 +3441,23 @@ export interface FileMimeTypeSelect<T extends boolean = true> {
  * via the `definition` "svg-only_select".
  */
 export interface SvgOnlySelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-delete-access_select".
+ */
+export interface MediaWithoutDeleteAccessSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;

@@ -143,7 +143,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Adicionar novo {{label}}',
     addRelationship: 'Adicionar Relação',
     addUpload: 'Adicionar Upload',
-    block: 'bloco',
+    block: 'Bloco',
     blocks: 'blocos',
     blockType: 'Tipo de bloco',
     chooseBetweenCustomTextOrDocument:
@@ -327,7 +327,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Agrupar por {{label}}',
     import: 'Importar',
     isEditing: 'está editando',
-    item: 'item',
+    item: 'Item',
     items: 'itens',
     language: 'Idioma',
     lastModified: 'Última modificação',
