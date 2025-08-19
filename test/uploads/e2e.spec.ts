@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { statSync } from 'fs'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
@@ -1601,6 +1602,24 @@ describe('Uploads', () => {
     await expect(filename).toHaveValue('image-as-pdf.pdf')
 
     await saveDocAndAssert(page, '#action-save', 'error')
+  })
+
+  test('should not rewrite file when updating collection fields', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.png'))
+    await saveDocAndAssert(page)
+    const imageID = page.url().split('/').pop()!
+    const { doc } = await client.findByID({ slug: mediaSlug, id: imageID, auth: true })
+    const filename = doc.filename as string
+    const filePath = path.resolve(dirname, 'media', filename)
+    const before = statSync(filePath)
+
+    const altField = page.locator('#field-alt')
+    await altField.fill('test alt')
+
+    await saveDocAndAssert(page)
+    const after = statSync(filePath)
+    expect(after.mtime.getTime()).toEqual(before.mtime.getTime())
   })
 
   test('should be able to replace the file even if the user doesnt have delete access', async () => {

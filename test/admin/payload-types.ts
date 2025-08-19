@@ -275,6 +275,10 @@ export interface Post {
   selectField?: ('option1' | 'option2')[] | null;
   file?: string | null;
   noReadAccessField?: string | null;
+  disableListColumnTextInRow?: string | null;
+  someGroup?: {
+    disableListColumnTextInGroup?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -824,6 +828,12 @@ export interface PostsSelect<T extends boolean = true> {
   selectField?: T;
   file?: T;
   noReadAccessField?: T;
+  disableListColumnTextInRow?: T;
+  someGroup?:
+    | T
+    | {
+        disableListColumnTextInGroup?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
