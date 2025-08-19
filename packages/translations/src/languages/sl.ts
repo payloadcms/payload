@@ -143,7 +143,7 @@ export const slTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Dodaj nov {{label}}',
     addRelationship: 'Dodaj povezavo',
     addUpload: 'Dodaj nalaganje',
-    block: 'blok',
+    block: 'Blok',
     blocks: 'bloki',
     blockType: 'Tip bloka',
     chooseBetweenCustomTextOrDocument:
@@ -325,7 +325,7 @@ export const slTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Razvrsti po {{label}}',
     import: 'Uvoz',
     isEditing: 'ureja',
-    item: 'predmet',
+    item: 'Predmet',
     items: 'predmeti',
     language: 'Jezik',
     lastModified: 'Zadnja sprememba',

@@ -145,7 +145,7 @@ export const trTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Yeni {{label}}',
     addRelationship: 'İlişki Ekle',
     addUpload: 'Yükleme Ekle',
-    block: 'blok',
+    block: 'Blok',
     blocks: 'blok',
     blockType: 'Blok tipi',
     chooseBetweenCustomTextOrDocument:
@@ -329,7 +329,7 @@ export const trTranslations: DefaultTranslationsObject = {
     groupByLabel: "{{label}}'ye göre grupla",
     import: 'İthalat',
     isEditing: 'düzenliyor',
-    item: 'öğe',
+    item: 'Öğe',
     items: 'öğeler',
     language: 'Dil',
     lastModified: 'Son değiştirme',

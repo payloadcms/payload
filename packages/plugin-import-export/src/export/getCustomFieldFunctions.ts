@@ -53,13 +53,21 @@ export const getCustomFieldFunctions = ({ fields }: Args): Record<string, ToCSVF
           // monomorphic many
           // @ts-expect-error ref is untyped
           result[`${ref.prefix}${field.name}`] = ({
+            data,
             value,
           }: {
-            value: Record<string, unknown>[]
-          }) =>
-            value.map((val: number | Record<string, unknown> | string) =>
-              typeof val === 'object' ? val.id : val,
-            )
+            data: Record<string, unknown>
+            value: Array<number | Record<string, any> | string> | undefined
+          }) => {
+            if (Array.isArray(value)) {
+              value.forEach((val, i) => {
+                const id = typeof val === 'object' && val ? val.id : val
+                // @ts-expect-error ref is untyped
+                data[`${ref.prefix}${field.name}_${i}_id`] = id
+              })
+            }
+            return undefined // prevents further flattening
+          }
         } else {
           // polymorphic many
           // @ts-expect-error ref is untyped

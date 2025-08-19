@@ -62,6 +62,14 @@ const AutosavePosts: CollectionConfig = {
       },
     },
     {
+      name: 'richText',
+      type: 'richText',
+    },
+    {
+      name: 'json',
+      type: 'json',
+    },
+    {
       name: 'description',
       label: 'Description',
       type: 'textarea',

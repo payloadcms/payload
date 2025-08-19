@@ -264,23 +264,21 @@ export const Form: React.FC<FormProps> = (props) => {
         await wait(100)
       }
 
-      /**
-       * Take copies of the current form state and data here. This will ensure it is consistent.
-       * For example, it is possible for the form state ref to change in the background while this submit function is running.
-       * TODO: can we send the `formStateCopy` through `reduceFieldsToValues` to even greater consistency? Doing this currently breaks uploads.
-       */
-      const formStateCopy = deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields)
       const data = reduceFieldsToValues(contextRef.current.fields, true)
 
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
+        const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
+          contextRef.current.fields,
+        )
+
         let revalidatedFormState: FormState
 
         await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
           await priorOnChange
 
           const result = await beforeSubmitFn({
-            formState: formStateCopy,
+            formState: serializableFormState,
           })
 
           revalidatedFormState = result
@@ -328,7 +326,7 @@ export const Form: React.FC<FormProps> = (props) => {
           data[key] = value
         }
 
-        onSubmit(formStateCopy, data)
+        onSubmit(contextRef.current.fields, data)
       }
 
       if (!hasFormSubmitAction) {
@@ -379,13 +377,14 @@ export const Form: React.FC<FormProps> = (props) => {
 
         if (res.status < 400) {
           if (typeof onSuccess === 'function') {
-            const newFormState = await onSuccess(json, context)
+            const newFormState = await onSuccess(json, {
+              context,
+            })
 
             if (newFormState) {
               dispatchFields({
                 type: 'MERGE_SERVER_STATE',
                 acceptValues,
-                formStateAtTimeOfRequest: formStateCopy,
                 prevStateRef: prevFormState,
                 serverState: newFormState,
               })
