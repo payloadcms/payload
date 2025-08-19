@@ -192,8 +192,8 @@ export function AuthProvider({
 
   const logOut = useCallback(async () => {
     try {
-      if (user?.collection) {
-        await requests.post(`${serverURL}${apiRoute}/${user?.collection}/logout`)
+      if (user && user.collection) {
+        await requests.post(`${serverURL}${apiRoute}/${user.collection}/logout`)
       }
       return true
     } catch (e) {
