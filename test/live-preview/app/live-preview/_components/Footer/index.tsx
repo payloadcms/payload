@@ -1,10 +1,12 @@
-import Link from 'next/link.js'
+import LinkWithDefault from 'next/link.js'
 import React from 'react'
 
 import { getFooter } from '../../_api/getFooter.js'
 import { Gutter } from '../Gutter/index.js'
 import { CMSLink } from '../Link/index.js'
 import classes from './index.module.scss'
+
+const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
 
 export async function Footer() {
   const footer = await getFooter()

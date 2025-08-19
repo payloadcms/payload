@@ -1,10 +1,12 @@
-import Link from 'next/link.js'
+import LinkWithDefault from 'next/link.js'
 import React from 'react'
 
 import { getHeader } from '../../_api/getHeader.js'
 import { Gutter } from '../Gutter/index.js'
 import classes from './index.module.scss'
 import { HeaderNav } from './Nav/index.js'
+
+const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
 
 export async function Header() {
   const header = await getHeader()

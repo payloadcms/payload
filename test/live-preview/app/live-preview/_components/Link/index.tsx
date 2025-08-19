@@ -1,10 +1,12 @@
-import Link from 'next/link.js'
+import NextLinkImport from 'next/link.js'
 import React from 'react'
 
 import type { Page, Post } from '../../../../payload-types.js'
 import type { Props as ButtonProps } from '../Button/index.js'
 
 import { Button } from '../Button/index.js'
+
+const NextLink = (NextLinkImport.default || NextLinkImport) as typeof NextLinkImport.default
 
 type CMSLinkType = {
   appearance?: ButtonProps['appearance']
@@ -46,10 +48,10 @@ export const CMSLink: React.FC<CMSLinkType> = ({
 
     if (href || url) {
       return (
-        <Link {...newTabProps} className={className} href={href || url || ''}>
+        <NextLink {...newTabProps} className={className} href={href || url || ''}>
           {label && label}
           {children || null}
-        </Link>
+        </NextLink>
       )
     }
   }
