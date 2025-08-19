@@ -19,7 +19,7 @@ export const Posts: CollectionConfig = {
     ],
     description: 'This is a custom collection description.',
     group: 'One',
-    listSearchableFields: ['id', 'title', 'description', 'number'],
+    listSearchableFields: ['id', 'title', 'description', 'number', 'relationship', 'upload'],
     components: {
       beforeListTable: [
         '/components/ResetColumns/index.js#ResetDefaultColumnsButton',
