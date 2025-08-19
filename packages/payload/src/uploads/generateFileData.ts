@@ -37,6 +37,33 @@ type Result<T> = Promise<{
   files: FileToSave[]
 }>
 
+const shouldReupload = (
+  uploadEdits: UploadEdits,
+  fileData: Record<string, unknown> | undefined,
+) => {
+  if (!fileData) {
+    return false
+  }
+
+  if (uploadEdits.crop || uploadEdits.heightInPixels || uploadEdits.widthInPixels) {
+    return true
+  }
+
+  // Since uploadEdits always has focalPoint, compare to the value in the data if it was changed
+  if (uploadEdits.focalPoint) {
+    const incomingFocalX = uploadEdits.focalPoint.x
+    const incomingFocalY = uploadEdits.focalPoint.y
+
+    const currentFocalX = 'focalX' in fileData && fileData.focalX
+    const currentFocalY = 'focalY' in fileData && fileData.focalY
+
+    const isEqual = incomingFocalX === currentFocalX && incomingFocalY === currentFocalY
+    return !isEqual
+  }
+
+  return false
+}
+
 export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   data,
@@ -56,7 +83,7 @@ export const generateFileData = async <T>({
 
   const { sharp } = req.payload.config
 
-  const file = req.file
+  let file = req.file
 
   const uploadEdits = parseUploadEditsFromReqOrIncomingData({
     data,
@@ -79,6 +106,34 @@ export const generateFileData = async <T>({
   } = collectionConfig.upload
 
   const staticPath = staticDir
+
+  const incomingFileData = isDuplicating ? originalDoc : data
+
+  if (!file && shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>)) {
+    const { filename, url } = incomingFileData as unknown as FileData
+
+    if (filename && (filename.includes('../') || filename.includes('..\\'))) {
+      throw new Forbidden(req.t)
+    }
+
+    try {
+      if (url && url.startsWith('/') && !disableLocalStorage) {
+        const filePath = `${staticPath}/${filename}`
+        const response = await getFileByPath(filePath)
+        file = response
+        overwriteExistingFiles = true
+      } else if (filename && url) {
+        file = await getExternalFile({
+          data: incomingFileData as unknown as FileData,
+          req,
+          uploadConfig: collectionConfig.upload,
+        })
+        overwriteExistingFiles = true
+      }
+    } catch (err: unknown) {
+      throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
+    }
+  }
 
   if (isDuplicating) {
     overwriteExistingFiles = false
