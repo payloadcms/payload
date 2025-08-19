@@ -30,18 +30,18 @@ export const addArrayRow = async (
 export const addArrayRowBelow = async (
   page: Page,
   { fieldName, rowIndex = 0 }: Parameters<typeof openArrayRowActions>[1],
-): Promise<{ popupContent: Locator; rowActionsButton: Locator }> => {
-  const { popupContent, rowActionsButton } = await openArrayRowActions(page, {
+): Promise<{ popupContentLocator: Locator; rowActionsButtonLocator: Locator }> => {
+  const { popupContentLocator, rowActionsButtonLocator } = await openArrayRowActions(page, {
     fieldName,
     rowIndex,
   })
 
-  const addBelowButton = popupContent.locator('.array-actions__action.array-actions__add')
+  const addBelowButton = popupContentLocator.locator('.array-actions__action.array-actions__add')
 
   await addBelowButton.click()
 
   // TODO: test the array row has appeared
   await wait(300)
 
-  return { popupContent, rowActionsButton }
+  return { popupContentLocator, rowActionsButtonLocator }
 }

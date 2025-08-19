@@ -16,8 +16,8 @@ export const openArrayRowActions = async (
     rowIndex?: number
   },
 ): Promise<{
-  popupContent: Locator
-  rowActionsButton: Locator
+  popupContentLocator: Locator
+  rowActionsButtonLocator: Locator
 }> => {
   // replace double underscores with single hyphens for the row ID
   const formattedRowID = fieldName.toString().replace(/__/g, '-')
@@ -26,20 +26,20 @@ export const openArrayRowActions = async (
     .locator(`#field-${fieldName} #${formattedRowID}-row-${rowIndex} .array-actions`)
     .first()
 
-  const popupContent = rowActions.locator('.popup__content')
+  const popupContentLocator = rowActions.locator('.popup__content')
 
-  if (await popupContent.isVisible()) {
+  if (await popupContentLocator.isVisible()) {
     throw new Error(`Row actions for field "${fieldName}" at index ${rowIndex} are already open.`)
   }
 
-  const rowActionsButton = rowActions.locator(`.array-actions__button`)
+  const rowActionsButtonLocator = rowActions.locator(`.array-actions__button`)
 
-  await rowActionsButton.click()
+  await rowActionsButtonLocator.click()
 
-  await expect(popupContent).toBeVisible()
+  await expect(popupContentLocator).toBeVisible()
 
   return {
-    rowActionsButton,
-    popupContent,
+    rowActionsButtonLocator,
+    popupContentLocator,
   }
 }
