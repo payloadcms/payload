@@ -15,6 +15,7 @@ export const hyTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Էջ',
     'field-selectionToUse-label': 'Օգտագործման ընտրություն',
     'field-sort-label': 'Դասավորել ըստ',
+    'field-sort-order-label': 'Դասավորության կարգ',
     'selectionToUse-allDocuments': 'Օգտագործեք բոլոր փաստաթղթերը',
     'selectionToUse-currentFilters': 'Օգտագործեք ընթացիկ ֆիլտրերը',
     'selectionToUse-currentSelection': 'Օգտագործել ընթացիկ ընտրությունը',

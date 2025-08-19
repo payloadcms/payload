@@ -143,7 +143,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Legg til ny {{label}}',
     addRelationship: 'Legg til Relasjon',
     addUpload: 'Legg til Opplasting',
-    block: 'blokk',
+    block: 'Blokk',
     blocks: 'blokker',
     blockType: 'Blokktype',
     chooseBetweenCustomTextOrDocument:
@@ -325,7 +325,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Grupper etter {{label}}',
     import: 'Import',
     isEditing: 'redigerer',
-    item: 'vare',
+    item: 'Vare',
     items: 'elementer',
     language: 'Språk',
     lastModified: 'Sist endret',

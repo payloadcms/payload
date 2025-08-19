@@ -15,6 +15,7 @@ export const thTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'หน้า',
     'field-selectionToUse-label': 'การเลือกใช้',
     'field-sort-label': 'เรียงตาม',
+    'field-sort-order-label': 'เรียงลำดับตาม',
     'selectionToUse-allDocuments': 'ใช้เอกสารทั้งหมด',
     'selectionToUse-currentFilters': 'ใช้ตัวกรองปัจจุบัน',
     'selectionToUse-currentSelection': 'ใช้การเลือกปัจจุบัน',

@@ -147,7 +147,7 @@ export const roTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Adăugați un nou {{label}}',
     addRelationship: 'Adăugați o relație',
     addUpload: 'Adăugați un fișier',
-    block: 'bloc',
+    block: 'Bloc',
     blocks: 'Blocuri',
     blockType: 'Tip de bloc',
     chooseBetweenCustomTextOrDocument:
@@ -331,7 +331,7 @@ export const roTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Grupare după {{label}}',
     import: 'Import',
     isEditing: 'editează',
-    item: 'articol',
+    item: 'Articol',
     items: 'articole',
     language: 'Limba',
     lastModified: 'Ultima modificare',

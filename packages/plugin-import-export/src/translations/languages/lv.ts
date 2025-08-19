@@ -15,6 +15,7 @@ export const lvTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Lapa',
     'field-selectionToUse-label': 'Izvēles lietošana',
     'field-sort-label': 'Kārtot pēc',
+    'field-sort-order-label': 'Kārtot pēc secības',
     'selectionToUse-allDocuments': 'Izmantojiet visus dokumentus',
     'selectionToUse-currentFilters': 'Izmantot pašreizējos filtrus',
     'selectionToUse-currentSelection': 'Izmantot pašreizējo izvēli',

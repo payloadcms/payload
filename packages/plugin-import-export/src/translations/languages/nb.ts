@@ -15,6 +15,7 @@ export const nbTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Side',
     'field-selectionToUse-label': 'Valg til bruk',
     'field-sort-label': 'Sorter etter',
+    'field-sort-order-label': 'Sorteringsrekkefølge',
     'selectionToUse-allDocuments': 'Bruk alle dokumentene',
     'selectionToUse-currentFilters': 'Bruk gjeldende filtre',
     'selectionToUse-currentSelection': 'Bruk gjeldende utvalg',

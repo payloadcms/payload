@@ -144,7 +144,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Dodaj novi {{label}}',
     addRelationship: 'Dodaj odnos',
     addUpload: 'Dodaj učitavanje',
-    block: 'blokiranje',
+    block: 'Blokiranje',
     blocks: 'blokiranja',
     blockType: 'Vrsta blokiranja',
     chooseBetweenCustomTextOrDocument:
@@ -326,7 +326,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Grupiraj po {{label}}',
     import: 'Uvoz',
     isEditing: 'uređuje',
-    item: 'stavka',
+    item: 'Stavka',
     items: 'stavke',
     language: 'Jezik',
     lastModified: 'Zadnja promjena',

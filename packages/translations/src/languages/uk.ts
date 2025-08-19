@@ -144,7 +144,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Створити {{label}}',
     addRelationship: "Додати взаємозв'язок",
     addUpload: 'Додати завантаження',
-    block: 'блок',
+    block: 'Блок',
     blocks: 'блоки',
     blockType: 'Тип блока',
     chooseBetweenCustomTextOrDocument:
@@ -325,7 +325,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Групувати за {{label}}',
     import: 'Імпорт',
     isEditing: 'редагує',
-    item: 'предмет',
+    item: 'Предмет',
     items: 'предмети',
     language: 'Мова',
     lastModified: 'Останні зміни',
