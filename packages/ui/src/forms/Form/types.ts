@@ -61,6 +61,10 @@ export type FormProps = {
        * Arbitrary context passed to the onSuccess callback.
        */
       context?: Record<string, unknown>
+      /**
+       * The form state that was submitted to send the request.
+       */
+      formState?: FormState
     },
   ) => Promise<FormState | void> | void
   redirect?: string

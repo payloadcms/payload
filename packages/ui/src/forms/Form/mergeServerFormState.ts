@@ -51,15 +51,15 @@ export const mergeServerFormState = ({
      *   a. accept all values when explicitly requested, e.g. on submit
      *   b. only accept values for unmodified fields, e.g. on autosave
      */
-    if (
-      !incomingField.addedByServer &&
-      (!acceptValues ||
-        // See `acceptValues` type definition for more details
-        (typeof acceptValues === 'object' &&
-          acceptValues !== null &&
-          acceptValues?.overrideLocalChanges === false &&
-          currentState[path].isModified))
-    ) {
+    const shouldAcceptValue =
+      incomingField.addedByServer ||
+      acceptValues === true ||
+      (typeof acceptValues === 'object' &&
+        acceptValues !== null &&
+        acceptValues.overrideLocalChanges !== false &&
+        !currentState[path].isModified)
+
+    if (!shouldAcceptValue) {
       delete incomingField.value
       delete incomingField.initialValue
     }

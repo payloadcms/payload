@@ -175,9 +175,9 @@ export const buildFormState = async (
     )
   }
 
-  // If there is a form state,
+  // If there is a form state and no data,
   // then we can deduce data from that form state
-  if (formState) {
+  if (formState && !data) {
     data = reduceFieldsToValues(formState, true)
   }
 
