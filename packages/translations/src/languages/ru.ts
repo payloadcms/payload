@@ -50,7 +50,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     logOut: 'Выйти',
     logout: 'Выйти',
     logoutSuccessful: 'Выход выполнен успешно.',
-    logoutUser: 'Вход из системы',
+    logoutUser: 'Выход из системы',
     newAccountCreated:
       'Новый аккаунт был создан для доступа к <a href="{{serverURL}}">{{serverURL}}</a> Пожалуйста, кликните по следующей ссылке или вставьте в адресную строку браузера чтобы подтвердить email: <a href="{{verificationURL}}">{{verificationURL}}</a><br> После подтверждения вашего email, вы сможете успешно войти в систему.',
     newAPIKeyGenerated: 'Новый API ключ сгенерирован.',
