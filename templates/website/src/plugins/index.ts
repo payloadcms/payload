@@ -10,6 +10,7 @@ import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
+import { stripePlugin } from '@payloadcms/plugin-stripe'
 
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -91,4 +92,13 @@ export const plugins: Plugin[] = [
     },
   }),
   payloadCloudPlugin(),
+  stripePlugin({
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
+    isTestKey: Boolean(process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY),
+    stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET,
+    rest: false,
+    webhooks: {
+      'charge.succeeded': chargeSucceeded,
+    },
+  }),
 ]
