@@ -15,6 +15,7 @@ export const viTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Trang',
     'field-selectionToUse-label': 'Lựa chọn để sử dụng',
     'field-sort-label': 'Sắp xếp theo',
+    'field-sort-order-label': 'Sắp xếp theo thứ tự',
     'selectionToUse-allDocuments': 'Sử dụng tất cả các tài liệu',
     'selectionToUse-currentFilters': 'Sử dụng bộ lọc hiện tại',
     'selectionToUse-currentSelection': 'Sử dụng lựa chọn hiện tại',

@@ -142,7 +142,7 @@ export const etTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Lisa uus {{label}}',
     addRelationship: 'Lisa seos',
     addUpload: 'Lisa üleslaadimine',
-    block: 'plokk',
+    block: 'Plokk',
     blocks: 'plokid',
     blockType: 'Ploki tüüp',
     chooseBetweenCustomTextOrDocument:
@@ -323,7 +323,7 @@ export const etTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Rühmita {{label}} järgi',
     import: 'Importimine',
     isEditing: 'muudab',
-    item: 'üksus',
+    item: 'Üksus',
     items: 'esemed',
     language: 'Keel',
     lastModified: 'Viimati muudetud',

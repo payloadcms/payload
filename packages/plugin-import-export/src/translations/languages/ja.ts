@@ -15,6 +15,7 @@ export const jaTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'ページ',
     'field-selectionToUse-label': '使用する選択',
     'field-sort-label': '並び替える',
+    'field-sort-order-label': '並び替えの順序',
     'selectionToUse-allDocuments': 'すべての文書を使用してください。',
     'selectionToUse-currentFilters': '現在のフィルターを使用してください',
     'selectionToUse-currentSelection': '現在の選択を使用する',

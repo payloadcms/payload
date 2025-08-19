@@ -143,7 +143,7 @@ export const svTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Lägg till ny {{label}}',
     addRelationship: 'Lägg till relation',
     addUpload: 'Lägg till uppladdning',
-    block: 'block',
+    block: 'Block',
     blocks: 'block',
     blockType: 'Blocktyp',
     chooseBetweenCustomTextOrDocument:
@@ -326,7 +326,7 @@ export const svTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Gruppera efter {{label}}',
     import: 'Importera',
     isEditing: 'redigerar',
-    item: 'artikel',
+    item: 'Artikel',
     items: 'artiklar',
     language: 'Språk',
     lastModified: 'Senast ändrad',

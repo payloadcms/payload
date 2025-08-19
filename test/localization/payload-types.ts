@@ -192,6 +192,14 @@ export interface RichText {
  */
 export interface BlocksField {
   id: string;
+  tabContent?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockInsideTab';
+      }[]
+    | null;
   content?:
     | {
         content?:
@@ -217,6 +225,7 @@ export interface BlocksField {
     | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -877,6 +886,17 @@ export interface RichTextSelect<T extends boolean = true> {
  * via the `definition` "blocks-fields_select".
  */
 export interface BlocksFieldsSelect<T extends boolean = true> {
+  tabContent?:
+    | T
+    | {
+        blockInsideTab?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   content?:
     | T
     | {
@@ -910,6 +930,7 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1499,6 +1520,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
