@@ -421,7 +421,7 @@ describe('Localization', () => {
       const nestedArrayURL = new AdminUrlUtil(serverURL, nestedToArrayAndBlockCollectionSlug)
       await page.goto(nestedArrayURL.create)
       await changeLocale(page, 'ar')
-      await addArrayRow(page, 'topLevelArray')
+      await addArrayRow(page, { fieldName: 'topLevelArray' })
 
       const arrayField = page.locator('#field-topLevelArray__0__localizedText')
       await expect(arrayField).toBeVisible()
@@ -676,7 +676,7 @@ describe('Localization', () => {
 async function createLocalizedArrayItem(page: Page, url: AdminUrlUtil) {
   await changeLocale(page, defaultLocale)
   await page.goto(url.create)
-  await addArrayRow(page, 'items')
+  await addArrayRow(page, { fieldName: 'items' })
   const textField = page.locator('#field-items__0__text')
   await textField.fill('test')
   await saveDocAndAssert(page)

@@ -176,7 +176,7 @@ describe('Conditional Logic', () => {
 
   test('should not render fields when adding array or blocks rows until form state returns', async () => {
     await page.goto(url.create)
-    await addArrayRow(page, 'arrayWithConditionalField')
+    await addArrayRow(page, { fieldName: 'arrayWithConditionalField' })
     const shimmer = '#field-arrayWithConditionalField .collapsible__content > .shimmer-effect'
 
     await expect(page.locator(shimmer)).toBeVisible()
@@ -205,11 +205,11 @@ describe('Conditional Logic', () => {
   test('should render field based on path argument', async () => {
     await page.goto(url.create)
 
-    await addArrayRow(page, 'arrayOne')
+    await addArrayRow(page, { fieldName: 'arrayOne' })
 
-    await addArrayRow(page, 'arrayOne__0__arrayTwo')
+    await addArrayRow(page, { fieldName: 'arrayOne__0__arrayTwo' })
 
-    await addArrayRow(page, 'arrayOne__0__arrayTwo__0__arrayThree')
+    await addArrayRow(page, { fieldName: 'arrayOne__0__arrayTwo__0__arrayThree' })
 
     const numberField = page.locator('#field-arrayOne__0__arrayTwo__0__arrayThree__0__numberField')
 

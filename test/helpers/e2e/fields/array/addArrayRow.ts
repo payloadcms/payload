@@ -15,7 +15,10 @@ export const addArrayRowAsync = async (page: Page, fieldName: string) => {
 /**
  * Adds an array row to the end of the array using the primary "Add Row" button.
  */
-export const addArrayRow = async (page: Page, fieldName: string) => {
+export const addArrayRow = async (
+  page: Page,
+  { fieldName }: Omit<Parameters<typeof openArrayRowActions>[1], 'rowIndex'>,
+) => {
   await addArrayRowAsync(page, fieldName)
 
   await wait(300)
@@ -26,7 +29,10 @@ export const addArrayRow = async (page: Page, fieldName: string) => {
 /**
  * Like `addArrayRow`, but inserts the row at the specified index using the row actions menu.
  */
-export const addArrayRowBelow = async (page: Page, fieldName: string, rowIndex: number) => {
+export const addArrayRowBelow = async (
+  page: Page,
+  { fieldName, rowIndex = 0 }: Parameters<typeof openArrayRowActions>[1],
+) => {
   await openArrayRowActions(page, { fieldName, rowIndex })
 
   // replace double underscores with single hyphens for the row ID

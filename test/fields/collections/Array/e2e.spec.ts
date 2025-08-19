@@ -90,7 +90,7 @@ describe('Array', () => {
   test('should render RowLabel using a component', async () => {
     const label = 'custom row label as component'
     await loadCreatePage()
-    await addArrayRow(page, 'rowLabelAsComponent')
+    await addArrayRow(page, { fieldName: 'rowLabelAsComponent' })
     await expect(page.locator('#field-rowLabelAsComponent__0__title')).toBeVisible()
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
@@ -120,7 +120,7 @@ describe('Array', () => {
     const label = 'test custom row label'
     const updatedLabel = 'updated custom row label'
     await loadCreatePage()
-    await addArrayRow(page, 'rowLabelAsComponent')
+    await addArrayRow(page, { fieldName: 'rowLabelAsComponent' })
 
     await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
 
@@ -151,7 +151,7 @@ describe('Array', () => {
 
   test('should render default array field within custom component', async () => {
     await loadCreatePage()
-    await addArrayRow(page, 'customArrayField')
+    await addArrayRow(page, { fieldName: 'customArrayField' })
     await expect(page.locator('#field-customArrayField__0__text')).toBeVisible()
   })
 
@@ -162,7 +162,7 @@ describe('Array', () => {
 
   test('should fail min rows validation when rows are present', async () => {
     await loadCreatePage()
-    await addArrayRow(page, 'arrayWithMinRows')
+    await addArrayRow(page, { fieldName: 'arrayWithMinRows' })
 
     // Ensure new array row is visible and fields are rendered
     await expect(page.locator('#arrayWithMinRows-row-0')).toBeVisible()
@@ -203,9 +203,9 @@ describe('Array', () => {
       await wait(300)
 
       // Add 3 rows
-      await addArrayRow(page, 'potentiallyEmptyArray')
-      await addArrayRow(page, 'potentiallyEmptyArray')
-      await addArrayRow(page, 'potentiallyEmptyArray')
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
 
       // Fill out row 1
       await page.locator('#field-potentiallyEmptyArray__0__text').fill(assertText0)
@@ -339,7 +339,7 @@ describe('Array', () => {
     await arrayOption.click()
     await wait(200)
 
-    await addArrayRow(page, 'items')
+    await addArrayRow(page, { fieldName: 'items' })
 
     await wait(200)
 
@@ -364,7 +364,7 @@ describe('Array', () => {
   test('should initialize array rows with collapsed state', async () => {
     await page.goto(url.create)
 
-    await addArrayRow(page, 'collapsedArray')
+    await addArrayRow(page, { fieldName: 'collapsedArray' })
 
     const row = page.locator(`#collapsedArray-row-0`)
     const toggler = row.locator('button.collapsible__toggle')
@@ -376,7 +376,7 @@ describe('Array', () => {
   test('should not collapse array rows on input change', async () => {
     await page.goto(url.create)
 
-    await addArrayRow(page, 'collapsedArray')
+    await addArrayRow(page, { fieldName: 'collapsedArray' })
 
     const row = page.locator(`#collapsedArray-row-0`)
     const toggler = row.locator('button.collapsible__toggle')
@@ -575,7 +575,7 @@ describe('Array', () => {
 
       const field = page.locator('#field-items')
 
-      await addArrayRow(page, 'items__0__subArray')
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
 
       const textInputRowOne = field.locator('#field-items__0__subArray__0__text')
       await expect(textInputRowOne).toBeVisible()
@@ -606,10 +606,10 @@ describe('Array', () => {
 
       const field = page.locator('#field-items')
 
-      await addArrayRow(page, 'items__0__subArray')
-      await addArrayRow(page, 'items__0__subArray')
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
 
-      await addArrayRow(page, 'items__1__subArray')
+      await addArrayRow(page, { fieldName: 'items__1__subArray' })
 
       const subArrayContainer = field.locator(
         '#field-items__0__subArray > div.array-field__draggable-rows > div',

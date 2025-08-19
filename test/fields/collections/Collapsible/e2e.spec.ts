@@ -88,7 +88,7 @@ describe('Collapsibles', () => {
     const arrayWithCollapsibles = page.locator('#field-arrayWithCollapsibles')
     await expect(arrayWithCollapsibles).toBeVisible()
 
-    await addArrayRow(page, 'arrayWithCollapsibles')
+    await addArrayRow(page, { fieldName: 'arrayWithCollapsibles' })
 
     await page
       .locator(

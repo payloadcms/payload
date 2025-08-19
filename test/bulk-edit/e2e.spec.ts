@@ -499,7 +499,7 @@ test.describe('Bulk Edit', () => {
 
     await wait(500)
 
-    await addArrayRow(page, 'array')
+    await addArrayRow(page, { fieldName: 'array' })
 
     const row = page.locator(`#array-row-0`)
     const toggler = row.locator('button.collapsible__toggle')

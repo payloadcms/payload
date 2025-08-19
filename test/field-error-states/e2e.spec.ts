@@ -46,7 +46,7 @@ describe('Field Error States', () => {
     await page.goto(`${serverURL}/admin/collections/error-fields/create`)
 
     // add parent array
-    await addArrayRow(page, 'parentArray')
+    await addArrayRow(page, { fieldName: 'parentArray' })
 
     // add first child array
     await page.locator('#parentArray-row-0 .collapsible__content .array-field__add-row').click()
