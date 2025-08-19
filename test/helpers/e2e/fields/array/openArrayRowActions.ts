@@ -1,4 +1,4 @@
-import type { Page } from 'playwright'
+import type { Locator, Page } from 'playwright'
 
 import { expect } from 'playwright/test'
 
@@ -15,18 +15,21 @@ export const openArrayRowActions = async (
     fieldName: string
     rowIndex?: number
   },
-) => {
+): Promise<{
+  popupContent: Locator
+  rowActionsButton: Locator
+}> => {
   // replace double underscores with single hyphens for the row ID
   const formattedRowID = fieldName.toString().replace(/__/g, '-')
 
-  const rowActions = page.locator(
-    `#field-${fieldName} #${formattedRowID}-row-${rowIndex} .array-actions`,
-  )
+  const rowActions = page
+    .locator(`#field-${fieldName} #${formattedRowID}-row-${rowIndex} .array-actions`)
+    .first()
 
   const popupContent = rowActions.locator('.popup__content')
 
   if (await popupContent.isVisible()) {
-    return
+    throw new Error(`Row actions for field "${fieldName}" at index ${rowIndex} are already open.`)
   }
 
   const rowActionsButton = rowActions.locator(`.array-actions__button`)
@@ -34,4 +37,9 @@ export const openArrayRowActions = async (
   await rowActionsButton.click()
 
   await expect(popupContent).toBeVisible()
+
+  return {
+    rowActionsButton,
+    popupContent,
+  }
 }

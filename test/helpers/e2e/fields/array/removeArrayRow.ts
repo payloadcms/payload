@@ -1,4 +1,4 @@
-import type { Page } from 'playwright'
+import type { Locator, Page } from 'playwright'
 
 import { openArrayRowActions } from './openArrayRowActions.js'
 
@@ -8,18 +8,19 @@ import { openArrayRowActions } from './openArrayRowActions.js'
 export const removeArrayRow = async (
   page: Page,
   { fieldName, rowIndex = 0 }: Parameters<typeof openArrayRowActions>[1],
-) => {
-  await openArrayRowActions(page, { fieldName, rowIndex })
+): Promise<{
+  popupContent: Locator
+  rowActionsButton: Locator
+}> => {
+  const { popupContent, rowActionsButton } = await openArrayRowActions(page, {
+    fieldName,
+    rowIndex,
+  })
 
-  // replace double underscores with single hyphens for the row ID
-  const formattedRowID = fieldName.toString().replace(/__/g, '-')
-
-  await page
-    .locator(
-      `#field-${fieldName} #${formattedRowID}-row-${rowIndex} .array-actions__action.array-actions__remove`,
-    )
-    .click()
+  await popupContent.locator('.array-actions__action.array-actions__remove').click()
 
   // TODO: test the array row has been removed
   // another row may have been moved into its place, though
+
+  return { popupContent, rowActionsButton }
 }
