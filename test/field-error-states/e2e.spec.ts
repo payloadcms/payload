@@ -61,7 +61,10 @@ describe('Field Error States', () => {
     // add third child array
     await page.locator('#parentArray-row-0 .collapsible__content .array-field__add-row').click()
 
-    await removeArrayRow(page, 'parentArray__0__childArray', 2)
+    await removeArrayRow(page, {
+      fieldName: 'parentArray__0__childArray',
+      rowIndex: 2,
+    })
 
     await page.locator('#action-save').click()
 

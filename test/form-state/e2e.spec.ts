@@ -236,7 +236,7 @@ test.describe('Form State', () => {
       await route.continue()
     })
 
-    await removeArrayRow(page, 'array')
+    await removeArrayRow(page, { fieldName: 'array' })
 
     await expect(
       page.locator('#field-array #array-row-0 #field-array__0__customTextField'),

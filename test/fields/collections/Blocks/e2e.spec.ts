@@ -151,7 +151,7 @@ describe('Block fields', () => {
   test('should duplicate block', async () => {
     await page.goto(url.create)
 
-    await duplicateArrayRow(page, 'blocks')
+    await duplicateArrayRow(page, { fieldName: 'blocks' })
 
     const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
     expect(await blocks.count()).toEqual(5)
@@ -160,7 +160,7 @@ describe('Block fields', () => {
   test('should save when duplicating subblocks', async () => {
     await page.goto(url.create)
 
-    await duplicateArrayRow(page, 'blocks', 2)
+    await duplicateArrayRow(page, { fieldName: 'blocks', rowIndex: 2 })
 
     const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
     expect(await blocks.count()).toEqual(5)

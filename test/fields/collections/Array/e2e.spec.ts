@@ -131,7 +131,7 @@ describe('Array', () => {
     await expect(customRowLabel).toBeVisible()
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
 
-    await duplicateArrayRow(page, 'rowLabelAsComponent')
+    await duplicateArrayRow(page, { fieldName: 'rowLabelAsComponent' })
 
     await expect(page.locator('#rowLabelAsComponent-row-1')).toBeVisible()
     await expect(
@@ -209,19 +209,23 @@ describe('Array', () => {
 
       // Fill out row 1
       await page.locator('#field-potentiallyEmptyArray__0__text').fill(assertText0)
+
       await page
         .locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow')
         .fill(assertGroupText0)
+
       // Fill out row 2
       await page.locator('#field-potentiallyEmptyArray__1__text').fill(assertText1)
+
       // Fill out row 3
       await page.locator('#field-potentiallyEmptyArray__2__text').fill(assertText3)
+
       await page
         .locator('#field-potentiallyEmptyArray__2__groupInRow__textInGroupInRow')
         .fill(assertGroupText3)
 
-      await removeArrayRow(page, 'potentiallyEmptyArray', 0)
-      await removeArrayRow(page, 'potentiallyEmptyArray', 1)
+      await removeArrayRow(page, { fieldName: 'potentiallyEmptyArray', rowIndex: 1 })
+      await removeArrayRow(page, { fieldName: 'potentiallyEmptyArray', rowIndex: 0 })
 
       // Save document
       await saveDocAndAssert(page)
@@ -233,7 +237,7 @@ describe('Array', () => {
       const input = page.locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow')
       await expect(input).toHaveValue(assertGroupText3)
 
-      await duplicateArrayRow(page, 'potentiallyEmptyArray')
+      await duplicateArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
 
       // Update duplicated row group field text
       await page
@@ -248,7 +252,7 @@ describe('Array', () => {
         page.locator('#field-potentiallyEmptyArray__1__groupInRow__textInGroupInRow'),
       ).toHaveValue(`${assertGroupText3} duplicate`)
 
-      await removeArrayRow(page, 'potentiallyEmptyArray', 0)
+      await removeArrayRow(page, { fieldName: 'potentiallyEmptyArray', rowIndex: 0 })
 
       // Save document
       await saveDocAndAssert(page)

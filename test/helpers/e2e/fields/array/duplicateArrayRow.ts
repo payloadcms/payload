@@ -7,12 +7,18 @@ import { openArrayRowActions } from './openArrayRowActions.js'
 /**
  * Duplicates the array row at the specified index.
  */
-export const duplicateArrayRow = async (page: Page, fieldName: string, rowIndex: number = 0) => {
-  await openArrayRowActions(page, fieldName, rowIndex)
+export const duplicateArrayRow = async (
+  page: Page,
+  { fieldName, rowIndex = 0 }: Parameters<typeof openArrayRowActions>[1],
+) => {
+  await openArrayRowActions(page, { fieldName, rowIndex })
+
+  // replace double underscores with single hyphens for the row ID
+  const formattedRowID = fieldName.toString().replace(/__/g, '-')
 
   await page
     .locator(
-      `#field-${fieldName} #${fieldName}-row-${rowIndex} .array-actions__action.array-actions__duplicate`,
+      `#field-${fieldName} #${formattedRowID}-row-${rowIndex} .array-actions__action.array-actions__duplicate`,
     )
     .click()
 

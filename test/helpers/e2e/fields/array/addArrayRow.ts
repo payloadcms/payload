@@ -27,10 +27,13 @@ export const addArrayRow = async (page: Page, fieldName: string) => {
  * Like `addArrayRow`, but inserts the row at the specified index using the row actions menu.
  */
 export const addArrayRowBelow = async (page: Page, fieldName: string, rowIndex: number) => {
-  await openArrayRowActions(page, fieldName, rowIndex)
+  await openArrayRowActions(page, { fieldName, rowIndex })
+
+  // replace double underscores with single hyphens for the row ID
+  const formattedRowID = fieldName.toString().replace(/__/g, '-')
 
   const addBelowButton = page.locator(
-    `#field-${fieldName} #${fieldName}-row-${rowIndex} .array-actions__action.array-actions__add`,
+    `#field-${fieldName} #${formattedRowID}-row-${rowIndex} .array-actions__action.array-actions__add`,
   )
 
   await expect(addBelowButton).toBeVisible()
