@@ -44,7 +44,6 @@ import './index.scss'
 const baseClass = 'collection-edit'
 
 export type OnSaveContext = {
-  formState?: FormState
   getDocPermissions?: boolean
   incrementVersionCount?: boolean
   renderAllFields?: boolean
@@ -266,7 +265,7 @@ export function DefaultEditView({
 
   const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
     async (json, options) => {
-      const { context } = options || {}
+      const { context, formState } = options || {}
 
       const controller = handleAbortRef(abortOnSaveRef)
 
@@ -336,10 +335,10 @@ export function DefaultEditView({
           data: document,
           docPermissions,
           docPreferences,
-          formState: context?.formState,
+          formState,
           globalSlug,
           operation,
-          renderAllFields: context?.renderAllFields ?? true,
+          renderAllFields: false,
           returnLockStatus: false,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,

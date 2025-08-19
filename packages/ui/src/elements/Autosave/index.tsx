@@ -3,11 +3,7 @@
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'
-import {
-  deepCopyObjectSimpleWithoutReactComponents,
-  reduceFieldsToValues,
-  versionDefaults,
-} from 'payload/shared'
+import { reduceFieldsToValues, versionDefaults } from 'payload/shared'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 
 import type { OnSaveContext } from '../../views/Edit/index.js'
@@ -51,7 +47,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const {
     docConfig,
-    incrementVersionCount,
     lastUpdateTime,
     mostRecentVersionIsAutosaved,
     setMostRecentVersionIsAutosaved,
@@ -161,10 +156,8 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
               },
               action: url,
               context: {
-                formState: deepCopyObjectSimpleWithoutReactComponents(formStateRef.current),
                 getDocPermissions: false,
                 incrementVersionCount: !mostRecentVersionIsAutosaved,
-                renderAllFields: false,
               },
               disableFormWhileProcessing: false,
               disableSuccessStatus: true,
