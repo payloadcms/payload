@@ -9,6 +9,7 @@ import type {
 import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
+import { baseAllLocaleStatusField } from '../../fields/baseFields/baseAllLocaleStatusField.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
@@ -254,6 +255,10 @@ export const sanitizeCollection = async (
     }
 
     sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
+  }
+
+  if (config.experimental?.allLocaleStatus) {
+    sanitized.fields = mergeBaseFields(sanitized.fields, baseAllLocaleStatusField)
   }
 
   if (collection?.admin?.pagination?.limits?.length) {

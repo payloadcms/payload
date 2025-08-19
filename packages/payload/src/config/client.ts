@@ -158,6 +158,21 @@ export const createClientConfig = ({
 
         break
 
+      case 'experiental':
+        if (config.experimental) {
+          if (!clientConfig.experimental) {
+            clientConfig.experimental = {}
+          }
+          if (config.experimental?.localizeStatus) {
+            clientConfig.experimental.localizeStatus = config.experimental.localizeStatus
+          }
+          if (config.experimental?.allLocaleStatus) {
+            clientConfig.experimental.allLocaleStatus = config.experimental.allLocaleStatus
+          }
+        }
+
+        break
+
       case 'folders':
         if (config.folders) {
           clientConfig.folders = {
@@ -191,13 +206,6 @@ export const createClientConfig = ({
           if (config.localization.defaultLocalePublishOption) {
             clientConfig.localization.defaultLocalePublishOption =
               config.localization.defaultLocalePublishOption
-          }
-
-          if (config.experimental?.localizeStatus) {
-            if (!clientConfig.experimental) {
-              clientConfig.experimental = {}
-            }
-            clientConfig.experimental.localizeStatus = config.experimental.localizeStatus
           }
 
           if (config.localization.fallback) {
