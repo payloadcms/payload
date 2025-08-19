@@ -160,9 +160,7 @@ export const createClientConfig = ({
 
       case 'experiental':
         if (config.experimental) {
-          if (!clientConfig.experimental) {
-            clientConfig.experimental = {}
-          }
+          clientConfig.experimental = {}
           if (config.experimental?.localizeStatus) {
             clientConfig.experimental.localizeStatus = config.experimental.localizeStatus
           }
