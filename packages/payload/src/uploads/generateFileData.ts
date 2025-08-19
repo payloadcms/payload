@@ -109,7 +109,10 @@ export const generateFileData = async <T>({
 
   const incomingFileData = isDuplicating ? originalDoc : data
 
-  if (!file && shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>)) {
+  if (
+    !file &&
+    (isDuplicating || shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
+  ) {
     const { filename, url } = incomingFileData as unknown as FileData
 
     if (filename && (filename.includes('../') || filename.includes('..\\'))) {
