@@ -1,6 +1,5 @@
 import type {
   BeforeDocumentControlsServerPropsOnly,
-  DefaultServerFunctionArgs,
   DocumentSlots,
   EditMenuItemsServerPropsOnly,
   PayloadRequest,
@@ -39,6 +38,7 @@ export const renderDocumentSlots: (args: {
   const isPreviewEnabled = collectionConfig?.admin?.preview || globalConfig?.admin?.preview
 
   const serverProps: ServerProps = {
+    id: req.routeParams.id as number | string,
     i18n: req.i18n,
     payload: req.payload,
     user: req.user,
