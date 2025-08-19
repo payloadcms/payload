@@ -127,7 +127,7 @@ describe('Block fields', () => {
   test('should open blocks drawer from block row and add below', async () => {
     await page.goto(url.create)
 
-    await addArrayRowBelow(page, 'blocks', 0)
+    await addArrayRowBelow(page, { fieldName: 'blocks' })
 
     const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
     await expect(blocksDrawer).toBeVisible()
