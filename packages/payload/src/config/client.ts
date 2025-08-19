@@ -158,7 +158,7 @@ export const createClientConfig = ({
 
         break
 
-      case 'experiental':
+      case 'experimental':
         if (config.experimental) {
           clientConfig.experimental = {}
           if (config.experimental?.localizeStatus) {
