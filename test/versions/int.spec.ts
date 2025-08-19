@@ -4,6 +4,7 @@ import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublish
 import path from 'path'
 import { createLocalReq, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
+import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -1549,9 +1550,32 @@ describe('Versions', () => {
         },
       })
 
-      const response = await restClient.GET(`/${collection}/versions?where[latest]=true`)
+      const query = qs.stringify(
+        {
+          where: {
+            and: [
+              {
+                latest: {
+                  equals: true,
+                },
+              },
+              {
+                parent: {
+                  equals: version1.id,
+                },
+              },
+            ],
+          },
+        },
+        {
+          addQueryPrefix: true,
+        },
+      )
+
+      const response = await restClient.GET(`/${draftCollectionSlug}/versions${query}`)
       expect(response.status).toBe(200)
       const json = await response.json()
+      expect(json.docs).toHaveLength(1)
 
       expect(json.docs[0].version.title).toBe(newestVersion.title)
     })
