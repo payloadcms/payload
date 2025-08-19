@@ -65,28 +65,15 @@ export const MyCollection: CollectionConfig = {
 ```
 ## Localized fields and MongoDB indexes
 
-<Banner type="info">
-  **Note:** If you set <code>index: true</code> or <code>unique: true</code> on a field that is also
-  <code>localized: true</code>, the database will create one index <strong>per locale path</strong>
-  (for example, <code>slug.en</code>, <code>slug.da-dk</code>, ...). With many locales and several
-  indexed fields, this can significantly increase the total number of indexes on a collection and may
-  approach MongoDB’s per-collection index limit.
-</Banner>
+When you set `index: true` or `unique: true` on a localized field, MongoDB creates one index **per locale path** (e.g., `slug.en`, `slug.da-dk`, etc.). With many locales and indexed fields, this can quickly approach MongoDB's per-collection index limit.
 
-<strong>Recommendations</strong>
-- Only index the specific locale paths you actually query by using the collection-level
-  <code>indexes</code> option instead of setting <code>index: true</code> directly on a localized field.
-- Prefer narrowly scoped or compound indexes tailored to your queries.
-
-<strong>Example: index a specific locale only</strong>
+If you know you'll query specifically by a locale, index only those locale paths using the collection-level `indexes` option instead of setting `index: true` on the localized field. This approach gives you more control and helps avoid unnecessary indexes.
 
 ```ts
 import type { CollectionConfig } from 'payload'
 
 export const Pages: CollectionConfig = {
-  fields: [
-    { name: 'slug', type: 'text', localized: true },
-  ],
+  fields: [{ name: 'slug', type: 'text', localized: true }],
   indexes: [
     // Index English slug only (rather than all locales)
     { fields: ['slug.en'] },
