@@ -1,7 +1,5 @@
 import type { Locator, Page } from 'playwright'
 
-import { wait } from 'payload/shared'
-
 import { openArrayRowActions } from './openArrayRowActions.js'
 
 /**
@@ -22,8 +20,6 @@ export const duplicateArrayRow = async (
   await popupContent.locator('.array-actions__action.array-actions__duplicate').click()
 
   // TODO: test the array row has been duplicated
-
-  await wait(300)
 
   return { popupContent, rowActionsButton }
 }

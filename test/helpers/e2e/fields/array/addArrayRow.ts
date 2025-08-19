@@ -1,12 +1,11 @@
 import type { Locator, Page } from 'playwright'
 
 import { wait } from 'payload/shared'
-import { expect } from 'playwright/test'
 
 import { openArrayRowActions } from './openArrayRowActions.js'
 
 /**
- * Does not wait after adding the row. Simply clicks the primary "Add Row" button.
+ * Does not wait after adding the row for the row to appear and fully load in. Simply clicks the primary "Add Row" button and moves on.
  */
 export const addArrayRowAsync = async (page: Page, fieldName: string) => {
   await page.locator(`#field-${fieldName} > .array-field__add-row`).first().click()
@@ -21,9 +20,8 @@ export const addArrayRow = async (
 ) => {
   await addArrayRowAsync(page, fieldName)
 
-  await wait(300)
-
   // TODO: test the array row has appeared
+  await wait(300)
 }
 
 /**
@@ -42,9 +40,8 @@ export const addArrayRowBelow = async (
 
   await addBelowButton.click()
 
-  await wait(300)
-
   // TODO: test the array row has appeared
+  await wait(300)
 
   return { popupContent, rowActionsButton }
 }
