@@ -50,7 +50,6 @@ export const getGenerateSignedURLHandler = ({
     const fileKey = path.posix.join(prefix, filename)
 
     const url = await getSignedUrl(
-      // @ts-expect-error mismatch versions or something
       getStorageClient(),
       new AWS.PutObjectCommand({ ACL: acl, Bucket: bucket, ContentType: mimeType, Key: fileKey }),
       {
