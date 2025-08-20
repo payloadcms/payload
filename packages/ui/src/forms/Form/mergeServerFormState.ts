@@ -94,21 +94,25 @@ export const mergeServerFormState = ({
      * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
      * Note: read `currentState` and not `newState` here, as the `rows` property have already been merged above
      */
-    if (Array.isArray(incomingField.rows) && path in currentState) {
-      newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
+    if (Array.isArray(incomingField.rows)) {
+      if (acceptValues === true) {
+        newState[path].rows = incomingField.rows
+      } else if (path in currentState) {
+        newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
 
-      incomingField.rows.forEach((row) => {
-        const indexInCurrentState = currentState[path].rows?.findIndex(
-          (existingRow) => existingRow.id === row.id,
-        )
+        incomingField.rows.forEach((row) => {
+          const indexInCurrentState = currentState[path].rows?.findIndex(
+            (existingRow) => existingRow.id === row.id,
+          )
 
-        if (indexInCurrentState > -1) {
-          newState[path].rows[indexInCurrentState] = {
-            ...currentState[path].rows[indexInCurrentState],
-            ...row,
+          if (indexInCurrentState > -1) {
+            newState[path].rows[indexInCurrentState] = {
+              ...currentState[path].rows[indexInCurrentState],
+              ...row,
+            }
           }
-        }
-      })
+        })
+      }
     }
 
     // If `valid` is `undefined`, mark it as `true`
