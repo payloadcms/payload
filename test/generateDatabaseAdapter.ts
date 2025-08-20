@@ -22,10 +22,10 @@ export const allDatabaseAdapters = {
     },
   })`,
   firestore: `
-  import { mongooseAdapter, compatabilityOptions } from '@payloadcms/db-mongodb'
+  import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
 
   export const databaseAdapter = mongooseAdapter({
-    ...compatabilityOptions.firestore,
+    ...compatibilityOptions.firestore,
     url:
       process.env.DATABASE_URI ||
       process.env.MONGODB_MEMORY_SERVER_URI ||
