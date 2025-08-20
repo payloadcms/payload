@@ -5,7 +5,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
-import buildQuery from './queries/buildQuery.js'
+import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
 import { getTransaction } from './utilities/getTransaction.js'
@@ -18,6 +18,7 @@ export const updateOne: UpdateOne = async function updateOne(
     data,
     joins: joinQuery,
     locale,
+    options = { upsert: false },
     req,
     returning,
     select,
@@ -41,9 +42,9 @@ export const updateOne: UpdateOne = async function updateOne(
     // selectDistinct will only return if there are joins
     const selectDistinctResult = await selectDistinct({
       adapter: this,
-      chainedMethods: [{ args: [1], method: 'limit' }],
       db,
       joins,
+      query: ({ query }) => query.limit(1),
       selectFields,
       tableName,
       where,
@@ -64,6 +65,13 @@ export const updateOne: UpdateOne = async function updateOne(
         .limit(1)
       idToUpdate = docsToUpdate?.[0]?.id
     }
+  }
+
+  if (!idToUpdate && !options.upsert) {
+    // TODO: In 4.0, if returning === false, we should differentiate between:
+    // - No document found to update
+    // - Document found, but returning === false
+    return null
   }
 
   const result = await upsertRow({

@@ -1,4 +1,11 @@
-import type { BuildFormStateArgs, ClientConfig, ClientUser, ErrorResult, FormState } from 'payload'
+import type {
+  BuildFormStateArgs,
+  ClientConfig,
+  ClientUser,
+  ErrorResult,
+  FormState,
+  ServerFunction,
+} from 'payload'
 
 import { formatErrors } from 'payload'
 import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
@@ -36,9 +43,10 @@ type BuildFormStateErrorResult = {
 
 export type BuildFormStateResult = BuildFormStateErrorResult | BuildFormStateSuccessResult
 
-export const buildFormStateHandler = async (
-  args: BuildFormStateArgs,
-): Promise<BuildFormStateResult> => {
+export const buildFormStateHandler: ServerFunction<
+  BuildFormStateArgs,
+  Promise<BuildFormStateResult>
+> = async (args) => {
   const { req } = args
 
   const incomingUserSlug = req.user?.collection
@@ -86,7 +94,7 @@ export const buildFormStateHandler = async (
     }
 
     if (err.message === 'Unauthorized') {
-      return null
+      throw new Error('Unauthorized')
     }
 
     return formatErrors(err)
@@ -107,7 +115,9 @@ export const buildFormState = async (
     globalSlug,
     initialBlockData,
     initialBlockFormState,
+    mockRSCs,
     operation,
+    readOnly,
     renderAllFields,
     req,
     req: {
@@ -123,8 +133,6 @@ export const buildFormState = async (
   } = args
 
   const selectMode = select ? getSelectMode(select) : undefined
-
-  let data = incomingData
 
   if (!collectionSlug && !globalSlug) {
     throw new Error('Either collectionSlug or globalSlug must be provided')
@@ -165,18 +173,18 @@ export const buildFormState = async (
     )
   }
 
-  // If there is a form state,
-  // then we can deduce data from that form state
-  if (formState) {
-    data = reduceFieldsToValues(formState, true)
-  }
+  // If there is form state but no data, deduce data from that form state, e.g. on initial load
+  // Otherwise, use the incoming data as the source of truth, e.g. on subsequent saves
+  const data = incomingData || reduceFieldsToValues(formState, true)
 
   let documentData = undefined
+
   if (documentFormState) {
     documentData = reduceFieldsToValues(documentFormState, true)
   }
 
   let blockData = initialBlockData
+
   if (initialBlockFormState) {
     blockData = reduceFieldsToValues(initialBlockFormState, true)
   }
@@ -205,10 +213,12 @@ export const buildFormState = async (
     fields,
     fieldSchemaMap: schemaMap,
     initialBlockData: blockData,
+    mockRSCs,
     operation,
     permissions: docPermissions?.fields || {},
     preferences: docPreferences || { fields: {} },
     previousFormState: formState,
+    readOnly,
     renderAllFields,
     renderFieldFn: renderField,
     req,

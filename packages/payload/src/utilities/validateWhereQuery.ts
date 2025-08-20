@@ -13,9 +13,10 @@ import { validOperatorSet } from '../types/constants.js'
 export const validateWhereQuery = (whereQuery: Where): whereQuery is Where => {
   if (
     whereQuery?.or &&
-    whereQuery?.or?.length > 0 &&
-    whereQuery?.or?.[0]?.and &&
-    whereQuery?.or?.[0]?.and?.length > 0
+    (whereQuery?.or?.length === 0 ||
+      (whereQuery?.or?.length > 0 &&
+        whereQuery?.or?.[0]?.and &&
+        whereQuery?.or?.[0]?.and?.length > 0))
   ) {
     // At this point we know that the whereQuery has 'or' and 'and' fields,
     // now let's check the structure and content of these fields.
@@ -35,7 +36,7 @@ export const validateWhereQuery = (whereQuery: Where): whereQuery is Where => {
           }
 
           for (const key of andKeys) {
-            const operator = Object.keys(andQuery[key])[0]
+            const operator = Object.keys(andQuery[key]!)[0]
             // Check if the key is a valid Operator.
             if (!operator || !validOperatorSet.has(operator as Operator)) {
               return false

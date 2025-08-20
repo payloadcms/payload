@@ -11,9 +11,11 @@ import { UploadCard } from '../UploadCard/index.js'
 
 const baseClass = 'upload upload--has-many'
 
-import type { ReloadDoc } from '../types.js'
+import { getBestFitFromSizes, isImage } from 'payload/shared'
 
 import './index.scss'
+
+import type { ReloadDoc } from '../types.js'
 
 type Props = {
   readonly className?: string
@@ -96,6 +98,15 @@ export function UploadComponentHasMany(props: Props) {
             }
           }
 
+          if (isImage(value.mimeType)) {
+            thumbnailSrc = getBestFitFromSizes({
+              sizes: value.sizes,
+              thumbnailURL: thumbnailSrc,
+              url: src,
+              width: value.width,
+            })
+          }
+
           return (
             <DraggableSortableItem disabled={!isSortable || readonly} id={id} key={id}>
               {(draggableSortableItemProps) => (
@@ -137,7 +148,7 @@ export function UploadComponentHasMany(props: Props) {
                       onRemove={() => removeItem(index)}
                       reloadDoc={reloadDoc}
                       src={src}
-                      thumbnailSrc={thumbnailSrc || src}
+                      thumbnailSrc={thumbnailSrc}
                       withMeta={false}
                       x={value?.width as number}
                       y={value?.height as number}

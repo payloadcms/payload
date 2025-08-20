@@ -1,10 +1,8 @@
 import type {
   ClientCollectionConfig,
-  ColumnPreference,
-  ListPreferences,
   ListQuery,
+  PaginatedDistinctDocs,
   PaginatedDocs,
-  QueryPreset,
   Sort,
   Where,
 } from 'payload'
@@ -22,25 +20,28 @@ export type OnListQueryChange = (query: ListQuery) => void
 export type ListQueryProps = {
   readonly children: React.ReactNode
   readonly collectionSlug?: ClientCollectionConfig['slug']
-  readonly columns?: ColumnPreference[]
-  readonly data: PaginatedDocs
-  readonly defaultLimit?: number
-  readonly defaultSort?: Sort
-  readonly listPreferences?: ListPreferences
+  readonly data: PaginatedDocs | undefined
   readonly modifySearchParams?: boolean
   readonly onQueryChange?: OnListQueryChange
+  readonly orderableFieldName?: string
   /**
    * @deprecated
    */
   readonly preferenceKey?: string
+  readonly query?: ListQuery
 }
 
 export type IListQueryContext = {
   collectionSlug: ClientCollectionConfig['slug']
-  data: PaginatedDocs
+  data: ListQueryProps['data']
   defaultLimit?: number
   defaultSort?: Sort
+  /**
+   * @experimental This prop is subject to change. Use at your own risk.
+   */
+  isGroupingBy: boolean
   modified: boolean
+  orderableFieldName?: string
   query: ListQuery
   refineListData: (args: ListQuery, setModified?: boolean) => Promise<void>
   setModified: (modified: boolean) => void

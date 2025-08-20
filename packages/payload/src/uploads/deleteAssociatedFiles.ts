@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'fs/promises'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
@@ -6,7 +6,7 @@ import type { PayloadRequest } from '../types/index.js'
 import type { FileData, FileToSave } from './types.js'
 
 import { ErrorDeletingFile } from '../errors/index.js'
-import fileExists from './fileExists.js'
+import { fileExists } from './fileExists.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
@@ -34,9 +34,9 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
 
     try {
       if (await fileExists(fileToDelete)) {
-        fs.unlinkSync(fileToDelete)
+        await fs.unlink(fileToDelete)
       }
-    } catch (err) {
+    } catch (ignore) {
       throw new ErrorDeletingFile(req.t)
     }
 
@@ -50,9 +50,9 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
         const sizeToDelete = `${staticPath}/${size.filename}`
         try {
           if (await fileExists(sizeToDelete)) {
-            fs.unlinkSync(sizeToDelete)
+            await fs.unlink(sizeToDelete)
           }
-        } catch (err) {
+        } catch (ignore) {
           throw new ErrorDeletingFile(req.t)
         }
       }

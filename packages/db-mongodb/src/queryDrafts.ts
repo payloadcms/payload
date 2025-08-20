@@ -12,6 +12,7 @@ import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
+import { resolveJoins } from './utilities/resolveJoins.js'
 import { transform } from './utilities/transform.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
@@ -151,10 +152,22 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
       query: versionQuery,
       session: paginationOptions.options?.session ?? undefined,
       sort: paginationOptions.sort as object,
+      sortAggregation,
       useEstimatedCount: paginationOptions.useEstimatedCount,
     })
   } else {
     result = await Model.paginate(versionQuery, paginationOptions)
+  }
+
+  if (!this.useJoinAggregations) {
+    await resolveJoins({
+      adapter: this,
+      collectionSlug,
+      docs: result.docs as Record<string, unknown>[],
+      joins,
+      locale,
+      versions: true,
+    })
   }
 
   transform({
@@ -166,7 +179,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   for (let i = 0; i < result.docs.length; i++) {
     const id = result.docs[i].parent
-    result.docs[i] = result.docs[i].version
+    result.docs[i] = result.docs[i].version ?? {}
     result.docs[i].id = id
   }
 

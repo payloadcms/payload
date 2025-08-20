@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type {
+  BlocksField,
   LocalizedPost,
   LocalizedSort,
   Nested,
@@ -27,6 +28,7 @@ import {
   defaultLocale as englishLocale,
   englishTitle,
   hungarianLocale,
+  localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -54,9 +56,7 @@ describe('Localization', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('Localization with fallback true', () => {
@@ -146,6 +146,36 @@ describe('Localization', () => {
 
         expect(localizedFallback.title.en).toEqual(englishTitle)
         expect(localizedFallback.title.es).toEqual('')
+      })
+
+      it('should show correct fallback data for arrays', async () => {
+        const localizedArrayPost = await payload.create({
+          collection: arrayCollectionSlug,
+          data: {
+            items: [
+              {
+                text: 'localized array item',
+              },
+            ],
+          },
+        })
+
+        const resultAllLocales: any = await payload.findByID({
+          id: localizedArrayPost.id,
+          collection: arrayCollectionSlug,
+          locale: 'all',
+        })
+
+        expect(resultAllLocales.items.en[0].text).toEqual('localized array item')
+        expect(resultAllLocales.items.es).toEqual(undefined)
+
+        const resultSpanishLocale: any = await payload.findByID({
+          id: localizedArrayPost.id,
+          collection: arrayCollectionSlug,
+          locale: spanishLocale,
+        })
+
+        expect(resultSpanishLocale.items[0].text).toEqual('localized array item')
       })
 
       it('should fallback to spanish translation when empty and locale-specific fallback is provided', async () => {
@@ -431,6 +461,32 @@ describe('Localization', () => {
       })
     })
 
+    describe('Localized date', () => {
+      it('can create a localized date', async () => {
+        const document = await payload.create({
+          collection: localizedDateFieldsSlug,
+          data: {
+            localizedDate: new Date().toISOString(),
+            date: new Date().toISOString(),
+          },
+        })
+        expect(document.localizedDate).toBeTruthy()
+      })
+
+      it('data is typed as string', async () => {
+        const document = await payload.create({
+          collection: localizedDateFieldsSlug,
+          data: {
+            localizedDate: new Date().toISOString(),
+            date: new Date().toISOString(),
+          },
+        })
+
+        expect(typeof document.localizedDate).toBe('string')
+        expect(typeof document.date).toBe('string')
+      })
+    })
+
     describe('Localized Sort Count', () => {
       const expectedTotalDocs = 5
       const posts: LocalizedSort[] = []
@@ -482,8 +538,6 @@ describe('Localization', () => {
           collection: localizedSortSlug,
           sort: 'date',
         })
-
-        console.log({ sortByTitleQuery })
 
         expect(sortByTitleQuery.totalDocs).toEqual(expectedTotalDocs)
         expect(sortByDateQuery.totalDocs).toEqual(expectedTotalDocs)
@@ -1159,11 +1213,52 @@ describe('Localization', () => {
           data: {
             items: [],
           },
-          fallbackLocale: 'none',
+          fallbackLocale: false,
           locale: spanishLocale,
         })
 
-        expect(updatedSpanishDoc.items).toStrictEqual([])
+        expect(updatedSpanishDoc.items).toStrictEqual(null)
+      })
+
+      it('should allow optional fallback data', async () => {
+        const englishDoc = await payload.create({
+          collection: arrayCollectionSlug,
+          data: {
+            items: [
+              {
+                text: englishTitle,
+              },
+            ],
+          },
+          locale: defaultLocale,
+        })
+
+        await payload.update({
+          id: englishDoc.id,
+          collection: arrayCollectionSlug,
+          data: {
+            items: [],
+          },
+          locale: spanishLocale,
+        })
+
+        const docWithoutFallback = await payload.findByID({
+          id: englishDoc.id,
+          collection: arrayCollectionSlug,
+          locale: spanishLocale,
+        })
+
+        // eslint-disable-next-line jest/no-conditional-in-test
+        if (['firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE!)) {
+          expect(docWithoutFallback.items).toStrictEqual(null)
+        } else {
+          // TODO: build out compatability with SQL databases
+          // Currently SQL databases always fallback since the localized values are joined in.
+          // The join only has 2 states, undefined or the localized value of the requested locale.
+          // If the localized value is not in the DB, there is no way to know if the value should fallback or not so we fallback if fallbackLocale is truthy.
+          // In MongoDB the value can be set to null, which allows us to know that the value should fallback.
+          expect(docWithoutFallback.items).toStrictEqual(englishDoc.items)
+        }
       })
 
       it('should use fallback value if setting null', async () => {
@@ -2152,6 +2247,195 @@ describe('Localization', () => {
     })
 
     describe('nested fields', () => {
+      it('should update localized block', async () => {
+        const doc = await payload.create({
+          collection: 'blocks-fields',
+          locale: 'en',
+          data: {
+            content: [
+              {
+                blockType: 'blockInsideBlock',
+                content: [
+                  {
+                    blockType: 'textBlock',
+                    text: 'some-text',
+                  },
+                ],
+              },
+            ],
+          },
+        })
+
+        const updated = await payload.update({
+          id: doc.id,
+          collection: 'blocks-fields',
+          data: {
+            id: doc.id,
+            content: [
+              {
+                // This can't be added in Postgres because you'd get a duplicate ID error
+                // since the parent is localized, and the primary key in the block table
+                // consists only of the ID. That's why it's removed in `copyToLocale`.
+                // id: doc.content?.[0]?.id,
+                blockName: null,
+                array: [],
+                blockType: 'blockInsideBlock',
+                content: [
+                  {
+                    // Same as above.
+                    // id: doc.content?.[0]?.content?.[0]?.id,
+                    text: 'some-text',
+                    blockName: null,
+                    blockType: 'textBlock',
+                  },
+                ],
+              },
+            ],
+          },
+          locale: 'es',
+        })
+
+        console.dir(updated, { depth: null })
+
+        expect(updated.content?.[0]?.content?.[0]?.text).toBe('some-text')
+      })
+
+      it('update specific locale should not erease the others in blocks and arrays', async () => {
+        const doc = await payload.create({
+          collection: 'nested',
+          locale: 'en',
+          data: {
+            blocks: [
+              {
+                blockType: 'block',
+                someText: 'some-block-text-en',
+              },
+            ],
+            topLevelArray: [
+              {
+                localizedText: 'some-localized-text',
+                notLocalizedText: 'some-not-localized-text',
+              },
+            ],
+          },
+        })
+
+        expect(doc.blocks?.[0]?.someText).toBe('some-block-text-en')
+        expect(doc.topLevelArray?.[0]?.localizedText).toBe('some-localized-text')
+        expect(doc.topLevelArray?.[0]?.notLocalizedText).toBe('some-not-localized-text')
+        expect(doc.topLevelArray).toHaveLength(1)
+
+        const findAllLocales = await payload.findByID({
+          id: doc.id,
+          collection: 'nested',
+          locale: 'all',
+        })
+
+        expect(findAllLocales.blocks?.[0]?.someText).toStrictEqual({
+          en: 'some-block-text-en',
+        })
+        expect(findAllLocales.topLevelArray?.[0]?.localizedText).toStrictEqual({
+          en: 'some-localized-text',
+        })
+
+        const updatedDoc = await payload.update({
+          id: doc.id,
+          collection: 'nested',
+          locale: 'es',
+          data: {
+            blocks: [
+              {
+                id: doc.blocks?.[0]?.id,
+                blockType: 'block',
+                someText: 'some-block-text-es',
+              },
+            ],
+            topLevelArray: [
+              {
+                id: doc.topLevelArray?.[0]?.id,
+                localizedText: 'some-localized-text-es',
+                notLocalizedText: 'some-not-localized-text-es',
+              },
+            ],
+          },
+        })
+
+        expect(updatedDoc.blocks?.[0]?.someText).toBe('some-block-text-es')
+        expect(updatedDoc.topLevelArray?.[0]?.localizedText).toBe('some-localized-text-es')
+        expect(updatedDoc.topLevelArray?.[0]?.notLocalizedText).toBe('some-not-localized-text-es')
+
+        const refreshedDoc = await payload.findByID({
+          id: doc.id,
+          collection: 'nested',
+          locale: 'all',
+        })
+
+        expect(refreshedDoc.blocks?.[0]?.someText).toStrictEqual({
+          en: 'some-block-text-en',
+          es: 'some-block-text-es',
+        })
+        expect(refreshedDoc.topLevelArray?.[0]?.localizedText).toStrictEqual({
+          en: 'some-localized-text',
+          es: 'some-localized-text-es',
+        })
+      })
+
+      it('update specific locale should not erease the others in simple fields', async () => {
+        const doc = await payload.create({
+          collection: 'localized-posts',
+          locale: 'en',
+          data: {
+            title: 'some-localized-title',
+            description: 'some-not-localized-description',
+            localizedDescription: 'some-localized-description',
+          },
+        })
+
+        expect(doc.title).toBe('some-localized-title')
+        expect(doc.localizedDescription).toBe('some-localized-description')
+
+        const findAllLocales = await payload.findByID({
+          id: doc.id,
+          collection: 'localized-posts',
+          locale: 'all',
+        })
+
+        expect(findAllLocales.title).toStrictEqual({
+          en: 'some-localized-title',
+        })
+        expect(findAllLocales.localizedDescription).toStrictEqual({
+          en: 'some-localized-description',
+        })
+
+        const updatedDoc = await payload.update({
+          id: doc.id,
+          collection: 'localized-posts',
+          locale: 'es',
+          data: {
+            title: 'some-localized-title-es',
+            description: 'some-not-localized-description-es',
+            localizedDescription: 'some-localized-description-es',
+          },
+        })
+
+        expect(updatedDoc.title).toBe('some-localized-title-es')
+        expect(updatedDoc.localizedDescription).toBe('some-localized-description-es')
+
+        const refreshedDoc = await payload.findByID({
+          id: doc.id,
+          collection: 'localized-posts',
+          locale: 'all',
+        })
+
+        expect(refreshedDoc.title).toStrictEqual({
+          en: 'some-localized-title',
+          es: 'some-localized-title-es',
+        })
+        expect(refreshedDoc.localizedDescription).toStrictEqual({
+          en: 'some-localized-description',
+          es: 'some-localized-description-es',
+        })
+      })
       it('should allow for fields which could contain new tables within localized arrays to be stored', async () => {
         const randomDoc = (
           await payload.find({
@@ -2596,6 +2880,71 @@ describe('Localization', () => {
         expect(res.localizedCheckbox).toBe(true)
       })
 
+      it('should copy block to locale', async () => {
+        // This was previously an e2e test but it was migrated to int
+        // because at the moment only int tests run in Postgres in CI,
+        // and that's where the bug occurs.
+        const doc = await payload.create({
+          collection: 'blocks-fields',
+          locale: 'en',
+          data: {
+            content: [
+              {
+                blockType: 'blockInsideBlock',
+                content: [
+                  {
+                    blockType: 'textBlock',
+                    text: 'some-text',
+                  },
+                ],
+              },
+            ],
+          },
+        })
+
+        const req = await createLocalReq({ user }, payload)
+        global.d = true
+        const res = (await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          req,
+          toLocale: 'es',
+          docID: doc.id,
+          collectionSlug: 'blocks-fields',
+        })) as BlocksField
+
+        expect(res.content?.[0]?.content?.[0]?.text).toBe('some-text')
+      })
+
+      it('should copy block inside tab to locale', async () => {
+        // This was previously an e2e test but it was migrated to int
+        // because at the moment only int tests run in Postgres in CI,
+        // and that's where the bug occurs.
+        const doc = await payload.create({
+          collection: 'blocks-fields',
+          locale: 'en',
+          data: {
+            tabContent: [
+              {
+                blockType: 'blockInsideTab',
+                text: 'some-text',
+              },
+            ],
+          },
+        })
+
+        const req = await createLocalReq({ user }, payload)
+        global.d = true
+        const res = (await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          req,
+          toLocale: 'pt',
+          docID: doc.id,
+          collectionSlug: 'blocks-fields',
+        })) as BlocksField
+
+        expect(res.tabContent?.[0]?.text).toBe('some-text')
+      })
+
       it('should copy localized nested to arrays', async () => {
         const doc = await payload.create({
           collection: 'nested',
@@ -2620,8 +2969,18 @@ describe('Localization', () => {
           collectionSlug: 'nested',
         })) as Nested
 
-        expect(res.topLevelArray[0].localizedText).toBe('some-localized-text')
-        expect(res.topLevelArray[0].notLocalizedText).toBe('some-not-localized-text')
+        expect(res.topLevelArray?.[0]?.localizedText).toBe('some-localized-text')
+        expect(res.topLevelArray?.[0]?.notLocalizedText).toBe('some-not-localized-text')
+
+        const refreshedDoc = await payload.findByID({
+          id: doc.id,
+          collection: 'nested',
+        })
+
+        // The source data should remain unchanged
+        expect(refreshedDoc.topLevelArray?.[0]?.localizedText).toBe('some-localized-text')
+        expect(refreshedDoc.topLevelArray?.[0]?.notLocalizedText).toBe('some-not-localized-text')
+        expect(refreshedDoc.topLevelArray).toHaveLength(1)
       })
 
       it('should copy localized arrays', async () => {
@@ -2647,7 +3006,15 @@ describe('Localization', () => {
           collectionSlug: 'nested',
         })) as Nested
 
-        expect(res.topLevelArrayLocalized[0].text).toBe('some-text')
+        expect(res.topLevelArrayLocalized?.[0]?.text).toBe('some-text')
+
+        const refreshedDoc = await payload.findByID({
+          id: doc.id,
+          collection: 'nested',
+        })
+
+        // The source data should remain unchanged
+        expect(refreshedDoc.topLevelArrayLocalized?.[0]?.text).toBe('some-text')
       })
     })
   })

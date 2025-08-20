@@ -95,4 +95,31 @@ describe('Select', () => {
 
     await expect(page.locator('.cell-selectWithJsxLabelOption svg#payload-logo')).toBeVisible()
   })
+
+  test('should reduce options', async () => {
+    await page.goto(url.create)
+    const field = page.locator('#field-selectWithFilteredOptions')
+    await field.click({ delay: 100 })
+    const options = page.locator('.rs__option')
+    await expect(options.locator('text=One')).toBeVisible()
+
+    // click the field again to close the options
+    await field.click({ delay: 100 })
+
+    await page.locator('#field-disallowOption1').click()
+    await field.click({ delay: 100 })
+    await expect(options.locator('text=One')).toBeHidden()
+  })
+
+  test('should retain search when reducing options', async () => {
+    await page.goto(url.create)
+    const field = page.locator('#field-selectWithFilteredOptions')
+    await field.click({ delay: 100 })
+    const options = page.locator('.rs__option')
+    await expect(options.locator('text=One')).toBeVisible()
+    await expect(options.locator('text=Two')).toBeVisible()
+    await field.locator('input').fill('On')
+    await expect(options.locator('text=One')).toBeVisible()
+    await expect(options.locator('text=Two')).toBeHidden()
+  })
 })

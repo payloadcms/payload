@@ -135,9 +135,10 @@ powerful Admin UI.
 
 | Option                 | Description                                                                                                                                                                                                                            |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** \*          | To be used as the property name when retrieved from the database. [More](./overview#field-names)                                                                                                                                       |
+| **`name`** \*          | To be used as the property name when retrieved from the database. [More details](./overview#field-names).                                                                                                                              |
 | **`collection`** \*    | The `slug`s having the relationship field or an array of collection slugs.                                                                                                                                                             |
 | **`on`** \*            | The name of the relationship or upload field that relates to the collection document. Use dot notation for nested paths, like 'myGroup.relationName'. If `collection` is an array, this field must exist for all specified collections |
+| **`orderable`**        | If true, enables custom ordering and joined documents can be reordered via drag and drop. Uses [fractional indexing](https://observablehq.com/@dgreensp/implementing-fractional-indexing) for efficient reordering.                    |
 | **`where`**            | A `Where` query to hide related documents from appearing. Will be merged with any `where` specified in the request.                                                                                                                    |
 | **`maxDepth`**         | Default is 1, Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached. [Max Depth](../queries/depth#max-depth).                                                                   |
 | **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                                                                                |
@@ -270,21 +271,6 @@ const result = await payload.find({
   and blocks.
 </Banner>
 
-<Banner type="warning">
-  Currently, querying by the Join Field itself is not supported, meaning:
-  ```ts
-  payload.find({
-    collection: 'categories',
-    where: {
-      'relatedPosts.title': { // relatedPosts is a join field
-        equals: "post"
-      }
-    }
-  })
-  ```
-  does not work yet.
-</Banner>
-
 ### Rest API
 
 The REST API supports the same query options as the Local API. You can use the `joins` query parameter to customize the
@@ -310,11 +296,16 @@ query {
         sort: "createdAt"
         limit: 5
         where: { author: { equals: "66e3431a3f23e684075aaeb9" } }
+        """
+        Optionally pass count: true if you want to retrieve totalDocs
+        """
+        count: true -- s
       ) {
         docs {
           title
         }
         hasNextPage
+        totalDocs
       }
     }
   }

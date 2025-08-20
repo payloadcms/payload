@@ -1,21 +1,25 @@
 import type { Field } from '../fields/config/types.js'
 import type { Access, CollectionSlug } from '../index.js'
-import type { ListPreferences } from '../preferences/types.js'
+import type { CollectionPreferences } from '../preferences/types.js'
 import type { Where } from '../types/index.js'
 
 // Note: order matters here as it will change the rendered order in the UI
 export const operations = ['read', 'update', 'delete'] as const
 
-type Operation = (typeof operations)[number]
+export type ConstraintOperation = (typeof operations)[number]
+
+export type DefaultConstraint = 'everyone' | 'onlyMe' | 'specificUsers'
+
+export type Constraint = DefaultConstraint | string // TODO: type `string` as the custom constraints provided by the config
 
 export type QueryPreset = {
   access: {
-    [operation in Operation]: {
-      constraint: 'everyone' | 'onlyMe' | 'specificUsers'
+    [operation in ConstraintOperation]: {
+      constraint: DefaultConstraint
       users?: string[]
     }
   }
-  columns: ListPreferences['columns']
+  columns: CollectionPreferences['columns']
   id: number | string
   isShared: boolean
   relatedCollection: CollectionSlug
@@ -25,7 +29,7 @@ export type QueryPreset = {
 
 export type QueryPresetConstraint = {
   access: Access<QueryPreset>
-  fields: Field[]
+  fields?: Field[]
   label: string
   value: string
 }

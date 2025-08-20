@@ -1,0 +1,5 @@
+@layer payload-default {
+  .draggable-with-click:not(.draggable-with-click--disabled) {
+    user-select: none;
+  }
+}

@@ -112,6 +112,12 @@ export const Categories: CollectionConfig = {
       on: 'array.category',
     },
     {
+      name: 'arrayHasManyPosts',
+      type: 'join',
+      collection: 'posts',
+      on: 'arrayHasMany.category',
+    },
+    {
       name: 'localizedArrayPosts',
       type: 'join',
       collection: 'posts',
@@ -161,6 +167,12 @@ export const Categories: CollectionConfig = {
       where: {
         isFiltered: { not_equals: true },
       },
+    },
+    {
+      name: 'inTab',
+      type: 'join',
+      collection: postsSlug,
+      on: 'tab.category',
     },
     {
       name: 'joinWithError',

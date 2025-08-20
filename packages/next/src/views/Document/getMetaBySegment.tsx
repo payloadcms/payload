@@ -6,16 +6,16 @@ import type { GenerateViewMetadata } from '../Root/index.js'
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateAPIViewMetadata } from '../API/metadata.js'
 import { generateEditViewMetadata } from '../Edit/metadata.js'
-import { generateLivePreviewViewMetadata } from '../LivePreview/metadata.js'
 import { generateNotFoundViewMetadata } from '../NotFound/metadata.js'
 import { generateVersionViewMetadata } from '../Version/metadata.js'
 import { generateVersionsViewMetadata } from '../Versions/metadata.js'
-import { getViewsFromConfig } from './getViewsFromConfig.js'
+import { getDocumentView } from './getDocumentView.js'
 
 export type GenerateEditViewMetadata = (
   args: {
     collectionConfig?: null | SanitizedCollectionConfig
     globalConfig?: null | SanitizedGlobalConfig
+    isReadOnly?: boolean
     view?: keyof EditConfig
   } & Parameters<GenerateViewMetadata>[0],
 ) => Promise<Metadata>
@@ -43,16 +43,17 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       fn = generateEditViewMetadata
     }
 
+    // `/collections/:collection/trash/:id`
+    if (segments.length === 4 && segments[2] === 'trash') {
+      fn = (args) => generateEditViewMetadata({ ...args, isReadOnly: true })
+    }
+
     // `/:collection/:id/:view`
     if (params.segments.length === 4) {
       switch (params.segments[3]) {
         case 'api':
           // `/:collection/:id/api`
           fn = generateAPIViewMetadata
-          break
-        case 'preview':
-          // `/:collection/:id/preview`
-          fn = generateLivePreviewViewMetadata
           break
         case 'versions':
           // `/:collection/:id/versions`
@@ -74,6 +75,25 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
           break
       }
     }
+
+    // `/collections/:collection/trash/:id/:view`
+    if (segments.length === 5 && segments[2] === 'trash') {
+      switch (segments[4]) {
+        case 'api':
+          fn = generateAPIViewMetadata
+          break
+        case 'versions':
+          fn = generateVersionsViewMetadata
+          break
+        default:
+          break
+      }
+    }
+
+    // `/collections/:collection/trash/:id/versions/:versionID`
+    if (segments.length === 6 && segments[2] === 'trash' && segments[4] === 'versions') {
+      fn = generateVersionViewMetadata
+    }
   }
 
   if (isGlobal) {
@@ -88,10 +108,6 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
         case 'api':
           // `/:global/api`
           fn = generateAPIViewMetadata
-          break
-        case 'preview':
-          // `/:global/preview`
-          fn = generateLivePreviewViewMetadata
           break
         case 'versions':
           // `/:global/versions`
@@ -121,11 +137,18 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       isEditing,
     })
   } else {
-    const { viewKey } = getViewsFromConfig({
+    const { viewKey } = getDocumentView({
       collectionConfig,
       config,
+      docPermissions: {
+        create: true,
+        delete: true,
+        fields: true,
+        read: true,
+        readVersions: true,
+        update: true,
+      },
       globalConfig,
-      overrideDocPermissions: true,
       routeSegments: typeof segments === 'string' ? [segments] : segments,
     })
 

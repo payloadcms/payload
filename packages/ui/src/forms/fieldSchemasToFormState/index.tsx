@@ -1,4 +1,5 @@
 import type {
+  BuildFormStateArgs,
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
@@ -56,6 +57,7 @@ type Args = {
    * the initial block data here, which will be used as `blockData` for the top-level fields, until the first block is encountered.
    */
   initialBlockData?: Data
+  mockRSCs?: BuildFormStateArgs['mockRSCs']
   operation?: 'create' | 'update'
   permissions: SanitizedFieldsPermissions
   preferences: DocumentPreferences
@@ -64,6 +66,7 @@ type Args = {
    * to be able to determine if custom fields need to be re-rendered.
    */
   previousFormState?: FormState
+  readOnly?: boolean
   /**
    * If renderAllFields is true, then no matter what is in previous form state,
    * all custom fields will be re-rendered.
@@ -86,10 +89,12 @@ export const fieldSchemasToFormState = async ({
   fields,
   fieldSchemaMap,
   initialBlockData,
+  mockRSCs,
   operation,
   permissions,
   preferences,
   previousFormState,
+  readOnly,
   renderAllFields,
   renderFieldFn,
   req,
@@ -99,6 +104,7 @@ export const fieldSchemasToFormState = async ({
   skipValidation,
 }: Args): Promise<FormState> => {
   if (!clientFieldSchemaMap && renderFieldFn) {
+    // eslint-disable-next-line no-console
     console.warn(
       'clientFieldSchemaMap is not passed to fieldSchemasToFormState - this will reduce performance',
     )
@@ -139,6 +145,7 @@ export const fieldSchemasToFormState = async ({
       fields,
       fieldSchemaMap,
       fullData,
+      mockRSCs,
       operation,
       parentIndexPath: '',
       parentPassesCondition: true,
@@ -147,6 +154,7 @@ export const fieldSchemasToFormState = async ({
       permissions,
       preferences,
       previousFormState,
+      readOnly,
       renderAllFields,
       renderFieldFn,
       req,

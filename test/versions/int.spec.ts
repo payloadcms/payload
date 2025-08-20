@@ -4,9 +4,11 @@ import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublish
 import path from 'path'
 import { createLocalReq, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
+import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { DraftPost } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -56,9 +58,7 @@ describe('Versions', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   beforeEach(async () => {
@@ -1506,6 +1506,79 @@ describe('Versions', () => {
       const jsonByID = await responseByID.json()
       expect(jsonByID.parent).toBe(collectionLocalPostID)
     })
+
+    it('should allow query by latest', async () => {
+      async function createVersion({ title }: { title: string }) {
+        return payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title,
+            description: 'Test Description',
+          },
+        })
+      }
+
+      async function updateVersion({
+        id,
+        data,
+      }: {
+        data: Partial<DraftPost>
+        id: number | string
+      }) {
+        return payload.update({
+          collection: draftCollectionSlug,
+          id,
+          data,
+        })
+      }
+
+      const version1 = await createVersion({
+        title: 'test1',
+      })
+
+      await updateVersion({
+        id: version1.id,
+        data: {
+          title: 'test1 updated',
+        },
+      })
+
+      const newestVersion = await updateVersion({
+        id: version1.id,
+        data: {
+          title: 'test2 updated',
+        },
+      })
+
+      const query = qs.stringify(
+        {
+          where: {
+            and: [
+              {
+                latest: {
+                  equals: true,
+                },
+              },
+              {
+                parent: {
+                  equals: version1.id,
+                },
+              },
+            ],
+          },
+        },
+        {
+          addQueryPrefix: true,
+        },
+      )
+
+      const response = await restClient.GET(`/${draftCollectionSlug}/versions${query}`)
+      expect(response.status).toBe(200)
+      const json = await response.json()
+      expect(json.docs).toHaveLength(1)
+
+      expect(json.docs[0].version.title).toBe(newestVersion.title)
+    })
   })
 
   describe('Globals - Local', () => {
@@ -1540,6 +1613,30 @@ describe('Versions', () => {
         expect(updatedGlobal.title).toBe(title2)
         expect(updatedGlobal._status).toStrictEqual('draft')
         expect(globalLocalVersionID).toBeDefined()
+      })
+
+      it('ensure global can be published after saving draft', async () => {
+        const draftVersion = await payload.updateGlobal({
+          slug: 'max-versions',
+          draft: true,
+          data: {
+            title: 'Draft',
+            _status: 'draft',
+          },
+        })
+        expect(draftVersion.title).toStrictEqual('Draft')
+        expect(draftVersion._status).toStrictEqual('draft')
+
+        const publishedVersion = await payload.updateGlobal({
+          slug: 'max-versions',
+          draft: false,
+          data: {
+            title: 'Published',
+            _status: 'published',
+          },
+        })
+        expect(publishedVersion.title).toStrictEqual('Published')
+        expect(publishedVersion._status).toStrictEqual('published')
       })
 
       it('should have different createdAt in a new version while the same version.createdAt', async () => {
@@ -1583,6 +1680,30 @@ describe('Versions', () => {
         // When creating a new version - updatedAt should match
         expect(fromNonVersionsTable.updatedAt).toBe(latestVersionData.version.updatedAt)
       })
+    })
+
+    it('should properly clean up old versions when reached versions.max', async () => {
+      const getLatestVersion = () =>
+        payload
+          .findGlobalVersions({
+            slug: 'max-versions',
+            sort: '-createdAt',
+            limit: 1,
+          })
+          .then((r) => r.docs[0])
+
+      await payload.updateGlobal({ slug: 'max-versions', data: { title: '1' } })
+      const version_1 = await getLatestVersion()
+      await payload.updateGlobal({ slug: 'max-versions', data: { title: '2' } })
+      const version_2 = await getLatestVersion()
+      await payload.updateGlobal({ slug: 'max-versions', data: { title: '3' } })
+      const version_3 = await getLatestVersion()
+      const version_1_deleted = await payload.findGlobalVersionByID({
+        slug: 'max-versions',
+        id: version_1?.id as string,
+        disableErrors: true,
+      })
+      expect(version_1_deleted).toBeFalsy()
     })
 
     describe('Read', () => {

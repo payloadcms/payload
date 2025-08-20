@@ -9,7 +9,7 @@ import type {
   UnsanitizedClientConfig,
 } from 'payload'
 
-import React, { createContext, use, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 type GetEntityConfigFn = {
   // Overload #1: collectionSlug only
@@ -64,9 +64,15 @@ export const ConfigProvider: React.FC<{
 }> = ({ children, config: configFromProps }) => {
   const [config, setConfig] = useState<ClientConfig>(() => sanitizeClientConfig(configFromProps))
 
+  const isFirstRenderRef = useRef(true)
+
   // Need to update local config state if config from props changes, for HMR.
   // That way, config changes will be updated in the UI immediately without needing a refresh.
   useEffect(() => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false
+      return
+    }
     setConfig(sanitizeClientConfig(configFromProps))
   }, [configFromProps])
 
@@ -98,9 +104,9 @@ export const ConfigProvider: React.FC<{
     [collectionsBySlug, globalsBySlug],
   )
 
-  return (
-    <RootConfigContext value={{ config, getEntityConfig, setConfig }}>{children}</RootConfigContext>
-  )
+  const value = useMemo(() => ({ config, getEntityConfig, setConfig }), [config, getEntityConfig])
+
+  return <RootConfigContext value={value}>{children}</RootConfigContext>
 }
 
 export const useConfig = (): ClientConfigContext => use(RootConfigContext)

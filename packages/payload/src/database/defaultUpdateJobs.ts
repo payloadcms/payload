@@ -1,16 +1,15 @@
-import type { BaseJob, DatabaseAdapter } from '../index.js'
+import type { DatabaseAdapter, Job } from '../index.js'
 import type { UpdateJobs } from './types.js'
 
-import { jobsCollectionSlug } from '../queues/config/index.js'
-import { sanitizeUpdateData } from '../queues/utilities/sanitizeUpdateData.js'
+import { jobsCollectionSlug } from '../queues/config/collection.js'
 
 export const defaultUpdateJobs: UpdateJobs = async function updateMany(
   this: DatabaseAdapter,
   { id, data, limit, req, returning, where },
 ) {
-  const updatedJobs: BaseJob[] | null = []
+  const updatedJobs: Job[] | null = []
 
-  const jobsToUpdate: BaseJob[] = (
+  const jobsToUpdate: Job[] = (
     id
       ? [
           await this.findOne({
@@ -28,7 +27,7 @@ export const defaultUpdateJobs: UpdateJobs = async function updateMany(
             where,
           })
         ).docs
-  ).filter(Boolean) as BaseJob[]
+  ).filter(Boolean) as Job[]
 
   if (!jobsToUpdate) {
     return null
@@ -42,7 +41,7 @@ export const defaultUpdateJobs: UpdateJobs = async function updateMany(
     const updatedJob = await this.updateOne({
       id: job.id,
       collection: jobsCollectionSlug,
-      data: sanitizeUpdateData({ data: updateData }),
+      data: updateData,
       req,
       returning,
     })

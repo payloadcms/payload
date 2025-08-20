@@ -1,7 +1,7 @@
 import type { Access, Config } from '../config/types.js'
 import type { Operation } from '../types/index.js'
 
-import defaultAccess from '../auth/defaultAccess.js'
+import { defaultAccess } from '../auth/defaultAccess.js'
 
 const operations: Operation[] = ['delete', 'read', 'update', 'create'] as const
 
@@ -71,7 +71,17 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
 
                     return {
                       and: [
-                        ...(typeof constraintAccess === 'object' ? [constraintAccess] : []),
+                        ...(typeof constraintAccess === 'object'
+                          ? [constraintAccess]
+                          : constraintAccess === false
+                            ? [
+                                {
+                                  id: {
+                                    equals: null,
+                                  },
+                                },
+                              ]
+                            : []),
                         {
                           [`access.${operation}.constraint`]: {
                             equals: constraint.value,

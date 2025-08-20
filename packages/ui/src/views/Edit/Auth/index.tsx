@@ -1,5 +1,6 @@
 'use client'
 
+import { getFieldPermissions } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -42,7 +43,8 @@ export const Auth: React.FC<Props> = (props) => {
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
-  const { docPermissions, isEditing, isInitializing } = useDocumentInfo()
+  const { docPermissions, isEditing, isInitializing, isTrashed } = useDocumentInfo()
+
   const {
     config: {
       routes: { api },
@@ -50,11 +52,66 @@ export const Auth: React.FC<Props> = (props) => {
     },
   } = useConfig()
 
-  const enableFields =
-    !disableLocalStrategy ||
-    (typeof disableLocalStrategy === 'object' && disableLocalStrategy.enableFields === true)
+  let showPasswordFields = true
+  let showUnlock = true
+  const hasPasswordFieldOverride =
+    typeof docPermissions.fields === 'object' && 'password' in docPermissions.fields
+  const hasLoginFieldOverride =
+    typeof docPermissions.fields === 'object' &&
+    ('username' in docPermissions.fields || 'email' in docPermissions.fields)
 
-  const disabled = readOnly || isInitializing
+  if (hasPasswordFieldOverride) {
+    const { permissions: passwordPermissions } = getFieldPermissions({
+      field: { name: 'password', type: 'text' },
+      operation,
+      parentName: '',
+      permissions: docPermissions?.fields,
+    })
+
+    if (operation === 'create') {
+      showPasswordFields =
+        passwordPermissions === true ||
+        (typeof passwordPermissions === 'object' && passwordPermissions.create)
+    } else {
+      showPasswordFields =
+        passwordPermissions === true ||
+        (typeof passwordPermissions === 'object' && passwordPermissions.update)
+    }
+  }
+
+  if (hasLoginFieldOverride) {
+    const hasEmailAndUsernameFields =
+      loginWithUsername && (loginWithUsername.requireEmail || loginWithUsername.allowEmailLogin)
+
+    const { operation: emailPermission } = getFieldPermissions({
+      field: { name: 'email', type: 'text' },
+      operation: 'read',
+      parentName: '',
+      permissions: docPermissions?.fields,
+    })
+
+    const { operation: usernamePermission } = getFieldPermissions({
+      field: { name: 'username', type: 'text' },
+      operation: 'read',
+      parentName: '',
+      permissions: docPermissions?.fields,
+    })
+
+    if (hasEmailAndUsernameFields) {
+      showUnlock = usernamePermission || emailPermission
+    } else if (loginWithUsername && !hasEmailAndUsernameFields) {
+      showUnlock = usernamePermission
+    } else {
+      showUnlock = emailPermission
+    }
+  }
+
+  const enableFields =
+    (!disableLocalStrategy ||
+      (typeof disableLocalStrategy === 'object' && disableLocalStrategy.enableFields === true)) &&
+    (showUnlock || showPasswordFields)
+
+  const disabled = readOnly || isInitializing || isTrashed
 
   const apiKeyPermissions =
     docPermissions?.fields === true ? true : docPermissions?.fields?.enableAPIKey
@@ -80,8 +137,8 @@ export const Auth: React.FC<Props> = (props) => {
   }, [permissions, collectionSlug])
 
   const handleChangePassword = useCallback(
-    (showPasswordFields: boolean) => {
-      if (showPasswordFields) {
+    (changingPassword: boolean) => {
+      if (changingPassword) {
         setValidateBeforeSubmit(true)
 
         dispatchFields({
@@ -103,7 +160,7 @@ export const Auth: React.FC<Props> = (props) => {
         dispatchFields({ type: 'REMOVE', path: 'confirm-password' })
       }
 
-      setChangingPassword(showPasswordFields)
+      setChangingPassword(changingPassword)
     },
     [dispatchFields, t, setValidateBeforeSubmit],
   )
@@ -146,7 +203,7 @@ export const Auth: React.FC<Props> = (props) => {
             loginWithUsername={loginWithUsername}
             operation={operation}
             permissions={docPermissions?.fields}
-            readOnly={readOnly}
+            readOnly={readOnly || isTrashed}
             t={t}
           />
           {(changingPassword || requirePassword) && (!disableLocalStrategy || !enableFields) && (
@@ -164,7 +221,7 @@ export const Auth: React.FC<Props> = (props) => {
                 path="password"
                 schemaPath="password"
               />
-              <ConfirmPasswordField disabled={readOnly} />
+              <ConfirmPasswordField disabled={readOnly || isTrashed} />
             </div>
           )}
           <div className={`${baseClass}__controls`}>
@@ -178,21 +235,24 @@ export const Auth: React.FC<Props> = (props) => {
                 {t('general:cancel')}
               </Button>
             )}
-            {!changingPassword && !requirePassword && !disableLocalStrategy && (
-              <Button
-                buttonStyle="secondary"
-                disabled={disabled}
-                id="change-password"
-                onClick={() => handleChangePassword(true)}
-                size="medium"
-              >
-                {t('authentication:changePassword')}
-              </Button>
-            )}
+            {!changingPassword &&
+              !requirePassword &&
+              !disableLocalStrategy &&
+              showPasswordFields && (
+                <Button
+                  buttonStyle="secondary"
+                  disabled={disabled}
+                  id="change-password"
+                  onClick={() => handleChangePassword(true)}
+                  size="medium"
+                >
+                  {t('authentication:changePassword')}
+                </Button>
+              )}
             {operation === 'update' && hasPermissionToUnlock && (
               <Button
                 buttonStyle="secondary"
-                disabled={disabled}
+                disabled={disabled || !showUnlock}
                 onClick={() => void unlock()}
                 size="medium"
               >

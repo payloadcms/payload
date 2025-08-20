@@ -1,6 +1,6 @@
 'use client'
 
-import type { FieldType, Options } from '@payloadcms/ui'
+import type { FieldType } from '@payloadcms/ui'
 import type { UploadFieldClientProps } from 'payload'
 
 import {
@@ -9,6 +9,7 @@ import {
   UploadInput,
   useConfig,
   useDocumentInfo,
+  useDocumentTitle,
   useField,
   useForm,
   useLocale,
@@ -28,11 +29,10 @@ type MetaImageProps = {
 
 export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const {
-    field: { label, localized, relationTo, required },
+    field: { admin: { allowCreate } = {}, label, localized, relationTo, required },
     hasGenerateImageFn,
-    path,
     readOnly,
-  } = props || {}
+  } = props
 
   const {
     config: {
@@ -42,10 +42,14 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     getEntityConfig,
   } = useConfig()
 
-  const field: FieldType<string> = useField({ ...props, path } as Options)
   const {
-    customComponents: { Error, Label },
-  } = field
+    customComponents: { Error, Label } = {},
+    filterOptions,
+    path,
+    setValue,
+    showError,
+    value,
+  }: FieldType<string> = useField()
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
@@ -53,7 +57,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const { getData } = useForm()
   const docInfo = useDocumentInfo()
 
-  const { setValue, showError, value } = field
+  const { title } = useDocumentTitle()
 
   const regenerateImage = useCallback(async () => {
     if (!hasGenerateImageFn) {
@@ -72,9 +76,9 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
-        initialState: reduceToSerializableFields(docInfo.initialState),
+        initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
         locale: typeof locale === 'object' ? locale?.code : locale,
-        title: docInfo.title,
+        title,
       } satisfies Omit<
         Parameters<GenerateImage>[0],
         'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
@@ -86,7 +90,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
       method: 'POST',
     })
 
-    const generatedImage = await genImageResponse.text()
+    const { result: generatedImage } = await genImageResponse.json()
 
     setValue(generatedImage || '')
   }, [
@@ -101,10 +105,10 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     docInfo.hasSavePermission,
     docInfo.initialData,
     docInfo.initialState,
-    docInfo.title,
     getData,
     locale,
     setValue,
+    title,
   ])
 
   const hasImage = Boolean(value)
@@ -171,10 +175,11 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <UploadInput
+          allowCreate={allowCreate !== false}
           api={api}
           collection={collection}
           Error={Error}
-          filterOptions={field.filterOptions}
+          filterOptions={filterOptions}
           onChange={(incomingImage) => {
             if (incomingImage !== null) {
               if (typeof incomingImage === 'object') {
