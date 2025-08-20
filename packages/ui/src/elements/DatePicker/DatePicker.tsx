@@ -3,8 +3,10 @@ import type { DatePickerProps } from 'react-datepicker'
 
 import React from 'react'
 import ReactDatePickerDefaultImport, { registerLocale, setDefaultLocale } from 'react-datepicker'
-const ReactDatePicker = (ReactDatePickerDefaultImport.default ||
-  ReactDatePickerDefaultImport) as unknown as typeof ReactDatePickerDefaultImport.default
+const ReactDatePicker =
+  'default' in ReactDatePickerDefaultImport
+    ? ReactDatePickerDefaultImport.default
+    : ReactDatePickerDefaultImport
 
 import type { Props } from './types.js'
 
