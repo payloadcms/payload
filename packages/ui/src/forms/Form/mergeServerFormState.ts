@@ -33,7 +33,11 @@ type Args = {
  * Note: Local state is the source of truth, not the new server state that is getting merged in. This is critical for array row
  * manipulation specifically, where the user may have added, removed, or reordered rows while a request was pending and is now stale.
  *
+<<<<<<< HEAD
  * This function will also a few defaults, as well as clean up the server response in preparation for the client.
+=======
+ * This function applies some defaults, as well as cleans up the server response in preparation for the client.
+>>>>>>> main
  * e.g. it will set `valid` and `passesCondition` to true if undefined, and remove `addedByServer` from the response.
  */
 export const mergeServerFormState = ({
@@ -59,15 +63,15 @@ export const mergeServerFormState = ({
       acceptValues === true ||
       (typeof acceptValues === 'object' &&
         acceptValues !== null &&
-        // Must be explicitly false, allow `null` or `undefined` to mean true
+        // Note: Must be explicitly `false`, allow `null` or `undefined` to mean true
         acceptValues.overrideLocalChanges === false &&
         !currentState[path]?.isModified)
 
     let sanitizedIncomingField = incomingField
 
     if (!shouldAcceptValue) {
-      /*
-       * Note: do not delete properties off incomingField as this will mutate the original object
+      /**
+       * Note: do not delete properties off `incomingField` as this will mutate the original object
        * Instead, omit them from the destructured object by excluding specific keys
        * This will also ensure we don't set `undefined` into the result unnecessarily
        */

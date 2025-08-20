@@ -331,7 +331,7 @@ export function mongooseAdapter({
   }
 }
 
-export { compatabilityOptions } from './utilities/compatabilityOptions.js'
+export { compatibilityOptions } from './utilities/compatibilityOptions.js'
 
 /**
  * Attempt to find migrations directory.
