@@ -97,12 +97,12 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
+        await page.goto(tenantsURL.list)
         await selectTenant({
           page,
           tenant: 'Blue Dog',
         })
 
-        await page.goto(tenantsURL.list)
         await expect(
           page.locator('.collection-list .table .cell-name', {
             hasText: 'Blue Dog',
@@ -124,9 +124,9 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
+        await page.goto(menuItemsURL.list)
         await clearTenant({ page })
 
-        await page.goto(menuItemsURL.list)
         await expect(
           page.locator('.collection-list .table .cell-name', {
             hasText: 'Spicy Mac',
@@ -145,12 +145,12 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
+        await page.goto(menuItemsURL.list)
         await selectTenant({
           page,
           tenant: 'Blue Dog',
         })
 
-        await page.goto(menuItemsURL.list)
         await expect(
           page.locator('.collection-list .table .cell-name', {
             hasText: 'Spicy Mac',
@@ -169,9 +169,9 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
+        await page.goto(menuItemsURL.list)
         await clearTenant({ page })
 
-        await page.goto(menuItemsURL.list)
         await expect(
           page.locator('.collection-list .table .cell-name', {
             hasText: 'Free Pizza',
@@ -185,9 +185,9 @@ test.describe('Multi Tenant', () => {
           data: credentials.owner,
         })
 
+        await page.goto(menuItemsURL.list)
         await clearTenant({ page })
 
-        await page.goto(menuItemsURL.list)
         await expect(
           page.locator('.collection-list .table .cell-name', {
             hasText: 'Free Pizza',
@@ -204,9 +204,9 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
+        await page.goto(usersURL.list)
         await clearTenant({ page })
 
-        await page.goto(usersURL.list)
         await expect(
           page.locator('.collection-list .table .cell-email', {
             hasText: 'jane@blue-dog.com',
@@ -231,12 +231,12 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
+        await page.goto(usersURL.list)
         await selectTenant({
           page,
           tenant: 'Blue Dog',
         })
 
-        await page.goto(usersURL.list)
         await expect(
           page.locator('.collection-list .table .cell-email', {
             hasText: 'jane@blue-dog.com',
@@ -264,6 +264,7 @@ test.describe('Multi Tenant', () => {
         data: credentials.admin,
       })
 
+      await page.goto(menuItemsURL.list)
       await clearTenant({ page })
 
       await goToListDoc({
@@ -291,6 +292,7 @@ test.describe('Multi Tenant', () => {
         data: credentials.admin,
       })
 
+      await page.goto(menuItemsURL.list)
       await clearTenant({ page })
 
       await goToListDoc({
