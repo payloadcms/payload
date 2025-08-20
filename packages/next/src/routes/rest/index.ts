@@ -8,7 +8,7 @@ const handlerBuilder =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
   async (
     request: Request,
-    args: {
+    args?: {
       params: Promise<{ slug: string[] }>
     },
   ): Promise<Response> => {
