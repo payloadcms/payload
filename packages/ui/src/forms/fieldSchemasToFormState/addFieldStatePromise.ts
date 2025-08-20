@@ -37,8 +37,7 @@ import { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
 import { isRowCollapsed } from './isRowCollapsed.js'
 import { iterateFields } from './iterateFields.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type AddFieldStatePromiseArgs = {
   addErrorPathToParent: (fieldPath: string) => void

@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { statSync } from 'fs'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
@@ -134,6 +135,7 @@ describe('Uploads', () => {
     mediaWithoutDeleteAccessURL = new AdminUrlUtil(serverURL, mediaWithoutDeleteAccessSlug)
 
     const context = await browser.newContext()
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     page = await context.newPage()
 
     const { consoleErrors, collectErrors, stopCollectingErrors } = initPageConsoleErrorCatch(page, {
@@ -215,6 +217,22 @@ describe('Uploads', () => {
     await page.locator('.doc-drawer__header-close').click()
 
     await expect(filename).toContainText('test-image.png')
+  })
+
+  test('should copy the file url field to the clipboard', async () => {
+    const mediaDoc = (
+      await payload.find({
+        collection: mediaSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0]
+
+    await page.goto(mediaURL.edit(mediaDoc!.id))
+    await page.locator('.copy-to-clipboard').click()
+    const clipbaordContent = await page.evaluate(() => navigator.clipboard.readText())
+    expect(clipbaordContent).toBe(mediaDoc?.url)
   })
 
   test('should create file upload', async () => {
@@ -1601,6 +1619,24 @@ describe('Uploads', () => {
     await expect(filename).toHaveValue('image-as-pdf.pdf')
 
     await saveDocAndAssert(page, '#action-save', 'error')
+  })
+
+  test('should not rewrite file when updating collection fields', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.png'))
+    await saveDocAndAssert(page)
+    const imageID = page.url().split('/').pop()!
+    const { doc } = await client.findByID({ slug: mediaSlug, id: imageID, auth: true })
+    const filename = doc.filename as string
+    const filePath = path.resolve(dirname, 'media', filename)
+    const before = statSync(filePath)
+
+    const altField = page.locator('#field-alt')
+    await altField.fill('test alt')
+
+    await saveDocAndAssert(page)
+    const after = statSync(filePath)
+    expect(after.mtime.getTime()).toEqual(before.mtime.getTime())
   })
 
   test('should be able to replace the file even if the user doesnt have delete access', async () => {

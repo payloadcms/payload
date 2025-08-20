@@ -384,6 +384,7 @@ export interface CustomField {
   descriptionAsComponent?: string | null;
   customSelectField?: string | null;
   customSelectInput?: string | null;
+  customMultiSelectField?: string[] | null;
   relationshipFieldWithBeforeAfterInputs?: (string | null) | Post;
   arrayFieldWithBeforeAfterInputs?:
     | {
@@ -927,6 +928,7 @@ export interface CustomFieldsSelect<T extends boolean = true> {
   descriptionAsComponent?: T;
   customSelectField?: T;
   customSelectInput?: T;
+  customMultiSelectField?: T;
   relationshipFieldWithBeforeAfterInputs?: T;
   arrayFieldWithBeforeAfterInputs?:
     | T

@@ -23,8 +23,7 @@ import { TaskError } from '../../../errors/index.js'
 import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { getTaskHandlerFromConfig } from './importHandlerPath.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type TaskParent = {
   taskID: string

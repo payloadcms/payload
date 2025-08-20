@@ -1,7 +1,6 @@
 import ObjectIdImport from 'bson-objectid'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export const isValidID = (
   value: number | string,
