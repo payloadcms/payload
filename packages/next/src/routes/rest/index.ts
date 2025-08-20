@@ -9,7 +9,7 @@ const handlerBuilder =
   async (
     request: Request,
     args?: {
-      params: Promise<{ slug: string[] }>
+      params: Promise<{ slug?: string[] }>
     },
   ): Promise<Response> => {
     const awaitedConfig = await config
@@ -31,11 +31,12 @@ const handlerBuilder =
     initedOGEndpoint = true
 
     const awaitedParams = args ? await args.params : undefined
+    const slugArr = awaitedParams?.slug ?? []
 
     const response = await handleEndpoints({
       config,
-      path: awaitedParams
-        ? `${awaitedConfig.routes.api}/${awaitedParams.slug.join('/')}`
+      path: slugArr.length
+        ? `${awaitedConfig.routes.api}/${slugArr.join('/')}`
         : undefined,
       request,
     })
