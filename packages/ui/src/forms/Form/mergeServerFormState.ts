@@ -30,7 +30,10 @@ type Args = {
  * We typically do not want to merge properties that rely on user input, however, such as values, unless explicitly requested.
  * Doing this would cause the client to lose any local changes to those fields.
  *
- * This function will also a few defaults, as well as clean up the server response in preparation for the client.
+ * Note: Local state is the source of truth, not the new server state that is getting merged in. This is critical for array row
+ * manipulation specifically, where the user may have added, removed, or reordered rows while a request was pending and is now stale.
+ *
+ * This function applies some defaults, as well as cleans up the server response in preparation for the client.
  * e.g. it will set `valid` and `passesCondition` to true if undefined, and remove `addedByServer` from the response.
  */
 export const mergeServerFormState = ({
@@ -51,22 +54,30 @@ export const mergeServerFormState = ({
      *   a. accept all values when explicitly requested, e.g. on submit
      *   b. only accept values for unmodified fields, e.g. on autosave
      */
-    if (
-      !incomingField.addedByServer &&
-      (!acceptValues ||
-        // See `acceptValues` type definition for more details
-        (typeof acceptValues === 'object' &&
-          acceptValues !== null &&
-          acceptValues?.overrideLocalChanges === false &&
-          currentState[path].isModified))
-    ) {
-      delete incomingField.value
-      delete incomingField.initialValue
+    const shouldAcceptValue =
+      incomingField.addedByServer ||
+      acceptValues === true ||
+      (typeof acceptValues === 'object' &&
+        acceptValues !== null &&
+        // Note: Must be explicitly `false`, allow `null` or `undefined` to mean true
+        acceptValues.overrideLocalChanges === false &&
+        !currentState[path]?.isModified)
+
+    let sanitizedIncomingField = incomingField
+
+    if (!shouldAcceptValue) {
+      /**
+       * Note: do not delete properties off `incomingField` as this will mutate the original object
+       * Instead, omit them from the destructured object by excluding specific keys
+       * This will also ensure we don't set `undefined` into the result unnecessarily
+       */
+      const { initialValue, value, ...rest } = incomingField
+      sanitizedIncomingField = rest
     }
 
     newState[path] = {
       ...currentState[path],
-      ...incomingField,
+      ...sanitizedIncomingField,
     }
 
     if (
