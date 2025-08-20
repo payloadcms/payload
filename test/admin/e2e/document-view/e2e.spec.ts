@@ -649,6 +649,26 @@ describe('Document View', () => {
         await page.locator('#field-customSelectField .rs__control').click()
         await expect(page.locator('#field-customSelectField .rs__option')).toHaveCount(2)
       })
+
+      test('should render custom multi select options', async () => {
+        await page.goto(customFieldsURL.create)
+        await page.locator('#field-customMultiSelectField .rs__control').click()
+        await expect(page.locator('#field-customMultiSelectField .rs__option')).toHaveCount(2)
+      })
+
+      test('should allow selecting multiple values in custom multi select', async () => {
+        await page.goto(customFieldsURL.create)
+
+        const control = page.locator('#field-customMultiSelectField .rs__control')
+
+        await control.click()
+        await page.locator('.rs__option', { hasText: 'Label 1' }).click()
+        await expect(page.locator('#field-customMultiSelectField .rs__multi-value')).toHaveCount(1)
+
+        await control.click()
+        await page.locator('.rs__option', { hasText: 'Label 2' }).click()
+        await expect(page.locator('#field-customMultiSelectField .rs__multi-value')).toHaveCount(2)
+      })
     })
   })
 
