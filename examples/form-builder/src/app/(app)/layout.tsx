@@ -10,7 +10,7 @@ export const metadata = {
   title: 'Payload Auth + Next.js App Router Example',
 }
 
-export default function RootLayout(props: { children: React.ReactNode }) {
+export default function RootLayout(props: LayoutProps<'/'>) {
   const { children } = props
 
   return (

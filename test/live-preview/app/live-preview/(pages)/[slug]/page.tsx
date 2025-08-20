@@ -8,10 +8,7 @@ import { getDoc } from '../../_api/getDoc.js'
 import { getDocs } from '../../_api/getDocs.js'
 import { PageClient } from './page.client.js'
 
-type Args = {
-  params: Promise<{ slug?: string }>
-}
-export default async function Page({ params: paramsPromise }: Args) {
+export default async function Page({ params: paramsPromise }: PageProps<'/live-preview/[slug]'>) {
   const { slug = 'home' } = await paramsPromise
   let page: null | Page = null
 

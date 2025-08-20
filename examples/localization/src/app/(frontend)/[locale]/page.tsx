@@ -14,14 +14,7 @@ import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import PageClient from './[slug]/page.client'
 
-type Args = {
-  params: Promise<{
-    slug?: string
-    locale: TypedLocale
-  }>
-}
-
-export default async function Page({ params: paramsPromise }: Args) {
+export default async function Page({ params: paramsPromise }: PageProps<'/[locale]'>) {
   const { slug = 'home', locale = 'en' } = await paramsPromise
   const url = '/' + slug
 
@@ -54,7 +47,7 @@ export default async function Page({ params: paramsPromise }: Args) {
   )
 }
 
-export async function generateMetadata({ params }: Args): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<'/[locale]'>): Promise<Metadata> {
   const { locale = 'en', slug = 'home' } = await params
   const page = await queryPage({
     locale,

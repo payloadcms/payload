@@ -11,7 +11,7 @@ import PageClient from './page.client'
 export const dynamic = 'force-static'
 export const revalidate = 600
 
-export default async function Page() {
+export default async function Page(props: PageProps<'/posts/page/[pageNumber]'>) {
   const payload = await getPayload({ config: configPromise })
 
   const posts = await payload.find({

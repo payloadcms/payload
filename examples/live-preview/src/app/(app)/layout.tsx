@@ -9,7 +9,7 @@ export const metadata = {
   title: 'Create Next App',
 }
 
-export default function RootLayout(props: { children: React.ReactNode }) {
+export default function RootLayout(props: LayoutProps<'/'>) {
   const { children } = props
 
   return (

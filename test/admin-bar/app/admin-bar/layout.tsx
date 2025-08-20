@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: 'Payload Admin Bar',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en">
       <body>
@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           adminPath="/admin"
           apiPath="/api"
           cmsURL="http://localhost:3000"
-          collection="pages"
+          collectionSlug="pages"
           devMode
           id="1"
         />

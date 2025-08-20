@@ -7,18 +7,11 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
-import { TypedLocale } from 'payload'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 export const revalidate = 600
 
-type Args = {
-  params: Promise<{
-    locale: TypedLocale
-  }>
-}
-
-export default async function Page({ params }: Args) {
+export default async function Page({ params }: PageProps<'/[locale]/posts'>) {
   const { locale = 'en' } = await params
   const t = await getTranslations()
   const payload = await getPayload({ config: configPromise })

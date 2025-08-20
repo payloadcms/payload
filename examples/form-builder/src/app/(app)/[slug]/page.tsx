@@ -7,14 +7,8 @@ import type { Page as PageType } from '../../../payload-types'
 
 import Blocks from '../../../components/Blocks'
 
-interface PageParams {
-  params: Promise<{
-    slug?: string
-  }>
-}
-
 // eslint-disable-next-line no-restricted-exports
-export default async function Page({ params: paramsPromise }: PageParams) {
+export default async function Page({ params: paramsPromise }: PageProps<'/[slug]'>) {
   const { slug = 'home' } = await paramsPromise
   const payload = await getPayload({ config })
 

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 }
 
 // eslint-disable-next-line no-restricted-exports
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: LayoutProps<'/'>) {
   const { isEnabled } = await draftMode()
 
   return (

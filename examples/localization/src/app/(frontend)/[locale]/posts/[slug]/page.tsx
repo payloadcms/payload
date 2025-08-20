@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { RelatedPosts } from '@/blocks/RelatedPosts/Component'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
-import { getPayload } from 'payload'
+import { getPayload, TypedLocale } from 'payload'
 import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
 import RichText from '@/components/RichText'
@@ -13,7 +13,6 @@ import type { Post } from '@/payload-types'
 import { PostHero } from '@/heros/PostHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
-import { TypedLocale } from 'payload'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -31,14 +30,7 @@ export async function generateStaticParams() {
   return params
 }
 
-type Args = {
-  params: Promise<{
-    slug?: string
-    locale?: TypedLocale
-  }>
-}
-
-export default async function Post({ params: paramsPromise }: Args) {
+export default async function Post({ params: paramsPromise }: PageProps<'/[locale]/posts/[slug]'>) {
   const { slug = '', locale = 'en' } = await paramsPromise
   const url = '/posts/' + slug
   const post = await queryPost({ slug, locale })
@@ -74,7 +66,9 @@ export default async function Post({ params: paramsPromise }: Args) {
   )
 }
 
-export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
+export async function generateMetadata({
+  params: paramsPromise,
+}: PageProps<'/[locale]/posts/[slug]'>): Promise<Metadata> {
   const { slug = '', locale = 'en' } = await paramsPromise
   const post = await queryPost({ slug, locale })
 

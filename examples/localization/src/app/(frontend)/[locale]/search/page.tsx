@@ -8,20 +8,11 @@ import { Post } from '@/payload-types'
 import { Search } from '@/search/Component'
 import PageClient from './page.client'
 import { getTranslations } from 'next-intl/server'
-import { TypedLocale } from 'payload'
 
-type Args = {
-  searchParams: Promise<{
-    q: string
-  }>
-  params: Promise<{
-    locale: TypedLocale
-  }>
-}
 export default async function Page({
   searchParams: searchParamsPromise,
   params: paramsPromise,
-}: Args) {
+}: PageProps<'/[locale]/search'>) {
   const { q: query } = await searchParamsPromise
   const { locale } = await paramsPromise
   const payload = await getPayload({ config: configPromise })

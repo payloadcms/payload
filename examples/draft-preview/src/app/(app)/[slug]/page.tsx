@@ -32,14 +32,8 @@ export async function generateStaticParams() {
   return params || []
 }
 
-type Args = {
-  params: Promise<{
-    slug?: string
-  }>
-}
-
 // eslint-disable-next-line no-restricted-exports
-export default async function Page({ params: paramsPromise }: Args) {
+export default async function Page({ params: paramsPromise }: PageProps<'/[slug]'>) {
   const { slug = 'home' } = await paramsPromise
 
   let page: null | PageType

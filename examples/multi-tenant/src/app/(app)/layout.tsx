@@ -10,7 +10,7 @@ export const metadata = {
 }
 
 // eslint-disable-next-line no-restricted-exports
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html className={baseClass} lang="en">
       <body>{children}</body>

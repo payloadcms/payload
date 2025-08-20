@@ -1,4 +1,4 @@
-export default async ({ params: paramsPromise }: { params: Promise<{ slug: string[] }> }) => {
+export default async (props: PageProps<'/'>) => {
   return (
     <div>
       <h1>Multi-Tenant Example</h1>

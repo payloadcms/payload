@@ -21,14 +21,7 @@ import { routing } from '@/i18n/routing'
 import { notFound } from 'next/navigation'
 import localization from '@/i18n/localization'
 
-type Args = {
-  children: React.ReactNode
-  params: Promise<{
-    locale: TypedLocale
-  }>
-}
-
-export default async function RootLayout({ children, params }: Args) {
+export default async function RootLayout({ children, params }: LayoutProps<'/[locale]'>) {
   const { locale } = await params
   const currentLocale = localization.locales.find((loc) => loc.code === locale)
   const direction = currentLocale?.rtl ? 'rtl' : 'ltr'

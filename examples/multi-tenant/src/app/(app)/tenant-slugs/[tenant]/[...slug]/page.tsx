@@ -11,9 +11,7 @@ import { RenderPage } from '../../../../components/RenderPage'
 // eslint-disable-next-line no-restricted-exports
 export default async function Page({
   params: paramsPromise,
-}: {
-  params: Promise<{ slug?: string[]; tenant: string }>
-}) {
+}: PageProps<'/tenant-slugs/[tenant]/[...slug]'>) {
   const params = await paramsPromise
 
   const headers = await getHeaders()

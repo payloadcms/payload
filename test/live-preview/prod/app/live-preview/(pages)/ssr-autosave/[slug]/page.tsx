@@ -11,13 +11,9 @@ import { Blocks } from '../../../_components/Blocks/index.js'
 import { Hero } from '../../../_components/Hero/index.js'
 import { RefreshRouteOnSave } from './RefreshRouteOnSave.js'
 
-type Args = {
-  params: Promise<{
-    slug?: string
-  }>
-}
-
-export default async function SSRAutosavePage({ params: paramsPromise }: Args) {
+export default async function SSRAutosavePage({
+  params: paramsPromise,
+}: PageProps<'/live-preview/ssr-autosave/[slug]'>) {
   const { slug = '' } = await paramsPromise
   const data = await getDoc<Page>({
     slug,

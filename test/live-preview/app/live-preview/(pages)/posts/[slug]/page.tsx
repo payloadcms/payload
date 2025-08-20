@@ -8,13 +8,9 @@ import { getDoc } from '../../../_api/getDoc.js'
 import { getDocs } from '../../../_api/getDocs.js'
 import { PostClient } from './page.client.js'
 
-type Args = {
-  params: Promise<{
-    slug?: string
-  }>
-}
-
-export default async function Post({ params: paramsPromise }: Args) {
+export default async function Post({
+  params: paramsPromise,
+}: PageProps<'/live-preview/posts/[slug]'>) {
   const { slug = '' } = await paramsPromise
   let post: null | Post = null
 

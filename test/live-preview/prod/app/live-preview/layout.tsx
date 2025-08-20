@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: 'Payload Live Preview',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: LayoutProps<'/live-preview'>) {
   return (
     <html lang="en">
       <body>

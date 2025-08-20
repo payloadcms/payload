@@ -10,14 +10,8 @@ import RichText from '../_components/RichText'
 import classes from './index.module.scss'
 import { RefreshRouteOnSave } from './RefreshRouteOnSave'
 
-interface PageParams {
-  params: Promise<{
-    slug?: string
-  }>
-}
-
 // eslint-disable-next-line no-restricted-exports
-export default async function Page({ params: paramsPromise }: PageParams) {
+export default async function Page({ params: paramsPromise }: PageProps<'/[slug]'>) {
   const { slug = 'home' } = await paramsPromise
   const payload = await getPayload({ config })
 
