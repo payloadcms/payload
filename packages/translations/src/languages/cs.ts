@@ -599,7 +599,6 @@ export const csTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Žádné verze nenalezeny',
     versionCount_one: '{{count}} verze nalezena',
     versionCount_other: '{{count}} verzí nalezeno',
-    versionCreatedOn: '{{version}} vytvořena:',
     versionID: 'ID verze',
     versions: 'Verze',
     viewingVersion: 'Zobrazuji verzi pro {{entityLabel}} {{documentTitle}}',

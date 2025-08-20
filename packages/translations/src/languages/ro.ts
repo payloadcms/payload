@@ -611,7 +611,6 @@ export const roTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Nici o versiune găsită',
     versionCount_one: '{{count}} versiune găsită',
     versionCount_other: '{{count}} versiuni găsite',
-    versionCreatedOn: '{{version}} creată pe:',
     versionID: 'ID-ul versiunii',
     versions: 'Versiuni',
     viewingVersion: 'Vizualizarea versiunii pentru {{entityLabel}} {{documentTitle}}',

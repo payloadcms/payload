@@ -600,7 +600,6 @@ export const plTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Nie znaleziono wersji',
     versionCount_one: 'Znaleziono {{count}} wersję',
     versionCount_other: 'Znaleziono {{count}} wersji',
-    versionCreatedOn: 'Wersja {{version}} utworzona:',
     versionID: 'ID wersji',
     versions: 'Wersje',
     viewingVersion: 'Przeglądanie wersji dla {{entityLabel}} {{documentTitle}}',
