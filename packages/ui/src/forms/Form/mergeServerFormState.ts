@@ -30,6 +30,9 @@ type Args = {
  * We typically do not want to merge properties that rely on user input, however, such as values, unless explicitly requested.
  * Doing this would cause the client to lose any local changes to those fields.
  *
+ * Note: Local state is the source of truth, not the new server state that is getting merged in. This is critical for array row
+ * manipulation specifically, where the user may have added, removed, or reordered rows while a request was pending and is now stale.
+ *
  * This function will also a few defaults, as well as clean up the server response in preparation for the client.
  * e.g. it will set `valid` and `passesCondition` to true if undefined, and remove `addedByServer` from the response.
  */
@@ -56,8 +59,9 @@ export const mergeServerFormState = ({
       acceptValues === true ||
       (typeof acceptValues === 'object' &&
         acceptValues !== null &&
-        acceptValues.overrideLocalChanges !== false &&
-        !currentState[path].isModified)
+        // Must be explicitly false, allow null or undefined to mean true
+        acceptValues.overrideLocalChanges === false &&
+        !currentState[path]?.isModified)
 
     newState[path] = {
       ...currentState[path],
