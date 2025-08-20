@@ -424,6 +424,12 @@ export const multiTenantPlugin =
      */
     incomingConfig.admin.components.beforeNavLinks.push({
       clientProps: {
+        enabledSlugs: [
+          ...collectionSlugs,
+          ...globalCollectionSlugs,
+          adminUsersCollection.slug,
+          tenantCollection.slug,
+        ],
         label: pluginConfig.tenantSelectorLabel || undefined,
       },
       path: '@payloadcms/plugin-multi-tenant/client#TenantSelector',

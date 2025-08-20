@@ -41,12 +41,12 @@ export const TenantField = (args: Props) => {
     }
   }, [args.unique, options, selectedTenantID, setTenant, value, setEntityType])
 
-  if (options.length > 1 && !args.unique) {
+  if (options.length > 1) {
     return (
       <>
         <div className={baseClass}>
           <div className={`${baseClass}__wrapper`}>
-            <RelationshipField {...args} />
+            <RelationshipField {...args} readOnly={args.unique} />
           </div>
         </div>
         <SyncFormModified />
