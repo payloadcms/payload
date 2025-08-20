@@ -1448,6 +1448,18 @@ describe('Fields', () => {
 
       expect(updatedDoc.localized).toEqual(undefined)
     })
+
+    it('should not error with camel case name point field', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+
+      const res = await payload.create({
+        collection: 'point-fields',
+        data: { point, camelCasePoint: [7, -7] },
+      })
+      expect(res.camelCasePoint).toEqual([7, -7])
+    })
   })
 
   describe('checkbox', () => {
