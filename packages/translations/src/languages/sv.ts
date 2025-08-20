@@ -602,7 +602,6 @@ export const svTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Inga versioner hittades',
     versionCount_one: '{{count}} version hittades',
     versionCount_other: '{{count}} versioner hittades',
-    versionCreatedOn: '{{version}} skapad den:',
     versionID: 'Versions-ID',
     versions: 'Versioner',
     viewingVersion: 'Visar version för {{entityLabel}} {{documentTitle}}',

@@ -604,7 +604,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Версий не найдено',
     versionCount_one: '{{count}} версия найдена',
     versionCount_other: 'Найдено {{count}} версий',
-    versionCreatedOn: '{{version}} создана:',
     versionID: 'ID версии',
     versions: 'Версии',
     viewingVersion: 'Просмотр версии для {{entityLabel}} {{documentTitle}}',

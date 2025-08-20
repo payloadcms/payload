@@ -589,7 +589,6 @@ export const thTranslations: DefaultTranslationsObject = {
     versionCount_none: 'ไม่พบเวอร์ชันอื่น',
     versionCount_one: 'พบ {{count}} เวอร์ชัน',
     versionCount_other: 'พบ {{count}} เวอร์ชัน',
-    versionCreatedOn: '{{version}} ถูกสร้างเมื่อ:',
     versionID: 'ID ของเวอร์ชัน',
     versions: 'เวอร์ชัน',
     viewingVersion: 'กำลังดูเวอร์ชันของ {{entityLabel}} {{documentTitle}}',
