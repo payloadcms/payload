@@ -43,10 +43,12 @@ const combineLabel = ({
 }
 
 export const reduceFields = ({
+  disabledFields = [],
   fields,
   labelPrefix = null,
   path = '',
 }: {
+  disabledFields?: string[]
   fields: ClientField[]
   labelPrefix?: React.ReactNode
   path?: string
@@ -66,6 +68,7 @@ export const reduceFields = ({
         return [
           ...fieldsToUse,
           ...reduceFields({
+            disabledFields,
             fields: field.fields,
             labelPrefix: combineLabel({ field, prefix: labelPrefix }),
             path: createNestedClientFieldPath(path, field),
@@ -80,12 +83,24 @@ export const reduceFields = ({
             (tabFields, tab) => {
               if ('fields' in tab) {
                 const isNamedTab = 'name' in tab && tab.name
+
+                const newPath = isNamedTab ? `${path}${path ? '.' : ''}${tab.name}` : path
+
                 return [
                   ...tabFields,
                   ...reduceFields({
+                    disabledFields,
                     fields: tab.fields,
-                    labelPrefix,
-                    path: isNamedTab ? createNestedClientFieldPath(path, field) : path,
+                    labelPrefix: isNamedTab
+                      ? combineLabel({
+                          field: {
+                            name: tab.name,
+                            label: tab.label ?? tab.name,
+                          } as any,
+                          prefix: labelPrefix,
+                        })
+                      : labelPrefix,
+                    path: newPath,
                   }),
                 ]
               }
@@ -97,6 +112,15 @@ export const reduceFields = ({
       }
 
       const val = createNestedClientFieldPath(path, field)
+
+      // If the field is disabled, skip it
+      if (
+        disabledFields.some(
+          (disabledField) => val === disabledField || val.startsWith(`${disabledField}.`),
+        )
+      ) {
+        return fieldsToUse
+      }
 
       const formattedField = {
         id: val,

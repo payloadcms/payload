@@ -9,6 +9,8 @@ export class AdminUrlUtil {
 
   admin: string
 
+  byFolder: string
+
   create: string
 
   entitySlug: string
@@ -22,6 +24,8 @@ export class AdminUrlUtil {
   routes: Config['routes']
 
   serverURL: string
+
+  trash: string
 
   constructor(serverURL: string, slug: string, routes?: Config['routes']) {
     this.routes = {
@@ -67,6 +71,18 @@ export class AdminUrlUtil {
       path: `/collections/${this.entitySlug}/create`,
       serverURL: this.serverURL,
     })
+
+    this.byFolder = formatAdminURL({
+      adminRoute: this.routes.admin,
+      path: `/collections/${this.entitySlug}/payload-folders`,
+      serverURL: this.serverURL,
+    })
+
+    this.trash = formatAdminURL({
+      adminRoute: this.routes.admin,
+      path: `/collections/${this.entitySlug}/trash`,
+      serverURL: this.serverURL,
+    })
   }
 
   collection(slug: string): string {
@@ -87,5 +103,9 @@ export class AdminUrlUtil {
       path: `/globals/${slug}`,
       serverURL: this.serverURL,
     })
+  }
+
+  trashEdit(id: number | string): string {
+    return `${this.trash}/${id}`
   }
 }

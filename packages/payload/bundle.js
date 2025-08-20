@@ -5,13 +5,16 @@ import { fileURLToPath } from 'url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const directoryArg = process.argv[2] || 'dist'
+
+
 async function build() {
   const resultIndex = await esbuild.build({
-    entryPoints: ['src/exports/index.ts'],
+    entryPoints: ['dist/index.js'],
     bundle: true,
     platform: 'node',
     format: 'esm',
-    outfile: 'dist/exports/index.js',
+    outfile: `${directoryArg}/index.js`,
     splitting: false,
     external: [
       'lodash',
@@ -33,11 +36,11 @@ async function build() {
   console.log('payload server bundled successfully')
 
   const resultShared = await esbuild.build({
-    entryPoints: ['src/exports/shared.ts'],
+    entryPoints: ['dist/exports/shared.js'],
     bundle: true,
     platform: 'node',
     format: 'esm',
-    outfile: 'dist/exports/shared.js',
+    outfile: `${directoryArg}/exports/shared.js`,
     splitting: false,
     external: [
       'lodash',

@@ -1,4 +1,4 @@
-// @ts-strict-ignore
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SanitizedFieldPermissions } from '../auth/types.js'
 import type { ClientField, Field } from '../fields/config/types.js'
 import type { Operation } from '../types/index.js'
@@ -31,26 +31,28 @@ export const getFieldPermissions = ({
 } => ({
   operation:
     permissions === true ||
-    permissions?.[operation] === true ||
-    permissions?.[parentName] === true ||
+    permissions?.[operation as keyof typeof permissions] === true ||
+    permissions?.[parentName as keyof typeof permissions] === true ||
     ('name' in field &&
       typeof permissions === 'object' &&
-      permissions?.[field.name] &&
-      (permissions[field.name] === true ||
-        (operation in permissions[field.name] && permissions[field.name][operation]))),
+      permissions?.[field.name as keyof typeof permissions] &&
+      (permissions[field.name as keyof typeof permissions] === true ||
+        (operation in (permissions as any)[field.name] &&
+          (permissions as any)[field.name][operation]))),
+
   permissions:
     permissions === undefined || permissions === null || permissions === true
       ? true
       : 'name' in field
-        ? permissions?.[field.name]
+        ? (permissions as any)[field.name]
         : permissions,
   read:
     permissions === true ||
     permissions?.read === true ||
-    permissions?.[parentName] === true ||
+    permissions?.[parentName as keyof typeof permissions] === true ||
     ('name' in field &&
       typeof permissions === 'object' &&
-      permissions?.[field.name] &&
-      (permissions[field.name] === true ||
-        ('read' in permissions[field.name] && permissions[field.name].read))),
+      permissions?.[field.name as keyof typeof permissions] &&
+      ((permissions as any)[field.name] === true ||
+        ('read' in (permissions as any)[field.name] && (permissions as any)[field.name].read))),
 })

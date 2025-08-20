@@ -51,7 +51,7 @@ For more granular control, pass a configuration object instead. Payload exposes 
 | Property       | Description                                                                                                                                                                         |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Component` \* | Pass in the component path that should be rendered when a user navigates to this route.                                                                                             |
-| `path` \*      | Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands.                                                              |
+| `path` \*      | Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands. Must begin with a forward slash (`/`).                       |
 | `exact`        | Boolean. When true, will only match if the path matches the `usePathname()` exactly.                                                                                                |
 | `strict`       | When true, a path that has a trailing slash will only match a `location.pathname` with a trailing slash. This has no effect when there are additional URL segments in the pathname. |
 | `sensitive`    | When true, will match if the path is case sensitive.                                                                                                                                |
@@ -158,7 +158,7 @@ export function MyCustomView(props: AdminViewServerProps) {
 
 <Banner type="success">
   **Tip:** For consistent layout and navigation, you may want to wrap your
-  Custom View with one of the built-in [Template](./overview#templates).
+  Custom View with one of the built-in [Templates](./overview#templates).
 </Banner>
 
 ### View Templates

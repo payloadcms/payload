@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import crypto from 'crypto'
 import { status as httpStatus } from 'http-status'
 import { URL } from 'url'
@@ -13,6 +12,7 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { APIError } from '../../errors/index.js'
 import { Forbidden } from '../../index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -124,6 +124,13 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       }
     }
 
+    // Exclude trashed users unless `trash: true`
+    whereConstraint = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash: false,
+      where: whereConstraint,
+    })
+
     let user = await payload.db.findOne<UserDoc>({
       collection: collectionConfig.slug,
       req,
@@ -138,20 +145,22 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       return null
     }
 
-    user.resetPasswordToken = token
-    user.resetPasswordExpiration = new Date(
+    const resetPasswordExpiration = new Date(
       Date.now() + (collectionConfig.auth?.forgotPassword?.expiration ?? expiration ?? 3600000),
     ).toISOString()
 
     user = await payload.update({
       id: user.id,
       collection: collectionConfig.slug,
-      data: user,
+      data: {
+        resetPasswordExpiration,
+        resetPasswordToken: token,
+      },
       req,
     })
 
     if (!disableEmail && user.email) {
-      const protocol = new URL(req.url).protocol // includes the final :
+      const protocol = new URL(req.url!).protocol // includes the final :
       const serverURL =
         config.serverURL !== null && config.serverURL !== ''
           ? config.serverURL

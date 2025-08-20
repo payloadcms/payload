@@ -135,7 +135,7 @@ powerful Admin UI.
 
 | Option                 | Description                                                                                                                                                                                                                            |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** \*          | To be used as the property name when retrieved from the database. [More](./overview#field-names)                                                                                                                                       |
+| **`name`** \*          | To be used as the property name when retrieved from the database. [More details](./overview#field-names).                                                                                                                              |
 | **`collection`** \*    | The `slug`s having the relationship field or an array of collection slugs.                                                                                                                                                             |
 | **`on`** \*            | The name of the relationship or upload field that relates to the collection document. Use dot notation for nested paths, like 'myGroup.relationName'. If `collection` is an array, this field must exist for all specified collections |
 | **`orderable`**        | If true, enables custom ordering and joined documents can be reordered via drag and drop. Uses [fractional indexing](https://observablehq.com/@dgreensp/implementing-fractional-indexing) for efficient reordering.                    |
@@ -296,11 +296,16 @@ query {
         sort: "createdAt"
         limit: 5
         where: { author: { equals: "66e3431a3f23e684075aaeb9" } }
+        """
+        Optionally pass count: true if you want to retrieve totalDocs
+        """
+        count: true -- s
       ) {
         docs {
           title
         }
         hasNextPage
+        totalDocs
       }
     }
   }

@@ -14,7 +14,7 @@ import type { RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir -- need this to reference already existing bundle. Otherwise, bundle size increases., payload/no-imports-from-exports-dir
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 import { FieldDescription, WatchCondition } from '../../exports/client/index.js'
 
 const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Filter'> = [
@@ -42,6 +42,7 @@ export const renderField: RenderFieldMethod = ({
   path,
   permissions,
   preferences,
+  readOnly: readOnlyFromProps,
   renderAllFields,
   req,
   schemaPath,
@@ -66,7 +67,12 @@ export const renderField: RenderFieldMethod = ({
     field: clientField,
     path,
     permissions,
-    readOnly: typeof permissions === 'boolean' ? !permissions : !permissions?.[operation],
+    readOnly:
+      readOnlyFromProps === true
+        ? true
+        : typeof permissions === 'boolean'
+          ? !permissions
+          : !permissions?.[operation],
     schemaPath,
   }
 
@@ -100,6 +106,7 @@ export const renderField: RenderFieldMethod = ({
     req,
     siblingData,
     user: req.user,
+    value: 'name' in fieldConfig && data?.[fieldConfig.name],
   }
 
   switch (fieldConfig.type) {

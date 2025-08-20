@@ -1,26 +1,37 @@
-import type { PayloadHandler } from 'payload'
+import type { PayloadRequest } from 'payload'
 
 import { APIError } from 'payload'
 
 import { createExport } from './createExport.js'
 
-export const download: PayloadHandler = async (req) => {
-  let body
-  if (typeof req?.json === 'function') {
-    body = await req.json()
+export const download = async (req: PayloadRequest, debug = false) => {
+  try {
+    let body
+    if (typeof req?.json === 'function') {
+      body = await req.json()
+    }
+
+    if (!body || !body.data) {
+      throw new APIError('Request data is required.')
+    }
+
+    const { collectionSlug } = body.data || {}
+
+    req.payload.logger.info(`Download request received ${collectionSlug}`)
+    body.data.user = req.user
+
+    const res = await createExport({
+      download: true,
+      input: { ...body.data, debug },
+      req,
+    })
+
+    return res as Response
+  } catch (err) {
+    // Return JSON for front-end toast
+    return new Response(
+      JSON.stringify({ errors: [{ message: (err as Error).message || 'Something went wrong' }] }),
+      { headers: { 'Content-Type': 'application/json' }, status: 400 },
+    )
   }
-
-  if (!body || !body.data) {
-    throw new APIError('Request data is required.')
-  }
-
-  req.payload.logger.info(`Download request received ${body.data.collectionSlug}`)
-
-  body.data.user = req.user
-
-  return createExport({
-    download: true,
-    input: body.data,
-    req,
-  }) as Promise<Response>
 }

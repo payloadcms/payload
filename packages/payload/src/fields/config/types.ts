@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { EditorProps } from '@monaco-editor/react'
@@ -129,6 +128,7 @@ import type {
   CollectionSlug,
   DateFieldValidation,
   EmailFieldValidation,
+  FieldCustom,
   JSONFieldValidation,
   PointFieldValidation,
   RadioFieldValidation,
@@ -142,6 +142,7 @@ import type {
   JsonObject,
   Operation,
   PayloadRequest,
+  PickPreserveOptional,
   Where,
 } from '../../types/index.js'
 import type {
@@ -406,7 +407,6 @@ export type LabelsClient = {
 
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   /**
-  /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
   blockData: Partial<TData>
@@ -415,6 +415,10 @@ export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   event?: 'onChange' | 'submit'
   id?: number | string
   operation?: Operation
+  /**
+   * The `overrideAccess` flag that was attached to the request. This is used to bypass access control checks for fields.
+   */
+  overrideAccess?: boolean
   /**
    * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
    */
@@ -480,7 +484,7 @@ export interface FieldBase {
   }
   admin?: Admin
   /** Extension point to add your custom data. Server only. */
-  custom?: Record<string, any>
+  custom?: FieldCustom
   defaultValue?: DefaultValue
   hidden?: boolean
   hooks?: {
@@ -586,6 +590,7 @@ export type NumberField = {
   Omit<FieldBase, 'validate'>
 
 export type NumberFieldClient = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<NumberField['admin'], 'autoComplete' | 'placeholder' | 'step'>
 } & FieldBaseClient &
   Pick<NumberField, 'hasMany' | 'max' | 'maxRows' | 'min' | 'minRows' | 'type'>
@@ -628,7 +633,8 @@ export type TextField = {
   Omit<FieldBase, 'validate'>
 
 export type TextFieldClient = {
-  admin?: AdminClient & Pick<TextField['admin'], 'autoComplete' | 'placeholder' | 'rtl'>
+  admin?: AdminClient &
+    PickPreserveOptional<NonNullable<TextField['admin']>, 'autoComplete' | 'placeholder' | 'rtl'>
 } & FieldBaseClient &
   Pick<TextField, 'hasMany' | 'maxLength' | 'maxRows' | 'minLength' | 'minRows' | 'type'>
 
@@ -648,7 +654,8 @@ export type EmailField = {
 } & Omit<FieldBase, 'validate'>
 
 export type EmailFieldClient = {
-  admin?: AdminClient & Pick<EmailField['admin'], 'autoComplete' | 'placeholder'>
+  admin?: AdminClient &
+    PickPreserveOptional<NonNullable<EmailField['admin']>, 'autoComplete' | 'placeholder'>
 } & FieldBaseClient &
   Pick<EmailField, 'type'>
 
@@ -671,7 +678,8 @@ export type TextareaField = {
 } & Omit<FieldBase, 'validate'>
 
 export type TextareaFieldClient = {
-  admin?: AdminClient & Pick<TextareaField['admin'], 'placeholder' | 'rows' | 'rtl'>
+  admin?: AdminClient &
+    PickPreserveOptional<NonNullable<TextareaField['admin']>, 'placeholder' | 'rows' | 'rtl'>
 } & FieldBaseClient &
   Pick<TextareaField, 'maxLength' | 'minLength' | 'type'>
 
@@ -713,11 +721,12 @@ export type DateField = {
 } & Omit<FieldBase, 'validate'>
 
 export type DateFieldClient = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<DateField['admin'], 'date' | 'placeholder'>
 } & FieldBaseClient &
   Pick<DateField, 'timezone' | 'type'>
 
-export type GroupField = {
+export type GroupBase = {
   admin?: {
     components?: {
       afterInput?: CustomComponent[]
@@ -727,6 +736,11 @@ export type GroupField = {
     hideGutter?: boolean
   } & Admin
   fields: Field[]
+  type: 'group'
+  validate?: Validate<unknown, unknown, unknown, GroupField>
+} & Omit<FieldBase, 'validate'>
+
+export type NamedGroupField = {
   /** Customize generated GraphQL and Typescript schema names.
    * By default, it is bound to the collection.
    *
@@ -734,15 +748,30 @@ export type GroupField = {
    * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
-  type: 'group'
-  validate?: Validate<unknown, unknown, unknown, GroupField>
-} & Omit<FieldBase, 'required' | 'validate'>
+} & GroupBase
 
-export type GroupFieldClient = {
-  admin?: AdminClient & Pick<GroupField['admin'], 'hideGutter'>
+export type UnnamedGroupField = {
+  interfaceName?: never
+  localized?: never
+} & Omit<GroupBase, 'name' | 'virtual'>
+
+export type GroupField = NamedGroupField | UnnamedGroupField
+
+export type NamedGroupFieldClient = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+  admin?: AdminClient & Pick<NamedGroupField['admin'], 'hideGutter'>
   fields: ClientField[]
 } & Omit<FieldBaseClient, 'required'> &
-  Pick<GroupField, 'interfaceName' | 'type'>
+  Pick<NamedGroupField, 'interfaceName' | 'type'>
+
+export type UnnamedGroupFieldClient = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+  admin?: AdminClient & Pick<UnnamedGroupField['admin'], 'hideGutter'>
+  fields: ClientField[]
+} & Omit<FieldBaseClient, 'name' | 'required'> &
+  Pick<UnnamedGroupField, 'label' | 'type'>
+
+export type GroupFieldClient = NamedGroupFieldClient | UnnamedGroupFieldClient
 
 export type RowField = {
   admin?: Omit<Admin, 'description'>
@@ -983,6 +1012,7 @@ export type PolymorphicUploadField = {
 
 export type PolymorphicUploadFieldClient = {
   admin?: {
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     sortOptions?: Pick<PolymorphicUploadField['admin'], 'sortOptions'>
   } & UploadAdminClient
 } & Pick<PolymorphicUploadField, 'displayPreview' | 'maxDepth' | 'relationTo' | 'type'> &
@@ -996,6 +1026,7 @@ export type SingleUploadField = {
 } & SharedUploadProperties
 
 export type SingleUploadFieldClient = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: Pick<SingleUploadField['admin'], 'sortOptions'> & UploadAdminClient
 } & Pick<SingleUploadField, 'displayPreview' | 'maxDepth' | 'relationTo' | 'type'> &
   SharedUploadPropertiesClient
@@ -1022,6 +1053,7 @@ export type CodeField = {
 } & Omit<FieldBase, 'admin' | 'validate'>
 
 export type CodeFieldClient = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<CodeField['admin'], 'editorOptions' | 'language'>
 } & Omit<FieldBaseClient, 'admin'> &
   Pick<CodeField, 'maxLength' | 'minLength' | 'type'>
@@ -1048,6 +1080,7 @@ export type JSONField = {
 } & Omit<FieldBase, 'admin' | 'validate'>
 
 export type JSONFieldClient = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<JSONField['admin'], 'editorOptions' | 'maxHeight'>
 } & Omit<FieldBaseClient, 'admin'> &
   Pick<JSONField, 'jsonSchema' | 'type'>
@@ -1062,6 +1095,7 @@ export type SelectField = {
     } & Admin['components']
     isClearable?: boolean
     isSortable?: boolean
+    placeholder?: LabelFunction | string
   } & Admin
   /**
    * Customize the SQL table name
@@ -1071,8 +1105,19 @@ export type SelectField = {
    * Customize the DB enum name
    */
   enumName?: DBIdentifierName
+  /**
+   * Reduce the available options based on the current user, value of another field, etc.
+   * Similar to the `filterOptions` property on `relationship` and `upload` fields, except with a different return type.
+   */
+  filterOptions?: (args: {
+    data: Data
+    options: Option[]
+    req: PayloadRequest
+    siblingData: Data
+  }) => Option[]
   hasMany?: boolean
-  /** Customize generated GraphQL and Typescript schema names.
+  /**
+   * Customize generated GraphQL and Typescript schema names.
    * By default, it is bound to the collection.
    *
    * This is useful if you would like to generate a top level type to share amongst collections/fields.
@@ -1094,7 +1139,8 @@ export type SelectField = {
   Omit<FieldBase, 'validate'>
 
 export type SelectFieldClient = {
-  admin?: AdminClient & Pick<SelectField['admin'], 'isClearable' | 'isSortable'>
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+  admin?: AdminClient & Pick<SelectField['admin'], 'isClearable' | 'isSortable' | 'placeholder'>
 } & FieldBaseClient &
   Pick<SelectField, 'hasMany' | 'interfaceName' | 'options' | 'type'>
 
@@ -1161,10 +1207,11 @@ type RelationshipAdmin = {
     >
   } & Admin['components']
   isSortable?: boolean
+  placeholder?: LabelFunction | string
 } & Admin
 
 type RelationshipAdminClient = AdminClient &
-  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'appearance' | 'isSortable'>
+  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'appearance' | 'isSortable' | 'placeholder'>
 
 export type PolymorphicRelationshipField = {
   admin?: {
@@ -1175,7 +1222,8 @@ export type PolymorphicRelationshipField = {
 
 export type PolymorphicRelationshipFieldClient = {
   admin?: {
-    sortOptions?: Pick<PolymorphicRelationshipField['admin'], 'sortOptions'>
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    sortOptions?: PolymorphicRelationshipField['admin']['sortOptions']
   } & RelationshipAdminClient
 } & Pick<PolymorphicRelationshipField, 'relationTo'> &
   SharedRelationshipPropertiesClient
@@ -1188,6 +1236,7 @@ export type SingleRelationshipField = {
 } & SharedRelationshipProperties
 
 export type SingleRelationshipFieldClient = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: Partial<Pick<SingleRelationshipField['admin'], 'sortOptions'>> & RelationshipAdminClient
 } & Pick<SingleRelationshipField, 'relationTo'> &
   SharedRelationshipPropertiesClient
@@ -1220,6 +1269,8 @@ export type RichTextField<
 > = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Error?: CustomComponent
       Label?: CustomComponent
     } & Admin['components']
@@ -1280,6 +1331,7 @@ export type ArrayField = {
 } & Omit<FieldBase, 'validate'>
 
 export type ArrayFieldClient = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<ArrayField['admin'], 'initCollapsed' | 'isSortable'>
   fields: ClientField[]
   labels?: LabelsClient
@@ -1317,6 +1369,7 @@ export type RadioField = {
 } & Omit<FieldBase, 'validate'>
 
 export type RadioFieldClient = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<RadioField['admin'], 'layout'>
 } & FieldBaseClient &
   Pick<RadioField, 'interfaceName' | 'options' | 'type'>
@@ -1447,6 +1500,7 @@ export type Block = {
 }
 
 export type ClientBlock = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: Pick<Block['admin'], 'custom' | 'disableBlockName' | 'group'>
   fields: ClientField[]
   labels?: LabelsClient
@@ -1482,6 +1536,7 @@ export type BlocksField = {
 } & Omit<FieldBase, 'validate'>
 
 export type BlocksFieldClient = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
   /**
    * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
@@ -1510,6 +1565,7 @@ export type PointField = {
 } & Omit<FieldBase, 'validate'>
 
 export type PointFieldClient = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<PointField['admin'], 'placeholder' | 'step'>
 } & FieldBaseClient &
   Pick<PointField, 'type'>
@@ -1584,6 +1640,7 @@ export type JoinField = {
 
 export type JoinFieldClient = {
   admin?: AdminClient &
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     Pick<JoinField['admin'], 'allowCreate' | 'defaultColumns' | 'disableBulkEdit' | 'readOnly'>
 } & { targetField: Pick<RelationshipFieldClient, 'relationTo'> } & FieldBaseClient &
   Pick<
@@ -1615,6 +1672,7 @@ export type FlattenedBlocksField = {
 
 export type FlattenedGroupField = {
   flattenedFields: FlattenedField[]
+  name: string
 } & GroupField
 
 export type FlattenedArrayField = {
@@ -1732,9 +1790,9 @@ export type FieldAffectingData =
   | CodeField
   | DateField
   | EmailField
-  | GroupField
   | JoinField
   | JSONField
+  | NamedGroupField
   | NumberField
   | PointField
   | RadioField
@@ -1753,9 +1811,9 @@ export type FieldAffectingDataClient =
   | CodeFieldClient
   | DateFieldClient
   | EmailFieldClient
-  | GroupFieldClient
   | JoinFieldClient
   | JSONFieldClient
+  | NamedGroupFieldClient
   | NumberFieldClient
   | PointFieldClient
   | RadioFieldClient
@@ -1775,8 +1833,8 @@ export type NonPresentationalField =
   | CollapsibleField
   | DateField
   | EmailField
-  | GroupField
   | JSONField
+  | NamedGroupField
   | NumberField
   | PointField
   | RadioField
@@ -1797,8 +1855,8 @@ export type NonPresentationalFieldClient =
   | CollapsibleFieldClient
   | DateFieldClient
   | EmailFieldClient
-  | GroupFieldClient
   | JSONFieldClient
+  | NamedGroupFieldClient
   | NumberFieldClient
   | PointFieldClient
   | RadioFieldClient
@@ -1903,7 +1961,7 @@ export function fieldIsPresentationalOnly<
 export function fieldIsSidebar<TField extends ClientField | Field | TabAsField | TabAsFieldClient>(
   field: TField,
 ): field is { admin: { position: 'sidebar' } } & TField {
-  return 'admin' in field && 'position' in field.admin && field.admin.position === 'sidebar'
+  return 'admin' in field && 'position' in field.admin! && field.admin.position === 'sidebar'
 }
 
 export function fieldIsID<TField extends ClientField | Field>(
@@ -1917,7 +1975,7 @@ export function fieldIsHiddenOrDisabled<
 >(field: TField): field is { admin: { hidden: true } } & TField {
   return (
     ('hidden' in field && field.hidden) ||
-    ('admin' in field && 'disabled' in field.admin && field.admin.disabled)
+    ('admin' in field && 'disabled' in field.admin! && field.admin.disabled!)
   )
 }
 
@@ -1934,6 +1992,12 @@ export function tabHasName<TField extends ClientTab | Tab>(tab: TField): tab is 
   return 'name' in tab
 }
 
+export function groupHasName(
+  group: Partial<NamedGroupFieldClient>,
+): group is NamedGroupFieldClient {
+  return 'name' in group
+}
+
 /**
  * Check if a field has localized: true set. This does not check if a field *should*
  * be localized. To check if a field should be localized, use `fieldShouldBeLocalized`.
@@ -1942,7 +2006,7 @@ export function tabHasName<TField extends ClientTab | Tab>(tab: TField): tab is 
  * parent field localization not being taken into account.
  */
 export function fieldIsLocalized(field: Field | Tab): boolean {
-  return 'localized' in field && field.localized
+  return 'localized' in field && field.localized!
 }
 
 /**
@@ -1957,7 +2021,7 @@ export function fieldShouldBeLocalized({
 }): boolean {
   return (
     'localized' in field &&
-    field.localized &&
+    field.localized! &&
     (!parentIsLocalized ||
       process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true')
   )

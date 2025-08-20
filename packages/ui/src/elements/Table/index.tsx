@@ -10,11 +10,12 @@ const baseClass = 'table'
 
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
+  readonly BeforeTable?: React.ReactNode
   readonly columns?: Column[]
   readonly data: Record<string, unknown>[]
 }
 
-export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
+export const Table: React.FC<Props> = ({ appearance, BeforeTable, columns, data }) => {
   const activeColumns = columns?.filter((col) => col?.active)
 
   if (!activeColumns || activeColumns.length === 0) {
@@ -27,11 +28,12 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
         .filter(Boolean)
         .join(' ')}
     >
+      {BeforeTable}
       <table cellPadding="0" cellSpacing="0">
         <thead>
           <tr>
             {activeColumns.map((col, i) => (
-              <th id={`heading-${col.accessor}`} key={i}>
+              <th id={`heading-${col.accessor.replace(/\./g, '__')}`} key={i}>
                 {col.Heading}
               </th>
             ))}
@@ -39,7 +41,7 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
         </thead>
         <tbody>
           {data &&
-            data.map((row, rowIndex) => (
+            data?.map((row, rowIndex) => (
               <tr
                 className={`row-${rowIndex + 1}`}
                 key={
@@ -52,7 +54,7 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
                   const { accessor } = col
 
                   return (
-                    <td className={`cell-${accessor}`} key={colIndex}>
+                    <td className={`cell-${accessor.replace(/\./g, '__')}`} key={colIndex}>
                       {col.renderedCells[rowIndex]}
                     </td>
                   )

@@ -102,6 +102,21 @@ describe('JSON', () => {
     )
   })
 
+  test('should save field with "target" property', async () => {
+    const input = '{"target": "foo"}'
+    await page.goto(url.create)
+    const jsonCodeEditor = page.locator('.json-field .code-editor').first()
+    await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+    const jsonFieldInputArea = page.locator('.json-field .inputarea').first()
+    await jsonFieldInputArea.fill(input)
+
+    await saveDocAndAssert(page)
+    const jsonField = page.locator('.json-field').first()
+    await expect(jsonField).toContainText('"target": "foo"')
+  })
+
   test('should update', async () => {
     const createdDoc = await payload.create({
       collection: 'json-fields',
@@ -113,12 +128,26 @@ describe('JSON', () => {
     })
 
     await page.goto(url.edit(createdDoc.id))
-    const jsonField = page.locator('.json-field #field-customJSON')
+    const jsonField = page.locator('.json-field:not(.read-only) #field-customJSON')
     await expect(jsonField).toContainText('"default": "value"')
 
-    const originalHeight = (await page.locator('#field-customJSON').boundingBox())?.height || 0
-    await page.locator('#set-custom-json').click()
-    const newHeight = (await page.locator('#field-customJSON').boundingBox())?.height || 0
-    expect(newHeight).toBeGreaterThan(originalHeight)
+    const boundingBox = await page
+      .locator('.json-field:not(.read-only) #field-customJSON')
+      .boundingBox()
+    await expect(() => expect(boundingBox).not.toBeNull()).toPass()
+    const originalHeight = boundingBox!.height
+
+    // click the button to set custom JSON
+    await page.locator('#set-custom-json').click({ delay: 1000 })
+
+    const newBoundingBox = await page
+      .locator('.json-field:not(.read-only) #field-customJSON')
+      .boundingBox()
+    await expect(() => expect(newBoundingBox).not.toBeNull()).toPass()
+    const newHeight = newBoundingBox!.height
+
+    await expect(() => {
+      expect(newHeight).toBeGreaterThan(originalHeight)
+    }).toPass()
   })
 })

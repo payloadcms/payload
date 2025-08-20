@@ -1,7 +1,7 @@
 import { type SupportedLanguages } from '@payloadcms/translations'
 
 import type { SanitizedDocumentPermissions } from '../../auth/types.js'
-import type { Field, Validate } from '../../fields/config/types.js'
+import type { Field, Option, Validate } from '../../fields/config/types.js'
 import type { TypedLocale } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
@@ -57,6 +57,12 @@ export type FieldState = {
   filterOptions?: FilterOptionsResult
   initialValue?: unknown
   /**
+   * @experimental - Note: this property is experimental and may change in the future. Use at your own discretion.
+   * Every time a field is changed locally, this flag is set to true. Prevents form state from server from overwriting local changes.
+   * After merging server form state, this flag is reset.
+   */
+  isModified?: boolean
+  /**
    * The path of the field when its custom components were last rendered.
    * This is used to denote if a field has been rendered, and if so,
    * what path it was rendered under last.
@@ -67,6 +73,10 @@ export type FieldState = {
   lastRenderedPath?: string
   passesCondition?: boolean
   rows?: Row[]
+  /**
+   * The result of running `field.filterOptions` on select fields.
+   */
+  selectFilterOptions?: Option[]
   valid?: boolean
   validate?: Validate
   value?: unknown
@@ -109,9 +119,12 @@ export type BuildFormStateArgs = {
    */
   mockRSCs?: boolean
   operation?: 'create' | 'update'
-  /*
-    If true, will render field components within their state object
-  */
+  readOnly?: boolean
+  /**
+   * If true, will render field components within their state object.
+   * Performance optimization: Setting to `false` ensures that only fields that have changed paths will re-render, e.g. new array rows, etc.
+   * For example, you only need to render ALL fields on initial render, not on every onChange.
+   */
   renderAllFields?: boolean
   req: PayloadRequest
   returnLockStatus?: boolean

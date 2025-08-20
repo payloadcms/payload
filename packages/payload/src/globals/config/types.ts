@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny } from 'ts-essentials'
 
@@ -9,6 +10,7 @@ import type {
 } from '../../admin/types.js'
 import type {
   Access,
+  CustomComponent,
   EditConfig,
   Endpoint,
   EntityDescription,
@@ -49,6 +51,7 @@ export type BeforeChangeHook = (args: {
 
 export type AfterChangeHook = (args: {
   context: RequestContext
+  data: any
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
@@ -80,6 +83,10 @@ export type GlobalAdminOptions = {
    */
   components?: {
     elements?: {
+      /**
+       * Inject custom components before the document controls
+       */
+      beforeDocumentControls?: CustomComponent[]
       Description?: EntityDescriptionComponent
       /**
        * Replaces the "Preview" button

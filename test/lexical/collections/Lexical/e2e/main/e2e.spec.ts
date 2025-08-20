@@ -92,11 +92,8 @@ describe('lexicalMain', () => {
     })*/
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: [
-        path.resolve(dirname, './collections/Upload/uploads'),
-        path.resolve(dirname, './collections/Upload2/uploads2'),
-      ],
+      snapshotKey: 'lexicalTest',
+      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
 
     if (client) {
@@ -674,7 +671,7 @@ describe('lexicalMain', () => {
     await relationshipSelectButton.click()
     await expect(slashMenuPopover).toBeHidden()
 
-    const relationshipListDrawer = page.locator('.list-drawer__header-text')
+    const relationshipListDrawer = page.locator('.list-header__title')
     await expect(relationshipListDrawer).toHaveText('Array Fields')
   })
 
@@ -728,7 +725,8 @@ describe('lexicalMain', () => {
     await expect(relationshipListDrawer).toBeVisible()
     await wait(500)
 
-    await expect(relationshipListDrawer.locator('.rs__single-value')).toHaveText('Lexical Field')
+    await relationshipListDrawer.locator('.rs__input').first().click()
+    await relationshipListDrawer.locator('.rs__menu').getByText('Lexical Field').click()
 
     await relationshipListDrawer.locator('button').getByText('Rich Text').first().click()
     await expect(relationshipListDrawer).toBeHidden()
@@ -769,6 +767,7 @@ describe('lexicalMain', () => {
 
     // make text bold
     await boldButton.click()
+    await wait(300)
 
     // Save drawer
     await docDrawer.locator('button').getByText('Save').first().click()
@@ -960,6 +959,7 @@ describe('lexicalMain', () => {
 
   test('ensure internal links can be created', async () => {
     await navigateToLexicalFields()
+    await wait(200)
     const richTextField = page.locator('.rich-text-lexical').first()
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
@@ -972,11 +972,15 @@ describe('lexicalMain', () => {
     const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
     await paragraph.scrollIntoViewIfNeeded()
     await expect(paragraph).toBeVisible()
+    await wait(200)
+
     /**
      * Type some text
      */
     await paragraph.click()
+    await wait(200)
     await page.keyboard.type('Link')
+    await wait(200)
 
     // Select "Link" by pressing shift + arrow left
     for (let i = 0; i < 4; i++) {
@@ -988,6 +992,7 @@ describe('lexicalMain', () => {
 
     const linkButton = inlineToolbar.locator('.toolbar-popup__button-link')
     await expect(linkButton).toBeVisible()
+    await wait(200)
     await linkButton.click()
 
     /**
@@ -1007,16 +1012,20 @@ describe('lexicalMain', () => {
       .locator('.radio-input__styled-radio')
 
     await radioInternalLink.click()
+    await wait(200)
 
     const internalLinkSelect = linkDrawer
       .locator('#field-doc .rs__control .value-container')
       .first()
     await internalLinkSelect.click()
+    await wait(200)
 
     await expect(linkDrawer.locator('.rs__option').nth(0)).toBeVisible()
     await expect(linkDrawer.locator('.rs__option').nth(0)).toContainText('Rich Text') // Link to itself - that way we can also test if depth 0 works
     await linkDrawer.locator('.rs__option').nth(0).click()
+
     await expect(internalLinkSelect).toContainText('Rich Text')
+    await wait(200)
 
     await linkDrawer.locator('button').getByText('Save').first().click()
     await expect(linkDrawer).toBeHidden()
@@ -1203,10 +1212,11 @@ describe('lexicalMain', () => {
     await expect(newUploadNode.locator('.lexical-upload__bottomRow')).toContainText('payload.png')
 
     await page.keyboard.press('Enter') // floating toolbar needs to appear with enough distance to the upload node, otherwise clicking may fail
+    await page.keyboard.press('Enter')
     await page.keyboard.press('ArrowLeft')
     await page.keyboard.press('ArrowLeft')
     // Select "there" by pressing shift + arrow left
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       await page.keyboard.press('Shift+ArrowLeft')
     }
 
@@ -1258,10 +1268,10 @@ describe('lexicalMain', () => {
       const firstParagraph: SerializedParagraphNode = lexicalField.root
         .children[0] as SerializedParagraphNode
       const secondParagraph: SerializedParagraphNode = lexicalField.root
-        .children[1] as SerializedParagraphNode
-      const thirdParagraph: SerializedParagraphNode = lexicalField.root
         .children[2] as SerializedParagraphNode
-      const uploadNode: SerializedUploadNode = lexicalField.root.children[3] as SerializedUploadNode
+      const thirdParagraph: SerializedParagraphNode = lexicalField.root
+        .children[3] as SerializedParagraphNode
+      const uploadNode: SerializedUploadNode = lexicalField.root.children[1] as SerializedUploadNode
 
       expect(firstParagraph.children).toHaveLength(2)
       expect((firstParagraph.children[0] as SerializedTextNode).text).toBe('Some ')
@@ -1391,7 +1401,7 @@ describe('lexicalMain', () => {
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
 
       // @ts-expect-error no need to type this
-      expect(lexicalField?.root?.children[1].fields.someTextRequired).toEqual('test')
+      expect(lexicalField?.root?.children[0].fields.someTextRequired).toEqual('test')
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
@@ -1541,7 +1551,7 @@ describe('lexicalMain', () => {
     await closeTagInMultiSelect.click()
     await expect(decoratorLocator).toBeHidden()
 
-    const labelInsideCollapsableBody = page.locator('label').getByText('Sub Blocks')
+    const labelInsideCollapsableBody = page.locator('h3>span').getByText('Sub Blocks')
     await labelInsideCollapsableBody.click()
     await expectInsideSelectedDecorator(labelInsideCollapsableBody)
 

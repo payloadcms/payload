@@ -132,6 +132,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
           'drizzle-kit/api',
           'sharp',
           'libsql',
+          'require-in-the-middle',
         ],
         ignoreWarnings: [
           ...(incomingWebpackConfig?.ignoreWarnings || []),
@@ -139,6 +140,13 @@ export const withPayload = (nextConfig = {}, options = {}) => {
           { file: /node_modules\/mongodb\/lib\/utils\.js/ },
           { module: /node_modules\/mongodb\/lib\/bson\.js/ },
           { file: /node_modules\/mongodb\/lib\/bson\.js/ },
+        ],
+        plugins: [
+          ...(incomingWebpackConfig?.plugins || []),
+          // Fix cloudflare:sockets error: https://github.com/vercel/next.js/discussions/50177
+          new webpackOptions.webpack.IgnorePlugin({
+            resourceRegExp: /^pg-native$|^cloudflare:sockets$/,
+          }),
         ],
         resolve: {
           ...(incomingWebpackConfig?.resolve || {}),

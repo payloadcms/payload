@@ -1,5 +1,7 @@
 import type {
   BulkOperationResult,
+  CustomDocumentViewConfig,
+  DefaultDocumentViewConfig,
   JoinQuery,
   PaginatedDocs,
   SelectType,
@@ -143,6 +145,32 @@ describe('Types testing', () => {
 
     test('has global generated options interface based on radio field', () => {
       expect(asType<Post['radioField']>()).type.toBe<MyRadioOptions>()
+    })
+  })
+
+  describe('fields', () => {
+    describe('Group', () => {
+      test('correctly ignores unnamed group', () => {
+        expect<Post>().type.toHaveProperty('insideUnnamedGroup')
+      })
+
+      test('generates nested group name', () => {
+        expect<Post>().type.toHaveProperty('namedGroup')
+        expect<NonNullable<Post['namedGroup']>>().type.toHaveProperty('insideNamedGroup')
+      })
+    })
+  })
+
+  describe('views', () => {
+    test('default view config', () => {
+      expect<DefaultDocumentViewConfig>().type.not.toBeAssignableWith<{
+        path: `/${string}`
+      }>()
+
+      expect<CustomDocumentViewConfig>().type.toBeAssignableWith<{
+        Component: string
+        path: `/${string}`
+      }>()
     })
   })
 })

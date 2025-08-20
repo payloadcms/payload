@@ -4,11 +4,11 @@ import type {
   SanitizedCollectionConfig,
 } from '../../collections/config/types.js'
 import type { ServerProps } from '../../config/types.js'
-import type { ListPreferences } from '../../preferences/types.js'
+import type { CollectionPreferences } from '../../preferences/types.js'
 import type { QueryPreset } from '../../query-presets/types.js'
 import type { ResolvedFilterOptions } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
-import type { Data } from '../types.js'
+import type { Data, ViewTypes } from '../types.js'
 
 export type ListViewSlots = {
   AfterList?: React.ReactNode
@@ -17,7 +17,7 @@ export type ListViewSlots = {
   BeforeListTable?: React.ReactNode
   Description?: React.ReactNode
   listMenuItems?: React.ReactNode[]
-  Table: React.ReactNode
+  Table: React.ReactNode | React.ReactNode[]
 }
 
 /**
@@ -30,7 +30,7 @@ export type ListViewServerPropsOnly = {
   collectionConfig: SanitizedCollectionConfig
   data: Data
   limit: number
-  listPreferences: ListPreferences
+  listPreferences: CollectionPreferences
   listSearchableFields: CollectionAdminOptions['listSearchableFields']
 } & ServerProps
 
@@ -45,10 +45,11 @@ export type ListViewClientProps = {
   disableQueryPresets?: boolean
   enableRowSelections?: boolean
   hasCreatePermission: boolean
+  hasDeletePermission?: boolean
   /**
    * @deprecated
    */
-  listPreferences?: ListPreferences
+  listPreferences?: CollectionPreferences
   newDocumentURL: string
   /**
    * @deprecated
@@ -58,11 +59,13 @@ export type ListViewClientProps = {
   queryPresetPermissions?: SanitizedCollectionPermission
   renderedFilters?: Map<string, React.ReactNode>
   resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
+  viewType: ViewTypes
 } & ListViewSlots
 
 export type ListViewSlotSharedClientProps = {
   collectionSlug: SanitizedCollectionConfig['slug']
   hasCreatePermission: boolean
+  hasDeletePermission?: boolean
   newDocumentURL: string
 }
 

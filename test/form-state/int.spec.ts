@@ -1,4 +1,4 @@
-import type { FormState, Payload, User } from 'payload'
+import type { FieldState, FormState, Payload, User } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import path from 'path'
@@ -38,9 +38,7 @@ describe('Form State', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should build entire form state', async () => {
@@ -228,6 +226,12 @@ describe('Form State', () => {
       collection: postsSlug,
       data: {
         title: 'Test Post',
+        blocks: [
+          {
+            blockType: 'text',
+            text: 'Test block',
+          },
+        ],
       },
     })
 
@@ -248,6 +252,7 @@ describe('Form State', () => {
     })
 
     expect(state.title?.addedByServer).toBe(true)
+    expect(state['blocks.0.blockType']?.addedByServer).toBe(true)
 
     // Ensure that `addedByServer` is removed after being received by the client
     const newState = mergeServerFormState({
@@ -304,6 +309,7 @@ describe('Form State', () => {
   it('should merge array rows without losing rows added to local state', () => {
     const currentState: FormState = {
       array: {
+        errorPaths: [],
         rows: [
           {
             id: '1',
@@ -353,6 +359,7 @@ describe('Form State', () => {
     // Row 2 should still exist
     expect(newState).toStrictEqual({
       array: {
+        errorPaths: [],
         passesCondition: true,
         valid: true,
         rows: [
@@ -557,5 +564,108 @@ describe('Form State', () => {
     })
 
     expect(newState === currentState).toBe(true)
+  })
+
+  it('should accept all values from the server regardless of local modifications, e.g. on submit', () => {
+    const title: FieldState = {
+      value: 'Test Post (modified on the client)',
+      initialValue: 'Test Post',
+      valid: true,
+      passesCondition: true,
+    }
+
+    const currentState: Record<string, FieldState> = {
+      title: {
+        ...title,
+        isModified: true,
+      },
+      computedTitle: {
+        value: 'Test Post (computed on the client)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+    }
+
+    const incomingStateFromServer: Record<string, FieldState> = {
+      title: {
+        value: 'Test Post (modified on the server)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+      computedTitle: {
+        value: 'Test Post (computed on the server)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+    }
+
+    const newState = mergeServerFormState({
+      acceptValues: true,
+      currentState,
+      incomingState: incomingStateFromServer,
+    })
+
+    expect(newState).toStrictEqual({
+      ...incomingStateFromServer,
+      title: {
+        ...incomingStateFromServer.title,
+        isModified: true,
+      },
+    })
+  })
+
+  it('should not accept values from the server if they have been modified locally since the request was made, e.g. on autosave', () => {
+    const title: FieldState = {
+      value: 'Test Post (modified on the client 1)',
+      initialValue: 'Test Post',
+      valid: true,
+      passesCondition: true,
+    }
+
+    const currentState: Record<string, FieldState> = {
+      title: {
+        ...title,
+        isModified: true,
+      },
+      computedTitle: {
+        value: 'Test Post',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+    }
+
+    const incomingStateFromServer: Record<string, FieldState> = {
+      title: {
+        value: 'Test Post (modified on the server)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+      computedTitle: {
+        value: 'Test Post (modified on the server)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+    }
+
+    const newState = mergeServerFormState({
+      acceptValues: { overrideLocalChanges: false },
+      currentState,
+      incomingState: incomingStateFromServer,
+    })
+
+    expect(newState).toStrictEqual({
+      ...currentState,
+      title: {
+        ...currentState.title,
+        isModified: true,
+      },
+      computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
+    })
   })
 })

@@ -226,6 +226,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -346,6 +353,12 @@ export interface ArrayField {
     | {
         text?: string | null;
         id?: string | null;
+      }[]
+    | null;
+  arrayWithCustomID?:
+    | {
+        id?: string | null;
+        text?: string | null;
       }[]
     | null;
   updatedAt: string;
@@ -535,6 +548,14 @@ export interface BlockField {
             blockType: 'blockWithoutGroup';
           }
       )[]
+    | null;
+  readOnly?:
+    | {
+        title?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'readOnlyBlock';
+      }[]
     | null;
   updatedAt: string;
   createdAt: string;
@@ -730,6 +751,7 @@ export interface TextField {
 export interface CheckboxField {
   id: string;
   checkbox: boolean;
+  checkboxNotRequired?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -902,6 +924,7 @@ export interface DateField {
   id: string;
   default: string;
   timeOnly?: string | null;
+  timeOnlyWithMiliseconds?: string | null;
   timeOnlyWithCustomFormat?: string | null;
   dayOnly?: string | null;
   dayAndTime?: string | null;
@@ -926,6 +949,12 @@ export interface DateField {
     | {
         dayAndTime?: string | null;
         dayAndTime_tz?: SupportedTimezones;
+        id?: string | null;
+      }[]
+    | null;
+  array?:
+    | {
+        date?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1074,6 +1103,11 @@ export interface GroupField {
         }[]
       | null;
   };
+  insideUnnamedGroup?: string | null;
+  insideGroupWithNoLabel?: string | null;
+  deeplyNestedGroup?: {
+    insideNestedUnnamedGroup?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1095,6 +1129,22 @@ export interface RowField {
   no_set_width_within_row_b?: string | null;
   no_set_width_within_row_c?: string | null;
   field_20_percent_width_within_row_d?: string | null;
+  leftColumn?:
+    | {
+        leftText?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'leftTextBlock';
+      }[]
+    | null;
+  rightColumn?:
+    | {
+        rightText?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'rightTextBlock';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1326,10 +1376,16 @@ export interface RelationshipField {
       } | null);
   relationshipDrawerHasMany?: (string | TextField)[] | null;
   relationshipDrawerHasManyPolymorphic?:
-    | {
-        relationTo: 'text-fields';
-        value: string | TextField;
-      }[]
+    | (
+        | {
+            relationTo: 'text-fields';
+            value: string | TextField;
+          }
+        | {
+            relationTo: 'array-fields';
+            value: string | ArrayField;
+          }
+      )[]
     | null;
   relationshipDrawerWithAllowCreateFalse?: (string | null) | TextField;
   relationshipDrawerWithFilterOptions?: {
@@ -1364,6 +1420,8 @@ export interface SelectField {
     category?: ('a' | 'b')[] | null;
   };
   selectWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
+  disallowOption1?: boolean | null;
+  selectWithFilteredOptions?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1817,6 +1875,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1941,6 +2006,12 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
     | {
         text?: T;
         id?: T;
+      };
+  arrayWithCustomID?:
+    | T
+    | {
+        id?: T;
+        text?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -2175,6 +2246,17 @@ export interface BlockFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  readOnly?:
+    | T
+    | {
+        readOnlyBlock?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2300,6 +2382,7 @@ export interface LocalizedTabsBlockSelect<T extends boolean = true> {
  */
 export interface CheckboxFieldsSelect<T extends boolean = true> {
   checkbox?: T;
+  checkboxNotRequired?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2465,6 +2548,7 @@ export interface CustomRowIdSelect<T extends boolean = true> {
 export interface DateFieldsSelect<T extends boolean = true> {
   default?: T;
   timeOnly?: T;
+  timeOnlyWithMiliseconds?: T;
   timeOnlyWithCustomFormat?: T;
   dayOnly?: T;
   dayAndTime?: T;
@@ -2490,6 +2574,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
     | {
         dayAndTime?: T;
         dayAndTime_tz?: T;
+        id?: T;
+      };
+  array?:
+    | T
+    | {
+        date?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -2658,6 +2748,13 @@ export interface GroupFieldsSelect<T extends boolean = true> {
     | {
         email?: T;
       };
+  insideUnnamedGroup?: T;
+  insideGroupWithNoLabel?: T;
+  deeplyNestedGroup?:
+    | T
+    | {
+        insideNestedUnnamedGroup?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2679,6 +2776,28 @@ export interface RowFieldsSelect<T extends boolean = true> {
   no_set_width_within_row_b?: T;
   no_set_width_within_row_c?: T;
   field_20_percent_width_within_row_d?: T;
+  leftColumn?:
+    | T
+    | {
+        leftTextBlock?:
+          | T
+          | {
+              leftText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  rightColumn?:
+    | T
+    | {
+        rightTextBlock?:
+          | T
+          | {
+              rightText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2849,6 +2968,8 @@ export interface SelectFieldsSelect<T extends boolean = true> {
         category?: T;
       };
   selectWithJsxLabelOption?: T;
+  disallowOption1?: T;
+  selectWithFilteredOptions?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -8,6 +8,7 @@ import {
   TextInput,
   useConfig,
   useDocumentInfo,
+  useDocumentTitle,
   useField,
   useForm,
   useLocale,
@@ -31,7 +32,13 @@ type MetaTitleProps = {
 
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
-    field: { label, maxLength: maxLengthFromProps, minLength: minLengthFromProps, required },
+    field: {
+      label,
+      localized,
+      maxLength: maxLengthFromProps,
+      minLength: minLengthFromProps,
+      required,
+    },
     hasGenerateTitleFn,
     readOnly,
   } = props
@@ -57,6 +64,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const locale = useLocale()
   const { getData } = useForm()
   const docInfo = useDocumentInfo()
+  const { title } = useDocumentTitle()
 
   const minLength = minLengthFromProps || minLengthDefault
   const maxLength = maxLengthFromProps || maxLengthDefault
@@ -80,7 +88,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         initialData: docInfo.initialData,
         initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
         locale: typeof locale === 'object' ? locale?.code : locale,
-        title: docInfo.title,
+        title,
       } satisfies Omit<
         Parameters<GenerateTitle>[0],
         'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
@@ -107,10 +115,10 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     docInfo.hasSavePermission,
     docInfo.initialData,
     docInfo.initialState,
-    docInfo.title,
     getData,
     locale,
     setValue,
+    title,
   ])
 
   return (
@@ -126,7 +134,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          {Label ?? <FieldLabel label={label} path={path} required={required} />}
+          {Label ?? (
+            <FieldLabel label={label} localized={localized} path={path} required={required} />
+          )}
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;

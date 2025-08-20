@@ -1,12 +1,13 @@
-// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -15,9 +16,11 @@ export type Arguments = {
   disableErrors?: boolean
   overrideAccess?: boolean
   req?: PayloadRequest
+  trash?: boolean
   where?: Where
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const countOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
 ): Promise<{ totalDocs: number }> => {
@@ -34,9 +37,9 @@ export const countOperation = async <TSlug extends CollectionSlug>(
           (await hook({
             args,
             collection: args.collection.config,
-            context: args.req.context,
+            context: args.req!.context,
             operation: 'count',
-            req: args.req,
+            req: args.req!,
           })) || args
       }
     }
@@ -45,10 +48,12 @@ export const countOperation = async <TSlug extends CollectionSlug>(
       collection: { config: collectionConfig },
       disableErrors,
       overrideAccess,
-      req: { payload },
       req,
+      trash = false,
       where,
     } = args
+
+    const { payload } = req!
 
     // /////////////////////////////////////
     // Access
@@ -57,7 +62,7 @@ export const countOperation = async <TSlug extends CollectionSlug>(
     let accessResult: AccessResult
 
     if (!overrideAccess) {
-      accessResult = await executeAccess({ disableErrors, req }, collectionConfig.access.read)
+      accessResult = await executeAccess({ disableErrors, req: req! }, collectionConfig.access.read)
 
       // If errors are disabled, and access returns false, return empty results
       if (accessResult === false) {
@@ -69,13 +74,21 @@ export const countOperation = async <TSlug extends CollectionSlug>(
 
     let result: { totalDocs: number }
 
-    const fullWhere = combineQueries(where, accessResult)
+    let fullWhere = combineQueries(where!, accessResult!)
+    sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
+
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
 
     await validateQueryPaths({
       collectionConfig,
-      overrideAccess,
-      req,
-      where,
+      overrideAccess: overrideAccess!,
+      req: req!,
+      where: where!,
     })
 
     result = await payload.db.count({
@@ -101,7 +114,7 @@ export const countOperation = async <TSlug extends CollectionSlug>(
 
     return result
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    await killTransaction(args.req!)
     throw error
   }
 }

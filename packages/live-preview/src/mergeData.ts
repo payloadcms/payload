@@ -1,6 +1,6 @@
 import type { DocumentEvent, FieldSchemaJSON, PaginatedDocs } from 'payload'
 
-import type { PopulationsByCollection } from './types.js'
+import type { CollectionPopulationRequestHandler, PopulationsByCollection } from './types.js'
 
 import { traverseFields } from './traverseFields.js'
 
@@ -29,21 +29,17 @@ let prevLocale: string | undefined
 
 export const mergeData = async <T extends Record<string, any>>(args: {
   apiRoute?: string
-  collectionPopulationRequestHandler?: ({
-    apiPath,
-    endpoint,
-    serverURL,
-  }: {
-    apiPath: string
-    endpoint: string
-    serverURL: string
-  }) => Promise<Response>
+  /**
+   * @deprecated Use `requestHandler` instead
+   */
+  collectionPopulationRequestHandler?: CollectionPopulationRequestHandler
   depth?: number
   externallyUpdatedRelationship?: DocumentEvent
   fieldSchema: FieldSchemaJSON
   incomingData: Partial<T>
   initialData: T
   locale?: string
+  requestHandler?: CollectionPopulationRequestHandler
   returnNumberOfRequests?: boolean
   serverURL: string
 }): Promise<
@@ -81,13 +77,14 @@ export const mergeData = async <T extends Record<string, any>>(args: {
       let res: PaginatedDocs
 
       const ids = new Set(populations.map(({ id }) => id))
-      const requestHandler = args.collectionPopulationRequestHandler || defaultRequestHandler
+      const requestHandler =
+        args.collectionPopulationRequestHandler || args.requestHandler || defaultRequestHandler
 
       try {
         res = await requestHandler({
           apiPath: apiRoute || '/api',
           endpoint: encodeURI(
-            `${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}${locale ? `&locale=${locale}` : ''}`,
+            `${collection}?depth=${depth}&limit=${ids.size}&where[id][in]=${Array.from(ids).join(',')}${locale ? `&locale=${locale}` : ''}`,
           ),
           serverURL,
         }).then((res) => res.json())

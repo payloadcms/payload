@@ -1,8 +1,7 @@
-// @ts-strict-ignore
 import type { Collection, TypeWithID } from '../collections/config/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
-import executeAccess from '../auth/executeAccess.js'
+import { executeAccess } from '../auth/executeAccess.js'
 import { Forbidden } from '../errors/Forbidden.js'
 
 export const checkFileAccess = async ({
@@ -13,7 +12,7 @@ export const checkFileAccess = async ({
   collection: Collection
   filename: string
   req: PayloadRequest
-}): Promise<TypeWithID> => {
+}): Promise<TypeWithID | undefined> => {
   if (filename.includes('../') || filename.includes('..\\')) {
     throw new Forbidden(req.t)
   }
@@ -42,7 +41,7 @@ export const checkFileAccess = async ({
 
     if (config.upload.imageSizes) {
       config.upload.imageSizes.forEach(({ name }) => {
-        queryToBuild.and[0].or.push({
+        queryToBuild.and?.[0]?.or?.push({
           [`sizes.${name}.filename`]: {
             equals: filename,
           },

@@ -5,7 +5,7 @@ import type { CreateGlobalVersionArgs, CreateVersionArgs, Payload } from '../ind
 import type { PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
-import sanitizeInternalFields from '../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
 
@@ -16,6 +16,7 @@ type Args = {
   draft?: boolean
   global?: SanitizedGlobalConfig
   id?: number | string
+  operation?: 'create' | 'restoreVersion' | 'update'
   payload: Payload
   publishSpecificLocale?: string
   req?: PayloadRequest
@@ -30,13 +31,14 @@ export const saveVersion = async ({
   docWithLocales: doc,
   draft,
   global,
+  operation,
   payload,
   publishSpecificLocale,
   req,
   select,
   snapshot,
 }: Args): Promise<TypeWithID> => {
-  let result
+  let result: TypeWithID | undefined
   let createNewVersion = true
   const now = new Date().toISOString()
   const versionData = deepCopyObjectSimple(doc)
@@ -78,7 +80,7 @@ export const saveVersion = async ({
       } else {
         ;({ docs } = await payload.db.findGlobalVersions({
           ...findVersionArgs,
-          global: global.slug,
+          global: global!.slug,
           limit: 1,
           pagination: false,
           req,
@@ -87,7 +89,7 @@ export const saveVersion = async ({
       const [latestVersion] = docs
 
       // overwrite the latest version if it's set to autosave
-      if (latestVersion?.autosave === true) {
+      if (latestVersion && 'autosave' in latestVersion && latestVersion.autosave === true) {
         createNewVersion = false
 
         const data: Record<string, unknown> = {
@@ -115,7 +117,7 @@ export const saveVersion = async ({
         } else {
           result = await payload.db.updateGlobalVersion({
             ...updateVersionArgs,
-            global: global.slug,
+            global: global!.slug,
             req,
           })
         }
@@ -125,9 +127,9 @@ export const saveVersion = async ({
     if (createNewVersion) {
       const createVersionArgs = {
         autosave: Boolean(autosave),
-        collectionSlug: undefined,
-        createdAt: now,
-        globalSlug: undefined,
+        collectionSlug: undefined as string | undefined,
+        createdAt: operation === 'restoreVersion' ? versionData.createdAt : now,
+        globalSlug: undefined as string | undefined,
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,
         req,
@@ -138,12 +140,12 @@ export const saveVersion = async ({
 
       if (collection) {
         createVersionArgs.collectionSlug = collection.slug
-        result = await payload.db.createVersion(createVersionArgs)
+        result = await payload.db.createVersion(createVersionArgs as CreateVersionArgs)
       }
 
       if (global) {
         createVersionArgs.globalSlug = global.slug
-        result = await payload.db.createGlobalVersion(createVersionArgs)
+        result = await payload.db.createGlobalVersion(createVersionArgs as CreateGlobalVersionArgs)
       }
 
       if (publishSpecificLocale && snapshot) {
@@ -183,10 +185,10 @@ export const saveVersion = async ({
       errorMessage = `There was an error while saving a version for the global ${typeof global.label === 'string' ? global.label : global.slug}.`
     }
     payload.logger.error({ err, msg: errorMessage })
-    return
+    return undefined!
   }
 
-  const max = collection ? collection.versions.maxPerDoc : global.versions.max
+  const max = collection ? collection.versions.maxPerDoc : global!.versions.max
 
   if (createNewVersion && max > 0) {
     await enforceMaxVersions({
@@ -199,10 +201,10 @@ export const saveVersion = async ({
     })
   }
 
-  let createdVersion = result.version
+  let createdVersion = (result as any).version
 
   createdVersion = sanitizeInternalFields(createdVersion)
-  createdVersion.id = result.parent
+  createdVersion.id = (result as any).parent
 
   return createdVersion
 }

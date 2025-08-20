@@ -16,7 +16,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { SelectInput } from './Input.js'
 
-const formatOptions = (options: Option[]): OptionObject[] =>
+export const formatOptions = (options: Option[]): OptionObject[] =>
   options.map((option) => {
     if (typeof option === 'object' && (option.value || option.value === '')) {
       return option
@@ -38,6 +38,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
         description,
         isClearable = true,
         isSortable = true,
+        placeholder,
       } = {} as SelectFieldClientProps['field']['admin'],
       hasMany = false,
       label,
@@ -66,6 +67,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
     path,
+    selectFilterOptions,
     setValue,
     showError,
     value,
@@ -108,6 +110,14 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       Description={Description}
       description={description}
       Error={Error}
+      filterOption={
+        selectFilterOptions
+          ? ({ label, value }, search) =>
+              selectFilterOptions?.some(
+                (option) => (typeof option === 'string' ? option : option.value) === value,
+              ) && label.toLowerCase().includes(search.toLowerCase())
+          : undefined
+      }
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}
@@ -118,6 +128,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       onChange={onChange}
       options={options}
       path={path}
+      placeholder={placeholder}
       readOnly={readOnly || disabled}
       required={required}
       showError={showError}
