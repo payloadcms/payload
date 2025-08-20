@@ -52,7 +52,7 @@ export const getFlattenedFieldKeys = (fields: FieldWithPresentational[], prefix 
             keys.push(`${fullKey}_0_relationTo`, `${fullKey}_0_id`)
           } else {
             // hasMany monomorphic
-            keys.push(`${fullKey}_0`)
+            keys.push(`${fullKey}_0_id`)
           }
         } else {
           if (Array.isArray(field.relationTo)) {

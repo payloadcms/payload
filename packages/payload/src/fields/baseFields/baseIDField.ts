@@ -14,6 +14,7 @@ export const baseIDField: TextField = {
   defaultValue: () => new ObjectId().toHexString(),
   hooks: {
     beforeChange: [({ value }) => value || new ObjectId().toHexString()],
+    // ID field values for arrays and blocks need to be unique when duplicating, as on postgres they are stored on the same table as primary keys.
     beforeDuplicate: [() => new ObjectId().toHexString()],
   },
   label: 'ID',

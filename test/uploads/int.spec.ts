@@ -1,15 +1,19 @@
+import type { AddressInfo } from 'net'
 import type { CollectionSlug, Payload } from 'payload'
 
 import { randomUUID } from 'crypto'
 import fs from 'fs'
+import { createServer } from 'http'
 import path from 'path'
-import { _internal_safeFetchGlobal, getFileByPath } from 'payload'
+import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
@@ -630,6 +634,50 @@ describe('Collections - Uploads', () => {
         expect(cookieHeader).toContain('other-cookie=456')
 
         fetchSpy.mockRestore()
+      })
+
+      it('getExternalFile should not filter out payload cookies when externalFileHeaderFilter is not defined and the URL is not external', async () => {
+        const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
+          '; ',
+        )
+
+        const fetchSpy = jest.spyOn(global, 'fetch')
+
+        // spin up a temporary server so fetch to the local doesn't fail
+        const server = createServer((req, res) => {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ ok: true }))
+        })
+        await new Promise((res) => server.listen(0, undefined, undefined, res))
+
+        const port = (server.address() as AddressInfo).port
+        const baseUrl = `http://localhost:${port}`
+
+        const req = await createPayloadRequest({
+          config: payload.config,
+          request: new Request(baseUrl, {
+            headers: new Headers({
+              cookie: testCookies,
+              origin: baseUrl,
+            }),
+          }),
+        })
+
+        await getExternalFile({
+          data: { url: '/api/media/image.png' },
+          req,
+          uploadConfig: { skipSafeFetch: true },
+        })
+
+        const [[, options]] = fetchSpy.mock.calls
+        const cookieHeader = options.headers.cookie
+
+        expect(cookieHeader).toContain('payload-token=123')
+        expect(cookieHeader).toContain('payload-something=789')
+        expect(cookieHeader).toContain('other-cookie=456')
+
+        fetchSpy.mockRestore()
+        await new Promise((res) => server.close(res))
       })
 
       it('should keep all cookies when externalFileHeaderFilter is defined', async () => {
