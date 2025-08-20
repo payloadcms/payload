@@ -16,6 +16,10 @@ const PointFields: CollectionConfig = {
       required: true,
     },
     {
+      name: 'camelCasePoint',
+      type: 'point',
+    },
+    {
       name: 'localized',
       type: 'point',
       label: 'Localized Point',
