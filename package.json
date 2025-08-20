@@ -168,7 +168,7 @@
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
     "mongodb-memory-server": "10.1.4",
-    "next": "15.4.4",
+    "next": "15.5.0",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",
     "pg": "8.16.3",
