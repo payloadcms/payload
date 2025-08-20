@@ -185,19 +185,19 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     typeof uploadConfig?.pasteURL === 'object' && uploadConfig.pasteURL.allowList?.length > 0
 
   const handleFileChange = useCallback(
-    (newFile: File) => {
-      if (newFile instanceof File) {
-        setFileSrc(URL.createObjectURL(newFile))
+    ({ file, isNewFile = true }: { file: File | null; isNewFile?: boolean }) => {
+      if (isNewFile && file instanceof File) {
+        setFileSrc(URL.createObjectURL(file))
       }
 
-      setValue(newFile)
+      setValue(file)
       setShowUrlInput(false)
       setUploadControlFileUrl('')
       setUploadControlFileName(null)
       setUploadControlFile(null)
 
       if (typeof onChange === 'function') {
-        onChange(newFile)
+        onChange(file)
       }
     },
     [onChange, setValue, setUploadControlFile, setUploadControlFileName, setUploadControlFileUrl],
@@ -217,7 +217,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       const updatedFileName = e.target.value
 
       if (value) {
-        handleFileChange(renameFile(value, updatedFileName))
+        handleFileChange({ file: renameFile(value, updatedFileName), isNewFile: false })
         setFilename(updatedFileName)
       }
     },
@@ -227,14 +227,14 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   const handleFileSelection = useCallback(
     (files: FileList) => {
       const fileToUpload = files?.[0]
-      handleFileChange(fileToUpload)
+      handleFileChange({ file: fileToUpload })
     },
     [handleFileChange],
   )
 
   const handleFileRemoval = useCallback(() => {
     setRemovedFile(true)
-    handleFileChange(null)
+    handleFileChange({ file: null })
     setFileSrc('')
     setFileUrl('')
     resetUploadEdits()
@@ -276,7 +276,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       const fileName = uploadControlFileName || decodeURIComponent(fileUrl.split('/').pop() || '')
       const file = new File([blob], fileName, { type: blob.type })
 
-      handleFileChange(file)
+      handleFileChange({ file })
       setUploadStatus('idle')
       return // Exit if client-side fetch succeeds
     } catch (_clientError) {
@@ -301,7 +301,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
       const file = new File([blob], fileName, { type: blob.type })
 
-      handleFileChange(file)
+      handleFileChange({ file })
       setUploadStatus('idle')
     } catch (_serverError) {
       toast.error('The provided URL is not allowed.')
@@ -368,7 +368,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   useEffect(() => {
     const handleControlFile = () => {
       if (uploadControlFile) {
-        handleFileChange(uploadControlFile)
+        handleFileChange({ file: uploadControlFile })
       }
     }
 

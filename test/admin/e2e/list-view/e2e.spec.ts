@@ -915,6 +915,18 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
+    test('should hide nested field in row in list table columns when admin.disableListColumn is true', async () => {
+      await page.goto(postsUrl.list)
+      await expect(page.locator('.table #heading-disableListColumnTextInRow')).toBeHidden()
+    })
+
+    test('should hide nested field in group in list table column when admin.disableListColumn is true', async () => {
+      await page.goto(postsUrl.list)
+      await expect(
+        page.locator('.table #heading-someGroup__disableListColumnTextInGroup'),
+      ).toBeHidden()
+    })
+
     test('should toggle columns and effect table', async () => {
       const tableHeaders = 'table > thead > tr > th'
 

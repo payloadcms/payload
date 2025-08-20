@@ -4,9 +4,11 @@ import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublish
 import path from 'path'
 import { createLocalReq, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
+import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { DraftPost } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -1503,6 +1505,79 @@ describe('Versions', () => {
       expect(responseByID.status).toBe(200)
       const jsonByID = await responseByID.json()
       expect(jsonByID.parent).toBe(collectionLocalPostID)
+    })
+
+    it('should allow query by latest', async () => {
+      async function createVersion({ title }: { title: string }) {
+        return payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title,
+            description: 'Test Description',
+          },
+        })
+      }
+
+      async function updateVersion({
+        id,
+        data,
+      }: {
+        data: Partial<DraftPost>
+        id: number | string
+      }) {
+        return payload.update({
+          collection: draftCollectionSlug,
+          id,
+          data,
+        })
+      }
+
+      const version1 = await createVersion({
+        title: 'test1',
+      })
+
+      await updateVersion({
+        id: version1.id,
+        data: {
+          title: 'test1 updated',
+        },
+      })
+
+      const newestVersion = await updateVersion({
+        id: version1.id,
+        data: {
+          title: 'test2 updated',
+        },
+      })
+
+      const query = qs.stringify(
+        {
+          where: {
+            and: [
+              {
+                latest: {
+                  equals: true,
+                },
+              },
+              {
+                parent: {
+                  equals: version1.id,
+                },
+              },
+            ],
+          },
+        },
+        {
+          addQueryPrefix: true,
+        },
+      )
+
+      const response = await restClient.GET(`/${draftCollectionSlug}/versions${query}`)
+      expect(response.status).toBe(200)
+      const json = await response.json()
+      expect(json.docs).toHaveLength(1)
+
+      expect(json.docs[0].version.title).toBe(newestVersion.title)
     })
   })
 

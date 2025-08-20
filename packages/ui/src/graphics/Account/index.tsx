@@ -3,7 +3,6 @@ import { usePathname } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-// import { RenderComponent } from '../../elements/RenderComponent/client.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DefaultAccountIcon } from './Default/index.js'
