@@ -33,11 +33,7 @@ type Args = {
  * Note: Local state is the source of truth, not the new server state that is getting merged in. This is critical for array row
  * manipulation specifically, where the user may have added, removed, or reordered rows while a request was pending and is now stale.
  *
-<<<<<<< HEAD
- * This function will also a few defaults, as well as clean up the server response in preparation for the client.
-=======
  * This function applies some defaults, as well as cleans up the server response in preparation for the client.
->>>>>>> main
  * e.g. it will set `valid` and `passesCondition` to true if undefined, and remove `addedByServer` from the response.
  */
 export const mergeServerFormState = ({
