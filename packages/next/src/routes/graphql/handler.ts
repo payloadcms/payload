@@ -97,8 +97,6 @@ export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedCon
 
 export const POST =
   (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request, _params?: Promise<{ slug?: string[] }>) => {
-    void _params
-    
     const originalRequest = request.clone()
     const req = await createPayloadRequest({
       canSetHeaders: true,
