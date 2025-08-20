@@ -46,7 +46,6 @@ const baseClass = 'collection-edit'
 export type OnSaveContext = {
   getDocPermissions?: boolean
   incrementVersionCount?: boolean
-  renderAllFields?: boolean
 }
 
 // This component receives props only on _pages_
