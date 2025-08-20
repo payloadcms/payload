@@ -15,6 +15,7 @@ export const zhTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': '页面',
     'field-selectionToUse-label': '选择范围',
     'field-sort-label': '排序方式',
+    'field-sort-order-label': '排序顺序',
     'selectionToUse-allDocuments': '使用所有文档',
     'selectionToUse-currentFilters': '使用当前过滤条件',
     'selectionToUse-currentSelection': '使用当前选择',

@@ -145,7 +145,7 @@ export const huTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Új {{label}} hozzáadása',
     addRelationship: 'Kapcsolat hozzáadása',
     addUpload: 'Feltöltés hozzáadása',
-    block: 'blokk',
+    block: 'Blokk',
     blocks: 'blokkok',
     blockType: 'Blokk típusa',
     chooseBetweenCustomTextOrDocument:
@@ -330,7 +330,7 @@ export const huTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Csoportosítás {{label}} szerint',
     import: 'Behozatal',
     isEditing: 'szerkeszt',
-    item: 'tétel',
+    item: 'Tétel',
     items: 'tételek',
     language: 'Nyelv',
     lastModified: 'Utoljára módosítva',

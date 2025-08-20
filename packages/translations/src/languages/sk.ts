@@ -146,7 +146,7 @@ export const skTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Pridať nový {{label}}',
     addRelationship: 'Pridať vzťah',
     addUpload: 'Pridať nahrávanie',
-    block: 'blok',
+    block: 'Blok',
     blocks: 'bloky',
     blockType: 'Typ bloku',
     chooseBetweenCustomTextOrDocument:
@@ -327,7 +327,7 @@ export const skTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Zoskupiť podľa {{label}}',
     import: 'Dovoz',
     isEditing: 'upravuje',
-    item: 'položka',
+    item: 'Položka',
     items: 'položky',
     language: 'Jazyk',
     lastModified: 'Naposledy zmenené',

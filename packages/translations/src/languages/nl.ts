@@ -145,7 +145,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Nieuw(e) {{label}} toevoegen',
     addRelationship: 'Nieuwe Relatie',
     addUpload: 'Upload Toevoegen',
-    block: 'blok',
+    block: 'Blok',
     blocks: 'blokken',
     blockType: 'Bloktype',
     chooseBetweenCustomTextOrDocument:
@@ -333,7 +333,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Groepeer op {{label}}',
     import: 'Importeren',
     isEditing: 'is aan het bewerken',
-    item: 'artikel',
+    item: 'Artikel',
     items: 'artikelen',
     language: 'Taal',
     lastModified: 'Laatst gewijzigd',
