@@ -144,6 +144,9 @@ export interface Post {
           }
       )[]
     | null;
+  /**
+   * If there is no value, a default row will be added by a beforeChange hook
+   */
   array?:
     | {
         customTextField?: string | null;
