@@ -94,7 +94,7 @@ export const generateFileData = async <T>({
   })
 
   const {
-    constructorOptions = {},
+    constructorOptions,
     disableLocalStorage,
     focalPoint: focalPointEnabled = true,
     formatOptions,
