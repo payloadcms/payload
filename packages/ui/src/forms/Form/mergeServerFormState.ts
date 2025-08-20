@@ -63,16 +63,19 @@ export const mergeServerFormState = ({
         acceptValues.overrideLocalChanges === false &&
         !currentState[path]?.isModified)
 
+    let sanitizedIncomingField = incomingField
+
+    if (!shouldAcceptValue) {
+      // Note: do not delete properties off incomingField as this will mutate the original object
+      // Instead, omit them from the destructured object by excluding specific keys
+      // This will also ensure we don't set `undefined` into the result unnecessarily
+      const { initialValue, value, ...rest } = incomingField
+      sanitizedIncomingField = rest
+    }
+
     newState[path] = {
       ...currentState[path],
-      ...(shouldAcceptValue
-        ? incomingField
-        : {
-            ...incomingField,
-            // Note: Override the value instead of deleting it, as this avoid mutating incomingField
-            initialValue: currentState[path]?.initialValue,
-            value: currentState[path]?.value,
-          }),
+      ...sanitizedIncomingField,
     }
 
     if (
