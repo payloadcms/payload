@@ -11,8 +11,7 @@ import {
 } from 'payload'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type CopyDataFromLocaleArgs = {
   collectionSlug?: CollectionSlug

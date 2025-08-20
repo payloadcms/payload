@@ -9,8 +9,7 @@ import { getCurrentDate } from '../utilities/getCurrentDate.js'
 import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
 import { getWorkflowRetryBehavior } from './getWorkflowRetryBehavior.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export async function handleTaskError({
   error,

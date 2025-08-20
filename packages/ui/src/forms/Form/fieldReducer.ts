@@ -10,8 +10,7 @@ import type { FieldAction } from './types.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
 import { flattenRows, separateRows } from './rows.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 /**
  * Reducer which modifies the form field state (all the current data of the fields in the form). When called using dispatch, it will return a new state object.
