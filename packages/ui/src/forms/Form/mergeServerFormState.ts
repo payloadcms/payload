@@ -75,11 +75,6 @@ export const mergeServerFormState = ({
           }),
     }
 
-    newState[path] = {
-      ...currentState[path],
-      ...incomingField,
-    }
-
     if (
       currentState[path] &&
       'errorPaths' in currentState[path] &&
