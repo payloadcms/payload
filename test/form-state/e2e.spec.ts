@@ -36,11 +36,6 @@ let context: BrowserContext
 let payload: PayloadTestSDK<Config>
 let serverURL: string
 
-const removeArrayRow = async (page, field: string, rowIndex: number) => {
-  await page.locator(`#field-${field} #array-row-${rowIndex} .array-actions__button`).click()
-  await page.locator(`#field-${field} #array-row-${rowIndex} .array-actions__remove`).click()
-}
-
 test.describe('Form State', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
@@ -318,7 +313,7 @@ test.describe('Form State', () => {
 
     await page.locator('#field-array #array-row-0').isVisible()
 
-    await removeArrayRow(page, 'array', 0)
+    await removeArrayRow(page, { fieldName: 'array' })
 
     await page.locator('#field-array .array-row-0').isHidden()
 
