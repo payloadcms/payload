@@ -59,14 +59,15 @@ export const mergeServerFormState = ({
         acceptValues.overrideLocalChanges !== false &&
         !currentState[path].isModified)
 
-    if (!shouldAcceptValue) {
-      delete incomingField.value
-      delete incomingField.initialValue
-    }
-
     newState[path] = {
       ...currentState[path],
-      ...incomingField,
+      ...(shouldAcceptValue
+        ? incomingField
+        : {
+            ...incomingField,
+            initialValue: currentState[path]?.initialValue,
+            value: currentState[path]?.value,
+          }),
     }
 
     if (
