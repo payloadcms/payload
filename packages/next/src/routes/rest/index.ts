@@ -30,7 +30,7 @@ const handlerBuilder =
 
     initedOGEndpoint = true
 
-    const awaitedParams = await args.params
+    const awaitedParams = args ? await args.params : undefined
 
     const response = await handleEndpoints({
       config,
