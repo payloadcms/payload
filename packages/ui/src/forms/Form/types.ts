@@ -23,10 +23,6 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
      * Arbitrary context passed to the onSuccess callback.
      */
     context?: C
-    /**
-     * The form state used to retrieve the resulting json data. May be stale.
-     */
-    formState?: FormState
   },
 ) => Promise<FormState | void> | void
 

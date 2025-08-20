@@ -265,7 +265,7 @@ export function DefaultEditView({
 
   const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
     async (json, options) => {
-      const { context, formState } = options || {}
+      const { context } = options || {}
 
       const controller = handleAbortRef(abortOnSaveRef)
 
@@ -335,10 +335,9 @@ export function DefaultEditView({
           data: document,
           docPermissions,
           docPreferences,
-          formState,
           globalSlug,
           operation,
-          renderAllFields: false,
+          renderAllFields: true,
           returnLockStatus: false,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
