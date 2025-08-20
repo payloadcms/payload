@@ -195,16 +195,13 @@ export function AuthProvider({
       if (user && user.collection) {
         await requests.post(`${serverURL}${apiRoute}/${user.collection}/logout`)
       }
-      return true
-    } catch (e) {
-      toast.error(`Logging out failed: ${e.message}`)
-      return false
-    } finally {
-      // Always clear local auth state
-      setNewUser(null)
-      revokeTokenAndExpire()
+    } catch (_) {
+      // fail silently and log the user out in state
     }
-  }, [apiRoute, revokeTokenAndExpire, serverURL, setNewUser, user])
+
+    setNewUser(null)
+    return true
+  }, [apiRoute, serverURL, setNewUser, user])
 
   const refreshPermissions = useCallback(
     async ({ locale }: { locale?: string } = {}) => {
