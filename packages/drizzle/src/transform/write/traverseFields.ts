@@ -129,8 +129,23 @@ export const traverseFields = ({
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
 
       if (isLocalized) {
-        if (typeof data[field.name] === 'object' && data[field.name] !== null) {
-          Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
+        let value: {
+          [locale: string]: unknown[]
+        } = data[field.name] as any
+
+        let push = false
+        if (typeof value === 'object' && '$push' in value) {
+          value = value.$push as any
+          push = true
+        }
+
+        if (typeof value === 'object' && value !== null) {
+          Object.entries(value).forEach(([localeKey, _localeData]) => {
+            let localeData = _localeData
+            if (push && !Array.isArray(localeData)) {
+              localeData = [localeData]
+            }
+
             if (Array.isArray(localeData)) {
               const newRows = transformArray({
                 adapter,
@@ -152,22 +167,25 @@ export const traverseFields = ({
                 textsToDelete,
                 withinArrayOrBlockLocale: localeKey,
               })
-              if (!arrays[arrayTableName]) {
-                arrays[arrayTableName] = []
+
+              if (push) {
+                if (!arraysToPush[arrayTableName]) {
+                  arraysToPush[arrayTableName] = []
+                }
+                arraysToPush[arrayTableName] = arraysToPush[arrayTableName].concat(newRows)
+              } else {
+                if (!arrays[arrayTableName]) {
+                  arrays[arrayTableName] = []
+                }
+                arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
               }
-              arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
             }
           })
         }
       } else {
         let value = data[field.name]
         let push = false
-        if (
-          // TODO do this for localized as well in DRY way
-
-          typeof value === 'object' &&
-          '$push' in value
-        ) {
+        if (typeof value === 'object' && '$push' in value) {
           value = Array.isArray(value.$push) ? value.$push : [value.$push]
           push = true
         }
