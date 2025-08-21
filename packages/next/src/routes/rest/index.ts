@@ -30,12 +30,13 @@ const handlerBuilder =
 
     initedOGEndpoint = true
 
-    const awaitedParams = args ? await args.params : undefined
-    const slugArr = awaitedParams?.slug ?? []
+    const awaitedParams = await args.params
 
     const response = await handleEndpoints({
       config,
-      path: slugArr.length ? `${awaitedConfig.routes.api}/${slugArr.join('/')}` : undefined,
+      path: awaitedParams
+        ? `${awaitedConfig.routes.api}/${awaitedParams.slug.join('/')}`
+        : undefined,
       request,
     })
 
