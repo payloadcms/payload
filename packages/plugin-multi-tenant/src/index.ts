@@ -432,7 +432,7 @@ export const multiTenantPlugin =
         ],
         label: pluginConfig.tenantSelectorLabel || undefined,
       },
-      path: '@payloadcms/plugin-multi-tenant/client#TenantSelector',
+      path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelector',
     })
 
     /**
