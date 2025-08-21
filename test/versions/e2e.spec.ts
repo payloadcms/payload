@@ -1629,6 +1629,19 @@ describe('Versions', () => {
       )
     })
 
+    test('correctly renders diff for text within rows within unnamed tabs within block fields', async () => {
+      await navigateToDiffVersionView()
+
+      const textInBlock = page.locator('[data-field-path="blocks.2.textInRowInUnnamedTab2InBlock"]')
+
+      await expect(textInBlock.locator('.html-diff__diff-old')).toHaveText(
+        'textInRowInUnnamedTab2InBlock',
+      )
+      await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
+        'textInRowInUnnamedTab2InBlock2',
+      )
+    })
+
     test('correctly renders diff for checkbox fields', async () => {
       await navigateToDiffVersionView()
 
