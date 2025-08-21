@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { draftMode } from 'next/headers'
+import { draftMode, cookies as getCookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
@@ -7,17 +7,11 @@ import { CollectionSlug, TypedLocale } from 'payload'
 
 const payloadToken = 'payload-token'
 
-export async function GET(
-  req: Request & {
-    cookies: {
-      get: (name: string) => {
-        value: string
-      }
-    }
-  },
-): Promise<Response> {
+export async function GET(req: Request): Promise<Response> {
   const payload = await getPayload({ config: configPromise })
-  const token = req.cookies.get(payloadToken)?.value
+  const cookies = await getCookies()
+
+  const token = cookies.get(payloadToken)?.value
   const { searchParams } = new URL(req.url)
   const path = searchParams.get('path')
   const collection = searchParams.get('collection') as CollectionSlug
@@ -51,7 +45,7 @@ export async function GET(
     let user
 
     try {
-      user = jwt.verify(token, payload.secret)
+      user = jwt.verify(token as string, payload.secret)
     } catch (error) {
       payload.logger.error('Error verifying token for live preview:', error)
     }
