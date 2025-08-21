@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+import type { BasePayload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
@@ -23,8 +24,10 @@ import {
 } from '../helpers/e2e/selectInput.js'
 import { openNav } from '../helpers/e2e/toggleNav.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
+import { seed } from './seed/index.js'
 import { menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -41,7 +44,7 @@ test.describe('Multi Tenant', () => {
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
-    const { serverURL: serverFromInit } = await initPayloadE2ENoConfig<Config>({ dirname })
+    const { serverURL: serverFromInit, payload } = await initPayloadE2ENoConfig<Config>({ dirname })
     serverURL = serverFromInit
     globalMenuURL = new AdminUrlUtil(serverURL, menuSlug)
     menuItemsURL = new AdminUrlUtil(serverURL, menuItemsSlug)
@@ -52,6 +55,14 @@ test.describe('Multi Tenant', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'multiTenant',
+    })
+    if (seed) {
+      await seed(payload as unknown as BasePayload)
+      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+    }
   })
 
   test.describe('Filters', () => {
