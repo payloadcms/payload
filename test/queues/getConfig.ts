@@ -116,7 +116,7 @@ export const getConfig: () => Partial<Config> = () => ({
       },
       // add as many cron jobs as you want
     ],
-    shouldAutoRun: () => true,
+    // shouldAutoRun: () => true,
     jobsCollectionOverrides: ({ defaultJobsCollection }) => {
       return {
         ...defaultJobsCollection,
