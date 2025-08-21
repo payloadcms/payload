@@ -2,6 +2,7 @@ import type { BrowserContext, Locator, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
+import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
 import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import * as path from 'path'
 import { wait } from 'payload/shared'
@@ -498,7 +499,7 @@ test.describe('Bulk Edit', () => {
 
     await wait(500)
 
-    await field.locator('button.array-field__add-row').click()
+    await addArrayRow(page, { fieldName: 'array' })
 
     const row = page.locator(`#array-row-0`)
     const toggler = row.locator('button.collapsible__toggle')

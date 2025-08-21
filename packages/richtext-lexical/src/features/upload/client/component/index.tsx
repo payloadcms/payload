@@ -5,14 +5,15 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
-  File,
   formatDrawerSlug,
+  Thumbnail,
   useConfig,
   useEditDepth,
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
+import { isImage } from 'payload/shared'
 import React, { useCallback, useId, useReducer, useRef, useState } from 'react'
 
 import type { BaseClientFeatureProps } from '../../../typesClient.js'
@@ -142,18 +143,11 @@ const Component: React.FC<ElementProps> = (props) => {
     <div className={baseClass} contentEditable={false} ref={uploadRef}>
       <div className={`${baseClass}__card`}>
         <div className={`${baseClass}__topRow`}>
-          {/* TODO: migrate to use @payloadcms/ui/elements/Thumbnail component */}
           <div className={`${baseClass}__thumbnail`}>
-            {thumbnailSRC ? (
-              <img
-                alt={data?.filename}
-                data-lexical-upload-id={value}
-                data-lexical-upload-relation-to={relationTo}
-                src={thumbnailSRC}
-              />
-            ) : (
-              <File />
-            )}
+            <Thumbnail
+              collectionSlug={relationTo}
+              fileSrc={isImage(data?.mimeType) ? thumbnailSRC : null}
+            />
           </div>
           <div className={`${baseClass}__topRowRightPanel`}>
             <div className={`${baseClass}__collectionLabel`}>

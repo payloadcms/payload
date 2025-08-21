@@ -8,6 +8,7 @@ import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
+import type { FormOnSuccess } from '../../forms/Form/types.js'
 import type { LockedState } from '../../utilities/buildFormState.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
@@ -41,6 +42,11 @@ import { SetDocumentTitle } from './SetDocumentTitle/index.js'
 import './index.scss'
 
 const baseClass = 'collection-edit'
+
+export type OnSaveContext = {
+  getDocPermissions?: boolean
+  incrementVersionCount?: boolean
+}
 
 // This component receives props only on _pages_
 // When rendered within a drawer, props are empty
@@ -256,8 +262,10 @@ export function DefaultEditView({
     user?.id,
   ])
 
-  const onSave = useCallback(
-    async (json, context?: Record<string, unknown>): Promise<FormState> => {
+  const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
+    async (json, options) => {
+      const { context, formState } = options || {}
+
       const controller = handleAbortRef(abortOnSaveRef)
 
       const document = json?.doc || json?.result
@@ -290,9 +298,10 @@ export function DefaultEditView({
         const operation = id ? 'update' : 'create'
 
         void onSaveFromContext({
-          ...json,
+          ...(json as Record<string, unknown>),
           context,
           operation,
+          // @ts-expect-error todo: this is not right, should be under `doc`?
           updatedAt:
             operation === 'update'
               ? new Date().toISOString()
@@ -312,7 +321,9 @@ export function DefaultEditView({
         resetUploadEdits()
       }
 
-      await getDocPermissions(json)
+      if (context?.getDocPermissions !== false) {
+        await getDocPermissions(json)
+      }
 
       if (id || globalSlug) {
         const docPreferences = await getDocPreferences()
@@ -323,9 +334,10 @@ export function DefaultEditView({
           data: document,
           docPermissions,
           docPreferences,
+          formState,
           globalSlug,
           operation,
-          renderAllFields: true,
+          renderAllFields: false,
           returnLockStatus: false,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
@@ -397,13 +409,11 @@ export function DefaultEditView({
         formState: prevFormState,
         globalSlug,
         operation,
-        skipValidation: !submitted,
-        // Performance optimization: Setting it to false ensure that only fields that have explicit requireRender set in the form state will be rendered (e.g. new array rows).
-        // We only want to render ALL fields on initial render, not in onChange.
         renderAllFields: false,
         returnLockStatus: isLockingEnabled,
         schemaPath: schemaPathSegments.join('.'),
         signal: controller.signal,
+        skipValidation: !submitted,
         updateLastEdited,
       })
 

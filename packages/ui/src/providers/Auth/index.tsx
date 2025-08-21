@@ -192,13 +192,17 @@ export function AuthProvider({
 
   const logOut = useCallback(async () => {
     try {
-      await requests.post(`${serverURL}${apiRoute}/${user.collection}/logout`)
-      setNewUser(null)
-      revokeTokenAndExpire()
+      if (user && user.collection) {
+        await requests.post(`${serverURL}${apiRoute}/${user.collection}/logout`)
+      }
       return true
     } catch (e) {
       toast.error(`Logging out failed: ${e.message}`)
       return false
+    } finally {
+      // Always clear local auth state
+      setNewUser(null)
+      revokeTokenAndExpire()
     }
   }, [apiRoute, revokeTokenAndExpire, serverURL, setNewUser, user])
 

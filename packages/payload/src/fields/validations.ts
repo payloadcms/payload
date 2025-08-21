@@ -1,8 +1,7 @@
 import Ajv from 'ajv'
 import ObjectIdImport from 'bson-objectid'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 import type { TFunction } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'

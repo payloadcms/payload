@@ -13,8 +13,8 @@ import classes from './index.module.scss'
 
 const { breakpoints } = cssVariables
 
-const NextImage = (NextImageWithDefault.default ||
-  NextImageWithDefault) as typeof NextImageWithDefault.default
+const NextImage =
+  'default' in NextImageWithDefault ? NextImageWithDefault.default : NextImageWithDefault
 
 export const Image: React.FC<MediaProps> = (props) => {
   const {
