@@ -492,11 +492,24 @@ export const transform = ({
       if (value && typeof value === 'object' && '$push' in value) {
         const push = value.$push
 
-        if (Array.isArray(push)) {
-          $push[`${parentPath}${field.name}`] = { $each: push }
-        } else if (typeof push === 'object') {
-          $push[`${parentPath}${field.name}`] = push
+        if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
+          if (typeof push === 'object' && push !== null) {
+            Object.entries(push).forEach(([localeKey, localeData]) => {
+              if (Array.isArray(localeData)) {
+                $push[`${parentPath}${field.name}.${localeKey}`] = { $each: localeData }
+              } else if (typeof localeData === 'object') {
+                $push[`${parentPath}${field.name}.${localeKey}`] = localeData
+              }
+            })
+          }
+        } else {
+          if (Array.isArray(push)) {
+            $push[`${parentPath}${field.name}`] = { $each: push }
+          } else if (typeof push === 'object') {
+            $push[`${parentPath}${field.name}`] = push
+          }
         }
+
         delete ref[field.name]
       }
     }
