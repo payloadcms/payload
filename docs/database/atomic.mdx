@@ -83,13 +83,13 @@ await payload.db.updateOne({
 
 ## `$inc`
 
-Use $inc to adjust a number field by a given amount. Positive values increment, negative values decrement.
+Use `$inc` to adjust a number field by a given amount. Positive values increment, negative values decrement.
 
 This only works if the update data is "simple", meaning no:
 
 - Arrays / Blocks
 - Localized Fields
-- hasMany: true text / select / number / relationship fields
+- `hasMany: true`` text / select / number / relationship fields
 - relationship fields with relationTo as an array
 
 ## Example: Increment a counter
