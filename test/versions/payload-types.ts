@@ -197,7 +197,38 @@ export interface Post {
 export interface AutosavePost {
   id: string;
   title: string;
+  computedTitle?: string | null;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   description: string;
+  array?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -366,7 +397,6 @@ export interface Diff {
               textInNamedTab1InBlock?: string | null;
             };
             textInUnnamedTab2InBlock?: string | null;
-            textInUnnamedTab2InBlockAccessFalse?: string | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'TabsBlock';
@@ -469,7 +499,6 @@ export interface Diff {
   };
   textInUnnamedTab2?: string | null;
   text?: string | null;
-  textCannotRead?: string | null;
   textArea?: string | null;
   upload?: (string | null) | Media;
   uploadHasMany?: (string | Media)[] | null;
@@ -787,7 +816,16 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
+  computedTitle?: T;
+  richText?: T;
+  json?: T;
   description?: T;
+  array?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -960,7 +998,6 @@ export interface DiffSelect<T extends boolean = true> {
                     textInNamedTab1InBlock?: T;
                   };
               textInUnnamedTab2InBlock?: T;
-              textInUnnamedTab2InBlockAccessFalse?: T;
               id?: T;
               blockName?: T;
             };
@@ -995,7 +1032,6 @@ export interface DiffSelect<T extends boolean = true> {
       };
   textInUnnamedTab2?: T;
   text?: T;
-  textCannotRead?: T;
   textArea?: T;
   upload?: T;
   uploadHasMany?: T;
@@ -1319,6 +1355,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

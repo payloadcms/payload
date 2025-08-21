@@ -125,6 +125,7 @@
 
     &--force-sidebar-wrap {
       display: block;
+      isolation: isolate;
 
       .document-fields {
         &__main {

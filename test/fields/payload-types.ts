@@ -1129,6 +1129,22 @@ export interface RowField {
   no_set_width_within_row_b?: string | null;
   no_set_width_within_row_c?: string | null;
   field_20_percent_width_within_row_d?: string | null;
+  leftColumn?:
+    | {
+        leftText?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'leftTextBlock';
+      }[]
+    | null;
+  rightColumn?:
+    | {
+        rightText?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'rightTextBlock';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1278,6 +1294,11 @@ export interface PointField {
    * @maxItems 2
    */
   point: [number, number];
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  camelCasePoint?: [number, number] | null;
   /**
    * @minItems 2
    * @maxItems 2
@@ -2760,6 +2781,28 @@ export interface RowFieldsSelect<T extends boolean = true> {
   no_set_width_within_row_b?: T;
   no_set_width_within_row_c?: T;
   field_20_percent_width_within_row_d?: T;
+  leftColumn?:
+    | T
+    | {
+        leftTextBlock?:
+          | T
+          | {
+              leftText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  rightColumn?:
+    | T
+    | {
+        rightTextBlock?:
+          | T
+          | {
+              rightText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2857,6 +2900,7 @@ export interface NumberFieldsSelect<T extends boolean = true> {
  */
 export interface PointFieldsSelect<T extends boolean = true> {
   point?: T;
+  camelCasePoint?: T;
   localized?: T;
   group?:
     | T

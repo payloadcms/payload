@@ -270,7 +270,7 @@ export type EnableFoldersOptions = {
   debug?: boolean
 }
 
-export type BaseListFilter = (args: {
+export type BaseFilter = (args: {
   limit: number
   locale?: TypedLocale
   page: number
@@ -278,7 +278,31 @@ export type BaseListFilter = (args: {
   sort: string
 }) => null | Promise<null | Where> | Where
 
+/**
+ * @deprecated Use `BaseFilter` instead.
+ */
+export type BaseListFilter = BaseFilter
+
 export type CollectionAdminOptions = {
+  /**
+   * Defines a default base filter which will be applied in the following parts of the admin panel:
+   * - List View
+   * - Relationship fields for internal links within the Lexical editor
+   *
+   * This is especially useful for plugins like multi-tenant. For example,
+   * a user may have access to multiple tenants, but should only see content
+   * related to the currently active or selected tenant in those places.
+   */
+  baseFilter?: BaseFilter
+  /**
+   * @deprecated Use `baseFilter` instead. If both are defined,
+   * `baseFilter` will take precedence. This property remains only
+   * for backward compatibility and may be removed in a future version.
+   *
+   * Originally, `baseListFilter` was intended to filter only the List View
+   * in the admin panel. However, base filtering is often required in other areas
+   * such as internal link relationships in the Lexical editor.
+   */
   baseListFilter?: BaseListFilter
   /**
    * Custom admin components

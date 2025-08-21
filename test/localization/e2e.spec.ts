@@ -2,6 +2,7 @@ import type { BrowserContext, Page } from '@playwright/test'
 import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
+import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { upsertPreferences } from 'helpers/e2e/preferences.js'
@@ -420,8 +421,7 @@ describe('Localization', () => {
       const nestedArrayURL = new AdminUrlUtil(serverURL, nestedToArrayAndBlockCollectionSlug)
       await page.goto(nestedArrayURL.create)
       await changeLocale(page, 'ar')
-      const addArrayRow = page.locator('#field-topLevelArray .array-field__add-row')
-      await addArrayRow.click()
+      await addArrayRow(page, { fieldName: 'topLevelArray' })
 
       const arrayField = page.locator('#field-topLevelArray__0__localizedText')
       await expect(arrayField).toBeVisible()
@@ -676,8 +676,7 @@ describe('Localization', () => {
 async function createLocalizedArrayItem(page: Page, url: AdminUrlUtil) {
   await changeLocale(page, defaultLocale)
   await page.goto(url.create)
-  const addArrayRow = page.locator('#field-items .array-field__add-row')
-  await addArrayRow.click()
+  await addArrayRow(page, { fieldName: 'items' })
   const textField = page.locator('#field-items__0__text')
   await textField.fill('test')
   await saveDocAndAssert(page)

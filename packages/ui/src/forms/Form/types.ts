@@ -10,9 +10,25 @@ import type {
 import type React from 'react'
 import type { Dispatch } from 'react'
 
+import type { AcceptValues } from './mergeServerFormState.js'
+
 export type Preferences = {
   [key: string]: unknown
 }
+
+export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
+  json: T,
+  options?: {
+    /**
+     * Arbitrary context passed to the onSuccess callback.
+     */
+    context?: C
+    /**
+     * Form state at the time of the request used to retrieve the JSON response.
+     */
+    formState?: FormState
+  },
+) => Promise<FormState | void> | void
 
 export type FormProps = {
   beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
@@ -52,7 +68,7 @@ export type FormProps = {
   log?: boolean
   onChange?: ((args: { formState: FormState; submitted?: boolean }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
-  onSuccess?: (json: unknown) => Promise<FormState | void> | void
+  onSuccess?: FormOnSuccess
   redirect?: string
   submitted?: boolean
   uuid?: string
@@ -68,18 +84,43 @@ export type FormProps = {
     }
 )
 
-export type SubmitOptions = {
+export type SubmitOptions<C = Record<string, unknown>> = {
+  acceptValues?: AcceptValues
   action?: string
+  /**
+   * @experimental - Note: this property is experimental and may change in the future. Use at your own discretion.
+   * If you want to pass additional data to the onSuccess callback, you can use this context object.
+   */
+  context?: C
+  /**
+   * When true, will disable the form while it is processing.
+   * @default true
+   */
+  disableFormWhileProcessing?: boolean
+  /**
+   * When true, will disable the success toast after form submission.
+   * @default false
+   */
+  disableSuccessStatus?: boolean
   method?: string
   overrides?: ((formState) => FormData) | Record<string, unknown>
+  /**
+   * When true, will skip validation before submitting the form.
+   * @default false
+   */
   skipValidation?: boolean
 }
 
 export type DispatchFields = React.Dispatch<any>
-export type Submit = (
-  options?: SubmitOptions,
+
+export type Submit = <T extends Response, C extends Record<string, unknown>>(
+  options?: SubmitOptions<C>,
   e?: React.FormEvent<HTMLFormElement>,
-) => Promise<void>
+) => Promise</**
+ * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use at your own discretion.
+ * Returns the form state and the response from the server.
+ */
+{ formState?: FormState; res: T } | void>
 
 export type ValidateForm = () => Promise<boolean>
 
@@ -89,7 +130,13 @@ export type CreateFormData = (
    * If mergeOverrideData true, the data will be merged with the existing data in the form state.
    * @default true
    */
-  options?: { mergeOverrideData?: boolean },
+  options?: {
+    /**
+     * If provided, will use this instead of of derived data from the current form state.
+     */
+    data?: Data
+    mergeOverrideData?: boolean
+  },
 ) => FormData | Promise<FormData>
 
 export type GetFields = () => FormState
@@ -151,7 +198,7 @@ export type ADD_ROW = {
 }
 
 export type MERGE_SERVER_STATE = {
-  acceptValues?: boolean
+  acceptValues?: AcceptValues
   prevStateRef: React.RefObject<FormState>
   serverState: FormState
   type: 'MERGE_SERVER_STATE'
