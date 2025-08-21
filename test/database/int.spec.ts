@@ -3120,6 +3120,48 @@ describe('database', () => {
     })
   })
 
+  it('should allow atomic array updates using $push with single value, localized array', async () => {
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        arrayWithIDsLocalized: [
+          {
+            text: 'some text',
+          },
+        ],
+        title: 'post',
+      },
+    })
+
+    const res = (await payload.db.updateOne({
+      data: {
+        // Locales used => no optimized row update => need to pass full data, incuding title
+        title: 'post',
+        arrayWithIDsLocalized: {
+          $push: {
+            en: {
+              text: 'some text 2',
+              id: new mongoose.Types.ObjectId().toHexString(),
+            },
+            es: {
+              text: 'some text 2 es',
+              id: new mongoose.Types.ObjectId().toHexString(),
+            },
+          },
+        },
+      },
+      collection: 'posts',
+      id: post.id,
+    })) as unknown as any
+
+    expect(res.arrayWithIDsLocalized?.en).toHaveLength(2)
+    expect(res.arrayWithIDsLocalized?.en?.[0]?.text).toBe('some text')
+    expect(res.arrayWithIDsLocalized?.en?.[1]?.text).toBe('some text 2')
+
+    expect(res.arrayWithIDsLocalized?.es).toHaveLength(1)
+    expect(res.arrayWithIDsLocalized?.es?.[0]?.text).toBe('some text 2 es')
+  })
+
   it('should allow atomic array updates using $push with multiple values, unlocalized', async () => {
     const post = await payload.create({
       collection: 'posts',
@@ -3156,6 +3198,55 @@ describe('database', () => {
     expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
     expect(res.arrayWithIDs?.[1]?.text).toBe('some text 2')
     expect(res.arrayWithIDs?.[2]?.text).toBe('some text 3')
+  })
+
+  it('should allow atomic array updates using $push with multiple values, localized array', async () => {
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        arrayWithIDsLocalized: [
+          {
+            text: 'some text',
+          },
+        ],
+        title: 'post',
+      },
+    })
+
+    const res = (await payload.db.updateOne({
+      data: {
+        // Locales used => no optimized row update => need to pass full data, incuding title
+        title: 'post',
+        arrayWithIDsLocalized: {
+          $push: {
+            en: {
+              text: 'some text 2',
+              id: new mongoose.Types.ObjectId().toHexString(),
+            },
+            es: [
+              {
+                text: 'some text 2 es',
+                id: new mongoose.Types.ObjectId().toHexString(),
+              },
+              {
+                text: 'some text 3 es',
+                id: new mongoose.Types.ObjectId().toHexString(),
+              },
+            ],
+          },
+        },
+      },
+      collection: 'posts',
+      id: post.id,
+    })) as unknown as any
+
+    expect(res.arrayWithIDsLocalized?.en).toHaveLength(2)
+    expect(res.arrayWithIDsLocalized?.en?.[0]?.text).toBe('some text')
+    expect(res.arrayWithIDsLocalized?.en?.[1]?.text).toBe('some text 2')
+
+    expect(res.arrayWithIDsLocalized?.es).toHaveLength(2)
+    expect(res.arrayWithIDsLocalized?.es?.[0]?.text).toBe('some text 2 es')
+    expect(res.arrayWithIDsLocalized?.es?.[1]?.text).toBe('some text 3 es')
   })
 
   it('should support x3 nesting blocks', async () => {

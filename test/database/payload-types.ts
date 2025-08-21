@@ -170,27 +170,11 @@ export interface UserAuthOperations {
 export interface Category {
   id: string;
   title?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "simple".
- */
-export interface Simple {
-  id: string;
-  text?: string | null;
-  number?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories-custom-id".
- */
-export interface CategoriesCustomId {
-  id: number;
+  hideout?: {
+    camera1?: {
+      time1Image?: (string | null) | Post;
+    };
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -234,6 +218,13 @@ export interface Post {
   arrayWithIDs?:
     | {
         text?: string | null;
+        textLocalized?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithIDsLocalized?:
+    | {
+        text?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -251,6 +242,27 @@ export interface Post {
   tab?: {
     text?: string | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-custom-id".
+ */
+export interface CategoriesCustomId {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple".
+ */
+export interface Simple {
+  id: string;
+  text?: string | null;
+  number?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -749,6 +761,15 @@ export interface PayloadMigration {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
+  hideout?:
+    | T
+    | {
+        camera1?:
+          | T
+          | {
+              time1Image?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -821,6 +842,13 @@ export interface PostsSelect<T extends boolean = true> {
   hasTransaction?: T;
   throwAfterChange?: T;
   arrayWithIDs?:
+    | T
+    | {
+        text?: T;
+        textLocalized?: T;
+        id?: T;
+      };
+  arrayWithIDsLocalized?:
     | T
     | {
         text?: T;
