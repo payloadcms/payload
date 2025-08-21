@@ -25,9 +25,7 @@ describe('Sort', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('Local API', () => {
@@ -630,6 +628,77 @@ describe('Sort', () => {
           parseInt(docDuplicatedAfterReorder._order!, 16),
         )
       })
+
+      it('should not break with existing base 62 digits', async () => {
+        const collection = orderableSlug
+        // create seed docs with aa, aA, a0 (legacy base64 chars for backward compatibility)
+        const aa = await payload.create({
+          collection,
+          data: {
+            title: 'Base62 aa',
+            _order: 'aa',
+          },
+        })
+        const aA = await payload.create({
+          collection,
+          data: {
+            title: 'Base62 aA',
+            _order: 'aA',
+          },
+        })
+        const a0 = await payload.create({
+          collection,
+          data: {
+            title: 'Base62 a0',
+            _order: 'a0',
+          },
+        })
+
+        const orderableDoc = await payload.create({
+          collection,
+          data: {
+            title: 'Base62 new',
+          },
+        })
+
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [orderableDoc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_order',
+            target: {
+              id: aA.id,
+              key: aA._order,
+            },
+          }),
+        })
+
+        expect(res.status).toStrictEqual(200)
+
+        const { docs } = await payload.find({
+          collection,
+          sort: '-_order',
+          where: {
+            title: {
+              contains: 'Base62 ',
+            },
+          },
+        })
+
+        expect(docs).toHaveLength(4)
+        const ids = [aa.id, aA.id, a0.id, orderableDoc.id]
+        expect(docs.every(({ id }) => ids.includes(id))).toBe(true)
+
+        const a0Index = docs.findIndex((d) => d.id === a0.id)
+        const aAIndex = docs.findIndex((d) => d.id === aA.id)
+        const orderableIndex = docs.findIndex((d) => d.id === orderableDoc.id)
+
+        // The reordered document should be positioned after the target (aA) since newKeyWillBe: 'greater'
+        // and before the target (a0) since (a0) is the smallest fractional index
+        expect(orderableIndex).toBeGreaterThan(aAIndex)
+        expect(orderableIndex).toBeLessThan(a0Index)
+      })
     })
 
     describe('Orderable join', () => {
@@ -696,6 +765,7 @@ describe('Sort', () => {
         expect(orderable2._orderable_orderableJoinField1_order).toBe('e4')
         expect(orderable4._orderable_orderableJoinField1_order).toBe('e2')
       })
+
       it('should sort join docs in the correct', async () => {
         related = await payload.findByID({
           collection: orderableJoinSlug,

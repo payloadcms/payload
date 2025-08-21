@@ -1,19 +1,21 @@
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { useRouter } from 'next/navigation.js'
 import React from 'react'
 import { toast } from 'sonner'
 
 import { Dots } from '../../../icons/Dots/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
+import { useRouteCache } from '../../../providers/RouteCache/index.js'
+import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
+import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
 import { Translation } from '../../Translation/index.js'
 import { MoveItemsToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
-import { RenameFolderDrawer } from '../Drawers/RenameFolder/index.js'
 
-const renameFolderDrawerSlug = 'rename-folder--current-folder'
 const moveToFolderDrawerSlug = 'move-to-folder--current-folder'
 const confirmDeleteDrawerSlug = 'confirm-many-delete'
 
@@ -23,16 +25,24 @@ type Props = {
   className?: string
 }
 export function CurrentFolderActions({ className }: Props) {
+  const router = useRouter()
+  const { startRouteTransition } = useRouteTransition()
   const {
     breadcrumbs,
     currentFolder,
     folderCollectionConfig,
     folderCollectionSlug,
+    folderFieldName,
     folderID,
+    getFolderRoute,
     moveToFolder,
-    renameFolder,
-    setFolderID,
   } = useFolder()
+  const [FolderDocumentDrawer, , { closeDrawer: closeFolderDrawer, openDrawer: openFolderDrawer }] =
+    useDocumentDrawer({
+      id: folderID,
+      collectionSlug: folderCollectionSlug,
+    })
+  const { clearRouteCache } = useRouteCache()
   const { config } = useConfig()
   const { routes, serverURL } = config
   const { closeModal, openModal } = useModal()
@@ -43,8 +53,19 @@ export function CurrentFolderActions({ className }: Props) {
       credentials: 'include',
       method: 'DELETE',
     })
-    await setFolderID({ folderID: breadcrumbs[breadcrumbs.length - 2]?.id || null })
-  }, [breadcrumbs, folderCollectionSlug, folderID, routes.api, serverURL, setFolderID])
+    startRouteTransition(() => {
+      router.push(getFolderRoute(breadcrumbs[breadcrumbs.length - 2]?.id || null))
+    })
+  }, [
+    breadcrumbs,
+    folderCollectionSlug,
+    folderID,
+    getFolderRoute,
+    router,
+    serverURL,
+    routes.api,
+    startRouteTransition,
+  ])
 
   if (!folderID) {
     return null
@@ -59,10 +80,12 @@ export function CurrentFolderActions({ className }: Props) {
           <PopupList.ButtonGroup>
             <PopupList.Button
               onClick={() => {
-                openModal(renameFolderDrawerSlug)
+                openFolderDrawer()
               }}
             >
-              {t('folder:renameFolder')}
+              {t('general:editLabel', {
+                label: getTranslation(folderCollectionConfig.labels.singular, i18n),
+              })}
             </PopupList.Button>
             <PopupList.Button
               onClick={() => {
@@ -84,6 +107,9 @@ export function CurrentFolderActions({ className }: Props) {
       <MoveItemsToFolderDrawer
         action="moveItemToFolder"
         drawerSlug={moveToFolderDrawerSlug}
+        folderAssignedCollections={currentFolder?.value.folderType}
+        folderCollectionSlug={folderCollectionSlug}
+        folderFieldName={folderFieldName}
         fromFolderID={currentFolder?.value.id}
         fromFolderName={currentFolder?.value._folderOrDocumentTitle}
         itemsToMove={[currentFolder]}
@@ -133,15 +159,10 @@ export function CurrentFolderActions({ className }: Props) {
         onConfirm={deleteCurrentFolder}
       />
 
-      <RenameFolderDrawer
-        drawerSlug={renameFolderDrawerSlug}
-        folderToRename={currentFolder}
-        onRenameConfirm={({ folderID: updatedFolderID, updatedName }) => {
-          renameFolder({
-            folderID: updatedFolderID,
-            newName: updatedName,
-          })
-          closeModal(renameFolderDrawerSlug)
+      <FolderDocumentDrawer
+        onSave={() => {
+          closeFolderDrawer()
+          clearRouteCache()
         }}
       />
     </>

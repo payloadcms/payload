@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -67,7 +68,7 @@ describe('Tabs', () => {
   test('should correctly save nested unnamed and named tabs', async () => {
     await page.goto(url.create)
 
-    await page.locator('#field-tabsInArray .array-field__add-row').click()
+    await addArrayRow(page, { fieldName: 'tabsInArray' })
     await page.locator('#field-tabsInArray__0__text').fill('tab 1 text')
     await page.locator('.tabs-field__tabs button:nth-child(2)').click()
     await page.locator('#field-tabsInArray__0__tab2__text2').fill('tab 2 text')

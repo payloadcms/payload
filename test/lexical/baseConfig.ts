@@ -11,6 +11,7 @@ import {
 } from './collections/Lexical/index.js'
 import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
+import { LexicalJSXConverter } from './collections/LexicalJSXConverter/index.js'
 import { LexicalLinkFeature } from './collections/LexicalLinkFeature/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
@@ -20,7 +21,7 @@ import RichTextFields from './collections/RichText/index.js'
 import TextFields from './collections/Text/index.js'
 import Uploads from './collections/Upload/index.js'
 import TabsWithRichText from './globals/TabsWithRichText.js'
-import { clearAndSeedEverything } from './seed.js'
+import { seed } from './seed.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -30,6 +31,7 @@ export const baseConfig: Partial<Config> = {
   collections: [
     LexicalFullyFeatured,
     LexicalLinkFeature,
+    LexicalJSXConverter,
     getLexicalFieldsCollection({
       blocks: lexicalBlocks,
       inlineBlocks: lexicalInlineBlocks,
@@ -60,8 +62,9 @@ export const baseConfig: Partial<Config> = {
     },
   },
   onInit: async (payload) => {
+    // IMPORTANT: This should only seed, not clear the database.
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await clearAndSeedEverything(payload)
+      await seed(payload)
     }
   },
   localization: {

@@ -1,6 +1,6 @@
 'use client'
 
-import type { ListPreferences, SelectFieldClientComponent } from 'payload'
+import type { SelectFieldClientComponent } from 'payload'
 import type { ReactNode } from 'react'
 
 import {
@@ -9,9 +9,9 @@ import {
   useConfig,
   useDocumentInfo,
   useField,
-  usePreferences,
+  useListQuery,
 } from '@payloadcms/ui'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 
 import { useImportExport } from '../ImportExportProvider/index.js'
 import { reduceFields } from './reduceFields.js'
@@ -24,61 +24,48 @@ export const FieldsToExport: SelectFieldClientComponent = (props) => {
   const { value: collectionSlug } = useField<string>({ path: 'collectionSlug' })
   const { getEntityConfig } = useConfig()
   const { collection } = useImportExport()
-  const { getPreference } = usePreferences()
-  const [displayedValue, setDisplayedValue] = useState<
-    { id: string; label: ReactNode; value: string }[]
-  >([])
+  const { query } = useListQuery()
 
   const collectionConfig = getEntityConfig({ collectionSlug: collectionSlug ?? collection })
-  const fieldOptions = reduceFields({ fields: collectionConfig?.fields })
 
-  useEffect(() => {
-    if (value && value.length > 0) {
-      setDisplayedValue((prevDisplayedValue) => {
-        if (prevDisplayedValue.length > 0) {
-          return prevDisplayedValue
-        } // Prevent unnecessary updates
+  const disabledFields =
+    collectionConfig?.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
 
-        return value.map((field) => {
-          const match = fieldOptions.find((option) => option.value === field)
-          return match ? { ...match, id: field } : { id: field, label: field, value: field }
-        })
-      })
-    }
-  }, [value, fieldOptions])
+  const fieldOptions = reduceFields({
+    disabledFields,
+    fields: collectionConfig?.fields,
+  })
 
   useEffect(() => {
     if (id || !collectionSlug) {
       return
     }
-    const doAsync = async () => {
-      const currentPreferences = await getPreference<{
-        columns: ListPreferences['columns']
-      }>(`${collectionSlug}-list`)
 
-      const columns = currentPreferences?.columns?.filter((a) => a.active).map((b) => b.accessor)
-      setValue(columns ?? collectionConfig?.admin?.defaultColumns ?? [])
+    const queryColumns = query?.columns
+
+    if (Array.isArray(queryColumns)) {
+      const cleanColumns = queryColumns.filter(
+        (col): col is string => typeof col === 'string' && !col.startsWith('-'),
+      )
+      // If columns are specified in the query, use them
+      setValue(cleanColumns)
+    } else {
+      // Fallback if no columns in query
+      setValue(collectionConfig?.admin?.defaultColumns ?? [])
     }
+  }, [id, collectionSlug, query?.columns, collectionConfig?.admin?.defaultColumns, setValue])
 
-    void doAsync()
-  }, [
-    getPreference,
-    collection,
-    setValue,
-    collectionSlug,
-    id,
-    collectionConfig?.admin?.defaultColumns,
-  ])
   const onChange = (options: { id: string; label: ReactNode; value: string }[]) => {
     if (!options) {
       setValue([])
       return
     }
-    const updatedValue = options?.map((option) =>
+
+    const updatedValue = options.map((option) =>
       typeof option === 'object' ? option.value : option,
     )
+
     setValue(updatedValue)
-    setDisplayedValue(options)
   }
 
   return (
@@ -95,7 +82,14 @@ export const FieldsToExport: SelectFieldClientComponent = (props) => {
         // @ts-expect-error react select option
         onChange={onChange}
         options={fieldOptions}
-        value={displayedValue}
+        value={
+          Array.isArray(value)
+            ? value.map((val) => {
+                const match = fieldOptions.find((opt) => opt.value === val)
+                return match ? { ...match, id: val } : { id: val, label: val, value: val }
+              })
+            : []
+        }
       />
     </div>
   )

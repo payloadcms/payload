@@ -1,11 +1,16 @@
-import type { FlattenedField } from 'payload'
-
 import { sql } from 'drizzle-orm'
+import { APIError, type FlattenedField } from 'payload'
 import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
-import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.js'
+import type {
+  ArrayRowToInsert,
+  BlockRowToInsert,
+  NumberToDelete,
+  RelationshipToDelete,
+  TextToDelete,
+} from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
 import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
@@ -35,6 +40,7 @@ type Args = {
    */
   columnPrefix: string
   data: Record<string, unknown>
+  enableAtomicWrites?: boolean
   existingLocales?: Record<string, unknown>[]
   /**
    * A prefix that will retain camel-case formatting, representing prior fields
@@ -51,6 +57,7 @@ type Args = {
     [locale: string]: Record<string, unknown>
   }
   numbers: Record<string, unknown>[]
+  numbersToDelete: NumberToDelete[]
   parentIsLocalized: boolean
   /**
    * This is the name of the parent table
@@ -64,6 +71,7 @@ type Args = {
     [tableName: string]: Record<string, unknown>[]
   }
   texts: Record<string, unknown>[]
+  textsToDelete: TextToDelete[]
   /**
    * Set to a locale code if this set of fields is traversed within a
    * localized array or block field
@@ -79,6 +87,7 @@ export const traverseFields = ({
   blocksToDelete,
   columnPrefix,
   data,
+  enableAtomicWrites,
   existingLocales,
   fieldPrefix,
   fields,
@@ -86,6 +95,7 @@ export const traverseFields = ({
   insideArrayOrBlock = false,
   locales,
   numbers,
+  numbersToDelete,
   parentIsLocalized,
   parentTableName,
   path,
@@ -94,6 +104,7 @@ export const traverseFields = ({
   row,
   selects,
   texts,
+  textsToDelete,
   withinArrayOrBlockLocale,
 }: Args) => {
   if (row._uuid) {
@@ -136,12 +147,14 @@ export const traverseFields = ({
                 field,
                 locale: localeKey,
                 numbers,
+                numbersToDelete,
                 parentIsLocalized: parentIsLocalized || field.localized,
                 path,
                 relationships,
                 relationshipsToDelete,
                 selects,
                 texts,
+                textsToDelete,
                 withinArrayOrBlockLocale: localeKey,
               })
 
@@ -159,12 +172,14 @@ export const traverseFields = ({
           data: data[field.name],
           field,
           numbers,
+          numbersToDelete,
           parentIsLocalized: parentIsLocalized || field.localized,
           path,
           relationships,
           relationshipsToDelete,
           selects,
           texts,
+          textsToDelete,
           withinArrayOrBlockLocale,
         })
 
@@ -174,7 +189,7 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type === 'blocks') {
+    if (field.type === 'blocks' && !adapter.blocksAsJSON) {
       ;(field.blockReferences ?? field.blocks).forEach((block) => {
         const matchedBlock =
           typeof block === 'string'
@@ -202,12 +217,14 @@ export const traverseFields = ({
                 field,
                 locale: localeKey,
                 numbers,
+                numbersToDelete,
                 parentIsLocalized: parentIsLocalized || field.localized,
                 path,
                 relationships,
                 relationshipsToDelete,
                 selects,
                 texts,
+                textsToDelete,
                 withinArrayOrBlockLocale: localeKey,
               })
             }
@@ -222,12 +239,14 @@ export const traverseFields = ({
           data: fieldData,
           field,
           numbers,
+          numbersToDelete,
           parentIsLocalized: parentIsLocalized || field.localized,
           path,
           relationships,
           relationshipsToDelete,
           selects,
           texts,
+          textsToDelete,
           withinArrayOrBlockLocale,
         })
       }
@@ -250,6 +269,7 @@ export const traverseFields = ({
               blocksToDelete,
               columnPrefix: `${columnName}_`,
               data: localeData as Record<string, unknown>,
+              enableAtomicWrites,
               existingLocales,
               fieldPrefix: `${fieldName}_`,
               fields: field.flattenedFields,
@@ -257,6 +277,7 @@ export const traverseFields = ({
               insideArrayOrBlock,
               locales,
               numbers,
+              numbersToDelete,
               parentIsLocalized: parentIsLocalized || field.localized,
               parentTableName,
               path: `${path || ''}${field.name}.`,
@@ -265,6 +286,7 @@ export const traverseFields = ({
               row,
               selects,
               texts,
+              textsToDelete,
               withinArrayOrBlockLocale: localeKey,
             })
           })
@@ -287,6 +309,7 @@ export const traverseFields = ({
             insideArrayOrBlock,
             locales,
             numbers,
+            numbersToDelete,
             parentIsLocalized: parentIsLocalized || field.localized,
             parentTableName,
             path: `${path || ''}${field.name}.`,
@@ -295,6 +318,7 @@ export const traverseFields = ({
             row,
             selects,
             texts,
+            textsToDelete,
             withinArrayOrBlockLocale,
           })
         }
@@ -380,6 +404,11 @@ export const traverseFields = ({
         if (typeof fieldData === 'object') {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
+              if (!localeData.length) {
+                textsToDelete.push({ locale: localeKey, path: textPath })
+                return
+              }
+
               transformTexts({
                 baseRow: {
                   locale: localeKey,
@@ -392,6 +421,11 @@ export const traverseFields = ({
           })
         }
       } else if (Array.isArray(fieldData)) {
+        if (!fieldData.length) {
+          textsToDelete.push({ locale: withinArrayOrBlockLocale, path: textPath })
+          return
+        }
+
         transformTexts({
           baseRow: {
             locale: withinArrayOrBlockLocale,
@@ -412,6 +446,11 @@ export const traverseFields = ({
         if (typeof fieldData === 'object') {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
+              if (!localeData.length) {
+                numbersToDelete.push({ locale: localeKey, path: numberPath })
+                return
+              }
+
               transformNumbers({
                 baseRow: {
                   locale: localeKey,
@@ -424,6 +463,11 @@ export const traverseFields = ({
           })
         }
       } else if (Array.isArray(fieldData)) {
+        if (!fieldData.length) {
+          numbersToDelete.push({ locale: withinArrayOrBlockLocale, path: numberPath })
+          return
+        }
+
         transformNumbers({
           baseRow: {
             locale: withinArrayOrBlockLocale,
@@ -509,6 +553,22 @@ export const traverseFields = ({
 
         if (field.type === 'text' && value && typeof value !== 'string') {
           formattedValue = JSON.stringify(value)
+        }
+
+        if (
+          field.type === 'number' &&
+          value &&
+          typeof value === 'object' &&
+          '$inc' in value &&
+          typeof value.$inc === 'number'
+        ) {
+          if (!enableAtomicWrites) {
+            throw new APIError(
+              'The passed data must not contain any nested fields for atomic writes',
+            )
+          }
+
+          formattedValue = sql.raw(`${columnName} + ${value.$inc}`)
         }
 
         if (field.type === 'date') {

@@ -29,9 +29,9 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { FieldSelect } from '../FieldSelect/index.js'
-import { baseClass, type EditManyProps } from './index.js'
 import './index.scss'
 import '../../forms/RenderFields/index.scss'
+import { baseClass, type EditManyProps } from './index.js'
 
 const Submit: React.FC<{
   readonly action: string
@@ -124,6 +124,10 @@ type EditManyDrawerContentProps = {
    */
   ids?: (number | string)[]
   /**
+   * The function to call after a successful action
+   */
+  onSuccess?: () => void
+  /**
    * Whether all items are selected
    */
   selectAll?: boolean
@@ -135,7 +139,9 @@ type EditManyDrawerContentProps = {
    * The function to set the selected fields to bulk edit
    */
   setSelectedFields: (fields: FieldOption[]) => void
+  where?: Where
 } & EditManyProps
+
 export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (props) => {
   const {
     collection,
@@ -143,9 +149,11 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
     count,
     drawerSlug,
     ids,
+    onSuccess: onSuccessFromProps,
     selectAll,
     selectedFields,
     setSelectedFields,
+    where,
   } = props
 
   const { permissions, user } = useAuth()
@@ -215,6 +223,10 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
   const queryString = useMemo((): string => {
     const whereConstraints: Where[] = []
 
+    if (where) {
+      whereConstraints.push(where)
+    }
+
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
       search: searchParams.get('search'),
@@ -229,7 +241,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
       whereConstraints.push(
         (parseSearchParams(searchParams)?.where as Where) || {
           id: {
-            exists: true,
+            not_equals: '',
           },
         },
       )
@@ -249,7 +261,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
       },
       { addQueryPrefix: true },
     )
-  }, [collection, searchParams, selectAll, ids, locale])
+  }, [collection, searchParams, selectAll, ids, locale, where])
 
   const onSuccess = () => {
     router.replace(
@@ -263,6 +275,10 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
     )
     clearRouteCache()
     closeModal(drawerSlug)
+
+    if (typeof onSuccessFromProps === 'function') {
+      onSuccessFromProps()
+    }
   }
 
   const onFieldSelect = useCallback<OnFieldSelect>(

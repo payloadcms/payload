@@ -226,6 +226,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -346,6 +353,12 @@ export interface ArrayField {
     | {
         text?: string | null;
         id?: string | null;
+      }[]
+    | null;
+  arrayWithCustomID?:
+    | {
+        id?: string | null;
+        text?: string | null;
       }[]
     | null;
   updatedAt: string;
@@ -535,6 +548,14 @@ export interface BlockField {
             blockType: 'blockWithoutGroup';
           }
       )[]
+    | null;
+  readOnly?:
+    | {
+        title?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'readOnlyBlock';
+      }[]
     | null;
   updatedAt: string;
   createdAt: string;
@@ -903,6 +924,7 @@ export interface DateField {
   id: string;
   default: string;
   timeOnly?: string | null;
+  timeOnlyWithMiliseconds?: string | null;
   timeOnlyWithCustomFormat?: string | null;
   dayOnly?: string | null;
   dayAndTime?: string | null;
@@ -1082,6 +1104,7 @@ export interface GroupField {
       | null;
   };
   insideUnnamedGroup?: string | null;
+  insideGroupWithNoLabel?: string | null;
   deeplyNestedGroup?: {
     insideNestedUnnamedGroup?: string | null;
   };
@@ -1106,6 +1129,22 @@ export interface RowField {
   no_set_width_within_row_b?: string | null;
   no_set_width_within_row_c?: string | null;
   field_20_percent_width_within_row_d?: string | null;
+  leftColumn?:
+    | {
+        leftText?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'leftTextBlock';
+      }[]
+    | null;
+  rightColumn?:
+    | {
+        rightText?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'rightTextBlock';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1255,6 +1294,11 @@ export interface PointField {
    * @maxItems 2
    */
   point: [number, number];
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  camelCasePoint?: [number, number] | null;
   /**
    * @minItems 2
    * @maxItems 2
@@ -1836,6 +1880,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1960,6 +2011,12 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
     | {
         text?: T;
         id?: T;
+      };
+  arrayWithCustomID?:
+    | T
+    | {
+        id?: T;
+        text?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -2190,6 +2247,17 @@ export interface BlockFieldsSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  readOnly?:
+    | T
+    | {
+        readOnlyBlock?:
+          | T
+          | {
+              title?: T;
               id?: T;
               blockName?: T;
             };
@@ -2485,6 +2553,7 @@ export interface CustomRowIdSelect<T extends boolean = true> {
 export interface DateFieldsSelect<T extends boolean = true> {
   default?: T;
   timeOnly?: T;
+  timeOnlyWithMiliseconds?: T;
   timeOnlyWithCustomFormat?: T;
   dayOnly?: T;
   dayAndTime?: T;
@@ -2685,6 +2754,7 @@ export interface GroupFieldsSelect<T extends boolean = true> {
         email?: T;
       };
   insideUnnamedGroup?: T;
+  insideGroupWithNoLabel?: T;
   deeplyNestedGroup?:
     | T
     | {
@@ -2711,6 +2781,28 @@ export interface RowFieldsSelect<T extends boolean = true> {
   no_set_width_within_row_b?: T;
   no_set_width_within_row_c?: T;
   field_20_percent_width_within_row_d?: T;
+  leftColumn?:
+    | T
+    | {
+        leftTextBlock?:
+          | T
+          | {
+              leftText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  rightColumn?:
+    | T
+    | {
+        rightTextBlock?:
+          | T
+          | {
+              rightText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2808,6 +2900,7 @@ export interface NumberFieldsSelect<T extends boolean = true> {
  */
 export interface PointFieldsSelect<T extends boolean = true> {
   point?: T;
+  camelCasePoint?: T;
   localized?: T;
   group?:
     | T

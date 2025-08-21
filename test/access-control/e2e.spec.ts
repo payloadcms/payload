@@ -16,7 +16,6 @@ import {
   closeNav,
   ensureCompilationIsDone,
   exactText,
-  getRoutes,
   initPageConsoleErrorCatch,
   login,
   saveDocAndAssert,
@@ -25,6 +24,7 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
+  authSlug,
   createNotUpdateCollectionSlug,
   disabledSlug,
   docLevelAccessSlug,
@@ -53,7 +53,7 @@ const dirname = path.dirname(filename)
  * Repeat all above for globals
  */
 
-const { beforeAll, describe } = test
+const { beforeAll, beforeEach, describe } = test
 let payload: PayloadTestSDK<Config>
 describe('Access Control', () => {
   let page: Page
@@ -70,7 +70,7 @@ describe('Access Control', () => {
   let disabledFields: AdminUrlUtil
   let serverURL: string
   let context: BrowserContext
-  let logoutURL: string
+  let authFields: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -87,6 +87,7 @@ describe('Access Control', () => {
     userRestrictedCollectionURL = new AdminUrlUtil(serverURL, userRestrictedCollectionSlug)
     userRestrictedGlobalURL = new AdminUrlUtil(serverURL, userRestrictedGlobalSlug)
     disabledFields = new AdminUrlUtil(serverURL, disabledSlug)
+    authFields = new AdminUrlUtil(serverURL, authSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -95,17 +96,6 @@ describe('Access Control', () => {
     await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
 
     await login({ page, serverURL })
-
-    await ensureCompilationIsDone({ page, serverURL })
-
-    const {
-      admin: {
-        routes: { logout: logoutRoute },
-      },
-      routes: { admin: adminRoute },
-    } = getRoutes({})
-
-    logoutURL = `${serverURL}${adminRoute}${logoutRoute}`
   })
 
   describe('fields', () => {
@@ -228,7 +218,7 @@ describe('Access Control', () => {
     /**
      * This reproduces a bug where certain fields were incorrectly marked as read-only
      */
-    // eslint-disable-next-line playwright/expect-expect
+
     test('ensure complex collection config fields show up in correct read-only state', async () => {
       const regression1URL = new AdminUrlUtil(serverURL, 'regression1')
       await page.goto(regression1URL.list)
@@ -272,7 +262,7 @@ describe('Access Control', () => {
     /**
      * This reproduces a bug where certain fields were incorrectly marked as read-only
      */
-    // eslint-disable-next-line playwright/expect-expect
+
     test('ensure complex collection config fields show up in correct read-only state 2', async () => {
       const regression2URL = new AdminUrlUtil(serverURL, 'regression2')
       await page.goto(regression2URL.list)
@@ -433,10 +423,15 @@ describe('Access Control', () => {
       const documentDrawer = page.locator(`[id^=doc-drawer_${createNotUpdateCollectionSlug}_1_]`)
       await expect(documentDrawer).toBeVisible()
       await expect(documentDrawer.locator('#action-save')).toBeVisible()
+
       await documentDrawer.locator('#field-name').fill('name')
       await expect(documentDrawer.locator('#field-name')).toHaveValue('name')
-      await documentDrawer.locator('#action-save').click()
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
+      await saveDocAndAssert(
+        page,
+        `[id^=doc-drawer_${createNotUpdateCollectionSlug}_1_] #action-save`,
+      )
+
       await expect(documentDrawer.locator('#action-save')).toBeHidden()
       await expect(documentDrawer.locator('#field-name')).toBeDisabled()
     })
@@ -507,6 +502,13 @@ describe('Access Control', () => {
 
     describe('global', () => {
       test('should restrict update access based on document field', async () => {
+        await payload.updateGlobal({
+          slug: userRestrictedGlobalSlug,
+          data: {
+            name: 'dev@payloadcms.com',
+          },
+        })
+
         await page.goto(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
         await expect(page.locator('#field-name')).toBeVisible()
         await expect(page.locator('#field-name')).toHaveValue(devUser.email)
@@ -721,7 +723,7 @@ describe('Access Control', () => {
       await page.locator('#field-unnamedTab').fill('unnamed tab')
 
       // array field
-      await page.locator('#field-array button').click()
+      await page.locator('#field-array > button').click()
       await page.locator('#field-array__0__text').fill('array row 0')
 
       await saveDocAndAssert(page)
@@ -731,6 +733,33 @@ describe('Access Control', () => {
       await page.locator('.tabs-field__tab-button').nth(1).click()
       await expect(page.locator('#field-unnamedTab')).toBeDisabled()
       await expect(page.locator('#field-array__0__text')).toBeDisabled()
+    })
+  })
+
+  describe('restricting update access to auth fields', () => {
+    let existingDoc: ReadOnlyCollection
+    beforeAll(async () => {
+      existingDoc = await payload.create({
+        collection: authSlug,
+        data: {
+          email: 'test@payloadcms.com',
+          password: 'test',
+        },
+      })
+    })
+    test('should show email as readonly when user does not have update permission', async () => {
+      await page.goto(authFields.edit(existingDoc.id))
+      const emailField = page.locator('#field-email')
+      await expect(emailField).toBeVisible()
+      await expect(emailField).toBeDisabled()
+    })
+
+    test('should hide Change Password button when user does not have update permission', async () => {
+      await page.goto(authFields.edit(existingDoc.id))
+      const passwordField = page.locator('#field-password')
+      await expect(passwordField).toBeHidden()
+      const changePasswordButton = page.locator('#change-password')
+      await expect(changePasswordButton).toBeHidden()
     })
   })
 })

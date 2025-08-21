@@ -22,6 +22,13 @@ meta_server.json
 meta_index.json
 meta_shared.json
 
+packages/payload/esbuild
+packages/ui/esbuild
+packages/next/esbuild
+packages/richtext-lexical/esbuild
+
+audit_output.json
+
 .turbo
 
 # Ignore test directory media folder/files
@@ -324,5 +331,7 @@ test/databaseAdapter.js
 test/.localstack
 test/google-cloud-storage
 test/azurestoragedata/
+/media-without-delete-access
+
 
 licenses.csv

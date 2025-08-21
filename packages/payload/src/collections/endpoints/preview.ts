@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
@@ -20,9 +19,10 @@ export const previewHandler: PayloadHandler = async (req) => {
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: searchParams.get('draft') === 'true',
     req,
+    trash: true,
   })
 
-  let previewURL: string
+  let previewURL!: string
 
   const generatePreviewURL =
     req.payload?.collections?.[collection.config.slug]?.config?.admin?.preview
@@ -30,11 +30,11 @@ export const previewHandler: PayloadHandler = async (req) => {
   const token = extractJWT(req)
 
   if (typeof generatePreviewURL === 'function') {
-    previewURL = await generatePreviewURL(doc, {
-      locale: req.locale,
+    previewURL = (await generatePreviewURL(doc, {
+      locale: req.locale!,
       req,
       token,
-    })
+    })) as string
   }
 
   return Response.json(previewURL, {

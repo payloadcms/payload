@@ -33,6 +33,7 @@ import {
   checkboxFieldsSlug,
   collapsibleFieldsSlug,
   groupFieldsSlug,
+  numberFieldsSlug,
   relationshipFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
@@ -52,9 +53,7 @@ describe('Fields', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   beforeEach(async () => {
@@ -400,6 +399,31 @@ describe('Fields', () => {
       expect(resInSecond.docs.find((res) => res.id === docSecond.id)).toBeDefined()
 
       expect(resInSecond.totalDocs).toBe(1)
+    })
+
+    it('should delete rows when updating hasMany with empty array', async () => {
+      const { id: createdDocId } = await payload.create({
+        collection: textFieldsSlug,
+        data: {
+          text: 'hasMany deletion test',
+          hasMany: ['one', 'two', 'three'],
+        },
+      })
+
+      await payload.update({
+        collection: textFieldsSlug,
+        id: createdDocId,
+        data: {
+          hasMany: [],
+        },
+      })
+
+      const resultingDoc = await payload.findByID({
+        collection: textFieldsSlug,
+        id: createdDocId,
+      })
+
+      expect(resultingDoc.hasMany).toHaveLength(0)
     })
   })
 
@@ -1042,6 +1066,30 @@ describe('Fields', () => {
 
       expect(numbersNotExists.docs).toHaveLength(1)
     })
+
+    it('should delete rows when updating hasMany with empty array', async () => {
+      const { id: createdDocId } = await payload.create({
+        collection: numberFieldsSlug,
+        data: {
+          localizedHasMany: [1, 2, 3],
+        },
+      })
+
+      await payload.update({
+        collection: numberFieldsSlug,
+        id: createdDocId,
+        data: {
+          localizedHasMany: [],
+        },
+      })
+
+      const resultingDoc = await payload.findByID({
+        collection: numberFieldsSlug,
+        id: createdDocId,
+      })
+
+      expect(resultingDoc.localizedHasMany).toHaveLength(0)
+    })
   })
 
   it('should query hasMany within an array', async () => {
@@ -1347,6 +1395,70 @@ describe('Fields', () => {
       expect(doc.point).toEqual(point)
       expect(doc.localized).toEqual(localized)
       expect(doc.group).toMatchObject(group)
+    })
+
+    it('should throw validation error when "required" field is set to null', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+      // first create the point field
+      doc = await payload.create({
+        collection: 'point-fields',
+        data: {
+          localized,
+          point,
+        },
+      })
+
+      // try to update the required field to null
+      await expect(() =>
+        payload.update({
+          collection: 'point-fields',
+          data: {
+            point: null,
+          },
+          id: doc.id,
+        }),
+      ).rejects.toThrow('The following field is invalid: Location')
+    })
+
+    it('should not throw validation error when non-"required" field is set to null', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+      // first create the point field
+      doc = await payload.create({
+        collection: 'point-fields',
+        data: {
+          localized,
+          point,
+        },
+      })
+
+      expect(doc.localized).toEqual(localized)
+
+      // try to update the non-required field to null
+      const updatedDoc = await payload.update({
+        collection: 'point-fields',
+        data: {
+          localized: null,
+        },
+        id: doc.id,
+      })
+
+      expect(updatedDoc.localized).toEqual(undefined)
+    })
+
+    it('should not error with camel case name point field', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+
+      const res = await payload.create({
+        collection: 'point-fields',
+        data: { point, camelCasePoint: [7, -7] },
+      })
+      expect(res.camelCasePoint).toEqual([7, -7])
     })
   })
 
@@ -1967,6 +2079,21 @@ describe('Fields', () => {
           },
         }),
       ).rejects.toThrow('The following field is invalid: Items 1 > Sub Array 1 > Text In Row')
+    })
+
+    it('should not have multiple instances of the id field in an array with a nested custom id field', () => {
+      const arraysCollection = payload.config.collections.find(
+        (collection) => collection.slug === arrayFieldsSlug,
+      )
+
+      const arrayWithNestedCustomIDField = arraysCollection?.fields.find(
+        (f) => f.name === 'arrayWithCustomID',
+      )
+
+      const idFields = arrayWithNestedCustomIDField?.fields.filter((f) => f.name === 'id')
+
+      expect(idFields).toHaveLength(1)
+      expect(idFields[0].admin?.disableListFilter).toBe(true)
     })
   })
 

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type {
   Document,
   PayloadRequest,
@@ -7,6 +6,7 @@ import type {
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
@@ -81,7 +81,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -115,8 +115,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   user?: Document
 }
 
-// eslint-disable-next-line no-restricted-exports
-export default async function createLocal<
+export async function createLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
 >(
@@ -148,9 +147,9 @@ export default async function createLocal<
     )
   }
 
-  const req = await createLocalReq(options, payload)
+  const req = await createLocalReq(options as CreateLocalReqOptions, payload)
 
-  req.file = file ?? (await getFileByPath(filePath))
+  req.file = file ?? (await getFileByPath(filePath!))
 
   return createOperation<TSlug, TSelect>({
     collection,

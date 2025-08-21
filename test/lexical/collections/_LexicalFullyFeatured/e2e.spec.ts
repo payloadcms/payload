@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url'
 import { ensureCompilationIsDone } from '../../../helpers.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
-import { LexicalHelpers } from './utils.js'
+import { LexicalHelpers } from '../utils.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -33,11 +33,8 @@ describe('Lexical Fully Featured', () => {
   beforeEach(async ({ page }) => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: [
-        path.resolve(dirname, './collections/Upload/uploads'),
-        path.resolve(dirname, './collections/Upload2/uploads2'),
-      ],
+      snapshotKey: 'lexicalTest',
+      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     const lexical = new LexicalHelpers(page)
@@ -58,13 +55,33 @@ describe('Lexical Fully Featured', () => {
     await lexical.drawer.getByText('Paste URL').click()
     await lexical.drawer
       .locator('.file-field__remote-file')
-      .fill('https://payloadcms.com/images/universal-truth.jpg')
+      .fill(
+        'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
+      )
     await lexical.drawer.getByText('Add file').click()
     await lexical.save('drawer')
     await expect(lexical.decorator).toHaveCount(3)
     const paragraph = lexical.editor.locator('> p')
     await expect(paragraph).toHaveText('')
   })
+
+  test('ControlOrMeta+A inside input should select all the text inside the input', async ({
+    page,
+  }) => {
+    const lexical = new LexicalHelpers(page)
+    await lexical.editor.first().focus()
+    await page.keyboard.type('Hello')
+    await page.keyboard.press('Enter')
+    await lexical.slashCommand('block')
+    await page.locator('#field-someText').first().focus()
+    await page.keyboard.type('World')
+    await page.keyboard.press('ControlOrMeta+A')
+    await page.keyboard.press('Backspace')
+    const paragraph = lexical.editor.locator('> p').first()
+    await expect(paragraph).toHaveText('Hello')
+    await expect(page.getByText('World')).toHaveCount(0)
+  })
+
   test('text state feature', async ({ page }) => {
     await page.keyboard.type('Hello')
     await page.keyboard.press('ControlOrMeta+A')

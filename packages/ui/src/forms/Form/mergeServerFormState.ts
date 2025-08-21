@@ -3,8 +3,23 @@ import type { FormState } from 'payload'
 
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 
+/**
+ * If true, will accept all values from the server, overriding any current values in local state.
+ * Can also provide an options object for more granular control.
+ */
+export type AcceptValues =
+  | {
+      /**
+       * When `false`, will accept the values from the server _UNLESS_ the value has been modified locally since the request was made.
+       * This is useful for autosave, for example, where hooks may have modified the field's value on the server while you were still making changes.
+       * @default undefined
+       */
+      overrideLocalChanges?: boolean
+    }
+  | boolean
+
 type Args = {
-  acceptValues?: boolean
+  acceptValues?: AcceptValues
   currentState?: FormState
   incomingState: FormState
 }
@@ -15,7 +30,10 @@ type Args = {
  * We typically do not want to merge properties that rely on user input, however, such as values, unless explicitly requested.
  * Doing this would cause the client to lose any local changes to those fields.
  *
- * This function will also a few defaults, as well as clean up the server response in preparation for the client.
+ * Note: Local state is the source of truth, not the new server state that is getting merged in. This is critical for array row
+ * manipulation specifically, where the user may have added, removed, or reordered rows while a request was pending and is now stale.
+ *
+ * This function applies some defaults, as well as cleans up the server response in preparation for the client.
  * e.g. it will set `valid` and `passesCondition` to true if undefined, and remove `addedByServer` from the response.
  */
 export const mergeServerFormState = ({
@@ -30,14 +48,44 @@ export const mergeServerFormState = ({
       continue
     }
 
-    if (!acceptValues && !incomingField.addedByServer) {
-      delete incomingField.value
-      delete incomingField.initialValue
+    /**
+     * If it's a new field added by the server, always accept the value.
+     * Otherwise:
+     *   a. accept all values when explicitly requested, e.g. on submit
+     *   b. only accept values for unmodified fields, e.g. on autosave
+     */
+    const shouldAcceptValue =
+      incomingField.addedByServer ||
+      acceptValues === true ||
+      (typeof acceptValues === 'object' &&
+        acceptValues !== null &&
+        // Note: Must be explicitly `false`, allow `null` or `undefined` to mean true
+        acceptValues.overrideLocalChanges === false &&
+        !currentState[path]?.isModified)
+
+    let sanitizedIncomingField = incomingField
+
+    if (!shouldAcceptValue) {
+      /**
+       * Note: do not delete properties off `incomingField` as this will mutate the original object
+       * Instead, omit them from the destructured object by excluding specific keys
+       * This will also ensure we don't set `undefined` into the result unnecessarily
+       */
+      const { initialValue, value, ...rest } = incomingField
+      sanitizedIncomingField = rest
     }
 
     newState[path] = {
       ...currentState[path],
-      ...incomingField,
+      ...sanitizedIncomingField,
+    }
+
+    if (
+      currentState[path] &&
+      'errorPaths' in currentState[path] &&
+      !('errorPaths' in incomingField)
+    ) {
+      newState[path].errorPaths = []
     }
 
     /**
@@ -46,21 +94,25 @@ export const mergeServerFormState = ({
      * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
      * Note: read `currentState` and not `newState` here, as the `rows` property have already been merged above
      */
-    if (Array.isArray(incomingField.rows) && path in currentState) {
-      newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
+    if (Array.isArray(incomingField.rows)) {
+      if (acceptValues === true) {
+        newState[path].rows = incomingField.rows
+      } else if (path in currentState) {
+        newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
 
-      incomingField.rows.forEach((row) => {
-        const indexInCurrentState = currentState[path].rows.findIndex(
-          (existingRow) => existingRow.id === row.id,
-        )
+        incomingField.rows.forEach((row) => {
+          const indexInCurrentState = currentState[path].rows?.findIndex(
+            (existingRow) => existingRow.id === row.id,
+          )
 
-        if (indexInCurrentState > -1) {
-          newState[path].rows[indexInCurrentState] = {
-            ...currentState[path].rows[indexInCurrentState],
-            ...row,
+          if (indexInCurrentState > -1) {
+            newState[path].rows[indexInCurrentState] = {
+              ...currentState[path].rows[indexInCurrentState],
+              ...row,
+            }
           }
-        }
-      })
+        })
+      }
     }
 
     // If `valid` is `undefined`, mark it as `true`

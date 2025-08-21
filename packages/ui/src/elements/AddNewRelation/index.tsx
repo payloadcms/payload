@@ -7,6 +7,7 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 import type { Props } from './types.js'
 
+import { useRelatedCollections } from '../../hooks/useRelatedCollections.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -16,7 +17,6 @@ import { Popup } from '../Popup/index.js'
 import * as PopupList from '../Popup/PopupButtonList/index.js'
 import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
-import { useRelatedCollections } from './useRelatedCollections.js'
 
 const baseClass = 'relationship-add-new'
 
@@ -52,7 +52,13 @@ export const AddNewRelation: React.FC<Props> = ({
 
   const onSave: DocumentDrawerContextType['onSave'] = useCallback(
     ({ doc, operation }) => {
-      if (operation === 'create') {
+      // if autosave is enabled, the operation will be 'update'
+      const isAutosaveEnabled =
+        typeof collectionConfig?.versions?.drafts === 'object'
+          ? collectionConfig.versions.drafts.autosave
+          : false
+
+      if (operation === 'create' || (operation === 'update' && isAutosaveEnabled)) {
         // ensure the value is not already in the array
         let isNewValue = false
         if (!value) {
@@ -139,7 +145,7 @@ export const AddNewRelation: React.FC<Props> = ({
   }, [isDrawerOpen, relatedToMany])
 
   const label = t('fields:addNewLabel', {
-    label: getTranslation(relatedCollections[0].labels.singular, i18n),
+    label: getTranslation(relatedCollections[0]?.labels.singular, i18n),
   })
 
   if (show) {

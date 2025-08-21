@@ -1,8 +1,9 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { MarkOptional } from 'ts-essentials'
 
-import type { SanitizedFieldPermissions, User } from '../../auth/types.js'
+import type { SanitizedFieldPermissions } from '../../auth/types.js'
 import type { ClientBlock, ClientField, Field } from '../../fields/config/types.js'
+import type { TypedUser } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, Payload, PayloadRequest } from '../../types/index.js'
 import type {
@@ -67,6 +68,9 @@ export type FieldPaths = {
   path: string
 }
 
+/**
+ * TODO: This should be renamed to `FieldComponentServerProps` or similar
+ */
 export type ServerComponentProps = {
   clientField: ClientFieldWithOptionalType
   clientFieldSchemaMap: ClientFieldSchemaMap
@@ -90,7 +94,7 @@ export type ServerComponentProps = {
   preferences: DocumentPreferences
   req: PayloadRequest
   siblingData: Data
-  user: User
+  user: TypedUser
   value?: unknown
 }
 

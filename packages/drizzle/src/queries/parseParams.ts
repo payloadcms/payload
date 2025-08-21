@@ -10,6 +10,7 @@ import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
+import { DistinctSymbol } from '../utilities/rawConstraint.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
@@ -108,6 +109,17 @@ export function parseParams({
                   value: val,
                 })
 
+                const resolvedColumn =
+                  rawColumn ||
+                  (aliasTable && tableName === getNameFromDrizzleTable(table)
+                    ? aliasTable[columnName]
+                    : table[columnName])
+
+                if (val === DistinctSymbol) {
+                  selectFields['_selected'] = resolvedColumn
+                  break
+                }
+
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
                   if (typeof value === 'string' && value.indexOf('%') > -1) {
                     constraints.push(adapter.operators.like(constraintTable[col], value))
@@ -117,7 +129,8 @@ export function parseParams({
                 })
 
                 if (
-                  ['json', 'richText'].includes(field.type) &&
+                  (['json', 'richText'].includes(field.type) ||
+                    (field.type === 'blocks' && adapter.blocksAsJSON)) &&
                   Array.isArray(pathSegments) &&
                   pathSegments.length > 1
                 ) {
@@ -206,7 +219,10 @@ export function parseParams({
 
                 if (
                   operator === 'like' &&
-                  (field.type === 'number' || table[columnName].columnType === 'PgUUID')
+                  (field.type === 'number' ||
+                    field.type === 'relationship' ||
+                    field.type === 'upload' ||
+                    table[columnName].columnType === 'PgUUID')
                 ) {
                   operator = 'equals'
                 }
@@ -279,12 +295,6 @@ export function parseParams({
 
                   break
                 }
-
-                const resolvedColumn =
-                  rawColumn ||
-                  (aliasTable && tableName === getNameFromDrizzleTable(table)
-                    ? aliasTable[columnName]
-                    : table[columnName])
 
                 if (queryOperator === 'not_equals' && queryValue !== null) {
                   constraints.push(
@@ -367,7 +377,25 @@ export function parseParams({
                   break
                 }
 
-                constraints.push(adapter.operators[queryOperator](resolvedColumn, queryValue))
+                const orConditions: SQL<unknown>[] = []
+                let resolvedQueryValue = queryValue
+                if (
+                  operator === 'in' &&
+                  Array.isArray(queryValue) &&
+                  queryValue.some((v) => v === null)
+                ) {
+                  orConditions.push(isNull(resolvedColumn))
+                  resolvedQueryValue = queryValue.filter((v) => v !== null)
+                }
+                let constraint = adapter.operators[queryOperator](
+                  resolvedColumn,
+                  resolvedQueryValue,
+                )
+                if (orConditions.length) {
+                  orConditions.push(constraint)
+                  constraint = or(...orConditions)
+                }
+                constraints.push(constraint)
               }
             }
           }

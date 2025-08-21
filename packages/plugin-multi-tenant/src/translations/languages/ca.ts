@@ -2,10 +2,11 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const caTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-tenant-switch--body':
-      'Estàs a punt de canviar la propietat de <0>{{fromTenant}}</0> a <0>{{toTenant}}</0>',
-    'confirm-tenant-switch--heading': 'Confirmeu el canvi de {{tenantLabel}}',
-    'field-assignedTentant-label': 'Llogater Assignat',
+    'confirm-modal-tenant-switch--body':
+      'Està a punt de canviar la propietat de <0>{{fromTenant}}</0> a <0>{{toTenant}}</0>',
+    'confirm-modal-tenant-switch--heading': 'Confirmeu el canvi de {{tenantLabel}}',
+    'field-assignedTenant-label': 'Llogater Assignat',
+    'nav-tenantSelector-label': 'Inquilí',
   },
 }
 
