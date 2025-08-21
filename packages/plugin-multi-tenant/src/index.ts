@@ -1,6 +1,8 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { CollectionConfig, Config } from 'payload'
 
+import chalk from 'chalk'
+
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { MultiTenantPluginConfig } from './types.js'
 
@@ -141,6 +143,9 @@ export const multiTenantPlugin =
       [[], []],
     )
 
+    // used to validate enabled collection slugs
+    const multiTenantCollectionsFound: string[] = []
+
     /**
      * The folders collection is added AFTER the plugin is initialized
      * so if they added the folder slug to the plugin collections,
@@ -151,6 +156,7 @@ export const multiTenantPlugin =
       : 'payload-folders'
 
     if (collectionSlugs.includes(foldersSlug)) {
+      multiTenantCollectionsFound.push(foldersSlug)
       const overrides = pluginConfig.collections[foldersSlug]?.tenantFieldOverrides
         ? pluginConfig.collections[foldersSlug]?.tenantFieldOverrides
         : pluginConfig.tenantField || {}
@@ -300,6 +306,7 @@ export const multiTenantPlugin =
           }),
         ]
       } else if (pluginConfig.collections?.[collection.slug]) {
+        multiTenantCollectionsFound.push(collection.slug)
         const isGlobal = Boolean(pluginConfig.collections[collection.slug]?.isGlobal)
 
         if (isGlobal) {
@@ -384,6 +391,22 @@ export const multiTenantPlugin =
 
     if (!tenantCollection) {
       throw new Error(`Tenants collection not found with slug: ${tenantsCollectionSlug}`)
+    }
+
+    if (
+      multiTenantCollectionsFound.length !==
+      collectionSlugs.length + globalCollectionSlugs.length
+    ) {
+      const missingSlugs = [...collectionSlugs, ...globalCollectionSlugs].filter(
+        (slug) => !multiTenantCollectionsFound.includes(slug),
+      )
+      // eslint-disable-next-line no-console
+      console.error(
+        chalk.yellow.bold('WARNING (plugin-multi-tenant)'),
+        'missing collections',
+        missingSlugs,
+        'try placing the multi-tenant plugin after other plugins.',
+      )
     }
 
     /**
