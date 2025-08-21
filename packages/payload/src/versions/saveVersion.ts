@@ -53,9 +53,6 @@ export const saveVersion = async ({
   if (versionData._id) {
     delete versionData._id
   }
-  if (versionData.id) {
-    delete versionData.id
-  }
 
   try {
     if (autosave) {
