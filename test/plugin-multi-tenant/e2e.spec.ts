@@ -55,13 +55,6 @@ test.describe('Multi Tenant', () => {
     await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
   })
 
-  test.beforeEach(async () => {
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'multiTenant',
-    })
-  })
-
   test.describe('Filters', () => {
     test.describe('Tenants', () => {
       test('should show all tenants when tenant selector is empty', async () => {
