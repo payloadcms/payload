@@ -58,7 +58,14 @@ export const TenantField = (args: Props) => {
       <>
         <div className={baseClass}>
           <div className={`${baseClass}__wrapper`}>
-            <RelationshipField {...args} readOnly={args.readOnly || args.unique} />
+            <RelationshipField
+              {...args}
+              field={{
+                ...args.field,
+                required: true,
+              }}
+              readOnly={args.readOnly || args.unique}
+            />
           </div>
         </div>
         {args.unique ? (

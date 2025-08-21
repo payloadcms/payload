@@ -7,6 +7,23 @@ import { getCollectionIDType } from '../../utilities/getCollectionIDType.js'
 import { getTenantFromCookie } from '../../utilities/getTenantFromCookie.js'
 import { getUserTenantIDs } from '../../utilities/getUserTenantIDs.js'
 
+const fieldValidation =
+  (validateFunction?: RelationshipFieldSingleValidation): RelationshipFieldSingleValidation =>
+  (value, options) => {
+    if (validateFunction) {
+      const result = validateFunction(value, options)
+      if (result !== true) {
+        return result
+      }
+    }
+
+    if (!value) {
+      return options.req.t('validation:required')
+    }
+
+    return true
+  }
+
 type Args = {
   debug?: boolean
   name: string
@@ -100,9 +117,9 @@ export const tenantField = ({
     hasMany: false,
     index: true,
     relationTo: tenantsCollectionSlug,
-    required: true,
     unique,
-    validate: (validate as RelationshipFieldSingleValidation) || undefined,
+    // TODO: V4 - replace validation with required: true
+    validate: fieldValidation(validate as RelationshipFieldSingleValidation),
     // @ts-expect-error translations are not typed for this plugin
     label: overrides.label || (({ t }) => t('plugin-multi-tenant:field-assignedTenant-label')),
   }
