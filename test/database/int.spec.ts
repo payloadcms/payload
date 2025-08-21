@@ -1,5 +1,5 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
-import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
+import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type {
   DataFromCollectionSlug,
