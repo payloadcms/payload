@@ -8,7 +8,7 @@ const handlerBuilder =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
   async (
     request: Request,
-    args?: {
+    args: {
       params: Promise<{ slug?: string[] }>
     },
   ): Promise<Response> => {
@@ -35,9 +35,7 @@ const handlerBuilder =
 
     const response = await handleEndpoints({
       config,
-      path: slugArr.length
-        ? `${awaitedConfig.routes.api}/${slugArr.join('/')}`
-        : undefined,
+      path: slugArr.length ? `${awaitedConfig.routes.api}/${slugArr.join('/')}` : undefined,
       request,
     })
 
