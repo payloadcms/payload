@@ -26,10 +26,11 @@ export const renderDocumentSlots: (args: {
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   hasSavePermission: boolean
+  id?: number | string
   permissions: SanitizedDocumentPermissions
   req: PayloadRequest
 }) => DocumentSlots = (args) => {
-  const { collectionConfig, globalConfig, hasSavePermission, req } = args
+  const { id, collectionConfig, globalConfig, hasSavePermission, req } = args
 
   const components: DocumentSlots = {} as DocumentSlots
 
@@ -38,7 +39,7 @@ export const renderDocumentSlots: (args: {
   const isPreviewEnabled = collectionConfig?.admin?.preview || globalConfig?.admin?.preview
 
   const serverProps: ServerProps = {
-    id: req.routeParams.id as number | string,
+    id,
     i18n: req.i18n,
     payload: req.payload,
     user: req.user,
