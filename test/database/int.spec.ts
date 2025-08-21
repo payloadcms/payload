@@ -3044,7 +3044,7 @@ describe('database', () => {
     expect(res2.number).toBe(8)
   })
 
-  it('should allow atomic array updates using $push with single value', async () => {
+  it('should allow atomic array updates using $push with single value, unlocalized', async () => {
     const post = await payload.create({
       collection: 'posts',
       data: {
@@ -3075,7 +3075,52 @@ describe('database', () => {
     expect(res.arrayWithIDs?.[1]?.text).toBe('some text 2')
   })
 
-  it('should allow atomic array updates using $push with multiple values', async () => {
+  it('should allow atomic array updates using $push with single value, localized field within array', async () => {
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        arrayWithIDs: [
+          {
+            text: 'some text',
+            textLocalized: 'Some text localized',
+          },
+        ],
+        title: 'post',
+      },
+    })
+
+    const res = (await payload.db.updateOne({
+      data: {
+        // Locales used => no optimized row update => need to pass full data, incuding title
+        title: 'post',
+        arrayWithIDs: {
+          $push: {
+            text: 'some text 2',
+            id: new mongoose.Types.ObjectId().toHexString(),
+            textLocalized: {
+              en: 'Some text 2 localized',
+              es: 'Algun texto 2 localizado',
+            },
+          },
+        },
+      },
+      collection: 'posts',
+      id: post.id,
+    })) as unknown as Post
+
+    expect(res.arrayWithIDs).toHaveLength(2)
+    expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
+    expect(res.arrayWithIDs?.[0]?.textLocalized).toEqual({
+      en: 'Some text localized',
+    })
+    expect(res.arrayWithIDs?.[1]?.text).toBe('some text 2')
+    expect(res.arrayWithIDs?.[1]?.textLocalized).toEqual({
+      en: 'Some text 2 localized',
+      es: 'Algun texto 2 localizado',
+    })
+  })
+
+  it('should allow atomic array updates using $push with multiple values, unlocalized', async () => {
     const post = await payload.create({
       collection: 'posts',
       data: {
@@ -3135,6 +3180,67 @@ describe('database', () => {
     expect(res.blocks).toHaveLength(1)
     expect(res.blocks[0]?.nested).toHaveLength(1)
     expect(res.blocks[0]?.nested[0]?.nested).toHaveLength(0)
+  })
+
+  it('should allow atomic array updates using $push with multiple values, localized field within array', async () => {
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        arrayWithIDs: [
+          {
+            text: 'some text',
+            textLocalized: 'Some text localized',
+          },
+        ],
+        title: 'post',
+      },
+    })
+
+    const res = (await payload.db.updateOne({
+      data: {
+        // Locales used => no optimized row update => need to pass full data, incuding title
+        title: 'post',
+        arrayWithIDs: {
+          $push: [
+            {
+              id: new mongoose.Types.ObjectId().toHexString(),
+              text: 'some text 2',
+              textLocalized: {
+                en: 'Some text 2 localized',
+                es: 'Algun texto 2 localizado',
+              },
+            },
+            {
+              id: new mongoose.Types.ObjectId().toHexString(),
+              text: 'some text 3',
+              textLocalized: {
+                en: 'Some text 3 localized',
+                es: 'Algun texto 3 localizado',
+              },
+            },
+          ],
+        },
+      },
+      collection: 'posts',
+      id: post.id,
+    })) as unknown as Post
+
+    expect(res.arrayWithIDs).toHaveLength(3)
+    expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
+    expect(res.arrayWithIDs?.[1]?.text).toBe('some text 2')
+    expect(res.arrayWithIDs?.[2]?.text).toBe('some text 3')
+
+    expect(res.arrayWithIDs?.[0]?.textLocalized).toEqual({
+      en: 'Some text localized',
+    })
+    expect(res.arrayWithIDs?.[1]?.textLocalized).toEqual({
+      en: 'Some text 2 localized',
+      es: 'Algun texto 2 localizado',
+    })
+    expect(res.arrayWithIDs?.[2]?.textLocalized).toEqual({
+      en: 'Some text 3 localized',
+      es: 'Algun texto 3 localizado',
+    })
   })
 
   it('should ignore blocks that exist in the db but not in the config', async () => {
