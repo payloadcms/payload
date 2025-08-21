@@ -102,4 +102,32 @@ describe('Lexical Fully Featured', () => {
     await expect(colored).not.toHaveCSS('background-color', 'oklch(0.704 0.191 22.216)')
     await expect(colored).not.toHaveAttribute('data-background-color', 'bg-red')
   })
+
+  test('ensure inline toolbar items are updated when selecting word by double-clicking', async ({
+    page,
+  }) => {
+    await page.keyboard.type('Hello')
+    await page.getByText('Hello').first().dblclick()
+
+    const { dropdownItems } = await lexical.clickInlineToolbarButton({
+      dropdownKey: 'textState',
+    })
+
+    const someButton = dropdownItems!.locator(`[data-item-key="bg-red"]`)
+    await expect(someButton).toHaveAttribute('aria-disabled', 'false')
+  })
+
+  test('ensure fixed toolbar items are updated when selecting word by double-clicking', async ({
+    page,
+  }) => {
+    await page.keyboard.type('Hello')
+    await page.getByText('Hello').first().dblclick()
+
+    const { dropdownItems } = await lexical.clickFixedToolbarButton({
+      dropdownKey: 'textState',
+    })
+
+    const someButton = dropdownItems!.locator(`[data-item-key="bg-red"]`)
+    await expect(someButton).toHaveAttribute('aria-disabled', 'false')
+  })
 })
