@@ -23,7 +23,6 @@ import {
 } from '../helpers/e2e/selectInput.js'
 import { openNav } from '../helpers/e2e/toggleNav.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
 import { menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from './shared.js'
@@ -52,10 +51,6 @@ test.describe('Multi Tenant', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'multiTenant',
-    })
     await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
   })
 
