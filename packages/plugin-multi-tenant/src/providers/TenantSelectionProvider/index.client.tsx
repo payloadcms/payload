@@ -1,9 +1,12 @@
 'use client'
 
+import type { OptionObject } from 'payload'
+
 import { toast, useAuth, useConfig } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
-import { generateCookie, type OptionObject } from 'payload'
 import React, { createContext } from 'react'
+
+import { generateCookie } from '../../utilities/generateCookie.js'
 
 type ContextType = {
   /**
