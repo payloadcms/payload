@@ -31,6 +31,7 @@ export default buildConfigWithDefaults({
   onInit: seed,
   plugins: [
     multiTenantPlugin<ConfigType>({
+      debug: true,
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
       useTenantsCollectionAccess: false,
       tenantField: {

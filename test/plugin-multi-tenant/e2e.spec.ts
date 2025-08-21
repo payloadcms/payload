@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+import type { BasePayload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
@@ -26,6 +27,7 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
+import { seed } from './seed/index.js'
 import { menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -42,7 +44,7 @@ test.describe('Multi Tenant', () => {
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
-    const { serverURL: serverFromInit } = await initPayloadE2ENoConfig<Config>({ dirname })
+    const { serverURL: serverFromInit, payload } = await initPayloadE2ENoConfig<Config>({ dirname })
     serverURL = serverFromInit
     globalMenuURL = new AdminUrlUtil(serverURL, menuSlug)
     menuItemsURL = new AdminUrlUtil(serverURL, menuItemsSlug)
@@ -53,13 +55,14 @@ test.describe('Multi Tenant', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
-  })
-
-  test.beforeEach(async () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'multiTenant',
     })
+    if (seed) {
+      await seed(payload as unknown as BasePayload)
+      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+    }
   })
 
   test.describe('Filters', () => {
@@ -74,6 +77,7 @@ test.describe('Multi Tenant', () => {
         await clearTenant({ page })
 
         await page.goto(tenantsURL.list)
+
         await expect(
           page.locator('.collection-list .table .cell-name', {
             hasText: 'Blue Dog',
@@ -97,12 +101,12 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
+        await page.goto(tenantsURL.list)
         await selectTenant({
           page,
           tenant: 'Blue Dog',
         })
 
-        await page.goto(tenantsURL.list)
         await expect(
           page.locator('.collection-list .table .cell-name', {
             hasText: 'Blue Dog',
@@ -124,9 +128,9 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
+        await page.goto(menuItemsURL.list)
         await clearTenant({ page })
 
-        await page.goto(menuItemsURL.list)
         await expect(
           page.locator('.collection-list .table .cell-name', {
             hasText: 'Spicy Mac',
@@ -145,12 +149,12 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
+        await page.goto(menuItemsURL.list)
         await selectTenant({
           page,
           tenant: 'Blue Dog',
         })
 
-        await page.goto(menuItemsURL.list)
         await expect(
           page.locator('.collection-list .table .cell-name', {
             hasText: 'Spicy Mac',
@@ -169,9 +173,9 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
+        await page.goto(menuItemsURL.list)
         await clearTenant({ page })
 
-        await page.goto(menuItemsURL.list)
         await expect(
           page.locator('.collection-list .table .cell-name', {
             hasText: 'Free Pizza',
@@ -185,9 +189,9 @@ test.describe('Multi Tenant', () => {
           data: credentials.owner,
         })
 
+        await page.goto(menuItemsURL.list)
         await clearTenant({ page })
 
-        await page.goto(menuItemsURL.list)
         await expect(
           page.locator('.collection-list .table .cell-name', {
             hasText: 'Free Pizza',
@@ -204,9 +208,9 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
+        await page.goto(usersURL.list)
         await clearTenant({ page })
 
-        await page.goto(usersURL.list)
         await expect(
           page.locator('.collection-list .table .cell-email', {
             hasText: 'jane@blue-dog.com',
@@ -231,12 +235,12 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
+        await page.goto(usersURL.list)
         await selectTenant({
           page,
           tenant: 'Blue Dog',
         })
 
-        await page.goto(usersURL.list)
         await expect(
           page.locator('.collection-list .table .cell-email', {
             hasText: 'jane@blue-dog.com',
@@ -264,6 +268,7 @@ test.describe('Multi Tenant', () => {
         data: credentials.admin,
       })
 
+      await page.goto(menuItemsURL.list)
       await clearTenant({ page })
 
       await goToListDoc({
@@ -291,6 +296,7 @@ test.describe('Multi Tenant', () => {
         data: credentials.admin,
       })
 
+      await page.goto(menuItemsURL.list)
       await clearTenant({ page })
 
       await goToListDoc({
@@ -300,7 +306,7 @@ test.describe('Multi Tenant', () => {
         urlUtil: menuItemsURL,
       })
 
-      await selectTenant({
+      await selecteDocumentTenant({
         page,
         tenant: 'Steel Cat',
       })
@@ -317,11 +323,11 @@ test.describe('Multi Tenant', () => {
         serverURL,
         data: credentials.admin,
       })
-      await selectTenant({
+      await page.goto(menuItemsURL.create)
+      await selecteDocumentTenant({
         page,
         tenant: 'Blue Dog',
       })
-      await page.goto(menuItemsURL.create)
       const editor = page.locator('[data-lexical-editor="true"]')
       await editor.focus()
       await page.keyboard.type('Hello World')
@@ -331,7 +337,12 @@ test.describe('Multi Tenant', () => {
       }
       await page.keyboard.up('Shift')
       await page.locator('.toolbar-popup__button-link').click()
-      await page.locator('.radio-input__styled-radio').last().click()
+      await expect(page.locator('.lexical-link-edit-drawer')).toBeVisible()
+      const linkRadio = page.locator('.radio-input__styled-radio').last()
+      await expect(linkRadio).toBeVisible()
+      await linkRadio.click({
+        delay: 100,
+      })
       await page.locator('.drawer__content').locator('.rs__input').click()
       await expect(page.getByText('Chorizo Con Queso')).toBeVisible()
       await expect(page.getByText('Pretzel Bites')).toBeHidden()
@@ -355,6 +366,7 @@ test.describe('Multi Tenant', () => {
         serverURL,
         data: credentials.admin,
       })
+      await page.goto(tenantsURL.list)
       await selectTenant({
         page,
         tenant: 'Blue Dog',
@@ -371,6 +383,7 @@ test.describe('Multi Tenant', () => {
         data: credentials.admin,
       })
 
+      await page.goto(tenantsURL.list)
       await selectTenant({
         page,
         tenant: 'Blue Dog',
@@ -415,6 +428,8 @@ test.describe('Multi Tenant', () => {
         data: credentials.admin,
       })
 
+      await page.goto(tenantsURL.list)
+
       await expect
         .poll(async () => {
           return (await getTenantOptions({ page })).sort()
@@ -435,6 +450,8 @@ test.describe('Multi Tenant', () => {
         data: credentials.admin,
       })
 
+      await page.goto(tenantsURL.list)
+
       await expect
         .poll(async () => {
           return (await getTenantOptions({ page })).sort()
@@ -448,6 +465,8 @@ test.describe('Multi Tenant', () => {
         serverURL,
         data: credentials.admin,
       })
+
+      await page.goto(tenantsURL.list)
 
       await expect
         .poll(async () => {
@@ -463,6 +482,8 @@ test.describe('Multi Tenant', () => {
         data: credentials.owner,
       })
 
+      await page.goto(tenantsURL.list)
+
       await expect
         .poll(async () => {
           return (await getTenantOptions({ page })).sort()
@@ -477,9 +498,9 @@ test.describe('Multi Tenant', () => {
         data: credentials.owner,
       })
 
+      await page.goto(tenantsURL.list)
       await clearTenant({ page })
 
-      await page.goto(tenantsURL.list)
       await expect(
         page.locator('.collection-list .table .cell-name', {
           hasText: 'Public Tenant',
@@ -505,6 +526,8 @@ test.describe('Multi Tenant', () => {
       await page.locator('#field-name').fill('Red Dog')
       await saveDocAndAssert(page)
 
+      await page.goto(tenantsURL.list)
+
       // Check the tenant selector
       await expect
         .poll(async () => {
@@ -512,9 +535,19 @@ test.describe('Multi Tenant', () => {
         })
         .toEqual(['Red Dog', 'Steel Cat', 'Public Tenant', 'Anchor Bar'].sort())
 
+      await goToListDoc({
+        cellClass: '.cell-name',
+        page,
+        textToMatch: 'Red Dog',
+        urlUtil: tenantsURL,
+      })
+
       // Change the tenant back to the original name
       await page.locator('#field-name').fill('Blue Dog')
       await saveDocAndAssert(page)
+
+      await page.goto(tenantsURL.list)
+
       await expect
         .poll(async () => {
           return (await getTenantOptions({ page })).sort()
@@ -538,6 +571,8 @@ test.describe('Multi Tenant', () => {
       await page.locator('#field-domain').fill('house-rules.com')
       await saveDocAndAssert(page)
 
+      await page.goto(tenantsURL.list)
+
       // Check the tenant selector
       await expect
         .poll(async () => {
@@ -555,6 +590,21 @@ async function getTenantOptions({ page }: { page: Page }): Promise<string[]> {
   await openNav(page)
   return await getSelectInputOptions({
     selectLocator: page.locator('.tenant-selector'),
+  })
+}
+
+async function selecteDocumentTenant({
+  page,
+  tenant,
+}: {
+  page: Page
+  tenant: string
+}): Promise<void> {
+  await openNav(page)
+  return selectInput({
+    selectLocator: page.locator('.tenantField'),
+    option: tenant,
+    multiSelect: false,
   })
 }
 
