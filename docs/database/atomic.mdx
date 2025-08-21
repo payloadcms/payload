@@ -1,0 +1,105 @@
+---
+title: Atomic Operations
+label: Atomic Operations
+order: 80
+keywords: database, atomic, $inc, $push
+desc: Perform atomic operations on documents.
+---
+
+Atomic operations let you update fields on a document without overwriting the whole record. This is useful when multiple processes might update the same document at the same time, such as with job queues or counters.
+
+Currently, Payload supports the following atomic operators:
+
+- **`$push`** — append one or more items to an array field
+- **`$inc`** — increment or decrement a number field
+
+These are only supported when using direct db calls (`payload.db.*`).
+
+## `$push`
+
+Use `$push` to append new items to an array. This works with both localized and unlocalized arrays. You can push a single item or an array of items in one call.
+
+### Example: Push a single item
+
+```ts
+import mongoose from 'mongoose'
+
+await payload.db.updateOne({
+  collection: 'posts',
+  id: post.id,
+  data: {
+    tags: {
+      $push: {
+        id: new mongoose.Types.ObjectId().toHexString(),
+        text: 'new tag',
+      },
+    },
+  },
+})
+```
+
+### Example: Push multiple items
+
+```ts
+await payload.db.updateOne({
+  collection: 'posts',
+  id: post.id,
+  data: {
+    tags: {
+      $push: [
+        { id: new mongoose.Types.ObjectId().toHexString(), text: 'tag 1' },
+        { id: new mongoose.Types.ObjectId().toHexString(), text: 'tag 2' },
+      ],
+    },
+  },
+})
+```
+
+### Example: Push to a localized array
+
+```ts
+await payload.db.updateOne({
+  collection: 'posts',
+  id: post.id,
+  data: {
+    tagsLocalized: {
+      $push: {
+        en: { id: new mongoose.Types.ObjectId().toHexString(), text: 'tag en' },
+        es: [
+          {
+            text: 'tag es 1',
+            id: new mongoose.Types.ObjectId().toHexString(),
+          },
+          {
+            text: 'tag es 2',
+            id: new mongoose.Types.ObjectId().toHexString(),
+          },
+        ],
+      },
+    },
+  },
+})
+```
+
+## `$inc`
+
+Use $inc to adjust a number field by a given amount. Positive values increment, negative values decrement.
+
+This only works if the update data is "simple", meaning no:
+
+- Arrays / Blocks
+- Localized Fields
+- hasMany: true text / select / number / relationship fields
+- relationship fields with relationTo as an array
+
+## Example: Increment a counter
+
+```ts
+await payload.db.updateOne({
+  collection: 'posts',
+  id: post.id,
+  data: {
+    numberField: { $inc: 2 },
+  },
+})
+```
