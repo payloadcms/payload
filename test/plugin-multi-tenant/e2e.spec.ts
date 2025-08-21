@@ -52,6 +52,10 @@ test.describe('Multi Tenant', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'multiTenant',
+    })
     await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
   })
 
@@ -67,6 +71,7 @@ test.describe('Multi Tenant', () => {
         await clearTenant({ page })
 
         await page.goto(tenantsURL.list)
+
         await expect(
           page.locator('.collection-list .table .cell-name', {
             hasText: 'Blue Dog',
