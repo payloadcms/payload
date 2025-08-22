@@ -352,7 +352,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               newRow.lastRenderedPath = previousRow.lastRenderedPath
             }
 
-            acc.rows.push(newRow)
+            // add addedByServer flag
+            if (!previousRow) {
+              newRow.addedByServer = true
+            }
 
             const isCollapsed = isRowCollapsed({
               collapsedPrefs: preferences?.fields?.[path]?.collapsed,
@@ -362,8 +365,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             })
 
             if (isCollapsed) {
-              acc.rows[acc.rows.length - 1].collapsed = true
+              newRow.collapsed = true
             }
+
+            acc.rows.push(newRow)
 
             return acc
           },
