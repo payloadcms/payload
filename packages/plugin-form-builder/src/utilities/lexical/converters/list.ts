@@ -20,7 +20,7 @@ export const ListHTMLConverter: HTMLConverter<any> = {
 }
 
 export const ListItemHTMLConverter: HTMLConverter<any> = {
-  converter: async ({ converters, node, parent }) => {
+  converter: async ({ converters, node, parent, submissionData }) => {
     const childrenText = await convertLexicalNodesToHTML({
       converters,
       lexicalNodes: node.children,
@@ -28,6 +28,7 @@ export const ListItemHTMLConverter: HTMLConverter<any> = {
         ...node,
         parent,
       },
+      submissionData
     })
 
     if ('listType' in parent && parent?.listType === 'check') {
