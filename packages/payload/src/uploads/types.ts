@@ -185,7 +185,7 @@ export type UploadConfig = {
    */
   externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
   /**
-   * Field slugs to use for a compount index instead of the default filename index.
+   * Field slugs to use for a compound index instead of the default filename index.
    */
   filenameCompoundIndex?: string[]
   /**
