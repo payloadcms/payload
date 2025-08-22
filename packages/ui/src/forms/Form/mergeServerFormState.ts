@@ -116,7 +116,9 @@ export const mergeServerFormState = ({
           // This is because the user may have re-ordered rows client-side while the long running request is processed
           // By the time it gets back to the client, any "index" we define on the server would be stale when it arrives
           // Instead, we just append it to the array
-          newState[path].rows.push(row)
+          const newRow = { ...row }
+          delete newRow.addedByServer
+          newState[path].rows.push(newRow)
         }
       })
     }
