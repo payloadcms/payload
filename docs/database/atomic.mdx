@@ -34,6 +34,8 @@ await payload.db.updateOne({
         text: 'new tag',
       },
     },
+    // Performance optimization: skip setting updatedAt => results in 1 instead of 2 db roundtrips on postgres
+    // updatedAt: null,
   },
 })
 ```
@@ -80,6 +82,34 @@ await payload.db.updateOne({
   },
 })
 ```
+
+<Banner type="info">
+
+**Performance tip:**
+When pushing an item to an array in Postgres, the default behavior triggers **two database calls**:
+
+1. Update the `updatedAt` column on the parent row.
+2. Insert the new array element into the related table.
+
+You can avoid the extra update by explicitly setting `updatedAt` to `null`. This skips the timestamp update and reduces the operation to a **single roundtrip**:
+
+```ts
+await payload.db.updateOne({
+  collection: 'posts',
+  id: post.id,
+  data: {
+    tags: {
+      $push: {
+        id: new mongoose.Types.ObjectId().toHexString(),
+        text: 'new tag',
+      },
+    },
+    updatedAt: null, // prevents automatic timestamp update
+  },
+})
+```
+
+</Banner>
 
 ## `$inc`
 
