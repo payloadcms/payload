@@ -7,6 +7,8 @@ import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
   apiKeysSlug,
+  customVerificationTokenSlug,
+  expectedVerificationToken,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
@@ -260,6 +262,15 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+    },
+    {
+      slug: customVerificationTokenSlug,
+      auth: {
+        verify: {
+          generateVerificationToken: async () => Promise.resolve(expectedVerificationToken),
+        },
+      },
+      fields: [],
     },
   ],
   onInit: seed,
