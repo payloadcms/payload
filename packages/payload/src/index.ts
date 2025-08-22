@@ -1010,9 +1010,7 @@ export const reload = async (
   ;(global as any)._payload_doNotCacheClientSchemaMap = true
 }
 
-export const getPayload = async (
-  options: Pick<InitOptions, 'config' | 'cron' | 'importMap'>,
-): Promise<Payload> => {
+export const getPayload = async (options: InitOptions): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayload to work.')
   }
