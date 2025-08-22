@@ -339,6 +339,57 @@ describe('database', () => {
       })
     })
 
+    it('ensure updatedAt is automatically set when using db.updateOne', async () => {
+      const post = await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'hello',
+        },
+      })
+
+      const result: any = await payload.db.updateOne({
+        collection: postsSlug,
+        id: post.id,
+        data: {
+          title: 'hello2',
+        },
+      })
+
+      expect(result.updatedAt).not.toStrictEqual(post.updatedAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
+    })
+
+    it('ensure updatedAt is not automatically set when using db.updateOne if it is explicitly set to `null`', async () => {
+      const post = await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'hello',
+        },
+      })
+
+      const result: any = await payload.db.updateOne({
+        collection: postsSlug,
+        id: post.id,
+        data: {
+          updatedAt: null,
+          title: 'hello2',
+        },
+      })
+
+      expect(result.updatedAt).toStrictEqual(post.updatedAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
+    })
+
     it('should allow createdAt to be set in updateVersion', async () => {
       const category = await payload.create({
         collection: 'categories',

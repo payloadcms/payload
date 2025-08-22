@@ -48,13 +48,15 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
   let insertedRow: Record<string, unknown> = { id }
   if (id && shouldUseOptimizedUpsertRow({ data, fields })) {
-    const { arraysToPush, row } = transformForWrite({
+    const transformedForWrite = transformForWrite({
       adapter,
       data,
       enableAtomicWrites: true,
       fields,
       tableName,
     })
+    let { row } = transformedForWrite
+    const { arraysToPush } = transformedForWrite
 
     const drizzle = db as LibSQLDatabase
 
@@ -70,8 +72,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       })
     }
 
-    const hasDataToUpdate =
-      row && Object.keys(row).some((key) => row[key] !== null && row[key] !== undefined)
+    // Remove null or undefined value from row. This is required for hasDataToUpdate to work accurately.
+    row = Object.fromEntries(Object.entries(row).filter(([_, v]) => v !== null && v !== undefined))
+
+    const hasDataToUpdate = row && Object.keys(row)?.length
 
     // Then, handle regular row update
     if (ignoreResult) {
