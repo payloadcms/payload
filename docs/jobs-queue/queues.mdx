@@ -197,7 +197,7 @@ pnpm payload jobs:run --cron "*/5 * * * *"
 You can also pass `--handle-schedules` flag to the `jobs:run` command to make it schedule jobs according to configured schedules:
 
 ```sh
-pnpm payload jobs:run --queue myQueue --handle-schedules # This will both schedule jobs according to the configuration and run them
+pnpm payload jobs:run --cron "*/5 * * * *" --queue myQueue --handle-schedules # This will both schedule jobs according to the configuration and run them
 ```
 
 ## Processing Order

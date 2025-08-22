@@ -40,13 +40,13 @@ You can disable this behavior by setting `disableScheduling: true` in your `auto
 Payload provides a set of bin scripts that can be used to handle schedules. If you're already using the `jobs:run` bin script, you can set it to also handle schedules by passing the `--handle-schedules` flag:
 
 ```sh
-pnpm payload jobs:run --queue myQueue --handle-schedules # This will both schedule jobs according to the configuration and run them
+pnpm payload jobs:run --cron "*/5 * * * *" --queue myQueue --handle-schedules # This will both schedule jobs according to the configuration and run them
 ```
 
 If you only want to handle schedules, you can use the dedicated `jobs:handle-schedules` bin script:
 
 ```sh
-pnpm payload jobs:handle-schedules --queue myQueue # or --all-queues
+pnpm payload jobs:handle-schedules --cron "*/5 * * * *" --queue myQueue # or --all-queues
 ```
 
 ## Defining schedules on Tasks or Workflows
