@@ -194,9 +194,8 @@ export const Auth: React.FC<Props> = (props) => {
   const showAuthBlock = enableFields
   const showAPIKeyBlock = useAPIKey && canReadApiKey
   const showVerifyBlock = verify && isEditing
-  const hasVisibleContent = showAuthBlock || showAPIKeyBlock || showVerifyBlock
 
-  if (!hasVisibleContent) {
+  if (!(showAuthBlock || showAPIKeyBlock || showVerifyBlock)) {
     return null
   }
 
