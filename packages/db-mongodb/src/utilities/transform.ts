@@ -594,7 +594,8 @@ export const transform = ({
   })
 
   if (operation === 'write') {
-    if (!data.updatedAt) {
+    if (typeof data.updatedAt === 'undefined') {
+      // If data.updatedAt is explicitly set to `null` we should not set it - this means we don't want to change the value of updatedAt.
       data.updatedAt = new Date().toISOString()
     }
   }
