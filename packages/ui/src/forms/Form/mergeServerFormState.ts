@@ -89,30 +89,38 @@ export const mergeServerFormState = ({
     }
 
     /**
-     * Intelligently merge the rows array to ensure changes to local state are not lost while the request was pending
+     * Deeply merge the rows array to ensure changes to local state are not lost while the request was pending
      * For example, the server response could come back with a row which has been deleted on the client
      * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
      * Note: read `currentState` and not `newState` here, as the `rows` property have already been merged above
      */
-    if (Array.isArray(incomingField.rows)) {
-      if (acceptValues === true) {
-        newState[path].rows = incomingField.rows
-      } else if (path in currentState) {
-        newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
+    if (Array.isArray(incomingField.rows) && path in currentState) {
+      newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
 
-        incomingField.rows.forEach((row) => {
-          const indexInCurrentState = currentState[path].rows?.findIndex(
-            (existingRow) => existingRow.id === row.id,
-          )
+      incomingField.rows.forEach((row) => {
+        const indexInCurrentState = currentState[path].rows?.findIndex(
+          (existingRow) => existingRow.id === row.id,
+        )
 
-          if (indexInCurrentState > -1) {
-            newState[path].rows[indexInCurrentState] = {
-              ...currentState[path].rows[indexInCurrentState],
-              ...row,
-            }
+        if (indexInCurrentState > -1) {
+          newState[path].rows[indexInCurrentState] = {
+            ...currentState[path].rows[indexInCurrentState],
+            ...row,
           }
-        })
-      }
+        } else if (row.addedByServer) {
+          /**
+           * Note: This is a known limitation of computed array and block rows
+           * If a new row was added by the server, we append it to the _end_ of this array
+           * This is because the client is the source of truth, and it has arrays ordered in a certain position
+           * For example, the user may have re-ordered rows client-side while a long running request is processing
+           * This means that we _cannot_ slice a new row into the second position on the server, for example
+           * By the time it gets back to the client, its index is stale
+           */
+          const newRow = { ...row }
+          delete newRow.addedByServer
+          newState[path].rows.push(newRow)
+        }
+      })
     }
 
     // If `valid` is `undefined`, mark it as `true`
