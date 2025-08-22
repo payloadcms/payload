@@ -23,6 +23,7 @@ const { serverURL } = await initPayloadE2ENoConfig({
 })
 
 describe('Lexical Fully Featured', () => {
+  let lexical: LexicalHelpers
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
@@ -37,14 +38,13 @@ describe('Lexical Fully Featured', () => {
       uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
-    const lexical = new LexicalHelpers(page)
+    lexical = new LexicalHelpers(page)
     await page.goto(url.create)
     await lexical.editor.first().focus()
   })
   test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async ({
     page,
   }) => {
-    const lexical = new LexicalHelpers(page)
     await lexical.slashCommand('block')
     await lexical.slashCommand('relationship')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
@@ -68,7 +68,6 @@ describe('Lexical Fully Featured', () => {
   test('ControlOrMeta+A inside input should select all the text inside the input', async ({
     page,
   }) => {
-    const lexical = new LexicalHelpers(page)
     await lexical.editor.first().focus()
     await page.keyboard.type('Hello')
     await page.keyboard.press('Enter')
@@ -85,15 +84,50 @@ describe('Lexical Fully Featured', () => {
   test('text state feature', async ({ page }) => {
     await page.keyboard.type('Hello')
     await page.keyboard.press('ControlOrMeta+A')
-    await page.locator('.toolbar-popup__dropdown-textState').first().click()
-    await page.getByRole('button', { name: 'Red' }).first().click()
+
+    await lexical.clickInlineToolbarButton({
+      dropdownKey: 'textState',
+      buttonKey: 'bg-red',
+    })
+
     const colored = page.locator('span').filter({ hasText: 'Hello' })
     await expect(colored).toHaveCSS('background-color', 'oklch(0.704 0.191 22.216)')
-    await expect(colored).toHaveAttribute('data-color', 'bg-red')
-    await page.locator('.toolbar-popup__dropdown-textState').first().click()
-    await page.getByRole('button', { name: 'Default style' }).click()
+    await expect(colored).toHaveAttribute('data-background-color', 'bg-red')
+    await lexical.clickInlineToolbarButton({
+      dropdownKey: 'textState',
+      buttonKey: 'clear-style',
+    })
+
     await expect(colored).toBeVisible()
     await expect(colored).not.toHaveCSS('background-color', 'oklch(0.704 0.191 22.216)')
-    await expect(colored).not.toHaveAttribute('data-color', 'bg-red')
+    await expect(colored).not.toHaveAttribute('data-background-color', 'bg-red')
+  })
+
+  test('ensure inline toolbar items are updated when selecting word by double-clicking', async ({
+    page,
+  }) => {
+    await page.keyboard.type('Hello')
+    await page.getByText('Hello').first().dblclick()
+
+    const { dropdownItems } = await lexical.clickInlineToolbarButton({
+      dropdownKey: 'textState',
+    })
+
+    const someButton = dropdownItems!.locator(`[data-item-key="bg-red"]`)
+    await expect(someButton).toHaveAttribute('aria-disabled', 'false')
+  })
+
+  test('ensure fixed toolbar items are updated when selecting word by double-clicking', async ({
+    page,
+  }) => {
+    await page.keyboard.type('Hello')
+    await page.getByText('Hello').first().dblclick()
+
+    const { dropdownItems } = await lexical.clickFixedToolbarButton({
+      dropdownKey: 'textState',
+    })
+
+    const someButton = dropdownItems!.locator(`[data-item-key="bg-red"]`)
+    await expect(someButton).toHaveAttribute('aria-disabled', 'false')
   })
 })
