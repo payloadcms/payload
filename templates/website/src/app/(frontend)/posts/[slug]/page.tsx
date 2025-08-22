@@ -47,6 +47,8 @@ export default async function Post({ params: paramsPromise }: Args) {
   const url = '/posts/' + slug
   const post = await queryPostBySlug({ slug })
 
+  console.log('post', post)
+
   if (!post) return <PayloadRedirects url={url} />
 
   return (
@@ -91,6 +93,7 @@ const queryPostBySlug = cache(async ({ slug }: { slug: string }) => {
     collection: 'posts',
     draft,
     limit: 1,
+    // depth: 0, // IF YOU UNCOMMENT THIS, THE BLOCKS WILL NOT BE POPULATED
     overrideAccess: draft,
     pagination: false,
     where: {
