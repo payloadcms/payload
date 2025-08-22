@@ -191,7 +191,12 @@ export const Auth: React.FC<Props> = (props) => {
     }
   }, [modified])
 
-  if (disableLocalStrategy && !enableFields && !useAPIKey) {
+  const showAuthBlock = enableFields
+  const showAPIKeyBlock = useAPIKey && canReadApiKey
+  const showVerifyBlock = verify && isEditing
+  const hasVisibleContent = showAuthBlock || showAPIKeyBlock || showVerifyBlock
+
+  if (!hasVisibleContent) {
     return null
   }
 
