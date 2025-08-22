@@ -28,7 +28,7 @@ import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
 import { seed } from './seed/index.js'
-import { menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from './shared.js'
+import { autosaveGlobalSlug, menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -37,6 +37,7 @@ test.describe('Multi Tenant', () => {
   let page: Page
   let serverURL: string
   let globalMenuURL: AdminUrlUtil
+  let autosaveGlobalURL: AdminUrlUtil
   let menuItemsURL: AdminUrlUtil
   let usersURL: AdminUrlUtil
   let tenantsURL: AdminUrlUtil
@@ -50,6 +51,7 @@ test.describe('Multi Tenant', () => {
     menuItemsURL = new AdminUrlUtil(serverURL, menuItemsSlug)
     usersURL = new AdminUrlUtil(serverURL, usersSlug)
     tenantsURL = new AdminUrlUtil(serverURL, tenantsSlug)
+    autosaveGlobalURL = new AdminUrlUtil(serverURL, autosaveGlobalSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -74,7 +76,7 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
-        await clearTenant({ page })
+        await clearGlobalTenant({ page })
 
         await page.goto(tenantsURL.list)
 
@@ -129,7 +131,7 @@ test.describe('Multi Tenant', () => {
         })
 
         await page.goto(menuItemsURL.list)
-        await clearTenant({ page })
+        await clearGlobalTenant({ page })
 
         await expect(
           page.locator('.collection-list .table .cell-name', {
@@ -174,7 +176,7 @@ test.describe('Multi Tenant', () => {
         })
 
         await page.goto(menuItemsURL.list)
-        await clearTenant({ page })
+        await clearGlobalTenant({ page })
 
         await expect(
           page.locator('.collection-list .table .cell-name', {
@@ -190,7 +192,7 @@ test.describe('Multi Tenant', () => {
         })
 
         await page.goto(menuItemsURL.list)
-        await clearTenant({ page })
+        await clearGlobalTenant({ page })
 
         await expect(
           page.locator('.collection-list .table .cell-name', {
@@ -209,7 +211,7 @@ test.describe('Multi Tenant', () => {
         })
 
         await page.goto(usersURL.list)
-        await clearTenant({ page })
+        await clearGlobalTenant({ page })
 
         await expect(
           page.locator('.collection-list .table .cell-email', {
@@ -269,7 +271,7 @@ test.describe('Multi Tenant', () => {
       })
 
       await page.goto(menuItemsURL.list)
-      await clearTenant({ page })
+      await clearGlobalTenant({ page })
 
       await goToListDoc({
         page,
@@ -297,7 +299,7 @@ test.describe('Multi Tenant', () => {
       })
 
       await page.goto(menuItemsURL.list)
-      await clearTenant({ page })
+      await clearGlobalTenant({ page })
 
       await goToListDoc({
         page,
@@ -306,7 +308,7 @@ test.describe('Multi Tenant', () => {
         urlUtil: menuItemsURL,
       })
 
-      await selecteDocumentTenant({
+      await selectDocumentTenant({
         page,
         tenant: 'Steel Cat',
       })
@@ -324,7 +326,7 @@ test.describe('Multi Tenant', () => {
         data: credentials.admin,
       })
       await page.goto(menuItemsURL.create)
-      await selecteDocumentTenant({
+      await selectDocumentTenant({
         page,
         tenant: 'Blue Dog',
       })
@@ -418,6 +420,24 @@ test.describe('Multi Tenant', () => {
         })
         .toBe('Steel Cat')
     })
+
+    test('should navigate to globals with autosave enabled', async () => {
+      await loginClientSide({
+        page,
+        serverURL,
+        data: credentials.admin,
+      })
+      await page.goto(tenantsURL.list)
+      await clearGlobalTenant({ page })
+      await page.goto(autosaveGlobalURL.list)
+      await expect(page.locator('.doc-header__title')).toBeVisible()
+      const globalTenant = await getGlobalTenant({ page })
+      await expect
+        .poll(async () => {
+          return await getDocumentTenant({ page })
+        })
+        .toBe(globalTenant)
+    })
   })
 
   test.describe('Tenant Selector', () => {
@@ -499,7 +519,7 @@ test.describe('Multi Tenant', () => {
       })
 
       await page.goto(tenantsURL.list)
-      await clearTenant({ page })
+      await clearGlobalTenant({ page })
 
       await expect(
         page.locator('.collection-list .table .cell-name', {
@@ -586,6 +606,24 @@ test.describe('Multi Tenant', () => {
 /**
  * Helper Functions
  */
+
+async function getGlobalTenant({ page }: { page: Page }): Promise<string | undefined> {
+  await openNav(page)
+  return await getSelectInputValue<false>({
+    selectLocator: page.locator('.tenant-selector'),
+    multiSelect: false,
+  })
+}
+
+async function getDocumentTenant({ page }: { page: Page }): Promise<string | undefined> {
+  await openNav(page)
+  return await getSelectInputValue<false>({
+    selectLocator: page.locator('#field-tenant'),
+    multiSelect: false,
+    valueLabelClass: '.relationship--single-value',
+  })
+}
+
 async function getTenantOptions({ page }: { page: Page }): Promise<string[]> {
   await openNav(page)
   return await getSelectInputOptions({
@@ -593,7 +631,7 @@ async function getTenantOptions({ page }: { page: Page }): Promise<string[]> {
   })
 }
 
-async function selecteDocumentTenant({
+async function selectDocumentTenant({
   page,
   tenant,
 }: {
@@ -617,7 +655,7 @@ async function selectTenant({ page, tenant }: { page: Page; tenant: string }): P
   })
 }
 
-async function clearTenant({ page }: { page: Page }): Promise<void> {
+async function clearGlobalTenant({ page }: { page: Page }): Promise<void> {
   await openNav(page)
   return clearSelectInput({
     selectLocator: page.locator('.tenant-selector'),
