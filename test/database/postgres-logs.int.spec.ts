@@ -191,6 +191,8 @@ describePostgres('database - postgres logs', () => {
 
     await payload.db.updateOne({
       data: {
+        // Ensure db adapter does not automatically set updatedAt - one less db call
+        updatedAt: null,
         arrayWithIDs: {
           $push: {
             text: 'some text 2',
@@ -203,10 +205,10 @@ describePostgres('database - postgres logs', () => {
       returning: false,
     })
 
-    // 2 Updates:
-    // 1. updatedAt for posts row. //TODO: Skip this once updatedAt PR is merged
+    // 1 Update:
+    // 1. (updatedAt for posts row.) - skipped because we explicitly set updatedAt to null
     // 2. arrayWithIDs.$push for posts row
-    expect(consoleCount).toHaveBeenCalledTimes(2)
+    expect(consoleCount).toHaveBeenCalledTimes(1)
     consoleCount.mockRestore()
 
     const updatedPost = (await payload.db.findOne({

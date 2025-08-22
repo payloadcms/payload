@@ -70,10 +70,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       })
     }
 
-    // Then, handle regular row update
+    const hasDataToUpdate =
+      row && Object.keys(row).some((key) => row[key] !== null && row[key] !== undefined)
 
+    // Then, handle regular row update
     if (ignoreResult) {
-      if (row && Object.keys(row).length) {
+      if (hasDataToUpdate) {
+        // Only update row if there is something to update.
+        // Example: if the data only consists of a single $push, calling insertArrays is enough - we don't need to update the row.
         await drizzle
           .update(adapter.tables[tableName])
           .set(row)
@@ -94,7 +98,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const findManyKeysLength = Object.keys(findManyArgs).length
     const hasOnlyColumns = Object.keys(findManyArgs.columns || {}).length > 0
 
-    if (!row || !Object.keys(row).length) {
+    if (!hasDataToUpdate) {
       // Nothing to update => just fetch current row and return
       findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
 
