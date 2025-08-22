@@ -89,7 +89,7 @@ export const mergeServerFormState = ({
     }
 
     /**
-     * Intelligently merge the rows array to ensure changes to local state are not lost while the request was pending
+     * Deeply merge the rows array to ensure changes to local state are not lost while the request was pending
      * For example, the server response could come back with a row which has been deleted on the client
      * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
      * Note: read `currentState` and not `newState` here, as the `rows` property have already been merged above
@@ -108,14 +108,14 @@ export const mergeServerFormState = ({
             ...row,
           }
         } else if (row.addedByServer) {
-          // TODO: is this going to cause problems in ordering?
-          // As in, the client side has arrays ordered in a certain position
-          // But if the server sliced a new row into the second position, let's say
-          // This logic would actually have placed it in the last position
-          // There's no good way to fix this though bc there's reliable way to determine its proper index
-          // This is because the user may have re-ordered rows client-side while the long running request is processed
-          // By the time it gets back to the client, any "index" we define on the server would be stale when it arrives
-          // Instead, we just append it to the array
+          /**
+           * Note: This is a known limitation of computed array and block rows
+           * If a new row was added by the server, we append it to the _end_ of this array
+           * This is because the client is the source of truth, and it has arrays ordered in a certain position
+           * For example, the user may have re-ordered rows client-side while a long running request is processing
+           * This means that we _cannot_ slice a new row into the second position on the server, for example
+           * By the time it gets back to the client, its index is stale
+           */
           const newRow = { ...row }
           delete newRow.addedByServer
           newState[path].rows.push(newRow)
