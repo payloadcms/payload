@@ -55,7 +55,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       fields,
       tableName,
     })
-    let { row } = transformedForWrite
+    const { row } = transformedForWrite
     const { arraysToPush } = transformedForWrite
 
     const drizzle = db as LibSQLDatabase
@@ -72,8 +72,11 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       })
     }
 
-    // Remove null or undefined value from row. This is required for hasDataToUpdate to work accurately.
-    row = Object.fromEntries(Object.entries(row).filter(([_, v]) => v !== null && v !== undefined))
+    // If row.updatedAt is not set, delete it to avoid triggering hasDataToUpdate. `updatedAt` may be explicitly set to null to
+    // disable triggering hasDataToUpdate.
+    if (typeof row.updatedAt === 'undefined' || row.updatedAt === null) {
+      delete row.updatedAt
+    }
 
     const hasDataToUpdate = row && Object.keys(row)?.length
 
