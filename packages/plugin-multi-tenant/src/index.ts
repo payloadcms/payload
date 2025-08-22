@@ -163,20 +163,22 @@ export const multiTenantPlugin =
       incomingConfig.folders = incomingConfig.folders || {}
       incomingConfig.folders.collectionOverrides = incomingConfig.folders.collectionOverrides || []
       incomingConfig.folders.collectionOverrides.push(({ collection }) => {
-        /**
-         * Add tenant field to enabled collections
-         */
-        const folderTenantField = tenantField({
-          ...(pluginConfig?.tenantField || {}),
-          name: tenantFieldName,
-          debug: pluginConfig.debug,
-          overrides,
-          tenantsArrayFieldName,
-          tenantsArrayTenantFieldName,
-          tenantsCollectionSlug,
-          unique: false,
-        })
-        collection.fields.unshift(folderTenantField)
+        if (pluginConfig.collections[foldersSlug]?.manuallyPlaceTenantField !== true) {
+          /**
+           * Add tenant field to enabled collections
+           */
+          const folderTenantField = tenantField({
+            ...(pluginConfig?.tenantField || {}),
+            name: tenantFieldName,
+            debug: pluginConfig.debug,
+            overrides,
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
+            tenantsCollectionSlug,
+            unique: false,
+          })
+          collection.fields.unshift(folderTenantField)
+        }
 
         if (pluginConfig.collections[foldersSlug]?.useBaseListFilter !== false) {
           /**
@@ -331,22 +333,24 @@ export const multiTenantPlugin =
           ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
           : pluginConfig.tenantField || {}
 
-        /**
-         * Add tenant field to enabled collections
-         */
-        collection.fields.splice(
-          0,
-          0,
-          tenantField({
-            name: tenantFieldName,
-            debug: pluginConfig.debug,
-            overrides,
-            tenantsArrayFieldName,
-            tenantsArrayTenantFieldName,
-            tenantsCollectionSlug,
-            unique: isGlobal,
-          }),
-        )
+        if (pluginConfig.collections[collection.slug]?.manuallyPlaceTenantField !== true) {
+          /**
+           * Add tenant field to enabled collections
+           */
+          collection.fields.splice(
+            0,
+            0,
+            tenantField({
+              name: tenantFieldName,
+              debug: pluginConfig.debug,
+              overrides,
+              tenantsArrayFieldName,
+              tenantsArrayTenantFieldName,
+              tenantsCollectionSlug,
+              unique: isGlobal,
+            }),
+          )
+        }
 
         const { useBaseFilter, useBaseListFilter } = pluginConfig.collections[collection.slug] || {}
 
