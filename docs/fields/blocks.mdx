@@ -82,10 +82,114 @@ The Blocks Field inherits all of the default admin options from the base [Field 
 
 | Option                 | Description                                                                |
 | ---------------------- | -------------------------------------------------------------------------- |
-| **`group`**            | Text or localization object used to group this Block in the Blocks Drawer. |
 | **`initCollapsed`**    | Set the initial collapsed state                                            |
 | **`isSortable`**       | Disable order sorting by setting this value to `false`                     |
-| **`disableBlockName`** | Hide the blockName field by setting this value to `true`                   |
+
+## Block Configs
+
+Blocks are defined as separate configs of their own.
+
+<Banner type="success">
+  **Tip:** Best practice is to define each block config in its own file, and
+  then import them into your Blocks field as necessary. This way each block
+  config can be easily shared between fields. For instance, using the "layout
+  builder" example, you might want to feature a few of the same blocks in a Post
+  collection as well as a Page collection. Abstracting into their own files
+  trivializes their reusability.
+</Banner>
+
+| Option                     | Description                                                                                                                                                                         |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`slug`** \*              | Identifier for this block type. Will be saved on each block as the `blockType` property.                                                                                            |
+| **`fields`** \*            | Array of fields to be stored in this block.                                                                                                                                         |
+| **`labels`**               | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined.                                                                             |
+| **`imageURL`**             | Provide a custom image thumbnail to help editors identify this block in the Admin UI.                                                                                               |
+| **`imageAltText`**         | Customize this block's image thumbnail alt text.                                                                                                                                    |
+| **`interfaceName`**        | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). |
+| **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interfaceName`.                                        |
+| **`dbName`**               | Custom table name for this block type when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.                               |
+| **`custom`**               | Extension point for adding custom data (e.g. for plugins)                                                                                                                           |
+| **`admin`**                | Admin-specific configuration. [More details](#block-admin-options).                                                                                                                       |
+
+## Block Admin Options
+
+To customize the appearance and behavior of a Block in the [Admin Panel](../admin/overview), you can use the `admin` option:
+
+```ts
+import type { Block } from 'payload'
+
+const QuoteBlock: Block = {
+  // ...
+  admin: {
+    // highlight-line
+    // ...
+  },
+}
+```
+
+A Block config can have the following admin options:
+
+| Option                 | Description                                                                |
+| ---------------------- | -------------------------------------------------------------------------- |
+| **`group`**            | Text or localization object used to group this Block in the Blocks Drawer. |
+| **`disableBlockName`** | Hide the blockName field by setting this value to `true.                   |
+| **`components.Label`** | React component to be rendered as the label on the block row. [Example](#row-label) |
+| **`components.Block`** | React component to be rendered as the block in Lexical. [More info](#customizing-the-way-your-block-is-rendered-in-lexical) |
+
+### Auto-generated data per block
+
+In addition to the field data that you define on each block, Payload will store two additional properties on each block:
+
+**`blockType`**
+
+The `blockType` is saved as the slug of the block that has been selected.
+
+**`blockName`**
+
+The Admin Panel provides each block with a `blockName` field which optionally allows editors to label their blocks for better editability and readability. This can be visually hidden via `admin.disableBlockName`.
+
+### Example
+
+`collections/ExampleCollection.js`
+
+```ts
+import { Block, CollectionConfig } from 'payload'
+
+const QuoteBlock: Block = {
+  slug: 'Quote', // required
+  imageURL: 'https://google.com/path/to/image.jpg',
+  imageAltText: 'A nice thumbnail image to show what this block looks like',
+  interfaceName: 'QuoteBlock', // optional
+  fields: [
+    // required
+    {
+      name: 'quoteHeader',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'quoteText',
+      type: 'text',
+    },
+  ],
+}
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'layout', // required
+      type: 'blocks', // required
+      minRows: 1,
+      maxRows: 20,
+      blocks: [
+        // required
+        QuoteBlock,
+      ],
+    },
+  ],
+}
+```
 
 #### Customizing the way your block is rendered in Lexical
 
@@ -130,86 +234,6 @@ import {
   // if you want to re-use it
   BlockCollapsible,
 } from '@payloadcms/richtext-lexical/client'
-```
-
-## Block Configs
-
-Blocks are defined as separate configs of their own.
-
-<Banner type="success">
-  **Tip:** Best practice is to define each block config in its own file, and
-  then import them into your Blocks field as necessary. This way each block
-  config can be easily shared between fields. For instance, using the "layout
-  builder" example, you might want to feature a few of the same blocks in a Post
-  collection as well as a Page collection. Abstracting into their own files
-  trivializes their reusability.
-</Banner>
-
-| Option                     | Description                                                                                                                                                                         |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`slug`** \*              | Identifier for this block type. Will be saved on each block as the `blockType` property.                                                                                            |
-| **`fields`** \*            | Array of fields to be stored in this block.                                                                                                                                         |
-| **`labels`**               | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined.                                                                             |
-| **`imageURL`**             | Provide a custom image thumbnail to help editors identify this block in the Admin UI.                                                                                               |
-| **`imageAltText`**         | Customize this block's image thumbnail alt text.                                                                                                                                    |
-| **`interfaceName`**        | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). |
-| **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interfaceName`.                                        |
-| **`dbName`**               | Custom table name for this block type when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.                               |
-| **`custom`**               | Extension point for adding custom data (e.g. for plugins)                                                                                                                           |
-
-### Auto-generated data per block
-
-In addition to the field data that you define on each block, Payload will store two additional properties on each block:
-
-**`blockType`**
-
-The `blockType` is saved as the slug of the block that has been selected.
-
-**`blockName`**
-
-The Admin Panel provides each block with a `blockName` field which optionally allows editors to label their blocks for better editability and readability. This can be visually hidden via `admin.disableBlockName`.
-
-## Example
-
-`collections/ExampleCollection.js`
-
-```ts
-import { Block, CollectionConfig } from 'payload'
-
-const QuoteBlock: Block = {
-  slug: 'Quote', // required
-  imageURL: 'https://google.com/path/to/image.jpg',
-  imageAltText: 'A nice thumbnail image to show what this block looks like',
-  interfaceName: 'QuoteBlock', // optional
-  fields: [
-    // required
-    {
-      name: 'quoteHeader',
-      type: 'text',
-      required: true,
-    },
-    {
-      name: 'quoteText',
-      type: 'text',
-    },
-  ],
-}
-
-export const ExampleCollection: CollectionConfig = {
-  slug: 'example-collection',
-  fields: [
-    {
-      name: 'layout', // required
-      type: 'blocks', // required
-      minRows: 1,
-      maxRows: 20,
-      blocks: [
-        // required
-        QuoteBlock,
-      ],
-    },
-  ],
-}
 ```
 
 ## Custom Components
