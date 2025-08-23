@@ -947,6 +947,7 @@ export const reload = async (
   config: SanitizedConfig,
   payload: Payload,
   skipImportMapGeneration?: boolean,
+  options?: InitOptions,
 ): Promise<void> => {
   if (typeof payload.db.destroy === 'function') {
     // Only destroy db, as we then later only call payload.db.init and not payload.init
@@ -996,9 +997,11 @@ export const reload = async (
     })
   }
 
-  await payload.db.init?.()
+  if (payload.db?.init) {
+    await payload.db.init()
+  }
 
-  if (payload.db.connect) {
+  if (!options?.disableDBConnect && payload.db.connect) {
     await payload.db.connect({ hotReload: true })
   }
 
@@ -1024,7 +1027,7 @@ export const getPayload = async (options: InitOptions): Promise<Payload> => {
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
       const config = await options.config
-      await reload(config, cached.payload, !options.importMap)
+      await reload(config, cached.payload, !options.importMap, options)
 
       resolve()
     }
