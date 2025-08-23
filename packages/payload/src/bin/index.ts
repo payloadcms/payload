@@ -147,8 +147,8 @@ async function runBinScript({
     const payload = await getPayload({ config }) // Do not setup crons here - this bin script can set up its own crons
     const limit = args.limit ? parseInt(args.limit, 10) : undefined
     const queue = args.queue ? args.queue : undefined
-    const allQueues = !!args.allQueues
-    const handleSchedules = !!args.handleSchedules
+    const allQueues = !!args['all-queues']
+    const handleSchedules = !!args['handle-schedules']
 
     if (handleSchedules) {
       await payload.jobs.handleSchedules({
@@ -169,7 +169,7 @@ async function runBinScript({
   if (script === 'jobs:handle-schedules') {
     const payload = await getPayload({ config }) // Do not setup crons here - this bin script can set up its own crons
     const queue = args.queue ? args.queue : undefined
-    const allQueues = !!args.allQueues
+    const allQueues = !!args['all-queues']
 
     await payload.jobs.handleSchedules({
       allQueues,
