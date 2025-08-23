@@ -1,4 +1,5 @@
 export const autosaveCollectionSlug = 'autosave-posts'
+export const autosaveWithMultiSelectCollectionSlug = 'autosave-multi-select-posts'
 
 export const autosaveWithDraftButtonSlug = 'autosave-with-draft-button-posts'
 
@@ -28,6 +29,7 @@ export const textCollectionSlug = 'text'
 
 export const collectionSlugs = [
   autosaveCollectionSlug,
+  autosaveWithMultiSelectCollectionSlug,
   draftCollectionSlug,
   postCollectionSlug,
   diffCollectionSlug,

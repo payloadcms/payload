@@ -5,6 +5,7 @@ import type {
   PaginatedDocs,
   PayloadRequest,
   SanitizedCollectionConfig,
+  ViewTypes,
   Where,
 } from 'payload'
 
@@ -24,6 +25,7 @@ export const handleGroupBy = async ({
   req,
   trash = false,
   user,
+  viewType,
   where: whereWithMergedSearch,
 }: {
   clientConfig: ClientConfig
@@ -37,6 +39,7 @@ export const handleGroupBy = async ({
   req: PayloadRequest
   trash?: boolean
   user: any
+  viewType?: ViewTypes
   where: Where
 }): Promise<{
   columnState: Column[]
@@ -140,10 +143,11 @@ export const handleGroupBy = async ({
         },
       })
 
-      let heading = valueOrRelationshipID || req.i18n.t('general:noValue')
+      let heading = valueOrRelationshipID
 
       if (
         groupByField?.type === 'relationship' &&
+        potentiallyPopulatedRelationship &&
         typeof potentiallyPopulatedRelationship === 'object'
       ) {
         heading =
@@ -151,12 +155,22 @@ export const handleGroupBy = async ({
           valueOrRelationshipID
       }
 
-      if (groupByField.type === 'date') {
+      if (groupByField.type === 'date' && valueOrRelationshipID) {
         heading = formatDate({
-          date: String(heading),
+          date: String(valueOrRelationshipID),
           i18n: req.i18n,
           pattern: clientConfig.admin.dateFormat,
         })
+      }
+
+      if (groupByField.type === 'checkbox') {
+        if (valueOrRelationshipID === true) {
+          heading = req.i18n.t('general:true')
+        }
+
+        if (valueOrRelationshipID === false) {
+          heading = req.i18n.t('general:false')
+        }
       }
 
       if (groupData.docs && groupData.docs.length > 0) {
@@ -170,13 +184,14 @@ export const handleGroupBy = async ({
           enableRowSelections,
           groupByFieldPath,
           groupByValue: valueOrRelationshipID,
-          heading,
+          heading: heading || req.i18n.t('general:noValue'),
           i18n: req.i18n,
           key: `table-${valueOrRelationshipID}`,
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,
           query,
           useAsTitle: collectionConfig.admin.useAsTitle,
+          viewType,
         })
 
         // Only need to set `columnState` once, using the first table's column state

@@ -46,7 +46,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "🚨 Actionable vulnerabilities found: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>"
+                    "text": "🚨 Actionable vulnerabilities found: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Script Run Details>"
                   }
                 },
               ]

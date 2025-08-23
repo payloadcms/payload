@@ -23,6 +23,8 @@ type DateFNSKeys =
   | 'hr'
   | 'hu'
   | 'hy-AM'
+  | 'id'
+  | 'is'
   | 'it'
   | 'ja'
   | 'ko'

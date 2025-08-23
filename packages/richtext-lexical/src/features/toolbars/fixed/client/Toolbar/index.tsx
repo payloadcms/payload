@@ -116,7 +116,11 @@ function ToolbarGroupComponent({
   )
 
   return (
-    <div className={`fixed-toolbar__group fixed-toolbar__group-${group.key}`} key={group.key}>
+    <div
+      className={`fixed-toolbar__group fixed-toolbar__group-${group.key}`}
+      data-toolbar-group-key={group.key}
+      key={group.key}
+    >
       {group.type === 'dropdown' && group.items.length ? (
         DropdownIcon ? (
           <ToolbarDropdown

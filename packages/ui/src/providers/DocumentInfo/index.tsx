@@ -97,6 +97,7 @@ const DocumentInfo: React.FC<
   const [versionCount, setVersionCount] = useState(versionCountFromProps)
 
   const [hasPublishedDoc, setHasPublishedDoc] = useState(hasPublishedDocFromProps)
+
   const [unpublishedVersionCount, setUnpublishedVersionCount] = useState(
     unpublishedVersionCountFromProps,
   )
@@ -104,11 +105,14 @@ const DocumentInfo: React.FC<
   const [documentIsLocked, setDocumentIsLocked] = useControllableState<boolean | undefined>(
     isLockedFromProps,
   )
+
   const [currentEditor, setCurrentEditor] = useControllableState<ClientUser | null>(
     currentEditorFromProps,
   )
   const [lastUpdateTime, setLastUpdateTime] = useControllableState<number>(lastUpdateTimeFromProps)
-  const [savedDocumentData, setSavedDocumentData] = useControllableState(initialData)
+
+  const [data, setData] = useControllableState(initialData)
+
   const [uploadStatus, setUploadStatus] = useControllableState<'failed' | 'idle' | 'uploading'>(
     'idle',
   )
@@ -164,12 +168,16 @@ const DocumentInfo: React.FC<
       try {
         const isGlobal = slug === globalSlug
 
-        const query = isGlobal
-          ? `where[globalSlug][equals]=${slug}`
-          : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
-
-        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`, {
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents`, {
           credentials: 'include',
+          params: isGlobal
+            ? {
+                'where[globalSlug][equals]': slug,
+              }
+            : {
+                'where[document.relationTo][equals]': slug,
+                'where[document.value][equals]': docID,
+              },
         })
 
         const { docs } = await request.json()
@@ -197,13 +205,17 @@ const DocumentInfo: React.FC<
       try {
         const isGlobal = slug === globalSlug
 
-        const query = isGlobal
-          ? `where[globalSlug][equals]=${slug}`
-          : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
-
         // Check if the document is already locked
-        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`, {
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents`, {
           credentials: 'include',
+          params: isGlobal
+            ? {
+                'where[globalSlug][equals]': slug,
+              }
+            : {
+                'where[document.relationTo][equals]': slug,
+                'where[document.value][equals]': docID,
+              },
         })
 
         const { docs } = await request.json()
@@ -294,13 +306,6 @@ const DocumentInfo: React.FC<
     }
   }, [collectionConfig, globalConfig, versionCount])
 
-  const updateSavedDocumentData = React.useCallback<DocumentInfoContext['updateSavedDocumentData']>(
-    (json) => {
-      setSavedDocumentData(json)
-    },
-    [setSavedDocumentData],
-  )
-
   /**
    * @todo: Remove this in v4
    * Users should use the `DocumentTitleContext` instead.
@@ -309,14 +314,14 @@ const DocumentInfo: React.FC<
     setDocumentTitle(
       formatDocTitle({
         collectionConfig,
-        data: { ...savedDocumentData, id },
+        data: { ...data, id },
         dateFormat,
         fallback: id?.toString(),
         globalConfig,
         i18n,
       }),
     )
-  }, [collectionConfig, globalConfig, savedDocumentData, dateFormat, i18n, id])
+  }, [collectionConfig, globalConfig, data, dateFormat, i18n, id])
 
   // clean on unmount
   useEffect(() => {
@@ -351,6 +356,7 @@ const DocumentInfo: React.FC<
     ...props,
     action,
     currentEditor,
+    data,
     docConfig,
     docPermissions,
     documentIsLocked,
@@ -367,8 +373,9 @@ const DocumentInfo: React.FC<
     lastUpdateTime,
     mostRecentVersionIsAutosaved,
     preferencesKey,
-    savedDocumentData,
+    savedDocumentData: data,
     setCurrentEditor,
+    setData,
     setDocFieldPreferences,
     setDocumentIsLocked,
     setDocumentTitle,
@@ -381,7 +388,7 @@ const DocumentInfo: React.FC<
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,
-    updateSavedDocumentData,
+    updateSavedDocumentData: setData,
     uploadStatus,
     versionCount,
   }

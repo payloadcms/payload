@@ -274,6 +274,11 @@ export interface Post {
   wavelengths?: ('fm' | 'am') | null;
   selectField?: ('option1' | 'option2')[] | null;
   file?: string | null;
+  noReadAccessField?: string | null;
+  disableListColumnTextInRow?: string | null;
+  someGroup?: {
+    disableListColumnTextInGroup?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -379,6 +384,7 @@ export interface CustomField {
   descriptionAsComponent?: string | null;
   customSelectField?: string | null;
   customSelectInput?: string | null;
+  customMultiSelectField?: string[] | null;
   relationshipFieldWithBeforeAfterInputs?: (string | null) | Post;
   arrayFieldWithBeforeAfterInputs?:
     | {
@@ -822,6 +828,13 @@ export interface PostsSelect<T extends boolean = true> {
   wavelengths?: T;
   selectField?: T;
   file?: T;
+  noReadAccessField?: T;
+  disableListColumnTextInRow?: T;
+  someGroup?:
+    | T
+    | {
+        disableListColumnTextInGroup?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -915,6 +928,7 @@ export interface CustomFieldsSelect<T extends boolean = true> {
   descriptionAsComponent?: T;
   customSelectField?: T;
   customSelectInput?: T;
+  customMultiSelectField?: T;
   relationshipFieldWithBeforeAfterInputs?: T;
   arrayFieldWithBeforeAfterInputs?:
     | T

@@ -1,9 +1,6 @@
 import type {
-  ArrayField,
-  BlocksField,
   BuildFormStateArgs,
   ClientFieldSchemaMap,
-  CollapsedPreferences,
   Data,
   DocumentPreferences,
   Field,
@@ -40,8 +37,7 @@ import { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
 import { isRowCollapsed } from './isRowCollapsed.js'
 import { iterateFields } from './iterateFields.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type AddFieldStatePromiseArgs = {
   addErrorPathToParent: (fieldPath: string) => void
@@ -153,6 +149,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   } = args
 
   if (!args.clientFieldSchemaMap && args.renderFieldFn) {
+    // eslint-disable-next-line no-console
     console.warn(
       'clientFieldSchemaMap is not passed to addFieldStatePromise - this will reduce performance',
     )
@@ -355,7 +352,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               newRow.lastRenderedPath = previousRow.lastRenderedPath
             }
 
-            acc.rows.push(newRow)
+            // add addedByServer flag
+            if (!previousRow) {
+              newRow.addedByServer = true
+            }
 
             const isCollapsed = isRowCollapsed({
               collapsedPrefs: preferences?.fields?.[path]?.collapsed,
@@ -365,8 +365,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             })
 
             if (isCollapsed) {
-              acc.rows[acc.rows.length - 1].collapsed = true
+              newRow.collapsed = true
             }
+
+            acc.rows.push(newRow)
 
             return acc
           },

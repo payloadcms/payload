@@ -786,6 +786,27 @@ describe('List View', () => {
       ).toBeHidden()
     })
 
+    test('should show no results when queryin on a field a user cannot read', async () => {
+      await payload.create({
+        collection: postsCollectionSlug,
+        data: {
+          noReadAccessField: 'test',
+        },
+      })
+
+      await page.goto(postsUrl.list)
+
+      const { whereBuilder } = await addListFilter({
+        page,
+        fieldLabel: 'No Read Access Field',
+        operatorLabel: 'equals',
+        value: 'test',
+      })
+
+      await expect(whereBuilder.locator('.condition__value input')).toBeVisible()
+      await expect(page.locator('.collection-list__no-results')).toBeVisible()
+    })
+
     test('should properly paginate many documents', async () => {
       await page.goto(with300DocumentsUrl.list)
 
@@ -892,6 +913,18 @@ describe('List View', () => {
       await expect(
         initialField.locator(`.rs__menu-list:has-text("Disable List Column Text")`),
       ).toBeVisible()
+    })
+
+    test('should hide nested field in row in list table columns when admin.disableListColumn is true', async () => {
+      await page.goto(postsUrl.list)
+      await expect(page.locator('.table #heading-disableListColumnTextInRow')).toBeHidden()
+    })
+
+    test('should hide nested field in group in list table column when admin.disableListColumn is true', async () => {
+      await page.goto(postsUrl.list)
+      await expect(
+        page.locator('.table #heading-someGroup__disableListColumnTextInGroup'),
+      ).toBeHidden()
     })
 
     test('should toggle columns and effect table', async () => {

@@ -10,8 +10,7 @@ import type { FieldAction } from './types.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
 import { flattenRows, separateRows } from './rows.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 /**
  * Reducer which modifies the form field state (all the current data of the fields in the form). When called using dispatch, it will return a new state object.
@@ -384,6 +383,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
             return {
               ...field,
               [key]: value,
+              ...(key === 'value' ? { isModified: true } : {}),
             }
           }
 
@@ -395,6 +395,15 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const newState = {
         ...state,
         [action.path]: newField,
+      }
+
+      // reset `isModified` in all other fields
+      if ('value' in action) {
+        for (const [path, field] of Object.entries(newState)) {
+          if (path !== action.path && 'isModified' in field) {
+            delete newState[path].isModified
+          }
+        }
       }
 
       return newState

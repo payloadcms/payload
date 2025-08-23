@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid'
-
 import type {
   AuthOperationsFromCollectionSlug,
   Collection,
@@ -24,7 +22,7 @@ import { getFieldsToSign } from '../getFieldsToSign.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { isUserLocked } from '../isUserLocked.js'
 import { jwtSign } from '../jwt.js'
-import { removeExpiredSessions } from '../removeExpiredSessions.js'
+import { addSessionToUser } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
@@ -285,34 +283,15 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       user,
     }
 
-    if (collectionConfig.auth.useSessions) {
-      // Add session to user
-      const newSessionID = uuid()
-      const now = new Date()
-      const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
-      const expiresAt = new Date(now.getTime() + tokenExpInMs)
+    const { sid } = await addSessionToUser({
+      collectionConfig,
+      payload,
+      req,
+      user,
+    })
 
-      const session = { id: newSessionID, createdAt: now, expiresAt }
-
-      if (!user.sessions?.length) {
-        user.sessions = [session]
-      } else {
-        user.sessions = removeExpiredSessions(user.sessions)
-        user.sessions.push(session)
-      }
-
-      await payload.db.updateOne({
-        id: user.id,
-        collection: collectionConfig.slug,
-        data: user,
-        req,
-        returning: false,
-      })
-
-      user.collection = collectionConfig.slug
-      user._strategy = 'local-jwt'
-
-      fieldsToSignArgs.sid = newSessionID
+    if (sid) {
+      fieldsToSignArgs.sid = sid
     }
 
     const fieldsToSign = getFieldsToSign(fieldsToSignArgs)

@@ -402,6 +402,7 @@ export type Params = { [key: string]: string | string[] | undefined }
 export type ServerProps = {
   readonly documentSubViewType?: DocumentSubViewTypes
   readonly i18n: I18nClient
+  readonly id?: number | string
   readonly locale?: Locale
   readonly params?: Params
   readonly payload: Payload
