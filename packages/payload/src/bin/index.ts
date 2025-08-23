@@ -32,12 +32,16 @@ export const bin = async () => {
   const script = (typeof args._[0] === 'string' ? args._[0] : '').toLowerCase()
 
   if (args.cron) {
-    new Cron(args.cron, async () => {
-      // If the bin script initializes payload (getPayload), this will only happen once, as getPayload
-      // caches the payload instance on the module scope => no need to manually cache and manage getPayload initialization
-      // outside the Cron here.
-      await runBinScript({ args, script })
-    })
+    new Cron(
+      args.cron,
+      async () => {
+        // If the bin script initializes payload (getPayload), this will only happen once, as getPayload
+        // caches the payload instance on the module scope => no need to manually cache and manage getPayload initialization
+        // outside the Cron here.
+        await runBinScript({ args, script })
+      },
+      { protect: true },
+    )
 
     process.stdin.resume() // Keep the process alive
 
