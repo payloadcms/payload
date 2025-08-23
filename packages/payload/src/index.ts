@@ -866,38 +866,45 @@ export class BasePayload {
 
       await Promise.all(
         cronJobs.map((cronConfig) => {
-          const jobAutorunCron = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
-            if (
-              _internal_jobSystemGlobals.shouldAutoSchedule &&
-              !cronConfig.disableScheduling &&
-              this.config.jobs.scheduling
-            ) {
-              await this.jobs.handleSchedules({
-                allQueues: cronConfig.allQueues,
-                queue: cronConfig.queue,
-              })
-            }
+          const jobAutorunCron = new Cron(
+            cronConfig.cron ?? DEFAULT_CRON,
+            async () => {
+              if (
+                _internal_jobSystemGlobals.shouldAutoSchedule &&
+                !cronConfig.disableScheduling &&
+                this.config.jobs.scheduling
+              ) {
+                await this.jobs.handleSchedules({
+                  allQueues: cronConfig.allQueues,
+                  queue: cronConfig.queue,
+                })
+              }
 
-            if (!_internal_jobSystemGlobals.shouldAutoRun) {
-              return
-            }
-
-            if (typeof this.config.jobs.shouldAutoRun === 'function') {
-              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
-
-              if (!shouldAutoRun) {
-                jobAutorunCron.stop()
+              if (!_internal_jobSystemGlobals.shouldAutoRun) {
                 return
               }
-            }
 
-            await this.jobs.run({
-              allQueues: cronConfig.allQueues,
-              limit: cronConfig.limit ?? DEFAULT_LIMIT,
-              queue: cronConfig.queue,
-              silent: cronConfig.silent,
-            })
-          })
+              if (typeof this.config.jobs.shouldAutoRun === 'function') {
+                const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+
+                if (!shouldAutoRun) {
+                  jobAutorunCron.stop()
+                  return
+                }
+              }
+
+              await this.jobs.run({
+                allQueues: cronConfig.allQueues,
+                limit: cronConfig.limit ?? DEFAULT_LIMIT,
+                queue: cronConfig.queue,
+                silent: cronConfig.silent,
+              })
+            },
+            {
+              // Do not run consecutive crons if previous crons still ongoing
+              protect: true,
+            },
+          )
 
           this.crons.push(jobAutorunCron)
         }),

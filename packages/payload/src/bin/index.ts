@@ -40,7 +40,10 @@ export const bin = async () => {
         // outside the Cron here.
         await runBinScript({ args, script })
       },
-      { protect: true },
+      {
+        // Do not run consecutive crons if previous crons still ongoing
+        protect: true,
+      },
     )
 
     process.stdin.resume() // Keep the process alive
