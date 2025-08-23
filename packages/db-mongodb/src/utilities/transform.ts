@@ -597,6 +597,10 @@ export const transform = ({
     if (typeof data.updatedAt === 'undefined') {
       // If data.updatedAt is explicitly set to `null` we should not set it - this means we don't want to change the value of updatedAt.
       data.updatedAt = new Date().toISOString()
+    } else if (data.updatedAt === null) {
+      // `updatedAt` may be explicitly set to null to disable updating it - if that is the case, we need to delete the property. Keeping it as null will
+      // cause the database to think we want to set it to null, which we don't.
+      delete data.updatedAt
     }
   }
 }
