@@ -86,6 +86,12 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       (hasAutosave || !modified),
   )
 
+  const hasLocalizedFields = Boolean(
+    entityConfig?.fields?.some((field) => 'localized' in field && field.localized)
+  )
+
+  const canPublishSpecificLocale = localization && hasLocalizedFields && hasPublishPermission
+
   const operation = useOperation()
 
   const disabled = operation === 'update' && !modified
@@ -213,30 +219,30 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         onClick={defaultPublish}
         size="medium"
         SubMenuPopupContent={
-          localization || canSchedulePublish
+          canPublishSpecificLocale || canSchedulePublish
             ? ({ close }) => {
-                return (
-                  <React.Fragment>
-                    {canSchedulePublish && (
-                      <PopupList.ButtonGroup key="schedule-publish">
-                        <PopupList.Button
-                          id="schedule-publish"
-                          onClick={() => [toggleModal(drawerSlug), close()]}
-                        >
-                          {t('version:schedulePublish')}
-                        </PopupList.Button>
-                      </PopupList.ButtonGroup>
-                    )}
-                    {localization && canPublish && (
-                      <PopupList.ButtonGroup>
-                        <PopupList.Button id="publish-locale" onClick={secondaryPublish}>
-                          {secondaryLabel}
-                        </PopupList.Button>
-                      </PopupList.ButtonGroup>
-                    )}
-                  </React.Fragment>
-                )
-              }
+              return (
+                <React.Fragment>
+                  {canSchedulePublish && (
+                    <PopupList.ButtonGroup key="schedule-publish">
+                      <PopupList.Button
+                        id="schedule-publish"
+                        onClick={() => [toggleModal(drawerSlug), close()]}
+                      >
+                        {t('version:schedulePublish')}
+                      </PopupList.Button>
+                    </PopupList.ButtonGroup>
+                  )}
+                  {canPublishSpecificLocale && (
+                    <PopupList.ButtonGroup>
+                      <PopupList.Button id="publish-locale" onClick={secondaryPublish}>
+                        {secondaryLabel}
+                      </PopupList.Button>
+                    </PopupList.ButtonGroup>
+                  )}
+                </React.Fragment>
+              )
+            }
             : undefined
         }
         type="button"
