@@ -6,16 +6,18 @@ import { isLivePreviewEvent } from './isLivePreviewEvent.js'
 import { mergeData } from './mergeData.js'
 
 const _payloadLivePreview: {
+  blocksSchemaMap?: Record<string, FieldSchemaJSON>
   fieldSchema: FieldSchemaJSON | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   previousData: any
 } = {
   /**
-   * For performance reasons, `fieldSchemaJSON` will only be sent once on the initial message
-   * We need to cache this value so that it can be used across subsequent messages
-   * To do this, save `fieldSchemaJSON` when it arrives as a global variable
-   * Send this cached value to `mergeData`, instead of `eventData.fieldSchemaJSON` directly
+   * For performance reasons, `fieldSchemaJSON` and `blocksSchemaMap` will only be sent once on the initial message
+   * We need to cache these values so that they can be used across subsequent messages
+   * To do this, save `fieldSchemaJSON` and `blocksSchemaMap` when it arrives as global variables
+   * Send these cached values to `mergeData`, instead of `eventData.fieldSchemaJSON` and `eventData.blocksSchemaMap` directly
    */
+  blocksSchemaMap: undefined,
   fieldSchema: undefined,
   /**
    * Each time the data is merged, cache the result as a `previousData` variable
@@ -35,10 +37,14 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
   const { apiRoute, depth, event, initialData, requestHandler, serverURL } = args
 
   if (isLivePreviewEvent(event, serverURL)) {
-    const { data, externallyUpdatedRelationship, fieldSchemaJSON, locale } = event.data
+    const { blocksSchemaMap, data, externallyUpdatedRelationship, fieldSchemaJSON, locale } =
+      event.data
 
     if (!_payloadLivePreview?.fieldSchema && fieldSchemaJSON) {
       _payloadLivePreview.fieldSchema = fieldSchemaJSON
+    }
+    if (!_payloadLivePreview.blocksSchemaMap && blocksSchemaMap) {
+      _payloadLivePreview.blocksSchemaMap = blocksSchemaMap
     }
 
     if (!_payloadLivePreview?.fieldSchema) {
@@ -52,6 +58,7 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
 
     const mergedData = await mergeData<T>({
       apiRoute,
+      blocksSchemaMap: _payloadLivePreview.blocksSchemaMap,
       depth,
       externallyUpdatedRelationship,
       fieldSchema: _payloadLivePreview.fieldSchema,

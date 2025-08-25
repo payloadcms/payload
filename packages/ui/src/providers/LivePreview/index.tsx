@@ -1,5 +1,5 @@
 'use client'
-import type { CollectionPreferences, LivePreviewConfig } from 'payload'
+import type { CollectionPreferences, FieldSchemaJSON, LivePreviewConfig } from 'payload'
 
 import { DndContext } from '@dnd-kit/core'
 import { fieldSchemaToJSON } from 'payload/shared'
@@ -109,6 +109,25 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
 
   const [fieldSchemaJSON] = useState(() => fieldSchemaToJSON(entityConfig?.fields || [], config))
+  const [blocksSchemaMap] = useState<Record<string, FieldSchemaJSON>>(() => {
+    const map: Record<string, FieldSchemaJSON> = {}
+    if (config?.blocksMap) {
+      for (const slug in config.blocksMap) {
+        const block = config.blocksMap[slug]
+        map[slug] = fieldSchemaToJSON(
+          [
+            ...block.fields,
+            {
+              name: 'id',
+              type: 'text',
+            },
+          ],
+          config,
+        )
+      }
+    }
+    return map
+  })
 
   // The toolbar needs to freely drag and drop around the page
   const handleDragEnd = (ev) => {
@@ -230,6 +249,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     <LivePreviewContext
       value={{
         appIsReady,
+        blocksSchemaMap,
         breakpoint,
         breakpoints,
         fieldSchemaJSON,
