@@ -79,6 +79,7 @@ formBuilderPlugin({
     text: true,
     textarea: true,
     select: true,
+    radio: true,
     email: true,
     state: true,
     country: true,
@@ -293,14 +294,46 @@ Maps to a `textarea` input on your front-end. Used to collect a multi-line strin
 
 Maps to a `select` input on your front-end. Used to display a list of options.
 
-| Property       | Type     | Description                                              |
-| -------------- | -------- | -------------------------------------------------------- |
-| `name`         | string   | The name of the field.                                   |
-| `label`        | string   | The label of the field.                                  |
-| `defaultValue` | string   | The default value of the field.                          |
-| `width`        | string   | The width of the field on the front-end.                 |
-| `required`     | checkbox | Whether or not the field is required when submitted.     |
-| `options`      | array    | An array of objects with `label` and `value` properties. |
+| Property       | Type     | Description                                                                     |
+| -------------- | -------- | ------------------------------------------------------------------------------- |
+| `name`         | string   | The name of the field.                                                          |
+| `label`        | string   | The label of the field.                                                         |
+| `defaultValue` | string   | The default value of the field.                                                 |
+| `placeholder`  | string   | The placeholder text for the field.                                             |
+| `width`        | string   | The width of the field on the front-end.                                        |
+| `required`     | checkbox | Whether or not the field is required when submitted.                            |
+| `options`      | array    | An array of objects that define the select options. See below for more details. |
+
+#### Select Options
+
+Each option in the `options` array defines a selectable choice for the select field.
+
+| Property | Type   | Description                         |
+| -------- | ------ | ----------------------------------- |
+| `label`  | string | The display text for the option.    |
+| `value`  | string | The value submitted for the option. |
+
+### Radio
+
+Maps to radio button inputs on your front-end. Used to allow users to select a single option from a list of choices.
+
+| Property       | Type     | Description                                                                    |
+| -------------- | -------- | ------------------------------------------------------------------------------ |
+| `name`         | string   | The name of the field.                                                         |
+| `label`        | string   | The label of the field.                                                        |
+| `defaultValue` | string   | The default value of the field.                                                |
+| `width`        | string   | The width of the field on the front-end.                                       |
+| `required`     | checkbox | Whether or not the field is required when submitted.                           |
+| `options`      | array    | An array of objects that define the radio options. See below for more details. |
+
+#### Radio Options
+
+Each option in the `options` array defines a selectable choice for the radio field.
+
+| Property | Type   | Description                         |
+| -------- | ------ | ----------------------------------- |
+| `label`  | string | The display text for the option.    |
+| `value`  | string | The value submitted for the option. |
 
 ### Email (field)
 
