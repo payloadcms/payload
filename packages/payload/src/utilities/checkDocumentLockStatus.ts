@@ -1,5 +1,6 @@
 import type { TypeWithID } from '../collections/config/types.js'
 import type { PaginatedDocs } from '../database/types.js'
+import type { CollectionSlug } from '../index.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
 import { Locked } from '../errors/index.js'
@@ -92,8 +93,8 @@ export const checkDocumentLockStatus = async ({
 
   // Perform the delete operation regardless of overrideLock status
   await payload.db.deleteMany({
-    collection: 'payload-locked-documents',
-    req,
+    collection: 'payload-locked-documents' as CollectionSlug,
+    req: undefined,
     where: lockedDocumentQuery,
   })
 }
