@@ -37,11 +37,12 @@ import {
   GraphQLString,
 } from 'graphql'
 import { flattenTopLevelFields, toWords } from 'payload'
-import { fieldAffectsData, optionIsObject, tabHasName } from 'payload/shared'
+import { fieldAffectsData, tabHasName } from 'payload/shared'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import { combineParentName } from '../utilities/combineParentName.js'
 import { formatName } from '../utilities/formatName.js'
+import { formatOptions } from '../utilities/formatOptions.js'
 import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequiredSubfield.js'
 import { withNullableType } from './withNullableType.js'
 
@@ -209,12 +210,18 @@ export function buildMutationInputType({
         }),
       },
     }),
-    radio: (inputObjectTypeConfig: InputObjectTypeConfig, field: RadioField) => ({
-      ...inputObjectTypeConfig,
-      [formatName(field.name)]: {
-        type: withNullableType({ type: GraphQLString, field, forceNullable, parentIsLocalized }),
-      },
-    }),
+    radio: (inputObjectTypeConfig: InputObjectTypeConfig, field: RadioField) => {
+      const type = new GraphQLEnumType({
+        name: `${combineParentName(parentName, field.name)}_MutationInput`,
+        values: formatOptions(field),
+      })
+      return {
+        ...inputObjectTypeConfig,
+        [formatName(field.name)]: {
+          type: withNullableType({ type, field, forceNullable, parentIsLocalized }),
+        },
+      }
+    },
     relationship: (inputObjectTypeConfig: InputObjectTypeConfig, field: RelationshipField) => {
       const { relationTo } = field
       type PayloadGraphQLRelationshipType =
@@ -278,23 +285,7 @@ export function buildMutationInputType({
       const formattedName = `${combineParentName(parentName, field.name)}_MutationInput`
       let type: GraphQLType = new GraphQLEnumType({
         name: formattedName,
-        values: field.options.reduce((values, option) => {
-          if (optionIsObject(option)) {
-            return {
-              ...values,
-              [formatName(option.value)]: {
-                value: option.value,
-              },
-            }
-          }
-
-          return {
-            ...values,
-            [formatName(option)]: {
-              value: option,
-            },
-          }
-        }, {}),
+        values: formatOptions(field),
       })
 
       type = field.hasMany ? new GraphQLList(type) : type
