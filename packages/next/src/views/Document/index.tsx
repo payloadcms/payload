@@ -208,7 +208,7 @@ export const renderDocument = async ({
       globalSlug,
       locale: locale?.code,
       operation,
-      readOnly: isTrashedDoc,
+      readOnly: isTrashedDoc || isLocked,
       renderAllFields: true,
       req,
       schemaPath: collectionSlug || globalSlug,
