@@ -573,7 +573,6 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     versionCount_none: '找不到版本',
     versionCount_one: '找到 {{count}} 個版本',
     versionCount_other: '找到 {{count}} 個版本',
-    versionCreatedOn: '{{version}} 建立於：',
     versionID: '版本 ID',
     versions: '版本記錄',
     viewingVersion: '正在檢視 {{entityLabel}}「{{documentTitle}}」的版本',

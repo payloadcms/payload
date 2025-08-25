@@ -607,7 +607,6 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     versionCount_none: 'কোনো সংস্করণ পাওয়া যায়নি',
     versionCount_one: '{{count}}টি সংস্করণ পাওয়া গেছে',
     versionCount_other: '{{count}}টি সংস্করণ পাওয়া গেছে',
-    versionCreatedOn: '{{version}} তৈরি হয়েছে:',
     versionID: 'সংস্করণ আইডি',
     versions: 'সংস্করণসমূহ',
     viewingVersion: '{{entityLabel}} {{documentTitle}}-এর সংস্করণ দেখানো হচ্ছে',

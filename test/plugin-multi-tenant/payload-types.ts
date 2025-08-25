@@ -71,6 +71,7 @@ export interface Config {
     users: User;
     'food-items': FoodItem;
     'food-menu': FoodMenu;
+    'autosave-global': AutosaveGlobal;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -85,6 +86,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     'food-items': FoodItemsSelect<false> | FoodItemsSelect<true>;
     'food-menu': FoodMenuSelect<false> | FoodMenuSelect<true>;
+    'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -219,6 +221,19 @@ export interface FoodMenu {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-global".
+ */
+export interface AutosaveGlobal {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  title: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -239,6 +254,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'food-menu';
         value: string | FoodMenu;
+      } | null)
+    | ({
+        relationTo: 'autosave-global';
+        value: string | AutosaveGlobal;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -351,6 +370,18 @@ export interface FoodMenuSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-global_select".
+ */
+export interface AutosaveGlobalSelect<T extends boolean = true> {
+  tenant?: T;
+  title?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

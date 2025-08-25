@@ -611,7 +611,6 @@ export const myTranslations: DefaultTranslationsObject = {
     versionCount_none: 'ဗားရှင်းရှာဖွေ့ပါ။',
     versionCount_one: '{{count}} ဗားရှင်အား တွေ့ပါသည်။',
     versionCount_other: 'ဗားရှင်း {{count}} ခု တွေ့ရှိပါသည်။',
-    versionCreatedOn: '{{version}} အား ဖန်တီးခဲ့သည်။',
     versionID: 'ဗားရှင်း ID',
     versions: 'ဗားရှင်းများ',
     viewingVersion: '{{entityLabel}} {{documentTitle}} အတွက် ဗားရှင်းကို ကြည့်ရှုနေသည်',

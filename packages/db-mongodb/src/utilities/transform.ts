@@ -548,4 +548,10 @@ export const transform = ({
     parentIsLocalized,
     ref: data,
   })
+
+  if (operation === 'write') {
+    if (!data.updatedAt) {
+      data.updatedAt = new Date().toISOString()
+    }
+  }
 }

@@ -604,7 +604,6 @@ export const trTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Sürüm bulunamadı',
     versionCount_one: '{{count}} sürüm bulundu',
     versionCount_other: '{{count}} sürüm bulundu',
-    versionCreatedOn: '{{version}} oluşturma tarihi:',
     versionID: 'Sürüm ID',
     versions: 'Sürümler',
     viewingVersion: '{{entityLabel}} {{documentTitle}} için sürümler gösteriliyor',

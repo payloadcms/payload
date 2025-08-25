@@ -605,7 +605,6 @@ export const azTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Versiya tapılmadı',
     versionCount_one: '{{count}} versiya tapıldı',
     versionCount_other: '{{count}} versiya tapıldı',
-    versionCreatedOn: '{{version}} tarixində yaradıldı:',
     versionID: 'Versiyanın ID-si',
     versions: 'Versiyalar',
     viewingVersion: '{{entityLabel}} {{documentTitle}} üçün versiyanı göstərir',

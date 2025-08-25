@@ -599,7 +599,6 @@ export const slTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Ni najdenih različic',
     versionCount_one: 'Najdena {{count}} različica',
     versionCount_other: 'Najdene {{count}} različice',
-    versionCreatedOn: '{{version}} ustvarjena:',
     versionID: 'ID različice',
     versions: 'Različice',
     viewingVersion: 'Ogled različice za {{entityLabel}} {{documentTitle}}',

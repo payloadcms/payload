@@ -1298,6 +1298,11 @@ export interface PointField {
    * @minItems 2
    * @maxItems 2
    */
+  camelCasePoint?: [number, number] | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
   localized?: [number, number] | null;
   group?: {
     /**
@@ -2895,6 +2900,7 @@ export interface NumberFieldsSelect<T extends boolean = true> {
  */
 export interface PointFieldsSelect<T extends boolean = true> {
   point?: T;
+  camelCasePoint?: T;
   localized?: T;
   group?:
     | T

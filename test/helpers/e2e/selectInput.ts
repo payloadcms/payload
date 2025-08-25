@@ -96,22 +96,26 @@ async function selectOption({
 type GetSelectInputValueFunction = <TMultiSelect = true>(args: {
   multiSelect: TMultiSelect
   selectLocator: Locator
+  valueLabelClass?: string
 }) => Promise<TMultiSelect extends true ? string[] : string | undefined>
 
 export const getSelectInputValue: GetSelectInputValueFunction = async ({
   selectLocator,
   multiSelect = false,
+  valueLabelClass,
 }) => {
   if (multiSelect) {
     // For multi-select, get all selected options
     const selectedOptions = await selectLocator
-      .locator('.multi-value-label__text')
+      .locator(valueLabelClass || '.multi-value-label__text')
       .allTextContents()
     return selectedOptions || []
   }
 
   // For single-select, get the selected value
-  const singleValue = await selectLocator.locator('.react-select--single-value').textContent()
+  const singleValue = await selectLocator
+    .locator(valueLabelClass || '.react-select--single-value')
+    .textContent()
   return (singleValue ?? undefined) as any
 }
 

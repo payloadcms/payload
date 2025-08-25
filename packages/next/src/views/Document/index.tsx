@@ -333,6 +333,7 @@ export const renderDocument = async ({
   }
 
   const documentSlots = renderDocumentSlots({
+    id,
     collectionConfig,
     globalConfig,
     hasSavePermission,

@@ -1,4 +1,4 @@
-import type { Page } from 'playwright'
+import type { Locator, Page } from 'playwright'
 
 import { expect } from '@playwright/test'
 
@@ -27,6 +27,64 @@ export class LexicalHelpers {
       await this.page.keyboard.press('Tab')
     }
     await this.page.keyboard.type(text)
+  }
+
+  async clickFixedToolbarButton({
+    buttonKey,
+    dropdownKey,
+  }: {
+    buttonKey?: string
+    dropdownKey?: string
+  }): Promise<{
+    dropdownItems?: Locator
+  }> {
+    if (dropdownKey) {
+      await this.fixedToolbar.locator(`[data-dropdown-key="${dropdownKey}"]`).click()
+
+      const dropdownItems = this.page.locator(`.toolbar-popup__dropdown-items`)
+      await expect(dropdownItems).toBeVisible()
+
+      if (buttonKey) {
+        await dropdownItems.locator(`[data-item-key="${buttonKey}"]`).click()
+      }
+      return {
+        dropdownItems,
+      }
+    }
+
+    if (buttonKey) {
+      await this.fixedToolbar.locator(`[data-item-key="${buttonKey}"]`).click()
+    }
+    return {}
+  }
+
+  async clickInlineToolbarButton({
+    buttonKey,
+    dropdownKey,
+  }: {
+    buttonKey?: string
+    dropdownKey?: string
+  }): Promise<{
+    dropdownItems?: Locator
+  }> {
+    if (dropdownKey) {
+      await this.inlineToolbar.locator(`[data-dropdown-key="${dropdownKey}"]`).click()
+
+      const dropdownItems = this.page.locator(`.toolbar-popup__dropdown-items`)
+      await expect(dropdownItems).toBeVisible()
+
+      if (buttonKey) {
+        await dropdownItems.locator(`[data-item-key="${buttonKey}"]`).click()
+      }
+      return {
+        dropdownItems,
+      }
+    }
+
+    if (buttonKey) {
+      await this.inlineToolbar.locator(`[data-item-key="${buttonKey}"]`).click()
+    }
+    return {}
   }
 
   async save(container: 'document' | 'drawer') {
@@ -62,6 +120,14 @@ export class LexicalHelpers {
 
   get editor() {
     return this.page.locator('[data-lexical-editor="true"]')
+  }
+
+  get fixedToolbar() {
+    return this.page.locator('.fixed-toolbar')
+  }
+
+  get inlineToolbar() {
+    return this.page.locator('.inline-toolbar-popup')
   }
 
   get paragraph() {
