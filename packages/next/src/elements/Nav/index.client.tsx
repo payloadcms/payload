@@ -4,7 +4,14 @@ import type { groupNavItems } from '@payloadcms/ui/shared'
 import type { NavPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { BrowseByFolderButton, Link, NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
+import {
+  BrowseByFolderButton,
+  Link,
+  NavGroup,
+  useConfig,
+  useLocale,
+  useTranslation,
+} from '@payloadcms/ui'
 import { EntityType } from '@payloadcms/ui/shared'
 import { usePathname } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
@@ -24,11 +31,14 @@ export const DefaultNavClient: React.FC<{
         routes: { browseByFolder: foldersRoute },
       },
       folders,
+      localization,
       routes: { admin: adminRoute },
     },
   } = useConfig()
 
   const { i18n } = useTranslation()
+
+  const locale = useLocale()
 
   const folderURL = formatAdminURL({
     adminRoute,
@@ -36,6 +46,8 @@ export const DefaultNavClient: React.FC<{
   })
 
   const viewingRootFolderView = pathname.startsWith(folderURL)
+
+  const addLocaleToURL = localization && locale.code ? `?locale=${locale.code}` : ''
 
   return (
     <Fragment>
@@ -48,12 +60,12 @@ export const DefaultNavClient: React.FC<{
               let id: string
 
               if (type === EntityType.collection) {
-                href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
+                href = `${formatAdminURL({ adminRoute, path: `/collections/${slug}` })}${addLocaleToURL}`
                 id = `nav-${slug}`
               }
 
               if (type === EntityType.global) {
-                href = formatAdminURL({ adminRoute, path: `/globals/${slug}` })
+                href = `${formatAdminURL({ adminRoute, path: `/globals/${slug}` })}${addLocaleToURL}`
                 id = `nav-global-${slug}`
               }
 
