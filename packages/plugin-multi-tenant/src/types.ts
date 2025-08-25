@@ -37,6 +37,11 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
        */
       isGlobal?: boolean
       /**
+       * Opt out of adding the tenant field and place
+       * it manually using the `tenantField` export from the plugin
+       */
+      manuallyPlaceTenantField?: boolean
+      /**
        * Overrides for the tenant field, will override the entire tenantField configuration
        */
       tenantFieldOverrides?: CollectionTenantFieldConfigOverrides

@@ -102,39 +102,37 @@ export const FolderTypeField = ({
   const styles = React.useMemo(() => mergeFieldStyles(field), [field])
 
   return (
-    <div>
-      <SelectInput
-        AfterInput={AfterInput}
-        BeforeInput={BeforeInput}
-        className={className}
-        Description={Description}
-        description={t('folder:folderTypeDescription')}
-        Error={Error}
-        filterOption={
-          selectFilterOptions
-            ? ({ value }) =>
-                selectFilterOptions?.some(
-                  (option) => (typeof option === 'string' ? option : option.value) === value,
-                )
-            : undefined
-        }
-        hasMany={hasMany}
-        isClearable={isClearable}
-        isSortable={isSortable}
-        Label={Label}
-        label={label}
-        localized={localized}
-        name={name}
-        onChange={onChange}
-        options={options}
-        path={path}
-        placeholder={placeholder}
-        readOnly={readOnly || disabled}
-        required={required || (Array.isArray(folderType) && folderType.length > 0)}
-        showError={showError}
-        style={styles}
-        value={value as string | string[]}
-      />
-    </div>
+    <SelectInput
+      AfterInput={AfterInput}
+      BeforeInput={BeforeInput}
+      className={className}
+      Description={Description}
+      description={t('folder:folderTypeDescription')}
+      Error={Error}
+      filterOption={
+        selectFilterOptions
+          ? ({ value }) =>
+              selectFilterOptions?.some(
+                (option) => (typeof option === 'string' ? option : option.value) === value,
+              )
+          : undefined
+      }
+      hasMany={hasMany}
+      isClearable={isClearable}
+      isSortable={isSortable}
+      Label={Label}
+      label={label}
+      localized={localized}
+      name={name}
+      onChange={onChange}
+      options={options}
+      path={path}
+      placeholder={placeholder}
+      readOnly={readOnly || disabled}
+      required={required || (Array.isArray(folderType) && folderType.length > 0)}
+      showError={showError}
+      style={styles}
+      value={value as string | string[]}
+    />
   )
 }
