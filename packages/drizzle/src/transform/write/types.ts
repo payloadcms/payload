@@ -2,6 +2,9 @@ export type ArrayRowToInsert = {
   arrays: {
     [tableName: string]: ArrayRowToInsert[]
   }
+  arraysToPush: {
+    [tableName: string]: ArrayRowToInsert[]
+  }
   locales: {
     [locale: string]: Record<string, unknown>
   }
@@ -10,6 +13,9 @@ export type ArrayRowToInsert = {
 
 export type BlockRowToInsert = {
   arrays: {
+    [tableName: string]: ArrayRowToInsert[]
+  }
+  arraysToPush: {
     [tableName: string]: ArrayRowToInsert[]
   }
   locales: {
@@ -35,6 +41,9 @@ export type NumberToDelete = {
 
 export type RowToInsert = {
   arrays: {
+    [tableName: string]: ArrayRowToInsert[]
+  }
+  arraysToPush: {
     [tableName: string]: ArrayRowToInsert[]
   }
   blocks: {
