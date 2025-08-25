@@ -75,6 +75,7 @@ export interface Config {
     'autosave-multi-select-posts': AutosaveMultiSelectPost;
     'draft-posts': DraftPost;
     'draft-with-max-posts': DraftWithMaxPost;
+    'draft-posts-with-change-hook': DraftPostsWithChangeHook;
     'draft-with-validate-posts': DraftWithValidatePost;
     'error-on-unpublish': ErrorOnUnpublish;
     'localized-posts': LocalizedPost;
@@ -100,6 +101,7 @@ export interface Config {
     'autosave-multi-select-posts': AutosaveMultiSelectPostsSelect<false> | AutosaveMultiSelectPostsSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     'draft-with-max-posts': DraftWithMaxPostsSelect<false> | DraftWithMaxPostsSelect<true>;
+    'draft-posts-with-change-hook': DraftPostsWithChangeHookSelect<false> | DraftPostsWithChangeHookSelect<true>;
     'draft-with-validate-posts': DraftWithValidatePostsSelect<false> | DraftWithValidatePostsSelect<true>;
     'error-on-unpublish': ErrorOnUnpublishSelect<false> | ErrorOnUnpublishSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
@@ -325,6 +327,18 @@ export interface DraftWithMaxPost {
       }[]
     | null;
   relation?: (string | null) | DraftWithMaxPost;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-posts-with-change-hook".
+ */
+export interface DraftPostsWithChangeHook {
+  id: string;
+  title: string;
+  description: string;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -722,6 +736,10 @@ export interface PayloadLockedDocument {
         value: string | DraftWithMaxPost;
       } | null)
     | ({
+        relationTo: 'draft-posts-with-change-hook';
+        value: string | DraftPostsWithChangeHook;
+      } | null)
+    | ({
         relationTo: 'draft-with-validate-posts';
         value: string | DraftWithValidatePost;
       } | null)
@@ -928,6 +946,17 @@ export interface DraftWithMaxPostsSelect<T extends boolean = true> {
             };
       };
   relation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-posts-with-change-hook_select".
+ */
+export interface DraftPostsWithChangeHookSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1368,6 +1397,10 @@ export interface TaskSchedulePublish {
       | ({
           relationTo: 'draft-posts';
           value: string | DraftPost;
+        } | null)
+      | ({
+          relationTo: 'draft-posts-with-change-hook';
+          value: string | DraftPostsWithChangeHook;
         } | null);
     global?: 'draft-global' | null;
     user?: (string | null) | User;
