@@ -26,9 +26,11 @@ export const LogoutClient: React.FC<{
 
   const { startRouteTransition } = useRouteTransition()
 
-  const [isLoggedOut, setIsLoggedOut] = React.useState<boolean>(!user)
+  const isLoggedIn = React.useMemo(() => {
+    return Boolean(user?.id)
+  }, [user?.id])
 
-  const logOutSuccessRef = React.useRef(false)
+  const navigatingToLoginRef = React.useRef(false)
 
   const [loginRoute] = React.useState(() =>
     formatAdminURL({
@@ -45,26 +47,26 @@ export const LogoutClient: React.FC<{
   const router = useRouter()
 
   const handleLogOut = React.useCallback(async () => {
-    const loggedOut = await logOut()
-    setIsLoggedOut(loggedOut)
+    await logOut()
 
-    if (!inactivity && loggedOut && !logOutSuccessRef.current) {
+    if (!inactivity && !navigatingToLoginRef.current) {
       toast.success(t('authentication:loggedOutSuccessfully'))
-      logOutSuccessRef.current = true
+      navigatingToLoginRef.current = true
       startRouteTransition(() => router.push(loginRoute))
       return
     }
   }, [inactivity, logOut, loginRoute, router, startRouteTransition, t])
 
   useEffect(() => {
-    if (!isLoggedOut) {
+    if (isLoggedIn) {
       void handleLogOut()
-    } else {
+    } else if (!navigatingToLoginRef.current) {
+      navigatingToLoginRef.current = true
       startRouteTransition(() => router.push(loginRoute))
     }
-  }, [handleLogOut, isLoggedOut, loginRoute, router, startRouteTransition])
+  }, [handleLogOut, isLoggedIn, loginRoute, router, startRouteTransition])
 
-  if (isLoggedOut && inactivity) {
+  if (!isLoggedIn && inactivity) {
     return (
       <div className={`${baseClass}__wrap`}>
         <h2>{t('authentication:loggedOutInactivity')}</h2>

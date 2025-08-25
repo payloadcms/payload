@@ -15,6 +15,7 @@ export const daTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': 'Side',
     'field-selectionToUse-label': 'Valg til brug',
     'field-sort-label': 'Sorter efter',
+    'field-sort-order-label': 'Sorteringsrækkefølge',
     'selectionToUse-allDocuments': 'Brug alle dokumenter',
     'selectionToUse-currentFilters': 'Brug nuværende filtre',
     'selectionToUse-currentSelection': 'Brug nuværende valg',

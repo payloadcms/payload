@@ -31,6 +31,7 @@ import {
   listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
+  mediaWithoutDeleteAccessSlug,
   mediaWithoutRelationPreviewSlug,
   mediaWithRelationPreviewSlug,
   noRestrictFileMimeTypesSlug,
@@ -338,7 +339,12 @@ export default buildConfigWithDefaults({
     },
     {
       slug: mediaSlug,
-      fields: [],
+      fields: [
+        {
+          type: 'text',
+          name: 'alt',
+        },
+      ],
       upload: {
         staticDir: path.resolve(dirname, './media'),
         // crop: false,
@@ -931,6 +937,12 @@ export default buildConfigWithDefaults({
         staticDir: path.resolve(dirname, './svg-only'),
       },
     },
+    {
+      slug: mediaWithoutDeleteAccessSlug,
+      fields: [],
+      upload: true,
+      access: { delete: () => false },
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
@@ -953,6 +965,8 @@ export default buildConfigWithDefaults({
       data: {},
       file: imageFile,
     })
+
+    await payload.create({ collection: mediaWithoutDeleteAccessSlug, data: {}, file: imageFile })
 
     const { id: versionedImage } = await payload.create({
       collection: versionSlug,

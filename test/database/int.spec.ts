@@ -49,6 +49,8 @@ const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
+const itMongo = process.env.PAYLOAD_DATABASE?.startsWith('mongodb') ? it : it.skip
+
 describe('database', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
@@ -224,6 +226,12 @@ describe('database', () => {
       const createdAtDate = new Date(result.createdAt)
 
       expect(createdAtDate.getMilliseconds()).toBeDefined()
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
     })
 
     it('should allow createdAt to be set in create', async () => {
@@ -243,9 +251,15 @@ describe('database', () => {
 
       expect(result.createdAt).toStrictEqual(createdAt)
       expect(doc.createdAt).toStrictEqual(createdAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
     })
 
-    it('updatedAt cannot be set in create', async () => {
+    it('should allow updatedAt to be set in create', async () => {
       const updatedAt = new Date('2022-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
         collection: postsSlug,
@@ -255,8 +269,302 @@ describe('database', () => {
         },
       })
 
-      expect(result.updatedAt).not.toStrictEqual(updatedAt)
+      expect(result.updatedAt).toStrictEqual(updatedAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
     })
+    it('should allow createdAt to be set in update', async () => {
+      const post = await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'hello',
+        },
+      })
+      const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
+
+      const result: any = await payload.db.updateOne({
+        collection: postsSlug,
+        id: post.id,
+        data: {
+          createdAt,
+        },
+      })
+
+      const doc = await payload.findByID({
+        id: result.id,
+        collection: postsSlug,
+      })
+
+      expect(doc.createdAt).toStrictEqual(createdAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
+    })
+
+    it('should allow updatedAt to be set in update', async () => {
+      const post = await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'hello',
+        },
+      })
+      const updatedAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
+
+      const result: any = await payload.db.updateOne({
+        collection: postsSlug,
+        id: post.id,
+        data: {
+          updatedAt,
+        },
+      })
+
+      const doc = await payload.findByID({
+        id: result.id,
+        collection: postsSlug,
+      })
+
+      expect(doc.updatedAt).toStrictEqual(updatedAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
+    })
+
+    it('should allow createdAt to be set in updateVersion', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: {
+          title: 'hello',
+        },
+      })
+      await payload.update({
+        collection: 'categories',
+        id: category.id,
+        data: {
+          title: 'hello2',
+        },
+      })
+      const versions = await payload.findVersions({
+        collection: 'categories',
+        depth: 0,
+        sort: '-createdAt',
+      })
+      const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
+
+      for (const version of versions.docs) {
+        await payload.db.updateVersion({
+          id: version.id,
+          collection: 'categories',
+          versionData: {
+            ...version.version,
+            createdAt,
+          },
+        })
+      }
+
+      const updatedVersions = await payload.findVersions({
+        collection: 'categories',
+        depth: 0,
+        sort: '-createdAt',
+      })
+      expect(updatedVersions.docs).toHaveLength(2)
+      for (const version of updatedVersions.docs) {
+        expect(version.createdAt).toStrictEqual(createdAt)
+      }
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: 'categories',
+        where: {},
+      })
+      await payload.db.deleteVersions({
+        collection: 'categories',
+        where: {},
+      })
+    })
+
+    it('should allow updatedAt to be set in updateVersion', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: {
+          title: 'hello',
+        },
+      })
+      await payload.update({
+        collection: 'categories',
+        id: category.id,
+        data: {
+          title: 'hello2',
+        },
+      })
+      const versions = await payload.findVersions({
+        collection: 'categories',
+        depth: 0,
+        sort: '-createdAt',
+      })
+      const updatedAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
+
+      for (const version of versions.docs) {
+        await payload.db.updateVersion({
+          id: version.id,
+          collection: 'categories',
+          versionData: {
+            ...version.version,
+            updatedAt,
+          },
+        })
+      }
+
+      const updatedVersions = await payload.findVersions({
+        collection: 'categories',
+        depth: 0,
+        sort: '-updatedAt',
+      })
+      expect(updatedVersions.docs).toHaveLength(2)
+      for (const version of updatedVersions.docs) {
+        expect(version.updatedAt).toStrictEqual(updatedAt)
+      }
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: 'categories',
+        where: {},
+      })
+      await payload.db.deleteVersions({
+        collection: 'categories',
+        where: {},
+      })
+    })
+
+    async function noTimestampsTestLocalAPI() {
+      const createdDoc: any = await payload.create({
+        collection: 'noTimeStamps',
+        data: {
+          title: 'hello',
+        },
+      })
+      expect(createdDoc.createdAt).toBeUndefined()
+      expect(createdDoc.updatedAt).toBeUndefined()
+
+      const updated: any = await payload.update({
+        collection: 'noTimeStamps',
+        id: createdDoc.id,
+        data: {
+          title: 'updated',
+        },
+      })
+      expect(updated.createdAt).toBeUndefined()
+      expect(updated.updatedAt).toBeUndefined()
+
+      const date = new Date('2021-01-01T00:00:00.000Z').toISOString()
+      const createdDocWithTimestamps: any = await payload.create({
+        collection: 'noTimeStamps',
+        data: {
+          title: 'hello',
+          createdAt: date,
+          updatedAt: date,
+        },
+      })
+      expect(createdDocWithTimestamps.createdAt).toBeUndefined()
+      expect(createdDocWithTimestamps.updatedAt).toBeUndefined()
+
+      const updatedDocWithTimestamps: any = await payload.update({
+        collection: 'noTimeStamps',
+        id: createdDocWithTimestamps.id,
+        data: {
+          title: 'updated',
+          createdAt: date,
+          updatedAt: date,
+        },
+      })
+      expect(updatedDocWithTimestamps.createdAt).toBeUndefined()
+      expect(updatedDocWithTimestamps.updatedAt).toBeUndefined()
+    }
+
+    async function noTimestampsTestDB(aa) {
+      const createdDoc: any = await payload.db.create({
+        collection: 'noTimeStamps',
+        data: {
+          title: 'hello',
+        },
+      })
+      expect(createdDoc.createdAt).toBeUndefined()
+      expect(createdDoc.updatedAt).toBeUndefined()
+
+      const updated: any = await payload.db.updateOne({
+        collection: 'noTimeStamps',
+        id: createdDoc.id,
+        data: {
+          title: 'updated',
+        },
+      })
+      expect(updated.createdAt).toBeUndefined()
+      expect(updated.updatedAt).toBeUndefined()
+
+      const date = new Date('2021-01-01T00:00:00.000Z').toISOString()
+      const createdDocWithTimestamps: any = await payload.db.create({
+        collection: 'noTimeStamps',
+        data: {
+          title: 'hello',
+          createdAt: date,
+          updatedAt: date,
+        },
+      })
+      expect(createdDocWithTimestamps.createdAt).toBeUndefined()
+      expect(createdDocWithTimestamps.updatedAt).toBeUndefined()
+
+      const updatedDocWithTimestamps: any = await payload.db.updateOne({
+        collection: 'noTimeStamps',
+        id: createdDocWithTimestamps.id,
+        data: {
+          title: 'updated',
+          createdAt: date,
+          updatedAt: date,
+        },
+      })
+      expect(updatedDocWithTimestamps.createdAt).toBeUndefined()
+      expect(updatedDocWithTimestamps.updatedAt).toBeUndefined()
+    }
+
+    // eslint-disable-next-line jest/expect-expect
+    it('ensure timestamps are not created in update or create when timestamps are disabled', async () => {
+      await noTimestampsTestLocalAPI()
+    })
+
+    // eslint-disable-next-line jest/expect-expect
+    it('ensure timestamps are not created in db adapter update or create when timestamps are disabled', async () => {
+      await noTimestampsTestDB(true)
+    })
+
+    itMongo(
+      'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
+      async () => {
+        const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
+        payload.db.allowAdditionalKeys = true
+        await noTimestampsTestLocalAPI()
+        payload.db.allowAdditionalKeys = originalAllowAdditionalKeys
+      },
+    )
+
+    itMongo(
+      'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
+      async () => {
+        const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
+        payload.db.allowAdditionalKeys = true
+        await noTimestampsTestDB()
+
+        payload.db.allowAdditionalKeys = originalAllowAdditionalKeys
+      },
+    )
   })
 
   describe('Data strictness', () => {

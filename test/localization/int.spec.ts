@@ -2903,7 +2903,7 @@ describe('Localization', () => {
         })
 
         const req = await createLocalReq({ user }, payload)
-
+        global.d = true
         const res = (await copyDataFromLocaleHandler({
           fromLocale: 'en',
           req,
@@ -2913,6 +2913,36 @@ describe('Localization', () => {
         })) as BlocksField
 
         expect(res.content?.[0]?.content?.[0]?.text).toBe('some-text')
+      })
+
+      it('should copy block inside tab to locale', async () => {
+        // This was previously an e2e test but it was migrated to int
+        // because at the moment only int tests run in Postgres in CI,
+        // and that's where the bug occurs.
+        const doc = await payload.create({
+          collection: 'blocks-fields',
+          locale: 'en',
+          data: {
+            tabContent: [
+              {
+                blockType: 'blockInsideTab',
+                text: 'some-text',
+              },
+            ],
+          },
+        })
+
+        const req = await createLocalReq({ user }, payload)
+        global.d = true
+        const res = (await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          req,
+          toLocale: 'pt',
+          docID: doc.id,
+          collectionSlug: 'blocks-fields',
+        })) as BlocksField
+
+        expect(res.tabContent?.[0]?.text).toBe('some-text')
       })
 
       it('should copy localized nested to arrays', async () => {

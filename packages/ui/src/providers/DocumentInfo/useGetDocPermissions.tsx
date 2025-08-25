@@ -6,6 +6,8 @@ import React from 'react'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
 import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
 
+export type GetDocPermissions = (data?: Data) => Promise<void>
+
 export const useGetDocPermissions = ({
   id,
   api,
@@ -30,7 +32,7 @@ export const useGetDocPermissions = ({
   setDocPermissions: React.Dispatch<React.SetStateAction<SanitizedDocumentPermissions>>
   setHasPublishPermission: React.Dispatch<React.SetStateAction<boolean>>
   setHasSavePermission: React.Dispatch<React.SetStateAction<boolean>>
-}) =>
+}): GetDocPermissions =>
   React.useCallback(
     async (data: Data) => {
       const params = {
@@ -111,5 +113,18 @@ export const useGetDocPermissions = ({
         )
       }
     },
-    [serverURL, api, id, permissions, i18n.language, locale, collectionSlug, globalSlug],
+    [
+      locale,
+      id,
+      collectionSlug,
+      globalSlug,
+      serverURL,
+      api,
+      i18n.language,
+      setDocPermissions,
+      setHasSavePermission,
+      setHasPublishPermission,
+      permissions?.collections,
+      permissions?.globals,
+    ],
   )

@@ -37,6 +37,16 @@ export const getConfig: () => Partial<Config> = () => ({
   },
   collections: [
     {
+      slug: 'noTimeStamps',
+      timestamps: false,
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+      ],
+    },
+    {
       slug: 'categories',
       versions: { drafts: true },
       fields: [

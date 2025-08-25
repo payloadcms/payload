@@ -6,7 +6,7 @@ import React from 'react'
 
 import { customNestedViewTitle, customViewPath } from '../../../shared.js'
 
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 export function CustomNestedView({ initPageResult }: AdminViewServerProps) {
   const {

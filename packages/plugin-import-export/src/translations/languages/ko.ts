@@ -15,6 +15,7 @@ export const koTranslations: PluginDefaultTranslationsObject = {
     'field-page-label': '페이지',
     'field-selectionToUse-label': '사용할 선택',
     'field-sort-label': '정렬 방식',
+    'field-sort-order-label': '정렬 순서',
     'selectionToUse-allDocuments': '모든 문서를 사용하십시오.',
     'selectionToUse-currentFilters': '현재 필터를 사용하십시오.',
     'selectionToUse-currentSelection': '현재 선택 항목을 사용하십시오.',
