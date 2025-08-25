@@ -1,5 +1,25 @@
 version: '3.2'
 services:
+  # PostgreSQL with PostGIS for automatic test database
+  postgres:
+    image: ghcr.io/payloadcms/postgis-vector:latest
+    container_name: payload_postgres_test
+    restart: unless-stopped
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: mydb
+      PAYLOAD_DATABASE: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U devuser -d mydb']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   localstack:
     image: localstack/localstack:latest
     container_name: localstack_demo
@@ -48,5 +68,6 @@ services:
       - ./google-cloud-storage/payload-bucket:/data/payload-bucket
 
 volumes:
+  postgres_data:
   google-cloud-storage:
   azurestoragedata:
