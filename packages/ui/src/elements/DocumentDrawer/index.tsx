@@ -96,10 +96,14 @@ export const useDocumentDrawer: UseDocumentDrawer = ({
   const { closeModal, modalState, openModal, toggleModal } = useModal()
   const [isOpen, setIsOpen] = useState(false)
 
-  const preferUUID = useRef(!id)
+  const initializedWithoutID = useRef(!id)
 
   const drawerSlug = formatDocumentDrawerSlug({
-    id: preferUUID.current ? uuid : id,
+    /**
+     * This pattern will maintain the same drawer slug across the create and update operations.
+     * Otherwise the drawer would be treated as a different instance and close unexpectedly.
+     */
+    id: initializedWithoutID.current ? uuid : id,
     collectionSlug,
     depth: editDepth,
   })
