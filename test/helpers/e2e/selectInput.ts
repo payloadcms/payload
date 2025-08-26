@@ -1,5 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { exactText } from 'helpers.js'
+
 type SelectReactOptionsParams = {
   selectLocator: Locator // Locator for the react-select component
 } & (
@@ -85,7 +87,7 @@ async function selectOption({
 
   // Find and click the desired option by visible text
   const optionLocator = selectLocator.locator('.rs__option', {
-    hasText: optionText,
+    hasText: exactText(optionText),
   })
 
   if (optionLocator) {
