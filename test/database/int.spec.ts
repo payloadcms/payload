@@ -3404,6 +3404,42 @@ describe('database', () => {
   })
 
   describe('array $push', () => {
+    it('should allow atomic array updates and $inc', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          number: 10,
+          arrayWithIDs: [
+            {
+              text: 'some text',
+            },
+          ],
+          title: 'post',
+        },
+      })
+
+      const res = (await payload.db.updateOne({
+        data: {
+          arrayWithIDs: {
+            $push: {
+              text: 'some text 2',
+              id: new mongoose.Types.ObjectId().toHexString(),
+            },
+          },
+          number: {
+            $inc: 5,
+          },
+        },
+        collection: 'posts',
+        id: post.id,
+      })) as unknown as Post
+
+      expect(res.arrayWithIDs).toHaveLength(2)
+      expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
+      expect(res.arrayWithIDs?.[1]?.text).toBe('some text 2')
+      expect(res.number).toBe(15)
+    })
+
     it('should allow atomic array updates using $push with single value, unlocalized', async () => {
       const post = await payload.create({
         collection: 'posts',
