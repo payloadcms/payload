@@ -25,6 +25,7 @@
 import type { BrowserContext, Dialog, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { postsCollectionSlug } from 'admin/slugs.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -37,6 +38,7 @@ import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
+  openDocDrawer,
   saveDocAndAssert,
   // throttleTest,
 } from '../helpers.js'
@@ -1313,6 +1315,42 @@ describe('Versions', () => {
       await expect(titleField).toHaveValue('Initial')
       const computedTitleField = page.locator('#field-computedTitle')
       await expect(computedTitleField).toHaveValue('Initial')
+    })
+
+    test('- with autosave - does not override local changes to form state after autosave runs within document drawer', async () => {
+      await payload.create({
+        collection: autosaveCollectionSlug,
+        data: {
+          title: 'This is a test',
+          description: 'some description',
+        },
+      })
+
+      const url = new AdminUrlUtil(serverURL, postsCollectionSlug)
+      await page.goto(url.create)
+
+      await page.locator('#field-relationToAutosaves .rs__control').click()
+      await page.locator('.rs__option:has-text("This is a test")').click()
+
+      await openDocDrawer(
+        page,
+        '#field-relationToAutosaves .relationship--single-value__drawer-toggler',
+      )
+
+      const titleField = page.locator('#field-title')
+
+      await titleField.fill('')
+
+      // press slower than the autosave interval, but not faster than the response and processing
+      await titleField.pressSequentially('Initial', {
+        delay: 150,
+      })
+
+      const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
+
+      await waitForAutoSaveToRunAndComplete(drawer)
+
+      await expect(titleField).toHaveValue('Initial')
     })
 
     test('- with autosave - does not display success toast after autosave complete', async () => {
