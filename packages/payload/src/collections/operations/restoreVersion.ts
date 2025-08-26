@@ -260,6 +260,8 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
 
     // Ensure updatedAt date is always updated
     result.updatedAt = new Date().toISOString()
+    // Ensure status respects draft arg
+    result._status = draftArg ? 'draft' : 'published'
     result = await req.payload.db.updateOne({
       id: parentDocID,
       collection: collectionConfig.slug,
