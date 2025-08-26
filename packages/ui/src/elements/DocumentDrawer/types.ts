@@ -24,12 +24,6 @@ export type DocumentDrawerProps = {
    * @deprecated
    */
   readonly initialState?: FormState
-  /**
-   * If true, the drawer will keep the same UUID it generated for the "create new" document.
-   * This is useful for keeping the drawer open when creating a new document, as it
-   * prevents the drawer from generating a new modal slug after the document ID is created.
-   */
-  readonly keepUUIDAfterCreate?: boolean
   readonly overrideEntityVisibility?: boolean
   readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
@@ -58,10 +52,7 @@ export type UseDocumentDrawerContext = {
 }
 
 export type UseDocumentDrawer = (
-  args: Pick<
-    DocumentDrawerProps,
-    'collectionSlug' | 'id' | 'keepUUIDAfterCreate' | 'overrideEntityVisibility'
-  >,
+  args: Pick<DocumentDrawerProps, 'collectionSlug' | 'id' | 'overrideEntityVisibility'>,
 ) => [
   // drawer
   React.FC<

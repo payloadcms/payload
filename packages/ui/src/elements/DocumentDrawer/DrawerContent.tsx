@@ -45,7 +45,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const [isLoading, setIsLoading] = useState(true)
 
   const hasInitialized = useRef(false)
-  const prevDocID = useRef(docID)
 
   const getDocumentView = useCallback(
     (docID?: DocumentDrawerProps['id'], showLoadingIndicator: boolean = false) => {
@@ -106,6 +105,10 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
+      if (args.operation === 'create') {
+        getDocumentView(args.doc.id, false)
+      }
+
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
           ...args,
@@ -113,11 +116,13 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
         })
       }
     },
-    [onSaveFromProps, collectionConfig],
+    [onSaveFromProps, collectionConfig, getDocumentView],
   )
 
   const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(
     (args) => {
+      getDocumentView(args.doc.id, false)
+
       if (typeof onDuplicateFromProps === 'function') {
         void onDuplicateFromProps({
           ...args,
@@ -125,7 +130,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
         })
       }
     },
-    [onDuplicateFromProps, collectionConfig],
+    [onDuplicateFromProps, collectionConfig, getDocumentView],
   )
 
   const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
@@ -147,13 +152,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   }, [getDocumentView])
 
   useEffect(() => {
-    if (!DocumentView && (!hasInitialized.current || prevDocID.current !== docID)) {
+    if (!DocumentView && !hasInitialized.current) {
       getDocumentView(docID, true)
       hasInitialized.current = true
-    }
-
-    if (prevDocID.current !== docID) {
-      prevDocID.current = docID
     }
   }, [DocumentView, getDocumentView, docID])
 

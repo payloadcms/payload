@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, DefaultDocumentIDType } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
@@ -33,7 +33,6 @@ export const AddNewRelation: React.FC<Props> = ({
   const { permissions } = useAuth()
   const [show, setShow] = useState(false)
   const [selectedCollection, setSelectedCollection] = useState<string>()
-  const [docID, setDocID] = useState<DefaultDocumentIDType>(undefined)
 
   const relatedToMany = relatedCollections.length > 1
 
@@ -47,9 +46,7 @@ export const AddNewRelation: React.FC<Props> = ({
 
   const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen, toggleDrawer }] = useDocumentDrawer(
     {
-      id: docID,
       collectionSlug: collectionConfig?.slug,
-      keepUUIDAfterCreate: true,
     },
   )
 
@@ -90,7 +87,6 @@ export const AddNewRelation: React.FC<Props> = ({
         }
 
         setSelectedCollection(undefined)
-        setDocID(doc.id)
       }
     },
     [collectionConfig, hasMany, onChange, value, relatedCollections],
@@ -157,7 +153,6 @@ export const AddNewRelation: React.FC<Props> = ({
               .filter(Boolean)
               .join(' ')}
             onClick={() => {
-              setDocID(undefined)
               setShowTooltip(false)
             }}
             onMouseEnter={() => setShowTooltip(true)}
@@ -206,7 +201,6 @@ export const AddNewRelation: React.FC<Props> = ({
                         key={relatedCollection?.slug}
                         onClick={() => {
                           closePopup()
-                          setDocID(undefined)
                           setSelectedCollection(relatedCollection?.slug)
                         }}
                       >

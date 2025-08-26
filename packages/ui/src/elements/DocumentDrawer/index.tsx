@@ -1,6 +1,6 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type {
   DocumentDrawerProps,
@@ -22,15 +22,11 @@ const formatDocumentDrawerSlug = ({
   id,
   collectionSlug,
   depth,
-  keepUUIDAfterCreate,
-  uuid,
 }: {
   collectionSlug: string
   depth: number
   id: number | string
-  keepUUIDAfterCreate?: boolean
-  uuid: string // supply when creating a new document and no id is available
-}) => `doc-drawer_${collectionSlug}_${depth}${id && !keepUUIDAfterCreate ? `_${id}` : ''}_${uuid}`
+}) => `doc-drawer_${collectionSlug}_${depth}_${id}`
 
 export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
   children,
@@ -93,7 +89,6 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
 export const useDocumentDrawer: UseDocumentDrawer = ({
   id,
   collectionSlug,
-  keepUUIDAfterCreate,
   overrideEntityVisibility,
 }) => {
   const editDepth = useEditDepth()
@@ -101,12 +96,12 @@ export const useDocumentDrawer: UseDocumentDrawer = ({
   const { closeModal, modalState, openModal, toggleModal } = useModal()
   const [isOpen, setIsOpen] = useState(false)
 
+  const preferUUID = useRef(!id)
+
   const drawerSlug = formatDocumentDrawerSlug({
-    id,
+    id: preferUUID.current ? uuid : id,
     collectionSlug,
     depth: editDepth,
-    keepUUIDAfterCreate,
-    uuid,
   })
 
   useEffect(() => {
@@ -132,12 +127,11 @@ export const useDocumentDrawer: UseDocumentDrawer = ({
         collectionSlug={collectionSlug}
         drawerSlug={drawerSlug}
         id={id}
-        keepUUIDAfterCreate={keepUUIDAfterCreate}
         key={drawerSlug}
         overrideEntityVisibility={overrideEntityVisibility}
       />
     )
-  }, [id, drawerSlug, collectionSlug, overrideEntityVisibility, keepUUIDAfterCreate])
+  }, [id, drawerSlug, collectionSlug, overrideEntityVisibility])
 
   const MemoizedDrawerToggler = useMemo<React.FC<DocumentTogglerProps>>(() => {
     return (props) => (
