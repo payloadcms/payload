@@ -932,17 +932,6 @@ const initialized = new BasePayload()
 // eslint-disable-next-line no-restricted-exports
 export default initialized
 
-let cached: {
-  payload: null | Payload
-  promise: null | Promise<Payload>
-  reload: boolean | Promise<void>
-  ws: null | WebSocket
-} = (global as any)._payload
-
-if (!cached) {
-  cached = (global as any)._payload = { payload: null, promise: null, reload: false, ws: null }
-}
-
 export const reload = async (
   config: SanitizedConfig,
   payload: Payload,
@@ -1010,11 +999,47 @@ export const reload = async (
   ;(global as any)._payload_doNotCacheClientSchemaMap = true
 }
 
+let _cached: WeakMap<
+  object,
+  Map<
+    string,
+    {
+      payload: null | Payload
+      promise: null | Promise<Payload>
+      reload: boolean | Promise<void>
+      ws: null | WebSocket
+    }
+  >
+> = (global as any)._payload
+
+if (!_cached) {
+  _cached = (global as any)._payload = new WeakMap()
+}
+
 export const getPayload = async (
   options: Pick<InitOptions, 'config' | 'cron' | 'importMap'>,
 ): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayload to work.')
+  }
+
+  let cachedByConfig = _cached.get(options.config)
+  if (!cachedByConfig) {
+    cachedByConfig = new Map()
+    _cached.set(options.config, cachedByConfig)
+  }
+
+  const cacheKey = JSON.stringify({ cron: options.cron })
+
+  let cached = cachedByConfig?.get(cacheKey)
+  if (!cached) {
+    cached = {
+      payload: null,
+      promise: null,
+      reload: false,
+      ws: null,
+    }
+    cachedByConfig.set(cacheKey, cached)
   }
 
   if (cached.payload) {
