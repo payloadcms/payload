@@ -1,6 +1,6 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
 
 import type {
   DocumentDrawerProps,
@@ -22,11 +22,13 @@ const formatDocumentDrawerSlug = ({
   id,
   collectionSlug,
   depth,
+  uuid,
 }: {
   collectionSlug: string
   depth: number
-  id: number | string
-}) => `doc-drawer_${collectionSlug}_${depth}_${id}`
+  id?: number | string
+  uuid: string
+}) => `doc-drawer_${collectionSlug}_${depth}${id ? `_${id}` : ''}_${uuid}`
 
 export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
   children,
@@ -96,16 +98,11 @@ export const useDocumentDrawer: UseDocumentDrawer = ({
   const { closeModal, modalState, openModal, toggleModal } = useModal()
   const [isOpen, setIsOpen] = useState(false)
 
-  const initializedWithoutID = useRef(!id)
-
   const drawerSlug = formatDocumentDrawerSlug({
-    /**
-     * This pattern will maintain the same drawer slug across the create and update operations.
-     * Otherwise the drawer would be treated as a different instance and close unexpectedly.
-     */
-    id: initializedWithoutID.current ? uuid : id,
+    id,
     collectionSlug,
     depth: editDepth,
+    uuid,
   })
 
   useEffect(() => {
