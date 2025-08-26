@@ -22,13 +22,15 @@ const formatDocumentDrawerSlug = ({
   id,
   collectionSlug,
   depth,
+  keepUUIDAfterCreate,
   uuid,
 }: {
   collectionSlug: string
   depth: number
   id: number | string
+  keepUUIDAfterCreate?: boolean
   uuid: string // supply when creating a new document and no id is available
-}) => `doc-drawer_${collectionSlug}_${depth}${id ? `_${id}` : ''}_${uuid}`
+}) => `doc-drawer_${collectionSlug}_${depth}${id && !keepUUIDAfterCreate ? `_${id}` : ''}_${uuid}`
 
 export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
   children,
@@ -91,6 +93,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
 export const useDocumentDrawer: UseDocumentDrawer = ({
   id,
   collectionSlug,
+  keepUUIDAfterCreate,
   overrideEntityVisibility,
 }) => {
   const editDepth = useEditDepth()
@@ -102,6 +105,7 @@ export const useDocumentDrawer: UseDocumentDrawer = ({
     id,
     collectionSlug,
     depth: editDepth,
+    keepUUIDAfterCreate,
     uuid,
   })
 
@@ -128,11 +132,12 @@ export const useDocumentDrawer: UseDocumentDrawer = ({
         collectionSlug={collectionSlug}
         drawerSlug={drawerSlug}
         id={id}
+        keepUUIDAfterCreate={keepUUIDAfterCreate}
         key={drawerSlug}
         overrideEntityVisibility={overrideEntityVisibility}
       />
     )
-  }, [id, drawerSlug, collectionSlug, overrideEntityVisibility])
+  }, [id, drawerSlug, collectionSlug, overrideEntityVisibility, keepUUIDAfterCreate])
 
   const MemoizedDrawerToggler = useMemo<React.FC<DocumentTogglerProps>>(() => {
     return (props) => (

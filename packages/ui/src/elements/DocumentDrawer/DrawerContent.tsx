@@ -15,7 +15,7 @@ import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.j
 import { DocumentDrawerContextProvider } from './Provider.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
-  id: existingDocID,
+  id: docID,
   collectionSlug,
   disableActions,
   drawerSlug,
@@ -43,10 +43,12 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const [DocumentView, setDocumentView] = useState<React.ReactNode>(undefined)
   const [isLoading, setIsLoading] = useState(true)
+
   const hasInitialized = useRef(false)
+  const prevDocID = useRef(docID)
 
   const getDocumentView = useCallback(
-    (docID?: number | string, showLoadingIndicator: boolean = false) => {
+    (docID?: DocumentDrawerProps['id'], showLoadingIndicator: boolean = false) => {
       const controller = handleAbortRef(abortGetDocumentViewRef)
 
       const fetchDocumentView = async () => {
@@ -78,7 +80,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
         } catch (error) {
           toast.error(error?.message || t('error:unspecific'))
           closeModal(drawerSlug)
-          // toast.error(data?.errors?.[0].message || t('error:unspecific'))
         }
 
         abortGetDocumentViewRef.current = null
@@ -146,11 +147,15 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   }, [getDocumentView])
 
   useEffect(() => {
-    if (!DocumentView && !hasInitialized.current) {
-      getDocumentView(existingDocID, true)
+    if (!DocumentView && (!hasInitialized.current || prevDocID.current !== docID)) {
+      getDocumentView(docID, true)
       hasInitialized.current = true
     }
-  }, [DocumentView, getDocumentView, existingDocID])
+
+    if (prevDocID.current !== docID) {
+      prevDocID.current = docID
+    }
+  }, [DocumentView, getDocumentView, docID])
 
   // Cleanup any pending requests when the component unmounts
   useEffect(() => {
