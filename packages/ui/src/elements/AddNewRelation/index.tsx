@@ -52,9 +52,15 @@ export const AddNewRelation: React.FC<Props> = ({
 
   const onSave: DocumentDrawerContextType['onSave'] = useCallback(
     ({ doc, operation }) => {
-      if (operation === 'create') {
-        let isNewValue = false
+      // if autosave is enabled, the operation will be 'update'
+      const isAutosaveEnabled =
+        typeof collectionConfig?.versions?.drafts === 'object'
+          ? collectionConfig.versions.drafts.autosave
+          : false
 
+      if (operation === 'create' || (operation === 'update' && isAutosaveEnabled)) {
+        // ensure the value is not already in the array
+        let isNewValue = false
         if (!value) {
           isNewValue = true
         } else {
