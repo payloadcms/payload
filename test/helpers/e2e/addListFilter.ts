@@ -50,11 +50,17 @@ export const addListFilter = async ({
     await expect(valueInput).toHaveValue(value)
 
     if ((await valueLocator.locator('input.rs__input').count()) > 0) {
-      await selectInput({
-        selectLocator: valueLocator,
-        multiSelect: false,
-        option: value,
-      })
+      const valueOptions = whereBuilder.locator('.condition__value .rs__option')
+      const createValue = valueOptions.locator(`text=Create "${value}"`)
+      if ((await createValue.count()) > 0) {
+        await createValue.click()
+      } else {
+        await selectInput({
+          selectLocator: valueLocator,
+          multiSelect: false,
+          option: value,
+        })
+      }
     }
     await networkPromise
   }
