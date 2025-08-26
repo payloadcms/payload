@@ -1,8 +1,9 @@
 'use client'
 
-import type { PublishButtonClientProps } from 'payload'
+import type { Field, PublishButtonClientProps, TabAsField } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
+import { traverseFields } from 'payload'
 import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 
@@ -26,6 +27,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     globalSlug,
     hasPublishedDoc,
     hasPublishPermission,
+    initialData: data,
     setHasPublishedDoc,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
@@ -86,9 +88,20 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       (hasAutosave || !modified),
   )
 
-  const hasLocalizedFields = Boolean(
-    entityConfig?.fields?.some((field) => 'localized' in field && field.localized)
-  )
+  const [hasLocalizedFields, setHasLocalizedFields] = React.useState(false)
+
+  React.useEffect(() => {
+    traverseFields({
+      callback: ({ field, parentIsLocalized }) => {
+        if (parentIsLocalized || ('localized' in field && field.localized)) {
+          setHasLocalizedFields(true)
+        }
+      },
+      fields: entityConfig?.fields as (Field | TabAsField)[],
+      fillEmpty: false,
+      ref: data,
+    })
+  }, [entityConfig?.fields, data])
 
   const canPublishSpecificLocale = localization && hasLocalizedFields && hasPublishPermission
 
@@ -221,28 +234,28 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         SubMenuPopupContent={
           canPublishSpecificLocale || canSchedulePublish
             ? ({ close }) => {
-              return (
-                <React.Fragment>
-                  {canSchedulePublish && (
-                    <PopupList.ButtonGroup key="schedule-publish">
-                      <PopupList.Button
-                        id="schedule-publish"
-                        onClick={() => [toggleModal(drawerSlug), close()]}
-                      >
-                        {t('version:schedulePublish')}
-                      </PopupList.Button>
-                    </PopupList.ButtonGroup>
-                  )}
-                  {canPublishSpecificLocale && (
-                    <PopupList.ButtonGroup>
-                      <PopupList.Button id="publish-locale" onClick={secondaryPublish}>
-                        {secondaryLabel}
-                      </PopupList.Button>
-                    </PopupList.ButtonGroup>
-                  )}
-                </React.Fragment>
-              )
-            }
+                return (
+                  <React.Fragment>
+                    {canSchedulePublish && (
+                      <PopupList.ButtonGroup key="schedule-publish">
+                        <PopupList.Button
+                          id="schedule-publish"
+                          onClick={() => [toggleModal(drawerSlug), close()]}
+                        >
+                          {t('version:schedulePublish')}
+                        </PopupList.Button>
+                      </PopupList.ButtonGroup>
+                    )}
+                    {canPublishSpecificLocale && (
+                      <PopupList.ButtonGroup>
+                        <PopupList.Button id="publish-locale" onClick={secondaryPublish}>
+                          {secondaryLabel}
+                        </PopupList.Button>
+                      </PopupList.ButtonGroup>
+                    )}
+                  </React.Fragment>
+                )
+              }
             : undefined
         }
         type="button"
