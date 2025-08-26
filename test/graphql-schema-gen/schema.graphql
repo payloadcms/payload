@@ -487,6 +487,7 @@ enum Collection2_spaceBottom {
   mb_8
   mb_16
   mb_24
+  mb__150px_
 }
 
 type Collection2s {
@@ -622,6 +623,7 @@ enum Collection2_spaceBottom_Input {
   mb_8
   mb_16
   mb_24
+  mb__150px_
 }
 
 input Collection2_updatedAt_operator {
@@ -3334,6 +3336,7 @@ enum Collection2_spaceBottom_MutationInput {
   mb_8
   mb_16
   mb_24
+  mb__150px_
 }
 
 input mutationCollection2UpdateInput {
@@ -3371,6 +3374,7 @@ enum Collection2Update_spaceBottom_MutationInput {
   mb_8
   mb_16
   mb_24
+  mb__150px_
 }
 
 input mutationUserInput {

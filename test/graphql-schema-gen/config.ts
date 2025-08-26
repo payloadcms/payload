@@ -159,7 +159,7 @@ export default buildConfigWithDefaults({
             { label: 'Small', value: 'mb-8' },
             { label: 'Medium', value: 'mb-16' },
             { label: 'Large', value: 'mb-24' },
-            // { label: 'Extra Large', value: 'mb-[150px]' },
+            { label: 'Extra Large', value: 'mb-[150px]' },
           ],
         },
       ],
