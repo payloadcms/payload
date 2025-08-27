@@ -11,7 +11,7 @@ keywords: lexical, richtext, html
 There are two main approaches to convert your Lexical-based rich text to HTML:
 
 1. **Generate HTML on-demand (Recommended)**: Convert JSON to HTML wherever you need it, on-demand.
-2. **Generate HTML within your Collection**: Create a new field that automatically converts your saved JSON content to HTML. This is not recommended because it adds overhead to the Payload API and may not work well with live preview.
+2. **Generate HTML within your Collection**: Create a new field that automatically converts your saved JSON content to HTML. This is not recommended because it adds overhead to the Payload API.
 
 ### On-demand
 
@@ -101,10 +101,7 @@ export const MyRSCComponent = async ({
 
 ### HTML field
 
-The `lexicalHTMLField()` helper converts JSON to HTML and saves it in a field that is updated every time you read it via an `afterRead` hook. It's generally not recommended for two reasons:
-
-1. It creates a column with duplicate content in another format.
-2. In [client-side live preview](/docs/live-preview/client), it makes it not "live".
+The `lexicalHTMLField()` helper converts JSON to HTML and saves it in a field that is updated every time you read it via an `afterRead` hook. It's generally not recommended, as it creates a column with duplicate content in another format.
 
 Consider using the [on-demand HTML converter above](/docs/rich-text/converting-html#on-demand-recommended) or the [JSX converter](/docs/rich-text/converting-jsx) unless you have a good reason.
 
