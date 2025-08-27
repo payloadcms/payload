@@ -1020,6 +1020,14 @@ if (!_cached) {
   _cached = (global as any)._payload = new Map()
 }
 
+/**
+ * Get a payload instance.
+ * This function is a wrapper around new BasePayload().init() that adds the following functionality on top of that:
+ *
+ * - smartly caches Payload instance on the module scope. That way, we prevent unnecessarily initializing Payload over and over again
+ * when calling getPayload multiple times or from multiple locations.
+ * - adds HMR support and reloads the payload instance when the config changes.
+ */
 export const getPayload = async (
   options: {
     /**
@@ -1059,6 +1067,7 @@ export const getPayload = async (
 
   if (cached.payload) {
     if (options.cron && !cached.initializedCrons) {
+      // getPayload called with crons enabled, but existing cached version does not have crons initialized. => Initialize crons in existing cached version
       cached.initializedCrons = true
       await cached.payload._initializeCrons()
     }
