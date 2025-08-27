@@ -262,6 +262,22 @@ export const getConfig: () => Partial<Config> = () => ({
               name: 'text',
               type: 'text',
             },
+            {
+              name: 'textLocalized',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+        {
+          name: 'arrayWithIDsLocalized',
+          type: 'array',
+          localized: true,
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
           ],
         },
         {

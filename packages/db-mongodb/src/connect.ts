@@ -35,7 +35,12 @@ export const connect: Connect = async function connect(
   }
 
   try {
-    this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
+    if (!this.connection) {
+      this.connection = await mongoose.createConnection(urlToConnect, connectionOptions).asPromise()
+    }
+
+    await this.connection.openUri(urlToConnect, connectionOptions)
+
     if (this.useAlternativeDropDatabase) {
       if (this.connection.db) {
         // Firestore doesn't support dropDatabase, so we monkey patch
@@ -75,7 +80,8 @@ export const connect: Connect = async function connect(
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info('---- DROPPING DATABASE ----')
-        await mongoose.connection.dropDatabase()
+        await this.connection.dropDatabase()
+
         this.payload.logger.info('---- DROPPED DATABASE ----')
       }
     }
