@@ -164,8 +164,8 @@ export const generateReindexHandler =
       })
 
       await Promise.all(promises)
-    } catch (msg) {
-      return Response.json({ message: msg }, { headers, status: 500 })
+    } catch (err: any) {
+      return Response.json({ message: err.message }, { headers, status: 500 })
     }
 
     const message = t('general:successfullyReindexed', {
