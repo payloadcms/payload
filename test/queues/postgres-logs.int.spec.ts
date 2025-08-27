@@ -52,7 +52,7 @@ describePostgres('queues - postgres logs', () => {
         jobStatus: { '1': { status: 'success' } },
         remainingJobsFromQueried: 0,
       })
-      expect(consoleCount).toHaveBeenCalledTimes(15) // Should be 15 sql calls if the optimizations are used. If not, this would be 22 calls      consoleCount.mockRestore()
+      expect(consoleCount).toHaveBeenCalledTimes(14) // Should be 14 sql calls if the optimizations are used. If not, this would be 22 calls      consoleCount.mockRestore()
     })
   })
 })

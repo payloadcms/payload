@@ -198,6 +198,8 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         log: {
           $push: newLogItem,
         } as any,
+        // Set to null to skip main row update on postgres. 2 => 1 db round trips
+        updatedAt: null as any,
       })
 
       return output
