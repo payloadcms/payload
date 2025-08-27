@@ -951,7 +951,8 @@ export type Config = {
        */
       duration?: number
       /**
-       * Control whether toasts are expanded by default (not collapsed).
+       * If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction.
+       * Otherwise only the latest notification can be read until the user hovers the stack.
        * @default false
        */
       expand?: boolean
