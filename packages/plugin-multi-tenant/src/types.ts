@@ -31,16 +31,16 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   collections: {
     [key in CollectionSlug]?: {
       /**
+       * Opt out of adding the tenant field and place
+       * it manually using the `tenantField` export from the plugin
+       */
+      customTenantField?: boolean
+      /**
        * Set to `true` if you want the collection to behave as a global
        *
        * @default false
        */
       isGlobal?: boolean
-      /**
-       * Opt out of adding the tenant field and place
-       * it manually using the `tenantField` export from the plugin
-       */
-      manuallyPlaceTenantField?: boolean
       /**
        * Overrides for the tenant field, will override the entire tenantField configuration
        */

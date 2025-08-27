@@ -163,7 +163,7 @@ export const multiTenantPlugin =
       incomingConfig.folders = incomingConfig.folders || {}
       incomingConfig.folders.collectionOverrides = incomingConfig.folders.collectionOverrides || []
       incomingConfig.folders.collectionOverrides.push(({ collection }) => {
-        if (pluginConfig.collections[foldersSlug]?.manuallyPlaceTenantField !== true) {
+        if (pluginConfig.collections[foldersSlug]?.customTenantField !== true) {
           /**
            * Add tenant field to enabled collections
            */
@@ -333,7 +333,7 @@ export const multiTenantPlugin =
           ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
           : pluginConfig.tenantField || {}
 
-        if (pluginConfig.collections[collection.slug]?.manuallyPlaceTenantField !== true) {
+        if (pluginConfig.collections[collection.slug]?.customTenantField !== true) {
           /**
            * Add tenant field to enabled collections
            */
