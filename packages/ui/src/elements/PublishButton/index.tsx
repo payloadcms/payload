@@ -1,11 +1,9 @@
 'use client'
 
-import type { Field, PublishButtonClientProps, TabAsField } from 'payload'
-
 import { useModal } from '@faceless-ui/modal'
-import { traverseFields } from 'payload'
+import { type Field, type PublishButtonClientProps, type TabAsField, traverseFields } from 'payload'
 import * as qs from 'qs-esm'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
@@ -88,9 +86,9 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       (hasAutosave || !modified),
   )
 
-  const [hasLocalizedFields, setHasLocalizedFields] = React.useState(false)
+  const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     traverseFields({
       callback: ({ field, parentIsLocalized }) => {
         if (parentIsLocalized || ('localized' in field && field.localized)) {
