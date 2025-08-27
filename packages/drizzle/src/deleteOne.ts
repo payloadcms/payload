@@ -5,9 +5,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
-import { buildFindManyArgs } from './find/buildFindManyArgs.js'
 import { buildQuery } from './queries/buildQuery.js'
-import { selectDistinct } from './queries/selectDistinct.js'
 import { transform } from './transform/read/index.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
@@ -20,9 +18,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
 
-  let docToDelete: Record<string, unknown>
-
-  const { joins, selectFields, where } = buildQuery({
+  const { joins, where } = buildQuery({
     adapter: this,
     fields: collection.flattenedFields,
     locale: req?.locale,
@@ -30,37 +26,24 @@ export const deleteOne: DeleteOne = async function deleteOne(
     where: whereArg,
   })
 
-  const selectDistinctResult = await selectDistinct({
-    adapter: this,
-    db,
-    joins,
-    query: ({ query }) => query.limit(1),
-    selectFields,
-    tableName,
-    where,
-  })
+  let whereToUse = where
 
-  if (selectDistinctResult?.[0]?.id) {
-    docToDelete = await db.query[tableName].findFirst({
-      where: eq(this.tables[tableName].id, selectDistinctResult[0].id),
+  let docToDelete: any = null
+
+  if (joins?.length || returning !== false) {
+    // Difficult to support joins (through where referencing other tables) in this.deleteWhere of deleteOne. => 2 separate queries.
+    // We can look into supporting this using one single query (through a subquery) in the future, though that's difficult to do in a generic way.
+    docToDelete = await this.findOne({
+      collection: collectionSlug,
+      req,
+      select: returning === false ? { id: true } : select,
+      where: whereArg,
     })
-  } else {
-    const findManyArgs = buildFindManyArgs({
-      adapter: this,
-      depth: 0,
-      fields: collection.flattenedFields,
-      joinQuery: false,
-      select,
-      tableName,
-    })
+    if (!docToDelete) {
+      return null
+    }
 
-    findManyArgs.where = where
-
-    docToDelete = await db.query[tableName].findFirst(findManyArgs)
-  }
-
-  if (!docToDelete) {
-    return null
+    whereToUse = eq(this.tables[tableName].id, docToDelete.id)
   }
 
   const result =
@@ -74,11 +57,10 @@ export const deleteOne: DeleteOne = async function deleteOne(
           joinQuery: false,
           tableName,
         })
-
   await this.deleteWhere({
     db,
     tableName,
-    where: eq(this.tables[tableName].id, docToDelete.id),
+    where: whereToUse,
   })
 
   return result
