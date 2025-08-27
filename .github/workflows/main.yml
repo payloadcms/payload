@@ -501,6 +501,13 @@ jobs:
           if-no-files-found: ignore
           retention-days: 1
 
+      # Disabled until this is fixed: https://github.com/daun/playwright-report-summary/issues/156
+      # - uses: daun/playwright-report-summary@v3
+      #   with:
+      #     report-file: results_${{ matrix.suite }}.json
+      #     report-tag: ${{ matrix.suite }}
+      #     job-summary: true
+
   # Build listed templates with packed local packages and then runs their int and e2e tests
   build-and-test-templates:
     runs-on: ubuntu-24.04
