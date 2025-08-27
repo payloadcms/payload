@@ -125,6 +125,7 @@ export interface Config {
       workflowRetries2TasksRetries0: WorkflowWorkflowRetries2TasksRetries0;
       inlineTaskTest: WorkflowInlineTaskTest;
       failsImmediately: WorkflowFailsImmediately;
+      fastParallelTask: WorkflowFastParallelTask;
       inlineTaskTestDelayed: WorkflowInlineTaskTestDelayed;
       externalWorkflow: WorkflowExternalWorkflow;
       retriesBackoffTest: WorkflowRetriesBackoffTest;
@@ -325,6 +326,7 @@ export interface PayloadJob {
         | 'workflowRetries2TasksRetries0'
         | 'inlineTaskTest'
         | 'failsImmediately'
+        | 'fastParallelTask'
         | 'inlineTaskTestDelayed'
         | 'externalWorkflow'
         | 'retriesBackoffTest'
@@ -759,6 +761,15 @@ export interface WorkflowInlineTaskTest {
  */
 export interface WorkflowFailsImmediately {
   input?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowFastParallelTask".
+ */
+export interface WorkflowFastParallelTask {
+  input: {
+    amount: number;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
