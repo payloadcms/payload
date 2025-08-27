@@ -64,7 +64,7 @@ export const TenantField = (args: Props) => {
                 ...args.field,
                 required: true,
               }}
-              readOnly={args.readOnly || args.unique}
+              readOnly={args.readOnly || args.field.admin?.readOnly || args.unique}
             />
           </div>
         </div>
