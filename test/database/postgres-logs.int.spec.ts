@@ -92,7 +92,7 @@ describePostgres('database - postgres logs', () => {
     consoleCount.mockRestore()
   })
 
-  it('ensure deleteOne is done in single db query - returning true', async () => {
+  it('ensure deleteOne is done in two db queries - returning true', async () => {
     const post = await payload.create({
       collection: 'posts',
       data: {
