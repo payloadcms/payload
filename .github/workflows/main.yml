@@ -34,6 +34,15 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
+      # If event type is labeled event, only continue if the label is 'run-e2e-turbo'
+      - name: Check for 'run-e2e-turbo' label
+        id: check-label
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.action }}" = "labeled" ] && [ "${{ github.event.label.name }}" != "run-e2e-turbo" ]; then
+            echo "Label is not 'run-e2e-turbo', exiting"
+            exit 0
+          fi
+
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
         id: filter
