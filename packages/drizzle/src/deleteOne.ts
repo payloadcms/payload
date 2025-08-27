@@ -1,4 +1,4 @@
-import type { DeleteOne } from 'payload'
+import type { DeleteOne, SelectType } from 'payload'
 
 import { eq } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
@@ -11,8 +11,15 @@ import { getTransaction } from './utilities/getTransaction.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: DrizzleAdapter,
-  { collection: collectionSlug, req, returning, select, where: whereArg },
+  { collection: collectionSlug, req, returning, select: selectArg, where: whereArg },
 ) {
+  const select: SelectType | undefined =
+    returning === false
+      ? {
+          id: true,
+        }
+      : selectArg
+
   const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
 
@@ -28,7 +35,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   let whereToUse = where
 
-  let docToDelete: any = null
+  let docToDelete: Record<string, unknown> = null
 
   if (joins?.length || returning !== false) {
     // Difficult to support joins (through where referencing other tables) in this.deleteWhere of deleteOne. => 2 separate queries.
@@ -36,7 +43,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     docToDelete = await this.findOne({
       collection: collectionSlug,
       req,
-      select: returning === false ? { id: true } : select,
+      select,
       where: whereArg,
     })
     if (!docToDelete) {
