@@ -1017,16 +1017,20 @@ if (!_cached) {
 }
 
 export const getPayload = async (
-  options: Pick<InitOptions, 'config' | 'cron' | 'importMap'>,
+  options: Pick<InitOptions, 'config' | 'cron' | 'disableOnInit' | 'importMap'>,
 ): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayload to work.')
   }
 
+  let alreadyCachedSameConfig = false
+
   let cachedByConfig = _cached.get(options.config)
   if (!cachedByConfig) {
     cachedByConfig = new Map()
     _cached.set(options.config, cachedByConfig)
+  } else {
+    alreadyCachedSameConfig = true
   }
 
   const cacheKey = JSON.stringify({ cron: options.cron })
@@ -1040,6 +1044,12 @@ export const getPayload = async (
       ws: null,
     }
     cachedByConfig.set(cacheKey, cached)
+  }
+
+  if (alreadyCachedSameConfig) {
+    // alreadyCachedSameConfig => already called onInit once, but same config => no need to call onInit again.
+    // calling onInit again would only make sense if a different config was passed.
+    options.disableOnInit = true
   }
 
   if (cached.payload) {
