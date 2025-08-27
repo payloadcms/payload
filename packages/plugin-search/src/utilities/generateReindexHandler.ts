@@ -149,18 +149,43 @@ export const generateReindexHandler =
 
     await initTransaction(req)
 
-    for (const collection of collections) {
-      try {
-        await deleteIndexes(collection)
-        await reindexCollection(collection)
-      } catch (err) {
-        const message = t('error:unableToReindexCollection', { collection })
-        payload.logger.error({ err, msg: message })
+    // log start time to measure performance
+    const t0 = performance.now()
 
-        await killTransaction(req)
-        return Response.json({ message }, { headers, status: 500 })
-      }
+    // for (const collection of collections) {
+    //   try {
+    //     await deleteIndexes(collection)
+    //     await reindexCollection(collection)
+    //   } catch (err) {
+    //     const message = t('error:unableToReindexCollection', { collection })
+    //     payload.logger.error({ err, msg: message })
+
+    //     await killTransaction(req)
+    //     return Response.json({ message }, { headers, status: 500 })
+    //   }
+    // }
+
+    try {
+      const promises = collections.map(async (collection) => {
+        try {
+          await deleteIndexes(collection)
+          await reindexCollection(collection)
+        } catch (err) {
+          const message = t('error:unableToReindexCollection', { collection })
+          payload.logger.error({ err, msg: message })
+
+          await killTransaction(req)
+          throw new Error(message)
+        }
+      })
+
+      await Promise.all(promises)
+    } catch (msg) {
+      return Response.json({ message: msg }, { headers, status: 500 })
     }
+
+    const t1 = performance.now()
+    console.log(`Call to reindex took ${t1 - t0} milliseconds.`)
 
     const message = t('general:successfullyReindexed', {
       collections: collections.join(', '),

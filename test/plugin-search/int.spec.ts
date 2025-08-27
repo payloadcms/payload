@@ -494,20 +494,22 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   it('should reindex whole collections', async () => {
-    await payload.create({
-      collection: pagesSlug,
-      data: {
-        title: 'Test page title',
-        _status: 'published',
-      },
-    })
-    await payload.create({
-      collection: postsSlug,
-      data: {
-        title: 'Test page title',
-        _status: 'published',
-      },
-    })
+    await Promise.all([
+      payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Test page title',
+          _status: 'published',
+        },
+      }),
+      payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'Test page title',
+          _status: 'published',
+        },
+      }),
+    ])
 
     await wait(200)
 
