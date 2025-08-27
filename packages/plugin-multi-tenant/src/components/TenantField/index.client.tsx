@@ -53,7 +53,7 @@ export const TenantField = (args: Props) => {
     }
   }, [args.unique, options, selectedTenantID, setTenant, value, setEntityType, entityType])
 
-  if (options.length > 1 && !args.field.admin?.hidden) {
+  if (options.length > 1 && !args.field.admin?.hidden && !args.field.hidden) {
     return (
       <>
         <div className={baseClass}>
