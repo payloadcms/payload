@@ -35,6 +35,10 @@ export type JobStats = {
 export const getJobStatsGlobal: (config: Config) => GlobalConfig = (config) => {
   return {
     slug: jobStatsGlobalSlug,
+    admin: {
+      group: 'System',
+      hidden: true,
+    },
     fields: [
       {
         name: 'stats',

@@ -15,6 +15,16 @@ import './index.scss'
 
 const baseClass = 'logout'
 
+/**
+ * This component should **just** be the inactivity route and do nothing with logging the user out.
+ *
+ * It currently handles too much, the auth provider should just log the user out and then
+ * we could remove the useEffect in this file. So instead of the logout button
+ * being an anchor link, it should be a button that calls `logOut` in the provider.
+ *
+ * This view is still useful if cookies attempt to refresh and fail, i.e. the user
+ * is logged out due to inactivity.
+ */
 export const LogoutClient: React.FC<{
   adminRoute: string
   inactivity?: boolean
@@ -47,11 +57,10 @@ export const LogoutClient: React.FC<{
   const router = useRouter()
 
   const handleLogOut = React.useCallback(async () => {
-    await logOut()
-
     if (!inactivity && !navigatingToLoginRef.current) {
-      toast.success(t('authentication:loggedOutSuccessfully'))
       navigatingToLoginRef.current = true
+      await logOut()
+      toast.success(t('authentication:loggedOutSuccessfully'))
       startRouteTransition(() => router.push(loginRoute))
       return
     }

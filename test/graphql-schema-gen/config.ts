@@ -145,6 +145,23 @@ export default buildConfigWithDefaults({
             },
           ],
         },
+        {
+          name: 'some[text]',
+          type: 'text',
+        },
+        {
+          name: 'spaceBottom',
+          type: 'select',
+          required: false,
+          defaultValue: 'mb-0',
+          options: [
+            { label: 'None', value: 'mb-0' },
+            { label: 'Small', value: 'mb-8' },
+            { label: 'Medium', value: 'mb-16' },
+            { label: 'Large', value: 'mb-24' },
+            { label: 'Extra Large', value: 'mb-[150px]' },
+          ],
+        },
       ],
     },
     {
