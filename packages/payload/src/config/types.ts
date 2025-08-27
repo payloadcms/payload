@@ -725,6 +725,15 @@ export type ImportMapGenerators = Array<
  * These may be unstable and may change or be removed in future releases.
  */
 export type ExperimentalConfig = {
+  /**
+   * Adds `_allLocaleStatus` group field which maintains the statuses of all locales.
+   * @default false
+   */
+  allLocaleStatus?: boolean
+  /**
+   * Returns status of the current locale instead of overall document.
+   * @default false
+   */
   localizeStatus?: boolean
 }
 

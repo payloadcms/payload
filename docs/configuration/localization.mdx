@@ -150,9 +150,10 @@ export default buildConfig({
 
 The following experimental options are available related to localization:
 
-| Option               | Description                                                                                                                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`localizeStatus`** | **Boolean.** When `true`, shows document status per locale in the admin panel instead of always showing the latest overall status. Opt-in for backwards compatibility. Defaults to `false`. |
+| Option                | Description                                                                                                                                                                                              |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`localizeStatus`**  | **Boolean.** When `true`, shows document status per locale in the admin panel instead of always showing the latest overall status. Opt-in for backwards compatibility. Defaults to `false`.              |
+| **`allLocaleStatus`** | **Boolean.** When `true`, adds an `_allLocaleStatus` field that stores the status of each locale. In list views, this field is rendered as a custom cell with colored status pills. Defaults to `false`. |
 
 ## Field Localization
 
