@@ -1423,7 +1423,7 @@ describe('Queues - Payload', () => {
     })
 
     // error can be defined while hasError is true, as hasError: true is only set if the job cannot retry anymore.
-    expect(jobAfterRun.error).toBeNull()
+    expect(jobAfterRun.error).not.toBeDefined()
     expect(jobAfterRun.hasError).toBe(false)
     expect(jobAfterRun.log?.length).toBe(amount)
 
@@ -1463,7 +1463,7 @@ describe('Queues - Payload', () => {
     })
 
     // error can be defined while hasError is true, as hasError: true is only set if the job cannot retry anymore.
-    expect(jobAfterRun.error).toBeNull()
+    expect(jobAfterRun.error).not.toBeDefined()
     expect(jobAfterRun.hasError).toBe(false)
     expect(jobAfterRun.log?.length).toBe(amount)
   })
