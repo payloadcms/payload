@@ -1475,8 +1475,6 @@ describe('Queues - CLI', () => {
   })
 
   it('ensure consecutive getPayload call with cron: true will autorun jobs', async () => {
-    ;({ config } = await initPayloadInt(dirname, undefined, false))
-
     const payload = await getPayload({
       config,
     })
