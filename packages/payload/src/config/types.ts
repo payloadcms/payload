@@ -940,7 +940,9 @@ export type Config = {
      */
     timezones?: TimezonesConfig
     /**
-     * Toast Config
+     * @experimental
+     * Configure toast message behavior and appearance in the admin panel.
+     * Currently using [Sonner](https://sonner.emilkowal.ski) for toast notifications.
      */
     toast?: {
       /**
