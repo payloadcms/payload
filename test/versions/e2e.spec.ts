@@ -265,7 +265,12 @@ describe('Versions', () => {
 
       await expect(page.locator('#field-title')).toHaveValue('v2')
       await page.goto(`${savedDocURL}/api`)
-      await expect(page.locator('.query-inspector__value')).not.toHaveText(/published/i)
+      const values = page.locator('.query-inspector__value')
+      const count = await values.count()
+
+      for (let i = 0; i < count; i++) {
+        await expect(values.nth(i)).not.toHaveText(/published/i)
+      }
     })
 
     test('should show currently published version status in versions view', async () => {
