@@ -71,6 +71,7 @@ const ToolbarItem = ({
       enabled={enabled}
       Icon={item?.ChildComponent ? <item.ChildComponent /> : undefined}
       item={item}
+      itemKey={item.key}
       key={item.key}
       tooltip={title}
     >
@@ -166,6 +167,9 @@ export const ToolbarDropdown = ({
   }, [editor, editorConfigContext, group, items, maxActiveItems, onActiveChange])
 
   useEffect(() => {
+    // Run on mount in order to update states when dropdown is opened
+    void runDeprioritized(updateStates)
+
     return mergeRegister(
       editor.registerUpdateListener(async () => {
         await runDeprioritized(updateStates)
@@ -195,6 +199,7 @@ export const ToolbarDropdown = ({
         .filter(Boolean)
         .join(' ')}
       disabled={!deferredToolbarState.enabledGroup}
+      dropdownKey={groupKey}
       Icon={Icon}
       itemsContainerClassNames={[`${baseClass}-items`, ...(itemsContainerClassNames || [])]}
       key={groupKey}

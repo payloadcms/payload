@@ -600,7 +600,6 @@ export const ukTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Версій не знайдено',
     versionCount_one: '{{count}} версія знайдена',
     versionCount_other: '{{count}} версій знайдено',
-    versionCreatedOn: '{{version}} створена:',
     versionID: 'ID версії',
     versions: 'Версії',
     viewingVersion: 'Перенляд версії для {{entityLabel}} {{documentTitle}}',

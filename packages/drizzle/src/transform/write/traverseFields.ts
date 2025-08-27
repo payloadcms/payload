@@ -546,6 +546,19 @@ export const traverseFields = ({
     valuesToTransform.forEach(({ localeKey, ref, value }) => {
       let formattedValue = value
 
+      if (field.type === 'date') {
+        if (fieldName === 'updatedAt' && !formattedValue) {
+          // let the db handle this
+          formattedValue = new Date().toISOString()
+        } else {
+          if (typeof value === 'number' && !Number.isNaN(value)) {
+            formattedValue = new Date(value).toISOString()
+          } else if (value instanceof Date) {
+            formattedValue = value.toISOString()
+          }
+        }
+      }
+
       if (typeof value !== 'undefined') {
         if (value && field.type === 'point' && adapter.name !== 'sqlite') {
           formattedValue = sql`ST_GeomFromGeoJSON(${JSON.stringify(value)})`
@@ -570,19 +583,6 @@ export const traverseFields = ({
 
           formattedValue = sql.raw(`${columnName} + ${value.$inc}`)
         }
-
-        if (field.type === 'date') {
-          if (typeof value === 'number' && !Number.isNaN(value)) {
-            formattedValue = new Date(value).toISOString()
-          } else if (value instanceof Date) {
-            formattedValue = value.toISOString()
-          }
-        }
-      }
-
-      if (field.type === 'date' && fieldName === 'updatedAt') {
-        // let the db handle this
-        formattedValue = new Date().toISOString()
       }
 
       if (typeof formattedValue !== 'undefined') {

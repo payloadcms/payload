@@ -3,12 +3,14 @@ import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 import type { FormState } from 'payload'
 
 import { expect, test } from '@playwright/test'
-import { addBlock } from 'helpers/e2e/addBlock.js'
 import { assertElementStaysVisible } from 'helpers/e2e/assertElementStaysVisible.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
+import { addArrayRowAsync, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
+import { addBlock } from 'helpers/e2e/fields/blocks/index.js'
 import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { Config, Post } from './payload-types.js'
@@ -162,7 +164,7 @@ test.describe('Form State', () => {
 
     // The `array` itself SHOULD have a `lastRenderedPath` because it was rendered on initial load
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: async () => await page.locator('#field-array .array-field__add-row').click(),
+      action: async () => await addArrayRowAsync(page, 'array'),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
@@ -181,7 +183,7 @@ test.describe('Form State', () => {
     // The `array` itself SHOULD still have a `lastRenderedPath`
     // The custom text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: async () => await page.locator('#field-array .array-field__add-row').click(),
+      action: async () => await addArrayRowAsync(page, 'array'),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
@@ -203,7 +205,7 @@ test.describe('Form State', () => {
     // The custom text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
     // The custom text field in the second row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the second request
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: async () => await page.locator('#field-array .array-field__add-row').click(),
+      action: async () => await addArrayRowAsync(page, 'array'),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
@@ -220,10 +222,10 @@ test.describe('Form State', () => {
   test('should not render stale values for server components while form state is in flight', async () => {
     await page.goto(postsUrl.create)
 
-    await page.locator('#field-array .array-field__add-row').click()
+    await addArrayRowAsync(page, 'array')
     await page.locator('#field-array #array-row-0 #field-array__0__customTextField').fill('1')
 
-    await page.locator('#field-array .array-field__add-row').click()
+    await addArrayRowAsync(page, 'array')
     await page.locator('#field-array #array-row-1 #field-array__1__customTextField').fill('2')
 
     // block the next form state request from firing to ensure the field remains in stale state
@@ -235,12 +237,7 @@ test.describe('Form State', () => {
       await route.continue()
     })
 
-    // remove the first row
-    await page.locator('#field-array #array-row-0 .array-actions__button').click()
-
-    await page
-      .locator('#field-array #array-row-0 .array-actions__action.array-actions__remove')
-      .click()
+    await removeArrayRow(page, { fieldName: 'array' })
 
     await expect(
       page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
@@ -312,6 +309,114 @@ test.describe('Form State', () => {
     await saveDocAndAssert(page)
 
     await expect(computedTitleField).toHaveValue('Test Title')
+
+    // Now test array rows, as their merge logic is different
+
+    await page.locator('#field-array #array-row-0').isVisible()
+
+    await removeArrayRow(page, { fieldName: 'array' })
+
+    await page.locator('#field-array .array-row-0').isHidden()
+
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('#field-array #array-row-0')).toBeVisible()
+
+    await expect(
+      page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
+    ).toHaveValue('This is a computed value.')
+
+    await expect(
+      page.locator('#field-array #array-row-0 #field-array__0__defaultTextField'),
+    ).toHaveValue('This is a computed value.')
+  })
+
+  test('should fetch new doc permissions after save', async () => {
+    const doc = await createPost({ title: 'Initial Title' })
+    await page.goto(postsUrl.edit(doc.id))
+    const titleField = page.locator('#field-title')
+    await expect(titleField).toBeEnabled()
+
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/posts/access/${doc.id}`,
+      async () => {
+        await titleField.fill('Updated Title')
+        await wait(500)
+        await page.click('#action-save', { delay: 100 })
+      },
+      {
+        allowedNumberOfRequests: 2,
+        minimumNumberOfRequests: 2,
+        timeout: 3000,
+      },
+    )
+
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/posts/access/${doc.id}`,
+      async () => {
+        await titleField.fill('Updated Title 2')
+        await wait(500)
+        await page.click('#action-save', { delay: 100 })
+      },
+      {
+        minimumNumberOfRequests: 2,
+        allowedNumberOfRequests: 2,
+        timeout: 3000,
+      },
+    )
+  })
+
+  test('autosave - should not fetch new doc permissions on every autosave', async () => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: {
+        title: 'Initial Title',
+      },
+    })
+
+    await page.goto(autosavePostsUrl.edit(doc.id))
+    const titleField = page.locator('#field-title')
+    await expect(titleField).toBeEnabled()
+
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      async () => {
+        await titleField.fill('Updated Title')
+      },
+      {
+        allowedNumberOfRequests: 0,
+        timeout: 3000,
+      },
+    )
+
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      async () => {
+        await titleField.fill('Updated Title Again')
+      },
+      {
+        allowedNumberOfRequests: 0,
+        timeout: 3000,
+      },
+    )
+
+    // save manually and ensure the permissions are fetched again
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/${autosavePostsSlug}/access/${doc.id}`,
+      async () => {
+        await page.click('#action-save', { delay: 100 })
+      },
+      {
+        allowedNumberOfRequests: 2,
+        minimumNumberOfRequests: 2,
+        timeout: 3000,
+      },
+    )
   })
 
   test('autosave - should render computed values after autosave', async () => {
@@ -390,7 +495,7 @@ test.describe('Form State', () => {
       })
 
       // Add the first row and expect an optimistic loading state
-      await page.locator('#field-array .array-field__add-row').click()
+      await addArrayRowAsync(page, 'array')
       await expect(page.locator('#field-array #array-row-0')).toBeVisible()
 
       // use waitForSelector because the shimmer effect is not always visible
@@ -401,7 +506,7 @@ test.describe('Form State', () => {
       await page.waitForRequest((request) => request.url() === postsUrl.create)
 
       // Before the first request comes back, add the second row and expect an optimistic loading state
-      await page.locator('#field-array .array-field__add-row').click()
+      await addArrayRowAsync(page, 'array')
       await expect(page.locator('#field-array #array-row-1')).toBeVisible()
 
       // use waitForSelector because the shimmer effect is not always visible
@@ -456,7 +561,7 @@ test.describe('Form State', () => {
         page,
         postsUrl.create,
         async () => {
-          await page.locator('#field-array .array-field__add-row').click()
+          await addArrayRowAsync(page, 'array')
           await page.locator('#field-title').fill('Test 2')
 
           // use `waitForSelector` to ensure the element doesn't appear and then disappear
@@ -485,8 +590,8 @@ test.describe('Form State', () => {
         page,
         postsUrl.create,
         async () => {
-          await page.locator('#field-array .array-field__add-row').click()
-          await page.locator('#field-array .array-field__add-row').click()
+          await addArrayRowAsync(page, 'array')
+          await addArrayRowAsync(page, 'array')
 
           // use `waitForSelector` to ensure the element doesn't appear and then disappear
           // eslint-disable-next-line playwright/no-wait-for-selector

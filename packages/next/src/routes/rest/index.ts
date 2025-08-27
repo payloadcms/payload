@@ -9,7 +9,7 @@ const handlerBuilder =
   async (
     request: Request,
     args: {
-      params: Promise<{ slug: string[] }>
+      params: Promise<{ slug?: string[] }>
     },
   ): Promise<Response> => {
     const awaitedConfig = await config

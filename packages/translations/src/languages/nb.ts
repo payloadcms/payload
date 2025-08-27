@@ -602,7 +602,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Ingen versjoner funnet',
     versionCount_one: '{{count}} versjon funnet',
     versionCount_other: '{{count}} versjoner funnet',
-    versionCreatedOn: '{{version}} opprettet:',
     versionID: 'Versjons-ID',
     versions: 'Versjoner',
     viewingVersion: 'Viser versjon for {{entityLabel}} {{documentTitle}}',

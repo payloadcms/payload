@@ -18,7 +18,6 @@ export const AutosavePostsCollection: CollectionConfig = {
       hooks: {
         beforeChange: [({ data }) => data?.title],
       },
-      label: 'Computed Title',
     },
   ],
   versions: {

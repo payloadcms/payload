@@ -25,6 +25,7 @@
 import type { BrowserContext, Dialog, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { postsCollectionSlug } from 'admin/slugs.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -37,6 +38,7 @@ import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
+  openDocDrawer,
   saveDocAndAssert,
   // throttleTest,
 } from '../helpers.js'
@@ -1315,6 +1317,42 @@ describe('Versions', () => {
       await expect(computedTitleField).toHaveValue('Initial')
     })
 
+    test('- with autosave - does not override local changes to form state after autosave runs within document drawer', async () => {
+      await payload.create({
+        collection: autosaveCollectionSlug,
+        data: {
+          title: 'This is a test',
+          description: 'some description',
+        },
+      })
+
+      const url = new AdminUrlUtil(serverURL, postsCollectionSlug)
+      await page.goto(url.create)
+
+      await page.locator('#field-relationToAutosaves .rs__control').click()
+      await page.locator('.rs__option:has-text("This is a test")').click()
+
+      await openDocDrawer(
+        page,
+        '#field-relationToAutosaves .relationship--single-value__drawer-toggler',
+      )
+
+      const titleField = page.locator('#field-title')
+
+      await titleField.fill('')
+
+      // press slower than the autosave interval, but not faster than the response and processing
+      await titleField.pressSequentially('Initial', {
+        delay: 150,
+      })
+
+      const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
+
+      await waitForAutoSaveToRunAndComplete(drawer)
+
+      await expect(titleField).toHaveValue('Initial')
+    })
+
     test('- with autosave - does not display success toast after autosave complete', async () => {
       const url = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       await page.goto(url.create)
@@ -1626,6 +1664,19 @@ describe('Versions', () => {
       )
       await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
         'textInUnnamedTab2InBlock2',
+      )
+    })
+
+    test('correctly renders diff for text within rows within unnamed tabs within block fields', async () => {
+      await navigateToDiffVersionView()
+
+      const textInBlock = page.locator('[data-field-path="blocks.2.textInRowInUnnamedTab2InBlock"]')
+
+      await expect(textInBlock.locator('.html-diff__diff-old')).toHaveText(
+        'textInRowInUnnamedTab2InBlock',
+      )
+      await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
+        'textInRowInUnnamedTab2InBlock2',
       )
     })
 

@@ -76,9 +76,23 @@ export const PostsCollection: CollectionConfig = {
       name: 'array',
       type: 'array',
       admin: {
+        description: 'If there is no value, a default row will be added by a beforeChange hook',
         components: {
           RowLabel: './collections/Posts/ArrayRowLabel.js#ArrayRowLabel',
         },
+      },
+      hooks: {
+        beforeChange: [
+          ({ value }) =>
+            !value?.length
+              ? [
+                  {
+                    defaultTextField: 'This is a computed value.',
+                    customTextField: 'This is a computed value.',
+                  },
+                ]
+              : value,
+        ],
       },
       fields: [
         {

@@ -4,9 +4,10 @@ import type { CollectionSlug } from 'payload'
 import { expect, test } from '@playwright/test'
 import { assertToastErrors } from 'helpers/assertToastErrors.js'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import { openCreateDocDrawer } from 'helpers/e2e/fields/relationship/openCreateDocDrawer.js'
 import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
-import { openCreateDocDrawer, openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
+import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -567,7 +568,9 @@ describe('Relationship Field', () => {
     ).toHaveCount(1)
     await drawerField.fill('Updated document')
     await saveButton.click()
-    await expect(page.locator('.payload-toast-container')).toContainText('Updated successfully')
+    await expect(page.locator('.payload-toast-container').first()).toContainText(
+      'Updated successfully',
+    )
     await page.locator('.doc-drawer__header-close').click()
     await expect(
       page.locator('#field-relationshipHasMany .value-container .rs__multi-value'),

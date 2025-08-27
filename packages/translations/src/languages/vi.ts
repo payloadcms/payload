@@ -597,7 +597,6 @@ export const viTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Không có phiên bản nào được tìm thấy',
     versionCount_one: '{{count}} phiên bản được tìm thấy',
     versionCount_other: 'Đã tìm thấy {{count}} phiên bản',
-    versionCreatedOn: 'Phiên bản {{version}} được tạo vào lúc:',
     versionID: 'ID của phiên bản',
     versions: 'Danh sách phiên bản',
     viewingVersion: 'Xem phiên bản của {{entityLabel}} {{documentTitle}}',

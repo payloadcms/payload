@@ -601,7 +601,6 @@ export const daTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Ingen versioner fundet',
     versionCount_one: '{{count}} version fundet',
     versionCount_other: '{{count}} version fundet',
-    versionCreatedOn: '{{version}} oprettet den:',
     versionID: 'Versions-ID',
     versions: 'Versioner',
     viewingVersion: 'Se versionen for {{entityLabel}} {{documentTitle}}',
