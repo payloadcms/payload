@@ -625,6 +625,57 @@ export class BasePayload {
     [slug: string]: any // TODO: Type this
   } = {}
 
+  async _initializeCrons() {
+    if (this.config.jobs.enabled && this.config.jobs.autoRun && !isNextBuild()) {
+      const DEFAULT_CRON = '* * * * *'
+      const DEFAULT_LIMIT = 10
+
+      const cronJobs =
+        typeof this.config.jobs.autoRun === 'function'
+          ? await this.config.jobs.autoRun(this)
+          : this.config.jobs.autoRun
+
+      await Promise.all(
+        cronJobs.map((cronConfig) => {
+          const jobAutorunCron = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+            if (
+              _internal_jobSystemGlobals.shouldAutoSchedule &&
+              !cronConfig.disableScheduling &&
+              this.config.jobs.scheduling
+            ) {
+              await this.jobs.handleSchedules({
+                allQueues: cronConfig.allQueues,
+                queue: cronConfig.queue,
+              })
+            }
+
+            if (!_internal_jobSystemGlobals.shouldAutoRun) {
+              return
+            }
+
+            if (typeof this.config.jobs.shouldAutoRun === 'function') {
+              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+
+              if (!shouldAutoRun) {
+                jobAutorunCron.stop()
+                return
+              }
+            }
+
+            await this.jobs.run({
+              allQueues: cronConfig.allQueues,
+              limit: cronConfig.limit ?? DEFAULT_LIMIT,
+              queue: cronConfig.queue,
+              silent: cronConfig.silent,
+            })
+          })
+
+          this.crons.push(jobAutorunCron)
+        }),
+      )
+    }
+  }
+
   async bin({
     args,
     cwd,
@@ -855,53 +906,8 @@ export class BasePayload {
       throw error
     }
 
-    if (this.config.jobs.enabled && this.config.jobs.autoRun && !isNextBuild() && options.cron) {
-      const DEFAULT_CRON = '* * * * *'
-      const DEFAULT_LIMIT = 10
-
-      const cronJobs =
-        typeof this.config.jobs.autoRun === 'function'
-          ? await this.config.jobs.autoRun(this)
-          : this.config.jobs.autoRun
-
-      await Promise.all(
-        cronJobs.map((cronConfig) => {
-          const jobAutorunCron = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
-            if (
-              _internal_jobSystemGlobals.shouldAutoSchedule &&
-              !cronConfig.disableScheduling &&
-              this.config.jobs.scheduling
-            ) {
-              await this.jobs.handleSchedules({
-                allQueues: cronConfig.allQueues,
-                queue: cronConfig.queue,
-              })
-            }
-
-            if (!_internal_jobSystemGlobals.shouldAutoRun) {
-              return
-            }
-
-            if (typeof this.config.jobs.shouldAutoRun === 'function') {
-              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
-
-              if (!shouldAutoRun) {
-                jobAutorunCron.stop()
-                return
-              }
-            }
-
-            await this.jobs.run({
-              allQueues: cronConfig.allQueues,
-              limit: cronConfig.limit ?? DEFAULT_LIMIT,
-              queue: cronConfig.queue,
-              silent: cronConfig.silent,
-            })
-          })
-
-          this.crons.push(jobAutorunCron)
-        }),
-      )
+    if (options.cron) {
+      await this._initializeCrons()
     }
 
     return this
@@ -1001,15 +1007,13 @@ export const reload = async (
 
 let _cached: Map<
   string,
-  Map<
-    string,
-    {
-      payload: null | Payload
-      promise: null | Promise<Payload>
-      reload: boolean | Promise<void>
-      ws: null | WebSocket
-    }
-  >
+  {
+    initializedCrons: boolean
+    payload: null | Payload
+    promise: null | Promise<Payload>
+    reload: boolean | Promise<void>
+    ws: null | WebSocket
+  }
 > = (global as any)._payload
 
 if (!_cached) {
@@ -1033,25 +1037,18 @@ export const getPayload = async (
 
   let alreadyCachedSameConfig = false
 
-  let cachedByConfig = _cached.get(options.key ?? 'default')
-  if (!cachedByConfig) {
-    cachedByConfig = new Map()
-    _cached.set(options.key ?? 'default', cachedByConfig)
-  } else {
-    alreadyCachedSameConfig = true
-  }
-
-  const cacheKey = JSON.stringify({ cron: options.cron })
-
-  let cached = cachedByConfig?.get(cacheKey)
+  let cached = _cached.get(options.key ?? 'default')
   if (!cached) {
     cached = {
+      initializedCrons: Boolean(options.cron),
       payload: null,
       promise: null,
       reload: false,
       ws: null,
     }
-    cachedByConfig.set(cacheKey, cached)
+    _cached.set(options.key ?? 'default', cached)
+  } else {
+    alreadyCachedSameConfig = true
   }
 
   if (alreadyCachedSameConfig) {
@@ -1061,6 +1058,11 @@ export const getPayload = async (
   }
 
   if (cached.payload) {
+    if (options.cron && !cached.initializedCrons) {
+      cached.initializedCrons = true
+      await cached.payload._initializeCrons()
+    }
+
     if (cached.reload === true) {
       let resolve!: () => void
 
