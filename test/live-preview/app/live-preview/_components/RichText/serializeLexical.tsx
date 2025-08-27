@@ -1,12 +1,12 @@
-import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
 import React from 'react'
 
 import { CMSLink } from '../Link/index.js'
 import { Media } from '../Media/index.js'
-
+import { MediaBlock } from '../../_blocks/MediaBlock/index.js'
 const serializer = (
-  content?: SerializedEditorState['root']['children'],
+  content?: DefaultTypedEditorState['root']['children'],
   renderUploadFilenameOnly?: boolean,
 ): React.ReactNode | React.ReactNode[] =>
   content?.map((node, i) => {
@@ -79,11 +79,17 @@ const serializer = (
         }
 
         return <Media key={i} resource={node?.value} />
+
+      case 'block':
+        switch (node.fields.blockType) {
+          case 'mediaBlock':
+            return <MediaBlock key={i} {...node.fields} />
+        }
     }
   })
 
 const serializeLexical = (
-  content?: SerializedEditorState,
+  content?: DefaultTypedEditorState,
   renderUploadFilenameOnly?: boolean,
 ): React.ReactNode | React.ReactNode[] => {
   return serializer(content?.root?.children, renderUploadFilenameOnly)
