@@ -43,6 +43,7 @@ describe('Config', () => {
 
     it('should allow multiple getPayload calls using different configs in same process', async () => {
       const payload2 = await getPayload({
+        key: 'payload2',
         config: await buildConfigWithDefaults({
           collections: [
             {
@@ -65,6 +66,7 @@ describe('Config', () => {
       expect(result2.title2).toBe('Payload 2')
 
       const payload3 = await getPayload({
+        key: 'payload3',
         config: await buildConfigWithDefaults({
           collections: [
             {

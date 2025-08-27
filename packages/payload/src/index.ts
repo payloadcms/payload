@@ -999,8 +999,8 @@ export const reload = async (
   ;(global as any)._payload_doNotCacheClientSchemaMap = true
 }
 
-let _cached: WeakMap<
-  object,
+let _cached: Map<
+  string,
   Map<
     string,
     {
@@ -1013,11 +1013,19 @@ let _cached: WeakMap<
 > = (global as any)._payload
 
 if (!_cached) {
-  _cached = (global as any)._payload = new WeakMap()
+  _cached = (global as any)._payload = new Map()
 }
 
 export const getPayload = async (
-  options: Pick<InitOptions, 'config' | 'cron' | 'disableOnInit' | 'importMap'>,
+  options: {
+    /**
+     * A unique key to identify the payload instance. You can pass your own key if you want to cache this payload instance separately.
+     * This is useful if you pass a different payload config for each instance.
+     *
+     * @default 'default'
+     */
+    key?: string
+  } & Pick<InitOptions, 'config' | 'cron' | 'disableOnInit' | 'importMap'>,
 ): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayload to work.')
@@ -1025,10 +1033,10 @@ export const getPayload = async (
 
   let alreadyCachedSameConfig = false
 
-  let cachedByConfig = _cached.get(options.config)
+  let cachedByConfig = _cached.get(options.key ?? 'default')
   if (!cachedByConfig) {
     cachedByConfig = new Map()
-    _cached.set(options.config, cachedByConfig)
+    _cached.set(options.key ?? 'default', cachedByConfig)
   } else {
     alreadyCachedSameConfig = true
   }
