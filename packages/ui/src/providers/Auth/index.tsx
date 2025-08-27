@@ -179,15 +179,17 @@ export function AuthProvider({
           return json.user
         }
 
-        setNewUser(null)
-        redirectToInactivityRoute()
+        if (user) {
+          setNewUser(null)
+          redirectToInactivityRoute()
+        }
         return null
       } catch (e) {
         toast.error(`Refreshing token failed: ${e.message}`)
         return null
       }
     },
-    [apiRoute, i18n.language, redirectToInactivityRoute, serverURL, setNewUser, userSlug],
+    [apiRoute, i18n.language, redirectToInactivityRoute, serverURL, setNewUser, userSlug, user],
   )
 
   const logOut = useCallback(async () => {
