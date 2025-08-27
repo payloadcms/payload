@@ -6,7 +6,7 @@ import {
   type Payload,
   type SanitizedConfig,
 } from 'payload'
-import { migrateCLI } from 'payload'
+import { getPayload, migrateCLI } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
@@ -17,15 +17,15 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { clearAndSeedEverything } from './seed.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
-let payload: Payload
-let restClient: NextRESTClient
-let token: string
-
 const { email, password } = devUser
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('Queues', () => {
+  let payload: Payload
+  let restClient: NextRESTClient
+  let token: string
+
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(dirname))
@@ -1056,7 +1056,7 @@ describe('Queues', () => {
   it('ensure payload.jobs.runByID works and only runs the specified job', async () => {
     payload.config.jobs.deleteJobOnComplete = false
 
-    let lastJobID: null | string = null
+    let lastJobID: null | number | string = null
     for (let i = 0; i < 3; i++) {
       const job = await payload.jobs.queue({
         task: 'CreateSimple',
@@ -1100,7 +1100,7 @@ describe('Queues', () => {
   it('ensure where query for id in payload.jobs.run works and only runs the specified job', async () => {
     payload.config.jobs.deleteJobOnComplete = false
 
-    let lastJobID: null | string = null
+    let lastJobID: null | number | string = null
     for (let i = 0; i < 3; i++) {
       const job = await payload.jobs.queue({
         task: 'CreateSimple',
@@ -1473,6 +1473,56 @@ describe('Queues - CLI', () => {
   beforeAll(async () => {
     ;({ config } = await initPayloadInt(dirname, undefined, false))
   })
+
+  it('ensure consecutive getPayload call with cron: true will autorun jobs', async () => {
+    ;({ config } = await initPayloadInt(dirname, undefined, false))
+
+    const payload = await getPayload({
+      config,
+    })
+
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTest',
+      queue: 'autorunSecond',
+      input: {
+        message: 'hello!',
+      },
+    })
+
+    process.env.PAYLOAD_DROP_DATABASE = 'false'
+
+    // Second instance of payload with the only purpose of running cron jobs
+    const _payload2 = await getPayload({
+      config,
+      cron: true,
+    })
+
+    await waitUntilAutorunIsDone({
+      payload,
+      queue: 'autorunSecond',
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples?.docs?.[0]?.title).toBe('hello!')
+
+    // Shut down safely:
+    // Ensure no new crons are scheduled
+    _internal_jobSystemGlobals.shouldAutoRun = false
+    _internal_jobSystemGlobals.shouldAutoSchedule = false
+    // Wait 3 seconds to ensure all currently-running crons are done. If we shut down the db while a function is running, it can cause issues
+    // Cron function runs may persist after a test has finished
+    await wait(3000)
+    // Now we can destroy the payload instance
+    await _payload2.destroy()
+    await payload.destroy()
+    _internal_resetJobSystemGlobals()
+  })
+
   it('can run migrate CLI without jobs attempting to run', async () => {
     await migrateCLI({
       config,
