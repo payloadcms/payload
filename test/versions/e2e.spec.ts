@@ -243,6 +243,38 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('v1')
     })
 
+    test('should restore version as draft', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('v1')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await page.locator('#field-title').fill('v2')
+      await page.locator('#field-description').fill('restore me as draft')
+      await saveDocAndAssert(page)
+      await page.locator('#field-title').fill('v3')
+      await page.locator('#field-description').fill('published')
+      await saveDocAndAssert(page)
+
+      const savedDocURL = page.url()
+      await page.goto(`${savedDocURL}/versions`)
+      const row2 = page.locator('tbody .row-2')
+      const versionID = await row2.locator('.cell-id').textContent()
+      await page.goto(`${savedDocURL}/versions/${versionID}`)
+      await expect(page.locator('.render-field-diffs')).toBeVisible()
+      await page.locator('.restore-version .popup__trigger-wrap button').click()
+      await page.getByRole('button', { name: 'Restore as draft' }).click()
+      await page.locator('button:has-text("Confirm")').click()
+      await page.waitForURL(savedDocURL)
+
+      await expect(page.locator('#field-title')).toHaveValue('v2')
+      await page.goto(`${savedDocURL}/api`)
+      const values = page.locator('.query-inspector__value')
+      const count = await values.count()
+
+      for (let i = 0; i < count; i++) {
+        await expect(values.nth(i)).not.toHaveText(/published/i)
+      }
+    })
+
     test('should show currently published version status in versions view', async () => {
       const publishedDoc = await payload.create({
         collection: draftCollectionSlug,
