@@ -959,7 +959,7 @@ export type Config = {
        * The maximum number of toasts that can be visible on the screen at once.
        * @default 5
        */
-      visibleToasts?: number
+      limit?: number
     }
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string

@@ -12,7 +12,7 @@ import { Warning } from './icons/Warning.js'
 export const ToastContainer: React.FC<{
   config: ClientConfig
 }> = ({ config }) => {
-  const { admin: { toast: { duration, expand, visibleToasts } = {} } = {} } = config
+  const { admin: { toast: { duration, expand, limit } = {} } = {} } = config
 
   return (
     <Toaster
@@ -44,7 +44,7 @@ export const ToastContainer: React.FC<{
         },
         unstyled: true,
       }}
-      visibleToasts={visibleToasts ?? 5}
+      visibleToasts={limit ?? 5}
     />
   )
 }
