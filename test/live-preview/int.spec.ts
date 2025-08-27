@@ -1,11 +1,6 @@
 import type { FieldSchemaJSON, Payload } from 'payload'
 
-import {
-  handleMessage,
-  type LivePreviewMessageEvent,
-  mergeData,
-  traverseRichText,
-} from '@payloadcms/live-preview'
+import { handleMessage, type LivePreviewMessageEvent, mergeData } from '@payloadcms/live-preview'
 import path from 'path'
 import { createClientConfig, getFileByPath, getLocalI18n } from 'payload'
 import { fieldSchemaToJSON } from 'payload/shared'
@@ -15,7 +10,7 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
 import config from './config.js'
-import { postsSlug, tenantsSlug } from './shared.js'
+import { pagesSlug, postsSlug, tenantsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -1160,8 +1155,18 @@ describe('Collections - Live Preview', () => {
       },
     })
 
+    const page = await payload.create({
+      collection: pagesSlug,
+      data: {
+        title: 'Test Page',
+        hero: { type: 'none' },
+        slug: 'testpage',
+      },
+      locale: 'en',
+    })
+
     const initialData: Partial<Page> = {
-      title: 'Test Page',
+      ...page,
       relationToLocalized: post.id,
     }
 
@@ -1178,89 +1183,11 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
       requestHandler,
       locale: 'es',
+      collectionSlug: pagesSlug,
     })
 
     expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.relationToLocalized).toHaveProperty('localizedTitle', 'Test Post Spanish')
-  })
-
-  it('— rich text - merges text changes', async () => {
-    // Add a relationship
-    const merge1 = await traverseRichText({
-      incomingData: [
-        {
-          type: 'paragraph',
-          children: [
-            {
-              text: 'Paragraph 1',
-            },
-          ],
-        },
-      ],
-      result: [],
-      populationsByCollection: {},
-    })
-
-    expect(merge1).toHaveLength(1)
-    expect(merge1[0].children[0].text).toEqual('Paragraph 1')
-
-    // Update the rich text
-    const merge2 = await traverseRichText({
-      incomingData: [
-        {
-          type: 'paragraph',
-          children: [
-            {
-              text: 'Paragraph 1 (Updated)',
-            },
-          ],
-        },
-      ],
-      populationsByCollection: {},
-      result: merge1,
-    })
-
-    expect(merge2).toHaveLength(1)
-    expect(merge2[0].children[0].text).toEqual('Paragraph 1 (Updated)')
-  })
-
-  it('— rich text - can reset heading type', async () => {
-    // Add a heading with an H1 type
-    const merge1 = await traverseRichText({
-      incomingData: [
-        {
-          type: 'h1',
-          children: [
-            {
-              text: 'Heading',
-            },
-          ],
-        },
-      ],
-      populationsByCollection: {},
-      result: [],
-    })
-
-    expect(merge1).toHaveLength(1)
-    expect(merge1[0].type).toEqual('h1')
-
-    // Update the rich text to remove the heading type
-    const merge2 = await traverseRichText({
-      incomingData: [
-        {
-          children: [
-            {
-              text: 'Heading',
-            },
-          ],
-        },
-      ],
-      populationsByCollection: {},
-      result: merge1,
-    })
-
-    expect(merge2).toHaveLength(1)
-    expect(merge2[0].type).toBeUndefined()
   })
 
   it('— blocks - adds, reorders, and removes blocks', async () => {

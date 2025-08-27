@@ -41,7 +41,6 @@ export const mergeData = async <T extends Record<string, any>>(args: {
     _numberOfRequests?: number
   } & T
 > => {
-  console.log('ARGS', args)
   const {
     apiRoute,
     collectionSlug,
