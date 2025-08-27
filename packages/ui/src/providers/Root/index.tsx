@@ -139,7 +139,11 @@ export const RootProvider: React.FC<Props> = ({
           </RouteCache>
         </RouteTransitionProvider>
       </ServerFunctionsProvider>
-      <ToastContainer />
+      <ToastContainer
+        duration={config.admin.toast?.duration}
+        expand={config.admin.toast?.expand}
+        visibleToasts={config.admin.toast?.visibleToasts}
+      />
     </ClickOutsideProvider>
   )
 }

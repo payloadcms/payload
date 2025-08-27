@@ -1,28 +1,25 @@
 'use client'
+import type { Config } from 'payload'
+
 import React from 'react'
 import { Toaster } from 'sonner'
 
-import { useConfig } from '../Config/index.js'
 import { Error } from './icons/Error.js'
 import { Info } from './icons/Info.js'
 import { Success } from './icons/Success.js'
 import { Warning } from './icons/Warning.js'
 
-export const ToastContainer: React.FC = () => {
-  const {
-    config: {
-      admin: { toast },
-    },
-  } = useConfig()
-
+export const ToastContainer: React.FC<
+  Pick<Config['admin']['toast'], 'duration' | 'expand' | 'visibleToasts'>
+> = ({ duration, expand, visibleToasts }) => {
   return (
     <Toaster
       className="payload-toast-container"
       closeButton
       // @ts-expect-error
       dir="undefined"
-      duration={toast?.duration ?? 4000}
-      expand={toast?.expand ?? false}
+      duration={duration ?? 4000}
+      expand={expand ?? false}
       gap={8}
       icons={{
         error: <Error />,
@@ -45,7 +42,7 @@ export const ToastContainer: React.FC = () => {
         },
         unstyled: true,
       }}
-      visibleToasts={toast?.visibleToasts ?? 5}
+      visibleToasts={visibleToasts ?? 5}
     />
   )
 }
