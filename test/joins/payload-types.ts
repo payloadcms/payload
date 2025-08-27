@@ -91,6 +91,9 @@ export interface Config {
     folders: Folder;
     'example-pages': ExamplePage;
     'example-posts': ExamplePost;
+    folderPoly1: FolderPoly1;
+    folderPoly2: FolderPoly2;
+    'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -106,6 +109,7 @@ export interface Config {
       'group.relatedPosts': 'posts';
       'group.camelCasePosts': 'posts';
       arrayPosts: 'posts';
+      arrayHasManyPosts: 'posts';
       localizedArrayPosts: 'posts';
       blocksPosts: 'posts';
       polymorphic: 'posts';
@@ -149,6 +153,9 @@ export interface Config {
     folders: {
       children: 'folders' | 'example-pages' | 'example-posts';
     };
+    'payload-folders': {
+      documentsAndFolders: 'payload-folders' | 'folderPoly1' | 'folderPoly2';
+    };
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
@@ -175,6 +182,9 @@ export interface Config {
     folders: FoldersSelect<false> | FoldersSelect<true>;
     'example-pages': ExamplePagesSelect<false> | ExamplePagesSelect<true>;
     'example-posts': ExamplePostsSelect<false> | ExamplePostsSelect<true>;
+    folderPoly1: FolderPoly1Select<false> | FolderPoly1Select<true>;
+    folderPoly2: FolderPoly2Select<false> | FolderPoly2Select<true>;
+    'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -231,6 +241,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -300,6 +317,12 @@ export interface Post {
   array?:
     | {
         category?: (string | null) | Category;
+        id?: string | null;
+      }[]
+    | null;
+  arrayHasMany?:
+    | {
+        category?: (string | Category)[] | null;
         id?: string | null;
       }[]
     | null;
@@ -392,6 +415,11 @@ export interface Category {
     };
   };
   arrayPosts?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  arrayHasManyPosts?: {
     docs?: (string | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
@@ -491,6 +519,7 @@ export interface Version {
  */
 export interface CategoriesVersion {
   id: string;
+  title?: string | null;
   relatedVersions?: {
     docs?: (string | Version)[];
     hasNextPage?: boolean;
@@ -741,6 +770,58 @@ export interface ExamplePost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly1".
+ */
+export interface FolderPoly1 {
+  id: string;
+  folderPoly1Title?: string | null;
+  folder?: (string | null) | FolderInterface;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders".
+ */
+export interface FolderInterface {
+  id: string;
+  name: string;
+  folder?: (string | null) | FolderInterface;
+  documentsAndFolders?: {
+    docs?: (
+      | {
+          relationTo?: 'payload-folders';
+          value: string | FolderInterface;
+        }
+      | {
+          relationTo?: 'folderPoly1';
+          value: string | FolderPoly1;
+        }
+      | {
+          relationTo?: 'folderPoly2';
+          value: string | FolderPoly2;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  folderType?: ('folderPoly1' | 'folderPoly2')[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly2".
+ */
+export interface FolderPoly2 {
+  id: string;
+  folderPoly2Title?: string | null;
+  folder?: (string | null) | FolderInterface;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -841,6 +922,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'example-posts';
         value: string | ExamplePost;
+      } | null)
+    | ({
+        relationTo: 'folderPoly1';
+        value: string | FolderPoly1;
+      } | null)
+    | ({
+        relationTo: 'folderPoly2';
+        value: string | FolderPoly2;
+      } | null)
+    | ({
+        relationTo: 'payload-folders';
+        value: string | FolderInterface;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -899,6 +992,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -925,6 +1025,12 @@ export interface PostsSelect<T extends boolean = true> {
         camelCaseCategory?: T;
       };
   array?:
+    | T
+    | {
+        category?: T;
+        id?: T;
+      };
+  arrayHasMany?:
     | T
     | {
         category?: T;
@@ -977,6 +1083,7 @@ export interface CategoriesSelect<T extends boolean = true> {
         camelCasePosts?: T;
       };
   arrayPosts?: T;
+  arrayHasManyPosts?: T;
   localizedArrayPosts?: T;
   blocksPosts?: T;
   polymorphic?: T;
@@ -1037,6 +1144,7 @@ export interface VersionsSelect<T extends boolean = true> {
  * via the `definition` "categories-versions_select".
  */
 export interface CategoriesVersionsSelect<T extends boolean = true> {
+  title?: T;
   relatedVersions?: T;
   relatedVersionsMany?: T;
   updatedAt?: T;
@@ -1213,6 +1321,38 @@ export interface ExamplePostsSelect<T extends boolean = true> {
   folder?: T;
   title?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly1_select".
+ */
+export interface FolderPoly1Select<T extends boolean = true> {
+  folderPoly1Title?: T;
+  folder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly2_select".
+ */
+export interface FolderPoly2Select<T extends boolean = true> {
+  folderPoly2Title?: T;
+  folder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders_select".
+ */
+export interface PayloadFoldersSelect<T extends boolean = true> {
+  name?: T;
+  folder?: T;
+  documentsAndFolders?: T;
+  folderType?: T;
   updatedAt?: T;
   createdAt?: T;
 }

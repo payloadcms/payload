@@ -67,7 +67,7 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     })
   }
 
-  let versionAccessResult
+  let versionAccessResult: undefined | Where
 
   if (hasWhereAccessResult(accessResult)) {
     versionAccessResult = appendVersionToQueryKey(accessResult)
@@ -82,7 +82,7 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     req,
     select: getQueryDraftsSelect({ select }),
     sort: '-updatedAt',
-    where: combineQueries(queryToBuild, versionAccessResult),
+    where: combineQueries(queryToBuild, versionAccessResult!),
   }
 
   let versionDocs
@@ -102,12 +102,13 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
 
   // Patch globalType onto version doc
   if (entityType === 'global' && 'globalType' in doc) {
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     draft.version.globalType = doc.globalType
   }
 
   // handle when .version wasn't selected due to projection
   if (!draft.version) {
-    draft.version = {}
+    draft.version = {} as T
   }
 
   // Disregard all other draft content at this point,

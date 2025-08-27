@@ -925,11 +925,16 @@ export { HeadingFeature, type HeadingFeatureProps } from './features/heading/ser
 export { HorizontalRuleFeature } from './features/horizontalRule/server/index.js'
 
 export { IndentFeature } from './features/indent/server/index.js'
-export { AutoLinkNode } from './features/link/nodes/AutoLinkNode.js'
-export { LinkNode } from './features/link/nodes/LinkNode.js'
+export {
+  $createAutoLinkNode,
+  $isAutoLinkNode,
+  AutoLinkNode,
+} from './features/link/nodes/AutoLinkNode.js'
+export { $createLinkNode, $isLinkNode, LinkNode } from './features/link/nodes/LinkNode.js'
 
 export type { LinkFields } from './features/link/nodes/types.js'
 export { LinkFeature, type LinkFeatureServerProps } from './features/link/server/index.js'
+
 export { ChecklistFeature } from './features/lists/checklist/server/index.js'
 export { OrderedListFeature } from './features/lists/orderedList/server/index.js'
 

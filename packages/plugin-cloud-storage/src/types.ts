@@ -58,6 +58,7 @@ export type StaticHandler = (
   req: PayloadRequest,
   args: {
     doc?: TypeWithID
+    headers?: Headers
     params: { clientUploadContext?: unknown; collection: string; filename: string }
   },
 ) => Promise<Response> | Response
@@ -80,6 +81,14 @@ export interface GeneratedAdapter {
 }
 
 export type Adapter = (args: { collection: CollectionConfig; prefix?: string }) => GeneratedAdapter
+
+export type AllowList = Array<{
+  hostname: string
+  pathname?: string
+  port?: string
+  protocol?: 'http' | 'https'
+  search?: string
+}>
 
 export type GenerateFileURL = (args: {
   collection: CollectionConfig

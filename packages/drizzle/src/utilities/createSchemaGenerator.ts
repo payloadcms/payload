@@ -296,12 +296,13 @@ declare module '${this.packageName}' {
 
     if (prettify) {
       try {
-        const prettier = await import('prettier')
+        const prettier = await eval('import("prettier")')
         const configPath = await prettier.resolveConfigFile()
         const config = configPath ? await prettier.resolveConfig(configPath) : {}
         code = await prettier.format(code, { ...config, parser: 'typescript' })
-        // eslint-disable-next-line no-empty
-      } catch {}
+      } catch {
+        /* empty */
+      }
     }
 
     await writeFile(outputFile, code, 'utf-8')

@@ -1,9 +1,12 @@
 import type { FormState, UploadEdits } from 'payload'
 
+import { v4 as uuidv4 } from 'uuid'
+
 export type State = {
   activeIndex: number
   forms: {
     errorCount: number
+    formID: string
     formState: FormState
     uploadEdits?: UploadEdits
   }[]
@@ -49,6 +52,7 @@ export function formsManagementReducer(state: State, action: Action): State {
       for (let i = 0; i < action.files.length; i++) {
         newForms[i] = {
           errorCount: 0,
+          formID: crypto.randomUUID ? crypto.randomUUID() : uuidv4(),
           formState: {
             ...(action.initialState || {}),
             file: {

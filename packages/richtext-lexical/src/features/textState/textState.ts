@@ -53,24 +53,31 @@ export function StatePlugin() {
           if (!node || !dom) {
             continue
           }
-          // stateKey could be color for example
-          stateMap.forEach((stateEntry, _stateKey) => {
-            // stateValue could be bg-red for example
+
+          const mergedStyles: Record<string, string> = Object.create(null)
+          // Examples:
+          // stateKey: 'color'
+          // stateValue: 'bg-red'
+          stateMap.forEach((stateEntry, stateKey) => {
             const stateValue = $getState(node, stateEntry.stateConfig)
             if (!stateValue) {
-              delete dom.dataset[_stateKey]
-              dom.style.cssText = ''
+              // clear the previous dataset value for this key
+              delete dom.dataset[stateKey]
               return
-            }
-            dom.dataset[_stateKey] = stateValue
+            } // skip - nothing else to do
+
+            dom.dataset[stateKey] = stateValue
+
             const css = stateEntry.stateValues[stateValue]?.css
-            if (!css) {
-              return
+            if (css) {
+              // merge existing styles with the new ones
+              Object.assign(mergedStyles, css)
             }
-            Object.entries(css).forEach(([key, value]) => {
-              dom.style.setProperty(key, value)
-            })
           })
+
+          // wipe previous inline styles once, then set the merged ones
+          dom.style.cssText = ''
+          Object.assign(dom.style, mergedStyles)
         }
       })
     })

@@ -6,6 +6,8 @@
     "source.fixAll.eslint": "explicit"
   },
   "editor.formatOnSaveMode": "file",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
   "eslint.rules.customizations": [
     // Silence some warnings that will get auto-fixed
     { "rule": "perfectionist/*", "severity": "off", "fixable": true },

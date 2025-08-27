@@ -111,16 +111,19 @@ export const promise = async ({
     parentSchemaPath,
   })
 
+  const fieldAffectsDataResult = fieldAffectsData(field)
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
+  let removedFieldValue = false
 
   if (
-    fieldAffectsData(field) &&
+    fieldAffectsDataResult &&
     field.hidden &&
     typeof siblingDoc[field.name!] !== 'undefined' &&
     !showHiddenFields
   ) {
+    removedFieldValue = true
     delete siblingDoc[field.name!]
   }
 
@@ -137,16 +140,17 @@ export const promise = async ({
     }
   }
 
-  const shouldHoistLocalizedValue =
+  const shouldHoistLocalizedValue: boolean = Boolean(
     flattenLocales &&
-    fieldAffectsData(field) &&
-    typeof siblingDoc[field.name!] === 'object' &&
-    siblingDoc[field.name!] !== null &&
-    fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! }) &&
-    locale !== 'all' &&
-    req.payload.config.localization
+      fieldAffectsDataResult &&
+      typeof siblingDoc[field.name!] === 'object' &&
+      siblingDoc[field.name!] !== null &&
+      fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! }) &&
+      locale !== 'all' &&
+      req.payload.config.localization,
+  )
 
-  if (shouldHoistLocalizedValue) {
+  if (fieldAffectsDataResult && shouldHoistLocalizedValue) {
     // replace actual value with localized value before sanitizing
     // { [locale]: fields } -> fields
     const value = siblingDoc[field.name!][locale!]
@@ -185,7 +189,7 @@ export const promise = async ({
     case 'group': {
       // Fill groups with empty objects so fields with hooks within groups can populate
       // themselves virtually as necessary
-      if (fieldAffectsData(field) && typeof siblingDoc[field.name] === 'undefined') {
+      if (fieldAffectsDataResult && typeof siblingDoc[field.name] === 'undefined') {
         siblingDoc[field.name] = {}
       }
 
@@ -232,7 +236,7 @@ export const promise = async ({
     }
   }
 
-  if (fieldAffectsData(field)) {
+  if (fieldAffectsDataResult) {
     // Execute hooks
     if (triggerHooks && field.hooks?.afterRead) {
       for (const hook of field.hooks.afterRead) {
@@ -331,7 +335,7 @@ export const promise = async ({
     // Execute access control
     let allowDefaultValue = true
     if (triggerAccessControl && field.access && field.access.read) {
-      const result = overrideAccess
+      const canReadField = overrideAccess
         ? true
         : await field.access.read({
             id: doc.id as number | string,
@@ -342,7 +346,7 @@ export const promise = async ({
             siblingData: siblingDoc,
           })
 
-      if (!result) {
+      if (!canReadField) {
         allowDefaultValue = false
         delete siblingDoc[field.name!]
       }
@@ -351,6 +355,7 @@ export const promise = async ({
     // Set defaultValue on the field for globals being returned without being first created
     // or collection documents created prior to having a default
     if (
+      !removedFieldValue &&
       allowDefaultValue &&
       typeof siblingDoc[field.name!] === 'undefined' &&
       typeof field.defaultValue !== 'undefined'
@@ -397,7 +402,7 @@ export const promise = async ({
         }
       }
 
-      if (Array.isArray(rows)) {
+      if (Array.isArray(rows) && rows.length > 0) {
         rows.forEach((row, rowIndex) => {
           traverseFields({
             blockData,
@@ -465,7 +470,9 @@ export const promise = async ({
             })
           }
         })
-      } else {
+      } else if (shouldHoistLocalizedValue && (!rows || rows.length === 0)) {
+        siblingDoc[field.name] = null
+      } else if (field.hidden !== true || showHiddenFields === true) {
         siblingDoc[field.name] = []
       }
       break
@@ -474,7 +481,7 @@ export const promise = async ({
     case 'blocks': {
       const rows = siblingDoc[field.name]
 
-      if (Array.isArray(rows)) {
+      if (Array.isArray(rows) && rows.length > 0) {
         rows.forEach((row, rowIndex) => {
           const blockTypeToMatch = (row as JsonObject).blockType
 
@@ -570,7 +577,9 @@ export const promise = async ({
             })
           }
         })
-      } else {
+      } else if (shouldHoistLocalizedValue && (!rows || rows.length === 0)) {
+        siblingDoc[field.name] = null
+      } else if (field.hidden !== true || showHiddenFields === true) {
         siblingDoc[field.name] = []
       }
 
@@ -614,7 +623,7 @@ export const promise = async ({
     }
 
     case 'group': {
-      if (fieldAffectsData(field)) {
+      if (fieldAffectsDataResult) {
         let groupDoc = siblingDoc[field.name] as JsonObject
 
         if (typeof siblingDoc[field.name] !== 'object') {

@@ -3,7 +3,7 @@
 import type { PayloadClientReactComponent, SanitizedConfig } from 'payload'
 
 import LinkImport from 'next/link.js'
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 import { useConfig } from '@payloadcms/ui'
 import React from 'react'

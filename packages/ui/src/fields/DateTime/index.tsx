@@ -167,7 +167,9 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     >
       <RenderCustomComponent
         CustomComponent={Label}
-        Fallback={<FieldLabel label={label} localized={localized} required={required} />}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
       />
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
         <RenderCustomComponent

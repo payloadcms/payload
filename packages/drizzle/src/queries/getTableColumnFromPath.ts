@@ -53,6 +53,7 @@ type Args = {
   fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale?: string
+  parentAliasTable?: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
   parentIsLocalized: boolean
   pathSegments: string[]
   rootTableName?: string
@@ -83,6 +84,7 @@ export const getTableColumnFromPath = ({
   fields,
   joins,
   locale: incomingLocale,
+  parentAliasTable,
   parentIsLocalized,
   pathSegments: incomingSegments,
   rootTableName: incomingRootTableName,
@@ -162,6 +164,7 @@ export const getTableColumnFromPath = ({
             table: adapter.tables[newTableName],
           })
         }
+
         return getTableColumnFromPath({
           adapter,
           collectionPath,
@@ -170,6 +173,7 @@ export const getTableColumnFromPath = ({
           fields: field.flattenedFields,
           joins,
           locale,
+          parentAliasTable: aliasTable,
           parentIsLocalized: parentIsLocalized || field.localized,
           pathSegments: pathSegments.slice(1),
           rootTableName,
@@ -180,6 +184,9 @@ export const getTableColumnFromPath = ({
         })
       }
       case 'blocks': {
+        if (adapter.blocksAsJSON) {
+          break
+        }
         let blockTableColumn: TableColumn
         let newTableName: string
 
@@ -387,6 +394,18 @@ export const getTableColumnFromPath = ({
             table: aliasRelationshipTable,
           })
 
+          if (newCollectionPath === 'id') {
+            return {
+              columnName: 'parent',
+              constraints,
+              field: {
+                name: 'id',
+                type: adapter.idType === 'uuid' ? 'text' : 'number',
+              } as NumberField | TextField,
+              table: aliasRelationshipTable,
+            }
+          }
+
           const relationshipConfig = adapter.payload.collections[field.collection].config
           const relationshipTableName = adapter.tableNameMap.get(
             toSnakeCase(relationshipConfig.slug),
@@ -436,6 +455,18 @@ export const getTableColumnFromPath = ({
           ),
           table: newAliasTable,
         })
+
+        if (newCollectionPath === 'id') {
+          return {
+            columnName: 'id',
+            constraints,
+            field: {
+              name: 'id',
+              type: adapter.idType === 'uuid' ? 'text' : 'number',
+            } as NumberField | TextField,
+            table: newAliasTable,
+          }
+        }
 
         return getTableColumnFromPath({
           adapter,
@@ -521,7 +552,10 @@ export const getTableColumnFromPath = ({
           // Join in the relationships table
           if (locale && isFieldLocalized && adapter.payload.config.localization) {
             const conditions = [
-              eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
+              eq(
+                (parentAliasTable || aliasTable || adapter.tables[rootTableName]).id,
+                aliasRelationshipTable.parent,
+              ),
               like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
             ]
 
@@ -539,7 +573,10 @@ export const getTableColumnFromPath = ({
             // Join in the relationships table
             addJoinTable({
               condition: and(
-                eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
+                eq(
+                  (parentAliasTable || aliasTable || adapter.tables[rootTableName]).id,
+                  aliasRelationshipTable.parent,
+                ),
                 like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
               ),
               joins,
@@ -772,9 +809,10 @@ export const getTableColumnFromPath = ({
             `${tableName}_${tableNameSuffix}${toSnakeCase(field.name)}`,
           )
 
+          const idColumn = (aliasTable ?? adapter.tables[tableName]).id
           if (locale && isFieldLocalized && adapter.payload.config.localization) {
             const conditions = [
-              eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
+              eq(idColumn, adapter.tables[newTableName].parent),
               eq(adapter.tables[newTableName]._locale, locale),
             ]
 
@@ -789,7 +827,7 @@ export const getTableColumnFromPath = ({
             })
           } else {
             addJoinTable({
-              condition: eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
+              condition: eq(idColumn, adapter.tables[newTableName].parent),
               joins,
               table: adapter.tables[newTableName],
             })

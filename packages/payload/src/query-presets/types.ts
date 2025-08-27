@@ -1,6 +1,6 @@
 import type { Field } from '../fields/config/types.js'
 import type { Access, CollectionSlug } from '../index.js'
-import type { ListPreferences } from '../preferences/types.js'
+import type { CollectionPreferences } from '../preferences/types.js'
 import type { Where } from '../types/index.js'
 
 // Note: order matters here as it will change the rendered order in the UI
@@ -19,7 +19,7 @@ export type QueryPreset = {
       users?: string[]
     }
   }
-  columns: ListPreferences['columns']
+  columns: CollectionPreferences['columns']
   id: number | string
   isShared: boolean
   relatedCollection: CollectionSlug

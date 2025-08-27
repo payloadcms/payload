@@ -3,6 +3,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: calc(var(--base) / 2);
   }
 
   .lock-button {

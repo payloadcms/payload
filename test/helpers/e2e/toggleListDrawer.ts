@@ -2,6 +2,9 @@ import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
+/**
+ * Closes the list drawer by clicking the close button in the header.
+ */
 export const closeListDrawer = async ({
   page,
   drawerSelector = '[id^=list-drawer_1_]',

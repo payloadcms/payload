@@ -18,6 +18,7 @@ export const updateOne: UpdateOne = async function updateOne(
     data,
     joins: joinQuery,
     locale,
+    options = { upsert: false },
     req,
     returning,
     select,
@@ -64,6 +65,13 @@ export const updateOne: UpdateOne = async function updateOne(
         .limit(1)
       idToUpdate = docsToUpdate?.[0]?.id
     }
+  }
+
+  if (!idToUpdate && !options.upsert) {
+    // TODO: In 4.0, if returning === false, we should differentiate between:
+    // - No document found to update
+    // - Document found, but returning === false
+    return null
   }
 
   const result = await upsertRow({

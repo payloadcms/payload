@@ -51,7 +51,7 @@ describe('flattenFields', () => {
 
       expect(result).toHaveLength(2)
       expect(result[1].name).toBe('slug')
-      expect(result[1].accessor).toBe('meta-slug')
+      expect(result[1].accessor).toBe('meta.slug')
       expect(result[1].labelWithPrefix).toBe('Meta Info > Slug')
     })
 
@@ -111,7 +111,7 @@ describe('flattenFields', () => {
 
       expect(hoisted).toHaveLength(3)
       expect(hoisted[2].name).toBe('deep')
-      expect(hoisted[2].accessor).toBe('outer-inner-deep')
+      expect(hoisted[2].accessor).toBe('outer.inner.deep')
       expect(hoisted[2].labelWithPrefix).toBe('Outer > Inner > Deep Field')
 
       const nonHoisted = flattenTopLevelFields(fields)
@@ -152,7 +152,7 @@ describe('flattenFields', () => {
 
       // Should return the group as a top-level item, not the inner field
       expect(withoutExtract).toHaveLength(1)
-      expect(withoutExtract[0].type).toBe('group')
+      expect(withoutExtract[0].type).toBe('text')
       expect(withoutExtract[0].accessor).toBeUndefined()
       expect(withoutExtract[0].labelWithPrefix).toBeUndefined()
     })
@@ -198,7 +198,7 @@ describe('flattenFields', () => {
 
       expect(hoistedResult).toHaveLength(5)
       expect(hoistedResult[4].name).toBe('nestedField')
-      expect(hoistedResult[4].accessor).toBe('namedGroup-nestedField')
+      expect(hoistedResult[4].accessor).toBe('namedGroup.nestedField')
       expect(hoistedResult[4].labelWithPrefix).toBe('Named Group > Nested Field')
 
       const nonHoistedResult = flattenTopLevelFields(fields)
@@ -434,7 +434,7 @@ describe('flattenFields', () => {
       })
 
       expect(result).toHaveLength(2)
-      expect(result[1].accessor).toBe('groupInRow-nestedInRowGroup')
+      expect(result[1].accessor).toBe('groupInRow.nestedInRowGroup')
       expect(result[1].labelWithPrefix).toBe('Group In Row > Nested In Row Group')
     })
 
@@ -466,7 +466,7 @@ describe('flattenFields', () => {
       })
 
       expect(result).toHaveLength(2)
-      expect(result[1].accessor).toBe('groupInCollapsible-nestedInCollapsibleGroup')
+      expect(result[1].accessor).toBe('groupInCollapsible.nestedInCollapsibleGroup')
       expect(result[1].labelWithPrefix).toBe('Group In Collapsible > Nested In Collapsible Group')
     })
   })
@@ -603,7 +603,7 @@ describe('flattenFields', () => {
       })
 
       expect(result).toHaveLength(2)
-      expect(result[1].accessor).toBe('groupInTab-nestedInTabGroup')
+      expect(result[1].accessor).toBe('groupInTab.nestedInTabGroup')
       expect(result[1].labelWithPrefix).toBe('Group In Tab > Nested In Tab Group')
     })
 
@@ -635,8 +635,8 @@ describe('flattenFields', () => {
       const defaultResult = flattenTopLevelFields(unnamedTabWithUnnamedGroup)
 
       expect(defaultResult).toHaveLength(1)
-      expect(defaultResult[0].type).toBe('group')
-      expect(defaultResult[0].label).toBe('Unnamed Group In Tab')
+      expect(defaultResult[0].type).toBe('text')
+      expect(defaultResult[0].label).toBe('Nested In Unnamed Group')
       expect('accessor' in defaultResult[0]).toBe(false)
       expect('labelWithPrefix' in defaultResult[0]).toBe(false)
 
@@ -659,13 +659,13 @@ describe('flattenFields', () => {
       })
 
       expect(result).toHaveLength(5)
-      expect(result[0].accessor).toBe('tabOne-array')
+      expect(result[0].accessor).toBe('tabOne.array')
       expect(result[0].labelWithPrefix).toBe('Tab One > array')
-      expect(result[1].accessor).toBe('tabOne-arrayInRow')
+      expect(result[1].accessor).toBe('tabOne.arrayInRow')
       expect(result[1].labelWithPrefix).toBe('Tab One > arrayInRow')
-      expect(result[2].accessor).toBe('tabOne-textInTab')
+      expect(result[2].accessor).toBe('tabOne.textInTab')
       expect(result[2].labelWithPrefix).toBe('Tab One > Text In Tab')
-      expect(result[4].accessor).toBe('tabOne-groupInTab-nestedTextInTabGroup')
+      expect(result[4].accessor).toBe('tabOne.groupInTab.nestedTextInTabGroup')
       expect(result[4].labelWithPrefix).toBe('Tab One > Group In Tab > Nested Text In Tab Group')
     })
 

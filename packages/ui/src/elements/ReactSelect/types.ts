@@ -22,6 +22,7 @@ type CustomSelectProps = {
   }) => void
   onDuplicate?: DocumentDrawerProps['onSave']
   onSave?: DocumentDrawerProps['onSave']
+  valueContainerLabel?: string
 }
 
 // augment the types for the `Select` component from `react-select`
@@ -83,6 +84,7 @@ export type ReactSelectAdapterProps = {
     boolean,
     GroupBase<Option>
   >['getOptionValue']
+  id?: string
   inputId?: string
   isClearable?: boolean
   /** Allows you to create own values in the UI despite them not being pre-specified */

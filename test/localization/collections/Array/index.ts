@@ -13,7 +13,6 @@ export const ArrayCollection: CollectionConfig = {
         {
           name: 'text',
           type: 'text',
-          required: true,
         },
       ],
     },

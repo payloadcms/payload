@@ -5,7 +5,7 @@ import type {
   SanitizedConfig,
   TextField,
   TextFieldSingleValidation,
-  User,
+  TypedUser,
 } from 'payload'
 
 import type { LinkFields } from '../nodes/types.js'
@@ -117,13 +117,23 @@ export const getBaseFields = (
       type: 'relationship',
       filterOptions:
         !enabledCollections && !disabledCollections
-          ? ({ relationTo, user }) => {
-              const hidden = config.collections.find(({ slug }) => slug === relationTo)?.admin
-                .hidden
-              if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
+          ? async ({ relationTo, req, user }) => {
+              const admin = config.collections.find(({ slug }) => slug === relationTo)?.admin
+
+              const hidden = admin?.hidden
+              if (typeof hidden === 'function' && hidden({ user } as { user: TypedUser })) {
                 return false
               }
-              return true
+
+              const baseFilter = admin?.baseFilter ?? admin?.baseListFilter
+              return (
+                (await baseFilter?.({
+                  limit: 0,
+                  page: 1,
+                  req,
+                  sort: 'id',
+                })) ?? true
+              )
             }
           : null,
       label: ({ t }) => t('fields:chooseDocumentToLink'),

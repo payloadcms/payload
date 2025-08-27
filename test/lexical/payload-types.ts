@@ -85,6 +85,7 @@ export interface Config {
   collections: {
     'lexical-fully-featured': LexicalFullyFeatured;
     'lexical-link-feature': LexicalLinkFeature;
+    'lexical-jsx-converter': LexicalJsxConverter;
     'lexical-fields': LexicalField;
     'lexical-migrate-fields': LexicalMigrateField;
     'lexical-localized-fields': LexicalLocalizedField;
@@ -105,6 +106,7 @@ export interface Config {
   collectionsSelect: {
     'lexical-fully-featured': LexicalFullyFeaturedSelect<false> | LexicalFullyFeaturedSelect<true>;
     'lexical-link-feature': LexicalLinkFeatureSelect<false> | LexicalLinkFeatureSelect<true>;
+    'lexical-jsx-converter': LexicalJsxConverterSelect<false> | LexicalJsxConverterSelect<true>;
     'lexical-fields': LexicalFieldsSelect<false> | LexicalFieldsSelect<true>;
     'lexical-migrate-fields': LexicalMigrateFieldsSelect<false> | LexicalMigrateFieldsSelect<true>;
     'lexical-localized-fields': LexicalLocalizedFieldsSelect<false> | LexicalLocalizedFieldsSelect<true>;
@@ -186,6 +188,30 @@ export interface LexicalFullyFeatured {
  * via the `definition` "lexical-link-feature".
  */
 export interface LexicalLinkFeature {
+  id: string;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-jsx-converter".
+ */
+export interface LexicalJsxConverter {
   id: string;
   richText?: {
     root: {
@@ -817,6 +843,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -833,6 +866,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'lexical-link-feature';
         value: string | LexicalLinkFeature;
+      } | null)
+    | ({
+        relationTo: 'lexical-jsx-converter';
+        value: string | LexicalJsxConverter;
       } | null)
     | ({
         relationTo: 'lexical-fields';
@@ -938,6 +975,15 @@ export interface LexicalFullyFeaturedSelect<T extends boolean = true> {
  * via the `definition` "lexical-link-feature_select".
  */
 export interface LexicalLinkFeatureSelect<T extends boolean = true> {
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-jsx-converter_select".
+ */
+export interface LexicalJsxConverterSelect<T extends boolean = true> {
   richText?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1254,6 +1300,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

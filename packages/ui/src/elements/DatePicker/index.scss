@@ -55,6 +55,7 @@ $cal-icon-width: 18px;
       border: none;
       outline: none;
       padding: 0;
+      display: flex;
       cursor: pointer;
     }
 
@@ -329,6 +330,16 @@ $cal-icon-width: 18px;
       border-radius: 0;
     }
 
+    .react-datepicker__month .react-datepicker__day {
+      &.react-datepicker__day--disabled {
+        color: var(--theme-elevation-200);
+
+        &:hover {
+          background: none;
+        }
+      }
+    }
+
     .react-datepicker__navigation--next--with-time:not(
         .react-datepicker__navigation--next--with-today-button
       ) {
@@ -342,6 +353,13 @@ $cal-icon-width: 18px;
       li.react-datepicker__time-list-item {
       line-height: 20px;
       font-size: base(0.5);
+
+      &.react-datepicker__time-list-item--disabled {
+        color: var(--theme-elevation-200);
+        &:hover {
+          background: none;
+        }
+      }
     }
 
     &__appearance--dayOnly,

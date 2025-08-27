@@ -1,7 +1,7 @@
 // @ts-strict-ignore
-import type { CheckboxField, Field } from '../fields/config/types.js'
+import type { CheckboxField, Field, Option } from '../fields/config/types.js'
 
-export const statuses = [
+export const statuses: Option[] = [
   {
     label: ({ t }) => t('version:draft'),
     value: 'draft',

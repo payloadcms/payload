@@ -1,29 +1,38 @@
 import type { Page } from '@playwright/test'
+import type { Config } from 'payload-types.js'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+
+import { devUser } from '../credentials.js'
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
+import { navigateToDoc, navigateToTrashedDoc } from '../helpers/e2e/navigateToDoc.js'
+import { deletePreferences } from '../helpers/e2e/preferences.js'
+import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
-import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   ensureDeviceIsCentered,
   ensureDeviceIsLeftAligned,
   goToCollectionLivePreview,
   goToGlobalLivePreview,
+  goToTrashedLivePreview,
   selectLivePreviewBreakpoint,
   selectLivePreviewZoom,
+  toggleLivePreview,
 } from './helpers.js'
 import {
+  collectionLevelConfigSlug,
   desktopBreakpoint,
   mobileBreakpoint,
   pagesSlug,
+  postsSlug,
   renderedPageTitleID,
   ssrAutosavePagesSlug,
   ssrPagesSlug,
@@ -39,14 +48,18 @@ describe('Live Preview', () => {
   let serverURL: string
 
   let pagesURLUtil: AdminUrlUtil
+  let postsURLUtil: AdminUrlUtil
   let ssrPagesURLUtil: AdminUrlUtil
   let ssrAutosavePostsURLUtil: AdminUrlUtil
+  let payload: PayloadTestSDK<Config>
+  let user: any
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ serverURL, payload } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     pagesURLUtil = new AdminUrlUtil(serverURL, pagesSlug)
+    postsURLUtil = new AdminUrlUtil(serverURL, postsSlug)
     ssrPagesURLUtil = new AdminUrlUtil(serverURL, ssrPagesSlug)
     ssrAutosavePostsURLUtil = new AdminUrlUtil(serverURL, ssrAutosavePagesSlug)
 
@@ -54,8 +67,17 @@ describe('Live Preview', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
-
     await ensureCompilationIsDone({ page, serverURL })
+
+    user = await payload
+      .login({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+      ?.then((res) => res.user) // TODO: this type is wrong
   })
 
   beforeEach(async () => {
@@ -67,32 +89,70 @@ describe('Live Preview', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('collection — has tab', async () => {
+  test('collection — renders toggler', async () => {
     await navigateToDoc(page, pagesURLUtil)
 
-    const livePreviewTab = page.locator('a.doc-tab:has-text("Live Preview")')
+    const livePreviewToggler = page.locator('button#live-preview-toggler')
 
-    await expect(() => expect(livePreviewTab).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-
-    const href = await livePreviewTab.getAttribute('href')
-    const docURL = page.url()
-    const pathname = new URL(docURL).pathname
-
-    await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({
+    await expect(() => expect(livePreviewToggler).toBeTruthy()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
   })
 
-  test('collection - should render BeforeDocumentControls', async () => {
-    await goToCollectionLivePreview(page, pagesURLUtil)
-    // locate using aria label "before-document-controls"
-    const beforeDocumentControls = page.locator('button[aria-label="before-document-controls"]')
-    await expect(beforeDocumentControls).toBeVisible()
+  test('collection — does not render live preview when creating a new doc', async () => {
+    await page.goto(pagesURLUtil.create)
+    await expect(page.locator('button#live-preview-toggler')).toBeHidden()
+    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
   })
 
-  test('collection — has route', async () => {
-    await goToCollectionLivePreview(page, pagesURLUtil)
-    await expect(page.locator('.live-preview')).toBeVisible()
+  test('collection - does not enable live preview is collections that are not configured', async () => {
+    const usersURL = new AdminUrlUtil(serverURL, 'users')
+    await navigateToDoc(page, usersURL)
+    const toggler = page.locator('#live-preview-toggler')
+    await expect(toggler).toBeHidden()
+  })
+
+  test('collection - respect collection-level live preview config', async () => {
+    const collURL = new AdminUrlUtil(serverURL, collectionLevelConfigSlug)
+    await page.goto(collURL.create)
+    await page.locator('#field-title').fill('Collection Level Config')
+    await saveDocAndAssert(page)
+    await toggleLivePreview(page)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
+  })
+
+  test('saves live preview state to preferences and loads it on next visit', async () => {
+    await deletePreferences({
+      payload,
+      user,
+      key: `collection-${pagesSlug}`,
+    })
+
+    await navigateToDoc(page, pagesURLUtil)
+
+    const toggler = page.locator('button#live-preview-toggler')
+    await expect(toggler).toBeVisible()
+
+    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+
+    await toggleLivePreview(page, {
+      targetState: 'on',
+    })
+
+    await page.reload()
+
+    await expect(toggler).toHaveClass(/live-preview-toggler--active/)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
+
+    await toggleLivePreview(page, {
+      targetState: 'off',
+    })
+
+    await page.reload()
+
+    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
   })
 
   test('collection — renders iframe', async () => {
@@ -101,7 +161,7 @@ describe('Live Preview', () => {
     await expect(iframe).toBeVisible()
   })
 
-  test('collection — re-renders iframe client-side when form state changes', async () => {
+  test('collection csr — re-renders iframe client-side when form state changes', async () => {
     await goToCollectionLivePreview(page, pagesURLUtil)
 
     const titleField = page.locator('#field-title')
@@ -131,6 +191,57 @@ describe('Live Preview', () => {
     await saveDocAndAssert(page)
   })
 
+  test('collection csr — retains live preview connection after toggling off and on', async () => {
+    await goToCollectionLivePreview(page, pagesURLUtil)
+
+    const titleField = page.locator('#field-title')
+    const frame = page.frameLocator('iframe.live-preview-iframe').first()
+
+    await expect(titleField).toBeEnabled()
+
+    const renderedPageTitleLocator = `#${renderedPageTitleID}`
+
+    // Forces the test to wait for the Next.js route to render before we try editing a field
+    await expect(() => expect(frame.locator(renderedPageTitleLocator)).toBeVisible()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    await expect(frame.locator(renderedPageTitleLocator)).toHaveText('For Testing: Home')
+
+    const newTitleValue = 'Home (Edited)'
+
+    await titleField.fill(newTitleValue)
+
+    await expect(() =>
+      expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue}`),
+    ).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    await toggleLivePreview(page, {
+      targetState: 'off',
+    })
+
+    await toggleLivePreview(page, {
+      targetState: 'on',
+    })
+
+    // The iframe should still be showing the updated title
+    await expect(frame.locator(renderedPageTitleLocator)).toHaveText(
+      `For Testing: ${newTitleValue}`,
+    )
+
+    // make new changes and ensure they continue to be reflected in the iframe
+    const newTitleValue2 = 'Home (Edited Again)'
+    await titleField.fill(newTitleValue2)
+
+    await expect(() =>
+      expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue2}`),
+    ).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
   test('collection ssr — re-render iframe when save is made', async () => {
     await goToCollectionLivePreview(page, ssrPagesURLUtil)
 
@@ -156,6 +267,60 @@ describe('Live Preview', () => {
 
     await expect(() =>
       expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue}`),
+    ).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
+  test('collection ssr — retains live preview connection after toggling off and on', async () => {
+    await goToCollectionLivePreview(page, ssrPagesURLUtil)
+
+    const titleField = page.locator('#field-title')
+    const frame = page.frameLocator('iframe.live-preview-iframe').first()
+
+    await expect(titleField).toBeEnabled()
+
+    const renderedPageTitleLocator = `#${renderedPageTitleID}`
+
+    // Forces the test to wait for the Next.js route to render before we try editing a field
+    await expect(() => expect(frame.locator(renderedPageTitleLocator)).toBeVisible()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    await expect(frame.locator(renderedPageTitleLocator)).toHaveText('For Testing: SSR Home')
+
+    const newTitleValue = 'SSR Home (Edited)'
+
+    await titleField.fill(newTitleValue)
+
+    await saveDocAndAssert(page)
+
+    await expect(() =>
+      expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue}`),
+    ).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    await toggleLivePreview(page, {
+      targetState: 'off',
+    })
+
+    await toggleLivePreview(page, {
+      targetState: 'on',
+    })
+
+    // The iframe should still be showing the updated title
+    await expect(frame.locator(renderedPageTitleLocator)).toHaveText(
+      `For Testing: ${newTitleValue}`,
+    )
+
+    // make new changes and ensure they continue to be reflected in the iframe
+    const newTitleValue2 = 'SSR Home (Edited Again)'
+    await titleField.fill(newTitleValue2)
+    await saveDocAndAssert(page)
+
+    await expect(() =>
+      expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue2}`),
     ).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
@@ -199,34 +364,41 @@ describe('Live Preview', () => {
     await saveDocAndAssert(page)
   })
 
-  test('collection — should show live-preview view-level action in live-preview view', async () => {
-    await goToCollectionLivePreview(page, pagesURLUtil)
-    await expect(page.locator('.app-header .collection-live-preview-button')).toHaveCount(1)
-  })
+  test('trash — has live-preview toggle', async () => {
+    await navigateToTrashedDoc(page, postsURLUtil)
 
-  test('global — should show live-preview view-level action in live-preview view', async () => {
-    await goToGlobalLivePreview(page, 'footer', serverURL)
-    await expect(page.locator('.app-header .global-live-preview-button')).toHaveCount(1)
-  })
+    const livePreviewToggler = page.locator('button#live-preview-toggler')
 
-  test('global — has tab', async () => {
-    const global = new AdminUrlUtil(serverURL, 'header')
-    await page.goto(global.global('header'))
-
-    const docURL = page.url()
-    const pathname = new URL(docURL).pathname
-
-    const livePreviewTab = page.locator('a.doc-tab:has-text("Live Preview")')
-
-    await expect(() => expect(livePreviewTab).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-    const href = await livePreviewTab.getAttribute('href')
-
-    await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({
+    await expect(() => expect(livePreviewToggler).toBeTruthy()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
   })
 
-  test('global — has route and renders iframe', async () => {
+  test('trash - renders iframe', async () => {
+    await goToTrashedLivePreview(page, postsURLUtil)
+    const iframe = page.locator('iframe.live-preview-iframe')
+    await expect(iframe).toBeVisible()
+  })
+
+  test('trash - fields should stay read-only', async () => {
+    await goToTrashedLivePreview(page, postsURLUtil)
+
+    const titleField = page.locator('#field-title')
+    await expect(titleField).toBeDisabled()
+  })
+
+  test('global — renders toggler', async () => {
+    const global = new AdminUrlUtil(serverURL, 'header')
+    await page.goto(global.global('header'))
+
+    const livePreviewToggler = page.locator('button#live-preview-toggler')
+
+    await expect(() => expect(livePreviewToggler).toBeTruthy()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
+  test('global — renders iframe', async () => {
     await goToGlobalLivePreview(page, 'header', serverURL)
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()
@@ -265,9 +437,9 @@ describe('Live Preview', () => {
     await expect(() => expect(heightInput).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
     const widthInputValue = await widthInput.getAttribute('value')
-    const width = parseInt(widthInputValue)
+    const width = parseInt(widthInputValue ?? '0')
     const heightInputValue = await heightInput.getAttribute('value')
-    const height = parseInt(heightInputValue)
+    const height = parseInt(heightInputValue ?? '0')
 
     // Allow a tolerance of a couple of pixels
     const tolerance = 2
@@ -340,19 +512,22 @@ describe('Live Preview', () => {
     await expect(() => expect(widthInput).toBeTruthy()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
+
     const heightInput = page.locator('.live-preview-toolbar input[name="live-preview-height"]')
 
     await expect(() => expect(heightInput).toBeTruthy()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
+
     const widthInputValue = await widthInput.getAttribute('value')
-    const width = parseInt(widthInputValue)
+    const width = parseInt(widthInputValue ?? '0')
 
     await expect(() => expect(width).toBe(mobileBreakpoint.width)).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
+
     const heightInputValue = await heightInput.getAttribute('value')
-    const height = parseInt(heightInputValue)
+    const height = parseInt(heightInputValue ?? '0')
 
     await expect(() => expect(height).toBe(mobileBreakpoint.height)).toPass({
       timeout: POLL_TOPASS_TIMEOUT,

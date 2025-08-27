@@ -2,7 +2,8 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+
+import { isValidReactElement } from './isValidReactElement.js'
 
 /**
  * Returns the appropriate display value for a field.
@@ -21,7 +22,7 @@ export const getDisplayedFieldValue = (cellData: any, field: ClientField, i18n: 
 
     if (selectedOption) {
       if (typeof selectedOption === 'object' && 'label' in selectedOption) {
-        return React.isValidElement(selectedOption.label)
+        return isValidReactElement(selectedOption.label)
           ? selectedOption.label // Return JSX directly
           : getTranslation(selectedOption.label, i18n) || selectedOption.value // Use translation or fallback to value
       }

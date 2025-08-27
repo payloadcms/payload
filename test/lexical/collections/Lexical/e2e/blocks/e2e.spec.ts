@@ -240,7 +240,7 @@ describe('lexicalBlocks', () => {
       )
 
       await dependsOnDocData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('Text Fieldsinvalid')
+      await expect(newBlock.locator('.rs__menu')).toHaveText('invalid')
       await dependsOnDocData.locator('.rs__control').click()
 
       await dependsOnSiblingData.locator('.rs__control').click()
@@ -281,7 +281,7 @@ describe('lexicalBlocks', () => {
       await dependsOnDocData.locator('.rs__control').click()
 
       await dependsOnSiblingData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('Text Fieldsinvalid')
+      await expect(newBlock.locator('.rs__menu')).toHaveText('invalid')
       await dependsOnSiblingData.locator('.rs__control').click()
 
       await dependsOnBlockData.locator('.rs__control').click()
@@ -322,7 +322,7 @@ describe('lexicalBlocks', () => {
       await dependsOnSiblingData.locator('.rs__control').click()
 
       await dependsOnBlockData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('Text Fieldsinvalid')
+      await expect(newBlock.locator('.rs__menu')).toHaveText('invalid')
       await dependsOnBlockData.locator('.rs__control').click()
 
       await saveDocAndAssert(page)

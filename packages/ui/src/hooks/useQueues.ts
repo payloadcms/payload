@@ -14,7 +14,7 @@ type QueuedTaskOptions = {
    * Can also be used to perform side effects before processing the queue
    * @returns {boolean} If `false`, the queue will not process
    */
-  beforeProcess?: () => boolean
+  beforeProcess?: () => boolean | void
 }
 
 type QueueTask = (fn: QueuedFunction, options?: QueuedTaskOptions) => void

@@ -270,6 +270,16 @@ export default buildConfigWithDefaults({
         path: `/${method}-test`,
       })),
     },
+    {
+      slug: 'disabled-bulk-edit-docs',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+      disableBulkEdit: true,
+    },
   ],
   endpoints: [
     {

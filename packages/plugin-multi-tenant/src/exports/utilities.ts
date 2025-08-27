@@ -1,4 +1,4 @@
-export { filterDocumentsBySelectedTenant as getTenantListFilter } from '../list-filters/filterDocumentsBySelectedTenant.js'
+export { filterDocumentsByTenants as getTenantListFilter } from '../filters/filterDocumentsByTenants.js'
 export { getGlobalViewRedirect } from '../utilities/getGlobalViewRedirect.js'
 export { getTenantAccess } from '../utilities/getTenantAccess.js'
 export { getTenantFromCookie } from '../utilities/getTenantFromCookie.js'

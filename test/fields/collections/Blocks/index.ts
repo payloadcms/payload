@@ -495,6 +495,31 @@ const BlockFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'readOnly',
+      type: 'blocks',
+      admin: {
+        readOnly: true,
+      },
+      defaultValue: [
+        {
+          blockType: 'readOnlyBlock',
+          title: 'readOnly',
+        },
+      ],
+      blocks: [
+        {
+          slug: 'readOnlyBlock',
+          fields: [
+            {
+              type: 'text',
+              name: 'title',
+              defaultValue: 'readOnly',
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
 

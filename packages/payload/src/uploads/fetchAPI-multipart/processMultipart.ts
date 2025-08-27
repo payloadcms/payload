@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { Readable } from 'stream'
 
 import Busboy from 'busboy'
@@ -15,6 +14,12 @@ import { createUploadTimer } from './uploadTimer.js'
 import { buildFields, debugLog, isFunc, parseFileName } from './utilities.js'
 
 const waitFlushProperty = Symbol('wait flush property symbol')
+
+declare global {
+  interface Request {
+    [waitFlushProperty]?: Promise<any>[]
+  }
+}
 
 type ProcessMultipart = (args: {
   options: FetchAPIFileUploadOptions
@@ -39,7 +44,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     files: undefined!,
   }
 
-  const headersObject = {}
+  const headersObject: Record<string, string> = {}
   request.headers.forEach((value, name) => {
     headersObject[name] = value
   })

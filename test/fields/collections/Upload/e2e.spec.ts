@@ -17,7 +17,6 @@ import {
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { uploadsSlug } from '../../slugs.js'
 
@@ -28,7 +27,6 @@ const dirname = path.resolve(currentFolder, '../../')
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let client: RESTClient
 let page: Page
 let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
@@ -57,12 +55,6 @@ describe('Upload', () => {
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
-    if (client) {
-      await client.logout()
-    }
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
-
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -82,8 +74,6 @@ describe('Upload', () => {
   })
 
   test('should upload files from remote URL', async () => {
-    await uploadImage()
-
     await page.goto(url.create)
 
     const pasteURLButton = page.locator('.file-field__upload button', {
@@ -91,7 +81,8 @@ describe('Upload', () => {
     })
     await pasteURLButton.click()
 
-    const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
+    const remoteImage =
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg'
 
     const inputField = page.locator('.file-field__upload .file-field__remote-file')
     await inputField.fill(remoteImage)
@@ -117,14 +108,15 @@ describe('Upload', () => {
     })
     await pasteURLButton.click()
 
-    const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
+    const remoteImage =
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg'
 
     const inputField = page.locator('.file-field__upload .file-field__remote-file')
     await inputField.fill(remoteImage)
 
     // Intercept the upload request
     await page.route(
-      'https://payloadcms.com/images/og-image.jpg',
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg',
       (route) => setTimeout(() => route.continue(), 2000), // Artificial 2-second delay
     )
 
@@ -135,7 +127,9 @@ describe('Upload', () => {
     await expect(submitButton).toBeDisabled()
 
     // Wait for the upload to complete
-    await page.waitForResponse('https://payloadcms.com/images/og-image.jpg')
+    await page.waitForResponse(
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg',
+    )
 
     // Assert the submit button is re-enabled after upload
     await expect(submitButton).toBeEnabled()

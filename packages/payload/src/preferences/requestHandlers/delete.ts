@@ -20,6 +20,7 @@ export const deleteHandler: PayloadHandler = async (incomingReq): Promise<Respon
 
   if (data) {
     reqWithData.data = data
+    // @ts-expect-error
     reqWithData.json = () => Promise.resolve(data)
   }
 

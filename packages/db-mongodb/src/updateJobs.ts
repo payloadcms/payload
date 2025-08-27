@@ -1,5 +1,5 @@
 import type { MongooseUpdateQueryOptions } from 'mongoose'
-import type { BaseJob, UpdateJobs, Where } from 'payload'
+import type { Job, UpdateJobs, Where } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -36,6 +36,8 @@ export const updateJobs: UpdateJobs = async function updateMany(
     lean: true,
     new: true,
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   let query = await buildQuery({
@@ -47,7 +49,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
 
   transform({ adapter: this, data, fields: collectionConfig.fields, operation: 'write' })
 
-  let result: BaseJob[] = []
+  let result: Job[] = []
 
   try {
     if (id) {

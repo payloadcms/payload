@@ -16,6 +16,7 @@ type Args = {
   draft?: boolean
   global?: SanitizedGlobalConfig
   id?: number | string
+  operation?: 'create' | 'restoreVersion' | 'update'
   payload: Payload
   publishSpecificLocale?: string
   req?: PayloadRequest
@@ -30,13 +31,14 @@ export const saveVersion = async ({
   docWithLocales: doc,
   draft,
   global,
+  operation,
   payload,
   publishSpecificLocale,
   req,
   select,
   snapshot,
 }: Args): Promise<TypeWithID> => {
-  let result
+  let result: TypeWithID | undefined
   let createNewVersion = true
   const now = new Date().toISOString()
   const versionData = deepCopyObjectSimple(doc)
@@ -87,7 +89,7 @@ export const saveVersion = async ({
       const [latestVersion] = docs
 
       // overwrite the latest version if it's set to autosave
-      if (latestVersion?.autosave === true) {
+      if (latestVersion && 'autosave' in latestVersion && latestVersion.autosave === true) {
         createNewVersion = false
 
         const data: Record<string, unknown> = {
@@ -126,7 +128,7 @@ export const saveVersion = async ({
       const createVersionArgs = {
         autosave: Boolean(autosave),
         collectionSlug: undefined as string | undefined,
-        createdAt: now,
+        createdAt: operation === 'restoreVersion' ? versionData.createdAt : now,
         globalSlug: undefined as string | undefined,
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,
@@ -199,10 +201,10 @@ export const saveVersion = async ({
     })
   }
 
-  let createdVersion = result.version
+  let createdVersion = (result as any).version
 
   createdVersion = sanitizeInternalFields(createdVersion)
-  createdVersion.id = result.parent
+  createdVersion.id = (result as any).parent
 
   return createdVersion
 }

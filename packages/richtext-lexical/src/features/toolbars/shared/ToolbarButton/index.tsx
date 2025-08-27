@@ -63,6 +63,9 @@ export const ToolbarButton = ({
   const runDeprioritized = useRunDeprioritized()
 
   useEffect(() => {
+    // Run on mount
+    void runDeprioritized(updateStates)
+
     const listener = () => runDeprioritized(updateStates)
 
     const cleanup = mergeRegister(editor.registerUpdateListener(listener))
@@ -99,7 +102,13 @@ export const ToolbarButton = ({
   }, [])
 
   return (
-    <button className={className} onClick={handleClick} onMouseDown={handleMouseDown} type="button">
+    <button
+      className={className}
+      data-button-key={item.key}
+      onClick={handleClick}
+      onMouseDown={handleMouseDown}
+      type="button"
+    >
       {children}
     </button>
   )

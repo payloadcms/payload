@@ -29,13 +29,13 @@ export const reorderColumns = async (
   await expect(page.locator(`${columnContainerSelector}.rah-static--height-auto`)).toBeVisible()
 
   const fromBoundingBox = await columnContainer
-    .locator(`.column-selector .column-selector__column`, {
+    .locator(`.pill-selector .pill-selector__pill`, {
       hasText: exactText(fromColumn),
     })
     .boundingBox()
 
   const toBoundingBox = await columnContainer
-    .locator(`.column-selector .column-selector__column`, {
+    .locator(`.pill-selector .pill-selector__pill`, {
       hasText: exactText(toColumn),
     })
     .boundingBox()
@@ -51,9 +51,9 @@ export const reorderColumns = async (
   await page.mouse.move(toBoundingBox.x - 2, toBoundingBox.y - 2, { steps: 10 })
   await page.mouse.up()
 
-  await expect(
-    columnContainer.locator('.column-selector .column-selector__column').first(),
-  ).toHaveText(fromColumn)
+  await expect(columnContainer.locator('.pill-selector .pill-selector__pill').first()).toHaveText(
+    fromColumn,
+  )
 
   await expect(page.locator('table thead tr th').nth(1).first()).toHaveText(fromColumn)
   // TODO: This wait makes sure the preferences are actually saved. Just waiting for the UI to update is not enough. We should replace this wait

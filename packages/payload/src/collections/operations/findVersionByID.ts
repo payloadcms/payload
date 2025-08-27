@@ -4,10 +4,11 @@ import type { PayloadRequest, PopulateType, SelectType } from '../../types/index
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
@@ -24,6 +25,7 @@ export type Arguments = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
+  trash?: boolean
 }
 
 export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
@@ -41,6 +43,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     req,
     select: incomingSelect,
     showHiddenFields,
+    trash = false,
   } = args
 
   if (!id) {
@@ -63,7 +66,16 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
 
     const hasWhereAccess = typeof accessResults === 'object'
 
-    const fullWhere = combineQueries({ id: { equals: id } }, accessResults)
+    const where = { id: { equals: id } }
+
+    let fullWhere = combineQueries(where, accessResults)
+
+    fullWhere = appendNonTrashedFilter({
+      deletedAtPath: 'version.deletedAt',
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
 
     // /////////////////////////////////////
     // Find by ID

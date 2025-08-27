@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { ErrorResult } from '../config/types.js'
 import type { APIError } from '../errors/APIError.js'
 
@@ -33,8 +32,8 @@ export const formatErrors = (incoming: { [key: string]: unknown } | APIError): E
         errors: Object.keys(incoming.errors).reduce(
           (acc, key) => {
             acc.push({
-              field: incoming.errors![key].path,
-              message: incoming.errors![key].message,
+              field: (incoming.errors as any)[key].path,
+              message: (incoming.errors as any)[key].message,
             })
             return acc
           },

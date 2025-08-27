@@ -4,6 +4,7 @@ import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { APIError, Forbidden } from '../../errors/index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -27,17 +28,26 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
   try {
     const shouldCommit = await initTransaction(req)
 
-    const user = await req.payload.db.findOne<any>({
-      collection: collection.config.slug,
-      req,
+    const where = appendNonTrashedFilter({
+      enableTrash: Boolean(collection.config.trash),
+      trash: false,
       where: {
         _verificationToken: { equals: token },
       },
     })
 
+    const user = await req.payload.db.findOne<any>({
+      collection: collection.config.slug,
+      req,
+      where,
+    })
+
     if (!user) {
       throw new APIError('Verification token is invalid.', httpStatus.FORBIDDEN)
     }
+
+    // Ensure updatedAt date is always updated
+    user.updatedAt = new Date().toISOString()
 
     await req.payload.db.updateOne({
       id: user.id,
@@ -61,5 +71,3 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
     throw error
   }
 }
-
-export default verifyEmailOperation

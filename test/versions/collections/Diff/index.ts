@@ -91,6 +91,15 @@ export const Diff: CollectionConfig = {
                       name: 'textInUnnamedTab2InBlock',
                       type: 'text',
                     },
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          name: 'textInRowInUnnamedTab2InBlock',
+                          type: 'text',
+                        },
+                      ],
+                    },
                   ],
                 },
               ],
@@ -144,6 +153,10 @@ export const Diff: CollectionConfig = {
       name: 'point',
     },
     {
+      type: 'json',
+      name: 'json',
+    },
+    {
       type: 'radio',
       name: 'radio',
       options: [
@@ -161,6 +174,29 @@ export const Diff: CollectionConfig = {
       type: 'relationship',
       name: 'relationship',
       relationTo: draftCollectionSlug,
+    },
+    {
+      type: 'relationship',
+      name: 'relationshipHasMany',
+      hasMany: true,
+      relationTo: draftCollectionSlug,
+    },
+    {
+      type: 'relationship',
+      name: 'relationshipPolymorphic',
+      relationTo: [draftCollectionSlug, 'text'],
+    },
+    {
+      type: 'relationship',
+      name: 'relationshipHasManyPolymorphic',
+      hasMany: true,
+      relationTo: [draftCollectionSlug, 'text'],
+    },
+    {
+      type: 'relationship',
+      name: 'relationshipHasManyPolymorphic2',
+      hasMany: true,
+      relationTo: [draftCollectionSlug, 'text'],
     },
     {
       name: 'richtext',
@@ -234,8 +270,15 @@ export const Diff: CollectionConfig = {
       relationTo: 'media',
       type: 'upload',
     },
+    {
+      name: 'uploadHasMany',
+      hasMany: true,
+      relationTo: 'media',
+      type: 'upload',
+    },
   ],
   versions: {
+    drafts: true,
     maxPerDoc: 35,
   },
 }

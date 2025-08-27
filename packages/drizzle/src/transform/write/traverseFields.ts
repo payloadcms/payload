@@ -1,6 +1,5 @@
-import type { FlattenedField } from 'payload'
-
 import { sql } from 'drizzle-orm'
+import { APIError, type FlattenedField } from 'payload'
 import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -41,6 +40,7 @@ type Args = {
    */
   columnPrefix: string
   data: Record<string, unknown>
+  enableAtomicWrites?: boolean
   existingLocales?: Record<string, unknown>[]
   /**
    * A prefix that will retain camel-case formatting, representing prior fields
@@ -87,6 +87,7 @@ export const traverseFields = ({
   blocksToDelete,
   columnPrefix,
   data,
+  enableAtomicWrites,
   existingLocales,
   fieldPrefix,
   fields,
@@ -188,7 +189,7 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type === 'blocks') {
+    if (field.type === 'blocks' && !adapter.blocksAsJSON) {
       ;(field.blockReferences ?? field.blocks).forEach((block) => {
         const matchedBlock =
           typeof block === 'string'
@@ -268,6 +269,7 @@ export const traverseFields = ({
               blocksToDelete,
               columnPrefix: `${columnName}_`,
               data: localeData as Record<string, unknown>,
+              enableAtomicWrites,
               existingLocales,
               fieldPrefix: `${fieldName}_`,
               fields: field.flattenedFields,
@@ -544,6 +546,19 @@ export const traverseFields = ({
     valuesToTransform.forEach(({ localeKey, ref, value }) => {
       let formattedValue = value
 
+      if (field.type === 'date') {
+        if (fieldName === 'updatedAt' && !formattedValue) {
+          // let the db handle this
+          formattedValue = new Date().toISOString()
+        } else {
+          if (typeof value === 'number' && !Number.isNaN(value)) {
+            formattedValue = new Date(value).toISOString()
+          } else if (value instanceof Date) {
+            formattedValue = value.toISOString()
+          }
+        }
+      }
+
       if (typeof value !== 'undefined') {
         if (value && field.type === 'point' && adapter.name !== 'sqlite') {
           formattedValue = sql`ST_GeomFromGeoJSON(${JSON.stringify(value)})`
@@ -553,18 +568,21 @@ export const traverseFields = ({
           formattedValue = JSON.stringify(value)
         }
 
-        if (field.type === 'date') {
-          if (typeof value === 'number' && !Number.isNaN(value)) {
-            formattedValue = new Date(value).toISOString()
-          } else if (value instanceof Date) {
-            formattedValue = value.toISOString()
+        if (
+          field.type === 'number' &&
+          value &&
+          typeof value === 'object' &&
+          '$inc' in value &&
+          typeof value.$inc === 'number'
+        ) {
+          if (!enableAtomicWrites) {
+            throw new APIError(
+              'The passed data must not contain any nested fields for atomic writes',
+            )
           }
-        }
-      }
 
-      if (field.type === 'date' && fieldName === 'updatedAt') {
-        // let the db handle this
-        formattedValue = new Date().toISOString()
+          formattedValue = sql.raw(`${columnName} + ${value.$inc}`)
+        }
       }
 
       if (typeof formattedValue !== 'undefined') {

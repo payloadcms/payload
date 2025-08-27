@@ -1,8 +1,9 @@
 export const autosaveCollectionSlug = 'autosave-posts'
+export const autosaveWithMultiSelectCollectionSlug = 'autosave-multi-select-posts'
 
 export const autosaveWithDraftButtonSlug = 'autosave-with-draft-button-posts'
 
-export const autosaveWithValidateCollectionSlug = 'autosave-with-validate-posts'
+export const autosaveWithDraftValidateSlug = 'autosave-with-validate-posts'
 
 export const customIDSlug = 'custom-ids'
 
@@ -15,6 +16,7 @@ export const postCollectionSlug = 'posts'
 
 export const diffCollectionSlug = 'diff'
 export const mediaCollectionSlug = 'media'
+export const media2CollectionSlug = 'media2'
 
 export const versionCollectionSlug = 'version-posts'
 
@@ -27,10 +29,12 @@ export const textCollectionSlug = 'text'
 
 export const collectionSlugs = [
   autosaveCollectionSlug,
+  autosaveWithMultiSelectCollectionSlug,
   draftCollectionSlug,
   postCollectionSlug,
   diffCollectionSlug,
   mediaCollectionSlug,
+  media2CollectionSlug,
   versionCollectionSlug,
   textCollectionSlug,
 ]

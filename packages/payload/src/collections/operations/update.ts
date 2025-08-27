@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import { status as httpStatus } from 'http-status'
@@ -13,13 +12,15 @@ import type {
   SelectFromCollectionSlug,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -53,6 +54,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
    * @example ['group', '-createdAt'] // sort by 2 fields, ASC group and DESC createdAt
    */
   sort?: Sort
+  trash?: boolean
   where: Where
 }
 
@@ -63,6 +65,10 @@ export const updateOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
+
+  if (args.collection.config.disableBulkEdit && !args.overrideAccess) {
+    throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk edit`, 403)
+  }
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -105,6 +111,7 @@ export const updateOperation = async <
       select: incomingSelect,
       showHiddenFields,
       sort: incomingSort,
+      trash = false,
       where,
     } = args
 
@@ -135,7 +142,29 @@ export const updateOperation = async <
     // Retrieve documents
     // /////////////////////////////////////
 
-    const fullWhere = combineQueries(where, accessResult!)
+    let fullWhere = combineQueries(where, accessResult!)
+
+    const isTrashAttempt =
+      collectionConfig.trash &&
+      typeof bulkUpdateData === 'object' &&
+      bulkUpdateData !== null &&
+      'deletedAt' in bulkUpdateData &&
+      bulkUpdateData.deletedAt != null
+
+    // Enforce delete access if performing a soft-delete (trash)
+    if (isTrashAttempt && !overrideAccess) {
+      const deleteAccessResult = await executeAccess({ req }, collectionConfig.access.delete)
+      fullWhere = combineQueries(fullWhere, deleteAccessResult)
+    }
+
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
+
+    sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
 
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,
@@ -236,7 +265,7 @@ export const updateOperation = async <
       } catch (error) {
         errors.push({
           id,
-          message: error.message,
+          message: error instanceof Error ? error.message : 'Unknown error',
         })
       }
       return null
@@ -263,6 +292,7 @@ export const updateOperation = async <
       args,
       collection: collectionConfig,
       operation: 'update',
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       result,
     })
 
@@ -270,6 +300,7 @@ export const updateOperation = async <
       await commitTransaction(req)
     }
 
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return result
   } catch (error: unknown) {
     await killTransaction(args.req)

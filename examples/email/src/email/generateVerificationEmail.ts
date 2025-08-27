@@ -1,5 +1,7 @@
 import { generateEmailHTML } from './generateEmailHTML'
 
+import { sanitizeUserDataForEmail } from 'payload/shared'
+
 type User = {
   email: string
   name?: string
@@ -16,7 +18,7 @@ export const generateVerificationEmail = async (
   const { token, user } = args
 
   return generateEmailHTML({
-    content: `<p>Hi${user.name ? ' ' + user.name : ''}! Validate your account by clicking the button below.</p>`,
+    content: `<p>Hi${user.name ? ' ' + sanitizeUserDataForEmail(user.name) : ''}! Validate your account by clicking the button below.</p>`,
     cta: {
       buttonLabel: 'Verify',
       url: `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/verify?token=${token}&email=${user.email}`,

@@ -1,20 +1,18 @@
 import type {
   AdminViewServerProps,
   BuildCollectionFolderViewResult,
+  FolderListViewClientProps,
   FolderListViewServerPropsOnly,
+  FolderSortKeys,
   ListQuery,
-  Where,
 } from 'payload'
 
-import { DefaultBrowseByFolderView, FolderProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import { DefaultBrowseByFolderView, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { getFolderResultsComponentAndData, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
-import { getFolderData } from 'payload'
-import { buildFolderWhereConstraints } from 'payload/shared'
 import React from 'react'
-
-import { getPreferences } from '../../utilities/getPreferences.js'
 
 export type BuildFolderViewArgs = {
   customCellProps?: Record<string, any>
@@ -56,84 +54,83 @@ export const buildBrowseByFolderView = async (
     visibleEntities,
   } = initPageResult
 
-  const browseByFolderSlugs = browseByFolderSlugsFromArgs.filter(
+  if (config.folders === false || config.folders.browseByFolder === false) {
+    throw new Error('not-found')
+  }
+
+  const foldersSlug = config.folders.slug
+
+  /**
+   * All visiible folder enabled collection slugs that the user has read permissions for.
+   */
+  const allowReadCollectionSlugs = browseByFolderSlugsFromArgs.filter(
     (collectionSlug) =>
       permissions?.collections?.[collectionSlug]?.read &&
       visibleEntities.collections.includes(collectionSlug),
   )
 
-  if (config.folders === false || config.folders.browseByFolder === false) {
-    throw new Error('not-found')
-  }
+  const query =
+    queryFromArgs ||
+    ((queryFromReq
+      ? {
+          ...queryFromReq,
+          relationTo:
+            typeof queryFromReq?.relationTo === 'string'
+              ? JSON.parse(queryFromReq.relationTo)
+              : undefined,
+        }
+      : {}) as ListQuery)
 
-  const query = queryFromArgs || queryFromReq
-  const selectedCollectionSlugs: string[] =
-    Array.isArray(query?.relationTo) && query.relationTo.length
-      ? query.relationTo.filter(
-          (slug) =>
-            browseByFolderSlugs.includes(slug) || (config.folders && slug === config.folders.slug),
-        )
-      : [...browseByFolderSlugs, config.folders.slug]
+  /**
+   * If a folderID is provided and the relationTo query param exists,
+   * we filter the collection slugs to only those that are allowed to be read.
+   *
+   * If no folderID is provided, only folders should be active and displayed (the root view).
+   */
+  let collectionsToDisplay: string[] = []
+  if (folderID && Array.isArray(query?.relationTo)) {
+    collectionsToDisplay = query.relationTo.filter(
+      (slug) => allowReadCollectionSlugs.includes(slug) || slug === foldersSlug,
+    )
+  } else if (folderID) {
+    collectionsToDisplay = [...allowReadCollectionSlugs, foldersSlug]
+  } else {
+    collectionsToDisplay = [foldersSlug]
+  }
 
   const {
     routes: { admin: adminRoute },
   } = config
 
-  const folderCollectionConfig = payload.collections[config.folders.slug].config
-
-  const browseByFolderPreferences = await getPreferences<{ viewPreference: string }>(
-    'browse-by-folder',
-    payload,
-    user.id,
-    user.collection,
-  )
-
-  let documentWhere: undefined | Where = undefined
-  let folderWhere: undefined | Where = undefined
-  // if folderID, dont make a documentWhere since it only queries root folders
-  for (const collectionSlug of selectedCollectionSlugs) {
-    if (collectionSlug === config.folders.slug) {
-      const folderCollectionConstraints = await buildFolderWhereConstraints({
-        collectionConfig: folderCollectionConfig,
-        folderID,
-        localeCode: fullLocale?.code,
-        req: initPageResult.req,
-        search: typeof query?.search === 'string' ? query.search : undefined,
-      })
-
-      if (folderCollectionConstraints) {
-        folderWhere = folderCollectionConstraints
-      }
-    } else if (folderID) {
-      if (!documentWhere) {
-        documentWhere = {
-          or: [],
-        }
-      }
-
-      const collectionConfig = payload.collections[collectionSlug].config
-      if (collectionConfig.folders && collectionConfig.folders.browseByFolder === true) {
-        const collectionConstraints = await buildFolderWhereConstraints({
-          collectionConfig,
-          folderID,
-          localeCode: fullLocale?.code,
-          req: initPageResult.req,
-          search: typeof query?.search === 'string' ? query.search : undefined,
-        })
-
-        if (collectionConstraints) {
-          documentWhere.or.push(collectionConstraints)
-        }
-      }
-    }
-  }
-
-  const { breadcrumbs, documents, subfolders } = await getFolderData({
-    documentWhere,
-    folderID,
-    folderWhere,
+  /**
+   * @todo: find a pattern to avoid setting preferences on hard navigation, i.e. direct links, page refresh, etc.
+   * This will ensure that prefs are only updated when explicitly set by the user
+   * This could potentially be done by injecting a `sessionID` into the params and comparing it against a session cookie
+   */
+  const browseByFolderPreferences = await upsertPreferences<{
+    sort?: FolderSortKeys
+    viewPreference?: 'grid' | 'list'
+  }>({
+    key: 'browse-by-folder',
     req: initPageResult.req,
+    value: {
+      sort: query?.sort as FolderSortKeys,
+    },
   })
+
+  const sortPreference: FolderSortKeys = browseByFolderPreferences?.sort || 'name'
+  const viewPreference = browseByFolderPreferences?.viewPreference || 'grid'
+
+  const { breadcrumbs, documents, folderAssignedCollections, FolderResultsComponent, subfolders } =
+    await getFolderResultsComponentAndData({
+      browseByFolder: true,
+      collectionsToDisplay,
+      displayAs: viewPreference,
+      folderAssignedCollections: collectionsToDisplay.filter((slug) => slug !== foldersSlug) || [],
+      folderID,
+      req: initPageResult.req,
+      sort: sortPreference,
+    })
 
   const resolvedFolderID = breadcrumbs[breadcrumbs.length - 1]?.id
 
@@ -171,39 +168,64 @@ export const buildBrowseByFolderView = async (
   //   serverProps,
   // })
 
-  // documents cannot be created without a parent folder in this view
-  const hasCreatePermissionCollectionSlugs = folderID
-    ? [config.folders.slug, ...browseByFolderSlugs]
-    : [config.folders.slug]
+  // Filter down allCollectionFolderSlugs by the ones the current folder is assingned to
+  const allAvailableCollectionSlugs =
+    folderID && Array.isArray(folderAssignedCollections) && folderAssignedCollections.length
+      ? allowReadCollectionSlugs.filter((slug) => folderAssignedCollections.includes(slug))
+      : allowReadCollectionSlugs
+
+  // Filter down activeCollectionFolderSlugs by the ones the current folder is assingned to
+  const availableActiveCollectionFolderSlugs = collectionsToDisplay.filter((slug) => {
+    if (slug === foldersSlug) {
+      return permissions?.collections?.[foldersSlug]?.read
+    } else {
+      return !folderAssignedCollections || folderAssignedCollections.includes(slug)
+    }
+  })
+
+  // Documents cannot be created without a parent folder in this view
+  const allowCreateCollectionSlugs = (
+    resolvedFolderID ? [foldersSlug, ...allAvailableCollectionSlugs] : [foldersSlug]
+  ).filter((collectionSlug) => {
+    if (collectionSlug === foldersSlug) {
+      return permissions?.collections?.[foldersSlug]?.create
+    }
+    return (
+      permissions?.collections?.[collectionSlug]?.create &&
+      visibleEntities.collections.includes(collectionSlug)
+    )
+  })
 
   return {
     View: (
-      <FolderProvider
-        breadcrumbs={breadcrumbs}
-        documents={documents}
-        filteredCollectionSlugs={selectedCollectionSlugs}
-        folderCollectionSlugs={browseByFolderSlugs}
-        folderFieldName={config.folders.fieldName}
-        folderID={folderID}
-        subfolders={subfolders}
-      >
+      <>
         <HydrateAuthProvider permissions={permissions} />
         {RenderServerComponent({
           clientProps: {
             // ...folderViewSlots,
+            activeCollectionFolderSlugs: availableActiveCollectionFolderSlugs,
+            allCollectionFolderSlugs: allAvailableCollectionSlugs,
+            allowCreateCollectionSlugs,
+            baseFolderPath: `/browse-by-folder`,
+            breadcrumbs,
             disableBulkDelete,
             disableBulkEdit,
+            documents,
             enableRowSelections,
-            hasCreatePermissionCollectionSlugs,
-            selectedCollectionSlugs,
-            viewPreference: browseByFolderPreferences?.value?.viewPreference,
-          },
-          // Component:config.folders?.components?.views?.list?.Component,
+            folderAssignedCollections,
+            folderFieldName: config.folders.fieldName,
+            folderID: resolvedFolderID || null,
+            FolderResultsComponent,
+            sort: sortPreference,
+            subfolders,
+            viewPreference,
+          } satisfies FolderListViewClientProps,
+          // Component:config.folders?.components?.views?.BrowseByFolders?.Component,
           Fallback: DefaultBrowseByFolderView,
           importMap: payload.importMap,
           serverProps,
         })}
-      </FolderProvider>
+      </>
     ),
   }
 }

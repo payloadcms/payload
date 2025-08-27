@@ -1,11 +1,16 @@
 'use client'
 import type { Column } from '@payloadcms/ui'
-import type { ClientField, FieldAffectingDataClient } from 'payload'
+import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { Table, Translation, useConfig, useField, useTranslation } from '@payloadcms/ui'
-import { fieldAffectsData } from 'payload/shared'
-import * as qs from 'qs-esm'
+import {
+  CodeEditorLazy,
+  Table,
+  Translation,
+  useConfig,
+  useField,
+  useTranslation,
+} from '@payloadcms/ui'
 import React from 'react'
 
 import type {
@@ -13,6 +18,7 @@ import type {
   PluginImportExportTranslations,
 } from '../../translations/index.js'
 
+import { buildDisabledFieldRegex } from '../../utilities/buildDisabledFieldRegex.js'
 import './index.scss'
 import { useImportExport } from '../ImportExportProvider/index.js'
 
@@ -22,10 +28,13 @@ export const Preview = () => {
   const { collection } = useImportExport()
   const { config } = useConfig()
   const { value: where } = useField({ path: 'where' })
+  const { value: page } = useField({ path: 'page' })
   const { value: limit } = useField<number>({ path: 'limit' })
   const { value: fields } = useField<string[]>({ path: 'fields' })
   const { value: sort } = useField({ path: 'sort' })
-  const { value: draft } = useField({ path: 'draft' })
+  const { value: draft } = useField({ path: 'drafts' })
+  const { value: locale } = useField({ path: 'locale' })
+  const { value: format } = useField({ path: 'format' })
   const [dataToRender, setDataToRender] = React.useState<any[]>([])
   const [resultCount, setResultCount] = React.useState<any>('')
   const [columns, setColumns] = React.useState<Column[]>([])
@@ -39,73 +48,132 @@ export const Preview = () => {
     (collection) => collection.slug === collectionSlug,
   )
 
+  const disabledFieldRegexes: RegExp[] = React.useMemo(() => {
+    const disabledFieldPaths =
+      collectionConfig?.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
+
+    return disabledFieldPaths.map(buildDisabledFieldRegex)
+  }, [collectionConfig])
+
+  const isCSV = format === 'csv'
+
   React.useEffect(() => {
     const fetchData = async () => {
-      if (!collectionSlug) {
+      if (!collectionSlug || !collectionConfig) {
         return
       }
 
       try {
-        const whereQuery = qs.stringify(
-          {
-            depth: 0,
+        const res = await fetch('/api/preview-data', {
+          body: JSON.stringify({
+            collectionSlug,
             draft,
-            limit: limit > 10 ? 10 : limit,
+            fields,
+            format,
+            limit,
+            locale,
+            page,
             sort,
             where,
-          },
-          {
-            addQueryPrefix: true,
-          },
-        )
-        const response = await fetch(`/api/${collectionSlug}${whereQuery}`, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          method: 'GET',
+          }),
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
         })
 
-        if (response.ok) {
-          const data = await response.json()
-          setResultCount(limit && limit < data.totalDocs ? limit : data.totalDocs)
-          // TODO: check if this data is in the correct format for the table
-
-          const filteredFields = (collectionConfig?.fields?.filter((field) => {
-            if (!fieldAffectsData(field)) {
-              return false
-            }
-            if (fields?.length > 0) {
-              return fields.includes(field.name)
-            }
-            return true
-          }) ?? []) as FieldAffectingDataClient[]
-
-          setColumns(
-            filteredFields.map((field) => ({
-              accessor: field.name || '',
-              active: true,
-              field: field as ClientField,
-              Heading: getTranslation(field?.label || (field.name as string), i18n),
-              renderedCells: data.docs.map((doc: Record<string, unknown>) => {
-                if (!field.name || !doc[field.name]) {
-                  return null
-                }
-                if (typeof doc[field.name] === 'object') {
-                  return JSON.stringify(doc[field.name])
-                }
-                return String(doc[field.name])
-              }),
-            })) as Column[],
-          )
-          setDataToRender(data.docs)
+        if (!res.ok) {
+          return
         }
+
+        const { docs, totalDocs }: { docs: Record<string, unknown>[]; totalDocs: number } =
+          await res.json()
+
+        setResultCount(limit && limit < totalDocs ? limit : totalDocs)
+
+        const allKeys = Array.from(new Set(docs.flatMap((doc) => Object.keys(doc))))
+        const defaultMetaFields = ['createdAt', 'updatedAt', '_status', 'id']
+
+        // Match CSV column ordering by building keys based on fields and regex
+        const fieldToRegex = (field: string): RegExp => {
+          const parts = field.split('.').map((part) => `${part}(?:_\\d+)?`)
+          return new RegExp(`^${parts.join('_')}`)
+        }
+
+        // Construct final list of field keys to match field order + meta order
+        const selectedKeys =
+          Array.isArray(fields) && fields.length > 0
+            ? fields.flatMap((field) => {
+                const regex = fieldToRegex(field)
+                return allKeys.filter(
+                  (key) =>
+                    regex.test(key) &&
+                    !disabledFieldRegexes.some((disabledRegex) => disabledRegex.test(key)),
+                )
+              })
+            : allKeys.filter(
+                (key) =>
+                  !defaultMetaFields.includes(key) &&
+                  !disabledFieldRegexes.some((regex) => regex.test(key)),
+              )
+
+        const fieldKeys =
+          Array.isArray(fields) && fields.length > 0
+            ? selectedKeys // strictly use selected fields only
+            : [
+                ...selectedKeys,
+                ...defaultMetaFields.filter(
+                  (key) => allKeys.includes(key) && !selectedKeys.includes(key),
+                ),
+              ]
+
+        // Build columns based on flattened keys
+        const newColumns: Column[] = fieldKeys.map((key) => ({
+          accessor: key,
+          active: true,
+          field: { name: key } as ClientField,
+          Heading: getTranslation(key, i18n),
+          renderedCells: docs.map((doc: Record<string, unknown>) => {
+            const val = doc[key]
+
+            if (val === undefined || val === null) {
+              return null
+            }
+
+            // Avoid ESLint warning by type-checking before calling String()
+            if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
+              return String(val)
+            }
+
+            if (Array.isArray(val)) {
+              return val.map(String).join(', ')
+            }
+
+            return JSON.stringify(val)
+          }),
+        }))
+
+        setColumns(newColumns)
+        setDataToRender(docs)
       } catch (error) {
-        console.error('Error fetching data:', error)
+        console.error('Error fetching preview data:', error)
       }
     }
 
     void fetchData()
-  }, [collectionConfig?.fields, collectionSlug, draft, fields, limit, sort, where])
+  }, [
+    collectionConfig,
+    collectionSlug,
+    disabledFieldRegexes,
+    draft,
+    fields,
+    format,
+    i18n,
+    limit,
+    locale,
+    page,
+    sort,
+    where,
+  ])
 
   return (
     <div className={baseClass}>
@@ -125,7 +193,12 @@ export const Preview = () => {
           />
         )}
       </div>
-      {dataToRender && <Table columns={columns} data={dataToRender} />}
+      {dataToRender &&
+        (isCSV ? (
+          <Table columns={columns} data={dataToRender} />
+        ) : (
+          <CodeEditorLazy language="json" readOnly value={JSON.stringify(dataToRender, null, 2)} />
+        ))}
     </div>
   )
 }

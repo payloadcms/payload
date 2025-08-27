@@ -1,20 +1,17 @@
 'use client'
 
 import type { CollectionSlug, Document } from 'payload'
-import type {
-  FolderBreadcrumb,
-  FolderDocumentItemKey,
-  FolderOrDocument,
-  GetFolderDataResult,
-} from 'payload/shared'
+import type { FolderBreadcrumb, FolderOrDocument } from 'payload/shared'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { formatFolderOrDocumentItem } from 'payload/shared'
+import { extractID } from 'payload/shared'
 import React from 'react'
 
-import { useConfig } from '../../../../providers/Config/index.js'
+import { useAuth } from '../../../../providers/Auth/index.js'
 import { FolderProvider, useFolder } from '../../../../providers/Folders/index.js'
+import { useRouteCache } from '../../../../providers/RouteCache/index.js'
+import { useServerFunctions } from '../../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { Button } from '../../../Button/index.js'
 import { ConfirmationModal } from '../../../ConfirmationModal/index.js'
@@ -28,7 +25,6 @@ import { NoListResults } from '../../../NoListResults/index.js'
 import { Translation } from '../../../Translation/index.js'
 import { FolderBreadcrumbs } from '../../Breadcrumbs/index.js'
 import { ColoredFolderIcon } from '../../ColoredFolderIcon/index.js'
-import { ItemCardGrid } from '../../ItemCardGrid/index.js'
 import './index.scss'
 
 const baseClass = 'move-folder-drawer'
@@ -45,6 +41,7 @@ type ActionProps =
     }
 export type MoveToFolderDrawerProps = {
   readonly drawerSlug: string
+  readonly folderAssignedCollections: CollectionSlug[]
   readonly folderCollectionSlug: string
   readonly folderFieldName: string
   readonly fromFolderID?: number | string
@@ -59,6 +56,7 @@ export type MoveToFolderDrawerProps = {
     id: null | number | string
     name: null | string
   }) => Promise<void> | void
+  readonly populateMoveToFolderDrawer?: (folderID: null | number | string) => Promise<void> | void
   /**
    * Set to `true` to skip the confirmation modal
    * @default false
@@ -75,51 +73,51 @@ export function MoveItemsToFolderDrawer(props: MoveToFolderDrawerProps) {
 }
 
 function LoadFolderData(props: MoveToFolderDrawerProps) {
-  const {
-    config: { routes, serverURL },
-  } = useConfig()
+  const { permissions } = useAuth()
   const [subfolders, setSubfolders] = React.useState<FolderOrDocument[]>([])
   const [documents, setDocuments] = React.useState<FolderOrDocument[]>([])
   const [breadcrumbs, setBreadcrumbs] = React.useState<FolderBreadcrumb[]>([])
+  const [FolderResultsComponent, setFolderResultsComponent] = React.useState<React.ReactNode>(null)
   const [hasLoaded, setHasLoaded] = React.useState(false)
+  const [folderID, setFolderID] = React.useState<null | number | string>(props.fromFolderID || null)
+  const hasLoadedRef = React.useRef(false)
+  const { getFolderResultsComponentAndData } = useServerFunctions()
 
-  React.useEffect(() => {
-    const onLoad = async () => {
-      // call some endpoint to load the data
-
+  const populateMoveToFolderDrawer = React.useCallback(
+    async (folderIDToPopulate: null | number | string) => {
       try {
-        const folderDataReq = await fetch(
-          `${serverURL}${routes.api}/${props.folderCollectionSlug}/populate-folder-data${props.fromFolderID ? `?folderID=${props.fromFolderID}` : ''}`,
-          {
-            credentials: 'include',
-            headers: {
-              'content-type': 'application/json',
-            },
-          },
-        )
+        const result = await getFolderResultsComponentAndData({
+          browseByFolder: false,
+          collectionsToDisplay: [props.folderCollectionSlug],
+          displayAs: 'grid',
+          // todo: should be able to pass undefined, empty array or null and get all folders. Need to look at API for this in the server function
+          folderAssignedCollections: props.folderAssignedCollections,
+          folderID: folderIDToPopulate,
+          sort: 'name',
+        })
 
-        if (folderDataReq.status === 200) {
-          const folderDataRes: GetFolderDataResult = await folderDataReq.json()
-          setBreadcrumbs(folderDataRes?.breadcrumbs || [])
-          setSubfolders(folderDataRes?.subfolders || [])
-          setDocuments(folderDataRes?.documents || [])
-        } else {
-          setBreadcrumbs([])
-          setSubfolders([])
-          setDocuments([])
-        }
+        setBreadcrumbs(result.breadcrumbs || [])
+        setSubfolders(result?.subfolders || [])
+        setDocuments(result?.documents || [])
+        setFolderResultsComponent(result.FolderResultsComponent || null)
+        setFolderID(folderIDToPopulate)
+        setHasLoaded(true)
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e)
+        setBreadcrumbs([])
+        setSubfolders([])
+        setDocuments([])
       }
 
-      setHasLoaded(true)
-    }
+      hasLoadedRef.current = true
+    },
+    [getFolderResultsComponentAndData, props.folderAssignedCollections, props.folderCollectionSlug],
+  )
 
-    if (!hasLoaded) {
-      void onLoad()
+  React.useEffect(() => {
+    if (!hasLoadedRef.current) {
+      void populateMoveToFolderDrawer(props.fromFolderID)
     }
-  }, [props.folderCollectionSlug, routes.api, serverURL, hasLoaded, props.fromFolderID])
+  }, [populateMoveToFolderDrawer, props.fromFolderID])
 
   if (!hasLoaded) {
     return <LoadingOverlay />
@@ -127,46 +125,59 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
 
   return (
     <FolderProvider
+      allCollectionFolderSlugs={[props.folderCollectionSlug]}
+      allowCreateCollectionSlugs={
+        permissions.collections[props.folderCollectionSlug]?.create
+          ? [props.folderCollectionSlug]
+          : []
+      }
       allowMultiSelection={false}
       breadcrumbs={breadcrumbs}
       documents={documents}
-      folderCollectionSlugs={[]}
       folderFieldName={props.folderFieldName}
-      folderID={props.fromFolderID}
+      folderID={folderID}
+      FolderResultsComponent={FolderResultsComponent}
+      key={folderID}
+      onItemClick={async (item) => {
+        await populateMoveToFolderDrawer(item.value.id)
+      }}
       subfolders={subfolders}
     >
-      <Content {...props} />
+      <Content {...props} populateMoveToFolderDrawer={populateMoveToFolderDrawer} />
     </FolderProvider>
   )
 }
 
 function Content({
   drawerSlug,
+  fromFolderID,
   fromFolderName,
   itemsToMove,
   onConfirm,
+  populateMoveToFolderDrawer,
   skipConfirmModal,
   ...props
 }: MoveToFolderDrawerProps) {
-  const { closeModal, openModal } = useModal()
+  const { clearRouteCache } = useRouteCache()
+  const { closeModal, isModalOpen, openModal } = useModal()
   const [count] = React.useState(() => itemsToMove.length)
+  const [folderAddedToUnderlyingFolder, setFolderAddedToUnderlyingFolder] = React.useState(false)
   const { i18n, t } = useTranslation()
   const {
-    addItems,
     breadcrumbs,
     folderCollectionConfig,
     folderCollectionSlug,
     folderFieldName,
     folderID,
+    FolderResultsComponent,
+    folderType,
     getSelectedItems,
-    setFolderID,
     subfolders,
   } = useFolder()
   const [FolderDocumentDrawer, , { closeDrawer: closeFolderDrawer, openDrawer: openFolderDrawer }] =
     useDocumentDrawer({
       collectionSlug: folderCollectionSlug,
     })
-  const { getEntityConfig } = useConfig()
 
   const getSelectedFolder = React.useCallback((): {
     id: null | number | string
@@ -191,19 +202,19 @@ function Content({
   }, [breadcrumbs, getSelectedItems])
 
   const onCreateSuccess = React.useCallback(
-    ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Document }) => {
-      const collectionConfig = getEntityConfig({ collectionSlug })
-      void addItems([
-        formatFolderOrDocumentItem({
-          folderFieldName,
-          isUpload: Boolean(collectionConfig?.upload),
-          relationTo: collectionSlug,
-          useAsTitle: collectionConfig.admin.useAsTitle,
-          value: doc,
-        }),
-      ])
+    async ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Document }) => {
+      await populateMoveToFolderDrawer(folderID)
+      if (
+        collectionSlug === folderCollectionSlug &&
+        ((doc?.folder && fromFolderID === extractID(doc?.folder)) ||
+          (!fromFolderID && !doc?.folder))
+      ) {
+        // if the folder we created is in the same folder as the one we are moving from
+        // set variable so we can clear the route cache when we close the drawer
+        setFolderAddedToUnderlyingFolder(true)
+      }
     },
-    [addItems, folderFieldName, getEntityConfig],
+    [populateMoveToFolderDrawer, folderID, fromFolderID, folderCollectionSlug],
   )
 
   const onConfirmMove = React.useCallback(() => {
@@ -212,8 +223,17 @@ function Content({
     }
   }, [getSelectedFolder, onConfirm])
 
+  React.useEffect(() => {
+    if (!isModalOpen(drawerSlug) && folderAddedToUnderlyingFolder) {
+      // if we added a folder to the underlying folder, clear the route cache
+      // so that the folder view will be reloaded with the new folder
+      setFolderAddedToUnderlyingFolder(false)
+      clearRouteCache()
+    }
+  }, [drawerSlug, isModalOpen, clearRouteCache, folderAddedToUnderlyingFolder])
+
   return (
-    <>
+    <div className={baseClass}>
       <DrawerActionHeader
         onCancel={() => {
           closeModal(drawerSlug)
@@ -230,7 +250,7 @@ function Content({
           <DrawerHeading
             action={props.action}
             count={count}
-            fromFolderName={props.fromFolderID ? fromFolderName : undefined}
+            fromFolderName={fromFolderID ? fromFolderName : undefined}
             title={props.action === 'moveItemToFolder' ? props.title : undefined}
           />
         }
@@ -249,7 +269,7 @@ function Content({
               ),
               onClick: breadcrumbs.length
                 ? () => {
-                    void setFolderID({ folderID: null })
+                    void populateMoveToFolderDrawer(null)
                   }
                 : undefined,
             },
@@ -259,7 +279,7 @@ function Content({
               onClick:
                 index !== breadcrumbs.length - 1
                   ? () => {
-                      void setFolderID({ folderID: crumb.id })
+                      void populateMoveToFolderDrawer(crumb.id)
                     }
                   : undefined,
             })),
@@ -282,14 +302,13 @@ function Content({
             <FolderDocumentDrawer
               initialData={{
                 [folderFieldName]: folderID,
+                folderType,
               }}
               onSave={(result) => {
-                if (typeof onCreateSuccess === 'function') {
-                  void onCreateSuccess({
-                    collectionSlug: folderCollectionConfig.slug,
-                    doc: result.doc,
-                  })
-                }
+                void onCreateSuccess({
+                  collectionSlug: folderCollectionConfig.slug,
+                  doc: result.doc,
+                })
                 closeFolderDrawer()
               }}
               redirectAfterCreate={false}
@@ -300,20 +319,14 @@ function Content({
 
       <DrawerContentContainer className={`${baseClass}__body-section`}>
         {subfolders.length > 0 ? (
-          <ItemCardGrid
-            disabledItemKeys={new Set(itemsToMove.map(({ itemKey }) => itemKey))}
-            items={subfolders}
-            selectedItemKeys={
-              new Set<FolderDocumentItemKey>([`${folderCollectionSlug}-${getSelectedFolder().id}`])
-            }
-            type="folder"
-          />
+          FolderResultsComponent
         ) : (
           <NoListResults
             Actions={[
               <ListCreateNewDocInFolderButton
                 buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
                 collectionSlugs={[folderCollectionSlug]}
+                folderAssignedCollections={props.folderAssignedCollections}
                 key="create-folder"
                 onCreateSuccess={onCreateSuccess}
                 slugPrefix="create-new-folder-from-drawer--no-results"
@@ -348,7 +361,7 @@ function Content({
           onConfirm={onConfirmMove}
         />
       )}
-    </>
+    </div>
   )
 }
 

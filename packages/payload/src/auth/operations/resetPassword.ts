@@ -6,6 +6,7 @@ import type { PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { APIError, Forbidden } from '../../errors/index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -76,13 +77,19 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
     // Reset Password
     // /////////////////////////////////////
 
-    const user = await payload.db.findOne<any>({
-      collection: collectionConfig.slug,
-      req,
+    const where = appendNonTrashedFilter({
+      enableTrash: Boolean(collectionConfig.trash),
+      trash: false,
       where: {
         resetPasswordExpiration: { greater_than: new Date().toISOString() },
         resetPasswordToken: { equals: data.token },
       },
+    })
+
+    const user = await payload.db.findOne<any>({
+      collection: collectionConfig.slug,
+      req,
+      where,
     })
 
     if (!user) {
@@ -124,6 +131,9 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
     // Update new password
     // /////////////////////////////////////
 
+    // Ensure updatedAt date is always updated
+    user.updatedAt = new Date().toISOString()
+
     const doc = await payload.db.updateOne({
       id: user.id,
       collection: collectionConfig.slug,
@@ -151,6 +161,7 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
       depth,
       overrideAccess,
       req,
+      trash: false,
     })
 
     if (shouldCommit) {

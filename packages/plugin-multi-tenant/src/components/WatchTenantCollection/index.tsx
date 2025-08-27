@@ -8,6 +8,8 @@ import {
   useDocumentTitle,
   useEffectEvent,
   useFormFields,
+  useFormSubmitted,
+  useOperation,
 } from '@payloadcms/ui'
 import React from 'react'
 
@@ -15,6 +17,8 @@ import { useTenantSelection } from '../../providers/TenantSelectionProvider/inde
 
 export const WatchTenantCollection = () => {
   const { id, collectionSlug } = useDocumentInfo()
+  const operation = useOperation()
+  const submitted = useFormSubmitted()
   const { title } = useDocumentTitle()
 
   const { getEntityConfig } = useConfig()
@@ -23,7 +27,7 @@ export const WatchTenantCollection = () => {
   )
   const titleField = useFormFields(([fields]) => (useAsTitleName ? fields[useAsTitleName] : {}))
 
-  const { updateTenants } = useTenantSelection()
+  const { syncTenants, updateTenants } = useTenantSelection()
 
   const syncTenantTitle = useEffectEvent(() => {
     if (id) {
@@ -35,9 +39,15 @@ export const WatchTenantCollection = () => {
     // only update the tenant selector when the document saves
     // → aka when initial value changes
     if (id && titleField?.initialValue) {
-      syncTenantTitle()
+      void syncTenantTitle()
     }
-  }, [id, titleField?.initialValue])
+  }, [id, titleField?.initialValue, syncTenants])
+
+  React.useEffect(() => {
+    if (operation === 'create' && submitted) {
+      void syncTenants()
+    }
+  }, [operation, submitted, syncTenants, id])
 
   return null
 }

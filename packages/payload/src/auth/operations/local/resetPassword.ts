@@ -17,7 +17,7 @@ export type Options<T extends CollectionSlug> = {
   req?: Partial<PayloadRequest>
 }
 
-async function localResetPassword<TSlug extends CollectionSlug>(
+export async function resetPasswordLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<Result> {
@@ -46,5 +46,3 @@ async function localResetPassword<TSlug extends CollectionSlug>(
 
   return result
 }
-
-export const resetPassword = localResetPassword

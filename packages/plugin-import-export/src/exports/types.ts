@@ -1,1 +1,1 @@
-export type { ImportExportPluginConfig } from '../types.js'
+export type { ImportExportPluginConfig, ToCSVFunction } from '../types.js'

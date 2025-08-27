@@ -67,5 +67,9 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
     return mergedData
   }
 
-  return initialData
+  if (!_payloadLivePreview.previousData) {
+    _payloadLivePreview.previousData = initialData
+  }
+
+  return _payloadLivePreview.previousData as T
 }

@@ -1,0 +1,43 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .live-preview-toolbar {
+    display: flex;
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
+    height: calc(var(--base) * 1.75);
+    align-items: center;
+    flex-shrink: 0;
+
+    &--static {
+      position: relative;
+      width: 100%;
+      justify-content: center;
+      border-bottom: 1px solid var(--theme-elevation-100);
+    }
+
+    &--draggable {
+      @include shadow-lg;
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 0;
+      border-radius: 4px;
+    }
+
+    &__drag-handle {
+      background: transparent;
+      border: 0;
+      padding: 0;
+      cursor: grab;
+
+      .icon--drag-handle .fill {
+        fill: var(--theme-elevation-300);
+      }
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+  }
+}

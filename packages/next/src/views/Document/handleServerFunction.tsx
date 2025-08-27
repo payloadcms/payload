@@ -1,11 +1,5 @@
-import type {
-  Data,
-  DocumentPreferences,
-  FormState,
-  Locale,
-  PayloadRequest,
-  VisibleEntities,
-} from 'payload'
+import type { RenderDocumentServerFunction } from '@payloadcms/ui'
+import type { DocumentPreferences, VisibleEntities } from 'payload'
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
@@ -13,26 +7,7 @@ import { getAccessResults, isEntityHidden, parseCookies } from 'payload'
 
 import { renderDocument } from './index.js'
 
-type RenderDocumentResult = {
-  data: any
-  Document: React.ReactNode
-  preferences: DocumentPreferences
-}
-
-export const renderDocumentHandler = async (args: {
-  collectionSlug: string
-  disableActions?: boolean
-  docID: string
-  drawerSlug?: string
-  initialData?: Data
-  initialState?: FormState
-  locale?: Locale
-  overrideEntityVisibility?: boolean
-  redirectAfterCreate?: boolean
-  redirectAfterDelete: boolean
-  redirectAfterDuplicate: boolean
-  req: PayloadRequest
-}): Promise<RenderDocumentResult> => {
+export const renderDocumentHandler: RenderDocumentServerFunction = async (args) => {
   const {
     collectionSlug,
     disableActions,
@@ -41,6 +16,7 @@ export const renderDocumentHandler = async (args: {
     initialData,
     locale,
     overrideEntityVisibility,
+    paramsOverride,
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
@@ -51,6 +27,8 @@ export const renderDocumentHandler = async (args: {
       payload: { config },
       user,
     },
+    searchParams = {},
+    versions,
   } = args
 
   const headers = await getHeaders()
@@ -163,14 +141,15 @@ export const renderDocumentHandler = async (args: {
       visibleEntities,
     },
     overrideEntityVisibility,
-    params: {
-      segments: ['collections', collectionSlug, docID],
+    params: paramsOverride ?? {
+      segments: ['collections', collectionSlug, String(docID)],
     },
     payload,
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
-    searchParams: {},
+    searchParams,
+    versions,
     viewType: 'document',
   })
 

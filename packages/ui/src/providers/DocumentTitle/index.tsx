@@ -19,8 +19,7 @@ export const useDocumentTitle = (): IDocumentTitleContext => use(DocumentTitleCo
 export const DocumentTitleProvider: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {
-  const { id, collectionSlug, docConfig, globalSlug, initialData, savedDocumentData } =
-    useDocumentInfo()
+  const { id, collectionSlug, data, docConfig, globalSlug, initialData } = useDocumentInfo()
 
   const {
     config: {
@@ -45,14 +44,14 @@ export const DocumentTitleProvider: React.FC<{
     setDocumentTitle(
       formatDocTitle({
         collectionConfig: collectionSlug ? (docConfig as ClientCollectionConfig) : undefined,
-        data: { ...savedDocumentData, id },
+        data: { ...data, id },
         dateFormat,
         fallback: id?.toString(),
         globalConfig: globalSlug ? (docConfig as ClientGlobalConfig) : undefined,
         i18n,
       }),
     )
-  }, [savedDocumentData, dateFormat, i18n, id, collectionSlug, docConfig, globalSlug])
+  }, [data, dateFormat, i18n, id, collectionSlug, docConfig, globalSlug])
 
   return <DocumentTitleContext value={{ setDocumentTitle, title }}>{children}</DocumentTitleContext>
 }

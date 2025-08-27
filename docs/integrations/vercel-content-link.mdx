@@ -34,20 +34,20 @@ npm i @payloadcms/plugin-csm
 Then in the `plugins` array of your Payload Config, call the plugin and enable any collections that require Content Source Maps.
 
 ```ts
-import { buildConfig } from "payload/config"
-import contentSourceMaps from "@payloadcms/plugin-csm"
+import { buildConfig } from 'payload/config'
+import contentSourceMaps from '@payloadcms/plugin-csm'
 
 const config = buildConfig({
   collections: [
     {
-      slug: "pages",
+      slug: 'pages',
       fields: [
         {
           name: 'slug',
           type: 'text',
         },
         {
-          name: 'title,'
+          name: 'title',
           type: 'text',
         },
       ],
@@ -55,7 +55,7 @@ const config = buildConfig({
   ],
   plugins: [
     contentSourceMaps({
-      collections: ["pages"],
+      collections: ['pages'],
     }),
   ],
 })

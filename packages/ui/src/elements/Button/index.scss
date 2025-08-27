@@ -196,7 +196,7 @@
     background-color: var(--bg-color, transparent);
     box-shadow: var(--box-shadow, none);
 
-    .icon {
+    &__icon {
       width: 100%;
       height: 100%;
 
@@ -227,7 +227,7 @@
       padding: var(--btn-icon-padding);
       color: inherit;
 
-      .icon {
+      svg {
         width: 100%;
         height: 100%;
       }
@@ -279,6 +279,25 @@
         --btn-padding-inline-end: calc(var(--base) * 0.3);
       }
 
+      &.btn--icon-style-with-border {
+        // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
+      }
+    }
+
+    &--size-xsmall {
+      --btn-icon-size: calc(var(--base) * 0.8);
+      // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
+      --btn-icon-content-gap: calc(var(--base) * 0.2);
+      --btn-padding-block-start: 0;
+      --btn-padding-inline-end: calc(var(--base) * 0.3);
+      --btn-padding-inline-start: calc(var(--base) * 0.3);
+      --btn-padding-block-end: 0;
+      &.btn--icon-position-left {
+        --btn-padding-inline-start: calc(var(--base) * 0.2);
+      }
+      &.btn--icon-position-right {
+        --btn-padding-inline-end: calc(var(--base) * 0.2);
+      }
       &.btn--icon-style-with-border {
         // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
       }

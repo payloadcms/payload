@@ -6,6 +6,7 @@ import type {
   Document,
   Field,
   Payload,
+  ViewTypes,
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
@@ -32,6 +33,7 @@ type RenderCellArgs = {
   readonly payload: Payload
   readonly rowIndex: number
   readonly serverField: Field
+  readonly viewType?: ViewTypes
 }
 export function renderCell({
   clientField,
@@ -45,6 +47,7 @@ export function renderCell({
   payload,
   rowIndex,
   serverField,
+  viewType,
 }: RenderCellArgs) {
   const baseCellClientProps: DefaultCellComponentProps = {
     cellData: undefined,
@@ -52,16 +55,16 @@ export function renderCell({
     customCellProps,
     field: clientField,
     rowData: undefined,
+    viewType,
   }
 
   const accessor: string | undefined =
     ('accessor' in clientField ? (clientField.accessor as string) : undefined) ??
     ('name' in clientField ? clientField.name : undefined)
-  const dotAccessor = accessor?.replace(/-/g, '.')
 
   const cellClientProps: DefaultCellComponentProps = {
     ...baseCellClientProps,
-    cellData: 'name' in clientField ? findValueFromPath(doc, dotAccessor) : undefined,
+    cellData: 'name' in clientField ? findValueFromPath(doc, accessor) : undefined,
     link: isLinkedColumn,
     rowData: doc,
   }

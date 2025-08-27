@@ -8,7 +8,7 @@ import { useTheme } from '../../providers/Theme/index.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import './index.scss'
 
-const Editor = (EditorImport.default || EditorImport) as unknown as typeof EditorImport.default
+const Editor = 'default' in EditorImport ? EditorImport.default : EditorImport
 
 const baseClass = 'code-editor'
 

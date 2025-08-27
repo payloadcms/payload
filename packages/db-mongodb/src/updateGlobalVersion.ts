@@ -39,6 +39,8 @@ export async function updateGlobalVersion<T extends TypeWithID>(
       select,
     }),
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   const query = await buildQuery({

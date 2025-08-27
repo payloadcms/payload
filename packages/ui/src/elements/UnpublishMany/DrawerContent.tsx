@@ -20,7 +20,9 @@ import { ConfirmationModal } from '../ConfirmationModal/index.js'
 type UnpublishManyDrawerContentProps = {
   drawerSlug: string
   ids: (number | string)[]
+  onSuccess?: () => void
   selectAll: boolean
+  where?: Where
 } & UnpublishManyProps
 
 export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProps) {
@@ -29,7 +31,9 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
     collection: { slug, labels: { plural, singular } } = {},
     drawerSlug,
     ids,
+    onSuccess,
     selectAll,
+    where,
   } = props
 
   const {
@@ -56,6 +60,10 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
       },
     ]
 
+    if (where) {
+      whereConstraints.push(where)
+    }
+
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
       search: searchParams.get('search'),
@@ -81,7 +89,7 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
       },
       { addQueryPrefix: true },
     )
-  }, [collection, searchParams, selectAll, ids, locale])
+  }, [collection, searchParams, selectAll, ids, locale, where])
 
   const handleUnpublish = useCallback(async () => {
     await requests
@@ -126,6 +134,11 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
             )
 
             clearRouteCache()
+
+            if (typeof onSuccess === 'function') {
+              onSuccess()
+            }
+
             return null
           }
 
@@ -153,6 +166,7 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
     selectAll,
     clearRouteCache,
     addDefaultError,
+    onSuccess,
   ])
 
   return (

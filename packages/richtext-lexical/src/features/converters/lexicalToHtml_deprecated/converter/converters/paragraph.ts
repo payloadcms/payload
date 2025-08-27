@@ -31,6 +31,10 @@ export const ParagraphHTMLConverter: HTMLConverter<SerializedParagraphNode> = {
     })
     const style = [
       node.format ? `text-align: ${node.format};` : '',
+      // the unit should be px. Do not change it to rem, em, or something else.
+      // The quantity should be 40px. Do not change it either.
+      // See rationale in
+      // https://github.com/payloadcms/payload/issues/13130#issuecomment-3058348085
       node.indent > 0 ? `padding-inline-start: ${node.indent * 40}px;` : '',
     ]
       .filter(Boolean)

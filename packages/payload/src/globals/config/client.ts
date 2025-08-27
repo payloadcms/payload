@@ -1,5 +1,4 @@
-// @ts-strict-ignore
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient, TFunction } from '@payloadcms/translations'
 
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type {
@@ -89,7 +88,8 @@ export const createClientGlobalConfig = ({
               clientGlobal.admin.preview = true
               break
             default:
-              clientGlobal.admin[adminKey] = global.admin[adminKey]
+              ;(clientGlobal.admin as any)[adminKey] =
+                global.admin[adminKey as keyof typeof global.admin]
           }
         }
         break
@@ -103,10 +103,12 @@ export const createClientGlobalConfig = ({
         break
       case 'label':
         clientGlobal.label =
-          typeof global.label === 'function' ? global.label({ i18n, t: i18n.t }) : global.label
+          typeof global.label === 'function'
+            ? global.label({ i18n, t: i18n.t as TFunction })
+            : global.label
         break
       default: {
-        clientGlobal[key] = global[key]
+        ;(clientGlobal as any)[key] = global[key as keyof typeof global]
         break
       }
     }

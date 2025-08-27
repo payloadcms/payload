@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
@@ -82,7 +81,7 @@ export async function validateQueryPaths({
         }
       } else if (!Array.isArray(constraint)) {
         for (const operator in constraint) {
-          const val = constraint[operator]
+          const val = constraint[operator as keyof typeof constraint]
           if (validOperatorSet.has(operator as Operator)) {
             promises.push(
               validateSearchParam({

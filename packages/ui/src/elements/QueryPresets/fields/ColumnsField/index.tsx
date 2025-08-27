@@ -23,7 +23,11 @@ export const QueryPresetsColumnField: JSONFieldClientComponent = ({
               const isColumnActive = !column.startsWith('-')
 
               return (
-                <Pill key={i} pillStyle={isColumnActive ? 'always-white' : 'light-gray'}>
+                <Pill
+                  key={i}
+                  pillStyle={isColumnActive ? 'always-white' : 'light-gray'}
+                  size="small"
+                >
                   {toWords(column)}
                 </Pill>
               )

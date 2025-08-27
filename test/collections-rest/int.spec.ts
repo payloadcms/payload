@@ -1797,6 +1797,28 @@ describe('collections-rest', () => {
       expect((await result.json()).message.startsWith('Route not found')).toBeTruthy()
     }
   })
+
+  it('should disable bulk edit for the collection with disableBulkEdit: true', async () => {
+    const res = await restClient.PATCH('/disabled-bulk-edit-docs?where[id][equals]=0', {})
+    expect(res.status).toBe(403)
+
+    await expect(
+      payload.update({
+        collection: 'disabled-bulk-edit-docs',
+        where: {},
+        data: {},
+        overrideAccess: false,
+      }),
+    ).rejects.toBeInstanceOf(APIError)
+
+    await expect(
+      payload.update({
+        collection: 'disabled-bulk-edit-docs',
+        where: {},
+        data: {},
+      }),
+    ).resolves.toBeTruthy()
+  })
 })
 
 async function createPost(overrides?: Partial<Post>) {

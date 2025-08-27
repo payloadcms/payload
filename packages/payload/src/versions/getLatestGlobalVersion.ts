@@ -1,6 +1,6 @@
-// @ts-strict-ignore
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Document, Payload, PayloadRequest, Where } from '../types/index.js'
+import type { TypeWithVersion } from './types.js'
 
 type Args = {
   config: SanitizedGlobalConfig
@@ -21,7 +21,7 @@ export const getLatestGlobalVersion = async ({
   req,
   where,
 }: Args): Promise<{ global: Document; globalExists: boolean }> => {
-  let latestVersion
+  let latestVersion: TypeWithVersion<Document> | undefined
 
   const whereQuery = published
     ? { 'version._status': { equals: 'published' } }

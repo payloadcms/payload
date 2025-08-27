@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
@@ -7,7 +6,7 @@ import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
-import isolateObjectProperty from '../../utilities/isolateObjectProperty.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
@@ -105,12 +104,15 @@ export async function validateSearchParam({
         return
       }
 
+      // where: { relatedPosts: { equals: 1}} -> { 'relatedPosts.id': { equals: 1}}
+      if (field.type === 'join' && path === incomingPath) {
+        constraint[`${path}.id` as keyof WhereField] = constraint[path as keyof WhereField]
+        delete constraint[path as keyof WhereField]
+      }
+
       if ('virtual' in field && field.virtual) {
         if (field.virtual === true) {
           errors.push({ path })
-        } else {
-          constraint[`${field.virtual}`] = constraint[path]
-          delete constraint[path]
         }
       }
 
@@ -155,35 +157,37 @@ export async function validateSearchParam({
         const entitySlug = collectionSlug || globalConfig!.slug
         const segments = fieldPath.split('.')
 
-        let fieldAccess
+        let fieldAccess: any
 
         if (versionFields) {
-          fieldAccess = policies[entityType]![entitySlug]!
+          fieldAccess = policies[entityType]![entitySlug]!.fields
 
-          if (segments[0] === 'parent' || segments[0] === 'version') {
+          if (
+            segments[0] === 'parent' ||
+            segments[0] === 'version' ||
+            segments[0] === 'snapshot' ||
+            segments[0] === 'latest'
+          ) {
             segments.shift()
           }
         } else {
           fieldAccess = policies[entityType]![entitySlug]!.fields
         }
 
-        segments.forEach((segment) => {
-          if (fieldAccess[segment]) {
-            if ('fields' in fieldAccess[segment]) {
-              fieldAccess = fieldAccess[segment].fields
-            } else if (
-              'blocks' in fieldAccess[segment] ||
-              'blockReferences' in fieldAccess[segment]
-            ) {
-              fieldAccess = fieldAccess[segment]
-            } else {
-              fieldAccess = fieldAccess[segment]
+        if (segments.length) {
+          segments.forEach((segment) => {
+            if (fieldAccess[segment]) {
+              if ('fields' in fieldAccess[segment]) {
+                fieldAccess = fieldAccess[segment].fields
+              } else {
+                fieldAccess = fieldAccess[segment]
+              }
             }
-          }
-        })
+          })
 
-        if (!fieldAccess?.read?.permission) {
-          errors.push({ path: fieldPath })
+          if (!fieldAccess?.read?.permission) {
+            errors.push({ path: fieldPath })
+          }
         }
       }
 

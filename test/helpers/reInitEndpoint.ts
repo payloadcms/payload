@@ -15,7 +15,7 @@ const handler: PayloadHandler = async (req) => {
   }
 
   const query: {
-    deleteOnly?: boolean
+    deleteOnly?: string
     snapshotKey?: string
     uploadsDir?: string | string[]
   } = qs.parse(req.url.split('?')[1] ?? '', {
@@ -24,7 +24,6 @@ const handler: PayloadHandler = async (req) => {
   })
 
   try {
-    console.log('Calling seedDB')
     await seedDB({
       _payload: payload,
       collectionSlugs: payload.config.collections.map(({ slug }) => slug),
@@ -32,7 +31,8 @@ const handler: PayloadHandler = async (req) => {
       snapshotKey: String(query.snapshotKey),
       // uploadsDir can be string or stringlist
       uploadsDir: query.uploadsDir as string | string[],
-      deleteOnly: query.deleteOnly,
+      // query value will be a string of 'true' or 'false'
+      deleteOnly: query.deleteOnly === 'true',
     })
 
     return Response.json(

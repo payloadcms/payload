@@ -393,7 +393,7 @@ export default function LoginForm() {
 
 ### Logout
 
-Logs out the current user by clearing the authentication cookie.
+Logs out the current user by clearing the authentication cookie and current sessions.
 
 #### Importing the `logout` function
 
@@ -401,7 +401,7 @@ Logs out the current user by clearing the authentication cookie.
 import { logout } from '@payloadcms/next/auth'
 ```
 
-Similar to the login function, you now need to pass your Payload config to this function and this cannot be done in a client component. Use a helper server function as shown below.
+Similar to the login function, you now need to pass your Payload config to this function and this cannot be done in a client component. Use a helper server function as shown below. To ensure all sessions are cleared, set `allSessions: true` in the options, if you wish to logout but keep current sessions active, you can set this to `false` or leave it `undefined`.
 
 ```ts
 'use server'
@@ -411,7 +411,7 @@ import config from '@payload-config'
 
 export async function logoutAction() {
   try {
-    return await logout({ config })
+    return await logout({ allSessions: true, config })
   } catch (error) {
     throw new Error(
       `Logout failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -434,7 +434,7 @@ export default function LogoutButton() {
 
 ### Refresh
 
-Refreshes the authentication token for the logged-in user.
+Refreshes the authentication token and current session for the logged-in user.
 
 #### Importing the `refresh` function
 
@@ -453,7 +453,6 @@ import config from '@payload-config'
 export async function refreshAction() {
   try {
     return await refresh({
-      collection: 'users', // pass your collection slug
       config,
     })
   } catch (error) {

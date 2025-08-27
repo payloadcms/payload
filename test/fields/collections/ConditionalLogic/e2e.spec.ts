@@ -1,6 +1,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -175,7 +176,7 @@ describe('Conditional Logic', () => {
 
   test('should not render fields when adding array or blocks rows until form state returns', async () => {
     await page.goto(url.create)
-    await page.locator('#field-arrayWithConditionalField .array-field__add-row').click()
+    await addArrayRow(page, { fieldName: 'arrayWithConditionalField' })
     const shimmer = '#field-arrayWithConditionalField .collapsible__content > .shimmer-effect'
 
     await expect(page.locator(shimmer)).toBeVisible()
@@ -204,14 +205,11 @@ describe('Conditional Logic', () => {
   test('should render field based on path argument', async () => {
     await page.goto(url.create)
 
-    const arrayOneButton = page.locator('#field-arrayOne .array-field__add-row')
-    await arrayOneButton.click()
+    await addArrayRow(page, { fieldName: 'arrayOne' })
 
-    const arrayTwoButton = page.locator('#arrayOne-row-0 .array-field__add-row')
-    await arrayTwoButton.click()
+    await addArrayRow(page, { fieldName: 'arrayOne__0__arrayTwo' })
 
-    const arrayThreeButton = page.locator('#arrayOne-0-arrayTwo-row-0 .array-field__add-row')
-    await arrayThreeButton.click()
+    await addArrayRow(page, { fieldName: 'arrayOne__0__arrayTwo__0__arrayThree' })
 
     const numberField = page.locator('#field-arrayOne__0__arrayTwo__0__arrayThree__0__numberField')
 

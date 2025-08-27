@@ -6,11 +6,12 @@ import {
   type FlattenedBlock,
   formatErrors,
   type PayloadRequest,
+  type ServerFunction,
+  traverseFields,
 } from 'payload'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type CopyDataFromLocaleArgs = {
   collectionSlug?: CollectionSlug
@@ -69,8 +70,9 @@ function iterateFields(
           // if the field has no value, take the source value
           if (
             field.name in toLocaleData &&
-            // only replace if the target value is null or undefined
-            [null, undefined].includes(toLocaleData[field.name]) &&
+            // only replace if the target value is null, undefined, or empty array
+            ([null, undefined].includes(toLocaleData[field.name]) ||
+              (Array.isArray(toLocaleData[field.name]) && toLocaleData[field.name].length === 0)) &&
             field.name in fromLocaleData
           ) {
             toLocaleData[field.name] = fromLocaleData[field.name]
@@ -189,18 +191,26 @@ function mergeData(
   return toLocaleData
 }
 
-function removeIds(data: Data): Data {
-  if (Array.isArray(data)) {
-    return data.map(removeIds)
-  }
-  if (typeof data === 'object' && data !== null) {
-    const { id: _id, ...rest } = data
-    return Object.fromEntries(Object.entries(rest).map(([key, value]) => [key, removeIds(value)]))
-  }
+/**
+ * We don't have to recursively remove all ids,
+ * just the ones from the fields inside a localized array or block.
+ */
+function removeIdIfParentIsLocalized(data: Data, fields: Field[]): Data {
+  traverseFields({
+    callback: ({ parentIsLocalized, ref }) => {
+      if (parentIsLocalized) {
+        delete (ref as { id: unknown }).id
+      }
+    },
+    fields,
+    fillEmpty: false,
+    ref: data,
+  })
+
   return data
 }
 
-export const copyDataFromLocaleHandler = async (args: CopyDataFromLocaleArgs) => {
+export const copyDataFromLocaleHandler: ServerFunction<CopyDataFromLocaleArgs> = async (args) => {
   const { req } = args
 
   try {
@@ -305,21 +315,23 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     throw new Error(`Error fetching data from locale "${toLocale}"`)
   }
 
-  const fromLocaleDataWithoutID = removeIds(fromLocaleData.value)
-  const toLocaleDataWithoutID = removeIds(toLocaleData.value)
+  const fields = globalSlug
+    ? globals[globalSlug].config.fields
+    : collections[collectionSlug].config.fields
+
+  const fromLocaleDataWithoutID = fromLocaleData.value
+  const toLocaleDataWithoutID = toLocaleData.value
+
+  const dataWithID = overrideData
+    ? fromLocaleDataWithoutID
+    : mergeData(fromLocaleDataWithoutID, toLocaleDataWithoutID, fields, req, false)
+
+  const data = removeIdIfParentIsLocalized(dataWithID, fields)
 
   return globalSlug
     ? await payload.updateGlobal({
         slug: globalSlug,
-        data: overrideData
-          ? fromLocaleDataWithoutID
-          : mergeData(
-              fromLocaleDataWithoutID,
-              toLocaleDataWithoutID,
-              globals[globalSlug].config.fields,
-              req,
-              false,
-            ),
+        data,
         locale: toLocale,
         overrideAccess: false,
         req,
@@ -328,15 +340,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     : await payload.update({
         id: docID,
         collection: collectionSlug,
-        data: overrideData
-          ? fromLocaleDataWithoutID
-          : mergeData(
-              fromLocaleDataWithoutID,
-              toLocaleDataWithoutID,
-              collections[collectionSlug].config.fields,
-              req,
-              false,
-            ),
+        data,
         locale: toLocale,
         overrideAccess: false,
         req,

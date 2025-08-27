@@ -10,7 +10,7 @@ import RichText from '../../_components/RichText/index.js'
 import { formatDateTime } from '../../_utilities/formatDateTime.js'
 import classes from './index.module.scss'
 
-const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
+const Link = 'default' in LinkWithDefault ? LinkWithDefault.default : LinkWithDefault
 
 export const PostHero: React.FC<{
   post: Post

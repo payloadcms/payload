@@ -2,10 +2,11 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const ruTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-tenant-switch--body':
+    'confirm-modal-tenant-switch--body':
       'Вы собираетесь изменить владельца с <0>{{fromTenant}}</0> на <0>{{toTenant}}</0>',
-    'confirm-tenant-switch--heading': 'Подтвердите изменение {{tenantLabel}}',
-    'field-assignedTentant-label': 'Назначенный Арендатор',
+    'confirm-modal-tenant-switch--heading': 'Подтвердите изменение {{tenantLabel}}',
+    'field-assignedTenant-label': 'Назначенный Арендатор',
+    'nav-tenantSelector-label': 'Арендатор',
   },
 }
 

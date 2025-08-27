@@ -1,21 +1,25 @@
 type Query {
-  Collection1(id: String!, draft: Boolean): Collection1
-  Collection1s(draft: Boolean, where: Collection1_where, limit: Int, page: Int, sort: String): Collection1s
-  countCollection1s(draft: Boolean, where: Collection1_where): countCollection1s
+  Collection1(id: String!, draft: Boolean, trash: Boolean): Collection1
+  Collection1s(draft: Boolean, where: Collection1_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): Collection1s
+  countCollection1s(draft: Boolean, trash: Boolean, where: Collection1_where): countCollection1s
   docAccessCollection1(id: String!): collection1DocAccess
-  Collection2(id: String!, draft: Boolean): Collection2
-  Collection2s(draft: Boolean, where: Collection2_where, limit: Int, page: Int, sort: String): Collection2s
-  countCollection2s(draft: Boolean, where: Collection2_where): countCollection2s
+  Collection2(id: String!, draft: Boolean, trash: Boolean): Collection2
+  Collection2s(draft: Boolean, where: Collection2_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): Collection2s
+  countCollection2s(draft: Boolean, trash: Boolean, where: Collection2_where): countCollection2s
   docAccessCollection2(id: String!): collection2DocAccess
-  User(id: String!, draft: Boolean): User
-  Users(draft: Boolean, where: User_where, limit: Int, page: Int, sort: String): Users
-  countUsers(draft: Boolean, where: User_where): countUsers
+  User(id: String!, draft: Boolean, trash: Boolean): User
+  Users(draft: Boolean, where: User_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): Users
+  countUsers(draft: Boolean, trash: Boolean, where: User_where): countUsers
   docAccessUser(id: String!): usersDocAccess
   meUser: usersMe
   initializedUser: Boolean
-  PayloadPreference(id: String!, draft: Boolean): PayloadPreference
-  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, sort: String): PayloadPreferences
-  countPayloadPreferences(draft: Boolean, where: PayloadPreference_where): countPayloadPreferences
+  PayloadLockedDocument(id: String!, draft: Boolean, trash: Boolean): PayloadLockedDocument
+  PayloadLockedDocuments(draft: Boolean, where: PayloadLockedDocument_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): PayloadLockedDocuments
+  countPayloadLockedDocuments(draft: Boolean, trash: Boolean, where: PayloadLockedDocument_where): countPayloadLockedDocuments
+  docAccessPayloadLockedDocument(id: String!): payload_locked_documentsDocAccess
+  PayloadPreference(id: String!, draft: Boolean, trash: Boolean): PayloadPreference
+  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): PayloadPreferences
+  countPayloadPreferences(draft: Boolean, trash: Boolean, where: PayloadPreference_where): countPayloadPreferences
   docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
   Access: Access
 }
@@ -60,17 +64,17 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 scalar DateTime
 
 type Collection1s {
-  docs: [Collection1]
-  hasNextPage: Boolean
-  hasPrevPage: Boolean
-  limit: Int
+  docs: [Collection1!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
   nextPage: Int
   offset: Int
-  page: Int
-  pagingCounter: Int
+  page: Int!
+  pagingCounter: Int!
   prevPage: Int
-  totalDocs: Int
-  totalPages: Int
+  totalDocs: Int!
+  totalPages: Int!
 }
 
 input Collection1_where {
@@ -463,6 +467,8 @@ type Collection2 {
   metaArray: [SharedMetaArray!]
   metaGroup: SharedMeta
   nestedGroup: Collection2_NestedGroup
+  some_text_: String
+  spaceBottom: Collection2_spaceBottom
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -476,18 +482,26 @@ type Collection2_NestedGroup {
   meta: SharedMeta
 }
 
+enum Collection2_spaceBottom {
+  mb_0
+  mb_8
+  mb_16
+  mb_24
+  mb__150px_
+}
+
 type Collection2s {
-  docs: [Collection2]
-  hasNextPage: Boolean
-  hasPrevPage: Boolean
-  limit: Int
+  docs: [Collection2!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
   nextPage: Int
   offset: Int
-  page: Int
-  pagingCounter: Int
+  page: Int!
+  pagingCounter: Int!
   prevPage: Int
-  totalDocs: Int
-  totalPages: Int
+  totalDocs: Int!
+  totalPages: Int!
 }
 
 input Collection2_where {
@@ -498,6 +512,8 @@ input Collection2_where {
   metaGroup__description: Collection2_metaGroup__description_operator
   nestedGroup__meta__title: Collection2_nestedGroup__meta__title_operator
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
+  some_text_: Collection2_some_text__operator
+  spaceBottom: Collection2_spaceBottom_operator
   updatedAt: Collection2_updatedAt_operator
   createdAt: Collection2_createdAt_operator
   id: Collection2_id_operator
@@ -582,6 +598,34 @@ input Collection2_nestedGroup__meta__description_operator {
   exists: Boolean
 }
 
+input Collection2_some_text__operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Collection2_spaceBottom_operator {
+  equals: Collection2_spaceBottom_Input
+  not_equals: Collection2_spaceBottom_Input
+  in: [Collection2_spaceBottom_Input]
+  not_in: [Collection2_spaceBottom_Input]
+  all: [Collection2_spaceBottom_Input]
+  exists: Boolean
+}
+
+enum Collection2_spaceBottom_Input {
+  mb_0
+  mb_8
+  mb_16
+  mb_24
+  mb__150px_
+}
+
 input Collection2_updatedAt_operator {
   equals: DateTime
   not_equals: DateTime
@@ -623,6 +667,8 @@ input Collection2_where_and {
   metaGroup__description: Collection2_metaGroup__description_operator
   nestedGroup__meta__title: Collection2_nestedGroup__meta__title_operator
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
+  some_text_: Collection2_some_text__operator
+  spaceBottom: Collection2_spaceBottom_operator
   updatedAt: Collection2_updatedAt_operator
   createdAt: Collection2_createdAt_operator
   id: Collection2_id_operator
@@ -638,6 +684,8 @@ input Collection2_where_or {
   metaGroup__description: Collection2_metaGroup__description_operator
   nestedGroup__meta__title: Collection2_nestedGroup__meta__title_operator
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
+  some_text_: Collection2_some_text__operator
+  spaceBottom: Collection2_spaceBottom_operator
   updatedAt: Collection2_updatedAt_operator
   createdAt: Collection2_createdAt_operator
   id: Collection2_id_operator
@@ -661,6 +709,8 @@ type Collection2DocAccessFields {
   metaArray: Collection2DocAccessFields_metaArray
   metaGroup: Collection2DocAccessFields_metaGroup
   nestedGroup: Collection2DocAccessFields_nestedGroup
+  some_text_: Collection2DocAccessFields_some_text_
+  spaceBottom: Collection2DocAccessFields_spaceBottom
   updatedAt: Collection2DocAccessFields_updatedAt
   createdAt: Collection2DocAccessFields_createdAt
 }
@@ -942,6 +992,52 @@ type Collection2DocAccessFields_nestedGroup_meta_description_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_some_text_ {
+  create: Collection2DocAccessFields_some_text__Create
+  read: Collection2DocAccessFields_some_text__Read
+  update: Collection2DocAccessFields_some_text__Update
+  delete: Collection2DocAccessFields_some_text__Delete
+}
+
+type Collection2DocAccessFields_some_text__Create {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_some_text__Read {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_some_text__Update {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_some_text__Delete {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_spaceBottom {
+  create: Collection2DocAccessFields_spaceBottom_Create
+  read: Collection2DocAccessFields_spaceBottom_Read
+  update: Collection2DocAccessFields_spaceBottom_Update
+  delete: Collection2DocAccessFields_spaceBottom_Delete
+}
+
+type Collection2DocAccessFields_spaceBottom_Create {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_spaceBottom_Read {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_spaceBottom_Update {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_spaceBottom_Delete {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_updatedAt {
   create: Collection2DocAccessFields_updatedAt_Create
   read: Collection2DocAccessFields_updatedAt_Read
@@ -1019,7 +1115,7 @@ type User {
   hash: String
   loginAttempts: Float
   lockUntil: DateTime
-  password: String!
+  sessions: [User_Sessions!]
 }
 
 """
@@ -1027,24 +1123,33 @@ A field whose value conforms to the standard internet email address format as sp
 """
 scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
 
+type User_Sessions {
+  id: String
+  createdAt: DateTime
+  expiresAt: DateTime
+}
+
 type Users {
-  docs: [User]
-  hasNextPage: Boolean
-  hasPrevPage: Boolean
-  limit: Int
+  docs: [User!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
   nextPage: Int
   offset: Int
-  page: Int
-  pagingCounter: Int
+  page: Int!
+  pagingCounter: Int!
   prevPage: Int
-  totalDocs: Int
-  totalPages: Int
+  totalDocs: Int!
+  totalPages: Int!
 }
 
 input User_where {
   updatedAt: User_updatedAt_operator
   createdAt: User_createdAt_operator
   email: User_email_operator
+  sessions__id: User_sessions__id_operator
+  sessions__createdAt: User_sessions__createdAt_operator
+  sessions__expiresAt: User_sessions__expiresAt_operator
   id: User_id_operator
   AND: [User_where_and]
   OR: [User_where_or]
@@ -1082,6 +1187,37 @@ input User_email_operator {
   all: [EmailAddress]
 }
 
+input User_sessions__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input User_sessions__createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input User_sessions__expiresAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+}
+
 input User_id_operator {
   equals: String
   not_equals: String
@@ -1097,6 +1233,9 @@ input User_where_and {
   updatedAt: User_updatedAt_operator
   createdAt: User_createdAt_operator
   email: User_email_operator
+  sessions__id: User_sessions__id_operator
+  sessions__createdAt: User_sessions__createdAt_operator
+  sessions__expiresAt: User_sessions__expiresAt_operator
   id: User_id_operator
   AND: [User_where_and]
   OR: [User_where_or]
@@ -1106,6 +1245,9 @@ input User_where_or {
   updatedAt: User_updatedAt_operator
   createdAt: User_createdAt_operator
   email: User_email_operator
+  sessions__id: User_sessions__id_operator
+  sessions__createdAt: User_sessions__createdAt_operator
+  sessions__expiresAt: User_sessions__expiresAt_operator
   id: User_id_operator
   AND: [User_where_and]
   OR: [User_where_or]
@@ -1128,7 +1270,7 @@ type UsersDocAccessFields {
   updatedAt: UsersDocAccessFields_updatedAt
   createdAt: UsersDocAccessFields_createdAt
   email: UsersDocAccessFields_email
-  password: UsersDocAccessFields_password
+  sessions: UsersDocAccessFields_sessions
 }
 
 type UsersDocAccessFields_updatedAt {
@@ -1200,26 +1342,102 @@ type UsersDocAccessFields_email_Delete {
   permission: Boolean!
 }
 
-type UsersDocAccessFields_password {
-  create: UsersDocAccessFields_password_Create
-  read: UsersDocAccessFields_password_Read
-  update: UsersDocAccessFields_password_Update
-  delete: UsersDocAccessFields_password_Delete
+type UsersDocAccessFields_sessions {
+  create: UsersDocAccessFields_sessions_Create
+  read: UsersDocAccessFields_sessions_Read
+  update: UsersDocAccessFields_sessions_Update
+  delete: UsersDocAccessFields_sessions_Delete
+  fields: UsersDocAccessFields_sessions_Fields
 }
 
-type UsersDocAccessFields_password_Create {
+type UsersDocAccessFields_sessions_Create {
   permission: Boolean!
 }
 
-type UsersDocAccessFields_password_Read {
+type UsersDocAccessFields_sessions_Read {
   permission: Boolean!
 }
 
-type UsersDocAccessFields_password_Update {
+type UsersDocAccessFields_sessions_Update {
   permission: Boolean!
 }
 
-type UsersDocAccessFields_password_Delete {
+type UsersDocAccessFields_sessions_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_Fields {
+  id: UsersDocAccessFields_sessions_id
+  createdAt: UsersDocAccessFields_sessions_createdAt
+  expiresAt: UsersDocAccessFields_sessions_expiresAt
+}
+
+type UsersDocAccessFields_sessions_id {
+  create: UsersDocAccessFields_sessions_id_Create
+  read: UsersDocAccessFields_sessions_id_Read
+  update: UsersDocAccessFields_sessions_id_Update
+  delete: UsersDocAccessFields_sessions_id_Delete
+}
+
+type UsersDocAccessFields_sessions_id_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_id_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_id_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_id_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_createdAt {
+  create: UsersDocAccessFields_sessions_createdAt_Create
+  read: UsersDocAccessFields_sessions_createdAt_Read
+  update: UsersDocAccessFields_sessions_createdAt_Update
+  delete: UsersDocAccessFields_sessions_createdAt_Delete
+}
+
+type UsersDocAccessFields_sessions_createdAt_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_createdAt_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_createdAt_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_createdAt_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_expiresAt {
+  create: UsersDocAccessFields_sessions_expiresAt_Create
+  read: UsersDocAccessFields_sessions_expiresAt_Read
+  update: UsersDocAccessFields_sessions_expiresAt_Update
+  delete: UsersDocAccessFields_sessions_expiresAt_Delete
+}
+
+type UsersDocAccessFields_sessions_expiresAt_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_expiresAt_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_expiresAt_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_expiresAt_Delete {
   permission: Boolean!
 }
 
@@ -1256,6 +1474,311 @@ type usersMe {
   user: User
 }
 
+type PayloadLockedDocument {
+  id: String!
+  document: PayloadLockedDocument_Document_Relationship
+  globalSlug: String
+  user: PayloadLockedDocument_User_Relationship!
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+type PayloadLockedDocument_Document_Relationship {
+  relationTo: PayloadLockedDocument_Document_RelationTo
+  value: PayloadLockedDocument_Document
+}
+
+enum PayloadLockedDocument_Document_RelationTo {
+  collection1
+  collection2
+  users
+}
+
+union PayloadLockedDocument_Document = Collection1 | Collection2 | User
+
+type PayloadLockedDocument_User_Relationship {
+  relationTo: PayloadLockedDocument_User_RelationTo
+  value: PayloadLockedDocument_User
+}
+
+enum PayloadLockedDocument_User_RelationTo {
+  users
+}
+
+union PayloadLockedDocument_User = User
+
+type PayloadLockedDocuments {
+  docs: [PayloadLockedDocument!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
+  nextPage: Int
+  offset: Int
+  page: Int!
+  pagingCounter: Int!
+  prevPage: Int
+  totalDocs: Int!
+  totalPages: Int!
+}
+
+input PayloadLockedDocument_where {
+  document: PayloadLockedDocument_document_Relation
+  globalSlug: PayloadLockedDocument_globalSlug_operator
+  user: PayloadLockedDocument_user_Relation
+  updatedAt: PayloadLockedDocument_updatedAt_operator
+  createdAt: PayloadLockedDocument_createdAt_operator
+  id: PayloadLockedDocument_id_operator
+  AND: [PayloadLockedDocument_where_and]
+  OR: [PayloadLockedDocument_where_or]
+}
+
+input PayloadLockedDocument_document_Relation {
+  relationTo: PayloadLockedDocument_document_Relation_RelationTo
+  value: JSON
+}
+
+enum PayloadLockedDocument_document_Relation_RelationTo {
+  collection1
+  collection2
+  no_graphql
+  users
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
+input PayloadLockedDocument_globalSlug_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input PayloadLockedDocument_user_Relation {
+  relationTo: PayloadLockedDocument_user_Relation_RelationTo
+  value: JSON
+}
+
+enum PayloadLockedDocument_user_Relation_RelationTo {
+  users
+}
+
+input PayloadLockedDocument_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input PayloadLockedDocument_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input PayloadLockedDocument_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input PayloadLockedDocument_where_and {
+  document: PayloadLockedDocument_document_Relation
+  globalSlug: PayloadLockedDocument_globalSlug_operator
+  user: PayloadLockedDocument_user_Relation
+  updatedAt: PayloadLockedDocument_updatedAt_operator
+  createdAt: PayloadLockedDocument_createdAt_operator
+  id: PayloadLockedDocument_id_operator
+  AND: [PayloadLockedDocument_where_and]
+  OR: [PayloadLockedDocument_where_or]
+}
+
+input PayloadLockedDocument_where_or {
+  document: PayloadLockedDocument_document_Relation
+  globalSlug: PayloadLockedDocument_globalSlug_operator
+  user: PayloadLockedDocument_user_Relation
+  updatedAt: PayloadLockedDocument_updatedAt_operator
+  createdAt: PayloadLockedDocument_createdAt_operator
+  id: PayloadLockedDocument_id_operator
+  AND: [PayloadLockedDocument_where_and]
+  OR: [PayloadLockedDocument_where_or]
+}
+
+type countPayloadLockedDocuments {
+  totalDocs: Int
+}
+
+type payload_locked_documentsDocAccess {
+  fields: PayloadLockedDocumentsDocAccessFields
+  create: PayloadLockedDocumentsCreateDocAccess
+  read: PayloadLockedDocumentsReadDocAccess
+  update: PayloadLockedDocumentsUpdateDocAccess
+  delete: PayloadLockedDocumentsDeleteDocAccess
+}
+
+type PayloadLockedDocumentsDocAccessFields {
+  document: PayloadLockedDocumentsDocAccessFields_document
+  globalSlug: PayloadLockedDocumentsDocAccessFields_globalSlug
+  user: PayloadLockedDocumentsDocAccessFields_user
+  updatedAt: PayloadLockedDocumentsDocAccessFields_updatedAt
+  createdAt: PayloadLockedDocumentsDocAccessFields_createdAt
+}
+
+type PayloadLockedDocumentsDocAccessFields_document {
+  create: PayloadLockedDocumentsDocAccessFields_document_Create
+  read: PayloadLockedDocumentsDocAccessFields_document_Read
+  update: PayloadLockedDocumentsDocAccessFields_document_Update
+  delete: PayloadLockedDocumentsDocAccessFields_document_Delete
+}
+
+type PayloadLockedDocumentsDocAccessFields_document_Create {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_document_Read {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_document_Update {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_document_Delete {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_globalSlug {
+  create: PayloadLockedDocumentsDocAccessFields_globalSlug_Create
+  read: PayloadLockedDocumentsDocAccessFields_globalSlug_Read
+  update: PayloadLockedDocumentsDocAccessFields_globalSlug_Update
+  delete: PayloadLockedDocumentsDocAccessFields_globalSlug_Delete
+}
+
+type PayloadLockedDocumentsDocAccessFields_globalSlug_Create {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_globalSlug_Read {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_globalSlug_Update {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_globalSlug_Delete {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_user {
+  create: PayloadLockedDocumentsDocAccessFields_user_Create
+  read: PayloadLockedDocumentsDocAccessFields_user_Read
+  update: PayloadLockedDocumentsDocAccessFields_user_Update
+  delete: PayloadLockedDocumentsDocAccessFields_user_Delete
+}
+
+type PayloadLockedDocumentsDocAccessFields_user_Create {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_user_Read {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_user_Update {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_user_Delete {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_updatedAt {
+  create: PayloadLockedDocumentsDocAccessFields_updatedAt_Create
+  read: PayloadLockedDocumentsDocAccessFields_updatedAt_Read
+  update: PayloadLockedDocumentsDocAccessFields_updatedAt_Update
+  delete: PayloadLockedDocumentsDocAccessFields_updatedAt_Delete
+}
+
+type PayloadLockedDocumentsDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_createdAt {
+  create: PayloadLockedDocumentsDocAccessFields_createdAt_Create
+  read: PayloadLockedDocumentsDocAccessFields_createdAt_Read
+  update: PayloadLockedDocumentsDocAccessFields_createdAt_Update
+  delete: PayloadLockedDocumentsDocAccessFields_createdAt_Delete
+}
+
+type PayloadLockedDocumentsDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLockedDocumentsReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLockedDocumentsUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLockedDocumentsDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type PayloadPreference {
   id: String!
   user: PayloadPreference_User_Relationship!
@@ -1276,23 +1799,18 @@ enum PayloadPreference_User_RelationTo {
 
 union PayloadPreference_User = User
 
-"""
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
-
 type PayloadPreferences {
-  docs: [PayloadPreference]
-  hasNextPage: Boolean
-  hasPrevPage: Boolean
-  limit: Int
+  docs: [PayloadPreference!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
   nextPage: Int
   offset: Int
-  page: Int
-  pagingCounter: Int
+  page: Int!
+  pagingCounter: Int!
   prevPage: Int
-  totalDocs: Int
-  totalPages: Int
+  totalDocs: Int!
+  totalPages: Int!
 }
 
 input PayloadPreference_where {
@@ -1551,6 +2069,7 @@ type Access {
   collection1: collection1Access
   collection2: collection2Access
   users: usersAccess
+  payload_locked_documents: payload_locked_documentsAccess
   payload_preferences: payload_preferencesAccess
 }
 
@@ -1817,6 +2336,8 @@ type Collection2Fields {
   metaArray: Collection2Fields_metaArray
   metaGroup: Collection2Fields_metaGroup
   nestedGroup: Collection2Fields_nestedGroup
+  some_text_: Collection2Fields_some_text_
+  spaceBottom: Collection2Fields_spaceBottom
   updatedAt: Collection2Fields_updatedAt
   createdAt: Collection2Fields_createdAt
 }
@@ -2098,6 +2619,52 @@ type Collection2Fields_nestedGroup_meta_description_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_some_text_ {
+  create: Collection2Fields_some_text__Create
+  read: Collection2Fields_some_text__Read
+  update: Collection2Fields_some_text__Update
+  delete: Collection2Fields_some_text__Delete
+}
+
+type Collection2Fields_some_text__Create {
+  permission: Boolean!
+}
+
+type Collection2Fields_some_text__Read {
+  permission: Boolean!
+}
+
+type Collection2Fields_some_text__Update {
+  permission: Boolean!
+}
+
+type Collection2Fields_some_text__Delete {
+  permission: Boolean!
+}
+
+type Collection2Fields_spaceBottom {
+  create: Collection2Fields_spaceBottom_Create
+  read: Collection2Fields_spaceBottom_Read
+  update: Collection2Fields_spaceBottom_Update
+  delete: Collection2Fields_spaceBottom_Delete
+}
+
+type Collection2Fields_spaceBottom_Create {
+  permission: Boolean!
+}
+
+type Collection2Fields_spaceBottom_Read {
+  permission: Boolean!
+}
+
+type Collection2Fields_spaceBottom_Update {
+  permission: Boolean!
+}
+
+type Collection2Fields_spaceBottom_Delete {
+  permission: Boolean!
+}
+
 type Collection2Fields_updatedAt {
   create: Collection2Fields_updatedAt_Create
   read: Collection2Fields_updatedAt_Read
@@ -2177,7 +2744,7 @@ type UsersFields {
   updatedAt: UsersFields_updatedAt
   createdAt: UsersFields_createdAt
   email: UsersFields_email
-  password: UsersFields_password
+  sessions: UsersFields_sessions
 }
 
 type UsersFields_updatedAt {
@@ -2249,26 +2816,102 @@ type UsersFields_email_Delete {
   permission: Boolean!
 }
 
-type UsersFields_password {
-  create: UsersFields_password_Create
-  read: UsersFields_password_Read
-  update: UsersFields_password_Update
-  delete: UsersFields_password_Delete
+type UsersFields_sessions {
+  create: UsersFields_sessions_Create
+  read: UsersFields_sessions_Read
+  update: UsersFields_sessions_Update
+  delete: UsersFields_sessions_Delete
+  fields: UsersFields_sessions_Fields
 }
 
-type UsersFields_password_Create {
+type UsersFields_sessions_Create {
   permission: Boolean!
 }
 
-type UsersFields_password_Read {
+type UsersFields_sessions_Read {
   permission: Boolean!
 }
 
-type UsersFields_password_Update {
+type UsersFields_sessions_Update {
   permission: Boolean!
 }
 
-type UsersFields_password_Delete {
+type UsersFields_sessions_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_Fields {
+  id: UsersFields_sessions_id
+  createdAt: UsersFields_sessions_createdAt
+  expiresAt: UsersFields_sessions_expiresAt
+}
+
+type UsersFields_sessions_id {
+  create: UsersFields_sessions_id_Create
+  read: UsersFields_sessions_id_Read
+  update: UsersFields_sessions_id_Update
+  delete: UsersFields_sessions_id_Delete
+}
+
+type UsersFields_sessions_id_Create {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_id_Read {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_id_Update {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_id_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_createdAt {
+  create: UsersFields_sessions_createdAt_Create
+  read: UsersFields_sessions_createdAt_Read
+  update: UsersFields_sessions_createdAt_Update
+  delete: UsersFields_sessions_createdAt_Delete
+}
+
+type UsersFields_sessions_createdAt_Create {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_createdAt_Read {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_createdAt_Update {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_createdAt_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_expiresAt {
+  create: UsersFields_sessions_expiresAt_Create
+  read: UsersFields_sessions_expiresAt_Read
+  update: UsersFields_sessions_expiresAt_Update
+  delete: UsersFields_sessions_expiresAt_Delete
+}
+
+type UsersFields_sessions_expiresAt_Create {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_expiresAt_Read {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_expiresAt_Update {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_expiresAt_Delete {
   permission: Boolean!
 }
 
@@ -2293,6 +2936,157 @@ type UsersDeleteAccess {
 }
 
 type UsersUnlockAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type payload_locked_documentsAccess {
+  fields: PayloadLockedDocumentsFields
+  create: PayloadLockedDocumentsCreateAccess
+  read: PayloadLockedDocumentsReadAccess
+  update: PayloadLockedDocumentsUpdateAccess
+  delete: PayloadLockedDocumentsDeleteAccess
+}
+
+type PayloadLockedDocumentsFields {
+  document: PayloadLockedDocumentsFields_document
+  globalSlug: PayloadLockedDocumentsFields_globalSlug
+  user: PayloadLockedDocumentsFields_user
+  updatedAt: PayloadLockedDocumentsFields_updatedAt
+  createdAt: PayloadLockedDocumentsFields_createdAt
+}
+
+type PayloadLockedDocumentsFields_document {
+  create: PayloadLockedDocumentsFields_document_Create
+  read: PayloadLockedDocumentsFields_document_Read
+  update: PayloadLockedDocumentsFields_document_Update
+  delete: PayloadLockedDocumentsFields_document_Delete
+}
+
+type PayloadLockedDocumentsFields_document_Create {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_document_Read {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_document_Update {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_document_Delete {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_globalSlug {
+  create: PayloadLockedDocumentsFields_globalSlug_Create
+  read: PayloadLockedDocumentsFields_globalSlug_Read
+  update: PayloadLockedDocumentsFields_globalSlug_Update
+  delete: PayloadLockedDocumentsFields_globalSlug_Delete
+}
+
+type PayloadLockedDocumentsFields_globalSlug_Create {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_globalSlug_Read {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_globalSlug_Update {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_globalSlug_Delete {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_user {
+  create: PayloadLockedDocumentsFields_user_Create
+  read: PayloadLockedDocumentsFields_user_Read
+  update: PayloadLockedDocumentsFields_user_Update
+  delete: PayloadLockedDocumentsFields_user_Delete
+}
+
+type PayloadLockedDocumentsFields_user_Create {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_user_Read {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_user_Update {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_user_Delete {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_updatedAt {
+  create: PayloadLockedDocumentsFields_updatedAt_Create
+  read: PayloadLockedDocumentsFields_updatedAt_Read
+  update: PayloadLockedDocumentsFields_updatedAt_Update
+  delete: PayloadLockedDocumentsFields_updatedAt_Delete
+}
+
+type PayloadLockedDocumentsFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_createdAt {
+  create: PayloadLockedDocumentsFields_createdAt_Create
+  read: PayloadLockedDocumentsFields_createdAt_Read
+  update: PayloadLockedDocumentsFields_createdAt_Update
+  delete: PayloadLockedDocumentsFields_createdAt_Delete
+}
+
+type PayloadLockedDocumentsFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLockedDocumentsReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLockedDocumentsUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLockedDocumentsDeleteAccess {
   permission: Boolean!
   where: JSONObject
 }
@@ -2450,27 +3244,31 @@ type PayloadPreferencesDeleteAccess {
 
 type Mutation {
   createCollection1(data: mutationCollection1Input!, draft: Boolean): Collection1
-  updateCollection1(id: String!, autosave: Boolean, data: mutationCollection1UpdateInput!, draft: Boolean): Collection1
-  deleteCollection1(id: String!): Collection1
-  duplicateCollection1(id: String!): Collection1
+  updateCollection1(id: String!, autosave: Boolean, data: mutationCollection1UpdateInput!, draft: Boolean, trash: Boolean): Collection1
+  deleteCollection1(id: String!, trash: Boolean): Collection1
+  duplicateCollection1(id: String!, data: mutationCollection1Input!): Collection1
   createCollection2(data: mutationCollection2Input!, draft: Boolean): Collection2
-  updateCollection2(id: String!, autosave: Boolean, data: mutationCollection2UpdateInput!, draft: Boolean): Collection2
-  deleteCollection2(id: String!): Collection2
-  duplicateCollection2(id: String!): Collection2
+  updateCollection2(id: String!, autosave: Boolean, data: mutationCollection2UpdateInput!, draft: Boolean, trash: Boolean): Collection2
+  deleteCollection2(id: String!, trash: Boolean): Collection2
+  duplicateCollection2(id: String!, data: mutationCollection2Input!): Collection2
   createUser(data: mutationUserInput!, draft: Boolean): User
-  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean): User
-  deleteUser(id: String!): User
+  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean, trash: Boolean): User
+  deleteUser(id: String!, trash: Boolean): User
   refreshTokenUser: usersRefreshedUser
-  logoutUser: String
+  logoutUser(allSessions: Boolean): String
   unlockUser(email: String!): Boolean!
   loginUser(email: String!, password: String): usersLoginResult
   forgotPasswordUser(disableEmail: Boolean, expiration: Int, email: String!): Boolean!
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
+  createPayloadLockedDocument(data: mutationPayloadLockedDocumentInput!, draft: Boolean): PayloadLockedDocument
+  updatePayloadLockedDocument(id: String!, autosave: Boolean, data: mutationPayloadLockedDocumentUpdateInput!, draft: Boolean, trash: Boolean): PayloadLockedDocument
+  deletePayloadLockedDocument(id: String!, trash: Boolean): PayloadLockedDocument
+  duplicatePayloadLockedDocument(id: String!, data: mutationPayloadLockedDocumentInput!): PayloadLockedDocument
   createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
-  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean): PayloadPreference
-  deletePayloadPreference(id: String!): PayloadPreference
-  duplicatePayloadPreference(id: String!): PayloadPreference
+  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean, trash: Boolean): PayloadPreference
+  deletePayloadPreference(id: String!, trash: Boolean): PayloadPreference
+  duplicatePayloadPreference(id: String!, data: mutationPayloadPreferenceInput!): PayloadPreference
 }
 
 input mutationCollection1Input {
@@ -2507,6 +3305,8 @@ input mutationCollection2Input {
   metaArray: [mutationCollection2_MetaArrayInput]
   metaGroup: mutationCollection2_MetaGroupInput
   nestedGroup: mutationCollection2_NestedGroupInput
+  some_text_: String
+  spaceBottom: Collection2_spaceBottom_MutationInput
   updatedAt: String
   createdAt: String
 }
@@ -2531,10 +3331,20 @@ input mutationCollection2_NestedGroup_MetaInput {
   description: String
 }
 
+enum Collection2_spaceBottom_MutationInput {
+  mb_0
+  mb_8
+  mb_16
+  mb_24
+  mb__150px_
+}
+
 input mutationCollection2UpdateInput {
   metaArray: [mutationCollection2Update_MetaArrayInput]
   metaGroup: mutationCollection2Update_MetaGroupInput
   nestedGroup: mutationCollection2Update_NestedGroupInput
+  some_text_: String
+  spaceBottom: Collection2Update_spaceBottom_MutationInput
   updatedAt: String
   createdAt: String
 }
@@ -2559,6 +3369,14 @@ input mutationCollection2Update_NestedGroup_MetaInput {
   description: String
 }
 
+enum Collection2Update_spaceBottom_MutationInput {
+  mb_0
+  mb_8
+  mb_16
+  mb_24
+  mb__150px_
+}
+
 input mutationUserInput {
   updatedAt: String
   createdAt: String
@@ -2569,7 +3387,14 @@ input mutationUserInput {
   hash: String
   loginAttempts: Float
   lockUntil: String
+  sessions: [mutationUser_SessionsInput]
   password: String!
+}
+
+input mutationUser_SessionsInput {
+  id: String!
+  createdAt: String
+  expiresAt: String!
 }
 
 input mutationUserUpdateInput {
@@ -2582,7 +3407,14 @@ input mutationUserUpdateInput {
   hash: String
   loginAttempts: Float
   lockUntil: String
+  sessions: [mutationUserUpdate_SessionsInput]
   password: String
+}
+
+input mutationUserUpdate_SessionsInput {
+  id: String!
+  createdAt: String
+  expiresAt: String!
 }
 
 type usersRefreshedUser {
@@ -2606,6 +3438,64 @@ type usersLoginResult {
 type usersResetPassword {
   token: String
   user: User
+}
+
+input mutationPayloadLockedDocumentInput {
+  document: PayloadLockedDocument_DocumentRelationshipInput
+  globalSlug: String
+  user: PayloadLockedDocument_UserRelationshipInput
+  updatedAt: String
+  createdAt: String
+}
+
+input PayloadLockedDocument_DocumentRelationshipInput {
+  relationTo: PayloadLockedDocument_DocumentRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadLockedDocument_DocumentRelationshipInputRelationTo {
+  collection1
+  collection2
+  no_graphql
+  users
+}
+
+input PayloadLockedDocument_UserRelationshipInput {
+  relationTo: PayloadLockedDocument_UserRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadLockedDocument_UserRelationshipInputRelationTo {
+  users
+}
+
+input mutationPayloadLockedDocumentUpdateInput {
+  document: PayloadLockedDocumentUpdate_DocumentRelationshipInput
+  globalSlug: String
+  user: PayloadLockedDocumentUpdate_UserRelationshipInput
+  updatedAt: String
+  createdAt: String
+}
+
+input PayloadLockedDocumentUpdate_DocumentRelationshipInput {
+  relationTo: PayloadLockedDocumentUpdate_DocumentRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadLockedDocumentUpdate_DocumentRelationshipInputRelationTo {
+  collection1
+  collection2
+  no_graphql
+  users
+}
+
+input PayloadLockedDocumentUpdate_UserRelationshipInput {
+  relationTo: PayloadLockedDocumentUpdate_UserRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadLockedDocumentUpdate_UserRelationshipInputRelationTo {
+  users
 }
 
 input mutationPayloadPreferenceInput {

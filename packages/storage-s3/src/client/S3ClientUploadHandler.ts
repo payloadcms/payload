@@ -13,7 +13,9 @@ export const S3ClientUploadHandler = createClientUploadHandler({
       method: 'POST',
     })
 
-    const { url } = await response.json()
+    const { url } = (await response.json()) as {
+      url: string
+    }
 
     await fetch(url, {
       body: file,

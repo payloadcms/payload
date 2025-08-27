@@ -16,7 +16,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { SelectInput } from './Input.js'
 
-const formatOptions = (options: Option[]): OptionObject[] =>
+export const formatOptions = (options: Option[]): OptionObject[] =>
   options.map((option) => {
     if (typeof option === 'object' && (option.value || option.value === '')) {
       return option
@@ -112,10 +112,10 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       Error={Error}
       filterOption={
         selectFilterOptions
-          ? ({ value }) =>
+          ? ({ label, value }, search) =>
               selectFilterOptions?.some(
                 (option) => (typeof option === 'string' ? option : option.value) === value,
-              )
+              ) && label.toLowerCase().includes(search.toLowerCase())
           : undefined
       }
       hasMany={hasMany}

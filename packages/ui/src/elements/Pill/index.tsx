@@ -5,6 +5,16 @@ import React from 'react' // TODO: abstract this out to support all routers
 
 import { Link } from '../Link/index.js'
 
+export type PillStyle =
+  | 'always-white'
+  | 'dark'
+  | 'error'
+  | 'light'
+  | 'light-gray'
+  | 'success'
+  | 'warning'
+  | 'white'
+
 export type PillProps = {
   alignIcon?: 'left' | 'right'
   'aria-checked'?: boolean
@@ -20,15 +30,10 @@ export type PillProps = {
   icon?: React.ReactNode
   id?: string
   onClick?: () => void
-  pillStyle?:
-    | 'always-white'
-    | 'dark'
-    | 'error'
-    | 'light'
-    | 'light-gray'
-    | 'success'
-    | 'warning'
-    | 'white'
+  /**
+   * @default 'light'
+   */
+  pillStyle?: PillStyle
   rounded?: boolean
   size?: 'medium' | 'small'
   to?: string

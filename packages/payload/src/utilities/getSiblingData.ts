@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { Data, FormState } from '../admin/types.js'
 
 import { reduceFieldsToValues } from './reduceFieldsToValues.js'
@@ -13,7 +12,7 @@ export const getSiblingData = (fields: FormState, path: string): Data => {
     return reduceFieldsToValues(fields, true)
   }
 
-  const siblingFields = {}
+  const siblingFields: Record<string, any> = {}
 
   // Determine if the last segment of the path is an array-based row
   const pathSegments = path.split('.')

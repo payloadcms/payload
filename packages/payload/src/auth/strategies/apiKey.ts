@@ -1,8 +1,9 @@
 import crypto from 'crypto'
 
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
+import type { TypedUser } from '../../index.js'
 import type { Where } from '../../types/index.js'
-import type { AuthStrategyFunction, User } from '../index.js'
+import type { AuthStrategyFunction } from '../index.js'
 
 export const APIKeyAuthentication =
   (collectionConfig: SanitizedCollectionConfig): AuthStrategyFunction =>
@@ -11,16 +12,34 @@ export const APIKeyAuthentication =
 
     if (authHeader?.startsWith(`${collectionConfig.slug} API-Key `)) {
       const apiKey = authHeader.replace(`${collectionConfig.slug} API-Key `, '')
-      const apiKeyIndex = crypto.createHmac('sha1', payload.secret).update(apiKey).digest('hex')
+
+      // TODO: V4 remove extra algorithm check
+      // api keys saved prior to v3.46.0 will have sha1
+      const sha1APIKeyIndex = crypto.createHmac('sha1', payload.secret).update(apiKey).digest('hex')
+      const sha256APIKeyIndex = crypto
+        .createHmac('sha256', payload.secret)
+        .update(apiKey)
+        .digest('hex')
+
+      const apiKeyConstraints = [
+        {
+          apiKeyIndex: {
+            equals: sha1APIKeyIndex,
+          },
+        },
+        {
+          apiKeyIndex: {
+            equals: sha256APIKeyIndex,
+          },
+        },
+      ]
 
       try {
         const where: Where = {}
         if (collectionConfig.auth?.verify) {
           where.and = [
             {
-              apiKeyIndex: {
-                equals: apiKeyIndex,
-              },
+              or: apiKeyConstraints,
             },
             {
               _verified: {
@@ -29,9 +48,7 @@ export const APIKeyAuthentication =
             },
           ]
         } else {
-          where.apiKeyIndex = {
-            equals: apiKeyIndex,
-          }
+          where.or = apiKeyConstraints
         }
 
         const userQuery = await payload.find({
@@ -49,7 +66,7 @@ export const APIKeyAuthentication =
           user!._strategy = 'api-key'
 
           return {
-            user: user as User,
+            user: user as TypedUser,
           }
         }
       } catch (ignore) {

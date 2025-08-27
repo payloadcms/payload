@@ -379,9 +379,11 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
             ),
           },
           hasNextPage: { type: new GraphQLNonNull(GraphQLBoolean) },
+          totalDocs: { type: GraphQLInt },
         },
       }),
       args: {
+        count: { type: GraphQLBoolean },
         limit: {
           type: GraphQLInt,
         },
@@ -402,7 +404,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       },
       async resolve(parent, args, context: Context) {
         const { collection } = field
-        const { limit, page, sort, where } = args
+        const { count = false, limit, page, sort, where } = args
         const { req } = context
 
         const draft = Boolean(args.draft ?? context.req.query?.draft)
@@ -429,7 +431,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           throw new Error('GraphQL with array of join.field.collection is not implemented')
         }
 
-        const { docs } = await req.payload.find({
+        const { docs, totalDocs } = await req.payload.find({
           collection,
           depth: 0,
           draft,
@@ -439,7 +441,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           locale: req.locale,
           overrideAccess: false,
           page,
-          pagination: false,
+          pagination: count ? true : false,
           req,
           sort,
           where: fullWhere,
@@ -454,6 +456,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         return {
           docs: shouldSlice ? docs.slice(0, -1) : docs,
           hasNextPage: limit === 0 ? false : limit < docs.length,
+          ...(count ? { totalDocs } : {}),
         }
       },
     }

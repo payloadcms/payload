@@ -1,9 +1,7 @@
 import type { Table } from 'drizzle-orm'
 
-export const getNameFromDrizzleTable = (table: Table): string => {
-  const symbol = Object.getOwnPropertySymbols(table).find((symb) =>
-    symb.description.includes('Name'),
-  )
+import { getTableName } from 'drizzle-orm'
 
-  return table[symbol]
+export const getNameFromDrizzleTable = (table: Table): string => {
+  return getTableName(table)
 }
