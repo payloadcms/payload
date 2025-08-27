@@ -1445,7 +1445,7 @@ describe('Queues - Payload', () => {
   })
 
   it('can reliably run workflows with parallel tasks that complete immediately', async () => {
-    const amount = 2
+    const amount = 20
     payload.config.jobs.deleteJobOnComplete = false
 
     const job = await payload.jobs.queue({
