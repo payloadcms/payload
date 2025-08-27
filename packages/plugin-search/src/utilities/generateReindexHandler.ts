@@ -149,22 +149,6 @@ export const generateReindexHandler =
 
     await initTransaction(req)
 
-    // log start time to measure performance
-    const t0 = performance.now()
-
-    // for (const collection of collections) {
-    //   try {
-    //     await deleteIndexes(collection)
-    //     await reindexCollection(collection)
-    //   } catch (err) {
-    //     const message = t('error:unableToReindexCollection', { collection })
-    //     payload.logger.error({ err, msg: message })
-
-    //     await killTransaction(req)
-    //     return Response.json({ message }, { headers, status: 500 })
-    //   }
-    // }
-
     try {
       const promises = collections.map(async (collection) => {
         try {
@@ -183,9 +167,6 @@ export const generateReindexHandler =
     } catch (msg) {
       return Response.json({ message: msg }, { headers, status: 500 })
     }
-
-    const t1 = performance.now()
-    console.log(`Call to reindex took ${t1 - t0} milliseconds.`)
 
     const message = t('general:successfullyReindexed', {
       collections: collections.join(', '),
