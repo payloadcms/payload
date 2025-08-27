@@ -1,8 +1,6 @@
-import type { DocumentEvent, FieldSchemaJSON, PaginatedDocs } from 'payload'
+import type { FieldSchemaJSON } from 'payload'
 
-import type { CollectionPopulationRequestHandler, PopulationsByCollection } from './types.js'
-
-import { traverseFields } from './traverseFields.js'
+import type { CollectionPopulationRequestHandler } from './types.js'
 
 const defaultRequestHandler = ({
   apiPath,
@@ -22,20 +20,16 @@ const defaultRequestHandler = ({
   })
 }
 
-// Relationships are only updated when their `id` or `relationTo` changes, by comparing the old and new values
-// This needs to also happen when locale changes, except this is not not part of the API response
-// Instead, we keep track of the old locale ourselves and trigger a re-population when it changes
-let prevLocale: string | undefined
-
 export const mergeData = async <T extends Record<string, any>>(args: {
   apiRoute?: string
   /**
    * @deprecated Use `requestHandler` instead
    */
   collectionPopulationRequestHandler?: CollectionPopulationRequestHandler
+  collectionSlug?: string
   depth?: number
-  externallyUpdatedRelationship?: DocumentEvent
   fieldSchema: FieldSchemaJSON
+  globalSlug?: string
   incomingData: Partial<T>
   initialData: T
   locale?: string
@@ -47,11 +41,13 @@ export const mergeData = async <T extends Record<string, any>>(args: {
     _numberOfRequests?: number
   } & T
 > => {
+  console.log('ARGS', args)
   const {
     apiRoute,
+    collectionSlug,
     depth,
-    externallyUpdatedRelationship,
     fieldSchema,
+    globalSlug,
     incomingData,
     initialData,
     locale,
@@ -59,57 +55,20 @@ export const mergeData = async <T extends Record<string, any>>(args: {
     serverURL,
   } = args
 
-  const result = { ...initialData }
+  const requestHandler =
+    args.collectionPopulationRequestHandler || args.requestHandler || defaultRequestHandler
 
-  const populationsByCollection: PopulationsByCollection = {}
-
-  traverseFields({
-    externallyUpdatedRelationship,
-    fieldSchema,
-    incomingData,
-    localeChanged: prevLocale !== locale,
-    populationsByCollection,
-    result,
-  })
-
-  await Promise.all(
-    Object.entries(populationsByCollection).map(async ([collection, populations]) => {
-      let res: PaginatedDocs
-
-      const ids = new Set(populations.map(({ id }) => id))
-      const requestHandler =
-        args.collectionPopulationRequestHandler || args.requestHandler || defaultRequestHandler
-
-      try {
-        res = await requestHandler({
-          apiPath: apiRoute || '/api',
-          endpoint: encodeURI(
-            `${collection}?depth=${depth}&limit=${ids.size}&where[id][in]=${Array.from(ids).join(',')}${locale ? `&locale=${locale}` : ''}`,
-          ),
-          serverURL,
-        }).then((res) => res.json())
-
-        if (res?.docs?.length > 0) {
-          res.docs.forEach((doc) => {
-            populationsByCollection[collection]?.forEach((population) => {
-              if (population.id === doc.id) {
-                population.ref[population.accessor] = doc
-              }
-            })
-          })
-        }
-      } catch (err) {
-        console.error(err) // eslint-disable-line no-console
-      }
-    }),
-  )
-
-  prevLocale = locale
+  // TODO: Use get-as-post to pass data
+  const result = await requestHandler({
+    apiPath: apiRoute || '/api',
+    endpoint: encodeURI(
+      `${collectionSlug ?? globalSlug}${collectionSlug ? `/${initialData.id}` : ''}?depth=${depth}${locale ? `&locale=${locale}` : ''}&data=${JSON.stringify(incomingData)}`,
+    ),
+    serverURL,
+  }).then((res) => res.json())
 
   return {
     ...result,
-    ...(returnNumberOfRequests
-      ? { _numberOfRequests: Object.keys(populationsByCollection).length }
-      : {}),
+    ...(returnNumberOfRequests ? { _numberOfRequests: 1 } : {}),
   }
 }

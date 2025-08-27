@@ -35,7 +35,7 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
   const { apiRoute, depth, event, initialData, requestHandler, serverURL } = args
 
   if (isLivePreviewEvent(event, serverURL)) {
-    const { data, externallyUpdatedRelationship, fieldSchemaJSON, locale } = event.data
+    const { collectionSlug, data, fieldSchemaJSON, globalSlug, locale } = event.data
 
     if (!_payloadLivePreview?.fieldSchema && fieldSchemaJSON) {
       _payloadLivePreview.fieldSchema = fieldSchemaJSON
@@ -52,9 +52,10 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
 
     const mergedData = await mergeData<T>({
       apiRoute,
+      collectionSlug,
       depth,
-      externallyUpdatedRelationship,
       fieldSchema: _payloadLivePreview.fieldSchema,
+      globalSlug,
       incomingData: data,
       initialData: _payloadLivePreview?.previousData || initialData,
       locale,
