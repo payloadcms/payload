@@ -2,18 +2,27 @@
 import React from 'react'
 import { Toaster } from 'sonner'
 
+import { useConfig } from '../Config/index.js'
 import { Error } from './icons/Error.js'
 import { Info } from './icons/Info.js'
 import { Success } from './icons/Success.js'
 import { Warning } from './icons/Warning.js'
 
 export const ToastContainer: React.FC = () => {
+  const {
+    config: {
+      admin: { toast },
+    },
+  } = useConfig()
+
   return (
     <Toaster
       className="payload-toast-container"
       closeButton
       // @ts-expect-error
       dir="undefined"
+      duration={toast?.duration ?? 4000}
+      expand={toast?.expand ?? false}
       gap={8}
       icons={{
         error: <Error />,
@@ -36,7 +45,7 @@ export const ToastContainer: React.FC = () => {
         },
         unstyled: true,
       }}
-      visibleToasts={5}
+      visibleToasts={toast?.visibleToasts ?? 5}
     />
   )
 }
