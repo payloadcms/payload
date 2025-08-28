@@ -29,6 +29,7 @@ let prevLocale: string | undefined
 
 export const mergeData = async <T extends Record<string, any>>(args: {
   apiRoute?: string
+  blocksSchemaMap?: Record<string, FieldSchemaJSON>
   /**
    * @deprecated Use `requestHandler` instead
    */
@@ -49,6 +50,7 @@ export const mergeData = async <T extends Record<string, any>>(args: {
 > => {
   const {
     apiRoute,
+    blocksSchemaMap,
     depth,
     externallyUpdatedRelationship,
     fieldSchema,
@@ -64,6 +66,7 @@ export const mergeData = async <T extends Record<string, any>>(args: {
   const populationsByCollection: PopulationsByCollection = {}
 
   traverseFields({
+    blocksSchemaMap,
     externallyUpdatedRelationship,
     fieldSchema,
     incomingData,

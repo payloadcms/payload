@@ -1,5 +1,5 @@
 'use client'
-import type { LivePreviewConfig } from 'payload'
+import type { FieldSchemaJSON, LivePreviewConfig } from 'payload'
 import type { fieldSchemaToJSON } from 'payload/shared'
 import type { Dispatch } from 'react'
 import type React from 'react'
@@ -11,6 +11,7 @@ import type { SizeReducerAction } from './sizeReducer.js'
 
 export interface LivePreviewContextType {
   appIsReady: boolean
+  blocksSchemaMap?: Record<string, FieldSchemaJSON>
   breakpoint: LivePreviewConfig['breakpoints'][number]['name']
   breakpoints: LivePreviewConfig['breakpoints']
   fieldSchemaJSON?: ReturnType<typeof fieldSchemaToJSON>
@@ -52,6 +53,7 @@ export interface LivePreviewContextType {
 
 export const LivePreviewContext = createContext<LivePreviewContextType>({
   appIsReady: false,
+  blocksSchemaMap: undefined,
   breakpoint: undefined,
   breakpoints: undefined,
   fieldSchemaJSON: undefined,

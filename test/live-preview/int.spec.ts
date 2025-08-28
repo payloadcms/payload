@@ -21,6 +21,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 let schemaJSON: FieldSchemaJSON
+let blocksSchemaMap: Record<string, FieldSchemaJSON>
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -99,6 +100,21 @@ describe('Collections - Live Preview', () => {
       throw new Error("Couldn't find client fields for 'pages' collection")
     }
     schemaJSON = fieldSchemaToJSON(clientFields, clientConfig)
+    blocksSchemaMap = Object.fromEntries(
+      (clientConfig.blocks || []).map((b) => [
+        b.slug,
+        fieldSchemaToJSON(
+          [
+            ...b.fields,
+            {
+              name: 'id',
+              type: 'text',
+            },
+          ],
+          clientConfig,
+        ),
+      ]),
+    )
   })
 
   afterAll(async () => {
@@ -941,6 +957,55 @@ describe('Collections - Live Preview', () => {
     expect(merge2.richTextLexical.root.children[2].type).toEqual('paragraph')
     expect(merge2.richTextLexical.root.children[3].type).toEqual('upload')
     expect(merge2.richTextLexical.root.children[3].value).toMatchObject(media)
+  })
+
+  it('— relationships - populates in block within Lexical rich text editor', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      blocksSchemaMap,
+      incomingData: {
+        ...initialData,
+        richTextLexical: {
+          root: {
+            type: 'root',
+            format: '',
+            indent: 0,
+            version: 1,
+            children: [
+              {
+                format: '',
+                type: 'block',
+                version: 1,
+                fields: {
+                  id: 123,
+                  media: media.id,
+                  invertBackground: false,
+                  position: 'fullscreen',
+                  blockType: 'mediaBlock',
+                },
+              },
+            ],
+            direction: null,
+          },
+        },
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+      requestHandler,
+    })
+
+    expect(merge1.richTextLexical.root.children).toHaveLength(1)
+    expect(merge1.richTextLexical.root.children[0].type).toEqual('block')
+    expect(merge1.richTextLexical.root.children[0].fields.blockType).toEqual('mediaBlock')
+    expect(merge1.richTextLexical.root.children[0].fields.media).toMatchObject(media)
+    expect(merge1.richTextLexical.root.children[0].fields.invertBackground).toEqual(false)
+    expect(merge1.richTextLexical.root.children[0].fields.position).toEqual('fullscreen')
   })
 
   it('— relationships - does not re-populate existing rich text relationships', async () => {
