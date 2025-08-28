@@ -721,6 +721,14 @@ export type ImportMapGenerators = Array<
   }) => void
 >
 
+/**
+ * Experimental features.
+ * These may be unstable and may change or be removed in future releases.
+ */
+export type ExperimentalConfig = {
+  localizeStatus?: boolean
+}
+
 export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
@@ -1042,6 +1050,12 @@ export type Config = {
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
+   * Configure experimental features for Payload.
+   *
+   * These features may be unstable and may change or be removed in future releases.
+   */
+  experimental?: ExperimentalConfig
+  /**
    * Options for folder view within the admin panel
    * @experimental this feature may change in minor versions until it is fully stable
    */
@@ -1309,6 +1323,7 @@ export type SanitizedConfig = {
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
+  experimental?: ExperimentalConfig
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
   jobs: SanitizedJobsConfig

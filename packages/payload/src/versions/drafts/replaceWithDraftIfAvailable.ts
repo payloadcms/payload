@@ -111,6 +111,12 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     draft.version = {} as T
   }
 
+  // Lift locale status from version data if available
+  const localeStatus = draft.localeStatus || {}
+  if (locale && localeStatus[locale]) {
+    ;(draft.version as { _status?: string })['_status'] = localeStatus[locale]
+  }
+
   // Disregard all other draft content at this point,
   // Only interested in the version itself.
   // Operations will handle firing hooks, etc.
