@@ -106,6 +106,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         zIndex: isDragging ? 1 : undefined,
       }}
     >
+      <p>{row.id}</p>
       <Collapsible
         actions={
           !readOnly ? (

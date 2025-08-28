@@ -13,6 +13,7 @@ export const populateBreadcrumbs = async (
   originalDoc?: any,
 ): Promise<any> => {
   const newData = data
+
   const breadcrumbDocs = [
     ...(await getParents(req, pluginConfig, collection, {
       ...originalDoc,
@@ -20,20 +21,21 @@ export const populateBreadcrumbs = async (
     })),
   ]
 
-  const currentDocBreadcrumb = {
+  console.log(data)
+
+  const currentDoc = {
     ...originalDoc,
     ...data,
+    id: originalDoc?.id ?? data?.id,
   }
 
-  if (originalDoc?.id) {
-    currentDocBreadcrumb.id = originalDoc?.id
-  }
-
-  breadcrumbDocs.push(currentDocBreadcrumb)
+  breadcrumbDocs.push(currentDoc)
 
   const breadcrumbs = breadcrumbDocs.map((_, i) =>
     formatBreadcrumb(pluginConfig, collection, breadcrumbDocs.slice(0, i + 1)),
   )
+
+  console.log('returning', breadcrumbs)
 
   return {
     ...newData,

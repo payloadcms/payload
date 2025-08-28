@@ -76,10 +76,33 @@ export const PostsCollection: CollectionConfig = {
       name: 'array',
       type: 'array',
       admin: {
-        description: 'If there is no value, a default row will be added by a beforeChange hook',
         components: {
           RowLabel: './collections/Posts/ArrayRowLabel.js#ArrayRowLabel',
         },
+      },
+      fields: [
+        {
+          name: 'customTextField',
+          type: 'text',
+          defaultValue: 'This is a default value',
+          admin: {
+            components: {
+              Field: './collections/Posts/TextField.js#CustomTextField',
+            },
+          },
+        },
+        {
+          name: 'defaultTextField',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'computedArray',
+      type: 'array',
+      admin: {
+        description:
+          'If there is no value, a default row will be added by a beforeChange hook. Otherwise, modifies the rows on save.',
       },
       hooks: {
         beforeChange: [
@@ -96,17 +119,7 @@ export const PostsCollection: CollectionConfig = {
       },
       fields: [
         {
-          name: 'customTextField',
-          type: 'text',
-          defaultValue: 'This is a default value',
-          admin: {
-            components: {
-              Field: './collections/Posts/TextField.js#CustomTextField',
-            },
-          },
-        },
-        {
-          name: 'defaultTextField',
+          name: 'text',
           type: 'text',
         },
       ],
