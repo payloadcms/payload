@@ -110,8 +110,7 @@ export const PostsCollection: CollectionConfig = {
             !value?.length
               ? [
                   {
-                    defaultTextField: 'This is a computed value.',
-                    customTextField: 'This is a computed value.',
+                    text: 'This is a computed value.',
                   },
                 ]
               : value,

@@ -39,7 +39,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./test/plugin-nested-docs/config.ts"
+        "./test/form-state/config.ts"
       ],
       "@payloadcms/admin-bar": [
         "./packages/admin-bar/src"
