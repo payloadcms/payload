@@ -758,7 +758,7 @@ export function entityToJSONSchema(
 
   const title = entity.typescript?.interface
     ? entity.typescript.interface
-    : singular(toWords(entity.slug, true))
+    : `${entity.typescript?.interfacePrefix ?? ''}${singular(toWords(entity.slug, true))}`
 
   let mutableFields = [...entity.flattenedFields]
 
