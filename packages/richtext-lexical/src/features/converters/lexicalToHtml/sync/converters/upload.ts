@@ -76,6 +76,6 @@ export const UploadHTMLConverter: HTMLConverters<SerializedUploadNode> = {
       />
     `
 
-    return `<picture${providedStyleTag}>${pictureHTML}</picture$>`
+    return `<picture${providedStyleTag}>${pictureHTML}</picture>`
   },
 }
