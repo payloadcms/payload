@@ -26,10 +26,13 @@ export const populateBreadcrumbs = async ({
   req,
 }: Args): Promise<Data> => {
   const newData = data
+
   const currentDocument = {
     ...originalDoc,
     ...data,
+    id: originalDoc?.id ?? data?.id,
   }
+
   const allParentDocuments: Document[] = await getAllParentDocuments(
     req,
     {
@@ -41,14 +44,11 @@ export const populateBreadcrumbs = async ({
     currentDocument,
   )
 
-  if (originalDoc?.id) {
-    currentDocument.id = originalDoc?.id
-  }
-
   allParentDocuments.push(currentDocument)
 
   const breadcrumbs = allParentDocuments.map((_, i) =>
     formatBreadcrumb({
+      breadcrumb: currentDocument[breadcrumbsFieldName]?.[i],
       collection,
       docs: allParentDocuments.slice(0, i + 1),
       generateLabel,
