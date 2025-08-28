@@ -413,6 +413,7 @@ export const renderDocument = async ({
           isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
           isLivePreviewing={entityPreferences?.value?.editViewType === 'live-preview'}
           url={livePreviewURL}
+          urlIsFunction={typeof livePreviewConfig?.url === 'function'}
         >
           {showHeader && !drawerSlug && (
             <DocumentHeader

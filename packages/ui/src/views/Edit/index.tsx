@@ -33,6 +33,7 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
+import { formatAbsoluteURL } from '../../utilities/formatAbsoluteURL.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
@@ -132,9 +133,16 @@ export function DefaultEditView({
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
-  const { getFormState } = useServerFunctions()
+  const { getFormState, getLivePreviewURL } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
-  const { isLivePreviewEnabled, isLivePreviewing, previewWindowType } = useLivePreviewContext()
+  const {
+    isLivePreviewEnabled,
+    isLivePreviewing,
+    previewWindowType,
+    setURL: setLivePreviewURL,
+    url: livePreviewURL,
+    urlIsFunction: shouldGetLivePreviewURL,
+  } = useLivePreviewContext()
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)
@@ -294,6 +302,23 @@ export function DefaultEditView({
         void setData(document || {})
       }
 
+      // Refresh live preview url, if needed
+      // One potential optimization here would be to only do this if certain fields changed
+      // And/or also combing this with some other action, like the submit itself
+      if (isLivePreviewEnabled && shouldGetLivePreviewURL) {
+        const { url: newURLRaw } = await getLivePreviewURL({
+          collectionSlug,
+          data: document,
+          globalSlug,
+        })
+
+        const newLivePreviewURL = formatAbsoluteURL(newURLRaw)
+
+        if (newLivePreviewURL && newLivePreviewURL !== livePreviewURL) {
+          setLivePreviewURL(newLivePreviewURL)
+        }
+      }
+
       if (typeof onSaveFromContext === 'function') {
         const operation = id ? 'update' : 'create'
 
@@ -383,6 +408,11 @@ export function DefaultEditView({
       schemaPathSegments,
       isLockingEnabled,
       setDocumentIsLocked,
+      setLivePreviewURL,
+      livePreviewURL,
+      getLivePreviewURL,
+      isLivePreviewEnabled,
+      shouldGetLivePreviewURL,
     ],
   )
 
