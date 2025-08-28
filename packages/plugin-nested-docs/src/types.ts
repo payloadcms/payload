@@ -32,8 +32,3 @@ export type NestedDocsPluginConfig = {
    */
   parentFieldSlug?: string
 }
-
-export type SanitizedNestedDocsPluginConfig = {
-  breadcrumbsFieldSlug: string
-  parentFieldSlug: string
-} & NestedDocsPluginConfig
