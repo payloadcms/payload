@@ -21,26 +21,5 @@ export const PostsCollection: CollectionConfig = {
         features: ({ defaultFeatures }) => [...defaultFeatures],
       }),
     },
-    {
-      type: 'json',
-      name: 'json',
-      admin: {
-        editorOptions: {
-          tabSize: 8,
-          insertSpaces: false,
-        },
-      },
-    },
-    {
-      type: 'code',
-      name: 'code',
-      admin: {
-        language: 'json',
-        editorOptions: {
-          tabSize: 4,
-          insertSpaces: false,
-        },
-      },
-    },
   ],
 }
