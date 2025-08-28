@@ -36,6 +36,31 @@ export type ServerFunctionHandler = (
   args: {
     config: Promise<SanitizedConfig> | SanitizedConfig
     importMap: ImportMap
+    /**
+     * A map of server function names to their implementations. These are
+     * registered alongside the base server functions and can be called
+     * using the useServerFunctions() hook.
+     *
+     * @example
+     * const { serverFunction } = useServerFunctions()
+     *
+     * const callServerFunction = useCallback(() => {
+     *
+     *  async function call() {
+     *   const result = (await serverFunction({
+     *    name: 'record-key',
+     *    args: {
+     *     // Your args
+     *    },
+     *   }))
+     *
+     *   // Do someting with the result
+     *  }
+     *
+     *  void call()
+     * }, [serverFunction])
+     */
+    serverFunctions?: Record<string, ServerFunction<any, any>>
   } & ServerFunctionClientArgs,
 ) => Promise<unknown>
 
