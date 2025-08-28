@@ -19,6 +19,7 @@ export const findByIDHandler: PayloadHandler = async (req) => {
   const result = await findByIDOperation({
     id,
     collection,
+    data: searchParams.get('data') ? JSON.parse(searchParams.get('data') as string) : undefined,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: searchParams.get('draft') === 'true',
     joins: sanitizeJoinParams(req.query.joins as JoinParams),

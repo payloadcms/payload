@@ -7,13 +7,14 @@ import React, { useEffect } from 'react'
 
 import { useAllFormFields } from '../../../forms/Form/context.js'
 import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
+import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { DeviceContainer } from '../Device/index.js'
+import './index.scss'
 import { IFrame } from '../IFrame/index.js'
 import { LivePreviewToolbar } from '../Toolbar/index.js'
-import './index.scss'
 
 const baseClass = 'live-preview-window'
 
@@ -39,6 +40,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>(undefined)
 
   const [formState] = useAllFormFields()
+  const { collectionSlug, globalSlug } = useDocumentInfo()
 
   // For client-side apps, send data through `window.postMessage`
   // The preview could either be an iframe embedded on the page
@@ -64,9 +66,11 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
 
       const message = {
         type: 'payload-live-preview',
+        collectionSlug,
         data: values,
         externallyUpdatedRelationship: mostRecentUpdate,
         fieldSchemaJSON: shouldSendSchema ? fieldSchemaJSON : undefined,
+        globalSlug,
         locale: locale.code,
       }
 
@@ -83,6 +87,8 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   }, [
     formState,
     url,
+    collectionSlug,
+    globalSlug,
     iframeHasLoaded,
     previewWindowType,
     popupRef,
