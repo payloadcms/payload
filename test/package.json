@@ -49,6 +49,7 @@
     "@payloadcms/plugin-ecommerce": "workspace:*",
     "@payloadcms/plugin-form-builder": "workspace:*",
     "@payloadcms/plugin-import-export": "workspace:*",
+    "@payloadcms/plugin-mcp": "workspace:*",
     "@payloadcms/plugin-multi-tenant": "workspace:*",
     "@payloadcms/plugin-nested-docs": "workspace:*",
     "@payloadcms/plugin-redirects": "workspace:*",
@@ -107,7 +108,8 @@
     "ts-essentials": "10.0.3",
     "typescript": "5.7.3",
     "uuid": "10.0.0",
-    "wrangler": "~4.42.0"
+    "wrangler": "~4.42.0",
+    "zod": "^3.25.5"
   },
   "pnpm": {
     "neverBuiltDependencies": []
