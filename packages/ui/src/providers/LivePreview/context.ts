@@ -1,5 +1,5 @@
 'use client'
-import type { LivePreviewConfig, SanitizedConfig } from 'payload'
+import type { LivePreviewConfig } from 'payload'
 import type { fieldSchemaToJSON } from 'payload/shared'
 import type { Dispatch } from 'react'
 import type React from 'react'
@@ -14,12 +14,17 @@ export interface LivePreviewContextType {
   breakpoint: LivePreviewConfig['breakpoints'][number]['name']
   breakpoints: LivePreviewConfig['breakpoints']
   fieldSchemaJSON?: ReturnType<typeof fieldSchemaToJSON>
-  iframeHasLoaded: boolean
   iframeRef: React.RefObject<HTMLIFrameElement | null>
   isLivePreviewEnabled: boolean
   isLivePreviewing: boolean
   isPopupOpen: boolean
   listeningForMessages?: boolean
+  /**
+   * The URL that has finished loading in the iframe or popup.
+   * For example, if you set the `url`, it will begin to load into the iframe,
+   * but `loadedURL` will not be set until the iframe's `onLoad` event fires.
+   */
+  loadedURL?: string
   measuredDeviceSize: {
     height: number
     width: number
@@ -30,8 +35,8 @@ export interface LivePreviewContextType {
   setAppIsReady: (appIsReady: boolean) => void
   setBreakpoint: (breakpoint: LivePreviewConfig['breakpoints'][number]['name']) => void
   setHeight: (height: number) => void
-  setIframeHasLoaded: (loaded: boolean) => void
   setIsLivePreviewing: (isLivePreviewing: boolean) => void
+  setLoadedURL: (loadedURL: string) => void
   setMeasuredDeviceSize: (size: { height: number; width: number }) => void
   setPreviewWindowType: (previewWindowType: 'iframe' | 'popup') => void
   setSize: Dispatch<SizeReducerAction>
@@ -66,7 +71,6 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   breakpoint: undefined,
   breakpoints: undefined,
   fieldSchemaJSON: undefined,
-  iframeHasLoaded: false,
   iframeRef: undefined,
   isLivePreviewEnabled: undefined,
   isLivePreviewing: false,
@@ -81,8 +85,8 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   setAppIsReady: () => {},
   setBreakpoint: () => {},
   setHeight: () => {},
-  setIframeHasLoaded: () => {},
   setIsLivePreviewing: () => {},
+  setLoadedURL: () => {},
   setMeasuredDeviceSize: () => {},
   setPreviewWindowType: () => {},
   setSize: () => {},

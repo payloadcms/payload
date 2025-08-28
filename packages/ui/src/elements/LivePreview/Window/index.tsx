@@ -22,12 +22,12 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     appIsReady,
     breakpoint,
     fieldSchemaJSON,
-    iframeHasLoaded,
     iframeRef,
     isLivePreviewing,
+    loadedURL,
     popupRef,
     previewWindowType,
-    setIframeHasLoaded,
+    setLoadedURL,
     url,
   } = useLivePreviewContext()
 
@@ -38,9 +38,11 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   const prevWindowType =
     React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>(undefined)
 
-  const prevURL = React.useRef<string | undefined>(undefined)
+  const prevLoadedURL = React.useRef<string | undefined>(loadedURL)
 
   const [formState] = useAllFormFields()
+
+  const loadedURLHasChanged = React.useRef(false)
 
   /**
    * For client-side apps, send data through `window.postMessage`
@@ -66,10 +68,20 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
       const shouldSendSchema =
         !prevWindowType.current ||
         prevWindowType.current !== previewWindowType ||
-        prevURL.current !== url
+        loadedURLHasChanged
+
+      /**
+       * Send the `fieldSchemaToJSON` again if the `url` attribute has changed
+       * It must happen on the message cycle directly after the new URL has fully loaded
+       */
+      if (prevLoadedURL.current !== loadedURL) {
+        loadedURLHasChanged.current = true
+      } else {
+        loadedURLHasChanged.current = false
+      }
 
       prevWindowType.current = previewWindowType
-      prevURL.current = url
+      prevLoadedURL.current = loadedURL
 
       const message = {
         type: 'payload-live-preview',
@@ -92,16 +104,16 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   }, [
     formState,
     url,
-    iframeHasLoaded,
     previewWindowType,
     popupRef,
     appIsReady,
     iframeRef,
-    setIframeHasLoaded,
+    setLoadedURL,
     fieldSchemaJSON,
     mostRecentUpdate,
     locale,
     isLivePreviewing,
+    loadedURL,
   ])
 
   /**
@@ -132,6 +144,9 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   if (previewWindowType !== 'iframe') {
     return null
   }
+
+  // AFTER the url changes, we need to send the JSON schema again
+  // we cannot simply do this in an effect like above, because it needs to happen AFTER the new app loads
 
   return (
     <div

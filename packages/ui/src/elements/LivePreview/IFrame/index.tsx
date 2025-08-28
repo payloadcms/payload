@@ -7,13 +7,14 @@ import './index.scss'
 const baseClass = 'live-preview-iframe'
 
 export const IFrame: React.FC = () => {
-  const { iframeRef, setIframeHasLoaded, url, zoom } = useLivePreviewContext()
+  const { iframeRef, setLoadedURL, url, zoom } = useLivePreviewContext()
 
   return (
     <iframe
       className={baseClass}
       onLoad={() => {
-        setIframeHasLoaded(true)
+        console.log('iframe loaded', url)
+        setLoadedURL(url)
       }}
       ref={iframeRef}
       src={url}
