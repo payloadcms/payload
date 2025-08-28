@@ -2,11 +2,21 @@ import type { CollectionConfig } from 'payload'
 
 import type { Breadcrumb, NestedDocsPluginConfig } from '../types.js'
 
-export const formatBreadcrumb = (
-  pluginConfig: NestedDocsPluginConfig,
-  collection: CollectionConfig,
-  docs: Array<Record<string, unknown>>,
-): Breadcrumb => {
+export const formatBreadcrumb = ({
+  breadcrumb,
+  collection,
+  docs,
+  pluginConfig,
+}: {
+  /**
+   * Existing breadcrumb, if any, to base the new breadcrumb on.
+   * This ensures that row IDs are maintained across updates, etc.
+   */
+  breadcrumb?: Breadcrumb
+  collection: CollectionConfig
+  docs: Array<Record<string, unknown>>
+  pluginConfig: NestedDocsPluginConfig
+}): Breadcrumb => {
   let url: string | undefined = undefined
   let label: string
 
@@ -25,6 +35,7 @@ export const formatBreadcrumb = (
   }
 
   return {
+    ...(breadcrumb || {}),
     doc: lastDoc.id as string,
     label,
     url,

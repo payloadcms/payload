@@ -21,8 +21,6 @@ export const populateBreadcrumbs = async (
     })),
   ]
 
-  console.log(data)
-
   const currentDoc = {
     ...originalDoc,
     ...data,
@@ -32,10 +30,13 @@ export const populateBreadcrumbs = async (
   breadcrumbDocs.push(currentDoc)
 
   const breadcrumbs = breadcrumbDocs.map((_, i) =>
-    formatBreadcrumb(pluginConfig, collection, breadcrumbDocs.slice(0, i + 1)),
+    formatBreadcrumb({
+      breadcrumb: currentDoc[pluginConfig.breadcrumbsFieldSlug || 'breadcrumbs']?.[i],
+      collection,
+      docs: breadcrumbDocs.slice(0, i + 1),
+      pluginConfig,
+    }),
   )
-
-  console.log('returning', breadcrumbs)
 
   return {
     ...newData,
