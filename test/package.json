@@ -44,6 +44,7 @@
     "@payloadcms/plugin-cloud-storage": "workspace:*",
     "@payloadcms/plugin-form-builder": "workspace:*",
     "@payloadcms/plugin-import-export": "workspace:*",
+    "@payloadcms/plugin-mcp": "workspace:*",
     "@payloadcms/plugin-multi-tenant": "workspace:*",
     "@payloadcms/plugin-nested-docs": "workspace:*",
     "@payloadcms/plugin-redirects": "workspace:*",
@@ -95,7 +96,8 @@
     "tempy": "^1.0.1",
     "ts-essentials": "10.0.3",
     "typescript": "5.7.3",
-    "uuid": "10.0.0"
+    "uuid": "10.0.0",
+    "zod": "^3.25.5"
   },
   "pnpm": {
     "neverBuiltDependencies": []
