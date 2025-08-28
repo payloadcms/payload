@@ -5,9 +5,12 @@ import { DndContext } from '@dnd-kit/core'
 import { fieldSchemaToJSON } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import type { LivePreviewContextType } from './context.js'
+
 import { usePopupWindow } from '../../hooks/usePopupWindow.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
+import { formatAbsoluteURL } from '../../utilities/formatAbsoluteURL.js'
 import { useConfig } from '../Config/index.js'
 import { customCollisionDetection } from './collisionDetection.js'
 import { LivePreviewContext } from './context.js'
@@ -23,17 +26,7 @@ export type LivePreviewProviderProps = {
   }
   isLivePreviewEnabled?: boolean
   isLivePreviewing: boolean
-  url: string
-  urlDeps?: LivePreviewConfig['urlDeps']
-}
-
-const getAbsoluteUrl = (url) => {
-  try {
-    return new URL(url, window.location.origin).href
-  } catch {
-    return url
-  }
-}
+} & Pick<LivePreviewContextType, 'url' | 'urlIsFunction'>
 
 export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   breakpoints: incomingBreakpoints,
@@ -41,7 +34,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   isLivePreviewEnabled,
   isLivePreviewing: incomingIsLivePreviewing,
   url: urlFromProps,
-  urlDeps,
+  urlIsFunction,
 }) => {
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
   const [isLivePreviewing, setIsLivePreviewing] = useState(incomingIsLivePreviewing)
@@ -59,19 +52,11 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     [incomingBreakpoints],
   )
 
-  const [url, setURLState] = useState<string>('')
-
-  const setURL = useCallback((incomingURL: string) => {
-    setURLState(
-      incomingURL?.startsWith('http://') || incomingURL?.startsWith('https://')
-        ? incomingURL
-        : getAbsoluteUrl(incomingURL),
-    )
-  }, [])
+  const [url, setURL] = useState<string>('')
 
   useEffect(() => {
-    setURL(urlFromProps)
-  }, [urlFromProps, setURL])
+    setURL(formatAbsoluteURL(urlFromProps))
+  }, [urlFromProps])
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
@@ -164,10 +149,12 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     }
   }, [breakpoint, breakpoints])
 
-  // Receive the `ready` message from the popup window
-  // This indicates that the app is ready to receive `window.postMessage` events
-  // This is also the only cross-origin way of detecting when a popup window has loaded
-  // Unlike iframe elements which have an `onLoad` handler, there is no way to access `window.open` on popups
+  /**
+   * Receive the `ready` message from the popup window
+   * This indicates that the app is ready to receive `window.postMessage` events
+   * This is also the only cross-origin way of detecting when a popup window has loaded
+   * Unlike iframe elements which have an `onLoad` handler, there is no way to access `window.open` on popups
+   */
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (
@@ -259,7 +246,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         size,
         toolbarPosition: position,
         url,
-        urlDeps,
+        urlIsFunction,
         zoom,
       }}
     >

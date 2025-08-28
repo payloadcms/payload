@@ -285,6 +285,7 @@ export { Warning as WarningIcon } from '../../providers/ToastContainer/icons/War
 
 // providers
 export {
+  type GetLivePreviewURLArgs,
   type RenderDocumentResult,
   type RenderDocumentServerFunction,
   ServerFunctionsProvider,

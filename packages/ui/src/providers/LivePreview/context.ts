@@ -52,7 +52,12 @@ export interface LivePreviewContextType {
     y: number
   }
   url: string | undefined
-  urlDeps?: SanitizedConfig['admin']['livePreview']['urlDeps']
+  /**
+   * If true, indicates the that live preview URL config is defined as a function.
+   * This tells the client that it needs to call the server to get the URL, rather than using a static string.
+   * Useful to ensure that the server function is only called when necessary.
+   */
+  urlIsFunction?: boolean
   zoom: number
 }
 
@@ -94,7 +99,7 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
     y: 0,
   },
   url: undefined,
-  urlDeps: undefined,
+  urlIsFunction: false,
   zoom: 1,
 })
 

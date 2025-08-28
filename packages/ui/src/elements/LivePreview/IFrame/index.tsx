@@ -6,16 +6,8 @@ import './index.scss'
 
 const baseClass = 'live-preview-iframe'
 
-type Props = {
-  ref: React.RefObject<HTMLIFrameElement>
-  setIframeHasLoaded: (value: boolean) => void
-  url: string
-}
-
-export const IFrame: React.FC<Props> = (props) => {
-  const { ref, setIframeHasLoaded, url } = props
-
-  const { zoom } = useLivePreviewContext()
+export const IFrame: React.FC = () => {
+  const { iframeRef, setIframeHasLoaded, url, zoom } = useLivePreviewContext()
 
   return (
     <iframe
@@ -23,7 +15,7 @@ export const IFrame: React.FC<Props> = (props) => {
       onLoad={() => {
         setIframeHasLoaded(true)
       }}
-      ref={ref}
+      ref={iframeRef}
       src={url}
       style={{
         transform: typeof zoom === 'number' ? `scale(${zoom}) ` : undefined,

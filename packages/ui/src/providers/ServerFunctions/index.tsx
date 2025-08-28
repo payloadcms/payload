@@ -2,6 +2,7 @@ import type {
   AdminViewServerPropsOnly,
   BuildFormStateArgs,
   BuildTableStateArgs,
+  CollectionSlug,
   Data,
   DocumentPreferences,
   DocumentSlots,
@@ -87,6 +88,14 @@ type CopyDataFromLocaleClient = (
     signal?: AbortSignal
   } & Omit<CopyDataFromLocaleArgs, 'req'>,
 ) => Promise<{ data: Data }>
+
+export type GetLivePreviewURLArgs = {
+  collectionSlug: CollectionSlug
+  data: Data
+  globalSlug?: string
+}
+
+type GetLivePreviewURLClient = (args: GetLivePreviewURLArgs) => Promise<{ url: null | string }>
 
 type GetDocumentSlots = (args: {
   collectionSlug: string
@@ -263,19 +272,22 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
-  const getLivePreviewURL = useCallback(async () => {
-    try {
-      const result = (await serverFunction({
-        name: 'get-live-preview-url',
-        args: {},
-      })) as { url: null | string }
+  const getLivePreviewURL = useCallback<GetLivePreviewURLClient>(
+    async (args) => {
+      try {
+        const result = (await serverFunction({
+          name: 'get-live-preview-url',
+          args,
+        })) as { url: null | string }
 
-      return result
-    } catch (_err) {
-      console.error(_err) // eslint-disable-line no-console
-    }
-    return { url: null }
-  }, [serverFunction])
+        return result
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+      return { url: null }
+    },
+    [serverFunction],
+  )
 
   const getFolderResultsComponentAndData = useCallback<GetFolderResultsComponentAndDataClient>(
     async (args) => {

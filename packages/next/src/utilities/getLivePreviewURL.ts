@@ -1,19 +1,16 @@
-import type { CollectionSlug, ServerFunction } from 'payload'
+import type { GetLivePreviewURLArgs } from '@payloadcms/ui'
+import type { ServerFunction } from 'payload'
 
 import { canAccessAdmin } from '@payloadcms/ui/shared'
 import { formatErrors } from 'payload'
 
 export const getLivePreviewURLHandler: ServerFunction<
-  {
-    collectionSlug: CollectionSlug
-    globalSlug?: string
-  },
+  GetLivePreviewURLArgs,
   Promise<{
     url: null | string
   }>
 > = async (args) => {
-  console.log('OK BOYS AND GIURLS')
-  const { collectionSlug, globalSlug, req } = args
+  const { collectionSlug, data, globalSlug, req } = args
 
   await canAccessAdmin({ req })
 
@@ -33,7 +30,7 @@ export const getLivePreviewURLHandler: ServerFunction<
         collectionConfig: req.payload.config.collections.find(
           (coll) => coll.slug === collectionSlug,
         ),
-        data: undefined, // TODO
+        data,
         globalConfig: globalSlug ? req.payload.globals[globalSlug] : undefined,
         locale: req.locale,
         payload: req.payload,
