@@ -752,7 +752,6 @@ export type Config = {
           username?: string
         }
       | false
-
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?:
       | 'default'
@@ -760,6 +759,7 @@ export type Config = {
       | {
           Component: PayloadComponent
         }
+
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -939,6 +939,29 @@ export type Config = {
      * Configure timezone related settings for the admin panel.
      */
     timezones?: TimezonesConfig
+    /**
+     * @experimental
+     * Configure toast message behavior and appearance in the admin panel.
+     * Currently using [Sonner](https://sonner.emilkowal.ski) for toast notifications.
+     */
+    toast?: {
+      /**
+       * Time in milliseconds until the toast automatically closes.
+       * @default 4000
+       */
+      duration?: number
+      /**
+       * If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction.
+       * Otherwise only the latest notification can be read until the user hovers the stack.
+       * @default false
+       */
+      expand?: boolean
+      /**
+       * The maximum number of toasts that can be visible on the screen at once.
+       * @default 5
+       */
+      limit?: number
+    }
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }

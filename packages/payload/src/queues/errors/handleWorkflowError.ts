@@ -79,7 +79,6 @@ export async function handleWorkflowError({
   await updateJob({
     error: errorJSON,
     hasError: hasFinalError, // If reached max retries => final error. If hasError is true this job will not be retried
-    log: job.log,
     processing: false,
     totalTried: (job.totalTried ?? 0) + 1,
     waitUntil: job.waitUntil,

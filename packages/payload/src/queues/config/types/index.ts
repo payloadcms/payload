@@ -157,6 +157,7 @@ export type JobsConfig = {
    * drastically affect performance.
    *
    * @default false
+   * @deprecated - this will be removed in 4.0
    */
   runHooks?: boolean
   /**
