@@ -465,23 +465,21 @@ function extractRelationToFilter(where: Record<string, unknown>): null | string[
   }
 
   // Check for relationTo in logical operators
-  if (where.and && Array.isArray(where.and)) {
-    for (const condition of where.and) {
-      const result = extractRelationToFilter(condition)
-      if (result) {
-        return result
-      }
-    }
-  }
+	const operators = ['and', 'or'];
 
-  if (where.or && Array.isArray(where.or)) {
-    for (const condition of where.or) {
-      const result = extractRelationToFilter(condition)
-      if (result) {
-        return result
-      }
-    }
-  }
+	for (const operator of operators) {
+		if (where[operator] && Array.isArray(where[operator])) {
+			return where[operator].reduce((acc, condition) => {
+				const result: null | string[] = extractRelationToFilter(condition);
+
+        if (result) {
+					acc.push(...result);
+				}
+
+				return acc;
+			}, []);
+		}
+	}
 
   return null
 }
