@@ -302,7 +302,6 @@ export function DefaultEditView({
         void setData(document || {})
       }
 
-      console.log('GETTING LIVE PREVIEW URL')
       // Refresh live preview url, if needed
       // One potential optimization here would be to only do this if certain fields changed
       // And/or also combing this with some other action, like the submit itself

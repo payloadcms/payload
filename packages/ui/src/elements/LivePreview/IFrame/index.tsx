@@ -13,7 +13,6 @@ export const IFrame: React.FC = () => {
     <iframe
       className={baseClass}
       onLoad={() => {
-        console.log('iframe loaded', url)
         setLoadedURL(url)
       }}
       ref={iframeRef}
