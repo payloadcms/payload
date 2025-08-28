@@ -141,6 +141,16 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  code?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -280,6 +290,8 @@ export interface PayloadMigration {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  json?: T;
+  code?: T;
   updatedAt?: T;
   createdAt?: T;
 }

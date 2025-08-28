@@ -33,6 +33,8 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     validate,
   } = props
 
+  const { tabSize = 2 } = editorOptions || {}
+
   const [jsonError, setJsonError] = useState<string>()
   const inputChangeFromRef = React.useRef<'system' | 'user'>('system')
   const [editorKey, setEditorKey] = useState<string>('')
@@ -61,7 +63,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
   const [initialStringValue, setInitialStringValue] = useState<string | undefined>(() =>
     (value || initialValue) !== undefined
-      ? JSON.stringify(value ?? initialValue, null, 2)
+      ? JSON.stringify(value ?? initialValue, null, tabSize)
       : undefined,
   )
 
@@ -86,10 +88,14 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         : `${uri}?${crypto.randomUUID ? crypto.randomUUID() : uuidv4()}`
 
       editor.setModel(
-        monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', monaco.Uri.parse(newUri)),
+        monaco.editor.createModel(
+          JSON.stringify(value, null, tabSize),
+          'json',
+          monaco.Uri.parse(newUri),
+        ),
       )
     },
-    [jsonSchema, value],
+    [jsonSchema, tabSize, value],
   )
 
   const handleChange = useCallback(
@@ -114,14 +120,14 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     if (inputChangeFromRef.current === 'system') {
       setInitialStringValue(
         (value || initialValue) !== undefined
-          ? JSON.stringify(value ?? initialValue, null, 2)
+          ? JSON.stringify(value ?? initialValue, null, tabSize)
           : undefined,
       )
-      setEditorKey(new Date().toString())
+      setEditorKey(`${path}-${new Date().toString()}`)
     }
 
     inputChangeFromRef.current = 'system'
-  }, [initialValue, value])
+  }, [initialValue, path, tabSize, value])
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
