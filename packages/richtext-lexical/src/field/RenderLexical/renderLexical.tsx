@@ -1,6 +1,5 @@
-import type { JSX } from 'react'
-
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { getSchemaMap } from '@payloadcms/ui/utilities/getSchemaMap'
 import {
   createClientField,
   type PayloadRequest,
@@ -13,10 +12,16 @@ import {
 import {
   lexicalEditor,
   type LexicalFieldAdminProps,
+  type LexicalRichTextAdapter,
   type SanitizedServerEditorConfig,
 } from '../../index.js'
 
 export type RenderLexicalServerFunctionArgs = {
+  /**
+   * 'default' or {global|collections}.entitySlug.fieldSchemaPath
+   *
+   * @example collections.posts.richText
+   */
   editorTarget: string
   req: PayloadRequest
 }
@@ -30,15 +35,37 @@ export const _internal_renderLexical: ServerFunction<
     throw new Error('Unauthorized')
   }
 
-  const editor = lexicalEditor({
-    features: ({ defaultFeatures }) => [],
-  })
+  let sanitizedEditor: LexicalRichTextAdapter
 
-  const sanitizedEditor = await editor({
-    config: req.payload.config,
-    isRoot: false,
-    parentIsLocalized: false,
-  })
+  if (editorTarget === 'default') {
+    sanitizedEditor = await lexicalEditor()({
+      config: req.payload.config,
+      isRoot: false,
+      parentIsLocalized: false,
+    })
+  } else {
+    const [entityType, entitySlug, ...fieldPath] = editorTarget.split('.')
+
+    const schemaMap = getSchemaMap({
+      collectionSlug: entityType === 'collections' ? entitySlug : undefined,
+      config: req.payload.config,
+      globalSlug: entityType === 'globals' ? entitySlug : undefined,
+      i18n: req.i18n,
+    })
+
+    const field = schemaMap.get(`${entitySlug}.${fieldPath.join('.')}`) as RichTextField | undefined
+
+    if (!field?.editor || typeof field.editor === 'function') {
+      throw new Error(`No editor found for target: ${editorTarget}`)
+    }
+
+    sanitizedEditor = field.editor as LexicalRichTextAdapter
+  }
+
+  if (!sanitizedEditor) {
+    throw new Error(`No editor found for target: ${editorTarget}`)
+  }
+
   const field: RichTextField = {
     name: 'richText',
     type: 'richText',

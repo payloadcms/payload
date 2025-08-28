@@ -12,5 +12,14 @@ export const OnDemand: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'ui2',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: './collections/OnDemand/OnDemand2.js#OnDemand',
+        },
+      },
+    },
   ],
 }

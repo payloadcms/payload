@@ -9,7 +9,7 @@ import type {
 } from './renderLexical.js'
 
 export const useRenderEditor_internal_ = (args: {
-  editorTarget: string
+  editorTarget: 'default' | ({} & string)
   initialState: DefaultTypedEditorState
   name: string
 }) => {
