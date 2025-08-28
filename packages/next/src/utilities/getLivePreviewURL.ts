@@ -1,14 +1,19 @@
 import type { GetLivePreviewURLArgs } from '@payloadcms/ui'
-import type { ServerFunction } from 'payload'
+import type { ErrorResult, ServerFunction } from 'payload'
 
 import { canAccessAdmin } from '@payloadcms/ui/shared'
 import { formatErrors } from 'payload'
 
+import { getRequestLocale } from './getRequestLocale.js'
+
 export const getLivePreviewURLHandler: ServerFunction<
   GetLivePreviewURLArgs,
-  Promise<{
-    url: null | string
-  }>
+  Promise<
+    | {
+        url: null | string
+      }
+    | ErrorResult
+  >
 > = async (args) => {
   const { collectionSlug, data, globalSlug, req } = args
 
@@ -26,13 +31,17 @@ export const getLivePreviewURLHandler: ServerFunction<
     }
 
     if (typeof url === 'function') {
+      const locale = await getRequestLocale({
+        req,
+      })
+
       const result = await url({
         collectionConfig: req.payload.config.collections.find(
           (coll) => coll.slug === collectionSlug,
         ),
         data,
         globalConfig: globalSlug ? req.payload.globals[globalSlug] : undefined,
-        locale: req.locale,
+        locale,
         payload: req.payload,
         req,
       })
