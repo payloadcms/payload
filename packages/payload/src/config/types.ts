@@ -170,6 +170,13 @@ export type LivePreviewConfig = {
         req: PayloadRequest
       }) => Promise<string> | string)
     | string
+  /**
+   * @experimental This feature is experimental and may change in future releases. Use at your own discretion.
+   * Will watch the specified fields for changes and re-run the live preview URL function when they change.
+   * This is useful if your live preview URL depends on certain fields, e.g. a slug field.
+   * Note: every time the URL changes, the iframe will reload. Use this option with consideration.
+   */
+  urlDeps?: string[]
 }
 
 export type RootLivePreviewConfig = {

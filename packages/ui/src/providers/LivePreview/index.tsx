@@ -24,6 +24,7 @@ export type LivePreviewProviderProps = {
   isLivePreviewEnabled?: boolean
   isLivePreviewing: boolean
   url: string
+  urlDeps?: LivePreviewConfig['urlDeps']
 }
 
 const getAbsoluteUrl = (url) => {
@@ -39,7 +40,8 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   children,
   isLivePreviewEnabled,
   isLivePreviewing: incomingIsLivePreviewing,
-  url: incomingUrl,
+  url: urlFromProps,
+  urlDeps,
 }) => {
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
   const [isLivePreviewing, setIsLivePreviewing] = useState(incomingIsLivePreviewing)
@@ -57,20 +59,19 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     [incomingBreakpoints],
   )
 
-  const [url, setURL] = useState<string>('')
+  const [url, setURLState] = useState<string>('')
 
-  // This needs to be done in a useEffect to prevent hydration issues
-  // as the URL may not be absolute when passed in as a prop,
-  // and getAbsoluteUrl requires the window object to be available
-  useEffect(
-    () =>
-      setURL(
-        incomingUrl?.startsWith('http://') || incomingUrl?.startsWith('https://')
-          ? incomingUrl
-          : getAbsoluteUrl(incomingUrl),
-      ),
-    [incomingUrl],
-  )
+  const setURL = useCallback((incomingURL: string) => {
+    setURLState(
+      incomingURL?.startsWith('http://') || incomingURL?.startsWith('https://')
+        ? incomingURL
+        : getAbsoluteUrl(incomingURL),
+    )
+  }, [])
+
+  useEffect(() => {
+    setURL(urlFromProps)
+  }, [urlFromProps, setURL])
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
@@ -252,11 +253,13 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         setPreviewWindowType: handleWindowChange,
         setSize,
         setToolbarPosition: setPosition,
+        setURL,
         setWidth,
         setZoom,
         size,
         toolbarPosition: position,
         url,
+        urlDeps,
         zoom,
       }}
     >

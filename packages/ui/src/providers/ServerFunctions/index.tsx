@@ -105,6 +105,11 @@ type ServerFunctionsContextType = {
   getDocumentSlots: GetDocumentSlots
   getFolderResultsComponentAndData: GetFolderResultsComponentAndDataClient
   getFormState: GetFormStateClient
+  getLivePreviewURL: (args: {
+    collectionSlug?: string
+    data?: Data
+    globalSlug?: string
+  }) => Promise<{ url: null | string }>
   getTableState: GetTableStateClient
   renderDocument: RenderDocumentServerFunctionHookFn
   schedulePublish: SchedulePublishClient
@@ -258,6 +263,20 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const getLivePreviewURL = useCallback(async () => {
+    try {
+      const result = (await serverFunction({
+        name: 'get-live-preview-url',
+        args: {},
+      })) as { url: null | string }
+
+      return result
+    } catch (_err) {
+      console.error(_err) // eslint-disable-line no-console
+    }
+    return { url: null }
+  }, [serverFunction])
+
   const getFolderResultsComponentAndData = useCallback<GetFolderResultsComponentAndDataClient>(
     async (args) => {
       const { signal: remoteSignal, ...rest } = args || {}
@@ -285,6 +304,7 @@ export const ServerFunctionsProvider: React.FC<{
         getDocumentSlots,
         getFolderResultsComponentAndData,
         getFormState,
+        getLivePreviewURL,
         getTableState,
         renderDocument,
         schedulePublish,

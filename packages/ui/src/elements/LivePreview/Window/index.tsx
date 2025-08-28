@@ -9,6 +9,7 @@ import { useAllFormFields } from '../../../forms/Form/context.js'
 import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
 import { useLocale } from '../../../providers/Locale/index.js'
+import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { DeviceContainer } from '../Device/index.js'
 import { IFrame } from '../IFrame/index.js'
@@ -28,17 +29,56 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     popupRef,
     previewWindowType,
     setIframeHasLoaded,
+    setURL,
     url,
+    urlDeps,
   } = useLivePreviewContext()
 
   const locale = useLocale()
 
   const { mostRecentUpdate } = useDocumentEvents()
 
+  const { getLivePreviewURL } = useServerFunctions()
+
   const prevWindowType =
     React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>(undefined)
 
   const [formState] = useAllFormFields()
+  const prevFormState = React.useRef(formState)
+
+  useEffect(() => {
+    if (!urlDeps || !urlDeps.length) {
+      return
+    }
+
+    const depsChanged = urlDeps?.some((dep) => {
+      if (!prevFormState.current) {
+        return false
+      }
+
+      return prevFormState.current[dep] !== formState?.[dep]
+    })
+
+    prevFormState.current = formState
+
+    if (!depsChanged) {
+      return
+    }
+
+    const get = async () => {
+      try {
+        const { url } = await getLivePreviewURL({
+          data: {},
+        })
+
+        setURL(url)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
+    void get()
+  }, [formState, setURL, getLivePreviewURL, urlDeps])
 
   // For client-side apps, send data through `window.postMessage`
   // The preview could either be an iframe embedded on the page

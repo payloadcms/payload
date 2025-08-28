@@ -1,5 +1,5 @@
 'use client'
-import type { LivePreviewConfig } from 'payload'
+import type { LivePreviewConfig, SanitizedConfig } from 'payload'
 import type { fieldSchemaToJSON } from 'payload/shared'
 import type { Dispatch } from 'react'
 import type React from 'react'
@@ -36,6 +36,11 @@ export interface LivePreviewContextType {
   setPreviewWindowType: (previewWindowType: 'iframe' | 'popup') => void
   setSize: Dispatch<SizeReducerAction>
   setToolbarPosition: (position: { x: number; y: number }) => void
+  /**
+   * Sets the URL of the preview (either iframe or popup).
+   * Will trigger a reload of the window.
+   */
+  setURL: (url: string) => void
   setWidth: (width: number) => void
   setZoom: (zoom: number) => void
   size: {
@@ -47,6 +52,7 @@ export interface LivePreviewContextType {
     y: number
   }
   url: string | undefined
+  urlDeps?: SanitizedConfig['admin']['livePreview']['urlDeps']
   zoom: number
 }
 
@@ -76,6 +82,7 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   setPreviewWindowType: () => {},
   setSize: () => {},
   setToolbarPosition: () => {},
+  setURL: () => {},
   setWidth: () => {},
   setZoom: () => {},
   size: {
@@ -87,6 +94,7 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
     y: 0,
   },
   url: undefined,
+  urlDeps: undefined,
   zoom: 1,
 })
 
