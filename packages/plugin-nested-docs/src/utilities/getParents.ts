@@ -1,14 +1,14 @@
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, Document, PayloadRequest } from 'payload'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 
 export const getParents = async (
   req: PayloadRequest,
-  pluginConfig: NestedDocsPluginConfig,
+  pluginConfig: Pick<NestedDocsPluginConfig, 'generateLabel' | 'generateURL' | 'parentFieldSlug'>,
   collection: CollectionConfig,
   doc: Record<string, unknown>,
   docs: Array<Record<string, unknown>> = [],
-): Promise<Array<Record<string, unknown>>> => {
+): Promise<Document[]> => {
   const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
   const parent = doc[parentSlug]
   let retrievedParent: null | Record<string, unknown> = null

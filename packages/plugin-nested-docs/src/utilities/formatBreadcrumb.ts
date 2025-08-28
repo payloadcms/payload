@@ -1,23 +1,30 @@
-import type { CollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload'
 
-import type { Breadcrumb, NestedDocsPluginConfig } from '../types.js'
+import type { Breadcrumb, GenerateLabel, GenerateURL } from '../types.js'
 
-export const formatBreadcrumb = (
-  pluginConfig: NestedDocsPluginConfig,
-  collection: CollectionConfig,
-  docs: Array<Record<string, unknown>>,
-): Breadcrumb => {
+type Args = {
+  collection: SanitizedCollectionConfig
+  docs: Record<string, unknown>[]
+  generateLabel?: GenerateLabel
+  generateURL?: GenerateURL
+}
+export const formatBreadcrumb = ({
+  collection,
+  docs,
+  generateLabel,
+  generateURL,
+}: Args): Breadcrumb => {
   let url: string | undefined = undefined
   let label: string
 
   const lastDoc = docs[docs.length - 1]!
 
-  if (typeof pluginConfig?.generateURL === 'function') {
-    url = pluginConfig.generateURL(docs, lastDoc)
+  if (typeof generateURL === 'function') {
+    url = generateURL(docs, lastDoc)
   }
 
-  if (typeof pluginConfig?.generateLabel === 'function') {
-    label = pluginConfig.generateLabel(docs, lastDoc)
+  if (typeof generateLabel === 'function') {
+    label = generateLabel(docs, lastDoc)
   } else {
     const title = collection.admin?.useAsTitle ? lastDoc[collection.admin.useAsTitle] : ''
 
