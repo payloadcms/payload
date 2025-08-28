@@ -43,7 +43,7 @@ describePostgres('queues - postgres logs', () => {
         },
       })
 
-      //  Count every console log (= db call)
+      // Count every console log (= db call)
       const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
 
       const res = await payload.jobs.run({})
@@ -52,7 +52,7 @@ describePostgres('queues - postgres logs', () => {
         jobStatus: { '1': { status: 'success' } },
         remainingJobsFromQueried: 0,
       })
-      expect(consoleCount).toHaveBeenCalledTimes(17) // Should be 17 sql calls if the optimizations are used. If not, this would be 22 calls
+      expect(consoleCount).toHaveBeenCalledTimes(14) // Should be 14 sql calls if the optimizations are used. If not, this would be 22 calls
       consoleCount.mockRestore()
     })
   })
