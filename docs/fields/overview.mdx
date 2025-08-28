@@ -159,6 +159,36 @@ The following field names are forbidden and cannot be used:
 - `file`
 - `status` - with Postgres Adapter and when drafts are enabled
 
+<Banner type="warning">
+  Field name values must be valid JSON object keys. Although names are always
+  strings, using numbers as names can break expected behavior because Payload
+  stores all content as nested JSON.
+</Banner>
+
+For example:
+
+```ts
+import type { Field } from 'payload'
+
+export const NumericFieldName: Field = {
+  type: 'text',
+  name: '1',
+}
+
+const doc = {
+  "1": "value"
+}
+
+// this will throw a syntax error:
+console.log(doc.1);
+
+// you would have to access it like this instead:
+console.log(doc['1']);
+
+```
+
+That said, numeric field names are allowed but aren't recommended due to JavaScript syntax pitfalls and you should lean towards descriptive string names.
+
 ### Field-level Hooks
 
 In addition to being able to define [Hooks](../hooks/overview) on a document-level, you can define extremely granular logic field-by-field.
