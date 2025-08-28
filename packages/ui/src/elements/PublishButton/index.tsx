@@ -1,7 +1,8 @@
 'use client'
 
+import type { PublishButtonClientProps } from 'payload'
+
 import { useModal } from '@faceless-ui/modal'
-import { type Field, type PublishButtonClientProps, type TabAsField, traverseFields } from 'payload'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -14,6 +15,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
 import { ScheduleDrawer } from './ScheduleDrawer/index.js'
 
@@ -25,7 +27,6 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     globalSlug,
     hasPublishedDoc,
     hasPublishPermission,
-    initialData: data,
     setHasPublishedDoc,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
@@ -89,17 +90,9 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
 
   useEffect(() => {
-    traverseFields({
-      callback: ({ field, parentIsLocalized }) => {
-        if (parentIsLocalized || ('localized' in field && field.localized)) {
-          setHasLocalizedFields(true)
-        }
-      },
-      fields: entityConfig?.fields as (Field | TabAsField)[],
-      fillEmpty: false,
-      ref: data,
-    })
-  }, [entityConfig?.fields, data])
+    const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields)
+    setHasLocalizedFields(hasLocalizedField)
+  }, [entityConfig?.fields])
 
   const canPublishSpecificLocale = localization && hasLocalizedFields && hasPublishPermission
 
