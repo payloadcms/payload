@@ -5,10 +5,10 @@ import type { NestedDocsPluginConfig } from './types.js'
 import { createBreadcrumbsField } from './fields/breadcrumbs.js'
 import { createParentField } from './fields/parent.js'
 import { parentFilterOptions } from './fields/parentFilterOptions.js'
+import { populateBreadcrumbsBeforeChange } from './hooks/populateBreadcrumbsBeforeChange.js'
 import { resaveChildren } from './hooks/resaveChildren.js'
 import { resaveSelfAfterCreate } from './hooks/resaveSelfAfterCreate.js'
 import { getParents } from './utilities/getParents.js'
-import { populateBreadcrumbs } from './utilities/populateBreadcrumbs.js'
 
 export { createBreadcrumbsField, createParentField, getParents }
 
@@ -53,13 +53,12 @@ export const nestedDocsPlugin =
           hooks: {
             ...(collection.hooks || {}),
             afterChange: [
-              resaveChildren(pluginConfig, collection),
-              resaveSelfAfterCreate(pluginConfig, collection),
+              resaveChildren(pluginConfig),
+              resaveSelfAfterCreate(pluginConfig),
               ...(collection?.hooks?.afterChange || []),
             ],
             beforeChange: [
-              async ({ data, originalDoc, req }) =>
-                populateBreadcrumbs(req, pluginConfig, collection, data, originalDoc),
+              populateBreadcrumbsBeforeChange(pluginConfig),
               ...(collection?.hooks?.beforeChange || []),
             ],
           },
