@@ -496,6 +496,27 @@ const BlockFields: CollectionConfig = {
       ],
     },
     {
+      name: 'blocksWithGeneratedName',
+      type: 'blocks',
+      admin: {
+        description: 'The purpose of this field is to test the admin.generateBlockName function.',
+      },
+      blocks: [
+        {
+          slug: 'blockWithGeneratedName',
+          admin: {
+            generateBlockName: ({ blockData }) => blockData.text,
+          },
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'readOnly',
       type: 'blocks',
       admin: {
