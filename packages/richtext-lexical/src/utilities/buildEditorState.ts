@@ -2,12 +2,12 @@ import type { SerializedLexicalNode } from 'lexical'
 
 import type { DefaultTypedEditorState, TypedEditorState } from '../nodeTypes.js'
 
-export function textToEditorState(args: {
+export function buildEditorState(args: {
   nodes?: DefaultTypedEditorState['root']['children']
   text?: string
 }): DefaultTypedEditorState
 
-export function textToEditorState<T extends SerializedLexicalNode>(args: {
+export function buildEditorState<T extends SerializedLexicalNode>(args: {
   // If you pass children typed for a specific schema T, the return is TypedEditorState<T>
   nodes?: TypedEditorState<T>['root']['children']
   text?: string
@@ -25,7 +25,7 @@ export function textToEditorState<T extends SerializedLexicalNode>(args: {
  * just passing text:
  *
  * ```ts
- * const editorState = textToEditorState({ text: 'Hello world' }) // result typed as DefaultTypedEditorState
+ * const editorState = buildEditorState({ text: 'Hello world' }) // result typed as DefaultTypedEditorState
  * ```
  *
  * @example
@@ -34,7 +34,7 @@ export function textToEditorState<T extends SerializedLexicalNode>(args: {
  *
  * ```ts
  * const editorState = // result typed as TypedEditorState<DefaultNodeTypes | SerializedBlockNode> (or TypedEditorState<SerializedBlockNode>)
- * textToEditorState<DefaultNodeTypes | SerializedBlockNode>({ // or just textToEditorState<SerializedBlockNode> if you *only* want to allow block nodes
+ * buildEditorState<DefaultNodeTypes | SerializedBlockNode>({ // or just buildEditorState<SerializedBlockNode> if you *only* want to allow block nodes
  *   nodes: [
  *     {
  *       type: 'block',
@@ -50,7 +50,7 @@ export function textToEditorState<T extends SerializedLexicalNode>(args: {
  * })
  * ```
  */
-export function textToEditorState<T extends SerializedLexicalNode>({
+export function buildEditorState<T extends SerializedLexicalNode>({
   nodes,
   text,
 }: {

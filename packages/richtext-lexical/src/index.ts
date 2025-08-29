@@ -1055,10 +1055,12 @@ export { populate } from './populateGraphQL/populate.js'
 
 export type { LexicalEditorProps, LexicalFieldAdminProps, LexicalRichTextAdapter } from './types.js'
 
+export { buildEditorState } from './utilities/buildEditorState.js'
 export { createServerFeature } from './utilities/createServerFeature.js'
-export { editorConfigFactory } from './utilities/editorConfigFactory.js'
 
+export { editorConfigFactory } from './utilities/editorConfigFactory.js'
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
+
 export { extractPropsFromJSXPropsString } from './utilities/jsx/extractPropsFromJSXPropsString.js'
 
 export {
@@ -1067,6 +1069,4 @@ export {
   objectToFrontmatter,
   propsToJSXString,
 } from './utilities/jsx/jsx.js'
-
-export { textToEditorState } from './utilities/textToEditorState.js'
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'

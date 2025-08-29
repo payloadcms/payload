@@ -4,7 +4,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { FieldAccess } from 'payload'
 
-import { textToEditorState } from '@payloadcms/richtext-lexical'
+import { buildEditorState } from '@payloadcms/richtext-lexical'
 
 import type { Config, User } from './payload-types.js'
 
@@ -719,33 +719,33 @@ export default buildConfigWithDefaults(
       await payload.create({
         collection: 'regression1',
         data: {
-          richText4: textToEditorState({ text: 'Text1' }),
-          array: [{ art: textToEditorState({ text: 'Text2' }) }],
-          arrayWithAccessFalse: [{ richText6: textToEditorState({ text: 'Text3' }) }],
+          richText4: buildEditorState({ text: 'Text1' }),
+          array: [{ art: buildEditorState({ text: 'Text2' }) }],
+          arrayWithAccessFalse: [{ richText6: buildEditorState({ text: 'Text3' }) }],
           group1: {
             text: 'Text4',
-            richText1: textToEditorState({ text: 'Text5' }),
+            richText1: buildEditorState({ text: 'Text5' }),
           },
           blocks: [
             {
               blockType: 'myBlock3',
-              richText7: textToEditorState({ text: 'Text6' }),
+              richText7: buildEditorState({ text: 'Text6' }),
               blockName: 'My Block 1',
             },
           ],
           blocks3: [
             {
               blockType: 'myBlock2',
-              richText5: textToEditorState({ text: 'Text7' }),
+              richText5: buildEditorState({ text: 'Text7' }),
               blockName: 'My Block 2',
             },
           ],
           tab1: {
-            richText2: textToEditorState({ text: 'Text8' }),
+            richText2: buildEditorState({ text: 'Text8' }),
             blocks2: [
               {
                 blockType: 'myBlock',
-                richText3: textToEditorState({ text: 'Text9' }),
+                richText3: buildEditorState({ text: 'Text9' }),
                 blockName: 'My Block 3',
               },
             ],
@@ -758,12 +758,12 @@ export default buildConfigWithDefaults(
         data: {
           array: [
             {
-              richText2: textToEditorState({ text: 'Text1' }),
+              richText2: buildEditorState({ text: 'Text1' }),
             },
           ],
           group: {
             text: 'Text2',
-            richText1: textToEditorState({ text: 'Text3' }),
+            richText1: buildEditorState({ text: 'Text3' }),
           },
         },
       })

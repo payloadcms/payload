@@ -152,4 +152,4 @@ export { useBlockComponentContext } from '../../features/blocks/client/component
 export { getRestPopulateFn } from '../../features/converters/utilities/restPopulateFn.js'
 
 export { useRenderEditor_internal_ } from '../../field/RenderLexical/useRenderEditor.js'
-export { textToEditorState } from '../../utilities/textToEditorState.js'
+export { buildEditorState } from '../../utilities/buildEditorState.js'

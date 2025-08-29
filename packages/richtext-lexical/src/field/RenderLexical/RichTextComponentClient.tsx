@@ -5,7 +5,7 @@ import type { FormState } from 'payload'
 import { Form } from '@payloadcms/ui'
 import React from 'react'
 
-import { textToEditorState } from '../../utilities/textToEditorState.js'
+import { buildEditorState } from '../../utilities/buildEditorState.js'
 
 export const RichTextComponentClient: React.FC<{
   FieldComponent: React.ReactNode
@@ -13,7 +13,7 @@ export const RichTextComponentClient: React.FC<{
   const { FieldComponent } = props
 
   const [initialState] = React.useState<FormState>(() => {
-    const lexical = textToEditorState({ text: 'Hello world' })
+    const lexical = buildEditorState({ text: 'Hello world' })
 
     return {
       richText: {

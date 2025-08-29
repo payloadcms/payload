@@ -6,11 +6,11 @@ import type { PaginatedDocs, Payload } from 'payload'
 
 /* eslint-disable jest/no-conditional-in-test */
 import {
+  buildEditorState,
   type SerializedBlockNode,
   type SerializedLinkNode,
   type SerializedRelationshipNode,
   type SerializedUploadNode,
-  textToEditorState,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -655,7 +655,7 @@ describe('Lexical', () => {
         locale: 'en',
         data: {
           title: 'Localized Lexical hooks',
-          lexicalBlocksLocalized: textToEditorState({ text: 'some text' }),
+          lexicalBlocksLocalized: buildEditorState({ text: 'some text' }),
           lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
             'Shared text',
             'English text in block',
