@@ -8,12 +8,13 @@ import type {
   RenderLexicalServerFunctionReturnType,
 } from './renderLexical.js'
 
-export const useRenderEditor_internal_ = (args: {
-  editorTarget: 'default' | ({} & string)
-  initialState: DefaultTypedEditorState
-  name: string
-}) => {
-  const { name, editorTarget, initialState } = args
+export const useRenderEditor_internal_ = (
+  args: {
+    initialState: DefaultTypedEditorState
+    name: string
+  } & RenderLexicalServerFunctionArgs,
+) => {
+  const { name, admin, editorTarget, initialState } = args
   const [Component, setComponent] = React.useState<null | React.ReactNode>(null)
   const { serverFunction } = useServerFunctions()
 
@@ -22,6 +23,7 @@ export const useRenderEditor_internal_ = (args: {
       const { Component } = (await serverFunction({
         name: 'render-lexical',
         args: {
+          admin,
           editorTarget,
         } as RenderLexicalServerFunctionArgs,
       })) as RenderLexicalServerFunctionReturnType
@@ -29,7 +31,7 @@ export const useRenderEditor_internal_ = (args: {
       setComponent(Component)
     }
     void render()
-  }, [editorTarget, serverFunction])
+  }, [editorTarget, serverFunction, admin])
 
   return { Component, renderLexical }
 }

@@ -2,7 +2,6 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { getSchemaMap } from '@payloadcms/ui/utilities/getSchemaMap'
 import {
   createClientField,
-  type PayloadRequest,
   type RichTextField,
   type RichTextFieldClient,
   type RichTextFieldServerProps,
@@ -17,20 +16,20 @@ import {
 } from '../../index.js'
 
 export type RenderLexicalServerFunctionArgs = {
+  admin?: LexicalFieldAdminProps
   /**
    * 'default' or {global|collections}.entitySlug.fieldSchemaPath
    *
    * @example collections.posts.richText
    */
-  editorTarget: string
-  req: PayloadRequest
+  editorTarget: 'default' | ({} & string)
 }
 export type RenderLexicalServerFunctionReturnType = { Component: React.ReactNode }
 
 export const _internal_renderLexical: ServerFunction<
   RenderLexicalServerFunctionArgs,
   Promise<RenderLexicalServerFunctionReturnType>
-> = async ({ editorTarget, importMap, req }) => {
+> = async ({ admin, editorTarget, importMap, req }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
   }
@@ -76,7 +75,7 @@ export const _internal_renderLexical: ServerFunction<
     Component: sanitizedEditor.FieldComponent,
     importMap,
     serverProps: {
-      admin: {},
+      admin: admin ?? {},
       clientField: createClientField({
         defaultIDType: req.payload.db.defaultIDType,
         field,
@@ -88,6 +87,7 @@ export const _internal_renderLexical: ServerFunction<
       data: {},
       field,
       fieldSchemaMap: new Map<string, RichTextField>(),
+      forceRender: true,
       formState: {},
       i18n: req.i18n,
       operation: 'create',
