@@ -1068,4 +1068,5 @@ export {
   propsToJSXString,
 } from './utilities/jsx/jsx.js'
 
+export { textToEditorState } from './utilities/textToEditorState.js'
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'

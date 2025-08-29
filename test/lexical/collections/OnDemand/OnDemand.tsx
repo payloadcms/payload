@@ -18,5 +18,5 @@ export const OnDemand: React.FC = () => {
     void renderLexical()
     mounted.current = true
   }, [renderLexical])
-  return <div>Component: {Component ? Component : 'Loading...'}</div>
+  return <div>Default Component: {Component ? Component : 'Loading...'}</div>
 }

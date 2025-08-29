@@ -1,48 +1,11 @@
 'use client'
 
-import type { SerializedEditorState } from 'lexical'
 import type { FormState } from 'payload'
 
 import { Form } from '@payloadcms/ui'
 import React from 'react'
 
-import type { SerializedParagraphNode, SerializedTextNode } from '../../nodeTypes.js'
-
-export function textToLexicalJSON({ text }: { text: string }): SerializedEditorState {
-  const editorJSON: SerializedEditorState = {
-    root: {
-      type: 'root',
-      children: [
-        {
-          type: 'paragraph',
-          children: [
-            {
-              type: 'text',
-              detail: 0,
-              format: 0,
-              mode: 'normal',
-              style: '',
-              text,
-              version: 1,
-            } as SerializedTextNode,
-          ],
-          direction: 'ltr',
-          format: '',
-          indent: 0,
-          textFormat: 0,
-          textStyle: '',
-          version: 1,
-        } as SerializedParagraphNode,
-      ],
-      direction: 'ltr',
-      format: '',
-      indent: 0,
-      version: 1,
-    },
-  }
-
-  return editorJSON
-}
+import { textToEditorState } from '../../utilities/textToEditorState.js'
 
 export const RichTextComponentClient: React.FC<{
   FieldComponent: React.ReactNode
@@ -50,7 +13,8 @@ export const RichTextComponentClient: React.FC<{
   const { FieldComponent } = props
 
   const [initialState] = React.useState<FormState>(() => {
-    const lexical = textToLexicalJSON({ text: 'Hello world' })
+    const lexical = textToEditorState({ text: 'Hello world' })
+
     return {
       richText: {
         initialValue: lexical,

@@ -1,5 +1,7 @@
 'use client'
 
+import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
+
 import { useRenderEditor_internal_ } from '@payloadcms/richtext-lexical/client'
 import { useEffect, useRef } from 'react'
 
@@ -9,7 +11,7 @@ export const OnDemand: React.FC = () => {
   const { Component, renderLexical } = useRenderEditor_internal_({
     name: 'richText',
     editorTarget: `collections.${lexicalFullyFeaturedSlug}.richText`,
-    initialState: {} as any,
+    initialState: {} as DefaultTypedEditorState,
   })
   const mounted = useRef(false)
 
@@ -20,5 +22,5 @@ export const OnDemand: React.FC = () => {
     void renderLexical()
     mounted.current = true
   }, [renderLexical])
-  return <div>Component: {Component ? Component : 'Loading...'}</div>
+  return <div>Fully-Featured Component: {Component ? Component : 'Loading...'}</div>
 }
