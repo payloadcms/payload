@@ -183,6 +183,11 @@
       "types": "./src/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.ts",
       "default": "./src/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.ts"
     },
+    "./lexical/react/LexicalNodeContextMenuPlugin": {
+      "import": "./src/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.ts",
+      "types": "./src/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.ts",
+      "default": "./src/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.ts"
+    },
     "./lexical/react/LexicalDecoratorBlockNode": {
       "import": "./src/lexical-proxy/@lexical-react/LexicalDecoratorBlockNode.ts",
       "types": "./src/lexical-proxy/@lexical-react/LexicalDecoratorBlockNode.ts",
@@ -580,6 +585,11 @@
         "import": "./dist/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.js",
         "types": "./dist/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.d.ts",
         "default": "./dist/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.js"
+      },
+      "./lexical/react/LexicalNodeContextMenuPlugin": {
+        "import": "./dist/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.js",
+        "types": "./dist/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.js"
       },
       "./lexical/react/LexicalDecoratorBlockNode": {
         "import": "./dist/lexical-proxy/@lexical-react/LexicalDecoratorBlockNode.js",
