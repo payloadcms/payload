@@ -264,14 +264,21 @@ export const seed = async (_payload: Payload) => {
             type: 'relationship',
             version: 2,
             relationTo: lexicalLocalizedFieldsSlug,
-            value: lexicalLocalizedRelID,
+            value: lexicalLocalizedDoc1.id,
           },
         ],
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
       }),
       lexicalBlocksSubLocalized: buildEditorState({
         text: 'English text 2',
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
+        nodes: [
+          {
+            format: '',
+            type: 'relationship',
+            version: 2,
+            relationTo: lexicalLocalizedFieldsSlug,
+            value: lexicalLocalizedDoc1.id,
+          },
+        ],
       }),
     },
     locale: 'en',
@@ -287,7 +294,15 @@ export const seed = async (_payload: Payload) => {
 
       lexicalBlocksLocalized: buildEditorState({
         text: 'Spanish text 2',
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
+        nodes: [
+          {
+            format: '',
+            type: 'relationship',
+            version: 2,
+            relationTo: lexicalLocalizedFieldsSlug,
+            value: lexicalLocalizedDoc1.id,
+          },
+        ],
       }),
     },
     locale: 'es',
