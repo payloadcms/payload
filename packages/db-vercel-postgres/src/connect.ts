@@ -1,8 +1,9 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { VercelPool } from '@vercel/postgres'
 import type { Connect, Migration } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
-import { sql, VercelPool } from '@vercel/postgres'
+import { createPool, sql } from '@vercel/postgres'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { withReplicas } from 'drizzle-orm/pg-core'
 import pg from 'pg'
@@ -36,7 +37,7 @@ export const connect: Connect = async function connect(
         },
       )
     } else {
-      client = this.poolOptions ? new VercelPool(this.poolOptions) : sql
+      client = this.poolOptions ? createPool(this.poolOptions) : sql
     }
 
     // Passed the poolOptions if provided,
@@ -53,7 +54,7 @@ export const connect: Connect = async function connect(
           ...this.poolOptions,
           connectionString,
         }
-        const pool = new VercelPool(options)
+        const pool = createPool(options)
         return drizzle({ client: pool, logger, schema: this.schema })
       })
       const myReplicas = withReplicas(this.drizzle, readReplicas as any)
