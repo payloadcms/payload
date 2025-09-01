@@ -116,6 +116,7 @@ export const createClientConfig = ({
           routes: config.admin.routes,
           theme: config.admin.theme,
           timezones: config.admin.timezones,
+          toast: config.admin.toast,
           user: config.admin.user,
         }
 

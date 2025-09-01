@@ -312,22 +312,18 @@ test.describe('Form State', () => {
 
     // Now test array rows, as their merge logic is different
 
-    await page.locator('#field-array #array-row-0').isVisible()
+    await page.locator('#field-computedArray #computedArray-row-0').isVisible()
 
-    await removeArrayRow(page, { fieldName: 'array' })
+    await removeArrayRow(page, { fieldName: 'computedArray' })
 
-    await page.locator('#field-array .array-row-0').isHidden()
+    await page.locator('#field-computedArray #computedArray-row-0').isHidden()
 
     await saveDocAndAssert(page)
 
-    await expect(page.locator('#field-array #array-row-0')).toBeVisible()
+    await expect(page.locator('#field-computedArray #computedArray-row-0')).toBeVisible()
 
     await expect(
-      page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
-    ).toHaveValue('This is a computed value.')
-
-    await expect(
-      page.locator('#field-array #array-row-0 #field-array__0__defaultTextField'),
+      page.locator('#field-computedArray #computedArray-row-0 #field-computedArray__0__text'),
     ).toHaveValue('This is a computed value.')
   })
 

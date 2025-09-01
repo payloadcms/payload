@@ -1,9 +1,10 @@
-import type { Config, Field, RelationshipField, SanitizedConfig } from 'payload'
+import type { Block, Config, Field, RelationshipField, SanitizedConfig } from 'payload'
 
 import { defaults } from '../defaults.js'
 import { filterDocumentsByTenants } from '../filters/filterDocumentsByTenants.js'
 
 type AddFilterOptionsToFieldsArgs = {
+  blockReferencesWithFilters: string[]
   config: Config | SanitizedConfig
   fields: Field[]
   tenantEnabledCollectionSlugs: string[]
@@ -15,6 +16,7 @@ type AddFilterOptionsToFieldsArgs = {
 }
 
 export function addFilterOptionsToFields({
+  blockReferencesWithFilters,
   config,
   fields,
   tenantEnabledCollectionSlugs,
@@ -74,6 +76,7 @@ export function addFilterOptionsToFields({
       field.type === 'group'
     ) {
       addFilterOptionsToFields({
+        blockReferencesWithFilters,
         config,
         fields: field.fields,
         tenantEnabledCollectionSlugs,
@@ -87,14 +90,21 @@ export function addFilterOptionsToFields({
 
     if (field.type === 'blocks') {
       ;(field.blockReferences ?? field.blocks).forEach((_block) => {
-        const block =
-          typeof _block === 'string'
-            ? // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
-              config?.blocks?.find((b) => b.slug === _block)
-            : _block
+        let block: Block | undefined
+
+        if (typeof _block === 'string') {
+          if (blockReferencesWithFilters.includes(_block)) {
+            return
+          }
+          block = config?.blocks?.find((b) => b.slug === _block)
+          blockReferencesWithFilters.push(_block)
+        } else {
+          block = _block
+        }
 
         if (block?.fields) {
           addFilterOptionsToFields({
+            blockReferencesWithFilters,
             config,
             fields: block.fields,
             tenantEnabledCollectionSlugs,
@@ -111,6 +121,7 @@ export function addFilterOptionsToFields({
     if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         addFilterOptionsToFields({
+          blockReferencesWithFilters,
           config,
           fields: tab.fields,
           tenantEnabledCollectionSlugs,

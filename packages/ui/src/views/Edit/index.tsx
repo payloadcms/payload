@@ -1,7 +1,7 @@
 /* eslint-disable react-compiler/react-compiler -- TODO: fix */
 'use client'
 
-import type { ClientUser, DocumentViewClientProps, FormState } from 'payload'
+import type { ClientUser, DocumentViewClientProps } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'

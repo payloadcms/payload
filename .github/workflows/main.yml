@@ -6,7 +6,6 @@ on:
       - opened
       - reopened
       - synchronize
-      - labeled
   push:
     branches:
       - main
@@ -371,6 +370,7 @@ jobs:
       #     report-tag: ${{ matrix.suite }}
       #     job-summary: true
 
+  # This is unused, keeping it here for reference and possibly enabling in the future
   tests-e2e-turbo:
     runs-on: ubuntu-24.04
     needs: [changes, build]
