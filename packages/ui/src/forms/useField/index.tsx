@@ -1,7 +1,7 @@
 'use client'
 import type { PayloadRequest } from 'payload'
 
-import { useCallback, useMemo, useRef } from 'react'
+import React, { useCallback, useMemo, useRef } from 'react'
 
 import type { UPDATE } from '../Form/types.js'
 import type { FieldType, Options } from './types.js'
@@ -24,12 +24,7 @@ import {
 } from '../Form/context.js'
 import { useFieldPath } from '../RenderFields/context.js'
 
-/**
- * Get and set the value of a form field.
- *
- * @see https://payloadcms.com/docs/admin/react-hooks#usefield
- */
-export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
+const useFieldImpl = <TValue,>(options?: Options): FieldType<TValue> => {
   const {
     disableFormData = false,
     hasRows,
@@ -228,4 +223,28 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   )
 
   return result
+}
+
+/**
+ * Get and set the value of a form field.
+ *
+ * @see https://payloadcms.com/docs/admin/react-hooks#usefield
+ */
+export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
+  const context = useFieldContext<TValue>()
+  if (context && (!options?.path || options.path === context.path)) {
+    return context
+  }
+  /**
+   * If no field context is passed, this means the field is within a form => get value from form through useFieldImpl
+   */
+  return useFieldImpl(options)
+}
+
+export const FieldContext = React.createContext<FieldType<unknown>>(undefined)
+
+export const useFieldContext = <TValue,>() => {
+  const context = React.use(FieldContext)
+
+  return context as FieldType<TValue>
 }
