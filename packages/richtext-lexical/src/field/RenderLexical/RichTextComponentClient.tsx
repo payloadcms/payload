@@ -30,7 +30,6 @@ export const RichTextComponentClient: React.FC<{
   const onChange: (args: { formState: FormState; submitted?: boolean }) => Promise<FormState> =
     // eslint-disable-next-line @typescript-eslint/require-await
     React.useCallback(async ({ formState }) => {
-      console.log('updated form state', formState)
       return formState
     }, [])
 

@@ -35,43 +35,44 @@ export const useRenderEditor_internal_ = (args: RenderLexicalServerFunctionArgs)
     void render()
   }, [serverFunction, admin, editorTarget, name, path, schemaPath, initialValue])
 
-  const WrappedComponent = React.memo(function WrappedComponent({
-    setValue,
-    value,
-  }: /**
-   * If value or setValue, or both, is provided, this component will manage its own value.
-   * If neither is passed, it will rely on the parent form to manage the value.
-   */
-  {
-    setValue?: FieldType<DefaultTypedEditorState | undefined>['setValue']
+  const WrappedComponent = React.useMemo(() => {
+    function Memoized({
+      setValue,
+      value,
+    }: /**
+     * If value or setValue, or both, is provided, this component will manage its own value.
+     * If neither is passed, it will rely on the parent form to manage the value.
+     */
+    {
+      setValue?: FieldType<DefaultTypedEditorState | undefined>['setValue']
 
-    value?: FieldType<DefaultTypedEditorState | undefined>['value']
-  }) {
-    if (!Component) {
-      return null
+      value?: FieldType<DefaultTypedEditorState | undefined>['value']
+    }) {
+      if (!Component) {
+        return null
+      }
+
+      if (typeof value === 'undefined' && !setValue) {
+        return Component
+      }
+
+      const fieldValue: FieldType<DefaultTypedEditorState | undefined> = {
+        disabled: false,
+        formInitializing: false,
+        formProcessing: false,
+        formSubmitted: false,
+        initialValue: value,
+        path: path ?? name,
+        setValue: setValue ?? (() => undefined),
+        showError: false,
+        value,
+      }
+
+      return <FieldContext value={fieldValue}>{Component}</FieldContext>
     }
-    if (typeof value === 'undefined' && !setValue) {
-      return Component
-    }
-    return (
-      <FieldContext
-        value={
-          {
-            disabled: false,
-            formInitializing: false,
-            formProcessing: false,
-            formSubmitted: false,
-            path: path ?? name,
-            setValue: setValue ?? (() => undefined),
-            showError: false,
-            value,
-          } satisfies FieldType<DefaultTypedEditorState | undefined>
-        }
-      >
-        {Component}
-      </FieldContext>
-    )
-  })
+
+    return Memoized
+  }, [Component, name, path])
 
   return { Component: WrappedComponent, renderLexical }
 }
