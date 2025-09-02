@@ -28,14 +28,14 @@ export const useRenderEditor_internal_ = (args: Omit<RenderFieldServerFnArgs, 'i
   const renderLexical = useCallback(
     (args?: Pick<RenderFieldServerFnArgs, 'initialValue'>) => {
       async function render() {
-        const { Component } = await _internal_renderField({
+        const { Field } = await _internal_renderField({
           field,
           initialValue: args?.initialValue ?? undefined,
           path,
           schemaPath,
         })
 
-        setComponent(Component)
+        setComponent(Field)
       }
       void render()
     },

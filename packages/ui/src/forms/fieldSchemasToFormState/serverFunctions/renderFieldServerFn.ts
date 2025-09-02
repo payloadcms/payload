@@ -28,7 +28,7 @@ export type RenderFieldServerFnArgs = {
    */
   schemaPath: string
 }
-export type RenderFieldServerFnReturnType = FieldState['customComponents']
+export type RenderFieldServerFnReturnType = {} & FieldState['customComponents']
 
 /**
  * @experimental - may break in minor releases
@@ -112,5 +112,5 @@ export const _internal_renderFieldHandler: ServerFunction<
     siblingData: data,
   })
 
-  return fieldState.customComponents
+  return fieldState.customComponents ?? {}
 }
