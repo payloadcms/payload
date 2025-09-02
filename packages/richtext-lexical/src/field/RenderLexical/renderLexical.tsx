@@ -24,6 +24,11 @@ export type RenderLexicalServerFunctionArgs = {
    * @example collections.posts.richText
    */
   editorTarget: 'default' | ({} & string)
+  /**
+   * Pass the value this richtext field will receive when rendering it on the server.
+   * This helps provide initial state for sub-fields that are immediately rendered (like blocks)
+   * so that we can avoid multiple waterfall requests for each block that renders on the client.
+   */
   initialValue?: DefaultTypedEditorState
   /**
    * Name of the field to render

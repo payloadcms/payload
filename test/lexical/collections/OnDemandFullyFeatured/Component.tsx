@@ -11,7 +11,6 @@ export const Component: JSONFieldClientComponent = (args) => {
   const { Component, renderLexical } = useRenderEditor_internal_({
     name: 'richText2',
     editorTarget: `collections.${lexicalFullyFeaturedSlug}.richText`,
-    initialValue: buildEditorState({ text: 'defaultValue' }),
   })
   const mounted = useRef(false)
 
@@ -19,7 +18,9 @@ export const Component: JSONFieldClientComponent = (args) => {
     if (mounted.current) {
       return
     }
-    void renderLexical()
+    void renderLexical({
+      initialValue: buildEditorState({ text: 'defaultValue' }),
+    })
     mounted.current = true
   }, [renderLexical])
   return <div>Fully-Featured Component: {Component ? <Component /> : 'Loading...'}</div>
