@@ -18,18 +18,18 @@ import type {
  * @experimental - may break in minor releases
  */
 export const useRenderEditor_internal_ = (
-  args: Omit<RenderLexicalServerFunctionArgs, 'initialValue'>,
+  args: Omit<RenderLexicalServerFunctionArgs, 'initialValue' | 'schemaPath'>,
 ) => {
-  const { name, admin, editorTarget, path, schemaPath } = args
+  const { name, admin, editorTarget, path } = args
   const [Component, setComponent] = React.useState<null | React.ReactNode>(null)
   const serverFunctionContext = useServerFunctions()
   const { serverFunction } = serverFunctionContext
 
+  const [entityType, entitySlug, ...fieldPath] = editorTarget.split('.')
+
   const renderLexical = useCallback(
     (args?: Pick<RenderLexicalServerFunctionArgs, 'initialValue'>) => {
       async function render() {
-        const [entityType, entitySlug, ...fieldPath] = editorTarget.split('.')
-
         const { Component } = (await serverFunction({
           name: 'render-lexical',
           args: {
@@ -46,7 +46,7 @@ export const useRenderEditor_internal_ = (
       }
       void render()
     },
-    [serverFunction, admin, editorTarget, name, path, schemaPath],
+    [serverFunction, name, admin, editorTarget, path, entitySlug, fieldPath],
   )
 
   const WrappedComponent = React.useMemo(() => {
@@ -66,8 +66,6 @@ export const useRenderEditor_internal_ = (
         return null
       }
 
-      const [entityType, entitySlug, ...fieldPath] = editorTarget.split('.')
-
       /**
        * By default, the lexical will make form state requests (e.g. to get drawer fields), passing in the arguments
        * of the current field. However, we need to override those arguments to get it to make requests based on the
@@ -76,23 +74,10 @@ export const useRenderEditor_internal_ = (
       const lexicalServerFunctionContext: ServerFunctionsContextType = {
         ...serverFunctionContext,
         getFormState: async (getFormStateArgs) => {
-          const currentSchemaPathWithoutEntitySlug = schemaPath ?? name
-          const editorTargetSchemaPath = `${entitySlug}.${fieldPath.join('.')}`
-
-          console.log('getFormStateArgs.schemaPath', getFormStateArgs.schemaPath)
-
-          const correctedSchemaPath = getFormStateArgs.schemaPath.startsWith(
-            currentSchemaPathWithoutEntitySlug,
-          )
-            ? editorTargetSchemaPath +
-              getFormStateArgs.schemaPath.slice(currentSchemaPathWithoutEntitySlug.length)
-            : getFormStateArgs.schemaPath
-
           return serverFunctionContext.getFormState({
             ...getFormStateArgs,
             collectionSlug: entityType === 'collection' ? entitySlug : undefined,
             globalSlug: entityType === 'global' ? entitySlug : undefined,
-            //schemaPath: correctedSchemaPath,
           })
         },
       }
@@ -125,7 +110,7 @@ export const useRenderEditor_internal_ = (
     }
 
     return Memoized
-  }, [Component, name, path, serverFunctionContext, editorTarget, schemaPath, name])
+  }, [Component, serverFunctionContext, path, name, entityType, entitySlug])
 
   return { Component: WrappedComponent, renderLexical }
 }

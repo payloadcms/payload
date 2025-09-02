@@ -100,7 +100,7 @@ type GetFolderResultsComponentAndDataClient = (
   } & Omit<GetFolderResultsComponentAndDataArgs, 'req'>,
 ) => ReturnType<typeof getFolderResultsComponentAndDataHandler>
 
-type ServerFunctionsContextType = {
+export type ServerFunctionsContextType = {
   copyDataFromLocale: CopyDataFromLocaleClient
   getDocumentSlots: GetDocumentSlots
   getFolderResultsComponentAndData: GetFolderResultsComponentAndDataClient
