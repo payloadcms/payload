@@ -9,7 +9,7 @@ import { lexicalFullyFeaturedSlug } from '../../slugs.js'
 export const Component: JSONFieldClientComponent = (args) => {
   return (
     <div>
-      Fully-Featured Component:{' '}
+      Fully-Featured Component:
       <RenderLexical
         field={{ name: 'json' }}
         initialValue={buildEditorState({ text: 'defaultValue' })}
