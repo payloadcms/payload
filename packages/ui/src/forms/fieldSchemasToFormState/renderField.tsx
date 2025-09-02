@@ -70,11 +70,9 @@ export const renderField: RenderFieldMethod = ({
     readOnly:
       readOnlyFromProps === true
         ? true
-        : permissions === undefined
-          ? false
-          : typeof permissions === 'boolean'
-            ? !permissions
-            : !permissions?.[operation],
+        : typeof permissions === 'boolean'
+          ? !permissions
+          : !permissions?.[operation],
     schemaPath,
   }
 

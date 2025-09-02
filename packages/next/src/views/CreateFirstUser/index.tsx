@@ -1,4 +1,8 @@
-import type { AdminViewServerProps } from 'payload'
+import type {
+  AdminViewServerProps,
+  SanitizedDocumentPermissions,
+  SanitizedFieldsPermissions,
+} from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import React from 'react'
@@ -50,11 +54,36 @@ export async function CreateFirstUserView({ initPageResult }: AdminViewServerPro
     req,
   })
 
+  const baseFields: SanitizedFieldsPermissions = Object.fromEntries(
+    collectionConfig.fields
+      .filter((f): f is { name: string } & typeof f => 'name' in f && typeof f.name === 'string')
+      .map((f) => [f.name, { create: true, read: true, update: true }]),
+  )
+
+  // In create-first-user we should always allow all fields
+  const docPermissionsForForm: SanitizedDocumentPermissions =
+    typeof docPermissions === 'object'
+      ? {
+          ...docPermissions, // keep top-level props
+          fields: {
+            ...baseFields, // start with full access
+            ...((typeof docPermissions === 'object' && docPermissions.fields // overlay specific perms (like sessions)
+              ? docPermissions.fields
+              : {}) as typeof baseFields),
+          },
+        }
+      : {
+          create: true,
+          fields: baseFields,
+          read: true,
+          update: true,
+        }
+
   // Build initial form state from data
   const { state: formState } = await buildFormState({
     collectionSlug: collectionConfig.slug,
     data,
-    docPermissions,
+    docPermissions: docPermissionsForForm,
     docPreferences,
     locale: locale?.code,
     operation: 'create',
@@ -69,7 +98,7 @@ export async function CreateFirstUserView({ initPageResult }: AdminViewServerPro
       <h1>{req.t('general:welcome')}</h1>
       <p>{req.t('authentication:beginCreateFirstUser')}</p>
       <CreateFirstUserClient
-        docPermissions={docPermissions}
+        docPermissions={docPermissionsForForm}
         docPreferences={docPreferences}
         initialState={formState}
         loginWithUsername={loginWithUsername}
