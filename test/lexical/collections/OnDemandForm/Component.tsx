@@ -2,28 +2,19 @@
 
 import type { JSONFieldClientComponent } from 'payload'
 
-import { buildEditorState, useRenderEditor_internal_ } from '@payloadcms/richtext-lexical/client'
-import { useEffect, useRef } from 'react'
+import { buildEditorState, RenderLexical } from '@payloadcms/richtext-lexical/client'
 
 import { lexicalFullyFeaturedSlug } from '../../slugs.js'
 
 export const Component: JSONFieldClientComponent = (args) => {
-  const { Component, renderLexical } = useRenderEditor_internal_({
-    field: {
-      name: 'json',
-    },
-    schemaPath: `collection.${lexicalFullyFeaturedSlug}.richText`,
-  })
-  const mounted = useRef(false)
-
-  useEffect(() => {
-    if (mounted.current) {
-      return
-    }
-    void renderLexical({
-      initialValue: buildEditorState({ text: 'defaultValue' }),
-    })
-    mounted.current = true
-  }, [renderLexical])
-  return <div>Fully-Featured Component: {Component ? <Component /> : 'Loading...'}</div>
+  return (
+    <div>
+      Fully-Featured Component:{' '}
+      <RenderLexical
+        field={{ name: 'json' }}
+        initialValue={buildEditorState({ text: 'defaultValue' })}
+        schemaPath={`collection.${lexicalFullyFeaturedSlug}.richText`}
+      />
+    </div>
+  )
 }

@@ -3,28 +3,12 @@
 import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import type { JSONFieldClientComponent } from 'payload'
 
-import { buildEditorState, useRenderEditor_internal_ } from '@payloadcms/richtext-lexical/client'
-import React, { useEffect, useRef, useState } from 'react'
+import { buildEditorState, RenderLexical } from '@payloadcms/richtext-lexical/client'
+import React, { useState } from 'react'
 
 import { lexicalFullyFeaturedSlug } from '../../slugs.js'
 
 export const Component: JSONFieldClientComponent = (args) => {
-  const { Component, renderLexical } = useRenderEditor_internal_({
-    field: {
-      name: 'richText',
-    },
-    schemaPath: `collection.${lexicalFullyFeaturedSlug}.richText`,
-  })
-  const mounted = useRef(false)
-
-  useEffect(() => {
-    if (mounted.current) {
-      return
-    }
-    void renderLexical()
-    mounted.current = true
-  }, [renderLexical])
-
   const [value, setValue] = useState<DefaultTypedEditorState | undefined>(() =>
     buildEditorState({ text: 'state default' }),
   )
@@ -36,7 +20,13 @@ export const Component: JSONFieldClientComponent = (args) => {
   return (
     <div>
       Default Component:
-      {Component ? <Component setValue={setValue as any} value={value} /> : 'Loading...'}
+      <RenderLexical
+        field={{ name: 'json' }}
+        initialValue={buildEditorState({ text: 'defaultValue' })}
+        schemaPath={`collection.${lexicalFullyFeaturedSlug}.richText`}
+        setValue={setValue as any}
+        value={value}
+      />
       <button onClick={handleReset} style={{ marginTop: 8 }} type="button">
         Reset Editor State
       </button>

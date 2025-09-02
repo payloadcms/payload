@@ -151,5 +151,5 @@ export { BlockRemoveButton } from '../../features/blocks/client/component/compon
 export { useBlockComponentContext } from '../../features/blocks/client/component/BlockContent.js'
 export { getRestPopulateFn } from '../../features/converters/utilities/restPopulateFn.js'
 
-export { useRenderEditor_internal_ } from '../../field/RenderLexical/useRenderEditor.js'
+export { RenderLexical } from '../../field/RenderLexical/index.js'
 export { buildEditorState } from '../../utilities/buildEditorState.js'
