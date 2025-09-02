@@ -1,14 +1,14 @@
 import type { CollectionConfig } from 'payload'
 
-export const OnDemandDefault: CollectionConfig = {
-  slug: 'onDemandDefault',
+export const OnDemandForm: CollectionConfig = {
+  slug: 'OnDemandForm',
   fields: [
     {
       name: 'ui',
       type: 'json',
       admin: {
         components: {
-          Field: './collections/OnDemandDefault/Component.js#Component',
+          Field: './collections/OnDemandForm/Component.js#Component',
         },
       },
     },

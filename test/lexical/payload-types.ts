@@ -97,8 +97,8 @@ export interface Config {
     'text-fields': TextField;
     uploads: Upload;
     'array-fields': ArrayField;
-    onDemandDefault: OnDemandDefault;
-    OnDemandFullyFeatured: OnDemandFullyFeatured;
+    OnDemandForm: OnDemandForm;
+    OnDemandOutsideForm: OnDemandOutsideForm;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -120,8 +120,8 @@ export interface Config {
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
-    onDemandDefault: OnDemandDefaultSelect<false> | OnDemandDefaultSelect<true>;
-    OnDemandFullyFeatured: OnDemandFullyFeaturedSelect<false> | OnDemandFullyFeaturedSelect<true>;
+    OnDemandForm: OnDemandFormSelect<false> | OnDemandFormSelect<true>;
+    OnDemandOutsideForm: OnDemandOutsideFormSelect<false> | OnDemandOutsideFormSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -834,9 +834,9 @@ export interface ArrayField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "onDemandDefault".
+ * via the `definition` "OnDemandForm".
  */
-export interface OnDemandDefault {
+export interface OnDemandForm {
   id: number;
   ui?:
     | {
@@ -852,9 +852,9 @@ export interface OnDemandDefault {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "OnDemandFullyFeatured".
+ * via the `definition` "OnDemandOutsideForm".
  */
-export interface OnDemandFullyFeatured {
+export interface OnDemandOutsideForm {
   id: number;
   ui?:
     | {
@@ -956,12 +956,12 @@ export interface PayloadLockedDocument {
         value: number | ArrayField;
       } | null)
     | ({
-        relationTo: 'onDemandDefault';
-        value: number | OnDemandDefault;
+        relationTo: 'OnDemandForm';
+        value: number | OnDemandForm;
       } | null)
     | ({
-        relationTo: 'OnDemandFullyFeatured';
-        value: number | OnDemandFullyFeatured;
+        relationTo: 'OnDemandOutsideForm';
+        value: number | OnDemandOutsideForm;
       } | null)
     | ({
         relationTo: 'users';
@@ -1336,18 +1336,18 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "onDemandDefault_select".
+ * via the `definition` "OnDemandForm_select".
  */
-export interface OnDemandDefaultSelect<T extends boolean = true> {
+export interface OnDemandFormSelect<T extends boolean = true> {
   ui?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "OnDemandFullyFeatured_select".
+ * via the `definition` "OnDemandOutsideForm_select".
  */
-export interface OnDemandFullyFeaturedSelect<T extends boolean = true> {
+export interface OnDemandOutsideFormSelect<T extends boolean = true> {
   ui?: T;
   updatedAt?: T;
   createdAt?: T;
