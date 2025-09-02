@@ -1,17 +1,17 @@
 'use client'
 
-import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
+import type { JSONFieldClientComponent } from 'payload'
 
-import { useRenderEditor_internal_ } from '@payloadcms/richtext-lexical/client'
+import { buildEditorState, useRenderEditor_internal_ } from '@payloadcms/richtext-lexical/client'
 import { useEffect, useRef } from 'react'
 
 import { lexicalFullyFeaturedSlug } from '../../../lexical/slugs.js'
 
-export const OnDemand: React.FC = () => {
+export const OnDemand: JSONFieldClientComponent = (args) => {
   const { Component, renderLexical } = useRenderEditor_internal_({
-    name: 'richText',
+    name: 'richText2',
     editorTarget: `collections.${lexicalFullyFeaturedSlug}.richText`,
-    initialState: {} as DefaultTypedEditorState,
+    initialValue: buildEditorState({ text: 'defaultValue' }),
   })
   const mounted = useRef(false)
 
@@ -22,5 +22,5 @@ export const OnDemand: React.FC = () => {
     void renderLexical()
     mounted.current = true
   }, [renderLexical])
-  return <div>Fully-Featured Component: {Component ? Component : 'Loading...'}</div>
+  return <div>Fully-Featured Component: {Component ? <Component /> : 'Loading...'}</div>
 }

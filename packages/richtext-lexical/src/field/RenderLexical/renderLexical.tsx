@@ -9,6 +9,7 @@ import {
 } from 'payload'
 
 import {
+  type DefaultTypedEditorState,
   lexicalEditor,
   type LexicalFieldAdminProps,
   type LexicalRichTextAdapter,
@@ -23,13 +24,31 @@ export type RenderLexicalServerFunctionArgs = {
    * @example collections.posts.richText
    */
   editorTarget: 'default' | ({} & string)
+  initialValue?: DefaultTypedEditorState
+  /**
+   * Name of the field to render
+   */
+  name: string
+  /**
+   * Path to the field to render
+   * @default field name
+   */
+  path?: string
+  /**
+   * Schema path to the field to render.
+   * @default field name
+   */
+  schemaPath?: string
 }
 export type RenderLexicalServerFunctionReturnType = { Component: React.ReactNode }
 
+/**
+ * @experimental - may break in minor releases
+ */
 export const _internal_renderLexical: ServerFunction<
   RenderLexicalServerFunctionArgs,
   Promise<RenderLexicalServerFunctionReturnType>
-> = async ({ admin, editorTarget, importMap, req }) => {
+> = async ({ name, admin, editorTarget, importMap, initialValue, path, req, schemaPath }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
   }
@@ -66,7 +85,7 @@ export const _internal_renderLexical: ServerFunction<
   }
 
   const field: RichTextField = {
-    name: 'richText',
+    name,
     type: 'richText',
     editor: sanitizedEditor,
   }
@@ -83,7 +102,7 @@ export const _internal_renderLexical: ServerFunction<
         importMap,
       }) as RichTextFieldClient,
       clientFieldSchemaMap: new Map<string, RichTextFieldClient>(),
-      collectionSlug: 'aa',
+      collectionSlug: '-',
       data: {},
       field,
       fieldSchemaMap: new Map<string, RichTextField>(),
@@ -91,7 +110,7 @@ export const _internal_renderLexical: ServerFunction<
       formState: {},
       i18n: req.i18n,
       operation: 'create',
-      path: 'richText',
+      path: path ?? name,
       payload: req.payload,
       permissions: true,
       preferences: {
@@ -99,8 +118,12 @@ export const _internal_renderLexical: ServerFunction<
       },
       req,
       sanitizedEditorConfig: sanitizedEditor.editorConfig,
-      schemaPath: 'richText',
-      siblingData: {},
+      schemaPath: schemaPath ?? name,
+      siblingData: initialValue
+        ? {
+            [name]: initialValue,
+          }
+        : {},
       user: req.user,
     } satisfies {
       admin: LexicalFieldAdminProps // <= new in 3.26.0

@@ -5,7 +5,7 @@ export const OnDemand: CollectionConfig = {
   fields: [
     {
       name: 'ui',
-      type: 'ui',
+      type: 'json',
       admin: {
         components: {
           Field: './collections/OnDemand/OnDemand.js#OnDemand',
@@ -14,7 +14,7 @@ export const OnDemand: CollectionConfig = {
     },
     {
       name: 'ui2',
-      type: 'ui',
+      type: 'json',
       admin: {
         components: {
           Field: './collections/OnDemand/OnDemand2.js#OnDemand',

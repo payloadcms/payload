@@ -7,6 +7,9 @@ import React from 'react'
 
 import { buildEditorState } from '../../utilities/buildEditorState.js'
 
+/**
+ * @experimental - may break in minor releases
+ */
 export const RichTextComponentClient: React.FC<{
   FieldComponent: React.ReactNode
 }> = (props) => {

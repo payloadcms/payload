@@ -24,7 +24,7 @@ import {
 } from '../Form/context.js'
 import { useFieldPath } from '../RenderFields/context.js'
 
-const useFieldImpl = <TValue,>(options?: Options): FieldType<TValue> => {
+const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
   const {
     disableFormData = false,
     hasRows,
@@ -225,47 +225,10 @@ const useFieldImpl = <TValue,>(options?: Options): FieldType<TValue> => {
   return result
 }
 
-// 1) A context that provides *which hook to use*.
-// Default is the expensive impl, but it’s still a hook and that’s fine.
-type UseFieldHook = <TValue>(options?: Options) => FieldType<TValue>
-const FieldHookStrategyContext = React.createContext<UseFieldHook>(useFieldImpl)
-
-// 2) Your value context for when a field is externally provided.
+/**
+ * Context to allow providing useField value for fields directly, if managed outside the form
+ */
 export const FieldContext = React.createContext<FieldType<unknown> | undefined>(undefined)
-
-// 3) A provider that overrides the strategy with a tiny hook
-// that just returns the precomputed field value from context.
-// Note: this hook still follows rules-of-hooks and does not call useFieldImpl.
-export function FieldContextProvider({
-  children,
-  value,
-}: {
-  children: React.ReactNode
-  value: FieldType<unknown>
-}) {
-  // This is the cheap hook used when wrapped.
-  const useFieldFromContext: UseFieldHook = React.useCallback(<TValue,>(_opts?: Options) => {
-    // It’s a hook because it uses useContext; it returns the provided value.
-    // No fallback here; the strategy is overridden only when we *know*
-    // we want to bypass the impl entirely.
-    const ctx = React.use(FieldContext) as FieldType<TValue> | undefined
-    if (!ctx) {
-      // Extremely defensive: if someone mounted this provider without value,
-      // gracefully fall back to useFieldImpl in a *separate* strategy layer.
-      // But we won’t do conditional calling here. Instead, we rely on
-      // the default higher up if needed. So just return a minimal object.
-      // In practice, don't mount the provider without value.
-      throw new Error('FieldContextProvider requires a `value`.')
-    }
-    return ctx
-  }, [])
-
-  return (
-    <FieldContext value={value}>
-      <FieldHookStrategyContext value={useFieldFromContext}>{children}</FieldHookStrategyContext>
-    </FieldContext>
-  )
-}
 
 /**
  * Get and set the value of a form field.
@@ -273,7 +236,28 @@ export function FieldContextProvider({
  * @see https://payloadcms.com/docs/admin/react-hooks#usefield
  */
 export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
-  const useFieldStrategy = React.use(FieldHookStrategyContext)
-  // Always invoke the selected hook. Order is stable.
-  return useFieldStrategy<TValue>(options)
+  const ctx = React.use(FieldContext) as FieldType<TValue> | undefined
+
+  // Lock the mode on first render so hook order is stable forever. This ensures
+  // that hooks are called in the same order each time a component renders => should
+  // not break the rule of hooks.
+  const modeRef = React.useRef<'context' | 'impl' | null>(null)
+  if (modeRef.current === null) {
+    modeRef.current = ctx ? 'context' : 'impl'
+  }
+
+  if (modeRef.current === 'context') {
+    if (!ctx) {
+      // Provider was removed after mount. That violates hook guarantees.
+      throw new Error('FieldContext was removed after mount. This breaks hook ordering.')
+    }
+    return ctx
+  }
+
+  // We intentionally guard this hook call with a mode that is fixed on first render.
+  // The order is consistent across renders. Silence the linter’s false positive.
+
+  // eslint-disable-next-line react-compiler/react-compiler
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  return useFieldInForm<TValue>(options)
 }
