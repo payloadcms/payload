@@ -76,6 +76,10 @@ export default buildConfigWithDefaults({
           saveToJWT: saveToJWTKey,
         },
         {
+          name: 'richText',
+          type: 'richText',
+        },
+        {
           name: 'group',
           type: 'group',
           fields: [
