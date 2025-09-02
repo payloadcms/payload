@@ -838,7 +838,7 @@ export interface ArrayField {
  */
 export interface OnDemandForm {
   id: number;
-  ui?:
+  json?:
     | {
         [k: string]: unknown;
       }
@@ -856,7 +856,7 @@ export interface OnDemandForm {
  */
 export interface OnDemandOutsideForm {
   id: number;
-  ui?:
+  json?:
     | {
         [k: string]: unknown;
       }
@@ -1339,7 +1339,7 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
  * via the `definition` "OnDemandForm_select".
  */
 export interface OnDemandFormSelect<T extends boolean = true> {
-  ui?: T;
+  json?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1348,7 +1348,7 @@ export interface OnDemandFormSelect<T extends boolean = true> {
  * via the `definition` "OnDemandOutsideForm_select".
  */
 export interface OnDemandOutsideFormSelect<T extends boolean = true> {
-  ui?: T;
+  json?: T;
   updatedAt?: T;
   createdAt?: T;
 }

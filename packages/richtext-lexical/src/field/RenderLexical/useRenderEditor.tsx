@@ -21,7 +21,9 @@ export const useRenderEditor_internal_ = (args: Omit<RenderFieldServerFnArgs, 'i
   const serverFunctionContext = useServerFunctions()
   const { _internal_renderField } = serverFunctionContext
 
-  const [entityType, entitySlug, ...fieldPath] = schemaPath.split('.')
+  const [entityType, entitySlug] = schemaPath.split('.')
+
+  const fieldPath = path ?? (field && 'name' in field ? field?.name : '') ?? ''
 
   const renderLexical = useCallback(
     (args?: Pick<RenderFieldServerFnArgs, 'initialValue'>) => {
@@ -73,8 +75,6 @@ export const useRenderEditor_internal_ = (args: Omit<RenderFieldServerFnArgs, 'i
         },
       }
 
-      const fieldPath = path ?? (field && 'name' in field ? field?.name : '') ?? ''
-
       if (typeof value === 'undefined' && !setValue) {
         return (
           <ServerFunctionsContext value={{ ...adjustedServerFunctionContext }}>
@@ -107,7 +107,7 @@ export const useRenderEditor_internal_ = (args: Omit<RenderFieldServerFnArgs, 'i
     }
 
     return Memoized
-  }, [Component, serverFunctionContext, path, field, entityType, entitySlug])
+  }, [Component, serverFunctionContext, fieldPath, entityType, entitySlug])
 
   return { Component: WrappedComponent, renderLexical }
 }

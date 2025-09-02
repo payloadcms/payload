@@ -4,7 +4,7 @@ export const OnDemandOutsideForm: CollectionConfig = {
   slug: 'OnDemandOutsideForm',
   fields: [
     {
-      name: 'ui',
+      name: 'json',
       type: 'json',
       admin: {
         components: {
