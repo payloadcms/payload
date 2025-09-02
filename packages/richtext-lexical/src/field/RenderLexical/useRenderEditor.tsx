@@ -1,5 +1,11 @@
 'use client'
-import { FieldContext, type FieldType, useServerFunctions } from '@payloadcms/ui'
+import {
+  FieldContext,
+  type FieldType,
+  ServerFunctionsContext,
+  type ServerFunctionsContextType,
+  useServerFunctions,
+} from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
 import type { DefaultTypedEditorState } from '../../nodeTypes.js'
@@ -16,11 +22,14 @@ export const useRenderEditor_internal_ = (
 ) => {
   const { name, admin, editorTarget, path, schemaPath } = args
   const [Component, setComponent] = React.useState<null | React.ReactNode>(null)
-  const { serverFunction } = useServerFunctions()
+  const serverFunctionContext = useServerFunctions()
+  const { serverFunction } = serverFunctionContext
 
   const renderLexical = useCallback(
     (args?: Pick<RenderLexicalServerFunctionArgs, 'initialValue'>) => {
       async function render() {
+        const [entityType, entitySlug, ...fieldPath] = editorTarget.split('.')
+
         const { Component } = (await serverFunction({
           name: 'render-lexical',
           args: {
@@ -29,7 +38,7 @@ export const useRenderEditor_internal_ = (
             editorTarget,
             initialValue: args?.initialValue ?? undefined,
             path,
-            schemaPath,
+            schemaPath: `${entitySlug}.${fieldPath.join('.')}`,
           } satisfies RenderLexicalServerFunctionArgs,
         })) as RenderLexicalServerFunctionReturnType
 
@@ -57,8 +66,43 @@ export const useRenderEditor_internal_ = (
         return null
       }
 
+      const [entityType, entitySlug, ...fieldPath] = editorTarget.split('.')
+
+      /**
+       * By default, the lexical will make form state requests (e.g. to get drawer fields), passing in the arguments
+       * of the current field. However, we need to override those arguments to get it to make requests based on the
+       * *target* field. The server only knows the schema map of the target field.
+       */
+      const lexicalServerFunctionContext: ServerFunctionsContextType = {
+        ...serverFunctionContext,
+        getFormState: async (getFormStateArgs) => {
+          const currentSchemaPathWithoutEntitySlug = schemaPath ?? name
+          const editorTargetSchemaPath = `${entitySlug}.${fieldPath.join('.')}`
+
+          console.log('getFormStateArgs.schemaPath', getFormStateArgs.schemaPath)
+
+          const correctedSchemaPath = getFormStateArgs.schemaPath.startsWith(
+            currentSchemaPathWithoutEntitySlug,
+          )
+            ? editorTargetSchemaPath +
+              getFormStateArgs.schemaPath.slice(currentSchemaPathWithoutEntitySlug.length)
+            : getFormStateArgs.schemaPath
+
+          return serverFunctionContext.getFormState({
+            ...getFormStateArgs,
+            collectionSlug: entityType === 'collection' ? entitySlug : undefined,
+            globalSlug: entityType === 'global' ? entitySlug : undefined,
+            //schemaPath: correctedSchemaPath,
+          })
+        },
+      }
+
       if (typeof value === 'undefined' && !setValue) {
-        return Component
+        return (
+          <ServerFunctionsContext value={{ ...lexicalServerFunctionContext }}>
+            {Component}
+          </ServerFunctionsContext>
+        )
       }
 
       const fieldValue: FieldType<DefaultTypedEditorState | undefined> = {
@@ -73,11 +117,15 @@ export const useRenderEditor_internal_ = (
         value,
       }
 
-      return <FieldContext value={fieldValue}>{Component}</FieldContext>
+      return (
+        <ServerFunctionsContext value={{ ...serverFunctionContext }}>
+          <FieldContext value={fieldValue}>{Component}</FieldContext>
+        </ServerFunctionsContext>
+      )
     }
 
     return Memoized
-  }, [Component, name, path])
+  }, [Component, name, path, serverFunctionContext, editorTarget, schemaPath, name])
 
   return { Component: WrappedComponent, renderLexical }
 }
