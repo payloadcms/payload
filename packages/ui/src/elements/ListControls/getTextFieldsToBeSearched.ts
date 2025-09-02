@@ -15,9 +15,17 @@ export const getTextFieldsToBeSearched = (
       moveSubFieldsToTop: true,
     }) as ClientField[]
 
-    return flattenedFields.filter(
-      (field) => fieldAffectsData(field) && listSearchableFields.includes(field.name),
-    )
+    const wanted = new Set(listSearchableFields)
+    const result: typeof flattenedFields = []
+
+    for (const field of flattenedFields) {
+      if (fieldAffectsData(field) && wanted.has(field.name)) {
+        result.push(field)
+        wanted.delete(field.name)
+      }
+    }
+
+    return result
   }
 
   return null
