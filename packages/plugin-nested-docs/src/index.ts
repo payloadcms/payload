@@ -53,13 +53,13 @@ export const nestedDocsPlugin =
           hooks: {
             ...(collection.hooks || {}),
             afterChange: [
+              ...(collection?.hooks?.afterChange || []),
               resaveChildren(pluginConfig),
               resaveSelfAfterCreate(pluginConfig),
-              ...(collection?.hooks?.afterChange || []),
             ],
             beforeChange: [
-              populateBreadcrumbsBeforeChange(pluginConfig),
               ...(collection?.hooks?.beforeChange || []),
+              populateBreadcrumbsBeforeChange(pluginConfig),
             ],
           },
         }
