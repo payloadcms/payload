@@ -23,8 +23,9 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
+import { autosaveWithRichTextSlug } from './collections/AutosaveWithRichText/AutosaveWithRichText.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 const { describe, beforeEach, afterEach } = test
@@ -41,12 +42,14 @@ test.describe('Form State', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
   let autosavePostsUrl: AdminUrlUtil
+  let autosaveWithRichtextUrl: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
     autosavePostsUrl = new AdminUrlUtil(serverURL, autosavePostsSlug)
+    autosaveWithRichtextUrl = new AdminUrlUtil(serverURL, autosaveWithRichTextSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -452,6 +455,60 @@ test.describe('Form State', () => {
     await titleField.fill('Test Title 2')
     await waitForAutoSaveToRunAndComplete(page)
     await expect(computedTitleField).toHaveValue('Test Title 2')
+  })
+
+  test('autosave - should not populate relationships', async () => {
+    const postDoc = await createPost()
+
+    const docData = {
+      title: 'Initial title',
+      richTextWithRelationship: {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'relationship',
+              value: postDoc.id,
+              format: '',
+              version: 1,
+              relationTo: 'posts',
+            },
+          ],
+          direction: 'ltr' as const,
+          format: '' as const,
+          indent: 0,
+          version: 1,
+        },
+      },
+    }
+    const doc = await payload.create({
+      collection: autosaveWithRichTextSlug,
+      data: docData,
+    })
+
+    await page.goto(autosaveWithRichtextUrl.edit(doc.id))
+    const titleField = page.locator('#field-title')
+    await expect(titleField).toBeEnabled()
+    await expect(titleField).toHaveValue('Initial title')
+
+    const autosaveRequestPromise = page.waitForRequest(
+      (request) =>
+        request.url().includes(`/api/${autosaveWithRichTextSlug}`) && request.method() === 'PATCH',
+    )
+    await titleField.fill('New title')
+    const autosaveRequest = await autosaveRequestPromise
+    const autosaveResponse = await autosaveRequest.response()
+    const autosaveResponseJson = await autosaveResponse?.json()
+    await expect(() => expect(autosaveRequest?.url()).toContain('depth=0')).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+    await expect(() =>
+      expect(autosaveResponseJson.doc.richTextWithRelationship).toEqual(
+        docData.richTextWithRelationship,
+      ),
+    ).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
   })
 
   describe('Throttled tests', () => {
