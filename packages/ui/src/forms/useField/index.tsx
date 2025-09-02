@@ -225,26 +225,55 @@ const useFieldImpl = <TValue,>(options?: Options): FieldType<TValue> => {
   return result
 }
 
+// 1) A context that provides *which hook to use*.
+// Default is the expensive impl, but it’s still a hook and that’s fine.
+type UseFieldHook = <TValue>(options?: Options) => FieldType<TValue>
+const FieldHookStrategyContext = React.createContext<UseFieldHook>(useFieldImpl)
+
+// 2) Your value context for when a field is externally provided.
+export const FieldContext = React.createContext<FieldType<unknown> | undefined>(undefined)
+
+// 3) A provider that overrides the strategy with a tiny hook
+// that just returns the precomputed field value from context.
+// Note: this hook still follows rules-of-hooks and does not call useFieldImpl.
+export function FieldContextProvider({
+  children,
+  value,
+}: {
+  children: React.ReactNode
+  value: FieldType<unknown>
+}) {
+  // This is the cheap hook used when wrapped.
+  const useFieldFromContext: UseFieldHook = React.useCallback(<TValue,>(_opts?: Options) => {
+    // It’s a hook because it uses useContext; it returns the provided value.
+    // No fallback here; the strategy is overridden only when we *know*
+    // we want to bypass the impl entirely.
+    const ctx = React.use(FieldContext) as FieldType<TValue> | undefined
+    if (!ctx) {
+      // Extremely defensive: if someone mounted this provider without value,
+      // gracefully fall back to useFieldImpl in a *separate* strategy layer.
+      // But we won’t do conditional calling here. Instead, we rely on
+      // the default higher up if needed. So just return a minimal object.
+      // In practice, don't mount the provider without value.
+      throw new Error('FieldContextProvider requires a `value`.')
+    }
+    return ctx
+  }, [])
+
+  return (
+    <FieldContext value={value}>
+      <FieldHookStrategyContext value={useFieldFromContext}>{children}</FieldHookStrategyContext>
+    </FieldContext>
+  )
+}
+
 /**
  * Get and set the value of a form field.
  *
  * @see https://payloadcms.com/docs/admin/react-hooks#usefield
  */
 export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
-  const context = useFieldContext<TValue>()
-  if (context && (!options?.path || options.path === context.path)) {
-    return context
-  }
-  /**
-   * If no field context is passed, this means the field is within a form => get value from form through useFieldImpl
-   */
-  return useFieldImpl(options)
-}
-
-export const FieldContext = React.createContext<FieldType<unknown>>(undefined)
-
-export const useFieldContext = <TValue,>() => {
-  const context = React.use(FieldContext)
-
-  return context as FieldType<TValue>
+  const useFieldStrategy = React.use(FieldHookStrategyContext)
+  // Always invoke the selected hook. Order is stable.
+  return useFieldStrategy<TValue>(options)
 }
