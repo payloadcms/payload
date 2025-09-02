@@ -17,7 +17,8 @@ import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
 import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
 import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
-import { OnDemand } from './collections/OnDemand/index.js'
+import { OnDemandDefault } from './collections/OnDemandDefault/index.js'
+import { OnDemandFullyFeatured } from './collections/OnDemandFullyFeatured/index.js'
 import RichTextFields from './collections/RichText/index.js'
 import TextFields from './collections/Text/index.js'
 import Uploads from './collections/Upload/index.js'
@@ -47,7 +48,8 @@ export const baseConfig: Partial<Config> = {
     TextFields,
     Uploads,
     ArrayFields,
-    OnDemand,
+    OnDemandDefault,
+    OnDemandFullyFeatured,
   ],
   globals: [TabsWithRichText],
 
