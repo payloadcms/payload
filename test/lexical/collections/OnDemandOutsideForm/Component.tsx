@@ -10,8 +10,10 @@ import { lexicalFullyFeaturedSlug } from '../../slugs.js'
 
 export const Component: JSONFieldClientComponent = (args) => {
   const { Component, renderLexical } = useRenderEditor_internal_({
-    name: 'richText',
-    editorTarget: `collection.${lexicalFullyFeaturedSlug}.richText`,
+    field: {
+      name: 'richText',
+    },
+    schemaPath: `collection.${lexicalFullyFeaturedSlug}.richText`,
   })
   const mounted = useRef(false)
 

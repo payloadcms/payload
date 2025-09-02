@@ -3,6 +3,7 @@ import {
   FieldContext,
   FieldPathContext,
   type FieldType,
+  type RenderFieldServerFnArgs,
   ServerFunctionsContext,
   type ServerFunctionsContextType,
   useServerFunctions,
@@ -10,44 +11,33 @@ import {
 import React, { useCallback } from 'react'
 
 import type { DefaultTypedEditorState } from '../../nodeTypes.js'
-import type {
-  RenderLexicalServerFunctionArgs,
-  RenderLexicalServerFunctionReturnType,
-} from './renderLexical.js'
 
 /**
  * @experimental - may break in minor releases
  */
-export const useRenderEditor_internal_ = (
-  args: Omit<RenderLexicalServerFunctionArgs, 'initialValue' | 'schemaPath'>,
-) => {
-  const { name, admin, editorTarget, path } = args
+export const useRenderEditor_internal_ = (args: Omit<RenderFieldServerFnArgs, 'initialValue'>) => {
+  const { field, path, schemaPath } = args
   const [Component, setComponent] = React.useState<null | React.ReactNode>(null)
   const serverFunctionContext = useServerFunctions()
-  const { serverFunction } = serverFunctionContext
+  const { _internal_renderField } = serverFunctionContext
 
-  const [entityType, entitySlug, ...fieldPath] = editorTarget.split('.')
+  const [entityType, entitySlug, ...fieldPath] = schemaPath.split('.')
 
   const renderLexical = useCallback(
-    (args?: Pick<RenderLexicalServerFunctionArgs, 'initialValue'>) => {
+    (args?: Pick<RenderFieldServerFnArgs, 'initialValue'>) => {
       async function render() {
-        const { Component } = (await serverFunction({
-          name: 'render-lexical',
-          args: {
-            name,
-            admin,
-            editorTarget,
-            initialValue: args?.initialValue ?? undefined,
-            path,
-            schemaPath: `${entitySlug}.${fieldPath.join('.')}`,
-          } satisfies RenderLexicalServerFunctionArgs,
-        })) as RenderLexicalServerFunctionReturnType
+        const { Component } = await _internal_renderField({
+          field,
+          initialValue: args?.initialValue ?? undefined,
+          path,
+          schemaPath,
+        })
 
         setComponent(Component)
       }
       void render()
     },
-    [serverFunction, name, admin, editorTarget, path, entitySlug, fieldPath],
+    [_internal_renderField, schemaPath, path, field],
   )
 
   const WrappedComponent = React.useMemo(() => {
@@ -83,7 +73,7 @@ export const useRenderEditor_internal_ = (
         },
       }
 
-      const fieldPath = path ?? name
+      const fieldPath = path ?? (field && 'name' in field ? field?.name : '') ?? ''
 
       if (typeof value === 'undefined' && !setValue) {
         return (
@@ -117,7 +107,7 @@ export const useRenderEditor_internal_ = (
     }
 
     return Memoized
-  }, [Component, serverFunctionContext, path, name, entityType, entitySlug])
+  }, [Component, serverFunctionContext, path, field, entityType, entitySlug])
 
   return { Component: WrappedComponent, renderLexical }
 }

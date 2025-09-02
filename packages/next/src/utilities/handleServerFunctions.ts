@@ -1,6 +1,6 @@
 import type { ServerFunction, ServerFunctionHandler } from 'payload'
 
-import { copyDataFromLocaleHandler } from '@payloadcms/ui/rsc'
+import { _internal_renderFieldHandler, copyDataFromLocaleHandler } from '@payloadcms/ui/rsc'
 import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
 import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
 import { getFolderResultsComponentAndDataHandler } from '@payloadcms/ui/utilities/getFolderResultsComponentAndData'
@@ -17,6 +17,7 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'get-folder-results-component-and-data': getFolderResultsComponentAndDataHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
+  'render-field': _internal_renderFieldHandler,
   'render-list': renderListHandler,
   'schedule-publish': schedulePublishHandler,
   'table-state': buildTableStateHandler,

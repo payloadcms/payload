@@ -9,7 +9,6 @@ import React from 'react'
 
 import { importMap } from './admin/importMap.js'
 import './custom.scss'
-import { _internal_renderLexical } from '@payloadcms/richtext-lexical/rsc'
 
 type Args = {
   children: React.ReactNode
@@ -21,9 +20,6 @@ const serverFunction: ServerFunctionClient = async function (args) {
     ...args,
     config,
     importMap,
-    serverFunctions: {
-      'render-lexical': _internal_renderLexical,
-    },
   })
 }
 

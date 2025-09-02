@@ -411,3 +411,7 @@ export { parseSearchParams } from '../../utilities/parseSearchParams.js'
 export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
 export { FieldDiffContainer } from '../../elements/FieldDiffContainer/index.js'
 export { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
+export type {
+  RenderFieldServerFnArgs,
+  RenderFieldServerFnReturnType,
+} from '../../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
