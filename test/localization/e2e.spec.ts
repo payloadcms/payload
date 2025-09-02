@@ -29,6 +29,7 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
+import { noLocalizedFieldsCollectionSlug } from './collections/NoLocalizedFields/index.js'
 import { richTextSlug } from './collections/RichText/index.js'
 import {
   arrayWithFallbackCollectionSlug,
@@ -61,6 +62,7 @@ let urlCannotCreateDefaultLocale: AdminUrlUtil
 let urlPostsWithDrafts: AdminUrlUtil
 let urlArray: AdminUrlUtil
 let arrayWithFallbackURL: AdminUrlUtil
+let noLocalizedFieldsURL: AdminUrlUtil
 
 const title = 'english title'
 const spanishTitle = 'spanish title'
@@ -87,6 +89,7 @@ describe('Localization', () => {
     urlPostsWithDrafts = new AdminUrlUtil(serverURL, localizedDraftsSlug)
     urlArray = new AdminUrlUtil(serverURL, arrayCollectionSlug)
     arrayWithFallbackURL = new AdminUrlUtil(serverURL, arrayWithFallbackCollectionSlug)
+    noLocalizedFieldsURL = new AdminUrlUtil(serverURL, noLocalizedFieldsCollectionSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -670,6 +673,13 @@ describe('Localization', () => {
       await changeLocale(page, defaultLocale)
       await expect(page.locator('#field-title')).toBeEmpty()
     })
+  })
+
+  test('should not show publish specific locale button when no localized fields exist', async () => {
+    await page.goto(urlPostsWithDrafts.create)
+    await expect(page.locator('#publish-locale')).toHaveCount(1)
+    await page.goto(noLocalizedFieldsURL.create)
+    await expect(page.locator('#publish-locale')).toHaveCount(0)
   })
 })
 
