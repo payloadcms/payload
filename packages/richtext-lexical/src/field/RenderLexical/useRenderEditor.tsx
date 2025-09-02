@@ -1,6 +1,7 @@
 'use client'
 import {
   FieldContext,
+  FieldPathContext,
   type FieldType,
   ServerFunctionsContext,
   type ServerFunctionsContextType,
@@ -71,7 +72,7 @@ export const useRenderEditor_internal_ = (
        * of the current field. However, we need to override those arguments to get it to make requests based on the
        * *target* field. The server only knows the schema map of the target field.
        */
-      const lexicalServerFunctionContext: ServerFunctionsContextType = {
+      const adjustedServerFunctionContext: ServerFunctionsContextType = {
         ...serverFunctionContext,
         getFormState: async (getFormStateArgs) => {
           return serverFunctionContext.getFormState({
@@ -82,10 +83,14 @@ export const useRenderEditor_internal_ = (
         },
       }
 
+      const fieldPath = path ?? name
+
       if (typeof value === 'undefined' && !setValue) {
         return (
-          <ServerFunctionsContext value={{ ...lexicalServerFunctionContext }}>
-            {Component}
+          <ServerFunctionsContext value={{ ...adjustedServerFunctionContext }}>
+            <FieldPathContext key={fieldPath} value={fieldPath}>
+              {Component}
+            </FieldPathContext>
           </ServerFunctionsContext>
         )
       }
@@ -96,15 +101,17 @@ export const useRenderEditor_internal_ = (
         formProcessing: false,
         formSubmitted: false,
         initialValue: value,
-        path: path ?? name,
+        path: fieldPath,
         setValue: setValue ?? (() => undefined),
         showError: false,
         value,
       }
 
       return (
-        <ServerFunctionsContext value={{ ...serverFunctionContext }}>
-          <FieldContext value={fieldValue}>{Component}</FieldContext>
+        <ServerFunctionsContext value={{ ...adjustedServerFunctionContext }}>
+          <FieldPathContext key={fieldPath} value={fieldPath}>
+            <FieldContext value={fieldValue}>{Component}</FieldContext>
+          </FieldPathContext>
         </ServerFunctionsContext>
       )
     }

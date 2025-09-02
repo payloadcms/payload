@@ -236,6 +236,8 @@ export const FieldContext = React.createContext<FieldType<unknown> | undefined>(
  * @see https://payloadcms.com/docs/admin/react-hooks#usefield
  */
 export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
+  const pathFromContext = useFieldPath()
+
   const ctx = React.use(FieldContext) as FieldType<TValue> | undefined
 
   // Lock the mode on first render so hook order is stable forever. This ensures
@@ -243,7 +245,12 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   // not break the rule of hooks.
   const modeRef = React.useRef<'context' | 'impl' | null>(null)
   if (modeRef.current === null) {
-    modeRef.current = ctx ? 'context' : 'impl'
+    // Use field context, if a field context exists **and** the path matches. If the path
+    // does not match, this could be the field context of a parent field => there likely is
+    // a nested <Form /> we should use instead => 'impl'
+    const currentPath = options.path || pathFromContext || options.potentiallyStalePath
+
+    modeRef.current = ctx && currentPath && ctx.path === currentPath ? 'context' : 'impl'
   }
 
   if (modeRef.current === 'context') {

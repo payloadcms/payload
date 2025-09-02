@@ -235,6 +235,8 @@ export type { FieldAction } from '../../forms/Form/types.js'
 export { fieldReducer } from '../../forms/Form/fieldReducer.js'
 export { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 export { RenderFields } from '../../forms/RenderFields/index.js'
+export { FieldPathContext, useFieldPath } from '../../forms/RenderFields/context.js'
+
 export { RowLabel, type RowLabelProps } from '../../forms/RowLabel/index.js'
 export { RowLabelProvider, useRowLabel } from '../../forms/RowLabel/Context/index.js'
 
