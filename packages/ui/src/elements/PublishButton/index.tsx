@@ -4,7 +4,7 @@ import type { PublishButtonClientProps } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import * as qs from 'qs-esm'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
@@ -15,6 +15,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
 import { ScheduleDrawer } from './ScheduleDrawer/index.js'
 
@@ -85,6 +86,15 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       (globalSlug || (collectionSlug && id)) &&
       (hasAutosave || !modified),
   )
+
+  const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
+
+  useEffect(() => {
+    const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields)
+    setHasLocalizedFields(hasLocalizedField)
+  }, [entityConfig?.fields])
+
+  const canPublishSpecificLocale = localization && hasLocalizedFields && hasPublishPermission
 
   const operation = useOperation()
 
@@ -213,7 +223,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         onClick={defaultPublish}
         size="medium"
         SubMenuPopupContent={
-          localization || canSchedulePublish
+          canPublishSpecificLocale || canSchedulePublish
             ? ({ close }) => {
                 return (
                   <React.Fragment>
@@ -227,7 +237,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
                         </PopupList.Button>
                       </PopupList.ButtonGroup>
                     )}
-                    {localization && canPublish && (
+                    {canPublishSpecificLocale && (
                       <PopupList.ButtonGroup>
                         <PopupList.Button id="publish-locale" onClick={secondaryPublish}>
                           {secondaryLabel}
