@@ -204,6 +204,12 @@ export const buildFormState = async (
       ? fieldOrEntityConfig.fields
       : [fieldOrEntityConfig]
 
+  // Ensure data.id is present during form state requests, where the data
+  // is passed from the client as an argument, without the ID
+  if (!data.id && id) {
+    data.id = id
+  }
+
   const formStateResult = await fieldSchemasToFormState({
     id,
     clientFieldSchemaMap: clientSchemaMap,
