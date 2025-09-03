@@ -126,6 +126,12 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
+  array?:
+    | {
+        textField?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   content?: {
     root: {
       type: string;
@@ -279,6 +285,12 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  array?:
+    | T
+    | {
+        textField?: T;
+        id?: T;
+      };
   content?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -186,6 +186,7 @@ export interface DisablePublish {
  */
 export interface Post {
   id: string;
+  relationship?: (string | null) | User;
   relationToAutosaves?: (string | null) | AutosavePost;
   relationToVersions?: (string | null) | VersionPost;
   relationToDrafts?: (string | null) | DraftPost;
@@ -194,11 +195,36 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autosave-posts".
  */
 export interface AutosavePost {
   id: string;
   title: string;
+  relationship?: (string | null) | User;
   computedTitle?: string | null;
   richText?: {
     root: {
@@ -569,30 +595,6 @@ export interface Media2 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs".
  */
 export interface PayloadJob {
@@ -823,6 +825,7 @@ export interface DisablePublishSelect<T extends boolean = true> {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
+  relationship?: T;
   relationToAutosaves?: T;
   relationToVersions?: T;
   relationToDrafts?: T;
@@ -835,6 +838,7 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
+  relationship?: T;
   computedTitle?: T;
   richText?: T;
   json?: T;

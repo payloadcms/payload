@@ -15,6 +15,16 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          type: 'text',
+          name: 'textField',
+        },
+      ],
+    },
+    {
       name: 'content',
       type: 'richText',
       editor: lexicalEditor({
