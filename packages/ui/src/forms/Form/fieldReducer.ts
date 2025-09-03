@@ -134,35 +134,37 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     case 'DUPLICATE_ROW': {
       const { path, rowIndex } = action
       const { remainingFields, rows } = separateRows(path, state)
-      const rowsMetadata = [...(state[path].rows || [])]
+      const rowsWithDuplicate = [...(state[path].rows || [])]
 
-      const duplicateRowMetadata = deepCopyObjectSimpleWithoutReactComponents(
-        rowsMetadata[rowIndex],
-      )
+      const newRow = deepCopyObjectSimpleWithoutReactComponents(rowsWithDuplicate[rowIndex])
 
-      if (duplicateRowMetadata.id) {
-        duplicateRowMetadata.id = new ObjectId().toHexString()
+      const newRowID = new ObjectId().toHexString()
+
+      if (newRow.id) {
+        newRow.id = newRowID
       }
 
-      if (rowsMetadata[rowIndex]?.customComponents?.RowLabel) {
-        duplicateRowMetadata.customComponents = {
-          RowLabel: rowsMetadata[rowIndex].customComponents.RowLabel,
+      if (rowsWithDuplicate[rowIndex]?.customComponents?.RowLabel) {
+        newRow.customComponents = {
+          RowLabel: rowsWithDuplicate[rowIndex].customComponents.RowLabel,
         }
       }
 
       const duplicateRowState = deepCopyObjectSimpleWithoutReactComponents(rows[rowIndex])
 
       if (duplicateRowState.id) {
-        duplicateRowState.id.value = new ObjectId().toHexString()
-        duplicateRowState.id.initialValue = new ObjectId().toHexString()
+        duplicateRowState.id.value = newRowID
+        duplicateRowState.id.initialValue = newRowID
       }
 
       for (const key of Object.keys(duplicateRowState).filter((key) => key.endsWith('.id'))) {
         const idState = duplicateRowState[key]
 
+        const newNestedFieldID = new ObjectId().toHexString()
+
         if (idState && typeof idState.value === 'string' && ObjectId.isValid(idState.value)) {
-          duplicateRowState[key].value = new ObjectId().toHexString()
-          duplicateRowState[key].initialValue = new ObjectId().toHexString()
+          duplicateRowState[key].value = newNestedFieldID
+          duplicateRowState[key].initialValue = newNestedFieldID
         }
       }
 
@@ -170,7 +172,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       if (Object.keys(duplicateRowState).length > 0) {
         // Add new object containing subfield names to unflattenedRows array
         rows.splice(rowIndex + 1, 0, duplicateRowState)
-        rowsMetadata.splice(rowIndex + 1, 0, duplicateRowMetadata)
+        rowsWithDuplicate.splice(rowIndex + 1, 0, newRow)
       }
 
       const newState = {
@@ -179,7 +181,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: true,
-          rows: rowsMetadata,
+          rows: rowsWithDuplicate,
           value: rows.length,
         },
       }

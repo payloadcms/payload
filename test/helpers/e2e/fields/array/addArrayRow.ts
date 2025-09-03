@@ -1,6 +1,7 @@
 import type { Locator, Page } from 'playwright'
 
 import { wait } from 'payload/shared'
+import { expect } from 'playwright/test'
 
 import { openArrayRowActions } from './openArrayRowActions.js'
 
@@ -18,10 +19,12 @@ export const addArrayRow = async (
   page: Page,
   { fieldName }: Omit<Parameters<typeof openArrayRowActions>[1], 'rowIndex'>,
 ) => {
+  const rowLocator = page.locator(`#field-${fieldName} .array-field__row`)
+  const numberOfPrevRows = await rowLocator.count()
+
   await addArrayRowAsync(page, fieldName)
 
-  // TODO: test the array row has appeared
-  await wait(300)
+  expect(await rowLocator.count()).toBe(numberOfPrevRows + 1)
 }
 
 /**
@@ -31,16 +34,19 @@ export const addArrayRowBelow = async (
   page: Page,
   { fieldName, rowIndex = 0 }: Parameters<typeof openArrayRowActions>[1],
 ): Promise<{ popupContentLocator: Locator; rowActionsButtonLocator: Locator }> => {
+  const rowLocator = page.locator(`#field-${fieldName} .array-field__row`)
+  const numberOfPrevRows = await rowLocator.count()
+
   const { popupContentLocator, rowActionsButtonLocator } = await openArrayRowActions(page, {
     fieldName,
     rowIndex,
   })
 
-  const addBelowButton = popupContentLocator.locator('.array-actions__action.array-actions__add')
+  await popupContentLocator.locator('.array-actions__action.array-actions__add').click()
 
-  await addBelowButton.click()
+  await expect(rowLocator).toHaveCount(numberOfPrevRows + 1)
 
-  // TODO: test the array row has appeared
+  // TODO: test the array row has appeared in the _correct position_ (immediately below the original row)
   await wait(300)
 
   return { popupContentLocator, rowActionsButtonLocator }
