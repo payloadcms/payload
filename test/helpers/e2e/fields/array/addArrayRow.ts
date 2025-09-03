@@ -19,12 +19,12 @@ export const addArrayRow = async (
   page: Page,
   { fieldName }: Omit<Parameters<typeof openArrayRowActions>[1], 'rowIndex'>,
 ) => {
-  const rowSelector = page.locator(`#field-${fieldName} .array-field__row`)
-  const numberOfCurrentRows = await rowSelector.count()
+  const rowLocator = page.locator(`#field-${fieldName} .array-field__row`)
+  const numberOfCurrentRows = await rowLocator.count()
 
   await addArrayRowAsync(page, fieldName)
 
-  expect(await rowSelector.count()).toBe(numberOfCurrentRows + 1)
+  expect(await rowLocator.count()).toBe(numberOfCurrentRows + 1)
 }
 
 /**
@@ -34,17 +34,17 @@ export const addArrayRowBelow = async (
   page: Page,
   { fieldName, rowIndex = 0 }: Parameters<typeof openArrayRowActions>[1],
 ): Promise<{ popupContentLocator: Locator; rowActionsButtonLocator: Locator }> => {
+  const rowLocator = page.locator(`#field-${fieldName} .array-field__row`)
+  const numberOfCurrentRows = await rowLocator.count()
+
   const { popupContentLocator, rowActionsButtonLocator } = await openArrayRowActions(page, {
     fieldName,
     rowIndex,
   })
 
-  const rowSelector = page.locator(`#field-${fieldName} .array-field__row`)
-  const numberOfCurrentRows = await rowSelector.count()
-
   await popupContentLocator.locator('.array-actions__action.array-actions__add').click()
 
-  expect(await rowSelector.count()).toBe(numberOfCurrentRows + 1)
+  await expect(rowLocator).toHaveCount(numberOfCurrentRows + 1)
 
   // TODO: test the array row has appeared in the _correct position_ (immediately below the original row)
   await wait(300)

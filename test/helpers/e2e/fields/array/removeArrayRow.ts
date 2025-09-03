@@ -14,17 +14,17 @@ export const removeArrayRow = async (
   popupContentLocator: Locator
   rowActionsButtonLocator: Locator
 }> => {
+  const rowLocator = page.locator(`#field-${fieldName} .array-field__row`)
+  const numberOfCurrentRows = await rowLocator.count()
+
   const { popupContentLocator, rowActionsButtonLocator } = await openArrayRowActions(page, {
     fieldName,
     rowIndex,
   })
 
-  const rowSelector = page.locator(`#field-${fieldName} .array-field__row`)
-  const numberOfCurrentRows = await rowSelector.count()
-
   await popupContentLocator.locator('.array-actions__action.array-actions__remove').click()
 
-  expect(await rowSelector.count()).toBe(numberOfCurrentRows - 1)
+  expect(await rowLocator.count()).toBe(numberOfCurrentRows - 1)
 
   // TODO: test the array row has been removed in the _correct position_ (original row index)
   // another row may have been moved into its place, need to ensure the test accounts for this fact

@@ -2,8 +2,13 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { copyPasteField } from 'helpers/e2e/copyPasteField.js'
-import { addArrayRowBelow, duplicateArrayRow } from 'helpers/e2e/fields/array/index.js'
-import { addBlock, openBlocksDrawer, reorderBlocks } from 'helpers/e2e/fields/blocks/index.js'
+import { duplicateArrayRow } from 'helpers/e2e/fields/array/index.js'
+import {
+  addBlock,
+  addBlockBelow,
+  openBlocksDrawer,
+  reorderBlocks,
+} from 'helpers/e2e/fields/blocks/index.js'
 import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
 import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import path from 'path'
@@ -127,22 +132,13 @@ describe('Block fields', () => {
   test('should open blocks drawer from block row and add below', async () => {
     await page.goto(url.create)
 
-    await addArrayRowBelow(page, { fieldName: 'blocks' })
-
-    const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
-    await expect(blocksDrawer).toBeVisible()
-
-    // select the first block in the drawer
-    const firstBlockSelector = blocksDrawer
-      .locator('.blocks-drawer__blocks .blocks-drawer__block')
-      .first()
-
-    await expect(firstBlockSelector).toContainText('Content')
-    await firstBlockSelector.click()
+    await addBlockBelow(page, { fieldName: 'blocks', blockToSelect: 'Content' })
 
     // ensure the block was inserted beneath the first in the rows
     const addedRow = page.locator('#field-blocks #blocks-row-1')
+
     await expect(addedRow).toBeVisible()
+
     await expect(addedRow.locator('.blocks-field__block-header')).toHaveText(
       'Custom Block Label: Content 02',
     ) // went from `Number` to `Content`
