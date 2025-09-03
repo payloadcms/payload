@@ -15,6 +15,7 @@ import {
   // throttleTest,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
+import { assertNetworkRequests } from '../../../helpers/e2e/assertNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
@@ -97,6 +98,53 @@ describe('Conditional Logic', () => {
     )
 
     expect(true).toBe(true)
+  })
+
+  test('ensure conditions receive document ID during form state request', async () => {
+    await page.goto(url.create)
+
+    const fieldOnlyVisibleIfNoID = page.locator('#field-fieldWithDocIDCondition')
+
+    await expect(fieldOnlyVisibleIfNoID).toBeVisible()
+
+    const textField = page.locator('#field-text')
+    await assertNetworkRequests(
+      page,
+      '/admin/collections/conditional-logic',
+      async () => {
+        await textField.fill('some text')
+      },
+      {
+        minimumNumberOfRequests: 1,
+      },
+    )
+
+    await assertNetworkRequests(
+      page,
+      '/api/conditional-logic',
+      async () => {
+        await saveDocAndAssert(page)
+      },
+      {
+        minimumNumberOfRequests: 1,
+      },
+    )
+
+    await expect(fieldOnlyVisibleIfNoID).toBeHidden()
+
+    // Fill text and wait for form state request to come back
+    await assertNetworkRequests(
+      page,
+      '/admin/collections/conditional-logic',
+      async () => {
+        await textField.fill('updated text')
+      },
+      {
+        minimumNumberOfRequests: 1,
+      },
+    )
+
+    await expect(fieldOnlyVisibleIfNoID).toBeHidden()
   })
 
   test('should conditionally render custom field that renders a Payload field', async () => {

@@ -613,7 +613,6 @@ export const deTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Keine Versionen gefunden',
     versionCount_one: '{{count}} Version gefunden',
     versionCount_other: '{{count}} Versionen gefunden',
-    versionCreatedOn: '{{version}} erstellt am:',
     versionID: 'Version-ID',
     versions: 'Versionen',
     viewingVersion: 'Version für {{entityLabel}} {{documentTitle}} ansehen',

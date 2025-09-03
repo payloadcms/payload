@@ -8,7 +8,7 @@ import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { DraftPost } from './payload-types.js'
+import type { AutosaveMultiSelectPost } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -18,6 +18,7 @@ import AutosaveGlobal from './globals/Autosave.js'
 import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
+  autosaveWithMultiSelectCollectionSlug,
   draftCollectionSlug,
   draftGlobalSlug,
   localizedCollectionSlug,
@@ -652,6 +653,71 @@ describe('Versions', () => {
         const updatedUpdatedAt = new Date(updated.updatedAt)
 
         expect(Number(updatedUpdatedAt)).toBeGreaterThan(Number(createdUpdatedAt))
+      })
+
+      it('should update correct version at doc that has hasMany field when saving with autosave', async () => {
+        const firstDocTag: AutosaveMultiSelectPost['tag'] = ['blog', 'essay']
+        const doc = await payload.create({
+          collection: autosaveWithMultiSelectCollectionSlug,
+          data: {
+            title: 'title 1',
+            tag: firstDocTag,
+            _status: 'published',
+          },
+          draft: false,
+        })
+        await payload.update({
+          collection: autosaveWithMultiSelectCollectionSlug,
+          id: doc.id,
+          data: {
+            title: 'title 2',
+            tag: firstDocTag,
+          },
+          draft: true,
+          autosave: true,
+        })
+
+        const doc2 = await payload.create({
+          collection: autosaveWithMultiSelectCollectionSlug,
+          data: {
+            title: 'title 1-2',
+            tag: ['blog'],
+            _status: 'published',
+          },
+          draft: false,
+        })
+
+        await payload.update({
+          collection: autosaveWithMultiSelectCollectionSlug,
+          id: doc2.id,
+          data: {
+            tag: ['blog'],
+            title: 'title 2-2',
+          },
+          draft: true,
+          autosave: true,
+        })
+        await payload.update({
+          collection: autosaveWithMultiSelectCollectionSlug,
+          id: doc2.id,
+          data: {
+            tag: ['blog'],
+            title: 'title 3-2',
+          },
+          draft: true,
+          autosave: true,
+        })
+
+        const lastDocVersion = await payload.findVersions({
+          collection: autosaveWithMultiSelectCollectionSlug,
+          where: {
+            parent: {
+              equals: doc.id,
+            },
+          },
+          limit: 1,
+        })
+        expect(lastDocVersion.docs[0]?.version.tag).toEqual(firstDocTag)
       })
 
       it('should validate when publishing with the draft arg', async () => {

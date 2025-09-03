@@ -600,7 +600,6 @@ export const skTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Žiadne verzie nenájdené',
     versionCount_one: '{{count}} verzia nájdená',
     versionCount_other: '{{count}} verzií nájdených',
-    versionCreatedOn: '{{version}} vytvorená:',
     versionID: 'ID verzie',
     versions: 'Verzie',
     viewingVersion: 'Zobrazujem verziu pre {{entityLabel}} {{documentTitle}}',

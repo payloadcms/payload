@@ -11,6 +11,7 @@ export type Data = {
 }
 
 export type Row = {
+  addedByServer?: FieldState['addedByServer']
   blockType?: string
   collapsed?: boolean
   customComponents?: {

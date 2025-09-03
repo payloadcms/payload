@@ -606,7 +606,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Nerasta jokių versijų',
     versionCount_one: 'Rasta {{count}} versija',
     versionCount_other: 'Rasta {{count}} versijų',
-    versionCreatedOn: '{{version}} sukurtas:',
     versionID: 'Versijos ID',
     versions: 'Versijos',
     viewingVersion: 'Peržiūrėkite versiją {{entityLabel}} {{documentTitle}}',

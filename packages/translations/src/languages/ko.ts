@@ -595,7 +595,6 @@ export const koTranslations: DefaultTranslationsObject = {
     versionCount_none: '버전을 찾을 수 없습니다',
     versionCount_one: '{{count}}개의 버전을 찾았습니다',
     versionCount_other: '{{count}}개의 버전을 찾았습니다',
-    versionCreatedOn: '{{version}} 생성 날짜:',
     versionID: '버전 ID',
     versions: '버전',
     viewingVersion: '{{entityLabel}} {{documentTitle}}의 버전 보기',

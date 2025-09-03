@@ -32,6 +32,9 @@ export const insertArrays = async ({
   const rowsByTable: RowsByTable = {}
 
   arrays.forEach((arraysByTable, parentRowIndex) => {
+    if (!arraysByTable || Object.keys(arraysByTable).length === 0) {
+      return
+    }
     Object.entries(arraysByTable).forEach(([tableName, arrayRows]) => {
       // If the table doesn't exist in map, initialize it
       if (!rowsByTable[tableName]) {

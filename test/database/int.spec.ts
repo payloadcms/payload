@@ -1,5 +1,5 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
-import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
+import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type {
   DataFromCollectionSlug,
@@ -29,7 +29,7 @@ import {
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 
-import type { Global2 } from './payload-types.js'
+import type { Global2, Post } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -48,6 +48,8 @@ let restClient: NextRESTClient
 const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
+
+const itMongo = process.env.PAYLOAD_DATABASE?.startsWith('mongodb') ? it : it.skip
 
 describe('database', () => {
   beforeAll(async () => {
@@ -224,6 +226,12 @@ describe('database', () => {
       const createdAtDate = new Date(result.createdAt)
 
       expect(createdAtDate.getMilliseconds()).toBeDefined()
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
     })
 
     it('should allow createdAt to be set in create', async () => {
@@ -243,9 +251,15 @@ describe('database', () => {
 
       expect(result.createdAt).toStrictEqual(createdAt)
       expect(doc.createdAt).toStrictEqual(createdAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
     })
 
-    it('updatedAt cannot be set in create', async () => {
+    it('should allow updatedAt to be set in create', async () => {
       const updatedAt = new Date('2022-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
         collection: postsSlug,
@@ -255,8 +269,353 @@ describe('database', () => {
         },
       })
 
-      expect(result.updatedAt).not.toStrictEqual(updatedAt)
+      expect(result.updatedAt).toStrictEqual(updatedAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
     })
+    it('should allow createdAt to be set in update', async () => {
+      const post = await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'hello',
+        },
+      })
+      const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
+
+      const result: any = await payload.db.updateOne({
+        collection: postsSlug,
+        id: post.id,
+        data: {
+          createdAt,
+        },
+      })
+
+      const doc = await payload.findByID({
+        id: result.id,
+        collection: postsSlug,
+      })
+
+      expect(doc.createdAt).toStrictEqual(createdAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
+    })
+
+    it('should allow updatedAt to be set in update', async () => {
+      const post = await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'hello',
+        },
+      })
+      const updatedAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
+
+      const result: any = await payload.db.updateOne({
+        collection: postsSlug,
+        id: post.id,
+        data: {
+          updatedAt,
+        },
+      })
+
+      const doc = await payload.findByID({
+        id: result.id,
+        collection: postsSlug,
+      })
+
+      expect(doc.updatedAt).toStrictEqual(updatedAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
+    })
+
+    it('ensure updatedAt is automatically set when using db.updateOne', async () => {
+      const post = await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'hello',
+        },
+      })
+
+      const result: any = await payload.db.updateOne({
+        collection: postsSlug,
+        id: post.id,
+        data: {
+          title: 'hello2',
+        },
+      })
+
+      expect(result.updatedAt).not.toStrictEqual(post.updatedAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
+    })
+
+    it('ensure updatedAt is not automatically set when using db.updateOne if it is explicitly set to `null`', async () => {
+      const post = await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'hello',
+        },
+      })
+
+      const result: any = await payload.db.updateOne({
+        collection: postsSlug,
+        id: post.id,
+        data: {
+          updatedAt: null,
+          title: 'hello2',
+        },
+      })
+
+      expect(result.updatedAt).toStrictEqual(post.updatedAt)
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {},
+      })
+    })
+
+    it('should allow createdAt to be set in updateVersion', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: {
+          title: 'hello',
+        },
+      })
+      await payload.update({
+        collection: 'categories',
+        id: category.id,
+        data: {
+          title: 'hello2',
+        },
+      })
+      const versions = await payload.findVersions({
+        collection: 'categories',
+        depth: 0,
+        sort: '-createdAt',
+      })
+      const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
+
+      for (const version of versions.docs) {
+        await payload.db.updateVersion({
+          id: version.id,
+          collection: 'categories',
+          versionData: {
+            ...version.version,
+            createdAt,
+          },
+        })
+      }
+
+      const updatedVersions = await payload.findVersions({
+        collection: 'categories',
+        depth: 0,
+        sort: '-createdAt',
+      })
+      expect(updatedVersions.docs).toHaveLength(2)
+      for (const version of updatedVersions.docs) {
+        expect(version.createdAt).toStrictEqual(createdAt)
+      }
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: 'categories',
+        where: {},
+      })
+      await payload.db.deleteVersions({
+        collection: 'categories',
+        where: {},
+      })
+    })
+
+    it('should allow updatedAt to be set in updateVersion', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: {
+          title: 'hello',
+        },
+      })
+      await payload.update({
+        collection: 'categories',
+        id: category.id,
+        data: {
+          title: 'hello2',
+        },
+      })
+      const versions = await payload.findVersions({
+        collection: 'categories',
+        depth: 0,
+        sort: '-createdAt',
+      })
+      const updatedAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
+
+      for (const version of versions.docs) {
+        await payload.db.updateVersion({
+          id: version.id,
+          collection: 'categories',
+          versionData: {
+            ...version.version,
+            updatedAt,
+          },
+        })
+      }
+
+      const updatedVersions = await payload.findVersions({
+        collection: 'categories',
+        depth: 0,
+        sort: '-updatedAt',
+      })
+      expect(updatedVersions.docs).toHaveLength(2)
+      for (const version of updatedVersions.docs) {
+        expect(version.updatedAt).toStrictEqual(updatedAt)
+      }
+
+      // Cleanup, as this test suite does not use clearAndSeedEverything
+      await payload.db.deleteMany({
+        collection: 'categories',
+        where: {},
+      })
+      await payload.db.deleteVersions({
+        collection: 'categories',
+        where: {},
+      })
+    })
+
+    async function noTimestampsTestLocalAPI() {
+      const createdDoc: any = await payload.create({
+        collection: 'noTimeStamps',
+        data: {
+          title: 'hello',
+        },
+      })
+      expect(createdDoc.createdAt).toBeUndefined()
+      expect(createdDoc.updatedAt).toBeUndefined()
+
+      const updated: any = await payload.update({
+        collection: 'noTimeStamps',
+        id: createdDoc.id,
+        data: {
+          title: 'updated',
+        },
+      })
+      expect(updated.createdAt).toBeUndefined()
+      expect(updated.updatedAt).toBeUndefined()
+
+      const date = new Date('2021-01-01T00:00:00.000Z').toISOString()
+      const createdDocWithTimestamps: any = await payload.create({
+        collection: 'noTimeStamps',
+        data: {
+          title: 'hello',
+          createdAt: date,
+          updatedAt: date,
+        },
+      })
+      expect(createdDocWithTimestamps.createdAt).toBeUndefined()
+      expect(createdDocWithTimestamps.updatedAt).toBeUndefined()
+
+      const updatedDocWithTimestamps: any = await payload.update({
+        collection: 'noTimeStamps',
+        id: createdDocWithTimestamps.id,
+        data: {
+          title: 'updated',
+          createdAt: date,
+          updatedAt: date,
+        },
+      })
+      expect(updatedDocWithTimestamps.createdAt).toBeUndefined()
+      expect(updatedDocWithTimestamps.updatedAt).toBeUndefined()
+    }
+
+    async function noTimestampsTestDB(aa) {
+      const createdDoc: any = await payload.db.create({
+        collection: 'noTimeStamps',
+        data: {
+          title: 'hello',
+        },
+      })
+      expect(createdDoc.createdAt).toBeUndefined()
+      expect(createdDoc.updatedAt).toBeUndefined()
+
+      const updated: any = await payload.db.updateOne({
+        collection: 'noTimeStamps',
+        id: createdDoc.id,
+        data: {
+          title: 'updated',
+        },
+      })
+      expect(updated.createdAt).toBeUndefined()
+      expect(updated.updatedAt).toBeUndefined()
+
+      const date = new Date('2021-01-01T00:00:00.000Z').toISOString()
+      const createdDocWithTimestamps: any = await payload.db.create({
+        collection: 'noTimeStamps',
+        data: {
+          title: 'hello',
+          createdAt: date,
+          updatedAt: date,
+        },
+      })
+      expect(createdDocWithTimestamps.createdAt).toBeUndefined()
+      expect(createdDocWithTimestamps.updatedAt).toBeUndefined()
+
+      const updatedDocWithTimestamps: any = await payload.db.updateOne({
+        collection: 'noTimeStamps',
+        id: createdDocWithTimestamps.id,
+        data: {
+          title: 'updated',
+          createdAt: date,
+          updatedAt: date,
+        },
+      })
+      expect(updatedDocWithTimestamps.createdAt).toBeUndefined()
+      expect(updatedDocWithTimestamps.updatedAt).toBeUndefined()
+    }
+
+    // eslint-disable-next-line jest/expect-expect
+    it('ensure timestamps are not created in update or create when timestamps are disabled', async () => {
+      await noTimestampsTestLocalAPI()
+    })
+
+    // eslint-disable-next-line jest/expect-expect
+    it('ensure timestamps are not created in db adapter update or create when timestamps are disabled', async () => {
+      await noTimestampsTestDB(true)
+    })
+
+    itMongo(
+      'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
+      async () => {
+        const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
+        payload.db.allowAdditionalKeys = true
+        await noTimestampsTestLocalAPI()
+        payload.db.allowAdditionalKeys = originalAllowAdditionalKeys
+      },
+    )
+
+    itMongo(
+      'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
+      async () => {
+        const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
+        payload.db.allowAdditionalKeys = true
+        await noTimestampsTestDB()
+
+        payload.db.allowAdditionalKeys = originalAllowAdditionalKeys
+      },
+    )
   })
 
   describe('Data strictness', () => {
@@ -3019,7 +3378,7 @@ describe('database', () => {
   it('should allow incremental number update', async () => {
     const post = await payload.create({ collection: 'posts', data: { number: 1, title: 'post' } })
 
-    const res = await payload.db.updateOne({
+    const res = (await payload.db.updateOne({
       data: {
         number: {
           $inc: 10,
@@ -3027,11 +3386,11 @@ describe('database', () => {
       },
       collection: 'posts',
       where: { id: { equals: post.id } },
-    })
+    })) as unknown as Post
 
     expect(res.number).toBe(11)
 
-    const res2 = await payload.db.updateOne({
+    const res2 = (await payload.db.updateOne({
       data: {
         number: {
           $inc: -3,
@@ -3039,9 +3398,312 @@ describe('database', () => {
       },
       collection: 'posts',
       where: { id: { equals: post.id } },
-    })
+    })) as unknown as Post
 
     expect(res2.number).toBe(8)
+  })
+
+  describe('array $push', () => {
+    it('should allow atomic array updates and $inc', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          number: 10,
+          arrayWithIDs: [
+            {
+              text: 'some text',
+            },
+          ],
+          title: 'post',
+        },
+      })
+
+      const res = (await payload.db.updateOne({
+        data: {
+          arrayWithIDs: {
+            $push: {
+              text: 'some text 2',
+              id: new mongoose.Types.ObjectId().toHexString(),
+            },
+          },
+          number: {
+            $inc: 5,
+          },
+        },
+        collection: 'posts',
+        id: post.id,
+      })) as unknown as Post
+
+      expect(res.arrayWithIDs).toHaveLength(2)
+      expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
+      expect(res.arrayWithIDs?.[1]?.text).toBe('some text 2')
+      expect(res.number).toBe(15)
+    })
+
+    it('should allow atomic array updates using $push with single value, unlocalized', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          arrayWithIDs: [
+            {
+              text: 'some text',
+            },
+          ],
+          title: 'post',
+        },
+      })
+
+      const res = (await payload.db.updateOne({
+        data: {
+          arrayWithIDs: {
+            $push: {
+              text: 'some text 2',
+              id: new mongoose.Types.ObjectId().toHexString(),
+            },
+          },
+        },
+        collection: 'posts',
+        id: post.id,
+      })) as unknown as Post
+
+      expect(res.arrayWithIDs).toHaveLength(2)
+      expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
+      expect(res.arrayWithIDs?.[1]?.text).toBe('some text 2')
+    })
+    it('should allow atomic array updates using $push with single value, localized field within array', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          arrayWithIDs: [
+            {
+              text: 'some text',
+              textLocalized: 'Some text localized',
+            },
+          ],
+          title: 'post',
+        },
+      })
+
+      const res = (await payload.db.updateOne({
+        data: {
+          // Locales used => no optimized row update => need to pass full data, incuding title
+          title: 'post',
+          arrayWithIDs: {
+            $push: {
+              text: 'some text 2',
+              id: new mongoose.Types.ObjectId().toHexString(),
+              textLocalized: {
+                en: 'Some text 2 localized',
+                es: 'Algun texto 2 localizado',
+              },
+            },
+          },
+        },
+        collection: 'posts',
+        id: post.id,
+      })) as unknown as Post
+
+      expect(res.arrayWithIDs).toHaveLength(2)
+      expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
+      expect(res.arrayWithIDs?.[0]?.textLocalized).toEqual({
+        en: 'Some text localized',
+      })
+      expect(res.arrayWithIDs?.[1]?.text).toBe('some text 2')
+      expect(res.arrayWithIDs?.[1]?.textLocalized).toEqual({
+        en: 'Some text 2 localized',
+        es: 'Algun texto 2 localizado',
+      })
+    })
+
+    it('should allow atomic array updates using $push with single value, localized array', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          arrayWithIDsLocalized: [
+            {
+              text: 'some text',
+            },
+          ],
+          title: 'post',
+        },
+      })
+
+      const res = (await payload.db.updateOne({
+        data: {
+          // Locales used => no optimized row update => need to pass full data, incuding title
+          title: 'post',
+          arrayWithIDsLocalized: {
+            $push: {
+              en: {
+                text: 'some text 2',
+                id: new mongoose.Types.ObjectId().toHexString(),
+              },
+              es: {
+                text: 'some text 2 es',
+                id: new mongoose.Types.ObjectId().toHexString(),
+              },
+            },
+          },
+        },
+        collection: 'posts',
+        id: post.id,
+      })) as unknown as any
+
+      expect(res.arrayWithIDsLocalized?.en).toHaveLength(2)
+      expect(res.arrayWithIDsLocalized?.en?.[0]?.text).toBe('some text')
+      expect(res.arrayWithIDsLocalized?.en?.[1]?.text).toBe('some text 2')
+
+      expect(res.arrayWithIDsLocalized?.es).toHaveLength(1)
+      expect(res.arrayWithIDsLocalized?.es?.[0]?.text).toBe('some text 2 es')
+    })
+
+    it('should allow atomic array updates using $push with multiple values, unlocalized', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          arrayWithIDs: [
+            {
+              text: 'some text',
+            },
+          ],
+          title: 'post',
+        },
+      })
+
+      const res = (await payload.db.updateOne({
+        data: {
+          arrayWithIDs: {
+            $push: [
+              {
+                id: new mongoose.Types.ObjectId().toHexString(),
+                text: 'some text 2',
+              },
+              {
+                id: new mongoose.Types.ObjectId().toHexString(),
+                text: 'some text 3',
+              },
+            ],
+          },
+        },
+        collection: 'posts',
+        id: post.id,
+      })) as unknown as Post
+
+      expect(res.arrayWithIDs).toHaveLength(3)
+      expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
+      expect(res.arrayWithIDs?.[1]?.text).toBe('some text 2')
+      expect(res.arrayWithIDs?.[2]?.text).toBe('some text 3')
+    })
+
+    it('should allow atomic array updates using $push with multiple values, localized field within array', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          arrayWithIDs: [
+            {
+              text: 'some text',
+              textLocalized: 'Some text localized',
+            },
+          ],
+          title: 'post',
+        },
+      })
+
+      const res = (await payload.db.updateOne({
+        data: {
+          // Locales used => no optimized row update => need to pass full data, incuding title
+          title: 'post',
+          arrayWithIDs: {
+            $push: [
+              {
+                id: new mongoose.Types.ObjectId().toHexString(),
+                text: 'some text 2',
+                textLocalized: {
+                  en: 'Some text 2 localized',
+                  es: 'Algun texto 2 localizado',
+                },
+              },
+              {
+                id: new mongoose.Types.ObjectId().toHexString(),
+                text: 'some text 3',
+                textLocalized: {
+                  en: 'Some text 3 localized',
+                  es: 'Algun texto 3 localizado',
+                },
+              },
+            ],
+          },
+        },
+        collection: 'posts',
+        id: post.id,
+      })) as unknown as Post
+
+      expect(res.arrayWithIDs).toHaveLength(3)
+      expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
+      expect(res.arrayWithIDs?.[1]?.text).toBe('some text 2')
+      expect(res.arrayWithIDs?.[2]?.text).toBe('some text 3')
+
+      expect(res.arrayWithIDs?.[0]?.textLocalized).toEqual({
+        en: 'Some text localized',
+      })
+      expect(res.arrayWithIDs?.[1]?.textLocalized).toEqual({
+        en: 'Some text 2 localized',
+        es: 'Algun texto 2 localizado',
+      })
+      expect(res.arrayWithIDs?.[2]?.textLocalized).toEqual({
+        en: 'Some text 3 localized',
+        es: 'Algun texto 3 localizado',
+      })
+    })
+
+    it('should allow atomic array updates using $push with multiple values, localized array', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          arrayWithIDsLocalized: [
+            {
+              text: 'some text',
+            },
+          ],
+          title: 'post',
+        },
+      })
+
+      const res = (await payload.db.updateOne({
+        data: {
+          // Locales used => no optimized row update => need to pass full data, incuding title
+          title: 'post',
+          arrayWithIDsLocalized: {
+            $push: {
+              en: {
+                text: 'some text 2',
+                id: new mongoose.Types.ObjectId().toHexString(),
+              },
+              es: [
+                {
+                  text: 'some text 2 es',
+                  id: new mongoose.Types.ObjectId().toHexString(),
+                },
+                {
+                  text: 'some text 3 es',
+                  id: new mongoose.Types.ObjectId().toHexString(),
+                },
+              ],
+            },
+          },
+        },
+        collection: 'posts',
+        id: post.id,
+      })) as unknown as any
+
+      expect(res.arrayWithIDsLocalized?.en).toHaveLength(2)
+      expect(res.arrayWithIDsLocalized?.en?.[0]?.text).toBe('some text')
+      expect(res.arrayWithIDsLocalized?.en?.[1]?.text).toBe('some text 2')
+
+      expect(res.arrayWithIDsLocalized?.es).toHaveLength(2)
+      expect(res.arrayWithIDsLocalized?.es?.[0]?.text).toBe('some text 2 es')
+      expect(res.arrayWithIDsLocalized?.es?.[1]?.text).toBe('some text 3 es')
+    })
   })
 
   it('should support x3 nesting blocks', async () => {

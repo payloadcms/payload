@@ -204,6 +204,11 @@ export async function loginClientSide(args: LoginArgs): Promise<void> {
     await openNav(page)
     await expect(page.locator('.nav__controls [aria-label="Log out"]')).toBeVisible()
     await page.locator('.nav__controls [aria-label="Log out"]').click()
+
+    if (await page.locator('dialog#leave-without-saving').isVisible()) {
+      await page.locator('dialog#leave-without-saving #confirm-action').click()
+    }
+
     await page.waitForURL(loginRoute)
   }
 

@@ -605,7 +605,6 @@ export const enTranslations = {
     versionCount_none: 'No versions found',
     versionCount_one: '{{count}} version found',
     versionCount_other: '{{count}} versions found',
-    versionCreatedOn: '{{version}} created on:',
     versionID: 'Version ID',
     versions: 'Versions',
     viewingVersion: 'Viewing version for the {{entityLabel}} {{documentTitle}}',

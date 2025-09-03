@@ -602,7 +602,6 @@ export const lvTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Nav atrastu versiju',
     versionCount_one: 'Atrasta {{count}} versija',
     versionCount_other: 'Atrastas {{count}} versijas',
-    versionCreatedOn: '{{version}} izveidota:',
     versionID: 'Versijas ID',
     versions: 'Versijas',
     viewingVersion: 'Skatās versiju priekš {{entityLabel}} {{documentTitle}}',

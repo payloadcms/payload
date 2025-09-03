@@ -16,6 +16,20 @@ export type Preferences = {
   [key: string]: unknown
 }
 
+export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
+  json: T,
+  options?: {
+    /**
+     * Arbitrary context passed to the onSuccess callback.
+     */
+    context?: C
+    /**
+     * Form state at the time of the request used to retrieve the JSON response.
+     */
+    formState?: FormState
+  },
+) => Promise<FormState | void> | void
+
 export type FormProps = {
   beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
   children?: React.ReactNode
@@ -54,16 +68,7 @@ export type FormProps = {
   log?: boolean
   onChange?: ((args: { formState: FormState; submitted?: boolean }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
-  onSuccess?: (
-    json: unknown,
-    options?: {
-      /**
-       * Arbitrary context passed to the onSuccess callback.
-       */
-      context?: Record<string, unknown>
-      formState?: FormState
-    },
-  ) => Promise<FormState | void> | void
+  onSuccess?: FormOnSuccess
   redirect?: string
   submitted?: boolean
   uuid?: string
@@ -79,14 +84,14 @@ export type FormProps = {
     }
 )
 
-export type SubmitOptions<T = Record<string, unknown>> = {
+export type SubmitOptions<C = Record<string, unknown>> = {
   acceptValues?: AcceptValues
   action?: string
   /**
    * @experimental - Note: this property is experimental and may change in the future. Use at your own discretion.
    * If you want to pass additional data to the onSuccess callback, you can use this context object.
    */
-  context?: T
+  context?: C
   /**
    * When true, will disable the form while it is processing.
    * @default true
@@ -108,14 +113,14 @@ export type SubmitOptions<T = Record<string, unknown>> = {
 
 export type DispatchFields = React.Dispatch<any>
 
-export type Submit = <T extends Record<string, unknown>>(
-  options?: SubmitOptions<T>,
+export type Submit = <T extends Response, C extends Record<string, unknown>>(
+  options?: SubmitOptions<C>,
   e?: React.FormEvent<HTMLFormElement>,
 ) => Promise</**
  * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use at your own discretion.
  * Returns the form state and the response from the server.
  */
-{ formState?: FormState; res: Response } | void>
+{ formState?: FormState; res: T } | void>
 
 export type ValidateForm = () => Promise<boolean>
 

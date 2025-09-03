@@ -606,7 +606,6 @@ export const caTranslations: DefaultTranslationsObject = {
     versionCount_none: "No s'han trobat versions",
     versionCount_one: '{{count}} versió trobada',
     versionCount_other: '{{count}} versions trobades',
-    versionCreatedOn: '{{version}} creada el:',
     versionID: 'ID de versió',
     versions: 'Versions',
     viewingVersion: 'Veient versió per al {{entityLabel}} {{documentTitle}}',

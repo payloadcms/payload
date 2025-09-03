@@ -90,6 +90,7 @@ type CopyDataFromLocaleClient = (
 
 type GetDocumentSlots = (args: {
   collectionSlug: string
+  id?: number | string
   signal?: AbortSignal
 }) => Promise<DocumentSlots>
 

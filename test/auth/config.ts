@@ -261,6 +261,33 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'api-keys-with-field-read-access',
+      auth: {
+        disableLocalStrategy: true,
+        useAPIKey: true,
+      },
+      fields: [
+        {
+          name: 'enableAPIKey',
+          type: 'checkbox',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          name: 'apiKey',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+      ],
+      labels: {
+        plural: 'API Keys With Field Read Access',
+        singular: 'API Key With Field Read Access',
+      },
+    },
   ],
   onInit: seed,
   typescript: {

@@ -568,7 +568,9 @@ describe('Relationship Field', () => {
     ).toHaveCount(1)
     await drawerField.fill('Updated document')
     await saveButton.click()
-    await expect(page.locator('.payload-toast-container')).toContainText('Updated successfully')
+    await expect(page.locator('.payload-toast-container').first()).toContainText(
+      'Updated successfully',
+    )
     await page.locator('.doc-drawer__header-close').click()
     await expect(
       page.locator('#field-relationshipHasMany .value-container .rs__multi-value'),

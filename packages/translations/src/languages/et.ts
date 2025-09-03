@@ -594,7 +594,6 @@ export const etTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Versioone ei leitud',
     versionCount_one: '{{count}} versioon leitud',
     versionCount_other: '{{count}} versiooni leitud',
-    versionCreatedOn: '{{version}} loodud:',
     versionID: 'Versiooni ID',
     versions: 'Versioonid',
     viewingVersion: 'Vaatan versiooni {{entityLabel}} {{documentTitle}} jaoks',

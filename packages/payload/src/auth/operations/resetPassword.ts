@@ -131,6 +131,9 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
     // Update new password
     // /////////////////////////////////////
 
+    // Ensure updatedAt date is always updated
+    user.updatedAt = new Date().toISOString()
+
     const doc = await payload.db.updateOne({
       id: user.id,
       collection: collectionConfig.slug,

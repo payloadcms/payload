@@ -587,7 +587,6 @@ export const arTranslations: DefaultTranslationsObject = {
     versionCount_none: 'لم يتمّ العثور على أيّ من النّسخ',
     versionCount_one: 'تمّ العثور على {{count}} من النّسخ',
     versionCount_other: 'تمّ العثور على {{count}} نُسخ',
-    versionCreatedOn: 'تمّ ﻹنشاء النّسخة في {{version}}:',
     versionID: 'مُعرّف النّسخة',
     versions: 'النُّسَخ',
     viewingVersion: 'يتمّ استعراض نسخة ل {{entityLabel}} {{documentTitle}}',

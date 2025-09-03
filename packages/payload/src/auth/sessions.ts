@@ -49,6 +49,9 @@ export const addSessionToUser = async ({
       user.sessions.push(session)
     }
 
+    // Ensure updatedAt date is always updated
+    user.updatedAt = new Date().toISOString()
+
     await payload.db.updateOne({
       id: user.id,
       collection: collectionConfig.slug,

@@ -8,6 +8,7 @@ import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
+import type { FormOnSuccess } from '../../forms/Form/types.js'
 import type { LockedState } from '../../utilities/buildFormState.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
@@ -41,6 +42,11 @@ import { SetDocumentTitle } from './SetDocumentTitle/index.js'
 import './index.scss'
 
 const baseClass = 'collection-edit'
+
+export type OnSaveContext = {
+  getDocPermissions?: boolean
+  incrementVersionCount?: boolean
+}
 
 // This component receives props only on _pages_
 // When rendered within a drawer, props are empty
@@ -256,13 +262,12 @@ export function DefaultEditView({
     user?.id,
   ])
 
-  const onSave = useCallback<FormProps['onSuccess']>(
+  const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
     async (json, options) => {
       const { context, formState } = options || {}
 
       const controller = handleAbortRef(abortOnSaveRef)
 
-      // @ts-expect-error can ignore
       const document = json?.doc || json?.result
 
       const updatedAt = document?.updatedAt || new Date().toISOString()
@@ -316,7 +321,9 @@ export function DefaultEditView({
         resetUploadEdits()
       }
 
-      await getDocPermissions(json)
+      if (context?.getDocPermissions !== false) {
+        await getDocPermissions(json)
+      }
 
       if (id || globalSlug) {
         const docPreferences = await getDocPreferences()

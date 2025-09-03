@@ -602,7 +602,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     versionCount_none: 'バージョンがありません',
     versionCount_one: '{{count}} バージョンがあります',
     versionCount_other: '{{count}}バージョンが見つかりました',
-    versionCreatedOn: '{{version}} 作成日時:',
     versionID: 'バージョンID',
     versions: 'バージョン',
     viewingVersion: '表示バージョン: {{entityLabel}} {{documentTitle}}',

@@ -608,7 +608,6 @@ export const huTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Nem található verzió',
     versionCount_one: '{{count}} verzió található',
     versionCount_other: '{{count}} verzió található',
-    versionCreatedOn: '{{version}} létrehozva:',
     versionID: 'Verzióazonosító',
     versions: 'Verziók',
     viewingVersion: 'A(z) {{entityLabel}} {{documentTitle}} verziójának megtekintése',

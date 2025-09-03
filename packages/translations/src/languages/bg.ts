@@ -601,7 +601,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Няма открити версии',
     versionCount_one: '{{count}} открита версия',
     versionCount_other: '{{count}} открити версии',
-    versionCreatedOn: '{{version}} създадена на:',
     versionID: 'Идентификатор на версията',
     versions: 'Версии',
     viewingVersion: 'Гледане на версия за {{entityLabel}} {{documentTitle}}',

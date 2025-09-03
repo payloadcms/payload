@@ -617,7 +617,6 @@ export const frTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Aucune version trouvée',
     versionCount_one: '{{count}} version trouvée',
     versionCount_other: '{{count}} versions trouvées',
-    versionCreatedOn: '{{version}} créé(e) le :',
     versionID: 'Identifiant de la version',
     versions: 'Versions',
     viewingVersion: 'Affichage de la version de ou du {{entityLabel}} {{documentTitle}}',

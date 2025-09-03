@@ -606,7 +606,6 @@ export const idTranslations = {
     versionCount_none: 'Tidak ada versi yang ditemukan',
     versionCount_one: '{{count}} versi ditemukan',
     versionCount_other: '{{count}} versi ditemukan',
-    versionCreatedOn: '{{version}} dibuat pada:',
     versionID: 'ID Versi',
     versions: 'Versi',
     viewingVersion: 'Melihat versi untuk {{entityLabel}} {{documentTitle}}',
