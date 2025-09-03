@@ -9,7 +9,6 @@ import React from 'react'
 
 import { getDocPreferences } from '../Document/getDocPreferences.js'
 import { getDocumentData } from '../Document/getDocumentData.js'
-import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { CreateFirstUserClient } from './index.client.js'
 import './index.scss'
 
@@ -47,13 +46,6 @@ export async function CreateFirstUserView({ initPageResult }: AdminViewServerPro
     user: req.user,
   })
 
-  // Get permissions
-  const { docPermissions } = await getDocumentPermissions({
-    collectionConfig,
-    data,
-    req,
-  })
-
   const baseFields: SanitizedFieldsPermissions = Object.fromEntries(
     collectionConfig.fields
       .filter((f): f is { name: string } & typeof f => 'name' in f && typeof f.name === 'string')
@@ -61,23 +53,14 @@ export async function CreateFirstUserView({ initPageResult }: AdminViewServerPro
   )
 
   // In create-first-user we should always allow all fields
-  const docPermissionsForForm: SanitizedDocumentPermissions =
-    typeof docPermissions === 'object'
-      ? {
-          ...docPermissions, // keep top-level props
-          fields: {
-            ...baseFields, // start with full access
-            ...((typeof docPermissions === 'object' && docPermissions.fields // overlay specific perms (like sessions)
-              ? docPermissions.fields
-              : {}) as typeof baseFields),
-          },
-        }
-      : {
-          create: true,
-          fields: baseFields,
-          read: true,
-          update: true,
-        }
+  const docPermissionsForForm: SanitizedDocumentPermissions = {
+    create: true,
+    delete: true,
+    fields: baseFields,
+    read: true,
+    readVersions: true,
+    update: true,
+  }
 
   // Build initial form state from data
   const { state: formState } = await buildFormState({
