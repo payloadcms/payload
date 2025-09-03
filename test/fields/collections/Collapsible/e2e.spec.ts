@@ -90,11 +90,11 @@ describe('Collapsibles', () => {
 
     await addArrayRow(page, { fieldName: 'arrayWithCollapsibles' })
 
-    await page
-      .locator(
-        '#arrayWithCollapsibles-row-0 #field-collapsible-arrayWithCollapsibles__0___index-0 #field-arrayWithCollapsibles__0__innerCollapsible',
-      )
-      .fill(label)
+    const innerTextField = page.locator(
+      '#arrayWithCollapsibles-row-0 #field-collapsible-arrayWithCollapsibles__0___index-0 #field-arrayWithCollapsibles__0__innerCollapsible',
+    )
+    await expect(innerTextField).toBeVisible()
+    await innerTextField.fill(label)
 
     const customCollapsibleLabel = page.locator(
       `#field-arrayWithCollapsibles >> #arrayWithCollapsibles-row-0 >> .collapsible-field__row-label-wrap :text("${label}")`,
