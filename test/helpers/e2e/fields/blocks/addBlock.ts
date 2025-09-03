@@ -6,7 +6,7 @@ import { exactText } from 'helpers.js'
 import { openArrayRowActions } from '../array/openArrayRowActions.js'
 import { openBlocksDrawer } from './openBlocksDrawer.js'
 
-const selectBlock = async ({
+const selectBlockFromDrawer = async ({
   blocksDrawer,
   blockToSelect,
 }: {
@@ -37,12 +37,20 @@ export const addBlock = async ({
   fieldName: string
   page: Page
 }) => {
+  const rowLocator = page.locator(
+    `#field-${fieldName} > .blocks-field__rows > div > .blocks-field__row`,
+  )
+
+  const numberOfPrevRows = await rowLocator.count()
+
   const blocksDrawer = await openBlocksDrawer({ page, fieldName })
 
-  await selectBlock({
+  await selectBlockFromDrawer({
     blocksDrawer,
     blockToSelect,
   })
+
+  await expect(rowLocator).toHaveCount(numberOfPrevRows + 1)
 
   // expect to see the block on the page
 }
@@ -72,7 +80,7 @@ export const addBlockBelow = async (
     `#field-${fieldName} > .blocks-field__rows > div > .blocks-field__row`,
   )
 
-  const numberOfCurrentRows = await rowLocator.count()
+  const numberOfPrevRows = await rowLocator.count()
 
   const { popupContentLocator, rowActionsButtonLocator } = await openArrayRowActions(page, {
     fieldName,
@@ -83,12 +91,12 @@ export const addBlockBelow = async (
 
   const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
 
-  await selectBlock({
+  await selectBlockFromDrawer({
     blocksDrawer,
     blockToSelect,
   })
 
-  await expect(rowLocator).toHaveCount(numberOfCurrentRows + 1)
+  await expect(rowLocator).toHaveCount(numberOfPrevRows + 1)
 
   return { popupContentLocator, rowActionsButtonLocator }
 }

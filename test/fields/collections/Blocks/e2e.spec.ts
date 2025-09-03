@@ -6,6 +6,7 @@ import { duplicateArrayRow } from 'helpers/e2e/fields/array/index.js'
 import {
   addBlock,
   addBlockBelow,
+  duplicateBlock,
   openBlocksDrawer,
   reorderBlocks,
 } from 'helpers/e2e/fields/blocks/index.js'
@@ -147,19 +148,17 @@ describe('Block fields', () => {
   test('should duplicate block', async () => {
     await page.goto(url.create)
 
-    await duplicateArrayRow(page, { fieldName: 'blocks' })
+    const { rowCount } = await duplicateBlock(page, { fieldName: 'blocks' })
 
-    const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
-    expect(await blocks.count()).toEqual(5)
+    expect(rowCount).toEqual(5)
   })
 
   test('should save when duplicating subblocks', async () => {
     await page.goto(url.create)
 
-    await duplicateArrayRow(page, { fieldName: 'blocks', rowIndex: 2 })
+    const { rowCount } = await duplicateBlock(page, { fieldName: 'blocks', rowIndex: 2 })
 
-    const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
-    expect(await blocks.count()).toEqual(5)
+    expect(rowCount).toEqual(5)
 
     await page.click('#action-save')
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
