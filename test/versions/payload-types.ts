@@ -199,6 +199,7 @@ export interface Post {
 export interface AutosavePost {
   id: string;
   title: string;
+  relationship?: (string | null) | Post;
   computedTitle?: string | null;
   richText?: {
     root: {
@@ -835,6 +836,7 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
+  relationship?: T;
   computedTitle?: T;
   richText?: T;
   json?: T;
