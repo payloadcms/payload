@@ -17,9 +17,14 @@ export const duplicateArrayRow = async (
     rowIndex,
   })
 
+  const rowSelector = page.locator(`#field-${fieldName} .array-field__row`)
+  const numberOfCurrentRows = await rowSelector.count()
+
   await popupContentLocator.locator('.array-actions__action.array-actions__duplicate').click()
 
-  // TODO: test the array row has been duplicated
+  expect(await rowSelector.count()).toBe(numberOfCurrentRows + 1)
+
+  // TODO: test the array row's field input values have been duplicated as well
 
   return { popupContentLocator, rowActionsButtonLocator }
 }

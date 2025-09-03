@@ -18,10 +18,12 @@ export const addArrayRow = async (
   page: Page,
   { fieldName }: Omit<Parameters<typeof openArrayRowActions>[1], 'rowIndex'>,
 ) => {
+  const rowSelector = page.locator(`#field-${fieldName} .array-field__row`)
+  const numberOfCurrentRows = await rowSelector.count()
+
   await addArrayRowAsync(page, fieldName)
 
-  // TODO: test the array row has appeared
-  await wait(300)
+  expect(await rowSelector.count()).toBe(numberOfCurrentRows + 1)
 }
 
 /**
@@ -36,11 +38,14 @@ export const addArrayRowBelow = async (
     rowIndex,
   })
 
-  const addBelowButton = popupContentLocator.locator('.array-actions__action.array-actions__add')
+  const rowSelector = page.locator(`#field-${fieldName} .array-field__row`)
+  const numberOfCurrentRows = await rowSelector.count()
 
-  await addBelowButton.click()
+  await popupContentLocator.locator('.array-actions__action.array-actions__add').click()
 
-  // TODO: test the array row has appeared
+  expect(await rowSelector.count()).toBe(numberOfCurrentRows + 1)
+
+  // TODO: test the array row has appeared in the _correct position_ (immediately below the original row)
   await wait(300)
 
   return { popupContentLocator, rowActionsButtonLocator }
