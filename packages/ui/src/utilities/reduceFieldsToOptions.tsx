@@ -30,10 +30,27 @@ export const reduceFieldsToOptions = ({
 }: ReduceFieldOptionsArgs): ReducedField[] => {
   return fields.reduce((reduced, field) => {
     // Do not filter out `field.admin.disableListFilter` fields here, as these should still render as disabled if they appear in the URL query
+    // Filter out `virtual: true` fields since they are regular virtuals and not backed by a DB field
     if (
       (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||
-      ('virtual' in field && (field.virtual === true || typeof field.virtual === 'string'))
+      ('virtual' in field && field.virtual === true)
     ) {
+      return reduced
+    }
+
+    // Handle virtual:string fields (virtual relationships, e.g. "post.title")
+    if ('virtual' in field && typeof field.virtual === 'string') {
+      const baseLabel = ('label' in field && field.label) || ('name' in field && field.name) || ''
+      const localizedLabel = getTranslation(baseLabel, i18n)
+
+      reduced.push({
+        label: localizedLabel,
+        plainTextLabel: localizedLabel,
+        value: field.virtual, // e.g. "post.title"
+        ...fieldTypes[field.type],
+        field,
+        operators: fieldTypes[field.type].operators,
+      })
       return reduced
     }
 

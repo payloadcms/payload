@@ -419,7 +419,7 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should not allow search by virtual field in field dropdown', async () => {
+    test('should not allow search by virtual: true field in field dropdown', async () => {
       await page.goto(virtualsUrl.list)
 
       await openListFilters(page, {})
@@ -433,9 +433,7 @@ describe('List View', () => {
       const menuList = conditionField.locator('.rs__menu-list')
 
       // ensure the virtual field is not present
-      await expect(
-        menuList.locator('div', { hasText: exactText('Virtual Title From Post') }),
-      ).toHaveCount(0)
+      await expect(menuList.locator('div', { hasText: exactText('Virtual Text') })).toHaveCount(0)
     })
 
     test('should allow to filter in array field', async () => {
