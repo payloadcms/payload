@@ -1,14 +1,17 @@
 import type { Payload } from 'payload'
 
-import { handleMessage, type LivePreviewMessageEvent, mergeData } from '@payloadcms/live-preview'
+import {
+  handleMessage as handleMessageImport,
+  type LivePreviewMessageEvent,
+  mergeData as mergeDataImport,
+} from '@payloadcms/live-preview'
 import path from 'path'
-import { createClientConfig, getFileByPath, getLocalI18n } from 'payload'
+import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
-import config from './config.js'
 import { pagesSlug, postsSlug, tenantsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -17,22 +20,61 @@ const dirname = path.dirname(filename)
 let payload: Payload
 let restClient: NextRESTClient
 
+import type { CollectionPopulationRequestHandler } from '../../packages/live-preview/src/types.js'
+
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
-function requestHandler({ endpoint }: { endpoint: string }) {
-  return restClient.GET(`/${endpoint}`)
+const requestHandler: CollectionPopulationRequestHandler = ({ data, postEndpoint }) => {
+  const url = `/${postEndpoint}`
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'X-Payload-HTTP-Method-Override': 'GET',
+  }
+
+  return restClient.POST(url as any, {
+    body: JSON.stringify(data),
+    credentials: 'include',
+    headers,
+  })
 }
 
 describe('Collections - Live Preview', () => {
-  let serverURL
+  const serverURL: string = 'http://localhost:3000'
 
   let testPost: Post
   let testPostTwo: Post
   let tenant: Tenant
   let media: Media
+  let handleMessage: (
+    args: Omit<Parameters<typeof handleMessageImport>[0], 'requestHandler' | 'serverURL'>,
+  ) => Promise<Record<string, any>> = handleMessageImport as any
+
+  let mergeData: (
+    args: Omit<Parameters<typeof mergeDataImport<any>>[0], 'requestHandler' | 'serverURL'>,
+  ) => Promise<Record<string, any>> = mergeDataImport as any
 
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
+
+    mergeData = async (args) => {
+      return await mergeDataImport({
+        ...args,
+        serverURL,
+        requestHandler,
+      })
+    }
+    handleMessage = async (args) => {
+      const newArgs: Parameters<typeof handleMessageImport>[0] = args as any
+      newArgs.requestHandler = requestHandler
+      newArgs.serverURL = serverURL
+
+      if (newArgs.event) {
+        // @ts-expect-error need to overwrite serverURL
+        newArgs.event.origin = serverURL
+      }
+
+      return await handleMessageImport(newArgs)
+    }
 
     tenant = await payload.create({
       collection: tenantsSlug,
@@ -64,7 +106,7 @@ describe('Collections - Live Preview', () => {
 
     // Create image
     const filePath = path.resolve(dirname, './seed/image-1.jpg')
-    const file = await getFileByPath(filePath)
+    const file = (await getFileByPath(filePath))!
     file.name = 'image-1.jpg'
 
     media = await payload.create({
@@ -74,22 +116,6 @@ describe('Collections - Live Preview', () => {
       },
       file,
     })
-
-    // get schemaJSON from client config
-    const resolvedConfig = await config
-    const i18n = await getLocalI18n({
-      config: resolvedConfig,
-      language: 'en',
-    })
-    const clientConfig = createClientConfig({
-      config: resolvedConfig,
-      i18n,
-      importMap: {},
-    })
-    const clientFields = clientConfig.collections.find((c) => c.slug === 'pages')?.fields
-    if (!clientFields) {
-      throw new Error("Couldn't find client fields for 'pages' collection")
-    }
   })
 
   afterAll(async () => {
@@ -101,17 +127,17 @@ describe('Collections - Live Preview', () => {
       depth: 1,
       event: {
         data: {
+          collectionSlug: postsSlug,
           data: {
             title: 'Test Page (Changed)',
           },
           type: 'payload-live-preview',
         },
-        origin: serverURL,
       } as MessageEvent as LivePreviewMessageEvent<Page>,
       initialData: {
         title: 'Test Page',
+        id: 1,
       } as Page,
-      serverURL,
     })
 
     expect(handledMessage.title).toEqual('Test Page (Changed)')
@@ -124,19 +150,14 @@ describe('Collections - Live Preview', () => {
 
     const mergedData = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         title: 'Test Page (Changed)',
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
     expect(mergedData.title).toEqual('Test Page (Changed)')
-    expect(mergedData._numberOfRequests).toEqual(0)
   })
 
   it('— arrays - can clear all rows', async () => {
@@ -152,38 +173,27 @@ describe('Collections - Live Preview', () => {
 
     const mergedData = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         arrayOfRelationships: [],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
     expect(mergedData.arrayOfRelationships).toEqual([])
-    expect(mergedData._numberOfRequests).toEqual(0)
 
     // do the same but with arrayOfRelationships: 0
 
     const mergedData2 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
-        // @ts-expect-error eslint-disable-next-line
         arrayOfRelationships: 0, // this is how form state represents an empty array
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
     expect(mergedData2.arrayOfRelationships).toEqual([])
-    expect(mergedData2._numberOfRequests).toEqual(0)
   })
 
   it('— uploads - adds and removes media', async () => {
@@ -194,7 +204,6 @@ describe('Collections - Live Preview', () => {
     // Add upload
     const mergedData = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         hero: {
@@ -203,18 +212,13 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
     expect(mergedData.hero.media).toMatchObject(media)
-    expect(mergedData._numberOfRequests).toEqual(1)
 
     // Add upload
     const mergedDataWithoutUpload = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...mergedData,
         hero: {
@@ -223,8 +227,6 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData: mergedData,
-      serverURL,
-      requestHandler,
     })
 
     expect(mergedDataWithoutUpload.hero.media).toBeFalsy()
@@ -238,7 +240,6 @@ describe('Collections - Live Preview', () => {
     // Add upload
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         richTextSlate: [
@@ -250,19 +251,14 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
     expect(merge1.richTextSlate).toHaveLength(1)
     expect(merge1.richTextSlate[0].value).toMatchObject(media)
-    expect(merge1._numberOfRequests).toEqual(1)
 
     // Remove upload
     const merge2 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...merge1,
         richTextSlate: [
@@ -277,15 +273,11 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
     expect(merge2.richTextSlate).toHaveLength(1)
     expect(merge2.richTextSlate[0].value).toBeFalsy()
     expect(merge2.richTextSlate[0].type).toEqual('paragraph')
-    expect(merge2._numberOfRequests).toEqual(0)
   })
 
   it('— uploads - populates within Lexical rich text editor', async () => {
@@ -296,7 +288,6 @@ describe('Collections - Live Preview', () => {
     // Add upload
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         richTextLexical: {
@@ -337,19 +328,14 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
     expect(merge1.richTextLexical.root.children).toHaveLength(2)
     expect(merge1.richTextLexical.root.children[1].value).toMatchObject(media)
-    expect(merge1._numberOfRequests).toEqual(1)
 
     // Remove upload
     const merge2 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...merge1,
         richTextLexical: {
@@ -383,9 +369,6 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
     expect(merge2.richTextLexical.root.children).toHaveLength(1)
@@ -400,18 +383,13 @@ describe('Collections - Live Preview', () => {
 
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         relationshipMonoHasOne: testPost.id,
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
   })
 
@@ -422,18 +400,13 @@ describe('Collections - Live Preview', () => {
 
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         relationshipMonoHasMany: [testPost.id],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])
   })
 
@@ -444,18 +417,13 @@ describe('Collections - Live Preview', () => {
 
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.relationshipPolyHasOne).toMatchObject({
       value: testPost,
       relationTo: postsSlug,
@@ -469,18 +437,13 @@ describe('Collections - Live Preview', () => {
 
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.relationshipPolyHasMany).toMatchObject([
       { value: testPost, relationTo: postsSlug },
     ])
@@ -497,7 +460,6 @@ describe('Collections - Live Preview', () => {
 
     const merge2 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         relationshipMonoHasOne: null,
         relationshipMonoHasMany: [],
@@ -505,12 +467,8 @@ describe('Collections - Live Preview', () => {
         relationshipPolyHasMany: [],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
-    expect(merge2._numberOfRequests).toEqual(0)
     expect(merge2.relationshipMonoHasOne).toBeFalsy()
     expect(merge2.relationshipMonoHasMany).toEqual([])
     expect(merge2.relationshipPolyHasOne).toBeFalsy()
@@ -524,7 +482,6 @@ describe('Collections - Live Preview', () => {
 
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         tab: {
@@ -532,8 +489,6 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData,
-      serverURL,
-      requestHandler,
     })
 
     expect(merge1.tab.relationshipInTab).toMatchObject(testPost)
@@ -546,7 +501,6 @@ describe('Collections - Live Preview', () => {
 
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         arrayOfRelationships: [
@@ -568,12 +522,8 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.arrayOfRelationships).toHaveLength(1)
     expect(merge1.arrayOfRelationships).toMatchObject([
       {
@@ -596,7 +546,6 @@ describe('Collections - Live Preview', () => {
     // Add a new block before the populated one, then check to see that the relationship is still populated
     const merge2 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...merge1,
         arrayOfRelationships: [
@@ -625,12 +574,8 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData: merge1,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
-    expect(merge2._numberOfRequests).toEqual(1)
     expect(merge2.arrayOfRelationships).toHaveLength(2)
     expect(merge2.arrayOfRelationships).toMatchObject([
       {
@@ -662,7 +607,6 @@ describe('Collections - Live Preview', () => {
     // Add a relationship and an upload
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         richTextSlate: [
@@ -701,12 +645,8 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
-    expect(merge1._numberOfRequests).toEqual(2)
     expect(merge1.richTextSlate).toHaveLength(3)
     expect(merge1.richTextSlate[0].type).toEqual('relationship')
     expect(merge1.richTextSlate[0].value).toMatchObject(testPost)
@@ -717,7 +657,6 @@ describe('Collections - Live Preview', () => {
     // Add a new node between the relationship and the upload
     const merge2 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...merge1,
         richTextSlate: [
@@ -764,12 +703,8 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData: merge1,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
-    expect(merge2._numberOfRequests).toEqual(1)
     expect(merge2.richTextSlate).toHaveLength(4)
     expect(merge2.richTextSlate[0].type).toEqual('relationship')
     expect(merge2.richTextSlate[0].value).toMatchObject(testPost)
@@ -787,7 +722,6 @@ describe('Collections - Live Preview', () => {
     // Add a relationship
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         richTextLexical: {
@@ -830,12 +764,8 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
-    expect(merge1._numberOfRequests).toEqual(2)
     expect(merge1.richTextLexical.root.children).toHaveLength(3)
     expect(merge1.richTextLexical.root.children[0].type).toEqual('relationship')
     expect(merge1.richTextLexical.root.children[0].value).toMatchObject(testPost)
@@ -846,7 +776,6 @@ describe('Collections - Live Preview', () => {
     // Add a node before the populated one
     const merge2 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...merge1,
         richTextLexical: {
@@ -897,12 +826,8 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData: merge1,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
-    expect(merge2._numberOfRequests).toEqual(1)
     expect(merge2.richTextLexical.root.children).toHaveLength(4)
     expect(merge2.richTextLexical.root.children[0].type).toEqual('relationship')
     expect(merge2.richTextLexical.root.children[0].value).toMatchObject(testPost)
@@ -933,7 +858,6 @@ describe('Collections - Live Preview', () => {
     // Make a change to the text
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         richTextSlate: [
@@ -951,12 +875,8 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
-    expect(merge1._numberOfRequests).toEqual(0)
     expect(merge1.richTextSlate).toHaveLength(2)
     expect(merge1.richTextSlate[0].text).toEqual('Paragraph 1 (Updated)')
     expect(merge1.richTextSlate[1].reference.value).toMatchObject(testPost)
@@ -1005,22 +925,17 @@ describe('Collections - Live Preview', () => {
     // Then check to see that the relationship is still populated
     const merge2 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         layout: [block2, block1(true)],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
     // Check that the relationship on the first has been removed
     // And that the relationship on the second has been populated
     expect(merge2.layout[0].links).toBeUndefined()
     expect(merge2.layout[1].links[0].link.reference.value).toMatchObject(testPost)
-    expect(merge2._numberOfRequests).toEqual(1)
   })
 
   it('— relationships - re-populates externally updated relationships', async () => {
@@ -1031,7 +946,6 @@ describe('Collections - Live Preview', () => {
     // Populate the relationships
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         title: 'Test Page',
         relationshipMonoHasOne: testPost.id,
@@ -1040,12 +954,8 @@ describe('Collections - Live Preview', () => {
         relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
     expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])
 
@@ -1076,7 +986,6 @@ describe('Collections - Live Preview', () => {
     // Merge again using the `externallyUpdatedRelationship` argument
     const merge2 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         title: 'Test Page',
         relationshipMonoHasOne: testPost.id,
@@ -1085,13 +994,8 @@ describe('Collections - Live Preview', () => {
         relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
       },
       initialData: merge1,
-      externallyUpdatedRelationship,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
-    expect(merge2._numberOfRequests).toEqual(1)
     expect(merge2.relationshipMonoHasOne).toMatchObject(updatedTestPost)
     expect(merge2.relationshipMonoHasMany).toMatchObject([updatedTestPost])
 
@@ -1147,20 +1051,15 @@ describe('Collections - Live Preview', () => {
     // Populate the relationships
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         relationToLocalized: post.id,
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
       locale: 'es',
       collectionSlug: pagesSlug,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.relationToLocalized).toHaveProperty('localizedTitle', 'Test Post Spanish')
   })
 
@@ -1197,7 +1096,6 @@ describe('Collections - Live Preview', () => {
     // Reorder the blocks
     const merge1 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         layout: [
@@ -1224,9 +1122,6 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
     // Check that the blocks have been reordered
@@ -1235,12 +1130,10 @@ describe('Collections - Live Preview', () => {
     expect(merge1.layout[1].id).toEqual(block1ID)
     expect(merge1.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
     expect(merge1.layout[1].richText[0].text).toEqual('Block 1 (Position 2)')
-    expect(merge1._numberOfRequests).toEqual(0)
 
     // Remove a block
     const merge2 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         layout: [
@@ -1257,114 +1150,24 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
     // Check that the block has been removed
     expect(merge2.layout).toHaveLength(1)
     expect(merge2.layout[0].id).toEqual(block2ID)
     expect(merge2.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
-    expect(merge2._numberOfRequests).toEqual(0)
 
     // Remove the last block to ensure that all blocks can be cleared
     const merge3 = await mergeData({
       depth: 1,
-      fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
         layout: [],
       },
       initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler,
     })
 
     // Check that the block has been removed
     expect(merge3.layout).toHaveLength(0)
-    expect(merge3._numberOfRequests).toEqual(0)
-  })
-
-  it('properly encodes URLs in requests', async () => {
-    const initialData: Partial<Page> = {
-      title: 'Test Page',
-    }
-
-    let capturedEndpoint: string | undefined
-
-    const customRequestHandler = async ({ apiPath, endpoint, serverURL }) => {
-      capturedEndpoint = `${serverURL}${apiPath}/${endpoint}`
-
-      const mockResponse = {
-        ok: true,
-        status: 200,
-        headers: new Headers({ 'Content-Type': 'application/json' }),
-        json: () => ({
-          docs: [
-            {
-              id: testPost.id,
-              slug: 'post-1',
-              tenant: { id: 'tenant-id', title: 'Tenant 1' },
-              title: 'Test Post',
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-            {
-              id: testPostTwo.id,
-              slug: 'post-2',
-              tenant: { id: 'tenant-id', title: 'Tenant 1' },
-              title: 'Test Post 2',
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-          ],
-        }),
-      }
-
-      return Promise.resolve(mockResponse as unknown as Response)
-    }
-
-    const mergedData = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: {
-        ...initialData,
-        relationshipPolyHasMany: [
-          { value: testPost.id, relationTo: postsSlug },
-          { value: testPostTwo.id, relationTo: postsSlug },
-        ],
-      },
-      initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-      requestHandler: customRequestHandler,
-    })
-
-    expect(mergedData.relationshipPolyHasMany).toMatchObject([
-      {
-        value: {
-          id: testPost.id,
-          slug: 'post-1',
-          title: 'Test Post',
-        },
-        relationTo: postsSlug,
-      },
-      {
-        value: {
-          id: testPostTwo.id,
-          slug: 'post-2',
-          title: 'Test Post 2',
-        },
-        relationTo: postsSlug,
-      },
-    ])
-
-    // Verify that the request was made to the properly encoded URL
-    // Without encodeURI wrapper the request URL - would receive string: "undefined/api/posts?depth=1&where[id][in]=66ba7ab6a60a945d10c8b976,66ba7ab6a60a945d10c8b979
-    expect(capturedEndpoint).toContain(
-      encodeURI(`posts?depth=1&limit=2&where[id][in]=${testPost.id},${testPostTwo.id}`),
-    )
   })
 })
