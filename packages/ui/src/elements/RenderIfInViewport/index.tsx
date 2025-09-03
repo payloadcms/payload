@@ -1,13 +1,16 @@
 'use client'
+import type { ClientComponentProps } from 'payload'
+
 import React from 'react'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
 
-export const RenderIfInViewport: React.FC<{
-  children: React.ReactNode
-  className?: string
-  forceRender?: boolean
-}> = ({ children, className, forceRender }) => {
+export const RenderIfInViewport: React.FC<
+  {
+    children: React.ReactNode
+    className?: string
+  } & Pick<ClientComponentProps, 'forceRender'>
+> = ({ children, className, forceRender }) => {
   const [hasRendered, setHasRendered] = React.useState(Boolean(forceRender))
   const [intersectionRef, entry] = useIntersect(
     {

@@ -1,6 +1,6 @@
 import type { ServerFunction, ServerFunctionHandler } from 'payload'
 
-import { copyDataFromLocaleHandler } from '@payloadcms/ui/rsc'
+import { _internal_renderFieldHandler, copyDataFromLocaleHandler } from '@payloadcms/ui/rsc'
 import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
 import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
 import { getFolderResultsComponentAndDataHandler } from '@payloadcms/ui/utilities/getFolderResultsComponentAndData'
@@ -11,19 +11,26 @@ import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlot
 import { renderListHandler } from '../views/List/handleServerFunction.js'
 import { initReq } from './initReq.js'
 
-const serverFunctions: Record<string, ServerFunction> = {
+const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
   'form-state': buildFormStateHandler,
   'get-folder-results-component-and-data': getFolderResultsComponentAndDataHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
+  'render-field': _internal_renderFieldHandler,
   'render-list': renderListHandler,
   'schedule-publish': schedulePublishHandler,
   'table-state': buildTableStateHandler,
 }
 
 export const handleServerFunctions: ServerFunctionHandler = async (args) => {
-  const { name: fnKey, args: fnArgs, config: configPromise, importMap } = args
+  const {
+    name: fnKey,
+    args: fnArgs,
+    config: configPromise,
+    importMap,
+    serverFunctions: extraServerFunctions,
+  } = args
 
   const { req } = await initReq({
     configPromise,
@@ -35,6 +42,11 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     ...fnArgs,
     importMap,
     req,
+  }
+
+  const serverFunctions = {
+    ...baseServerFunctions,
+    ...(extraServerFunctions || {}),
   }
 
   const fn = serverFunctions[fnKey]

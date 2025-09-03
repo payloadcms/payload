@@ -78,9 +78,17 @@ type RecursiveNodes<T extends SerializedLexicalNode, Depth extends number = 4> =
 
 type DecrementDepth<N extends number> = [0, 0, 1, 2, 3, 4][N]
 
+/**
+ * Alternative type to `SerializedEditorState` that automatically types your nodes
+ * more strictly, narrowing down nodes based on the `type` without having to manually
+ * type-cast.
+ */
 export type TypedEditorState<T extends SerializedLexicalNode = SerializedLexicalNode> =
   SerializedEditorState<RecursiveNodes<T>>
 
+/**
+ * All node types included by default in a lexical editor without configuration.
+ */
 export type DefaultNodeTypes =
   | SerializedAutoLinkNode
   //| SerializedBlockNode // Not included by default
@@ -97,5 +105,12 @@ export type DefaultNodeTypes =
   | SerializedTextNode
   | SerializedUploadNode
 
-export type DefaultTypedEditorState<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  TypedEditorState<DefaultNodeTypes | T>
+/**
+ * Like `TypedEditorState` but includes all default node types.
+ * You can pass *additional* node types as a generic parameter.
+ */
+export type DefaultTypedEditorState<
+  TAdditionalNodeTypes extends null | SerializedLexicalNode = null,
+> = [TAdditionalNodeTypes] extends null
+  ? TypedEditorState<DefaultNodeTypes>
+  : TypedEditorState<DefaultNodeTypes | NonNullable<TAdditionalNodeTypes>>

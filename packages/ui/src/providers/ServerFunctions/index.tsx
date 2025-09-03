@@ -16,6 +16,10 @@ import type {
 
 import React, { createContext, useCallback } from 'react'
 
+import type {
+  RenderFieldServerFnArgs,
+  RenderFieldServerFnReturnType,
+} from '../../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
 import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
 import type { CopyDataFromLocaleArgs } from '../../utilities/copyDataFromLocale.js'
@@ -100,7 +104,9 @@ type GetFolderResultsComponentAndDataClient = (
   } & Omit<GetFolderResultsComponentAndDataArgs, 'req'>,
 ) => ReturnType<typeof getFolderResultsComponentAndDataHandler>
 
-type ServerFunctionsContextType = {
+type RenderFieldClient = (args: RenderFieldServerFnArgs) => Promise<RenderFieldServerFnReturnType>
+export type ServerFunctionsContextType = {
+  _internal_renderField: RenderFieldClient
   copyDataFromLocale: CopyDataFromLocaleClient
   getDocumentSlots: GetDocumentSlots
   getFolderResultsComponentAndData: GetFolderResultsComponentAndDataClient
@@ -278,9 +284,26 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const _internal_renderField = useCallback<RenderFieldClient>(
+    async (args) => {
+      try {
+        const result = (await serverFunction({
+          name: 'render-field',
+          args,
+        })) as RenderFieldServerFnReturnType
+
+        return result
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+    },
+    [serverFunction],
+  )
+
   return (
     <ServerFunctionsContext
       value={{
+        _internal_renderField,
         copyDataFromLocale,
         getDocumentSlots,
         getFolderResultsComponentAndData,

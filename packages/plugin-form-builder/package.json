@@ -68,8 +68,8 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "^1.0.4",
-    "@types/react": "19.1.8",
-    "@types/react-dom": "19.1.6",
+    "@types/react": "19.1.12",
+    "@types/react-dom": "19.1.9",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "payload": "workspace:*"
