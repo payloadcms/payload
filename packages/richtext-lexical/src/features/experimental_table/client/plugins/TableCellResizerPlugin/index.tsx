@@ -17,7 +17,7 @@ import {
   TableNode,
 } from '@lexical/table'
 import { calculateZoomLevel, mergeRegister } from '@lexical/utils'
-import { $getNearestNodeFromDOMNode, isHTMLElement } from 'lexical'
+import { $getNearestNodeFromDOMNode, isHTMLElement, SKIP_SCROLL_INTO_VIEW_TAG } from 'lexical'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -223,7 +223,7 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
           const newHeight = Math.max(height + heightChange, MIN_ROW_HEIGHT)
           tableRow.setHeight(newHeight)
         },
-        { tag: 'skip-scroll-into-view' },
+        { tag: SKIP_SCROLL_INTO_VIEW_TAG },
       )
     },
     [activeCell, editor],
@@ -281,7 +281,7 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
           newColWidths[columnIndex] = newWidth
           tableNode.setColWidths(newColWidths)
         },
-        { tag: 'skip-scroll-into-view' },
+        { tag: SKIP_SCROLL_INTO_VIEW_TAG },
       )
     },
     [activeCell, editor],
