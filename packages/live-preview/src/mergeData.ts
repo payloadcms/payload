@@ -1,5 +1,3 @@
-import type { FieldSchemaJSON } from 'payload'
-
 import type { CollectionPopulationRequestHandler } from './types.js'
 
 const defaultRequestHandler: CollectionPopulationRequestHandler = ({
@@ -34,7 +32,6 @@ export const mergeData = async <T extends Record<string, any>>(args: {
   collectionPopulationRequestHandler?: CollectionPopulationRequestHandler
   collectionSlug?: string
   depth?: number
-  fieldSchema: FieldSchemaJSON
   globalSlug?: string
   incomingData: Partial<T>
   initialData: T
@@ -51,7 +48,6 @@ export const mergeData = async <T extends Record<string, any>>(args: {
     apiRoute,
     collectionSlug,
     depth,
-    fieldSchema,
     globalSlug,
     incomingData,
     initialData,

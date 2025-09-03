@@ -2,7 +2,6 @@
 import type { CollectionPreferences, LivePreviewConfig } from 'payload'
 
 import { DndContext } from '@dnd-kit/core'
-import { fieldSchemaToJSON } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { usePopupWindow } from '../../hooks/usePopupWindow.js'
@@ -107,8 +106,6 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
 
   const [breakpoint, setBreakpoint] =
     React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
-
-  const [fieldSchemaJSON] = useState(() => fieldSchemaToJSON(entityConfig?.fields || [], config))
 
   // The toolbar needs to freely drag and drop around the page
   const handleDragEnd = (ev) => {
@@ -232,7 +229,6 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         appIsReady,
         breakpoint,
         breakpoints,
-        fieldSchemaJSON,
         iframeHasLoaded,
         iframeRef,
         isLivePreviewEnabled,

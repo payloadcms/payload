@@ -1,4 +1,4 @@
-import type { DocumentEvent, FieldSchemaJSON } from 'payload'
+import type { DocumentEvent } from 'payload'
 
 export type CollectionPopulationRequestHandler = ({
   apiPath,
@@ -29,7 +29,6 @@ export type LivePreviewMessageEvent<T> = MessageEvent<{
   collectionSlug?: string
   data: T
   externallyUpdatedRelationship?: DocumentEvent
-  fieldSchemaJSON: FieldSchemaJSON
   globalSlug?: string
   locale?: string
   type: 'payload-live-preview'

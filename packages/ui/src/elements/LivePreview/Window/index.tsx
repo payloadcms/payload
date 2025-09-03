@@ -22,7 +22,6 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   const {
     appIsReady,
     breakpoint,
-    fieldSchemaJSON,
     iframeHasLoaded,
     iframeRef,
     isLivePreviewing,
@@ -35,9 +34,6 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   const locale = useLocale()
 
   const { mostRecentUpdate } = useDocumentEvents()
-
-  const prevWindowType =
-    React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>(undefined)
 
   const [formState] = useAllFormFields()
   const { collectionSlug, globalSlug } = useDocumentInfo()
@@ -55,21 +51,11 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     if (formState && window && 'postMessage' in window && appIsReady) {
       const values = reduceFieldsToValues(formState, true)
 
-      // To reduce on large `postMessage` payloads, only send `fieldSchemaToJSON` one time
-      // To do this, the underlying JS function maintains a cache of this value
-      // So we need to send it through each time the window type changes
-      // But only once per window type change, not on every render, because this is a potentially large obj
-      const shouldSendSchema =
-        !prevWindowType.current || prevWindowType.current !== previewWindowType
-
-      prevWindowType.current = previewWindowType
-
       const message = {
         type: 'payload-live-preview',
         collectionSlug,
         data: values,
         externallyUpdatedRelationship: mostRecentUpdate,
-        fieldSchemaJSON: shouldSendSchema ? fieldSchemaJSON : undefined,
         globalSlug,
         locale: locale.code,
       }
@@ -95,7 +81,6 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     appIsReady,
     iframeRef,
     setIframeHasLoaded,
-    fieldSchemaJSON,
     mostRecentUpdate,
     locale,
     isLivePreviewing,

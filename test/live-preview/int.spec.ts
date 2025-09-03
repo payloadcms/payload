@@ -1,9 +1,8 @@
-import type { FieldSchemaJSON, Payload } from 'payload'
+import type { Payload } from 'payload'
 
 import { handleMessage, type LivePreviewMessageEvent, mergeData } from '@payloadcms/live-preview'
 import path from 'path'
 import { createClientConfig, getFileByPath, getLocalI18n } from 'payload'
-import { fieldSchemaToJSON } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -14,8 +13,6 @@ import { pagesSlug, postsSlug, tenantsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-let schemaJSON: FieldSchemaJSON
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -93,7 +90,6 @@ describe('Collections - Live Preview', () => {
     if (!clientFields) {
       throw new Error("Couldn't find client fields for 'pages' collection")
     }
-    schemaJSON = fieldSchemaToJSON(clientFields, clientConfig)
   })
 
   afterAll(async () => {
@@ -101,28 +97,6 @@ describe('Collections - Live Preview', () => {
   })
 
   it('handles `postMessage`', async () => {
-    const handledMessage = await handleMessage({
-      depth: 1,
-      event: {
-        data: {
-          data: {
-            title: 'Test Page (Changed)',
-          },
-          fieldSchemaJSON: schemaJSON,
-          type: 'payload-live-preview',
-        },
-        origin: serverURL,
-      } as MessageEvent as LivePreviewMessageEvent<Page>,
-      initialData: {
-        title: 'Test Page',
-      } as Page,
-      serverURL,
-    })
-
-    expect(handledMessage.title).toEqual('Test Page (Changed)')
-  })
-
-  it('caches `fieldSchemaJSON`', async () => {
     const handledMessage = await handleMessage({
       depth: 1,
       event: {
