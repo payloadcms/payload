@@ -119,24 +119,27 @@ export function AuthProvider({
           0,
           Math.min((userResponse.exp ?? 0) * 1000 - Date.now(), maxTimeoutMs),
         )
-        const nextForceLogoutBufferMs = Math.min(60_000, expiresInMs / 2)
-        setForceLogoutBufferMs(nextForceLogoutBufferMs)
 
-        reminderTimeoutRef.current = setTimeout(
-          () => {
-            if (autoRefresh) {
-              refreshCookieEvent()
-            } else {
-              openModal(stayLoggedInModalSlug)
-            }
-          },
-          Math.max(expiresInMs - nextForceLogoutBufferMs, 0),
-        )
+        if (expiresInMs) {
+          const nextForceLogoutBufferMs = Math.min(60_000, expiresInMs / 2)
+          setForceLogoutBufferMs(nextForceLogoutBufferMs)
 
-        forceLogOutTimeoutRef.current = setTimeout(() => {
-          revokeTokenAndExpire()
-          redirectToInactivityRoute()
-        }, expiresInMs)
+          reminderTimeoutRef.current = setTimeout(
+            () => {
+              if (autoRefresh) {
+                refreshCookieEvent()
+              } else {
+                openModal(stayLoggedInModalSlug)
+              }
+            },
+            Math.max(expiresInMs - nextForceLogoutBufferMs, 0),
+          )
+
+          forceLogOutTimeoutRef.current = setTimeout(() => {
+            revokeTokenAndExpire()
+            redirectToInactivityRoute()
+          }, expiresInMs)
+        }
       } else {
         revokeTokenAndExpire()
       }
