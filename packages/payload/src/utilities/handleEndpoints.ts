@@ -84,21 +84,35 @@ export const handleEndpoints = async ({
     (request.headers.get('X-Payload-HTTP-Method-Override') === 'GET' ||
       request.headers.get('X-HTTP-Method-Override') === 'GET')
   ) {
-    const search = await request.text()
+    let url = request.url
+    let data = undefined
+    if (request.headers.get('Content-Type') === 'application/x-www-form-urlencoded') {
+      const search = await request.text()
+      url = `${request.url}?${search}`
+    } else if (request.headers.get('Content-Type') === 'application/json') {
+      // May not be supported by every endpoint
+      data = await request.json()
+    }
 
-    const url = `${request.url}?${new URLSearchParams(search).toString()}`
+    const req = new Request(url, {
+      // @ts-expect-error // TODO: check if this is required
+      cache: request.cache,
+      credentials: request.credentials,
+      headers: request.headers,
+      method: 'GET',
+      signal: request.signal,
+    })
+
+    if (data) {
+      // @ts-expect-error attach data to request - less overhead than using urlencoded
+      req.data = data
+    }
+
     const response = await handleEndpoints({
       basePath,
       config: incomingConfig,
       path,
-      request: new Request(url, {
-        // @ts-expect-error // TODO: check if this is required
-        cache: request.cache,
-        credentials: request.credentials,
-        headers: request.headers,
-        method: 'GET',
-        signal: request.signal,
-      }),
+      request: req,
     })
 
     return response

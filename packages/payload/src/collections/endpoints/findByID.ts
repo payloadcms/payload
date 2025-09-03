@@ -1,5 +1,4 @@
 import { status as httpStatus } from 'http-status'
-import * as qs from 'qs-esm'
 
 import type { PayloadHandler } from '../../config/types.js'
 
@@ -12,19 +11,21 @@ import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
 import { findByIDOperation } from '../operations/findByID.js'
 
 export const findByIDHandler: PayloadHandler = async (req) => {
-  const { searchParams } = req
+  const { data, searchParams } = req
   const { id, collection } = getRequestCollectionWithID(req)
-  const urlSearchParamsParsed: any = qs.parse(searchParams.toString())
-
-  const depth = urlSearchParamsParsed.depth
-  const trash = urlSearchParamsParsed.trash === 'true'
+  const depth = data ? data.depth : searchParams.get('depth')
+  const trash = data ? data.trash : searchParams.get('trash') === 'true'
 
   const result = await findByIDOperation({
     id,
     collection,
-    data: urlSearchParamsParsed.data,
+    data: data
+      ? data?.data
+      : searchParams.get('data')
+        ? JSON.parse(searchParams.get('data') as string)
+        : undefined,
     depth: isNumber(depth) ? Number(depth) : undefined,
-    draft: searchParams.get('draft') === 'true',
+    draft: data ? data.draft : searchParams.get('draft') === 'true',
     joins: sanitizeJoinParams(req.query.joins as JoinParams),
     populate: sanitizePopulateParam(req.query.populate),
     req,

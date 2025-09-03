@@ -1,7 +1,5 @@
 import type { FieldSchemaJSON } from 'payload'
 
-import { stringify } from 'qs-esm'
-
 import type { CollectionPopulationRequestHandler } from './types.js'
 
 const defaultRequestHandler: CollectionPopulationRequestHandler = ({
@@ -13,7 +11,7 @@ const defaultRequestHandler: CollectionPopulationRequestHandler = ({
 }) => {
   const url = `${serverURL}${apiPath}/${data && postEndpoint ? postEndpoint : endpoint}`
   const headers: Record<string, string> = {
-    'Content-Type': data ? 'application/x-www-form-urlencoded' : 'application/json',
+    'Content-Type': 'application/json',
   }
 
   if (data) {
@@ -21,7 +19,7 @@ const defaultRequestHandler: CollectionPopulationRequestHandler = ({
   }
 
   return fetch(url, {
-    body: data ? stringify(data) : undefined,
+    body: JSON.stringify(data),
     credentials: 'include',
     headers,
     method: data ? 'POST' : 'GET',
@@ -82,6 +80,8 @@ export const mergeData = async <T extends Record<string, any>>(args: {
     ),
     serverURL,
   }).then((res) => res.json())
+
+  console.log('Res', result)
 
   return {
     ...result,
