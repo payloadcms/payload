@@ -36,7 +36,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   const { mostRecentUpdate } = useDocumentEvents()
 
   const [formState] = useAllFormFields()
-  const { collectionSlug, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   // For client-side apps, send data through `window.postMessage`
   // The preview could either be an iframe embedded on the page
@@ -50,6 +50,10 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     // For performance, do no reduce fields to values until after the iframe or popup has loaded
     if (formState && window && 'postMessage' in window && appIsReady) {
       const values = reduceFieldsToValues(formState, true)
+
+      if (!values.id) {
+        values.id = id
+      }
 
       const message = {
         type: 'payload-live-preview',
@@ -76,6 +80,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     collectionSlug,
     globalSlug,
     iframeHasLoaded,
+    id,
     previewWindowType,
     popupRef,
     appIsReady,
