@@ -93,7 +93,7 @@
       }
 
       position: var(--sidebar-wrap-position, sticky);
-      top: var(--sidebar-wrap-top, 0);
+      top: var(--sidebar-wrap-top, var(--doc-controls-height));
       width: var(--sidebar-wrap-width, 33.33%);
       height: var(--sidebar-wrap-height, calc(100vh - var(--doc-controls-height)));
       min-width: var(--sidebar-wrap-min-width, var(--doc-sidebar-width));
