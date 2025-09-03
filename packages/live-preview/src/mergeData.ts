@@ -63,8 +63,6 @@ export const mergeData = async <T extends Record<string, any>>(args: {
   const requestHandler =
     args.collectionPopulationRequestHandler || args.requestHandler || defaultRequestHandler
 
-  console.log('Sending request')
-
   const result = await requestHandler({
     apiPath: apiRoute || '/api',
     data: {
@@ -80,8 +78,6 @@ export const mergeData = async <T extends Record<string, any>>(args: {
     ),
     serverURL,
   }).then((res) => res.json())
-
-  console.log('Res', result)
 
   return {
     ...result,
