@@ -37,10 +37,12 @@ export const mergeData = async <T extends Record<string, any>>(args: {
   initialData: T
   locale?: string
   requestHandler?: CollectionPopulationRequestHandler
+  // TODO: Remove this in v4 - will always be 1
   returnNumberOfRequests?: boolean
   serverURL: string
 }): Promise<
   {
+    // TODO: Remove this in v4 - will always be 1
     _numberOfRequests?: number
   } & T
 > => {
@@ -75,8 +77,9 @@ export const mergeData = async <T extends Record<string, any>>(args: {
     serverURL,
   }).then((res) => res.json())
 
-  return {
-    ...result,
-    ...(returnNumberOfRequests ? { _numberOfRequests: 1 } : {}),
+  if (returnNumberOfRequests) {
+    // TODO: Remove this in v4 - will always be 1
+    result._numberOfRequests = 1
   }
+  return result
 }
