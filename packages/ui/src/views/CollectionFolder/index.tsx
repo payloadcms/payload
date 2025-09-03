@@ -112,7 +112,6 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
     dragOverlayItem,
     folderCollectionConfig,
     folderCollectionSlug,
-    folderID,
     FolderResultsComponent,
     folderType,
     getSelectedItems,
@@ -303,7 +302,11 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
             TitleActions={[
               allowCreateCollectionSlugs.length && (
                 <ListCreateNewDocInFolderButton
-                  buttonLabel={t('general:createNew')}
+                  buttonLabel={
+                    allowCreateCollectionSlugs.length > 1
+                      ? t('general:createNew')
+                      : `${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`
+                  }
                   collectionSlugs={allowCreateCollectionSlugs}
                   folderAssignedCollections={
                     Array.isArray(folderType) ? folderType : [collectionSlug]
@@ -370,7 +373,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
               Message={
                 <p>
                   {i18n.t('general:noResults', {
-                    label: `${folderID ? `${getTranslation(labels?.plural, i18n)} ${t('general:or').toLowerCase()} ` : ''}${getTranslation(
+                    label: `${getTranslation(labels?.plural, i18n)} ${t('general:or').toLowerCase()} ${getTranslation(
                       folderCollectionConfig.labels?.plural,
                       i18n,
                     )}`,

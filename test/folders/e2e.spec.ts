@@ -422,12 +422,10 @@ test.describe('Folders', () => {
 
     test('should create folder from By Folder view', async () => {
       await page.goto(postURL.byFolder)
-      const createDropdown = page.locator('.create-new-doc-in-folder__popup-button', {
-        hasText: 'Create',
+      const createButton = page.locator('.create-new-doc-in-folder__button', {
+        hasText: 'Create folder',
       })
-      await createDropdown.click()
-      const createFolderButton = page.locator('.popup-button-list__button', { hasText: 'Folder' })
-      await createFolderButton.click()
+      await createButton.click()
       await createFolderDoc({
         page,
         folderName: 'New Folder From Collection',
@@ -485,7 +483,7 @@ test.describe('Folders', () => {
       await createFolder({
         folderName,
         page,
-        fromDropdown: true,
+        fromDropdown: false,
         folderType: ['Omitted From Browse By', 'Posts'],
       })
 
