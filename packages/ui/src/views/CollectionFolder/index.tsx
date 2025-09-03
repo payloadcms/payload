@@ -112,6 +112,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
     dragOverlayItem,
     folderCollectionConfig,
     folderCollectionSlug,
+    folderID,
     FolderResultsComponent,
     folderType,
     getSelectedItems,
@@ -369,7 +370,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
               Message={
                 <p>
                   {i18n.t('general:noResults', {
-                    label: `${getTranslation(labels?.plural, i18n)} ${t('general:or').toLowerCase()} ${getTranslation(
+                    label: `${folderID ? `${getTranslation(labels?.plural, i18n)} ${t('general:or').toLowerCase()} ` : ''}${getTranslation(
                       folderCollectionConfig.labels?.plural,
                       i18n,
                     )}`,
