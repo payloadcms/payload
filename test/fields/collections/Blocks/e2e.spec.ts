@@ -456,11 +456,11 @@ describe('Block fields', () => {
       })
     })
 
-    test('should generated on save when generateBlockName is defined', async () => {
+    test('should generate on save when generateBlockName is defined', async () => {
       await page.goto(url.create)
       await addBlock({
         page,
-        blockLabel: 'Block With Generated Name',
+        blockToSelect: 'Block With Generated Name',
         fieldName: 'blocksWithGeneratedName',
       })
 
@@ -483,7 +483,7 @@ describe('Block fields', () => {
       await page.goto(url.create)
       await addBlock({
         page,
-        blockLabel: 'Block With Generated Name',
+        blockToSelect: 'Block With Generated Name',
         fieldName: 'blocksWithGeneratedName',
       })
 
