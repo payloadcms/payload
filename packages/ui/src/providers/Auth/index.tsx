@@ -223,13 +223,13 @@ export function AuthProvider({
   const logOut = useCallback(async () => {
     try {
       if (user && user.collection) {
+        setNewUser(null)
         await requests.post(`${serverURL}${apiRoute}/${user.collection}/logout`)
       }
     } catch (_) {
       // fail silently and log the user out in state
     }
 
-    setNewUser(null)
     return true
   }, [apiRoute, serverURL, setNewUser, user])
 

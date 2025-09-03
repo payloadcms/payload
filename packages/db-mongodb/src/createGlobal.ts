@@ -14,6 +14,10 @@ export const createGlobal: CreateGlobal = async function createGlobal(
 ) {
   const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug })
 
+  if (!data.createdAt) {
+    ;(data as any).createdAt = new Date().toISOString()
+  }
+
   transform({
     adapter: this,
     data,
@@ -24,6 +28,8 @@ export const createGlobal: CreateGlobal = async function createGlobal(
 
   const options: CreateOptions = {
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   let [result] = (await Model.create([data], options)) as any

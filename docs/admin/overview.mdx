@@ -108,6 +108,7 @@ The following options are available:
 | `suppressHydrationWarning` | If set to `true`, suppresses React hydration mismatch warnings during the hydration of the root `<html>` tag. Defaults to `false`.              |
 | `theme`                    | Restrict the Admin Panel theme to use only one of your choice. Default is `all`.                                                                |
 | `timezones`                | Configure the timezone settings for the admin panel. [More details](#timezones)                                                                 |
+| `toast`                    | Customize the handling of toast messages within the Admin Panel. [More details](#toasts)                                                        |
 | `user`                     | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                    |
 
 <Banner type="success">
@@ -299,3 +300,20 @@ We validate the supported timezones array by checking the value against the list
   `timezone: true`. See [Date Fields](../fields/overview#date) for more
   information.
 </Banner>
+
+## Toast
+
+The `admin.toast` configuration allows you to customize the handling of toast messages within the Admin Panel, such as increasing the duration they are displayed and limiting the number of visible toasts at once.
+
+<Banner type="info">
+  **Note:** The Admin Panel currently uses the
+  [Sonner](https://sonner.emilkowal.ski) library for toast notifications.
+</Banner>
+
+The following options are available for the `admin.toast` configuration:
+
+| Option     | Description                                                                                                      | Default |
+| ---------- | ---------------------------------------------------------------------------------------------------------------- | ------- |
+| `duration` | The length of time (in milliseconds) that a toast message is displayed.                                          | `4000`  |
+| `expand`   | If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction. | `false` |
+| `limit`    | The maximum number of toasts that can be visible on the screen at once.                                          | `5`     |

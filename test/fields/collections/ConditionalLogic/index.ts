@@ -18,6 +18,13 @@ const ConditionalLogic: CollectionConfig = {
       type: 'checkbox',
     },
     {
+      name: 'fieldWithDocIDCondition',
+      type: 'text',
+      admin: {
+        condition: ({ id }) => !id,
+      },
+    },
+    {
       name: 'fieldWithCondition',
       type: 'text',
       admin: {

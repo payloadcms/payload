@@ -45,6 +45,8 @@ export const updateVersion: UpdateVersion = async function updateVersion(
       select,
     }),
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   const query = await buildQuery({

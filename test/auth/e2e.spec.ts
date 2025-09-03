@@ -335,5 +335,30 @@ describe('Auth', () => {
         })
       })
     })
+
+    describe('api-keys-with-field-read-access', () => {
+      let user
+
+      beforeAll(async () => {
+        url = new AdminUrlUtil(serverURL, 'api-keys-with-field-read-access')
+
+        user = await payload.create({
+          collection: apiKeysSlug,
+          data: {
+            apiKey: uuid(),
+            enableAPIKey: true,
+          },
+        })
+      })
+
+      test('should hide auth parent container if api keys enabled but no read access', async () => {
+        await page.goto(url.create)
+
+        // assert that the auth parent container is hidden
+        await expect(page.locator('.auth-fields')).toBeHidden()
+
+        await saveDocAndAssert(page)
+      })
+    })
   })
 })
