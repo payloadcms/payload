@@ -733,6 +733,11 @@ export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
 
+export type DashboardWidget = {
+  Component: PayloadComponent
+  slug: string
+}
+
 /**
  * This is the central configuration
  *
@@ -767,7 +772,6 @@ export type Config = {
       | {
           Component: PayloadComponent
         }
-
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -845,6 +849,13 @@ export type Config = {
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    /**
+     * Customize the dashboard widgets
+     */
+    dashboard?: {
+      components?: Array<DashboardWidget>
+      defaults?: Array<DashboardWidget>
+    }
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /**
