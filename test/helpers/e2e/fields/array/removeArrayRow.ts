@@ -1,5 +1,7 @@
 import type { Locator, Page } from 'playwright'
 
+import { expect } from 'playwright/test'
+
 import { openArrayRowActions } from './openArrayRowActions.js'
 
 /**

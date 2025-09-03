@@ -1,6 +1,7 @@
 import type { Locator, Page } from 'playwright'
 
 import { wait } from 'payload/shared'
+import { expect } from 'playwright/test'
 
 import { openArrayRowActions } from './openArrayRowActions.js'
 
