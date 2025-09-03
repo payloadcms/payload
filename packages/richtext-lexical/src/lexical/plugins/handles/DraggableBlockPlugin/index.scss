@@ -2,7 +2,7 @@
 
 @layer payload-default {
   .draggable-block-menu {
-    all: unset; // reset all default button styles
+    border: none;
     border-radius: $style-radius-m;
     padding: 0;
     cursor: grab;
