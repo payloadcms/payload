@@ -96,11 +96,11 @@ describe('Collapsibles', () => {
       )
       .fill(label)
 
-    await wait(100)
-
     const customCollapsibleLabel = page.locator(
       `#field-arrayWithCollapsibles >> #arrayWithCollapsibles-row-0 >> .collapsible-field__row-label-wrap :text("${label}")`,
     )
+
+    await expect(customCollapsibleLabel).toBeVisible()
     await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase')
   })
 })
