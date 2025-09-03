@@ -70,7 +70,7 @@ function useDraggableBlockMenu(
 ): React.ReactElement {
   const scrollerElem = anchorElem.parentElement
 
-  const menuRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLButtonElement>(null)
   const targetLineRef = useRef<HTMLDivElement>(null)
   const debugHighlightRef = useRef<HTMLDivElement>(null)
   const isDraggingBlockRef = useRef<boolean>(false)
@@ -396,7 +396,7 @@ function useDraggableBlockMenu(
     editorConfig?.admin?.hideGutter,
   ])
 
-  function onDragStart(event: ReactDragEvent<HTMLDivElement>): void {
+  function onDragStart(event: ReactDragEvent<HTMLButtonElement>): void {
     const dataTransfer = event.dataTransfer
     if (!dataTransfer || !draggableBlockElem) {
       return
@@ -422,15 +422,17 @@ function useDraggableBlockMenu(
 
   return createPortal(
     <React.Fragment>
-      <div
+      <button
+        aria-label="Drag to move"
         className="icon draggable-block-menu"
         draggable
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
         ref={menuRef}
+        type="button"
       >
         <div className={isEditable ? 'icon' : ''} />
-      </div>
+      </button>
       <div className="draggable-block-target-line" ref={targetLineRef} />
       <div className="debug-highlight" ref={debugHighlightRef} />
     </React.Fragment>,
