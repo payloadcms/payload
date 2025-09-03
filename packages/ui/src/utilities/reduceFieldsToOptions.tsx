@@ -30,7 +30,10 @@ export const reduceFieldsToOptions = ({
 }: ReduceFieldOptionsArgs): ReducedField[] => {
   return fields.reduce((reduced, field) => {
     // Do not filter out `field.admin.disableListFilter` fields here, as these should still render as disabled if they appear in the URL query
-    if (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) {
+    if (
+      (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||
+      ('virtual' in field && (field.virtual === true || typeof field.virtual === 'string'))
+    ) {
       return reduced
     }
 
