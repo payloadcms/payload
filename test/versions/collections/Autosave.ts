@@ -54,12 +54,6 @@ const AutosavePosts: CollectionConfig = {
       localized: true,
     },
     {
-      name: 'relationship',
-      label: 'Relationship',
-      type: 'relationship',
-      relationTo: 'users',
-    },
-    {
       name: 'computedTitle',
       label: 'Computed Title',
       type: 'text',

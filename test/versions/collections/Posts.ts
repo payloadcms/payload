@@ -11,12 +11,6 @@ const Posts: CollectionConfig = {
   slug: postCollectionSlug,
   fields: [
     {
-      name: 'relationship',
-      label: 'Relationship',
-      type: 'relationship',
-      relationTo: 'users',
-    },
-    {
       name: 'relationToAutosaves',
       type: 'relationship',
       relationTo: autosaveCollectionSlug,
