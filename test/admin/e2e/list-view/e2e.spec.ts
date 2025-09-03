@@ -23,6 +23,7 @@ import {
   listDrawerSlug,
   placeholderCollectionSlug,
   postsCollectionSlug,
+  virtualsSlug,
   with300DocumentsSlug,
 } from '../../slugs.js'
 
@@ -70,6 +71,7 @@ describe('List View', () => {
   let placeholderUrl: AdminUrlUtil
   let disableBulkEditUrl: AdminUrlUtil
   let user: any
+  let virtualsUrl: AdminUrlUtil
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -94,6 +96,7 @@ describe('List View', () => {
     withListViewUrl = new AdminUrlUtil(serverURL, listDrawerSlug)
     placeholderUrl = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
     disableBulkEditUrl = new AdminUrlUtil(serverURL, 'disable-bulk-edit')
+    virtualsUrl = new AdminUrlUtil(serverURL, virtualsSlug)
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -414,6 +417,25 @@ describe('List View', () => {
           hasText: exactText('Tab 1 > Title'),
         }),
       ).toBeVisible()
+    })
+
+    test('should not allow search by virtual field in field dropdown', async () => {
+      await page.goto(virtualsUrl.list)
+
+      await openListFilters(page, {})
+
+      const whereBuilder = page.locator('.where-builder')
+      await whereBuilder.locator('.where-builder__add-first-filter').click()
+
+      const conditionField = whereBuilder.locator('.condition__field')
+      await conditionField.click()
+
+      const menuList = conditionField.locator('.rs__menu-list')
+
+      // ensure the virtual field is not present
+      await expect(
+        menuList.locator('div', { hasText: exactText('Virtual Title From Post') }),
+      ).toHaveCount(0)
     })
 
     test('should allow to filter in array field', async () => {
