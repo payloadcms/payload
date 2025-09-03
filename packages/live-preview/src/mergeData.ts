@@ -1,22 +1,30 @@
 import type { FieldSchemaJSON } from 'payload'
 
+import { stringify } from 'qs-esm'
+
 import type { CollectionPopulationRequestHandler } from './types.js'
 
-const defaultRequestHandler = ({
+const defaultRequestHandler: CollectionPopulationRequestHandler = ({
   apiPath,
+  data,
   endpoint,
+  postEndpoint,
   serverURL,
-}: {
-  apiPath: string
-  endpoint: string
-  serverURL: string
 }) => {
-  const url = `${serverURL}${apiPath}/${endpoint}`
+  const url = `${serverURL}${apiPath}/${data && postEndpoint ? postEndpoint : endpoint}`
+  const headers: Record<string, string> = {
+    'Content-Type': data ? 'application/x-www-form-urlencoded' : 'application/json',
+  }
+
+  if (data) {
+    headers['X-Payload-HTTP-Method-Override'] = 'GET'
+  }
+
   return fetch(url, {
+    body: data ? stringify(data) : undefined,
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
+    method: data ? 'POST' : 'GET',
   })
 }
 
@@ -57,11 +65,20 @@ export const mergeData = async <T extends Record<string, any>>(args: {
   const requestHandler =
     args.collectionPopulationRequestHandler || args.requestHandler || defaultRequestHandler
 
-  // TODO: Use get-as-post to pass data
+  console.log('Sending request')
+
   const result = await requestHandler({
     apiPath: apiRoute || '/api',
+    data: {
+      data: incomingData,
+      depth,
+      locale,
+    },
     endpoint: encodeURI(
       `${collectionSlug ?? globalSlug}${collectionSlug ? `/${initialData.id}` : ''}?depth=${depth}${locale ? `&locale=${locale}` : ''}&data=${JSON.stringify(incomingData)}`,
+    ),
+    postEndpoint: encodeURI(
+      `${collectionSlug ?? globalSlug}${collectionSlug ? `/${initialData.id}` : ''}`,
     ),
     serverURL,
   }).then((res) => res.json())
