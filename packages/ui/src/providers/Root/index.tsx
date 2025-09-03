@@ -101,7 +101,11 @@ export const RootProvider: React.FC<Props> = ({
                     <ScrollInfoProvider>
                       <SearchParamsProvider>
                         <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
-                          <AuthProvider permissions={permissions} user={user}>
+                          <AuthProvider
+                            autoRefresh={Boolean(config.admin.autoRefresh)}
+                            permissions={permissions}
+                            user={user}
+                          >
                             <PreferencesProvider>
                               <ThemeProvider theme={theme}>
                                 <ParamsProvider>
