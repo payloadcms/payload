@@ -206,7 +206,7 @@ export const buildFormState = async (
 
   // Ensure data.id is present during form state requests, where the data
   // is passed from the client as an argument, without the ID
-  if (id && !data.id) {
+  if (!data.id && id) {
     data.id = id
   }
 
