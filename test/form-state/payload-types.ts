@@ -69,7 +69,6 @@ export interface Config {
   collections: {
     posts: Post;
     'autosave-posts': AutosavePost;
-    'autosave-with-richtext': AutosaveWithRichtext;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -79,7 +78,6 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
-    'autosave-with-richtext': AutosaveWithRichtextSelect<false> | AutosaveWithRichtextSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -179,32 +177,6 @@ export interface AutosavePost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-with-richtext".
- */
-export interface AutosaveWithRichtext {
-  id: string;
-  title: string;
-  richTextWithRelationship?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -241,10 +213,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'autosave-posts';
         value: string | AutosavePost;
-      } | null)
-    | ({
-        relationTo: 'autosave-with-richtext';
-        value: string | AutosaveWithRichtext;
       } | null)
     | ({
         relationTo: 'users';
@@ -342,17 +310,6 @@ export interface PostsSelect<T extends boolean = true> {
 export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
   computedTitle?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-with-richtext_select".
- */
-export interface AutosaveWithRichtextSelect<T extends boolean = true> {
-  title?: T;
-  richTextWithRelationship?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
