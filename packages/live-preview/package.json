@@ -41,9 +41,6 @@
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
-  "dependencies": {
-    "qs-esm": "7.0.2"
-  },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*"

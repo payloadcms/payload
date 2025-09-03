@@ -647,10 +647,6 @@ importers:
         version: link:../payload
 
   packages/live-preview:
-    dependencies:
-      qs-esm:
-        specifier: 7.0.2
-        version: 7.0.2
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
