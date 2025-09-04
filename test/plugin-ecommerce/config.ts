@@ -4,7 +4,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
-import { EUR, JPY, USD } from '@payloadcms/plugin-ecommerce/currencies'
+import { EUR, USD } from '@payloadcms/plugin-ecommerce/currencies'
 import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
 
 import type { EcommercePluginConfig } from '../../packages/plugin-ecommerce/src/types.js'
@@ -16,7 +16,16 @@ import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
 export const currenciesConfig: NonNullable<EcommercePluginConfig['currencies']> = {
-  supportedCurrencies: [USD, JPY, EUR],
+  supportedCurrencies: [
+    USD,
+    EUR,
+    {
+      code: 'JPY',
+      decimals: 0,
+      label: 'Japanese Yen',
+      symbol: '¥',
+    },
+  ],
   defaultCurrency: 'USD',
 }
 
@@ -44,6 +53,7 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     ecommercePlugin({
+      access: {},
       customers: {
         slug: 'users',
       },

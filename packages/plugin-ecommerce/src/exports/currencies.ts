@@ -1,1 +1,1 @@
-export { EUR, GBP, JPY, USD } from '../currencies/index.js'
+export { EUR, GBP, USD } from '../currencies/index.js'
