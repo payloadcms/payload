@@ -6,7 +6,7 @@
  *
  */
 
-import type { ElementNode } from 'lexical'
+import { ELEMENT_TRANSFORMERS, TEXT_FORMAT_TRANSFORMERS } from '@lexical/markdown'
 
 import type {
   ElementTransformer,
@@ -36,22 +36,6 @@ import {
 } from './MarkdownTransformers.js'
 
 const MULTILINE_ELEMENT_TRANSFORMERS: Array<MultilineElementTransformer> = []
-
-// Order of text format transformers matters:
-//
-// - code should go first as it prevents any transformations inside
-// - then longer tags match (e.g. ** or __ should go before * or _)
-const TEXT_FORMAT_TRANSFORMERS: Array<TextFormatTransformer> = [
-  INLINE_CODE,
-  BOLD_ITALIC_STAR,
-  BOLD_ITALIC_UNDERSCORE,
-  BOLD_STAR,
-  BOLD_UNDERSCORE,
-  HIGHLIGHT,
-  ITALIC_STAR,
-  ITALIC_UNDERSCORE,
-  STRIKETHROUGH,
-]
 
 const TEXT_MATCH_TRANSFORMERS: Array<TextMatchTransformer> = [PAYLOAD_LINK_TRANSFORMER]
 
