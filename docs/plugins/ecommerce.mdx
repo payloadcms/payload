@@ -8,6 +8,11 @@ keywords: plugins, ecommerce, stripe, plugin, payload, cms, shop, payments
 
 ![https://www.npmjs.com/package/@payloadcms/plugin-ecommerce](https://img.shields.io/npm/v/@payloadcms/plugin-ecommerce)
 
+<Banner type="warning">
+  This plugin is currently in Alpha and may have breaking changes in future
+  releases.
+</Banner>
+
 This plugin allows you to add ecommerce functionality to your Payload app. It provides a set of utilities and collections to manage products, orders, and payments. It also integrates with popular payment gateways like Stripe to handle transactions.
 
 <Banner type="info">
@@ -74,7 +79,7 @@ export default config
 | `carts`        | `object`           | Configuration for carts collection. [More](#carts)                                                                       |
 | `currencies`   | `object`           | Supported currencies by the store. [More](#currencies)                                                                   |
 | `customers`    | `object`           | Used to provide the customers slug. [More](#customers)                                                                   |
-| `inventory`    | `boolean` `object` | Enable or disable inventory tracking within Payload. Defaults to `true`.                                                 |
+| `inventory`    | `boolean` `object` | Enable inventory tracking within Payload. Defaults to `true`. [More](#inventory)                                         |
 | `payments`     | `object`           | Configuring payments and supported payment methods. [More](#payments)                                                    |
 | `products`     | `object`           | Configuration for products, variants collections and more. [More](#products)                                             |
 | `orders`       | `object`           | Configuration for orders collection. [More](#orders)                                                                     |
@@ -225,6 +230,37 @@ isCustomerField: ({ req: { user } }) =>
   Boolean(user?.roles?.includes('customer'))
 ```
 
+## Carts
+
+The `carts` option is used to configure the carts collection. Defaults to `true` which will create a `carts` collection with default fields. It also takes an object:
+
+| Option            | Type                 | Description                                                                                                                                          |
+| ----------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cartsCollection` | `CollectionOverride` | Allows you to override the collection for `carts` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array. |
+
+You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
+
+```ts
+carts: {
+  cartsCollection: {
+    fields: ({ defaultFields }) => {
+      const fields = [
+        ...defaultFields,
+        {
+          name: 'notes',
+          label: 'Notes',
+          type: 'textarea',
+        },
+      ]
+      return fields
+    },
+  }
+}
+```
+
+Carts are created when a customer adds their first item to the cart. The cart is then updated as they add or remove items. The cart is linked to a _Customer_ via the `customer` field. If the user is authenticated, this will be set to their user ID. If the user is not authenticated, this will be `null`.
+If the user is not authenticated, the cart ID is stored in local storage and used to fetch the cart on subsequent requests. Access control by default works so that if the user is not authenticated then they can only access carts that have no customer linked to them.
+
 ## Customers
 
 The `customers` option is required and is used to provide the customers collection slug. This collection is used to link orders, carts, and addresses to a customer.
@@ -232,6 +268,18 @@ The `customers` option is required and is used to provide the customers collecti
 | Option | Type   | Description                           |
 | ------ | ------ | ------------------------------------- |
 | `slug` | string | The slug of the customers collection. |
+
+While it's recommended to use just one collection for customers and your editors, you can use any collection you want for your customers. Just make sure that your access control is checking for the correct collections as well.
+
+## Inventory
+
+The `inventory` option is used to enable or disable inventory tracking within Payload. It defaults to `true`. It also takes an object:
+
+| Option      | Type     | Description                                                               |
+| ----------- | -------- | ------------------------------------------------------------------------- |
+| `fieldName` | `string` | Override the field name used to track inventory. Defaults to `inventory`. |
+
+For now it's quite rudimentary tracking with no integrations to 3rd party services. It will simply add an `inventory` field to the `variants` collection and decrement the inventory when an order is placed.
 
 ## Payments
 
@@ -397,34 +445,6 @@ You can import the default list of countries from the plugin:
 import { defaultCountries } from '@payloadcms/plugin-ecommerce/addresses'
 ```
 
-## Carts
-
-The `carts` option is used to configure the carts collection. Defaults to `true` which will create a `carts` collection with default fields. It also takes an object:
-
-| Option            | Type                 | Description                                                                                                                                          |
-| ----------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cartsCollection` | `CollectionOverride` | Allows you to override the collection for `carts` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array. |
-
-You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
-
-```ts
-carts: {
-  cartsCollection: {
-    fields: ({ defaultFields }) => {
-      const fields = [
-        ...defaultFields,
-        {
-          name: 'notes',
-          label: 'Notes',
-          type: 'textarea',
-        },
-      ]
-      return fields
-    },
-  }
-}
-```
-
 ## Currencies
 
 The `currencies` option is used to configure the supported currencies by the store. Defaults to `true` which will support `USD`. It also takes an object:
@@ -520,9 +540,11 @@ products: {
 
 The `variants` option is used to configure the variants collection. It takes an object:
 
-| Option               | Type                 | Description                                                                                                                                             |
-| -------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `variantsCollection` | `CollectionOverride` | Allows you to override the collection for `variants` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array. |
+| Option                     | Type                 | Description                                                                                                                                                   |
+| -------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `variantsCollection`       | `CollectionOverride` | Allows you to override the collection for `variants` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array.       |
+| `variantTypesCollection`   | `CollectionOverride` | Allows you to override the collection for `variantTypes` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array.   |
+| `variantOptionsCollection` | `CollectionOverride` | Allows you to override the collection for `variantOptions` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array. |
 
 You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
 
@@ -543,6 +565,12 @@ variants: {
   }
 }
 ```
+
+The key differences between these collections:
+
+- `variantTypes` are the types of variants that a product can have, e.g. Size, Color.
+- `variantOptions` are the options for each variant type, e.g. Small, Medium, Large for Size.
+- `variants` are the actual variants of a product, e.g. a T-Shirt in Size Small and Color Red.
 
 ## Orders
 
@@ -667,11 +695,11 @@ The `api` prop is used to configure the API settings for the internal fetches of
 
 The `cartsFetchQuery` property allows you to specify additional query parameters to include when fetching the cart. This can be useful for including related data or customizing the response. This accepts:
 
-| Property   | Type           | Description                           |
-| ---------- | -------------- | ------------------------------------- |
-| `depth`    | `string`       | Defaults to 0.                        |
-| `select`   | `SelectType`   | Select parameters. [See Select]()     |
-| `populate` | `PopulateType` | Populate parameters. [See Populate]() |
+| Property   | Type           | Description                                                     |
+| ---------- | -------------- | --------------------------------------------------------------- |
+| `depth`    | `string`       | Defaults to 0. [See Depth](../queries/depth)                    |
+| `select`   | `SelectType`   | Select parameters. [See Select](../queries/select)              |
+| `populate` | `PopulateType` | Populate parameters. [See Populate](../queries/select#populate) |
 
 Example usage:
 
@@ -775,7 +803,56 @@ const CheckoutComponent = () => {
 
 #### `confirmOrder`
 
+Use this method to confirm an order by its ID. It requires the payment method ID and will return the order ID.
+
+```ts
+try {
+  const data = await confirmOrder('stripe', {
+    additionalData: {
+      paymentIntentID: paymentIntent.id,
+      customerEmail,
+    },
+  })
+  // Return type will contain `orderID`
+  // use data to redirect to your order page
+} catch (error) {
+  // handle error
+}
+```
+
+If the payment gateway requires additional confirmations offsite then you will need another landing page to handle that. For example with Stripe you may need to use a callback URL, just make sure the relevant information is routed back.
+
+<Banner type="info">
+  This will mark the transaction as complete in the backend and create the order
+  for the user.
+</Banner>
+
 #### `initiatePayment`
+
+Use this method to initiate a payment for an order. It requires the cart ID and the payment method ID. Depending on the payment method, additional data may be required. Depending on the payment method used you may need to provide additional data, for example with Stripe:
+
+```ts
+try {
+  const data = await initiatePayment('stripe', {
+    additionalData: {
+      customerEmail,
+      billingAddress,
+      shippingAddress,
+    },
+  })
+} catch (error) {
+  // handle error
+}
+```
+
+This function will hit the Payload API endpoint for `/stripe/initiate` and return the payment data required to complete the payment on the client side, which by default will include a `client_secret` to complete the payment with Stripe.js. The next step is to call the `confirmOrder` once payment is confirmed on the client side by Stripe.
+
+<Banner type="info">
+  At this step the cart is verified and a transaction is created in the backend
+  with the address details provided. No order is created yet until you call
+  `confirmOrder`, which should be done after payment is confirmed on the client
+  side or via webhooks if you opt for that approach instead.
+</Banner>
 
 ### `useCurrency`
 
@@ -818,10 +895,18 @@ const EcommerceComponent = () => {
 
 ## TypeScript
 
+The plugin will inherit the types from your generated Payload types where possible. We also export the following types:
+
+- `Cart` - The cart type as stored in the React state and local storage and on the client side.
+- `CollectionOverride` - Type for overriding collections.
+- `CurrenciesConfig` - Type for the currencies configuration.
+- `EcommercePluginConfig` - The configuration object for the ecommerce plugin.
+- `FieldsOverride` - Type for overriding fields in collections.
+
 All types can be directly imported:
 
 ```ts
-import { PluginConfig } from '@payloadcms/plugin-ecommerce/types'
+import { EcommercePluginConfig } from '@payloadcms/plugin-ecommerce/types'
 ```
 
 ## Examples
