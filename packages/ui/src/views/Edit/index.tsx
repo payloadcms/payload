@@ -141,7 +141,8 @@ export function DefaultEditView({
     previewWindowType,
     setURL: setLivePreviewURL,
     url: livePreviewURL,
-    urlIsFunction: shouldGetLivePreviewURL,
+    urlDeps: livePreviewURLDeps,
+    urlIsFunction: livePreviewURLIsFunction,
   } = useLivePreviewContext()
 
   const abortOnChangeRef = useRef<AbortController>(null)
@@ -271,8 +272,8 @@ export function DefaultEditView({
   ])
 
   const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
-    async (json, options) => {
-      const { context, formState } = options || {}
+    async (json, ctx) => {
+      const { context, dataSubmitted, formState } = ctx || {}
 
       const controller = handleAbortRef(abortOnSaveRef)
 
@@ -302,10 +303,28 @@ export function DefaultEditView({
         void setData(document || {})
       }
 
+      let shouldFetchLivePreviewURL = false
+
+      const data = dataSubmitted.get('_payload')
+      console.log(data, typeof data)
+
+      if (isLivePreviewEnabled && livePreviewURLIsFunction && livePreviewURLDeps) {
+        if (!livePreviewURLDeps.length) {
+          shouldFetchLivePreviewURL = true
+        } else {
+          /*
+           * Check the deps in the most efficient way possible
+           * One extremely fast way is to simply check if they were submitted in the request
+           * This will prevent us from having to loop over `json` response and compare prev values
+           */
+          console.log(dataSubmitted)
+        }
+      }
+
       // Refresh live preview url, if needed
       // One potential optimization here would be to only do this if certain fields changed
       // And/or also combing this with some other action, like the submit itself
-      if (isLivePreviewEnabled && shouldGetLivePreviewURL) {
+      if (shouldFetchLivePreviewURL) {
         const { url: newURLRaw } = await getLivePreviewURL({
           collectionSlug,
           data: document,
@@ -412,7 +431,8 @@ export function DefaultEditView({
       livePreviewURL,
       getLivePreviewURL,
       isLivePreviewEnabled,
-      shouldGetLivePreviewURL,
+      livePreviewURLDeps,
+      livePreviewURLIsFunction,
     ],
   )
 

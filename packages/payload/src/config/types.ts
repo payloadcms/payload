@@ -151,10 +151,11 @@ export type LivePreviewConfig = {
     width: number | string
   }[]
   /**
-   The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
-   Payload will send a `window.postMessage()` to this URL with the document data in real-time.
-   The frontend application is responsible for receiving the message and updating the UI accordingly.
-   Use the `useLivePreview` hook to get started in React applications.
+   * The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
+   * Payload will send a `window.postMessage()` to this URL with the document data in real-time.
+   * The frontend application is responsible for receiving the message and updating the UI accordingly.
+   * Use the `useLivePreview` hook to get started in React applications.
+   * Tip: If using a function, use in conjunction with `urlDeps` to optimize re-runs.
    */
   url?:
     | ((args: {
@@ -170,6 +171,13 @@ export type LivePreviewConfig = {
         req: PayloadRequest
       }) => Promise<string> | string)
     | string
+  /**
+   * @experimental This property is experimental and may change in the future. Use at your own discretion.
+   * Opt-in optimization for live preview URL generation, especially for autosave.
+   * If specified, Payload will only run your `url` function when one of the specified dependencies change.
+   * Otherwise it will perform a network request on every save and autosave.
+   */
+  urlDeps?: string[]
 }
 
 export type RootLivePreviewConfig = {
