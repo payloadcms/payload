@@ -1,9 +1,12 @@
 import type { GlobalConfig } from 'payload'
 
+import type { PluginMCPServerConfig } from '../types.js'
+
 import { toCamelCase } from '../utils/camelCase.js'
 
-export const createMcpToolsGlobal = (
+export const createMCPToolsGlobal = (
   customTools: Array<{ description: string; name: string }> = [],
+  experimentalTools: NonNullable<PluginMCPServerConfig['_experimental']>['tools'] = {},
 ): GlobalConfig => {
   const customToolsFields = customTools.map((tool) => {
     const camelCasedName = toCamelCase(tool.name)
@@ -24,7 +27,6 @@ export const createMcpToolsGlobal = (
       group: 'MCP',
     },
     fields: [
-      // General Tools
       {
         type: 'collapsible',
         fields: [
@@ -36,7 +38,7 @@ export const createMcpToolsGlobal = (
                 name: 'find',
                 type: 'checkbox',
                 admin: {
-                  description: 'Find documents in a Collection.',
+                  description: 'Allow LLMs to find documents in a Collection.',
                 },
                 defaultValue: true,
               },
@@ -44,7 +46,7 @@ export const createMcpToolsGlobal = (
                 name: 'create',
                 type: 'checkbox',
                 admin: {
-                  description: 'Create documents in a Collection.',
+                  description: 'Allow LLMs to create documents in a Collection.',
                 },
                 defaultValue: false,
               },
@@ -52,7 +54,7 @@ export const createMcpToolsGlobal = (
                 name: 'update',
                 type: 'checkbox',
                 admin: {
-                  description: 'Update documents in a Collection.',
+                  description: 'Allow LLMs to update documents in a Collection.',
                 },
                 defaultValue: false,
               },
@@ -60,196 +62,227 @@ export const createMcpToolsGlobal = (
                 name: 'delete',
                 type: 'checkbox',
                 admin: {
-                  description: 'Delete documents from a Collection.',
+                  description: 'Allow LLMs to delete documents from a Collection.',
                 },
                 defaultValue: false,
               },
             ],
           },
-          ...(customTools.length > 0
-            ? [
+        ],
+        label: 'Payload MCP Tools',
+      },
+
+      // Experimental Tools
+      ...(process.env.NODE_ENV === 'development' &&
+      (experimentalTools?.collections?.enabled ||
+        experimentalTools?.jobs?.enabled ||
+        experimentalTools?.config?.enabled ||
+        experimentalTools?.auth?.enabled)
+        ? [
+            {
+              type: 'collapsible' as const,
+              fields: [
+                ...(experimentalTools?.collections?.enabled
+                  ? [
+                      {
+                        name: 'collections',
+                        type: 'group' as const,
+                        fields: [
+                          {
+                            name: 'find',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description:
+                                'Allow LLMs to find and list Payload collections with optional content and document counts.',
+                            },
+                            defaultValue: false,
+                          },
+                          {
+                            name: 'create',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description:
+                                'Allow LLMs to create new Payload collections with specified fields and configuration.',
+                            },
+                            defaultValue: false,
+                          },
+                          {
+                            name: 'update',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description:
+                                'Allow LLMs to update existing Payload collections with new fields, modifications, or configuration changes.',
+                            },
+                            defaultValue: false,
+                          },
+                          {
+                            name: 'delete',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description:
+                                'Allow LLMs to delete Payload collections and optionally update the configuration.',
+                            },
+                            defaultValue: false,
+                          },
+                        ],
+                      },
+                    ]
+                  : []),
+                ...(experimentalTools?.jobs?.enabled
+                  ? [
+                      {
+                        name: 'jobs',
+                        type: 'group' as const,
+                        fields: [
+                          {
+                            name: 'create',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description:
+                                'Allow LLMs to create new Payload jobs (tasks and workflows) with custom schemas and configuration.',
+                            },
+                            defaultValue: false,
+                          },
+                          {
+                            name: 'run',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description:
+                                'Allow LLMs to execute Payload jobs with custom input data and queue options.',
+                            },
+                            defaultValue: false,
+                          },
+                          {
+                            name: 'update',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description:
+                                'Allow LLMs to update existing Payload jobs with new schemas, configuration, or handler code.',
+                            },
+                            defaultValue: false,
+                          },
+                        ],
+                      },
+                    ]
+                  : []),
+                ...(experimentalTools?.config?.enabled
+                  ? [
+                      {
+                        name: 'config',
+                        type: 'group' as const,
+                        fields: [
+                          {
+                            name: 'find',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description:
+                                'Allow LLMs to read and display a Payload configuration file.',
+                            },
+                            defaultValue: false,
+                          },
+                          {
+                            name: 'update',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description:
+                                'Allow LLMs to update a Payload configuration file with various modifications.',
+                            },
+                            defaultValue: false,
+                          },
+                        ],
+                      },
+                    ]
+                  : []),
+                ...(experimentalTools?.auth?.enabled
+                  ? [
+                      {
+                        name: 'auth',
+                        type: 'group' as const,
+                        fields: [
+                          {
+                            name: 'auth',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description:
+                                'Allow LLMs to check authentication status for a user by setting custom headers. (e.g. {"Authorization": "Bearer <token>"})',
+                            },
+                            defaultValue: false,
+                            label: 'Check Auth Status',
+                          },
+                          {
+                            name: 'login',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description:
+                                'Allow LLMs to authenticate a user with email and password.',
+                            },
+                            defaultValue: false,
+                            label: 'User Login',
+                          },
+                          {
+                            name: 'verify',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description:
+                                'Allow LLMs to verify a user email with a verification token.',
+                            },
+                            defaultValue: false,
+                            label: 'Email Verification',
+                          },
+                          {
+                            name: 'resetPassword',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description:
+                                'Allow LLMs to reset a user password with a reset token.',
+                            },
+                            defaultValue: false,
+                            label: 'Reset Password',
+                          },
+                          {
+                            name: 'forgotPassword',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description: 'Allow LLMs to send a password reset email to a user.',
+                            },
+                            defaultValue: false,
+                            label: 'Forgot Password',
+                          },
+                          {
+                            name: 'unlock',
+                            type: 'checkbox' as const,
+                            admin: {
+                              description:
+                                'Allow LLMs to unlock a user account that has been locked due to failed login attempts.',
+                            },
+                            defaultValue: false,
+                            label: 'Unlock Account',
+                          },
+                        ],
+                      },
+                    ]
+                  : []),
+              ],
+              label: 'Payload Experimental MCP Tools',
+            },
+          ]
+        : []),
+
+      ...(customTools.length > 0
+        ? [
+            {
+              type: 'collapsible' as const,
+              fields: [
                 {
                   name: 'custom',
                   type: 'group' as const,
                   fields: customToolsFields,
                 },
-              ]
-            : []),
-        ],
-        label: 'General',
-      },
-      // Development Tools (Experimental)
-      {
-        type: 'collapsible',
-        fields: [
-          {
-            name: 'collections',
-            type: 'group',
-            fields: [
-              {
-                name: 'find',
-                type: 'checkbox',
-                admin: {
-                  description:
-                    'Find and list Payload collections with optional content and document counts.',
-                },
-                defaultValue: false,
-              },
-              {
-                name: 'create',
-                type: 'checkbox',
-                admin: {
-                  description:
-                    'Create new Payload collections with specified fields and configuration.',
-                },
-                defaultValue: false,
-              },
-              {
-                name: 'update',
-                type: 'checkbox',
-                admin: {
-                  description:
-                    'Update existing Payload collections with new fields, modifications, or configuration changes.',
-                },
-                defaultValue: false,
-              },
-              {
-                name: 'delete',
-                type: 'checkbox',
-                admin: {
-                  description:
-                    'Delete Payload collections and optionally update the configuration.',
-                },
-                defaultValue: false,
-              },
-            ],
-          },
-          {
-            name: 'jobs',
-            type: 'group',
-            fields: [
-              {
-                name: 'create',
-                type: 'checkbox',
-                admin: {
-                  description:
-                    'Create new Payload jobs (tasks and workflows) with custom schemas and configuration.',
-                },
-                defaultValue: false,
-              },
-              {
-                name: 'run',
-                type: 'checkbox',
-                admin: {
-                  description: 'Execute Payload jobs with custom input data and queue options.',
-                },
-                defaultValue: false,
-              },
-              {
-                name: 'update',
-                type: 'checkbox',
-                admin: {
-                  description:
-                    'Update existing Payload jobs with new schemas, configuration, or handler code.',
-                },
-                defaultValue: false,
-              },
-            ],
-          },
-          {
-            name: 'config',
-            type: 'group',
-            fields: [
-              {
-                name: 'find',
-                type: 'checkbox',
-                admin: {
-                  description: 'Read and display a Payload configuration file.',
-                },
-                defaultValue: false,
-              },
-              {
-                name: 'update',
-                type: 'checkbox',
-                admin: {
-                  description: 'Update a Payload configuration file with various modifications.',
-                },
-                defaultValue: false,
-              },
-            ],
-          },
-        ],
-        label: 'Development',
-      },
-      // Administration Tools (Experimental)
-      {
-        type: 'collapsible',
-        fields: [
-          {
-            name: 'auth',
-            type: 'group',
-            fields: [
-              {
-                name: 'auth',
-                type: 'checkbox',
-                admin: {
-                  description:
-                    'Check authentication status for a user by setting custom headers. (e.g. {"Authorization": "Bearer <token>"})',
-                },
-                defaultValue: false,
-                label: 'Check Auth Status',
-              },
-              {
-                name: 'login',
-                type: 'checkbox',
-                admin: {
-                  description: 'Authenticate a user with email and password.',
-                },
-                defaultValue: false,
-                label: 'User Login',
-              },
-              {
-                name: 'verify',
-                type: 'checkbox',
-                admin: {
-                  description: 'Verify a user email with a verification token.',
-                },
-                defaultValue: false,
-                label: 'Email Verification',
-              },
-              {
-                name: 'resetPassword',
-                type: 'checkbox',
-                admin: {
-                  description: 'Reset a user password with a reset token.',
-                },
-                defaultValue: false,
-                label: 'Reset Password',
-              },
-              {
-                name: 'forgotPassword',
-                type: 'checkbox',
-                admin: {
-                  description: 'Send a password reset email to a user.',
-                },
-                defaultValue: false,
-                label: 'Forgot Password',
-              },
-              {
-                name: 'unlock',
-                type: 'checkbox',
-                admin: {
-                  description:
-                    'Unlock a user account that has been locked due to failed login attempts.',
-                },
-                defaultValue: false,
-                label: 'Unlock Account',
-              },
-            ],
-          },
-        ],
-        label: 'Administration',
-      },
+              ],
+              label: 'MCP Tools',
+            },
+          ]
+        : []),
     ],
     label: 'Tools',
   }
