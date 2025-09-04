@@ -379,62 +379,17 @@ export const ORDERED_LIST: ElementTransformer = {
   replace: listReplace('number'),
 }
 
-export const INLINE_CODE: TextFormatTransformer = {
-  type: 'text-format',
-  format: ['code'],
-  tag: '`',
-}
-
-export const HIGHLIGHT: TextFormatTransformer = {
-  type: 'text-format',
-  format: ['highlight'],
-  tag: '==',
-}
-
-export const BOLD_ITALIC_STAR: TextFormatTransformer = {
-  type: 'text-format',
-  format: ['bold', 'italic'],
-  tag: '***',
-}
-
-export const BOLD_ITALIC_UNDERSCORE: TextFormatTransformer = {
-  type: 'text-format',
-  format: ['bold', 'italic'],
-  intraword: false,
-  tag: '___',
-}
-
-export const BOLD_STAR: TextFormatTransformer = {
-  type: 'text-format',
-  format: ['bold'],
-  tag: '**',
-}
-
-export const BOLD_UNDERSCORE: TextFormatTransformer = {
-  type: 'text-format',
-  format: ['bold'],
-  intraword: false,
-  tag: '__',
-}
-
-export const STRIKETHROUGH: TextFormatTransformer = {
-  type: 'text-format',
-  format: ['strikethrough'],
-  tag: '~~',
-}
-
-export const ITALIC_STAR: TextFormatTransformer = {
-  type: 'text-format',
-  format: ['italic'],
-  tag: '*',
-}
-
-export const ITALIC_UNDERSCORE: TextFormatTransformer = {
-  type: 'text-format',
-  format: ['italic'],
-  intraword: false,
-  tag: '_',
-}
+export {
+  BOLD_ITALIC_STAR,
+  BOLD_ITALIC_UNDERSCORE,
+  BOLD_STAR,
+  BOLD_UNDERSCORE,
+  HIGHLIGHT,
+  INLINE_CODE,
+  ITALIC_STAR,
+  ITALIC_UNDERSCORE,
+  STRIKETHROUGH,
+} from '@lexical/markdown'
 
 export function normalizeMarkdown(input: string, shouldMergeAdjacentLines: boolean): string {
   const lines = input.split('\n')
