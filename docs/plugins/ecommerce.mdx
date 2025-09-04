@@ -1,0 +1,228 @@
+---
+title: Ecommerce Plugin
+label: Ecommerce
+order: 120
+desc: Add ecommerce functionality to your Payload CMS application with this plugin.
+keywords: plugins, ecommerce, stripe, plugin, payload, cms, shop, payments
+---
+
+![https://www.npmjs.com/package/@payloadcms/plugin-ecommerce](https://img.shields.io/npm/v/@payloadcms/plugin-ecommerce)
+
+This plugin allows you to add ecommerce functionality to your Payload app. It provides a set of utilities and collections to manage products, orders, and payments. It also integrates with popular payment gateways like Stripe to handle transactions.
+
+<Banner type="info">
+  This plugin is completely open-source and the [source code can be found
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-ecommerce).
+  If you need help, check out our [Community
+  Help](https://payloadcms.com/community-help). If you think you've found a bug,
+  please [open a new
+  issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%redirects&template=bug_report.md&title=plugin-ecommerce%3A)
+  with as much detail as possible.
+</Banner>
+
+## Core features
+
+The plugin ships with a wide range of features to help you get started with ecommerce:
+
+- Products with Variants are supported by default
+- Carts are tracked in Payload
+- Orders and Transactions
+- Addresses linked to your Customers
+- Stripe Payments integration
+- Any number of currencies supported
+
+## Installation
+
+Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
+
+```bash
+  pnpm add @payloadcms/plugin-ecommerce
+```
+
+## Basic Usage
+
+In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+
+```ts
+import { buildConfig } from 'payload'
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+
+const config = buildConfig({
+  collections: [
+    {
+      slug: 'pages',
+      fields: [],
+    },
+  ],
+  plugins: [
+    ecommercePlugin({
+      customers: { slug: 'users' },
+    }),
+  ],
+})
+
+export default config
+```
+
+### Options
+
+| Option         | Type     | Description                                                                                                              |
+| -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `access`       | `object` | Configuration to override the default access control, use this when checking for roles or multi tenancy. [More](#access) |
+| `customers`    | `object` | Used to provide the customers slug. [More](#customers)                                                                   |
+| `payments`     | `object` | Configuring payments and supported payment methods. [More](#payments)                                                    |
+| `addresses`    | `object` | Configuration for addresses collection and supported fields. [More](#addresses)                                          |
+| `carts`        | `object` | Configuration for carts collection. [More](#carts)                                                                       |
+| `currencies`   | `object` | Supported currencies by the store. [More](#currencies)                                                                   |
+| `products`     | `object` | Configuration for products, variants collections and more. [More](#products)                                             |
+| `orders`       | `object` | Configuration for orders collection. [More](#orders)                                                                     |
+| `transactions` | `object` | Configuration for transactions collection. [More](#transactions)                                                         |
+
+Note that the fields in overrides take a function that receives the default fields and returns an array of fields. This allows you to add fields to the collection.
+
+```ts
+ecommercePlugin({
+  access: {
+    isAdmin: isAdmin,
+    isAdminField: isAdminField,
+    isAdminOrOwner: isAdminOrOwner,
+    isAdminOrPublished: isAdminOrPublished,
+    isCustomerField: isCustomerField,
+  },
+  customers: {
+    slug: 'users',
+  },
+  payments: {
+    paymentMethods: [
+      stripeAdapter({
+        secretKey: process.env.STRIPE_SECRET_KEY!,
+        publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+        webhookSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET!,
+      }),
+    ],
+  },
+  products: {
+    variants: {
+      variantsCollection: VariantsCollection,
+    },
+    productsCollection: ProductsCollection,
+  },
+})
+```
+
+## Access
+
+The plugin requires access control functions in order to restrict permissions to certain collections or fields. You can override these functions by providing your own in the `access` option.
+
+| Option               | Type          | Description                                                               |
+| -------------------- | ------------- | ------------------------------------------------------------------------- |
+| `isAuthenticated`    | `Access`      | Authenticated access only, provided by default.                           |
+| `isPublic`           | `Access`      | Public access, provided by default.                                       |
+| `isAdmin`            | `Access`      | Limited to only admin users.                                              |
+| `isAdminField`       | `FieldAccess` | Limited to only admin users, specifically for Field level access control. |
+| `isAdminOrOwner`     | `Access`      | Is the owner of the document via the `customer` field or is an admin.     |
+| `isAdminOrPublished` | `Access`      | The document is published or user is admin.                               |
+| `isCustomerField`    | `FieldAccess` | Limited to customers only, specifically for Field level access control.   |
+
+The default access control functions are:
+
+```ts
+access: {
+  isAuthenticated: ({ req: { user } }) => Boolean(user),
+  isPublic: () => true,
+}
+```
+
+### `isAuthenticated`
+
+Access control to check if the user is authenticated. By default the following is provided:
+
+```ts
+isAuthenticated: ({ req: { user } }) => Boolean(user)
+```
+
+### `isPublic`
+
+Access control to allow public access. By default the following is provided:
+
+```ts
+isPublic: () => true
+```
+
+### `isAdmin`
+
+Access control to check if the user has an `admin` role. Example:
+
+```ts
+isAdmin: ({ req: { user } }) => Boolean(user?.roles?.includes('admin'))
+```
+
+### `isAdminField`
+
+Field level access control to check if the user has an `admin` role. Example:
+
+```ts
+isAdminField: ({ req: { user } }) => Boolean(user?.roles?.includes('admin'))
+```
+
+### `isAdminOrOwner`
+
+Access control to check if the user has an `admin` role or is the owner of the document via the `customer` field. Example:
+
+```ts
+isAdminOrOwner: ({ req: { user } }) => {
+  if (user && Boolean(user?.roles?.includes('admin'))) {
+    return true
+  }
+
+  if (user?.id) {
+    return {
+      customer: {
+        equals: user.id,
+      },
+    }
+  }
+
+  return false
+}
+```
+
+### `isAdminOrPublished`
+
+Access control to check if the user has an `admin` role or if the document is published. Example:
+
+```ts
+isAdminOrPublished: ({ req: { user } }) => {
+  if (user && Boolean(user?.roles?.includes('admin'))) {
+    return true
+  }
+  return {
+    _status: {
+      equals: 'published',
+    },
+  }
+}
+```
+
+### `isCustomerField`
+
+Field level access control to check if the user has a `customer` role. Example:
+
+```ts
+isCustomerField: ({ req: { user } }) =>
+  Boolean(user?.roles?.includes('customer'))
+```
+
+## Customers
+
+## TypeScript
+
+All types can be directly imported:
+
+```ts
+import { PluginConfig } from '@payloadcms/plugin-ecommerce/types'
+```
+
+## Examples
+
+The [Templates Directory](https://github.com/payloadcms/payload/tree/main/templates) also contains an official [E-commerce Template](https://github.com/payloadcms/payload/tree/main/templates/ecommerce), which uses this plugin.
