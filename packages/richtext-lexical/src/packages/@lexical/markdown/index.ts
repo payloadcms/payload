@@ -17,8 +17,6 @@ import type {
 } from './MarkdownTransformers.js'
 
 import { PAYLOAD_LINK_TRANSFORMER } from '../../../features/link/markdownTransformer.js'
-import { createMarkdownExport } from './MarkdownExport.js'
-import { createMarkdownImport } from './MarkdownImport.js'
 import { registerMarkdownShortcuts } from './MarkdownShortcuts.js'
 import {
   BOLD_ITALIC_STAR,
@@ -31,19 +29,11 @@ import {
   INLINE_CODE,
   ITALIC_STAR,
   ITALIC_UNDERSCORE,
-  normalizeMarkdown,
   ORDERED_LIST,
   QUOTE,
   STRIKETHROUGH,
   UNORDERED_LIST,
 } from './MarkdownTransformers.js'
-
-const ELEMENT_TRANSFORMERS: Array<ElementTransformer> = [
-  HEADING,
-  QUOTE,
-  UNORDERED_LIST,
-  ORDERED_LIST,
-]
 
 const MULTILINE_ELEMENT_TRANSFORMERS: Array<MultilineElementTransformer> = []
 
@@ -78,7 +68,6 @@ export {
   BOLD_STAR,
   BOLD_UNDERSCORE,
   CHECK_LIST,
-  ELEMENT_TRANSFORMERS,
   type ElementTransformer,
   HEADING,
   HIGHLIGHT,
