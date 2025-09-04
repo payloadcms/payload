@@ -418,7 +418,7 @@ export type CollectionAdminOptions = {
    *
    * @experimental This is an experimental feature and may change in the future. Use at your own discretion.
    */
-  listSelectFields?: boolean
+  listSelectActiveColumns?: boolean
   /**
    * Live preview options
    */

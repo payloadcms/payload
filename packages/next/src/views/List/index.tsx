@@ -217,7 +217,7 @@ export const renderListView = async (
       i18n,
     })
 
-    const select = collectionConfig.admin.listSelectFields
+    const select = collectionConfig.admin.listSelectActiveColumns
       ? transformColumnsToSelect(columns)
       : undefined
 

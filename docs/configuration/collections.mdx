@@ -141,7 +141,7 @@ The following options are available:
 | `livePreview`                | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                                |
 | `components`                 | Swap in your own React components to be used within this Collection. [More details](#custom-components).                                                                                                                     |
 | `listSearchableFields`       | Specify which fields should be searched in the List search view. [More details](#list-searchable-fields).                                                                                                                    |
-| `listSelectFields`           | Performance opt-in. When `true`, uses the Select API in the List View to process only the active columns as opposed to entire documents. [More details](#list-select-fields).                                                |
+| `listSelectActiveColumns`    | Performance opt-in. When `true`, uses the Select API in the List View to query only the active columns as opposed to entire documents. [More details](#list-select-fields).                                                  |
 | `pagination`                 | Set pagination-specific options for this Collection in the List View. [More details](#pagination).                                                                                                                           |
 | `baseFilter`                 | Defines a default base filter which will be applied to the List View (along with any other filters applied by the user) and internal links in Lexical Editor,                                                                |
 
@@ -277,7 +277,7 @@ export const Posts: CollectionConfig = {
 
 When `true`, the List View will use the [Select API](../queries/select) to process only the active columns as opposed to entire documents. This can greatly improve performance, especially for collections with large documents or many fields.
 
-To enable this, set `listSelectFields: true` in your Collection Config:
+To enable this, set `listSelectActiveColumns: true` in your Collection Config:
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -287,15 +287,15 @@ export const Posts: CollectionConfig = {
   admin: {
     // ...
     // highlight-start
-    listSelectFields: true,
+    listSelectActiveColumns: true,
     // highlight-end
   },
 }
 ```
 
 <Banner type="info">
-  **Note:** The `listSelectFields` property is labeled as experimental, as it
-  will likely become the default behavior in v4 and be deprecated.
+  **Note:** The `listSelectActiveColumns` property is labeled as experimental,
+  as it will likely become the default behavior in v4 and be deprecated.
 </Banner>
 
 Enabling this feature may cause unexpected behavior in some cases, however, such as when using hooks that rely on the full document data.
