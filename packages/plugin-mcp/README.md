@@ -10,12 +10,12 @@ pnpm add @payloadcms/plugin-mcp
 
 ```typescript
 import { buildConfig } from 'payload'
-import { pluginMcp } from '@payloadcms/plugin-mcp'
+import { pluginMCP } from '@payloadcms/plugin-mcp'
 
 export default buildConfig({
   // ... your existing config
   plugins: [
-    pluginMcp({
+    pluginMCP({
       collections: {
         posts: true,
         users: true,
@@ -42,12 +42,12 @@ These tools allow LLMs to interact with collection documents by treating collect
 
 ```typescript
 import { z } from 'zod'
-import { pluginMcp } from '@payloadcms/plugin-mcp'
+import { pluginMCP } from '@payloadcms/plugin-mcp'
 
 export default buildConfig({
   // ... your existing config
   plugins: [
-    pluginMcp({
+    pluginMCP({
       collections: {
         posts: true,
       },
