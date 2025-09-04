@@ -5,6 +5,7 @@ import type {
   ClientFieldWithOptionalType,
   PayloadRequest,
   SanitizedFieldPermissions,
+  SanitizedFieldsPermissions,
 } from '../../index.js'
 
 export type VersionTab = {
@@ -54,11 +55,7 @@ export type FieldDiffClientProps<TClientField extends ClientFieldWithOptionalTyp
    */
   diffMethod: any
   field: TClientField
-  fieldPermissions:
-    | {
-        [key: string]: SanitizedFieldPermissions
-      }
-    | true
+  fieldPermissions: SanitizedFieldPermissions | SanitizedFieldsPermissions
   /**
    * If this field is localized, this will be the locale of the field
    */

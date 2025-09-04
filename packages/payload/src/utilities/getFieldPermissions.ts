@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { SanitizedFieldPermissions } from '../auth/types.js'
+import type { SanitizedFieldPermissions, SanitizedFieldsPermissions } from '../auth/types.js'
 import type { ClientField, Field } from '../fields/config/types.js'
 import type { Operation } from '../types/index.js'
 
@@ -19,14 +19,10 @@ export const getFieldPermissions = ({
   readonly field: ClientField | Field
   readonly operation: Operation
   readonly parentName: string
-  readonly permissions:
-    | {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-    | SanitizedFieldPermissions
+  readonly permissions: SanitizedFieldPermissions | SanitizedFieldsPermissions
 }): {
   operation: boolean
-  permissions: SanitizedFieldPermissions
+  permissions: SanitizedFieldPermissions | SanitizedFieldsPermissions
   read: boolean
 } => ({
   operation:

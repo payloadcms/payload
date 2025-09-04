@@ -14,7 +14,7 @@ import {
   MissingEditorProp,
   type PayloadComponent,
   type PayloadRequest,
-  type SanitizedFieldPermissions,
+  type SanitizedFieldsPermissions,
   type VersionField,
 } from 'payload'
 import {
@@ -34,11 +34,7 @@ export type BuildVersionFieldsArgs = {
     Record<FieldTypes, PayloadComponent<FieldDiffServerProps, FieldDiffClientProps>>
   >
   entitySlug: string
-  fieldPermissions:
-    | {
-        [key: string]: SanitizedFieldPermissions
-      }
-    | true
+  fieldPermissions: SanitizedFieldsPermissions
   fields: Field[]
   i18n: I18nClient
   modifiedOnly: boolean
@@ -238,7 +234,8 @@ const buildVersionField = ({
     permissions: fieldPermissions,
   })
 
-  if (!hasReadPermission) {
+  if ('name' in field && !hasReadPermission) {
+    // HasReadPermission is only valid if the field has a name. E.g. for a tabs field it would incorrectly return `false`.
     return null
   }
 
@@ -294,18 +291,20 @@ const buildVersionField = ({
         parentSchemaPath,
       })
 
-      let tabPermissions: typeof fieldPermissions = undefined
+      // At this point, permissions === fieldPermissions (FieldsPermissions)
+
+      let tabPermissions: SanitizedFieldsPermissions = undefined
 
       if (typeof permissions === 'boolean') {
         tabPermissions = permissions
       } else if (permissions && typeof permissions === 'object') {
         if ('name' in tab) {
           tabPermissions =
-            typeof permissions.fields?.[tab.name] === 'object'
-              ? permissions.fields?.[tab.name].fields
-              : permissions.fields?.[tab.name]
+            typeof permissions?.[tab.name] === 'object'
+              ? permissions?.[tab.name]?.fields
+              : permissions?.[tab.name]
         } else {
-          tabPermissions = permissions.fields
+          tabPermissions = permissions as SanitizedFieldsPermissions
         }
       }
 
@@ -345,13 +344,17 @@ const buildVersionField = ({
     }
   } // At this point, we are dealing with a `row`, `collapsible`, etc
   else if ('fields' in field) {
-    let subfieldPermissions: typeof fieldPermissions = undefined
+    let subfieldPermissions: SanitizedFieldsPermissions = undefined
 
     if (typeof permissions === 'boolean') {
       subfieldPermissions = permissions
     } else if (permissions && typeof permissions === 'object') {
-      subfieldPermissions = permissions.fields
+      subfieldPermissions =
+        'name' in field
+          ? (permissions.fields as SanitizedFieldsPermissions)
+          : (permissions as SanitizedFieldsPermissions)
     }
+
     if (field.type === 'array' && (valueTo || valueFrom)) {
       const maxLength = Math.max(
         Array.isArray(valueTo) ? valueTo.length : 0,
@@ -500,7 +503,7 @@ const buildVersionField = ({
      */
     diffMethod: 'diffWordsWithSpace',
     field: clientField,
-    fieldPermissions: typeof permissions === 'object' ? permissions.fields : permissions,
+    fieldPermissions: permissions,
     parentIsLocalized,
 
     nestingLevel: nestingLevel ? nestingLevel : undefined,
