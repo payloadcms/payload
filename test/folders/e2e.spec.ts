@@ -77,7 +77,7 @@ test.describe('Folders', () => {
 
     test('should create new folder from collection view', async () => {
       await page.goto(postURL.byFolder)
-      await createFolder({ folderName: 'New Folder From Collection', fromDropdown: true, page })
+      await createFolder({ folderName: 'New Folder From Collection', fromDropdown: false, page })
     })
 
     test('should create new folder from document view', async () => {
