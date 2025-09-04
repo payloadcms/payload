@@ -53,7 +53,23 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     ecommercePlugin({
-      access: {},
+      access: {
+        isAdmin: ({ req }) => Boolean(req.user),
+        isAdminField: ({ req }) => Boolean(req.user),
+        isAdminOrOwner: ({ req }) => Boolean(req.user),
+        isCustomerField: ({ req }) => Boolean(req.user),
+        isAdminOrPublished: ({ req }) => {
+          if (req.user) {
+            return true
+          }
+
+          return {
+            _status: {
+              equals: 'published',
+            },
+          }
+        },
+      },
       customers: {
         slug: 'users',
       },

@@ -621,10 +621,16 @@ The `EcommerceProvider` component is used to wrap your application and provide t
 
 | Prop               | Type               | Description                                                                                         |
 | ------------------ | ------------------ | --------------------------------------------------------------------------------------------------- |
+| `addressesSlug`    | `string`           | The slug of the addresses collection. Defaults to `addresses`.                                      |
+| `api`              | `object`           | API configuration for the internal fetches of the provider. [More](#api)                            |
+| `cartsSlug`        | `string`           | The slug of the carts collection. Defaults to `carts`.                                              |
 | `children`         | `ReactNode`        | The child components that will have access to the ecommerce context.                                |
-| `paymentMethods`   | `PaymentMethod[]`  | An array of payment method adapters for the client side. See [Payment adapters](#payment-adapters). |
-| `enableVariants`   | `boolean`          | Enable or disable product variants support. Defaults to `true`.                                     |
 | `currenciesConfig` | `CurrenciesConfig` | Configuration for supported currencies. See [Currencies](#currencies).                              |
+| `customersSlug`    | `string`           | The slug of the customers collection. Defaults to `users`.                                          |
+| `debug`            | `boolean`          | Enable or disable debug mode. This will send more information to the console.                       |
+| `enableVariants`   | `boolean`          | Enable or disable product variants support. Defaults to `true`.                                     |
+| `paymentMethods`   | `PaymentMethod[]`  | An array of payment method adapters for the client side. See [Payment adapters](#payment-adapters). |
+| `syncLocalStorage` | `boolean` `object` | Whether to sync the cart ID to local storage. Defaults to `true`. Takes an object for configuration |
 
 Example usage:
 
@@ -647,9 +653,62 @@ export const Providers = () => (
 )
 ```
 
+#### `api`
+
+The `api` prop is used to configure the API settings for the internal fetches of the provider. It takes an object with the following properties:
+
+| Property          | Type     | Description                                                       |
+| ----------------- | -------- | ----------------------------------------------------------------- |
+| `apiRoute`        | `string` | The base route for accessing the Payload API. Defaults to `/api`. |
+| `serverURL`       | `string` | The full URL of your Payload server.                              |
+| `cartsFetchQuery` | `object` | Additional query parameters to include when fetching the cart.    |
+
+#### `cartsFetchQuery`
+
+The `cartsFetchQuery` property allows you to specify additional query parameters to include when fetching the cart. This can be useful for including related data or customizing the response. This accepts:
+
+| Property   | Type           | Description                           |
+| ---------- | -------------- | ------------------------------------- |
+| `depth`    | `string`       | Defaults to 0.                        |
+| `select`   | `SelectType`   | Select parameters. [See Select]()     |
+| `populate` | `PopulateType` | Populate parameters. [See Populate]() |
+
+Example usage:
+
+```tsx
+<EcommerceProvider
+  api={{
+    cartsFetchQuery: {
+      depth: 2, // Include related data up to 2 levels deep
+    },
+  }}
+>
+  {children}
+</EcommerceProvider>
+```
+
+#### `syncLocalStorage`
+
+The `syncLocalStorage` prop is used to enable or disable syncing the cart ID to local storage. This allows the cart to persist across page reloads and sessions. It defaults to `true`.
+
+You can also provide an object with the following properties for more configuration:
+
+| Property | Type     | Description                                                                  |
+| -------- | -------- | ---------------------------------------------------------------------------- |
+| `key`    | `string` | The key to use for storing the cart ID in local storage. Defaults to `cart`. |
+
 ### `useCart`
 
-The `useCart` hook is used to manage the cart state and actions. It provides methods to add, remove, and update items in the cart, as well as to fetch the current cart state.
+The `useCart` hook is used to manage the cart state and actions. It provides methods to add, remove, and update items in the cart, as well as to fetch the current cart state. It has the following properties:
+
+| Property        | Type                                               | Description                                                                               |
+| --------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `addItem`       | `(item: CartItemInput, quantity?: number) => void` | Method to add an item to the cart, optionally accepts a quantity to add multiple at once. |
+| `cart`          | `Cart` `null`                                      | The current cart state. Null or undefined if it doesn't exist.                            |
+| `clearCart`     | `() => void`                                       | Method to clear the cart.                                                                 |
+| `decrementItem` | `(item: IDType) => void`                           | Method to decrement the quantity of an item. Will remove it entirely if it reaches 0.     |
+| `incrementItem` | `(item: IDType) => void`                           | Method to increment the quantity of an item.                                              |
+| `removeItem`    | `(item: IDType) => void`                           | Method to remove an item from the cart.                                                   |
 
 Example usage:
 
@@ -666,15 +725,13 @@ const CartComponent = () => {
 
 ### `useAddresses`
 
-The `useAddresses` hook is used to fetch and manage addresses. It provides methods to create, update, and delete addresses, as well as to fetch the list of addresses.
+The `useAddresses` hook is used to fetch and manage addresses. It provides methods to create, update, and delete addresses, as well as to fetch the list of addresses. It has the following properties:
 
-It has the following properties:
-
-| Property        | Type                                                                | Description                           |
-| --------------- | ------------------------------------------------------------------- | ------------------------------------- |
-| `addresses`     | `Address[]`                                                         | The list of addresses.                |
-| `createAddress` | `(address: AddressInput) => Promise<Address>`                       | Method to create a new address.       |
-| `updateAddress` | `(id: string \| number, address: AddressInput) => Promise<Address>` | Method to update an existing address. |
+| Property        | Type                                                              | Description                                                       |
+| --------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `addresses`     | `Address[]`                                                       | The list of addresses, if any are available for the current user. |
+| `createAddress` | `(data: Address) => Promise<Address>`                             | Method to create a new address.                                   |
+| `updateAddress` | `(addressID: IDType, data: Partial<Address>) => Promise<Address>` | Method to update an existing address by ID.                       |
 
 Example usage:
 
@@ -690,7 +747,14 @@ const AddressesComponent = () => {
 
 ### `usePayments`
 
-The `usePayments` hook is used to manage the checkout process. It provides methods to initiate payments, confirm orders, and handle payment status.
+The `usePayments` hook is used to manage the checkout process. It provides methods to initiate payments, confirm orders, and handle payment status. It has the following properties:
+
+| Property                | Type                       | Description                                                         |
+| ----------------------- | -------------------------- | ------------------------------------------------------------------- |
+| `confirmOrder`          | `(args) => Promise<Order>` | Method to confirm an order by ID. [More](#confirmOrder)             |
+| `initiatePayment`       | `(args) => Promise<void>`  | Method to initiate a payment for an order. [More](#initiatePayment) |
+| `paymentMethods`        | `PaymentMethod[]`          | The list of available payment methods.                              |
+| `selectedPaymentMethod` | `PaymentMethod`            | The currently selected payment method, if any.                      |
 
 Example usage:
 
@@ -709,11 +773,22 @@ const CheckoutComponent = () => {
 }
 ```
 
+#### `confirmOrder`
+
+#### `initiatePayment`
+
 ### `useCurrency`
 
-The `useCurrency` hook is used to format prices based on the selected currency. It provides methods to format prices and to get the current currency.
+The `useCurrency` hook is used to format prices based on the selected currency. It provides methods to format prices and to get the current currency. It has the following properties:
 
-Example usage:
+| Property           | Type                             | Description                                                                                                                           |
+| ------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `currenciesConfig` | `CurrenciesConfig`               | The configuration for supported currencies. Directly matching the config provided to the Context Provider. [More](#ecommerceprovider) |
+| `currency`         | `Currency`                       | The currently selected currency.                                                                                                      |
+| `formatPrice`      | `(amount: number) => string`     | Method to format a price based on the selected currency.                                                                              |
+| `setCurrency`      | `(currencyCode: string) => void` | Method to set the current currency by code. It will update all price formats when used in conjunction with the `formatPrice` utility. |
+
+`formatPrice` in particular is very helpful as all prices are stored as integers to avoid any potential issues with decimal calculations, therefore on the frontend you can use this utility to format your price accounting for the currency and decimals. Example usage:
 
 ```tsx
 import { useCurrency } from '@payloadcms/plugin-ecommerce/react'
