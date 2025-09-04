@@ -213,7 +213,7 @@ export const renderListView = async (
 
     const columns = getColumns({
       collectionConfig: clientCollectionConfig,
-      columns: collectionPreferences?.columns || [],
+      columns: collectionPreferences?.columns,
       i18n,
     })
 
