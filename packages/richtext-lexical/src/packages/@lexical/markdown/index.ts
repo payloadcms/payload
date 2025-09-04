@@ -1,11 +1,3 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-
 import type {
   MultilineElementTransformer,
   TextMatchTransformer,
@@ -15,7 +7,6 @@ import type {
 import { ELEMENT_TRANSFORMERS, TEXT_FORMAT_TRANSFORMERS } from '@lexical/markdown'
 
 import { PAYLOAD_LINK_TRANSFORMER } from '../../../features/link/markdownTransformer.js'
-import { registerMarkdownShortcuts } from './MarkdownShortcuts.js'
 
 const MULTILINE_ELEMENT_TRANSFORMERS: Array<MultilineElementTransformer> = []
 
@@ -28,9 +19,4 @@ const TRANSFORMERS: Array<Transformer> = [
   ...TEXT_MATCH_TRANSFORMERS,
 ]
 
-export {
-  MULTILINE_ELEMENT_TRANSFORMERS,
-  registerMarkdownShortcuts,
-  TEXT_MATCH_TRANSFORMERS,
-  TRANSFORMERS,
-}
+export { MULTILINE_ELEMENT_TRANSFORMERS, TEXT_MATCH_TRANSFORMERS, TRANSFORMERS }
