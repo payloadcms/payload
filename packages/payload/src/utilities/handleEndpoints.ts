@@ -85,13 +85,22 @@ export const handleEndpoints = async ({
       request.headers.get('X-HTTP-Method-Override') === 'GET')
   ) {
     let url = request.url
-    let data = undefined
+    let data: any = undefined
     if (request.headers.get('Content-Type') === 'application/x-www-form-urlencoded') {
       const search = await request.text()
       url = `${request.url}?${search}`
     } else if (request.headers.get('Content-Type') === 'application/json') {
       // May not be supported by every endpoint
       data = await request.json()
+
+      // locale and fallbackLocale is read by createPayloadRequest to populate req.locale and req.fallbackLocale
+      // => add to searchParams
+      if (data?.locale) {
+        url += `?locale=${data.locale}`
+      }
+      if (data?.fallbackLocale) {
+        url += `&fallbackLocale=${data.depth}`
+      }
     }
 
     const req = new Request(url, {
