@@ -65,20 +65,20 @@ const config = buildConfig({
 export default config
 ```
 
-### Options
+## Options
 
-| Option         | Type                 | Description                                                                                                              |
-| -------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `access`       | `object`             | Configuration to override the default access control, use this when checking for roles or multi tenancy. [More](#access) |
-| `customers`    | `object`             | Used to provide the customers slug. [More](#customers)                                                                   |
-| `payments`     | `object`             | Configuring payments and supported payment methods. [More](#payments)                                                    |
-| `addresses`    | `object`             | Configuration for addresses collection and supported fields. [More](#addresses)                                          |
-| `carts`        | `object`             | Configuration for carts collection. [More](#carts)                                                                       |
-| `currencies`   | `object`             | Supported currencies by the store. [More](#currencies)                                                                   |
-| `products`     | `object`             | Configuration for products, variants collections and more. [More](#products)                                             |
-| `orders`       | `object`             | Configuration for orders collection. [More](#orders)                                                                     |
-| `transactions` | `boolean` `object`   | Configuration for transactions collection. [More](#transactions)                                                         |
-| `inventory`    | `boolean` / `object` | Enable or disable inventory tracking within Payload. Defaults to `true`.                                                 |
+| Option         | Type               | Description                                                                                                              |
+| -------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `access`       | `object`           | Configuration to override the default access control, use this when checking for roles or multi tenancy. [More](#access) |
+| `addresses`    | `object`           | Configuration for addresses collection and supported fields. [More](#addresses)                                          |
+| `carts`        | `object`           | Configuration for carts collection. [More](#carts)                                                                       |
+| `currencies`   | `object`           | Supported currencies by the store. [More](#currencies)                                                                   |
+| `customers`    | `object`           | Used to provide the customers slug. [More](#customers)                                                                   |
+| `inventory`    | `boolean` `object` | Enable or disable inventory tracking within Payload. Defaults to `true`.                                                 |
+| `payments`     | `object`           | Configuring payments and supported payment methods. [More](#payments)                                                    |
+| `products`     | `object`           | Configuration for products, variants collections and more. [More](#products)                                             |
+| `orders`       | `object`           | Configuration for orders collection. [More](#orders)                                                                     |
+| `transactions` | `boolean` `object` | Configuration for transactions collection. [More](#transactions)                                                         |
 
 Note that the fields in overrides take a function that receives the default fields and returns an array of fields. This allows you to add fields to the collection.
 
@@ -604,6 +604,17 @@ transactions: {
 
 The plugin provides a set of React utilities to help you manage your ecommerce frontend. These include context providers, hooks, and components to handle carts, products, and payments.
 
+The following hooks and components are available:
+
+| Hook / Component    | Description                                                                    |
+| ------------------- | ------------------------------------------------------------------------------ |
+| `EcommerceProvider` | A context provider to wrap your application and provide the ecommerce context. |
+| `useCart`           | A hook to manage the cart state and actions.                                   |
+| `useAddresses`      | A hook to fetch and manage products.                                           |
+| `usePayments`       | A hook to manage the checkout process.                                         |
+| `useCurrency`       | A hook to format prices based on the selected currency.                        |
+| `useEcommerce`      | A hook that encompasses all of the above in one.                               |
+
 ### `EcommerceProvider`
 
 The `EcommerceProvider` component is used to wrap your application and provide the ecommerce context. It takes the following props:
@@ -634,6 +645,100 @@ export const Providers = () => (
     {children}
   </EcommerceProvider>
 )
+```
+
+### `useCart`
+
+The `useCart` hook is used to manage the cart state and actions. It provides methods to add, remove, and update items in the cart, as well as to fetch the current cart state.
+
+Example usage:
+
+```tsx
+import { useCart } from '@payloadcms/plugin-ecommerce/react'
+
+const CartComponent = () => {
+  const { addItem, cart, clearCart, decrementItem, incrementItem, removeItem } =
+    useCart()
+
+  // Your component logic here
+}
+```
+
+### `useAddresses`
+
+The `useAddresses` hook is used to fetch and manage addresses. It provides methods to create, update, and delete addresses, as well as to fetch the list of addresses.
+
+It has the following properties:
+
+| Property        | Type                                                                | Description                           |
+| --------------- | ------------------------------------------------------------------- | ------------------------------------- |
+| `addresses`     | `Address[]`                                                         | The list of addresses.                |
+| `createAddress` | `(address: AddressInput) => Promise<Address>`                       | Method to create a new address.       |
+| `updateAddress` | `(id: string \| number, address: AddressInput) => Promise<Address>` | Method to update an existing address. |
+
+Example usage:
+
+```tsx
+import { useAddresses } from '@payloadcms/plugin-ecommerce/react'
+
+const AddressesComponent = () => {
+  const { addresses, createAddress, updateAddress } = useAddresses()
+
+  // Your component logic here
+}
+```
+
+### `usePayments`
+
+The `usePayments` hook is used to manage the checkout process. It provides methods to initiate payments, confirm orders, and handle payment status.
+
+Example usage:
+
+```tsx
+import { usePayments } from '@payloadcms/plugin-ecommerce/react'
+
+const CheckoutComponent = () => {
+  const {
+    confirmOrder,
+    initiatePayment,
+    paymentMethods,
+    selectedPaymentMethod,
+  } = usePayments()
+
+  // Your component logic here
+}
+```
+
+### `useCurrency`
+
+The `useCurrency` hook is used to format prices based on the selected currency. It provides methods to format prices and to get the current currency.
+
+Example usage:
+
+```tsx
+import { useCurrency } from '@payloadcms/plugin-ecommerce/react'
+
+const PriceComponent = ({ amount }) => {
+  const { currenciesConfig, currency, setCurrency } = useCurrency()
+
+  return <div>{formatPrice(amount)}</div>
+}
+```
+
+### `useEcommerce`
+
+The `useEcommerce` hook encompasses all of the above hooks in one. It provides access to the cart, addresses, and payments hooks.
+
+Example usage:
+
+```tsx
+import { useEcommerce } from '@payloadcms/plugin-ecommerce/react'
+
+const EcommerceComponent = () => {
+  const { cart, addresses, selectedPaymentMethod } = useEcommerce()
+
+  // Your component logic here
+}
 ```
 
 ## TypeScript
