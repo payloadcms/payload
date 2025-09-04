@@ -124,6 +124,33 @@ describe('Auth', () => {
         .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
         .not.toContain('create-first-user')
     })
+
+    test('richText field should should not be readOnly in create first user view', async () => {
+      const {
+        admin: {
+          routes: { createFirstUser: createFirstUserRoute },
+        },
+        routes: { admin: adminRoute },
+      } = getRoutes({})
+
+      // wait for create first user route
+      await page.goto(serverURL + `${adminRoute}${createFirstUserRoute}`)
+
+      await expect(page.locator('.create-first-user')).toBeVisible()
+
+      await waitForVisibleAuthFields()
+
+      const richTextRoot = page
+        .locator('.rich-text-lexical .ContentEditable__root[data-lexical-editor="true"]')
+        .first()
+
+      // ensure editor is present
+      await expect(richTextRoot).toBeVisible()
+
+      // core read-only checks
+      await expect(richTextRoot).toHaveAttribute('contenteditable', 'true')
+      await expect(richTextRoot).not.toHaveAttribute('aria-readonly', 'true')
+    })
   })
 
   describe('non create first user', () => {
