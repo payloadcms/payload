@@ -21,7 +21,7 @@
 
 - Any package can be built using a `pnpm build:*` script defined in the root `package.json`. These typically follow the format `pnpm build:<directory_name>`. The options are all of the top-level directories inside the `packages/` directory. Ex `pnpm build:db-mongodb` which builds the `packages/db-mongodb` package.
 - ALL packages can be built with `pnpm build:all`.
-- Use `pnpm dev` to start the monorepo dev server. This loads the default config located at `test/_common/config.ts`.
+- Use `pnpm dev` to start the monorepo dev server. This loads the default config located at `test/_community/config.ts`.
 - Specific dev configs for each package can be run with `pnpm dev <directory_name>`. The options are all of the top-level directories inside the `test/` directory. Ex `pnpm dev fields` which loads the `test/fields/config.ts` config. The directory name can either encompass a single area of functionality or be the name of a specific package.
 
 ## Testing instructions
