@@ -1,4 +1,4 @@
-import { pluginMcp } from '@payloadcms/plugin-mcp'
+import { pluginMCP } from '@payloadcms/plugin-mcp'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { z } from 'zod'
@@ -20,14 +20,22 @@ export default buildConfigWithDefaults({
   collections: [Media, Posts],
   onInit: seed,
   plugins: [
-    pluginMcp({
+    pluginMCP({
       collections: {
         media: true,
         posts: true,
       },
-      collectionsDirPath: 'dev/collections',
-      configFilePath: path.resolve(dirname, 'payload.config.ts'),
       mcp: {
+        handlerOptions: {
+          verboseLogs: true,
+          maxDuration: 60,
+        },
+        serverOptions: {
+          serverInfo: {
+            name: 'My Custom MCP Server',
+            version: '1.0.0',
+          },
+        },
         tools: [
           {
             name: 'diceRoll',
@@ -56,6 +64,27 @@ export default buildConfigWithDefaults({
             }).shape,
           },
         ],
+      },
+
+      // Experimental MCP tools
+      _experimental: {
+        tools: {
+          collections: {
+            collectionsDirPath: 'dev/collections',
+            enabled: true,
+          },
+          config: {
+            configFilePath: path.resolve(dirname, 'payload.config.ts'),
+            enabled: true,
+          },
+          jobs: {
+            enabled: true,
+            jobsDirPath: 'dev/jobs',
+          },
+          auth: {
+            enabled: true,
+          },
+        },
       },
     }),
   ],
