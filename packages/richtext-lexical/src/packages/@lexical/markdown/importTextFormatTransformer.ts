@@ -8,10 +8,10 @@
 
 import type { TextNode } from 'lexical'
 
-import type { TextFormatTransformersIndex } from './MarkdownImport.js'
-import type { TextFormatTransformer } from './MarkdownTransformers.js'
+import type { TextFormatTransformersIndex } from './MarkdownImport'
+import type { TextFormatTransformer } from './MarkdownTransformers'
 
-import { PUNCTUATION_OR_SPACE } from './utils.js'
+import { PUNCTUATION_OR_SPACE } from './utils'
 
 export function findOutermostTextFormatTransformer(
   textNode: TextNode,
@@ -32,7 +32,6 @@ export function findOutermostTextFormatTransformer(
   const textFormatMatchStart: number = match.index || 0
   const textFormatMatchEnd = textFormatMatchStart + match[0].length
 
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   const transformer: TextFormatTransformer = textFormatTransformersIndex.transformersByTag[match[1]]
 
   return {
@@ -102,9 +101,7 @@ export function importTextFormatTransformer(
   const textContent = textNode.getTextContent()
 
   // No text matches - we can safely process the text format match
-  let nodeAfter: TextNode | undefined
-  let nodeBefore: TextNode | undefined
-  let transformedNode: TextNode
+  let nodeAfter, nodeBefore, transformedNode
 
   // If matching full content there's no need to run splitText and can reuse existing textNode
   // to update its content and apply format. E.g. for **_Hello_** string after applying bold
@@ -113,20 +110,14 @@ export function importTextFormatTransformer(
     transformedNode = textNode
   } else {
     if (startIndex === 0) {
-      ;[transformedNode, nodeAfter] = textNode.splitText(endIndex) as [
-        TextNode,
-        TextNode | undefined,
-      ]
+      ;[transformedNode, nodeAfter] = textNode.splitText(endIndex)
     } else {
-      ;[nodeBefore, transformedNode, nodeAfter] = textNode.splitText(startIndex, endIndex) as [
-        TextNode,
-        TextNode,
-        TextNode | undefined,
-      ]
+      ;[nodeBefore, transformedNode, nodeAfter] = textNode.splitText(startIndex, endIndex)
     }
   }
 
-  transformedNode.setTextContent(match[2]!)
+  transformedNode.setTextContent(match[2])
+
   if (transformer) {
     for (const format of transformer.format) {
       if (!transformedNode.hasFormat(format)) {

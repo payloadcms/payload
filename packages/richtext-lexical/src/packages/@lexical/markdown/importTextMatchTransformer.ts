@@ -7,7 +7,7 @@ import { type TextNode } from 'lexical'
  * LICENSE file in the root directory of this source tree.
  *
  */
-import type { TextMatchTransformer } from './MarkdownTransformers.js'
+import type { TextMatchTransformer } from './MarkdownTransformers'
 
 export function findOutermostTextMatchTransformer(
   textNode_: TextNode,
@@ -95,9 +95,7 @@ export function importFoundTextMatchTransformer(
   if (!transformer.replace) {
     return null
   }
-  const potentialTransformedNode = transformedNode
-    ? transformer.replace(transformedNode, match)
-    : undefined
+  const potentialTransformedNode = transformer.replace(transformedNode, match)
 
   return {
     nodeAfter,
