@@ -12,6 +12,9 @@ export type CollectionPopulationRequestHandler = ({
    * @todo make this required and default in v4
    */
   data?: Record<string, any>
+  /**
+   * @deprecated - use postEndpoint instead
+   */
   endpoint: string
   /**
    * endpoint that will be used if data is passed
