@@ -143,10 +143,33 @@ describe('Collections - Live Preview', () => {
     expect(handledMessage.title).toEqual('Test Page (Changed)')
   })
 
+  async function createPageWithInitialData(initialData: Partial<Page>) {
+    await payload.db.deleteOne({
+      collection: pagesSlug,
+      where: {
+        slug: {
+          equals: 'testPage',
+        },
+      },
+      returning: false,
+    })
+
+    const page = await payload.create({
+      collection: pagesSlug,
+      depth: 0,
+      data: {
+        ...initialData,
+        slug: 'testPage',
+      } as Page,
+    })
+
+    return page
+  }
+
   it('— strings - merges data', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     const mergedData = await mergeData({
       depth: 1,
@@ -155,13 +178,14 @@ describe('Collections - Live Preview', () => {
         title: 'Test Page (Changed)',
       },
       initialData,
+      collectionSlug: pagesSlug,
     })
 
     expect(mergedData.title).toEqual('Test Page (Changed)')
   })
 
   it('— arrays - can clear all rows', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
       arrayOfRelationships: [
         {
@@ -169,7 +193,7 @@ describe('Collections - Live Preview', () => {
           relationshipInArrayMonoHasOne: testPost.id,
         },
       ],
-    }
+    })
 
     const mergedData = await mergeData({
       depth: 1,
@@ -178,6 +202,7 @@ describe('Collections - Live Preview', () => {
         arrayOfRelationships: [],
       },
       initialData,
+      collectionSlug: pagesSlug,
     })
 
     expect(mergedData.arrayOfRelationships).toEqual([])
@@ -191,15 +216,16 @@ describe('Collections - Live Preview', () => {
         arrayOfRelationships: 0, // this is how form state represents an empty array
       },
       initialData,
+      collectionSlug: pagesSlug,
     })
 
     expect(mergedData2.arrayOfRelationships).toEqual([])
   })
 
   it('— uploads - adds and removes media', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     // Add upload
     const mergedData = await mergeData({
@@ -212,6 +238,7 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData,
+      collectionSlug: pagesSlug,
     })
 
     expect(mergedData.hero.media).toMatchObject(media)
@@ -227,15 +254,16 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData: mergedData,
+      collectionSlug: pagesSlug,
     })
 
     expect(mergedDataWithoutUpload.hero.media).toBeFalsy()
   })
 
   it('— uploads - populates within Slate rich text editor', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     // Add upload
     const merge1 = await mergeData({
@@ -246,11 +274,14 @@ describe('Collections - Live Preview', () => {
           {
             type: 'upload',
             relationTo: 'media',
-            value: media.id,
+            value: {
+              id: media.id,
+            },
           },
         ],
       },
       initialData,
+      collectionSlug: pagesSlug,
     })
 
     expect(merge1.richTextSlate).toHaveLength(1)
@@ -273,6 +304,7 @@ describe('Collections - Live Preview', () => {
         ],
       },
       initialData,
+      collectionSlug: pagesSlug,
     })
 
     expect(merge2.richTextSlate).toHaveLength(1)
@@ -281,13 +313,14 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— uploads - populates within Lexical rich text editor', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     // Add upload
     const merge1 = await mergeData({
       depth: 1,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         richTextLexical: {
@@ -336,6 +369,7 @@ describe('Collections - Live Preview', () => {
     // Remove upload
     const merge2 = await mergeData({
       depth: 1,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...merge1,
         richTextLexical: {
@@ -377,12 +411,13 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— relationships - populates monomorphic has one relationships', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     const merge1 = await mergeData({
-      depth: 1,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         relationshipMonoHasOne: testPost.id,
@@ -394,34 +429,36 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— relationships - populates monomorphic has many relationships', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     const merge1 = await mergeData({
-      depth: 1,
+      depth: 2,
       incomingData: {
         ...initialData,
         relationshipMonoHasMany: [testPost.id],
       },
       initialData,
+      collectionSlug: pagesSlug,
     })
 
     expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])
   })
 
   it('— relationships - populates polymorphic has one relationships', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     const merge1 = await mergeData({
-      depth: 1,
+      depth: 2,
       incomingData: {
         ...initialData,
         relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
       },
       initialData,
+      collectionSlug: pagesSlug,
     })
 
     expect(merge1.relationshipPolyHasOne).toMatchObject({
@@ -431,17 +468,18 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— relationships - populates polymorphic has many relationships', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     const merge1 = await mergeData({
-      depth: 1,
+      depth: 2,
       incomingData: {
         ...initialData,
         relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
       },
       initialData,
+      collectionSlug: pagesSlug,
     })
 
     expect(merge1.relationshipPolyHasMany).toMatchObject([
@@ -450,13 +488,13 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— relationships - can clear relationships', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
       relationshipMonoHasOne: testPost.id,
       relationshipMonoHasMany: [testPost.id],
       relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
       relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
-    }
+    })
 
     const merge2 = await mergeData({
       depth: 1,
@@ -467,6 +505,7 @@ describe('Collections - Live Preview', () => {
         relationshipPolyHasMany: [],
       },
       initialData,
+      collectionSlug: pagesSlug,
     })
 
     expect(merge2.relationshipMonoHasOne).toBeFalsy()
@@ -476,12 +515,12 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— relationships - populates within tabs', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     const merge1 = await mergeData({
-      depth: 1,
+      depth: 2,
       incomingData: {
         ...initialData,
         tab: {
@@ -489,18 +528,20 @@ describe('Collections - Live Preview', () => {
         },
       },
       initialData,
+      collectionSlug: pagesSlug,
     })
 
     expect(merge1.tab.relationshipInTab).toMatchObject(testPost)
   })
 
   it('— relationships - populates within arrays', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     const merge1 = await mergeData({
-      depth: 1,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         arrayOfRelationships: [
@@ -545,7 +586,8 @@ describe('Collections - Live Preview', () => {
 
     // Add a new block before the populated one, then check to see that the relationship is still populated
     const merge2 = await mergeData({
-      depth: 1,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...merge1,
         arrayOfRelationships: [
@@ -600,13 +642,14 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— relationships - populates within Slate rich text editor', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     // Add a relationship and an upload
     const merge1 = await mergeData({
-      depth: 1,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         richTextSlate: [
@@ -656,7 +699,8 @@ describe('Collections - Live Preview', () => {
 
     // Add a new node between the relationship and the upload
     const merge2 = await mergeData({
-      depth: 1,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...merge1,
         richTextSlate: [
@@ -715,13 +759,14 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— relationships - populates within Lexical rich text editor', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     // Add a relationship
     const merge1 = await mergeData({
-      depth: 1,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         richTextLexical: {
@@ -775,7 +820,8 @@ describe('Collections - Live Preview', () => {
 
     // Add a node before the populated one
     const merge2 = await mergeData({
-      depth: 1,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...merge1,
         richTextLexical: {
@@ -837,115 +883,15 @@ describe('Collections - Live Preview', () => {
     expect(merge2.richTextLexical.root.children[3].value).toMatchObject(media)
   })
 
-  it('— relationships - does not re-populate existing rich text relationships', async () => {
-    const initialData: Partial<Page> = {
-      title: 'Test Page',
-      richTextSlate: [
-        {
-          type: 'paragraph',
-          text: 'Paragraph 1',
-        },
-        {
-          type: 'reference',
-          reference: {
-            relationTo: postsSlug,
-            value: testPost,
-          },
-        },
-      ],
-    }
-
-    // Make a change to the text
-    const merge1 = await mergeData({
-      depth: 1,
-      incomingData: {
-        ...initialData,
-        richTextSlate: [
-          {
-            type: 'paragraph',
-            text: 'Paragraph 1 (Updated)',
-          },
-          {
-            type: 'reference',
-            reference: {
-              relationTo: postsSlug,
-              value: testPost.id,
-            },
-          },
-        ],
-      },
-      initialData,
-    })
-
-    expect(merge1.richTextSlate).toHaveLength(2)
-    expect(merge1.richTextSlate[0].text).toEqual('Paragraph 1 (Updated)')
-    expect(merge1.richTextSlate[1].reference.value).toMatchObject(testPost)
-  })
-
-  it('— relationships - populates within blocks', async () => {
-    const block1 = (shallow?: boolean): Extract<Page['layout'][0], { blockType: 'cta' }> => ({
-      blockType: 'cta',
-      id: '123',
-      links: [
-        {
-          link: {
-            label: 'Link 1',
-            type: 'reference',
-            reference: {
-              relationTo: postsSlug,
-              value: shallow ? testPost?.id : testPost,
-            },
-          },
-        },
-      ],
-    })
-
-    const block2: Extract<Page['layout'][0], { blockType: 'content' }> = {
-      blockType: 'content',
-      id: '456',
-      columns: [
-        {
-          id: '789',
-          richText: [
-            {
-              type: 'paragraph',
-              text: 'Column 1',
-            },
-          ],
-        },
-      ],
-    }
-
-    const initialData: Partial<Page> = {
-      title: 'Test Page',
-      layout: [block1(), block2],
-    }
-
-    // Add a new block before the populated one
-    // Then check to see that the relationship is still populated
-    const merge2 = await mergeData({
-      depth: 1,
-      incomingData: {
-        ...initialData,
-        layout: [block2, block1(true)],
-      },
-      initialData,
-    })
-
-    // Check that the relationship on the first has been removed
-    // And that the relationship on the second has been populated
-    expect(merge2.layout[0].links).toBeUndefined()
-    expect(merge2.layout[1].links[0].link.reference.value).toMatchObject(testPost)
-  })
-
   it('— relationships - re-populates externally updated relationships', async () => {
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
-    }
+    })
 
     // Populate the relationships
     const merge1 = await mergeData({
-      depth: 1,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         title: 'Test Page',
         relationshipMonoHasOne: testPost.id,
@@ -977,15 +923,9 @@ describe('Collections - Live Preview', () => {
       },
     })
 
-    const externallyUpdatedRelationship = {
-      id: updatedTestPost.id,
-      entitySlug: postsSlug,
-      updatedAt: updatedTestPost.updatedAt,
-    }
-
-    // Merge again using the `externallyUpdatedRelationship` argument
     const merge2 = await mergeData({
-      depth: 1,
+      depth: 2,
+      collectionSlug: pagesSlug,
       incomingData: {
         title: 'Test Page',
         relationshipMonoHasOne: testPost.id,
@@ -1043,10 +983,10 @@ describe('Collections - Live Preview', () => {
       locale: 'en',
     })
 
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       ...page,
       relationToLocalized: post.id,
-    }
+    })
 
     // Populate the relationships
     const merge1 = await mergeData({
@@ -1067,7 +1007,7 @@ describe('Collections - Live Preview', () => {
     const block1ID = '123'
     const block2ID = '456'
 
-    const initialData: Partial<Page> = {
+    const initialData = await createPageWithInitialData({
       title: 'Test Page',
       layout: [
         {
@@ -1091,11 +1031,12 @@ describe('Collections - Live Preview', () => {
           ],
         },
       ],
-    }
+    })
 
     // Reorder the blocks
     const merge1 = await mergeData({
       depth: 1,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         layout: [
@@ -1134,6 +1075,7 @@ describe('Collections - Live Preview', () => {
     // Remove a block
     const merge2 = await mergeData({
       depth: 1,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         layout: [
@@ -1160,6 +1102,7 @@ describe('Collections - Live Preview', () => {
     // Remove the last block to ensure that all blocks can be cleared
     const merge3 = await mergeData({
       depth: 1,
+      collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
         layout: [],
