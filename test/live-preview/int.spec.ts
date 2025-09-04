@@ -42,7 +42,6 @@ describe('Collections - Live Preview', () => {
   const serverURL: string = 'http://localhost:3000'
 
   let testPost: Post
-  let testPostTwo: Post
   let tenant: Tenant
   let media: Media
   let handleMessage: (
@@ -84,26 +83,6 @@ describe('Collections - Live Preview', () => {
       },
     })
 
-    testPost = await payload.create({
-      collection: postsSlug,
-      data: {
-        slug: 'post-1',
-        title: 'Test Post',
-        tenant: tenant.id,
-        localizedTitle: 'Test Post',
-      },
-    })
-
-    testPostTwo = await payload.create({
-      collection: postsSlug,
-      data: {
-        slug: 'post-2',
-        title: 'Test Post 2',
-        tenant: tenant.id,
-        localizedTitle: 'Test Post 2',
-      },
-    })
-
     // Create image
     const filePath = path.resolve(dirname, './seed/image-1.jpg')
     const file = (await getFileByPath(filePath))!
@@ -115,6 +94,20 @@ describe('Collections - Live Preview', () => {
         alt: 'Image 1',
       },
       file,
+    })
+
+    testPost = await payload.create({
+      collection: postsSlug,
+      data: {
+        slug: 'post-1',
+        title: 'Test Post',
+        tenant: tenant.id,
+        localizedTitle: 'Test Post',
+        hero: {
+          type: 'highImpact',
+          media: media.id,
+        },
+      },
     })
   })
 
