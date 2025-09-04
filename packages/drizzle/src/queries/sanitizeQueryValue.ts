@@ -110,19 +110,32 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  if (field.type === 'date' && operator !== 'exists') {
-    if (typeof val === 'string') {
-      if (val === 'null' || val === '') {
-        formattedValue = null
-      } else {
-        const date = new Date(val)
-        if (Number.isNaN(date.getTime())) {
-          return { operator, value: undefined }
-        }
-        formattedValue = date.toISOString()
+  // Helper function to convert a single date value to ISO string
+  const convertDateToISO = (item: unknown): unknown => {
+    if (typeof item === 'string') {
+      if (item === 'null' || item === '') {
+        return null
       }
-    } else if (typeof val === 'number') {
-      formattedValue = new Date(val).toISOString()
+      const date = new Date(item)
+      return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
+    } else if (typeof item === 'number') {
+      return new Date(item).toISOString()
+    } else if (item instanceof Date) {
+      return item.toISOString()
+    }
+    return item
+  }
+
+  if (field.type === 'date' && operator !== 'exists') {
+    if (Array.isArray(formattedValue)) {
+      // Handle arrays of dates for 'in' and 'not_in' operators
+      formattedValue = formattedValue.map(convertDateToISO).filter((item) => item !== undefined)
+    } else {
+      const converted = convertDateToISO(val)
+      if (converted === undefined) {
+        return { operator, value: undefined }
+      }
+      formattedValue = converted
     }
   }
 

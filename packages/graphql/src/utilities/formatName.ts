@@ -22,6 +22,7 @@ export const formatName = (string: string): string => {
     .replace(/\)/g, '_')
     .replace(/'/g, '_')
     .replace(/ /g, '')
+    .replace(/\[|\]/g, '_')
 
   return formatted || '_'
 }

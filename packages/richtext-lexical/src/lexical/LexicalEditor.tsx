@@ -131,8 +131,12 @@ export const LexicalEditor: React.FC<
           <React.Fragment>
             {!isSmallWidthViewport && editor.isEditable() && (
               <React.Fragment>
-                <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
-                <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
+                {editorConfig.admin?.hideDraggableBlockElement ? null : (
+                  <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+                )}
+                {editorConfig.admin?.hideAddBlockButton ? null : (
+                  <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
+                )}
               </React.Fragment>
             )}
             {editorConfig.features.plugins?.map((plugin) => {

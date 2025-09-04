@@ -76,6 +76,10 @@ export default buildConfigWithDefaults({
           saveToJWT: saveToJWTKey,
         },
         {
+          name: 'richText',
+          type: 'richText',
+        },
+        {
           name: 'group',
           type: 'group',
           fields: [
@@ -260,6 +264,33 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+    },
+    {
+      slug: 'api-keys-with-field-read-access',
+      auth: {
+        disableLocalStrategy: true,
+        useAPIKey: true,
+      },
+      fields: [
+        {
+          name: 'enableAPIKey',
+          type: 'checkbox',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          name: 'apiKey',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+      ],
+      labels: {
+        plural: 'API Keys With Field Read Access',
+        singular: 'API Key With Field Read Access',
+      },
     },
   ],
   onInit: seed,
