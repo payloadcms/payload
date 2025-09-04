@@ -85,7 +85,7 @@ The following options are available:
 | `versions`           | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#collection-config).                                                                                              |
 | `defaultPopulate`    | Specify which fields to select when this Collection is populated from another document. [More Details](../queries/select#defaultpopulate-collection-config-property).                                                            |
 | `indexes`            | Define compound indexes for this collection. This can be used to either speed up querying/sorting by 2 or more fields at the same time or to ensure uniqueness between several fields.                                           |
-| `forceSelect`        | Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks                                                                            |
+| `forceSelect`        | Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks. [More details](../queries/select).                                        |
 | `disableBulkEdit`    | Disable the bulk edit operation for the collection in the admin panel and the REST API                                                                                                                                           |
 
 _\* An asterisk denotes that a property is required._
@@ -141,6 +141,7 @@ The following options are available:
 | `livePreview`                | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                                |
 | `components`                 | Swap in your own React components to be used within this Collection. [More details](#custom-components).                                                                                                                     |
 | `listSearchableFields`       | Specify which fields should be searched in the List search view. [More details](#list-searchable-fields).                                                                                                                    |
+| `listSelectFields`           | Performance opt-in. When `true`, uses the Select API in the List View to process only the active columns as opposed to entire documents. [More details](#list-select-fields).                                                |
 | `pagination`                 | Set pagination-specific options for this Collection in the List View. [More details](#pagination).                                                                                                                           |
 | `baseFilter`                 | Defines a default base filter which will be applied to the List View (along with any other filters applied by the user) and internal links in Lexical Editor,                                                                |
 
@@ -271,6 +272,66 @@ export const Posts: CollectionConfig = {
   **Tip:** If you are adding `listSearchableFields`, make sure you index each of
   these fields so your admin queries can remain performant.
 </Banner>
+
+## List Select Fields
+
+When `true`, the List View will use the [Select API](../queries/select) to process only the active columns as opposed to entire documents. This can greatly improve performance, especially for collections with large documents or many fields.
+
+To enable this, set `listSelectFields: true` in your Collection Config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  // ...
+  admin: {
+    // ...
+    // highlight-start
+    listSelectFields: true,
+    // highlight-end
+  },
+}
+```
+
+<Banner type="info">
+  **Note:** The `listSelectFields` property is labeled as experimental, as it
+  will likely become the default behavior in v4 and be deprecated.
+</Banner>
+
+Enabling this feature may cause unexpected behavior in some cases, however, such as when using hooks that rely on the full document data.
+
+For example, if your component relies on a "title" field, this field will no longer be populated if the column is inactive:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    {
+      name: 'myField',
+      type: 'text',
+      hooks: {
+        afterRead: [
+          ({ doc }) => doc.title, // The `title` field will no longer be populated by default, unless the column is active
+        ],
+      },
+    },
+  ],
+}
+```
+
+To ensure title is always present, you will need to add that field to the [`forceSelect`](../queries/select) property in your Collection Config:
+
+```ts
+export const Posts: CollectionConfig = {
+  // ...
+  forceSelect: {
+    title: true,
+  },
+}
+```
 
 ## GraphQL
 
