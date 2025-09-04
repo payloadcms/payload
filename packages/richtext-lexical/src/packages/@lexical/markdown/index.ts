@@ -16,6 +16,7 @@ import type {
   Transformer,
 } from './MarkdownTransformers.js'
 
+import { PAYLOAD_LINK_TRANSFORMER } from '../../../features/link/markdownTransformer.js'
 import { createMarkdownExport } from './MarkdownExport.js'
 import { createMarkdownImport } from './MarkdownImport.js'
 import { registerMarkdownShortcuts } from './MarkdownShortcuts.js'
@@ -62,7 +63,7 @@ const TEXT_FORMAT_TRANSFORMERS: Array<TextFormatTransformer> = [
   STRIKETHROUGH,
 ]
 
-const TEXT_MATCH_TRANSFORMERS: Array<TextMatchTransformer> = []
+const TEXT_MATCH_TRANSFORMERS: Array<TextMatchTransformer> = [PAYLOAD_LINK_TRANSFORMER]
 
 const TRANSFORMERS: Array<Transformer> = [
   ...ELEMENT_TRANSFORMERS,

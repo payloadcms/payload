@@ -16,7 +16,7 @@ import type { ClientProps } from '../client/index.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
-import { LinkMarkdownTransformer } from '../markdownTransformer.js'
+import { PAYLOAD_LINK_TRANSFORMER } from '../markdownTransformer.js'
 import { AutoLinkNode } from '../nodes/AutoLinkNode.js'
 import { LinkNode } from '../nodes/LinkNode.js'
 import { linkPopulationPromiseHOC } from './graphQLPopulationPromise.js'
@@ -158,7 +158,7 @@ export const LinkFeature = createServerFeature<
         return schemaMap
       },
       i18n,
-      markdownTransformers: [LinkMarkdownTransformer],
+      markdownTransformers: [PAYLOAD_LINK_TRANSFORMER],
       nodes: [
         props?.disableAutoLinks === true
           ? null
