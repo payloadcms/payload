@@ -1,13 +1,5 @@
 /* eslint-disable regexp/no-unused-capturing-group */
 
-export type {
-  ElementTransformer,
-  MultilineElementTransformer,
-  TextFormatTransformer,
-  TextMatchTransformer,
-  Transformer,
-} from '@lexical/markdown'
-
 const EMPTY_OR_WHITESPACE_ONLY = /^[\t ]*$/
 const ORDERED_LIST_REGEX = /^(\s*)(\d+)\.\s/
 const UNORDERED_LIST_REGEX = /^(\s*)[-*+]\s/
@@ -21,23 +13,6 @@ const TABLE_ROW_REG_EXP = /^\|(.+)\|\s?$/
 const TABLE_ROW_DIVIDER_REG_EXP = /^(\| ?:?-*:? ?)+\|\s?$/
 const TAG_START_REGEX = /^[ \t]*<[a-z_][\w-]*(?:\s[^<>]*)?\/?>/i
 const TAG_END_REGEX = /^[ \t]*<\/[a-z_][\w-]*\s*>/i
-
-export {
-  BOLD_ITALIC_STAR,
-  BOLD_ITALIC_UNDERSCORE,
-  BOLD_STAR,
-  BOLD_UNDERSCORE,
-  CHECK_LIST,
-  HEADING,
-  HIGHLIGHT,
-  INLINE_CODE,
-  ITALIC_STAR,
-  ITALIC_UNDERSCORE,
-  ORDERED_LIST,
-  QUOTE,
-  STRIKETHROUGH,
-  UNORDERED_LIST,
-} from '@lexical/markdown'
 
 export function normalizeMarkdown(input: string, shouldMergeAdjacentLines: boolean): string {
   const lines = input.split('\n')
