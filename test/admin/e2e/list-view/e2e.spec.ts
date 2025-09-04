@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
 import * as qs from 'qs-esm'
 
-import type { Config, Geo, Post } from '../../payload-types.js'
+import type { Config, Geo, Post, Virtual } from '../../payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -434,6 +434,27 @@ describe('List View', () => {
 
       // ensure the virtual field is not present
       await expect(menuList.locator('div', { hasText: exactText('Virtual Text') })).toHaveCount(0)
+    })
+
+    test('should allow to filter by virtual relationship field', async () => {
+      const post1 = await createPost({ title: 'somePost' })
+      const post2 = await createPost({ title: 'otherPost' })
+
+      await createVirtualDoc({ post: post1.id })
+      await createVirtualDoc({ post: post2.id })
+
+      await page.goto(virtualsUrl.list)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
+      await addListFilter({
+        page,
+        fieldLabel: 'Virtual Title From Post',
+        operatorLabel: 'equals',
+        value: 'somePost',
+      })
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
     })
 
     test('should allow to filter in array field', async () => {
@@ -1805,4 +1826,14 @@ async function createArray() {
       array: [{ text: 'test' }],
     },
   })
+}
+
+async function createVirtualDoc(overrides?: Partial<Virtual>): Promise<Virtual> {
+  return payload.create({
+    collection: virtualsSlug,
+    data: {
+      post: overrides?.post,
+      ...overrides,
+    },
+  }) as unknown as Promise<Virtual>
 }
