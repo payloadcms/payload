@@ -15,6 +15,7 @@ import { APIError, formatErrors } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import { getClientConfig } from './getClientConfig.js'
+import { getColumns } from './getColumns.js'
 import { renderFilters, renderTable } from './renderTable.js'
 import { upsertPreferences } from './upsertPreferences.js'
 
@@ -73,7 +74,7 @@ const buildTableState = async (
 ): Promise<BuildTableStateSuccessResult> => {
   const {
     collectionSlug,
-    columns,
+    columns: columnsFromArgs,
     data: dataFromArgs,
     enableRowSelections,
     orderableFieldName,
@@ -148,7 +149,7 @@ const buildTableState = async (
       : `collection-${collectionSlug}`,
     req,
     value: {
-      columns,
+      columns: columnsFromArgs,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       sort: query?.sort as string,
     },
@@ -223,6 +224,12 @@ const buildTableState = async (
       })
     }
   }
+
+  const columns = getColumns({
+    collectionConfig: clientCollectionConfig,
+    columns: columnsFromArgs,
+    i18n: req.i18n,
+  })
 
   const { columnState, Table } = renderTable({
     clientCollectionConfig,

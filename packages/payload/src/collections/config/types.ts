@@ -412,6 +412,13 @@ export type CollectionAdminOptions = {
    */
   listSearchableFields?: string[]
   /**
+   * @experimental This is an experimental feature and may change in the future. Use at your own discretion.
+   * Performance opt-in. If true, will use the [Select API](https://payloadcms.com/docs/queries/select) when loading the list view.
+   * If your cells require specific fields that may be unselected, use `forceSelect` in conjunction with this property.
+   * All active columns will be automatically selected.
+   */
+  listSelectFields?: boolean
+  /**
    * Live preview options
    */
   livePreview?: LivePreviewConfig

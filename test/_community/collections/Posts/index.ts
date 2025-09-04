@@ -6,6 +6,10 @@ export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
   admin: {
     useAsTitle: 'title',
+    listSelectFields: true,
+  },
+  forceSelect: {
+    title: true,
   },
   fields: [
     {
