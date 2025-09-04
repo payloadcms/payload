@@ -30,6 +30,7 @@ The plugin ships with a wide range of features to help you get started with ecom
 - Addresses linked to your Customers
 - Stripe Payments integration
 - Any number of currencies supported
+- React UI utilities to help you manage your frontend logic
 
 ## Installation
 
@@ -214,6 +215,88 @@ isCustomerField: ({ req: { user } }) =>
 ```
 
 ## Customers
+
+The `customers` option is required and is used to provide the customers collection slug. This collection is used to link orders, carts, and addresses to a customer.
+
+| Option | Type   | Description                           |
+| ------ | ------ | ------------------------------------- |
+| `slug` | string | The slug of the customers collection. |
+
+## Payments
+
+The `payments` option is used to configure payments and supported payment methods.
+
+| Option           | Type    | Description                                                                                       |
+| ---------------- | ------- | ------------------------------------------------------------------------------------------------- |
+| `paymentMethods` | `array` | An array of payment method adapters. Currently, only Stripe is supported. [More](#stripe-adapter) |
+
+### Payment adapters
+
+The plugin supports payment adapters to integrate with different payment gateways. Currently, only the [Stripe adapter](#stripe-adapter) is available.
+
+### Stripe Adapter
+
+The Stripe adapter is used to integrate with the Stripe payment gateway. It requires a secret key, publishable key, and optionally webhook secret.
+
+<Banner type="info">
+  Note that Payload will not install the Stripe SDK package for you
+  automatically, so you will need to install it yourself:
+  <br />
+  <code>pnpm add stripe</code>
+</Banner>
+
+```ts
+import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
+
+stripeAdapter({
+  secretKey: process.env.STRIPE_SECRET_KEY!,
+  publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+  webhookSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET!,
+})
+```
+
+## Addresses
+
+The `addresses` option is used to configure the addresses collection and supported fields. Defaults to `true` which will create an `addresses` collection with default fields. It also takes an object:
+
+| Option               | Type                 | Description                                                                                                                                                  |
+| -------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `addressFields`      | `FieldsOverride`     | A function that is given the `defaultFields` as an argument and returns an array of fields. Use this to customise the supported fields for stored addresses. |
+| `collectionOverride` | `CollectionOverride` | Allows you to override the collection for `addresses` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array.     |
+| `supportedCountries` | `CountryType[]`      | An array of supported countries in [ISO 3166-1 alpha-2 format](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Defaults to all countries.                 |
+
+You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
+
+```ts
+addresses: {
+  collectionOverride: {
+    fields: ({ defaultFields }) => {
+      const fields = [
+        ...defaultFields,
+        {
+          name: 'googleMapLocation',
+          label: 'Google Map Location',
+          type: 'text',
+        },
+      ]
+
+      return fields
+    },
+  }
+}
+```
+
+### `supportedCountries`
+
+The `supportedCountries` option is an array of country codes in [ISO 3166-1 alpha-2 format](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). This is used to limit the countries that can be selected when creating or updating an address. If not provided, all countries will be supported. Currently used for storing addresses only.
+
+You can import the default list of countries from the plugin:
+
+```ts
+import { defaultCountries } from '@payloadcms/plugin-ecommerce/addresses'
+```
+
+## React
 
 ## TypeScript
 
