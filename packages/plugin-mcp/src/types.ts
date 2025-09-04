@@ -1,15 +1,35 @@
 import type { CollectionSlug } from 'payload'
 import type { z } from 'zod'
 
-export type PluginMcpServerConfig = {
+export type PluginMCPServerConfig = {
+  /**
+   * Experimental features
+   * **These features are for experimental purposes -- They are Disabled in Production by Default**
+   */
+  _experimental?: {
+    tools: {
+      auth?: {
+        enabled: boolean
+      }
+      collections?: {
+        collectionsDirPath: string
+        enabled: boolean
+      }
+      config?: {
+        configFilePath: string
+        enabled: boolean
+      }
+      jobs?: {
+        enabled: boolean
+        jobsDirPath: string
+      }
+    }
+  }
   collections?: Partial<Record<CollectionSlug, true>>
-  collectionsDirPath?: string
-  configFilePath?: string
   disabled?: boolean
-  jobsDirPath?: string
   mcp?: {
-    handlerOptions?: McpHandlerOptions
-    serverOptions?: McpServerOptions
+    handlerOptions?: MCPHandlerOptions
+    serverOptions?: MCPServerOptions
     tools?: {
       description: string
       handler: (args: Record<string, unknown>) => Promise<{
@@ -24,14 +44,14 @@ export type PluginMcpServerConfig = {
   }
 }
 
-export type McpHandlerOptions = {
+export type MCPHandlerOptions = {
   basePath?: string
   maxDuration?: number
   redisUrl?: string
   verboseLogs?: boolean
 }
 
-export type McpServerOptions = {
+export type MCPServerOptions = {
   serverInfo?: {
     name: string
     version: string
@@ -39,45 +59,36 @@ export type McpServerOptions = {
 }
 
 export type GlobalSettings = {
-  endpoint: {
-    basePath: string
-    maxDuration: number
-    serverInfo: {
-      name: string
-      version: string
-    }
-    verboseLogs: boolean
-  }
   tools: {
-    auth: {
-      auth: boolean
-      forgotPassword: boolean
-      login: boolean
-      resetPassword: boolean
-      unlock: boolean
-      verify: boolean
+    auth?: {
+      auth?: boolean
+      forgotPassword?: boolean
+      login?: boolean
+      resetPassword?: boolean
+      unlock?: boolean
+      verify?: boolean
     }
-    collections: {
-      create: boolean
-      delete: boolean
-      find: boolean
-      update: boolean
+    collections?: {
+      create?: boolean
+      delete?: boolean
+      find?: boolean
+      update?: boolean
     }
-    config: {
-      find: boolean
-      update: boolean
+    config?: {
+      find?: boolean
+      update?: boolean
     }
     custom?: Record<string, boolean>
-    jobs: {
-      create: boolean
-      run: boolean
-      update: boolean
+    jobs?: {
+      create?: boolean
+      run?: boolean
+      update?: boolean
     }
-    resources: {
-      create: boolean
-      delete: boolean
-      find: boolean
-      update: boolean
+    resources?: {
+      create?: boolean
+      delete?: boolean
+      find?: boolean
+      update?: boolean
     }
   }
 }
@@ -190,26 +201,4 @@ export interface JobConfigUpdate {
   queue?: string
   retries?: number
   timeout?: number
-}
-
-// Figma
-export type FigmaSettings = {
-  credentials?: {
-    apiToken?: string
-    baseUrl?: string
-    teamId?: string
-    webhookSecret?: string
-  }
-  tools?: {
-    getComments?: boolean
-    getFile?: boolean
-    getFileMetadata?: boolean
-    getFileNodes?: boolean
-    getFileStyles?: boolean
-    getFileVersions?: boolean
-    getImageFills?: boolean
-    getImages?: boolean
-    getProjects?: boolean
-    getUsers?: boolean
-  }
 }
