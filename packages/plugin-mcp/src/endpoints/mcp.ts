@@ -6,15 +6,12 @@ import { createRequestFromPayloadRequest } from '../mcp/createRequest.js'
 import { getMCPHandler } from '../mcp/getMcpHandler.js'
 
 export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
-  let toolsSettings: GlobalSettings['tools'] | undefined
-
   const mcpHandler: PayloadHandler = async (req) => {
-    if (!toolsSettings) {
-      toolsSettings = await req.payload.findGlobal({
-        slug: 'payload-mcp-tools',
-        user: req.user,
-      })
-    }
+    // Admins can change the tool list using the admin panel, so retrieve latest global
+    const toolsSettings = await req.payload.findGlobal({
+      slug: 'payload-mcp-tools',
+      user: req.user,
+    })
 
     const globalSettings = {
       tools: toolsSettings,
