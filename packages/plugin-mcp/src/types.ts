@@ -96,12 +96,6 @@ export type GlobalSettings = {
       run?: boolean
       update?: boolean
     }
-    resources?: {
-      create?: boolean
-      delete?: boolean
-      find?: boolean
-      update?: boolean
-    }
   }
 }
 

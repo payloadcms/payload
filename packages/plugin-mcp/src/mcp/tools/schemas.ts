@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const toolSchemas = {
   findResources: {
-    description: 'Finds documents in a Payload collection using Find or FindByID',
+    description: 'Find documents in a Payload collection using Find or FindByID.',
     parameters: z.object({
       id: z
         .string()
@@ -10,10 +10,6 @@ export const toolSchemas = {
         .describe(
           'Optional: specific document ID to retrieve. If not provided, returns all documents',
         ),
-      collection: z
-        .string()
-        .min(1, 'Collection name is required')
-        .describe('The name of the collection to read from (e.g. "media", "users")'),
       limit: z
         .number()
         .int()
@@ -43,9 +39,8 @@ export const toolSchemas = {
   },
 
   createResource: {
-    description: 'Creates a document in a Payload collection.',
+    description: 'Create a document in a Payload collection.',
     parameters: z.object({
-      collection: z.string().describe('The collection to create the document in'),
       data: z.string().describe('JSON string containing the data for the new document'),
       draft: z
         .boolean()
@@ -56,10 +51,9 @@ export const toolSchemas = {
   },
 
   updateResource: {
-    description: 'Updates documents in a Payload collection by ID or where clause.',
+    description: 'Update documents in a Payload collection by ID or where clause.',
     parameters: z.object({
       id: z.string().optional().describe('Optional: specific document ID to update'),
-      collection: z.string().describe('The collection to update the document in'),
       data: z.string().describe('JSON string containing the data to update'),
       depth: z
         .number()
@@ -89,10 +83,9 @@ export const toolSchemas = {
   },
 
   deleteResource: {
-    description: 'Deletes documents in a Payload collection by ID or where clause.',
+    description: 'Delete documents in a Payload collection by ID or where clause.',
     parameters: z.object({
       id: z.string().optional().describe('Optional: specific document ID to delete'),
-      collection: z.string().describe('The collection to delete the document from'),
       depth: z
         .number()
         .int()

@@ -3,17 +3,17 @@ import type { PayloadRequest } from 'payload'
 
 import type { PluginMCPServerConfig } from '../../../types.js'
 
-import { validateCollectionSlug } from '../../helpers/validation.js'
+import { toCamelCase } from '../../../utils/camelCase.js'
 import { toolSchemas } from '../schemas.js'
 
 export const deleteResourceTool = (
   server: McpServer,
   req: PayloadRequest,
   verboseLogs: boolean,
+  collectionSlug: string,
   collections: PluginMCPServerConfig['collections'],
 ) => {
   const tool = async (
-    collection: string,
     id?: string,
     where?: string,
     depth: number = 0,
@@ -21,24 +21,9 @@ export const deleteResourceTool = (
   ) => {
     const payload = req.payload
 
-    const collectionKeys = Object.keys(collections || {})
-    const collectionNames = collectionKeys.reduce(
-      (acc, key) => {
-        acc[key] = true
-        return acc
-      },
-      {} as Record<string, true>,
-    )
-    const validationError = validateCollectionSlug(collection, collectionNames)
-    if (validationError) {
-      payload.logger.warn(`[payload-mcp] Validation error for ${collection}: ${validationError}`)
-      return {
-        content: [{ type: 'text' as const, text: `Validation Error: ${validationError}` }],
-      }
-    }
     if (verboseLogs) {
       payload.logger.info(
-        `[payload-mcp] Deleting resource from collection: ${collection}${id ? ` with ID: ${id}` : ' with where clause'}`,
+        `[payload-mcp] Deleting resource from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}`,
       )
     }
 
@@ -71,7 +56,7 @@ export const deleteResourceTool = (
 
       // Build delete options
       const deleteOptions: Record<string, unknown> = {
-        collection,
+        collection: collectionSlug,
         depth,
         overrideAccess,
       }
@@ -94,7 +79,6 @@ export const deleteResourceTool = (
       // Handle different result types
       if (id) {
         // Single document deletion
-        const singleResult = result as Record<string, unknown>
         if (verboseLogs) {
           payload.logger.info(`[payload-mcp] Successfully deleted document with ID: ${id}`)
         }
@@ -103,7 +87,7 @@ export const deleteResourceTool = (
           content: [
             {
               type: 'text' as const,
-              text: `Document deleted successfully from collection "${collection}"!
+              text: `Document deleted successfully from collection "${collectionSlug}"!
 Deleted document:
 \`\`\`json
 ${JSON.stringify(result, null, 2)}
@@ -123,7 +107,7 @@ ${JSON.stringify(result, null, 2)}
           )
         }
 
-        let responseText = `Multiple documents deleted from collection "${collection}"!
+        let responseText = `Multiple documents deleted from collection "${collectionSlug}"!
 Deleted: ${docs.length} documents
 Errors: ${errors.length}
 ---`
@@ -154,33 +138,28 @@ ${JSON.stringify(errors, null, 2)}
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       payload.logger.error(
-        `[payload-mcp] Error deleting resource from ${collection}: ${errorMessage}`,
+        `[payload-mcp] Error deleting resource from ${collectionSlug}: ${errorMessage}`,
       )
 
       return {
         content: [
           {
             type: 'text' as const,
-            text: `Error deleting resource from collection "${collection}": ${errorMessage}`,
+            text: `Error deleting resource from collection "${collectionSlug}": ${errorMessage}`,
           },
         ],
       }
     }
   }
 
-  const collectionSlugs = Object.keys(collections || {})
-  collectionSlugs.forEach((collectionSlug) => {
-    if (!collections?.[collectionSlug]?.enabled) {
-      return
-    }
-
+  if (collections?.[collectionSlug]?.enabled) {
     server.tool(
-      `delete${collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)}Document`,
+      `delete${toCamelCase(collectionSlug).charAt(0).toUpperCase() + collectionSlug.slice(1)}Document`,
       `${toolSchemas.deleteResource.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
       toolSchemas.deleteResource.parameters.shape,
-      async ({ id, collection, depth, overrideAccess, where }) => {
-        return await tool(collection, id, where, depth, overrideAccess)
+      async ({ id, depth, overrideAccess, where }) => {
+        return await tool(id, where, depth, overrideAccess)
       },
     )
-  })
+  }
 }

@@ -4,7 +4,62 @@ import type { PluginMCPServerConfig } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
 
+const addEnabledCollectionTools = (collections: PluginMCPServerConfig['collections']) => {
+  const enabledCollectionSlugs = Object.keys(collections || {}).filter(
+    (collection) => collections?.[collection]?.enabled,
+  )
+  return enabledCollectionSlugs.map((enabledCollectionSlug) => ({
+    type: 'collapsible' as const,
+    fields: [
+      {
+        name: `${enabledCollectionSlug}-capabilities`,
+        type: 'group' as const,
+        fields: [
+          {
+            name: `${enabledCollectionSlug}-find`,
+            type: 'checkbox' as const,
+            admin: {
+              description: `Allow clients to find ${enabledCollectionSlug}.`,
+            },
+            defaultValue: true,
+            label: 'Find',
+          },
+          {
+            name: `${enabledCollectionSlug}-create`,
+            type: 'checkbox' as const,
+            admin: {
+              description: `Allow clients to create ${enabledCollectionSlug}.`,
+            },
+            defaultValue: false,
+            label: 'Create',
+          },
+          {
+            name: `${enabledCollectionSlug}-update`,
+            type: 'checkbox' as const,
+            admin: {
+              description: `Allow clients to update ${enabledCollectionSlug}.`,
+            },
+            defaultValue: false,
+            label: 'Update',
+          },
+          {
+            name: `${enabledCollectionSlug}-delete`,
+            type: 'checkbox' as const,
+            admin: {
+              description: `Allow clients to delete ${enabledCollectionSlug}.`,
+            },
+            defaultValue: false,
+            label: 'Delete',
+          },
+        ],
+      },
+    ],
+    label: `${enabledCollectionSlug.charAt(0).toUpperCase() + enabledCollectionSlug.slice(1)}`,
+  }))
+}
+
 export const createMCPToolsGlobal = (
+  collections: PluginMCPServerConfig['collections'],
   customTools: Array<{ description: string; name: string }> = [],
   experimentalTools: NonNullable<PluginMCPServerConfig['_experimental']>['tools'] = {},
 ): GlobalConfig => {
@@ -27,50 +82,7 @@ export const createMCPToolsGlobal = (
       group: 'MCP',
     },
     fields: [
-      {
-        type: 'collapsible',
-        fields: [
-          {
-            name: 'resources',
-            type: 'group',
-            fields: [
-              {
-                name: 'find',
-                type: 'checkbox',
-                admin: {
-                  description: 'Allow LLMs to find collection documents.',
-                },
-                defaultValue: true,
-              },
-              {
-                name: 'create',
-                type: 'checkbox',
-                admin: {
-                  description: 'Allow LLMs to create collection documents.',
-                },
-                defaultValue: false,
-              },
-              {
-                name: 'update',
-                type: 'checkbox',
-                admin: {
-                  description: 'Allow LLMs to update collection documents.',
-                },
-                defaultValue: false,
-              },
-              {
-                name: 'delete',
-                type: 'checkbox',
-                admin: {
-                  description: 'Allow LLMs to delete collection documents.',
-                },
-                defaultValue: false,
-              },
-            ],
-          },
-        ],
-        label: 'Payload MCP Tools',
-      },
+      ...addEnabledCollectionTools(collections),
 
       // Experimental Tools
       ...(process.env.NODE_ENV === 'development' &&
@@ -263,7 +275,7 @@ export const createMCPToolsGlobal = (
                     ]
                   : []),
               ],
-              label: 'Payload Experimental MCP Tools',
+              label: 'Experimental Tools',
             },
           ]
         : []),
@@ -279,7 +291,7 @@ export const createMCPToolsGlobal = (
                   fields: customToolsFields,
                 },
               ],
-              label: 'MCP Tools',
+              label: 'Custom Tools',
             },
           ]
         : []),

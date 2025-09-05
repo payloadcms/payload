@@ -3,17 +3,17 @@ import type { PayloadRequest } from 'payload'
 
 import type { PluginMCPServerConfig } from '../../../types.js'
 
-import { validateCollectionSlug } from '../../helpers/validation.js'
+import { toCamelCase } from '../../../utils/camelCase.js'
 import { toolSchemas } from '../schemas.js'
 
 export const findResourceTool = (
   server: McpServer,
   req: PayloadRequest,
   verboseLogs: boolean,
+  collectionSlug: string,
   collections: PluginMCPServerConfig['collections'],
 ) => {
   const tool = async (
-    collection: string,
     id?: string,
     limit: number = 10,
     page: number = 1,
@@ -22,25 +22,9 @@ export const findResourceTool = (
   ) => {
     const payload = req.payload
 
-    const collectionKeys = Object.keys(collections || {})
-    const collectionNames = collectionKeys.reduce(
-      (acc, key) => {
-        acc[key] = true
-        return acc
-      },
-      {} as Record<string, true>,
-    )
-    const validationError = validateCollectionSlug(collection, collectionNames)
-    if (validationError) {
-      payload.logger.warn(`[payload-mcp] Validation error for ${collection}: ${validationError}`)
-      return {
-        content: [{ type: 'text' as const, text: `Validation Error: ${validationError}` }],
-      }
-    }
-
     if (verboseLogs) {
       payload.logger.info(
-        `[payload-mcp] Reading resource from collection: ${collection}${id ? ` with ID: ${id}` : ''}, limit: ${limit}, page: ${page}`,
+        `[payload-mcp] Reading resource from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ''}, limit: ${limit}, page: ${page}`,
       )
     }
 
@@ -66,7 +50,7 @@ export const findResourceTool = (
         try {
           const doc = await payload.findByID({
             id,
-            collection,
+            collection: collectionSlug,
           })
 
           if (verboseLogs) {
@@ -77,20 +61,20 @@ export const findResourceTool = (
             content: [
               {
                 type: 'text' as const,
-                text: `Resource from collection "${collection}":
+                text: `Resource from collection "${collectionSlug}":
 ${JSON.stringify(doc, null, 2)}`,
               },
             ],
           }
         } catch (_findError) {
           payload.logger.warn(
-            `[payload-mcp] Document not found with ID: ${id} in collection: ${collection}`,
+            `[payload-mcp] Document not found with ID: ${id} in collection: ${collectionSlug}`,
           )
           return {
             content: [
               {
                 type: 'text' as const,
-                text: `Error: Document with ID "${id}" not found in collection "${collection}"`,
+                text: `Error: Document with ID "${id}" not found in collection "${collectionSlug}"`,
               },
             ],
           }
@@ -99,7 +83,7 @@ ${JSON.stringify(doc, null, 2)}`,
 
       // Otherwise, use find to get multiple documents
       const findOptions: Parameters<typeof payload.find>[0] = {
-        collection,
+        collection: collectionSlug,
         limit,
         page,
       }
@@ -116,18 +100,17 @@ ${JSON.stringify(doc, null, 2)}`,
 
       if (verboseLogs) {
         payload.logger.info(
-          `[payload-mcp] Found ${result.docs.length} documents in collection: ${collection}`,
+          `[payload-mcp] Found ${result.docs.length} documents in collection: ${collectionSlug}`,
         )
       }
 
-      let responseText = `Resources from collection "${collection}":
+      let responseText = `Collection: "${collectionSlug}"
 Total: ${result.totalDocs} documents
 Page: ${result.page} of ${result.totalPages}
-Showing: ${result.docs.length} documents
----`
+`
 
       for (const doc of result.docs) {
-        responseText += `\`\`\`json\n${JSON.stringify(doc, null, 2)}\n\`\`\``
+        responseText += `\n\`\`\`json\n${JSON.stringify(doc, null, 2)}\n\`\`\``
       }
 
       return {
@@ -141,32 +124,27 @@ Showing: ${result.docs.length} documents
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       payload.logger.error(
-        `[payload-mcp] Error reading resources from collection ${collection}: ${errorMessage}`,
+        `[payload-mcp] Error reading resources from collection ${collectionSlug}: ${errorMessage}`,
       )
       return {
         content: [
           {
             type: 'text' as const,
-            text: `❌ **Error reading resources from collection "${collection}":** ${errorMessage}`,
+            text: `❌ **Error reading resources from collection "${collectionSlug}":** ${errorMessage}`,
           },
         ],
       }
     }
   }
 
-  const collectionSlugs = Object.keys(collections || {})
-  collectionSlugs.forEach((collectionSlug) => {
-    if (!collections?.[collectionSlug]?.enabled) {
-      return
-    }
-
+  if (collections?.[collectionSlug]?.enabled) {
     server.tool(
-      `find${collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)}Document`,
+      `find${toCamelCase(collectionSlug).charAt(0).toUpperCase() + collectionSlug.slice(1)}Document`,
       `${toolSchemas.findResources.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
       toolSchemas.findResources.parameters.shape,
-      async ({ id, collection, limit, page, sort, where }) => {
-        return await tool(collection, id, limit, page, sort, where)
+      async ({ id, limit, page, sort, where }) => {
+        return await tool(id, limit, page, sort, where)
       },
     )
-  })
+  }
 }

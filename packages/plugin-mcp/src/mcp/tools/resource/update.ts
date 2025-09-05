@@ -3,17 +3,16 @@ import type { PayloadRequest } from 'payload'
 
 import type { PluginMCPServerConfig } from '../../../types.js'
 
-import { validateCollectionSlug } from '../../helpers/validation.js'
+import { toCamelCase } from '../../../utils/camelCase.js'
 import { toolSchemas } from '../schemas.js'
-
 export const updateResourceTool = (
   server: McpServer,
   req: PayloadRequest,
   verboseLogs: boolean,
+  collectionSlug: string,
   collections: PluginMCPServerConfig['collections'],
 ) => {
   const tool = async (
-    collection: string,
     data: string,
     id?: string,
     where?: string,
@@ -25,25 +24,9 @@ export const updateResourceTool = (
   ) => {
     const payload = req.payload
 
-    const collectionKeys = Object.keys(collections || {})
-    const collectionNames = collectionKeys.reduce(
-      (acc, key) => {
-        acc[key] = true
-        return acc
-      },
-      {} as Record<string, true>,
-    )
-    const validationError = validateCollectionSlug(collection, collectionNames)
-    if (validationError) {
-      payload.logger.warn(`[payload-mcp] Validation error for ${collection}: ${validationError}`)
-      return {
-        content: [{ type: 'text' as const, text: `Validation Error: ${validationError}` }],
-      }
-    }
-
     if (verboseLogs) {
       payload.logger.info(
-        `[payload-mcp] Updating resource in collection: ${collection}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}`,
+        `[payload-mcp] Updating resource in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}`,
       )
     }
 
@@ -54,7 +37,7 @@ export const updateResourceTool = (
         parsedData = JSON.parse(data)
         if (verboseLogs) {
           payload.logger.info(
-            `[payload-mcp] Parsed data for ${collection}: ${JSON.stringify(parsedData)}`,
+            `[payload-mcp] Parsed data for ${collectionSlug}: ${JSON.stringify(parsedData)}`,
           )
         }
       } catch (_parseError) {
@@ -95,7 +78,7 @@ export const updateResourceTool = (
         // Single document update
         const updateOptions = {
           id,
-          collection,
+          collection: collectionSlug,
           data: parsedData,
           depth,
           draft,
@@ -110,7 +93,7 @@ export const updateResourceTool = (
         }
         const result = await payload.update({
           ...updateOptions,
-          data: collections?.[collection]?.override?.(parsedData, req) || parsedData,
+          data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
         } as any)
 
         if (verboseLogs) {
@@ -121,7 +104,7 @@ export const updateResourceTool = (
           content: [
             {
               type: 'text' as const,
-              text: `Document updated successfully in collection "${collection}"!
+              text: `Document updated successfully in collection "${collectionSlug}"!
 Updated document:
 \`\`\`json
 ${JSON.stringify(result, null, 2)}
@@ -132,7 +115,7 @@ ${JSON.stringify(result, null, 2)}
       } else {
         // Multiple documents update
         const updateOptions = {
-          collection,
+          collection: collectionSlug,
           data: parsedData,
           depth,
           draft,
@@ -148,7 +131,7 @@ ${JSON.stringify(result, null, 2)}
         }
         const result = await payload.update({
           ...updateOptions,
-          data: collections?.[collection]?.override?.(parsedData, req) || parsedData,
+          data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
         } as any)
 
         const bulkResult = result as { docs?: unknown[]; errors?: unknown[] }
@@ -161,7 +144,7 @@ ${JSON.stringify(result, null, 2)}
           )
         }
 
-        let responseText = `Multiple documents updated in collection "${collection}"!
+        let responseText = `Multiple documents updated in collection "${collectionSlug}"!
 Updated: ${docs.length} documents
 Errors: ${errors.length}
 ---`
@@ -192,43 +175,27 @@ ${JSON.stringify(errors, null, 2)}
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       payload.logger.error(
-        `[payload-mcp] Error updating resource in ${collection}: ${errorMessage}`,
+        `[payload-mcp] Error updating resource in ${collectionSlug}: ${errorMessage}`,
       )
 
       return {
         content: [
           {
             type: 'text' as const,
-            text: `Error updating resource in collection "${collection}": ${errorMessage}`,
+            text: `Error updating resource in collection "${collectionSlug}": ${errorMessage}`,
           },
         ],
       }
     }
   }
 
-  const collectionSlugs = Object.keys(collections || {})
-  collectionSlugs.forEach((collectionSlug) => {
-    if (!collections?.[collectionSlug]?.enabled) {
-      return
-    }
-
+  if (collections?.[collectionSlug]?.enabled) {
     server.tool(
-      `update${collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)}Document`,
+      `update${toCamelCase(collectionSlug).charAt(0).toUpperCase() + collectionSlug.slice(1)}Document`,
       `${toolSchemas.updateResource.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
       toolSchemas.updateResource.parameters.shape,
-      async ({
-        id,
-        collection,
-        data,
-        depth,
-        draft,
-        filePath,
-        overrideLock,
-        overwriteExistingFiles,
-        where,
-      }) => {
+      async ({ id, data, depth, draft, filePath, overrideLock, overwriteExistingFiles, where }) => {
         return await tool(
-          collection,
           data,
           id,
           where,
@@ -240,5 +207,5 @@ ${JSON.stringify(errors, null, 2)}
         )
       },
     )
-  })
+  }
 }
