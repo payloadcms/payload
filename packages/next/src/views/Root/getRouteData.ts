@@ -325,11 +325,12 @@ export const getRouteData = ({
             viewType = 'collection-folders'
           } else {
             // Collection Edit Views
+            // --> /collections/:collectionSlug/create
             // --> /collections/:collectionSlug/:id
             // --> /collections/:collectionSlug/:id/api
             // --> /collections/:collectionSlug/:id/versions
             // --> /collections/:collectionSlug/:id/versions/:versionID
-            routeParams.id = segmentThree
+            routeParams.id = segmentThree === 'create' ? undefined : segmentThree
             routeParams.versionID = segmentFive
 
             ViewToRender = {
