@@ -978,6 +978,8 @@ describe('List View', () => {
       await expect(page.locator('.pill-selector')).toBeVisible()
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
+      await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+
       await page.locator('#heading-id').waitFor({ state: 'detached' })
       await page.locator('.cell-id').first().waitFor({ state: 'detached' })
       await expect(page.locator(tableHeaders)).toHaveCount(numberOfColumns - 1)
