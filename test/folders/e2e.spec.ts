@@ -367,11 +367,11 @@ test.describe('Folders', () => {
     })
 
     test('should show By Folder button', async () => {
-      const folderButton = page.locator('.list-pills__button', { hasText: 'By Folder' })
+      const folderButton = page.locator('.default-list-view-tabs__button', { hasText: 'By Folder' })
       await expect(folderButton).toBeVisible()
     })
     test('should navigate to By Folder view', async () => {
-      const folderButton = page.locator('.list-pills__button', { hasText: 'By Folder' })
+      const folderButton = page.locator('.default-list-view-tabs__button', { hasText: 'By Folder' })
       await folderButton.click()
       await expect(page).toHaveURL(`${serverURL}/admin/collections/posts/payload-folders`)
       const foldersTitle = page.locator('.collection-folder-list', { hasText: 'Folders' })
