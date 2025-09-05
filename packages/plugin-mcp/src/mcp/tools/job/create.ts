@@ -63,7 +63,7 @@ const createOrUpdateJobFile = (
     const arrayRegex = new RegExp(`(${arrayName}:\\s*\\[)([^\\]]*)(\\])`, 's')
     const arrayMatch = content.match(arrayRegex)
 
-    if (arrayMatch) {
+    if (arrayMatch && arrayMatch[2]) {
       const existingItems = arrayMatch[2].trim()
       const newItem = existingItems ? `${existingItems},\n    ${importName}` : `\n    ${importName}`
       content = content.replace(arrayRegex, `$1${newItem}\n  $3`)
@@ -76,7 +76,7 @@ const createOrUpdateJobFile = (
       const jobsConfigRegex = /(export\s+const\s.*JobsConfig\s*=\s*\{)([^}]*)(\})/s
       const jobsConfigMatch = content.match(jobsConfigRegex)
 
-      if (jobsConfigMatch) {
+      if (jobsConfigMatch && jobsConfigMatch[2]) {
         const existingConfig = jobsConfigMatch[2].trim()
         const newConfig = existingConfig
           ? `${existingConfig},\n  ${arrayName}: [\n    ${importName}\n  ]`
@@ -240,11 +240,17 @@ export const createJob = async (
       content: [
         {
           type: 'text' as const,
-          text: `✅ **Job created successfully!**\n\n**File**: \`${fileName}\`\n**Type**: \`${jobType}\`\n**Slug**: \`${jobSlug}\`\n**Description**: ${description}\n\n**Next steps**:\n1. Restart your development server to load the new job\n2. The job will be available in your Payload jobs configuration\n3. You can now queue and run this job`,
-        },
-        {
-          type: 'text' as const,
-          text: '**Generated Job Code:**\n```typescript\n' + jobContent + '\n```',
+          text: `✅ **Job created successfully!**
+
+**File**: \`${fileName}\`
+**Type**: \`${jobType}\`
+**Slug**: \`${jobSlug}\`
+**Description**: ${description}
+
+**Generated Job Code:**
+\`\`\`typescript
+${jobContent}
+\`\`\``,
         },
       ],
     }
@@ -285,14 +291,14 @@ export const ${camelCaseJobSlug}Task: Task = {
     // TODO: Implement your task logic here
     // Access input data: input.fieldName
     // Access context: context.payload, context.req, etc.
-    
+
     // Example implementation:
     const result = {
       message: 'Task executed successfully',
       input,
       timestamp: new Date().toISOString(),
     }
-    
+
     return result
   },
 }

@@ -90,7 +90,7 @@ export const deleteCollection = (
       }
     }
 
-    const results = []
+    let responseText = ''
     let operationsPerformed = 0
 
     // Delete the collection file
@@ -102,24 +102,15 @@ export const deleteCollection = (
             `[payload-mcp] Successfully deleted collection file: ${collectionFilePath}`,
           )
         }
-        results.push({
-          type: 'text' as const,
-          text: `✅ Deleted collection file: \`${capitalizedName}.ts\``,
-        })
+        responseText += `✅ Deleted collection file: \`${capitalizedName}.ts\`\n`
         operationsPerformed++
       } catch (error) {
         const errorMessage = (error as Error).message
         payload.logger.error(`[payload-mcp] Error deleting collection file: ${errorMessage}`)
-        results.push({
-          type: 'text' as const,
-          text: `❌ Error deleting collection file: ${errorMessage}`,
-        })
+        responseText += `❌ Error deleting collection file: ${errorMessage}\n`
       }
     } else {
-      results.push({
-        type: 'text' as const,
-        text: `⚠️ Collection file not found: \`${capitalizedName}.ts\``,
-      })
+      responseText += `⚠️ Collection file not found: \`${capitalizedName}.ts\`\n`
     }
 
     // Update the config file if requested and it exists
@@ -130,41 +121,33 @@ export const deleteCollection = (
         if (verboseLogs) {
           payload.logger.info(`[payload-mcp] Successfully updated config file: ${configFilePath}`)
         }
-        results.push({
-          type: 'text' as const,
-          text: `✅ Updated payload.config.ts to remove collection reference`,
-        })
+        responseText += `✅ Updated payload.config.ts to remove collection reference\n`
         operationsPerformed++
       } catch (error) {
         const errorMessage = (error as Error).message
         payload.logger.error(`[payload-mcp] Error updating config file: ${errorMessage}`)
-        results.push({
-          type: 'text' as const,
-          text: `❌ Error updating config file: ${errorMessage}`,
-        })
+        responseText += `❌ Error updating config file: ${errorMessage}\n`
       }
     } else if (updateConfig && !configExists) {
-      results.push({
-        type: 'text' as const,
-        text: `⚠️ Config file not found: payload.config.ts`,
-      })
+      responseText += `⚠️ Config file not found: payload.config.ts\n`
     }
 
     // Summary
     if (operationsPerformed > 0) {
-      results.push({
-        type: 'text' as const,
-        text: `\n✅ **Collection deletion completed!**\n\n**Operations performed**: ${operationsPerformed}\n\n**Next steps**:\n1. Restart your development server\n2. Verify the collection is no longer available in the admin panel`,
-      })
+      responseText += `\n✅ **Collection deletion completed!**`
     } else {
-      results.push({
-        type: 'text' as const,
-        text: `\n⚠️ **No operations performed**\n\nThe collection file may not have existed or there were errors during deletion.`,
-      })
+      responseText += `\n⚠️ **No operations performed**
+
+The collection file may not have existed or there were errors during deletion.`
     }
 
     return {
-      content: results,
+      content: [
+        {
+          type: 'text' as const,
+          text: responseText,
+        },
+      ],
     }
   } catch (error) {
     const errorMessage = (error as Error).message

@@ -43,10 +43,13 @@ export const readCollections = (
 
         return {
           content: [
-            { type: 'text' as const, text: `Collection: ${collectionName}` },
-            { type: 'text' as const, text: `File: ${fileName}` },
-            { type: 'text' as const, text: '---' },
-            { type: 'text' as const, text: content },
+            {
+              type: 'text' as const,
+              text: `Collection: ${collectionName}
+File: ${fileName}
+---
+${content}`,
+            },
           ],
         }
       } catch (_error) {

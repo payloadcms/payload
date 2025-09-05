@@ -65,10 +65,13 @@ export const findResourceTool = (
 
           return {
             content: [
-              { type: 'text' as const, text: `Resource from collection "${collection}":` },
-              { type: 'text' as const, text: `ID: ${doc.id}` },
-              { type: 'text' as const, text: '---' },
-              { type: 'text' as const, text: JSON.stringify(doc, null, 2) },
+              {
+                type: 'text' as const,
+                text: `Resource from collection "${collection}":
+ID: ${doc.id}
+---
+${JSON.stringify(doc, null, 2)}`,
+              },
             ],
           }
         } catch (_findError) {
@@ -109,34 +112,23 @@ export const findResourceTool = (
         )
       }
 
-      const results = []
-      results.push({
-        type: 'text' as const,
-        text: `Resources from collection "${collection}":`,
-      })
-      results.push({
-        type: 'text' as const,
-        text: `Total: ${result.totalDocs} documents`,
-      })
-      results.push({
-        type: 'text' as const,
-        text: `Page: ${result.page} of ${result.totalPages}`,
-      })
-      results.push({
-        type: 'text' as const,
-        text: `Showing: ${result.docs.length} documents`,
-      })
-      results.push({ type: 'text' as const, text: '---' })
+      let responseText = `Resources from collection "${collection}":
+Total: ${result.totalDocs} documents
+Page: ${result.page} of ${result.totalPages}
+Showing: ${result.docs.length} documents
+---`
 
       for (const doc of result.docs) {
-        results.push({
-          type: 'text' as const,
-          text: `**Document ID: ${doc.id}**\n\`\`\`json\n${JSON.stringify(doc, null, 2)}\n\`\`\`\n---`,
-        })
+        responseText += `\n\n**Document ID: ${doc.id}**\n\`\`\`json\n${JSON.stringify(doc, null, 2)}\n\`\`\`\n---`
       }
 
       return {
-        content: results,
+        content: [
+          {
+            type: 'text' as const,
+            text: responseText,
+          },
+        ],
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'

@@ -179,11 +179,18 @@ export const updateConfig = (
       content: [
         {
           type: 'text' as const,
-          text: `✅ **Config updated successfully!**\n\n**File**: \`${configFilePath}\`\n**Update Type**: ${updateType}\n\n**Changes Made**:\n${updateSummary.map((summary) => `- ${summary}`).join('\n')}\n\n**Next steps**:\n1. Restart your development server to load the updated configuration\n2. Verify the changes are working correctly`,
-        },
-        {
-          type: 'text' as const,
-          text: '**Updated Config Content:**\n```typescript\n' + updatedContent + '\n```',
+          text: `✅ **Config updated successfully!**
+
+**File**: \`${configFilePath}\`
+**Update Type**: ${updateType}
+
+**Changes Made**:
+${updateSummary.map((summary) => `- ${summary}`).join('\n')}
+
+**Updated Config Content:**
+\`\`\`typescript
+${updatedContent}
+\`\`\``,
         },
       ],
     }
