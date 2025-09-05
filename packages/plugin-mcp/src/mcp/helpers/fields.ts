@@ -67,7 +67,7 @@ export function addFieldsToCollection(content: string, newFields: FieldDefinitio
     .join('\n')
 
   // Add new fields before the closing bracket
-  const existingFields = match[1]
+  const existingFields = match[1] || ''
   const hasTrailingComma = existingFields.trim().endsWith(',')
   const separator = hasTrailingComma ? '\n' : ',\n'
 
