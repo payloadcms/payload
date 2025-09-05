@@ -383,6 +383,15 @@ export type CollectionAdminOptions = {
    * @default false
    */
   disableCopyToLocale?: boolean
+  /**
+   * Performance opt-in. If true, will use the [Select API](https://payloadcms.com/docs/queries/select) when
+   * loading the list view to query only the active columns, as opposed to the entire documents.
+   * If your cells require specific fields that may be unselected, such as within hooks, etc.,
+   * use `forceSelect` in conjunction with this property.
+   *
+   * @experimental This is an experimental feature and may change in the future. Use at your own discretion.
+   */
+  enableListViewSelectAPI?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
@@ -411,14 +420,6 @@ export type CollectionAdminOptions = {
    * Additional fields to be searched via the full text search
    */
   listSearchableFields?: string[]
-  /**
-   * Performance opt-in. If true, will use the [Select API](https://payloadcms.com/docs/queries/select) when
-   * loading the list view to query only the active columns, as opposed to the entire documents.
-   * If your cells require specific fields that may be unselected, use `forceSelect` in conjunction with this property.
-   *
-   * @experimental This is an experimental feature and may change in the future. Use at your own discretion.
-   */
-  listSelectActiveColumns?: boolean
   /**
    * Live preview options
    */

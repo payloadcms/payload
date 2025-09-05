@@ -6,7 +6,7 @@ export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
   admin: {
     useAsTitle: 'title',
-    listSelectActiveColumns: true,
+    enableListViewSelectAPI: true,
   },
   forceSelect: {
     title: true,
