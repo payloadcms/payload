@@ -1,8 +1,11 @@
-import type { Collection, PaginatedDocs, PayloadRequest, Where } from 'payload'
+import type { GraphQLResolveInfo } from 'graphql'
+import type { Collection, PaginatedDocs, Where } from 'payload'
 
 import { findVersionsOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { graphqlSelectFromCollectionMany } from '../../utilities/graphqlSelect.js'
 
 export type Resolver = (
   _: unknown,
@@ -17,13 +20,12 @@ export type Resolver = (
     trash?: boolean
     where: Where
   },
-  context: {
-    req: PayloadRequest
-  },
+  context: Context,
+  info: GraphQLResolveInfo,
 ) => Promise<PaginatedDocs<any>>
 
 export function findVersionsResolver(collection: Collection): Resolver {
-  return async function resolver(_, args, context: Context) {
+  return async function resolver(_, args, context, info) {
     let { req } = context
     const locale = req.locale
     const fallbackLocale = req.fallbackLocale
@@ -54,6 +56,7 @@ export function findVersionsResolver(collection: Collection): Resolver {
       page: args.page,
       pagination: args.pagination,
       req: isolateObjectProperty(req, 'transactionID'),
+      select: graphqlSelectFromCollectionMany(info),
       sort: args.sort,
       trash: args.trash,
       where: args.where,

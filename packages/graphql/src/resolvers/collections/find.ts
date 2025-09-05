@@ -1,8 +1,11 @@
-import type { Collection, PaginatedDocs, PayloadRequest, Where } from 'payload'
+import type { GraphQLResolveInfo } from 'graphql'
+import type { Collection, PaginatedDocs, Where } from 'payload'
 
 import { findOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { graphqlSelectFromCollectionMany } from '../../utilities/graphqlSelect.js'
 
 export type Resolver = (
   _: unknown,
@@ -18,14 +21,13 @@ export type Resolver = (
     trash?: boolean
     where?: Where
   },
-  context: {
-    req: PayloadRequest
-  },
+  context: Context,
+  info: GraphQLResolveInfo,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => Promise<PaginatedDocs<any>>
 
 export function findResolver(collection: Collection): Resolver {
-  return async function resolver(_, args, context: Context) {
+  return async function resolver(_, args, context, info) {
     let { req } = context
     const locale = req.locale
     const fallbackLocale = req.fallbackLocale
@@ -57,6 +59,7 @@ export function findResolver(collection: Collection): Resolver {
       page: args.page,
       pagination: args.pagination,
       req,
+      select: graphqlSelectFromCollectionMany(info),
       sort: args.sort,
       trash: args.trash,
       where: args.where,
