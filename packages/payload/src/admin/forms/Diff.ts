@@ -55,6 +55,9 @@ export type FieldDiffClientProps<TClientField extends ClientFieldWithOptionalTyp
    */
   diffMethod: any
   field: TClientField
+  /**
+   * Permissions at this level of the field. If this field is unnamed, this will be `SanitizedFieldsPermissions` - if it is named, it will be `SanitizedFieldPermissions`
+   */
   fieldPermissions: SanitizedFieldPermissions | SanitizedFieldsPermissions
   /**
    * If this field is localized, this will be the locale of the field

@@ -14,6 +14,7 @@ import {
   MissingEditorProp,
   type PayloadComponent,
   type PayloadRequest,
+  type SanitizedFieldPermissions,
   type SanitizedFieldsPermissions,
   type VersionField,
 } from 'payload'
@@ -34,8 +35,8 @@ export type BuildVersionFieldsArgs = {
     Record<FieldTypes, PayloadComponent<FieldDiffServerProps, FieldDiffClientProps>>
   >
   entitySlug: string
-  fieldPermissions: SanitizedFieldsPermissions
   fields: Field[]
+  fieldsPermissions: SanitizedFieldsPermissions
   i18n: I18nClient
   modifiedOnly: boolean
   nestingLevel?: number
@@ -60,8 +61,8 @@ export const buildVersionFields = ({
   clientSchemaMap,
   customDiffComponents,
   entitySlug,
-  fieldPermissions,
   fields,
+  fieldsPermissions,
   i18n,
   modifiedOnly,
   nestingLevel = 0,
@@ -127,12 +128,12 @@ export const buildVersionFields = ({
           customDiffComponents,
           entitySlug,
           field,
-          fieldPermissions,
           i18n,
           indexPath,
           locale,
           modifiedOnly,
           nestingLevel,
+          parentFieldsPermissions: fieldsPermissions,
           parentIsLocalized: true,
           parentPath,
           parentSchemaPath,
@@ -154,11 +155,11 @@ export const buildVersionFields = ({
         customDiffComponents,
         entitySlug,
         field,
-        fieldPermissions,
         i18n,
         indexPath,
         modifiedOnly,
         nestingLevel,
+        parentFieldsPermissions: fieldsPermissions,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath,
         parentSchemaPath,
@@ -194,12 +195,12 @@ const buildVersionField = ({
   customDiffComponents,
   entitySlug,
   field,
-  fieldPermissions,
   i18n,
   indexPath,
   locale,
   modifiedOnly,
   nestingLevel,
+  parentFieldsPermissions,
   parentIsLocalized,
   parentPath,
   parentSchemaPath,
@@ -216,6 +217,7 @@ const buildVersionField = ({
   locale?: string
   modifiedOnly?: boolean
   nestingLevel: number
+  parentFieldsPermissions: SanitizedFieldsPermissions
   parentIsLocalized: boolean
   path: string
   schemaPath: string
@@ -223,16 +225,27 @@ const buildVersionField = ({
   valueTo: unknown
 } & Omit<
   BuildVersionFieldsArgs,
-  'fields' | 'parentIndexPath' | 'versionFromSiblingData' | 'versionToSiblingData'
+  | 'fields'
+  | 'fieldsPermissions'
+  | 'parentIndexPath'
+  | 'versionFromSiblingData'
+  | 'versionToSiblingData'
 >): BaseVersionField | null => {
-  const { permissions, read: hasReadPermission } = getFieldPermissions({
+  const { read: hasReadPermission } = getFieldPermissions({
     field,
     operation: 'read',
     parentName: parentPath?.includes('.')
       ? parentPath.split('.')[parentPath.split('.').length - 1]
       : parentPath,
-    permissions: fieldPermissions,
+    permissions: parentFieldsPermissions,
   })
+
+  const fieldPermissions: SanitizedFieldPermissions | undefined =
+    typeof parentFieldsPermissions === 'boolean'
+      ? parentFieldsPermissions
+      : 'name' in field
+        ? parentFieldsPermissions?.[field.name]
+        : undefined
 
   if ('name' in field && !hasReadPermission) {
     // HasReadPermission is only valid if the field has a name. E.g. for a tabs field it would incorrectly return `false`.
@@ -293,18 +306,21 @@ const buildVersionField = ({
 
       // At this point, permissions === fieldPermissions (FieldsPermissions)
 
-      let tabPermissions: SanitizedFieldsPermissions = undefined
+      let tabFieldsPermissions: SanitizedFieldsPermissions = undefined
 
-      if (typeof permissions === 'boolean') {
-        tabPermissions = permissions
-      } else if (permissions && typeof permissions === 'object') {
+      // The tabs field does not have its own permissions as it's unnamed => use parentFieldsPermissions
+      if (typeof parentFieldsPermissions === 'boolean') {
+        tabFieldsPermissions = parentFieldsPermissions
+      } else {
         if ('name' in tab) {
-          tabPermissions =
-            typeof permissions?.[tab.name] === 'object'
-              ? permissions?.[tab.name]?.fields
-              : permissions?.[tab.name]
+          const tabPermissions = parentFieldsPermissions?.[tab.name]
+          if (typeof tabPermissions === 'boolean') {
+            tabFieldsPermissions = tabPermissions
+          } else {
+            tabFieldsPermissions = tabPermissions?.fields
+          }
         } else {
-          tabPermissions = permissions as SanitizedFieldsPermissions
+          tabFieldsPermissions = parentFieldsPermissions
         }
       }
 
@@ -314,8 +330,8 @@ const buildVersionField = ({
           clientSchemaMap,
           customDiffComponents,
           entitySlug,
-          fieldPermissions: tabPermissions,
           fields: tab.fields,
+          fieldsPermissions: tabFieldsPermissions,
           i18n,
           modifiedOnly,
           nestingLevel: nestingLevel + 1,
@@ -342,17 +358,17 @@ const buildVersionField = ({
     if (modifiedOnly && !baseVersionField.tabs.length) {
       return null
     }
-  } // At this point, we are dealing with a `row`, `collapsible`, etc
+  } // At this point, we are dealing with a `row`, `collapsible`, array`, etc
   else if ('fields' in field) {
-    let subfieldPermissions: SanitizedFieldsPermissions = undefined
+    let subFieldsPermissions: SanitizedFieldsPermissions = undefined
 
-    if (typeof permissions === 'boolean') {
-      subfieldPermissions = permissions
-    } else if (permissions && typeof permissions === 'object') {
-      subfieldPermissions =
-        'name' in field
-          ? (permissions.fields as SanitizedFieldsPermissions)
-          : (permissions as SanitizedFieldsPermissions)
+    if ('name' in field && typeof fieldPermissions !== 'undefined') {
+      // Named fields like arrays
+      subFieldsPermissions =
+        typeof fieldPermissions === 'boolean' ? fieldPermissions : fieldPermissions.fields
+    } else {
+      // Unnamed fields like collapsible and row inherit directly from parent permissions
+      subFieldsPermissions = parentFieldsPermissions
     }
 
     if (field.type === 'array' && (valueTo || valueFrom)) {
@@ -370,8 +386,8 @@ const buildVersionField = ({
           clientSchemaMap,
           customDiffComponents,
           entitySlug,
-          fieldPermissions: subfieldPermissions,
           fields: field.fields,
+          fieldsPermissions: subFieldsPermissions,
           i18n,
           modifiedOnly,
           nestingLevel: nestingLevel + 1,
@@ -394,8 +410,8 @@ const buildVersionField = ({
         clientSchemaMap,
         customDiffComponents,
         entitySlug,
-        fieldPermissions: subfieldPermissions,
         fields: field.fields,
+        fieldsPermissions: subFieldsPermissions,
         i18n,
         modifiedOnly,
         nestingLevel: field.type !== 'row' ? nestingLevel + 1 : nestingLevel,
@@ -452,16 +468,19 @@ const buildVersionField = ({
         }
       }
 
-      let blockPermissions: typeof fieldPermissions = undefined
+      let blockFieldsPermissions: SanitizedFieldsPermissions = undefined
 
-      if (permissions === true) {
-        blockPermissions = true
+      // fieldPermissions will be set here, as the blocks field has a name
+      if (typeof fieldPermissions === 'boolean') {
+        blockFieldsPermissions = fieldPermissions
+      } else if (typeof fieldPermissions?.blocks === 'boolean') {
+        blockFieldsPermissions = fieldPermissions.blocks
       } else {
-        const permissionsBlockSpecific = permissions?.blocks?.[blockSlugToMatch]
-        if (permissionsBlockSpecific === true) {
-          blockPermissions = true
+        const permissionsBlockSpecific = fieldPermissions?.blocks?.[blockSlugToMatch]
+        if (typeof permissionsBlockSpecific === 'boolean') {
+          blockFieldsPermissions = permissionsBlockSpecific
         } else {
-          blockPermissions = permissionsBlockSpecific?.fields
+          blockFieldsPermissions = permissionsBlockSpecific?.fields
         }
       }
 
@@ -469,8 +488,8 @@ const buildVersionField = ({
         clientSchemaMap,
         customDiffComponents,
         entitySlug,
-        fieldPermissions: blockPermissions,
         fields,
+        fieldsPermissions: blockFieldsPermissions,
         i18n,
         modifiedOnly,
         nestingLevel: nestingLevel + 1,
@@ -503,7 +522,8 @@ const buildVersionField = ({
      */
     diffMethod: 'diffWordsWithSpace',
     field: clientField,
-    fieldPermissions: permissions,
+    fieldPermissions:
+      typeof fieldPermissions === 'undefined' ? parentFieldsPermissions : fieldPermissions,
     parentIsLocalized,
 
     nestingLevel: nestingLevel ? nestingLevel : undefined,
