@@ -32,7 +32,7 @@ export default buildConfigWithDefaults({
         },
         media: {
           enabled: true,
-          description: 'This is a Payload Collection with Media documents.',
+          description: 'This is a Payload collection with Media documents.',
         },
       },
       mcp: {

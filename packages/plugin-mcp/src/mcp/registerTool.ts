@@ -1,6 +1,6 @@
 export const registerTool = (
   isEnabled: boolean | undefined,
-  toolName: string,
+  toolType: string,
   registrationFn: () => void,
   payload: { logger: { info: (message: string) => void } },
   useVerboseLogs: boolean,
@@ -8,9 +8,9 @@ export const registerTool = (
   if (isEnabled) {
     registrationFn()
     if (useVerboseLogs) {
-      payload.logger.info(`[payload-mcp] ✅ ${toolName} Tool Registered.`)
+      payload.logger.info(`[payload-mcp] ✅ ${toolType} Tools Registered.`)
     }
   } else if (useVerboseLogs) {
-    payload.logger.info(`[payload-mcp] ⏭️ ${toolName} Tool Skipped.`)
+    payload.logger.info(`[payload-mcp] ⏭️ ${toolType} Tools Skipped.`)
   }
 }
