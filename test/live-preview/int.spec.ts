@@ -24,8 +24,8 @@ import type { CollectionPopulationRequestHandler } from '../../packages/live-pre
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
-const requestHandler: CollectionPopulationRequestHandler = ({ data, postEndpoint }) => {
-  const url = `/${postEndpoint}`
+const requestHandler: CollectionPopulationRequestHandler = ({ data, endpoint }) => {
+  const url = `/${endpoint}`
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'X-Payload-HTTP-Method-Override': 'GET',
