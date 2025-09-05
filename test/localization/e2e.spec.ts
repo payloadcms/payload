@@ -2,6 +2,7 @@ import type { BrowserContext, Page } from '@playwright/test'
 import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
+import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { upsertPreferences } from 'helpers/e2e/preferences.js'
@@ -28,6 +29,7 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
+import { noLocalizedFieldsCollectionSlug } from './collections/NoLocalizedFields/index.js'
 import { richTextSlug } from './collections/RichText/index.js'
 import {
   arrayWithFallbackCollectionSlug,
@@ -60,6 +62,7 @@ let urlCannotCreateDefaultLocale: AdminUrlUtil
 let urlPostsWithDrafts: AdminUrlUtil
 let urlArray: AdminUrlUtil
 let arrayWithFallbackURL: AdminUrlUtil
+let noLocalizedFieldsURL: AdminUrlUtil
 
 const title = 'english title'
 const spanishTitle = 'spanish title'
@@ -86,6 +89,7 @@ describe('Localization', () => {
     urlPostsWithDrafts = new AdminUrlUtil(serverURL, localizedDraftsSlug)
     urlArray = new AdminUrlUtil(serverURL, arrayCollectionSlug)
     arrayWithFallbackURL = new AdminUrlUtil(serverURL, arrayWithFallbackCollectionSlug)
+    noLocalizedFieldsURL = new AdminUrlUtil(serverURL, noLocalizedFieldsCollectionSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -420,8 +424,7 @@ describe('Localization', () => {
       const nestedArrayURL = new AdminUrlUtil(serverURL, nestedToArrayAndBlockCollectionSlug)
       await page.goto(nestedArrayURL.create)
       await changeLocale(page, 'ar')
-      const addArrayRow = page.locator('#field-topLevelArray .array-field__add-row')
-      await addArrayRow.click()
+      await addArrayRow(page, { fieldName: 'topLevelArray' })
 
       const arrayField = page.locator('#field-topLevelArray__0__localizedText')
       await expect(arrayField).toBeVisible()
@@ -698,13 +701,19 @@ describe('Localization', () => {
       await expect(page.locator('.row-1 .cell-_status')).toContainText('Published')
     })
   })
+
+  test('should not show publish specific locale button when no localized fields exist', async () => {
+    await page.goto(urlPostsWithDrafts.create)
+    await expect(page.locator('#publish-locale')).toHaveCount(1)
+    await page.goto(noLocalizedFieldsURL.create)
+    await expect(page.locator('#publish-locale')).toHaveCount(0)
+  })
 })
 
 async function createLocalizedArrayItem(page: Page, url: AdminUrlUtil) {
   await changeLocale(page, defaultLocale)
   await page.goto(url.create)
-  const addArrayRow = page.locator('#field-items .array-field__add-row')
-  await addArrayRow.click()
+  await addArrayRow(page, { fieldName: 'items' })
   const textField = page.locator('#field-items__0__text')
   await textField.fill('test')
   await saveDocAndAssert(page)

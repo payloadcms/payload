@@ -25,6 +25,7 @@
 import type { BrowserContext, Dialog, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { postsCollectionSlug } from 'admin/slugs.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -37,6 +38,7 @@ import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
+  openDocDrawer,
   saveDocAndAssert,
   // throttleTest,
 } from '../helpers.js'
@@ -241,6 +243,38 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('v1')
     })
 
+    test('should restore version as draft', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('v1')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await page.locator('#field-title').fill('v2')
+      await page.locator('#field-description').fill('restore me as draft')
+      await saveDocAndAssert(page)
+      await page.locator('#field-title').fill('v3')
+      await page.locator('#field-description').fill('published')
+      await saveDocAndAssert(page)
+
+      const savedDocURL = page.url()
+      await page.goto(`${savedDocURL}/versions`)
+      const row2 = page.locator('tbody .row-2')
+      const versionID = await row2.locator('.cell-id').textContent()
+      await page.goto(`${savedDocURL}/versions/${versionID}`)
+      await expect(page.locator('.render-field-diffs')).toBeVisible()
+      await page.locator('.restore-version .popup__trigger-wrap button').click()
+      await page.getByRole('button', { name: 'Restore as draft' }).click()
+      await page.locator('button:has-text("Confirm")').click()
+      await page.waitForURL(savedDocURL)
+
+      await expect(page.locator('#field-title')).toHaveValue('v2')
+      await page.goto(`${savedDocURL}/api`)
+      const values = page.locator('.query-inspector__value')
+      const count = await values.count()
+
+      for (let i = 0; i < count; i++) {
+        await expect(values.nth(i)).not.toHaveText(/published/i)
+      }
+    })
+
     test('should show currently published version status in versions view', async () => {
       const publishedDoc = await payload.create({
         collection: draftCollectionSlug,
@@ -387,6 +421,48 @@ describe('Versions', () => {
       const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
       await expect(drawer).toBeVisible()
       await expect(drawer.locator('.id-label')).toBeVisible()
+    })
+
+    test('collection - should autosave using proper depth', async () => {
+      const { id: postID } = await payload.create({
+        collection: postCollectionSlug,
+        data: {
+          title: 'post title',
+          description: 'post description',
+        },
+      })
+
+      const { id: docID } = await payload.create({
+        collection: autosaveCollectionSlug,
+        data: {
+          title: 'autosave title',
+          description: 'autosave description',
+          relationship: postID,
+        },
+      })
+
+      await page.goto(autosaveURL.edit(docID))
+
+      await expect(page.locator('#custom-field-label')).toHaveText(
+        `Value in DocumentInfoContext: ${postID}`,
+      )
+
+      await assertNetworkRequests(
+        page,
+        // Important: assert that depth is 0 in this request
+        `${serverURL}/api/autosave-posts/${docID}?depth=0&draft=true&autosave=true&locale=en`,
+        async () => {
+          await page.locator('#field-title').fill('changed title')
+        },
+        {
+          allowedNumberOfRequests: 1,
+        },
+      )
+
+      // Ensure that the value in context remains consistent across saves
+      await expect(page.locator('#custom-field-label')).toHaveText(
+        `Value in DocumentInfoContext: ${postID}`,
+      )
     })
 
     test('collection - should show "save as draft" button when showSaveDraftButton is true', async () => {
@@ -1315,6 +1391,42 @@ describe('Versions', () => {
       await expect(computedTitleField).toHaveValue('Initial')
     })
 
+    test('- with autosave - does not override local changes to form state after autosave runs within document drawer', async () => {
+      await payload.create({
+        collection: autosaveCollectionSlug,
+        data: {
+          title: 'This is a test',
+          description: 'some description',
+        },
+      })
+
+      const url = new AdminUrlUtil(serverURL, postsCollectionSlug)
+      await page.goto(url.create)
+
+      await page.locator('#field-relationToAutosaves .rs__control').click()
+      await page.locator('.rs__option:has-text("This is a test")').click()
+
+      await openDocDrawer(
+        page,
+        '#field-relationToAutosaves .relationship--single-value__drawer-toggler',
+      )
+
+      const titleField = page.locator('#field-title')
+
+      await titleField.fill('')
+
+      // press slower than the autosave interval, but not faster than the response and processing
+      await titleField.pressSequentially('Initial', {
+        delay: 150,
+      })
+
+      const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
+
+      await waitForAutoSaveToRunAndComplete(drawer)
+
+      await expect(titleField).toHaveValue('Initial')
+    })
+
     test('- with autosave - does not display success toast after autosave complete', async () => {
       const url = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       await page.goto(url.create)
@@ -1626,6 +1738,19 @@ describe('Versions', () => {
       )
       await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
         'textInUnnamedTab2InBlock2',
+      )
+    })
+
+    test('correctly renders diff for text within rows within unnamed tabs within block fields', async () => {
+      await navigateToDiffVersionView()
+
+      const textInBlock = page.locator('[data-field-path="blocks.2.textInRowInUnnamedTab2InBlock"]')
+
+      await expect(textInBlock.locator('.html-diff__diff-old')).toHaveText(
+        'textInRowInUnnamedTab2InBlock',
+      )
+      await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
+        'textInRowInUnnamedTab2InBlock2',
       )
     })
 

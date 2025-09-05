@@ -339,7 +339,12 @@ export default buildConfigWithDefaults({
     },
     {
       slug: mediaSlug,
-      fields: [],
+      fields: [
+        {
+          type: 'text',
+          name: 'alt',
+        },
+      ],
       upload: {
         staticDir: path.resolve(dirname, './media'),
         // crop: false,

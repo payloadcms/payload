@@ -30,7 +30,10 @@ type Args = {
  * We typically do not want to merge properties that rely on user input, however, such as values, unless explicitly requested.
  * Doing this would cause the client to lose any local changes to those fields.
  *
- * This function will also a few defaults, as well as clean up the server response in preparation for the client.
+ * Note: Local state is the source of truth, not the new server state that is getting merged in. This is critical for array row
+ * manipulation specifically, where the user may have added, removed, or reordered rows while a request was pending and is now stale.
+ *
+ * This function applies some defaults, as well as cleans up the server response in preparation for the client.
  * e.g. it will set `valid` and `passesCondition` to true if undefined, and remove `addedByServer` from the response.
  */
 export const mergeServerFormState = ({
@@ -51,22 +54,30 @@ export const mergeServerFormState = ({
      *   a. accept all values when explicitly requested, e.g. on submit
      *   b. only accept values for unmodified fields, e.g. on autosave
      */
-    if (
-      !incomingField.addedByServer &&
-      (!acceptValues ||
-        // See `acceptValues` type definition for more details
-        (typeof acceptValues === 'object' &&
-          acceptValues !== null &&
-          acceptValues?.overrideLocalChanges === false &&
-          currentState[path].isModified))
-    ) {
-      delete incomingField.value
-      delete incomingField.initialValue
+    const shouldAcceptValue =
+      incomingField.addedByServer ||
+      acceptValues === true ||
+      (typeof acceptValues === 'object' &&
+        acceptValues !== null &&
+        // Note: Must be explicitly `false`, allow `null` or `undefined` to mean true
+        acceptValues.overrideLocalChanges === false &&
+        !currentState[path]?.isModified)
+
+    let sanitizedIncomingField = incomingField
+
+    if (!shouldAcceptValue) {
+      /**
+       * Note: do not delete properties off `incomingField` as this will mutate the original object
+       * Instead, omit them from the destructured object by excluding specific keys
+       * This will also ensure we don't set `undefined` into the result unnecessarily
+       */
+      const { initialValue, value, ...rest } = incomingField
+      sanitizedIncomingField = rest
     }
 
     newState[path] = {
       ...currentState[path],
-      ...incomingField,
+      ...sanitizedIncomingField,
     }
 
     if (
@@ -78,7 +89,7 @@ export const mergeServerFormState = ({
     }
 
     /**
-     * Intelligently merge the rows array to ensure changes to local state are not lost while the request was pending
+     * Deeply merge the rows array to ensure changes to local state are not lost while the request was pending
      * For example, the server response could come back with a row which has been deleted on the client
      * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
      * Note: read `currentState` and not `newState` here, as the `rows` property have already been merged above
@@ -96,6 +107,18 @@ export const mergeServerFormState = ({
             ...currentState[path].rows[indexInCurrentState],
             ...row,
           }
+        } else if (row.addedByServer) {
+          /**
+           * Note: This is a known limitation of computed array and block rows
+           * If a new row was added by the server, we append it to the _end_ of this array
+           * This is because the client is the source of truth, and it has arrays ordered in a certain position
+           * For example, the user may have re-ordered rows client-side while a long running request is processing
+           * This means that we _cannot_ slice a new row into the second position on the server, for example
+           * By the time it gets back to the client, its index is stale
+           */
+          const newRow = { ...row }
+          delete newRow.addedByServer
+          newState[path].rows.push(newRow)
         }
       })
     }

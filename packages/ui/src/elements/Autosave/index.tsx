@@ -6,6 +6,8 @@ import { dequal } from 'dequal/lite'
 import { reduceFieldsToValues, versionDefaults } from 'payload/shared'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 
+import type { OnSaveContext } from '../../views/Edit/index.js'
+
 import {
   useAllFormFields,
   useForm,
@@ -45,7 +47,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const {
     docConfig,
-    incrementVersionCount,
     lastUpdateTime,
     mostRecentVersionIsAutosaved,
     setMostRecentVersionIsAutosaved,
@@ -133,13 +134,13 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
           if (collection && id) {
             entitySlug = collection.slug
-            url = `${serverURL}${api}/${entitySlug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`
+            url = `${serverURL}${api}/${entitySlug}/${id}?depth=0&draft=true&autosave=true&locale=${localeRef.current}`
             method = 'PATCH'
           }
 
           if (globalDoc) {
             entitySlug = globalDoc.slug
-            url = `${serverURL}${api}/globals/${entitySlug}?draft=true&autosave=true&locale=${localeRef.current}`
+            url = `${serverURL}${api}/globals/${entitySlug}?depth=0&draft=true&autosave=true&locale=${localeRef.current}`
             method = 'POST'
           }
 
@@ -149,15 +150,14 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
             submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
 
           if (!skipSubmission && modifiedRef.current && url) {
-            const result = await submit<{
-              incrementVersionCount: boolean
-            }>({
+            const result = await submit<any, OnSaveContext>({
               acceptValues: {
                 overrideLocalChanges: false,
               },
               action: url,
               context: {
-                incrementVersionCount: false,
+                getDocPermissions: false,
+                incrementVersionCount: !mostRecentVersionIsAutosaved,
               },
               disableFormWhileProcessing: false,
               disableSuccessStatus: true,
@@ -169,7 +169,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
             })
 
             if (result && result?.res?.ok && !mostRecentVersionIsAutosaved) {
-              incrementVersionCount()
               setMostRecentVersionIsAutosaved(true)
               setUnpublishedVersionCount((prev) => prev + 1)
             }

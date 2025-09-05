@@ -116,6 +116,7 @@ export const createClientConfig = ({
           routes: config.admin.routes,
           theme: config.admin.theme,
           timezones: config.admin.timezones,
+          toast: config.admin.toast,
           user: config.admin.user,
         }
 
@@ -164,7 +165,7 @@ export const createClientConfig = ({
           if (config.experimental?.localizeStatus) {
             clientConfig.experimental.localizeStatus = config.experimental.localizeStatus
           }
-         
+
           if (config.experimental?.allLocaleStatus) {
             clientConfig.experimental.allLocaleStatus = config.experimental.allLocaleStatus
           }

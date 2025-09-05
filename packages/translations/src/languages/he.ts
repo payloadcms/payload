@@ -583,7 +583,6 @@ export const heTranslations: DefaultTranslationsObject = {
     versionCount_none: 'לא נמצאו גרסאות',
     versionCount_one: 'נמצאה גרסה אחת',
     versionCount_other: '{{count}} גרסאות נמצאו',
-    versionCreatedOn: '{{version}} נוצר בתאריך:',
     versionID: 'מזהה גרסה',
     versions: 'גרסאות',
     viewingVersion: 'צופה בגרסה עבור {{entityLabel}} {{documentTitle}}',

@@ -151,6 +151,15 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
+  /**
+   * If there is no value, a default row will be added by a beforeChange hook. Otherwise, modifies the rows on save.
+   */
+  computedArray?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -283,6 +292,12 @@ export interface PostsSelect<T extends boolean = true> {
     | {
         customTextField?: T;
         defaultTextField?: T;
+        id?: T;
+      };
+  computedArray?:
+    | T
+    | {
+        text?: T;
         id?: T;
       };
   updatedAt?: T;

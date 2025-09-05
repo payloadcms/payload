@@ -30,6 +30,8 @@ export const createVersion: CreateVersion = async function createVersion(
 
   const options = {
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   const data = {
@@ -42,6 +44,9 @@ export const createVersion: CreateVersion = async function createVersion(
     snapshot,
     updatedAt,
     version: versionData,
+  }
+  if (!data.createdAt) {
+    data.createdAt = new Date().toISOString()
   }
 
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)

@@ -596,7 +596,6 @@ export const faTranslations: DefaultTranslationsObject = {
     versionCount_none: 'هیچ نگارشی یافت نشد',
     versionCount_one: '{{count}} نگارش یافت شد',
     versionCount_other: '{{count}} نگارش یافت شد',
-    versionCreatedOn: '{{version}} ساخته شده در:',
     versionID: 'شناسه نگارش',
     versions: 'نگارش‌ها',
     viewingVersion: 'در حال مشاهده نگارش برای {{entityLabel}} {{documentTitle}}',

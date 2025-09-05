@@ -599,7 +599,6 @@ export const hrTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Nema pronađenih verzija',
     versionCount_one: '{{count}} pronađena verzija',
     versionCount_other: '{{count}} pronađenih verzija',
-    versionCreatedOn: '{{version}} izrađenih:',
     versionID: 'ID verzije',
     versions: 'Verzije',
     viewingVersion: 'Pregled verzije za {{entityLabel}} {{documentTitle}}',

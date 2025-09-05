@@ -134,8 +134,6 @@ export const buildFormState = async (
 
   const selectMode = select ? getSelectMode(select) : undefined
 
-  let data = incomingData
-
   if (!collectionSlug && !globalSlug) {
     throw new Error('Either collectionSlug or globalSlug must be provided')
   }
@@ -175,11 +173,9 @@ export const buildFormState = async (
     )
   }
 
-  // If there is a form state,
-  // then we can deduce data from that form state
-  if (formState) {
-    data = reduceFieldsToValues(formState, true)
-  }
+  // If there is form state but no data, deduce data from that form state, e.g. on initial load
+  // Otherwise, use the incoming data as the source of truth, e.g. on subsequent saves
+  const data = incomingData || reduceFieldsToValues(formState, true)
 
   let documentData = undefined
 
@@ -207,6 +203,12 @@ export const buildFormState = async (
     : 'fields' in fieldOrEntityConfig
       ? fieldOrEntityConfig.fields
       : [fieldOrEntityConfig]
+
+  // Ensure data.id is present during form state requests, where the data
+  // is passed from the client as an argument, without the ID
+  if (!data.id && id) {
+    data.id = id
+  }
 
   const formStateResult = await fieldSchemasToFormState({
     id,

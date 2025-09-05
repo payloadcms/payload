@@ -26,6 +26,8 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
 
   const options = {
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   const data = {
@@ -38,6 +40,9 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     snapshot,
     updatedAt,
     version: versionData,
+  }
+  if (!data.createdAt) {
+    data.createdAt = new Date().toISOString()
   }
 
   const fields = buildVersionGlobalFields(this.payload.config, globalConfig)

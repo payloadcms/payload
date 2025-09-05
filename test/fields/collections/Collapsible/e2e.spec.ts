@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -87,7 +88,7 @@ describe('Collapsibles', () => {
     const arrayWithCollapsibles = page.locator('#field-arrayWithCollapsibles')
     await expect(arrayWithCollapsibles).toBeVisible()
 
-    await page.locator('#field-arrayWithCollapsibles >> .array-field__add-row').click()
+    await addArrayRow(page, { fieldName: 'arrayWithCollapsibles' })
 
     await page
       .locator(

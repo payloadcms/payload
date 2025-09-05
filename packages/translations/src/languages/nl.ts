@@ -611,7 +611,6 @@ export const nlTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Geen versies gevonden',
     versionCount_one: '{{count}} versie gevonden',
     versionCount_other: '{{count}} versies gevonden',
-    versionCreatedOn: '{{version}} aangemaakt op:',
     versionID: 'Versie-ID',
     versions: 'Versies',
     viewingVersion: 'Bekijk versie voor {{entityLabel}} {{documentTitle}}',

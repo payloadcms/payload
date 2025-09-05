@@ -755,6 +755,22 @@ describe('Locked Documents', () => {
 
       // fields should be readOnly / disabled
       await expect(page.locator('#field-text')).toBeDisabled()
+
+      const richTextRoot = page
+        .locator('.rich-text-lexical .ContentEditable__root[data-lexical-editor="true"]')
+        .first()
+
+      // ensure editor is present
+      await expect(richTextRoot).toBeVisible()
+
+      // core read-only checks
+      await expect(richTextRoot).toHaveAttribute('contenteditable', 'false')
+      await expect(richTextRoot).toHaveAttribute('aria-readonly', 'true')
+
+      // wrapper has read-only class (nice-to-have)
+      await expect(page.locator('.rich-text-lexical').first()).toHaveClass(
+        /rich-text-lexical--read-only/,
+      )
     })
   })
 

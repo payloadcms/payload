@@ -598,7 +598,6 @@ export const rsTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Нема пронађених верзија',
     versionCount_one: '{{count}} пронађена верзија',
     versionCount_other: '{{count}} пронађених верзија',
-    versionCreatedOn: '{{version}} креираних:',
     versionID: 'Идентификатор верзије',
     versions: 'Верзије',
     viewingVersion: 'Преглед верзије за {{entityLabel}} {{documentTitle}}',

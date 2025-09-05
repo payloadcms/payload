@@ -610,7 +610,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     versionCount_none: 'Ոչ մի տարբերակ չի գտնվել',
     versionCount_one: '{{count}} տարբերակ է գտնվել',
     versionCount_other: '{{count}} տարբերակ է գտնվել',
-    versionCreatedOn: '{{version}}-ը ստեղծվել է՝',
     versionID: 'Տարբերակի ID',
     versions: 'Տարբերակներ',
     viewingVersion: 'Ցույց է տրված {{entityLabel}} {{documentTitle}}-ի տարբերակը',

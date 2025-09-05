@@ -13,9 +13,13 @@ export const updateJobs: UpdateJobs = async function updateMany(
   this: DrizzleAdapter,
   { id, data, limit: limitArg, req, returning, sort: sortArg, where: whereArg },
 ) {
-  if (!(data?.log as object[])?.length) {
+  if (
+    !(data?.log as object[])?.length &&
+    !(data.log && typeof data.log === 'object' && '$push' in data.log)
+  ) {
     delete data.log
   }
+
   const whereToUse: Where = id ? { id: { equals: id } } : whereArg
   const limit = id ? 1 : limitArg
 

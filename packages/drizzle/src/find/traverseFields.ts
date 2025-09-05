@@ -791,9 +791,14 @@ export const traverseFields = ({
         } else {
           shouldSelect = true
         }
+        const tableName = fieldShouldBeLocalized({ field, parentIsLocalized })
+          ? `${currentTableName}${adapter.localesSuffix}`
+          : currentTableName
 
         if (shouldSelect) {
-          args.extras[name] = sql.raw(`ST_AsGeoJSON(${toSnakeCase(name)})::jsonb`).as(name)
+          args.extras[name] = sql
+            .raw(`ST_AsGeoJSON("${adapter.tables[tableName][name].name}")::jsonb`)
+            .as(name)
         }
         break
       }
