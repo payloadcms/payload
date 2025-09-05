@@ -7,20 +7,8 @@ export type CollectionPopulationRequestHandler = ({
   serverURL,
 }: {
   apiPath: string
-  /**
-   * If data is passed, fetch will be sent as a POST request
-   * @todo make this required and default in v4
-   */
-  data?: Record<string, any>
-  /**
-   * @deprecated - use postEndpoint instead
-   */
+  data: Record<string, any>
   endpoint: string
-  /**
-   * endpoint that will be used if data is passed
-   * @todo make this required and default in v4
-   */
-  postEndpoint?: string
   serverURL: string
 }) => Promise<Response>
 

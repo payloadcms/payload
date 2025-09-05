@@ -4,32 +4,23 @@ const defaultRequestHandler: CollectionPopulationRequestHandler = ({
   apiPath,
   data,
   endpoint,
-  postEndpoint,
   serverURL,
 }) => {
-  const url = `${serverURL}${apiPath}/${data && postEndpoint ? postEndpoint : endpoint}`
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  }
-
-  if (data) {
-    headers['X-Payload-HTTP-Method-Override'] = 'GET'
-  }
+  const url = `${serverURL}${apiPath}/${endpoint}`
 
   return fetch(url, {
     body: JSON.stringify(data),
     credentials: 'include',
-    headers,
-    method: data ? 'POST' : 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Payload-HTTP-Method-Override': 'GET',
+    },
+    method: 'POST',
   })
 }
 
 export const mergeData = async <T extends Record<string, any>>(args: {
   apiRoute?: string
-  /**
-   * @deprecated Use `requestHandler` instead
-   */
-  collectionPopulationRequestHandler?: CollectionPopulationRequestHandler
   collectionSlug?: string
   depth?: number
   globalSlug?: string
@@ -50,8 +41,7 @@ export const mergeData = async <T extends Record<string, any>>(args: {
     serverURL,
   } = args
 
-  const requestHandler =
-    args.collectionPopulationRequestHandler || args.requestHandler || defaultRequestHandler
+  const requestHandler = args.requestHandler || defaultRequestHandler
 
   const result = await requestHandler({
     apiPath: apiRoute || '/api',
@@ -61,9 +51,6 @@ export const mergeData = async <T extends Record<string, any>>(args: {
       locale,
     },
     endpoint: encodeURI(
-      `${collectionSlug ?? globalSlug}${collectionSlug ? `/${initialData.id}` : ''}?depth=${depth}${locale ? `&locale=${locale}` : ''}&data=${JSON.stringify(incomingData)}`,
-    ),
-    postEndpoint: encodeURI(
       `${collectionSlug ?? globalSlug}${collectionSlug ? `/${initialData.id}` : ''}`,
     ),
     serverURL,
