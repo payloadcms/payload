@@ -112,10 +112,10 @@ export const createClientConfig = ({
   if (!user) {
     return {
       admin: {
-        custom: {},
-        routes: {},
+        routes: config.admin.routes,
         user: config.admin.user,
-      },
+      } as unknown as ClientConfig['admin'],
+      auth: {},
       blocks: [],
       blocksMap: {},
       collections: [
@@ -126,9 +126,11 @@ export const createClientConfig = ({
           importMap,
         }),
       ],
+      custom: {},
       globals: [],
-      routes: {},
-    } as ClientConfig
+      routes: config.routes,
+      serverURL: config.serverURL,
+    } as unknown as ClientConfig
   }
 
   for (const key in config) {
