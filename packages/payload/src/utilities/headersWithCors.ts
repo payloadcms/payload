@@ -17,6 +17,7 @@ export const headersWithCors = ({ headers, req }: CorsArgs): Headers => {
       'Authorization',
       'Content-Encoding',
       'x-apollo-tracing',
+      'X-Payload-HTTP-Method-Override',
     ]
 
     headers.set('Access-Control-Allow-Methods', 'PUT, PATCH, POST, GET, DELETE, OPTIONS')
