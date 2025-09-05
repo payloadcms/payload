@@ -1,6 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { PayloadRequest } from 'payload'
 
+import type { PluginMCPServerConfig } from '../../../types.js'
+
 import { validateCollectionData, validateCollectionSlug } from '../../helpers/validation.js'
 import { toolSchemas } from '../schemas.js'
 
@@ -8,12 +10,20 @@ export const createResourceTool = (
   server: McpServer,
   req: PayloadRequest,
   verboseLogs: boolean,
-  collections: Partial<Record<string, true>>,
+  collections: PluginMCPServerConfig['collections'],
 ) => {
   const tool = async (collection: string, data: string, draft: boolean = false) => {
     const payload = req.payload
 
-    const validationError = validateCollectionSlug(collection, collections)
+    const collectionKeys = Object.keys(collections || {})
+    const collectionNames = collectionKeys.reduce(
+      (acc, key) => {
+        acc[key] = true
+        return acc
+      },
+      {} as Record<string, true>,
+    )
+    const validationError = validateCollectionSlug(collection, collectionNames)
     if (validationError) {
       payload.logger.warn(`[payload-mcp] Validation error for ${collection}: ${validationError}`)
       return {
@@ -57,7 +67,7 @@ export const createResourceTool = (
       // Create the resource
       const result = await payload.create({
         collection,
-        data: parsedData,
+        data: collections?.[collection]?.override?.(parsedData, req) || parsedData,
         draft,
         overrideAccess: true,
       })
@@ -73,9 +83,6 @@ export const createResourceTool = (
           {
             type: 'text' as const,
             text: `Resource created successfully in collection "${collection}"!
-ID: ${result.id}
-Draft: ${draft}
----
 Created resource:
 \`\`\`json
 ${JSON.stringify(result, null, 2)}
@@ -99,18 +106,19 @@ ${JSON.stringify(result, null, 2)}
       }
     }
   }
+  const collectionSlugs = Object.keys(collections || {})
+  collectionSlugs.forEach((collectionSlug) => {
+    if (!collections?.[collectionSlug]?.enabled) {
+      return
+    }
 
-  server.tool(
-    'createResource',
-    (() => {
-      const collectionSlugs = Object.keys(collections || {})
-      const baseDesc = toolSchemas.createResource.description.trim()
-      const punctuated = baseDesc.endsWith('.') ? baseDesc : `${baseDesc}.`
-      return `${punctuated} Possible collections are: ${collectionSlugs.join(', ')}`
-    })(),
-    toolSchemas.createResource.parameters.shape,
-    async ({ collection, data, draft }) => {
-      return await tool(collection, data, draft)
-    },
-  )
+    server.tool(
+      `create${collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)}Document`,
+      `${toolSchemas.createResource.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
+      toolSchemas.createResource.parameters.shape,
+      async ({ collection, data, draft }) => {
+        return await tool(collection, data, draft)
+      },
+    )
+  })
 }

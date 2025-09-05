@@ -1,6 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { PayloadRequest } from 'payload'
 
+import type { PluginMCPServerConfig } from '../../../types.js'
+
 import { validateCollectionSlug } from '../../helpers/validation.js'
 import { toolSchemas } from '../schemas.js'
 
@@ -8,7 +10,7 @@ export const findResourceTool = (
   server: McpServer,
   req: PayloadRequest,
   verboseLogs: boolean,
-  collections: Partial<Record<string, true>>,
+  collections: PluginMCPServerConfig['collections'],
 ) => {
   const tool = async (
     collection: string,
@@ -20,7 +22,15 @@ export const findResourceTool = (
   ) => {
     const payload = req.payload
 
-    const validationError = validateCollectionSlug(collection, collections)
+    const collectionKeys = Object.keys(collections || {})
+    const collectionNames = collectionKeys.reduce(
+      (acc, key) => {
+        acc[key] = true
+        return acc
+      },
+      {} as Record<string, true>,
+    )
+    const validationError = validateCollectionSlug(collection, collectionNames)
     if (validationError) {
       payload.logger.warn(`[payload-mcp] Validation error for ${collection}: ${validationError}`)
       return {
@@ -68,8 +78,6 @@ export const findResourceTool = (
               {
                 type: 'text' as const,
                 text: `Resource from collection "${collection}":
-ID: ${doc.id}
----
 ${JSON.stringify(doc, null, 2)}`,
               },
             ],
@@ -119,7 +127,7 @@ Showing: ${result.docs.length} documents
 ---`
 
       for (const doc of result.docs) {
-        responseText += `\n\n**Document ID: ${doc.id}**\n\`\`\`json\n${JSON.stringify(doc, null, 2)}\n\`\`\`\n---`
+        responseText += `\`\`\`json\n${JSON.stringify(doc, null, 2)}\n\`\`\``
       }
 
       return {
@@ -146,17 +154,19 @@ Showing: ${result.docs.length} documents
     }
   }
 
-  server.tool(
-    'findResource',
-    (() => {
-      const collectionSlugs = Object.keys(collections || {})
-      const baseDesc = toolSchemas.findResources.description.trim()
-      const punctuated = baseDesc.endsWith('.') ? baseDesc : `${baseDesc}.`
-      return `${punctuated} Possible collections are: ${collectionSlugs.join(', ')}`
-    })(),
-    toolSchemas.findResources.parameters.shape,
-    async ({ id, collection, limit, page, sort, where }) => {
-      return await tool(collection, id, limit, page, sort, where)
-    },
-  )
+  const collectionSlugs = Object.keys(collections || {})
+  collectionSlugs.forEach((collectionSlug) => {
+    if (!collections?.[collectionSlug]?.enabled) {
+      return
+    }
+
+    server.tool(
+      `find${collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)}Document`,
+      `${toolSchemas.findResources.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
+      toolSchemas.findResources.parameters.shape,
+      async ({ id, collection, limit, page, sort, where }) => {
+        return await tool(collection, id, limit, page, sort, where)
+      },
+    )
+  })
 }
