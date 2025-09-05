@@ -12,16 +12,16 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import './index.scss'
 
-const baseClass = 'default-list-actions'
+const baseClass = 'default-list-view-tabs'
 
-export type DefaultListActionsProps = {
+type DefaultListViewTabsProps = {
   collectionConfig: ClientCollectionConfig
   config: ClientConfig
   onChange?: (viewType: ViewTypes) => void
   viewType?: ViewTypes
 }
 
-export const DefaultListActions: React.FC<DefaultListActionsProps> = ({
+export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
   collectionConfig,
   config,
   onChange,

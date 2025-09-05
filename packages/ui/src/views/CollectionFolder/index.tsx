@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import { DefaultListActions } from '../../elements/DefaultListActions/index.js'
+import { DefaultListViewTabs } from '../../elements/DefaultListActions/index.js'
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
 import { ColoredFolderIcon } from '../../elements/FolderView/ColoredFolderIcon/index.js'
 import { CurrentFolderActions } from '../../elements/FolderView/CurrentFolderActions/index.js'
@@ -272,7 +272,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                   key="list-selection"
                 />
               ),
-              <DefaultListActions
+              <DefaultListViewTabs
                 collectionConfig={collectionConfig}
                 config={config}
                 key="default-list-actions"
