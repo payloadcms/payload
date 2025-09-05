@@ -94,6 +94,7 @@ export interface Config {
     'use-as-title-group-field': UseAsTitleGroupField;
     'disable-bulk-edit': DisableBulkEdit;
     'custom-list-drawer': CustomListDrawer;
+    virtuals: Virtual;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -127,6 +128,7 @@ export interface Config {
     'use-as-title-group-field': UseAsTitleGroupFieldSelect<false> | UseAsTitleGroupFieldSelect<true>;
     'disable-bulk-edit': DisableBulkEditSelect<false> | DisableBulkEditSelect<true>;
     'custom-list-drawer': CustomListDrawerSelect<false> | CustomListDrawerSelect<true>;
+    virtuals: VirtualsSelect<false> | VirtualsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -584,6 +586,18 @@ export interface CustomListDrawer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtuals".
+ */
+export interface Virtual {
+  id: string;
+  virtualTitleFromPost?: string | null;
+  virtualText?: string | null;
+  post?: (string | null) | Post;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -696,6 +710,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'custom-list-drawer';
         value: string | CustomListDrawer;
+      } | null)
+    | ({
+        relationTo: 'virtuals';
+        value: string | Virtual;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1108,6 +1126,17 @@ export interface DisableBulkEditSelect<T extends boolean = true> {
  * via the `definition` "custom-list-drawer_select".
  */
 export interface CustomListDrawerSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtuals_select".
+ */
+export interface VirtualsSelect<T extends boolean = true> {
+  virtualTitleFromPost?: T;
+  virtualText?: T;
+  post?: T;
   updatedAt?: T;
   createdAt?: T;
 }

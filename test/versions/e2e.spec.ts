@@ -423,6 +423,48 @@ describe('Versions', () => {
       await expect(drawer.locator('.id-label')).toBeVisible()
     })
 
+    test('collection - should autosave using proper depth', async () => {
+      const { id: postID } = await payload.create({
+        collection: postCollectionSlug,
+        data: {
+          title: 'post title',
+          description: 'post description',
+        },
+      })
+
+      const { id: docID } = await payload.create({
+        collection: autosaveCollectionSlug,
+        data: {
+          title: 'autosave title',
+          description: 'autosave description',
+          relationship: postID,
+        },
+      })
+
+      await page.goto(autosaveURL.edit(docID))
+
+      await expect(page.locator('#custom-field-label')).toHaveText(
+        `Value in DocumentInfoContext: ${postID}`,
+      )
+
+      await assertNetworkRequests(
+        page,
+        // Important: assert that depth is 0 in this request
+        `${serverURL}/api/autosave-posts/${docID}?depth=0&draft=true&autosave=true&locale=en`,
+        async () => {
+          await page.locator('#field-title').fill('changed title')
+        },
+        {
+          allowedNumberOfRequests: 1,
+        },
+      )
+
+      // Ensure that the value in context remains consistent across saves
+      await expect(page.locator('#custom-field-label')).toHaveText(
+        `Value in DocumentInfoContext: ${postID}`,
+      )
+    })
+
     test('collection - should show "save as draft" button when showSaveDraftButton is true', async () => {
       await page.goto(autosaveWithDraftButtonURL.create)
       await expect(page.locator('#action-save-draft')).toBeVisible()
@@ -1053,7 +1095,7 @@ describe('Versions', () => {
 
       await textField.fill('spanish draft')
       await saveDocAndAssert(page, '#action-save-draft')
-      await expect(status).toContainText('Changed')
+      await expect(status).toContainText('Draft')
 
       await changeLocale(page, 'en')
       await textField.fill('english published')
@@ -1086,7 +1128,7 @@ describe('Versions', () => {
 
       const publishedDoc = data.docs[0]
 
-      expect(publishedDoc.text).toStrictEqual({
+      expect(publishedDoc?.text).toStrictEqual({
         en: 'english published',
         es: 'spanish published',
       })

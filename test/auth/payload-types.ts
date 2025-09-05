@@ -243,6 +243,21 @@ export interface User {
   adminOnlyField?: string | null;
   roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
   namedSaveToJWT?: string | null;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   group?: {
     liftedSaveToJWT?: string | null;
   };
@@ -503,6 +518,7 @@ export interface UsersSelect<T extends boolean = true> {
   adminOnlyField?: T;
   roles?: T;
   namedSaveToJWT?: T;
+  richText?: T;
   group?:
     | T
     | {

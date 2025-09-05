@@ -2,19 +2,23 @@ import type { Locator, Page } from 'playwright'
 
 import { expect } from 'playwright/test'
 
-import { openArrayRowActions } from './openArrayRowActions.js'
+import { openArrayRowActions } from '../array/openArrayRowActions.js'
 
 /**
- * Duplicates the array row at the specified index.
+ * Duplicates the block row at the specified index.
  */
-export const duplicateArrayRow = async (
+export const duplicateBlock = async (
   page: Page,
   { fieldName, rowIndex = 0 }: Parameters<typeof openArrayRowActions>[1],
 ): Promise<{
   popupContentLocator: Locator
   rowActionsButtonLocator: Locator
+  rowCount: number
 }> => {
-  const rowLocator = page.locator(`#field-${fieldName} .array-field__row`)
+  const rowLocator = page.locator(
+    `#field-${fieldName} > .blocks-field__rows > div > .blocks-field__row`,
+  )
+
   const numberOfPrevRows = await rowLocator.count()
 
   const { popupContentLocator, rowActionsButtonLocator } = await openArrayRowActions(page, {
@@ -23,10 +27,11 @@ export const duplicateArrayRow = async (
   })
 
   await popupContentLocator.locator('.array-actions__action.array-actions__duplicate').click()
+  const numberOfCurrentRows = await rowLocator.count()
 
-  expect(await rowLocator.count()).toBe(numberOfPrevRows + 1)
+  expect(numberOfCurrentRows).toBe(numberOfPrevRows + 1)
 
   // TODO: test the array row's field input values have been duplicated as well
 
-  return { popupContentLocator, rowActionsButtonLocator }
+  return { popupContentLocator, rowActionsButtonLocator, rowCount: numberOfCurrentRows }
 }
