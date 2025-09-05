@@ -2,14 +2,6 @@
 
 @layer payload-default {
   .LexicalEditorTheme {
-    &__ltr {
-      text-align: left;
-    }
-
-    &__rtl {
-      text-align: right;
-    }
-
     &__paragraph {
       font-size: base(0.8);
       margin-bottom: 0.55em;

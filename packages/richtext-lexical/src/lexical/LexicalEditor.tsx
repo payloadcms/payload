@@ -4,6 +4,7 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary.js'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
+import { isFieldRTL, useConfig, useLocale } from '@payloadcms/ui'
 import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
@@ -11,8 +12,8 @@ import { useEffect, useState } from 'react'
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
 import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
-import { EditorPlugin } from './EditorPlugin.js'
 import './LexicalEditor.scss'
+import { EditorPlugin } from './EditorPlugin.js'
 import { DecoratorPlugin } from './plugins/DecoratorPlugin/index.js'
 import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/index.js'
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
@@ -28,9 +29,9 @@ export const LexicalEditor: React.FC<
   {
     editorContainerRef: React.RefObject<HTMLDivElement | null>
     isSmallWidthViewport: boolean
-  } & Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>
+  } & Pick<LexicalProviderProps, 'editorConfig' | 'fieldProps' | 'onChange'>
 > = (props) => {
-  const { editorConfig, editorContainerRef, isSmallWidthViewport, onChange } = props
+  const { editorConfig, editorContainerRef, fieldProps, isSmallWidthViewport, onChange } = props
   const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
 
@@ -82,6 +83,15 @@ export const LexicalEditor: React.FC<
       editorConfigContext.parentEditor?.unregisterChild?.(editorConfigContext.uuid)
     }
   }, [editor, editorConfigContext])
+  const locale = useLocale()
+  const { config } = useConfig()
+
+  const rtl = isFieldRTL({
+    fieldLocalized: !!fieldProps?.field?.localized,
+    fieldRTL: undefined,
+    locale,
+    localizationConfig: config.localization || undefined,
+  })
 
   return (
     <React.Fragment>
@@ -101,7 +111,7 @@ export const LexicalEditor: React.FC<
         <RichTextPlugin
           contentEditable={
             <div className="editor-scroller">
-              <div className="editor" ref={onRef}>
+              <div className="editor" data-rtl={rtl} ref={onRef}>
                 <LexicalContentEditable editorConfig={editorConfig} />
               </div>
             </div>

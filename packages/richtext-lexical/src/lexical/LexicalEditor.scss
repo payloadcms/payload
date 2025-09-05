@@ -4,6 +4,16 @@
   .rich-text-lexical {
     .editor {
       position: relative;
+
+      &[data-rtl='true'] {
+        direction: rtl;
+        text-align: right;
+
+        ul,
+        ol {
+          direction: rtl;
+        }
+      }
     }
 
     .editor-container {
