@@ -151,7 +151,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
           />
         ) : (
           <input
-            dir={rtl ? 'rtl' : 'ltr'}
+            data-rtl={rtl}
             disabled={readOnly}
             id={`field-${path?.replace(/\./g, '__')}`}
             name={path}
