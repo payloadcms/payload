@@ -1272,6 +1272,7 @@ export {
   type CreateClientConfigArgs,
   serverOnlyAdminConfigProperties,
   serverOnlyConfigProperties,
+  type UnauthenticatedClientConfig,
   type UnsanitizedClientConfig,
 } from './config/client.js'
 export { defaults } from './config/defaults.js'

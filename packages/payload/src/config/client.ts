@@ -64,6 +64,17 @@ export type ClientConfig = {
   globals: ClientGlobalConfig[]
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
 
+export type UnauthenticatedClientConfig = {
+  admin: {
+    routes: ClientConfig['admin']['routes']
+    user: ClientConfig['admin']['user']
+  }
+  collections: [ClientCollectionConfig]
+  globals: []
+  routes: ClientConfig['routes']
+  serverURL: ClientConfig['serverURL']
+}
+
 export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
 
 export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] = [
@@ -114,10 +125,7 @@ export const createClientConfig = ({
       admin: {
         routes: config.admin.routes,
         user: config.admin.user,
-      } as unknown as ClientConfig['admin'],
-      auth: {},
-      blocks: [],
-      blocksMap: {},
+      },
       collections: [
         createClientCollectionConfig({
           collection: config.collections.find(({ slug }) => slug === config.admin.user)!,
@@ -126,11 +134,10 @@ export const createClientConfig = ({
           importMap,
         }),
       ],
-      custom: {},
       globals: [],
       routes: config.routes,
       serverURL: config.serverURL,
-    } as unknown as ClientConfig
+    } satisfies UnauthenticatedClientConfig as unknown as ClientConfig
   }
 
   for (const key in config) {
