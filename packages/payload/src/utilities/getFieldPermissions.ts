@@ -22,6 +22,10 @@ export const getFieldPermissions = ({
   readonly permissions: SanitizedFieldPermissions | SanitizedFieldsPermissions
 }): {
   operation: boolean
+  /**
+   * The field-level permissions. This can be equal to the permissions passed to the
+   * `getFieldPermissions` function if the field has no name.
+   */
   permissions: SanitizedFieldPermissions | SanitizedFieldsPermissions
   read: boolean
 } => ({
