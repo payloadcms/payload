@@ -5,9 +5,12 @@ import { DndContext } from '@dnd-kit/core'
 import { fieldSchemaToJSON } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import type { LivePreviewContextType } from './context.js'
+
 import { usePopupWindow } from '../../hooks/usePopupWindow.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
+import { formatAbsoluteURL } from '../../utilities/formatAbsoluteURL.js'
 import { useConfig } from '../Config/index.js'
 import { customCollisionDetection } from './collisionDetection.js'
 import { LivePreviewContext } from './context.js'
@@ -23,23 +26,15 @@ export type LivePreviewProviderProps = {
   }
   isLivePreviewEnabled?: boolean
   isLivePreviewing: boolean
-  url: string
-}
-
-const getAbsoluteUrl = (url) => {
-  try {
-    return new URL(url, window.location.origin).href
-  } catch {
-    return url
-  }
-}
+} & Pick<LivePreviewContextType, 'url' | 'urlIsFunction'>
 
 export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   breakpoints: incomingBreakpoints,
   children,
   isLivePreviewEnabled,
   isLivePreviewing: incomingIsLivePreviewing,
-  url: incomingUrl,
+  url: urlFromProps,
+  urlIsFunction,
 }) => {
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
   const [isLivePreviewing, setIsLivePreviewing] = useState(incomingIsLivePreviewing)
@@ -59,18 +54,9 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
 
   const [url, setURL] = useState<string>('')
 
-  // This needs to be done in a useEffect to prevent hydration issues
-  // as the URL may not be absolute when passed in as a prop,
-  // and getAbsoluteUrl requires the window object to be available
-  useEffect(
-    () =>
-      setURL(
-        incomingUrl?.startsWith('http://') || incomingUrl?.startsWith('https://')
-          ? incomingUrl
-          : getAbsoluteUrl(incomingUrl),
-      ),
-    [incomingUrl],
-  )
+  useEffect(() => {
+    setURL(formatAbsoluteURL(urlFromProps))
+  }, [urlFromProps])
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
@@ -88,7 +74,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
-  const [iframeHasLoaded, setIframeHasLoaded] = useState(false)
+  const [loadedURL, setLoadedURL] = useState<string>()
 
   const { config, getEntityConfig } = useConfig()
 
@@ -163,10 +149,12 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     }
   }, [breakpoint, breakpoints])
 
-  // Receive the `ready` message from the popup window
-  // This indicates that the app is ready to receive `window.postMessage` events
-  // This is also the only cross-origin way of detecting when a popup window has loaded
-  // Unlike iframe elements which have an `onLoad` handler, there is no way to access `window.open` on popups
+  /**
+   * Receive the `ready` message from the popup window
+   * This indicates that the app is ready to receive `window.postMessage` events
+   * This is also the only cross-origin way of detecting when a popup window has loaded
+   * Unlike iframe elements which have an `onLoad` handler, there is no way to access `window.open` on popups
+   */
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (
@@ -233,12 +221,12 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         breakpoint,
         breakpoints,
         fieldSchemaJSON,
-        iframeHasLoaded,
         iframeRef,
         isLivePreviewEnabled,
         isLivePreviewing,
         isPopupOpen,
         listeningForMessages,
+        loadedURL,
         measuredDeviceSize,
         openPopupWindow,
         popupRef,
@@ -246,17 +234,19 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         setAppIsReady,
         setBreakpoint,
         setHeight,
-        setIframeHasLoaded,
         setIsLivePreviewing,
+        setLoadedURL,
         setMeasuredDeviceSize,
         setPreviewWindowType: handleWindowChange,
         setSize,
         setToolbarPosition: setPosition,
+        setURL,
         setWidth,
         setZoom,
         size,
         toolbarPosition: position,
         url,
+        urlIsFunction,
         zoom,
       }}
     >

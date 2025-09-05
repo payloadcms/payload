@@ -72,6 +72,7 @@ export const initReq = async function ({
       cookies,
       headers,
     })
+
     const i18n: I18nClient = await initI18n({
       config: config.i18n,
       context: 'client',
