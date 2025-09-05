@@ -5,7 +5,7 @@
     .editor {
       position: relative;
 
-      &[data-rtl='true'] {
+      &[dir='rtl'] {
         direction: rtl;
         text-align: right;
 

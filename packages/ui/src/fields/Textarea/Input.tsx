@@ -72,7 +72,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         {BeforeInput}
         <div className="textarea-outer">
           <textarea
-            data-rtl={rtl}
+            dir={rtl ? 'rtl' : 'ltr'}
             disabled={readOnly}
             id={`field-${path.replace(/\./g, '__')}`}
             name={path}

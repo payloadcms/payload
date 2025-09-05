@@ -74,7 +74,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
           <input
             aria-label={getTranslation(label, i18n)}
             autoComplete={autoComplete}
-            data-rtl={rtl}
+            dir={rtl ? 'rtl' : 'ltr'}
             disabled={readOnly}
             id={`field-${path.replace(/\./g, '__')}`}
             name={path}

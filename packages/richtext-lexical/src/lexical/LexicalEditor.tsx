@@ -111,7 +111,7 @@ export const LexicalEditor: React.FC<
         <RichTextPlugin
           contentEditable={
             <div className="editor-scroller">
-              <div className="editor" data-rtl={rtl} ref={onRef}>
+              <div className="editor" dir={rtl ? 'rtl' : 'ltr'} ref={onRef}>
                 <LexicalContentEditable editorConfig={editorConfig} />
               </div>
             </div>

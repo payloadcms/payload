@@ -145,7 +145,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
   transition-duration: 100ms, 100ms, 500ms;
   transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
-  &[data-rtl='true'] {
+  &[dir='rtl'] {
     direction: rtl;
   }
 
