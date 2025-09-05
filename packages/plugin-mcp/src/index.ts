@@ -12,6 +12,8 @@ export const pluginMCP =
       config.globals = []
     }
 
+    // Collections
+    const collections = pluginOptions.collections || {}
     // Extract custom tools for the global config
     const customTools =
       pluginOptions.mcp?.tools?.map((tool) => ({
@@ -22,7 +24,7 @@ export const pluginMCP =
     const experimentalTools = pluginOptions?._experimental?.tools || {}
 
     // Add MCP globals.
-    config.globals.push(createMCPToolsGlobal(customTools, experimentalTools))
+    config.globals.push(createMCPToolsGlobal(collections, customTools, experimentalTools))
 
     /**
      * If the plugin is disabled, we still want to keep added collections/fields so the database schema is consistent which is important for migrations.
