@@ -24,6 +24,15 @@
       border-inline-start-style: solid;
       padding-inline-start: base(0.6);
       padding-block: base(0.2);
+
+      [data-rtl='true'] & {
+        border-inline-start: none;
+        border-inline-end-color: var(--theme-elevation-150);
+        border-inline-end-width: base(0.2);
+        border-inline-end-style: solid;
+        padding-inline-start: 0;
+        padding-inline-end: base(0.6);
+      }
     }
 
     &__h1 {

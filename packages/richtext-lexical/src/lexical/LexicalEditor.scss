@@ -9,8 +9,9 @@
         direction: rtl;
         text-align: right;
 
-        ul,
-        ol {
+        // Every single lexical node needs the `direction: rtl` class. This allows
+        // $isParentRTL() to work correctly.
+        * {
           direction: rtl;
         }
       }
