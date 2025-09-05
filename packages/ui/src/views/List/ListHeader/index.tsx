@@ -5,7 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { CloseModalButton } from '../../../elements/CloseModalButton/index.js'
-import { DefaultListViewTabs } from '../../../elements/DefaultListActions/index.js'
+import { DefaultListViewTabs } from '../../../elements/DefaultListViewTabs/index.js'
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { DrawerRelationshipSelect } from '../../../elements/ListHeader/DrawerRelationshipSelect/index.js'
 import { ListDrawerCreateNewDocButton } from '../../../elements/ListHeader/DrawerTitleActions/index.js'

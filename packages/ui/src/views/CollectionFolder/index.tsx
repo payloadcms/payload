@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import { DefaultListViewTabs } from '../../elements/DefaultListActions/index.js'
+import { DefaultListViewTabs } from '../../elements/DefaultListViewTabs/index.js'
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
 import { ColoredFolderIcon } from '../../elements/FolderView/ColoredFolderIcon/index.js'
 import { CurrentFolderActions } from '../../elements/FolderView/CurrentFolderActions/index.js'

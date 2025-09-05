@@ -127,7 +127,7 @@ export const getRouteData = ({
       }, [])) ||
     []
 
-  const viewActions: CustomComponent[] = config?.admin?.components?.actions || []
+  const viewActions: CustomComponent[] = [...(config?.admin?.components?.actions || [])]
 
   switch (segments.length) {
     case 0: {
@@ -231,8 +231,9 @@ export const getRouteData = ({
           templateClassName = `${segmentTwo}-list`
           templateType = 'default'
           viewType = 'list'
-          viewActions.concat(collectionConfig.admin.components?.views?.list?.actions ?? [])
         }
+
+        viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
       } else if (globalConfig) {
         // --> /globals/:globalSlug
         routeParams.global = globalConfig.slug
@@ -246,8 +247,8 @@ export const getRouteData = ({
         viewType = 'document'
 
         // add default view actions
-        viewActions.concat(
-          getViewActions({
+        viewActions.push(
+          ...getViewActions({
             editConfig: globalConfig.admin?.components?.views?.edit,
             viewKey: 'default',
           }),
@@ -291,8 +292,8 @@ export const getRouteData = ({
           viewType = viewInfo.viewType
           documentSubViewType = viewInfo.documentSubViewType
 
-          viewActions.concat(
-            getSubViewActions({
+          viewActions.push(
+            ...getSubViewActions({
               collectionOrGlobal: collectionConfig,
               viewKeyArg: documentSubViewType,
             }),
@@ -307,7 +308,7 @@ export const getRouteData = ({
           templateType = 'default'
           viewType = 'trash'
 
-          viewActions.concat(collectionConfig.admin.components?.views?.list?.actions ?? [])
+          viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
         } else {
           if (config.folders && segmentThree === config.folders.slug && collectionConfig.folders) {
             // Collection Folder Views
@@ -323,6 +324,8 @@ export const getRouteData = ({
             templateClassName = `collection-folders`
             templateType = 'default'
             viewType = 'collection-folders'
+
+            viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
           } else {
             // Collection Edit Views
             // --> /collections/:collectionSlug/create
@@ -344,8 +347,8 @@ export const getRouteData = ({
             viewType = viewInfo.viewType
             documentSubViewType = viewInfo.documentSubViewType
 
-            viewActions.concat(
-              getSubViewActions({
+            viewActions.push(
+              ...getSubViewActions({
                 collectionOrGlobal: collectionConfig,
                 viewKeyArg: documentSubViewType,
               }),
@@ -371,8 +374,8 @@ export const getRouteData = ({
         viewType = viewInfo.viewType
         documentSubViewType = viewInfo.documentSubViewType
 
-        viewActions.concat(
-          getSubViewActions({
+        viewActions.push(
+          ...getSubViewActions({
             collectionOrGlobal: globalConfig,
             viewKeyArg: documentSubViewType,
           }),
