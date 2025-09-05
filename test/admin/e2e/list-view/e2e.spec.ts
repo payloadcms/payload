@@ -1029,7 +1029,8 @@ describe('List View', () => {
         targetState: 'off',
       })
 
-      // Poll until the "description" field is removed from the response BUT id is still present
+      // Poll until the "description" field is removed from the response BUT `id` is still present
+      // The `id` field will remain selected despite it being inactive
       await expect
         .poll(
           async () => {

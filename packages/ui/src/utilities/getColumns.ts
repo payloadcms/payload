@@ -19,7 +19,7 @@ export const getColumns = ({
 }) =>
   columns
     ? columns?.filter((column) =>
-        flattenTopLevelFields(collectionConfig.fields, {
+        flattenTopLevelFields(collectionConfig?.fields, {
           i18n,
           keepPresentationalFields: true,
           moveSubFieldsToTop: true,
@@ -30,7 +30,7 @@ export const getColumns = ({
         }),
       )
     : getInitialColumns(
-        isPolymorphic ? collectionConfig.fields : filterFields(collectionConfig.fields),
+        isPolymorphic ? collectionConfig?.fields : filterFields(collectionConfig?.fields),
         collectionConfig.admin?.useAsTitle,
         isPolymorphic ? [] : collectionConfig?.admin?.defaultColumns,
       )
