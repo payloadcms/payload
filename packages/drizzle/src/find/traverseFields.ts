@@ -293,7 +293,7 @@ export const traverseFields = ({
             ) {
               blockSelect = {}
               blockSelectMode = 'include'
-            } else if (selectMode === 'include' && blocksSelect[block.slug] === true) {
+            } else if (selectMode === 'include' && Boolean(blocksSelect[block.slug])) {
               blockSelect = true
             }
           }
@@ -783,7 +783,7 @@ export const traverseFields = ({
         if (select || selectAllOnCurrentLevel) {
           if (
             selectAllOnCurrentLevel ||
-            (selectMode === 'include' && select[field.name] === true) ||
+            (selectMode === 'include' && Boolean(select[field.name])) ||
             (selectMode === 'exclude' && typeof select[field.name] === 'undefined')
           ) {
             shouldSelect = true
@@ -847,7 +847,7 @@ export const traverseFields = ({
 
         if (
           selectAllOnCurrentLevel ||
-          (selectMode === 'include' && select[field.name] === true) ||
+          (selectMode === 'include' && Boolean(select[field.name])) ||
           (selectMode === 'exclude' && typeof select[field.name] === 'undefined')
         ) {
           const fieldPath = `${path}${field.name}`
