@@ -72,15 +72,15 @@ export const createResourceTool = (
         content: [
           {
             type: 'text' as const,
-            text: `Resource created successfully in collection "${collection}"!`,
+            text: `Resource created successfully in collection "${collection}"!
+ID: ${result.id}
+Draft: ${draft}
+---
+Created resource:
+\`\`\`json
+${JSON.stringify(result, null, 2)}
+\`\`\``,
           },
-          { type: 'text' as const, text: `ID: ${result.id}` },
-          { type: 'text' as const, text: `Draft: ${draft}` },
-          { type: 'text' as const, text: '---' },
-          { type: 'text' as const, text: 'Created resource:' },
-          { type: 'text' as const, text: '```json' },
-          { type: 'text' as const, text: JSON.stringify(result, null, 2) },
-          { type: 'text' as const, text: '```' },
         ],
       }
     } catch (error) {

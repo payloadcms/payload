@@ -146,11 +146,12 @@ ${fieldDefinitions}
       content: [
         {
           type: 'text' as const,
-          text: `✅ **Collection created successfully!**\n\n**File**: \`${fileName}\`\n**Slug**: \`${slug}\`\n**Fields**: ${fields.length}\n\n**Next steps**:\n1. Restart your development server to load the new collection\n2. Access the collection in the Payload admin panel\n3. Add any additional configuration as needed`,
-        },
-        {
-          type: 'text' as const,
-          text: '**Generated Collection Code:**\n```typescript\n' + collectionContent + '\n```',
+          text: `✅ **Collection created successfully!**
+**File**: \`${fileName}\`
+**Collection Config:**
+\`\`\`typescript
+${collectionContent}
+\`\`\``,
         },
       ],
     }

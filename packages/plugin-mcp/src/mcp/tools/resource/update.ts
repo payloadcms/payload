@@ -110,15 +110,15 @@ export const updateResourceTool = (
           content: [
             {
               type: 'text' as const,
-              text: `Document updated successfully in collection "${collection}"!`,
+              text: `Document updated successfully in collection "${collection}"!
+ID: ${result.id}
+Draft: ${draft}
+---
+Updated document:
+\`\`\`json
+${JSON.stringify(result, null, 2)}
+\`\`\``,
             },
-            { type: 'text' as const, text: `ID: ${result.id}` },
-            { type: 'text' as const, text: `Draft: ${draft}` },
-            { type: 'text' as const, text: '---' },
-            { type: 'text' as const, text: 'Updated document:' },
-            { type: 'text' as const, text: '```json' },
-            { type: 'text' as const, text: JSON.stringify(result, null, 2) },
-            { type: 'text' as const, text: '```' },
           ],
         }
       } else {
@@ -152,30 +152,33 @@ export const updateResourceTool = (
           )
         }
 
-        const results = []
-        results.push({
-          type: 'text' as const,
-          text: `Multiple documents updated in collection "${collection}"!`,
-        })
-        results.push({ type: 'text' as const, text: `Updated: ${docs.length} documents` })
-        results.push({ type: 'text' as const, text: `Errors: ${errors.length}` })
-        results.push({ type: 'text' as const, text: '---' })
+        let responseText = `Multiple documents updated in collection "${collection}"!
+Updated: ${docs.length} documents
+Errors: ${errors.length}
+---`
 
         if (docs.length > 0) {
-          results.push({ type: 'text' as const, text: 'Updated documents:' })
-          results.push({ type: 'text' as const, text: '```json' })
-          results.push({ type: 'text' as const, text: JSON.stringify(docs, null, 2) })
-          results.push({ type: 'text' as const, text: '```' })
+          responseText += `\n\nUpdated documents:
+\`\`\`json
+${JSON.stringify(docs, null, 2)}
+\`\`\``
         }
 
         if (errors.length > 0) {
-          results.push({ type: 'text' as const, text: 'Errors:' })
-          results.push({ type: 'text' as const, text: '```json' })
-          results.push({ type: 'text' as const, text: JSON.stringify(errors, null, 2) })
-          results.push({ type: 'text' as const, text: '```' })
+          responseText += `\n\nErrors:
+\`\`\`json
+${JSON.stringify(errors, null, 2)}
+\`\`\``
         }
 
-        return { content: results }
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: responseText,
+            },
+          ],
+        }
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'

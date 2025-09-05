@@ -179,11 +179,18 @@ export const updateCollection = async (
       content: [
         {
           type: 'text' as const,
-          text: `✅ **Collection updated successfully!**\n\n**File**: \`${fileName}\`\n**Update Type**: ${updateType}\n\n**Changes Made**:\n${updateSummary.map((summary) => `- ${summary}`).join('\n')}\n\n**Next steps**:\n1. Restart your development server to load the updated collection\n2. Verify the changes in the Payload admin panel`,
-        },
-        {
-          type: 'text' as const,
-          text: '**Updated Collection Code:**\n```typescript\n' + updatedContent + '\n```',
+          text: `✅ **Collection updated successfully!**
+
+**File**: \`${fileName}\`
+**Update Type**: ${updateType}
+
+**Changes Made**:
+${updateSummary.map((summary) => `- ${summary}`).join('\n')}
+
+**Updated Collection Code:**
+\`\`\`typescript
+${updatedContent}
+\`\`\``,
         },
       ],
     }

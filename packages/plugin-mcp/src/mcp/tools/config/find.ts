@@ -37,26 +37,32 @@ export const readConfigFile = (
       payload.logger.info(`[payload-mcp] Successfully read config file. Size: ${stats.size} bytes`)
     }
 
-    const results = []
-    results.push({
-      type: 'text' as const,
-      text: `# Payload Configuration\n\n**File**: \`${configFilePath}\``,
-    })
+    let responseText = `# Payload Configuration
+
+**File**: \`${configFilePath}\``
 
     if (includeMetadata) {
-      results.push({
-        type: 'text' as const,
-        text: `**Size**: ${stats.size.toLocaleString()} bytes\n**Modified**: ${stats.mtime.toISOString()}\n**Created**: ${stats.birthtime.toISOString()}`,
-      })
+      responseText += `
+**Size**: ${stats.size.toLocaleString()} bytes
+**Modified**: ${stats.mtime.toISOString()}
+**Created**: ${stats.birthtime.toISOString()}`
     }
 
-    results.push({
-      type: 'text' as const,
-      text: '---\n\n**Configuration Content:**\n```typescript\n' + content + '\n```',
-    })
+    responseText += `
+---
+
+**Configuration Content:**
+\`\`\`typescript
+${content}
+\`\`\``
 
     return {
-      content: results,
+      content: [
+        {
+          type: 'text' as const,
+          text: responseText,
+        },
+      ],
     }
   } catch (error) {
     const errorMessage = (error as Error).message
