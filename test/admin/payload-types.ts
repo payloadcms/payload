@@ -95,6 +95,7 @@ export interface Config {
     'disable-bulk-edit': DisableBulkEdit;
     'custom-list-drawer': CustomListDrawer;
     'list-view-select-api': ListViewSelectApi;
+    virtuals: Virtual;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -129,6 +130,7 @@ export interface Config {
     'disable-bulk-edit': DisableBulkEditSelect<false> | DisableBulkEditSelect<true>;
     'custom-list-drawer': CustomListDrawerSelect<false> | CustomListDrawerSelect<true>;
     'list-view-select-api': ListViewSelectApiSelect<false> | ListViewSelectApiSelect<true>;
+    virtuals: VirtualsSelect<false> | VirtualsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -597,6 +599,18 @@ export interface ListViewSelectApi {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtuals".
+ */
+export interface Virtual {
+  id: string;
+  virtualTitleFromPost?: string | null;
+  virtualText?: string | null;
+  post?: (string | null) | Post;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -713,6 +727,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'list-view-select-api';
         value: string | ListViewSelectApi;
+      } | null)
+    | ({
+        relationTo: 'virtuals';
+        value: string | Virtual;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1135,6 +1153,17 @@ export interface CustomListDrawerSelect<T extends boolean = true> {
 export interface ListViewSelectApiSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtuals_select".
+ */
+export interface VirtualsSelect<T extends boolean = true> {
+  virtualTitleFromPost?: T;
+  virtualText?: T;
+  post?: T;
   updatedAt?: T;
   createdAt?: T;
 }

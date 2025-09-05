@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
 import * as qs from 'qs-esm'
 
-import type { Config, Geo, Post } from '../../payload-types.js'
+import type { Config, Geo, Post, Virtual } from '../../payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -23,6 +23,7 @@ import {
   listDrawerSlug,
   placeholderCollectionSlug,
   postsCollectionSlug,
+  virtualsSlug,
   with300DocumentsSlug,
 } from '../../slugs.js'
 
@@ -72,6 +73,7 @@ describe('List View', () => {
   let placeholderUrl: AdminUrlUtil
   let disableBulkEditUrl: AdminUrlUtil
   let user: any
+  let virtualsUrl: AdminUrlUtil
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -96,6 +98,7 @@ describe('List View', () => {
     withListViewUrl = new AdminUrlUtil(serverURL, listDrawerSlug)
     placeholderUrl = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
     disableBulkEditUrl = new AdminUrlUtil(serverURL, 'disable-bulk-edit')
+    virtualsUrl = new AdminUrlUtil(serverURL, virtualsSlug)
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -416,6 +419,44 @@ describe('List View', () => {
           hasText: exactText('Tab 1 > Title'),
         }),
       ).toBeVisible()
+    })
+
+    test('should not allow search by virtual: true field in field dropdown', async () => {
+      await page.goto(virtualsUrl.list)
+
+      await openListFilters(page, {})
+
+      const whereBuilder = page.locator('.where-builder')
+      await whereBuilder.locator('.where-builder__add-first-filter').click()
+
+      const conditionField = whereBuilder.locator('.condition__field')
+      await conditionField.click()
+
+      const menuList = conditionField.locator('.rs__menu-list')
+
+      // ensure the virtual field is not present
+      await expect(menuList.locator('div', { hasText: exactText('Virtual Text') })).toHaveCount(0)
+    })
+
+    test('should allow to filter by virtual relationship field', async () => {
+      const post1 = await createPost({ title: 'somePost' })
+      const post2 = await createPost({ title: 'otherPost' })
+
+      await createVirtualDoc({ post: post1.id })
+      await createVirtualDoc({ post: post2.id })
+
+      await page.goto(virtualsUrl.list)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
+      await addListFilter({
+        page,
+        fieldLabel: 'Virtual Title From Post',
+        operatorLabel: 'equals',
+        value: 'somePost',
+      })
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
     })
 
     test('should allow to filter in array field', async () => {
@@ -1838,4 +1879,14 @@ async function createArray() {
       array: [{ text: 'test' }],
     },
   })
+}
+
+async function createVirtualDoc(overrides?: Partial<Virtual>): Promise<Virtual> {
+  return payload.create({
+    collection: virtualsSlug,
+    data: {
+      post: overrides?.post,
+      ...overrides,
+    },
+  }) as unknown as Promise<Virtual>
 }

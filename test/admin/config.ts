@@ -29,6 +29,7 @@ import { UploadCollection } from './collections/Upload.js'
 import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { UseAsTitleGroupField } from './collections/UseAsTitleGroupField.js'
 import { Users } from './collections/Users.js'
+import { Virtuals } from './collections/Virtuals.js'
 import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
@@ -189,6 +190,7 @@ export default buildConfigWithDefaults({
     DisableBulkEdit,
     CustomListDrawer,
     ListViewSelectAPI,
+    Virtuals,
   ],
   globals: [
     GlobalHidden,
