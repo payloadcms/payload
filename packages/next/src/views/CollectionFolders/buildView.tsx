@@ -178,7 +178,9 @@ export const buildCollectionFolderView = async (
                 permissions?.collections?.[config.folders.slug]?.create
                   ? config.folders.slug
                   : null,
-                permissions?.collections?.[collectionSlug]?.create ? collectionSlug : null,
+                resolvedFolderID && permissions?.collections?.[collectionSlug]?.create
+                  ? collectionSlug
+                  : null,
               ].filter(Boolean),
               baseFolderPath: `/collections/${collectionSlug}/${config.folders.slug}`,
               breadcrumbs,

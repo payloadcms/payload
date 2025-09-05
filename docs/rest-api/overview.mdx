@@ -773,3 +773,28 @@ const res = await fetch(`${api}/${collectionSlug}?depth=1&locale=en`, {
   },
 })
 ```
+
+### Passing as JSON
+
+When using `X-Payload-HTTP-Method-Override`, it expects the body to be a query string. If you want to pass JSON instead, you can set the `Content-Type` to `application/json` and include the JSON body in the request.
+
+#### Example
+
+```ts
+const res = await fetch(`${api}/${collectionSlug}/${id}`, {
+  // Only the findByID endpoint supports HTTP method overrides with JSON data
+  method: 'POST',
+  credentials: 'include',
+  headers: {
+    'Accept-Language': i18n.language,
+    'Content-Type': 'application/json',
+    'X-Payload-HTTP-Method-Override': 'GET',
+  },
+  body: JSON.stringify({
+    depth: 1,
+    locale: 'en',
+  }),
+})
+```
+
+This can be more efficient for large JSON payloads, as you avoid converting data to and from query strings. However, only certain endpoints support this. Supported endpoints will read the parsed body under a `data` property, instead of reading from query parameters as with standard GET requests.
