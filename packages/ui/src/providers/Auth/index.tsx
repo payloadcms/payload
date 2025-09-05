@@ -42,14 +42,12 @@ const Context = createContext({} as AuthContext)
 const maxTimeoutMs = 2147483647
 
 type Props = {
-  autoRefresh?: boolean
   children: React.ReactNode
   permissions?: SanitizedPermissions
   user?: ClientUser | null
 }
 
 export function AuthProvider({
-  autoRefresh = false,
   children,
   permissions: initialPermissions,
   user: initialUser,
@@ -61,6 +59,7 @@ export function AuthProvider({
 
   const {
     admin: {
+      autoRefresh,
       routes: { inactivity: logoutInactivityRoute },
       user: userSlug,
     },
