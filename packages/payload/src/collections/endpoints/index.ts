@@ -14,6 +14,7 @@ import { findVersionByIDHandler } from './findVersionByID.js'
 import { findVersionsHandler } from './findVersions.js'
 import { previewHandler } from './preview.js'
 import { restoreVersionHandler } from './restoreVersion.js'
+import { unpublishHandler } from './unpublish.js'
 import { updateHandler } from './update.js'
 import { updateByIDHandler } from './updateByID.js'
 
@@ -84,6 +85,11 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       handler: restoreVersionHandler,
       method: 'post',
       path: '/versions/:id',
+    },
+    {
+      handler: unpublishHandler,
+      method: 'post',
+      path: '/:id/unpublish',
     },
     {
       handler: updateHandler,

@@ -539,6 +539,7 @@ export const daTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Du er ved at tilbagerulle dette dokuments ændringer til dets offentliggjorte tilstand. Er du sikker?',
     aboutToUnpublish: 'Du er ved at afpublicere dette dokument. Er du sikker?',
+    aboutToUnpublishIn: 'Du er ved at afpublicere dette dokument i {{locale}}. Er du sikker?',
     aboutToUnpublishSelection:
       'Du er ved at afpublicere alt {{label}} i denne sektion. Er du sikker?',
     autosave: 'Autosave',
@@ -584,6 +585,8 @@ export const daTranslations: DefaultTranslationsObject = {
     restoring: 'Gendanner...',
     reverting: 'Tilbageruller...',
     revertToPublished: 'Tilbagerul til offentliggjort',
+    revertUnsuccessful:
+      'Tilbageføring mislykkedes. Ingen tidligere offentliggjorte version fundet.',
     saveDraft: 'Gem kladde',
     scheduledSuccessfully: 'Planlagt med succes.',
     schedulePublish: 'Planlæg offentliggørelse',
@@ -594,6 +597,7 @@ export const daTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifik Version',
     status: 'Status',
     unpublish: 'Afpublicer',
+    unpublishedSuccessfully: 'Offentliggørelse annulleret med succes.',
     unpublishing: 'Afpublicerer...',
     version: 'Version',
     versionAgo: '{{distance}} siden',

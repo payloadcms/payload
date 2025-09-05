@@ -538,6 +538,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Vratićete promene u dokumentu u objavljeno stanje. Da li ste sigurni?',
     aboutToUnpublish: 'Poništićete objavu ovog dokumenta. Da li ste sigurni?',
+    aboutToUnpublishIn:
+      'Uskoro ćete povući objavljivanje ovog dokumenta na {{locale}}. Da li ste sigurni?',
     aboutToUnpublishSelection:
       'Upravo ćete poništiti objavu svih {{label}} u odabiru. Da li ste sigurni?',
     autosave: 'Automatsko čuvanje',
@@ -583,6 +585,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     restoring: 'Vraćanje...',
     reverting: 'Vraćanje...',
     revertToPublished: 'Vrati na objavljeno',
+    revertUnsuccessful: 'Povratak nije uspeo. Nije pronađena prethodno objavljena verzija.',
     saveDraft: 'Sačuvaj nacrt',
     scheduledSuccessfully: 'Uspešno zakazano.',
     schedulePublish: 'Zakaži objavljivanje',
@@ -593,6 +596,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifična verzija',
     status: 'Status',
     unpublish: 'Poništi objavu',
+    unpublishedSuccessfully: 'Uspješno nije objavljeno.',
     unpublishing: 'Poništavanje objave...',
     version: 'Verzija',
     versionAgo: 'pre {{distance}}',

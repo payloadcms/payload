@@ -528,6 +528,7 @@ export const thTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'คุณกำลังจะย้อนการเปลี่ยนแปลงของเอกสารนี้ไปยังเวอร์ชันที่เผยแพร่อยู่ คุณต้องการดำเนินการต่อหรือไม่?',
     aboutToUnpublish: 'คุณกำลังจะยกเลิกเผยแพร่เอกสารนี้ คุณต้องการดำเนินการต่อหรือไม่?',
+    aboutToUnpublishIn: 'คุณกำลังจะยกเลิกการเผยแพร่เอกสารนี้ใน {{locale}} คุณแน่ใจไหม?',
     aboutToUnpublishSelection: 'คุณกำลังจะเลิกเผยแพร่ {{label}} ทั้งหมดในส่วนที่เลือก คุณแน่ใจไหม?',
     autosave: 'บันทึกอัตโนมัติ',
     autosavedSuccessfully: 'บันทึกอัตโนมัติสำเร็จ',
@@ -572,6 +573,7 @@ export const thTranslations: DefaultTranslationsObject = {
     restoring: 'กำลังกู้คืน...',
     reverting: 'กำลังย้อน...',
     revertToPublished: 'ย้อนกลับไปเวอร์ชันที่เผยแพร่อยู่',
+    revertUnsuccessful: 'ย้อนกลับไม่สำเร็จ ไม่พบรุ่นที่เผยแพร่ก่อนหน้านี้',
     saveDraft: 'บันทึกร่าง',
     scheduledSuccessfully: 'ได้ทำการจัดตารางเรียบร้อยแล้ว',
     schedulePublish: 'ตั้งเวลาเผยแพร่',
@@ -582,6 +584,7 @@ export const thTranslations: DefaultTranslationsObject = {
     specificVersion: 'เวอร์ชันเฉพาะ',
     status: 'สถานะ',
     unpublish: 'หยุดเผยแพร่',
+    unpublishedSuccessfully: 'ยกเลิกการเผยแพร่เรียบร้อยแล้ว',
     unpublishing: 'กำลังหยุดการเผยแพร่...',
     version: 'เวอร์ชัน',
     versionAgo: '{{distance}} ที่แล้ว',

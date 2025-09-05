@@ -727,6 +727,10 @@ export type ImportMapGenerators = Array<
  */
 export type ExperimentalConfig = {
   localizeStatus?: boolean
+  /**
+   * Enables the ability to unpublish the current locale only.
+   */
+  unpublishSpecificLocale?: boolean
 }
 
 export type AfterErrorHook = (

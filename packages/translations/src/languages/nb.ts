@@ -540,6 +540,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Du er i ferd med å tilbakestille endringene i dette dokumentet til den publiserte tilstanden. Er du sikker?',
     aboutToUnpublish: 'Du er i ferd med å avpublisere dette dokumentet. Er du sikker?',
+    aboutToUnpublishIn:
+      'Du er i ferd med å avpublisere dette dokumentet i {{locale}}. Er du sikker?',
     aboutToUnpublishSelection:
       'Du er i ferd med å oppheve publiseringen av alle {{label}} i utvalget. Er du sikker?',
     autosave: 'Lagre automatisk',
@@ -585,6 +587,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     restoring: 'Gjenoppretter...',
     reverting: 'Tilbakestiller...',
     revertToPublished: 'Tilbakestill til publisert',
+    revertUnsuccessful: 'Tilbakestilling mislyktes. Ingen tidligere publisert versjon funnet.',
     saveDraft: 'Lagre utkast',
     scheduledSuccessfully: 'Planlagt vellykket.',
     schedulePublish: 'Planlegg Publisering',
@@ -595,6 +598,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     specificVersion: 'Spesifikk versjon',
     status: 'Status',
     unpublish: 'Avpubliser',
+    unpublishedSuccessfully: 'Avpublisert med suksess.',
     unpublishing: 'Avpubliserer...',
     version: 'Versjon',
     versionAgo: '{{distance}} siden',

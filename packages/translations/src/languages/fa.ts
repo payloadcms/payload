@@ -535,6 +535,7 @@ export const faTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'شما در حال بازگردانی تغییرات این رسانه به وضعیت منتشر شده آن هستید. از این کار اطمینان دارید؟',
     aboutToUnpublish: 'شما در حال لغو انتشار این سند هستید، آیا از این کار اطمینان دارید؟',
+    aboutToUnpublishIn: 'شما در حال غیرانتشار این سند در {{locale}} هستید. آیا مطمئن هستید؟',
     aboutToUnpublishSelection: 'شما در شرف لغو انتشار {{label}} برگزیده هستید. ایا اطمینان دارید؟',
     autosave: 'ذخیره خودکار',
     autosavedSuccessfully: 'با موفقیت ذخیره خودکار شد.',
@@ -579,6 +580,7 @@ export const faTranslations: DefaultTranslationsObject = {
     restoring: 'در حال بازیابی...',
     reverting: 'در حال بازگردانی...',
     revertToPublished: 'بازگردانی به انتشار یافته',
+    revertUnsuccessful: 'بازگشت ناموفق. نسخه قبلا منتشر شده‌ای یافت نشد.',
     saveDraft: 'ذخیره پیش‌نویس',
     scheduledSuccessfully: 'با موفقیت زمانبندی شد.',
     schedulePublish: 'برنامه انتشار',
@@ -589,6 +591,7 @@ export const faTranslations: DefaultTranslationsObject = {
     specificVersion: 'نسخه مشخص',
     status: 'وضعیت',
     unpublish: 'لغو انتشار',
+    unpublishedSuccessfully: 'با موفقیت منتشر نشد.',
     unpublishing: 'در حال لغو انتشار...',
     version: 'نگارش',
     versionAgo: '{{distance}} پیش',

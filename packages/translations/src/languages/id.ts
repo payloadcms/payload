@@ -1,8 +1,6 @@
-import { title } from 'process'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import type { Language } from '../types.js'
-
-export const idTranslations = {
+export const idTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Akun',
     accountOfCurrentUser: 'Akun pengguna saat ini',
@@ -29,11 +27,9 @@ export const idTranslations = {
     forgotPassword: 'Lupa Kata Sandi',
     forgotPasswordEmailInstructions:
       'Silakan masukkan email Anda di bawah ini. Anda akan menerima pesan email dengan instruksi tentang cara mengatur ulang kata sandi Anda.',
+    forgotPasswordQuestion: 'Lupa kata sandi?',
     forgotPasswordUsernameInstructions:
       'Silakan masukkan nama pengguna Anda di bawah ini. Instruksi tentang cara mengatur ulang kata sandi Anda akan dikirim ke alamat email yang terkait dengan nama pengguna Anda.',
-    usernameNotValid: 'Nama pengguna yang diberikan tidak valid',
-
-    forgotPasswordQuestion: 'Lupa kata sandi?',
     generate: 'Buat',
     generateNewAPIKey: 'Buat kunci API baru',
     generatingNewAPIKeyWillInvalidate:
@@ -71,6 +67,7 @@ export const idTranslations = {
     tokenRefreshSuccessful: 'Penyegaran token berhasil.',
     unableToVerify: 'Tidak Dapat Memverifikasi',
     username: 'Nama Pengguna',
+    usernameNotValid: 'Nama pengguna yang diberikan tidak valid',
     verified: 'Terverifikasi',
     verifiedSuccessfully: 'Berhasil Diverifikasi',
     verify: 'Verifikasi',
@@ -544,6 +541,8 @@ export const idTranslations = {
     aboutToRevertToPublished:
       'Anda akan mengembalikan perubahan dokumen ini ke keadaan yang dipublikasikan. Apakah Anda yakin?',
     aboutToUnpublish: 'Anda akan membatalkan publikasi dokumen ini. Apakah Anda yakin?',
+    aboutToUnpublishIn:
+      'Anda akan membatalkan penerbitan dokumen ini dalam {{locale}}. Apakah Anda yakin?',
     aboutToUnpublishSelection:
       'Anda akan membatalkan publikasi semua {{label}} dalam pilihan. Apakah Anda yakin?',
     autosave: 'Simpan Otomatis',
@@ -589,6 +588,8 @@ export const idTranslations = {
     restoring: 'Memulihkan...',
     reverting: 'Mengembalikan...',
     revertToPublished: 'Kembali ke yang dipublikasikan',
+    revertUnsuccessful:
+      'Pembatalan tidak berhasil. Tidak ditemukan versi yang sebelumnya dipublikasikan.',
     saveDraft: 'Simpan Draf',
     scheduledSuccessfully: 'Berhasil dijadwalkan.',
     schedulePublish: 'Jadwalkan Publikasi',
@@ -599,6 +600,7 @@ export const idTranslations = {
     specificVersion: 'Versi Spesifik',
     status: 'Status',
     unpublish: 'Batalkan Publikasi',
+    unpublishedSuccessfully: 'Berhasil tidak dipublikasikan.',
     unpublishing: 'Membatalkan publikasi...',
     version: 'Versi',
     versionAgo: '{{distance}} yang lalu',

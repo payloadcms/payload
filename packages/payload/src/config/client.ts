@@ -165,6 +165,11 @@ export const createClientConfig = ({
           if (config.experimental?.localizeStatus) {
             clientConfig.experimental.localizeStatus = config.experimental.localizeStatus
           }
+
+          if (config.experimental?.unpublishSpecificLocale) {
+            clientConfig.experimental.unpublishSpecificLocale =
+              config.experimental.unpublishSpecificLocale
+          }
         }
 
         break

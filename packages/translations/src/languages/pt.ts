@@ -542,6 +542,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Você está prestes a reverter as alterações desse documento para seu estado de publicação. Tem certeza?',
     aboutToUnpublish: 'Você está prestes a despublicar esse documento. Tem certeza?',
+    aboutToUnpublishIn: 'Está prestes a despublicar este documento em {{locale}}. Tem certeza?',
     aboutToUnpublishSelection:
       'Você está prestes a cancelar a publicação de todos os {{label}} na seleção. Tem certeza?',
     autosave: 'Salvamento automático',
@@ -587,6 +588,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     restoring: 'Restaurando...',
     reverting: 'Revertendo...',
     revertToPublished: 'Reverter para publicado',
+    revertUnsuccessful: 'Reversão malsucedida. Nenhuma versão publicada anteriormente encontrada.',
     saveDraft: 'Salvar rascunho',
     scheduledSuccessfully: 'Agendado com sucesso.',
     schedulePublish: 'Agendar Publicação',
@@ -597,6 +599,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versão Específica',
     status: 'Status',
     unpublish: 'Despublicar',
+    unpublishedSuccessfully: 'Não publicado com sucesso.',
     unpublishing: 'Despublicando...',
     version: 'Versão',
     versionAgo: 'há {{distance}}',

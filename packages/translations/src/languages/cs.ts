@@ -537,6 +537,8 @@ export const csTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Chystáte se vrátit změny tohoto dokumentu do jeho publikovaného stavu. Jste si jisti?',
     aboutToUnpublish: 'Chystáte se zrušit publikování tohoto dokumentu. Jste si jisti?',
+    aboutToUnpublishIn:
+      'Chystáte se zrušit publikaci tohoto dokumentu v {{locale}}. Jste si jistý?',
     aboutToUnpublishSelection:
       'Chystáte se zrušit publikování všech {{label}} ve výběru. Jsi si jistá?',
     autosave: 'Automatické uložení',
@@ -582,6 +584,7 @@ export const csTranslations: DefaultTranslationsObject = {
     restoring: 'Obnovování...',
     reverting: 'Vracení...',
     revertToPublished: 'Vrátit se k publikovanému',
+    revertUnsuccessful: 'Vrácení neúspěšné. Nebyla nalezena žádná předchozí publikovaná verze.',
     saveDraft: 'Uložit koncept',
     scheduledSuccessfully: 'Úspěšně naplánováno.',
     schedulePublish: 'Naplánovat publikaci',
@@ -592,6 +595,7 @@ export const csTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifická verze',
     status: 'Stav',
     unpublish: 'Zrušit publikování',
+    unpublishedSuccessfully: 'Úspěšně nezveřejněno.',
     unpublishing: 'Zrušuji publikování...',
     version: 'Verze',
     versionAgo: 'před {{distance}}',
