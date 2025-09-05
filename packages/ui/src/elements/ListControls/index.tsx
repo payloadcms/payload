@@ -133,7 +133,9 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
       )}
       <SearchBar
         Actions={[
-          !smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>,
+          !smallBreak && (
+            <React.Fragment key="before-actions">{beforeActions && beforeActions}</React.Fragment>
+          ),
           enableColumns && (
             <Pill
               aria-controls={`${baseClass}-columns`}
@@ -141,6 +143,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               className={`${baseClass}__toggle-columns`}
               icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
               id="toggle-list-columns"
+              key="toggle-list-columns"
               onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
               pillStyle="light"
               size="small"
@@ -155,6 +158,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               className={`${baseClass}__toggle-where`}
               icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
               id="toggle-list-filters"
+              key="toggle-list-filters"
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
               pillStyle="light"
               size="small"
@@ -169,6 +173,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               className={`${baseClass}__toggle-sort`}
               icon={<ChevronIcon />}
               id="toggle-list-sort"
+              key="toggle-list-sort"
               onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
               pillStyle="light"
               size="small"
@@ -183,6 +188,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               className={`${baseClass}__toggle-group-by`}
               icon={<ChevronIcon direction={visibleDrawer === 'group-by' ? 'up' : 'down'} />}
               id="toggle-group-by"
+              key="toggle-group-by"
               onClick={() =>
                 setVisibleDrawer(visibleDrawer !== 'group-by' ? 'group-by' : undefined)
               }
