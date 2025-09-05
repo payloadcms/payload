@@ -38,7 +38,7 @@ export const createMCPToolsGlobal = (
                 name: 'find',
                 type: 'checkbox',
                 admin: {
-                  description: 'Allow LLMs to find documents in a Collection.',
+                  description: 'Allow LLMs to find collection documents.',
                 },
                 defaultValue: true,
               },
@@ -46,7 +46,7 @@ export const createMCPToolsGlobal = (
                 name: 'create',
                 type: 'checkbox',
                 admin: {
-                  description: 'Allow LLMs to create documents in a Collection.',
+                  description: 'Allow LLMs to create collection documents.',
                 },
                 defaultValue: false,
               },
@@ -54,7 +54,7 @@ export const createMCPToolsGlobal = (
                 name: 'update',
                 type: 'checkbox',
                 admin: {
-                  description: 'Allow LLMs to update documents in a Collection.',
+                  description: 'Allow LLMs to update collection documents.',
                 },
                 defaultValue: false,
               },
@@ -62,7 +62,7 @@ export const createMCPToolsGlobal = (
                 name: 'delete',
                 type: 'checkbox',
                 admin: {
-                  description: 'Allow LLMs to delete documents from a Collection.',
+                  description: 'Allow LLMs to delete collection documents.',
                 },
                 defaultValue: false,
               },
