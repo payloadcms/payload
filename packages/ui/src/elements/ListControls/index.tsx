@@ -11,7 +11,6 @@ import { Popup } from '../../elements/Popup/index.js'
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { Dots } from '../../icons/Dots/index.js'
-import { SearchIcon } from '../../icons/Search/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
@@ -19,7 +18,7 @@ import { ColumnSelector } from '../ColumnSelector/index.js'
 import { GroupByBuilder } from '../GroupByBuilder/index.js'
 import { Pill } from '../Pill/index.js'
 import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
-import { SearchFilter } from '../SearchFilter/index.js'
+import { SearchBar } from '../SearchBar/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
 import './index.scss'
@@ -132,19 +131,10 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           queryPresetPermissions={queryPresetPermissions}
         />
       )}
-      <div className={`${baseClass}__wrap`}>
-        <div className={`${baseClass}__search`}>
-          <SearchIcon />
-          <SearchFilter
-            handleChange={handleSearchChange}
-            key={collectionSlug}
-            label={searchLabelTranslated.current}
-            searchQueryParam={query?.search}
-          />
-        </div>
-        <div className={`${baseClass}__buttons`}>
-          {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
-          {enableColumns && (
+      <SearchBar
+        Actions={[
+          !smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>,
+          enableColumns && (
             <Pill
               aria-controls={`${baseClass}-columns`}
               aria-expanded={visibleDrawer === 'columns'}
@@ -157,8 +147,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             >
               {t('general:columns')}
             </Pill>
-          )}
-          {enableFilters && (
+          ),
+          enableFilters && (
             <Pill
               aria-controls={`${baseClass}-where`}
               aria-expanded={visibleDrawer === 'where'}
@@ -171,8 +161,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             >
               {t('general:filters')}
             </Pill>
-          )}
-          {enableSort && (
+          ),
+          enableSort && (
             <Pill
               aria-controls={`${baseClass}-sort`}
               aria-expanded={visibleDrawer === 'sort'}
@@ -185,8 +175,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             >
               {t('general:sort')}
             </Pill>
-          )}
-          {collectionConfig.admin.groupBy && (
+          ),
+          collectionConfig.admin.groupBy && (
             <Pill
               aria-controls={`${baseClass}-group-by`}
               aria-expanded={visibleDrawer === 'group-by'}
@@ -203,8 +193,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 label: '',
               })}
             </Pill>
-          )}
-          {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
+          ),
+          listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
             <Popup
               button={<Dots ariaLabel={t('general:moreOptions')} />}
               className={`${baseClass}__popup`}
@@ -217,9 +207,13 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
               ))}
             </Popup>
-          )}
-        </div>
-      </div>
+          ),
+        ].filter(Boolean)}
+        key={collectionSlug}
+        label={searchLabelTranslated.current}
+        onSearchChange={handleSearchChange}
+        searchQueryParam={query?.search}
+      />
       {enableColumns && (
         <AnimateHeight
           className={`${baseClass}__columns`}
