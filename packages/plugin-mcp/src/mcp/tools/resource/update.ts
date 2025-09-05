@@ -1,6 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { PayloadRequest } from 'payload'
 
+import type { PluginMCPServerConfig } from '../../../types.js'
+
 import { validateCollectionSlug } from '../../helpers/validation.js'
 import { toolSchemas } from '../schemas.js'
 
@@ -8,7 +10,7 @@ export const updateResourceTool = (
   server: McpServer,
   req: PayloadRequest,
   verboseLogs: boolean,
-  collections: Partial<Record<string, true>>,
+  collections: PluginMCPServerConfig['collections'],
 ) => {
   const tool = async (
     collection: string,
@@ -23,7 +25,15 @@ export const updateResourceTool = (
   ) => {
     const payload = req.payload
 
-    const validationError = validateCollectionSlug(collection, collections)
+    const collectionKeys = Object.keys(collections || {})
+    const collectionNames = collectionKeys.reduce(
+      (acc, key) => {
+        acc[key] = true
+        return acc
+      },
+      {} as Record<string, true>,
+    )
+    const validationError = validateCollectionSlug(collection, collectionNames)
     if (validationError) {
       payload.logger.warn(`[payload-mcp] Validation error for ${collection}: ${validationError}`)
       return {
@@ -98,9 +108,10 @@ export const updateResourceTool = (
         if (verboseLogs) {
           payload.logger.info(`[payload-mcp] Updating single document with ID: ${id}`)
         }
-        const result = await payload.update(
-          updateOptions as unknown as Parameters<typeof payload.update>[0],
-        )
+        const result = await payload.update({
+          ...updateOptions,
+          data: collections?.[collection]?.override?.(parsedData, req) || parsedData,
+        } as any)
 
         if (verboseLogs) {
           payload.logger.info(`[payload-mcp] Successfully updated document with ID: ${id}`)
@@ -111,9 +122,6 @@ export const updateResourceTool = (
             {
               type: 'text' as const,
               text: `Document updated successfully in collection "${collection}"!
-ID: ${result.id}
-Draft: ${draft}
----
 Updated document:
 \`\`\`json
 ${JSON.stringify(result, null, 2)}
@@ -138,9 +146,10 @@ ${JSON.stringify(result, null, 2)}
         if (verboseLogs) {
           payload.logger.info(`[payload-mcp] Updating multiple documents with where clause`)
         }
-        const result = await payload.update(
-          updateOptions as unknown as Parameters<typeof payload.update>[0],
-        )
+        const result = await payload.update({
+          ...updateOptions,
+          data: collections?.[collection]?.override?.(parsedData, req) || parsedData,
+        } as any)
 
         const bulkResult = result as { docs?: unknown[]; errors?: unknown[] }
         const docs = bulkResult.docs || []
@@ -197,37 +206,39 @@ ${JSON.stringify(errors, null, 2)}
     }
   }
 
-  server.tool(
-    'updateResource',
-    (() => {
-      const collectionSlugs = Object.keys(collections || {})
-      const baseDesc = toolSchemas.updateResource.description.trim()
-      const punctuated = baseDesc.endsWith('.') ? baseDesc : `${baseDesc}.`
-      return `${punctuated} Possible collections are: ${collectionSlugs.join(', ')}`
-    })(),
-    toolSchemas.updateResource.parameters.shape,
-    async ({
-      id,
-      collection,
-      data,
-      depth,
-      draft,
-      filePath,
-      overrideLock,
-      overwriteExistingFiles,
-      where,
-    }) => {
-      return await tool(
+  const collectionSlugs = Object.keys(collections || {})
+  collectionSlugs.forEach((collectionSlug) => {
+    if (!collections?.[collectionSlug]?.enabled) {
+      return
+    }
+
+    server.tool(
+      `update${collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)}Document`,
+      `${toolSchemas.updateResource.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
+      toolSchemas.updateResource.parameters.shape,
+      async ({
+        id,
         collection,
         data,
-        id,
-        where,
-        draft,
         depth,
-        overrideLock,
+        draft,
         filePath,
+        overrideLock,
         overwriteExistingFiles,
-      )
-    },
-  )
+        where,
+      }) => {
+        return await tool(
+          collection,
+          data,
+          id,
+          where,
+          draft,
+          depth,
+          overrideLock,
+          filePath,
+          overwriteExistingFiles,
+        )
+      },
+    )
+  })
 }

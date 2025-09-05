@@ -1,6 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { PayloadRequest } from 'payload'
 
+import type { PluginMCPServerConfig } from '../../../types.js'
+
 import { validateCollectionSlug } from '../../helpers/validation.js'
 import { toolSchemas } from '../schemas.js'
 
@@ -8,7 +10,7 @@ export const deleteResourceTool = (
   server: McpServer,
   req: PayloadRequest,
   verboseLogs: boolean,
-  collections: Partial<Record<string, true>>,
+  collections: PluginMCPServerConfig['collections'],
 ) => {
   const tool = async (
     collection: string,
@@ -19,7 +21,15 @@ export const deleteResourceTool = (
   ) => {
     const payload = req.payload
 
-    const validationError = validateCollectionSlug(collection, collections)
+    const collectionKeys = Object.keys(collections || {})
+    const collectionNames = collectionKeys.reduce(
+      (acc, key) => {
+        acc[key] = true
+        return acc
+      },
+      {} as Record<string, true>,
+    )
+    const validationError = validateCollectionSlug(collection, collectionNames)
     if (validationError) {
       payload.logger.warn(`[payload-mcp] Validation error for ${collection}: ${validationError}`)
       return {
@@ -94,8 +104,6 @@ export const deleteResourceTool = (
             {
               type: 'text' as const,
               text: `Document deleted successfully from collection "${collection}"!
-ID: ${String((singleResult as { id?: unknown }).id)}
----
 Deleted document:
 \`\`\`json
 ${JSON.stringify(result, null, 2)}
@@ -160,17 +168,19 @@ ${JSON.stringify(errors, null, 2)}
     }
   }
 
-  server.tool(
-    'deleteResource',
-    (() => {
-      const collectionSlugs = Object.keys(collections || {})
-      const baseDesc = toolSchemas.deleteResource.description.trim()
-      const punctuated = baseDesc.endsWith('.') ? baseDesc : `${baseDesc}.`
-      return `${punctuated} Possible collections are: ${collectionSlugs.join(', ')}`
-    })(),
-    toolSchemas.deleteResource.parameters.shape,
-    async ({ id, collection, depth, overrideAccess, where }) => {
-      return await tool(collection, id, where, depth, overrideAccess)
-    },
-  )
+  const collectionSlugs = Object.keys(collections || {})
+  collectionSlugs.forEach((collectionSlug) => {
+    if (!collections?.[collectionSlug]?.enabled) {
+      return
+    }
+
+    server.tool(
+      `delete${collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)}Document`,
+      `${toolSchemas.deleteResource.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
+      toolSchemas.deleteResource.parameters.shape,
+      async ({ id, collection, depth, overrideAccess, where }) => {
+        return await tool(collection, id, where, depth, overrideAccess)
+      },
+    )
+  })
 }
