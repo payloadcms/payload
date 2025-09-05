@@ -12,9 +12,14 @@ type Props = {
   customerEmail?: string
   billingAddress?: Partial<Address>
   shippingAddress?: Partial<Address>
+  setProcessingPayment: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export const CheckoutForm: React.FC<Props> = ({ customerEmail, billingAddress }) => {
+export const CheckoutForm: React.FC<Props> = ({
+  customerEmail,
+  billingAddress,
+  setProcessingPayment,
+}) => {
   const stripe = useStripe()
   const elements = useElements()
   const [error, setError] = React.useState<null | string>(null)
@@ -27,6 +32,7 @@ export const CheckoutForm: React.FC<Props> = ({ customerEmail, billingAddress })
     async (e) => {
       e.preventDefault()
       setIsLoading(true)
+      setProcessingPayment(true)
 
       if (stripe && elements) {
         try {
@@ -92,6 +98,7 @@ export const CheckoutForm: React.FC<Props> = ({ customerEmail, billingAddress })
           const msg = err instanceof Error ? err.message : 'Something went wrong.'
           setError(`Error while submitting payment: ${msg}`)
           setIsLoading(false)
+          setProcessingPayment(false)
         }
       }
     },

@@ -24,6 +24,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { AddressItem } from '@/components/addresses/AddressItem'
 import { FormItem } from '@/components/forms/FormItem'
 import { toast } from 'sonner'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
 const stripe = loadStripe(apiKey)
@@ -45,6 +46,7 @@ export const CheckoutPage: React.FC = () => {
   const [shippingAddress, setShippingAddress] = useState<Partial<Address>>()
   const [billingAddress, setBillingAddress] = useState<Partial<Address>>()
   const [billingAddressSameAsShipping, setBillingAddressSameAsShipping] = useState(true)
+  const [isProcessingPayment, setProcessingPayment] = useState(false)
 
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
 
@@ -104,6 +106,15 @@ export const CheckoutPage: React.FC = () => {
   )
 
   if (!stripe) return null
+
+  if (cartIsEmpty && isProcessingPayment) {
+    return (
+      <div className="prose dark:prose-invert py-12 w-full items-center text-center">
+        <p>Processing your payment...</p>
+        <LoadingSpinner />
+      </div>
+    )
+  }
 
   if (cartIsEmpty) {
     return (
@@ -318,7 +329,11 @@ export const CheckoutPage: React.FC = () => {
                 }}
                 stripe={stripe}
               >
-                <CheckoutForm customerEmail={email} billingAddress={billingAddress} />
+                <CheckoutForm
+                  customerEmail={email}
+                  billingAddress={billingAddress}
+                  setProcessingPayment={setProcessingPayment}
+                />
               </Elements>
             </div>
           )}
