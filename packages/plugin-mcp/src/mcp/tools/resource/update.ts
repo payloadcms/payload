@@ -191,7 +191,7 @@ ${JSON.stringify(errors, null, 2)}
 
   if (collections?.[collectionSlug]?.enabled) {
     server.tool(
-      `update${toCamelCase(collectionSlug).charAt(0).toUpperCase() + collectionSlug.slice(1)}Document`,
+      `update${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}Document`,
       `${toolSchemas.updateResource.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
       toolSchemas.updateResource.parameters.shape,
       async ({ id, data, depth, draft, filePath, overrideLock, overwriteExistingFiles, where }) => {

@@ -84,7 +84,7 @@ ${JSON.stringify(result, null, 2)}
 
   if (collections?.[collectionSlug]?.enabled) {
     server.tool(
-      `create${toCamelCase(collectionSlug).charAt(0).toUpperCase() + collectionSlug.slice(1)}Document`,
+      `create${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}Document`,
       `${toolSchemas.createResource.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
       toolSchemas.createResource.parameters.shape,
       async ({ data, draft }) => {

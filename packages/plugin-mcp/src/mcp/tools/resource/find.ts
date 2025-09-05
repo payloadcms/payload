@@ -139,7 +139,7 @@ Page: ${result.page} of ${result.totalPages}
 
   if (collections?.[collectionSlug]?.enabled) {
     server.tool(
-      `find${toCamelCase(collectionSlug).charAt(0).toUpperCase() + collectionSlug.slice(1)}Document`,
+      `find${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}Document`,
       `${toolSchemas.findResources.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
       toolSchemas.findResources.parameters.shape,
       async ({ id, limit, page, sort, where }) => {
