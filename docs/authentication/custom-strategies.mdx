@@ -49,7 +49,7 @@ export const Users: CollectionConfig = {
     strategies: [
       {
         name: 'custom-strategy',
-        authenticate: ({ payload, headers }) => {
+        authenticate: async ({ payload, headers }) => {
           const usersQuery = await payload.find({
             collection: 'users',
             where: {
