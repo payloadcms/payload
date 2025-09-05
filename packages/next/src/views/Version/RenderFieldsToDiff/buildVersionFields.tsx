@@ -22,7 +22,6 @@ import {
   fieldIsID,
   fieldShouldBeLocalized,
   getFieldPaths,
-  getFieldPermissions,
   getUniqueListBy,
   tabHasName,
 } from 'payload/shared'
@@ -231,23 +230,28 @@ const buildVersionField = ({
   | 'versionFromSiblingData'
   | 'versionToSiblingData'
 >): BaseVersionField | null => {
-  const { read: hasReadPermission } = getFieldPermissions({
-    field,
-    operation: 'read',
-    parentName: parentPath?.includes('.')
-      ? parentPath.split('.')[parentPath.split('.').length - 1]
-      : parentPath,
-    permissions: parentFieldsPermissions,
-  })
+  let hasReadPermission: boolean = false
+  let fieldPermissions: SanitizedFieldPermissions | undefined = undefined
 
-  const fieldPermissions: SanitizedFieldPermissions | undefined =
-    typeof parentFieldsPermissions === 'boolean'
-      ? parentFieldsPermissions
-      : 'name' in field
-        ? parentFieldsPermissions?.[field.name]
-        : undefined
+  if (typeof parentFieldsPermissions === 'boolean') {
+    hasReadPermission = parentFieldsPermissions
+    fieldPermissions = parentFieldsPermissions
+  } else {
+    if ('name' in field) {
+      fieldPermissions = parentFieldsPermissions?.[field.name]
+      if (typeof fieldPermissions === 'boolean') {
+        hasReadPermission = fieldPermissions
+      } else if (typeof fieldPermissions?.read === 'boolean') {
+        hasReadPermission = fieldPermissions.read
+      }
+    } else {
+      // If the field is unnamed and parentFieldsPermissions is an object, its sub-fields will decide their read permissions state.
+      // As far as this field is concerned, we are allowed to read it, as we need to reach its sub-fields to determine their read permissions.
+      hasReadPermission = true
+    }
+  }
 
-  if ('name' in field && !hasReadPermission) {
+  if (!hasReadPermission) {
     // HasReadPermission is only valid if the field has a name. E.g. for a tabs field it would incorrectly return `false`.
     return null
   }
