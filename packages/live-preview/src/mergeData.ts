@@ -51,7 +51,7 @@ export const mergeData = async <T extends Record<string, any>>(args: {
       locale,
     },
     endpoint: encodeURI(
-      `${collectionSlug ?? globalSlug}${collectionSlug ? `/${initialData.id}` : ''}`,
+      `${globalSlug ? 'globals/' : ''}${collectionSlug ?? globalSlug}${collectionSlug ? `/${initialData.id}` : ''}`,
     ),
     serverURL,
   }).then((res) => res.json())

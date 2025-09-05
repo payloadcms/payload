@@ -17,6 +17,11 @@ import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
 type Args = {
+  /**
+   * You may pass the document data directly which will skip the `db.findOne` database query.
+   * This is useful if you want to use this endpoint solely for running hooks and populating data.
+   */
+  data?: Record<string, unknown>
   depth?: number
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
@@ -67,13 +72,15 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Perform database operation
     // /////////////////////////////////////
 
-    let doc = await req.payload.db.findGlobal({
-      slug,
-      locale: locale!,
-      req,
-      select,
-      where: overrideAccess ? undefined : (accessResult as Where),
-    })
+    let doc =
+      (args.data as any) ??
+      (await req.payload.db.findGlobal({
+        slug,
+        locale: locale!,
+        req,
+        select,
+        where: overrideAccess ? undefined : (accessResult as Where),
+      }))
     if (!doc) {
       doc = {}
     }
