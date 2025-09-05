@@ -1,4 +1,4 @@
-import type { CollectionSlug } from 'payload'
+import type { Collection, CollectionConfig, CollectionSlug, PayloadRequest } from 'payload'
 import type { z } from 'zod'
 
 export type PluginMCPServerConfig = {
@@ -25,7 +25,19 @@ export type PluginMCPServerConfig = {
       }
     }
   }
-  collections?: Partial<Record<CollectionSlug, true>>
+  collections?: Partial<
+    Record<
+      CollectionSlug,
+      {
+        description: string
+        enabled: boolean
+        override?: (
+          original: Record<string, unknown>,
+          req: PayloadRequest,
+        ) => Record<string, unknown>
+      }
+    >
+  >
   disabled?: boolean
   mcp?: {
     handlerOptions?: MCPHandlerOptions

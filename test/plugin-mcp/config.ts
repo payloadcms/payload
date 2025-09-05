@@ -22,8 +22,18 @@ export default buildConfigWithDefaults({
   plugins: [
     pluginMCP({
       collections: {
-        media: true,
-        posts: true,
+        posts: {
+          enabled: true,
+          description: 'This is a Payload collection with Post documents.',
+          override: (original) => {
+            console.log('[Override MCP resource call for Posts]:', original)
+            return { ...original, myCustomOverrideProp: true }
+          },
+        },
+        media: {
+          enabled: true,
+          description: 'This is a Payload Collection with Media documents.',
+        },
       },
       mcp: {
         handlerOptions: {
@@ -70,11 +80,11 @@ export default buildConfigWithDefaults({
       _experimental: {
         tools: {
           collections: {
-            collectionsDirPath: 'dev/collections',
+            collectionsDirPath: 'test/plugin-mcp/collections',
             enabled: true,
           },
           config: {
-            configFilePath: path.resolve(dirname, 'payload.config.ts'),
+            configFilePath: path.resolve(dirname, 'test/plugin-mcp/config.ts'),
             enabled: true,
           },
           jobs: {
