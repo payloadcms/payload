@@ -1,6 +1,11 @@
 import type { PayloadRequest, RelationshipField, TypeWithID } from 'payload'
 
-import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldIsPresentationalOnly,
+  fieldShouldBeLocalized,
+  flattenTopLevelFields,
+} from 'payload/shared'
 
 import type { PopulatedRelationshipValue } from './index.js'
 
@@ -32,7 +37,12 @@ export const generateLabelFromValue = ({
   const relatedCollection = req.payload.collections[relationTo].config
 
   const useAsTitle = relatedCollection?.admin?.useAsTitle
-  const useAsTitleField = relatedCollection.fields.find(
+
+  const flattenedRelatedCollectionFields = flattenTopLevelFields(relatedCollection.fields, {
+    moveSubFieldsToTop: true,
+  })
+
+  const useAsTitleField = flattenedRelatedCollectionFields.find(
     (f) => fieldAffectsData(f) && !fieldIsPresentationalOnly(f) && f.name === useAsTitle,
   )
   let titleFieldIsLocalized = false
