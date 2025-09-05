@@ -225,18 +225,16 @@ const buildTableState = async (
     }
   }
 
-  const columns = getColumns({
-    collectionConfig: clientCollectionConfig,
-    columns: columnsFromArgs,
-    i18n: req.i18n,
-  })
-
   const { columnState, Table } = renderTable({
     clientCollectionConfig,
     clientConfig,
     collectionConfig,
     collections: Array.isArray(collectionSlug) ? collectionSlug : undefined,
-    columns,
+    columns: getColumns({
+      collectionConfig: clientCollectionConfig,
+      columns: columnsFromArgs,
+      i18n: req.i18n,
+    }),
     data,
     enableRowSelections,
     i18n: req.i18n,
