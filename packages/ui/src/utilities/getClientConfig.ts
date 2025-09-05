@@ -1,5 +1,5 @@
-import type { I18nClient, SupportedLanguages } from '@payloadcms/translations'
-import type { ClientConfig, ImportMap, SanitizedConfig } from 'payload'
+import type { SupportedLanguages } from '@payloadcms/translations'
+import type { ClientConfig, CreateClientConfigArgs } from 'payload'
 
 import { createClientConfig } from 'payload'
 import { cache } from 'react'
@@ -17,8 +17,7 @@ if (!cachedClientConfigs) {
 }
 
 export const getClientConfig = cache(
-  (args: { config: SanitizedConfig; i18n: I18nClient; importMap: ImportMap }): ClientConfig => {
-    const { config, i18n, importMap } = args
+  ({ config, i18n, importMap, user }: CreateClientConfigArgs): ClientConfig => {
     const currentLanguage = i18n.language
 
     if (cachedClientConfigs[currentLanguage] && !global._payload_doNotCacheClientConfig) {
@@ -29,6 +28,7 @@ export const getClientConfig = cache(
       config,
       i18n,
       importMap,
+      user,
     })
 
     cachedClientConfigs[currentLanguage] = cachedClientConfig
