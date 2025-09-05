@@ -418,7 +418,9 @@ export const getRouteData = ({
         : routeParams.versionID
   }
 
-  viewActions.reverse()
+  if (viewActions.length) {
+    viewActions.reverse()
+  }
 
   return {
     browseByFolderSlugs,
@@ -429,7 +431,7 @@ export const getRouteData = ({
     routeParams,
     templateClassName,
     templateType,
-    viewActions,
+    viewActions: viewActions.length ? viewActions : undefined,
     viewType,
   }
 }

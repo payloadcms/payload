@@ -7,14 +7,11 @@ import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
-  ServerPropsFromView,
-  VisibleEntities,
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
-import { isEntityHidden } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
@@ -22,10 +19,11 @@ import React from 'react'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
-import { handleAuthRedirect } from '../../utilities/initPage/handleAuthRedirect.js'
-import { isCustomAdminView } from '../../utilities/initPage/isCustomAdminView.js'
-import { isPublicAdminRoute } from '../../utilities/initPage/shared.js'
+import { getVisibleEntities } from '../../utilities/getVisisbleEntities.js'
+import { handleAuthRedirect } from '../../utilities/handleAuthRedirect.js'
 import { initReq } from '../../utilities/initReq.js'
+import { isCustomAdminView } from '../../utilities/isCustomAdminView.js'
+import { isPublicAdminRoute } from '../../utilities/isPublicAdminRoute.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getRouteData } from './getRouteData.js'
 
@@ -114,6 +112,10 @@ export const RootPage = async ({
     }
   }
 
+  if ((isCollectionRoute && !collectionConfig) || (isGlobalRoute && !globalConfig)) {
+    return notFound()
+  }
+
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
   const {
     cookies,
@@ -165,12 +167,6 @@ export const RootPage = async ({
     }
   }
 
-  const serverProps: ServerPropsFromView = {
-    collectionConfig,
-    globalConfig,
-    viewActions: [],
-  }
-
   const {
     browseByFolderSlugs,
     DefaultView,
@@ -191,24 +187,7 @@ export const RootPage = async ({
     segments,
   })
 
-  serverProps.viewActions = viewActions
-
-  if ((isCollectionRoute && !collectionConfig) || (isGlobalRoute && !globalConfig)) {
-    return notFound()
-  }
-
-  const visibleEntities: VisibleEntities = {
-    collections: payload.config.collections
-      .map(({ slug, admin: { hidden } }) =>
-        !isEntityHidden({ hidden, user: req.user }) ? slug : null,
-      )
-      .filter(Boolean),
-    globals: payload.config.globals
-      .map(({ slug, admin: { hidden } }) =>
-        !isEntityHidden({ hidden, user: req.user }) ? slug : null,
-      )
-      .filter(Boolean),
-  }
+  req.routeParams = routeParams
 
   const dbHasUser =
     req.user ||
@@ -260,6 +239,8 @@ export const RootPage = async ({
     importMap,
   })
 
+  const visibleEntities = getVisibleEntities({ req })
+
   const folderID = routeParams.folderID
 
   const RenderedView = RenderServerComponent({
@@ -273,10 +254,11 @@ export const RootPage = async ({
     Fallback: DefaultView.Component,
     importMap,
     serverProps: {
-      ...serverProps,
       clientConfig,
+      collectionConfig,
       docID: routeParams.id,
       folderID,
+      globalConfig,
       i18n: req.i18n,
       importMap,
       initPageResult: {
@@ -306,6 +288,7 @@ export const RootPage = async ({
       params,
       payload: req.payload,
       searchParams,
+      viewActions,
     } satisfies AdminViewServerPropsOnly,
   })
 
@@ -329,7 +312,7 @@ export const RootPage = async ({
           req={req}
           searchParams={searchParams}
           user={req.user}
-          viewActions={serverProps.viewActions}
+          viewActions={viewActions}
           viewType={viewType}
           visibleEntities={{
             // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
