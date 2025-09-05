@@ -30,7 +30,14 @@ export type PluginMCPServerConfig = {
       CollectionSlug,
       {
         description: string
-        enabled: boolean
+        enabled:
+          | {
+              create?: boolean
+              delete?: boolean
+              find?: boolean
+              update?: boolean
+            }
+          | boolean
         override?: (
           original: Record<string, unknown>,
           req: PayloadRequest,
@@ -70,34 +77,32 @@ export type MCPServerOptions = {
   }
 }
 
-export type GlobalSettings = {
-  tools: {
-    auth?: {
-      auth?: boolean
-      forgotPassword?: boolean
-      login?: boolean
-      resetPassword?: boolean
-      unlock?: boolean
-      verify?: boolean
-    }
-    collections?: {
-      create?: boolean
-      delete?: boolean
-      find?: boolean
-      update?: boolean
-    }
-    config?: {
-      find?: boolean
-      update?: boolean
-    }
-    custom?: Record<string, boolean>
-    jobs?: {
-      create?: boolean
-      run?: boolean
-      update?: boolean
-    }
+export type ToolSettings = {
+  auth?: {
+    auth?: boolean
+    forgotPassword?: boolean
+    login?: boolean
+    resetPassword?: boolean
+    unlock?: boolean
+    verify?: boolean
   }
-}
+  collections?: {
+    create?: boolean
+    delete?: boolean
+    find?: boolean
+    update?: boolean
+  }
+  config?: {
+    find?: boolean
+    update?: boolean
+  }
+  custom?: Record<string, boolean>
+  jobs?: {
+    create?: boolean
+    run?: boolean
+    update?: boolean
+  }
+} & Record<string, unknown>
 
 export type FieldDefinition = {
   description?: string

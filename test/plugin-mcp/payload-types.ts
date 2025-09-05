@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     media: Media;
     posts: Post;
+    'example-products': ExampleProduct;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +79,7 @@ export interface Config {
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    'example-products': ExampleProductsSelect<false> | ExampleProductsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -87,11 +89,9 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {
-    'payload-mcp-endpoint': PayloadMcpEndpoint;
     'payload-mcp-tools': PayloadMcpTool;
   };
   globalsSelect: {
-    'payload-mcp-endpoint': PayloadMcpEndpointSelect<false> | PayloadMcpEndpointSelect<true>;
     'payload-mcp-tools': PayloadMcpToolsSelect<false> | PayloadMcpToolsSelect<true>;
   };
   locale: null;
@@ -178,6 +178,18 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "example-products".
+ */
+export interface ExampleProduct {
+  id: string;
+  title?: string | null;
+  description?: string | null;
+  price?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -190,6 +202,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'example-products';
+        value: string | ExampleProduct;
       } | null)
     | ({
         relationTo: 'users';
@@ -268,6 +284,17 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "example-products_select".
+ */
+export interface ExampleProductsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  price?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -322,58 +349,43 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-endpoint".
- */
-export interface PayloadMcpEndpoint {
-  id: string;
-  serverInfo?: {
-    /**
-     * The name of the MCP server.
-     */
-    name?: string | null;
-    /**
-     * The version of the MCP server.
-     */
-    version?: string | null;
-  };
-  /**
-   * The base path for the MCP server. This is set automatically by the plugin.
-   */
-  basePath?: string | null;
-  /**
-   * The maximum transaction duration.
-   */
-  maxDuration?: number | null;
-  /**
-   * Enable verbose logs.
-   */
-  verboseLogs?: boolean | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-tools".
  */
 export interface PayloadMcpTool {
   id: string;
-  resources?: {
+  'example-products-capabilities'?: {
     /**
-     * Find documents in a Collection.
+     * Allow clients to find example-products.
      */
-    find?: boolean | null;
+    'example-products-find'?: boolean | null;
     /**
-     * Create documents in a Collection.
+     * Allow clients to create example-products.
      */
-    create?: boolean | null;
+    'example-products-create'?: boolean | null;
     /**
-     * Update documents in a Collection.
+     * Allow clients to update example-products.
      */
-    update?: boolean | null;
+    'example-products-update'?: boolean | null;
     /**
-     * Delete documents from a Collection.
+     * Allow clients to delete example-products.
      */
-    delete?: boolean | null;
+    'example-products-delete'?: boolean | null;
+  };
+  'posts-capabilities'?: {
+    /**
+     * Allow clients to create posts.
+     */
+    'posts-create'?: boolean | null;
+  };
+  'media-capabilities'?: {
+    /**
+     * Allow clients to find media.
+     */
+    'media-find'?: boolean | null;
+    /**
+     * Allow clients to update media.
+     */
+    'media-update'?: boolean | null;
   };
   custom?: {
     /**
@@ -381,143 +393,37 @@ export interface PayloadMcpTool {
      */
     diceRoll?: boolean | null;
   };
-  collections?: {
-    /**
-     * Find and list Payload collections with optional content and document counts.
-     */
-    find?: boolean | null;
-    /**
-     * Create new Payload collections with specified fields and configuration.
-     */
-    create?: boolean | null;
-    /**
-     * Update existing Payload collections with new fields, modifications, or configuration changes.
-     */
-    update?: boolean | null;
-    /**
-     * Delete Payload collections and optionally update the configuration.
-     */
-    delete?: boolean | null;
-  };
-  jobs?: {
-    /**
-     * Create new Payload jobs (tasks and workflows) with custom schemas and configuration.
-     */
-    create?: boolean | null;
-    /**
-     * Execute Payload jobs with custom input data and queue options.
-     */
-    run?: boolean | null;
-    /**
-     * Update existing Payload jobs with new schemas, configuration, or handler code.
-     */
-    update?: boolean | null;
-  };
-  config?: {
-    /**
-     * Read and display a Payload configuration file.
-     */
-    find?: boolean | null;
-    /**
-     * Update a Payload configuration file with various modifications.
-     */
-    update?: boolean | null;
-  };
-  auth?: {
-    /**
-     * Check authentication status for a user by setting custom headers. (e.g. {"Authorization": "Bearer <token>"})
-     */
-    auth?: boolean | null;
-    /**
-     * Authenticate a user with email and password.
-     */
-    login?: boolean | null;
-    /**
-     * Verify a user email with a verification token.
-     */
-    verify?: boolean | null;
-    /**
-     * Reset a user password with a reset token.
-     */
-    resetPassword?: boolean | null;
-    /**
-     * Send a password reset email to a user.
-     */
-    forgotPassword?: boolean | null;
-    /**
-     * Unlock a user account that has been locked due to failed login attempts.
-     */
-    unlock?: boolean | null;
-  };
   updatedAt?: string | null;
   createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-endpoint_select".
- */
-export interface PayloadMcpEndpointSelect<T extends boolean = true> {
-  serverInfo?:
-    | T
-    | {
-        name?: T;
-        version?: T;
-      };
-  basePath?: T;
-  maxDuration?: T;
-  verboseLogs?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-tools_select".
  */
 export interface PayloadMcpToolsSelect<T extends boolean = true> {
-  resources?:
+  'example-products-capabilities'?:
     | T
     | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
+        'example-products-find'?: T;
+        'example-products-create'?: T;
+        'example-products-update'?: T;
+        'example-products-delete'?: T;
+      };
+  'posts-capabilities'?:
+    | T
+    | {
+        'posts-create'?: T;
+      };
+  'media-capabilities'?:
+    | T
+    | {
+        'media-find'?: T;
+        'media-update'?: T;
       };
   custom?:
     | T
     | {
         diceRoll?: T;
-      };
-  collections?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  jobs?:
-    | T
-    | {
-        create?: T;
-        run?: T;
-        update?: T;
-      };
-  config?:
-    | T
-    | {
-        find?: T;
-        update?: T;
-      };
-  auth?:
-    | T
-    | {
-        auth?: T;
-        login?: T;
-        verify?: T;
-        resetPassword?: T;
-        forgotPassword?: T;
-        unlock?: T;
       };
   updatedAt?: T;
   createdAt?: T;

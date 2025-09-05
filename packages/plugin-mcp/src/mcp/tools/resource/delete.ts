@@ -154,7 +154,7 @@ ${JSON.stringify(errors, null, 2)}
 
   if (collections?.[collectionSlug]?.enabled) {
     server.tool(
-      `delete${toCamelCase(collectionSlug).charAt(0).toUpperCase() + collectionSlug.slice(1)}Document`,
+      `delete${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}Document`,
       `${toolSchemas.deleteResource.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
       toolSchemas.deleteResource.parameters.shape,
       async ({ id, depth, overrideAccess, where }) => {

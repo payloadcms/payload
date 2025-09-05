@@ -5,9 +5,29 @@ import type { PluginMCPServerConfig } from '../types.js'
 import { toCamelCase } from '../utils/camelCase.js'
 
 const addEnabledCollectionTools = (collections: PluginMCPServerConfig['collections']) => {
-  const enabledCollectionSlugs = Object.keys(collections || {}).filter(
-    (collection) => collections?.[collection]?.enabled,
-  )
+  const enabledCollectionSlugs = Object.keys(collections || {}).filter((collection) => {
+    const fullyEnabled =
+      typeof collections?.[collection]?.enabled === 'boolean' && collections?.[collection]?.enabled
+
+    if (fullyEnabled) {
+      return true
+    }
+
+    const partiallyEnabled =
+      typeof collections?.[collection]?.enabled !== 'boolean' &&
+      ((typeof collections?.[collection]?.enabled?.find === 'boolean' &&
+        collections?.[collection]?.enabled?.find === true) ||
+        (typeof collections?.[collection]?.enabled?.create === 'boolean' &&
+          collections?.[collection]?.enabled?.create === true) ||
+        (typeof collections?.[collection]?.enabled?.update === 'boolean' &&
+          collections?.[collection]?.enabled?.update === true) ||
+        (typeof collections?.[collection]?.enabled?.delete === 'boolean' &&
+          collections?.[collection]?.enabled?.delete === true))
+
+    if (partiallyEnabled) {
+      return true
+    }
+  })
   return enabledCollectionSlugs.map((enabledCollectionSlug) => ({
     type: 'collapsible' as const,
     fields: [
@@ -15,46 +35,77 @@ const addEnabledCollectionTools = (collections: PluginMCPServerConfig['collectio
         name: `${enabledCollectionSlug}-capabilities`,
         type: 'group' as const,
         fields: [
-          {
-            name: `${enabledCollectionSlug}-find`,
-            type: 'checkbox' as const,
-            admin: {
-              description: `Allow clients to find ${enabledCollectionSlug}.`,
-            },
-            defaultValue: true,
-            label: 'Find',
-          },
-          {
-            name: `${enabledCollectionSlug}-create`,
-            type: 'checkbox' as const,
-            admin: {
-              description: `Allow clients to create ${enabledCollectionSlug}.`,
-            },
-            defaultValue: false,
-            label: 'Create',
-          },
-          {
-            name: `${enabledCollectionSlug}-update`,
-            type: 'checkbox' as const,
-            admin: {
-              description: `Allow clients to update ${enabledCollectionSlug}.`,
-            },
-            defaultValue: false,
-            label: 'Update',
-          },
-          {
-            name: `${enabledCollectionSlug}-delete`,
-            type: 'checkbox' as const,
-            admin: {
-              description: `Allow clients to delete ${enabledCollectionSlug}.`,
-            },
-            defaultValue: false,
-            label: 'Delete',
-          },
+          ...(collections?.[enabledCollectionSlug]?.enabled === true ||
+          (typeof collections?.[enabledCollectionSlug]?.enabled !== 'boolean' &&
+            typeof collections?.[enabledCollectionSlug]?.enabled?.find === 'boolean' &&
+            collections?.[enabledCollectionSlug]?.enabled?.find === true)
+            ? [
+                {
+                  name: `${enabledCollectionSlug}-find`,
+                  type: 'checkbox' as const,
+                  admin: {
+                    description: `Allow clients to find ${enabledCollectionSlug}.`,
+                  },
+                  defaultValue: false,
+                  label: 'Find',
+                },
+              ]
+            : []),
+
+          ...(collections?.[enabledCollectionSlug]?.enabled === true ||
+          (typeof collections?.[enabledCollectionSlug]?.enabled !== 'boolean' &&
+            typeof collections?.[enabledCollectionSlug]?.enabled?.create === 'boolean' &&
+            collections?.[enabledCollectionSlug]?.enabled?.create === true)
+            ? [
+                {
+                  name: `${enabledCollectionSlug}-create`,
+                  type: 'checkbox' as const,
+                  admin: {
+                    description: `Allow clients to create ${enabledCollectionSlug}.`,
+                  },
+                  defaultValue: false,
+                  label: 'Create',
+                },
+              ]
+            : []),
+
+          ...(collections?.[enabledCollectionSlug]?.enabled === true ||
+          (typeof collections?.[enabledCollectionSlug]?.enabled !== 'boolean' &&
+            typeof collections?.[enabledCollectionSlug]?.enabled?.update === 'boolean' &&
+            collections?.[enabledCollectionSlug]?.enabled?.update === true)
+            ? [
+                {
+                  name: `${enabledCollectionSlug}-update`,
+                  type: 'checkbox' as const,
+                  admin: {
+                    description: `Allow clients to update ${enabledCollectionSlug}.`,
+                  },
+                  defaultValue: false,
+                  label: 'Update',
+                },
+              ]
+            : []),
+
+          ...(collections?.[enabledCollectionSlug]?.enabled === true ||
+          (typeof collections?.[enabledCollectionSlug]?.enabled !== 'boolean' &&
+            typeof collections?.[enabledCollectionSlug]?.enabled?.delete === 'boolean' &&
+            collections?.[enabledCollectionSlug]?.enabled?.delete === true)
+            ? [
+                {
+                  name: `${enabledCollectionSlug}-delete`,
+                  type: 'checkbox' as const,
+                  admin: {
+                    description: `Allow clients to delete ${enabledCollectionSlug}.`,
+                  },
+                  defaultValue: false,
+                  label: 'Delete',
+                },
+              ]
+            : []),
         ],
       },
     ],
-    label: `${enabledCollectionSlug.charAt(0).toUpperCase() + enabledCollectionSlug.slice(1)}`,
+    label: `${enabledCollectionSlug.charAt(0).toUpperCase() + toCamelCase(enabledCollectionSlug).slice(1)}`,
   }))
 }
 

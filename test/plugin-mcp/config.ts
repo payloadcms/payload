@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import { z } from 'zod'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { ExampleProducts } from './collections/ExampleProducts.js'
 import { Media } from './collections/Media.js'
 import { Posts } from './collections/Posts.js'
 import { seed } from './seed/index.js'
@@ -17,13 +18,19 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Media, Posts],
+  collections: [Media, Posts, ExampleProducts],
   onInit: seed,
   plugins: [
     pluginMCP({
       collections: {
-        posts: {
+        [ExampleProducts.slug]: {
           enabled: true,
+        },
+        posts: {
+          enabled: {
+            find: false,
+            create: true,
+          },
           description: 'This is a Payload collection with Post documents.',
           override: (original) => {
             console.log('[Override MCP resource call for Posts]:', original)
@@ -31,7 +38,12 @@ export default buildConfigWithDefaults({
           },
         },
         media: {
-          enabled: true,
+          enabled: {
+            find: true,
+            create: false,
+            update: true,
+            delete: false,
+          },
           description: 'This is a Payload collection with Media documents.',
         },
       },
