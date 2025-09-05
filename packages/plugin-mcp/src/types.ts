@@ -1,4 +1,4 @@
-import type { Collection, CollectionConfig, CollectionSlug, PayloadRequest } from 'payload'
+import type { CollectionSlug, PayloadRequest } from 'payload'
 import type { z } from 'zod'
 
 export type PluginMCPServerConfig = {
