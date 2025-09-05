@@ -16,12 +16,12 @@ export function addCollectionToConfig(content: string, collectionName: string): 
   const importRegex = /import.*from\s*['"]\.\/collections\/.*['"]/g
   const importMatches = content.match(importRegex)
 
-  if (importMatches) {
+  if (importMatches && importMatches.length > 0) {
     const lastImport = importMatches[importMatches.length - 1]
     const newImport = `import { ${capitalizedName} } from './collections/${capitalizedName}'`
 
     // Check if import already exists
-    if (!content.includes(newImport)) {
+    if (lastImport && !content.includes(newImport)) {
       content = content.replace(lastImport, `${lastImport}\n${newImport}`)
     }
   } else {
@@ -38,7 +38,7 @@ export function addCollectionToConfig(content: string, collectionName: string): 
   const collectionsRegex = /collections:\s*\[([\s\S]*?)\]/
   const collectionsMatch = content.match(collectionsRegex)
 
-  if (collectionsMatch) {
+  if (collectionsMatch && collectionsMatch[1]) {
     const collectionsContent = collectionsMatch[1].trim()
     if (!collectionsContent.includes(capitalizedName)) {
       const newCollections = collectionsContent
@@ -68,7 +68,7 @@ export function removeCollectionFromConfig(content: string, collectionName: stri
   const collectionsRegex = /collections:\s*\[([\s\S]*?)\]/
   const collectionsMatch = content.match(collectionsRegex)
 
-  if (collectionsMatch) {
+  if (collectionsMatch && collectionsMatch[1]) {
     let collectionsContent = collectionsMatch[1]
 
     // Remove the collection name and clean up commas
@@ -95,7 +95,7 @@ export function updateAdminConfig(content: string, adminConfig: AdminConfig): st
   const adminRegex = /admin:\s*\{([^}]*)\}/
   const adminMatch = content.match(adminRegex)
 
-  if (adminMatch) {
+  if (adminMatch && adminMatch[1]) {
     let adminContent = adminMatch[1]
 
     // Update specific admin properties
@@ -185,7 +185,7 @@ export function updatePluginsConfig(content: string, pluginUpdates: PluginUpdate
   const pluginsRegex = /plugins:\s*\[([\s\S]*?)\]/
   const pluginsMatch = content.match(pluginsRegex)
 
-  if (pluginsMatch) {
+  if (pluginsMatch && pluginsMatch[1]) {
     let pluginsContent = pluginsMatch[1]
 
     // Remove plugins
@@ -201,7 +201,7 @@ export function updatePluginsConfig(content: string, pluginUpdates: PluginUpdate
       pluginUpdates.add.forEach((pluginImport: string) => {
         // This will match: import { PluginName } from '...';
         const match = pluginImport.match(/import\s*\{\s*(\w+)\s*\}/)
-        if (match) {
+        if (match && match[1]) {
           const pluginName = match[1]
           if (!pluginsContent.includes(`${pluginName}(`)) {
             pluginsContent = pluginsContent.trim()
