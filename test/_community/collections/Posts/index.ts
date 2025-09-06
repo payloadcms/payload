@@ -7,6 +7,7 @@ export const PostsCollection: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
   },
+  defaultSort: '-updatedAt',
   fields: [
     {
       name: 'title',
@@ -21,6 +22,14 @@ export const PostsCollection: CollectionConfig = {
           type: 'text',
         },
       ],
+    },
+    {
+      type: 'relationship',
+      name: 'relatedArticle',
+      relationTo: 'posts',
+      admin: {
+        sortOptions: '-updatedAt',
+      },
     },
   ],
 }
