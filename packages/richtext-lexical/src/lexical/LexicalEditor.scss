@@ -4,6 +4,17 @@
   .rich-text-lexical {
     .editor {
       position: relative;
+
+      &[data-rtl='true'] {
+        direction: rtl;
+        text-align: right;
+
+        // Every single lexical node needs the `direction: rtl` class. This allows
+        // $isParentRTL() to work correctly.
+        * {
+          direction: rtl;
+        }
+      }
     }
 
     .editor-container {

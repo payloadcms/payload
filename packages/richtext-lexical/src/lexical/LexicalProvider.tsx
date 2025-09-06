@@ -115,6 +115,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
           <LexicalEditorComponent
             editorConfig={editorConfig}
             editorContainerRef={editorContainerRef}
+            fieldProps={fieldProps}
             isSmallWidthViewport={isSmallWidthViewport}
             onChange={onChange}
           />
