@@ -8,6 +8,15 @@ keywords: hooks, fields, config, configuration, documentation, Content Managemen
 
 Field Hooks are [Hooks](./overview) that run on Documents on a per-field basis. They allow you to execute your own logic during specific events of the Document lifecycle. Field Hooks offer incredible potential for isolating your logic from the rest of your [Collection Hooks](./collections) and [Global Hooks](./globals).
 
+<Banner type="warning">
+  **Important:** Field Hooks only work on fields that affect data.
+  Presentational fields like [Row](../fields/row),
+  [Collapsible](../fields/collapsible), [Tabs](../fields/tabs) (without names),
+  and [UI](../fields/ui) fields do not execute hooks even if configured. These
+  fields are designed only for organizing the Admin Panel layout and do not
+  store or process data.
+</Banner>
+
 To add Hooks to a Field, use the `hooks` property in your [Field Config](../fields/overview):
 
 ```ts
