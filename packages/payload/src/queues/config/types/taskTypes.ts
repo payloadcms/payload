@@ -1,4 +1,5 @@
 import type { Field, Job, PayloadRequest, StringKeyOf, TypedJobs } from '../../../index.js'
+import type { ScheduleConfig } from './index.js'
 import type { SingleTaskStatus } from './workflowTypes.js'
 
 export type TaskInputOutput = {
@@ -54,6 +55,9 @@ export type TaskHandler<
   args: TaskHandlerArgs<TTaskSlugOrInputOutput, TWorkflowSlug>,
 ) => Promise<TaskHandlerResult<TTaskSlugOrInputOutput>> | TaskHandlerResult<TTaskSlugOrInputOutput>
 
+/**
+ * @todo rename to TaskSlug in 4.0, similar to CollectionSlug
+ */
 export type TaskType = StringKeyOf<TypedJobs['tasks']>
 
 // Extracts the type of `input` corresponding to each task
@@ -233,6 +237,10 @@ export type TaskConfig<
    * @default By default, tasks are not retried and `retries` is `undefined`.
    */
   retries?: number | RetryConfig | undefined
+  /**
+   * Allows automatically scheduling this task to run regularly at a specified interval.
+   */
+  schedule?: ScheduleConfig[]
   /**
    * Define a slug-based name for this job. This slug needs to be unique among both tasks and workflows.
    */

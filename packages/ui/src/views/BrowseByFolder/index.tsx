@@ -9,10 +9,10 @@ import { useRouter } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
-import { CollectionTypePill } from '../../elements/FolderView/CollectionTypePill/index.js'
 import { ColoredFolderIcon } from '../../elements/FolderView/ColoredFolderIcon/index.js'
 import { CurrentFolderActions } from '../../elements/FolderView/CurrentFolderActions/index.js'
 import { DragOverlaySelection } from '../../elements/FolderView/DragOverlaySelection/index.js'
+import { FilterFolderTypePill } from '../../elements/FolderView/FilterFolderTypePill/index.js'
 import { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index.js'
 import { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
 import { SortByPill } from '../../elements/FolderView/SortByPill/index.js'
@@ -92,6 +92,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
     Description,
     disableBulkDelete,
     disableBulkEdit,
+    folderAssignedCollections,
     viewPreference,
   } = props
 
@@ -111,11 +112,12 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
     allowCreateCollectionSlugs,
     breadcrumbs,
     documents,
+    dragOverlayItem,
     folderCollectionConfig,
     folderID,
+    folderType,
     getFolderRoute,
     getSelectedItems,
-    lastSelectedIndex,
     moveToFolder,
     refineFolderData,
     search,
@@ -236,6 +238,10 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
     }
   }, [breadcrumbs, drawerDepth, getFolderRoute, router, setStepNav, startRouteTransition, t])
 
+  const nonFolderCollectionSlugs = allowCreateCollectionSlugs.filter(
+    (slug) => slug !== folderCollectionConfig.slug,
+  )
+
   return (
     <Fragment>
       <DndEventListener onDragEnd={onDragEnd} setIsDragging={setIsDragging} />
@@ -248,6 +254,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                 <ListSelection
                   disableBulkDelete={disableBulkDelete}
                   disableBulkEdit={disableBulkEdit}
+                  folderAssignedCollections={folderAssignedCollections}
                   key="list-selection"
                 />
               ),
@@ -257,8 +264,13 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
             TitleActions={[
               allowCreateCollectionSlugs.length && (
                 <ListCreateNewDocInFolderButton
-                  buttonLabel={t('general:createNew')}
+                  buttonLabel={
+                    allowCreateCollectionSlugs.length > 1
+                      ? t('general:createNew')
+                      : `${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`
+                  }
                   collectionSlugs={allowCreateCollectionSlugs}
+                  folderAssignedCollections={Array.isArray(folderType) ? folderType : []}
                   key="create-new-button"
                   onCreateSuccess={clearRouteCache}
                   slugPrefix="create-document--header-pill"
@@ -269,7 +281,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
           <SearchBar
             Actions={[
               <SortByPill key="sort-by-pill" />,
-              folderID && <CollectionTypePill key="collection-type" />,
+              folderID && <FilterFolderTypePill key="collection-type" />,
               <ToggleViewButtons
                 activeView={activeView}
                 key="toggle-view-buttons"
@@ -315,24 +327,22 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
                     collectionSlugs={[folderCollectionConfig.slug]}
+                    folderAssignedCollections={Array.isArray(folderType) ? folderType : []}
                     key="create-folder"
                     onCreateSuccess={clearRouteCache}
                     slugPrefix="create-folder--no-results"
                   />
                 ),
-                folderID &&
-                  allowCreateCollectionSlugs.filter((slug) => slug !== folderCollectionConfig.slug)
-                    .length > 0 && (
-                    <ListCreateNewDocInFolderButton
-                      buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
-                      collectionSlugs={allowCreateCollectionSlugs.filter(
-                        (slug) => slug !== folderCollectionConfig.slug,
-                      )}
-                      key="create-document"
-                      onCreateSuccess={clearRouteCache}
-                      slugPrefix="create-document--no-results"
-                    />
-                  ),
+                folderID && nonFolderCollectionSlugs.length > 0 && (
+                  <ListCreateNewDocInFolderButton
+                    buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
+                    collectionSlugs={nonFolderCollectionSlugs}
+                    folderAssignedCollections={Array.isArray(folderType) ? folderType : []}
+                    key="create-document"
+                    onCreateSuccess={clearRouteCache}
+                    slugPrefix="create-document--no-results"
+                  />
+                ),
               ].filter(Boolean)}
               Message={
                 <p>
@@ -347,11 +357,9 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
         </Gutter>
         {AfterFolderList}
       </div>
-      <DragOverlaySelection
-        allItems={[...subfolders, ...documents]}
-        lastSelected={lastSelectedIndex}
-        selectedCount={selectedItemKeys.size}
-      />
+      {selectedItemKeys.size > 0 && dragOverlayItem && (
+        <DragOverlaySelection item={dragOverlayItem} selectedCount={selectedItemKeys.size} />
+      )}
     </Fragment>
   )
 }

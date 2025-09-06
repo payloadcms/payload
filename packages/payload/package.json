@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.43.0",
+  "version": "3.54.0",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -71,8 +71,8 @@
     "bin.js"
   ],
   "scripts": {
-    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild",
-    "build:esbuild": "echo skipping esbuild",
+    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && echo skipping esbuild",
+    "build:bundle-for-analysis": "node ./bundle.js esbuild",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
@@ -92,7 +92,7 @@
     "busboy": "^1.6.0",
     "ci-info": "^4.1.0",
     "console-table-printer": "2.12.1",
-    "croner": "9.0.0",
+    "croner": "9.1.0",
     "dataloader": "2.2.3",
     "deepmerge": "4.3.1",
     "file-type": "19.3.0",
@@ -111,7 +111,7 @@
     "sanitize-filename": "1.6.3",
     "scmp": "2.1.0",
     "ts-essentials": "10.0.3",
-    "tsx": "4.19.2",
+    "tsx": "4.20.3",
     "undici": "7.10.0",
     "uuid": "10.0.0",
     "ws": "^8.16.0"

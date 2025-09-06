@@ -1,7 +1,10 @@
 import { expect, type Page } from '@playwright/test'
 
+import { createFolderDoc } from './createFolderDoc.js'
+
 type Args = {
   folderName: string
+  folderType?: string[]
   fromDropdown?: boolean
   page: Page
 }
@@ -9,33 +12,30 @@ export async function createFolder({
   folderName,
   fromDropdown = false,
   page,
+  folderType = ['Posts'],
 }: Args): Promise<void> {
   if (fromDropdown) {
-    const folderDropdown = page.locator('.create-new-doc-in-folder__popup-button', {
+    const titleActionsLocator = page.locator('.list-header__title-actions')
+    const folderDropdown = titleActionsLocator.locator('.create-new-doc-in-folder__action-popup', {
       hasText: 'Create',
     })
     await folderDropdown.click()
-    const createFolderButton = page.locator('.popup-button-list__button', {
+    const createFolderButton = titleActionsLocator.locator('.popup-button-list__button', {
       hasText: 'Folder',
     })
     await createFolderButton.click()
   } else {
     const createFolderButton = page.locator(
-      '.create-new-doc-in-folder__button:has-text("Create New")',
+      '.list-header__title-and-actions .create-new-doc-in-folder__button:has-text("Create folder")',
     )
     await createFolderButton.click()
   }
 
-  const folderNameInput = page.locator(
-    'dialog#create-document--header-pill-new-folder-drawer div.drawer-content-container input#field-name',
-  )
-
-  await folderNameInput.fill(folderName)
-
-  const createButton = page.getByRole('button', { name: 'Apply Changes' })
-  await createButton.click()
-
-  await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+  await createFolderDoc({
+    page,
+    folderName,
+    folderType,
+  })
 
   const folderCard = page.locator('.folder-file-card__name', { hasText: folderName }).first()
   await expect(folderCard).toBeVisible()

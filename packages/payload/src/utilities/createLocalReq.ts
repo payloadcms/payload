@@ -1,5 +1,4 @@
-import type { User } from '../auth/types.js'
-import type { Payload, RequestContext, TypedLocale } from '../index.js'
+import type { Payload, RequestContext, TypedLocale, TypedUser } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
@@ -91,7 +90,7 @@ export type CreateLocalReqOptions = {
   locale?: string
   req?: Partial<PayloadRequest>
   urlSuffix?: string
-  user?: User
+  user?: TypedUser
 }
 
 type CreateLocalReq = (options: CreateLocalReqOptions, payload: Payload) => Promise<PayloadRequest>

@@ -8,13 +8,15 @@ import { countOperation } from '../operations/count.js'
 
 export const countHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { where } = req.query as {
+  const { trash, where } = req.query as {
+    trash?: string
     where?: Where
   }
 
   const result = await countOperation({
     collection,
     req,
+    trash: trash === 'true',
     where,
   })
 

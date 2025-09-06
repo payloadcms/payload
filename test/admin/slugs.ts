@@ -23,6 +23,7 @@ export const uploadTwoCollectionSlug = 'uploads-two'
 export const customFieldsSlug = 'custom-fields'
 
 export const listDrawerSlug = 'with-list-drawer'
+export const virtualsSlug = 'virtuals'
 export const collectionSlugs = [
   usersCollectionSlug,
   customViews1CollectionSlug,
@@ -39,6 +40,7 @@ export const collectionSlugs = [
   customFieldsSlug,
   disableDuplicateSlug,
   listDrawerSlug,
+  virtualsSlug,
 ]
 
 export const customGlobalViews1GlobalSlug = 'custom-global-views-one'

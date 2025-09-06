@@ -16,7 +16,7 @@ import { devUser } from '../credentials.js'
 type ValidPath = `/${string}`
 type RequestOptions = {
   auth?: boolean
-  query?: {
+  query?: { [key: string]: unknown } & {
     depth?: number
     fallbackLocale?: string
     joins?: JoinQuery

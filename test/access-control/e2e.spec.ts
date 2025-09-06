@@ -6,7 +6,7 @@ import { devUser } from 'credentials.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
-import { email, wait } from 'payload/shared'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -16,7 +16,6 @@ import {
   closeNav,
   ensureCompilationIsDone,
   exactText,
-  getRoutes,
   initPageConsoleErrorCatch,
   login,
   saveDocAndAssert,
@@ -71,7 +70,6 @@ describe('Access Control', () => {
   let disabledFields: AdminUrlUtil
   let serverURL: string
   let context: BrowserContext
-  let logoutURL: string
   let authFields: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -98,17 +96,6 @@ describe('Access Control', () => {
     await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
 
     await login({ page, serverURL })
-
-    await ensureCompilationIsDone({ page, serverURL })
-
-    const {
-      admin: {
-        routes: { logout: logoutRoute },
-      },
-      routes: { admin: adminRoute },
-    } = getRoutes({})
-
-    logoutURL = `${serverURL}${adminRoute}${logoutRoute}`
   })
 
   describe('fields', () => {
@@ -436,10 +423,15 @@ describe('Access Control', () => {
       const documentDrawer = page.locator(`[id^=doc-drawer_${createNotUpdateCollectionSlug}_1_]`)
       await expect(documentDrawer).toBeVisible()
       await expect(documentDrawer.locator('#action-save')).toBeVisible()
+
       await documentDrawer.locator('#field-name').fill('name')
       await expect(documentDrawer.locator('#field-name')).toHaveValue('name')
-      await documentDrawer.locator('#action-save').click()
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
+      await saveDocAndAssert(
+        page,
+        `[id^=doc-drawer_${createNotUpdateCollectionSlug}_1_] #action-save`,
+      )
+
       await expect(documentDrawer.locator('#action-save')).toBeHidden()
       await expect(documentDrawer.locator('#field-name')).toBeDisabled()
     })
@@ -510,6 +502,13 @@ describe('Access Control', () => {
 
     describe('global', () => {
       test('should restrict update access based on document field', async () => {
+        await payload.updateGlobal({
+          slug: userRestrictedGlobalSlug,
+          data: {
+            name: 'dev@payloadcms.com',
+          },
+        })
+
         await page.goto(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
         await expect(page.locator('#field-name')).toBeVisible()
         await expect(page.locator('#field-name')).toHaveValue(devUser.email)
@@ -724,7 +723,7 @@ describe('Access Control', () => {
       await page.locator('#field-unnamedTab').fill('unnamed tab')
 
       // array field
-      await page.locator('#field-array button').click()
+      await page.locator('#field-array > button').click()
       await page.locator('#field-array__0__text').fill('array row 0')
 
       await saveDocAndAssert(page)

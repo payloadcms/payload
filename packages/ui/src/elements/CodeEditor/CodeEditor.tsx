@@ -8,13 +8,16 @@ import { useTheme } from '../../providers/Theme/index.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import './index.scss'
 
-const Editor = (EditorImport.default || EditorImport) as unknown as typeof EditorImport.default
+const Editor = 'default' in EditorImport ? EditorImport.default : EditorImport
 
 const baseClass = 'code-editor'
 
 const CodeEditor: React.FC<Props> = (props) => {
   const { className, maxHeight, minHeight, options, readOnly, ...rest } = props
   const MIN_HEIGHT = minHeight ?? 56 // equivalent to 3 lines
+
+  // Extract per-model settings to avoid global conflicts
+  const { insertSpaces, tabSize, trimAutoWhitespace, ...editorOptions } = options || {}
   const paddingFromProps = options?.padding
     ? (options.padding.top || 0) + (options.padding?.bottom || 0)
     : 0
@@ -36,8 +39,9 @@ const CodeEditor: React.FC<Props> = (props) => {
       className={classes}
       loading={<ShimmerEffect height={dynamicHeight} />}
       options={{
-        detectIndentation: true,
+        detectIndentation: false, // use the tabSize on the model, set onMount
         hideCursorInOverviewRuler: true,
+        insertSpaces: false,
         minimap: {
           enabled: false,
         },
@@ -47,9 +51,9 @@ const CodeEditor: React.FC<Props> = (props) => {
           alwaysConsumeMouseWheel: false,
         },
         scrollBeyondLastLine: false,
-        tabSize: 2,
+        trimAutoWhitespace: false,
         wordWrap: 'on',
-        ...options,
+        ...editorOptions,
       }}
       theme={theme === 'dark' ? 'vs-dark' : 'vs'}
       {...rest}
@@ -64,6 +68,17 @@ const CodeEditor: React.FC<Props> = (props) => {
       }}
       onMount={(editor, monaco) => {
         rest.onMount?.(editor, monaco)
+
+        // Set per-model options to avoid global conflicts
+        const model = editor.getModel()
+        if (model) {
+          model.updateOptions({
+            insertSpaces: insertSpaces ?? true,
+            tabSize: tabSize ?? 4,
+            trimAutoWhitespace: trimAutoWhitespace ?? true,
+          })
+        }
+
         setDynamicHeight(
           Math.max(MIN_HEIGHT, editor.getValue().split('\n').length * 18 + 2 + paddingFromProps),
         )

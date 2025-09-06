@@ -240,6 +240,23 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: 'directors',
         },
+        {
+          type: 'array',
+          name: 'array',
+          fields: [
+            {
+              name: 'director',
+              type: 'relationship',
+              relationTo: 'directors',
+              hasMany: true,
+            },
+            {
+              name: 'polymorphic',
+              type: 'relationship',
+              relationTo: ['directors'],
+            },
+          ],
+        },
       ],
     },
     {

@@ -8,7 +8,7 @@ import type {
 import type { FolderBreadcrumb, FolderOrDocument } from 'payload/shared'
 
 import { APIError, formatErrors, getFolderData } from 'payload'
-import { buildFolderWhereConstraints } from 'payload/shared'
+import { buildFolderWhereConstraints, combineWhereConstraints } from 'payload/shared'
 
 import {
   FolderFileTable,
@@ -19,6 +19,7 @@ import {
 type GetFolderResultsComponentAndDataResult = {
   breadcrumbs?: FolderBreadcrumb[]
   documents?: FolderOrDocument[]
+  folderAssignedCollections?: CollectionSlug[]
   FolderResultsComponent: React.ReactNode
   subfolders?: FolderOrDocument[]
 }
@@ -45,17 +46,10 @@ export const getFolderResultsComponentAndDataHandler: ServerFunction<
     const res = await getFolderResultsComponentAndData(args)
     return res
   } catch (err) {
-    req.payload.logger.error({ err, msg: `There was an error building form state` })
-
-    if (err.message === 'Could not find field schema for given path') {
-      return {
-        message: err.message,
-      }
-    }
-
-    if (err.message === 'Unauthorized') {
-      return null
-    }
+    req.payload.logger.error({
+      err,
+      msg: `There was an error getting the folder results component and data`,
+    })
 
     return formatErrors(err)
   }
@@ -64,16 +58,12 @@ export const getFolderResultsComponentAndDataHandler: ServerFunction<
 /**
  * This function is responsible for fetching folder data, building the results component
  * and returns the data and component together.
- *
- *
- * Open ended questions:
- * - If we rerender the results section, does the provider update?? I dont think so, if the provider is on the server.
- *   Maybe we should move the provider to the client.
  */
 export const getFolderResultsComponentAndData = async ({
-  activeCollectionSlugs,
-  browseByFolder,
+  browseByFolder = false,
+  collectionsToDisplay: activeCollectionSlugs,
   displayAs,
+  folderAssignedCollections,
   folderID = undefined,
   req,
   sort,
@@ -84,9 +74,17 @@ export const getFolderResultsComponentAndData = async ({
     throw new APIError('Folders are not enabled in the configuration.')
   }
 
+  const emptyQuery = {
+    id: {
+      exists: false,
+    },
+  }
+
   let collectionSlug: CollectionSlug | undefined = undefined
-  let documentWhere: undefined | Where = undefined
-  let folderWhere: undefined | Where = undefined
+  let documentWhere: undefined | Where =
+    Array.isArray(activeCollectionSlugs) && !activeCollectionSlugs.length ? emptyQuery : undefined
+  let folderWhere: undefined | Where =
+    Array.isArray(activeCollectionSlugs) && !activeCollectionSlugs.length ? emptyQuery : undefined
 
   // todo(perf): - collect promises and resolve them in parallel
   for (const activeCollectionSlug of activeCollectionSlugs) {
@@ -103,6 +101,34 @@ export const getFolderResultsComponentAndData = async ({
       if (folderCollectionConstraints) {
         folderWhere = folderCollectionConstraints
       }
+
+      folderWhere = combineWhereConstraints([
+        folderWhere,
+        Array.isArray(folderAssignedCollections) &&
+        folderAssignedCollections.length &&
+        payload.config.folders.collectionSpecific
+          ? {
+              or: [
+                {
+                  folderType: {
+                    in: folderAssignedCollections,
+                  },
+                },
+                // if the folderType is not set, it means it accepts all collections and should appear in the results
+                {
+                  folderType: {
+                    exists: false,
+                  },
+                },
+                {
+                  folderType: {
+                    equals: null,
+                  },
+                },
+              ],
+            }
+          : undefined,
+      ])
     } else if ((browseByFolder && folderID) || !browseByFolder) {
       if (!browseByFolder) {
         collectionSlug = activeCollectionSlug
@@ -135,6 +161,7 @@ export const getFolderResultsComponentAndData = async ({
     folderID,
     folderWhere,
     req,
+    sort,
   })
 
   let FolderResultsComponent = null
@@ -167,6 +194,7 @@ export const getFolderResultsComponentAndData = async ({
   return {
     breadcrumbs: folderData.breadcrumbs,
     documents: folderData.documents,
+    folderAssignedCollections: folderData.folderAssignedCollections,
     FolderResultsComponent,
     subfolders: folderData.subfolders,
   }

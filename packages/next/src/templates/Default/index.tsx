@@ -146,7 +146,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
-      <BulkUploadProvider>
+      <BulkUploadProvider drawerSlugPrefix={collectionSlug}>
         <ActionsProvider Actions={Actions}>
           {RenderServerComponent({
             clientProps,

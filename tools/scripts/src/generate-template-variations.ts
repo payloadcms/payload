@@ -323,13 +323,19 @@ async function main() {
 
     // Generate importmap
     log('Generating import map')
-    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace'} generate:importmap`, {
+    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}generate:importmap`, {
+      cwd: destDir,
+    })
+
+    // Generate types
+    log('Generating types')
+    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}generate:types`, {
       cwd: destDir,
     })
 
     if (shouldBuild) {
       log('Building...')
-      execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace'} build`, { cwd: destDir })
+      execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}build`, { cwd: destDir })
     }
 
     // TODO: Email?

@@ -19,11 +19,6 @@ export function getDocumentViewInfo(segments: string[]): {
         documentSubViewType: 'versions',
         viewType: 'document',
       }
-    } else if (tabSegment === 'preview') {
-      return {
-        documentSubViewType: 'livePreview',
-        viewType: 'document',
-      }
     } else if (tabSegment === 'api') {
       return {
         documentSubViewType: 'api',

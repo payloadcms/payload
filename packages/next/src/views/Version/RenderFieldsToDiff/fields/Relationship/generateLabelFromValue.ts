@@ -1,6 +1,11 @@
 import type { PayloadRequest, RelationshipField, TypeWithID } from 'payload'
 
-import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldIsPresentationalOnly,
+  fieldShouldBeLocalized,
+  flattenTopLevelFields,
+} from 'payload/shared'
 
 import type { RelationshipValue } from './index.js'
 
@@ -17,16 +22,13 @@ export const generateLabelFromValue = ({
   req: PayloadRequest
   value: RelationshipValue
 }): string => {
-  let relatedDoc: number | string | TypeWithID
+  let relatedDoc: TypeWithID
+  let relationTo: string = field.relationTo as string
   let valueToReturn: string = ''
-
-  const relationTo: string =
-    typeof value === 'object' && 'relationTo' in value
-      ? value.relationTo
-      : (field.relationTo as string)
 
   if (typeof value === 'object' && 'relationTo' in value) {
     relatedDoc = value.value
+    relationTo = value.relationTo
   } else {
     // Non-polymorphic relationship or deleted document
     relatedDoc = value
@@ -35,7 +37,12 @@ export const generateLabelFromValue = ({
   const relatedCollection = req.payload.collections[relationTo].config
 
   const useAsTitle = relatedCollection?.admin?.useAsTitle
-  const useAsTitleField = relatedCollection.fields.find(
+
+  const flattenedRelatedCollectionFields = flattenTopLevelFields(relatedCollection.fields, {
+    moveSubFieldsToTop: true,
+  })
+
+  const useAsTitleField = flattenedRelatedCollectionFields.find(
     (f) => fieldAffectsData(f) && !fieldIsPresentationalOnly(f) && f.name === useAsTitle,
   )
   let titleFieldIsLocalized = false

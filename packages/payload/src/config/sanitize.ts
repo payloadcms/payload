@@ -3,6 +3,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
+import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type {
   Config,
@@ -18,22 +19,18 @@ import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
-import { addFolderCollections } from '../folders/addFolderCollections.js'
+import { addFolderCollection } from '../folders/addFolderCollection.js'
+import { addFolderFieldToCollection } from '../folders/addFolderFieldToCollection.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
-import {
-  baseBlockFields,
-  type CollectionSlug,
-  formatLabels,
-  type GlobalSlug,
-  sanitizeFields,
-} from '../index.js'
+import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
 import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
 } from '../locked-documents/config.js'
 import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
 import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
-import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/index.js'
+import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
+import { getJobStatsGlobal } from '../queues/config/global.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
@@ -191,14 +188,16 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const collectionSlugs = new Set<CollectionSlug>()
 
-  await addFolderCollections(config as unknown as Config)
-
   const validRelationships = [
     ...(config.collections?.map((c) => c.slug) ?? []),
     jobsCollectionSlug,
     lockedDocumentsCollectionSlug,
     preferencesCollectionSlug,
   ]
+
+  if (config.folders !== false) {
+    validRelationships.push(config.folders!.slug)
+  }
 
   /**
    * Blocks sanitization needs to happen before collections, as collection/global join field sanitization needs config.blocks
@@ -236,6 +235,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
+  const folderEnabledCollections: SanitizedCollectionConfig[] = []
+
   for (let i = 0; i < config.collections!.length; i++) {
     if (collectionSlugs.has(config.collections![i]!.slug)) {
       throw new DuplicateCollection('slug', config.collections![i]!.slug)
@@ -257,12 +258,25 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       }
     }
 
+    if (config.folders !== false && config.collections![i]!.folders) {
+      addFolderFieldToCollection({
+        collection: config.collections![i]!,
+        collectionSpecific: config.folders!.collectionSpecific,
+        folderFieldName: config.folders!.fieldName,
+        folderSlug: config.folders!.slug,
+      })
+    }
+
     config.collections![i] = await sanitizeCollection(
       config as unknown as Config,
       config.collections![i]!,
       richTextSanitizationPromises,
       validRelationships,
     )
+
+    if (config.folders !== false && config.collections![i]!.folders) {
+      folderEnabledCollections.push(config.collections![i]!)
+    }
   }
 
   if (config.globals!.length > 0) {
@@ -300,7 +314,28 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   // Need to add default jobs collection before locked documents collections
   if (config.jobs.enabled) {
-    let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
+    // Check for schedule property in both tasks and workflows
+    const hasScheduleProperty =
+      (config?.jobs?.tasks?.length && config.jobs.tasks.some((task) => task.schedule)) ||
+      (config?.jobs?.workflows?.length &&
+        config.jobs.workflows.some((workflow) => workflow.schedule))
+
+    if (hasScheduleProperty) {
+      config.jobs.scheduling = true
+      // Add payload-jobs-stats global for tracking when a job of a specific slug was last run
+      ;(config.globals ??= []).push(
+        await sanitizeGlobal(
+          config as unknown as Config,
+          getJobStatsGlobal(config as unknown as Config),
+          richTextSanitizationPromises,
+          validRelationships,
+        ),
+      )
+
+      config.jobs.stats = true
+    }
+
+    let defaultJobsCollection = getDefaultJobsCollection(config.jobs)
 
     if (typeof config.jobs.jobsCollectionOverrides === 'function') {
       defaultJobsCollection = config.jobs.jobsCollectionOverrides({
@@ -329,7 +364,17 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       validRelationships,
     )
 
-    configWithDefaults.collections!.push(sanitizedJobsCollection)
+    ;(config.collections ??= []).push(sanitizedJobsCollection)
+  }
+
+  if (config.folders !== false && folderEnabledCollections.length) {
+    await addFolderCollection({
+      collectionSpecific: config.folders!.collectionSpecific,
+      config: config as unknown as Config,
+      folderEnabledCollections,
+      richTextSanitizationPromises,
+      validRelationships,
+    })
   }
 
   configWithDefaults.collections!.push(

@@ -13,6 +13,7 @@ import type {
   TaskType,
 } from '../../../config/types/taskTypes.js'
 import type {
+  JobLog,
   SingleTaskStatus,
   WorkflowConfig,
   WorkflowTypes,
@@ -20,10 +21,10 @@ import type {
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
 import { TaskError } from '../../../errors/index.js'
+import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { getTaskHandlerFromConfig } from './importHandlerPath.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type TaskParent = {
   taskID: string
@@ -54,7 +55,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         task,
       }: Parameters<RunInlineTaskFunction>[1] & Parameters<RunTaskFunction<string>>[1],
     ) => {
-      const executedAt = new Date()
+      const executedAt = getCurrentDate()
 
       let taskConfig: TaskConfig | undefined
       if (!isInline) {
@@ -184,9 +185,9 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         await taskConfig.onSuccess()
       }
 
-      ;(job.log ??= []).push({
+      const newLogItem: JobLog = {
         id: new ObjectId().toHexString(),
-        completedAt: new Date().toISOString(),
+        completedAt: getCurrentDate().toISOString(),
         executedAt: executedAt.toISOString(),
         input,
         output,
@@ -194,10 +195,14 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         state: 'succeeded',
         taskID,
         taskSlug,
-      })
+      }
 
       await updateJob({
-        log: job.log,
+        log: {
+          $push: newLogItem,
+        } as any,
+        // Set to null to skip main row update on postgres. 2 => 1 db round trips
+        updatedAt: null as any,
       })
 
       return output

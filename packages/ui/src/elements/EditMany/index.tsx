@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React, { useState } from 'react'
@@ -11,9 +11,9 @@ import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Drawer } from '../Drawer/index.js'
-import './index.scss'
 import { ListSelectionButton } from '../ListSelection/index.js'
 import { EditManyDrawerContent } from './DrawerContent.js'
+import './index.scss'
 
 export const baseClass = 'edit-many'
 
@@ -22,13 +22,14 @@ export type EditManyProps = {
 }
 
 export const EditMany: React.FC<EditManyProps> = (props) => {
-  const { count, selectAll, selected, toggleAll } = useSelection()
+  const { count, selectAll, selectedIDs, toggleAll } = useSelection()
+
   return (
     <EditMany_v4
       {...props}
       count={count}
-      ids={Array.from(selected.keys())}
-      onSuccess={() => toggleAll(false)}
+      ids={selectedIDs}
+      onSuccess={() => toggleAll()}
       selectAll={selectAll === SelectAllStatus.AllAvailable}
     />
   )
@@ -38,10 +39,15 @@ export const EditMany_v4: React.FC<
   {
     count: number
     ids: (number | string)[]
+    /**
+     * When multiple EditMany components are rendered on the page, this will differentiate them.
+     */
+    modalPrefix?: string
     onSuccess?: () => void
     selectAll: boolean
-  } & EditManyProps
-> = ({ collection, count, ids, onSuccess, selectAll }) => {
+    where?: Where
+  } & Omit<EditManyProps, 'ids'>
+> = ({ collection, count, ids, modalPrefix, onSuccess, selectAll, where }) => {
   const { permissions } = useAuth()
   const { openModal } = useModal()
 
@@ -51,7 +57,7 @@ export const EditMany_v4: React.FC<
 
   const collectionPermissions = permissions?.collections?.[collection.slug]
 
-  const drawerSlug = `edit-${collection.slug}`
+  const drawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}edit-${collection.slug}`
 
   if (count === 0 || !collectionPermissions?.update) {
     return null
@@ -79,6 +85,7 @@ export const EditMany_v4: React.FC<
             selectAll={selectAll}
             selectedFields={selectedFields}
             setSelectedFields={setSelectedFields}
+            where={where}
           />
         </Drawer>
       </EditDepthProvider>

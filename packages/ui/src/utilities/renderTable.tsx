@@ -3,14 +3,16 @@ import type {
   ClientConfig,
   ClientField,
   CollectionConfig,
+  CollectionPreferences,
   Column,
   ColumnPreference,
   Field,
   ImportMap,
-  ListPreferences,
+  ListQuery,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
+  ViewTypes,
 } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
@@ -21,9 +23,12 @@ import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumn
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import {
+  GroupByHeader,
+  GroupByPageControls,
   OrderableTable,
   Pill,
   SelectAll,
+  SelectionProvider,
   SelectRow,
   SortHeader,
   SortRow,
@@ -64,34 +69,44 @@ export const renderTable = ({
   clientConfig,
   collectionConfig,
   collections,
-  columnPreferences,
   columns: columnsFromArgs,
   customCellProps,
-  docs,
+  data,
   enableRowSelections,
+  groupByFieldPath,
+  groupByValue,
+  heading,
   i18n,
+  key = 'table',
   orderableFieldName,
   payload,
+  query,
   renderRowTypes,
   tableAppearance,
   useAsTitle,
+  viewType,
 }: {
   clientCollectionConfig?: ClientCollectionConfig
   clientConfig?: ClientConfig
   collectionConfig?: SanitizedCollectionConfig
   collections?: string[]
-  columnPreferences: ListPreferences['columns']
-  columns?: ListPreferences['columns']
+  columns?: CollectionPreferences['columns']
   customCellProps?: Record<string, unknown>
-  docs: PaginatedDocs['docs']
+  data?: PaginatedDocs | undefined
   drawerSlug?: string
   enableRowSelections: boolean
+  groupByFieldPath?: string
+  groupByValue?: string
+  heading?: string
   i18n: I18nClient
+  key?: string
   orderableFieldName: string
   payload: Payload
+  query?: ListQuery
   renderRowTypes?: boolean
   tableAppearance?: 'condensed' | 'default'
   useAsTitle: CollectionConfig['admin']['useAsTitle']
+  viewType?: ViewTypes
 }): {
   columnState: Column[]
   Table: React.ReactNode
@@ -102,6 +117,8 @@ export const renderTable = ({
   let clientFields: ClientField[] = clientCollectionConfig?.fields || []
   let serverFields: Field[] = collectionConfig?.fields || []
   const isPolymorphic = collections
+
+  const isGroupingBy = Boolean(collectionConfig?.admin?.groupBy && query?.groupBy)
 
   if (isPolymorphic) {
     clientFields = []
@@ -154,7 +171,6 @@ export const renderTable = ({
   const sharedArgs: Pick<
     BuildColumnStateArgs,
     | 'clientFields'
-    | 'columnPreferences'
     | 'columns'
     | 'customCellProps'
     | 'enableRowSelections'
@@ -162,9 +178,9 @@ export const renderTable = ({
     | 'payload'
     | 'serverFields'
     | 'useAsTitle'
+    | 'viewType'
   > = {
     clientFields,
-    columnPreferences,
     columns,
     enableRowSelections,
     i18n,
@@ -173,6 +189,7 @@ export const renderTable = ({
     payload,
     serverFields,
     useAsTitle,
+    viewType,
   }
 
   if (isPolymorphic) {
@@ -180,14 +197,14 @@ export const renderTable = ({
       ...sharedArgs,
       collectionSlug: undefined,
       dataType: 'polymorphic',
-      docs,
+      docs: data?.docs || [],
     })
   } else {
     columnState = buildColumnState({
       ...sharedArgs,
       collectionSlug: clientCollectionConfig.slug,
       dataType: 'monomorphic',
-      docs,
+      docs: data?.docs || [],
     })
   }
 
@@ -204,7 +221,7 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: i18n.t('version:type'),
-      renderedCells: docs.map((doc, i) => (
+      renderedCells: (data?.docs || []).map((doc, i) => (
         <Pill key={i} size="small">
           {getTranslation(
             collections
@@ -228,15 +245,51 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: <SelectAll />,
-      renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
+      renderedCells: (data?.docs || []).map((_, i) => (
+        <SelectRow key={i} rowData={data?.docs[i]} />
+      )),
     } as Column)
+  }
+
+  if (isGroupingBy) {
+    return {
+      columnState,
+      // key is required since Next.js 15.2.0 to prevent React key error
+      Table: (
+        <div
+          className={['table-wrap', groupByValue !== undefined && `table-wrap--group-by`]
+            .filter(Boolean)
+            .join(' ')}
+          key={key}
+        >
+          <SelectionProvider docs={data?.docs || []} totalDocs={data?.totalDocs || 0}>
+            <GroupByHeader
+              collectionConfig={clientCollectionConfig}
+              groupByFieldPath={groupByFieldPath}
+              groupByValue={groupByValue}
+              heading={heading}
+            />
+            <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
+            <GroupByPageControls
+              collectionConfig={clientCollectionConfig}
+              data={data}
+              groupByValue={groupByValue}
+            />
+          </SelectionProvider>
+        </div>
+      ),
+    }
   }
 
   if (!orderableFieldName) {
     return {
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
-      Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} key="table" />,
+      Table: (
+        <div className="table-wrap" key={key}>
+          <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
+        </div>
+      ),
     }
   }
 
@@ -250,20 +303,21 @@ export const renderTable = ({
       hidden: true,
     },
     Heading: <SortHeader />,
-    renderedCells: docs.map((_, i) => <SortRow key={i} />),
+    renderedCells: (data?.docs || []).map((_, i) => <SortRow key={i} />),
   } as Column)
 
   return {
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
     Table: (
-      <OrderableTable
-        appearance={tableAppearance}
-        collection={clientCollectionConfig}
-        columns={columnsToUse}
-        data={docs}
-        key="table"
-      />
+      <div className="table-wrap" key={key}>
+        <OrderableTable
+          appearance={tableAppearance}
+          collection={clientCollectionConfig}
+          columns={columnsToUse}
+          data={data?.docs || []}
+        />
+      </div>
     ),
   }
 }

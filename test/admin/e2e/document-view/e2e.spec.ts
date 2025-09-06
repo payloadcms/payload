@@ -160,7 +160,7 @@ describe('Document View', () => {
       await page.goto(collectionWithPreview.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await expect(page.locator('.btn.preview-btn')).toBeVisible()
+      await expect(page.locator('button#preview-button')).toBeVisible()
     })
 
     test('collection — should not render preview button when `admin.preview` is not set', async () => {
@@ -168,13 +168,13 @@ describe('Document View', () => {
       await page.goto(collectionWithoutPreview.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await expect(page.locator('.btn.preview-btn')).toBeHidden()
+      await expect(page.locator('button#preview-button')).toBeHidden()
     })
 
     test('global — should render preview button when `admin.preview` is set', async () => {
       const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
       await page.goto(globalWithPreview.global(globalSlug))
-      await expect(page.locator('.btn.preview-btn')).toBeVisible()
+      await expect(page.locator('button#preview-button')).toBeVisible()
     })
 
     test('global — should not render preview button when `admin.preview` is not set', async () => {
@@ -182,7 +182,7 @@ describe('Document View', () => {
       await page.goto(globalWithoutPreview.global(group1GlobalSlug))
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await expect(page.locator('.btn.preview-btn')).toBeHidden()
+      await expect(page.locator('button#preview-button')).toBeHidden()
     })
   })
 
@@ -363,6 +363,43 @@ describe('Document View', () => {
   })
 
   describe('drawers', () => {
+    test('document drawers do not unmount across save events', async () => {
+      // Navigate to a post document
+      await navigateToDoc(page, postsUrl)
+
+      // Open the relationship drawer
+      await page
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+
+      const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+      const drawerEditView = drawer.locator('.drawer__content .collection-edit')
+      await expect(drawerEditView).toBeVisible()
+
+      const drawerTitleField = drawerEditView.locator('#field-title')
+      const testTitle = 'Test Title for Persistence'
+      await drawerTitleField.fill(testTitle)
+      await expect(drawerTitleField).toHaveValue(testTitle)
+
+      await drawerEditView.evaluate((el) => {
+        el.setAttribute('data-test-instance', 'This is a test')
+      })
+
+      await expect(drawerEditView).toHaveAttribute('data-test-instance', 'This is a test')
+
+      await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] .drawer__content #action-save')
+
+      await expect(drawerEditView).toBeVisible()
+      await expect(drawerTitleField).toHaveValue(testTitle)
+
+      // Verify the element instance hasn't changed (i.e., it wasn't re-mounted and discarded the custom attribute)
+      await expect
+        .poll(async () => {
+          return await drawerEditView.getAttribute('data-test-instance')
+        })
+        .toBe('This is a test')
+    })
+
     test('document drawers are visually stacking', async () => {
       await navigateToDoc(page, postsUrl)
       await page.locator('#field-title').fill(title)
@@ -612,6 +649,26 @@ describe('Document View', () => {
         await page.locator('#field-customSelectField .rs__control').click()
         await expect(page.locator('#field-customSelectField .rs__option')).toHaveCount(2)
       })
+
+      test('should render custom multi select options', async () => {
+        await page.goto(customFieldsURL.create)
+        await page.locator('#field-customMultiSelectField .rs__control').click()
+        await expect(page.locator('#field-customMultiSelectField .rs__option')).toHaveCount(2)
+      })
+
+      test('should allow selecting multiple values in custom multi select', async () => {
+        await page.goto(customFieldsURL.create)
+
+        const control = page.locator('#field-customMultiSelectField .rs__control')
+
+        await control.click()
+        await page.locator('.rs__option', { hasText: 'Label 1' }).click()
+        await expect(page.locator('#field-customMultiSelectField .rs__multi-value')).toHaveCount(1)
+
+        await control.click()
+        await page.locator('.rs__option', { hasText: 'Label 2' }).click()
+        await expect(page.locator('#field-customMultiSelectField .rs__multi-value')).toHaveCount(2)
+      })
     })
   })
 
@@ -660,10 +717,10 @@ describe('Document View', () => {
       await saveDocAndAssert(page)
     })
 
-    test('collection — should show live preview as first tab', async () => {
+    test('collection — should show api as first tab', async () => {
       const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
       const firstTab = tabs.first()
-      await expect(firstTab).toContainText('Live Preview')
+      await expect(firstTab).toContainText('API')
     })
 
     test('collection — should show edit as third tab', async () => {
@@ -674,7 +731,7 @@ describe('Document View', () => {
   })
 
   describe('custom editMenuItem components', () => {
-    test('should render custom editMenuItems component', async () => {
+    test('should render custom editMenuItems client component', async () => {
       await page.goto(editMenuItemsURL.create)
       await page.locator('#field-title')?.fill(title)
       await saveDocAndAssert(page)
@@ -689,23 +746,50 @@ describe('Document View', () => {
 
       await expect(customEditMenuItem).toBeVisible()
     })
-    test('should render custom editMenuItems component in live preview tab', async () => {
+
+    test('should render custom editMenuItems server component', async () => {
       await page.goto(editMenuItemsURL.create)
       await page.locator('#field-title')?.fill(title)
       await saveDocAndAssert(page)
 
-      const livePreviewURL = `${page.url()}/preview`
-      await page.goto(livePreviewURL)
-
-      const threeDotMenu = page.locator('.doc-controls__popup')
+      const threeDotMenu = page.getByRole('main').locator('.doc-controls__popup')
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const customEditMenuItem = page.locator('.popup-button-list__button', {
-        hasText: 'Custom Edit Menu Item',
+      const popup = page.locator('.popup--active .popup__content')
+      await expect(popup).toBeVisible()
+
+      const customEditMenuItem = popup.getByRole('link', {
+        name: 'Custom Edit Menu Item (Server)',
       })
 
       await expect(customEditMenuItem).toBeVisible()
+    })
+
+    test('should render doc id in href of custom editMenuItems server component link', async () => {
+      await page.goto(editMenuItemsURL.create)
+      await page.locator('#field-title')?.fill(title)
+      await saveDocAndAssert(page)
+
+      const threeDotMenu = page.getByRole('main').locator('.doc-controls__popup')
+      await expect(threeDotMenu).toBeVisible()
+      await threeDotMenu.click()
+
+      const popup = page.locator('.popup--active .popup__content')
+      await expect(popup).toBeVisible()
+
+      const customEditMenuItem = popup.getByRole('link', {
+        name: 'Custom Edit Menu Item (Server)',
+      })
+
+      await expect(customEditMenuItem).toBeVisible()
+
+      // Extract the document id from the edit page URL (last path segment)
+      const editPath = new URL(page.url()).pathname
+      const docId = editPath.split('/').filter(Boolean).pop()!
+
+      // Assert the href contains the same id
+      await expect(customEditMenuItem).toHaveAttribute('href', `/custom-action?id=${docId}`)
     })
   })
 })

@@ -10,6 +10,7 @@ export const Pages: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'title',
+    groupBy: true,
   },
   versions: {
     drafts: true,
@@ -61,6 +62,11 @@ export const Pages: CollectionConfig = {
           name: 'value',
           type: 'text',
           defaultValue: 'group value',
+          // custom: {
+          //   'plugin-import-export': {
+          //     disabled: true,
+          //   },
+          // },
         },
         {
           name: 'ignore',
@@ -95,7 +101,6 @@ export const Pages: CollectionConfig = {
       ],
     },
     {
-      name: 'tabs',
       type: 'tabs',
       tabs: [
         {
@@ -216,6 +221,27 @@ export const Pages: CollectionConfig = {
       type: 'relationship',
       relationTo: ['users', 'posts'],
       hasMany: true,
+    },
+    {
+      name: 'hasManyMonomorphic',
+      type: 'relationship',
+      relationTo: 'posts',
+      hasMany: true,
+    },
+    {
+      type: 'collapsible',
+      label: 'Collapsible Field',
+      fields: [
+        {
+          name: 'textFieldInCollapsible',
+          type: 'text',
+          // custom: {
+          //   'plugin-import-export': {
+          //     disabled: true,
+          //   },
+          // },
+        },
+      ],
     },
   ],
 }

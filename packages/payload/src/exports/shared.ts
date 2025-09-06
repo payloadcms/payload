@@ -6,6 +6,7 @@ export {
   parseCookies,
 } from '../auth/cookies.js'
 export { getLoginOptions } from '../auth/getLoginOptions.js'
+export { addSessionToUser, removeExpiredSessions } from '../auth/sessions.js'
 export { getFromImportMap } from '../bin/generateImportMap/utilities/getFromImportMap.js'
 export { parsePayloadComponent } from '../bin/generateImportMap/utilities/parsePayloadComponent.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
@@ -74,8 +75,6 @@ export {
 
 export { extractID } from '../utilities/extractID.js'
 
-export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
-
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 export { formatAdminURL } from '../utilities/formatAdminURL.js'
@@ -111,6 +110,8 @@ export {
 } from '../utilities/mergeListSearchAndWhere.js'
 
 export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
+
+export { sanitizeUserDataForEmail } from '../utilities/sanitizeUserDataForEmail.js'
 
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
 

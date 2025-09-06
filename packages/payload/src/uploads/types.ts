@@ -1,6 +1,6 @@
 import type { ResizeOptions, Sharp, SharpOptions } from 'sharp'
 
-import type { TypeWithID } from '../collections/config/types.js'
+import type { CollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { PayloadComponent } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { WithMetadata } from './optionallyAppendMetadata.js'
@@ -102,6 +102,11 @@ export type AllowList = Array<{
   search?: string
 }>
 
+export type FileAllowList = Array<{
+  extensions: string[]
+  mimeType: string
+}>
+
 type Admin = {
   components?: {
     /**
@@ -127,6 +132,14 @@ export type UploadConfig = {
    * - A function that generates a fully qualified URL for the thumbnail, receives the doc as the only argument.
    **/
   adminThumbnail?: GetAdminThumbnail | string
+  /**
+   * Allow restricted file types known to be problematic.
+   * - If set to `true`, it will allow all file types.
+   * - If set to `false`, it will not allow file types and extensions known to be problematic.
+   * - This setting is overriden by the `mimeTypes` option.
+   * @default false
+   */
+  allowRestrictedFileTypes?: boolean
   /**
    * Enables bulk upload of files from the list view.
    * @default true
@@ -160,14 +173,19 @@ export type UploadConfig = {
    */
   displayPreview?: boolean
   /**
-   * Ability to filter/modify Request Headers when fetching a file.
+   *
+   * Accepts existing headers and returns the headers after filtering or modifying.
+   * If using this option, you should handle the removal of any sensitive cookies
+   * (like payload-prefixed cookies) to prevent leaking session information to external
+   * services. By default, Payload automatically filters out payload-prefixed cookies
+   * when this option is NOT defined.
    *
    * Useful for adding custom headers to fetch from external providers.
    * @default undefined
    */
   externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
   /**
-   * Field slugs to use for a compount index instead of the default filename index.
+   * Field slugs to use for a compound index instead of the default filename index.
    */
   filenameCompoundIndex?: string[]
   /**
@@ -198,6 +216,7 @@ export type UploadConfig = {
     req: PayloadRequest,
     args: {
       doc: TypeWithID
+      headers?: Headers
       params: { clientUploadContext?: unknown; collection: string; filename: string }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
@@ -220,8 +239,7 @@ export type UploadConfig = {
    * Ability to modify the response headers fetching a file.
    * @default undefined
    */
-  modifyResponseHeaders?: ({ headers }: { headers: Headers }) => Headers
-
+  modifyResponseHeaders?: ({ headers }: { headers: Headers }) => Headers | void
   /**
    * Controls the behavior of pasting/uploading files from URLs.
    * If set to `false`, fetching from remote URLs is disabled.
@@ -262,6 +280,11 @@ export type UploadConfig = {
    * @default false
    */
   withMetadata?: WithMetadata
+}
+export type checkFileRestrictionsParams = {
+  collection: CollectionConfig
+  file: File
+  req: PayloadRequest
 }
 
 export type SanitizedUploadConfig = {

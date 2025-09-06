@@ -100,6 +100,7 @@ export type RelationshipInputProps = {
   readonly description?: StaticDescription
   readonly Error?: React.ReactNode
   readonly filterOptions?: FilterOptionsResult
+  readonly formatDisplayedOptions?: (options: OptionGroup[]) => Option[] | OptionGroup[]
   readonly isSortable?: boolean
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel

@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-exports */
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
@@ -484,6 +483,12 @@ export default buildConfigWithDefaults(
             name: 'hidden',
             type: 'checkbox',
             hidden: true,
+          },
+          {
+            name: 'hiddenWithDefault',
+            type: 'text',
+            hidden: true,
+            defaultValue: 'default value',
           },
         ],
       },

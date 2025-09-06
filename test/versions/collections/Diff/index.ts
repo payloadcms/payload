@@ -91,6 +91,15 @@ export const Diff: CollectionConfig = {
                       name: 'textInUnnamedTab2InBlock',
                       type: 'text',
                     },
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          name: 'textInRowInUnnamedTab2InBlock',
+                          type: 'text',
+                        },
+                      ],
+                    },
                   ],
                 },
               ],

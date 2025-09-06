@@ -27,7 +27,7 @@ export const createPayloadRequest = async ({
   request,
 }: Args): Promise<PayloadRequest> => {
   const cookies = parseCookies(request.headers)
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayload({ config: configPromise, cron: true })
 
   const { config } = payload
   const localization = config.localization

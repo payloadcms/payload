@@ -1,24 +1,46 @@
 'use server'
 
+import type { SanitizedConfig } from 'payload'
+
 import { cookies as getCookies, headers as nextHeaders } from 'next/headers.js'
-import { getPayload } from 'payload'
+import { createLocalReq, getPayload, logoutOperation } from 'payload'
 
 import { getExistingAuthToken } from '../utilities/getExistingAuthToken.js'
 
-export async function logout({ config }: { config: any }) {
-  const payload = await getPayload({ config })
+export async function logout({
+  allSessions = false,
+  config,
+}: {
+  allSessions?: boolean
+  config: Promise<SanitizedConfig> | SanitizedConfig
+}) {
+  const payload = await getPayload({ config, cron: true })
   const headers = await nextHeaders()
-  const result = await payload.auth({ headers })
+  const authResult = await payload.auth({ headers })
 
-  if (!result.user) {
+  if (!authResult.user) {
     return { message: 'User already logged out', success: true }
   }
 
-  const existingCookie = await getExistingAuthToken(payload.config.cookiePrefix)
+  const { user } = authResult
+  const req = await createLocalReq({ user }, payload)
+  const collection = payload.collections[user.collection]
 
+  const logoutResult = await logoutOperation({
+    allSessions,
+    collection,
+    req,
+  })
+
+  if (!logoutResult) {
+    return { message: 'Logout failed', success: false }
+  }
+
+  const existingCookie = await getExistingAuthToken(payload.config.cookiePrefix)
   if (existingCookie) {
     const cookies = await getCookies()
     cookies.delete(existingCookie.name)
-    return { message: 'User logged out successfully', success: true }
   }
+
+  return { message: 'User logged out successfully', success: true }
 }

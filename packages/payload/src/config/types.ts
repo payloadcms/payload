@@ -258,6 +258,13 @@ export type InitOptions = {
    */
   config: Promise<SanitizedConfig> | SanitizedConfig
   /**
+   * If set to `true`, payload will initialize crons for things like autorunning jobs on initialization.
+   *
+   * @default false
+   */
+  cron?: boolean
+
+  /**
    * Disable connect to the database on init
    */
   disableDBConnect?: boolean
@@ -268,7 +275,6 @@ export type InitOptions = {
   disableOnInit?: boolean
 
   importMap?: ImportMap
-
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
@@ -375,7 +381,7 @@ type BaseDocumentViewConfig = {
 export type CustomDocumentViewConfig =
   | ({
       Component: DocumentViewComponent
-      path: string
+      path: `/${string}`
     } & BaseDocumentViewConfig)
   | ({
       Component?: DocumentViewComponent
@@ -396,6 +402,7 @@ export type Params = { [key: string]: string | string[] | undefined }
 export type ServerProps = {
   readonly documentSubViewType?: DocumentSubViewTypes
   readonly i18n: I18nClient
+  readonly id?: number | string
   readonly locale?: Locale
   readonly params?: Params
   readonly payload: Payload
@@ -714,6 +721,14 @@ export type ImportMapGenerators = Array<
   }) => void
 >
 
+/**
+ * Experimental features.
+ * These may be unstable and may change or be removed in future releases.
+ */
+export type ExperimentalConfig = {
+  localizeStatus?: boolean
+}
+
 export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
@@ -745,7 +760,12 @@ export type Config = {
           username?: string
         }
       | false
-
+    /**
+     * Automatically refresh user tokens for users logged into the dashboard
+     *
+     * @default false
+     */
+    autoRefresh?: boolean
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?:
       | 'default'
@@ -753,6 +773,7 @@ export type Config = {
       | {
           Component: PayloadComponent
         }
+
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -932,6 +953,29 @@ export type Config = {
      * Configure timezone related settings for the admin panel.
      */
     timezones?: TimezonesConfig
+    /**
+     * @experimental
+     * Configure toast message behavior and appearance in the admin panel.
+     * Currently using [Sonner](https://sonner.emilkowal.ski) for toast notifications.
+     */
+    toast?: {
+      /**
+       * Time in milliseconds until the toast automatically closes.
+       * @default 4000
+       */
+      duration?: number
+      /**
+       * If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction.
+       * Otherwise only the latest notification can be read until the user hovers the stack.
+       * @default false
+       */
+      expand?: boolean
+      /**
+       * The maximum number of toasts that can be visible on the screen at once.
+       * @default 5
+       */
+      limit?: number
+    }
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
@@ -1012,6 +1056,12 @@ export type Config = {
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
+   * Configure experimental features for Payload.
+   *
+   * These features may be unstable and may change or be removed in future releases.
+   */
+  experimental?: ExperimentalConfig
+  /**
    * Options for folder view within the admin panel
    * @experimental this feature may change in minor versions until it is fully stable
    */
@@ -1029,6 +1079,17 @@ export type Config = {
    */
   graphQL?: {
     disable?: boolean
+    /**
+     * Disable introspection queries in production.
+     *
+     * @default true
+     */
+    disableIntrospectionInProduction?: boolean
+    /**
+     * Disable the GraphQL Playground in production.
+     *
+     * @default true
+     */
     disablePlaygroundInProduction?: boolean
     maxComplexity?: number
     /**
@@ -1162,18 +1223,35 @@ export type Config = {
     filterConstraints?: SelectField['filterOptions']
     labels?: CollectionConfig['labels']
   }
-  /** Control the routing structure that Payload binds itself to. */
+  /**
+   * Control the routing structure that Payload binds itself to.
+   * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+   */
   routes?: {
-    /** The route for the admin panel.
-     * @example "/my-admin"
+    /**
+     * The route for the admin panel.
+     * @example "/my-admin" or "/"
      * @default "/admin"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
      */
     admin?: string
-    /** @default "/api"  */
+    /**
+     * The base route for all REST API endpoints.
+     * @default "/api"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     api?: string
-    /** @default "/graphql"  */
+    /**
+     * The base route for all GraphQL endpoints.
+     * @default "/graphql"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     graphQL?: string
-    /** @default "/graphql-playground" */
+    /**
+     * The route for the GraphQL Playground.
+     * @default "/graphql-playground"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     graphQLPlayground?: string
   }
   /** Secure string that Payload will use for any encryption workflows */
@@ -1251,6 +1329,7 @@ export type SanitizedConfig = {
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
+  experimental?: ExperimentalConfig
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
   jobs: SanitizedJobsConfig

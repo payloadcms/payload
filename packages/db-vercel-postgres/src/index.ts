@@ -18,6 +18,7 @@ import {
   deleteVersions,
   destroy,
   find,
+  findDistinct,
   findGlobal,
   findGlobalVersions,
   findMigrationDir,
@@ -38,6 +39,7 @@ import {
   updateMany,
   updateOne,
   updateVersion,
+  upsert,
 } from '@payloadcms/drizzle'
 import {
   columnToCodeConverter,
@@ -173,6 +175,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       dropDatabase,
       execute,
       find,
+      findDistinct,
       findGlobal,
       findGlobalVersions,
       readReplicaOptions: args.readReplicas,
@@ -202,7 +205,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       updateMany,
       updateOne,
       updateVersion,
-      upsert: updateOne,
+      upsert,
     })
   }
 

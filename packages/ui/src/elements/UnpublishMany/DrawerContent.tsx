@@ -22,6 +22,7 @@ type UnpublishManyDrawerContentProps = {
   ids: (number | string)[]
   onSuccess?: () => void
   selectAll: boolean
+  where?: Where
 } & UnpublishManyProps
 
 export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProps) {
@@ -32,6 +33,7 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
     ids,
     onSuccess,
     selectAll,
+    where,
   } = props
 
   const {
@@ -58,6 +60,10 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
       },
     ]
 
+    if (where) {
+      whereConstraints.push(where)
+    }
+
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
       search: searchParams.get('search'),
@@ -83,7 +89,7 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
       },
       { addQueryPrefix: true },
     )
-  }, [collection, searchParams, selectAll, ids, locale])
+  }, [collection, searchParams, selectAll, ids, locale, where])
 
   const handleUnpublish = useCallback(async () => {
     await requests

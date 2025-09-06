@@ -69,7 +69,6 @@ export function DraggableTableRow({
       ]
         .filter(Boolean)
         .join(' ')}
-      id={itemKey}
       key={itemKey}
       onClick={onClick}
       onKeyDown={onKeyDown}

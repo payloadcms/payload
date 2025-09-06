@@ -63,7 +63,8 @@ export const promise = async <T>({
     let fieldData = siblingDoc?.[field.name!]
     const fieldIsLocalized = localization && fieldShouldBeLocalized({ field, parentIsLocalized })
 
-    // Run field beforeDuplicate hooks
+    // Run field beforeDuplicate hooks.
+    // These hooks are responsible for resetting the `id` field values of array and block rows. See `baseIDField`.
     if (Array.isArray(field.hooks?.beforeDuplicate)) {
       if (fieldIsLocalized) {
         const localeData: JsonObject = {}

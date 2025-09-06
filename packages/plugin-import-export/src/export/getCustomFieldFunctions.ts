@@ -1,21 +1,12 @@
-import {
-  type FlattenedField,
-  type SelectIncludeType,
-  traverseFields,
-  type TraverseFieldsCallback,
-} from 'payload'
+import { type FlattenedField, traverseFields, type TraverseFieldsCallback } from 'payload'
 
 import type { ToCSVFunction } from '../types.js'
 
 type Args = {
   fields: FlattenedField[]
-  select: SelectIncludeType | undefined
 }
 
-export const getCustomFieldFunctions = ({
-  fields,
-  select,
-}: Args): Record<string, ToCSVFunction> => {
+export const getCustomFieldFunctions = ({ fields }: Args): Record<string, ToCSVFunction> => {
   const result: Record<string, ToCSVFunction> = {}
 
   const buildCustomFunctions: TraverseFieldsCallback = ({ field, parentRef, ref }) => {
@@ -54,7 +45,7 @@ export const getCustomFieldFunctions = ({
                 data[`${ref.prefix}${field.name}_relationTo`] = relationTo
               }
             }
-            return undefined
+            return undefined // prevents further flattening
           }
         }
       } else {
@@ -62,13 +53,21 @@ export const getCustomFieldFunctions = ({
           // monomorphic many
           // @ts-expect-error ref is untyped
           result[`${ref.prefix}${field.name}`] = ({
+            data,
             value,
           }: {
-            value: Record<string, unknown>[]
-          }) =>
-            value.map((val: number | Record<string, unknown> | string) =>
-              typeof val === 'object' ? val.id : val,
-            )
+            data: Record<string, unknown>
+            value: Array<number | Record<string, any> | string> | undefined
+          }) => {
+            if (Array.isArray(value)) {
+              value.forEach((val, i) => {
+                const id = typeof val === 'object' && val ? val.id : val
+                // @ts-expect-error ref is untyped
+                data[`${ref.prefix}${field.name}_${i}_id`] = id
+              })
+            }
+            return undefined // prevents further flattening
+          }
         } else {
           // polymorphic many
           // @ts-expect-error ref is untyped
@@ -98,10 +97,6 @@ export const getCustomFieldFunctions = ({
         }
       }
     }
-
-    // TODO: do this so we only return the functions needed based on the select used
-    ////@ts-expect-error ref is untyped
-    // ref.select = typeof select !== 'undefined' || select[field.name] ? select : {}
   }
 
   traverseFields({ callback: buildCustomFunctions, fields })

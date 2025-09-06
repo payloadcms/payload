@@ -27,7 +27,7 @@ export async function login({ collection, config, email, password, username }: L
   token?: string
   user: any
 }> {
-  const payload = await getPayload({ config })
+  const payload = await getPayload({ config, cron: true })
 
   const authConfig = payload.collections[collection]?.config.auth
 

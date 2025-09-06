@@ -12,6 +12,7 @@ export const createVersion: CreateVersion = async function createVersion(
     autosave,
     collectionSlug,
     createdAt,
+    localeStatus,
     parent,
     publishedLocale,
     req,
@@ -29,17 +30,23 @@ export const createVersion: CreateVersion = async function createVersion(
 
   const options = {
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   const data = {
     autosave,
     createdAt,
     latest: true,
+    localeStatus,
     parent,
     publishedLocale,
     snapshot,
     updatedAt,
     version: versionData,
+  }
+  if (!data.createdAt) {
+    data.createdAt = new Date().toISOString()
   }
 
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)

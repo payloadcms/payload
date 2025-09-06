@@ -62,6 +62,7 @@ type RenderDocumentBaseArgs = {
   redirectAfterCreate?: boolean
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
+  redirectAfterRestore?: boolean
   searchParams?: Params
   /**
    * Properties specific to the versions view
@@ -89,6 +90,7 @@ type CopyDataFromLocaleClient = (
 
 type GetDocumentSlots = (args: {
   collectionSlug: string
+  id?: number | string
   signal?: AbortSignal
 }) => Promise<DocumentSlots>
 

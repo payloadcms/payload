@@ -36,6 +36,7 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
       className={[className, baseClass, idAsTitle && `${baseClass}--has-id`]
         .filter(Boolean)
         .join(' ')}
+      data-doc-id={id}
       title={title}
     >
       {isInitializing ? (

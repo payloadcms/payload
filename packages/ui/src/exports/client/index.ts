@@ -101,6 +101,8 @@ export type {
 } from '../../elements/ListDrawer/types.js'
 export { ListSelection } from '../../views/List/ListSelection/index.js'
 export { CollectionListHeader as ListHeader } from '../../views/List/ListHeader/index.js'
+export { GroupByHeader } from '../../views/List/GroupByHeader/index.js'
+export { GroupByPageControls } from '../../elements/PageControls/GroupByPageControls.js'
 export { LoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { FormLoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { LoadingOverlay } from '../../elements/Loading/index.js'
@@ -123,8 +125,9 @@ export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
 // folder elements
 export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
 export { BrowseByFolderButton } from '../../elements/FolderView/BrowseByFolderButton/index.js'
-export { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
+export { FolderTypeField } from '../../elements/FolderView/FolderTypeField/index.js'
 export { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index.js'
+export { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
 
 export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
 export { ReactSelect as Select } from '../../elements/ReactSelect/index.js'
@@ -248,7 +251,6 @@ export { Account } from '../../graphics/Account/index.js'
 export { PayloadIcon } from '../../graphics/Icon/index.js'
 
 export { DefaultBlockImage } from '../../graphics/DefaultBlockImage/index.js'
-export { ExternalLinkIcon } from '../../graphics/ExternalLink/index.js'
 export { File } from '../../graphics/File/index.js'
 
 // icons
@@ -260,6 +262,7 @@ export { CodeBlockIcon } from '../../icons/CodeBlock/index.js'
 export { CopyIcon } from '../../icons/Copy/index.js'
 export { DragHandleIcon } from '../../icons/DragHandle/index.js'
 export { EditIcon } from '../../icons/Edit/index.js'
+export { ExternalLinkIcon } from '../../icons/ExternalLink/index.js'
 export { LineIcon } from '../../icons/Line/index.js'
 export { LinkIcon } from '../../icons/Link/index.js'
 export { LogOutIcon } from '../../icons/LogOut/index.js'
@@ -292,6 +295,8 @@ export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
 export type { UserWithToken } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
+
+export { LivePreviewProvider } from '../../providers/LivePreview/index.js'
 
 export { ProgressBar } from '../../providers/RouteTransition/ProgressBar/index.js'
 export {
@@ -387,7 +392,7 @@ export type {
   /**
    * @deprecated
    * This export will be removed in the next major version.
-   * Use `import type { ListPreferences } from 'payload'` instead.
+   * Use `import type { CollectionPreferences } from 'payload'` instead.
    */
   ListPreferences,
 } from 'payload'

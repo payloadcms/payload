@@ -8,7 +8,7 @@ import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import { generateLexicalData } from './collections/Diff/generateLexicalData.js'
 import {
-  autosaveWithValidateCollectionSlug,
+  autosaveWithDraftValidateSlug,
   diffCollectionSlug,
   draftCollectionSlug,
   media2CollectionSlug,
@@ -141,7 +141,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   await _payload.create({
-    collection: autosaveWithValidateCollectionSlug,
+    collection: autosaveWithDraftValidateSlug,
     data: {
       title: 'Initial seeded title',
     },
@@ -235,6 +235,8 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
             textInNamedTab1InBlock: 'textInNamedTab1InBlock',
           },
           textInUnnamedTab2InBlock: 'textInUnnamedTab2InBlock',
+          textInRowInUnnamedTab2InBlock: 'textInRowInUnnamedTab2InBlock',
+          textInUnnamedTab2InBlockAccessFalse: 'textInUnnamedTab2InBlockAccessFalse',
         },
       ],
       checkbox: true,
@@ -274,6 +276,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       textInCollapsible: 'textInCollapsible',
       textInRow: 'textInRow',
       textInUnnamedTab2: 'textInUnnamedTab2',
+      textCannotRead: 'textCannotRead',
       relationshipPolymorphic: {
         relationTo: 'text',
         value: doc1ID,
@@ -308,8 +311,8 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   await _payload.db.updateOne({
     collection: diffCollectionSlug,
     id: diffDoc.id,
+    returning: false,
     data: {
-      ...diffDoc,
       point: pointGeoJSON,
       createdAt: new Date(new Date(diffDoc.createdAt).getTime() - 2 * 60 * 10000).toISOString(),
       updatedAt: new Date(new Date(diffDoc.updatedAt).getTime() - 2 * 60 * 10000).toISOString(),
@@ -326,18 +329,15 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   let i = 0
   for (const version of versions.docs) {
     i += 1
+    const date = new Date(new Date(version.createdAt).getTime() - 2 * 60 * 10000 * i).toISOString()
     await _payload.db.updateVersion({
       id: version.id,
       collection: diffCollectionSlug,
+      returning: false,
       versionData: {
-        ...version.version,
-        createdAt: new Date(
-          new Date(version.createdAt).getTime() - 2 * 60 * 10000 * i,
-        ).toISOString(),
-        updatedAt: new Date(
-          new Date(version.updatedAt).getTime() - 2 * 60 * 10000 * i,
-        ).toISOString(),
-      },
+        createdAt: date,
+        updatedAt: date,
+      } as any,
     })
   }
 
@@ -373,6 +373,8 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
             textInNamedTab1InBlock: 'textInNamedTab1InBlock2',
           },
           textInUnnamedTab2InBlock: 'textInUnnamedTab2InBlock2',
+          textInRowInUnnamedTab2InBlock: 'textInRowInUnnamedTab2InBlock2',
+          textInUnnamedTab2InBlockAccessFalse: 'textInUnnamedTab2InBlockAccessFalse2',
         },
       ],
       checkbox: false,
@@ -435,6 +437,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       textArea: 'textArea2',
       textInCollapsible: 'textInCollapsible2',
       textInRow: 'textInRow2',
+      textCannotRead: 'textCannotRead2',
       textInUnnamedTab2: 'textInUnnamedTab22',
       upload: uploadedImage2,
       uploadHasMany: [uploadedImage, uploadedImage2],

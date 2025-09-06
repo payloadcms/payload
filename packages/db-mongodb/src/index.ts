@@ -42,6 +42,7 @@ import { deleteOne } from './deleteOne.js'
 import { deleteVersions } from './deleteVersions.js'
 import { destroy } from './destroy.js'
 import { find } from './find.js'
+import { findDistinct } from './findDistinct.js'
 import { findGlobal } from './findGlobal.js'
 import { findGlobalVersions } from './findGlobalVersions.js'
 import { findOne } from './findOne.js'
@@ -118,6 +119,13 @@ export interface Args {
      */
     useFacet?: boolean
   } & ConnectOptions
+  /**
+   * We add a secondary sort based on `createdAt` to ensure that results are always returned in the same order when sorting by a non-unique field.
+   * This is because MongoDB does not guarantee the order of results, however in very large datasets this could affect performance.
+   *
+   * Set to `true` to disable this behaviour.
+   */
+  disableFallbackSort?: boolean
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
   /**
@@ -131,10 +139,34 @@ export interface Args {
    */
   mongoMemoryServer?: MongoMemoryReplSet
   prodMigrations?: Migration[]
+
   transactionOptions?: false | TransactionOptions
 
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
+
+  /**
+   * Set to `true` to use an alternative `dropDatabase` implementation that calls `collection.deleteMany({})` on every collection instead of sending a raw `dropDatabase` command.
+   * Payload only uses `dropDatabase` for testing purposes.
+   * @default false
+   */
+  useAlternativeDropDatabase?: boolean
+  /**
+   * Set to `true` to use `BigInt` for custom ID fields of type `'number'`.
+   * Useful for databases that don't support `double` or `int32` IDs.
+   * @default false
+   */
+  useBigIntForNumberIDs?: boolean
+  /**
+   * Set to `false` to disable join aggregations (which use correlated subqueries) and instead populate join fields via multiple `find` queries.
+   * @default true
+   */
+  useJoinAggregations?: boolean
+  /**
+   * Set to `false` to disable the use of `pipeline` in the `$lookup` aggregation in sorting.
+   * @default true
+   */
+  usePipelineInSortLookup?: boolean
 }
 
 export type MongooseAdapter = {
@@ -151,6 +183,10 @@ export type MongooseAdapter = {
     up: (args: MigrateUpArgs) => Promise<void>
   }[]
   sessions: Record<number | string, ClientSession>
+  useAlternativeDropDatabase: boolean
+  useBigIntForNumberIDs: boolean
+  useJoinAggregations: boolean
+  usePipelineInSortLookup: boolean
   versions: {
     [slug: string]: CollectionModel
   }
@@ -186,6 +222,10 @@ declare module 'payload' {
     updateVersion: <T extends TypeWithID = TypeWithID>(
       args: { options?: QueryOptions } & UpdateVersionArgs<T>,
     ) => Promise<TypeWithVersion<T>>
+    useAlternativeDropDatabase: boolean
+    useBigIntForNumberIDs: boolean
+    useJoinAggregations: boolean
+    usePipelineInSortLookup: boolean
     versions: {
       [slug: string]: CollectionModel
     }
@@ -198,6 +238,7 @@ export function mongooseAdapter({
   autoPluralization = true,
   collectionsSchemaOptions = {},
   connectOptions,
+  disableFallbackSort = false,
   disableIndexHints = false,
   ensureIndexes = false,
   migrationDir: migrationDirArg,
@@ -205,6 +246,10 @@ export function mongooseAdapter({
   prodMigrations,
   transactionOptions = {},
   url,
+  useAlternativeDropDatabase = false,
+  useBigIntForNumberIDs = false,
+  useJoinAggregations = true,
+  usePipelineInSortLookup = true,
 }: Args): DatabaseAdapterObj {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(migrationDirArg)
@@ -251,7 +296,9 @@ export function mongooseAdapter({
       deleteOne,
       deleteVersions,
       destroy,
+      disableFallbackSort,
       find,
+      findDistinct,
       findGlobal,
       findGlobalVersions,
       findOne,
@@ -269,6 +316,10 @@ export function mongooseAdapter({
       updateOne,
       updateVersion,
       upsert,
+      useAlternativeDropDatabase,
+      useBigIntForNumberIDs,
+      useJoinAggregations,
+      usePipelineInSortLookup,
     })
   }
 
@@ -279,6 +330,8 @@ export function mongooseAdapter({
     init: adapter,
   }
 }
+
+export { compatibilityOptions } from './utilities/compatibilityOptions.js'
 
 /**
  * Attempt to find migrations directory.

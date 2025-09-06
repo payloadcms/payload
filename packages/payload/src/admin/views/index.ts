@@ -23,7 +23,10 @@ export type AdminViewConfig = {
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
   meta?: MetaConfig
-  path?: string
+  /**
+   * Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands. Must begin with a forward slash (`/`).
+   */
+  path?: `/${string}`
   sensitive?: boolean
   strict?: boolean
 }
@@ -50,6 +53,7 @@ export type AdminViewServerPropsOnly = {
   readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
+  readonly redirectAfterRestore?: boolean
 } & ServerProps
 
 export type AdminViewServerProps = AdminViewClientProps & AdminViewServerPropsOnly
@@ -89,6 +93,7 @@ export type ViewTypes =
   | 'folders'
   | 'list'
   | 'reset'
+  | 'trash'
   | 'verify'
   | 'version'
 

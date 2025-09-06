@@ -143,6 +143,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -235,6 +242,8 @@ export interface Page {
           }
       )[]
     | null;
+  hasManyMonomorphic?: (string | Post)[] | null;
+  textFieldInCollapsible?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -257,9 +266,11 @@ export interface Post {
 export interface Export {
   id: string;
   name?: string | null;
-  format: 'csv' | 'json';
+  format?: ('csv' | 'json') | null;
   limit?: number | null;
+  page?: number | null;
   sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
@@ -293,9 +304,11 @@ export interface Export {
 export interface ExportsTask {
   id: string;
   name?: string | null;
-  format: 'csv' | 'json';
+  format?: ('csv' | 'json') | null;
   limit?: number | null;
+  page?: number | null;
   sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
@@ -502,6 +515,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -565,6 +585,8 @@ export interface PagesSelect<T extends boolean = true> {
   excerpt?: T;
   hasOnePolymorphic?: T;
   hasManyPolymorphic?: T;
+  hasManyMonomorphic?: T;
+  textFieldInCollapsible?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -587,7 +609,9 @@ export interface ExportsSelect<T extends boolean = true> {
   name?: T;
   format?: T;
   limit?: T;
+  page?: T;
   sort?: T;
+  sortOrder?: T;
   locale?: T;
   drafts?: T;
   selectionToUse?: T;
@@ -614,7 +638,9 @@ export interface ExportsTasksSelect<T extends boolean = true> {
   name?: T;
   format?: T;
   limit?: T;
+  page?: T;
   sort?: T;
+  sortOrder?: T;
   locale?: T;
   drafts?: T;
   selectionToUse?: T;
@@ -703,9 +729,11 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface TaskCreateCollectionExport {
   input: {
     name?: string | null;
-    format: 'csv' | 'json';
+    format?: ('csv' | 'json') | null;
     limit?: number | null;
+    page?: number | null;
     sort?: string | null;
+    sortOrder?: ('asc' | 'desc') | null;
     locale?: ('all' | 'en' | 'es' | 'de') | null;
     drafts?: ('yes' | 'no') | null;
     selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
