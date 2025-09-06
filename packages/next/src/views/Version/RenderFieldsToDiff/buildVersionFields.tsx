@@ -308,8 +308,6 @@ const buildVersionField = ({
         parentSchemaPath,
       })
 
-      // At this point, permissions === fieldPermissions (FieldsPermissions)
-
       let tabFieldsPermissions: SanitizedFieldsPermissions = undefined
 
       // The tabs field does not have its own permissions as it's unnamed => use parentFieldsPermissions
