@@ -69,6 +69,10 @@ export type GenerateImageName = (args: {
 }) => string
 
 export type ImageSize = {
+  admin?: {
+    disableListColumn?: boolean
+    disableListFilter?: boolean
+  }
   /**
    * @deprecated prefer position
    */
