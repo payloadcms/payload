@@ -1,5 +1,7 @@
 import type { SanitizedConfig } from 'payload'
 
+import { getRouteWithoutAdmin } from './getRouteWithoutAdmin.js'
+
 // Routes that require admin authentication
 const publicAdminRoutes: (keyof Pick<
   SanitizedConfig['admin']['routes'],
@@ -14,17 +16,6 @@ const publicAdminRoutes: (keyof Pick<
   'unauthorized',
   'reset',
 ]
-
-export const isAdminRoute = ({
-  adminRoute,
-  route,
-}: {
-  adminRoute: string
-  config: SanitizedConfig
-  route: string
-}): boolean => {
-  return route.startsWith(adminRoute)
-}
 
 export const isPublicAdminRoute = ({
   adminRoute,
@@ -49,14 +40,4 @@ export const isPublicAdminRoute = ({
   })
 
   return isPublicAdminRoute
-}
-
-export const getRouteWithoutAdmin = ({
-  adminRoute,
-  route,
-}: {
-  adminRoute: string
-  route: string
-}): string => {
-  return adminRoute && adminRoute !== '/' ? route.replace(adminRoute, '') : route
 }

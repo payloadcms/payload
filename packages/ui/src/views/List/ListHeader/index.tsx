@@ -5,6 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { CloseModalButton } from '../../../elements/CloseModalButton/index.js'
+import { DefaultListViewTabs } from '../../../elements/DefaultListViewTabs/index.js'
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { DrawerRelationshipSelect } from '../../../elements/ListHeader/DrawerRelationshipSelect/index.js'
 import { ListDrawerCreateNewDocButton } from '../../../elements/ListHeader/DrawerTitleActions/index.js'
@@ -14,13 +15,10 @@ import {
   ListCreateNewButton,
   ListEmptyTrashButton,
 } from '../../../elements/ListHeader/TitleActions/index.js'
-import { ByFolderPill } from '../../../elements/ListHeaderTabs/ByFolderPill.js'
-import { DefaultListPill } from '../../../elements/ListHeaderTabs/DefaultListPill.js'
-import './index.scss'
-import { TrashPill } from '../../../elements/ListHeaderTabs/TrashPill.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useListQuery } from '../../../providers/ListQuery/index.js'
 import { ListSelection } from '../ListSelection/index.js'
+import './index.scss'
 
 const drawerBaseClass = 'list-drawer'
 
@@ -119,28 +117,12 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             viewType={viewType}
           />
         ),
-        ((collectionConfig.folders && config.folders) || isTrashEnabled) && (
-          <DefaultListPill
-            collectionConfig={collectionConfig}
-            key="list-header-default-button"
-            viewType={viewType}
-          />
-        ),
-        collectionConfig.folders && config.folders && (
-          <ByFolderPill
-            collectionConfig={collectionConfig}
-            folderCollectionSlug={config.folders.slug}
-            key="list-header-by-folder-button"
-            viewType={viewType}
-          />
-        ),
-        isTrashEnabled && (
-          <TrashPill
-            collectionConfig={collectionConfig}
-            key="list-header-trash-button"
-            viewType={viewType}
-          />
-        ),
+        <DefaultListViewTabs
+          collectionConfig={collectionConfig}
+          config={config}
+          key="default-list-actions"
+          viewType={viewType}
+        />,
       ].filter(Boolean)}
       AfterListHeaderContent={Description}
       className={className}
