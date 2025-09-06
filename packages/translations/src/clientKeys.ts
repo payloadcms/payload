@@ -92,6 +92,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'error:unPublishingDocument',
   'error:problemUploadingFile',
   'error:restoringTitle',
+  'error:fileTooLarge',
 
   'fields:addLabel',
   'fields:addLink',
