@@ -248,6 +248,8 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       },
       namedTab1: {
         textInNamedTab1: 'textInNamedTab1',
+        textInNamedTab1ReadFalse: 'textInNamedTab1ReadFalse',
+        textInNamedTab1UpdateFalse: 'textInNamedTab1UpdateFalse',
       },
       number: 1,
       point: [1, 2],
@@ -276,6 +278,9 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       textInCollapsible: 'textInCollapsible',
       textInRow: 'textInRow',
       textInUnnamedTab2: 'textInUnnamedTab2',
+      textInRowInUnnamedTab: 'textInRowInUnnamedTab',
+      textInRowInUnnamedTabUpdateFalse: 'textInRowInUnnamedTabUpdateFalse',
+
       textCannotRead: 'textCannotRead',
       relationshipPolymorphic: {
         relationTo: 'text',
@@ -386,6 +391,8 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       },
       namedTab1: {
         textInNamedTab1: 'textInNamedTab12',
+        textInNamedTab1ReadFalse: 'textInNamedTab1ReadFalse2',
+        textInNamedTab1UpdateFalse: 'textInNamedTab1UpdateFalse2',
       },
       number: 2,
       json: {
@@ -439,6 +446,9 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       textInRow: 'textInRow2',
       textCannotRead: 'textCannotRead2',
       textInUnnamedTab2: 'textInUnnamedTab22',
+      textInRowInUnnamedTab: 'textInRowInUnnamedTab2',
+      textInRowInUnnamedTabUpdateFalse: 'textInRowInUnnamedTabUpdateFalse2',
+
       upload: uploadedImage2,
       uploadHasMany: [uploadedImage, uploadedImage2],
     },

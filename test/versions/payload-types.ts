@@ -412,6 +412,7 @@ export interface Diff {
               textInNamedTab1InBlock?: string | null;
             };
             textInUnnamedTab2InBlock?: string | null;
+            textInUnnamedTab2InBlockAccessFalse?: string | null;
             textInRowInUnnamedTab2InBlock?: string | null;
             id?: string | null;
             blockName?: string | null;
@@ -509,11 +510,16 @@ export interface Diff {
     [k: string]: unknown;
   } | null;
   textInRow?: string | null;
+  textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
   namedTab1?: {
     textInNamedTab1?: string | null;
+    textInNamedTab1ReadFalse?: string | null;
+    textInNamedTab1UpdateFalse?: string | null;
   };
   textInUnnamedTab2?: string | null;
+  textInRowInUnnamedTab?: string | null;
+  textInRowInUnnamedTabUpdateFalse?: string | null;
   text?: string | null;
   textArea?: string | null;
   upload?: (string | null) | Media;
@@ -1030,6 +1036,7 @@ export interface DiffSelect<T extends boolean = true> {
                     textInNamedTab1InBlock?: T;
                   };
               textInUnnamedTab2InBlock?: T;
+              textInUnnamedTab2InBlockAccessFalse?: T;
               textInRowInUnnamedTab2InBlock?: T;
               id?: T;
               blockName?: T;
@@ -1057,13 +1064,18 @@ export interface DiffSelect<T extends boolean = true> {
   richtext?: T;
   richtextWithCustomDiff?: T;
   textInRow?: T;
+  textCannotRead?: T;
   select?: T;
   namedTab1?:
     | T
     | {
         textInNamedTab1?: T;
+        textInNamedTab1ReadFalse?: T;
+        textInNamedTab1UpdateFalse?: T;
       };
   textInUnnamedTab2?: T;
+  textInRowInUnnamedTab?: T;
+  textInRowInUnnamedTabUpdateFalse?: T;
   text?: T;
   textArea?: T;
   upload?: T;
