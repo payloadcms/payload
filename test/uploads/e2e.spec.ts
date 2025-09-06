@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { statSync } from 'fs'
+import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -32,14 +34,17 @@ import {
   constructorOptionsSlug,
   customFileNameMediaSlug,
   customUploadFieldSlug,
+  fileMimeTypeSlug,
   focalOnlySlug,
   hideFileInputOnCreateSlug,
   imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
+  mediaWithoutDeleteAccessSlug,
   relationPreviewSlug,
   relationSlug,
+  svgOnlySlug,
   threeDimensionalSlug,
   withMetadataSlug,
   withOnlyJPEGMetadataSlug,
@@ -84,6 +89,9 @@ let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
 let bulkUploadsURL: AdminUrlUtil
+let fileMimeTypeURL: AdminUrlUtil
+let svgOnlyURL: AdminUrlUtil
+let mediaWithoutDeleteAccessURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -122,8 +130,12 @@ describe('Uploads', () => {
     threeDimensionalURL = new AdminUrlUtil(serverURL, threeDimensionalSlug)
     constructorOptionsURL = new AdminUrlUtil(serverURL, constructorOptionsSlug)
     bulkUploadsURL = new AdminUrlUtil(serverURL, bulkUploadsSlug)
+    fileMimeTypeURL = new AdminUrlUtil(serverURL, fileMimeTypeSlug)
+    svgOnlyURL = new AdminUrlUtil(serverURL, svgOnlySlug)
+    mediaWithoutDeleteAccessURL = new AdminUrlUtil(serverURL, mediaWithoutDeleteAccessSlug)
 
     const context = await browser.newContext()
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     page = await context.newPage()
 
     const { consoleErrors, collectErrors, stopCollectingErrors } = initPageConsoleErrorCatch(page, {
@@ -207,6 +219,22 @@ describe('Uploads', () => {
     await expect(filename).toContainText('test-image.png')
   })
 
+  test('should copy the file url field to the clipboard', async () => {
+    const mediaDoc = (
+      await payload.find({
+        collection: mediaSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0]
+
+    await page.goto(mediaURL.edit(mediaDoc!.id))
+    await page.locator('.copy-to-clipboard').click()
+    const clipbaordContent = await page.evaluate(() => navigator.clipboard.readText())
+    expect(clipbaordContent).toBe(mediaDoc?.url)
+  })
+
   test('should create file upload', async () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
@@ -264,6 +292,23 @@ describe('Uploads', () => {
 
     const fileMetaSizeType = page.locator('.file-meta__size-type')
     await expect(fileMetaSizeType).toHaveText(/model\/gltf-binary/)
+  })
+
+  test('should show proper mimetype for svg+xml file', async () => {
+    await page.goto(svgOnlyURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './svgWithXml.svg'))
+    const filename = page.locator('.file-field__filename')
+    await expect(filename).toHaveValue('svgWithXml.svg')
+
+    await saveDocAndAssert(page)
+
+    const fileMetaSizeType = page.locator('.file-meta__size-type')
+    await expect(fileMetaSizeType).toHaveText(/image\/svg\+xml/)
+
+    // ensure the svg loads
+    const svgImage = page.locator('img[src*="svgWithXml"]')
+    await expect(svgImage).toBeVisible()
   })
 
   test('should create animated file upload', async () => {
@@ -1421,23 +1466,10 @@ describe('Uploads', () => {
   test('should see upload previews in relation list if allowed in config', async () => {
     await page.goto(relationPreviewURL.list)
 
-    await wait(110)
-
     // Show all columns with relations
-    await page.locator('.list-controls__toggle-columns').click()
-    await expect(page.locator('.pill-selector')).toBeVisible()
-    const imageWithoutPreview2Button = page.locator(`.pill-selector .pill-selector__pill`, {
-      hasText: exactText('Image Without Preview2'),
-    })
-    const imageWithPreview3Button = page.locator(`.pill-selector .pill-selector__pill`, {
-      hasText: exactText('Image With Preview3'),
-    })
-    const imageWithoutPreview3Button = page.locator(`.pill-selector .pill-selector__pill`, {
-      hasText: exactText('Image Without Preview3'),
-    })
-    await imageWithoutPreview2Button.click()
-    await imageWithPreview3Button.click()
-    await imageWithoutPreview3Button.click()
+    await toggleColumn(page, { columnLabel: 'Image Without Preview2', targetState: 'on' })
+    await toggleColumn(page, { columnLabel: 'Image With Preview3', targetState: 'on' })
+    await toggleColumn(page, { columnLabel: 'Image Without Preview3', targetState: 'on' })
 
     // Wait for the columns to be displayed
     await expect(page.locator('.cell-imageWithoutPreview3')).toBeVisible()
@@ -1577,5 +1609,51 @@ describe('Uploads', () => {
 
     await expect(filename).toHaveValue('animated.webp')
     await saveDocAndAssert(page, '#action-save', 'error')
+  })
+
+  test('should prevent invalid mimetype disguised as valid mimetype', async () => {
+    await page.goto(fileMimeTypeURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image-as-pdf.pdf'))
+
+    const filename = page.locator('.file-field__filename')
+    await expect(filename).toHaveValue('image-as-pdf.pdf')
+
+    await saveDocAndAssert(page, '#action-save', 'error')
+  })
+
+  test('should not rewrite file when updating collection fields', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.png'))
+    await saveDocAndAssert(page)
+    const imageID = page.url().split('/').pop()!
+    const { doc } = await client.findByID({ slug: mediaSlug, id: imageID, auth: true })
+    const filename = doc.filename as string
+    const filePath = path.resolve(dirname, 'media', filename)
+    const before = statSync(filePath)
+
+    const altField = page.locator('#field-alt')
+    await altField.fill('test alt')
+
+    await saveDocAndAssert(page)
+    const after = statSync(filePath)
+    expect(after.mtime.getTime()).toEqual(before.mtime.getTime())
+  })
+
+  test('should be able to replace the file even if the user doesnt have delete access', async () => {
+    const docID = (await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 }))
+      .docs[0]?.id as string
+    await page.goto(mediaWithoutDeleteAccessURL.edit(docID))
+    const removeButton = page.locator('.file-details__remove')
+    await expect(removeButton).toBeVisible()
+    await removeButton.click()
+    await expect(page.locator('input[type="file"]')).toBeAttached()
+    await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
+    const filename = page.locator('.file-field__filename')
+    await expect(filename).toHaveValue('test-image.jpg')
+    await saveDocAndAssert(page)
+    const filenameFromAPI = (
+      await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 })
+    ).docs[0]?.filename
+    expect(filenameFromAPI).toBe('test-image.jpg')
   })
 })

@@ -58,6 +58,7 @@ export type StaticHandler = (
   req: PayloadRequest,
   args: {
     doc?: TypeWithID
+    headers?: Headers
     params: { clientUploadContext?: unknown; collection: string; filename: string }
   },
 ) => Promise<Response> | Response

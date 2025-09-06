@@ -39,7 +39,7 @@
       outline-offset: var(--accessibility-outline-offset);
     }
 
-    .icon {
+    &__icon .icon {
       flex-shrink: 0;
       width: var(--pill-icon-size);
       height: var(--pill-icon-size);

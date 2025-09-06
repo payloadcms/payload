@@ -2,7 +2,7 @@ import { decodeJwt } from 'jose'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { TypedUser } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { JoinQuery, PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { ClientUser } from '../types.js'
 
 export type MeOperationResult = {
@@ -22,11 +22,16 @@ export type MeOperationResult = {
 export type Arguments = {
   collection: Collection
   currentToken?: string
+  depth?: number
+  draft?: boolean
+  joins?: JoinQuery
+  populate?: PopulateType
   req: PayloadRequest
+  select?: SelectType
 }
 
 export const meOperation = async (args: Arguments): Promise<MeOperationResult> => {
-  const { collection, currentToken, req } = args
+  const { collection, currentToken, depth, draft, joins, populate, req, select } = args
 
   let result: MeOperationResult = {
     user: null!,
@@ -39,9 +44,13 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
     const user = (await req.payload.findByID({
       id: req.user.id,
       collection: collection.config.slug,
-      depth: isGraphQL ? 0 : collection.config.auth.depth,
+      depth: isGraphQL ? 0 : (depth ?? collection.config.auth.depth),
+      draft,
+      joins,
       overrideAccess: false,
+      populate,
       req,
+      select,
       showHiddenFields: false,
     })) as TypedUser
 

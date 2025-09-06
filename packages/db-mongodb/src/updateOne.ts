@@ -1,4 +1,4 @@
-import type { MongooseUpdateQueryOptions } from 'mongoose'
+import type { MongooseUpdateQueryOptions, UpdateQuery } from 'mongoose'
 import type { UpdateOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -38,6 +38,8 @@ export const updateOne: UpdateOne = async function updateOne(
       select,
     }),
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   const query = await buildQuery({
@@ -50,15 +52,33 @@ export const updateOne: UpdateOne = async function updateOne(
 
   let result
 
-  transform({ adapter: this, data, fields, operation: 'write' })
+  let updateData: UpdateQuery<any> = data
+
+  const $inc: Record<string, number> = {}
+  const $push: Record<string, { $each: any[] } | any> = {}
+
+  transform({ $inc, $push, adapter: this, data, fields, operation: 'write' })
+
+  const updateOps: UpdateQuery<any> = {}
+
+  if (Object.keys($inc).length) {
+    updateOps.$inc = $inc
+  }
+  if (Object.keys($push).length) {
+    updateOps.$push = $push
+  }
+  if (Object.keys(updateOps).length) {
+    updateOps.$set = updateData
+    updateData = updateOps
+  }
 
   try {
     if (returning === false) {
-      await Model.updateOne(query, data, options)
+      await Model.updateOne(query, updateData, options)
       transform({ adapter: this, data, fields, operation: 'read' })
       return null
     } else {
-      result = await Model.findOneAndUpdate(query, data, options)
+      result = await Model.findOneAndUpdate(query, updateData, options)
     }
   } catch (error) {
     handleError({ collection: collectionSlug, error, req })

@@ -1,5 +1,7 @@
 'use client'
 
+import type { CollectionSlug } from 'payload'
+
 import { useModal } from '@faceless-ui/modal'
 import { extractID } from 'payload/shared'
 import React, { Fragment } from 'react'
@@ -30,22 +32,24 @@ type GroupedSelections = {
 export type ListSelectionProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  folderAssignedCollections: CollectionSlug[]
 }
 
 export const ListSelection: React.FC<ListSelectionProps> = ({
   disableBulkDelete,
   disableBulkEdit,
+  folderAssignedCollections,
 }) => {
   const {
     clearSelections,
     currentFolder,
-    folderCollectionConfig,
     folderCollectionSlug,
     folderFieldName,
     folderID,
     getSelectedItems,
     moveToFolder,
   } = useFolder()
+
   const { clearRouteCache } = useRouteCache()
   const { config } = useConfig()
   const { t } = useTranslation()
@@ -135,6 +139,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             <MoveItemsToFolderDrawer
               action="moveItemsToFolder"
               drawerSlug={moveToFolderDrawerSlug}
+              folderAssignedCollections={folderAssignedCollections}
               folderCollectionSlug={folderCollectionSlug}
               folderFieldName={folderFieldName}
               fromFolderID={folderID}
@@ -163,6 +168,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
                   )
                 }
 
+                clearRouteCache()
                 closeModal(moveToFolderDrawerSlug)
               }}
             />

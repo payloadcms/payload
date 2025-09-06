@@ -77,7 +77,7 @@ All auto-generated files will contain the following comments at the top of each 
 
 ## Admin Options
 
-All options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` property:
+All root-level options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` property:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -98,6 +98,7 @@ The following options are available:
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `avatar`                   | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                        |
 | `autoLogin`                | Used to automate log-in for dev and demonstration convenience. [More details](../authentication/overview).                                      |
+| `autoRefresh`              | Used to automatically refresh user tokens for users logged into the dashboard. [More details](../authentication/overview).                      |
 | `components`               | Component overrides that affect the entirety of the Admin Panel. [More details](../custom-components/overview).                                 |
 | `custom`                   | Any custom properties you wish to pass to the Admin Panel.                                                                                      |
 | `dateFormat`               | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used. |
@@ -107,6 +108,7 @@ The following options are available:
 | `suppressHydrationWarning` | If set to `true`, suppresses React hydration mismatch warnings during the hydration of the root `<html>` tag. Defaults to `false`.              |
 | `theme`                    | Restrict the Admin Panel theme to use only one of your choice. Default is `all`.                                                                |
 | `timezones`                | Configure the timezone settings for the admin panel. [More details](#timezones)                                                                 |
+| `toast`                    | Customize the handling of toast messages within the Admin Panel. [More details](#toasts)                                                        |
 | `user`                     | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                    |
 
 <Banner type="success">
@@ -298,3 +300,20 @@ We validate the supported timezones array by checking the value against the list
   `timezone: true`. See [Date Fields](../fields/overview#date) for more
   information.
 </Banner>
+
+## Toast
+
+The `admin.toast` configuration allows you to customize the handling of toast messages within the Admin Panel, such as increasing the duration they are displayed and limiting the number of visible toasts at once.
+
+<Banner type="info">
+  **Note:** The Admin Panel currently uses the
+  [Sonner](https://sonner.emilkowal.ski) library for toast notifications.
+</Banner>
+
+The following options are available for the `admin.toast` configuration:
+
+| Option     | Description                                                                                                      | Default |
+| ---------- | ---------------------------------------------------------------------------------------------------------------- | ------- |
+| `duration` | The length of time (in milliseconds) that a toast message is displayed.                                          | `4000`  |
+| `expand`   | If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction. | `false` |
+| `limit`    | The maximum number of toasts that can be visible on the screen at once.                                          | `5`     |

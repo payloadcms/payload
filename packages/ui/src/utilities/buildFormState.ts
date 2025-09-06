@@ -94,7 +94,7 @@ export const buildFormStateHandler: ServerFunction<
     }
 
     if (err.message === 'Unauthorized') {
-      return null
+      throw new Error('Unauthorized')
     }
 
     return formatErrors(err)
@@ -117,6 +117,7 @@ export const buildFormState = async (
     initialBlockFormState,
     mockRSCs,
     operation,
+    readOnly,
     renderAllFields,
     req,
     req: {
@@ -132,8 +133,6 @@ export const buildFormState = async (
   } = args
 
   const selectMode = select ? getSelectMode(select) : undefined
-
-  let data = incomingData
 
   if (!collectionSlug && !globalSlug) {
     throw new Error('Either collectionSlug or globalSlug must be provided')
@@ -174,18 +173,18 @@ export const buildFormState = async (
     )
   }
 
-  // If there is a form state,
-  // then we can deduce data from that form state
-  if (formState) {
-    data = reduceFieldsToValues(formState, true)
-  }
+  // If there is form state but no data, deduce data from that form state, e.g. on initial load
+  // Otherwise, use the incoming data as the source of truth, e.g. on subsequent saves
+  const data = incomingData || reduceFieldsToValues(formState, true)
 
   let documentData = undefined
+
   if (documentFormState) {
     documentData = reduceFieldsToValues(documentFormState, true)
   }
 
   let blockData = initialBlockData
+
   if (initialBlockFormState) {
     blockData = reduceFieldsToValues(initialBlockFormState, true)
   }
@@ -205,6 +204,12 @@ export const buildFormState = async (
       ? fieldOrEntityConfig.fields
       : [fieldOrEntityConfig]
 
+  // Ensure data.id is present during form state requests, where the data
+  // is passed from the client as an argument, without the ID
+  if (!data.id && id) {
+    data.id = id
+  }
+
   const formStateResult = await fieldSchemasToFormState({
     id,
     clientFieldSchemaMap: clientSchemaMap,
@@ -219,6 +224,7 @@ export const buildFormState = async (
     permissions: docPermissions?.fields || {},
     preferences: docPreferences || { fields: {} },
     previousFormState: formState,
+    readOnly,
     renderAllFields,
     renderFieldFn: renderField,
     req,

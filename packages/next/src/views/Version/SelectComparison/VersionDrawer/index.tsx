@@ -3,6 +3,7 @@ import {
   Drawer,
   LoadingOverlay,
   toast,
+  useDocumentInfo,
   useEditDepth,
   useModal,
   useServerFunctions,
@@ -30,6 +31,7 @@ export const VersionDrawerContent: React.FC<{
   globalSlug?: string
 }> = (props) => {
   const { collectionSlug, docID, drawerSlug, globalSlug } = props
+  const { isTrashed } = useDocumentInfo()
   const { closeModal } = useModal()
   const searchParams = useSearchParams()
   const prevSearchParams = useRef(searchParams)
@@ -58,6 +60,7 @@ export const VersionDrawerContent: React.FC<{
               segments: [
                 isGlobal ? 'globals' : 'collections',
                 entitySlug,
+                ...(isTrashed ? ['trash'] : []),
                 isGlobal ? undefined : String(docID),
                 'versions',
               ].filter(Boolean),
@@ -84,7 +87,16 @@ export const VersionDrawerContent: React.FC<{
 
       void fetchDocumentView()
     },
-    [closeModal, collectionSlug, globalSlug, drawerSlug, renderDocument, searchParams, t],
+    [
+      closeModal,
+      collectionSlug,
+      drawerSlug,
+      globalSlug,
+      isTrashed,
+      renderDocument,
+      searchParams,
+      t,
+    ],
   )
 
   useEffect(() => {

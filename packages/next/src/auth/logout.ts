@@ -14,7 +14,7 @@ export async function logout({
   allSessions?: boolean
   config: Promise<SanitizedConfig> | SanitizedConfig
 }) {
-  const payload = await getPayload({ config })
+  const payload = await getPayload({ config, cron: true })
   const headers = await nextHeaders()
   const authResult = await payload.auth({ headers })
 

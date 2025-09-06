@@ -12,11 +12,11 @@ import { fileURLToPath } from 'url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const describeToUse = process.env.PAYLOAD_DATABASE?.startsWith('postgres')
+const describePostgres = process.env.PAYLOAD_DATABASE?.startsWith('postgres')
   ? describe
   : describe.skip
 
-describeToUse('postgres vector custom column', () => {
+describePostgres('postgres vector custom column', () => {
   const vectorColumnQueryTest = async (vectorType: string) => {
     const {
       databaseAdapter,

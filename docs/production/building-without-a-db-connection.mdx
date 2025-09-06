@@ -14,7 +14,9 @@ Solutions:
 
 ## Using the experimental-build-mode Next.js build flag
 
-You can run Next.js build using the `pnpx next build --experimental-build-mode compile` command to only compile the code without static generation, which does not require a DB connection. In that case, your pages will be rendered dynamically, but after that, you can still generate static pages using the `pnpx next build --experimental-build-mode generate` command when you have a DB connection.
+You can run Next.js build using the `pnpm next build --experimental-build-mode compile` command to only compile the code without static generation, which does not require a DB connection. In that case, your pages will be rendered dynamically, but after that, you can still generate static pages using the `pnpm next build --experimental-build-mode generate` command when you have a DB connection.
+
+When running `pnpm next build --experimental-build-mode compile`, environment variables prefixed with `NEXT_PUBLIC` will not be inlined and will be `undefined` on the client. To make these variables available, either run `pnpm next build --experimental-build-mode generate` if a DB connection is available, or use `pnpm next build --experimental-build-mode generate-env` if you do not have a DB connection.
 
 [Next.js documentation](https://nextjs.org/docs/pages/api-reference/cli/next#next-build-options)
 

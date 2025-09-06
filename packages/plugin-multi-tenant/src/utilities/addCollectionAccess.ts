@@ -49,7 +49,6 @@ export const addCollectionAccess = <ConfigType>({
       adminUsersSlug,
       collection,
       fieldName: key === 'readVersions' ? `version.${fieldName}` : fieldName,
-      operation: key,
       tenantsArrayFieldName,
       tenantsArrayTenantFieldName,
       userHasAccessToAllTenants,

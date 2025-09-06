@@ -4,8 +4,8 @@ import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatFilesize, isNumber } from 'payload/shared'
-import React, { Fragment, useEffect, useState } from 'react'
+import { formatAdminURL, formatFilesize } from 'payload/shared'
+import React, { Fragment, useEffect } from 'react'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -13,22 +13,22 @@ import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { useModal } from '../../elements/Modal/index.js'
-import { Pagination } from '../../elements/Pagination/index.js'
-import { PerPage } from '../../elements/PerPage/index.js'
+import { PageControls } from '../../elements/PageControls/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
+import { StickyToolbar } from '../../elements/StickyToolbar/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
-import { useAuth } from '../../providers/Auth/index.js'
+import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
+import { ListSelection } from '../../views/List/ListSelection/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
-import { ListSelection } from './ListSelection/index.js'
 import './index.scss'
 
 const baseClass = 'collection-list'
@@ -48,6 +48,7 @@ export function DefaultListView(props: ListViewClientProps) {
     disableQueryPresets,
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
+    hasDeletePermission,
     listMenuItems,
     newDocumentURL,
     queryPreset,
@@ -55,9 +56,10 @@ export function DefaultListView(props: ListViewClientProps) {
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
+    viewType,
   } = props
 
-  const [Table, setTable] = useState(InitialTable)
+  const [Table] = useControllableState(InitialTable)
 
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
 
@@ -66,24 +68,15 @@ export function DefaultListView(props: ListViewClientProps) {
       ? allowCreate && hasCreatePermissionFromProps
       : hasCreatePermissionFromProps
 
-  useEffect(() => {
-    if (InitialTable) {
-      setTable(InitialTable)
-    }
-  }, [InitialTable])
-
-  const { user } = useAuth()
-
-  const { getEntityConfig } = useConfig()
+  const {
+    config: {
+      routes: { admin: adminRoute },
+    },
+    getEntityConfig,
+  } = useConfig()
   const router = useRouter()
 
-  const {
-    data,
-    defaultLimit: initialLimit,
-    handlePageChange,
-    handlePerPageChange,
-    query,
-  } = useListQuery()
+  const { data, isGroupingBy } = useListQuery()
 
   const { openModal } = useModal()
   const { drawerSlug: bulkUploadDrawerSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
@@ -95,6 +88,8 @@ export function DefaultListView(props: ListViewClientProps) {
   const isUploadCollection = Boolean(upload)
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
+
+  const isTrashEnabled = Boolean(collectionConfig.trash)
 
   const { i18n } = useTranslation()
 
@@ -113,9 +108,9 @@ export function DefaultListView(props: ListViewClientProps) {
         }
       })
     } else {
-      return data.docs
+      return data?.docs
     }
-  }, [data.docs, isUploadCollection])
+  }, [data?.docs, isUploadCollection])
 
   const openBulkUpload = React.useCallback(() => {
     setCollectionSlug(collectionSlug)
@@ -125,19 +120,33 @@ export function DefaultListView(props: ListViewClientProps) {
 
   useEffect(() => {
     if (!isInDrawer) {
-      setStepNav([
-        {
-          label: labels?.plural,
-        },
-      ])
+      const baseLabel = {
+        label: getTranslation(labels?.plural, i18n),
+        url:
+          isTrashEnabled && viewType === 'trash'
+            ? formatAdminURL({
+                adminRoute,
+                path: `/collections/${collectionSlug}`,
+              })
+            : undefined,
+      }
+
+      const trashLabel = {
+        label: i18n.t('general:trash'),
+      }
+
+      const navItems =
+        isTrashEnabled && viewType === 'trash' ? [baseLabel, trashLabel] : [baseLabel]
+
+      setStepNav(navItems)
     }
-  }, [setStepNav, labels, isInDrawer])
+  }, [adminRoute, setStepNav, labels, isInDrawer, isTrashEnabled, viewType, i18n, collectionSlug])
 
   return (
     <Fragment>
       <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
         <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
-          <SelectionProvider docs={docs} totalDocs={data.totalDocs} user={user}>
+          <SelectionProvider docs={docs} totalDocs={data?.totalDocs}>
             {BeforeList}
             <Gutter className={`${baseClass}__wrap`}>
               <CollectionListHeader
@@ -158,12 +167,14 @@ export function DefaultListView(props: ListViewClientProps) {
                 disableBulkDelete={disableBulkDelete}
                 disableBulkEdit={disableBulkEdit}
                 hasCreatePermission={hasCreatePermission}
+                hasDeletePermission={hasDeletePermission}
                 i18n={i18n}
                 isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
+                isTrashEnabled={isTrashEnabled}
                 newDocumentURL={newDocumentURL}
                 openBulkUpload={openBulkUpload}
                 smallBreak={smallBreak}
-                viewType="list"
+                viewType={viewType}
               />
               <ListControls
                 beforeActions={
@@ -185,13 +196,19 @@ export function DefaultListView(props: ListViewClientProps) {
                 resolvedFilterOptions={resolvedFilterOptions}
               />
               {BeforeListTable}
-              {docs.length > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}
-              {docs.length === 0 && (
+              {docs?.length > 0 && (
+                <div className={`${baseClass}__tables`}>
+                  <RelationshipProvider>{Table}</RelationshipProvider>
+                </div>
+              )}
+              {docs?.length === 0 && (
                 <div className={`${baseClass}__no-results`}>
                   <p>
-                    {i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}
+                    {i18n.t(viewType === 'trash' ? 'general:noTrashResults' : 'general:noResults', {
+                      label: getTranslation(labels?.plural, i18n),
+                    })}
                   </p>
-                  {hasCreatePermission && newDocumentURL && (
+                  {hasCreatePermission && newDocumentURL && viewType !== 'trash' && (
                     <Fragment>
                       {isInDrawer ? (
                         <Button el="button" onClick={() => openModal(createNewDrawerSlug)}>
@@ -211,63 +228,44 @@ export function DefaultListView(props: ListViewClientProps) {
                 </div>
               )}
               {AfterListTable}
-              {docs.length > 0 && (
-                <div className={`${baseClass}__page-controls`}>
-                  <Pagination
-                    hasNextPage={data.hasNextPage}
-                    hasPrevPage={data.hasPrevPage}
-                    limit={data.limit}
-                    nextPage={data.nextPage}
-                    numberOfNeighbors={1}
-                    onChange={(page) => void handlePageChange(page)}
-                    page={data.page}
-                    prevPage={data.prevPage}
-                    totalPages={data.totalPages}
-                  />
-                  {data.totalDocs > 0 && (
-                    <Fragment>
-                      <div className={`${baseClass}__page-info`}>
-                        {data.page * data.limit - (data.limit - 1)}-
-                        {data.totalPages > 1 && data.totalPages !== data.page
-                          ? data.limit * data.page
-                          : data.totalDocs}{' '}
-                        {i18n.t('general:of')} {data.totalDocs}
-                      </div>
-                      <PerPage
-                        handleChange={(limit) => void handlePerPageChange(limit)}
-                        limit={isNumber(query?.limit) ? Number(query.limit) : initialLimit}
-                        limits={collectionConfig?.admin?.pagination?.limits}
-                        resetPage={data.totalDocs <= data.pagingCounter}
-                      />
-                      {smallBreak && (
-                        <div className={`${baseClass}__list-selection`}>
-                          <ListSelection
-                            collectionConfig={collectionConfig}
-                            disableBulkDelete={disableBulkDelete}
-                            disableBulkEdit={disableBulkEdit}
-                            label={getTranslation(collectionConfig.labels.plural, i18n)}
-                          />
-                          <div className={`${baseClass}__list-selection-actions`}>
-                            {enableRowSelections && typeof onBulkSelect === 'function'
-                              ? beforeActions
-                                ? [
-                                    ...beforeActions,
-                                    <SelectMany key="select-many" onClick={onBulkSelect} />,
-                                  ]
-                                : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                              : beforeActions}
-                          </div>
+              {docs?.length > 0 && !isGroupingBy && (
+                <PageControls
+                  AfterPageControls={
+                    smallBreak ? (
+                      <div className={`${baseClass}__list-selection`}>
+                        <ListSelection
+                          collectionConfig={collectionConfig}
+                          disableBulkDelete={disableBulkDelete}
+                          disableBulkEdit={disableBulkEdit}
+                          label={getTranslation(collectionConfig.labels.plural, i18n)}
+                          showSelectAllAcrossPages={!isGroupingBy}
+                        />
+                        <div className={`${baseClass}__list-selection-actions`}>
+                          {enableRowSelections && typeof onBulkSelect === 'function'
+                            ? beforeActions
+                              ? [
+                                  ...beforeActions,
+                                  <SelectMany key="select-many" onClick={onBulkSelect} />,
+                                ]
+                              : [<SelectMany key="select-many" onClick={onBulkSelect} />]
+                            : beforeActions}
                         </div>
-                      )}
-                    </Fragment>
-                  )}
-                </div>
+                      </div>
+                    ) : null
+                  }
+                  collectionConfig={collectionConfig}
+                />
               )}
             </Gutter>
             {AfterList}
           </SelectionProvider>
         </div>
       </TableColumnsProvider>
+      {docs?.length > 0 && isGroupingBy && data.totalPages > 1 && (
+        <StickyToolbar>
+          <PageControls collectionConfig={collectionConfig} />
+        </StickyToolbar>
+      )}
     </Fragment>
   )
 }

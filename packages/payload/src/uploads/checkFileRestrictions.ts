@@ -1,6 +1,10 @@
+import { fileTypeFromBuffer } from 'file-type'
+
 import type { checkFileRestrictionsParams, FileAllowList } from './types.js'
 
-import { APIError } from '../errors/index.js'
+import { ValidationError } from '../errors/index.js'
+import { validateMimeType } from '../utilities/validateMimeType.js'
+import { detectSvgFromXml } from './detectSvgFromXml.js'
 
 /**
  * Restricted file types and their extensions.
@@ -39,11 +43,12 @@ export const RESTRICTED_FILE_EXT_AND_TYPES: FileAllowList = [
   { extensions: ['command'], mimeType: 'application/x-command' },
 ]
 
-export const checkFileRestrictions = ({
+export const checkFileRestrictions = async ({
   collection,
   file,
   req,
-}: checkFileRestrictionsParams): void => {
+}: checkFileRestrictionsParams): Promise<void> => {
+  const errors: string[] = []
   const { upload: uploadConfig } = collection
   const configMimeTypes =
     uploadConfig &&
@@ -58,20 +63,48 @@ export const checkFileRestrictions = ({
       ? (uploadConfig as { allowRestrictedFileTypes?: boolean }).allowRestrictedFileTypes
       : false
 
-  // Skip validation if `mimeTypes` are defined in the upload config, or `allowRestrictedFileTypes` are allowed
-  if (allowRestrictedFileTypes || configMimeTypes.length) {
+  // Skip validation if `allowRestrictedFileTypes` is true
+  if (allowRestrictedFileTypes) {
     return
   }
 
-  const isRestricted = RESTRICTED_FILE_EXT_AND_TYPES.some((type) => {
-    const hasRestrictedExt = type.extensions.some((ext) => file.name.toLowerCase().endsWith(ext))
-    const hasRestrictedMime = type.mimeType === file.mimetype
-    return hasRestrictedExt || hasRestrictedMime
-  })
+  // Secondary mimetype check to assess file type from buffer
+  if (configMimeTypes.length > 0) {
+    let detected = await fileTypeFromBuffer(file.data)
 
-  if (isRestricted) {
-    const errorMessage = `File type '${file.mimetype}' not allowed ${file.name}: Restricted file type detected -- set 'allowRestrictedFileTypes' to true to skip this check for this Collection.`
-    req.payload.logger.error(errorMessage)
-    throw new APIError(errorMessage)
+    // Handle SVG files that are detected as XML due to <?xml declarations
+    if (
+      detected?.mime === 'application/xml' &&
+      configMimeTypes.some(
+        (type) => type.includes('image/') && (type.includes('svg') || type === 'image/*'),
+      ) &&
+      detectSvgFromXml(file.data)
+    ) {
+      detected = { ext: 'svg' as any, mime: 'image/svg+xml' as any }
+    }
+
+    const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)
+
+    if (detected && !passesMimeTypeCheck) {
+      errors.push(`Invalid MIME type: ${detected.mime}.`)
+    }
+  } else {
+    const isRestricted = RESTRICTED_FILE_EXT_AND_TYPES.some((type) => {
+      const hasRestrictedExt = type.extensions.some((ext) => file.name.toLowerCase().endsWith(ext))
+      const hasRestrictedMime = type.mimeType === file.mimetype
+      return hasRestrictedExt || hasRestrictedMime
+    })
+    if (isRestricted) {
+      errors.push(
+        `File type '${file.mimetype}' not allowed ${file.name}: Restricted file type detected -- set 'allowRestrictedFileTypes' to true to skip this check for this Collection.`,
+      )
+    }
+  }
+
+  if (errors.length > 0) {
+    req.payload.logger.error(errors.join(', '))
+    throw new ValidationError({
+      errors: [{ message: errors.join(', '), path: 'file' }],
+    })
   }
 }

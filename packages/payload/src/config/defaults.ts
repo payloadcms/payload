@@ -47,6 +47,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   defaultDepth: 2,
   defaultMaxTextLength: 40000,
   endpoints: [],
+  experimental: {},
   globals: [],
   graphQL: {
     disablePlaygroundInProduction: true,
@@ -121,6 +122,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.defaultDepth = config.defaultDepth ?? 2
   config.defaultMaxTextLength = config.defaultMaxTextLength ?? 40000
   config.endpoints = config.endpoints ?? []
+  config.experimental = config.experimental ?? {}
   config.globals = config.globals ?? []
   config.graphQL = {
     disableIntrospectionInProduction: true,
@@ -163,14 +165,17 @@ export const addDefaultsToConfig = (config: Config): Config => {
     ...(config.auth || {}),
   }
 
-  const hasFolderCollections = config.collections.some((collection) => Boolean(collection.folders))
-  if (hasFolderCollections) {
+  if (
+    config.folders !== false &&
+    config.collections.some((collection) => Boolean(collection.folders))
+  ) {
     config.folders = {
-      slug: foldersSlug,
-      browseByFolder: true,
-      debug: false,
-      fieldName: parentFolderFieldName,
-      ...(config.folders || {}),
+      slug: config.folders?.slug ?? foldersSlug,
+      browseByFolder: config.folders?.browseByFolder ?? true,
+      collectionOverrides: config.folders?.collectionOverrides || undefined,
+      collectionSpecific: config.folders?.collectionSpecific ?? true,
+      debug: config.folders?.debug ?? false,
+      fieldName: config.folders?.fieldName ?? parentFolderFieldName,
     }
   } else {
     config.folders = false

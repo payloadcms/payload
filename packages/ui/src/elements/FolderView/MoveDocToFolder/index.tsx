@@ -1,5 +1,6 @@
 'use client'
 
+import type { CollectionSlug } from 'payload'
 import type { FolderOrDocument } from 'payload/shared'
 
 import { useModal } from '@faceless-ui/modal'
@@ -16,8 +17,8 @@ import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { formatDrawerSlug, useDrawerDepth } from '../../Drawer/index.js'
-import { MoveItemsToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 import './index.scss'
+import { MoveItemsToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 
 const baseClass = 'move-doc-to-folder'
 
@@ -151,6 +152,8 @@ export const MoveDocToFolderButton = ({
       <MoveItemsToFolderDrawer
         action="moveItemToFolder"
         drawerSlug={drawerSlug}
+        //todo this should inherit
+        folderAssignedCollections={[collectionSlug]}
         folderCollectionSlug={folderCollectionSlug}
         folderFieldName={folderFieldName}
         fromFolderID={fromFolderID}

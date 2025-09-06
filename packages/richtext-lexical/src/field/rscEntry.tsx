@@ -85,6 +85,12 @@ export const RscEntryLexicalField: React.FC<
   if (args.admin?.hideInsertParagraphAtEnd) {
     admin.hideInsertParagraphAtEnd = true
   }
+  if (args.admin?.hideAddBlockButton) {
+    admin.hideAddBlockButton = true
+  }
+  if (args.admin?.hideDraggableBlockElement) {
+    admin.hideDraggableBlockElement = true
+  }
 
   const props: LexicalRichTextFieldProps = {
     clientFeatures,

@@ -208,6 +208,8 @@ const sanitizeDate = ({
 }
 
 type Args = {
+  $inc?: Record<string, number>
+  $push?: Record<string, { $each: any[] } | any>
   /** instance of the adapter */
   adapter: MongooseAdapter
   /** data to transform, can be an array of documents or a single document */
@@ -396,6 +398,8 @@ const stripFields = ({
 }
 
 export const transform = ({
+  $inc,
+  $push,
   adapter,
   data,
   fields,
@@ -404,9 +408,22 @@ export const transform = ({
   parentIsLocalized = false,
   validateRelationships = true,
 }: Args) => {
+  if (!data) {
+    return null
+  }
+
   if (Array.isArray(data)) {
     for (const item of data) {
-      transform({ adapter, data: item, fields, globalSlug, operation, validateRelationships })
+      transform({
+        $inc,
+        $push,
+        adapter,
+        data: item,
+        fields,
+        globalSlug,
+        operation,
+        validateRelationships,
+      })
     }
     return
   }
@@ -424,6 +441,11 @@ export const transform = ({
       data.id = data.id.toHexString()
     }
 
+    // Handle BigInt conversion for custom ID fields of type 'number'
+    if (adapter.useBigIntForNumberIDs && typeof data.id === 'bigint') {
+      data.id = Number(data.id)
+    }
+
     if (!adapter.allowAdditionalKeys) {
       stripFields({
         config,
@@ -438,12 +460,59 @@ export const transform = ({
     data.globalType = globalSlug
   }
 
-  const sanitize: TraverseFieldsCallback = ({ field, ref: incomingRef }) => {
+  const sanitize: TraverseFieldsCallback = ({ field, parentPath, ref: incomingRef }) => {
     if (!incomingRef || typeof incomingRef !== 'object') {
       return
     }
 
     const ref = incomingRef as Record<string, unknown>
+
+    if (
+      $inc &&
+      field.type === 'number' &&
+      operation === 'write' &&
+      field.name in ref &&
+      ref[field.name]
+    ) {
+      const value = ref[field.name]
+      if (value && typeof value === 'object' && '$inc' in value && typeof value.$inc === 'number') {
+        $inc[`${parentPath}${field.name}`] = value.$inc
+        delete ref[field.name]
+      }
+    }
+
+    if (
+      $push &&
+      field.type === 'array' &&
+      operation === 'write' &&
+      field.name in ref &&
+      ref[field.name]
+    ) {
+      const value = ref[field.name]
+      if (value && typeof value === 'object' && '$push' in value) {
+        const push = value.$push
+
+        if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
+          if (typeof push === 'object' && push !== null) {
+            Object.entries(push).forEach(([localeKey, localeData]) => {
+              if (Array.isArray(localeData)) {
+                $push[`${parentPath}${field.name}.${localeKey}`] = { $each: localeData }
+              } else if (typeof localeData === 'object') {
+                $push[`${parentPath}${field.name}.${localeKey}`] = localeData
+              }
+            })
+          }
+        } else {
+          if (Array.isArray(push)) {
+            $push[`${parentPath}${field.name}`] = { $each: push }
+          } else if (typeof push === 'object') {
+            $push[`${parentPath}${field.name}`] = push
+          }
+        }
+
+        delete ref[field.name]
+      }
+    }
 
     if (field.type === 'date' && operation === 'read' && field.name in ref && ref[field.name]) {
       if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
@@ -523,4 +592,15 @@ export const transform = ({
     parentIsLocalized,
     ref: data,
   })
+
+  if (operation === 'write') {
+    if (typeof data.updatedAt === 'undefined') {
+      // If data.updatedAt is explicitly set to `null` we should not set it - this means we don't want to change the value of updatedAt.
+      data.updatedAt = new Date().toISOString()
+    } else if (data.updatedAt === null) {
+      // `updatedAt` may be explicitly set to null to disable updating it - if that is the case, we need to delete the property. Keeping it as null will
+      // cause the database to think we want to set it to null, which we don't.
+      delete data.updatedAt
+    }
+  }
 }

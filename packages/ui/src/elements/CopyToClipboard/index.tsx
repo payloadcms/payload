@@ -1,5 +1,5 @@
 'use client'
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 
 import { CopyIcon } from '../../icons/Copy/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -15,7 +15,6 @@ export type Props = {
 }
 
 export const CopyToClipboard: React.FC<Props> = ({ defaultMessage, successMessage, value }) => {
-  const ref = useRef(null)
   const [copied, setCopied] = useState(false)
   const [hovered, setHovered] = useState(false)
   const { t } = useTranslation()
@@ -24,13 +23,9 @@ export const CopyToClipboard: React.FC<Props> = ({ defaultMessage, successMessag
     return (
       <button
         className={baseClass}
-        onClick={() => {
-          if (ref && ref.current) {
-            ref.current.select()
-            ref.current.setSelectionRange(0, value.length + 1)
-            document.execCommand('copy')
-            setCopied(true)
-          }
+        onClick={async () => {
+          await navigator.clipboard.writeText(value)
+          setCopied(true)
         }}
         onMouseEnter={() => {
           setHovered(true)
@@ -47,7 +42,6 @@ export const CopyToClipboard: React.FC<Props> = ({ defaultMessage, successMessag
           {copied && (successMessage ?? t('general:copied'))}
           {!copied && (defaultMessage ?? t('general:copy'))}
         </Tooltip>
-        <textarea readOnly ref={ref} tabIndex={-1} value={value} />
       </button>
     )
   }

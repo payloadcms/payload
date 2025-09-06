@@ -74,6 +74,8 @@ export const testEslintConfig = [
             'expectNoResultsAndCreateFolderButton',
             'createFolder',
             'createFolderFromDoc',
+            'assertURLParams',
+            'uploadImage',
           ],
         },
       ],

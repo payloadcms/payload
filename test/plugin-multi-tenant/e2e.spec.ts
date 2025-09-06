@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+import type { BasePayload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
@@ -10,7 +11,7 @@ import type { Config } from './payload-types.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
-  login,
+  loginClientSide,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -26,7 +27,8 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
-import { menuItemsSlug, menuSlug, tenantsSlug } from './shared.js'
+import { seed } from './seed/index.js'
+import { autosaveGlobalSlug, menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -35,126 +37,323 @@ test.describe('Multi Tenant', () => {
   let page: Page
   let serverURL: string
   let globalMenuURL: AdminUrlUtil
+  let autosaveGlobalURL: AdminUrlUtil
   let menuItemsURL: AdminUrlUtil
+  let usersURL: AdminUrlUtil
   let tenantsURL: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
-    const { serverURL: serverFromInit } = await initPayloadE2ENoConfig<Config>({ dirname })
+    const { serverURL: serverFromInit, payload } = await initPayloadE2ENoConfig<Config>({ dirname })
     serverURL = serverFromInit
     globalMenuURL = new AdminUrlUtil(serverURL, menuSlug)
     menuItemsURL = new AdminUrlUtil(serverURL, menuItemsSlug)
+    usersURL = new AdminUrlUtil(serverURL, usersSlug)
     tenantsURL = new AdminUrlUtil(serverURL, tenantsSlug)
+    autosaveGlobalURL = new AdminUrlUtil(serverURL, autosaveGlobalSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
-  })
-
-  test.beforeEach(async () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'multiTenant',
     })
+    if (seed) {
+      await seed(payload as unknown as BasePayload)
+      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+    }
   })
 
-  test.describe('tenant selector', () => {
-    test('should populate tenant selector on login', async () => {
-      await login({
-        page,
-        serverURL,
-        data: credentials.admin,
-      })
-
-      await expect
-        .poll(async () => {
-          return (await getTenantOptions({ page })).sort()
+  test.describe('Filters', () => {
+    test.describe('Tenants', () => {
+      test('should show all tenants when tenant selector is empty', async () => {
+        await loginClientSide({
+          page,
+          serverURL,
+          data: credentials.admin,
         })
-        .toEqual(['Blue Dog', 'Steel Cat', 'Anchor Bar'].sort())
+
+        await clearGlobalTenant({ page })
+
+        await page.goto(tenantsURL.list)
+
+        await expect(
+          page.locator('.collection-list .table .cell-name', {
+            hasText: 'Blue Dog',
+          }),
+        ).toBeVisible()
+        await expect(
+          page.locator('.collection-list .table .cell-name', {
+            hasText: 'Steel Cat',
+          }),
+        ).toBeVisible()
+        await expect(
+          page.locator('.collection-list .table .cell-name', {
+            hasText: 'Public Tenant',
+          }),
+        ).toBeVisible()
+      })
+      test('should show filtered tenants when tenant selector is set', async () => {
+        await loginClientSide({
+          page,
+          serverURL,
+          data: credentials.admin,
+        })
+
+        await page.goto(tenantsURL.list)
+        await selectTenant({
+          page,
+          tenant: 'Blue Dog',
+        })
+
+        await expect(
+          page.locator('.collection-list .table .cell-name', {
+            hasText: 'Blue Dog',
+          }),
+        ).toBeVisible()
+        await expect(
+          page.locator('.collection-list .table .cell-name', {
+            hasText: 'Steel Cat',
+          }),
+        ).toBeHidden()
+      })
     })
 
-    test('should show all tenants for userHasAccessToAllTenants users', async () => {
-      await login({
-        page,
-        serverURL,
-        data: credentials.admin,
-      })
-
-      await expect
-        .poll(async () => {
-          return (await getTenantOptions({ page })).sort()
+    test.describe('Tenant Assigned Documents', () => {
+      test('should show all tenant items when tenant selector is empty', async () => {
+        await loginClientSide({
+          page,
+          serverURL,
+          data: credentials.admin,
         })
-        .toEqual(['Blue Dog', 'Steel Cat', 'Anchor Bar'].sort())
+
+        await page.goto(menuItemsURL.list)
+        await clearGlobalTenant({ page })
+
+        await expect(
+          page.locator('.collection-list .table .cell-name', {
+            hasText: 'Spicy Mac',
+          }),
+        ).toBeVisible()
+        await expect(
+          page.locator('.collection-list .table .cell-name', {
+            hasText: 'Pretzel Bites',
+          }),
+        ).toBeVisible()
+      })
+      test('should show filtered tenant items when tenant selector is set', async () => {
+        await loginClientSide({
+          page,
+          serverURL,
+          data: credentials.admin,
+        })
+
+        await page.goto(menuItemsURL.list)
+        await selectTenant({
+          page,
+          tenant: 'Blue Dog',
+        })
+
+        await expect(
+          page.locator('.collection-list .table .cell-name', {
+            hasText: 'Spicy Mac',
+          }),
+        ).toBeVisible()
+        await expect(
+          page.locator('.collection-list .table .cell-name', {
+            hasText: 'Pretzel Bites',
+          }),
+        ).toBeHidden()
+      })
+      test('should show public tenant items to super admins', async () => {
+        await loginClientSide({
+          page,
+          serverURL,
+          data: credentials.admin,
+        })
+
+        await page.goto(menuItemsURL.list)
+        await clearGlobalTenant({ page })
+
+        await expect(
+          page.locator('.collection-list .table .cell-name', {
+            hasText: 'Free Pizza',
+          }),
+        ).toBeVisible()
+      })
+      test('should not show public tenant items to users with assigned tenants', async () => {
+        await loginClientSide({
+          page,
+          serverURL,
+          data: credentials.owner,
+        })
+
+        await page.goto(menuItemsURL.list)
+        await clearGlobalTenant({ page })
+
+        await expect(
+          page.locator('.collection-list .table .cell-name', {
+            hasText: 'Free Pizza',
+          }),
+        ).toBeHidden()
+      })
     })
 
-    test('should only show users assigned tenants', async () => {
-      await login({
-        page,
-        serverURL,
-        data: credentials.owner,
+    test.describe('Users', () => {
+      test('should show all users when tenant selector is empty', async () => {
+        await loginClientSide({
+          page,
+          serverURL,
+          data: credentials.admin,
+        })
+
+        await page.goto(usersURL.list)
+        await clearGlobalTenant({ page })
+
+        await expect(
+          page.locator('.collection-list .table .cell-email', {
+            hasText: 'jane@blue-dog.com',
+          }),
+        ).toBeVisible()
+        await expect(
+          page.locator('.collection-list .table .cell-email', {
+            hasText: 'huel@steel-cat.com',
+          }),
+        ).toBeVisible()
+        await expect(
+          page.locator('.collection-list .table .cell-email', {
+            hasText: 'dev@payloadcms.com',
+          }),
+        ).toBeVisible()
       })
 
-      await expect
-        .poll(async () => {
-          return (await getTenantOptions({ page })).sort()
+      test('should show only tenant users when tenant selector is empty', async () => {
+        await loginClientSide({
+          page,
+          serverURL,
+          data: credentials.admin,
         })
-        .toEqual(['Blue Dog', 'Anchor Bar'].sort())
+
+        await page.goto(usersURL.list)
+        await selectTenant({
+          page,
+          tenant: 'Blue Dog',
+        })
+
+        await expect(
+          page.locator('.collection-list .table .cell-email', {
+            hasText: 'jane@blue-dog.com',
+          }),
+        ).toBeVisible()
+        await expect(
+          page.locator('.collection-list .table .cell-email', {
+            hasText: 'huel@steel-cat.com',
+          }),
+        ).toBeHidden()
+        await expect(
+          page.locator('.collection-list .table .cell-email', {
+            hasText: 'dev@payloadcms.com',
+          }),
+        ).toBeHidden()
+      })
     })
   })
 
-  test.describe('Base List Filter', () => {
-    test('should show all tenant items when tenant selector is empty', async () => {
-      await login({
+  test.describe('Documents', () => {
+    test('should set tenant upon entering document', async () => {
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
       })
-
-      await clearTenant({ page })
 
       await page.goto(menuItemsURL.list)
-      await expect(
-        page.locator('.collection-list .table .cell-name', {
-          hasText: 'Spicy Mac',
-        }),
-      ).toBeVisible()
-      await expect(
-        page.locator('.collection-list .table .cell-name', {
-          hasText: 'Pretzel Bites',
-        }),
-      ).toBeVisible()
+      await clearGlobalTenant({ page })
+
+      await goToListDoc({
+        page,
+        cellClass: '.cell-name',
+        textToMatch: 'Spicy Mac',
+        urlUtil: menuItemsURL,
+      })
+
+      await openNav(page)
+      await expect
+        .poll(async () => {
+          return await getSelectInputValue<false>({
+            selectLocator: page.locator('.tenant-selector'),
+            multiSelect: false,
+          })
+        })
+        .toBe('Blue Dog')
     })
-    test('should show filtered tenant items when tenant selector is set', async () => {
-      await login({
+
+    test('should prompt for confirmation upon tenant switching', async () => {
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
       })
 
-      await selectTenant({
+      await page.goto(menuItemsURL.list)
+      await clearGlobalTenant({ page })
+
+      await goToListDoc({
+        page,
+        cellClass: '.cell-name',
+        textToMatch: 'Spicy Mac',
+        urlUtil: menuItemsURL,
+      })
+
+      await selectDocumentTenant({
+        page,
+        tenant: 'Steel Cat',
+      })
+
+      const confirmationModal = page.locator('#confirm-switch-tenant')
+      await expect(confirmationModal).toBeVisible()
+      await expect(
+        confirmationModal.getByText('You are about to change ownership from Blue Dog to Steel Cat'),
+      ).toBeVisible()
+    })
+    test('should filter internal links in Lexical editor', async () => {
+      await loginClientSide({
+        page,
+        serverURL,
+        data: credentials.admin,
+      })
+      await page.goto(menuItemsURL.create)
+      await selectDocumentTenant({
         page,
         tenant: 'Blue Dog',
       })
-
-      await page.goto(menuItemsURL.list)
-      await expect(
-        page.locator('.collection-list .table .cell-name', {
-          hasText: 'Spicy Mac',
-        }),
-      ).toBeVisible()
-      await expect(
-        page.locator('.collection-list .table .cell-name', {
-          hasText: 'Pretzel Bites',
-        }),
-      ).toBeHidden()
+      const editor = page.locator('[data-lexical-editor="true"]')
+      await editor.focus()
+      await page.keyboard.type('Hello World')
+      await page.keyboard.down('Shift')
+      for (let i = 0; i < 'World'.length; i++) {
+        await page.keyboard.press('ArrowLeft')
+      }
+      await page.keyboard.up('Shift')
+      await page.locator('.toolbar-popup__button-link').click()
+      await expect(page.locator('.lexical-link-edit-drawer')).toBeVisible()
+      const linkRadio = page.locator('.radio-input__styled-radio').last()
+      await expect(linkRadio).toBeVisible()
+      await linkRadio.click({
+        delay: 100,
+      })
+      await page.locator('.drawer__content').locator('.rs__input').click()
+      await expect(page.getByText('Chorizo Con Queso')).toBeVisible()
+      await expect(page.getByText('Pretzel Bites')).toBeHidden()
     })
   })
 
-  test.describe('globals', () => {
+  test.describe('Globals', () => {
     test('should redirect list view to edit view', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
@@ -164,11 +363,12 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should redirect from create to edit view when tenant already has content', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
       })
+      await page.goto(tenantsURL.list)
       await selectTenant({
         page,
         tenant: 'Blue Dog',
@@ -179,12 +379,13 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should prompt leave without saving changes modal when switching tenants', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
       })
 
+      await page.goto(tenantsURL.list)
       await selectTenant({
         page,
         tenant: 'Blue Dog',
@@ -206,69 +407,129 @@ test.describe('Multi Tenant', () => {
           'Your changes have not been saved. If you leave now, you will lose your changes.',
         ),
       ).toBeVisible()
-    })
-  })
 
-  test.describe('documents', () => {
-    test('should set tenant upon entering', async () => {
-      await login({
-        page,
-        serverURL,
-        data: credentials.admin,
-      })
-
-      await clearTenant({ page })
-
-      await goToListDoc({
-        page,
-        cellClass: '.cell-name',
-        textToMatch: 'Spicy Mac',
-        urlUtil: menuItemsURL,
-      })
-
-      await openNav(page)
+      await confirmationModal.locator('#confirm-action').click()
+      await expect(page.locator('#confirm-leave-without-saving')).toBeHidden()
+      await page.goto(menuItemsURL.list)
       await expect
         .poll(async () => {
-          return await getSelectInputValue<false>({
+          return await getSelectInputValue({
             selectLocator: page.locator('.tenant-selector'),
             multiSelect: false,
           })
         })
-        .toBe('Blue Dog')
+        .toBe('Steel Cat')
     })
 
-    test('should prompt for confirmation upon tenant switching', async () => {
-      await login({
+    test('should navigate to globals with autosave enabled', async () => {
+      await loginClientSide({
+        page,
+        serverURL,
+        data: credentials.admin,
+      })
+      await page.goto(tenantsURL.list)
+      await clearGlobalTenant({ page })
+      await page.goto(autosaveGlobalURL.list)
+      await expect(page.locator('.doc-header__title')).toBeVisible()
+      const globalTenant = await getGlobalTenant({ page })
+      await expect
+        .poll(async () => {
+          return await getDocumentTenant({ page })
+        })
+        .toBe(globalTenant)
+    })
+  })
+
+  test.describe('Tenant Selector', () => {
+    test('should populate tenant selector on login', async () => {
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
       })
 
-      await clearTenant({ page })
+      await page.goto(tenantsURL.list)
 
-      await goToListDoc({
-        page,
-        cellClass: '.cell-name',
-        textToMatch: 'Spicy Mac',
-        urlUtil: menuItemsURL,
-      })
-
-      await selectTenant({
-        page,
-        tenant: 'Steel Cat',
-      })
-
-      const confirmationModal = page.locator('#confirm-switch-tenant')
-      await expect(confirmationModal).toBeVisible()
-      await expect(
-        confirmationModal.getByText('You are about to change ownership from Blue Dog to Steel Cat'),
-      ).toBeVisible()
+      await expect
+        .poll(async () => {
+          return (await getTenantOptions({ page })).sort()
+        })
+        .toEqual(['Blue Dog', 'Steel Cat', 'Public Tenant', 'Anchor Bar'].sort())
     })
-  })
 
-  test.describe('tenants', () => {
+    test('should populate the tenant selector after logout with 1 tenant user', async () => {
+      await loginClientSide({
+        page,
+        serverURL,
+        data: credentials.blueDog,
+      })
+
+      await loginClientSide({
+        page,
+        serverURL,
+        data: credentials.admin,
+      })
+
+      await page.goto(tenantsURL.list)
+
+      await expect
+        .poll(async () => {
+          return (await getTenantOptions({ page })).sort()
+        })
+        .toEqual(['Blue Dog', 'Steel Cat', 'Public Tenant', 'Anchor Bar'].sort())
+    })
+
+    test('should show all tenants for userHasAccessToAllTenants users', async () => {
+      await loginClientSide({
+        page,
+        serverURL,
+        data: credentials.admin,
+      })
+
+      await page.goto(tenantsURL.list)
+
+      await expect
+        .poll(async () => {
+          return (await getTenantOptions({ page })).sort()
+        })
+        .toEqual(['Blue Dog', 'Steel Cat', 'Public Tenant', 'Anchor Bar'].sort())
+    })
+
+    test('should only show users assigned tenants', async () => {
+      await loginClientSide({
+        page,
+        serverURL,
+        data: credentials.owner,
+      })
+
+      await page.goto(tenantsURL.list)
+
+      await expect
+        .poll(async () => {
+          return (await getTenantOptions({ page })).sort()
+        })
+        .toEqual(['Blue Dog', 'Anchor Bar'].sort())
+    })
+
+    test('should not show public tenants to users with assigned tenants', async () => {
+      await loginClientSide({
+        page,
+        serverURL,
+        data: credentials.owner,
+      })
+
+      await page.goto(tenantsURL.list)
+      await clearGlobalTenant({ page })
+
+      await expect(
+        page.locator('.collection-list .table .cell-name', {
+          hasText: 'Public Tenant',
+        }),
+      ).toBeHidden()
+    })
+
     test('should update the tenant name in the selector when editing a tenant', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
@@ -285,25 +546,37 @@ test.describe('Multi Tenant', () => {
       await page.locator('#field-name').fill('Red Dog')
       await saveDocAndAssert(page)
 
+      await page.goto(tenantsURL.list)
+
       // Check the tenant selector
       await expect
         .poll(async () => {
           return (await getTenantOptions({ page })).sort()
         })
-        .toEqual(['Red Dog', 'Steel Cat', 'Anchor Bar'].sort())
+        .toEqual(['Red Dog', 'Steel Cat', 'Public Tenant', 'Anchor Bar'].sort())
+
+      await goToListDoc({
+        cellClass: '.cell-name',
+        page,
+        textToMatch: 'Red Dog',
+        urlUtil: tenantsURL,
+      })
 
       // Change the tenant back to the original name
       await page.locator('#field-name').fill('Blue Dog')
       await saveDocAndAssert(page)
+
+      await page.goto(tenantsURL.list)
+
       await expect
         .poll(async () => {
           return (await getTenantOptions({ page })).sort()
         })
-        .toEqual(['Blue Dog', 'Steel Cat', 'Anchor Bar'].sort())
+        .toEqual(['Blue Dog', 'Steel Cat', 'Public Tenant', 'Anchor Bar'].sort())
     })
 
     test('should add tenant to the selector when creating a new tenant', async () => {
-      await login({
+      await loginClientSide({
         page,
         serverURL,
         data: credentials.admin,
@@ -318,12 +591,14 @@ test.describe('Multi Tenant', () => {
       await page.locator('#field-domain').fill('house-rules.com')
       await saveDocAndAssert(page)
 
+      await page.goto(tenantsURL.list)
+
       // Check the tenant selector
       await expect
         .poll(async () => {
           return (await getTenantOptions({ page })).sort()
         })
-        .toEqual(['Blue Dog', 'Steel Cat', 'Anchor Bar', 'House Rules'].sort())
+        .toEqual(['Blue Dog', 'Steel Cat', 'Anchor Bar', 'Public Tenant', 'House Rules'].sort())
     })
   })
 })
@@ -331,10 +606,43 @@ test.describe('Multi Tenant', () => {
 /**
  * Helper Functions
  */
+
+async function getGlobalTenant({ page }: { page: Page }): Promise<string | undefined> {
+  await openNav(page)
+  return await getSelectInputValue<false>({
+    selectLocator: page.locator('.tenant-selector'),
+    multiSelect: false,
+  })
+}
+
+async function getDocumentTenant({ page }: { page: Page }): Promise<string | undefined> {
+  await openNav(page)
+  return await getSelectInputValue<false>({
+    selectLocator: page.locator('#field-tenant'),
+    multiSelect: false,
+    valueLabelClass: '.relationship--single-value',
+  })
+}
+
 async function getTenantOptions({ page }: { page: Page }): Promise<string[]> {
   await openNav(page)
   return await getSelectInputOptions({
     selectLocator: page.locator('.tenant-selector'),
+  })
+}
+
+async function selectDocumentTenant({
+  page,
+  tenant,
+}: {
+  page: Page
+  tenant: string
+}): Promise<void> {
+  await openNav(page)
+  return selectInput({
+    selectLocator: page.locator('.tenantField'),
+    option: tenant,
+    multiSelect: false,
   })
 }
 
@@ -347,7 +655,7 @@ async function selectTenant({ page, tenant }: { page: Page; tenant: string }): P
   })
 }
 
-async function clearTenant({ page }: { page: Page }): Promise<void> {
+async function clearGlobalTenant({ page }: { page: Page }): Promise<void> {
   await openNav(page)
   return clearSelectInput({
     selectLocator: page.locator('.tenant-selector'),

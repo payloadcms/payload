@@ -271,6 +271,10 @@ export interface Movie {
   array?:
     | {
         director?: (string | Director)[] | null;
+        polymorphic?: {
+          relationTo: 'directors';
+          value: string | Director;
+        } | null;
         id?: string | null;
       }[]
     | null;
@@ -750,6 +754,7 @@ export interface MoviesSelect<T extends boolean = true> {
     | T
     | {
         director?: T;
+        polymorphic?: T;
         id?: T;
       };
   updatedAt?: T;

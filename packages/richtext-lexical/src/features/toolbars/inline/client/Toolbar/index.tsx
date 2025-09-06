@@ -94,6 +94,7 @@ function ToolbarGroupComponent({
   return (
     <div
       className={`inline-toolbar-popup__group inline-toolbar-popup__group-${group.key}`}
+      data-toolbar-group-key={group.key}
       key={group.key}
     >
       {group.type === 'dropdown' && group.items.length ? (

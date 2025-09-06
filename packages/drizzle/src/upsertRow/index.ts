@@ -1,3 +1,5 @@
+import type { LibSQLDatabase } from 'drizzle-orm/libsql'
+import type { SelectedFields } from 'drizzle-orm/sqlite-core'
 import type { TypeWithID } from 'payload'
 
 import { eq } from 'drizzle-orm'
@@ -12,13 +14,14 @@ import { transformForWrite } from '../transform/write/index.js'
 import { deleteExistingArrayRows } from './deleteExistingArrayRows.js'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath.js'
 import { insertArrays } from './insertArrays.js'
+import { shouldUseOptimizedUpsertRow } from './shouldUseOptimizedUpsertRow.js'
 
 /**
  * If `id` is provided, it will update the row with that ID.
  * If `where` is provided, it will update the row that matches the `where`
  * If neither `id` nor `where` is provided, it will create a new row.
  *
- * This function replaces the entire row and does not support partial updates.
+ * adapter function replaces the entire row and does not support partial updates.
  */
 export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>({
   id,
@@ -39,19 +42,146 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   upsertTarget,
   where,
 }: Args): Promise<T> => {
+  if (operation === 'create' && !data.createdAt) {
+    data.createdAt = new Date().toISOString()
+  }
+
+  let insertedRow: Record<string, unknown> = { id }
+  if (id && shouldUseOptimizedUpsertRow({ data, fields })) {
+    const transformedForWrite = transformForWrite({
+      adapter,
+      data,
+      enableAtomicWrites: true,
+      fields,
+      tableName,
+    })
+    const { row } = transformedForWrite
+    const { arraysToPush } = transformedForWrite
+
+    const drizzle = db as LibSQLDatabase
+
+    // First, handle $push arrays
+
+    if (arraysToPush && Object.keys(arraysToPush)?.length) {
+      await insertArrays({
+        adapter,
+        arrays: [arraysToPush],
+        db,
+        parentRows: [insertedRow],
+        uuidMap: {},
+      })
+    }
+
+    // If row.updatedAt is not set, delete it to avoid triggering hasDataToUpdate. `updatedAt` may be explicitly set to null to
+    // disable triggering hasDataToUpdate.
+    if (typeof row.updatedAt === 'undefined' || row.updatedAt === null) {
+      delete row.updatedAt
+    }
+
+    const hasDataToUpdate = row && Object.keys(row)?.length
+
+    // Then, handle regular row update
+    if (ignoreResult) {
+      if (hasDataToUpdate) {
+        // Only update row if there is something to update.
+        // Example: if the data only consists of a single $push, calling insertArrays is enough - we don't need to update the row.
+        await drizzle
+          .update(adapter.tables[tableName])
+          .set(row)
+          .where(eq(adapter.tables[tableName].id, id))
+      }
+      return ignoreResult === 'idOnly' ? ({ id } as T) : null
+    }
+
+    const findManyArgs = buildFindManyArgs({
+      adapter,
+      depth: 0,
+      fields,
+      joinQuery: false,
+      select,
+      tableName,
+    })
+
+    const findManyKeysLength = Object.keys(findManyArgs).length
+    const hasOnlyColumns = Object.keys(findManyArgs.columns || {}).length > 0
+
+    if (!hasDataToUpdate) {
+      // Nothing to update => just fetch current row and return
+      findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
+
+      const doc = await db.query[tableName].findFirst(findManyArgs)
+
+      return transform<T>({
+        adapter,
+        config: adapter.payload.config,
+        data: doc,
+        fields,
+        joinQuery: false,
+        tableName,
+      })
+    }
+
+    if (findManyKeysLength === 0 || hasOnlyColumns) {
+      // Optimization - No need for joins => can simply use returning(). This is optimal for very simple collections
+      // without complex fields that live in separate tables like blocks, arrays, relationships, etc.
+
+      const selectedFields: SelectedFields = {}
+      if (hasOnlyColumns) {
+        for (const [column, enabled] of Object.entries(findManyArgs.columns)) {
+          if (enabled) {
+            selectedFields[column] = adapter.tables[tableName][column]
+          }
+        }
+      }
+
+      const docs = await drizzle
+        .update(adapter.tables[tableName])
+        .set(row)
+        .where(eq(adapter.tables[tableName].id, id))
+        .returning(Object.keys(selectedFields).length ? selectedFields : undefined)
+
+      return transform<T>({
+        adapter,
+        config: adapter.payload.config,
+        data: docs[0],
+        fields,
+        joinQuery: false,
+        tableName,
+      })
+    }
+
+    // DB Update that needs the result, potentially with joins => need to update first, then find. returning() does not work with joins.
+
+    await drizzle
+      .update(adapter.tables[tableName])
+      .set(row)
+      .where(eq(adapter.tables[tableName].id, id))
+
+    findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
+
+    const doc = await db.query[tableName].findFirst(findManyArgs)
+
+    return transform<T>({
+      adapter,
+      config: adapter.payload.config,
+      data: doc,
+      fields,
+      joinQuery: false,
+      tableName,
+    })
+  }
   // Split out the incoming data into the corresponding:
   // base row, locales, relationships, blocks, and arrays
   const rowToInsert = transformForWrite({
     adapter,
     data,
+    enableAtomicWrites: false,
     fields,
     path,
     tableName,
   })
 
   // First, we insert the main row
-  let insertedRow: Record<string, unknown>
-
   try {
     if (operation === 'update') {
       const target = upsertTarget || adapter.tables[tableName].id
@@ -275,7 +405,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       }
     }
 
-    // When versions are enabled, this is used to track mapping between blocks/arrays ObjectID to their numeric generated representation, then we use it for nested to arrays/blocks select hasMany in versions.
+    // When versions are enabled, adapter is used to track mapping between blocks/arrays ObjectID to their numeric generated representation, then we use it for nested to arrays/blocks select hasMany in versions.
     const arraysBlocksUUIDMap: Record<string, number | string> = {}
 
     for (const [tableName, blockRows] of Object.entries(blocksToInsert)) {
@@ -346,9 +476,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     await insertArrays({
       adapter,
-      arrays: [rowToInsert.arrays],
+      arrays: [rowToInsert.arrays, rowToInsert.arraysToPush],
       db,
-      parentRows: [insertedRow],
+      parentRows: [insertedRow, insertedRow],
       uuidMap: arraysBlocksUUIDMap,
     })
 

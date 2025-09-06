@@ -93,6 +93,8 @@ export interface Config {
     placeholder: Placeholder;
     'use-as-title-group-field': UseAsTitleGroupField;
     'disable-bulk-edit': DisableBulkEdit;
+    'custom-list-drawer': CustomListDrawer;
+    virtuals: Virtual;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -125,6 +127,8 @@ export interface Config {
     placeholder: PlaceholderSelect<false> | PlaceholderSelect<true>;
     'use-as-title-group-field': UseAsTitleGroupFieldSelect<false> | UseAsTitleGroupFieldSelect<true>;
     'disable-bulk-edit': DisableBulkEditSelect<false> | DisableBulkEditSelect<true>;
+    'custom-list-drawer': CustomListDrawerSelect<false> | CustomListDrawerSelect<true>;
+    virtuals: VirtualsSelect<false> | VirtualsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -272,6 +276,11 @@ export interface Post {
   wavelengths?: ('fm' | 'am') | null;
   selectField?: ('option1' | 'option2')[] | null;
   file?: string | null;
+  noReadAccessField?: string | null;
+  disableListColumnTextInRow?: string | null;
+  someGroup?: {
+    disableListColumnTextInGroup?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -377,6 +386,7 @@ export interface CustomField {
   descriptionAsComponent?: string | null;
   customSelectField?: string | null;
   customSelectInput?: string | null;
+  customMultiSelectField?: string[] | null;
   relationshipFieldWithBeforeAfterInputs?: (string | null) | Post;
   arrayFieldWithBeforeAfterInputs?:
     | {
@@ -567,6 +577,27 @@ export interface DisableBulkEdit {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-list-drawer".
+ */
+export interface CustomListDrawer {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtuals".
+ */
+export interface Virtual {
+  id: string;
+  virtualTitleFromPost?: string | null;
+  virtualText?: string | null;
+  post?: (string | null) | Post;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -675,6 +706,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'disable-bulk-edit';
         value: string | DisableBulkEdit;
+      } | null)
+    | ({
+        relationTo: 'custom-list-drawer';
+        value: string | CustomListDrawer;
+      } | null)
+    | ({
+        relationTo: 'virtuals';
+        value: string | Virtual;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -807,6 +846,13 @@ export interface PostsSelect<T extends boolean = true> {
   wavelengths?: T;
   selectField?: T;
   file?: T;
+  noReadAccessField?: T;
+  disableListColumnTextInRow?: T;
+  someGroup?:
+    | T
+    | {
+        disableListColumnTextInGroup?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -900,6 +946,7 @@ export interface CustomFieldsSelect<T extends boolean = true> {
   descriptionAsComponent?: T;
   customSelectField?: T;
   customSelectInput?: T;
+  customMultiSelectField?: T;
   relationshipFieldWithBeforeAfterInputs?: T;
   arrayFieldWithBeforeAfterInputs?:
     | T
@@ -1071,6 +1118,25 @@ export interface UseAsTitleGroupFieldSelect<T extends boolean = true> {
  * via the `definition` "disable-bulk-edit_select".
  */
 export interface DisableBulkEditSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-list-drawer_select".
+ */
+export interface CustomListDrawerSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtuals_select".
+ */
+export interface VirtualsSelect<T extends boolean = true> {
+  virtualTitleFromPost?: T;
+  virtualText?: T;
+  post?: T;
   updatedAt?: T;
   createdAt?: T;
 }

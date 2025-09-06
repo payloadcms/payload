@@ -4,6 +4,7 @@ import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { APIError } from '../../errors/index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 
 export type Arguments = {
   allSessions?: boolean
@@ -39,17 +40,23 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
   }
 
   if (collectionConfig.auth.disableLocalStrategy !== true && collectionConfig.auth.useSessions) {
+    const where = appendNonTrashedFilter({
+      enableTrash: Boolean(collectionConfig.trash),
+      trash: false,
+      where: {
+        id: {
+          equals: user.id,
+        },
+      },
+    })
+
     const userWithSessions = await req.payload.db.findOne<{
       id: number | string
       sessions: { id: string }[]
     }>({
       collection: collectionConfig.slug,
       req,
-      where: {
-        id: {
-          equals: user.id,
-        },
-      },
+      where,
     })
 
     if (!userWithSessions) {
@@ -65,6 +72,9 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
 
       userWithSessions.sessions = sessionsAfterLogout
     }
+
+    // Ensure updatedAt date is always updated
+    ;(userWithSessions as any).updatedAt = new Date().toISOString()
 
     await req.payload.db.updateOne({
       id: user.id,

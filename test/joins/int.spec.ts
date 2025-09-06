@@ -356,6 +356,56 @@ describe('Joins Field', () => {
     expect(result.docs[0]?.documentsAndFolders.docs).toHaveLength(1)
   })
 
+  it('should allow join where query on hasMany select fields', async () => {
+    const folderDoc = await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'scopedFolder',
+        folderType: ['folderPoly1', 'folderPoly2'],
+      },
+    })
+
+    await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'childFolder',
+        folderType: ['folderPoly1'],
+        folder: folderDoc.id,
+      },
+    })
+
+    const findFolder = await payload.find({
+      collection: 'payload-folders',
+      where: {
+        id: {
+          equals: folderDoc.id,
+        },
+      },
+      joins: {
+        documentsAndFolders: {
+          limit: 100_000,
+          sort: 'name',
+          where: {
+            and: [
+              {
+                relationTo: {
+                  equals: 'payload-folders',
+                },
+              },
+              {
+                folderType: {
+                  in: ['folderPoly1'],
+                },
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    expect(findFolder?.docs[0]?.documentsAndFolders?.docs).toHaveLength(1)
+  })
+
   it('should filter joins using where query', async () => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
@@ -917,6 +967,37 @@ describe('Joins Field', () => {
       expect(unlimited.data.Categories.docs[0].relatedPosts.docs).toHaveLength(15)
       expect(unlimited.data.Categories.docs[0].relatedPosts.docs[0].title).toStrictEqual('test 0')
       expect(unlimited.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
+    })
+
+    it('should return totalDocs with count: true', async () => {
+      const queryWithLimit = `query {
+    Categories(where: {
+            name: { equals: "paginate example" }
+          }) {
+          docs {
+            relatedPosts(
+              sort: "createdAt",
+              limit: 4,
+              count: true
+            ) {
+              docs {
+                title
+              }
+              hasNextPage
+              totalDocs
+            }
+          }
+        }
+      }`
+      const pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs).toHaveLength(4)
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[0].title).toStrictEqual(
+        'test 0',
+      )
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(true)
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.totalDocs).toStrictEqual(15)
     })
 
     it('should have simple paginate with page for joins', async () => {

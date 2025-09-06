@@ -157,6 +157,7 @@ The following field names are forbidden and cannot be used:
 - `salt`
 - `hash`
 - `file`
+- `status` - with Postgres Adapter and when drafts are enabled
 
 ### Field-level Hooks
 
@@ -303,7 +304,7 @@ The following additional properties are provided in the `ctx` object:
 | `path`        | The full path to the field in the schema, represented as an array of string segments, including array indexes. I.e `['group', 'myArray', '1', 'textField']`. |
 | `id`          | The `id` of the current document being edited. `id` is `undefined` during the `create` operation.                                                            |
 | `req`         | The current HTTP request object. Contains `payload`, `user`, etc.                                                                                            |
-| `event`       | Either `onChange` or `submit` depending on the current action. Used as a performance opt-in. [More details](#async-field-validations).                       |
+| `event`       | Either `onChange` or `submit` depending on the current action. Used as a performance opt-in. [More details](#validation-performance).                        |
 
 #### Localized and Built-in Error Messages
 
@@ -365,11 +366,11 @@ import {
 } from 'payload/shared'
 ```
 
-#### Async Field Validations
+#### Validation Performance
 
-Custom validation functions can also be asynchronous depending on your needs. This makes it possible to make requests to external services or perform other miscellaneous asynchronous logic.
+When writing async or computationally heavy validation functions, it is important to consider the performance implications. Within the Admin Panel, validations are executed on every change to the field, so they should be as lightweight as possible and only run when necessary.
 
-When writing async validation functions, it is important to consider the performance implications. Validations are executed on every change to the field, so they should be as lightweight as possible. If you need to perform expensive validations, such as querying the database, consider using the `event` property in the `ctx` object to only run the validation on form submission.
+If you need to perform expensive validations, such as querying the database, consider using the `event` property in the `ctx` object to only run that particular validation on form submission.
 
 To write asynchronous validation functions, use the `async` keyword to define your function:
 
@@ -402,6 +403,11 @@ export const Orders: CollectionConfig = {
   ],
 }
 ```
+
+<Banner type="success">
+  For more performance tips, see the [Performance
+  documentation](../performance/overview).
+</Banner>
 
 ## Custom ID Fields
 

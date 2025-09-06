@@ -6,7 +6,6 @@ on:
       - opened
       - reopened
       - synchronize
-      - labeled
   push:
     branches:
       - main
@@ -34,7 +33,7 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -63,7 +62,7 @@ jobs:
   lint:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -79,7 +78,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -99,7 +98,7 @@ jobs:
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -123,7 +122,7 @@ jobs:
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -153,6 +152,7 @@ jobs:
       matrix:
         database:
           - mongodb
+          - firestore
           - postgres
           - postgres-custom-schema
           - postgres-uuid
@@ -184,7 +184,7 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -283,6 +283,8 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - group-by
+          - folders
           - hooks
           - lexical__collections__Lexical__e2e__main
           - lexical__collections__Lexical__e2e__blocks
@@ -301,12 +303,13 @@ jobs:
           - plugin-nested-docs
           - plugin-seo
           - sort
+          - trash
           - versions
           - uploads
     env:
       SUITE_NAME: ${{ matrix.suite }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -367,6 +370,7 @@ jobs:
       #     report-tag: ${{ matrix.suite }}
       #     job-summary: true
 
+  # This is unused, keeping it here for reference and possibly enabling in the future
   tests-e2e-turbo:
     runs-on: ubuntu-24.04
     needs: [changes, build]
@@ -417,6 +421,8 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - group-by
+          - folders
           - hooks
           - lexical__collections__Lexical__e2e__main
           - lexical__collections__Lexical__e2e__blocks
@@ -435,12 +441,13 @@ jobs:
           - plugin-nested-docs
           - plugin-seo
           - sort
+          - trash
           - versions
           - uploads
     env:
       SUITE_NAME: ${{ matrix.suite }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -543,7 +550,7 @@ jobs:
       MONGODB_VERSION: 6.0
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -640,7 +647,7 @@ jobs:
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -699,7 +706,7 @@ jobs:
       actions: read # for fetching base branch bundle stats
       pull-requests: write # for comments
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -718,6 +725,8 @@ jobs:
           DO_NOT_TRACK: 1 # Disable Turbopack telemetry
 
       - name: Analyze esbuild bundle size
+        # Temporarily disable this for community PRs until this can be implemented in a separate workflow
+        if: github.event.pull_request.head.repo.fork == false
         uses: exoego/esbuild-bundle-analyzer@v1
         with:
           metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'

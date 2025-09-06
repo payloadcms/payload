@@ -16,6 +16,7 @@ export const updateByIDHandler: PayloadHandler = async (req) => {
   const autosave = searchParams.get('autosave') === 'true'
   const draft = searchParams.get('draft') === 'true'
   const overrideLock = searchParams.get('overrideLock')
+  const trash = searchParams.get('trash') === 'true'
   const publishSpecificLocale = req.query.publishSpecificLocale as string | undefined
 
   const doc = await updateByIDOperation({
@@ -30,6 +31,7 @@ export const updateByIDHandler: PayloadHandler = async (req) => {
     publishSpecificLocale,
     req,
     select: sanitizeSelectParam(req.query.select),
+    trash,
   })
 
   let message = req.t('general:updatedSuccessfully')

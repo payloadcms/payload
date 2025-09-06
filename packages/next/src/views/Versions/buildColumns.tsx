@@ -23,6 +23,7 @@ export const buildVersionColumns = ({
   docs,
   globalConfig,
   i18n: { t },
+  isTrashed,
   latestDraftVersion,
 }: {
   collectionConfig?: SanitizedCollectionConfig
@@ -35,6 +36,7 @@ export const buildVersionColumns = ({
   docs: PaginatedDocs<TypeWithVersion<any>>['docs']
   globalConfig?: SanitizedGlobalConfig
   i18n: I18n
+  isTrashed?: boolean
   latestDraftVersion?: {
     id: number | string
     updatedAt: string
@@ -59,6 +61,7 @@ export const buildVersionColumns = ({
             collectionSlug={collectionConfig?.slug}
             docID={docID}
             globalSlug={globalConfig?.slug}
+            isTrashed={isTrashed}
             key={i}
             rowData={{
               id: doc.id,

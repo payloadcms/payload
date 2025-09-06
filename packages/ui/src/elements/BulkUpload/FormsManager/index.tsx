@@ -127,7 +127,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const initialStateRef = React.useRef<FormState>(null)
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
 
-  const actionURL = `${api}/${collectionSlug}`
+  const actionURL = `${serverURL}${api}/${collectionSlug}`
 
   const initializeSharedDocPermissions = React.useCallback(async () => {
     const params = {
@@ -301,6 +301,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
               collectionSlug,
               getUploadHandler({ collectionSlug }),
             ),
+            credentials: 'include',
             method: 'POST',
           })
 

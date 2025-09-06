@@ -1,8 +1,7 @@
 import Ajv from 'ajv'
 import ObjectIdImport from 'bson-objectid'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 import type { TFunction } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
@@ -61,7 +60,7 @@ export const text: TextFieldValidation = (
   let maxLength!: number
 
   if (!required) {
-    if (!value) {
+    if (value === undefined || value === null) {
       return true
     }
   }

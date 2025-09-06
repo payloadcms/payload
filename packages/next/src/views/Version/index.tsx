@@ -425,7 +425,6 @@ export async function VersionView(props: DocumentViewServerProps) {
       VersionToCreatedAtLabel={formatPill({ doc: versionTo, labelStyle: 'pill' })}
       versionToID={versionTo.id}
       versionToStatus={versionTo.version?._status}
-      versionToUseAsTitle={versionTo[collectionConfig?.admin?.useAsTitle || 'id']}
     />
   )
 }

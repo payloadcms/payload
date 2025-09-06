@@ -256,6 +256,9 @@ export const updateOperation = async <
         result.createdAt = new Date().toISOString()
       }
 
+      // Ensure updatedAt date is always updated
+      result.updatedAt = new Date().toISOString()
+
       if (globalExists) {
         result = await payload.db.updateGlobal({
           slug,
@@ -282,6 +285,8 @@ export const updateOperation = async <
         docWithLocales: result,
         draft: shouldSaveDraft,
         global: globalConfig,
+        locale,
+        operation: 'update',
         payload,
         publishSpecificLocale,
         req,

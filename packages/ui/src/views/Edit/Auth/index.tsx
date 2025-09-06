@@ -43,7 +43,7 @@ export const Auth: React.FC<Props> = (props) => {
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
-  const { docPermissions, isEditing, isInitializing } = useDocumentInfo()
+  const { docPermissions, isEditing, isInitializing, isTrashed } = useDocumentInfo()
 
   const {
     config: {
@@ -111,7 +111,7 @@ export const Auth: React.FC<Props> = (props) => {
       (typeof disableLocalStrategy === 'object' && disableLocalStrategy.enableFields === true)) &&
     (showUnlock || showPasswordFields)
 
-  const disabled = readOnly || isInitializing
+  const disabled = readOnly || isInitializing || isTrashed
 
   const apiKeyPermissions =
     docPermissions?.fields === true ? true : docPermissions?.fields?.enableAPIKey
@@ -191,7 +191,11 @@ export const Auth: React.FC<Props> = (props) => {
     }
   }, [modified])
 
-  if (disableLocalStrategy && !enableFields && !useAPIKey) {
+  const showAuthBlock = enableFields
+  const showAPIKeyBlock = useAPIKey && canReadApiKey
+  const showVerifyBlock = verify && isEditing
+
+  if (!(showAuthBlock || showAPIKeyBlock || showVerifyBlock)) {
     return null
   }
 
@@ -203,7 +207,7 @@ export const Auth: React.FC<Props> = (props) => {
             loginWithUsername={loginWithUsername}
             operation={operation}
             permissions={docPermissions?.fields}
-            readOnly={readOnly}
+            readOnly={readOnly || isTrashed}
             t={t}
           />
           {(changingPassword || requirePassword) && (!disableLocalStrategy || !enableFields) && (
@@ -221,7 +225,7 @@ export const Auth: React.FC<Props> = (props) => {
                 path="password"
                 schemaPath="password"
               />
-              <ConfirmPasswordField disabled={readOnly} />
+              <ConfirmPasswordField disabled={readOnly || isTrashed} />
             </div>
           )}
           <div className={`${baseClass}__controls`}>

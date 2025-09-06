@@ -250,6 +250,11 @@ export default buildConfigWithDefaults({
               relationTo: 'directors',
               hasMany: true,
             },
+            {
+              name: 'polymorphic',
+              type: 'relationship',
+              relationTo: ['directors'],
+            },
           ],
         },
       ],

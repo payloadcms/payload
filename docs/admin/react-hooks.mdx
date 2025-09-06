@@ -114,7 +114,12 @@ const MyComponent: React.FC = () => {
 
 ## useAllFormFields
 
-**To retrieve more than one field**, you can use the `useAllFormFields` hook. Your component will re-render when _any_ field changes, so use this hook only if you absolutely need to. Unlike the `useFormFields` hook, this hook does not accept a "selector", and it always returns an array with type of `[fields: Fields, dispatch: React.Dispatch<Action>]]`.
+**To retrieve more than one field**, you can use the `useAllFormFields` hook. Unlike the `useFormFields` hook, this hook does not accept a "selector", and it always returns an array with type of `[fields: Fields, dispatch: React.Dispatch<Action>]]`.
+
+<Banner type="warning">
+  **Warning:** Your component will re-render when _any_ field changes, so use
+  this hook only if you absolutely need to.
+</Banner>
 
 You can do lots of powerful stuff by retrieving the full form state, like using built-in helper functions to reduce field state to values only, or to retrieve sibling data by path.
 
@@ -734,7 +739,7 @@ The `useDocumentInfo` hook provides information about the current document being
 | **`lastUpdateTime`**               | Timestamp of the last update to the document.                                                                                                    |
 | **`mostRecentVersionIsAutosaved`** | Whether the most recent version is an autosaved version.                                                                                         |
 | **`preferencesKey`**               | The `preferences` key to use when interacting with document-level user preferences. [More details](./preferences).                               |
-| **`savedDocumentData`**            | The saved data of the document.                                                                                                                  |
+| **`data`**                         | The saved data of the document.                                                                                                                  |
 | **`setDocFieldPreferences`**       | Method to set preferences for a specific field. [More details](./preferences).                                                                   |
 | **`setDocumentTitle`**             | Method to set the document title.                                                                                                                |
 | **`setHasPublishedDoc`**           | Method to update whether the document has been published.                                                                                        |

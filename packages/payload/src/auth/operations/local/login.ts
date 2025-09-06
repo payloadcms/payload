@@ -22,6 +22,7 @@ export type Options<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   req?: Partial<PayloadRequest>
   showHiddenFields?: boolean
+  trash?: boolean
 }
 
 export async function loginLocal<TSlug extends CollectionSlug>(

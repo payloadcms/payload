@@ -5,8 +5,6 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { fieldAffectsData } from 'payload/shared'
-
 import { getRouteWithoutAdmin, isAdminRoute } from './shared.js'
 
 type Args = {
@@ -35,7 +33,7 @@ export function getRouteInfo({
   if (isAdminRoute({ adminRoute, config, route })) {
     const routeWithoutAdmin = getRouteWithoutAdmin({ adminRoute, route })
     const routeSegments = routeWithoutAdmin.split('/').filter(Boolean)
-    const [entityType, entitySlug, createOrID] = routeSegments
+    const [entityType, entitySlug, segment3, segment4] = routeSegments
     const collectionSlug = entityType === 'collections' ? entitySlug : undefined
     const globalSlug = entityType === 'globals' ? entitySlug : undefined
 
@@ -58,12 +56,17 @@ export function getRouteInfo({
       }
     }
 
-    const docID =
-      collectionSlug && createOrID !== 'create'
-        ? idType === 'number'
-          ? Number(createOrID)
-          : createOrID
-        : undefined
+    let docID: number | string | undefined
+
+    if (collectionSlug) {
+      if (segment3 === 'trash' && segment4) {
+        // /collections/:slug/trash/:id
+        docID = idType === 'number' ? Number(segment4) : segment4
+      } else if (segment3 && segment3 !== 'create') {
+        // /collections/:slug/:id
+        docID = idType === 'number' ? Number(segment3) : segment3
+      }
+    }
 
     return {
       collectionConfig,

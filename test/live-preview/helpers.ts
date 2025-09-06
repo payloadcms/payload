@@ -4,7 +4,7 @@ import { expect } from '@playwright/test'
 
 import { exactText } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
+import { navigateToDoc, navigateToTrashedDoc } from '../helpers/e2e/navigateToDoc.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 
 export const toggleLivePreview = async (
@@ -38,6 +38,14 @@ export const goToCollectionLivePreview = async (
   urlUtil: AdminUrlUtil,
 ): Promise<void> => {
   await navigateToDoc(page, urlUtil)
+
+  await toggleLivePreview(page, {
+    targetState: 'on',
+  })
+}
+
+export const goToTrashedLivePreview = async (page: Page, urlUtil: AdminUrlUtil): Promise<void> => {
+  await navigateToTrashedDoc(page, urlUtil)
 
   await toggleLivePreview(page, {
     targetState: 'on',
