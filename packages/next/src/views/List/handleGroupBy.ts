@@ -1,10 +1,12 @@
 import type {
+  ClientCollectionConfig,
   ClientConfig,
   Column,
   ListQuery,
   PaginatedDocs,
   PayloadRequest,
   SanitizedCollectionConfig,
+  SelectType,
   ViewTypes,
   Where,
 } from 'payload'
@@ -14,6 +16,7 @@ import { formatDate } from '@payloadcms/ui/shared'
 import { flattenAllFields } from 'payload'
 
 export const handleGroupBy = async ({
+  clientCollectionConfig,
   clientConfig,
   collectionConfig,
   collectionSlug,
@@ -23,11 +26,13 @@ export const handleGroupBy = async ({
   enableRowSelections,
   query,
   req,
+  select,
   trash = false,
   user,
   viewType,
   where: whereWithMergedSearch,
 }: {
+  clientCollectionConfig: ClientCollectionConfig
   clientConfig: ClientConfig
   collectionConfig: SanitizedCollectionConfig
   collectionSlug: string
@@ -37,6 +42,7 @@ export const handleGroupBy = async ({
   enableRowSelections?: boolean
   query?: ListQuery
   req: PayloadRequest
+  select?: SelectType
   trash?: boolean
   user: any
   viewType?: ViewTypes
@@ -50,7 +56,6 @@ export const handleGroupBy = async ({
   let columnState: Column[]
 
   const dataByGroup: Record<string, PaginatedDocs> = {}
-  const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
   // NOTE: is there a faster/better way to do this?
   const flattenedFields = flattenAllFields({ fields: collectionConfig.fields })
@@ -132,6 +137,7 @@ export const handleGroupBy = async ({
         req,
         // Note: if we wanted to enable table-by-table sorting, we could use this:
         // sort: query?.queryByGroup?.[valueOrRelationshipID]?.sort,
+        select,
         sort: query?.sort,
         trash,
         user,

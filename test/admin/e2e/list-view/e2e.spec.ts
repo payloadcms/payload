@@ -34,8 +34,10 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
+import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
 import { devUser } from 'credentials.js'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
@@ -968,7 +970,7 @@ describe('List View', () => {
       ).toBeHidden()
     })
 
-    test('should toggle columns and effect table', async () => {
+    test('should toggle columns and affect table', async () => {
       const tableHeaders = 'table > thead > tr > th'
 
       await openListColumns(page, {})
@@ -990,6 +992,60 @@ describe('List View', () => {
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
       await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+    })
+
+    test('should use select API in the list view when `enableListViewSelectAPI` is true', async () => {
+      const doc = await payload.create({
+        collection: listViewSelectAPISlug,
+        data: {
+          title: 'This is a test title',
+          description: 'This is a test description',
+        },
+      })
+
+      const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
+
+      await page.goto(selectAPIUrl.list)
+
+      const printedResults = page.locator('#table-state')
+
+      await expect
+        .poll(
+          async () => {
+            const resultText = await printedResults.innerText()
+            const parsedResult = JSON.parse(resultText)
+            return Boolean(parsedResult[0].id && parsedResult[0].description)
+          },
+          {
+            timeout: 3000,
+            intervals: [100, 250, 500, 1000],
+          },
+        )
+        .toBeTruthy()
+
+      await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+
+      await toggleColumn(page, {
+        columnLabel: 'Description',
+        columnName: 'description',
+        targetState: 'off',
+      })
+
+      // Poll until the "description" field is removed from the response BUT `id` is still present
+      // The `id` field will remain selected despite it being inactive
+      await expect
+        .poll(
+          async () => {
+            const resultText = await printedResults.innerText()
+            const parsedResult = JSON.parse(resultText)
+            return Boolean(parsedResult[0].description === undefined && parsedResult[0].id)
+          },
+          {
+            timeout: 3000,
+            intervals: [100, 250, 500, 1000],
+          },
+        )
+        .toBeTruthy()
     })
 
     test('should toggle columns and save to preferences', async () => {

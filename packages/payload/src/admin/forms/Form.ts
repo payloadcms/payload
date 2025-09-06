@@ -58,9 +58,10 @@ export type FieldState = {
   filterOptions?: FilterOptionsResult
   initialValue?: unknown
   /**
-   * @experimental - Note: this property is experimental and may change in the future. Use at your own discretion.
    * Every time a field is changed locally, this flag is set to true. Prevents form state from server from overwriting local changes.
    * After merging server form state, this flag is reset.
+   *
+   * @experimental This property is experimental and may change in the future. Use at your own discretion.
    */
   isModified?: boolean
   /**

@@ -126,12 +126,21 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
-  array?:
-    | {
-        title?: string | null;
-        id?: string | null;
-      }[]
-    | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -270,12 +279,7 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
-  array?:
-    | T
-    | {
-        title?: T;
-        id?: T;
-      };
+  content?: T;
   updatedAt?: T;
   createdAt?: T;
 }
