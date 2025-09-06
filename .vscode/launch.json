@@ -161,6 +161,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm tsx --no-deprecation test/dev.ts plugin-search",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev plugin-search",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm run test:int live-preview",
       "cwd": "${workspaceFolder}",
       "name": "Live Preview Int Tests",

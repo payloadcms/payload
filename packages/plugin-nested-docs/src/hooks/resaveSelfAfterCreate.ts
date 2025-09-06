@@ -17,7 +17,7 @@ export const resaveSelfAfterCreate =
     const breadcrumbs = doc[breadcrumbSlug] as unknown as Breadcrumb[]
 
     try {
-      await payload.update({
+      await payload.db.updateOne({
         id: doc.id,
         collection: collection.slug,
         data: {
@@ -27,9 +27,8 @@ export const resaveSelfAfterCreate =
               doc: breadcrumbs.length === i + 1 ? doc.id : crumb.doc,
             })) || [],
         },
-        depth: 0,
         draft: collection.versions.drafts && doc._status !== 'published',
-        locale,
+        locale: locale || undefined,
         req,
       })
     } catch (err: unknown) {
