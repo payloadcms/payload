@@ -3,7 +3,7 @@ import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { ClientBlock } from '../fields/config/types.js'
-import type { BlockSlug } from '../index.js'
+import type { BlockSlug, TypedUser } from '../index.js'
 import type {
   RootLivePreviewConfig,
   SanitizedConfig,
@@ -12,6 +12,7 @@ import type {
 
 import {
   type ClientCollectionConfig,
+  createClientCollectionConfig,
   createClientCollectionConfigs,
 } from '../collections/config/client.js'
 import { createClientBlocks } from '../fields/config/client.js'
@@ -63,6 +64,17 @@ export type ClientConfig = {
   globals: ClientGlobalConfig[]
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
 
+export type UnauthenticatedClientConfig = {
+  admin: {
+    routes: ClientConfig['admin']['routes']
+    user: ClientConfig['admin']['user']
+  }
+  collections: [ClientCollectionConfig]
+  globals: []
+  routes: ClientConfig['routes']
+  serverURL: ClientConfig['serverURL']
+}
+
 export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
 
 export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] = [
@@ -88,16 +100,45 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
+export type CreateClientConfigArgs = {
+  config: SanitizedConfig
+  i18n: I18nClient
+  importMap: ImportMap
+  /**
+   * If unauthenticated, the client config will omit some sensitive properties
+   * such as field schemas, etc. This is useful for login and error pages where
+   * the page source should not contain this information.
+   */
+  user?: TypedUser
+}
+
 export const createClientConfig = ({
   config,
   i18n,
   importMap,
-}: {
-  config: SanitizedConfig
-  i18n: I18nClient
-  importMap: ImportMap
-}): ClientConfig => {
+  user,
+}: CreateClientConfigArgs): ClientConfig => {
   const clientConfig = {} as DeepPartial<ClientConfig>
+
+  if (!user) {
+    return {
+      admin: {
+        routes: config.admin.routes,
+        user: config.admin.user,
+      },
+      collections: [
+        createClientCollectionConfig({
+          collection: config.collections.find(({ slug }) => slug === config.admin.user)!,
+          defaultIDType: config.db.defaultIDType,
+          i18n,
+          importMap,
+        }),
+      ],
+      globals: [],
+      routes: config.routes,
+      serverURL: config.serverURL,
+    } satisfies UnauthenticatedClientConfig as unknown as ClientConfig
+  }
 
   for (const key in config) {
     if (serverOnlyConfigProperties.includes(key as any)) {
