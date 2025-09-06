@@ -660,6 +660,27 @@ describe('Localization', () => {
     await expect(searchInput).toHaveAttribute('placeholder', 'Search by Full title')
   })
 
+  test('should not persist locale after back navigation', async () => {
+    await changeLocale(page, defaultLocale)
+    await page.goto(url.create)
+    await page.locator('#field-title').fill(title)
+    await saveDocAndAssert(page)
+
+    await changeLocale(page, spanishLocale)
+    await page.goBack()
+    await page.reload()
+    const localeLabel = page.locator('.localizer-button__current-label').first()
+
+    await expect
+      .poll(
+        async () => {
+          return await localeLabel.textContent()
+        },
+        { timeout: 3000 },
+      )
+      .toContain('English')
+  })
+
   describe('publish specific locale', () => {
     test('should create post in correct locale with publishSpecificLocale', async () => {
       await page.goto(urlPostsWithDrafts.create)

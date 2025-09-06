@@ -21,6 +21,10 @@ export const initPage = async ({
   useLayoutReq,
 }: Args): Promise<InitPageResult> => {
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
+  const query = qs.parse(queryString, {
+    depth: 10,
+    ignoreQueryPrefix: true,
+  })
 
   const {
     cookies,
@@ -35,10 +39,7 @@ export const initPage = async ({
     overrides: {
       fallbackLocale: false,
       req: {
-        query: qs.parse(queryString, {
-          depth: 10,
-          ignoreQueryPrefix: true,
-        }),
+        query,
         routeParams,
       },
       urlSuffix: `${route}${searchParams ? queryString : ''}`,
@@ -46,6 +47,7 @@ export const initPage = async ({
   })
 
   const {
+    admin: { routes },
     collections,
     globals,
     routes: { admin: adminRoute },
@@ -79,6 +81,12 @@ export const initPage = async ({
   }
 
   let redirectTo = null
+
+  const logoutPath = `${adminRoute || '/admin'}${routes.logout || '/logout'}`
+
+  if (req?.user && payload.config?.localization && !query.locale && req.pathname !== logoutPath) {
+    redirectTo = `${req.pathname}${queryString ? '&' : '?'}locale=${locale.code}`
+  }
 
   if (
     !permissions.canAccessAdmin &&
