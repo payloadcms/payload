@@ -22,7 +22,7 @@ export const generateLabelFromValue = ({
   req: PayloadRequest
   value: RelationshipValue
 }): string => {
-  let relatedDoc: TypeWithID
+  let relatedDoc: number | string | TypeWithID
   let relationTo: string = field.relationTo as string
   let valueToReturn: string = ''
 
