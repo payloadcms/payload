@@ -1970,6 +1970,7 @@ describe('Versions', () => {
         String(uploadDocs?.docs?.[1]?.filename),
       )
     })
+
     test('does not render diff for fields with read access control false', async () => {
       await navigateToDiffVersionView()
 
