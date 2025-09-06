@@ -1982,6 +1982,41 @@ describe('Versions', () => {
       const hiddenField2 = page.locator('[data-field-path="textCannotRead"]')
       await expect(hiddenField2).toBeHidden()
     })
+
+    test('correctly renders diff for relationship fields with deleted relation', async () => {
+      await payload.delete({
+        collection: 'draft-posts',
+      })
+
+      await navigateToDiffVersionView()
+
+      const diffsToCheck = [
+        'relationship',
+        'relationshipHasMany',
+        'relationshipHasManyPolymorphic',
+        'relationshipHasManyPolymorphic2',
+      ]
+      const checkPromises = diffsToCheck.map(async (dataFieldPath) => {
+        const relation = page.locator(`[data-field-path="${dataFieldPath}"]`)
+        return expect(relation).toBeVisible()
+      })
+      await Promise.all(checkPromises)
+    })
+
+    test('correctly renders diff for upload fields with deleted upload', async () => {
+      await payload.delete({
+        collection: 'media',
+      })
+
+      await navigateToDiffVersionView()
+
+      const diffsToCheck = ['upload', 'uploadHasMany']
+      const checkPromises = diffsToCheck.map(async (dataFieldPath) => {
+        const relation = page.locator(`[data-field-path="${dataFieldPath}"]`)
+        return expect(relation).toBeVisible()
+      })
+      await Promise.all(checkPromises)
+    })
   })
 
   describe('Scheduled publish', () => {

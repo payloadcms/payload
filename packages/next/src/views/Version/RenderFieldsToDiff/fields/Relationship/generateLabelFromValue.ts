@@ -7,7 +7,7 @@ import {
   flattenTopLevelFields,
 } from 'payload/shared'
 
-import type { PopulatedRelationshipValue } from './index.js'
+import type { RelationshipValue } from './index.js'
 
 export const generateLabelFromValue = ({
   field,
@@ -20,9 +20,9 @@ export const generateLabelFromValue = ({
   locale: string
   parentIsLocalized: boolean
   req: PayloadRequest
-  value: PopulatedRelationshipValue
+  value: RelationshipValue
 }): string => {
-  let relatedDoc: TypeWithID
+  let relatedDoc: number | string | TypeWithID
   let relationTo: string = field.relationTo as string
   let valueToReturn: string = ''
 
@@ -30,7 +30,7 @@ export const generateLabelFromValue = ({
     relatedDoc = value.value
     relationTo = value.relationTo
   } else {
-    // Non-polymorphic relationship
+    // Non-polymorphic relationship or deleted document
     relatedDoc = value
   }
 
@@ -54,7 +54,11 @@ export const generateLabelFromValue = ({
   if (typeof relatedDoc?.[useAsTitle] !== 'undefined') {
     valueToReturn = relatedDoc[useAsTitle]
   } else {
-    valueToReturn = String(relatedDoc.id)
+    valueToReturn = String(
+      typeof relatedDoc === 'object'
+        ? relatedDoc.id
+        : `${req.i18n.t('general:untitled')} - ID: ${relatedDoc}`,
+    )
   }
 
   if (
