@@ -28,7 +28,7 @@ export default buildConfigWithDefaults({
         },
         posts: {
           enabled: {
-            find: false,
+            find: true,
             create: true,
           },
           description: 'This is a Payload collection with Post documents.',
