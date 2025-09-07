@@ -44,6 +44,9 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
     }))
 
     if (migrationsInDB.find((m) => m.batch === -1)) {
+      if (args?.failOnDev) {
+        payload.logger.fatal("It looks like you've run Payload in dev mode, meaning you've dynamically pushed changes to your database. Running migrations will cause data loss.")
+      }
       const { confirm: runMigrations } = await prompts(
         {
           name: 'confirm',

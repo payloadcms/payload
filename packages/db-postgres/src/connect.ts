@@ -127,6 +127,6 @@ export const connect: Connect = async function connect(
   }
 
   if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
-    await this.migrate({ migrations: this.prodMigrations as unknown as Migration[] })
+    await this.migrate({ failOnDev: true, migrations: this.prodMigrations as unknown as Migration[] })
   }
 }
