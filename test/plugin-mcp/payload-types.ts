@@ -146,8 +146,17 @@ export interface Media {
  */
 export interface Post {
   id: string;
-  title?: string | null;
+  /**
+   * The title of the post
+   */
+  title: string;
+  /**
+   * The content of the post
+   */
   content?: string | null;
+  /**
+   * The author of the post
+   */
   author?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
@@ -373,6 +382,10 @@ export interface PayloadMcpTool {
   };
   'posts-capabilities'?: {
     /**
+     * Allow clients to find posts.
+     */
+    'posts-find'?: boolean | null;
+    /**
      * Allow clients to create posts.
      */
     'posts-create'?: boolean | null;
@@ -386,6 +399,74 @@ export interface PayloadMcpTool {
      * Allow clients to update media.
      */
     'media-update'?: boolean | null;
+  };
+  collections?: {
+    /**
+     * Allow LLMs to find and list Payload collections with optional content and document counts.
+     */
+    find?: boolean | null;
+    /**
+     * Allow LLMs to create new Payload collections with specified fields and configuration.
+     */
+    create?: boolean | null;
+    /**
+     * Allow LLMs to update existing Payload collections with new fields, modifications, or configuration changes.
+     */
+    update?: boolean | null;
+    /**
+     * Allow LLMs to delete Payload collections and optionally update the configuration.
+     */
+    delete?: boolean | null;
+  };
+  jobs?: {
+    /**
+     * Allow LLMs to create new Payload jobs (tasks and workflows) with custom schemas and configuration.
+     */
+    create?: boolean | null;
+    /**
+     * Allow LLMs to execute Payload jobs with custom input data and queue options.
+     */
+    run?: boolean | null;
+    /**
+     * Allow LLMs to update existing Payload jobs with new schemas, configuration, or handler code.
+     */
+    update?: boolean | null;
+  };
+  config?: {
+    /**
+     * Allow LLMs to read and display a Payload configuration file.
+     */
+    find?: boolean | null;
+    /**
+     * Allow LLMs to update a Payload configuration file with various modifications.
+     */
+    update?: boolean | null;
+  };
+  auth?: {
+    /**
+     * Allow LLMs to check authentication status for a user by setting custom headers. (e.g. {"Authorization": "Bearer <token>"})
+     */
+    auth?: boolean | null;
+    /**
+     * Allow LLMs to authenticate a user with email and password.
+     */
+    login?: boolean | null;
+    /**
+     * Allow LLMs to verify a user email with a verification token.
+     */
+    verify?: boolean | null;
+    /**
+     * Allow LLMs to reset a user password with a reset token.
+     */
+    resetPassword?: boolean | null;
+    /**
+     * Allow LLMs to send a password reset email to a user.
+     */
+    forgotPassword?: boolean | null;
+    /**
+     * Allow LLMs to unlock a user account that has been locked due to failed login attempts.
+     */
+    unlock?: boolean | null;
   };
   custom?: {
     /**
@@ -412,6 +493,7 @@ export interface PayloadMcpToolsSelect<T extends boolean = true> {
   'posts-capabilities'?:
     | T
     | {
+        'posts-find'?: T;
         'posts-create'?: T;
       };
   'media-capabilities'?:
@@ -419,6 +501,37 @@ export interface PayloadMcpToolsSelect<T extends boolean = true> {
     | {
         'media-find'?: T;
         'media-update'?: T;
+      };
+  collections?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  jobs?:
+    | T
+    | {
+        create?: T;
+        run?: T;
+        update?: T;
+      };
+  config?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  auth?:
+    | T
+    | {
+        auth?: T;
+        login?: T;
+        verify?: T;
+        resetPassword?: T;
+        forgotPassword?: T;
+        unlock?: T;
       };
   custom?:
     | T
