@@ -1,4 +1,4 @@
-import type { PayloadRequest } from 'payload'
+import type { CollectionConfig, Config, PayloadRequest } from 'payload'
 
 import { createMcpHandler } from '@vercel/mcp-adapter'
 import { join } from 'path'
@@ -35,6 +35,7 @@ export const getMCPHandler = (
   pluginOptions: PluginMCPServerConfig,
   toolSettings: ToolSettings,
   req: PayloadRequest,
+  config: Config,
 ) => {
   const payload = req.payload
 
@@ -94,6 +95,9 @@ export const getMCPHandler = (
 
       // Collection Operation Tools
       enabledCollectionSlugs.forEach((enabledCollectionSlug) => {
+        const collectionConfig = config.collections?.filter(
+          (collection) => collection.slug === enabledCollectionSlug,
+        )[0]
         const collectonGlobalSetting = toolSettings?.[
           `${enabledCollectionSlug}-capabilities`
         ] as Record<string, unknown>
@@ -121,6 +125,7 @@ export const getMCPHandler = (
                 useVerboseLogs,
                 enabledCollectionSlug,
                 collectionsPluginConfig,
+                collectionConfig as unknown as CollectionConfig,
               ),
             payload,
             useVerboseLogs,
@@ -169,6 +174,7 @@ export const getMCPHandler = (
                 useVerboseLogs,
                 enabledCollectionSlug,
                 collectionsPluginConfig,
+                collectionConfig as unknown as CollectionConfig,
               ),
             payload,
             useVerboseLogs,

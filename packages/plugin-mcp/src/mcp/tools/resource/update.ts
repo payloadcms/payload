@@ -1,9 +1,12 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest } from 'payload'
+
+import { z } from 'zod'
 
 import type { PluginMCPServerConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
+import { convertFieldsToZod } from '../../../utils/convertFieldsToZod.js'
 import { toolSchemas } from '../schemas.js'
 export const updateResourceTool = (
   server: McpServer,
@@ -11,6 +14,7 @@ export const updateResourceTool = (
   verboseLogs: boolean,
   collectionSlug: string,
   collections: PluginMCPServerConfig['collections'],
+  collectionConfig: CollectionConfig,
 ) => {
   const tool = async (
     data: string,
@@ -190,11 +194,61 @@ ${JSON.stringify(errors, null, 2)}
   }
 
   if (collections?.[collectionSlug]?.enabled) {
+    const convertedFields = convertFieldsToZod(collectionConfig.fields)
+
+    // Create a new schema that combines the converted fields with update-specific parameters
+    const updateResourceSchema = z.object({
+      ...convertedFields.shape,
+      id: z.string().optional().describe('The ID of the document to update'),
+      depth: z
+        .number()
+        .optional()
+        .default(0)
+        .describe('How many levels deep to populate relationships'),
+      draft: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe('Whether to update the document as a draft'),
+      filePath: z.string().optional().describe('File path for file uploads'),
+      overrideLock: z
+        .boolean()
+        .optional()
+        .default(true)
+        .describe('Whether to override document locks'),
+      overwriteExistingFiles: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe('Whether to overwrite existing files'),
+      where: z
+        .string()
+        .optional()
+        .describe('JSON string for where clause to update multiple documents'),
+    })
+
+    if (verboseLogs) {
+      req.payload.logger.info(
+        `[payload-mcp] Generated update schema for collection: ${collectionSlug} with ${Object.keys(convertedFields.shape).length} fields`,
+      )
+    }
+
     server.tool(
       `update${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}Document`,
       `${toolSchemas.updateResource.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
-      toolSchemas.updateResource.parameters.shape,
-      async ({ id, data, depth, draft, filePath, overrideLock, overwriteExistingFiles, where }) => {
+      updateResourceSchema.shape,
+      async ({
+        id,
+        depth,
+        draft,
+        filePath,
+        overrideLock,
+        overwriteExistingFiles,
+        where,
+        ...fieldData
+      }) => {
+        // Convert field data back to JSON string format expected by the tool
+        const data = JSON.stringify(fieldData)
         return await tool(
           data,
           id,
