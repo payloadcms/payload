@@ -1,25 +1,26 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest } from 'payload'
+
+import { z } from 'zod'
 
 import type { PluginMCPServerConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
+import { convertFieldsToZod } from '../../../utils/convertFieldsToZod.js'
 import { toolSchemas } from '../schemas.js'
-
 export const createResourceTool = (
   server: McpServer,
   req: PayloadRequest,
   verboseLogs: boolean,
   collectionSlug: string,
   collections: PluginMCPServerConfig['collections'],
+  collectionConfig: CollectionConfig,
 ) => {
-  const tool = async (data: string, draft: boolean = false) => {
+  const tool = async (data: string) => {
     const payload = req.payload
 
     if (verboseLogs) {
-      payload.logger.info(
-        `[payload-mcp] Creating resource in collection: ${collectionSlug}, draft: ${draft}`,
-      )
+      payload.logger.info(`[payload-mcp] Creating resource in collection: ${collectionSlug}`)
     }
 
     try {
@@ -43,7 +44,6 @@ export const createResourceTool = (
       const result = await payload.create({
         collection: collectionSlug,
         data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
-        draft,
         overrideAccess: true,
       })
 
@@ -83,12 +83,15 @@ ${JSON.stringify(result, null, 2)}
   }
 
   if (collections?.[collectionSlug]?.enabled) {
+    const convertedFields = convertFieldsToZod(collectionConfig.fields)
+
     server.tool(
       `create${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}Document`,
       `${toolSchemas.createResource.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
-      toolSchemas.createResource.parameters.shape,
-      async ({ data, draft }) => {
-        return await tool(data, draft)
+      convertedFields.shape,
+      async (params) => {
+        const data = JSON.stringify(params)
+        return await tool(data)
       },
     )
   }

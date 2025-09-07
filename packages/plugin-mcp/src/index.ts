@@ -42,7 +42,7 @@ export const pluginMCP =
     // Payload will automatically add the /api prefix to the path, so the full path is `/api/mcp`
     // NOTE: This is only transport method until we add full support for SSE which will be another endpoint at `/api/sse`
     config.endpoints.push({
-      handler: initializeMCPHandler(pluginOptions),
+      handler: initializeMCPHandler(pluginOptions, config),
       method: 'post',
       path: '/mcp',
     })
@@ -50,7 +50,7 @@ export const pluginMCP =
     // The GET response is always: {"jsonrpc":"2.0","error":{"code":-32000,"message":"Method not allowed."},"id":null}
     // This is expected behavior and MCP clients should always use the POST endpoint.
     config.endpoints.push({
-      handler: initializeMCPHandler(pluginOptions),
+      handler: initializeMCPHandler(pluginOptions, config),
       method: 'get',
       path: '/mcp',
     })
