@@ -236,7 +236,7 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await expect(page.locator('.render-field-diffs')).toBeVisible()
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
       await page.locator('.restore-version__restore-as-draft-button').click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
@@ -259,7 +259,7 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await expect(page.locator('.render-field-diffs')).toBeVisible()
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
       await page.locator('.restore-version .popup__trigger-wrap button').click()
       await page.getByRole('button', { name: 'Restore as draft' }).click()
       await page.locator('button:has-text("Confirm")').click()
@@ -1482,6 +1482,7 @@ describe('Versions', () => {
   describe('Versions diff view', () => {
     let postID: string
     let versionID: string
+    let oldVersionID: string
     let diffID: string
     let versionDiffID: string
 
@@ -1507,7 +1508,7 @@ describe('Versions', () => {
         draft: true,
         depth: 0,
         data: {
-          title: 'draft post',
+          title: 'current draft post title',
           description: 'draft description',
           blocksField: [
             {
@@ -1521,7 +1522,7 @@ describe('Versions', () => {
 
       const versions = await payload.findVersions({
         collection: draftCollectionSlug,
-        limit: 1,
+        limit: 2,
         depth: 0,
         where: {
           parent: { equals: postID },
@@ -1529,6 +1530,7 @@ describe('Versions', () => {
       })
 
       versionID = versions.docs[0].id
+      oldVersionID = versions.docs[1].id
 
       const diffDoc = (
         await payload.find({
@@ -1554,7 +1556,7 @@ describe('Versions', () => {
       versionDiffID = versionDiff.id
     })
 
-    async function navigateToDraftVersionView() {
+    async function navigateToDraftVersionView(versionID: string) {
       const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
       await page.goto(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
@@ -1567,12 +1569,22 @@ describe('Versions', () => {
     }
 
     test('should render diff', async () => {
-      await navigateToDraftVersionView()
+      await navigateToDraftVersionView(versionID)
       expect(true).toBe(true)
     })
 
+    test('should show the current version title in step nav for all versions', async () => {
+      await navigateToDraftVersionView(versionID)
+      // Document title part of the step nav should be the current version title
+      await expect(page.locator('.step-nav')).toContainText('current draft post title')
+
+      await navigateToDraftVersionView(oldVersionID)
+      // Document title part of the step nav should still be the current version title
+      await expect(page.locator('.step-nav')).toContainText('current draft post title')
+    })
+
     test('should render diff for nested fields', async () => {
-      await navigateToDraftVersionView()
+      await navigateToDraftVersionView(versionID)
 
       const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
       await expect(blocksDiffLabel).toBeVisible()
@@ -1591,7 +1603,7 @@ describe('Versions', () => {
     })
 
     test('should render diff collapser for nested fields', async () => {
-      await navigateToDraftVersionView()
+      await navigateToDraftVersionView(versionID)
 
       const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
       await expect(blocksDiffLabel).toBeVisible()
@@ -1969,6 +1981,41 @@ describe('Versions', () => {
 
       const hiddenField2 = page.locator('[data-field-path="textCannotRead"]')
       await expect(hiddenField2).toBeHidden()
+    })
+
+    test('correctly renders diff for relationship fields with deleted relation', async () => {
+      await payload.delete({
+        collection: 'draft-posts',
+      })
+
+      await navigateToDiffVersionView()
+
+      const diffsToCheck = [
+        'relationship',
+        'relationshipHasMany',
+        'relationshipHasManyPolymorphic',
+        'relationshipHasManyPolymorphic2',
+      ]
+      const checkPromises = diffsToCheck.map(async (dataFieldPath) => {
+        const relation = page.locator(`[data-field-path="${dataFieldPath}"]`)
+        return expect(relation).toBeVisible()
+      })
+      await Promise.all(checkPromises)
+    })
+
+    test('correctly renders diff for upload fields with deleted upload', async () => {
+      await payload.delete({
+        collection: 'media',
+      })
+
+      await navigateToDiffVersionView()
+
+      const diffsToCheck = ['upload', 'uploadHasMany']
+      const checkPromises = diffsToCheck.map(async (dataFieldPath) => {
+        const relation = page.locator(`[data-field-path="${dataFieldPath}"]`)
+        return expect(relation).toBeVisible()
+      })
+      await Promise.all(checkPromises)
     })
   })
 

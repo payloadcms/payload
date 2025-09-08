@@ -20,6 +20,20 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const seed: Config['onInit'] = async (payload) => {
+  const existingUser = await payload.find({
+    collection: 'users',
+    where: {
+      email: {
+        equals: devUser.email,
+      },
+    },
+  })
+
+  // Seed already ran => this is likely a consecutive, uncached getPayload call
+  if (existingUser.docs.length) {
+    return
+  }
+
   const uploadsDir = path.resolve(dirname, './media')
   removeFiles(path.normalize(uploadsDir))
 
