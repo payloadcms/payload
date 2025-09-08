@@ -16,6 +16,33 @@ const { email, password } = devUser
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+async function fetchStreamResponse(request: Request): Promise<string> {
+  const response = await fetch(request)
+  const reader = response.body?.getReader()
+  const decoder = new TextDecoder()
+
+  let streamData = ''
+  while (true) {
+    const { done, value } = (await reader?.read()) || { done: false, value: new Uint8Array() }
+    if (done) {
+      break
+    }
+    streamData += decoder.decode(value, { stream: true })
+  }
+
+  const streamJSONDataLine = streamData
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('data:'))
+    .pop()
+
+  const streamJSONString = streamJSONDataLine
+    ? streamJSONDataLine.slice('data:'.length).trim()
+    : streamData.trim()
+
+  return streamJSONString
+}
+
 describe('@payloadcms/plugin-mcp', () => {
   beforeAll(async () => {
     const initialized = await initPayloadInt(dirname)
@@ -69,31 +96,7 @@ describe('@payloadcms/plugin-mcp', () => {
       }),
     })
 
-    const response = await fetch(request)
-    const reader = response.body?.getReader()
-    const decoder = new TextDecoder()
-
-    let streamData = ''
-    while (true) {
-      // eslint-disable-next-line jest/no-conditional-in-test
-      const { done, value } = (await reader?.read()) || { done: false, value: new Uint8Array() }
-      // eslint-disable-next-line jest/no-conditional-in-test
-      if (done) {
-        break
-      }
-      streamData += decoder.decode(value, { stream: true })
-    }
-
-    const streamJSONDataLine = streamData
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line.startsWith('data:'))
-      .pop()
-
-    // eslint-disable-next-line jest/no-conditional-in-test
-    const streamJSONString = streamJSONDataLine
-      ? streamJSONDataLine.slice('data:'.length).trim()
-      : streamData.trim()
+    const streamJSONString = await fetchStreamResponse(request)
 
     const json = JSON.parse(streamJSONString)
 
