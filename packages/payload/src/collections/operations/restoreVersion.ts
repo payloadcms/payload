@@ -43,7 +43,6 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     id,
     collection: { config: collectionConfig },
     depth,
-    draft: draftArg = false,
     overrideAccess = false,
     populate,
     req,
@@ -54,6 +53,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    const shouldSaveDraft = Boolean(args.draft && collectionConfig.versions.drafts)
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -66,6 +66,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
             args,
             collection: args.collection.config,
             context: args.req.context,
+            draft: shouldSaveDraft,
             operation: 'restoreVersion',
             req: args.req,
           })) || args
@@ -151,7 +152,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       context: req.context,
       depth: 0,
       doc: deepCopyObjectSimple(prevDocWithLocales),
-      draft: draftArg,
+      draft: shouldSaveDraft,
       fallbackLocale: null,
       global: null,
       locale: locale!,
@@ -166,7 +167,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       context: req.context,
       depth: 0,
       doc: deepCopyObjectSimple(versionToRestoreWithLocales),
-      draft: draftArg,
+      draft: shouldSaveDraft,
       fallbackLocale: null,
       global: null,
       locale: locale!,
@@ -187,6 +188,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       context: req.context,
       data,
       doc: originalDoc,
+      draft: shouldSaveDraft,
       global: null,
       operation: 'update',
       overrideAccess,
@@ -204,6 +206,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
             collection: collectionConfig,
             context: req.context,
             data,
+            draft: shouldSaveDraft,
             operation: 'update',
             originalDoc,
             req,
@@ -222,6 +225,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
             collection: collectionConfig,
             context: req.context,
             data,
+            draft: shouldSaveDraft,
             operation: 'update',
             originalDoc,
             req,
@@ -240,12 +244,15 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       data: { ...data, id: parentDocID },
       doc: originalDoc,
       docWithLocales: versionToRestoreWithLocales,
+      draft: shouldSaveDraft,
       global: null,
       operation: 'update',
       overrideAccess,
       req,
       skipValidation:
-        draftArg && collectionConfig.versions.drafts && !collectionConfig.versions.drafts.validate,
+        shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate,
     })
 
     // /////////////////////////////////////
@@ -261,7 +268,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // Ensure updatedAt date is always updated
     result.updatedAt = new Date().toISOString()
     // Ensure status respects restoreAsDraft arg
-    result._status = draftArg ? 'draft' : result._status
+    result._status = shouldSaveDraft ? 'draft' : result._status
     result = await req.payload.db.updateOne({
       id: parentDocID,
       collection: collectionConfig.slug,
@@ -279,7 +286,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       autosave: false,
       collection: collectionConfig,
       docWithLocales: result,
-      draft: draftArg,
+      draft: shouldSaveDraft,
       operation: 'restoreVersion',
       payload,
       req,
@@ -332,6 +339,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       context: req.context,
       data: result,
       doc: result,
+      draft: shouldSaveDraft,
       global: null,
       operation: 'update',
       previousDoc: prevDocWithLocales,
@@ -350,6 +358,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
             context: req.context,
             data: result,
             doc: result,
+            draft: shouldSaveDraft,
             operation: 'update',
             previousDoc: prevDocWithLocales,
             req,
