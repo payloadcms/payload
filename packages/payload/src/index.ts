@@ -1270,6 +1270,7 @@ export {
   type ClientConfig,
   createClientConfig,
   type CreateClientConfigArgs,
+  createUnauthenticatedClientConfig,
   serverOnlyAdminConfigProperties,
   serverOnlyConfigProperties,
   type UnauthenticatedClientConfig,

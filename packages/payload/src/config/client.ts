@@ -109,36 +109,36 @@ export type CreateClientConfigArgs = {
    * such as field schemas, etc. This is useful for login and error pages where
    * the page source should not contain this information.
    */
-  user?: TypedUser
+  user: TypedUser
+}
+
+export const createUnauthenticatedClientConfig = ({
+  clientConfig,
+}: {
+  /**
+   * Send the previously generated client config so share memory when applicable.
+   * E.g. the admin-enabled collection config can reference the existing collection rather than creating a new object.
+   */
+  clientConfig: ClientConfig
+}): UnauthenticatedClientConfig => {
+  return {
+    admin: {
+      routes: clientConfig.admin.routes,
+      user: clientConfig.admin.user,
+    },
+    collections: [clientConfig.collections.find(({ slug }) => slug === clientConfig.admin.user)!],
+    globals: [],
+    routes: clientConfig.routes,
+    serverURL: clientConfig.serverURL,
+  }
 }
 
 export const createClientConfig = ({
   config,
   i18n,
   importMap,
-  user,
 }: CreateClientConfigArgs): ClientConfig => {
   const clientConfig = {} as DeepPartial<ClientConfig>
-
-  if (!user) {
-    return {
-      admin: {
-        routes: config.admin.routes,
-        user: config.admin.user,
-      },
-      collections: [
-        createClientCollectionConfig({
-          collection: config.collections.find(({ slug }) => slug === config.admin.user)!,
-          defaultIDType: config.db.defaultIDType,
-          i18n,
-          importMap,
-        }),
-      ],
-      globals: [],
-      routes: config.routes,
-      serverURL: config.serverURL,
-    } satisfies UnauthenticatedClientConfig as unknown as ClientConfig
-  }
 
   for (const key in config) {
     if (serverOnlyConfigProperties.includes(key as any)) {
