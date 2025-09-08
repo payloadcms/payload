@@ -1,6 +1,5 @@
 'use client'
 import type { LivePreviewConfig } from 'payload'
-import type { fieldSchemaToJSON } from 'payload/shared'
 import type { Dispatch } from 'react'
 import type React from 'react'
 
@@ -13,7 +12,6 @@ export interface LivePreviewContextType {
   appIsReady: boolean
   breakpoint: LivePreviewConfig['breakpoints'][number]['name']
   breakpoints: LivePreviewConfig['breakpoints']
-  fieldSchemaJSON?: ReturnType<typeof fieldSchemaToJSON>
   iframeHasLoaded: boolean
   iframeRef: React.RefObject<HTMLIFrameElement | null>
   isLivePreviewEnabled: boolean
@@ -54,7 +52,6 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   appIsReady: false,
   breakpoint: undefined,
   breakpoints: undefined,
-  fieldSchemaJSON: undefined,
   iframeHasLoaded: false,
   iframeRef: undefined,
   isLivePreviewEnabled: undefined,
