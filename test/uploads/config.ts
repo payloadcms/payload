@@ -30,6 +30,7 @@ import {
   imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
+  mediaWithImageSizeAdminPropsSlug,
   mediaWithoutCacheTagsSlug,
   mediaWithoutDeleteAccessSlug,
   mediaWithoutRelationPreviewSlug,
@@ -943,6 +944,45 @@ export default buildConfigWithDefaults({
       upload: true,
       access: { delete: () => false },
     },
+    {
+      slug: mediaWithImageSizeAdminPropsSlug,
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'one',
+            height: 200,
+            width: 200,
+            admin: {
+              disableListFilter: true,
+              disableListColumn: true,
+            },
+          },
+          {
+            name: 'two',
+            height: 300,
+            width: 300,
+            admin: {
+              disableListColumn: true,
+            },
+          },
+          {
+            name: 'three',
+            height: 400,
+            width: 400,
+            admin: {
+              disableListColumn: false,
+              disableListFilter: true,
+            },
+          },
+          {
+            name: 'four',
+            height: 400,
+            width: 300,
+          },
+        ],
+      },
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
@@ -1116,6 +1156,16 @@ export default buildConfigWithDefaults({
         alt: 'alt-1',
       },
       file: imageFile,
+    })
+
+    // Create animated type images
+    const testImageFilePath = path.resolve(dirname, './test-image.png')
+    const testImageFile = await getFileByPath(testImageFilePath)
+
+    await payload.create({
+      collection: mediaWithImageSizeAdminPropsSlug,
+      data: {},
+      file: testImageFile,
     })
 
     for (let i = 0; i < 20; i++) {
