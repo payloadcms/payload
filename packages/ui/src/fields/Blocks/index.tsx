@@ -298,6 +298,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
+  console.log(config.blocksMap)
+
   return (
     <div
       className={[
@@ -401,8 +403,9 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         >
           {rows.map((row, i) => {
             const { blockType, isLoading } = row
+
             const blockConfig: ClientBlock =
-              config.blocksMap[blockType] ??
+              config.blocksMap?.[blockType] ??
               ((blockReferences ?? blocks).find(
                 (block) => typeof block !== 'string' && block.slug === blockType,
               ) as ClientBlock)
