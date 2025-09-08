@@ -814,6 +814,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                     properties: {
                       type: {
                         type: 'string',
+                        tsType: 'any',
                       },
                       version: {
                         type: 'integer',
