@@ -430,6 +430,7 @@ export default buildConfigWithDefaults({
   ],
   experimental: {
     localizeStatus: true,
+    localizeUpdatedAt: true,
   },
   localization: {
     filterAvailableLocales: ({ locales }) => {

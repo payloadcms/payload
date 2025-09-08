@@ -162,8 +162,12 @@ export const createClientConfig = ({
       case 'experimental':
         if (config.experimental) {
           clientConfig.experimental = {}
-          if (config.experimental?.localizeStatus) {
+          if (config.experimental.localizeStatus) {
             clientConfig.experimental.localizeStatus = config.experimental.localizeStatus
+          }
+
+          if (config.experimental.localizeUpdatedAt) {
+            clientConfig.experimental.localizeUpdatedAt = config.experimental.localizeUpdatedAt
           }
         }
 

@@ -727,6 +727,10 @@ export type ImportMapGenerators = Array<
  */
 export type ExperimentalConfig = {
   localizeStatus?: boolean
+  /**
+   * Boolean. Returns the `updatedAt` timestamp of the localized document.
+   **/
+  localizeUpdatedAt?: boolean
 }
 
 export type AfterErrorHook = (

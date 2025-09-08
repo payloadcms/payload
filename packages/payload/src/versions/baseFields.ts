@@ -64,3 +64,19 @@ export function buildLocaleStatusField(config: SanitizedConfig): Field[] {
     }
   })
 }
+
+export function buildLocaleUpdatedAtFields(config: SanitizedConfig): Field[] {
+  if (!config.localization || !config.localization.locales) {
+    return []
+  }
+
+  return config.localization.locales.map((locale) => {
+    const code = typeof locale === 'string' ? locale : locale.code
+
+    return {
+      name: code,
+      type: 'date',
+      index: true,
+    }
+  })
+}

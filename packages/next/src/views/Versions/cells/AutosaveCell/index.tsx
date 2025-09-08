@@ -20,6 +20,7 @@ type AutosaveCellProps = {
     autosave?: boolean
     id: number | string
     localeStatus?: Record<string, 'draft' | 'published'>
+    localeUpdatedAt?: Record<string, string>
     publishedLocale?: string
     version: {
       _status: string
