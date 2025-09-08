@@ -22,7 +22,12 @@ export const assertRequestBody = async <T>(
   page: Page,
   options: {
     action: () => Promise<void> | void
-    expect?: (requestBody: T) => boolean | Promise<boolean>
+    expect?: (
+      requestBody: T,
+      requestHeaders: {
+        [key: string]: string
+      },
+    ) => boolean | Promise<boolean>
     requestMethod?: string
     url: string
   },
@@ -43,7 +48,7 @@ export const assertRequestBody = async <T>(
     const parsedBody = JSON.parse(requestBody) as T
 
     if (typeof options.expect === 'function') {
-      expect(await options.expect(parsedBody)).toBeTruthy()
+      expect(await options.expect(parsedBody, request.headers())).toBeTruthy()
     }
 
     return parsedBody

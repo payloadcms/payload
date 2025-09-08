@@ -29,7 +29,7 @@ const toolbarGroups = (props: TextStateFeatureProps): ToolbarGroup[] => {
     {
       ChildComponent: () => <TextStateIcon />,
       key: `clear-style`,
-      label: 'Default style',
+      label: ({ i18n }) => i18n.t('lexical:textState:defaultStyle'),
       onSelect: ({ editor }) => {
         for (const stateKey in props.state) {
           setTextState(editor, stateKey, undefined)
