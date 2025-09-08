@@ -1158,16 +1158,6 @@ export default buildConfigWithDefaults({
       file: imageFile,
     })
 
-    // Create animated type images
-    const testImageFilePath = path.resolve(dirname, './test-image.png')
-    const testImageFile = await getFileByPath(testImageFilePath)
-
-    await payload.create({
-      collection: mediaWithImageSizeAdminPropsSlug,
-      data: {},
-      file: testImageFile,
-    })
-
     for (let i = 0; i < 20; i++) {
       const data = {
         title: `List View Preview ${i + 1}`,
