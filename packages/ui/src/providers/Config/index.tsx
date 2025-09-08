@@ -73,6 +73,7 @@ export const ConfigProvider: React.FC<{
       isFirstRenderRef.current = false
       return
     }
+
     setConfig(sanitizeClientConfig(configFromProps))
   }, [configFromProps])
 
@@ -84,6 +85,7 @@ export const ConfigProvider: React.FC<{
     for (const collection of config.collections) {
       collectionsBySlug[collection.slug] = collection
     }
+
     for (const global of config.globals) {
       globalsBySlug[global.slug] = global
     }
@@ -96,9 +98,11 @@ export const ConfigProvider: React.FC<{
       if ('collectionSlug' in args) {
         return collectionsBySlug[args.collectionSlug] ?? null
       }
+
       if ('globalSlug' in args) {
         return globalsBySlug[args.globalSlug] ?? null
       }
+
       return null as any
     },
     [collectionsBySlug, globalsBySlug],
