@@ -11,8 +11,17 @@
 
         // Every single lexical node needs the `direction: rtl` class. This allows
         // $isParentRTL() to work correctly.
-        * {
+        // => Apply RTL to all descendants EXCEPT:
+        // 1) elements that themselves have data-rtl="false"
+        // 2) anything inside a subtree with data-rtl="false"
+        [data-lexical-decorator='true']:not([data-rtl='false']):not(
+            [data-rtl='false'] [data-lexical-decorator='true']
+          ),
+        [class^='LexicalEditorTheme']:not([data-rtl='false']):not(
+            [data-rtl='false'] [class^='LexicalEditorTheme']
+          ) {
           direction: rtl;
+          text-align: inherit;
         }
       }
     }
