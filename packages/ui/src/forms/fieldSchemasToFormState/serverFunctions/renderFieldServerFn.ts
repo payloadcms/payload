@@ -22,9 +22,14 @@ export type RenderFieldServerFnArgs = {
    */
   path?: string
   /**
-   * chema path to the field to render. {global|collection}.entitySlug.fieldSchemaPath
+   * Dot schema path to a richText field declared in your config.
+   * Format:
+   *   "collection.<collectionSlug>.<fieldPath>"
+   *   "global.<globalSlug>.<fieldPath>"
    *
-   * @example collection.posts.richText
+   * Examples:
+   *   "collection.posts.richText"
+   *   "global.siteSettings.content"
    */
   schemaPath: string
 }
