@@ -549,8 +549,8 @@ importers:
         specifier: 19.1.0-rc.2
         version: 19.1.0-rc.2(eslint@9.22.0(jiti@1.21.6))
       eslint-plugin-react-hooks:
-        specifier: 0.0.0-experimental-b1b0955f-20250901
-        version: 0.0.0-experimental-b1b0955f-20250901(eslint@9.22.0(jiti@1.21.6))
+        specifier: 0.0.0-experimental-d331ba04-20250307
+        version: 0.0.0-experimental-d331ba04-20250307(eslint@9.22.0(jiti@1.21.6))
       eslint-plugin-regexp:
         specifier: 2.7.0
         version: 2.7.0(eslint@9.22.0(jiti@1.21.6))
@@ -600,8 +600,8 @@ importers:
         specifier: 3.9.1
         version: 3.9.1(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3)
       eslint-plugin-react-hooks:
-        specifier: 0.0.0-experimental-b1b0955f-20250901
-        version: 0.0.0-experimental-b1b0955f-20250901(eslint@9.22.0(jiti@1.21.6))
+        specifier: 0.0.0-experimental-d331ba04-20250307
+        version: 0.0.0-experimental-d331ba04-20250307(eslint@9.22.0(jiti@1.21.6))
       eslint-plugin-regexp:
         specifier: 2.7.0
         version: 2.7.0(eslint@9.22.0(jiti@1.21.6))
@@ -8199,8 +8199,8 @@ packages:
       typescript:
         optional: true
 
-  eslint-plugin-react-hooks@0.0.0-experimental-b1b0955f-20250901:
-    resolution: {integrity: sha512-r8BMAtodVPJBXRhALMzvW+o7l1HewqzEv6VAQrKNuTe0AIkV8Ul2D95Uu1ydC7ZbJkxQwTtYDK5dr08TYWGg8g==}
+  eslint-plugin-react-hooks@0.0.0-experimental-d331ba04-20250307:
+    resolution: {integrity: sha512-nCE8wVid8kurFLS0tfQCJ6JP+60+Ezv0ZbzG/uYe+/AX5A6m2CIan1iZ2sGK86ppcuy8YvnSwWrWLLJ1OtGqsQ==}
     engines: {node: '>=18'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -19776,17 +19776,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-react-hooks@0.0.0-experimental-b1b0955f-20250901(eslint@9.22.0(jiti@1.21.6)):
+  eslint-plugin-react-hooks@0.0.0-experimental-d331ba04-20250307(eslint@9.22.0(jiti@1.21.6)):
     dependencies:
-      '@babel/core': 7.27.3
-      '@babel/parser': 7.27.5
-      '@babel/plugin-proposal-private-methods': 7.18.6(@babel/core@7.27.3)
       eslint: 9.22.0(jiti@1.21.6)
-      hermes-parser: 0.25.1
-      zod: 3.23.8
-      zod-validation-error: 3.4.0(zod@3.23.8)
-    transitivePeerDependencies:
-      - supports-color
 
   eslint-plugin-react-hooks@5.2.0(eslint@9.22.0(jiti@1.21.6)):
     dependencies:
