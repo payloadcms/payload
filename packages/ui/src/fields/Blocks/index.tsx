@@ -110,6 +110,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     }
 
     const resolvedBlocks: ClientBlock[] = []
+
     for (const blockReference of blockReferences) {
       const block =
         typeof blockReference === 'string' ? config.blocksMap[blockReference] : blockReference
@@ -297,8 +298,6 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const showRequired = readOnly && rows.length === 0
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
-
-  console.log(config.blocksMap)
 
   return (
     <div

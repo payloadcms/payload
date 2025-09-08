@@ -62,9 +62,13 @@ export const ConfigProvider: React.FC<{
   readonly children: React.ReactNode
   readonly config: ClientConfig | UnsanitizedClientConfig
 }> = ({ children, config: configFromProps }) => {
-  const [config, setConfig] = useState<ClientConfig>(() => sanitizeClientConfig(configFromProps))
+  const [config, setConfigFn] = useState<ClientConfig>(() => sanitizeClientConfig(configFromProps))
 
   const isFirstRenderRef = useRef(true)
+
+  const setConfig = useCallback((newConfig: ClientConfig | UnsanitizedClientConfig) => {
+    setConfigFn(sanitizeClientConfig(newConfig))
+  }, [])
 
   // Need to update local config state if config from props changes, for HMR.
   // That way, config changes will be updated in the UI immediately without needing a refresh.
@@ -74,8 +78,8 @@ export const ConfigProvider: React.FC<{
       return
     }
 
-    setConfig(sanitizeClientConfig(configFromProps))
-  }, [configFromProps])
+    setConfig(configFromProps)
+  }, [configFromProps, setConfig])
 
   // Build lookup maps for collections and globals so we can do O(1) lookups by slug
   const { collectionsBySlug, globalsBySlug } = useMemo(() => {
