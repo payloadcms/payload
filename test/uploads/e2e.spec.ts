@@ -1296,7 +1296,7 @@ describe('Uploads', () => {
       const pasteUrlEndpoint = `/api/uploads-1/paste-url?src=${encodedImageURL}`
       const serverSideFetchPromise = page.waitForResponse(
         (response) => response.url().includes(pasteUrlEndpoint) && response.status() === 200,
-        { timeout: 1000 },
+        { timeout: POLL_TOPASS_TIMEOUT },
       )
 
       // Click the "Add File" button
