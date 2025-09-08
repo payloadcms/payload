@@ -121,10 +121,12 @@ export const renderTable = ({
   if (isPolymorphic) {
     clientFields = []
     serverFields = []
+
     for (const collection of collections) {
       const clientCollectionConfig = clientConfig.collections.find(
         (each) => each.slug === collection,
       )
+
       for (const field of filterFields(clientCollectionConfig.fields)) {
         if (fieldAffectsData(field)) {
           if (clientFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
@@ -136,6 +138,7 @@ export const renderTable = ({
       }
 
       const serverCollectionConfig = payload.collections[collection].config
+
       for (const field of filterFields(serverCollectionConfig.fields)) {
         if (fieldAffectsData(field)) {
           if (serverFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {

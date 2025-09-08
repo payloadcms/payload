@@ -1,25 +1,50 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientCollectionConfig, ColumnPreference } from 'payload'
+import type { ClientCollectionConfig, ClientConfig, ColumnPreference } from 'payload'
 
 import { flattenTopLevelFields } from 'payload'
+import { fieldAffectsData } from 'payload/shared'
 
 import { filterFields } from '../providers/TableColumns/buildColumnState/filterFields.js'
 import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'
 
 export const getColumns = ({
+  clientConfig,
   collectionConfig,
+  collectionSlug,
   columns,
   i18n,
-  isPolymorphic,
 }: {
+  clientConfig: ClientConfig
   collectionConfig?: ClientCollectionConfig
+  collectionSlug: string | string[]
   columns: ColumnPreference[]
   i18n: I18nClient
-  isPolymorphic?: boolean
-}) =>
-  columns
+}) => {
+  const isPolymorphic = Array.isArray(collectionSlug)
+
+  const fields = !isPolymorphic ? (collectionConfig?.fields ?? []) : []
+
+  if (isPolymorphic) {
+    for (const collection of collectionSlug) {
+      const clientCollectionConfig = clientConfig.collections.find(
+        (each) => each.slug === collection,
+      )
+
+      for (const field of filterFields(clientCollectionConfig.fields)) {
+        if (fieldAffectsData(field)) {
+          if (fields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
+            continue
+          }
+        }
+
+        fields.push(field)
+      }
+    }
+  }
+
+  return columns
     ? columns?.filter((column) =>
-        flattenTopLevelFields(collectionConfig?.fields, {
+        flattenTopLevelFields(fields, {
           i18n,
           keepPresentationalFields: true,
           moveSubFieldsToTop: true,
@@ -30,7 +55,8 @@ export const getColumns = ({
         }),
       )
     : getInitialColumns(
-        isPolymorphic ? collectionConfig?.fields : filterFields(collectionConfig?.fields),
+        isPolymorphic ? fields : filterFields(fields),
         collectionConfig.admin?.useAsTitle,
         isPolymorphic ? [] : collectionConfig?.admin?.defaultColumns,
       )
+}

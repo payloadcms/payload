@@ -231,7 +231,9 @@ const buildTableState = async (
     collectionConfig,
     collections: Array.isArray(collectionSlug) ? collectionSlug : undefined,
     columns: getColumns({
+      clientConfig,
       collectionConfig: clientCollectionConfig,
+      collectionSlug,
       columns: columnsFromArgs,
       i18n: req.i18n,
     }),
