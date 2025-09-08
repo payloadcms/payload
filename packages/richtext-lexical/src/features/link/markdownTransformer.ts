@@ -2,9 +2,9 @@
  * Code adapted from https://github.com/facebook/lexical/blob/main/packages/lexical-markdown/src/MarkdownTransformers.ts#L357
  */
 
-import { $createTextNode } from 'lexical'
+import type { TextMatchTransformer } from '@lexical/markdown'
 
-import type { TextMatchTransformer } from '../../packages/@lexical/markdown/MarkdownTransformers.js'
+import { $createTextNode } from 'lexical'
 
 import { $createLinkNode, $isLinkNode, LinkNode } from './nodes/LinkNode.js'
 
