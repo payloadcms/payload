@@ -3131,7 +3131,10 @@ describe('Fields', () => {
           await payload.create({
             collection: 'json-fields',
             data: {
-              json: { value: i },
+              json: {
+                value: i,
+                isEven: i % 2 === 0,
+              },
             },
           })
         }
@@ -3335,6 +3338,30 @@ describe('Fields', () => {
         expect(docIDs).not.toContain(1)
         expect(docIDs).not.toContain(3)
         expect(docIDs).toContain(2)
+      })
+
+      it('should query nested numbers with multiple clauses - equals_and_in', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            and: [
+              {
+                'json.isEven': { equals: true },
+              },
+              {
+                // Tests odd -> even order and even -> odd order for better coverage.
+                'json.value': { in: [1, 4, 2, 3] },
+              },
+            ],
+          },
+        })
+
+        const docIDs = docs.map(({ json }) => json.value)
+
+        expect(docIDs).not.toContain(1)
+        expect(docIDs).toContain(2)
+        expect(docIDs).not.toContain(3)
+        expect(docIDs).toContain(4)
       })
 
       it('should query deeply', async () => {
