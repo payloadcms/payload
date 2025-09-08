@@ -69,8 +69,21 @@ export type GenerateImageName = (args: {
 }) => string
 
 export type ImageSize = {
+  /**
+   * Admin UI options that control how this image size appears in list views.
+   */
   admin?: {
+    /**
+     * If set to true, this image size will not be available
+     * as a selectable column in the collection list view.
+     * @default false
+     */
     disableListColumn?: boolean
+    /**
+     * If set to true, this image size will not be available
+     * as a filter option in the collection list view.
+     * @default false
+     */
     disableListFilter?: boolean
   }
   /**
