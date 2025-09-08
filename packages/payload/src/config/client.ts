@@ -108,8 +108,10 @@ export type CreateClientConfigArgs = {
    * If unauthenticated, the client config will omit some sensitive properties
    * such as field schemas, etc. This is useful for login and error pages where
    * the page source should not contain this information.
+   * Allow `true` to generate a client config for the "create first user" page
+   * where there is no user yet, but the config should be as complete.
    */
-  user: TypedUser
+  user: true | TypedUser
 }
 
 export const createUnauthenticatedClientConfig = ({

@@ -165,7 +165,7 @@ export const RootPage = async ({
     config,
     i18n: initPageResult?.req.i18n,
     importMap,
-    user: initPageResult?.req.user,
+    user: viewType === 'createFirstUser' ? true : initPageResult?.req.user,
   })
 
   const payload = initPageResult?.req.payload
