@@ -1049,18 +1049,16 @@ export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
 
 export type * from './nodeTypes.js'
 
-export { $convertFromMarkdownString } from './packages/@lexical/markdown/index.js'
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export { populate } from './populateGraphQL/populate.js'
-
 export type { LexicalEditorProps, LexicalFieldAdminProps, LexicalRichTextAdapter } from './types.js'
 
 export { createServerFeature } from './utilities/createServerFeature.js'
+
 export { editorConfigFactory } from './utilities/editorConfigFactory.js'
-
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
-export { extractPropsFromJSXPropsString } from './utilities/jsx/extractPropsFromJSXPropsString.js'
 
+export { extractPropsFromJSXPropsString } from './utilities/jsx/extractPropsFromJSXPropsString.js'
 export {
   extractFrontmatter,
   frontmatterToObject,
