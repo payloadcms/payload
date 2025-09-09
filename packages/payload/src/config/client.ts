@@ -118,7 +118,7 @@ export const createUnauthenticatedClientConfig = ({
   clientConfig,
 }: {
   /**
-   * Send the previously generated client config so share memory when applicable.
+   * Send the previously generated client config to share memory when applicable.
    * E.g. the admin-enabled collection config can reference the existing collection rather than creating a new object.
    */
   clientConfig: ClientConfig
