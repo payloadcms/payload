@@ -107,7 +107,7 @@ ${JSON.stringify(result, null, 2)}
           )
         }
 
-        let responseText = `Multiple documents deleted from collection "${collectionSlug}"!
+        let responseText = `Document deleted successfully from collection "${collectionSlug}"!
 Deleted: ${docs.length} documents
 Errors: ${errors.length}
 ---`
@@ -154,8 +154,8 @@ ${JSON.stringify(errors, null, 2)}
 
   if (collections?.[collectionSlug]?.enabled) {
     server.tool(
-      `delete${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}Document`,
-      `${toolSchemas.deleteResource.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
+      `delete${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
+      `${toolSchemas.deleteResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
       toolSchemas.deleteResource.parameters.shape,
       async ({ id, depth, overrideAccess, where }) => {
         return await tool(id, where, depth, overrideAccess)
