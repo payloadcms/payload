@@ -842,6 +842,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
   tabs: ({
     config,
     field,
+    collectionSlug,
     forceNullable,
     graphqlResult,
     newlyCreatedBlockType,
@@ -860,6 +861,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
             config,
             fields: tab.fields,
             forceNullable,
+            collectionSlug,
             graphqlResult,
             parentIsLocalized: tab.localized || parentIsLocalized,
             parentName: interfaceName,
@@ -897,6 +899,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
               config,
               field: subField,
               forceNullable,
+              collectionSlug,
               graphqlResult,
               newlyCreatedBlockType,
               objectTypeConfig: subFieldSchema,
