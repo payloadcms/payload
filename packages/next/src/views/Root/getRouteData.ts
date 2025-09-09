@@ -1,5 +1,6 @@
 import type {
   AdminViewServerProps,
+  CollectionPreferences,
   CollectionSlug,
   CustomComponent,
   DocumentSubViewTypes,
@@ -87,10 +88,17 @@ type GetRouteDataResult = {
 type GetRouteDataArgs = {
   adminRoute: string
   collectionConfig?: SanitizedCollectionConfig
+  /**
+   * User preferences for a collection.
+   *
+   * These preferences are normally undefined
+   * unless the user is on the list view and the
+   * collection is folder enabled.
+   */
+  collectionPreferences?: CollectionPreferences
   currentRoute: string
   globalConfig?: SanitizedGlobalConfig
   payload: Payload
-  replaceListWithFolders?: boolean
   searchParams: {
     [key: string]: string | string[]
   }
@@ -100,10 +108,10 @@ type GetRouteDataArgs = {
 export const getRouteData = ({
   adminRoute,
   collectionConfig,
+  collectionPreferences = undefined,
   currentRoute,
   globalConfig,
   payload,
-  replaceListWithFolders = false,
   segments,
 }: GetRouteDataArgs): GetRouteDataResult => {
   const { config } = payload
@@ -216,7 +224,11 @@ export const getRouteData = ({
         // --> /collections/:collectionSlug'
         routeParams.collection = collectionConfig.slug
 
-        if (replaceListWithFolders) {
+        if (
+          collectionPreferences?.listViewType &&
+          collectionPreferences.listViewType === 'folders'
+        ) {
+          // Render folder view by default if set in preferences
           ViewToRender = {
             Component: CollectionFolderView,
           }

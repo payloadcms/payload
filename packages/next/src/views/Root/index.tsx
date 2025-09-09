@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import type {
   AdminViewClientProps,
   AdminViewServerPropsOnly,
+  CollectionPreferences,
   ImportMap,
   SanitizedCollectionConfig,
   SanitizedConfig,
@@ -155,16 +156,18 @@ export const RootPage = async ({
     )
   }
 
-  let replaceListWithFolders = false
+  let collectionPreferences: CollectionPreferences = undefined
 
   if (collectionConfig && segments.length === 2) {
     if (config.folders && collectionConfig.folders && segments[1] !== config.folders.slug) {
-      const prefs = await getPreferences<{
-        listViewType: string
-      }>(`collection-${collectionConfig.slug}`, req.payload, req.user.id, config.admin.user)
-      if (prefs?.value.listViewType && prefs.value.listViewType === 'folders') {
-        replaceListWithFolders = true
-      }
+      await getPreferences<CollectionPreferences>(
+        `collection-${collectionConfig.slug}`,
+        req.payload,
+        req.user.id,
+        config.admin.user,
+      ).then((res) => {
+        collectionPreferences = res.value
+      })
     }
   }
 
@@ -180,10 +183,10 @@ export const RootPage = async ({
   } = getRouteData({
     adminRoute,
     collectionConfig,
+    collectionPreferences,
     currentRoute,
     globalConfig,
     payload,
-    replaceListWithFolders,
     searchParams,
     segments,
   })
