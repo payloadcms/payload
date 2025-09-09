@@ -3,7 +3,6 @@ import type {
   EditConfig,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
-  ServerPropsFromView,
 } from 'payload'
 
 export function getViewActions({
@@ -12,23 +11,21 @@ export function getViewActions({
 }: {
   editConfig: EditConfig
   viewKey: keyof EditConfig
-}): CustomComponent[] | undefined {
+}): CustomComponent[] {
   if (editConfig && viewKey in editConfig && 'actions' in editConfig[viewKey]) {
-    return editConfig[viewKey].actions
+    return editConfig[viewKey].actions ?? []
   }
 
-  return undefined
+  return []
 }
 
-export function attachViewActions({
+export function getSubViewActions({
   collectionOrGlobal,
-  serverProps,
   viewKeyArg,
 }: {
   collectionOrGlobal: SanitizedCollectionConfig | SanitizedGlobalConfig
-  serverProps: ServerPropsFromView
   viewKeyArg?: keyof EditConfig
-}) {
+}): CustomComponent[] {
   if (collectionOrGlobal?.admin?.components?.views?.edit) {
     let viewKey = viewKeyArg || 'default'
     if ('root' in collectionOrGlobal.admin.components.views.edit) {
@@ -40,8 +37,8 @@ export function attachViewActions({
       viewKey,
     })
 
-    if (actions) {
-      serverProps.viewActions = serverProps.viewActions.concat(actions)
-    }
+    return actions
   }
+
+  return []
 }

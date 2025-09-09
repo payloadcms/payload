@@ -1,22 +1,30 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
+import type {
+  AdminViewClientProps,
+  AdminViewServerPropsOnly,
+  CollectionPreferences,
+  ImportMap,
+  SanitizedCollectionConfig,
+  SanitizedConfig,
+  SanitizedGlobalConfig,
+} from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
-import {
-  type AdminViewClientProps,
-  type AdminViewServerPropsOnly,
-  type ImportMap,
-  parseDocumentID,
-  type SanitizedConfig,
-} from 'payload'
 import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
-import { initPage } from '../../utilities/initPage/index.js'
+import { getPreferences } from '../../utilities/getPreferences.js'
+import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
+import { handleAuthRedirect } from '../../utilities/handleAuthRedirect.js'
+import { initReq } from '../../utilities/initReq.js'
+import { isCustomAdminView } from '../../utilities/isCustomAdminView.js'
+import { isPublicAdminRoute } from '../../utilities/isPublicAdminRoute.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getRouteData } from './getRouteData.js'
 import { SyncClientConfig } from './SyncClientConfig.js'
@@ -61,32 +69,105 @@ export const RootPage = async ({
   })
 
   const segments = Array.isArray(params.segments) ? params.segments : []
+  const isCollectionRoute = segments[0] === 'collections'
+  const isGlobalRoute = segments[0] === 'globals'
+  let collectionConfig: SanitizedCollectionConfig = undefined
+  let globalConfig: SanitizedGlobalConfig = undefined
 
   const searchParams = await searchParamsPromise
 
   // Redirect `${adminRoute}/collections` to `${adminRoute}`
-  if (segments.length === 1 && segments[0] === 'collections') {
-    const { viewKey } = getCustomViewByRoute({
-      config,
-      currentRoute: '/collections',
-    })
+  if (isCollectionRoute) {
+    if (segments.length === 1) {
+      const { viewKey } = getCustomViewByRoute({
+        config,
+        currentRoute: '/collections',
+      })
 
-    // Only redirect if there's NO custom view configured for /collections
-    if (!viewKey) {
-      redirect(adminRoute)
+      // Only redirect if there's NO custom view configured for /collections
+      if (!viewKey) {
+        redirect(adminRoute)
+      }
+    }
+
+    if (segments[1]) {
+      collectionConfig = config.collections.find(({ slug }) => slug === segments[1])
     }
   }
 
   // Redirect `${adminRoute}/globals` to `${adminRoute}`
-  if (segments.length === 1 && segments[0] === 'globals') {
-    const { viewKey } = getCustomViewByRoute({
-      config,
-      currentRoute: '/globals',
-    })
+  if (isGlobalRoute) {
+    if (segments.length === 1) {
+      const { viewKey } = getCustomViewByRoute({
+        config,
+        currentRoute: '/globals',
+      })
 
-    // Only redirect if there's NO custom view configured for /globals
-    if (!viewKey) {
-      redirect(adminRoute)
+      // Only redirect if there's NO custom view configured for /globals
+      if (!viewKey) {
+        redirect(adminRoute)
+      }
+    }
+
+    if (segments[1]) {
+      globalConfig = config.globals.find(({ slug }) => slug === segments[1])
+    }
+  }
+
+  if ((isCollectionRoute && !collectionConfig) || (isGlobalRoute && !globalConfig)) {
+    return notFound()
+  }
+
+  const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
+  const {
+    cookies,
+    locale,
+    permissions,
+    req,
+    req: { payload },
+  } = await initReq({
+    configPromise: config,
+    importMap,
+    key: 'initPage',
+    overrides: {
+      fallbackLocale: false,
+      req: {
+        query: qs.parse(queryString, {
+          depth: 10,
+          ignoreQueryPrefix: true,
+        }),
+      },
+      urlSuffix: `${currentRoute}${searchParams ? queryString : ''}`,
+    },
+  })
+
+  if (
+    !permissions.canAccessAdmin &&
+    !isPublicAdminRoute({ adminRoute, config: payload.config, route: currentRoute }) &&
+    !isCustomAdminView({ adminRoute, config: payload.config, route: currentRoute })
+  ) {
+    redirect(
+      handleAuthRedirect({
+        config: payload.config,
+        route: currentRoute,
+        searchParams,
+        user: req.user,
+      }),
+    )
+  }
+
+  let collectionPreferences: CollectionPreferences = undefined
+
+  if (collectionConfig && segments.length === 2) {
+    if (config.folders && collectionConfig.folders && segments[1] !== config.folders.slug) {
+      await getPreferences<CollectionPreferences>(
+        `collection-${collectionConfig.slug}`,
+        req.payload,
+        req.user.id,
+        config.admin.user,
+      ).then((res) => {
+        collectionPreferences = res.value
+      })
     }
   }
 
@@ -94,29 +175,30 @@ export const RootPage = async ({
     browseByFolderSlugs,
     DefaultView,
     documentSubViewType,
-    folderID: folderIDParam,
-    initPageOptions,
-    serverProps,
+    routeParams,
     templateClassName,
     templateType,
+    viewActions,
     viewType,
   } = getRouteData({
     adminRoute,
-    config,
+    collectionConfig,
+    collectionPreferences,
     currentRoute,
-    importMap,
+    globalConfig,
+    payload,
     searchParams,
     segments,
   })
 
-  const initPageResult = await initPage(initPageOptions)
+  req.routeParams = routeParams
 
   const dbHasUser =
-    initPageResult.req.user ||
-    (await initPageResult?.req.payload.db
+    req.user ||
+    (await req.payload.db
       .findOne({
         collection: userSlug,
-        req: initPageResult?.req,
+        req,
       })
       ?.then((doc) => !!doc))
 
@@ -125,7 +207,7 @@ export const RootPage = async ({
    * The current route did not match any default views or custom route views.
    */
   if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
-    if (initPageResult?.req?.user) {
+    if (req?.user) {
       notFound()
     }
 
@@ -134,27 +216,21 @@ export const RootPage = async ({
     }
   }
 
-  if (typeof initPageResult?.redirectTo === 'string') {
-    redirect(initPageResult.redirectTo)
+  const createFirstUserRoute = formatAdminURL({ adminRoute, path: _createFirstUserRoute })
+
+  const usersCollection = config.collections.find(({ slug }) => slug === userSlug)
+  const disableLocalStrategy = usersCollection?.auth?.disableLocalStrategy
+
+  if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
+    redirect(adminRoute)
   }
 
-  if (initPageResult) {
-    const createFirstUserRoute = formatAdminURL({ adminRoute, path: _createFirstUserRoute })
+  if (!dbHasUser && currentRoute !== createFirstUserRoute && !disableLocalStrategy) {
+    redirect(createFirstUserRoute)
+  }
 
-    const collectionConfig = config.collections.find(({ slug }) => slug === userSlug)
-    const disableLocalStrategy = collectionConfig?.auth?.disableLocalStrategy
-
-    if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
-      redirect(adminRoute)
-    }
-
-    if (!dbHasUser && currentRoute !== createFirstUserRoute && !disableLocalStrategy) {
-      redirect(createFirstUserRoute)
-    }
-
-    if (dbHasUser && currentRoute === createFirstUserRoute) {
-      redirect(adminRoute)
-    }
+  if (dbHasUser && currentRoute === createFirstUserRoute) {
+    redirect(adminRoute)
   }
 
   if (!DefaultView?.Component && !DefaultView?.payloadComponent && !dbHasUser) {
@@ -163,19 +239,14 @@ export const RootPage = async ({
 
   const clientConfig = getClientConfig({
     config,
-    i18n: initPageResult?.req.i18n,
+    i18n: req.i18n,
     importMap,
-    user: viewType === 'createFirstUser' ? true : initPageResult?.req.user,
+    user: viewType === 'createFirstUser' ? true : req.user,
   })
 
-  const payload = initPageResult?.req.payload
-  const folderID = payload.config.folders
-    ? parseDocumentID({
-        id: folderIDParam,
-        collectionSlug: payload.config.folders.slug,
-        payload,
-      })
-    : undefined
+  const visibleEntities = getVisibleEntities({ req })
+
+  const folderID = routeParams.folderID
 
   const RenderedView = RenderServerComponent({
     clientProps: {
@@ -188,16 +259,41 @@ export const RootPage = async ({
     Fallback: DefaultView.Component,
     importMap,
     serverProps: {
-      ...serverProps,
       clientConfig,
-      docID: initPageResult?.docID,
+      collectionConfig,
+      docID: routeParams.id,
       folderID,
-      i18n: initPageResult?.req.i18n,
+      globalConfig,
+      i18n: req.i18n,
       importMap,
-      initPageResult,
+      initPageResult: {
+        collectionConfig,
+        cookies,
+        docID: routeParams.id,
+        globalConfig,
+        languageOptions: Object.entries(req.payload.config.i18n.supportedLanguages || {}).reduce(
+          (acc, [language, languageConfig]) => {
+            if (Object.keys(req.payload.config.i18n.supportedLanguages).includes(language)) {
+              acc.push({
+                label: languageConfig.translations.general.thisLanguage,
+                value: language,
+              })
+            }
+
+            return acc
+          },
+          [],
+        ),
+        locale,
+        permissions,
+        req,
+        translations: req.i18n.translations,
+        visibleEntities,
+      },
       params,
-      payload: initPageResult?.req.payload,
+      payload: req.payload,
       searchParams,
+      viewActions,
     } satisfies AdminViewServerPropsOnly,
   })
 
@@ -210,25 +306,25 @@ export const RootPage = async ({
       )}
       {templateType === 'default' && (
         <DefaultTemplate
-          collectionSlug={initPageResult?.collectionConfig?.slug}
-          docID={initPageResult?.docID}
+          collectionSlug={collectionConfig?.slug}
+          docID={routeParams.id}
           documentSubViewType={documentSubViewType}
-          globalSlug={initPageResult?.globalConfig?.slug}
-          i18n={initPageResult?.req.i18n}
-          locale={initPageResult?.locale}
+          globalSlug={globalConfig?.slug}
+          i18n={req.i18n}
+          locale={locale}
           params={params}
-          payload={initPageResult?.req.payload}
-          permissions={initPageResult?.permissions}
-          req={initPageResult?.req}
+          payload={req.payload}
+          permissions={permissions}
+          req={req}
           searchParams={searchParams}
-          user={initPageResult?.req.user}
-          viewActions={serverProps.viewActions}
+          user={req.user}
+          viewActions={viewActions}
           viewType={viewType}
           visibleEntities={{
             // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
             // which this caused as soon as initPageResult.visibleEntities is passed in
-            collections: initPageResult?.visibleEntities?.collections,
-            globals: initPageResult?.visibleEntities?.globals,
+            collections: visibleEntities?.collections,
+            globals: visibleEntities?.globals,
           }}
         >
           {RenderedView}
