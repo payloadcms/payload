@@ -234,8 +234,8 @@ ${JSON.stringify(errors, null, 2)}
     }
 
     server.tool(
-      `update${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}Document`,
-      `${toolSchemas.updateResource.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
+      `update${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
+      `${toolSchemas.updateResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
       updateResourceSchema.shape,
       async ({
         id,

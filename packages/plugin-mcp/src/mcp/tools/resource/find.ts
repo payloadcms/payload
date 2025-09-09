@@ -139,8 +139,8 @@ Page: ${result.page} of ${result.totalPages}
 
   if (collections?.[collectionSlug]?.enabled) {
     server.tool(
-      `find${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}Document`,
-      `${toolSchemas.findResources.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
+      `find${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
+      `${toolSchemas.findResources.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
       toolSchemas.findResources.parameters.shape,
       async ({ id, limit, page, sort, where }) => {
         return await tool(id, limit, page, sort, where)

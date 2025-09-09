@@ -86,8 +86,8 @@ ${JSON.stringify(result, null, 2)}
     const convertedFields = convertFieldsToZod(collectionConfig.fields)
 
     server.tool(
-      `create${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}Document`,
-      `${toolSchemas.createResource.description.trim()}\n\n${collections?.[collectionSlug]?.description}`,
+      `create${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
+      `${toolSchemas.createResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
       convertedFields.shape,
       async (params) => {
         const data = JSON.stringify(params)
