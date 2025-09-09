@@ -1165,7 +1165,6 @@ export type Config = {
    * ```
    */
   logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
-
   /**
    * Override the log level of errors for Payload's error handler or disable logging with `false`.
    * Levels can be any of the following: 'trace', 'debug', 'info', 'warn', 'error', 'fatal' or false.
@@ -1196,7 +1195,17 @@ export type Config = {
    * @default 10
    */
   maxDepth?: number
-
+  /**
+   * When defined, throws an error when a hook has been invoked above the allowed threshold.
+   * This can happen when hooks call themselves through Payload operations.
+   * For example, a `beforeChange` hook that updates the same document being saved.
+   * This could trigger an infinite loop and potentially crash the server.
+   * Note: Ensure you pass `context` between Payload operations to track recursion.
+   * @see https://payloadcms.com/docs/hooks/context#preventing-infinite-loops
+   *
+   * @experimental This property is experimental and may change in future releases. Use at your own discretion.
+   */
+  maxHookRecursion?: number
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void
   /**

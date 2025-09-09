@@ -126,6 +126,50 @@ const MyCollection: CollectionConfig = {
 }
 ```
 
+#### maxHookRecursion
+
+To help prevent infinite loops, Payload provides a configuration option to limit the number of times a hook can be called in a single request. This is configured via the `maxHookRecursion` option in your Payload config.
+
+```ts
+import { buildConfig } from 'payload/config'
+
+export default buildConfig({
+  // ...
+  maxHookRecursion: 5, // default is undefined (no limit)
+})
+```
+
+<Banner type="warning">
+  **Important:** To ensure that recursive hooks are tracked correctly, you must
+  pass the `context` object between Payload operations. Failing to do so may
+  result in the recursion limit not being enforced as expected.
+</Banner>
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+const MyCollection: CollectionConfig = {
+  // ...
+  hooks: {
+    beforeChange: [
+      async ({ context, doc, req }) => {
+        // ...
+        await req.payload.update({
+          collection: 'my-collection',
+          id: doc.id,
+          data: {
+            // ...
+          },
+          // highlight-start
+          context, // Pass the context object here to track recursion across operations
+          // highlight-end
+        })
+      },
+    ],
+  },
+}
+```
+
 ## TypeScript
 
 The default TypeScript interface for `context` is `{ [key: string]: unknown }`. If you prefer a more strict typing in your project or when authoring plugins for others, you can override this using the `declare module` syntax.

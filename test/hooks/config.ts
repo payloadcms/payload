@@ -16,6 +16,7 @@ import { DataHooks } from './collections/Data/index.js'
 import { FieldPaths } from './collections/FieldPaths/index.js'
 import Hooks, { hooksSlug } from './collections/Hook/index.js'
 import NestedAfterReadHooks from './collections/NestedAfterReadHooks/index.js'
+import { RecursiveHooksCollection } from './collections/RecursiveHooks/index.js'
 import Relations from './collections/Relations/index.js'
 import TransformHooks from './collections/Transform/index.js'
 import Users, { seedHooksUsers } from './collections/Users/index.js'
@@ -28,6 +29,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  maxHookRecursion: 3,
   collections: [
     BeforeChangeHooks,
     BeforeValidateCollection,
@@ -42,6 +44,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     DataHooks,
     FieldPaths,
     ValueCollection,
+    RecursiveHooksCollection,
   ],
   globals: [DataHooksGlobal],
   endpoints: [
