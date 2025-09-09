@@ -238,7 +238,7 @@ export const RootPage = async ({
     config,
     i18n: req.i18n,
     importMap,
-    user: viewType === 'createFirstUser' ? true : initPageResult?.req.user,
+    user: viewType === 'createFirstUser' ? true : req.user,
   })
 
   const visibleEntities = getVisibleEntities({ req })
