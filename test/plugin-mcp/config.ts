@@ -7,6 +7,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { ExampleProducts } from './collections/ExampleProducts.js'
 import { Media } from './collections/Media.js'
 import { Posts } from './collections/Posts.js'
+import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -18,7 +19,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Media, Posts, ExampleProducts],
+  collections: [Users, Media, Posts, ExampleProducts],
   onInit: seed,
   plugins: [
     pluginMCP({
