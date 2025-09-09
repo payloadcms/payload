@@ -7,7 +7,7 @@ import React from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
-import { getVisibleEntities } from '../../utilities/getVisisbleEntities.js'
+import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 import { initReq } from '../../utilities/initReq.js'
 import { NotFoundClient } from './index.client.js'
 
