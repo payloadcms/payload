@@ -19,6 +19,7 @@ import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getRouteData } from './getRouteData.js'
+import { SyncClientConfig } from './SyncClientConfig.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -164,6 +165,7 @@ export const RootPage = async ({
     config,
     i18n: initPageResult?.req.i18n,
     importMap,
+    user: viewType === 'createFirstUser' ? true : initPageResult?.req.user,
   })
 
   const payload = initPageResult?.req.payload
@@ -201,6 +203,7 @@ export const RootPage = async ({
 
   return (
     <React.Fragment>
+      <SyncClientConfig clientConfig={clientConfig} />
       {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
       {templateType === 'minimal' && (
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
