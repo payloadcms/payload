@@ -183,6 +183,9 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     mimeType.validate = mimeTypeValidator(uploadOptions.mimeTypes)
   }
 
+  // In Payload v4, image size subfields (`url`, `width`, `height`, etc.) should
+  // default to `disableListColumn: true` and `disableListFilter: true`
+  // to avoid cluttering the collection list view and filters by default.
   if (uploadOptions.imageSizes) {
     uploadFields = uploadFields.concat([
       {
