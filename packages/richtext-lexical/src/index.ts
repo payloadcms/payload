@@ -1049,16 +1049,29 @@ export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
 
 export type * from './nodeTypes.js'
 
+import { $convertFromMarkdownString as $convertFromMarkdownStringLexical } from '@lexical/markdown'
+
+/**
+ * @deprecated This import will be removed from this path in the next major release.
+ * import from `@payloadcms/richtex-lexical/lexical/markdown` instead.
+ *
+ * Renders markdown from a string. The selection is moved to the start after the operation.
+ * @param shouldPreserveNewLines — By setting this to true, new lines will be preserved between conversions
+ * @param shouldMergeAdjacentLines — By setting this to true, adjacent non empty lines will be merged according to commonmark spec: https://spec.commonmark.org/0.24/#example-177. Not applicable if shouldPreserveNewLines = true.
+ */
+export const $convertFromMarkdownString = $convertFromMarkdownStringLexical
+
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export { populate } from './populateGraphQL/populate.js'
+
 export type { LexicalEditorProps, LexicalFieldAdminProps, LexicalRichTextAdapter } from './types.js'
 
 export { createServerFeature } from './utilities/createServerFeature.js'
-
 export { editorConfigFactory } from './utilities/editorConfigFactory.js'
-export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
 
+export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
 export { extractPropsFromJSXPropsString } from './utilities/jsx/extractPropsFromJSXPropsString.js'
+
 export {
   extractFrontmatter,
   frontmatterToObject,
