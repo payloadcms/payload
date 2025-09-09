@@ -18,6 +18,7 @@ import {
   generatedAfterReadText,
   nestedAfterReadHooksSlug,
 } from './collections/NestedAfterReadHooks/index.js'
+import { recursiveHooksSlug } from './collections/RecursiveHooks/index.js'
 import { relationsSlug } from './collections/Relations/index.js'
 import { transformSlug } from './collections/Transform/index.js'
 import { hooksUsersSlug } from './collections/Users/index.js'
@@ -327,6 +328,24 @@ describe('Hooks', () => {
       })
 
       expect(retrievedDoc.value).toEqual('data from rest API')
+    })
+
+    it('should detect an infinite loop in hooks', async () => {
+      try {
+        const res = await payload.create({
+          collection: recursiveHooksSlug,
+          data: {
+            title: 'Test',
+          },
+        })
+
+        expect(res).toBeFalsy()
+      } catch (err: any) {
+        expect(err.message).toContain(
+          'Max hook recursion of 3 exceeded. There may be a circular dependency between hooks.',
+        )
+        return
+      }
     })
   })
 
