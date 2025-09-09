@@ -98,21 +98,14 @@ export const getMCPHandler = (
         const collectionConfig = config.collections?.filter(
           (collection) => collection.slug === enabledCollectionSlug,
         )[0]
-        const collectonGlobalSetting = toolSettings?.[
-          `${enabledCollectionSlug}-capabilities`
-        ] as Record<string, unknown>
-        const allowCreate: boolean | undefined = collectonGlobalSetting[
-          `${enabledCollectionSlug}-create`
-        ] as boolean
-        const allowDelete: boolean | undefined = collectonGlobalSetting[
-          `${enabledCollectionSlug}-delete`
-        ] as boolean
-        const allowFind: boolean | undefined = collectonGlobalSetting[
-          `${enabledCollectionSlug}-find`
-        ] as boolean
-        const allowUpdate: boolean | undefined = collectonGlobalSetting[
-          `${enabledCollectionSlug}-update`
-        ] as boolean
+        const toolCapabilities = toolSettings?.[`${toCamelCase(enabledCollectionSlug)}`] as Record<
+          string,
+          unknown
+        >
+        const allowCreate: boolean | undefined = toolCapabilities['create'] as boolean
+        const allowDelete: boolean | undefined = toolCapabilities['delete'] as boolean
+        const allowFind: boolean | undefined = toolCapabilities['find'] as boolean
+        const allowUpdate: boolean | undefined = toolCapabilities['update'] as boolean
 
         if (allowCreate) {
           registerTool(
@@ -198,12 +191,12 @@ export const getMCPHandler = (
 
       // Experimental - Collection Schema Modfication Tools
       if (
-        toolSettings.collections?.create &&
+        toolSettings._experimental_collections?.create &&
         experimentalTools.collections?.enabled &&
         isDevelopment
       ) {
         registerTool(
-          toolSettings.collections.create,
+          toolSettings._experimental_collections.create,
           'Create Collection',
           () =>
             createCollectionTool(server, req, useVerboseLogs, collectionsDirPath, configFilePath),
@@ -212,12 +205,12 @@ export const getMCPHandler = (
         )
       }
       if (
-        toolSettings.collections?.delete &&
+        toolSettings._experimental_collections?.delete &&
         experimentalTools.collections?.enabled &&
         isDevelopment
       ) {
         registerTool(
-          toolSettings.collections.delete,
+          toolSettings._experimental_collections.delete,
           'Delete Collection',
           () =>
             deleteCollectionTool(server, req, useVerboseLogs, collectionsDirPath, configFilePath),
@@ -227,12 +220,12 @@ export const getMCPHandler = (
       }
 
       if (
-        toolSettings.collections?.find &&
+        toolSettings._experimental_collections?.find &&
         experimentalTools.collections?.enabled &&
         isDevelopment
       ) {
         registerTool(
-          toolSettings.collections.find,
+          toolSettings._experimental_collections.find,
           'Find Collection',
           () => findCollectionTool(server, req, useVerboseLogs, collectionsDirPath),
           payload,
@@ -241,12 +234,12 @@ export const getMCPHandler = (
       }
 
       if (
-        toolSettings.collections?.update &&
+        toolSettings._experimental_collections?.update &&
         experimentalTools.collections?.enabled &&
         isDevelopment
       ) {
         registerTool(
-          toolSettings.collections.update,
+          toolSettings._experimental_collections.update,
           'Update Collection',
           () =>
             updateCollectionTool(server, req, useVerboseLogs, collectionsDirPath, configFilePath),
@@ -256,9 +249,13 @@ export const getMCPHandler = (
       }
 
       // Experimental - Payload Config Modification Tools
-      if (toolSettings.config?.find && experimentalTools.config?.enabled && isDevelopment) {
+      if (
+        toolSettings._experimental_config?.find &&
+        experimentalTools.config?.enabled &&
+        isDevelopment
+      ) {
         registerTool(
-          toolSettings.config.find,
+          toolSettings._experimental_config.find,
           'Find Config',
           () => findConfigTool(server, req, useVerboseLogs, configFilePath),
           payload,
@@ -266,9 +263,13 @@ export const getMCPHandler = (
         )
       }
 
-      if (toolSettings.config?.update && experimentalTools.config?.enabled && isDevelopment) {
+      if (
+        toolSettings._experimental_config?.update &&
+        experimentalTools.config?.enabled &&
+        isDevelopment
+      ) {
         registerTool(
-          toolSettings.config.update,
+          toolSettings._experimental_config.update,
           'Update Config',
           () => updateConfigTool(server, req, useVerboseLogs, configFilePath),
           payload,
@@ -277,9 +278,13 @@ export const getMCPHandler = (
       }
 
       // Experimental - Job Modification Tools
-      if (toolSettings.jobs?.create && experimentalTools.jobs?.enabled && isDevelopment) {
+      if (
+        toolSettings._experimental_jobs?.create &&
+        experimentalTools.jobs?.enabled &&
+        isDevelopment
+      ) {
         registerTool(
-          toolSettings.jobs.create,
+          toolSettings._experimental_jobs.create,
           'Create Job',
           () => createJobTool(server, req, useVerboseLogs, jobsDirPath),
           payload,
@@ -287,9 +292,13 @@ export const getMCPHandler = (
         )
       }
 
-      if (toolSettings.jobs?.update && experimentalTools.jobs?.enabled && isDevelopment) {
+      if (
+        toolSettings._experimental_jobs?.update &&
+        experimentalTools.jobs?.enabled &&
+        isDevelopment
+      ) {
         registerTool(
-          toolSettings.jobs.update,
+          toolSettings._experimental_jobs.update,
           'Update Job',
           () => updateJobTool(server, req, useVerboseLogs, jobsDirPath),
           payload,
@@ -297,9 +306,13 @@ export const getMCPHandler = (
         )
       }
 
-      if (toolSettings.jobs?.run && experimentalTools.jobs?.enabled && isDevelopment) {
+      if (
+        toolSettings._experimental_jobs?.run &&
+        experimentalTools.jobs?.enabled &&
+        isDevelopment
+      ) {
         registerTool(
-          toolSettings.jobs.run,
+          toolSettings._experimental_jobs.run,
           'Run Job',
           () => runJobTool(server, req, useVerboseLogs),
           payload,
@@ -308,9 +321,13 @@ export const getMCPHandler = (
       }
 
       // Experimental - Auth Modification Tools
-      if (toolSettings.auth?.auth && experimentalTools.auth?.enabled && isDevelopment) {
+      if (
+        toolSettings._experimental_auth?.auth &&
+        experimentalTools.auth?.enabled &&
+        isDevelopment
+      ) {
         registerTool(
-          toolSettings.auth.auth,
+          toolSettings._experimental_auth.auth,
           'Auth',
           () => authTool(server, req, useVerboseLogs),
           payload,
@@ -318,9 +335,13 @@ export const getMCPHandler = (
         )
       }
 
-      if (toolSettings.auth?.login && experimentalTools.auth?.enabled && isDevelopment) {
+      if (
+        toolSettings._experimental_auth?.login &&
+        experimentalTools.auth?.enabled &&
+        isDevelopment
+      ) {
         registerTool(
-          toolSettings.auth.login,
+          toolSettings._experimental_auth.login,
           'Login',
           () => loginTool(server, req, useVerboseLogs),
           payload,
@@ -328,9 +349,13 @@ export const getMCPHandler = (
         )
       }
 
-      if (toolSettings.auth?.verify && experimentalTools.auth?.enabled && isDevelopment) {
+      if (
+        toolSettings._experimental_auth?.verify &&
+        experimentalTools.auth?.enabled &&
+        isDevelopment
+      ) {
         registerTool(
-          toolSettings.auth.verify,
+          toolSettings._experimental_auth.verify,
           'Verify',
           () => verifyTool(server, req, useVerboseLogs),
           payload,
@@ -338,9 +363,9 @@ export const getMCPHandler = (
         )
       }
 
-      if (toolSettings.auth?.resetPassword && experimentalTools.auth?.enabled) {
+      if (toolSettings._experimental_auth?.resetPassword && experimentalTools.auth?.enabled) {
         registerTool(
-          toolSettings.auth.resetPassword,
+          toolSettings._experimental_auth.resetPassword,
           'Reset Password',
           () => resetPasswordTool(server, req, useVerboseLogs),
           payload,
@@ -348,9 +373,9 @@ export const getMCPHandler = (
         )
       }
 
-      if (toolSettings.auth?.forgotPassword && experimentalTools.auth?.enabled) {
+      if (toolSettings._experimental_auth?.forgotPassword && experimentalTools.auth?.enabled) {
         registerTool(
-          toolSettings.auth.forgotPassword,
+          toolSettings._experimental_auth.forgotPassword,
           'Forgot Password',
           () => forgotPasswordTool(server, req, useVerboseLogs),
           payload,
@@ -358,9 +383,9 @@ export const getMCPHandler = (
         )
       }
 
-      if (toolSettings.auth?.unlock && experimentalTools.auth?.enabled) {
+      if (toolSettings._experimental_auth?.unlock && experimentalTools.auth?.enabled) {
         registerTool(
-          toolSettings.auth.unlock,
+          toolSettings._experimental_auth.unlock,
           'Unlock',
           () => unlockTool(server, req, useVerboseLogs),
           payload,
