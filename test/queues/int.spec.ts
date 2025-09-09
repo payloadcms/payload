@@ -1422,6 +1422,8 @@ describe('Queues - Payload', () => {
       id: job.id,
     })
 
+    // error can be defined while hasError is true, as hasError: true is only set if the job cannot retry anymore.
+    expect(Boolean(jobAfterRun.error)).toBe(false)
     expect(jobAfterRun.hasError).toBe(false)
     expect(jobAfterRun.log?.length).toBe(amount)
 
@@ -1440,6 +1442,30 @@ describe('Queues - Payload', () => {
       expect(logEntry).toBeDefined()
       expect((logEntry?.output as any)?.simpleID).toBe(simpleDoc?.id)
     }
+  })
+
+  it('can reliably run workflows with parallel tasks that complete immediately', async () => {
+    const amount = 20
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'fastParallelTask',
+      input: {
+        amount,
+      },
+    })
+
+    await payload.jobs.run({ silent: false })
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // error can be defined while hasError is true, as hasError: true is only set if the job cannot retry anymore.
+    expect(Boolean(jobAfterRun.error)).toBe(false)
+    expect(jobAfterRun.hasError).toBe(false)
+    expect(jobAfterRun.log?.length).toBe(amount)
   })
 
   it('can create and autorun jobs', async () => {

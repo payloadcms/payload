@@ -3,6 +3,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { MediaBlock } from './blocks/MediaBlock/index.js'
 import { Categories } from './collections/Categories.js'
 import { CollectionLevelConfig } from './collections/CollectionLevelConfig.js'
 import { Media } from './collections/Media.js'
@@ -62,4 +63,5 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
+  blocks: [MediaBlock],
 })

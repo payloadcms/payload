@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-24.04
     if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/release-commenter
         continue-on-error: true
         env:
@@ -43,9 +43,9 @@ jobs:
     if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Github Releases To Discord
-        uses: SethCohen/github-releases-to-discord@v1.16.2
+        uses: SethCohen/github-releases-to-discord@v1.19.0
         with:
           webhook_url: ${{ secrets.DISCORD_RELEASES_WEBHOOK_URL }}
           color: '16777215'

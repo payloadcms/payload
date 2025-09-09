@@ -236,7 +236,7 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await expect(page.locator('.render-field-diffs')).toBeVisible()
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
       await page.locator('.restore-version__restore-as-draft-button').click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
@@ -259,7 +259,7 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await expect(page.locator('.render-field-diffs')).toBeVisible()
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
       await page.locator('.restore-version .popup__trigger-wrap button').click()
       await page.getByRole('button', { name: 'Restore as draft' }).click()
       await page.locator('button:has-text("Confirm")').click()
@@ -421,6 +421,48 @@ describe('Versions', () => {
       const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
       await expect(drawer).toBeVisible()
       await expect(drawer.locator('.id-label')).toBeVisible()
+    })
+
+    test('collection - should autosave using proper depth', async () => {
+      const { id: postID } = await payload.create({
+        collection: postCollectionSlug,
+        data: {
+          title: 'post title',
+          description: 'post description',
+        },
+      })
+
+      const { id: docID } = await payload.create({
+        collection: autosaveCollectionSlug,
+        data: {
+          title: 'autosave title',
+          description: 'autosave description',
+          relationship: postID,
+        },
+      })
+
+      await page.goto(autosaveURL.edit(docID))
+
+      await expect(page.locator('#custom-field-label')).toHaveText(
+        `Value in DocumentInfoContext: ${postID}`,
+      )
+
+      await assertNetworkRequests(
+        page,
+        // Important: assert that depth is 0 in this request
+        `${serverURL}/api/autosave-posts/${docID}?depth=0&draft=true&autosave=true&locale=en`,
+        async () => {
+          await page.locator('#field-title').fill('changed title')
+        },
+        {
+          allowedNumberOfRequests: 1,
+        },
+      )
+
+      // Ensure that the value in context remains consistent across saves
+      await expect(page.locator('#custom-field-label')).toHaveText(
+        `Value in DocumentInfoContext: ${postID}`,
+      )
     })
 
     test('collection - should show "save as draft" button when showSaveDraftButton is true', async () => {
@@ -1053,7 +1095,7 @@ describe('Versions', () => {
 
       await textField.fill('spanish draft')
       await saveDocAndAssert(page, '#action-save-draft')
-      await expect(status).toContainText('Changed')
+      await expect(status).toContainText('Draft')
 
       await changeLocale(page, 'en')
       await textField.fill('english published')
@@ -1086,7 +1128,7 @@ describe('Versions', () => {
 
       const publishedDoc = data.docs[0]
 
-      expect(publishedDoc.text).toStrictEqual({
+      expect(publishedDoc?.text).toStrictEqual({
         en: 'english published',
         es: 'spanish published',
       })
@@ -1440,6 +1482,7 @@ describe('Versions', () => {
   describe('Versions diff view', () => {
     let postID: string
     let versionID: string
+    let oldVersionID: string
     let diffID: string
     let versionDiffID: string
 
@@ -1465,7 +1508,7 @@ describe('Versions', () => {
         draft: true,
         depth: 0,
         data: {
-          title: 'draft post',
+          title: 'current draft post title',
           description: 'draft description',
           blocksField: [
             {
@@ -1479,7 +1522,7 @@ describe('Versions', () => {
 
       const versions = await payload.findVersions({
         collection: draftCollectionSlug,
-        limit: 1,
+        limit: 2,
         depth: 0,
         where: {
           parent: { equals: postID },
@@ -1487,6 +1530,7 @@ describe('Versions', () => {
       })
 
       versionID = versions.docs[0].id
+      oldVersionID = versions.docs[1].id
 
       const diffDoc = (
         await payload.find({
@@ -1512,7 +1556,7 @@ describe('Versions', () => {
       versionDiffID = versionDiff.id
     })
 
-    async function navigateToDraftVersionView() {
+    async function navigateToDraftVersionView(versionID: string) {
       const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
       await page.goto(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
@@ -1525,12 +1569,22 @@ describe('Versions', () => {
     }
 
     test('should render diff', async () => {
-      await navigateToDraftVersionView()
+      await navigateToDraftVersionView(versionID)
       expect(true).toBe(true)
     })
 
+    test('should show the current version title in step nav for all versions', async () => {
+      await navigateToDraftVersionView(versionID)
+      // Document title part of the step nav should be the current version title
+      await expect(page.locator('.step-nav')).toContainText('current draft post title')
+
+      await navigateToDraftVersionView(oldVersionID)
+      // Document title part of the step nav should still be the current version title
+      await expect(page.locator('.step-nav')).toContainText('current draft post title')
+    })
+
     test('should render diff for nested fields', async () => {
-      await navigateToDraftVersionView()
+      await navigateToDraftVersionView(versionID)
 
       const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
       await expect(blocksDiffLabel).toBeVisible()
@@ -1549,7 +1603,7 @@ describe('Versions', () => {
     })
 
     test('should render diff collapser for nested fields', async () => {
-      await navigateToDraftVersionView()
+      await navigateToDraftVersionView(versionID)
 
       const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
       await expect(blocksDiffLabel).toBeVisible()
@@ -1927,6 +1981,41 @@ describe('Versions', () => {
 
       const hiddenField2 = page.locator('[data-field-path="textCannotRead"]')
       await expect(hiddenField2).toBeHidden()
+    })
+
+    test('correctly renders diff for relationship fields with deleted relation', async () => {
+      await payload.delete({
+        collection: 'draft-posts',
+      })
+
+      await navigateToDiffVersionView()
+
+      const diffsToCheck = [
+        'relationship',
+        'relationshipHasMany',
+        'relationshipHasManyPolymorphic',
+        'relationshipHasManyPolymorphic2',
+      ]
+      const checkPromises = diffsToCheck.map(async (dataFieldPath) => {
+        const relation = page.locator(`[data-field-path="${dataFieldPath}"]`)
+        return expect(relation).toBeVisible()
+      })
+      await Promise.all(checkPromises)
+    })
+
+    test('correctly renders diff for upload fields with deleted upload', async () => {
+      await payload.delete({
+        collection: 'media',
+      })
+
+      await navigateToDiffVersionView()
+
+      const diffsToCheck = ['upload', 'uploadHasMany']
+      const checkPromises = diffsToCheck.map(async (dataFieldPath) => {
+        const relation = page.locator(`[data-field-path="${dataFieldPath}"]`)
+        return expect(relation).toBeVisible()
+      })
+      await Promise.all(checkPromises)
     })
   })
 

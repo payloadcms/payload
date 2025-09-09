@@ -102,16 +102,16 @@ describe('Array', () => {
       })
       .catch(() => false) // If it doesn't appear, this resolves to `false`
 
-    expect(defaultRowLabelWasAttached).toBeFalsy()
+    await expect.poll(() => defaultRowLabelWasAttached).toBeFalsy()
 
     await expect(page.locator('#field-rowLabelAsComponent #custom-array-row-label')).toBeVisible()
 
     await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
-    await wait(100)
 
     const customRowLabel = page.locator(
       '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("custom row label")',
     )
+    await expect(customRowLabel).toBeVisible()
 
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
   })

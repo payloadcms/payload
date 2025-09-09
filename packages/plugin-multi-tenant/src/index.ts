@@ -116,12 +116,13 @@ export const multiTenantPlugin =
       adminUsersCollection.admin.baseFilter = combineFilters({
         baseFilter,
         customFilter: (args) =>
-          filterDocumentsByTenants({
+          filterDocumentsByTenants<ConfigType>({
             filterFieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
             req: args.req,
             tenantsArrayFieldName,
             tenantsArrayTenantFieldName,
             tenantsCollectionSlug,
+            userHasAccessToAllTenants,
           }),
       })
     }
@@ -176,6 +177,7 @@ export const multiTenantPlugin =
           tenantsArrayFieldName,
           tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
+          userHasAccessToAllTenants,
         })
 
         if (pluginConfig.collections[foldersSlug]?.customTenantField !== true) {
@@ -207,12 +209,13 @@ export const multiTenantPlugin =
           collection.admin.baseFilter = combineFilters({
             baseFilter: collection.admin?.baseFilter ?? collection.admin?.baseListFilter,
             customFilter: (args) =>
-              filterDocumentsByTenants({
+              filterDocumentsByTenants<ConfigType>({
                 filterFieldName: tenantFieldName,
                 req: args.req,
                 tenantsArrayFieldName,
                 tenantsArrayTenantFieldName,
                 tenantsCollectionSlug,
+                userHasAccessToAllTenants,
               }),
           })
         }
@@ -279,6 +282,7 @@ export const multiTenantPlugin =
                 tenantsArrayFieldName,
                 tenantsArrayTenantFieldName,
                 tenantsCollectionSlug,
+                userHasAccessToAllTenants,
               }),
           })
         }
@@ -312,12 +316,14 @@ export const multiTenantPlugin =
                 path: '@payloadcms/plugin-multi-tenant/client#WatchTenantCollection',
               },
             },
+            disableBulkEdit: true,
+            disableListColumn: true,
           },
         })
 
         collection.endpoints = [
           ...(collection.endpoints || []),
-          getTenantOptionsEndpoint<ConfigType>({
+          getTenantOptionsEndpoint({
             tenantsArrayFieldName,
             tenantsArrayTenantFieldName,
             tenantsCollectionSlug,
@@ -346,6 +352,7 @@ export const multiTenantPlugin =
           tenantsArrayFieldName,
           tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
+          userHasAccessToAllTenants,
         })
 
         if (pluginConfig.collections[collection.slug]?.customTenantField !== true) {
@@ -383,6 +390,7 @@ export const multiTenantPlugin =
                 tenantsArrayFieldName,
                 tenantsArrayTenantFieldName,
                 tenantsCollectionSlug,
+                userHasAccessToAllTenants,
               }),
           })
         }

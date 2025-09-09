@@ -22,6 +22,11 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   context?: RequestContext
   /**
+   * You may pass the document data directly which will skip the `db.findOne` database query.
+   * This is useful if you want to use this endpoint solely for running hooks and populating data.
+   */
+  data?: Record<string, unknown>
+  /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
@@ -84,6 +89,7 @@ export async function findOneGlobalLocal<
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
   const {
     slug: globalSlug,
+    data,
     depth,
     draft = false,
     includeLockStatus,
@@ -101,6 +107,7 @@ export async function findOneGlobalLocal<
 
   return findOneOperation({
     slug: globalSlug as string,
+    data,
     depth,
     draft,
     globalConfig,

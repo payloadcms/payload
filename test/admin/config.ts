@@ -19,6 +19,7 @@ import { CollectionGroup2A } from './collections/Group2A.js'
 import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { ListDrawer } from './collections/ListDrawer.js'
+import { ListViewSelectAPI } from './collections/ListViewSelectAPI/index.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Placeholder } from './collections/Placeholder.js'
@@ -28,6 +29,7 @@ import { UploadCollection } from './collections/Upload.js'
 import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { UseAsTitleGroupField } from './collections/UseAsTitleGroupField.js'
 import { Users } from './collections/Users.js'
+import { Virtuals } from './collections/Virtuals.js'
 import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
@@ -187,6 +189,8 @@ export default buildConfigWithDefaults({
     UseAsTitleGroupField,
     DisableBulkEdit,
     CustomListDrawer,
+    ListViewSelectAPI,
+    Virtuals,
   ],
   globals: [
     GlobalHidden,
