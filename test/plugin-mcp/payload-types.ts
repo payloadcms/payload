@@ -64,23 +64,26 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'payload-mcp-tool-api-key': PayloadMcpToolApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
+    users: User;
     media: Media;
     posts: Post;
     'example-products': ExampleProduct;
-    users: User;
+    'payload-mcp-tool-api-key': PayloadMcpToolApiKey;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
   collectionsSelect: {
+    users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'example-products': ExampleProductsSelect<false> | ExampleProductsSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
+    'payload-mcp-tool-api-key': PayloadMcpToolApiKeySelect<false> | PayloadMcpToolApiKeySelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -95,9 +98,13 @@ export interface Config {
     'payload-mcp-tools': PayloadMcpToolsSelect<false> | PayloadMcpToolsSelect<true>;
   };
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user:
+    | (User & {
+        collection: 'users';
+      })
+    | (PayloadMcpToolApiKey & {
+        collection: 'payload-mcp-tool-api-key';
+      });
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -120,6 +127,51 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+export interface PayloadMcpToolApiKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -163,30 +215,6 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "example-products".
  */
 export interface ExampleProduct {
@@ -199,11 +227,147 @@ export interface ExampleProduct {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-tool-api-key".
+ */
+export interface PayloadMcpToolApiKey {
+  id: string;
+  /**
+   * A useful label for the API key.
+   */
+  label: string;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  exampleProducts?: {
+    /**
+     * Allow clients to find example-products.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create example-products.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update example-products.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete example-products.
+     */
+    delete?: boolean | null;
+  };
+  posts?: {
+    /**
+     * Allow clients to find posts.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create posts.
+     */
+    create?: boolean | null;
+  };
+  media?: {
+    /**
+     * Allow clients to find media.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update media.
+     */
+    update?: boolean | null;
+  };
+  custom?: {
+    /**
+     * Rolls a virtual dice with a specified number of sides
+     */
+    diceRoll?: boolean | null;
+  };
+  _experimental_collections?: {
+    /**
+     * Allow LLMs to find and list Payload collections with optional content and document counts.
+     */
+    find?: boolean | null;
+    /**
+     * Allow LLMs to create new Payload collections with specified fields and configuration.
+     */
+    create?: boolean | null;
+    /**
+     * Allow LLMs to update existing Payload collections with new fields, modifications, or configuration changes.
+     */
+    update?: boolean | null;
+    /**
+     * Allow LLMs to delete Payload collections and optionally update the configuration.
+     */
+    delete?: boolean | null;
+  };
+  _experimental_jobs?: {
+    /**
+     * Allow LLMs to create new Payload jobs (tasks and workflows) with custom schemas and configuration.
+     */
+    create?: boolean | null;
+    /**
+     * Allow LLMs to execute Payload jobs with custom input data and queue options.
+     */
+    run?: boolean | null;
+    /**
+     * Allow LLMs to update existing Payload jobs with new schemas, configuration, or handler code.
+     */
+    update?: boolean | null;
+  };
+  _experimental_config?: {
+    /**
+     * Allow LLMs to read and display a Payload configuration file.
+     */
+    find?: boolean | null;
+    /**
+     * Allow LLMs to update a Payload configuration file with various modifications.
+     */
+    update?: boolean | null;
+  };
+  _experimental_auth?: {
+    /**
+     * Allow LLMs to check authentication status for a user by setting custom headers. (e.g. {"Authorization": "Bearer <token>"})
+     */
+    auth?: boolean | null;
+    /**
+     * Allow LLMs to authenticate a user with email and password.
+     */
+    login?: boolean | null;
+    /**
+     * Allow LLMs to verify a user email with a verification token.
+     */
+    verify?: boolean | null;
+    /**
+     * Allow LLMs to reset a user password with a reset token.
+     */
+    resetPassword?: boolean | null;
+    /**
+     * Allow LLMs to send a password reset email to a user.
+     */
+    forgotPassword?: boolean | null;
+    /**
+     * Allow LLMs to unlock a user account that has been locked due to failed login attempts.
+     */
+    unlock?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
   id: string;
   document?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
     | ({
         relationTo: 'media';
         value: string | Media;
@@ -217,14 +381,19 @@ export interface PayloadLockedDocument {
         value: string | ExampleProduct;
       } | null)
     | ({
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'payload-mcp-tool-api-key';
+        value: string | PayloadMcpToolApiKey;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-tool-api-key';
+        value: string | PayloadMcpToolApiKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -234,10 +403,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-tool-api-key';
+        value: string | PayloadMcpToolApiKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -261,6 +435,31 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -304,25 +503,72 @@ export interface ExampleProductsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "payload-mcp-tool-api-key_select".
  */
-export interface UsersSelect<T extends boolean = true> {
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
+export interface PayloadMcpToolApiKeySelect<T extends boolean = true> {
+  label?: T;
+  description?: T;
+  exampleProducts?:
     | T
     | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
       };
+  posts?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+      };
+  media?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  custom?:
+    | T
+    | {
+        diceRoll?: T;
+      };
+  _experimental_collections?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  _experimental_jobs?:
+    | T
+    | {
+        create?: T;
+        run?: T;
+        update?: T;
+      };
+  _experimental_config?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  _experimental_auth?:
+    | T
+    | {
+        auth?: T;
+        login?: T;
+        verify?: T;
+        resetPassword?: T;
+        forgotPassword?: T;
+        unlock?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
