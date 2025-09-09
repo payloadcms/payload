@@ -88,6 +88,7 @@ export type InitPageResult = {
 export type ViewTypes =
   | 'account'
   | 'collection-folders'
+  | 'createFirstUser'
   | 'dashboard'
   | 'document'
   | 'folders'

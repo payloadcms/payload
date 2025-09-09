@@ -147,7 +147,7 @@ export const buildFormState = async (
 
   const clientSchemaMap = getClientSchemaMap({
     collectionSlug,
-    config: getClientConfig({ config, i18n, importMap: req.payload.importMap }),
+    config: getClientConfig({ config, i18n, importMap: req.payload.importMap, user: req.user }),
     globalSlug,
     i18n,
     payload,

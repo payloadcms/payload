@@ -85,6 +85,7 @@ export const RootLayout = async ({
     config,
     i18n: req.i18n,
     importMap,
+    user: req.user,
   })
 
   if (
