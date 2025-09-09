@@ -36,7 +36,9 @@ export async function generateStaticParams() {
 
   try {
     const pages = await getDocs<Page>('pages')
-    return pages?.map(({ slug }) => slug)
+    return pages?.map((page) => {
+      return { slug: page.slug }
+    })
   } catch (_err) {
     return []
   }

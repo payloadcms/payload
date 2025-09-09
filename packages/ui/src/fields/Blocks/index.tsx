@@ -110,6 +110,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     }
 
     const resolvedBlocks: ClientBlock[] = []
+
     for (const blockReference of blockReferences) {
       const block =
         typeof blockReference === 'string' ? config.blocksMap[blockReference] : blockReference
@@ -401,6 +402,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         >
           {rows.map((row, i) => {
             const { blockType, isLoading } = row
+
             const blockConfig: ClientBlock =
               config.blocksMap[blockType] ??
               ((blockReferences ?? blocks).find(

@@ -2,13 +2,11 @@
 import type { CollectionPreferences, LivePreviewConfig } from 'payload'
 
 import { DndContext } from '@dnd-kit/core'
-import { fieldSchemaToJSON } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { usePopupWindow } from '../../hooks/usePopupWindow.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
-import { useConfig } from '../Config/index.js'
 import { customCollisionDetection } from './collisionDetection.js'
 import { LivePreviewContext } from './context.js'
 import { sizeReducer } from './sizeReducer.js'
@@ -90,8 +88,6 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
 
   const [iframeHasLoaded, setIframeHasLoaded] = useState(false)
 
-  const { config, getEntityConfig } = useConfig()
-
   const [zoom, setZoom] = useState(1)
 
   const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -103,12 +99,8 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     width: 0,
   })
 
-  const entityConfig = getEntityConfig({ collectionSlug, globalSlug })
-
   const [breakpoint, setBreakpoint] =
     React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
-
-  const [fieldSchemaJSON] = useState(() => fieldSchemaToJSON(entityConfig?.fields || [], config))
 
   // The toolbar needs to freely drag and drop around the page
   const handleDragEnd = (ev) => {
@@ -232,7 +224,6 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         appIsReady,
         breakpoint,
         breakpoints,
-        fieldSchemaJSON,
         iframeHasLoaded,
         iframeRef,
         isLivePreviewEnabled,

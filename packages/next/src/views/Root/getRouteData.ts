@@ -174,12 +174,13 @@ export const getRouteData = ({
           Component: oneSegmentViews[viewKey],
         }
 
+        viewType = viewKey as ViewTypes
+
         templateClassName = baseClasses[viewKey]
         templateType = 'minimal'
 
         if (viewKey === 'account') {
           templateType = 'default'
-          viewType = 'account'
         }
 
         if (isBrowseByFolderEnabled && viewKey === 'browseByFolder') {

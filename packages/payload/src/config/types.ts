@@ -760,6 +760,12 @@ export type Config = {
           username?: string
         }
       | false
+    /**
+     * Automatically refresh user tokens for users logged into the dashboard
+     *
+     * @default false
+     */
+    autoRefresh?: boolean
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?:
       | 'default'
@@ -948,9 +954,10 @@ export type Config = {
      */
     timezones?: TimezonesConfig
     /**
-     * @experimental
      * Configure toast message behavior and appearance in the admin panel.
      * Currently using [Sonner](https://sonner.emilkowal.ski) for toast notifications.
+     *
+     * @experimental This property is experimental and may change in future releases. Use at your own discretion.
      */
     toast?: {
       /**
@@ -1057,7 +1064,8 @@ export type Config = {
   experimental?: ExperimentalConfig
   /**
    * Options for folder view within the admin panel
-   * @experimental this feature may change in minor versions until it is fully stable
+   *
+   * @experimental This feature may change in minor versions until it is fully stable
    */
   folders?: false | RootFoldersConfiguration
   /**

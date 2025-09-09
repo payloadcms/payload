@@ -26,6 +26,7 @@ import { isCustomAdminView } from '../../utilities/isCustomAdminView.js'
 import { isPublicAdminRoute } from '../../utilities/isPublicAdminRoute.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getRouteData } from './getRouteData.js'
+import { SyncClientConfig } from './SyncClientConfig.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -237,6 +238,7 @@ export const RootPage = async ({
     config,
     i18n: req.i18n,
     importMap,
+    user: viewType === 'createFirstUser' ? true : initPageResult?.req.user,
   })
 
   const visibleEntities = getVisibleEntities({ req })
@@ -294,6 +296,7 @@ export const RootPage = async ({
 
   return (
     <React.Fragment>
+      <SyncClientConfig clientConfig={clientConfig} />
       {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
       {templateType === 'minimal' && (
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>

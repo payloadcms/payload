@@ -188,7 +188,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       collectionSlug: docConfig?.slug,
       config,
       docID,
-      fields: relatedCollection.fields,
+      fields: relatedCollection?.fields,
       segments: field.on.split('.'),
     })
   }, [getEntityConfig, field.collection, field.on, docConfig?.slug, docID, config])

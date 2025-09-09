@@ -75,8 +75,6 @@ export {
 
 export { extractID } from '../utilities/extractID.js'
 
-export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
-
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 export { formatAdminURL } from '../utilities/formatAdminURL.js'
