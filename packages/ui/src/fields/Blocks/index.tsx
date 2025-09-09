@@ -404,7 +404,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             const { blockType, isLoading } = row
 
             const blockConfig: ClientBlock =
-              config.blocksMap?.[blockType] ??
+              config.blocksMap[blockType] ??
               ((blockReferences ?? blocks).find(
                 (block) => typeof block !== 'string' && block.slug === blockType,
               ) as ClientBlock)
