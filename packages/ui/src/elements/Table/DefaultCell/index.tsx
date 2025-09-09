@@ -6,6 +6,7 @@ import { fieldAffectsData, fieldIsID } from 'payload/shared'
 import React from 'react' // TODO: abstract this out to support all routers
 
 import { useConfig } from '../../../providers/Config/index.js'
+import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
 import { getDisplayedFieldValue } from '../../../utilities/getDisplayedFieldValue.js'
@@ -31,12 +32,15 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
 
   const {
     config: {
+      localization,
       routes: { admin: adminRoute },
     },
     getEntityConfig,
   } = useConfig()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
+
+  const locale = useLocale()
 
   const classNameFromConfigContext = admin && 'className' in admin ? admin.className : undefined
 
@@ -59,14 +63,16 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     className,
   }
 
+  const addLocaleToURL = localization && locale.code ? `?locale=${locale.code}` : ''
+
   if (link) {
     wrapElementProps.prefetch = false
     WrapElement = Link
     wrapElementProps.href = collectionConfig?.slug
       ? formatAdminURL({
-          adminRoute,
-          path: `/collections/${collectionConfig?.slug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(rowData.id)}`,
-        })
+        adminRoute,
+        path: `/collections/${collectionConfig?.slug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(rowData.id)}${addLocaleToURL}`,
+      })
       : ''
   }
 

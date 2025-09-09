@@ -46,6 +46,7 @@ export function DefaultDashboard(props: DashboardViewServerProps) {
         admin: {
           components: { afterDashboard, beforeDashboard },
         },
+        localization,
         routes: { admin: adminRoute },
       },
     },
@@ -54,6 +55,8 @@ export function DefaultDashboard(props: DashboardViewServerProps) {
     searchParams,
     user,
   } = props
+
+  const addLocaleToURL = localization && locale.code ? `?locale=${locale.code}` : ''
 
   return (
     <div className={baseClass}>
@@ -96,11 +99,14 @@ export function DefaultDashboard(props: DashboardViewServerProps) {
 
                         buttonAriaLabel = t('general:showAllLabel', { label: title })
 
-                        href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
+                        href = formatAdminURL({
+                          adminRoute,
+                          path: `/collections/${slug}${addLocaleToURL}`,
+                        })
 
                         createHREF = formatAdminURL({
                           adminRoute,
-                          path: `/collections/${slug}/create`,
+                          path: `/collections/${slug}/create${addLocaleToURL}`,
                         })
 
                         hasCreatePermission = permissions?.collections?.[slug]?.create
@@ -115,7 +121,7 @@ export function DefaultDashboard(props: DashboardViewServerProps) {
 
                         href = formatAdminURL({
                           adminRoute,
-                          path: `/globals/${slug}`,
+                          path: `/globals/${slug}${addLocaleToURL}`,
                         })
 
                         // Find the lock status for the global
