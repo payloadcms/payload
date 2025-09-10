@@ -8,9 +8,9 @@ export const registerTool = (
   if (isEnabled) {
     registrationFn()
     if (useVerboseLogs) {
-      payload.logger.info(`[payload-mcp] ✅ ${toolType} Registered.`)
+      payload.logger.info(`[payload-mcp] ✅ Tool: ${toolType} Registered.`)
     }
   } else if (useVerboseLogs) {
-    payload.logger.info(`[payload-mcp] ⏭️ ${toolType} Skipped.`)
+    payload.logger.info(`[payload-mcp] ⏭️ Tool: ${toolType} Skipped.`)
   }
 }

@@ -27,6 +27,7 @@
     "@date-fns/tz": "1.2.0",
     "@miniflare/d1": "2.14.4",
     "@miniflare/shared": "2.14.4",
+    "@modelcontextprotocol/sdk": "^1.17.2",
     "@next/env": "15.4.4",
     "@opennextjs/cloudflare": "1.9.2",
     "@payloadcms/admin-bar": "workspace:*",

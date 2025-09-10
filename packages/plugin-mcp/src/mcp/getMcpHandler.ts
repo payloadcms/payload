@@ -42,6 +42,8 @@ export const getMCPHandler = (
   // MCP Server and Handler Options
   const MCPOptions = pluginOptions.mcp || {}
   const customMCPTools = MCPOptions.tools || []
+  const customMCPPrompts = MCPOptions.prompts || []
+  const customMCPResources = MCPOptions.resources || []
   const MCPHandlerOptions = MCPOptions.handlerOptions || {}
   const serverOptions = MCPOptions.serverOptions || {}
   const useVerboseLogs = MCPHandlerOptions.verboseLogs ?? false
@@ -66,6 +68,41 @@ export const getMCPHandler = (
 
   return createMcpHandler(
     (server) => {
+      // Custom prompts
+      customMCPPrompts.forEach((prompt) => {
+        server.registerPrompt(
+          prompt.name,
+          {
+            argsSchema: prompt.argsSchema,
+            description: prompt.description,
+            title: prompt.title,
+          },
+          prompt.handler,
+        )
+        if (useVerboseLogs) {
+          payload.logger.info(`[payload-mcp] ✅ Prompt: ${prompt.title} Registered.`)
+        }
+      })
+
+      // Custom resources
+      customMCPResources.forEach((resource) => {
+        server.registerResource(
+          resource.name,
+          //@ts-expect-error - Overload type is not working however -- ResourceTemplate OR String is a valid type
+          resource.uri,
+          {
+            description: resource.description,
+            mimeType: resource.mimeType,
+            title: resource.title,
+          },
+          resource.handler,
+        )
+
+        if (useVerboseLogs) {
+          payload.logger.info(`[payload-mcp] ✅ Resource: ${resource.title} Registered.`)
+        }
+      })
+
       const enabledCollectionSlugs = Object.keys(collectionsPluginConfig || {}).filter(
         (collection) => {
           const fullyEnabled =
@@ -394,7 +431,7 @@ export const getMCPHandler = (
       }
 
       if (useVerboseLogs) {
-        payload.logger.info('[payload-mcp] 🚀 Tools Registered.')
+        payload.logger.info('[payload-mcp] 🚀 MCP Server Ready.')
       }
     },
     {

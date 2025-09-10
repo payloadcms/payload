@@ -1,6 +1,8 @@
 import type { CollectionSlug, PayloadRequest } from 'payload'
 import type { z } from 'zod'
 
+import { type ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
+
 export type PluginMCPServerConfig = {
   /**
    * Experimental features
@@ -107,6 +109,66 @@ export type PluginMCPServerConfig = {
    */
   mcp?: {
     handlerOptions?: MCPHandlerOptions
+    /**
+     * Add custom MCP Prompts.
+     */
+    prompts?: {
+      /**
+       * Set the args schema of the prompt. This is the args schema that will be passed to the prompt. This is used by MCP clients to determine the arguments that will be passed to the prompt.
+       */
+      argsSchema: z.ZodRawShape
+      /**
+       * Set the description of the prompt. This is used by MCP clients to determine when to use the prompt.
+       */
+      description: string
+      /**
+       * Set the handler of the prompt. This is the function that will be called when the prompt is used.
+       */
+      handler: (...args: any) => any
+      /**
+       * Set the function name of the prompt.
+       */
+      name: string
+      /**
+       * Set the title of the prompt. LLMs will interperate the title to determine when to use the prompt.
+       */
+      title: string
+    }[]
+
+    /**
+     * Add custom MCP Resource.
+     */
+    resources?: {
+      /**
+       * Set the description of the resource. This is used by MCP clients to determine when to use the resource.
+       * example: 'Data is a resource that contains special data.'
+       */
+      description: string
+      /**
+       * Set the handler of the resource. This is the function that will be called when the resource is used.
+       */
+      handler: (...args: any) => any
+      /**
+       * Set the mime type of the resource.
+       * example: 'text/plain'
+       */
+      mimeType: string
+      /**
+       * Set the function name of the resource.
+       * example: 'data'
+       */
+      name: string
+      /**
+       * Set the title of the resource. LLMs will interperate the title to determine when to use the resource.
+       * example: 'Data'
+       */
+      title: string
+      /**
+       * Set the uri of the resource.
+       * example: 'data://app'
+       */
+      uri: ResourceTemplate | string
+    }[]
     serverOptions?: MCPServerOptions
     /**
      * Add custom MCP Tools.
