@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { HeadingFeature, lexicalEditor, TreeViewFeature } from '@payloadcms/richtext-lexical'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export const postsSlug = 'posts'
 
@@ -19,13 +19,7 @@ export const PostsCollection: CollectionConfig = {
       name: 'content',
       type: 'richText',
       editor: lexicalEditor({
-        features: ({ defaultFeatures }) => {
-          return [
-            ...defaultFeatures,
-            HeadingFeature({ enabledHeadingSizes: ['h2', 'h4'] }),
-            TreeViewFeature(),
-          ]
-        },
+        features: ({ defaultFeatures }) => [...defaultFeatures],
       }),
     },
   ],
