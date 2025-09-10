@@ -92,7 +92,9 @@ type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
 
 export type BeforeOperationHook = (args: {
   args?: any
-  /** The collection which this hook is being run on */
+  /**
+   *  The collection which this hook is being run on
+   */
   collection: SanitizedCollectionConfig
   context: RequestContext
   /**

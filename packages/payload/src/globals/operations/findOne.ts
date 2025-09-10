@@ -53,6 +53,23 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
 
   try {
     // /////////////////////////////////////
+    // beforeOperation - Global
+    // /////////////////////////////////////
+
+    if (globalConfig.hooks?.beforeOperation?.length) {
+      for (const hook of globalConfig.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            context: args.req.context,
+            global: globalConfig,
+            operation: 'read',
+            req: args.req,
+          })) || args
+      }
+    }
+
+    // /////////////////////////////////////
     // Retrieve and execute access
     // /////////////////////////////////////
 

@@ -32,6 +32,23 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     const shouldCommit = await initTransaction(req)
 
     // /////////////////////////////////////
+    // beforeOperation - Global
+    // /////////////////////////////////////
+
+    if (globalConfig.hooks?.beforeOperation?.length) {
+      for (const hook of globalConfig.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            context: req.context,
+            global: globalConfig,
+            operation: 'restoreVersion',
+            req,
+          })) || args
+      }
+    }
+
+    // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
