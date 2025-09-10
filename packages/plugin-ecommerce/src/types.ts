@@ -348,37 +348,37 @@ export type AccessConfig = {
   /**
    * Limited to only admin users.
    */
-  isAdmin: Access
+  adminOnly: Access
   /**
    * Limited to only admin users, specifically for Field level access control.
    */
-  isAdminField: FieldAccess
+  adminOnlyFieldAccess: FieldAccess
   /**
    * Is the owner of the document via the `customer` field or is an admin.
    */
-  isAdminOrOwner: Access
+  adminOrCustomerOwner: Access
   /**
-   * The document is published or user is admin.
+   * The document status is published or user is admin.
    */
-  isAdminOrPublished: Access
+  adminOrPublishedStatus: Access
   /**
    * Authenticated users only. Defaults to the example function.
    *
    * @example
-   * authenticated: ({ req }) => !!req?.user
+   * anyUser: ({ req }) => !!req?.user
    */
-  isAuthenticated?: Access
+  authenticatedOnly?: Access
   /**
    * Limited to customers only, specifically for Field level access control.
    */
-  isCustomerField: FieldAccess
+  customerOnlyFieldAccess: FieldAccess
   /**
-   * Public access. Defaults to the example function.
+   * Entirely public access. Defaults to the example function.
    *
    * @example
-   * public: () => true
+   * publicAccess: () => true
    */
-  isPublic?: Access
+  publicAccess?: Access
 }
 
 export type EcommercePluginConfig = {

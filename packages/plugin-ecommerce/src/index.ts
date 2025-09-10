@@ -4,19 +4,19 @@ import { deepMergeSimple } from 'payload/shared'
 
 import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from './types.js'
 
-import { addressesCollection } from './addresses/addressesCollection.js'
-import { cartsCollection } from './carts/cartsCollection.js'
+import { createAddressesCollection } from './addresses/createAddressesCollection.js'
+import { createCartsCollection } from './carts/createCartsCollection.js'
 import { confirmOrderHandler } from './endpoints/confirmOrder.js'
 import { initiatePaymentHandler } from './endpoints/initiatePayment.js'
-import { ordersCollection } from './orders/ordersCollection.js'
-import { productsCollection } from './products/productsCollection.js'
-import { transactionsCollection } from './transactions/transactionsCollection.js'
+import { createOrdersCollection } from './orders/createOrdersCollection.js'
+import { createProductsCollection } from './products/createProductsCollection.js'
+import { createTransactionsCollection } from './transactions/createTransactionsCollection.js'
 import { translations } from './translations/index.js'
 import { getCollectionSlugMap } from './utilities/getCollectionSlugMap.js'
 import { sanitizePluginConfig } from './utilities/sanitizePluginConfig.js'
-import { variantOptionsCollection } from './variants/variantOptionsCollection.js'
-import { variantsCollection } from './variants/variantsCollection/index.js'
-import { variantTypesCollection } from './variants/variantTypesCollection.js'
+import { createVariantOptionsCollection } from './variants/createVariantOptionsCollection.js'
+import { createVariantsCollection } from './variants/createVariantsCollection/index.js'
+import { createVariantTypesCollection } from './variants/createVariantTypesCollection.js'
 
 export const ecommercePlugin =
   (pluginConfig?: EcommercePluginConfig) =>
@@ -56,12 +56,14 @@ export const ecommercePlugin =
 
       const supportedCountries = sanitizedPluginConfig.addresses.supportedCountries
 
-      const addresses = addressesCollection({
+      const addresses = createAddressesCollection({
+        access: {
+          adminOrCustomerOwner: accessConfig.adminOrCustomerOwner,
+          authenticatedOnly: accessConfig.authenticatedOnly,
+          customerOnlyFieldAccess: accessConfig.customerOnlyFieldAccess,
+        },
         addressFields,
         customersSlug: collectionSlugMap.customers,
-        isAuthenticated: accessConfig.isAuthenticated,
-        isCustomerField: accessConfig.isCustomerField,
-        isOwnerOrAdmin: accessConfig.isAdminOrOwner,
         overrides: collectionOverrides,
         supportedCountries,
       })
@@ -83,26 +85,32 @@ export const ecommercePlugin =
         const overrides =
           typeof productsConfig.variants === 'boolean' ? undefined : productsConfig.variants
 
-        const variants = variantsCollection({
+        const variants = createVariantsCollection({
+          access: {
+            adminOnly: accessConfig.adminOnly,
+            adminOrPublishedStatus: accessConfig.adminOrPublishedStatus,
+          },
           currenciesConfig,
           inventory: sanitizedPluginConfig.inventory,
-          isAdmin: accessConfig.isAdmin,
-          isAdminOrPublished: accessConfig.isAdminOrPublished,
           overrides: overrides?.variantsCollection,
           productsSlug: collectionSlugMap.products,
           variantOptionsSlug: collectionSlugMap.variantOptions,
         })
 
-        const variantTypes = variantTypesCollection({
-          isAdmin: accessConfig.isAdmin,
-          isPublic: accessConfig.isPublic,
+        const variantTypes = createVariantTypesCollection({
+          access: {
+            adminOnly: accessConfig.adminOnly,
+            publicAccess: accessConfig.publicAccess,
+          },
           overrides: overrides?.variantTypesCollection,
           variantOptionsSlug: collectionSlugMap.variantOptions,
         })
 
-        const variantOptions = variantOptionsCollection({
-          isAdmin: accessConfig.isAdmin,
-          isPublic: accessConfig.isPublic,
+        const variantOptions = createVariantOptionsCollection({
+          access: {
+            adminOnly: accessConfig.adminOnly,
+            publicAccess: accessConfig.publicAccess,
+          },
           overrides: overrides?.variantOptionsCollection,
           variantTypesSlug: collectionSlugMap.variantTypes,
         })
@@ -110,7 +118,7 @@ export const ecommercePlugin =
         incomingConfig.collections.push(variants, variantTypes, variantOptions)
       }
 
-      const products = productsCollection({
+      const products = createProductsCollection({
         currenciesConfig,
         enableVariants,
         inventory: sanitizedPluginConfig.inventory,
@@ -119,19 +127,23 @@ export const ecommercePlugin =
         ...('productsCollection' in productsConfig && productsConfig.productsCollection
           ? { overrides: productsConfig.productsCollection }
           : {}),
-        isAdmin: accessConfig.isAdmin,
-        isAdminOrPublished: accessConfig.isAdminOrPublished,
+        access: {
+          adminOnly: accessConfig.adminOnly,
+          adminOrPublishedStatus: accessConfig.adminOrPublishedStatus,
+        },
       })
 
       incomingConfig.collections.push(products)
 
       if (sanitizedPluginConfig.carts) {
-        const carts = cartsCollection({
+        const carts = createCartsCollection({
+          access: {
+            adminOrCustomerOwner: accessConfig.adminOrCustomerOwner,
+            publicAccess: accessConfig.publicAccess,
+          },
           currenciesConfig,
           customersSlug: collectionSlugMap.customers,
           enableVariants: Boolean(productsConfig.variants),
-          isOwnerOrAdmin: accessConfig.isAdminOrOwner,
-          isPublic: accessConfig.isPublic,
           overrides:
             sanitizedPluginConfig.carts === true
               ? undefined
@@ -145,14 +157,16 @@ export const ecommercePlugin =
     }
 
     if (sanitizedPluginConfig.orders) {
-      const orders = ordersCollection({
+      const orders = createOrdersCollection({
+        access: {
+          adminOnly: accessConfig.adminOnly,
+          adminOnlyFieldAccess: accessConfig.adminOnlyFieldAccess,
+          adminOrCustomerOwner: accessConfig.adminOrCustomerOwner,
+        },
         addressFields,
         currenciesConfig,
         customersSlug: collectionSlugMap.customers,
         enableVariants,
-        isAdmin: accessConfig.isAdmin,
-        isAdminField: accessConfig.isAdminField,
-        isAdminOrOwner: accessConfig.isAdminOrOwner,
         overrides:
           sanitizedPluginConfig.orders === true
             ? undefined
@@ -229,13 +243,15 @@ export const ecommercePlugin =
     }
 
     if (sanitizedPluginConfig.transactions) {
-      const transactions = transactionsCollection({
+      const transactions = createTransactionsCollection({
+        access: {
+          adminOnly: accessConfig.adminOnly,
+        },
         addressFields,
         cartsSlug: collectionSlugMap.carts,
         currenciesConfig,
         customersSlug: collectionSlugMap.customers,
         enableVariants,
-        isAdmin: accessConfig.isAdmin,
         ordersSlug: collectionSlugMap.orders,
         overrides:
           sanitizedPluginConfig.transactions === true

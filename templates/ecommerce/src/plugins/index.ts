@@ -11,11 +11,11 @@ import { Page, Product } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 import { ProductsCollection } from '@/collections/Products'
 import { VariantsCollection } from '@/collections/Variants'
-import { isAdminOrOwner } from '@/access/isAdminOrOwner'
-import { isAdminOrPublished } from '@/access/isAdminOrPublished'
-import { isAdmin } from '@/access/isAdmin'
-import { isAdminField } from '@/access/isAdminField'
-import { isCustomerField } from '@/access/isCustomerField'
+import { adminOrCustomerOwner } from '@/access/adminOrCustomerOwner'
+import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
+import { adminOnly } from '@/access/adminOnly'
+import { adminOnlyFieldAccess } from '@/access/adminOnlyFieldAccess'
+import { customerOnlyFieldAccess } from '@/access/customerOnlyFieldAccess'
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Ecommerce Template` : 'Payload Ecommerce Template'
@@ -68,11 +68,11 @@ export const plugins: Plugin[] = [
   }),
   ecommercePlugin({
     access: {
-      isAdmin: isAdmin,
-      isAdminField: isAdminField,
-      isAdminOrOwner: isAdminOrOwner,
-      isAdminOrPublished: isAdminOrPublished,
-      isCustomerField: isCustomerField,
+      adminOnly,
+      adminOnlyFieldAccess,
+      adminOrCustomerOwner,
+      adminOrPublishedStatus,
+      customerOnlyFieldAccess,
     },
     customers: {
       slug: 'users',

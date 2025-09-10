@@ -3,8 +3,10 @@ import type { CollectionConfig, Field } from 'payload'
 import type { AccessConfig, FieldsOverride } from '../types.js'
 
 type Props = {
-  isAdmin: NonNullable<AccessConfig['isAdmin']>
-  isPublic: NonNullable<AccessConfig['isPublic']>
+  access: {
+    adminOnly: NonNullable<AccessConfig['adminOnly']>
+    publicAccess: NonNullable<AccessConfig['publicAccess']>
+  }
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   /**
    * Slug of the variant options collection, defaults to 'variantOptions'.
@@ -12,8 +14,12 @@ type Props = {
   variantOptionsSlug?: string
 }
 
-export const variantTypesCollection: (props?: Props) => CollectionConfig = (props) => {
-  const { isAdmin, isPublic, overrides, variantOptionsSlug = 'variantOptions' } = props || {}
+export const createVariantTypesCollection: (props: Props) => CollectionConfig = (props) => {
+  const {
+    access: { adminOnly, publicAccess },
+    overrides,
+    variantOptionsSlug = 'variantOptions',
+  } = props || {}
   const fieldsOverride = overrides?.fields
 
   const variantTypesDefaultFields: Field[] = [
@@ -46,10 +52,10 @@ export const variantTypesCollection: (props?: Props) => CollectionConfig = (prop
     slug: 'variantTypes',
     ...overrides,
     access: {
-      create: isAdmin,
-      delete: isAdmin,
-      read: isPublic,
-      update: isAdmin,
+      create: adminOnly,
+      delete: adminOnly,
+      read: publicAccess,
+      update: adminOnly,
       ...overrides?.access,
     },
     admin: {

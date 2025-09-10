@@ -6,6 +6,11 @@ import { defaultCountries } from './defaultCountries.js'
 import { beforeChange } from './hooks/beforeChange.js'
 
 type Props = {
+  access: {
+    adminOrCustomerOwner: AccessConfig['adminOrCustomerOwner']
+    authenticatedOnly: NonNullable<AccessConfig['authenticatedOnly']>
+    customerOnlyFieldAccess: AccessConfig['customerOnlyFieldAccess']
+  }
   /**
    * Array of fields used for capturing the address data. Use this over overrides to customise the fields here as it's reused across the plugin.
    */
@@ -14,20 +19,15 @@ type Props = {
    * Slug of the customers collection, defaults to 'users'.
    */
   customersSlug?: string
-  isAuthenticated: NonNullable<AccessConfig['isAuthenticated']>
-  isCustomerField: AccessConfig['isCustomerField']
-  isOwnerOrAdmin: AccessConfig['isAdminOrOwner']
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   supportedCountries?: CountryType[]
 }
 
-export const addressesCollection: (props: Props) => CollectionConfig = (props) => {
+export const createAddressesCollection: (props: Props) => CollectionConfig = (props) => {
   const {
+    access: { adminOrCustomerOwner, authenticatedOnly, customerOnlyFieldAccess },
     addressFields,
     customersSlug = 'users',
-    isAuthenticated,
-    isCustomerField,
-    isOwnerOrAdmin,
     overrides,
   } = props || {}
   const fieldsOverride = overrides?.fields
@@ -77,10 +77,10 @@ export const addressesCollection: (props: Props) => CollectionConfig = (props) =
     timestamps: true,
     ...overrides,
     access: {
-      create: isAuthenticated,
-      delete: isOwnerOrAdmin,
-      read: isOwnerOrAdmin,
-      update: isOwnerOrAdmin,
+      create: authenticatedOnly,
+      delete: adminOrCustomerOwner,
+      read: adminOrCustomerOwner,
+      update: adminOrCustomerOwner,
       ...overrides?.access,
     },
     admin: {
@@ -91,7 +91,10 @@ export const addressesCollection: (props: Props) => CollectionConfig = (props) =
     fields,
     hooks: {
       ...(overrides?.hooks || {}),
-      beforeChange: [beforeChange({ isCustomerField }), ...(overrides?.hooks?.beforeChange || [])],
+      beforeChange: [
+        beforeChange({ customerOnlyFieldAccess }),
+        ...(overrides?.hooks?.beforeChange || []),
+      ],
     },
   }
 

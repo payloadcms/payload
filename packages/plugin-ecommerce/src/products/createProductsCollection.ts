@@ -7,6 +7,10 @@ import { pricesField } from '../fields/pricesField.js'
 import { variantsFields } from '../fields/variantsFields.js'
 
 type Props = {
+  access: {
+    adminOnly: NonNullable<AccessConfig['adminOnly']>
+    adminOrPublishedStatus: NonNullable<AccessConfig['adminOrPublishedStatus']>
+  }
   currenciesConfig: CurrenciesConfig
   enableVariants?: boolean
   /**
@@ -14,8 +18,6 @@ type Props = {
    * Defaults to true.
    */
   inventory?: boolean | InventoryConfig
-  isAdmin: NonNullable<AccessConfig['isAdmin']>
-  isAdminOrPublished: NonNullable<AccessConfig['isAdminOrPublished']>
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   /**
    * Slug of the variants collection, defaults to 'variants'.
@@ -27,13 +29,12 @@ type Props = {
   variantTypesSlug?: string
 }
 
-export const productsCollection: (props: Props) => CollectionConfig = (props) => {
+export const createProductsCollection: (props: Props) => CollectionConfig = (props) => {
   const {
+    access: { adminOnly, adminOrPublishedStatus },
     currenciesConfig,
     enableVariants = false,
     inventory = true,
-    isAdmin,
-    isAdminOrPublished,
     overrides,
     variantsSlug = 'variants',
     variantTypesSlug = 'variantTypes',
@@ -65,10 +66,10 @@ export const productsCollection: (props: Props) => CollectionConfig = (props) =>
     slug: 'products',
     ...overrides,
     access: {
-      create: isAdmin,
-      delete: isAdmin,
-      read: isAdminOrPublished,
-      update: isAdmin,
+      create: adminOnly,
+      delete: adminOnly,
+      read: adminOrPublishedStatus,
+      update: adminOnly,
       ...overrides?.access,
     },
     admin: {

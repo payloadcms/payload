@@ -13,13 +13,15 @@ import { variantsCollectionBeforeChange as beforeChange } from './hooks/beforeCh
 import { validateOptions } from './hooks/validateOptions.js'
 
 type Props = {
+  access: {
+    adminOnly: NonNullable<AccessConfig['adminOnly']>
+    adminOrPublishedStatus: NonNullable<AccessConfig['adminOrPublishedStatus']>
+  }
   currenciesConfig?: CurrenciesConfig
   /**
    * Enables inventory tracking for variants. Defaults to true.
    */
   inventory?: InventoryConfig
-  isAdmin: NonNullable<AccessConfig['isAdmin']>
-  isAdminOrPublished: NonNullable<AccessConfig['isAdminOrPublished']>
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   /**
    * Slug of the products collection, defaults to 'products'.
@@ -31,12 +33,11 @@ type Props = {
   variantOptionsSlug?: string
 }
 
-export const variantsCollection: (props: Props) => CollectionConfig = (props) => {
+export const createVariantsCollection: (props: Props) => CollectionConfig = (props) => {
   const {
+    access: { adminOnly, adminOrPublishedStatus },
     currenciesConfig,
     inventory = true,
-    isAdmin,
-    isAdminOrPublished,
     overrides,
     productsSlug = 'products',
     variantOptionsSlug = 'variantOptions',
@@ -109,10 +110,10 @@ export const variantsCollection: (props: Props) => CollectionConfig = (props) =>
     slug: 'variants',
     ...overrides,
     access: {
-      create: isAdmin,
-      delete: isAdmin,
-      read: isAdminOrPublished,
-      update: isAdmin,
+      create: adminOnly,
+      delete: adminOnly,
+      read: adminOrPublishedStatus,
+      update: adminOnly,
       ...overrides?.access,
     },
     admin: {

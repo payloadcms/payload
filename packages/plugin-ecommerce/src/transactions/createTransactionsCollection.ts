@@ -1,27 +1,39 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { AccessConfig, CurrenciesConfig, FieldsOverride } from '../types.js'
+import type { AccessConfig, CurrenciesConfig, FieldsOverride, PaymentAdapter } from '../types.js'
 
 import { amountField } from '../fields/amountField.js'
 import { cartItemsField } from '../fields/cartItemsField.js'
 import { currencyField } from '../fields/currencyField.js'
-import { beforeChangeCart } from './beforeChange.js'
-import { statusBeforeRead } from './statusBeforeRead.js'
+import { statusField } from '../fields/statusField.js'
 
 type Props = {
+  access: {
+    adminOnly: NonNullable<AccessConfig['adminOnly']>
+  }
+  /**
+   * Array of fields used for capturing the billing address.
+   */
+  addressFields?: Field[]
+  /**
+   * Slug of the carts collection, defaults to 'carts'.
+   */
+  cartsSlug?: string
   currenciesConfig?: CurrenciesConfig
   /**
    * Slug of the customers collection, defaults to 'users'.
    */
   customersSlug?: string
   /**
-   * Enables support for variants in the cart.
-   * Defaults to false.
+   * Enable variants in the transactions collection.
    */
   enableVariants?: boolean
-  isOwnerOrAdmin: NonNullable<AccessConfig['isAdminOrOwner']>
-  isPublic: NonNullable<AccessConfig['isPublic']>
+  /**
+   * Slug of the orders collection, defaults to 'orders'.
+   */
+  ordersSlug?: string
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
+  paymentMethods?: PaymentAdapter[]
   /**
    * Slug of the products collection, defaults to 'products'.
    */
@@ -32,17 +44,21 @@ type Props = {
   variantsSlug?: string
 }
 
-export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
+export const createTransactionsCollection: (props: Props) => CollectionConfig = (props) => {
   const {
+    access: { adminOnly },
+    addressFields,
+    cartsSlug = 'carts',
     currenciesConfig,
     customersSlug = 'users',
     enableVariants = false,
-    isOwnerOrAdmin,
-    isPublic,
+    ordersSlug = 'orders',
     overrides,
+    paymentMethods,
     productsSlug = 'products',
     variantsSlug = 'variants',
   } = props || {}
+
   const fieldsOverride = overrides?.fields
 
   const defaultFields: Field[] = [
@@ -55,65 +71,41 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
       relationTo: customersSlug,
     },
     {
-      name: 'purchasedAt',
-      type: 'date',
-      admin: {
-        date: { pickerAppearance: 'dayAndTime' },
-      },
+      name: 'customerEmail',
+      type: 'email',
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:purchasedAt'),
+        t('plugin-ecommerce:customerEmail'),
     },
     {
-      name: 'status',
-      type: 'select',
-      admin: {
-        readOnly: true,
-      },
-      hooks: {
-        afterRead: [statusBeforeRead],
-      },
+      name: 'order',
+      type: 'relationship',
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:status'),
-      options: [
-        {
-          // @ts-expect-error - translations are not typed in plugins yet
-          label: ({ t }) => t('plugin-ecommerce:active'),
-          value: 'active',
-        },
-        {
-          // @ts-expect-error - translations are not typed in plugins yet
-          label: ({ t }) => t('plugin-ecommerce:purchased'),
-          value: 'purchased',
-        },
-        {
-          // @ts-expect-error - translations are not typed in plugins yet
-          label: ({ t }) => t('plugin-ecommerce:abandoned'),
-          value: 'abandoned',
-        },
-      ],
-      virtual: true,
+        t('plugin-ecommerce:order'),
+      relationTo: ordersSlug,
     },
-    ...(currenciesConfig
+    {
+      name: 'cart',
+      type: 'relationship',
+      relationTo: cartsSlug,
+    },
+    ...(addressFields
       ? [
-          currencyField({
-            currenciesConfig,
-          }),
-          amountField({
-            currenciesConfig,
-            overrides: {
-              name: 'subtotal',
-              label: ({ t }) =>
-                // @ts-expect-error - translations are not typed in plugins yet
-                t('plugin-ecommerce:subtotal'),
-            },
-          }),
+          {
+            name: 'billingAddress',
+            type: 'group',
+            fields: addressFields,
+            label: ({ t }) =>
+              // @ts-expect-error - translations are not typed in plugins yet
+              t('plugin-ecommerce:shippingAddress'),
+          } as Field,
         ]
       : []),
     cartItemsField({
       enableVariants,
       overrides: {
+        name: 'items',
         label: ({ t }) =>
           // @ts-expect-error - translations are not typed in plugins yet
           t('plugin-ecommerce:items'),
@@ -129,7 +121,31 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
       productsSlug,
       variantsSlug,
     }),
+    statusField(),
   ]
+
+  if (paymentMethods?.length && paymentMethods.length > 0) {
+    defaultFields.push({
+      name: 'paymentMethod',
+      type: 'select',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:paymentMethod'),
+      options: paymentMethods.map((method) => ({
+        label: method.label ?? method.name,
+        value: method.name,
+      })),
+    })
+
+    paymentMethods.forEach((method) => {
+      defaultFields.push(method.group)
+    })
+  }
+
+  if (currenciesConfig) {
+    defaultFields.push(currencyField({ currenciesConfig }))
+    defaultFields.push(amountField({ currenciesConfig }))
+  }
 
   const fields =
     fieldsOverride && typeof fieldsOverride === 'function'
@@ -137,30 +153,21 @@ export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
       : defaultFields
 
   const baseConfig: CollectionConfig = {
-    slug: 'carts',
-    timestamps: true,
+    slug: 'transactions',
     ...overrides,
     access: {
-      create: isPublic,
-      delete: isOwnerOrAdmin,
-      read: isOwnerOrAdmin,
-      update: isOwnerOrAdmin,
+      create: adminOnly,
+      delete: adminOnly,
+      read: adminOnly,
+      update: adminOnly,
       ...overrides?.access,
     },
     admin: {
+      defaultColumns: ['createdAt', 'customer', 'order', 'amount', 'status'],
       group: 'Ecommerce',
-      useAsTitle: 'createdAt',
       ...overrides?.admin,
     },
     fields,
-    hooks: {
-      beforeChange: [
-        // This hook can be used to update the subtotal before saving the cart
-        beforeChangeCart({ productsSlug, variantsSlug }),
-        ...(overrides?.hooks?.beforeChange || []),
-      ],
-      ...overrides?.hooks,
-    },
   }
 
   return { ...baseConfig }

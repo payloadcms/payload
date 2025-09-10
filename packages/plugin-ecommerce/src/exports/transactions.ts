@@ -1,1 +1,1 @@
-export { transactionsCollection } from '../transactions/transactionsCollection.js'
+export { createTransactionsCollection as transactionsCollection } from '../transactions/createTransactionsCollection.js'

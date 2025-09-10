@@ -4,7 +4,7 @@ import { Banner } from '@/blocks/Banner/config'
 import { Carousel } from '@/blocks/Carousel/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
-import { isAdmin } from '@/access/isAdmin'
+import { adminOnly } from '@/access/adminOnly'
 import { Archive } from '@/blocks/ArchiveBlock/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Content } from '@/blocks/Content/config'
@@ -12,7 +12,7 @@ import { FormBlock } from '@/blocks/Form/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { hero } from '@/fields/hero'
 import { slugField } from '@/fields/slug'
-import { isAdminOrPublished } from '@/access/isAdminOrPublished'
+import { adminOrPublished } from '@/access/adminOrPublishedStatus'
 import {
   MetaDescriptionField,
   MetaImageField,
@@ -25,10 +25,10 @@ import { revalidatePage, revalidateDelete } from './hooks/revalidatePage'
 export const Pages: CollectionConfig = {
   slug: 'pages',
   access: {
-    create: isAdmin,
-    delete: isAdmin,
-    read: isAdminOrPublished,
-    update: isAdmin,
+    create: adminOnly,
+    delete: adminOnly,
+    read: adminOrPublished,
+    update: adminOnly,
   },
   admin: {
     group: 'Content',

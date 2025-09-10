@@ -1,5 +1,5 @@
-export { variantOptionsCollection } from '../variants/variantOptionsCollection.js'
+export { createVariantOptionsCollection as variantOptionsCollection } from '../variants/createVariantOptionsCollection.js'
 
-export { variantsCollection } from '../variants/variantsCollection/index.js'
+export { createVariantsCollection as variantsCollection } from '../variants/createVariantsCollection/index.js'
 
-export { variantTypesCollection } from '../variants/variantTypesCollection.js'
+export { createVariantTypesCollection as variantTypesCollection } from '../variants/createVariantTypesCollection.js'

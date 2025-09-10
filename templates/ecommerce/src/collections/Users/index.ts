@@ -1,9 +1,9 @@
-import type { User } from '@/payload-types'
 import type { CollectionConfig } from 'payload'
 
-import { isAdmin } from '@/access/isAdmin'
-import { isPublic } from '@/access/isPublic'
-import { isAdminOrSelf } from '@/access/isAdminOrSelf'
+import { adminOnly } from '@/access/adminOnly'
+import { adminOnlyFieldAccess } from '@/access/adminOnlyFieldAccess'
+import { publicAccess } from '@/access/publicAccess'
+import { adminOrSelf } from '@/access/adminOrSelf'
 import { checkRole } from '@/access/utilities'
 
 import { ensureFirstUserIsAdmin } from './hooks/ensureFirstUserIsAdmin'
@@ -12,10 +12,10 @@ export const Users: CollectionConfig = {
   slug: 'users',
   access: {
     admin: ({ req: { user } }) => checkRole(['admin'], user),
-    create: isPublic,
-    delete: isAdmin,
-    read: isAdminOrSelf,
-    update: isAdminOrSelf,
+    create: publicAccess,
+    delete: adminOnly,
+    read: adminOrSelf,
+    update: adminOrSelf,
   },
   admin: {
     group: 'Users',
@@ -33,11 +33,11 @@ export const Users: CollectionConfig = {
     {
       name: 'roles',
       type: 'select',
-      // access: {
-      //   create: admins,
-      //   read: admins,
-      //   update: admins,
-      // },
+      access: {
+        create: adminOnlyFieldAccess,
+        read: adminOnlyFieldAccess,
+        update: adminOnlyFieldAccess,
+      },
       defaultValue: ['customer'],
       hasMany: true,
       hooks: {
