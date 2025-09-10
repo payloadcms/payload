@@ -243,10 +243,10 @@ export const promise = async ({
         const shouldRunHookOnAllLocales =
           fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! }) &&
           (locale === 'all' || !flattenLocales) &&
-          typeof siblingDoc[field.name!] === 'object'
+          typeof siblingDoc[field.name] === 'object'
 
         if (shouldRunHookOnAllLocales) {
-          const localesAndValues = Object.entries(siblingDoc[field.name!])
+          const localesAndValues = Object.entries(siblingDoc[field.name])
           await Promise.all(
             localesAndValues.map(async ([localeKey, value]) => {
               const hookedValue = await hook({
@@ -274,7 +274,7 @@ export const promise = async ({
               })
 
               if (hookedValue !== undefined) {
-                siblingDoc[field.name!][localeKey] = hookedValue
+                siblingDoc[field.name][localeKey] = hookedValue
               }
             }),
           )
@@ -300,11 +300,11 @@ export const promise = async ({
             showHiddenFields,
             siblingData: siblingDoc,
             siblingFields: siblingFields!,
-            value: siblingDoc[field.name!],
+            value: siblingDoc[field.name],
           })
 
           if (hookedValue !== undefined) {
-            siblingDoc[field.name!] = hookedValue
+            siblingDoc[field.name] = hookedValue
           }
         }
       }

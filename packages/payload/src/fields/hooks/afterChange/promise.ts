@@ -88,16 +88,16 @@ export const promise = async ({
           path: pathSegments,
           previousDoc,
           previousSiblingDoc,
-          previousValue: previousDoc?.[field.name!],
+          previousValue: previousDoc?.[field.name],
           req,
           schemaPath: schemaPathSegments,
           siblingData,
           siblingFields: siblingFields!,
-          value: siblingDoc?.[field.name!],
+          value: siblingDoc?.[field.name],
         })
 
         if (hookedValue !== undefined) {
-          siblingDoc[field.name!] = hookedValue
+          siblingDoc[field.name] = hookedValue
         }
       }
     }
