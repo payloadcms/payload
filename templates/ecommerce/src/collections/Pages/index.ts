@@ -12,7 +12,7 @@ import { FormBlock } from '@/blocks/Form/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { hero } from '@/fields/hero'
 import { slugField } from '@/fields/slug'
-import { adminOrPublished } from '@/access/adminOrPublishedStatus'
+import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
 import {
   MetaDescriptionField,
   MetaImageField,
@@ -27,7 +27,7 @@ export const Pages: CollectionConfig = {
   access: {
     create: adminOnly,
     delete: adminOnly,
-    read: adminOrPublished,
+    read: adminOrPublishedStatus,
     update: adminOnly,
   },
   admin: {
