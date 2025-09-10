@@ -141,18 +141,20 @@ describe('collections-rest', () => {
         nullsAsUndefineds: false,
       })
 
-      // Ensure the form data we are about to send is actually over 1mb
+      // Ensure the form data we are about to send is actually over 1mb which is the default limit
       const docSize = getFormDataSize(formData)
       expect(docSize).toBeGreaterThan(1 * 1024 * 1024)
 
       // This request should not fail with error: "Unterminated string in JSON at position..."
-      const data = await restClient
-        .PATCH(`/${postsSlug}/${doc.id}?limit=1`, {
+      // This is because we set `multipartFormdataOptions.limits.fieldSize` to 2mb in the root config
+      const { doc: updatedDoc } = await restClient
+        .PATCH(`/${largeDocumentsCollectionSlug}/${doc.id}?limit=1`, {
           body: formData,
         })
         .then((res) => res.json())
 
-      expect(data.array?.[0]?.text).toEqual('Hello, world!')
+      expect(updatedDoc.id).toEqual(doc.id)
+      expect(updatedDoc.array[0].text).toEqual('Hello, world!')
     })
 
     describe('Bulk operations', () => {

@@ -275,6 +275,7 @@ export type InitOptions = {
   disableOnInit?: boolean
 
   importMap?: ImportMap
+
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
@@ -980,6 +981,7 @@ export type Config = {
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
+
   /**
    * Configure authentication-related Payload-wide settings.
    */
@@ -1024,10 +1026,8 @@ export type Config = {
   cors?: '*' | CORSConfig | string[]
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
-
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
-
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult
   /** Enable to expose more detailed error information. */
@@ -1165,7 +1165,6 @@ export type Config = {
    * ```
    */
   logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
-
   /**
    * Override the log level of errors for Payload's error handler or disable logging with `false`.
    * Levels can be any of the following: 'trace', 'debug', 'info', 'warn', 'error', 'fatal' or false.
@@ -1196,6 +1195,16 @@ export type Config = {
    * @default 10
    */
   maxDepth?: number
+
+  /**
+   * Pass additional options to the parser used to process `multipart/form-data` requests.
+   * For example, a PATCH request containing HTML form data.
+   * For example, you may want to increase the `limits` imposed by the parser.
+   * Currently using @link {https://www.npmjs.com/package/busboy|busboy} under the hood.
+   *
+   * @experimental This property is experimental and may change in future releases. Use at your own discretion.
+   */
+  multipartFormdataOptions?: Partial<BusboyConfig>
 
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void

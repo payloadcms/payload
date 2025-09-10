@@ -1,7 +1,7 @@
 import type { PayloadRequest } from '../types/index.js'
 
 import { APIError } from '../errors/APIError.js'
-import { fetchAPIFileUpload } from '../uploads/fetchAPI-multipart/index.js'
+import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js'
 
 type AddDataAndFileToRequest = (req: PayloadRequest) => Promise<void>
 
@@ -24,12 +24,15 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         req.payload.logger.error(error)
       } finally {
         req.data = data
-        // @ts-expect-error
+        // @ts-expect-error attach json method to request
         req.json = () => Promise.resolve(data)
       }
     } else if (bodyByteSize && contentType?.includes('multipart/')) {
-      const { error, fields, files } = await fetchAPIFileUpload({
-        options: payload.config.upload,
+      const { error, fields, files } = await processMultipartFormdata({
+        options: {
+          ...(payload.config.multipartFormdataOptions || {}),
+          ...(payload.config.upload || {}),
+        },
         request: req as Request,
       })
 

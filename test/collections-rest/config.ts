@@ -283,6 +283,11 @@ export default buildConfigWithDefaults({
     },
     LargeDocuments,
   ],
+  multipartFormdataOptions: {
+    limits: {
+      fieldSize: 4 * 1024 * 1024, // 2MB
+    },
+  },
   endpoints: [
     {
       handler: async ({ payload }) => {
