@@ -126,16 +126,16 @@ const MyCollection: CollectionConfig = {
 }
 ```
 
-#### maxHookRecursion
+#### hooksMaxRecursion
 
-To help prevent infinite loops, Payload provides a configuration option to limit the number of times a hook can be called in a single request. This is configured via the `maxHookRecursion` option in your Payload config.
+To help prevent infinite loops, Payload provides a configuration option to limit the number of times a hook can be called in a single request. This is configured via the `hooksMaxRecursion` option in your Payload config.
 
 ```ts
 import { buildConfig } from 'payload/config'
 
 export default buildConfig({
   // ...
-  maxHookRecursion: 5, // default is undefined (no limit)
+  hooksMaxRecursion: 5, // default is undefined (no limit)
 })
 ```
 

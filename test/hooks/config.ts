@@ -29,7 +29,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  maxHookRecursion: 3,
+  hooksMaxRecursion: 3,
   collections: [
     BeforeChangeHooks,
     BeforeValidateCollection,

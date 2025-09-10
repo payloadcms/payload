@@ -51,7 +51,7 @@ export const sanitizeCollection = async (
   const sanitized: CollectionConfig = addDefaultsToCollectionConfig(collection)
 
   // Attach recursive hook detection, if enabled
-  if (typeof config.maxHookRecursion === 'number' && sanitized.hooks) {
+  if (typeof config.hooksMaxRecursion === 'number' && sanitized.hooks) {
     if (!sanitized.hooks.beforeOperation) {
       sanitized.hooks.beforeOperation = []
     }

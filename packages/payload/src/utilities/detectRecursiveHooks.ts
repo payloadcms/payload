@@ -16,7 +16,7 @@ type InvocationContext = {
 /**
  * Tracks the number of invocations of hooks per collection and operation in the request context.
  * If the number of invocations exceeds the configured maximum, an error is thrown to prevent infinite loops.
- * To enable, set the `maxHookRecursion` property in the Payload config to a number greater than 0.
+ * To enable, set the `hooksMaxRecursion` property in the Payload config to a number greater than 0.
  * @example
  * // This what this hook tracks via context
  * {
@@ -36,7 +36,7 @@ export const detectRecursiveHooks = (
 
   const context = _args.context as InvocationContext
 
-  if (typeof config.maxHookRecursion === 'number') {
+  if (typeof config.hooksMaxRecursion === 'number') {
     if (!context._invocations) {
       context._invocations = {
         [collection.slug]: {
@@ -57,7 +57,7 @@ export const detectRecursiveHooks = (
     if (
       context._invocations[collection.slug] &&
       typeof context._invocations[collection.slug]![operation] === 'number' &&
-      context._invocations[collection.slug]![operation]! > config.maxHookRecursion
+      context._invocations[collection.slug]![operation]! > config.hooksMaxRecursion
     ) {
       const msg = `Maximum number of hooks invoked on collection '${collection.slug}' for operation '${operation}'. There may be a circular dependency between hooks.`
       _args.req.payload.logger.error(msg)
