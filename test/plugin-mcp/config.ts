@@ -1,3 +1,4 @@
+import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { pluginMCP } from '@payloadcms/plugin-mcp'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -85,6 +86,59 @@ export default buildConfigWithDefaults({
                 .default(6)
                 .describe('Number of sides on the dice (default: 6)'),
             }).shape,
+          },
+        ],
+        prompts: [
+          {
+            name: 'echo',
+            argsSchema: { message: z.string() },
+            description: 'Creates a prompt to process a message',
+            title: 'Echo Prompt',
+            handler: ({ message }: { message: string }) => ({
+              messages: [
+                {
+                  content: {
+                    type: 'text',
+                    text: `Please process this message: ${message}`,
+                  },
+                  role: 'user',
+                },
+              ],
+            }),
+          },
+        ],
+        resources: [
+          // Resource with a static URI
+          {
+            name: 'data',
+            description: 'Data is a resource that contains special data.',
+            handler: (uri) => ({
+              contents: [
+                {
+                  uri: uri.href,
+                  text: 'My special data.',
+                },
+              ],
+            }),
+            mimeType: 'text/plain',
+            title: 'Data',
+            uri: 'data://app',
+          },
+          // Resource with a template
+          {
+            name: 'dataByID',
+            description: 'Data is a resource that contains special data.',
+            handler: (uri, { id }) => ({
+              contents: [
+                {
+                  uri: uri.href,
+                  text: `My special data for ID: ${id}`,
+                },
+              ],
+            }),
+            mimeType: 'text/plain',
+            title: 'Data By ID',
+            uri: new ResourceTemplate('data://app/{id}', { list: undefined }),
           },
         ],
       },

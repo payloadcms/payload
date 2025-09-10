@@ -25,6 +25,7 @@
     "@aws-sdk/client-s3": "^3.614.0",
     "@azure/storage-blob": "^12.11.0",
     "@date-fns/tz": "1.2.0",
+    "@modelcontextprotocol/sdk": "^1.17.2",
     "@next/env": "15.4.4",
     "@payloadcms/admin-bar": "workspace:*",
     "@payloadcms/db-mongodb": "workspace:*",

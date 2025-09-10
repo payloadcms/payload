@@ -227,12 +227,6 @@ ${JSON.stringify(errors, null, 2)}
         .describe('JSON string for where clause to update multiple documents'),
     })
 
-    if (verboseLogs) {
-      req.payload.logger.info(
-        `[payload-mcp] Generated update schema for collection: ${collectionSlug} with ${Object.keys(convertedFields.shape).length} fields`,
-      )
-    }
-
     server.tool(
       `update${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
       `${toolSchemas.updateResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
