@@ -42,9 +42,7 @@ describe('Lexical Fully Featured', () => {
     await page.goto(url.create)
     await lexical.editor.first().focus()
   })
-  test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async ({
-    page,
-  }) => {
+  test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async () => {
     await lexical.slashCommand('block')
     await lexical.slashCommand('relationship')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
