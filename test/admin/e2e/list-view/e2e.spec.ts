@@ -19,6 +19,7 @@ import { customAdminRoutes } from '../../shared.js'
 import {
   arrayCollectionSlug,
   customViews1CollectionSlug,
+  formatDocURLCollectionSlug,
   geoCollectionSlug,
   listDrawerSlug,
   placeholderCollectionSlug,
@@ -37,7 +38,6 @@ let payload: PayloadTestSDK<Config>
 import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
 import { devUser } from 'credentials.js'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
-import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
@@ -55,7 +55,7 @@ import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 
 import { reorderColumns } from '../../../helpers/e2e/reorderColumns.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -72,6 +72,7 @@ describe('List View', () => {
   let withListViewUrl: AdminUrlUtil
   let placeholderUrl: AdminUrlUtil
   let disableBulkEditUrl: AdminUrlUtil
+  let formatDocURLUrl: AdminUrlUtil
   let user: any
   let virtualsUrl: AdminUrlUtil
 
@@ -98,6 +99,7 @@ describe('List View', () => {
     withListViewUrl = new AdminUrlUtil(serverURL, listDrawerSlug)
     placeholderUrl = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
     disableBulkEditUrl = new AdminUrlUtil(serverURL, 'disable-bulk-edit')
+    formatDocURLUrl = new AdminUrlUtil(serverURL, formatDocURLCollectionSlug)
     virtualsUrl = new AdminUrlUtil(serverURL, virtualsSlug)
     const context = await browser.newContext()
     page = await context.newPage()
@@ -1847,6 +1849,148 @@ describe('List View', () => {
     await createNewDrawer.locator('.doc-drawer__header-close').click()
 
     await expect(drawer.locator('.table > table > tbody > tr')).toHaveCount(2)
+  })
+
+  describe('formatDocURL', () => {
+    beforeEach(async () => {
+      // Clean up any existing formatDocURL documents
+      await payload.delete({
+        collection: formatDocURLCollectionSlug,
+        where: { id: { exists: true } },
+      })
+    })
+
+    test('should disable linking for documents with title "no-link"', async () => {
+      // Create test documents
+      await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'no-link', description: 'This should not be linkable' },
+      })
+
+      const normalDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'normal', description: 'This should be linkable normally' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
+      // Find the row with "no-link" title - it should NOT have a link
+      const noLinkRow = page.locator(tableRowLocator).filter({ hasText: 'no-link' })
+      const noLinkTitleCell = noLinkRow.locator('td').nth(1)
+      await expect(noLinkTitleCell.locator('a')).toHaveCount(0)
+
+      // Find the row with "normal" title - it should have a link with admin=true query param
+      // (because we're logged in as dev@payloadcms.com)
+      const normalRow = page.locator(tableRowLocator).filter({ hasText: 'normal' })
+      const normalTitleCell = normalRow.locator('td').nth(1)
+      const normalLink = normalTitleCell.locator('a')
+      await expect(normalLink).toHaveCount(1)
+      await expect(normalLink).toHaveAttribute(
+        'href',
+        `${adminRoutes.routes?.admin}/collections/${formatDocURLCollectionSlug}/${normalDoc.id}?admin=true`,
+      )
+    })
+
+    test('should use custom destination for documents with title "custom-link"', async () => {
+      await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'custom-link', description: 'This should link to custom destination' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      // Find the row with "custom-link" title - it should link to custom destination
+      const customLinkRow = page.locator(tableRowLocator).filter({ hasText: 'custom-link' })
+      const customLinkTitleCell = customLinkRow.locator('td').nth(1)
+      const customLink = customLinkTitleCell.locator('a')
+      await expect(customLink).toHaveCount(1)
+      await expect(customLink).toHaveAttribute('href', '/custom-destination')
+    })
+
+    test('should add admin query param for dev@payloadcms.com user', async () => {
+      // This test verifies the user-based URL modification
+      const adminDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'admin-test', description: 'This should have admin query param' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      // Since we're logged in as dev@payloadcms.com, links should have ?admin=true
+      const adminRow = page.locator(tableRowLocator).filter({ hasText: 'admin-test' })
+      const adminTitleCell = adminRow.locator('td').nth(1)
+      const adminLink = adminTitleCell.locator('a')
+      await expect(adminLink).toHaveCount(1)
+      await expect(adminLink).toHaveAttribute(
+        'href',
+        new RegExp(
+          `${adminRoutes.routes?.admin}/collections/${formatDocURLCollectionSlug}/${adminDoc.id}\\?admin=true`,
+        ),
+      )
+    })
+
+    test('should use different URL for trash view', async () => {
+      // Create a document and then move it to trash
+      const trashDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'trash-test', description: 'This should show trash URL' },
+      })
+
+      // Move the document to trash by setting deletedAt (not delete)
+      await payload.update({
+        collection: formatDocURLCollectionSlug,
+        id: trashDoc.id,
+        data: {
+          deletedAt: new Date().toISOString(),
+        },
+      })
+
+      // Go to trash view
+      await page.goto(`${formatDocURLUrl.list}/trash`)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      // In trash view, the formatDocURL should add ?from=trash
+      const trashRow = page.locator(tableRowLocator).filter({ hasText: 'trash-test' })
+      const trashTitleCell = trashRow.locator('td').nth(1)
+      const trashLink = trashTitleCell.locator('a')
+      await expect(trashLink).toHaveCount(1)
+      await expect(trashLink).toHaveAttribute(
+        'href',
+        new RegExp(
+          `${adminRoutes.routes?.admin}/collections/${formatDocURLCollectionSlug}/trash/${trashDoc.id}\\?from=trash`,
+        ),
+      )
+    })
+
+    test('should add published query param for published documents', async () => {
+      // Create a published document
+      const publishedDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: {
+          title: 'published-test',
+          description: 'This is a published document',
+          _status: 'published',
+        },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      // Published documents should have ?published=true added
+      const publishedRow = page.locator(tableRowLocator).filter({ hasText: 'published-test' })
+      const publishedTitleCell = publishedRow.locator('td').nth(1)
+      const publishedLink = publishedTitleCell.locator('a')
+      await expect(publishedLink).toHaveCount(1)
+      await expect(publishedLink).toHaveAttribute(
+        'href',
+        new RegExp(
+          `${adminRoutes.routes?.admin}/collections/${formatDocURLCollectionSlug}/${publishedDoc.id}\\?published=true`,
+        ),
+      )
+    })
   })
 })
 
