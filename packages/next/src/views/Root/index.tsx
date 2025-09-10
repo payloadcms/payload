@@ -166,7 +166,9 @@ export const RootPage = async ({
         req.user.id,
         config.admin.user,
       ).then((res) => {
-        collectionPreferences = res.value
+        if (res && res.value) {
+          collectionPreferences = res.value
+        }
       })
     }
   }
