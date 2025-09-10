@@ -278,7 +278,7 @@ describe('Hooks', () => {
       const document = await payload.create({
         collection: contextHooksSlug,
         context: {
-          secretValue: 'data from local API',
+          secretValue: 'data from Local API',
         },
         data: {
           value: 'wrongvalue',
@@ -290,28 +290,28 @@ describe('Hooks', () => {
         collection: contextHooksSlug,
       })
 
-      expect(retrievedDoc.value).toEqual('data from local API')
+      expect(retrievedDoc.value).toEqual('data from Local API')
     })
 
-    it('should pass context from local API to global hooks', async () => {
+    it('should pass context from Local API to global hooks', async () => {
       const globalDocument = await payload.findGlobal({
         slug: dataHooksGlobalSlug,
       })
 
-      expect(globalDocument.field_globalAndField).not.toEqual('data from local API context')
+      expect(globalDocument.field_globalAndField).not.toEqual('data from Local API context')
 
       const globalDocumentWithContext = await payload.findGlobal({
         slug: dataHooksGlobalSlug,
         context: {
-          field_beforeChange_GlobalAndField_override: 'data from local API context',
+          field_beforeChange_GlobalAndField_override: 'data from Local API context',
         },
       })
-      expect(globalDocumentWithContext.field_globalAndField).toEqual('data from local API context')
+      expect(globalDocumentWithContext.field_globalAndField).toEqual('data from Local API context')
     })
 
-    it('should pass context from rest API to hooks', async () => {
+    it('should pass context from REST API to hooks', async () => {
       const params = new URLSearchParams({
-        context_secretValue: 'data from rest API',
+        context_secretValue: 'data from REST API',
       })
       // send context as query params. It will be parsed by the beforeOperation hook
       const { doc } = await restClient
@@ -327,7 +327,7 @@ describe('Hooks', () => {
         id: doc.id,
       })
 
-      expect(retrievedDoc.value).toEqual('data from rest API')
+      expect(retrievedDoc.value).toEqual('data from REST API')
     })
 
     it('should detect an infinite loop in hooks', async () => {
@@ -445,15 +445,19 @@ describe('Hooks', () => {
       expect(JSON.parse(doc.collection_beforeOperation_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )
+
       expect(JSON.parse(doc.collection_beforeChange_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )
+
       expect(JSON.parse(doc.collection_afterChange_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )
+
       expect(JSON.parse(doc.collection_afterRead_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )
+
       expect(JSON.parse(doc.collection_afterOperation_collection)).toStrictEqual(
         sanitizedHooksCollection,
       )

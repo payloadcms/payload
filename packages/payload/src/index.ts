@@ -1575,6 +1575,7 @@ export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
   BeforeChangeHook as GlobalBeforeChangeHook,
+  BeforeOperationHook as GlobalBeforeOperationHook,
   BeforeReadHook as GlobalBeforeReadHook,
   BeforeValidateHook as GlobalBeforeValidateHook,
   DataFromGlobalSlug,
