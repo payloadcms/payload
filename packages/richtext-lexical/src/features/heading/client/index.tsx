@@ -138,5 +138,5 @@ const HeadingPlugin: PluginComponent<HeadingFeatureProps> = ({ clientProps }) =>
     })
   }, [editor, enabledHeadingSizes, lowestAllowed])
 
-  return <div>HeadingPlugin</div>
+  return null
 }
