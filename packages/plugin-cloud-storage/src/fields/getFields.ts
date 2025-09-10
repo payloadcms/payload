@@ -119,7 +119,9 @@ export const getFields = ({
                     generateFileURL,
                     size,
                   }),
-                  ...(('hooks' in existingSizeURLField && existingSizeURLField?.hooks?.afterRead) ||
+                  ...((typeof existingSizeURLField === 'object' &&
+                    'hooks' in existingSizeURLField &&
+                    existingSizeURLField?.hooks?.afterRead) ||
                     []),
                 ],
               },
