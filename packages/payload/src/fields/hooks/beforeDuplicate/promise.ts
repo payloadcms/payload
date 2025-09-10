@@ -90,7 +90,7 @@ export const promise = async <T>({
           }
 
           let hookResult
-          if ('hooks' in field) {
+          if ('hooks' in field && field.hooks?.beforeDuplicate) {
             for (const hook of field.hooks.beforeDuplicate) {
               hookResult = await hook(beforeDuplicateArgs)
             }
@@ -123,7 +123,7 @@ export const promise = async <T>({
         }
 
         let hookResult
-        if ('hooks' in field) {
+        if ('hooks' in field && field.hooks?.beforeDuplicate) {
           for (const hook of field.hooks.beforeDuplicate) {
             hookResult = await hook(beforeDuplicateArgs)
           }
