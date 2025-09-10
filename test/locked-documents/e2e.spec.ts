@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
 import * as path from 'path'
 import { mapAsync } from 'payload'
 import { wait } from 'payload/shared'
@@ -218,9 +219,9 @@ describe('Locked Documents', () => {
       await page.goto(postsUrl.list)
       await page.locator('input#select-all').check()
       await page.locator('.delete-documents__toggle').click()
-      await expect(page.locator('#delete-posts .confirmation-modal__content p')).toHaveText(
-        'You are about to delete 2 Posts',
-      )
+      await expect(
+        page.locator('#confirm-delete-many-docs .confirmation-modal__content p'),
+      ).toHaveText('You are about to delete 2 Posts')
     })
 
     test('should only allow bulk delete on unlocked documents on all pages', async () => {
@@ -235,9 +236,9 @@ describe('Locked Documents', () => {
       await page.goto(postsUrl.list)
 
       await page.locator('input#select-all').check()
-      await page.locator('.list-selection .list-selection__button').click()
+      await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#delete-posts #confirm-action').click()
+      await page.locator('#confirm-delete-many-docs #confirm-action').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })
 
@@ -253,14 +254,11 @@ describe('Locked Documents', () => {
       await page.goto(postsUrl.list)
 
       await page.locator('input#select-all').check()
-      await page.locator('.list-selection .list-selection__button').click()
-      await page.locator('.publish-many__toggle').click()
+      await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
+      await page.locator('.list-selection__button[aria-label="Publish"]').click()
       await page.locator('#publish-posts #confirm-action').click()
 
-      const paginator = page.locator('.paginator')
-
-      await paginator.locator('button').nth(1).click()
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
+      await goToNextPage(page)
       await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
     })
 
@@ -268,8 +266,8 @@ describe('Locked Documents', () => {
       await page.goto(postsUrl.list)
 
       await page.locator('input#select-all').check()
-      await page.locator('.list-selection .list-selection__button').click()
-      await page.locator('.unpublish-many__toggle').click()
+      await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
+      await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
       await page.locator('#unpublish-posts #confirm-action').click()
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'Updated 10 Posts successfully.',
@@ -282,7 +280,7 @@ describe('Locked Documents', () => {
       const bulkText = 'Bulk update title'
 
       await page.locator('input#select-all').check()
-      await page.locator('.list-selection .list-selection__button').click()
+      await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.edit-many__toggle').click()
 
       await page.locator('.field-select .rs__control').click()
@@ -313,10 +311,7 @@ describe('Locked Documents', () => {
       await expect(page.locator('.row-1 .cell-text')).toContainText(bulkText)
       await expect(page.locator('.row-2 .cell-text')).toContainText(bulkText)
 
-      const paginator = page.locator('.paginator')
-
-      await paginator.locator('button').nth(1).click()
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
+      await goToNextPage(page)
       await expect(page.locator('.row-1 .cell-text')).toContainText('hello')
     })
   })
@@ -547,7 +542,7 @@ describe('Locked Documents', () => {
 
       expect(lockedDocs.docs.length).toBe(1)
 
-      await page.locator('li[aria-label="API"] a').click()
+      await page.locator('a[aria-label="API"]').click()
 
       // Locate the modal container
       const modalContainer = page.locator('.payload__modal-container')
@@ -760,6 +755,22 @@ describe('Locked Documents', () => {
 
       // fields should be readOnly / disabled
       await expect(page.locator('#field-text')).toBeDisabled()
+
+      const richTextRoot = page
+        .locator('.rich-text-lexical .ContentEditable__root[data-lexical-editor="true"]')
+        .first()
+
+      // ensure editor is present
+      await expect(richTextRoot).toBeVisible()
+
+      // core read-only checks
+      await expect(richTextRoot).toHaveAttribute('contenteditable', 'false')
+      await expect(richTextRoot).toHaveAttribute('aria-readonly', 'true')
+
+      // wrapper has read-only class (nice-to-have)
+      await expect(page.locator('.rich-text-lexical').first()).toHaveClass(
+        /rich-text-lexical--read-only/,
+      )
     })
   })
 

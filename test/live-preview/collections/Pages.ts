@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { Archive } from '../blocks/ArchiveBlock/index.js'
@@ -21,17 +21,6 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
-    components: {
-      views: {
-        edit: {
-          livePreview: {
-            actions: [
-              '/components/CollectionLivePreviewButton/index.js#CollectionLivePreviewButton',
-            ],
-          },
-        },
-      },
-    },
     preview: (doc) => `/live-preview/${doc?.slug}`,
   },
   fields: [
@@ -96,7 +85,12 @@ export const Pages: CollectionConfig = {
               label: 'Rich Text — Lexical',
               type: 'richText',
               name: 'richTextLexical',
-              editor: lexicalEditor({}),
+              editor: lexicalEditor({
+                features: ({ defaultFeatures }) => [
+                  ...defaultFeatures,
+                  BlocksFeature({ blocks: ['mediaBlock'] }),
+                ],
+              }),
             },
             {
               name: 'relationshipAsUpload',

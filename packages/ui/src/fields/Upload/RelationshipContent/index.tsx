@@ -2,7 +2,7 @@
 
 import type { TypeWithID } from 'payload'
 
-import { formatFilesize } from 'payload/shared'
+import { formatFilesize, isImage } from 'payload/shared'
 import React from 'react'
 
 import type { ReloadDoc } from '../types.js'

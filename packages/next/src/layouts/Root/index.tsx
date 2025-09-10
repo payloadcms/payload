@@ -23,11 +23,13 @@ export const metadata = {
 export const RootLayout = async ({
   children,
   config: configPromise,
+  htmlProps = {},
   importMap,
   serverFunction,
 }: {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
+  readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
 }) => {
@@ -77,12 +79,13 @@ export const RootLayout = async ({
     })
   }
 
-  const navPrefs = await getNavPrefs(req.payload, req.user?.id, req.user?.collection)
+  const navPrefs = await getNavPrefs(req)
 
   const clientConfig = getClientConfig({
     config,
     i18n: req.i18n,
     importMap,
+    user: req.user,
   })
 
   if (
@@ -105,6 +108,7 @@ export const RootLayout = async ({
       dir={dir}
       lang={languageCode}
       suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
+      {...htmlProps}
     >
       <head>
         <style>{`@layer payload-default, payload;`}</style>

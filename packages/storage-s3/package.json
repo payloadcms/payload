@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-s3",
-  "version": "3.27.0",
+  "version": "3.55.0",
   "description": "Payload storage adapter for Amazon S3",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,6 +17,7 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -52,6 +53,7 @@
     "@payloadcms/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {
+    "@smithy/node-http-handler": "4.0.3",
     "payload": "workspace:*"
   },
   "peerDependencies": {

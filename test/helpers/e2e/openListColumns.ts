@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
@@ -11,7 +11,9 @@ export const openListColumns = async (
     columnContainerSelector?: string
     togglerSelector?: string
   },
-): Promise<any> => {
+): Promise<{
+  columnContainer: Locator
+}> => {
   const columnContainer = page.locator(columnContainerSelector).first()
 
   const isAlreadyOpen = await columnContainer.isVisible()
@@ -22,5 +24,5 @@ export const openListColumns = async (
 
   await expect(page.locator(`${columnContainerSelector}.rah-static--height-auto`)).toBeVisible()
 
-  return columnContainer
+  return { columnContainer }
 }

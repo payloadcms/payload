@@ -11,12 +11,6 @@ export const testEslintConfig = [
     ignores: [...defaultESLintIgnores, '**/payload-types.ts', 'jest.setup.js'],
   },
   {
-    languageOptions: {
-      parserOptions: {
-        ...rootParserOptions,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
     rules: {
       'payload/no-relative-monorepo-imports': 'error',
     },
@@ -32,6 +26,12 @@ export const testEslintConfig = [
       '@typescript-eslint/unbound-method': 'off',
       'no-console': 'off',
       'perfectionist/sort-objects': 'off',
+    },
+  },
+  {
+    files: ['**/*.config.ts', '**/config.ts'],
+    rules: {
+      'no-restricted-exports': 'off',
     },
   },
   {
@@ -65,7 +65,18 @@ export const testEslintConfig = [
       'playwright/expect-expect': [
         'error',
         {
-          assertFunctionNames: ['assertToastErrors', 'saveDocAndAssert', 'runFilterOptionsTest'],
+          assertFunctionNames: [
+            'assertToastErrors',
+            'saveDocAndAssert',
+            'runFilterOptionsTest',
+            'assertNetworkRequests',
+            'assertRequestBody',
+            'expectNoResultsAndCreateFolderButton',
+            'createFolder',
+            'createFolderFromDoc',
+            'assertURLParams',
+            'uploadImage',
+          ],
         },
       ],
     },

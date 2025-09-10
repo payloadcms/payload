@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -156,8 +157,6 @@ export interface BeforeValidate {
   id: string;
   title?: string | null;
   selection?: ('a' | 'b') | null;
-  cannotMutate?: string | null;
-  canMutate?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -743,8 +742,6 @@ export interface BeforeChangeHooksSelect<T extends boolean = true> {
 export interface BeforeValidateSelect<T extends boolean = true> {
   title?: T;
   selection?: T;
-  cannotMutate?: T;
-  canMutate?: T;
   updatedAt?: T;
   createdAt?: T;
 }

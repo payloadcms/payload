@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
   Document,
@@ -7,6 +6,7 @@ import type {
   SelectType,
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { SelectFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -21,6 +21,11 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * to determine if it should run or not.
    */
   context?: RequestContext
+  /**
+   * You may pass the document data directly which will skip the `db.findOne` database query.
+   * This is useful if you want to use this endpoint solely for running hooks and populating data.
+   */
+  data?: Record<string, unknown>
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
@@ -43,7 +48,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -75,7 +80,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   user?: Document
 }
 
-export default async function findOneLocal<
+export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
 >(
@@ -84,6 +89,7 @@ export default async function findOneLocal<
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
   const {
     slug: globalSlug,
+    data,
     depth,
     draft = false,
     includeLockStatus,
@@ -101,13 +107,14 @@ export default async function findOneLocal<
 
   return findOneOperation({
     slug: globalSlug as string,
+    data,
     depth,
     draft,
     globalConfig,
     includeLockStatus,
     overrideAccess,
     populate,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
   })

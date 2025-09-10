@@ -1,5 +1,5 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
-import type { ServerProps } from 'payload'
+import type { PayloadRequest, ServerProps } from 'payload'
 
 import { Logout } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -15,7 +15,9 @@ const baseClass = 'nav'
 import { getNavPrefs } from './getNavPrefs.js'
 import { DefaultNavClient } from './index.client.js'
 
-export type NavProps = ServerProps
+export type NavProps = {
+  req?: PayloadRequest
+} & ServerProps
 
 export const DefaultNav: React.FC<NavProps> = async (props) => {
   const {
@@ -25,6 +27,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     params,
     payload,
     permissions,
+    req,
     searchParams,
     user,
     viewType,
@@ -68,7 +71,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     i18n,
   )
 
-  const navPreferences = await getNavPrefs(payload, user?.id, user?.collection)
+  const navPreferences = await getNavPrefs(req)
 
   const LogoutComponent = RenderServerComponent({
     clientProps: {

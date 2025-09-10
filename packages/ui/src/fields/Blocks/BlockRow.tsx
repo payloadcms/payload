@@ -2,7 +2,7 @@
 import type { ClientBlock, ClientField, Labels, Row, SanitizedFieldPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'
 import type { RenderFieldsProps } from '../../forms/RenderFields/types.js'
@@ -13,6 +13,7 @@ import { Pill } from '../../elements/Pill/index.js'
 import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
+import { RowLabel } from '../../forms/RowLabel/index.js'
 import { useThrottledValue } from '../../hooks/useThrottledValue.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { RowActions } from './RowActions.js'
@@ -24,6 +25,7 @@ type BlocksFieldProps = {
   addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   block: ClientBlock
   blocks: (ClientBlock | string)[] | ClientBlock[]
+  copyRow: (rowIndex: number) => void
   duplicateRow: (rowIndex: number) => void
   errorCount: number
   fields: ClientField[]
@@ -34,6 +36,7 @@ type BlocksFieldProps = {
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
   parentPath: string
+  pasteRow: (rowIndex: number) => void
   path: string
   permissions: SanitizedFieldPermissions
   readOnly: boolean
@@ -50,6 +53,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   attributes,
   block,
   blocks,
+  copyRow,
   duplicateRow,
   errorCount,
   fields,
@@ -61,6 +65,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   listeners,
   moveRow,
   parentPath,
+  pasteRow,
   path,
   permissions,
   readOnly,
@@ -118,12 +123,14 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
               addRow={addRow}
               blocks={blocks}
               blockType={row.blockType}
+              copyRow={copyRow}
               duplicateRow={duplicateRow}
               fields={block.fields}
               hasMaxRows={hasMaxRows}
               isSortable={isSortable}
               labels={labels}
               moveRow={moveRow}
+              pasteRow={pasteRow}
               removeRow={removeRow}
               rowCount={rowCount}
               rowIndex={rowIndex}
@@ -146,21 +153,29 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
             <ShimmerEffect height="1rem" width="8rem" />
           ) : (
             <div className={`${baseClass}__block-header`}>
-              {Label || (
-                <Fragment>
-                  <span className={`${baseClass}__block-number`}>
-                    {String(rowIndex + 1).padStart(2, '0')}
-                  </span>
-                  <Pill
-                    className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
-                    pillStyle="white"
-                  >
-                    {getTranslation(block.labels.singular, i18n)}
-                  </Pill>
-                  {showBlockName && <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />}
-                  {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
-                </Fragment>
-              )}
+              <RowLabel
+                CustomComponent={Label}
+                label={
+                  <>
+                    <span className={`${baseClass}__block-number`}>
+                      {String(rowIndex + 1).padStart(2, '0')}
+                    </span>
+                    <Pill
+                      className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
+                      pillStyle="white"
+                      size="small"
+                    >
+                      {getTranslation(block.labels.singular, i18n)}
+                    </Pill>
+                    {showBlockName && (
+                      <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+                    )}
+                  </>
+                }
+                path={path}
+                rowNumber={rowIndex}
+              />
+              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           )
         }

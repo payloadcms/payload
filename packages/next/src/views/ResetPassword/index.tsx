@@ -11,8 +11,6 @@ import './index.scss'
 
 export const resetPasswordBaseClass = 'reset-password'
 
-export { generateResetPasswordMetadata } from './meta.js'
-
 export function ResetPassword({ initPageResult, params }: AdminViewServerProps) {
   const { req } = initPageResult
 

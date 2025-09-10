@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import crypto from 'crypto'
 
 import type {
@@ -9,9 +8,6 @@ import type {
   TransformCollectionWithSelect,
 } from '../../types/index.js'
 import type {
-  AfterChangeHook,
-  BeforeOperationHook,
-  BeforeValidateHook,
   Collection,
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
@@ -19,7 +15,7 @@ import type {
 } from '../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
@@ -34,7 +30,8 @@ import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -50,6 +47,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
+  publishSpecificLocale?: string
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -91,6 +89,10 @@ export const createOperation = async <
       }
     }
 
+    if (args.publishSpecificLocale) {
+      args.req.locale = args.publishSpecificLocale
+    }
+
     const {
       autosave = false,
       collection: { config: collectionConfig },
@@ -102,6 +104,7 @@ export const createOperation = async <
       overrideAccess,
       overwriteExistingFiles = false,
       populate,
+      publishSpecificLocale,
       req: {
         fallbackLocale,
         locale,
@@ -109,7 +112,7 @@ export const createOperation = async <
         payload: { config },
       },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
     } = args
 
@@ -172,7 +175,7 @@ export const createOperation = async <
       doc: duplicatedFromDoc,
       global: null,
       operation: 'create',
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
     })
 
@@ -224,6 +227,7 @@ export const createOperation = async <
       docWithLocales: duplicatedFromDocWithLocales,
       global: null,
       operation: 'create',
+      overrideAccess,
       req,
       skipValidation:
         shouldSaveDraft &&
@@ -244,6 +248,12 @@ export const createOperation = async <
     // /////////////////////////////////////
 
     let doc
+
+    const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
       if (collectionConfig.auth.verify) {
@@ -281,7 +291,10 @@ export const createOperation = async <
         autosave,
         collection: collectionConfig,
         docWithLocales: result,
+        locale,
+        operation: 'create',
         payload,
+        publishSpecificLocale,
         req,
       })
     }
@@ -294,7 +307,7 @@ export const createOperation = async <
       await sendVerificationEmail({
         collection: { config: collectionConfig },
         config: payload.config,
-        disableEmail: disableVerificationEmail,
+        disableEmail: disableVerificationEmail!,
         email: payload.email,
         req,
         token: verificationToken,
@@ -309,17 +322,17 @@ export const createOperation = async <
     result = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: result,
       draft,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////
@@ -363,6 +376,7 @@ export const createOperation = async <
           (await hook({
             collection: collectionConfig,
             context: req.context,
+            data,
             doc: result,
             operation: 'create',
             previousDoc: {},

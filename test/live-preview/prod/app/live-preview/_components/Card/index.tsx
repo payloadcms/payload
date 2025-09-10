@@ -6,7 +6,7 @@ import type { Post } from '../../../../../payload-types.js'
 import { Media } from '../Media/index.js'
 import classes from './index.module.scss'
 
-const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
+const Link = 'default' in LinkWithDefault ? LinkWithDefault.default : LinkWithDefault
 
 export const Card: React.FC<{
   alignItems?: 'center'

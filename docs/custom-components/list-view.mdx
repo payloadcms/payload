@@ -6,13 +6,14 @@ desc:
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The List View is where users interact with a list of [Collection](../collections/overview) Documents within the [Admin Panel](../admin/overview). This is where they can view, sort, filter, and paginate their documents to find exactly what they're looking for. This is also where users can perform bulk operations on multiple documents at once, such as deleting, editing, or publishing many.
+The List View is where users interact with a list of [Collection](../configuration/collections) Documents within the [Admin Panel](../admin/overview). This is where they can view, sort, filter, and paginate their documents to find exactly what they're looking for. This is also where users can perform bulk operations on multiple documents at once, such as deleting, editing, or publishing many.
 
 The List View can be swapped out in its entirety for a Custom View, or it can be injected with a number of Custom Components to add additional functionality or presentational elements without replacing the entire view.
 
 <Banner type="info">
-  **Note:**
-  Only [Collections](../collections/overview) have a List View. [Globals](../globals/overview) do not have a List View as they are single documents.
+  **Note:** Only [Collections](../configuration/collections) have a List View.
+  [Globals](../configuration/globals) do not have a List View as they are single
+  documents.
 </Banner>
 
 ## Custom List View
@@ -46,11 +47,7 @@ import type { ListViewServerProps } from 'payload'
 import { DefaultListView } from '@payloadcms/ui'
 
 export function MyCustomServerListView(props: ListViewServerProps) {
-  return (
-    <div>
-      This is a custom List View (Server)
-    </div>
-  )
+  return <div>This is a custom List View (Server)</div>
 }
 ```
 
@@ -62,11 +59,7 @@ import React from 'react'
 import type { ListViewClientProps } from 'payload'
 
 export function MyCustomClientListView(props: ListViewClientProps) {
-  return (
-    <div>
-      This is a custom List View (Client)
-    </div>
-  )
+  return <div>This is a custom List View (Client)</div>
 }
 ```
 
@@ -95,13 +88,14 @@ export const MyCollection: CollectionConfig = {
 
 The following options are available:
 
-| Path                  | Description                                                                                                                  |
-|-----------------------|----------------------------------------------------------------------------------------------------------------------------- |
-| `beforeList`          | An array of custom components to inject before the list of documents in the List View. [More details](#beforeList).          |
-| `beforeListTable`     | An array of custom components to inject before the table of documents in the List View. [More details](#beforeListTable).    |
-| `afterList`           | An array of custom components to inject after the list of documents in the List View. [More details](#afterList).            |
-| `afterListTable`      | An array of custom components to inject after the table of documents in the List View. [More details](#afterListTable).      |
-| `Description`         | A component to render a description of the Collection. [More details](#Description).                                         |
+| Path              | Description                                                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `beforeList`      | An array of custom components to inject before the list of documents in the List View. [More details](#beforelist).       |
+| `beforeListTable` | An array of custom components to inject before the table of documents in the List View. [More details](#beforelisttable). |
+| `afterList`       | An array of custom components to inject after the list of documents in the List View. [More details](#afterlist).         |
+| `afterListTable`  | An array of custom components to inject after the table of documents in the List View. [More details](#afterlisttable).   |
+| `listMenuItems`   | An array of components to render within a menu next to the List Controls (after the Columns and Filters options)          |
+| `Description`     | A component to render a description of the Collection. [More details](#description).                                      |
 
 ### beforeList
 
@@ -117,9 +111,7 @@ export const MyCollection: CollectionConfig = {
   admin: {
     components: {
       // highlight-start
-      beforeList: [
-        '/path/to/MyBeforeListComponent',
-      ],
+      beforeList: ['/path/to/MyBeforeListComponent'],
       // highlight-end
     },
   },
@@ -135,11 +127,7 @@ import React from 'react'
 import type { BeforeListServerProps } from 'payload'
 
 export function MyBeforeListComponent(props: BeforeListServerProps) {
-  return (
-    <div>
-      This is a custom beforeList component (Server)
-    </div>
-  )
+  return <div>This is a custom beforeList component (Server)</div>
 }
 ```
 
@@ -151,11 +139,7 @@ import React from 'react'
 import type { BeforeListClientProps } from 'payload'
 
 export function MyBeforeListComponent(props: BeforeListClientProps) {
-  return (
-    <div>
-      This is a custom beforeList component (Client)
-    </div>
-  )
+  return <div>This is a custom beforeList component (Client)</div>
 }
 ```
 
@@ -173,9 +157,7 @@ export const MyCollection: CollectionConfig = {
   admin: {
     components: {
       // highlight-start
-      beforeListTable: [
-        '/path/to/MyBeforeListTableComponent',
-      ],
+      beforeListTable: ['/path/to/MyBeforeListTableComponent'],
       // highlight-end
     },
   },
@@ -191,11 +173,7 @@ import React from 'react'
 import type { BeforeListTableServerProps } from 'payload'
 
 export function MyBeforeListTableComponent(props: BeforeListTableServerProps) {
-  return (
-    <div>
-      This is a custom beforeListTable component (Server)
-    </div>
-  )
+  return <div>This is a custom beforeListTable component (Server)</div>
 }
 ```
 
@@ -207,11 +185,7 @@ import React from 'react'
 import type { BeforeListTableClientProps } from 'payload'
 
 export function MyBeforeListTableComponent(props: BeforeListTableClientProps) {
-  return (
-    <div>
-      This is a custom beforeListTable component (Client)
-    </div>
-  )
+  return <div>This is a custom beforeListTable component (Client)</div>
 }
 ```
 
@@ -229,9 +203,7 @@ export const MyCollection: CollectionConfig = {
   admin: {
     components: {
       // highlight-start
-      afterList: [
-        '/path/to/MyAfterListComponent',
-      ],
+      afterList: ['/path/to/MyAfterListComponent'],
       // highlight-end
     },
   },
@@ -247,11 +219,7 @@ import React from 'react'
 import type { AfterListServerProps } from 'payload'
 
 export function MyAfterListComponent(props: AfterListServerProps) {
-  return (
-    <div>
-      This is a custom afterList component (Server)
-    </div>
-  )
+  return <div>This is a custom afterList component (Server)</div>
 }
 ```
 
@@ -263,11 +231,7 @@ import React from 'react'
 import type { AfterListClientProps } from 'payload'
 
 export function MyAfterListComponent(props: AfterListClientProps) {
-  return (
-    <div>
-      This is a custom afterList component (Client)
-    </div>
-  )
+  return <div>This is a custom afterList component (Client)</div>
 }
 ```
 
@@ -285,9 +249,7 @@ export const MyCollection: CollectionConfig = {
   admin: {
     components: {
       // highlight-start
-      afterListTable: [
-        '/path/to/MyAfterListTableComponent',
-      ],
+      afterListTable: ['/path/to/MyAfterListTableComponent'],
       // highlight-end
     },
   },
@@ -303,11 +265,7 @@ import React from 'react'
 import type { AfterListTableServerProps } from 'payload'
 
 export function MyAfterListTableComponent(props: AfterListTableServerProps) {
-  return (
-    <div>
-      This is a custom afterListTable component (Server)
-    </div>
-  )
+  return <div>This is a custom afterListTable component (Server)</div>
 }
 ```
 
@@ -319,11 +277,7 @@ import React from 'react'
 import type { AfterListTableClientProps } from 'payload'
 
 export function MyAfterListTableComponent(props: AfterListTableClientProps) {
-  return (
-    <div>
-      This is a custom afterListTable component (Client)
-    </div>
-  )
+  return <div>This is a custom afterListTable component (Client)</div>
 }
 ```
 
@@ -349,8 +303,8 @@ export const MyCollection: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  **Note:**
-  The `Description` component is shared between the List View and the [Edit View](./edit-view).
+  **Note:** The `Description` component is shared between the List View and the
+  [Edit View](./edit-view).
 </Banner>
 
 Here's an example of a custom `Description` component:
@@ -362,11 +316,7 @@ import React from 'react'
 import type { ViewDescriptionServerProps } from 'payload'
 
 export function MyDescriptionComponent(props: ViewDescriptionServerProps) {
-  return (
-    <div>
-      This is a custom Collection description component (Server)
-    </div>
-  )
+  return <div>This is a custom Collection description component (Server)</div>
 }
 ```
 
@@ -378,10 +328,6 @@ import React from 'react'
 import type { ViewDescriptionClientProps } from 'payload'
 
 export function MyDescriptionComponent(props: ViewDescriptionClientProps) {
-  return (
-    <div>
-      This is a custom Collection description component (Client)
-    </div>
-  )
+  return <div>This is a custom Collection description component (Client)</div>
 }
 ```

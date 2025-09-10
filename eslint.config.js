@@ -74,21 +74,13 @@ export const rootEslintConfig = [
       'no-console': 'off',
       'perfectionist/sort-object-types': 'off',
       'perfectionist/sort-objects': 'off',
+      'payload/no-relative-monorepo-imports': 'off',
     },
   },
 ]
 
 export default [
   ...rootEslintConfig,
-  {
-    languageOptions: {
-      parserOptions: {
-        ...rootParserOptions,
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-  },
   {
     files: ['packages/eslint-config/**/*.ts'],
     rules: {

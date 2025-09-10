@@ -1,13 +1,13 @@
-import type { FlattenedField } from 'payload'
-
 import { sql } from 'drizzle-orm'
+import { APIError, type FlattenedField } from 'payload'
 import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
-import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.js'
+import type { NumberToDelete, RelationshipToDelete, RowToInsert, TextToDelete } from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
+import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
 import { transformArray } from './array.js'
 import { transformBlocks } from './blocks.js'
 import { transformNumbers } from './numbers.js'
@@ -17,16 +17,20 @@ import { transformTexts } from './texts.js'
 
 type Args = {
   adapter: DrizzleAdapter
-  arrays: {
-    [tableName: string]: ArrayRowToInsert[]
-  }
+  /**
+   * This will delete the array table and then re-insert all the new array rows.
+   */
+  arrays: RowToInsert['arrays']
+  /**
+   * Array rows to push to the existing array. This will simply create
+   * a new row in the array table.
+   */
+  arraysToPush: RowToInsert['arraysToPush']
   /**
    * This is the name of the base table
    */
   baseTableName: string
-  blocks: {
-    [blockType: string]: BlockRowToInsert[]
-  }
+  blocks: RowToInsert['blocks']
   blocksToDelete: Set<string>
   /**
    * A snake-case field prefix, representing prior fields
@@ -34,6 +38,7 @@ type Args = {
    */
   columnPrefix: string
   data: Record<string, unknown>
+  enableAtomicWrites?: boolean
   existingLocales?: Record<string, unknown>[]
   /**
    * A prefix that will retain camel-case formatting, representing prior fields
@@ -50,6 +55,7 @@ type Args = {
     [locale: string]: Record<string, unknown>
   }
   numbers: Record<string, unknown>[]
+  numbersToDelete: NumberToDelete[]
   parentIsLocalized: boolean
   /**
    * This is the name of the parent table
@@ -63,6 +69,7 @@ type Args = {
     [tableName: string]: Record<string, unknown>[]
   }
   texts: Record<string, unknown>[]
+  textsToDelete: TextToDelete[]
   /**
    * Set to a locale code if this set of fields is traversed within a
    * localized array or block field
@@ -73,11 +80,13 @@ type Args = {
 export const traverseFields = ({
   adapter,
   arrays,
+  arraysToPush,
   baseTableName,
   blocks,
   blocksToDelete,
   columnPrefix,
   data,
+  enableAtomicWrites,
   existingLocales,
   fieldPrefix,
   fields,
@@ -85,6 +94,7 @@ export const traverseFields = ({
   insideArrayOrBlock = false,
   locales,
   numbers,
+  numbersToDelete,
   parentIsLocalized,
   parentTableName,
   path,
@@ -93,6 +103,7 @@ export const traverseFields = ({
   row,
   selects,
   texts,
+  textsToDelete,
   withinArrayOrBlockLocale,
 }: Args) => {
   if (row._uuid) {
@@ -117,13 +128,24 @@ export const traverseFields = ({
     if (field.type === 'array') {
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
 
-      if (!arrays[arrayTableName]) {
-        arrays[arrayTableName] = []
-      }
-
       if (isLocalized) {
-        if (typeof data[field.name] === 'object' && data[field.name] !== null) {
-          Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
+        let value: {
+          [locale: string]: unknown[]
+        } = data[field.name] as any
+
+        let push = false
+        if (typeof value === 'object' && '$push' in value) {
+          value = value.$push as any
+          push = true
+        }
+
+        if (typeof value === 'object' && value !== null) {
+          Object.entries(value).forEach(([localeKey, _localeData]) => {
+            let localeData = _localeData
+            if (push && !Array.isArray(localeData)) {
+              localeData = [localeData]
+            }
+
             if (Array.isArray(localeData)) {
               const newRows = transformArray({
                 adapter,
@@ -135,47 +157,88 @@ export const traverseFields = ({
                 field,
                 locale: localeKey,
                 numbers,
+                numbersToDelete,
                 parentIsLocalized: parentIsLocalized || field.localized,
                 path,
                 relationships,
                 relationshipsToDelete,
                 selects,
                 texts,
+                textsToDelete,
                 withinArrayOrBlockLocale: localeKey,
               })
 
-              arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
+              if (push) {
+                if (!arraysToPush[arrayTableName]) {
+                  arraysToPush[arrayTableName] = []
+                }
+                arraysToPush[arrayTableName] = arraysToPush[arrayTableName].concat(newRows)
+              } else {
+                if (!arrays[arrayTableName]) {
+                  arrays[arrayTableName] = []
+                }
+                arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
+              }
             }
           })
         }
       } else {
+        let value = data[field.name]
+        let push = false
+        if (typeof value === 'object' && '$push' in value) {
+          value = Array.isArray(value.$push) ? value.$push : [value.$push]
+          push = true
+        }
+
         const newRows = transformArray({
           adapter,
           arrayTableName,
           baseTableName,
           blocks,
           blocksToDelete,
-          data: data[field.name],
+          data: value,
           field,
           numbers,
+          numbersToDelete,
           parentIsLocalized: parentIsLocalized || field.localized,
           path,
           relationships,
           relationshipsToDelete,
           selects,
           texts,
+          textsToDelete,
           withinArrayOrBlockLocale,
         })
 
-        arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
+        if (push) {
+          if (!arraysToPush[arrayTableName]) {
+            arraysToPush[arrayTableName] = []
+          }
+          arraysToPush[arrayTableName] = arraysToPush[arrayTableName].concat(newRows)
+        } else {
+          if (!arrays[arrayTableName]) {
+            arrays[arrayTableName] = []
+          }
+          arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
+        }
       }
 
       return
     }
 
-    if (field.type === 'blocks') {
+    if (field.type === 'blocks' && !adapter.blocksAsJSON) {
       ;(field.blockReferences ?? field.blocks).forEach((block) => {
-        blocksToDelete.add(toSnakeCase(typeof block === 'string' ? block : block.slug))
+        const matchedBlock =
+          typeof block === 'string'
+            ? adapter.payload.config.blocks.find((each) => each.slug === block)
+            : block
+
+        blocksToDelete.add(
+          resolveBlockTableName(
+            matchedBlock,
+            adapter.tableNameMap.get(`${baseTableName}_blocks_${toSnakeCase(matchedBlock.slug)}`),
+          ),
+        )
       })
 
       if (isLocalized) {
@@ -191,12 +254,14 @@ export const traverseFields = ({
                 field,
                 locale: localeKey,
                 numbers,
+                numbersToDelete,
                 parentIsLocalized: parentIsLocalized || field.localized,
                 path,
                 relationships,
                 relationshipsToDelete,
                 selects,
                 texts,
+                textsToDelete,
                 withinArrayOrBlockLocale: localeKey,
               })
             }
@@ -211,12 +276,14 @@ export const traverseFields = ({
           data: fieldData,
           field,
           numbers,
+          numbersToDelete,
           parentIsLocalized: parentIsLocalized || field.localized,
           path,
           relationships,
           relationshipsToDelete,
           selects,
           texts,
+          textsToDelete,
           withinArrayOrBlockLocale,
         })
       }
@@ -234,11 +301,13 @@ export const traverseFields = ({
             traverseFields({
               adapter,
               arrays,
+              arraysToPush,
               baseTableName,
               blocks,
               blocksToDelete,
               columnPrefix: `${columnName}_`,
               data: localeData as Record<string, unknown>,
+              enableAtomicWrites,
               existingLocales,
               fieldPrefix: `${fieldName}_`,
               fields: field.flattenedFields,
@@ -246,6 +315,7 @@ export const traverseFields = ({
               insideArrayOrBlock,
               locales,
               numbers,
+              numbersToDelete,
               parentIsLocalized: parentIsLocalized || field.localized,
               parentTableName,
               path: `${path || ''}${field.name}.`,
@@ -254,6 +324,7 @@ export const traverseFields = ({
               row,
               selects,
               texts,
+              textsToDelete,
               withinArrayOrBlockLocale: localeKey,
             })
           })
@@ -265,6 +336,7 @@ export const traverseFields = ({
           traverseFields({
             adapter,
             arrays,
+            arraysToPush,
             baseTableName,
             blocks,
             blocksToDelete,
@@ -276,6 +348,7 @@ export const traverseFields = ({
             insideArrayOrBlock,
             locales,
             numbers,
+            numbersToDelete,
             parentIsLocalized: parentIsLocalized || field.localized,
             parentTableName,
             path: `${path || ''}${field.name}.`,
@@ -284,6 +357,7 @@ export const traverseFields = ({
             row,
             selects,
             texts,
+            textsToDelete,
             withinArrayOrBlockLocale,
           })
         }
@@ -369,6 +443,11 @@ export const traverseFields = ({
         if (typeof fieldData === 'object') {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
+              if (!localeData.length) {
+                textsToDelete.push({ locale: localeKey, path: textPath })
+                return
+              }
+
               transformTexts({
                 baseRow: {
                   locale: localeKey,
@@ -381,6 +460,11 @@ export const traverseFields = ({
           })
         }
       } else if (Array.isArray(fieldData)) {
+        if (!fieldData.length) {
+          textsToDelete.push({ locale: withinArrayOrBlockLocale, path: textPath })
+          return
+        }
+
         transformTexts({
           baseRow: {
             locale: withinArrayOrBlockLocale,
@@ -401,6 +485,11 @@ export const traverseFields = ({
         if (typeof fieldData === 'object') {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
+              if (!localeData.length) {
+                numbersToDelete.push({ locale: localeKey, path: numberPath })
+                return
+              }
+
               transformNumbers({
                 baseRow: {
                   locale: localeKey,
@@ -413,6 +502,11 @@ export const traverseFields = ({
           })
         }
       } else if (Array.isArray(fieldData)) {
+        if (!fieldData.length) {
+          numbersToDelete.push({ locale: withinArrayOrBlockLocale, path: numberPath })
+          return
+        }
+
         transformNumbers({
           baseRow: {
             locale: withinArrayOrBlockLocale,
@@ -491,12 +585,11 @@ export const traverseFields = ({
     valuesToTransform.forEach(({ localeKey, ref, value }) => {
       let formattedValue = value
 
-      if (typeof value !== 'undefined') {
-        if (value && field.type === 'point' && adapter.name !== 'sqlite') {
-          formattedValue = sql`ST_GeomFromGeoJSON(${JSON.stringify(value)})`
-        }
-
-        if (field.type === 'date') {
+      if (field.type === 'date') {
+        if (fieldName === 'updatedAt' && typeof formattedValue === 'undefined') {
+          // let the db handle this. If formattedValue is explicitly set to `null` we should not set it - this means we don't want to change the value of updatedAt.
+          formattedValue = new Date().toISOString()
+        } else {
           if (typeof value === 'number' && !Number.isNaN(value)) {
             formattedValue = new Date(value).toISOString()
           } else if (value instanceof Date) {
@@ -505,9 +598,30 @@ export const traverseFields = ({
         }
       }
 
-      if (field.type === 'date' && fieldName === 'updatedAt') {
-        // let the db handle this
-        formattedValue = new Date().toISOString()
+      if (typeof value !== 'undefined') {
+        if (value && field.type === 'point' && adapter.name !== 'sqlite') {
+          formattedValue = sql`ST_GeomFromGeoJSON(${JSON.stringify(value)})`
+        }
+
+        if (field.type === 'text' && value && typeof value !== 'string') {
+          formattedValue = JSON.stringify(value)
+        }
+
+        if (
+          field.type === 'number' &&
+          value &&
+          typeof value === 'object' &&
+          '$inc' in value &&
+          typeof value.$inc === 'number'
+        ) {
+          if (!enableAtomicWrites) {
+            throw new APIError(
+              'The passed data must not contain any nested fields for atomic writes',
+            )
+          }
+
+          formattedValue = sql.raw(`${columnName} + ${value.$inc}`)
+        }
       }
 
       if (typeof formattedValue !== 'undefined') {

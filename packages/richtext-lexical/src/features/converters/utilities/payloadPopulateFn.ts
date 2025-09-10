@@ -1,6 +1,6 @@
 import { createLocalReq, type Payload, type PayloadRequest, type TypedLocale } from 'payload'
 
-import type { HTMLPopulateFn } from '../html/async/types.js'
+import type { HTMLPopulateFn } from '../lexicalToHtml/async/types.js'
 
 import { populate } from '../../../populateGraphQL/populate.js'
 

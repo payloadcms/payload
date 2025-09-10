@@ -34,15 +34,14 @@ function createErrorsFromMessage(message: string): {
   message: string
 } {
   const [intro, errorsString] = message.split(':')
-  const errors = (errorsString || '')
-    .split(',')
-    .map((error) => error.replaceAll(' > ', ' → ').trim())
 
-  if (errors.length === 0) {
+  if (!errorsString) {
     return {
       message: intro,
     }
   }
+
+  const errors = errorsString.split(',').map((error) => error.replaceAll(' > ', ' → ').trim())
 
   if (errors.length === 1) {
     return {
@@ -64,11 +63,15 @@ export function FieldErrorsToast({ errorMessage }) {
     <div>
       {message}
       {Array.isArray(errors) && errors.length > 0 ? (
-        <ul data-testid="field-errors">
-          {errors.map((error, index) => {
-            return <li key={index}>{error}</li>
-          })}
-        </ul>
+        errors.length === 1 ? (
+          <span data-testid="field-error">{errors[0]}</span>
+        ) : (
+          <ul data-testid="field-errors">
+            {errors.map((error, index) => {
+              return <li key={index}>{error}</li>
+            })}
+          </ul>
+        )
       ) : null}
     </div>
   )

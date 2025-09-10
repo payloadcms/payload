@@ -24,6 +24,21 @@ export const syncDocAsSearchIndex = async ({
     },
     title,
   }
+  const docKey = `${collection}:${id}`
+  const syncedDocsSet = (req.context?.syncedDocsSet as Set<string>) || new Set<string>()
+
+  if (syncedDocsSet.has(docKey)) {
+    /*
+     * prevents duplicate syncing of documents in the same request
+     * this can happen when hooks call `payload.update` within the create lifecycle
+     * like the nested-docs plugin does
+     */
+    return
+  } else {
+    syncedDocsSet.add(docKey)
+  }
+
+  req.context.syncedDocsSet = syncedDocsSet
 
   if (typeof beforeSync === 'function') {
     let docToSyncWith = doc
@@ -64,18 +79,17 @@ export const syncDocAsSearchIndex = async ({
   const doSync = syncDrafts || (!syncDrafts && status !== 'draft')
 
   try {
-    if (operation === 'create') {
-      if (doSync) {
-        await payload.create({
-          collection: searchSlug,
-          data: {
-            ...dataToSave,
-            priority: defaultPriority,
-          },
-          locale: syncLocale,
-          req,
-        })
-      }
+    if (operation === 'create' && doSync) {
+      await payload.create({
+        collection: searchSlug,
+        data: {
+          ...dataToSave,
+          priority: defaultPriority,
+        },
+        depth: 0,
+        locale: syncLocale,
+        req,
+      })
     }
 
     if (operation === 'update') {
@@ -110,6 +124,7 @@ export const syncDocAsSearchIndex = async ({
             const duplicativeDocIDs = duplicativeDocs.map(({ id }) => id)
             await payload.delete({
               collection: searchSlug,
+              depth: 0,
               req,
               where: { id: { in: duplicativeDocIDs } },
             })
@@ -134,6 +149,7 @@ export const syncDocAsSearchIndex = async ({
                   ...dataToSave,
                   priority: foundDoc.priority || defaultPriority,
                 },
+                depth: 0,
                 locale: syncLocale,
                 req,
               })
@@ -148,6 +164,7 @@ export const syncDocAsSearchIndex = async ({
               docs: [docWithPublish],
             } = await payload.find({
               collection,
+              depth: 0,
               draft: false,
               limit: 1,
               locale: syncLocale,
@@ -175,6 +192,7 @@ export const syncDocAsSearchIndex = async ({
                 await payload.delete({
                   id: searchDocID,
                   collection: searchSlug,
+                  depth: 0,
                   req,
                 })
               } catch (err: unknown) {
@@ -190,6 +208,7 @@ export const syncDocAsSearchIndex = async ({
                 ...dataToSave,
                 priority: defaultPriority,
               },
+              depth: 0,
               locale: syncLocale,
               req,
             })

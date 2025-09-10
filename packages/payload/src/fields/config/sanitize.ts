@@ -1,5 +1,5 @@
-// @ts-strict-ignore
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
+import { v4 as uuid } from 'uuid'
 
 import type {
   CollectionConfig,
@@ -16,6 +16,7 @@ import {
   MissingEditorProp,
   MissingFieldType,
 } from '../../errors/index.js'
+import { ReservedFieldName } from '../../errors/ReservedFieldName.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
@@ -23,14 +24,24 @@ import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
 import { defaultTimezones } from '../baseFields/timezone/defaultTimezones.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import { validations } from '../validations.js'
+import {
+  reservedAPIKeyFieldNames,
+  reservedBaseAuthFieldNames,
+  reservedBaseUploadFieldNames,
+  reservedVerifyFieldNames,
+} from './reservedFieldNames.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
-import { fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
+import { fieldAffectsData as _fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
 
 type Args = {
   collectionConfig?: CollectionConfig
   config: Config
   existingFieldNames?: Set<string>
   fields: Field[]
+  /**
+   * Used to prevent unnecessary sanitization of fields that are not top-level.
+   */
+  isTopLevelField?: boolean
   joinPath?: string
   /**
    * When not passed in, assume that join are not supported (globals, arrays, blocks)
@@ -38,7 +49,6 @@ type Args = {
   joins?: SanitizedJoins
   parentIsLocalized: boolean
   polymorphicJoins?: SanitizedJoin[]
-
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
    *
@@ -58,9 +68,11 @@ type Args = {
 }
 
 export const sanitizeFields = async ({
+  collectionConfig,
   config,
   existingFieldNames = new Set(),
   fields,
+  isTopLevelField = true,
   joinPath = '',
   joins,
   parentIsLocalized,
@@ -74,11 +86,12 @@ export const sanitizeFields = async ({
   }
 
   for (let i = 0; i < fields.length; i++) {
-    const field = fields[i]
+    const field = fields[i]!
 
     if ('_sanitized' in field && field._sanitized === true) {
       continue
     }
+
     if ('_sanitized' in field) {
       field._sanitized = true
     }
@@ -87,8 +100,41 @@ export const sanitizeFields = async ({
       throw new MissingFieldType(field)
     }
 
+    const fieldAffectsData = _fieldAffectsData(field)
+
+    if (isTopLevelField && fieldAffectsData && field.name) {
+      if (collectionConfig && collectionConfig.upload) {
+        if (reservedBaseUploadFieldNames.includes(field.name)) {
+          throw new ReservedFieldName(field, field.name)
+        }
+      }
+
+      if (
+        collectionConfig &&
+        collectionConfig.auth &&
+        typeof collectionConfig.auth === 'object' &&
+        !collectionConfig.auth.disableLocalStrategy
+      ) {
+        if (reservedBaseAuthFieldNames.includes(field.name)) {
+          throw new ReservedFieldName(field, field.name)
+        }
+
+        if (collectionConfig.auth.verify) {
+          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+          if (reservedAPIKeyFieldNames.includes(field.name)) {
+            throw new ReservedFieldName(field, field.name)
+          }
+
+          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+          if (reservedVerifyFieldNames.includes(field.name)) {
+            throw new ReservedFieldName(field, field.name)
+          }
+        }
+      }
+    }
+
     // assert that field names do not contain forbidden characters
-    if (fieldAffectsData(field) && field.name.includes('.')) {
+    if (fieldAffectsData && field.name.includes('.')) {
       throw new InvalidFieldName(field, field.name)
     }
 
@@ -121,6 +167,7 @@ export const sanitizeFields = async ({
         const relationships = Array.isArray(field.relationTo)
           ? field.relationTo
           : [field.relationTo]
+
         relationships.forEach((relationship: string) => {
           if (!validRelationships.includes(relationship)) {
             throw new InvalidFieldRelationship(field, relationship)
@@ -134,6 +181,7 @@ export const sanitizeFields = async ({
         )
         field.minRows = field.min
       }
+
       if (field.max && !field.maxRows) {
         console.warn(
           `(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`,
@@ -152,14 +200,17 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'array' && field.fields) {
-      field.fields.push(baseIDField)
+      const hasCustomID = field.fields.some((f) => 'name' in f && f.name === 'id')
+      if (!hasCustomID) {
+        field.fields.push(baseIDField)
+      }
     }
 
     if ((field.type === 'blocks' || field.type === 'array') && field.label) {
       field.labels = field.labels || formatLabels(field.name)
     }
 
-    if (fieldAffectsData(field)) {
+    if (fieldAffectsData) {
       if (existingFieldNames.has(field.name)) {
         throw new DuplicateFieldName(field.name)
       } else if (!['blockName', 'id'].includes(field.name)) {
@@ -184,9 +235,10 @@ export const sanitizeFields = async ({
       }
 
       if (typeof field.validate === 'undefined') {
-        const defaultValidate = validations[field.type]
+        const defaultValidate = validations[field.type as keyof typeof validations]
         if (defaultValidate) {
-          field.validate = (val, options) => defaultValidate(val, { ...field, ...options })
+          field.validate = (val: any, options: any) =>
+            defaultValidate(val, { ...field, ...options })
         } else {
           field.validate = (): true => true
         }
@@ -195,6 +247,7 @@ export const sanitizeFields = async ({
       if (!field.hooks) {
         field.hooks = {}
       }
+
       if (!field.access) {
         field.access = {}
       }
@@ -222,12 +275,12 @@ export const sanitizeFields = async ({
           field.editor = await field.editor({
             config: _config,
             isRoot: requireFieldLevelRichTextEditor,
-            parentIsLocalized: parentIsLocalized || field.localized,
+            parentIsLocalized: (parentIsLocalized || field.localized)!,
           })
         }
 
         if (field.editor.i18n && Object.keys(field.editor.i18n).length >= 0) {
-          config.i18n.translations = deepMergeSimple(config.i18n.translations, field.editor.i18n)
+          config.i18n!.translations = deepMergeSimple(config.i18n!.translations!, field.editor.i18n)
         }
       }
       if (richTextSanitizationPromises) {
@@ -242,21 +295,35 @@ export const sanitizeFields = async ({
         throw new Error('You cannot have both blockReferences and blocks in the same blocks field')
       }
 
+      const blockSlugs: string[] = []
+
       for (const block of field.blockReferences ?? field.blocks) {
+        const blockSlug = typeof block === 'string' ? block : block.slug
+
+        if (blockSlugs.includes(blockSlug)) {
+          throw new DuplicateFieldName(blockSlug)
+        }
+
+        blockSlugs.push(blockSlug)
+
         if (typeof block === 'string') {
           continue
         }
+
         if (block._sanitized === true) {
           continue
         }
+
         block._sanitized = true
         block.fields = block.fields.concat(baseBlockFields)
         block.labels = !block.labels ? formatLabels(block.slug) : block.labels
         block.fields = await sanitizeFields({
+          collectionConfig,
           config,
           existingFieldNames: new Set(),
           fields: block.fields,
-          parentIsLocalized: parentIsLocalized || field.localized,
+          isTopLevelField: false,
+          parentIsLocalized: (parentIsLocalized || field.localized)!,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,
@@ -266,12 +333,12 @@ export const sanitizeFields = async ({
 
     if ('fields' in field && field.fields) {
       field.fields = await sanitizeFields({
+        collectionConfig,
         config,
-        existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
+        existingFieldNames: fieldAffectsData ? new Set() : existingFieldNames,
         fields: field.fields,
-        joinPath: fieldAffectsData(field)
-          ? `${joinPath ? joinPath + '.' : ''}${field.name}`
-          : joinPath,
+        isTopLevelField: isTopLevelField && !fieldAffectsData,
+        joinPath: fieldAffectsData ? `${joinPath ? joinPath + '.' : ''}${field.name}` : joinPath,
         joins,
         parentIsLocalized: parentIsLocalized || fieldIsLocalized(field),
         polymorphicJoins,
@@ -283,23 +350,39 @@ export const sanitizeFields = async ({
 
     if (field.type === 'tabs') {
       for (let j = 0; j < field.tabs.length; j++) {
-        const tab = field.tabs[j]
-        if (tabHasName(tab) && typeof tab.label === 'undefined') {
+        const tab = field.tabs[j]!
+
+        const isNamedTab = tabHasName(tab)
+
+        if (isNamedTab && typeof tab.label === 'undefined') {
           tab.label = toWords(tab.name)
         }
 
+        if (
+          'admin' in tab &&
+          tab.admin?.condition &&
+          typeof tab.admin.condition === 'function' &&
+          !tab.id
+        ) {
+          // Always attach a UUID to tabs with a condition so there's no conflicts even if there are duplicate nested names
+          tab.id = isNamedTab ? `${tab.name}_${uuid()}` : uuid()
+        }
+
         tab.fields = await sanitizeFields({
+          collectionConfig,
           config,
-          existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
+          existingFieldNames: isNamedTab ? new Set() : existingFieldNames,
           fields: tab.fields,
-          joinPath: tabHasName(tab) ? `${joinPath ? joinPath + '.' : ''}${tab.name}` : joinPath,
+          isTopLevelField: isTopLevelField && !isNamedTab,
+          joinPath: isNamedTab ? `${joinPath ? joinPath + '.' : ''}${tab.name}` : joinPath,
           joins,
-          parentIsLocalized: parentIsLocalized || (tabHasName(tab) && tab.localized),
+          parentIsLocalized: parentIsLocalized || (isNamedTab && tab.localized)!,
           polymorphicJoins,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,
         })
+
         field.tabs[j] = tab
       }
     }
@@ -313,9 +396,9 @@ export const sanitizeFields = async ({
     // Insert our field after assignment
     if (field.type === 'date' && field.timezone) {
       const name = field.name + '_tz'
-      const defaultTimezone = config.admin.timezones.defaultTimezone
+      const defaultTimezone = config.admin?.timezones?.defaultTimezone
 
-      const supportedTimezones = config.admin.timezones.supportedTimezones
+      const supportedTimezones = config.admin?.timezones?.supportedTimezones
 
       const options =
         typeof supportedTimezones === 'function'

@@ -16,7 +16,7 @@ import { INSERT_TABLE_COMMAND, TableCellNode, TableNode, TableRowNode } from '@l
 import { mergeRegister } from '@lexical/utils'
 import { formatDrawerSlug, useEditDepth } from '@payloadcms/ui'
 import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical'
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, use, useEffect, useMemo, useState } from 'react'
 import * as React from 'react'
 
 import type { PluginComponent } from '../../../../typesClient.js'
@@ -64,7 +64,7 @@ export function TableContext({ children }: { children: JSX.Element }) {
     cellEditorPlugins: null,
   })
   return (
-    <CellContext.Provider
+    <CellContext
       value={useMemo(
         () => ({
           cellEditorConfig: contextValue.cellEditorConfig,
@@ -77,13 +77,13 @@ export function TableContext({ children }: { children: JSX.Element }) {
       )}
     >
       {children}
-    </CellContext.Provider>
+    </CellContext>
   )
 }
 
 export const TablePlugin: PluginComponent = () => {
   const [editor] = useLexicalComposerContext()
-  const cellContext = useContext(CellContext)
+  const cellContext = use(CellContext)
   const editDepth = useEditDepth()
   const {
     fieldProps: { schemaPath },

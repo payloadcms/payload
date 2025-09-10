@@ -9,7 +9,7 @@ import { getTransaction } from './utilities/getTransaction.js'
 
 export async function updateGlobal<T extends Record<string, unknown>>(
   this: DrizzleAdapter,
-  { slug, data, req, select, returning }: UpdateGlobalArgs,
+  { slug, data, req, returning, select }: UpdateGlobalArgs,
 ): Promise<T> {
   const db = await getTransaction(this, req)
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
@@ -23,10 +23,10 @@ export async function updateGlobal<T extends Record<string, unknown>>(
     data,
     db,
     fields: globalConfig.flattenedFields,
+    ignoreResult: returning === false,
     req,
     select,
     tableName,
-    ignoreResult: returning === false,
   })
 
   if (returning === false) {

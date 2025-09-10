@@ -20,7 +20,11 @@ export const resolveAllFilterOptions = async ({
         return
       }
 
-      if ('name' in field && 'filterOptions' in field && field.filterOptions) {
+      if (
+        (field.type === 'relationship' || field.type === 'upload') &&
+        'filterOptions' in field &&
+        field.filterOptions
+      ) {
         const options = await resolveFilterOptions(field.filterOptions, {
           id: undefined,
           blockData: undefined,

@@ -1,0 +1,12 @@
+@layer payload-default {
+  .date-diff {
+    p *[data-match-type='delete'] {
+      color: unset !important;
+      background-color: unset !important;
+    }
+    p *[data-match-type='create'] {
+      color: unset !important;
+      background-color: unset !important;
+    }
+  }
+}

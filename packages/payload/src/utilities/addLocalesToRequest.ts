@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
@@ -14,34 +13,39 @@ export function addLocalesToRequestFromData(req: PayloadRequest): void {
   } = req
 
   if (data) {
-    let localeOnReq = req.locale
-    let fallbackLocaleOnReq = req.fallbackLocale
+    const localeOnReq = req.locale
+    const fallbackLocaleOnReq = req.fallbackLocale
+    let localeFromData!: string
+    let fallbackLocaleFromData!: string
 
     if (!localeOnReq && data?.locale && typeof data.locale === 'string') {
-      localeOnReq = data.locale
+      localeFromData = data.locale
     }
 
     if (!fallbackLocaleOnReq) {
       if (data?.['fallback-locale'] && typeof data?.['fallback-locale'] === 'string') {
-        fallbackLocaleOnReq = data['fallback-locale']
+        fallbackLocaleFromData = data['fallback-locale']
       }
 
       if (data?.['fallbackLocale'] && typeof data?.['fallbackLocale'] === 'string') {
-        fallbackLocaleOnReq = data['fallbackLocale']
+        fallbackLocaleFromData = data['fallbackLocale']
       }
     }
 
-    const { fallbackLocale, locale } = sanitizeLocales({
-      fallbackLocale: fallbackLocaleOnReq,
-      locale: localeOnReq,
-      localization: config.localization,
-    })
+    if (!localeOnReq || !fallbackLocaleOnReq) {
+      const { fallbackLocale, locale } = sanitizeLocales({
+        fallbackLocale: fallbackLocaleFromData,
+        locale: localeFromData,
+        localization: config.localization,
+      })
 
-    if (locale) {
-      req.locale = locale
-    }
-    if (fallbackLocale) {
-      req.fallbackLocale = fallbackLocale
+      if (localeFromData) {
+        req.locale = locale
+      }
+
+      if (fallbackLocaleFromData) {
+        req.fallbackLocale = fallbackLocale
+      }
     }
   }
 }
@@ -67,7 +71,7 @@ export const sanitizeLocales = ({
       fallbackLocale,
       locale,
       localization,
-    })
+    })!
   }
 
   if (['*', 'all'].includes(locale)) {

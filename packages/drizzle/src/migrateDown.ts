@@ -50,7 +50,8 @@ export async function migrateDown(this: DrizzleAdapter): Promise<void> {
         msg: `Migrated down:  ${migrationFile.name} (${Date.now() - start}ms)`,
       })
 
-      const tableExists = await migrationTableExists(this)
+      const tableExists = await migrationTableExists(this, db)
+
       if (tableExists) {
         await payload.delete({
           id: migration.id,

@@ -137,6 +137,47 @@ const RowFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'leftColumn',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'leftTextBlock',
+              fields: [
+                {
+                  name: 'leftText',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          name: 'rightColumn',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'rightTextBlock',
+              fields: [
+                {
+                  name: 'rightText',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
   ],
 }
 

@@ -64,7 +64,6 @@ const toolbarGroups: ToolbarGroup[] = [
 
           const linkFields: Partial<LinkFields> = {
             doc: null,
-            newTab: false,
           }
 
           editor.dispatchCommand(TOGGLE_LINK_WITH_MODAL_COMMAND, {

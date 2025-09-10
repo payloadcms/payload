@@ -15,10 +15,25 @@ import { post3 } from './post-3.js'
 import { postsPage } from './posts-page.js'
 import { tenant1 } from './tenant-1.js'
 import { tenant2 } from './tenant-2.js'
+import { trashedPost } from './trashed-post.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const seed: Config['onInit'] = async (payload) => {
+  const existingUser = await payload.find({
+    collection: 'users',
+    where: {
+      email: {
+        equals: devUser.email,
+      },
+    },
+  })
+
+  // Seed already ran => this is likely a consecutive, uncached getPayload call
+  if (existingUser.docs.length) {
+    return
+  }
+
   const uploadsDir = path.resolve(dirname, './media')
   removeFiles(path.normalize(uploadsDir))
 
@@ -73,6 +88,15 @@ export const seed: Config['onInit'] = async (payload) => {
     collection: postsSlug,
     data: JSON.parse(
       JSON.stringify(post3)
+        .replace(/"\{\{IMAGE\}\}"/g, mediaID)
+        .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
+    ),
+  })
+
+  await payload.create({
+    collection: postsSlug,
+    data: JSON.parse(
+      JSON.stringify(trashedPost)
         .replace(/"\{\{IMAGE\}\}"/g, mediaID)
         .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
     ),

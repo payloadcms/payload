@@ -1,4 +1,4 @@
-import type { Field, SanitizedConfig, User } from 'payload'
+import type { Field, SanitizedConfig, TypedUser } from 'payload'
 
 export const getBaseFields = (config: SanitizedConfig): Field[] => [
   {
@@ -47,7 +47,7 @@ export const getBaseFields = (config: SanitizedConfig): Field[] => [
     type: 'relationship',
     filterOptions: ({ relationTo, user }) => {
       const hidden = config.collections.find(({ slug }) => slug === relationTo).admin.hidden
-      if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
+      if (typeof hidden === 'function' && hidden({ user } as { user: TypedUser })) {
         return false
       }
     },

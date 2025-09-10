@@ -50,7 +50,7 @@ export const RscEntryLexicalField: React.FC<
   })
 
   let initialLexicalFormState = {}
-  if (args.data?.[field.name]?.root?.children?.length) {
+  if (args.siblingData?.[field.name]?.root?.children?.length) {
     initialLexicalFormState = await buildInitialState({
       context: {
         id: args.id,
@@ -66,7 +66,7 @@ export const RscEntryLexicalField: React.FC<
         renderFieldFn: renderField,
         req: args.req,
       },
-      nodeData: args.data?.[field.name]?.root?.children as SerializedLexicalNode[],
+      nodeData: args.siblingData?.[field.name]?.root?.children as SerializedLexicalNode[],
     })
   }
 
@@ -84,6 +84,12 @@ export const RscEntryLexicalField: React.FC<
   }
   if (args.admin?.hideInsertParagraphAtEnd) {
     admin.hideInsertParagraphAtEnd = true
+  }
+  if (args.admin?.hideAddBlockButton) {
+    admin.hideAddBlockButton = true
+  }
+  if (args.admin?.hideDraggableBlockElement) {
+    admin.hideDraggableBlockElement = true
   }
 
   const props: LexicalRichTextFieldProps = {

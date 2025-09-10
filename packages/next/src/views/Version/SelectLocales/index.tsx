@@ -1,41 +1,41 @@
 'use client'
-import { ReactSelect, useLocale, useTranslation } from '@payloadcms/ui'
+
+import { AnimateHeight } from '@payloadcms/ui'
+import { PillSelector, type SelectablePill } from '@payloadcms/ui'
 import React from 'react'
-
-import type { Props } from './types.js'
-
-import './index.scss'
 
 const baseClass = 'select-version-locales'
 
-export const SelectLocales: React.FC<Props> = ({ onChange, options, value }) => {
-  const { t } = useTranslation()
-  const { code } = useLocale()
+export type SelectedLocaleOnChange = (args: { locales: SelectablePill[] }) => void
+export type Props = {
+  locales: SelectablePill[]
+  localeSelectorOpen: boolean
+  onChange: SelectedLocaleOnChange
+}
 
-  const format = (items) => {
-    return items.map((item) => {
-      if (typeof item.label === 'string') {
-        return item
-      }
-      if (typeof item.label !== 'string' && item.label[code]) {
-        return {
-          label: item.label[code],
-          value: item.value,
-        }
-      }
-    })
-  }
-
+export const SelectLocales: React.FC<Props> = ({ locales, localeSelectorOpen, onChange }) => {
   return (
-    <div className={baseClass}>
-      <div className={`${baseClass}__label`}>{t('version:showLocales')}</div>
-      <ReactSelect
-        isMulti
-        onChange={onChange}
-        options={format(options)}
-        placeholder={t('version:selectLocales')}
-        value={format(value)}
+    <AnimateHeight
+      className={baseClass}
+      height={localeSelectorOpen ? 'auto' : 0}
+      id={`${baseClass}-locales`}
+    >
+      <PillSelector
+        onClick={({ pill }) => {
+          const newLocales = locales.map((locale) => {
+            if (locale.name === pill.name) {
+              return {
+                ...locale,
+                selected: !pill.selected,
+              }
+            } else {
+              return locale
+            }
+          })
+          onChange({ locales: newLocales })
+        }}
+        pills={locales}
       />
-    </div>
+    </AnimateHeight>
   )
 }

@@ -1,16 +1,17 @@
-// @ts-strict-ignore
 import type { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
+import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 
 export type Arguments = {
   depth?: number
@@ -38,13 +39,13 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     page,
     pagination = true,
     populate,
-    req: { fallbackLocale, locale, payload },
-    req,
-    select,
+    select: incomingSelect,
     showHiddenFields,
     sort,
     where,
   } = args
+  const req = args.req!
+  const { fallbackLocale, locale, payload } = req
 
   const versionFields = buildVersionGlobalFields(payload.config, globalConfig, true)
 
@@ -59,13 +60,20 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
 
     await validateQueryPaths({
       globalConfig,
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
       versionFields,
-      where,
+      where: where!,
     })
 
-    const fullWhere = combineQueries(where, accessResults)
+    const fullWhere = combineQueries(where!, accessResults)
+
+    const select = sanitizeSelect({
+      fields: buildVersionGlobalFields(payload.config, globalConfig, true),
+      forceSelect: getQueryDraftsSelect({ select: globalConfig.forceSelect }),
+      select: incomingSelect,
+      versions: true,
+    })
 
     // /////////////////////////////////////
     // Find
@@ -74,7 +82,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     const paginatedDocs = await payload.db.findGlobalVersions<T>({
       global: globalConfig.slug,
       limit: limit ?? 10,
-      locale,
+      locale: locale!,
       page: page || 1,
       pagination,
       req,
@@ -100,22 +108,22 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
             version: await afterRead<T>({
               collection: null,
               context: req.context,
-              depth,
+              depth: depth!,
               doc: {
                 ...data.version,
                 // Patch globalType onto version doc
                 globalType: globalConfig.slug,
               },
-              draft: undefined,
-              fallbackLocale,
+              draft: undefined!,
+              fallbackLocale: fallbackLocale!,
               findMany: true,
               global: globalConfig,
-              locale,
-              overrideAccess,
+              locale: locale!,
+              overrideAccess: overrideAccess!,
               populate,
               req,
               select,
-              showHiddenFields,
+              showHiddenFields: showHiddenFields!,
             }),
           }
         }),

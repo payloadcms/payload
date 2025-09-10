@@ -18,10 +18,30 @@ const ConditionalLogic: CollectionConfig = {
       type: 'checkbox',
     },
     {
+      name: 'fieldWithDocIDCondition',
+      type: 'text',
+      admin: {
+        condition: ({ id }) => !id,
+      },
+    },
+    {
       name: 'fieldWithCondition',
       type: 'text',
       admin: {
         condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'fieldWithOperationCondition',
+      type: 'text',
+      admin: {
+        condition: (data, siblingData, { operation }) => {
+          if (operation === 'create') {
+            return true
+          }
+
+          return false
+        },
       },
     },
     {
@@ -217,7 +237,7 @@ const ConditionalLogic: CollectionConfig = {
                   name: 'numberField',
                   type: 'number',
                   admin: {
-                    condition: (data, siblingData, { path, user }) => {
+                    condition: (data, siblingData, { path }) => {
                       // Ensure path has enough depth
                       if (path.length < 5) {
                         return false

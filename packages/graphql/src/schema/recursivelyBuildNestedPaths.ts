@@ -1,4 +1,4 @@
-import type { FieldWithSubFields, TabsField } from 'payload'
+import type { FieldWithSubFields, Tab, TabsField } from 'payload'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 

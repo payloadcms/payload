@@ -1,6 +1,7 @@
 import type {
   CustomComponent,
   DocumentSubViewTypes,
+  PayloadRequest,
   ServerProps,
   ViewTypes,
   VisibleEntities,
@@ -32,6 +33,7 @@ export type DefaultTemplateProps = {
   docID?: number | string
   documentSubViewType?: DocumentSubViewTypes
   globalSlug?: string
+  req?: PayloadRequest
   viewActions?: CustomComponent[]
   viewType?: ViewTypes
   visibleEntities: VisibleEntities
@@ -49,6 +51,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   params,
   payload,
   permissions,
+  req,
   searchParams,
   user,
   viewActions,
@@ -84,6 +87,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
       params,
       payload,
       permissions,
+      req,
       searchParams,
       user,
     }),
@@ -98,6 +102,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
       globalSlug,
       collectionSlug,
       docID,
+      req,
     ],
   )
 
@@ -141,7 +146,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
-      <BulkUploadProvider>
+      <BulkUploadProvider drawerSlugPrefix={collectionSlug}>
         <ActionsProvider Actions={Actions}>
           {RenderServerComponent({
             clientProps,

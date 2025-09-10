@@ -15,13 +15,14 @@ export async function createGlobalVersion<T extends TypeWithID>(
     autosave,
     createdAt,
     globalSlug,
+    localeStatus,
     publishedLocale,
     req,
+    returning,
     select,
     snapshot,
     updatedAt,
     versionData,
-    returning,
   }: CreateGlobalVersionArgs,
 ) {
   const db = await getTransaction(this, req)
@@ -35,6 +36,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
       autosave,
       createdAt,
       latest: true,
+      localeStatus,
       publishedLocale,
       snapshot,
       updatedAt,
@@ -42,11 +44,11 @@ export async function createGlobalVersion<T extends TypeWithID>(
     },
     db,
     fields: buildVersionGlobalFields(this.payload.config, global, true),
+    ignoreResult: returning === false ? 'idOnly' : false,
     operation: 'create',
     req,
     select,
     tableName,
-    ignoreResult: returning === false ? 'idOnly' : false,
   })
 
   const table = this.tables[tableName]

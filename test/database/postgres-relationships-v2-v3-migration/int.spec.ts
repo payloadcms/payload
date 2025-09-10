@@ -46,6 +46,6 @@ describe('Postgres relationships v2-v3 migration', () => {
     expect(hasErr).toBeFalsy()
 
     await payload.db.dropDatabase({ adapter: payload.db as any })
-    await payload.db.destroy()
+    await payload.destroy()
   })
 })

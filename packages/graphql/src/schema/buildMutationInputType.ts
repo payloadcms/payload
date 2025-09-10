@@ -145,27 +145,37 @@ export function buildMutationInputType({
       },
     }),
     group: (inputObjectTypeConfig: InputObjectTypeConfig, field: GroupField) => {
-      const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(field)
-      const fullName = combineParentName(parentName, toWords(field.name, true))
-      let type: GraphQLType = buildMutationInputType({
-        name: fullName,
-        config,
-        fields: field.fields,
-        graphqlResult,
-        parentIsLocalized: parentIsLocalized || field.localized,
-        parentName: fullName,
-      })
+      if (fieldAffectsData(field)) {
+        const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(field)
+        const fullName = combineParentName(parentName, toWords(field.name, true))
+        let type: GraphQLType = buildMutationInputType({
+          name: fullName,
+          config,
+          fields: field.fields,
+          graphqlResult,
+          parentIsLocalized: parentIsLocalized || field.localized,
+          parentName: fullName,
+        })
 
-      if (!type) {
-        return inputObjectTypeConfig
-      }
+        if (!type) {
+          return inputObjectTypeConfig
+        }
 
-      if (requiresAtLeastOneField) {
-        type = new GraphQLNonNull(type)
-      }
-      return {
-        ...inputObjectTypeConfig,
-        [formatName(field.name)]: { type },
+        if (requiresAtLeastOneField) {
+          type = new GraphQLNonNull(type)
+        }
+        return {
+          ...inputObjectTypeConfig,
+          [formatName(field.name)]: { type },
+        }
+      } else {
+        return field.fields.reduce((acc, subField: CollapsibleField) => {
+          const addSubField = fieldToSchemaMap[subField.type]
+          if (addSubField) {
+            return addSubField(acc, subField)
+          }
+          return acc
+        }, inputObjectTypeConfig)
       }
     },
     json: (inputObjectTypeConfig: InputObjectTypeConfig, field: JSONField) => ({

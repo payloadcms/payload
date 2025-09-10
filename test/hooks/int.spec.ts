@@ -38,9 +38,7 @@ describe('Hooks', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
   if (isMongoose(payload)) {
     describe('transform actions', () => {

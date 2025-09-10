@@ -9,7 +9,7 @@ import type {
   UnsanitizedClientConfig,
 } from 'payload'
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 type GetEntityConfigFn = {
   // Overload #1: collectionSlug only
@@ -62,13 +62,24 @@ export const ConfigProvider: React.FC<{
   readonly children: React.ReactNode
   readonly config: ClientConfig | UnsanitizedClientConfig
 }> = ({ children, config: configFromProps }) => {
-  const [config, setConfig] = useState<ClientConfig>(() => sanitizeClientConfig(configFromProps))
+  const [config, setConfigFn] = useState<ClientConfig>(() => sanitizeClientConfig(configFromProps))
+
+  const isFirstRenderRef = useRef(true)
+
+  const setConfig = useCallback((newConfig: ClientConfig | UnsanitizedClientConfig) => {
+    setConfigFn(sanitizeClientConfig(newConfig))
+  }, [])
 
   // Need to update local config state if config from props changes, for HMR.
   // That way, config changes will be updated in the UI immediately without needing a refresh.
   useEffect(() => {
-    setConfig(sanitizeClientConfig(configFromProps))
-  }, [configFromProps])
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false
+      return
+    }
+
+    setConfig(configFromProps)
+  }, [configFromProps, setConfig])
 
   // Build lookup maps for collections and globals so we can do O(1) lookups by slug
   const { collectionsBySlug, globalsBySlug } = useMemo(() => {
@@ -78,6 +89,7 @@ export const ConfigProvider: React.FC<{
     for (const collection of config.collections) {
       collectionsBySlug[collection.slug] = collection
     }
+
     for (const global of config.globals) {
       globalsBySlug[global.slug] = global
     }
@@ -90,19 +102,19 @@ export const ConfigProvider: React.FC<{
       if ('collectionSlug' in args) {
         return collectionsBySlug[args.collectionSlug] ?? null
       }
+
       if ('globalSlug' in args) {
         return globalsBySlug[args.globalSlug] ?? null
       }
+
       return null as any
     },
     [collectionsBySlug, globalsBySlug],
   )
 
-  return (
-    <RootConfigContext.Provider value={{ config, getEntityConfig, setConfig }}>
-      {children}
-    </RootConfigContext.Provider>
-  )
+  const value = useMemo(() => ({ config, getEntityConfig, setConfig }), [config, getEntityConfig])
+
+  return <RootConfigContext value={value}>{children}</RootConfigContext>
 }
 
-export const useConfig = (): ClientConfigContext => useContext(RootConfigContext)
+export const useConfig = (): ClientConfigContext => use(RootConfigContext)

@@ -101,7 +101,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Trích dẫn',
   },
   zh: {
-    label: '块引用',
+    label: '引用区块',
   },
   'zh-TW': {
     label: '引用塊',

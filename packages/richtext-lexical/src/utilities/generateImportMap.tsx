@@ -1,4 +1,4 @@
-import type { RichTextAdapter } from 'payload'
+import type { PayloadComponent, RichTextAdapter } from 'payload'
 
 import { genImportMapIterateFields } from 'payload'
 
@@ -6,10 +6,10 @@ import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 
 export const getGenerateImportMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextAdapter['generateImportMap'] =>
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   ({ addToImportMap, baseDir, config, importMap, imports }) => {
     addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell')
     addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalField')
+    addToImportMap('@payloadcms/richtext-lexical/rsc#LexicalDiffComponent')
 
     // iterate just through args.resolvedFeatureMap.values()
     for (const resolvedFeature of args.resolvedFeatureMap.values()) {
@@ -31,7 +31,7 @@ export const getGenerateImportMap =
           })
         } else if (typeof resolvedFeature.componentImports === 'object') {
           for (const component of Object.values(resolvedFeature.componentImports)) {
-            addToImportMap(component)
+            addToImportMap(component as PayloadComponent)
           }
         }
       }

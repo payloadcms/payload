@@ -4,6 +4,9 @@ export const noLocalizedFieldsCollectionSlug = 'no-localized-fields'
 
 export const NoLocalizedFieldsCollection: CollectionConfig = {
   slug: noLocalizedFieldsCollectionSlug,
+  versions: {
+    drafts: true,
+  },
   fields: [
     {
       name: 'text',

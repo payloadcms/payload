@@ -42,9 +42,10 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const [errorCount, setErrorCount] = useState(0)
   const fieldHasErrors = errorCount > 0
 
-  const { customComponents: { AfterInput, BeforeInput, Description, Label } = {} } = useField({
-    path,
-  })
+  const { customComponents: { AfterInput, BeforeInput, Description, Label } = {}, disabled } =
+    useField({
+      path,
+    })
 
   const onToggle = useCallback(
     async (newCollapsedState: boolean): Promise<void> => {
@@ -145,7 +146,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
             parentPath={parentPath}
             parentSchemaPath={parentSchemaPath}
             permissions={permissions}
-            readOnly={readOnly}
+            readOnly={readOnly || disabled}
           />
         </CollapsibleElement>
         {AfterInput}

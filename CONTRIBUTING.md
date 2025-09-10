@@ -87,41 +87,43 @@ You can run the entire test suite using `pnpm test`. If you wish to only run e2e
 
 By default, `pnpm test:int` will only run int test against MongoDB. To run int tests against postgres, you can use `pnpm test:int:postgres`. You will have to have postgres installed on your system for this to work.
 
-### Commits
+### Pull Requests
 
-We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for our commit messages. Please follow this format when creating commits. Here are some examples:
+For all Pull Requests, you should be extremely descriptive about both your problem and proposed solution. If there are any affected open or closed issues, please leave the issue number in your PR description.
 
-- `feat: adds new feature`
-- `fix: fixes bug`
-- `docs: adds documentation`
-- `chore: does chore`
+All commits within a PR are squashed when merged, using the PR title as the commit message. For that reason, please use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for your PR titles.
 
-Here's a breakdown of the format. At the top-level, we use the following types to categorize our commits:
+Here are some examples:
 
-- `feat`: new feature that adds functionality. These are automatically added to the changelog when creating new releases.
-- `fix`: a fix to an existing feature. These are automatically added to the changelog when creating new releases.
-- `docs`: changes to [docs](./docs) only. These do not appear in the changelog.
-- `chore`: changes to code that is neither a fix nor a feature (e.g. refactoring, adding tests, etc.). These do not appear in the changelog.
+- `feat: add new feature`
+- `fix: fix bug`
+- `docs: add documentation`
+- `test: add/fix tests`
+- `refactor: refactor code`
+- `chore: anything that does not fit into the above categories`
+
+If applicable, you must indicate the affected packages in parentheses to "scope" the changes. Changes to the payload chore package do not require scoping.
+
+Here are some examples:
+
+- `feat(ui): add new feature`
+- `fix(richtext-lexical): fix bug`
 
 If you are committing to [templates](./templates) or [examples](./examples), use the `chore` type with the proper scope, like this:
 
 - `chore(templates): adds feature to template`
 - `chore(examples): fixes bug in example`
 
-## Pull Requests
-
-For all Pull Requests, you should be extremely descriptive about both your problem and proposed solution. If there are any affected open or closed issues, please leave the issue number in your PR message.
-
 ## Previewing docs
 
 This is how you can preview changes you made locally to the docs:
 
 1. Clone our [website repository](https://github.com/payloadcms/website)
-2. Run `yarn install`
+2. Run `pnpm install`
 3. Duplicate the `.env.example` file and rename it to `.env`
 4. Add a `DOCS_DIR` environment variable to the `.env` file which points to the absolute path of your modified docs folder. For example `DOCS_DIR=/Users/yourname/Documents/GitHub/payload/docs`
-5. Run `yarn run fetchDocs:local`. If this was successful, you should see no error messages and the following output: _Docs successfully written to /.../website/src/app/docs.json_. There could be error messages if you have incorrect markdown in your local docs folder. In this case, it will tell you how you can fix it
-6. You're done! Now you can start the website locally using `yarn run dev` and preview the docs under [http://localhost:3000/docs/](http://localhost:3000/docs/)
+5. Run `pnpm fetchDocs:local`. If this was successful, you should see no error messages and the following output: _Docs successfully written to /.../website/src/app/docs.json_. There could be error messages if you have incorrect markdown in your local docs folder. In this case, it will tell you how you can fix it
+6. You're done! Now you can start the website locally using `pnpm dev` and preview the docs under [http://localhost:3000/docs/local](http://localhost:3000/docs/local)
 
 ## Internationalization (i18n)
 

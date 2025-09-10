@@ -41,15 +41,18 @@ export const usePreviewURL = (): {
       if (isGeneratingPreviewURL.current) {
         return
       }
+
       isGeneratingPreviewURL.current = true
 
       try {
         setIsLoading(true)
 
         let url = `${serverURL}${api}`
+
         if (collectionSlug) {
           url = `${url}/${collectionSlug}/${id}/preview`
         }
+
         if (globalSlug) {
           url = `${url}/globals/${globalSlug}/preview`
         }
@@ -64,17 +67,21 @@ export const usePreviewURL = (): {
         if (!res.ok) {
           throw new Error()
         }
+
         const newPreviewURL = await res.json()
+
         if (!newPreviewURL) {
           throw new Error()
         }
+
         setPreviewURL(newPreviewURL)
         setIsLoading(false)
         isGeneratingPreviewURL.current = false
+
         if (openPreviewWindow) {
           window.open(newPreviewURL, '_blank')
         }
-      } catch (err) {
+      } catch (_err) {
         setIsLoading(false)
         isGeneratingPreviewURL.current = false
         toast.error(t('error:previewing'))

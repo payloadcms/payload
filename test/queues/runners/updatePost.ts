@@ -44,7 +44,7 @@ export const updatePostStep2: TaskHandler<'UpdatePostStep2'> = async ({ req, inp
     id: postID,
     req,
     data: {
-      jobStep2Ran: input.messageTwice + job.taskStatus.UpdatePost['1'].output.messageTwice,
+      jobStep2Ran: input.messageTwice + job.taskStatus.UpdatePost?.['1']?.output?.messageTwice,
     },
   })
 

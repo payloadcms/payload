@@ -11,6 +11,8 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = mongooseAdapter({
     ensureIndexes: true,
+    // required for connect to detect that we are using a memory server
+    mongoMemoryServer:  global._mongoMemoryServer,
     url:
       process.env.MONGODB_MEMORY_SERVER_URI ||
       process.env.DATABASE_URI ||
@@ -18,6 +20,25 @@ export const allDatabaseAdapters = {
     collation: {
       strength: 1,
     },
+  })`,
+  firestore: `
+  import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
+
+  export const databaseAdapter = mongooseAdapter({
+    ...compatibilityOptions.firestore,
+    url:
+      process.env.DATABASE_URI ||
+      process.env.MONGODB_MEMORY_SERVER_URI ||
+      'mongodb://127.0.0.1/payloadtests',
+    collation: {
+      strength: 1,
+    },
+    // The following options prevent some tests from failing.
+    // More work needed to get tests succeeding without these options.
+    ensureIndexes: true,
+    transactionOptions: {},
+    disableIndexHints: false,
+    useAlternativeDropDatabase: false,
   })`,
   postgres: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
@@ -45,6 +66,26 @@ export const allDatabaseAdapters = {
       connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
   })`,
+  'postgres-read-replica': `
+  import { postgresAdapter } from '@payloadcms/db-postgres'
+
+  export const databaseAdapter = postgresAdapter({
+    pool: {
+      connectionString: process.env.POSTGRES_URL,
+    },
+    readReplicas: [process.env.POSTGRES_REPLICA_URL],
+  })
+  `,
+  'vercel-postgres-read-replica': `
+  import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
+
+  export const databaseAdapter = vercelPostgresAdapter({
+    pool: {
+      connectionString: process.env.POSTGRES_URL,
+    },
+    readReplicas: [process.env.POSTGRES_REPLICA_URL],
+  })
+  `,
   sqlite: `
   import { sqliteAdapter } from '@payloadcms/db-sqlite'
 

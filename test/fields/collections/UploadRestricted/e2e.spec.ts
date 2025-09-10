@@ -90,7 +90,7 @@ describe('Upload with restrictions', () => {
       .locator('.list-drawer__header')
       .locator('button', { hasText: 'Create New' })
     await expect(createNewHeader).toBeVisible()
-    await page.locator('.list-drawer__header-close').click()
+    await page.locator('.list-drawer__header .close-modal-button').click()
     await expect(drawer).toBeHidden()
     const fieldWithAllowCreateFalse = page.locator('#field-uploadWithAllowCreateFalse')
     await expect(fieldWithAllowCreateFalse).toBeVisible()

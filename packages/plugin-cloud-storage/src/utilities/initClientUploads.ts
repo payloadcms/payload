@@ -32,7 +32,8 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
     let handlerCount = 0
 
     for (const endpoint of config.endpoints) {
-      if (endpoint.path === serverHandlerPath) {
+      // We want to match on 'path', 'path-1', 'path-2', etc.
+      if (endpoint.path?.startsWith(serverHandlerPath)) {
         handlerCount++
       }
     }
@@ -50,6 +51,16 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
 
   if (!config.admin) {
     config.admin = {}
+  }
+
+  if (!config.admin.dependencies) {
+    config.admin.dependencies = {}
+  }
+  // Ensure client handler is always part of the import map, to avoid
+  // import map discrepancies between dev and prod
+  config.admin.dependencies[clientHandler] = {
+    type: 'function',
+    path: clientHandler,
   }
 
   if (!config.admin.components) {
@@ -78,7 +89,7 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
       clientProps: {
         collectionSlug,
         enabled,
-        extra: extraClientHandlerProps ? extraClientHandlerProps(collection) : undefined,
+        extra: extraClientHandlerProps ? extraClientHandlerProps(collection!) : undefined,
         prefix,
         serverHandlerPath,
       },

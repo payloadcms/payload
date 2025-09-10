@@ -1,9 +1,8 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FlattenedField } from '../fields/config/types.js'
 
-import { versionSnapshotField } from './baseFields.js'
+import { buildLocaleStatusField, versionSnapshotField } from './baseFields.js'
 
 export const buildVersionCollectionFields = <T extends boolean = false>(
   config: SanitizedConfig,
@@ -23,7 +22,7 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
       fields: collection.fields.filter((field) => !('name' in field) || field.name !== 'id'),
       ...(flatten && {
         flattenedFields: collection.flattenedFields.filter((each) => each.name !== 'id'),
-      }),
+      })!,
     },
     {
       name: 'createdAt',
@@ -63,6 +62,23 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
           return locale.code
         }),
       })
+
+      if (config.experimental?.localizeStatus) {
+        const localeStatusFields = buildLocaleStatusField(config)
+
+        fields.push({
+          name: 'localeStatus',
+          type: 'group',
+          admin: {
+            disableBulkEdit: true,
+            disabled: true,
+          },
+          fields: localeStatusFields,
+          ...(flatten && {
+            flattenedFields: localeStatusFields as FlattenedField[],
+          })!,
+        })
+      }
     }
 
     fields.push({

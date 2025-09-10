@@ -2,10 +2,19 @@
 import type { BlocksFieldClientComponent, ClientBlock } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment, useCallback } from 'react'
+import React, { Fragment, useCallback, useMemo } from 'react'
+import { toast } from 'sonner'
+
+import type { ClipboardPasteData } from '../../elements/ClipboardAction/types.js'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
+import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
+import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
+import {
+  mergeFormStateFromClipboard,
+  reduceFormStateByPath,
+} from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
@@ -22,13 +31,14 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
+import './index.scss'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { BlockRow } from './BlockRow.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
-import './index.scss'
 
 const baseClass = 'blocks-field'
 
@@ -36,8 +46,10 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
+    field,
     field: {
       name,
+      type,
       admin: { className, description, isSortable = true } = {},
       blockReferences,
       blocks,
@@ -48,18 +60,27 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
-    path,
+    path: pathFromProps,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
     validate,
   } = props
+
   const schemaPath = schemaPathFromProps ?? name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, setModified } = useForm()
+  const {
+    addFieldRow,
+    dispatchFields,
+    getFields,
+    moveFieldRow,
+    removeFieldRow,
+    replaceState,
+    setModified,
+  } = useForm()
   const { code: locale } = useLocale()
   const {
     config: { localization },
@@ -76,12 +97,30 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const editingDefaultLocale = (() => {
     if (localization && localization.fallback) {
-      const defaultLocale = localization.defaultLocale || 'en'
+      const defaultLocale = localization.defaultLocale
       return locale === defaultLocale
     }
 
     return true
   })()
+
+  const clientBlocks = useMemo(() => {
+    if (!blockReferences) {
+      return blocks
+    }
+
+    const resolvedBlocks: ClientBlock[] = []
+
+    for (const blockReference of blockReferences) {
+      const block =
+        typeof blockReference === 'string' ? config.blocksMap[blockReference] : blockReference
+      if (block) {
+        resolvedBlocks.push(block)
+      }
+    }
+
+    return resolvedBlocks
+  }, [blockReferences, blocks, config.blocksMap])
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -97,15 +136,17 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     errorPaths,
+    path,
     rows = [],
     showError,
     valid,
     value,
   } = useField<number>({
     hasRows: true,
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -139,23 +180,19 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const removeRow = useCallback(
     (rowIndex: number) => {
-      dispatchFields({
-        type: 'REMOVE_ROW',
+      removeFieldRow({
         path,
         rowIndex,
       })
-
-      setModified(true)
     },
-    [path, dispatchFields, setModified],
+    [path, removeFieldRow],
   )
 
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
-      dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path })
-      setModified(true)
+      moveFieldRow({ moveFromIndex, moveToIndex, path })
     },
-    [dispatchFields, path, setModified],
+    [moveFieldRow, path],
   )
 
   const toggleCollapseAll = useCallback(
@@ -164,6 +201,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         collapsed,
         rows,
       })
+
       dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
@@ -177,10 +215,78 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         rowID,
         rows,
       })
+
       dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
     [dispatchFields, path, rows, setDocFieldPreferences],
+  )
+
+  const copyRow = useCallback(
+    (rowIndex: number) => {
+      const clipboardResult = clipboardCopy({
+        type,
+        blocks: clientBlocks,
+        getDataToCopy: () =>
+          reduceFormStateByPath({
+            formState: { ...getFields() },
+            path,
+            rowIndex,
+          }),
+        path,
+        rowIndex,
+        t,
+      })
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      } else {
+        toast.success(t('general:copied'))
+      }
+    },
+    [clientBlocks, path, t, type, getFields],
+  )
+
+  const pasteRow = useCallback(
+    (rowIndex: number) => {
+      const pasteArgs = {
+        onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
+          const newState = mergeFormStateFromClipboard({
+            dataFromClipboard,
+            formState,
+            path,
+            rowIndex,
+          })
+          replaceState(newState)
+          setModified(true)
+        },
+        path,
+        schemaBlocks: clientBlocks,
+        t,
+      }
+
+      const clipboardResult = clipboardPaste(pasteArgs)
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      }
+    },
+    [clientBlocks, getFields, path, replaceState, setModified, t],
+  )
+
+  const pasteBlocks = useCallback(
+    (dataFromClipboard: ClipboardPasteData) => {
+      const formState = { ...getFields() }
+      const newState = mergeFormStateFromClipboard({
+        dataFromClipboard,
+        formState,
+        path,
+      })
+      replaceState(newState)
+      setModified(true)
+    },
+    [getFields, path, replaceState, setModified],
   )
 
   const hasMaxRows = maxRows && rows.length >= maxRows
@@ -190,6 +296,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
   const showRequired = readOnly && rows.length === 0
+
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <div
@@ -202,6 +310,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
+      style={styles}
     >
       {showError && (
         <RenderCustomComponent
@@ -216,7 +325,13 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
               <RenderCustomComponent
                 CustomComponent={Label}
                 Fallback={
-                  <FieldLabel label={label} localized={localized} path={path} required={required} />
+                  <FieldLabel
+                    as="span"
+                    label={label}
+                    localized={localized}
+                    path={path}
+                    required={required}
+                  />
                 }
               />
             </h3>
@@ -224,28 +339,48 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
           </div>
-          {rows.length > 0 && (
-            <ul className={`${baseClass}__header-actions`}>
-              <li>
-                <button
-                  className={`${baseClass}__header-action`}
-                  onClick={() => toggleCollapseAll(true)}
-                  type="button"
-                >
-                  {t('fields:collapseAll')}
-                </button>
-              </li>
-              <li>
-                <button
-                  className={`${baseClass}__header-action`}
-                  onClick={() => toggleCollapseAll(false)}
-                  type="button"
-                >
-                  {t('fields:showAll')}
-                </button>
-              </li>
-            </ul>
-          )}
+          <ul className={`${baseClass}__header-actions`}>
+            {rows.length > 0 && (
+              <Fragment>
+                <li>
+                  <button
+                    className={`${baseClass}__header-action`}
+                    onClick={() => toggleCollapseAll(true)}
+                    type="button"
+                  >
+                    {t('fields:collapseAll')}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className={`${baseClass}__header-action`}
+                    onClick={() => toggleCollapseAll(false)}
+                    type="button"
+                  >
+                    {t('fields:showAll')}
+                  </button>
+                </li>
+              </Fragment>
+            )}
+            <li>
+              <ClipboardAction
+                allowCopy={rows?.length > 0}
+                allowPaste={!readOnly}
+                blocks={clientBlocks}
+                className={`${baseClass}__header-action`}
+                disabled={disabled}
+                getDataToCopy={() =>
+                  reduceFormStateByPath({
+                    formState: { ...getFields() },
+                    path,
+                  })
+                }
+                onPaste={pasteBlocks}
+                path={path}
+                type={type}
+              />
+            </li>
+          </ul>
         </div>
         <RenderCustomComponent
           CustomComponent={Description}
@@ -253,7 +388,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         />
       </header>
       {BeforeInput}
-      <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
+      <NullifyLocaleField
+        fieldValue={value}
+        localized={localized}
+        path={path}
+        readOnly={readOnly}
+      />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__rows`}
@@ -262,6 +402,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         >
           {rows.map((row, i) => {
             const { blockType, isLoading } = row
+
             const blockConfig: ClientBlock =
               config.blocksMap[blockType] ??
               ((blockReferences ?? blocks).find(
@@ -276,26 +417,32 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
               ).length
 
               return (
-                <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
+                <DraggableSortableItem
+                  disabled={readOnly || disabled || !isSortable}
+                  id={row.id}
+                  key={row.id}
+                >
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
                       addRow={addRow}
                       block={blockConfig}
                       blocks={blockReferences ?? blocks}
+                      copyRow={copyRow}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
                       fields={blockConfig.fields}
                       hasMaxRows={hasMaxRows}
                       isLoading={isLoading}
                       isSortable={isSortable}
-                      Label={RowLabels?.[i]}
+                      Label={rows?.[i]?.customComponents?.RowLabel}
                       labels={labels}
                       moveRow={moveRow}
                       parentPath={path}
+                      pasteRow={pasteRow}
                       path={rowPath}
                       permissions={permissions}
-                      readOnly={readOnly}
+                      readOnly={readOnly || disabled}
                       removeRow={removeRow}
                       row={row}
                       rowCount={rows.length}
@@ -335,12 +482,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         <Fragment>
           <DrawerToggler
             className={`${baseClass}__drawer-toggler`}
-            disabled={readOnly}
+            disabled={readOnly || disabled}
             slug={drawerSlug}
           >
             <Button
               buttonStyle="icon-label"
-              disabled={readOnly}
+              disabled={readOnly || disabled}
               el="span"
               icon="plus"
               iconPosition="left"

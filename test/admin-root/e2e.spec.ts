@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
@@ -10,6 +10,7 @@ import {
   initPageConsoleErrorCatch,
   login,
   saveDocAndAssert,
+  // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -17,6 +18,7 @@ import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+let context: BrowserContext
 
 test.describe('Admin Panel (Root)', () => {
   let page: Page
@@ -30,7 +32,7 @@ test.describe('Admin Panel (Root)', () => {
       admin: adminRoute,
     })
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
@@ -54,6 +56,21 @@ test.describe('Admin Panel (Root)', () => {
     })
   })
 
+  // test.beforeEach(async () => {
+  //   await throttleTest({
+  //     page,
+  //     context,
+  //     delay: 'Fast 4G',
+  //   })
+  // })
+
+  test('should redirect `${adminRoute}/collections` to `${adminRoute}', async () => {
+    const collectionsURL = `${url.admin}/collections`
+    await page.goto(collectionsURL)
+    // Should redirect to dashboard
+    await expect.poll(() => page.url()).toBe(`${url.admin}`)
+  })
+
   test('renders admin panel at root', async () => {
     await page.goto(url.admin)
     const pageURL = page.url()
@@ -74,7 +91,7 @@ test.describe('Admin Panel (Root)', () => {
     await textField.fill('test')
     await saveDocAndAssert(page)
 
-    const versionsTab = page.locator('.doc-tab a[href$="/versions"]')
+    const versionsTab = page.locator('a.doc-tab[href$="/versions"]')
     await versionsTab.click()
     const firstRow = page.locator('tbody .row-1')
     await expect(firstRow).toBeVisible()
@@ -99,7 +116,7 @@ test.describe('Admin Panel (Root)', () => {
   test('global — renders versions list', async () => {
     await page.goto(url.global('menu'))
     const textField = page.locator('#field-globalText')
-    await textField.fill('test')
+    await textField.fill('updated global text')
     await saveDocAndAssert(page)
 
     await page.goto(`${url.global('menu')}/versions`)
@@ -122,5 +139,10 @@ test.describe('Admin Panel (Root)', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
     await expect(page.locator('#field-theme')).toBeHidden()
     await expect(page.locator('#field-theme-auto')).toBeHidden()
+  })
+
+  test('should mount custom root views', async () => {
+    await page.goto(`${url.admin}/custom-view`)
+    await expect(page.locator('#custom-view')).toBeVisible()
   })
 })

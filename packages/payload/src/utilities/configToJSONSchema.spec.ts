@@ -411,4 +411,36 @@ describe('configToJSONSchema', () => {
 
     expect(schema?.definitions?.SharedBlock).toBeDefined()
   })
+
+  it('should allow overriding required to false', async () => {
+    // @ts-expect-error
+    const config: Config = {
+      collections: [
+        {
+          slug: 'test',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+              defaultValue: 'test',
+              typescriptSchema: [
+                () => ({
+                  type: 'string',
+                  required: false,
+                }),
+              ],
+            },
+          ],
+          timestamps: false,
+        },
+      ],
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const schema = configToJSONSchema(sanitizedConfig, 'text')
+
+    // @ts-expect-error
+    expect(schema.definitions.test.properties.title.required).toStrictEqual(false)
+  })
 })

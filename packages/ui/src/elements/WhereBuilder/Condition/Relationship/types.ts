@@ -8,7 +8,7 @@ import type {
 
 import type { DefaultFilterProps } from '../types.js'
 
-export type Props = {
+export type RelationshipFilterProps = {
   readonly field: RelationshipFieldClient
   readonly filterOptions: ResolvedFilterOptions
 } & DefaultFilterProps

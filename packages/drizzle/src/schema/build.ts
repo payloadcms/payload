@@ -32,6 +32,7 @@ type Args = {
    * ie. indexes, multiple columns, etc
    */
   baseIndexes?: Record<string, RawIndex>
+  blocksTableNameMap: Record<string, number>
   buildNumbers?: boolean
   buildRelationships?: boolean
   compoundIndexes?: SanitizedCompoundIndex[]
@@ -70,6 +71,7 @@ export const buildTable = ({
   baseColumns = {},
   baseForeignKeys = {},
   baseIndexes = {},
+  blocksTableNameMap,
   compoundIndexes,
   disableNotNull,
   disableRelsTableUnique = false,
@@ -120,6 +122,7 @@ export const buildTable = ({
     hasManyTextField,
   } = traverseFields({
     adapter,
+    blocksTableNameMap,
     columns,
     disableNotNull,
     disableRelsTableUnique,

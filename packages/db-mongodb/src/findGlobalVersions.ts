@@ -48,6 +48,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   let sort
   if (!hasNearConstraint) {
     sort = buildSortParam({
+      adapter: this,
       config: this.payload.config,
       fields: versionFields,
       locale,
@@ -103,7 +104,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   if (limit && limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
-     
+
     paginationOptions.options!.limit = limit
 
     // Disable pagination if limit is 0

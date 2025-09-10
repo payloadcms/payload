@@ -43,6 +43,7 @@ body:
         - 'plugin: cloud'
         - 'plugin: cloud-storage'
         - 'plugin: form-builder'
+        - 'plugin: multi-tenant'
         - 'plugin: nested-docs'
         - 'plugin: richtext-lexical'
         - 'plugin: richtext-slate'
@@ -59,10 +60,7 @@ body:
       label: Environment Info
       description: Paste output from `pnpm payload info` _or_ Payload, Node.js, and Next.js versions. Please avoid using "latest"—specific version numbers help us accurately diagnose and resolve issues.
       render: text
-      placeholder: |
-        Payload:
-        Node.js:
-        Next.js:
+      placeholder: Run `pnpm payload info` in your terminal and paste the output here.
     validations:
       required: true
 

@@ -7,7 +7,7 @@ import * as React from 'react'
 type Options = {
   uploads: boolean
   user: ClientUser
-  visibleEntities: VisibleEntities
+  visibleEntities?: VisibleEntities
 }
 
 type FilteredCollectionsT = (
@@ -17,7 +17,7 @@ type FilteredCollectionsT = (
 
 const filterRichTextCollections: FilteredCollectionsT = (collections, options) => {
   return collections.filter(({ slug, admin: { enableRichTextRelationship }, upload }) => {
-    if (!options?.visibleEntities.collections.includes(slug)) {
+    if (!options?.visibleEntities?.collections.includes(slug)) {
       return false
     }
 

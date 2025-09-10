@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { getTranslation } from '@payloadcms/translations'
 import { status as httpStatus } from 'http-status'
 
@@ -17,14 +16,16 @@ export const createHandler: PayloadHandler = async (req) => {
   const autosave = searchParams.get('autosave') === 'true'
   const draft = searchParams.get('draft') === 'true'
   const depth = searchParams.get('depth')
+  const publishSpecificLocale = req.query.publishSpecificLocale as string | undefined
 
   const doc = await createOperation({
     autosave,
     collection,
-    data: req.data,
+    data: req.data!,
     depth: isNumber(depth) ? depth : undefined,
     draft,
     populate: sanitizePopulateParam(req.query.populate),
+    publishSpecificLocale,
     req,
     select: sanitizeSelectParam(req.query.select),
   })

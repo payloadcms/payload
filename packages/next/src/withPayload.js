@@ -1,9 +1,11 @@
 /**
  * @param {import('next').NextConfig} nextConfig
+ * @param {Object} [options] - Optional configuration options
+ * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default true
  *
  * @returns {import('next').NextConfig}
  * */
-export const withPayload = (nextConfig = {}) => {
+export const withPayload = (nextConfig = {}, options = {}) => {
   const env = nextConfig?.env || {}
 
   if (nextConfig.experimental?.staleTimes?.dynamic) {
@@ -54,16 +56,6 @@ export const withPayload = (nextConfig = {}) => {
       ...(nextConfig?.outputFileTracingIncludes || {}),
       '**/*': [...(nextConfig?.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
     },
-    experimental: {
-      ...(nextConfig?.experimental || {}),
-      turbo: {
-        ...(nextConfig?.experimental?.turbo || {}),
-        resolveAlias: {
-          ...(nextConfig?.experimental?.turbo?.resolveAlias || {}),
-          'payload-mock-package': 'payload-mock-package',
-        },
-      },
-    },
     // We disable the poweredByHeader here because we add it manually in the headers function below
     ...(nextConfig?.poweredByHeader !== false ? { poweredByHeader: false } : {}),
     headers: async () => {
@@ -99,6 +91,32 @@ export const withPayload = (nextConfig = {}) => {
       'libsql',
       'pino-pretty',
       'graphql',
+      // Do not bundle server-only packages during dev to improve compile speed
+      ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages === false
+        ? [
+            'payload',
+            '@payloadcms/db-mongodb',
+            '@payloadcms/db-postgres',
+            '@payloadcms/db-sqlite',
+            '@payloadcms/db-vercel-postgres',
+            '@payloadcms/drizzle',
+            '@payloadcms/email-nodemailer',
+            '@payloadcms/email-resend',
+            '@payloadcms/graphql',
+            '@payloadcms/payload-cloud',
+            '@payloadcms/plugin-redirects',
+            // TODO: Add the following packages, excluding their /client subpath exports, once Next.js supports it
+            //'@payloadcms/plugin-cloud-storage',
+            //'@payloadcms/plugin-sentry',
+            //'@payloadcms/plugin-stripe',
+            // @payloadcms/richtext-lexical
+            //'@payloadcms/storage-azure',
+            //'@payloadcms/storage-gcs',
+            //'@payloadcms/storage-s3',
+            //'@payloadcms/storage-uploadthing',
+            //'@payloadcms/storage-vercel-blob',
+          ]
+        : []),
     ],
     webpack: (webpackConfig, webpackOptions) => {
       const incomingWebpackConfig =
@@ -114,6 +132,7 @@ export const withPayload = (nextConfig = {}) => {
           'drizzle-kit/api',
           'sharp',
           'libsql',
+          'require-in-the-middle',
         ],
         ignoreWarnings: [
           ...(incomingWebpackConfig?.ignoreWarnings || []),
@@ -121,6 +140,13 @@ export const withPayload = (nextConfig = {}) => {
           { file: /node_modules\/mongodb\/lib\/utils\.js/ },
           { module: /node_modules\/mongodb\/lib\/bson\.js/ },
           { file: /node_modules\/mongodb\/lib\/bson\.js/ },
+        ],
+        plugins: [
+          ...(incomingWebpackConfig?.plugins || []),
+          // Fix cloudflare:sockets error: https://github.com/vercel/next.js/discussions/50177
+          new webpackOptions.webpack.IgnorePlugin({
+            resourceRegExp: /^pg-native$|^cloudflare:sockets$/,
+          }),
         ],
         resolve: {
           ...(incomingWebpackConfig?.resolve || {}),
