@@ -21,5 +21,4 @@ export type DefaultVersionsViewProps = {
   VersionToCreatedAtLabel: React.ReactNode
   versionToID?: string
   versionToStatus?: string
-  versionToUseAsTitle?: string
 }

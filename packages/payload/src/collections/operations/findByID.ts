@@ -32,6 +32,11 @@ import { buildAfterOperation } from './utils.js'
 export type Arguments = {
   collection: Collection
   currentDepth?: number
+  /**
+   * You may pass the document data directly which will skip the `db.findOne` database query.
+   * This is useful if you want to use this endpoint solely for running hooks and populating data.
+   */
+  data?: Record<string, unknown>
   depth?: number
   disableErrors?: boolean
   draft?: boolean
@@ -163,7 +168,8 @@ export const findByIDOperation = async <
       throw new NotFound(t)
     }
 
-    let result: DataFromCollectionSlug<TSlug> = (await req.payload.db.findOne(findOneArgs))!
+    let result: DataFromCollectionSlug<TSlug> =
+      (args.data as DataFromCollectionSlug<TSlug>) ?? (await req.payload.db.findOne(findOneArgs))!
 
     if (!result) {
       if (!disableErrors) {

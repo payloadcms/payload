@@ -139,20 +139,22 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     }
   })
 
-  const publish = useCallback(() => {
+  const publish = useCallback(async () => {
     if (uploadStatus === 'uploading') {
       return
     }
 
-    void submit({
+    const result = await submit({
       overrides: {
         _status: 'published',
       },
     })
 
-    setUnpublishedVersionCount(0)
-    setMostRecentVersionIsAutosaved(false)
-    setHasPublishedDoc(true)
+    if (result) {
+      setUnpublishedVersionCount(0)
+      setMostRecentVersionIsAutosaved(false)
+      setHasPublishedDoc(true)
+    }
   }, [
     setHasPublishedDoc,
     submit,
@@ -162,7 +164,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   ])
 
   const publishSpecificLocale = useCallback(
-    (locale) => {
+    async (locale) => {
       if (uploadStatus === 'uploading') {
         return
       }
@@ -175,14 +177,16 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}/${id ? `${'/' + id}` : ''}`
       }${params ? '?' + params : ''}`
 
-      void submit({
+      const result = await submit({
         action,
         overrides: {
           _status: 'published',
         },
       })
 
-      setHasPublishedDoc(true)
+      if (result) {
+        setHasPublishedDoc(true)
+      }
     },
     [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit, uploadStatus],
   )

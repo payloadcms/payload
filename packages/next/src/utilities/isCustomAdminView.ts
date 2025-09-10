@@ -1,6 +1,6 @@
-import type { AdminViewConfig, PayloadRequest, SanitizedConfig } from 'payload'
+import type { SanitizedConfig } from 'payload'
 
-import { getRouteWithoutAdmin } from './shared.js'
+import { getRouteWithoutAdmin } from './getRouteWithoutAdmin.js'
 
 /**
  * Returns an array of views marked with 'public: true' in the config

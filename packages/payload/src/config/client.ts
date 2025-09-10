@@ -3,7 +3,7 @@ import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { ClientBlock } from '../fields/config/types.js'
-import type { BlockSlug } from '../index.js'
+import type { BlockSlug, TypedUser } from '../index.js'
 import type {
   RootLivePreviewConfig,
   SanitizedConfig,
@@ -12,6 +12,7 @@ import type {
 
 import {
   type ClientCollectionConfig,
+  createClientCollectionConfig,
   createClientCollectionConfigs,
 } from '../collections/config/client.js'
 import { createClientBlocks } from '../fields/config/client.js'
@@ -63,6 +64,17 @@ export type ClientConfig = {
   globals: ClientGlobalConfig[]
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
 
+export type UnauthenticatedClientConfig = {
+  admin: {
+    routes: ClientConfig['admin']['routes']
+    user: ClientConfig['admin']['user']
+  }
+  collections: [ClientCollectionConfig]
+  globals: []
+  routes: ClientConfig['routes']
+  serverURL: ClientConfig['serverURL']
+}
+
 export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
 
 export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] = [
@@ -88,15 +100,46 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
+export type CreateClientConfigArgs = {
+  config: SanitizedConfig
+  i18n: I18nClient
+  importMap: ImportMap
+  /**
+   * If unauthenticated, the client config will omit some sensitive properties
+   * such as field schemas, etc. This is useful for login and error pages where
+   * the page source should not contain this information.
+   * Allow `true` to generate a client config for the "create first user" page
+   * where there is no user yet, but the config should be as complete.
+   */
+  user: true | TypedUser
+}
+
+export const createUnauthenticatedClientConfig = ({
+  clientConfig,
+}: {
+  /**
+   * Send the previously generated client config to share memory when applicable.
+   * E.g. the admin-enabled collection config can reference the existing collection rather than creating a new object.
+   */
+  clientConfig: ClientConfig
+}): UnauthenticatedClientConfig => {
+  return {
+    admin: {
+      routes: clientConfig.admin.routes,
+      user: clientConfig.admin.user,
+    },
+    collections: [clientConfig.collections.find(({ slug }) => slug === clientConfig.admin.user)!],
+    globals: [],
+    routes: clientConfig.routes,
+    serverURL: clientConfig.serverURL,
+  }
+}
+
 export const createClientConfig = ({
   config,
   i18n,
   importMap,
-}: {
-  config: SanitizedConfig
-  i18n: I18nClient
-  importMap: ImportMap
-}): ClientConfig => {
+}: CreateClientConfigArgs): ClientConfig => {
   const clientConfig = {} as DeepPartial<ClientConfig>
 
   for (const key in config) {
@@ -156,6 +199,16 @@ export const createClientConfig = ({
           i18n,
           importMap,
         })
+
+        break
+
+      case 'experimental':
+        if (config.experimental) {
+          clientConfig.experimental = {}
+          if (config.experimental?.localizeStatus) {
+            clientConfig.experimental.localizeStatus = config.experimental.localizeStatus
+          }
+        }
 
         break
 
