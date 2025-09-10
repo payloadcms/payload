@@ -753,7 +753,7 @@ export type NamedGroupField = {
 export type UnnamedGroupField = {
   interfaceName?: never
   localized?: never
-} & Omit<GroupBase, 'name' | 'virtual'>
+} & Omit<GroupBase, 'hooks' | 'name' | 'virtual'>
 
 export type GroupField = NamedGroupField | UnnamedGroupField
 
