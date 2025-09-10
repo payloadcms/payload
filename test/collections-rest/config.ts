@@ -6,6 +6,7 @@ import { APIError, type CollectionConfig, type Endpoint } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { LargeDocuments } from './collections/LargeDocuments.js'
 
 export interface Relation {
   id: string
@@ -280,6 +281,7 @@ export default buildConfigWithDefaults({
       ],
       disableBulkEdit: true,
     },
+    LargeDocuments,
   ],
   endpoints: [
     {

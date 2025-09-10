@@ -1,6 +1,7 @@
 import type { Payload, SanitizedCollectionConfig } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
+import { serialize } from 'object-to-formdata'
 import path from 'path'
 import { APIError, NotFound } from 'payload'
 import { fileURLToPath } from 'url'
@@ -9,7 +10,9 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
+import { getFormDataSize } from '../helpers/getFormDataSize.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
 import {
   customIdNumberSlug,
   customIdSlug,
@@ -117,6 +120,39 @@ describe('collections-rest', () => {
       expect(response.status).toEqual(200)
       expect(doc.title).toEqual(updatedTitle)
       expect(doc.description).toEqual(description) // Check was not modified
+    })
+
+    it('can handle PATCH requests with form-data of over 1mb', async () => {
+      const doc = await payload.create({
+        collection: largeDocumentsCollectionSlug,
+        data: {},
+      })
+
+      // Now use the REST API and attempt to PATCH the document with a payload over 1mb
+      const dataToSerialize: Record<string, unknown> = {
+        _payload: JSON.stringify({
+          title: 'Hello, world!',
+          array: new Array(50000).fill({ text: 'Hello, world!' }),
+        }),
+      }
+
+      const formData: FormData = serialize(dataToSerialize, {
+        indices: true,
+        nullsAsUndefineds: false,
+      })
+
+      // Ensure the form data we are about to send is actually over 1mb
+      const docSize = getFormDataSize(formData)
+      expect(docSize).toBeGreaterThan(1 * 1024 * 1024)
+
+      // This request should not fail with error: "Unterminated string in JSON at position..."
+      const data = await restClient
+        .PATCH(`/${postsSlug}/${doc.id}?limit=1`, {
+          body: formData,
+        })
+        .then((res) => res.json())
+
+      expect(data.array?.[0]?.text).toEqual('Hello, world!')
     })
 
     describe('Bulk operations', () => {
