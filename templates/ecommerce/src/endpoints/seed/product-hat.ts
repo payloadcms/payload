@@ -3,7 +3,7 @@ import type { Media } from '@/payload-types'
 import { RequiredDataFromCollectionSlug } from 'payload'
 
 type ProductArgs = {
-  galleryImages: Media[]
+  galleryImage: Media
   metaImage: Media
   variantTypes: VariantType[]
   categories: Category[]
@@ -11,15 +11,13 @@ type ProductArgs = {
 }
 
 export const productHatData: (args: ProductArgs) => RequiredDataFromCollectionSlug<'products'> = ({
-  galleryImages,
+  galleryImage,
   relatedProducts,
   metaImage,
   variantTypes,
   categories,
 }) => {
   return {
-    enableVariants: true,
-    variantTypes: variantTypes,
     meta: {
       title: 'Hat | Payload Ecommerce Template',
       image: metaImage,
@@ -60,29 +58,11 @@ export const productHatData: (args: ProductArgs) => RequiredDataFromCollectionSl
         version: 1,
       },
     },
-    gallery: galleryImages,
+    gallery: [{ image: galleryImage }],
     title: 'Hat',
     slug: 'hat',
     priceInUSDEnabled: true,
     priceInUSD: 2500,
     relatedProducts: relatedProducts,
-  }
-}
-
-type ProductVariantArgs = {
-  product: Product
-  variantOptions: VariantOption[]
-}
-
-export const productHatVariant: (
-  args: ProductVariantArgs,
-) => RequiredDataFromCollectionSlug<'variants'> = ({ product, variantOptions }) => {
-  return {
-    product: product,
-    options: variantOptions,
-    inventory: 365,
-    priceInUSDEnabled: true,
-    priceInUSD: 2500,
-    _status: 'published',
   }
 }

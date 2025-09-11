@@ -7,7 +7,7 @@ import { Price } from '@/components/Price'
 import React, { Suspense } from 'react'
 
 import { VariantSelector } from './VariantSelector'
-import { useCurrency } from '@payloadcms/plugin-ecommerce/react'
+import { useCurrency } from '@payloadcms/plugin-ecommerce/client/react'
 import { StockIndicator } from '@/components/product/StockIndicator'
 
 export function ProductDescription({ product }: { product: Product }) {

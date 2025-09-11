@@ -2,13 +2,12 @@ import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from '
 
 import { contactFormData } from './contact-form'
 import { contactPageData } from './contact-page'
-import { productMousepadData } from './product-mousepad'
-import { productHatData, productHatVariant } from './product-hat'
-import { productHoodieData, productHoodieVariant } from './product-hoodie'
+import { productHatData } from './product-hat'
+import { productTshirtData, productTshirtVariant } from './product-tshirt'
 import { homePageData } from './home'
-import { image1Data } from './image-1'
-import { image2Data } from './image-2'
-import { image3Data } from './image-3'
+import { imageHatData } from './image-hat'
+import { imageTshirtBlackData } from './image-tshirt-black'
+import { imageTshirtWhiteData } from './image-tshirt-white'
 import { imageHero1Data } from './image-hero-1'
 import { Address, Transaction, VariantOption } from '@/payload-types'
 
@@ -123,26 +122,27 @@ export const seed = async ({
 
   payload.logger.info(`— Seeding media...`)
 
-  const [image1Buffer, image2Buffer, image3Buffer, hero1Buffer] = await Promise.all([
-    fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post1.webp',
-    ),
-    fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post2.webp',
-    ),
-    fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post3.webp',
-    ),
-    fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-hero1.webp',
-    ),
-  ])
+  const [imageHatBuffer, imageTshirtBlackBuffer, imageTshirtWhiteBuffer, hero1Buffer] =
+    await Promise.all([
+      fetchFileByURL(
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/website/src/endpoints/seed/hat-logo.png',
+      ),
+      fetchFileByURL(
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/website/src/endpoints/seed/tshirt-black.png',
+      ),
+      fetchFileByURL(
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/website/src/endpoints/seed/tshirt-black.png',
+      ),
+      fetchFileByURL(
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/website/src/endpoints/seed/image-hero1.webp',
+      ),
+    ])
 
   const [
     customer,
-    image1,
-    image2,
-    image3,
+    imageHat,
+    imageTshirtBlack,
+    imageTshirtWhite,
     imageHome,
     accessoriesCategory,
     tshirtsCategory,
@@ -160,18 +160,18 @@ export const seed = async ({
     }),
     payload.create({
       collection: 'media',
-      data: image1Data,
-      file: image1Buffer,
+      data: imageHatData,
+      file: imageHatBuffer,
     }),
     payload.create({
       collection: 'media',
-      data: image2Data,
-      file: image2Buffer,
+      data: imageTshirtBlackData,
+      file: imageTshirtBlackBuffer,
     }),
     payload.create({
       collection: 'media',
-      data: image3Data,
-      file: image3Buffer,
+      data: imageTshirtWhiteData,
+      file: imageTshirtWhiteBuffer,
     }),
     payload.create({
       collection: 'media',
@@ -258,76 +258,48 @@ export const seed = async ({
 
   payload.logger.info(`— Seeding products...`)
 
-  const productMousepad = await payload.create({
-    collection: 'products',
-    depth: 0,
-    data: productMousepadData({
-      galleryImages: [image1, image2, image3],
-      metaImage: image1,
-      categories: [accessoriesCategory],
-    }),
-  })
-
   const productHat = await payload.create({
     collection: 'products',
     depth: 0,
     data: productHatData({
-      galleryImages: [image1, image2, image3],
-      metaImage: image1,
+      galleryImage: imageHat,
+      metaImage: imageHat,
       variantTypes: [colorVariantType],
       categories: [hatsCategory],
-      relatedProducts: [productMousepad],
+      relatedProducts: [],
     }),
   })
 
-  const variantHatWhite = await payload.create({
-    collection: 'variants',
-    depth: 0,
-    data: productHatVariant({
-      product: productHat,
-      variantOptions: [white],
-    }),
-  })
-
-  const variantHatBlack = await payload.create({
-    collection: 'variants',
-    depth: 0,
-    data: productHatVariant({
-      product: productHat,
-      variantOptions: [black],
-    }),
-  })
-
-  const productHoodie = await payload.create({
+  const productTshirt = await payload.create({
     collection: 'products',
     depth: 0,
-    data: productHoodieData({
-      galleryImages: [image1, image2, image3],
-      metaImage: image1,
+    data: productTshirtData({
+      galleryImages: [imageHat, imageTshirtBlack, imageTshirtWhite],
+      metaImage: imageHat,
       variantTypes: [colorVariantType, sizeVariantType],
       categories: [hoodiesCategory],
       relatedProducts: [productHat],
     }),
   })
 
-  let hoodieID: number | string = productHoodie.id
+  let hoodieID: number | string = productTshirt.id
 
   if (payload.db.defaultIDType === 'text') {
     hoodieID = `"${hoodieID}"`
   }
 
   const [
-    smallWhiteHoodieVariant,
-    mediumWhiteHoodieVariant,
-    largeWhiteHoodieVariant,
-    xlargeWhiteHoodieVariant,
+    smallTshirtHoodieVariant,
+    mediumTshirtHoodieVariant,
+    largeTshirtHoodieVariant,
+    xlargeTshirtHoodieVariant,
   ] = await Promise.all(
     [small, medium, large, xlarge].map((variantOption) =>
       payload.create({
         collection: 'variants',
         depth: 0,
-        data: productHoodieVariant({
-          product: productHoodie,
+        data: productTshirtVariant({
+          product: productTshirt,
           variantOptions: [variantOption, white],
         }),
       }),
@@ -339,8 +311,8 @@ export const seed = async ({
       payload.create({
         collection: 'variants',
         depth: 0,
-        data: productHoodieVariant({
-          product: productHoodie,
+        data: productTshirtVariant({
+          product: productTshirt,
           variantOptions: [variantOption, black],
           ...(variantOption.value === 'medium' ? { inventory: 0 } : {}),
         }),
@@ -364,7 +336,7 @@ export const seed = async ({
       depth: 0,
       data: homePageData({
         contentImage: imageHome,
-        metaImage: image1,
+        metaImage: imageHat,
       }),
     }),
     payload.create({
@@ -444,8 +416,8 @@ export const seed = async ({
       currency: 'USD',
       items: [
         {
-          product: productHoodie.id,
-          variant: mediumWhiteHoodieVariant.id,
+          product: productTshirt.id,
+          variant: mediumTshirtHoodieVariant.id,
           quantity: 1,
         },
       ],
@@ -462,7 +434,7 @@ export const seed = async ({
       createdAt: oldTimestamp,
       items: [
         {
-          product: productMousepad.id,
+          product: productHat.id,
           quantity: 1,
         },
       ],
@@ -479,13 +451,13 @@ export const seed = async ({
       subtotal: 7499,
       items: [
         {
-          product: productHat.id,
-          variant: variantHatWhite.id,
+          product: productTshirt.id,
+          variant: smallTshirtHoodieVariant.id,
           quantity: 1,
         },
         {
-          product: productHoodie.id,
-          variant: mediumWhiteHoodieVariant.id,
+          product: productTshirt.id,
+          variant: mediumTshirtHoodieVariant.id,
           quantity: 1,
         },
       ],
@@ -509,13 +481,13 @@ export const seed = async ({
       shippingAddress: baseAddressUSData,
       items: [
         {
-          product: productHat.id,
-          variant: variantHatWhite.id,
+          product: productTshirt.id,
+          variant: smallTshirtHoodieVariant.id,
           quantity: 1,
         },
         {
-          product: productHoodie.id,
-          variant: mediumWhiteHoodieVariant.id,
+          product: productTshirt.id,
+          variant: mediumTshirtHoodieVariant.id,
           quantity: 1,
         },
       ],
@@ -533,13 +505,13 @@ export const seed = async ({
       shippingAddress: baseAddressUSData,
       items: [
         {
-          product: productHat.id,
-          variant: variantHatWhite.id,
+          product: productTshirt.id,
+          variant: smallTshirtHoodieVariant.id,
           quantity: 1,
         },
         {
-          product: productHoodie.id,
-          variant: mediumWhiteHoodieVariant.id,
+          product: productTshirt.id,
+          variant: mediumTshirtHoodieVariant.id,
           quantity: 1,
         },
       ],

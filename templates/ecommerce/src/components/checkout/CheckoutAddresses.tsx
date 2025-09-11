@@ -2,7 +2,7 @@
 
 import { AddressItem } from '@/components/addresses/AddressItem'
 import { Address } from '@/payload-types'
-import { useAddresses } from '@payloadcms/plugin-ecommerce/react'
+import { useAddresses } from '@payloadcms/plugin-ecommerce/client/react'
 import {
   Dialog,
   DialogContent,

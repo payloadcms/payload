@@ -1,10 +1,15 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { AccessConfig, CurrenciesConfig, FieldsOverride, InventoryConfig } from '../types.js'
+import type {
+  AccessConfig,
+  CurrenciesConfig,
+  FieldsOverride,
+  InventoryConfig,
+} from '../../types.js'
 
-import { inventoryField } from '../fields/inventoryField.js'
-import { pricesField } from '../fields/pricesField.js'
-import { variantsFields } from '../fields/variantsFields.js'
+import { inventoryField } from '../../fields/inventoryField.js'
+import { pricesField } from '../../fields/pricesField.js'
+import { variantsFields } from '../../fields/variantsFields.js'
 
 type Props = {
   access: {

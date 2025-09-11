@@ -9,7 +9,7 @@ type ProductArgs = {
   relatedProducts: Product[]
 }
 
-export const productHoodieData: (
+export const productTshirtData: (
   args: ProductArgs,
 ) => RequiredDataFromCollectionSlug<'products'> = ({
   galleryImages,
@@ -23,10 +23,10 @@ export const productHoodieData: (
     variantTypes: variantTypes,
     inventory: 0,
     meta: {
-      title: 'Hoodie | Payload Ecommerce Template',
+      title: 'Tshirt | Payload Ecommerce Template',
       image: metaImage,
       description:
-        'Top off your look with our classic hat, crafted for style and comfort. Made with breathable, high-quality materials and an adjustable strap for the perfect fit.',
+        'Top off your look with our classic Tshirt, crafted for style and comfort. Made with breathable, high-quality materials and an adjustable strap for the perfect fit.',
     },
     _status: 'published',
     layout: [],
@@ -62,9 +62,9 @@ export const productHoodieData: (
         version: 1,
       },
     },
-    gallery: galleryImages,
-    title: 'Hoodie',
-    slug: 'hoodie',
+    gallery: galleryImages.map((image) => ({ image })),
+    title: 'Tshirt',
+    slug: 'tshirt',
     priceInUSDEnabled: true,
     priceInUSD: 4999,
     relatedProducts: relatedProducts,
@@ -78,7 +78,7 @@ type ProductVariantArgs = {
   priceInUSD?: number
 }
 
-export const productHoodieVariant: (
+export const productTshirtVariant: (
   args: ProductVariantArgs,
 ) => RequiredDataFromCollectionSlug<'variants'> = ({
   product,

@@ -1,6 +1,6 @@
 import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from '../types.js'
 
-import { defaultAddressFields } from '../addresses/defaultAddressFields.js'
+import { defaultAddressFields } from '../collections/addresses/defaultAddressFields.js'
 import { USD } from '../currencies/index.js'
 
 type Props = {
@@ -76,9 +76,15 @@ export const sanitizePluginConfig = ({ pluginConfig }: Props): SanitizedEcommerc
     config.payments.paymentMethods = []
   }
 
+  if (config.products) {
+    if (typeof config.products === 'object' && typeof config.products.variants === 'undefined') {
+      config.products.variants = true
+    }
+  }
+
   config.access = {
-    isAuthenticated: ({ req: { user } }) => Boolean(user),
-    isPublic: () => true,
+    authenticatedOnly: ({ req: { user } }) => Boolean(user),
+    publicAccess: () => true,
     ...pluginConfig.access,
   }
 

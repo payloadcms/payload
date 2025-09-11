@@ -5,10 +5,10 @@ import type {
   CurrenciesConfig,
   FieldsOverride,
   InventoryConfig,
-} from '../../types.js'
+} from '../../../types.js'
 
-import { inventoryField } from '../../fields/inventoryField.js'
-import { pricesField } from '../../fields/pricesField.js'
+import { inventoryField } from '../../../fields/inventoryField.js'
+import { pricesField } from '../../../fields/pricesField.js'
 import { variantsCollectionBeforeChange as beforeChange } from './hooks/beforeChange.js'
 import { validateOptions } from './hooks/validateOptions.js'
 
@@ -76,7 +76,7 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
       admin: {
         components: {
           Field: {
-            path: '@payloadcms/plugin-ecommerce/ui#VariantOptionsSelector',
+            path: '@payloadcms/plugin-ecommerce/rsc#VariantOptionsSelector',
           },
         },
       },

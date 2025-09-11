@@ -2,7 +2,7 @@ import type { Media, Product } from '@/payload-types'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { GridTileImage } from '@/components/grid/tile'
-import { Gallery, GalleryImage } from '@/components/product/Gallery'
+import { Gallery } from '@/components/product/Gallery'
 import { ProductDescription } from '@/components/product/ProductDescription'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
@@ -26,12 +26,12 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
 
   if (!product) return notFound()
 
-  const gallery: Media[] = product.gallery?.filter((image) => typeof image === 'object') || []
+  const gallery = product.gallery?.filter((item) => typeof item.image === 'object') || []
 
   const metaImage = typeof product.meta?.image === 'object' ? product.meta?.image : undefined
   const canIndex = product._status === 'published'
 
-  const seoImage = metaImage || (gallery.length ? gallery[0] : undefined)
+  const seoImage = metaImage || (gallery.length ? (gallery[0]?.image as Media) : undefined)
 
   return {
     description: product.meta?.description || '',
@@ -65,11 +65,11 @@ export default async function ProductPage({ params }: Args) {
 
   if (!product) return notFound()
 
-  const gallery: GalleryImage[] =
+  const gallery =
     product.gallery
-      ?.filter((image) => typeof image === 'object')
-      .map((image) => ({
-        image: image as Media,
+      ?.filter((item) => typeof item.image === 'object')
+      .map((item) => ({
+        image: item.image as Media,
         variantID: undefined,
       })) || []
 
@@ -90,21 +90,6 @@ export default async function ProductPage({ params }: Args) {
       }
       return acc
     }, product.priceInUSD || 0)
-
-    for (const variant of product.variants.docs) {
-      if (typeof variant !== 'object') continue
-
-      if (variant.gallery && variant.gallery.length > 0) {
-        const variantGallery = variant.gallery
-          .filter((image) => typeof image === 'object')
-          .map((image) => ({
-            image: image as Media,
-            variantID: variant.id,
-          }))
-
-        gallery.push(...variantGallery)
-      }
-    }
   }
 
   const productJsonLd = {
@@ -225,7 +210,6 @@ const queryProductBySlug = async ({ slug }: { slug: string }) => {
         priceInUSD: true,
         inventory: true,
         options: true,
-        gallery: true,
       },
     },
   })

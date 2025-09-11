@@ -5,4 +5,4 @@ export {
   useCurrency,
   useEcommerce,
   usePayments,
-} from '../react/provider/index.js'
+} from '../../react/provider/index.js'

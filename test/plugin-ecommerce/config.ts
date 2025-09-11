@@ -3,8 +3,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
-import { EUR, USD } from '@payloadcms/plugin-ecommerce/currencies'
+import { ecommercePlugin, EUR, USD } from '@payloadcms/plugin-ecommerce'
 import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
 
 import type { EcommercePluginConfig } from '../../packages/plugin-ecommerce/src/types.js'
@@ -54,11 +53,11 @@ export default buildConfigWithDefaults({
   plugins: [
     ecommercePlugin({
       access: {
-        isAdmin: ({ req }) => Boolean(req.user),
-        isAdminField: ({ req }) => Boolean(req.user),
-        isAdminOrOwner: ({ req }) => Boolean(req.user),
-        isCustomerField: ({ req }) => Boolean(req.user),
-        isAdminOrPublished: ({ req }) => {
+        adminOnly: ({ req }) => Boolean(req.user),
+        adminOnlyFieldAccess: ({ req }) => Boolean(req.user),
+        adminOrCustomerOwner: ({ req }) => Boolean(req.user),
+        customerOnlyFieldAccess: ({ req }) => Boolean(req.user),
+        adminOrPublishedStatus: ({ req }) => {
           if (req.user) {
             return true
           }

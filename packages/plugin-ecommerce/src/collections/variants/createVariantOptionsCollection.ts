@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { AccessConfig, FieldsOverride } from '../types.js'
+import type { AccessConfig, FieldsOverride } from '../../types.js'
 
 type Props = {
   access: {

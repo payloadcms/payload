@@ -16,7 +16,7 @@ import React, { Suspense, useCallback, useEffect, useState } from 'react'
 
 import { cssVariables } from '@/cssVariables'
 import { CheckoutForm } from '@/components/forms/CheckoutForm'
-import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/react'
+import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { CheckoutAddresses } from '@/components/checkout/CheckoutAddresses'
 import { CreateAddressModal } from '@/components/addresses/CreateAddressModal'
 import { Address } from '@/payload-types'

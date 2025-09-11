@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useRouter } from 'next/navigation'
 import React, { useCallback } from 'react'
-import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/react'
+import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { Address } from '@/payload-types'
 
 type Props = {

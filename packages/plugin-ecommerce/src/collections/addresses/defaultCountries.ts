@@ -1,4 +1,4 @@
-import type { CountryType } from '../types.js'
+import type { CountryType } from '../../types.js'
 
 /**
  * Default list of countries supported for forms and payments.

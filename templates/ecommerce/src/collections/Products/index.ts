@@ -18,7 +18,7 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
-import { Field } from 'payload'
+import { DefaultDocumentIDType, Field, Where } from 'payload'
 
 export const ProductsCollection: CollectionOverride = {
   admin: {
@@ -80,11 +80,59 @@ export const ProductsCollection: CollectionOverride = {
               },
               {
                 name: 'gallery',
-                type: 'upload',
-                relationTo: 'media',
-                required: true,
-                hasMany: true,
+                type: 'array',
+                minRows: 1,
+                fields: [
+                  {
+                    name: 'image',
+                    type: 'upload',
+                    relationTo: 'media',
+                    required: true,
+                  },
+                  {
+                    name: 'variantOption',
+                    type: 'relationship',
+                    relationTo: 'variantOptions',
+                    admin: {
+                      condition: (data) => {
+                        return data?.enableVariants === true && data?.variantTypes?.length > 0
+                      },
+                    },
+                    filterOptions: ({ data }) => {
+                      if (data?.enableVariants && data?.variantTypes?.length) {
+                        const variantTypeIDs = data.variantTypes.map((item: any) => {
+                          if (typeof item === 'object' && item?.id) {
+                            return item.id
+                          }
+                          return item
+                        }) as DefaultDocumentIDType[]
+
+                        if (variantTypeIDs.length === 0)
+                          return {
+                            variantType: {
+                              in: [],
+                            },
+                          }
+
+                        const query: Where = {
+                          variantType: {
+                            in: variantTypeIDs,
+                          },
+                        }
+
+                        return query
+                      }
+
+                      return {
+                        variantType: {
+                          in: [],
+                        },
+                      }
+                    },
+                  },
+                ],
               },
+
               {
                 name: 'layout',
                 type: 'blocks',

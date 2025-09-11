@@ -10,7 +10,6 @@ import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
 import { Page, Product } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 import { ProductsCollection } from '@/collections/Products'
-import { VariantsCollection } from '@/collections/Variants'
 import { adminOrCustomerOwner } from '@/access/adminOrCustomerOwner'
 import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
 import { adminOnly } from '@/access/adminOnly'
@@ -87,9 +86,6 @@ export const plugins: Plugin[] = [
       ],
     },
     products: {
-      variants: {
-        variantsCollection: VariantsCollection,
-      },
       productsCollection: ProductsCollection,
     },
   }),

@@ -1,6 +1,6 @@
 import type { CollectionBeforeChangeHook } from 'payload'
 
-import type { AccessConfig } from '../../types.js'
+import type { AccessConfig } from '../../../types.js'
 
 interface Props {
   customerOnlyFieldAccess: AccessConfig['customerOnlyFieldAccess']

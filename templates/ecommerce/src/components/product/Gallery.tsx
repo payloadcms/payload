@@ -1,6 +1,6 @@
 'use client'
 
-import type { Media as MediaType } from '@/payload-types'
+import type { Media as MediaType, Product } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 import { GridTileImage } from '@/components/grid/tile'
@@ -9,13 +9,8 @@ import React, { useEffect } from 'react'
 
 import { Carousel, CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel'
 
-export type GalleryImage = {
-  image: MediaType
-  variantID?: string
-}
-
 type Props = {
-  gallery: GalleryImage[]
+  gallery: NonNullable<Product['gallery']>
 }
 
 export const Gallery: React.FC<Props> = ({ gallery }) => {
@@ -33,7 +28,7 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
     const variantID = searchParams.get('variant')
 
     if (variantID && api) {
-      const index = gallery.findIndex((item) => item.variantID === variantID)
+      const index = gallery.findIndex((item) => item.variantOption === variantID)
       if (index !== -1) {
         setCurrent(index)
         api.scrollTo(index, true)
@@ -53,15 +48,19 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
 
       <Carousel setApi={setApi} className="w-full" opts={{ align: 'start', loop: false }}>
         <CarouselContent>
-          {gallery.map((item, i) => (
-            <CarouselItem
-              className="basis-1/5"
-              key={`${item.image.id}-${i}`}
-              onClick={() => setCurrent(i)}
-            >
-              <GridTileImage active={i === current} media={item.image} />
-            </CarouselItem>
-          ))}
+          {gallery.map((item, i) => {
+            if (typeof item.image !== 'object') return null
+
+            return (
+              <CarouselItem
+                className="basis-1/5"
+                key={`${item.image.id}-${i}`}
+                onClick={() => setCurrent(i)}
+              >
+                <GridTileImage active={i === current} media={item.image} />
+              </CarouselItem>
+            )
+          })}
         </CarouselContent>
       </Carousel>
     </div>

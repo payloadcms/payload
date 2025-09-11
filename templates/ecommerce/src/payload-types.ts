@@ -323,7 +323,13 @@ export interface Product {
     };
     [k: string]: unknown;
   } | null;
-  gallery: (string | Media)[];
+  gallery?:
+    | {
+        image: string | Media;
+        variantOption?: (string | null) | VariantOption;
+        id?: string | null;
+      }[]
+    | null;
   layout?: (CallToActionBlock | ContentBlock | MediaBlock)[] | null;
   inventory?: number | null;
   enableVariants?: boolean | null;
@@ -384,6 +390,38 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "variantOptions".
+ */
+export interface VariantOption {
+  id: string;
+  _variantOptions_options_order?: string | null;
+  variantType: string | VariantType;
+  label: string;
+  /**
+   * should be defaulted or dynamic based on label
+   */
+  value: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "variantTypes".
+ */
+export interface VariantType {
+  id: string;
+  label: string;
+  name: string;
+  options?: {
+    docs?: (string | VariantOption)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -868,38 +906,6 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "variantTypes".
- */
-export interface VariantType {
-  id: string;
-  label: string;
-  name: string;
-  options?: {
-    docs?: (string | VariantOption)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "variantOptions".
- */
-export interface VariantOption {
-  id: string;
-  _variantOptions_options_order?: string | null;
-  variantType: string | VariantType;
-  label: string;
-  /**
-   * should be defaulted or dynamic based on label
-   */
-  value: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "variants".
  */
 export interface Variant {
@@ -916,7 +922,6 @@ export interface Variant {
   inventory?: number | null;
   priceInUSDEnabled?: boolean | null;
   priceInUSD?: number | null;
-  gallery?: (string | Media)[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1513,7 +1518,6 @@ export interface VariantsSelect<T extends boolean = true> {
   inventory?: T;
   priceInUSDEnabled?: T;
   priceInUSD?: T;
-  gallery?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1548,7 +1552,13 @@ export interface VariantOptionsSelect<T extends boolean = true> {
 export interface ProductsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
-  gallery?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        variantOption?: T;
+        id?: T;
+      };
   layout?:
     | T
     | {

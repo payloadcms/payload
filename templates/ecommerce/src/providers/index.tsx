@@ -1,5 +1,5 @@
 import { AuthProvider } from '@/providers/Auth'
-import { EcommerceProvider } from '@payloadcms/plugin-ecommerce/react'
+import { EcommerceProvider } from '@payloadcms/plugin-ecommerce/client/react'
 import { stripeAdapterClient } from '@payloadcms/plugin-ecommerce/payments/stripe'
 import React from 'react'
 

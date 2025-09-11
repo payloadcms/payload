@@ -36,50 +36,15 @@
       "types": "./src/exports/types.ts",
       "default": "./src/exports/types.ts"
     },
-    "./variants": {
-      "import": "./src/exports/variants.ts",
-      "types": "./src/exports/variants.ts",
-      "default": "./src/exports/variants.ts"
-    },
-    "./addresses": {
-      "import": "./src/exports/addresses.ts",
-      "types": "./src/exports/addresses.ts",
-      "default": "./src/exports/addresses.ts"
-    },
-    "./fields": {
-      "import": "./src/exports/fields.ts",
-      "types": "./src/exports/fields.ts",
-      "default": "./src/exports/fields.ts"
-    },
-    "./products": {
-      "import": "./src/exports/products.ts",
-      "types": "./src/exports/products.ts",
-      "default": "./src/exports/products.ts"
-    },
-    "./transactions": {
-      "import": "./src/exports/transactions.ts",
-      "types": "./src/exports/transactions.ts",
-      "default": "./src/exports/transactions.ts"
-    },
     "./payments/stripe": {
       "import": "./src/exports/payments/stripe.ts",
       "types": "./src/exports/payments/stripe.ts",
       "default": "./src/exports/payments/stripe.ts"
     },
-    "./ui": {
-      "import": "./src/exports/ui.ts",
-      "types": "./src/exports/ui.ts",
-      "default": "./src/exports/ui.ts"
-    },
-    "./currencies": {
-      "import": "./src/exports/currencies.ts",
-      "types": "./src/exports/currencies.ts",
-      "default": "./src/exports/currencies.ts"
-    },
-    "./orders": {
-      "import": "./src/exports/orders.ts",
-      "types": "./src/exports/orders.ts",
-      "default": "./src/exports/orders.ts"
+    "./rsc": {
+      "import": "./src/exports/rsc.ts",
+      "types": "./src/exports/rsc.ts",
+      "default": "./src/exports/rsc.ts"
     },
     "./translations": {
       "import": "./src/exports/translations.ts",
@@ -87,14 +52,14 @@
       "default": "./src/exports/translations.ts"
     },
     "./client": {
-      "import": "./src/exports/client.ts",
-      "types": "./src/exports/client.ts",
-      "default": "./src/exports/client.ts"
+      "import": "./src/exports/client/index.ts",
+      "types": "./src/exports/client/index.ts",
+      "default": "./src/exports/client/index.ts"
     },
-    "./react": {
-      "import": "./src/exports/react.ts",
-      "types": "./src/exports/react.ts",
-      "default": "./src/exports/react.ts"
+    "./client/react": {
+      "import": "./src/exports/client/react.ts",
+      "types": "./src/exports/client/react.ts",
+      "default": "./src/exports/client/react.ts"
     }
   },
   "main": "./src/index.tsx",
@@ -142,65 +107,30 @@
         "types": "./dist/exports/types.d.ts",
         "default": "./dist/exports/types.js"
       },
-      "./variants": {
-        "import": "./dist/exports/variants.js",
-        "types": "./dist/exports/variants.d.ts",
-        "default": "./dist/exports/variants.js"
-      },
-      "./addresses": {
-        "import": "./dist/exports/addresses.js",
-        "types": "./dist/exports/addresses.d.ts",
-        "default": "./dist/exports/addresses.js"
-      },
-      "./fields": {
-        "import": "./dist/exports/fields.js",
-        "types": "./dist/exports/fields.d.ts",
-        "default": "./dist/exports/fields.js"
-      },
-      "./products": {
-        "import": "./dist/exports/products.js",
-        "types": "./dist/exports/products.d.ts",
-        "default": "./dist/exports/products.js"
-      },
-      "./transactions": {
-        "import": "./dist/exports/transactions.js",
-        "types": "./dist/exports/transactions.d.ts",
-        "default": "./dist/exports/transactions.js"
-      },
-      "./currencies": {
-        "import": "./dist/exports/currencies.js",
-        "types": "./dist/exports/currencies.d.ts",
-        "default": "./dist/exports/currencies.js"
-      },
       "./payments/stripe": {
         "import": "./dist/exports/payments/stripe.js",
         "types": "./dist/exports/payments/stripe.d.ts",
         "default": "./dist/exports/payments/stripe.js"
       },
-      "./ui": {
-        "import": "./dist/exports/ui.js",
-        "types": "./dist/exports/ui.d.ts",
-        "default": "./dist/exports/ui.js"
-      },
-      "./orders": {
-        "import": "./dist/exports/orders.js",
-        "types": "./dist/exports/orders.d.ts",
-        "default": "./dist/exports/orders.js"
+      "./rsc": {
+        "import": "./dist/exports/rsc.js",
+        "types": "./dist/exports/rsc.d.ts",
+        "default": "./dist/exports/rsc.js"
       },
       "./client": {
-        "import": "./dist/exports/client.js",
-        "types": "./dist/exports/client.d.ts",
-        "default": "./dist/exports/client.js"
+        "import": "./dist/exports/client/index.js",
+        "types": "./dist/exports/client/index.d.ts",
+        "default": "./dist/exports/client/index.js"
+      },
+      "./client/react": {
+        "import": "./dist/exports/client/react.js",
+        "types": "./dist/exports/client/react.d.ts",
+        "default": "./dist/exports/client/react.js"
       },
       "./translations": {
         "import": "./dist/exports/translations.js",
         "types": "./dist/exports/translations.d.ts",
         "default": "./dist/exports/translations.js"
-      },
-      "./react": {
-        "import": "./dist/exports/react.js",
-        "types": "./dist/exports/react.d.ts",
-        "default": "./dist/exports/react.js"
       }
     },
     "main": "./dist/index.js",

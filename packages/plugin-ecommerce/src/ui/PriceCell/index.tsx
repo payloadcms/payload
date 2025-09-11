@@ -37,7 +37,7 @@ export const PriceCell: React.FC<Props> = (args) => {
 
   if (!cellData) {
     // @ts-expect-error - plugin translations are not typed yet
-    return <span>Price not set. {t('plugin-ecommerce:priceNotSet')}</span>
+    return <span>{t('plugin-ecommerce:priceNotSet')}</span>
   }
 
   return (

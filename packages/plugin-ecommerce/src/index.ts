@@ -4,19 +4,19 @@ import { deepMergeSimple } from 'payload/shared'
 
 import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from './types.js'
 
-import { createAddressesCollection } from './addresses/createAddressesCollection.js'
-import { createCartsCollection } from './carts/createCartsCollection.js'
+import { createAddressesCollection } from './collections/addresses/createAddressesCollection.js'
+import { createCartsCollection } from './collections/carts/createCartsCollection.js'
+import { createOrdersCollection } from './collections/orders/createOrdersCollection.js'
+import { createProductsCollection } from './collections/products/createProductsCollection.js'
+import { createVariantOptionsCollection } from './collections/variants/createVariantOptionsCollection.js'
+import { createVariantsCollection } from './collections/variants/createVariantsCollection/index.js'
+import { createVariantTypesCollection } from './collections/variants/createVariantTypesCollection.js'
 import { confirmOrderHandler } from './endpoints/confirmOrder.js'
 import { initiatePaymentHandler } from './endpoints/initiatePayment.js'
-import { createOrdersCollection } from './orders/createOrdersCollection.js'
-import { createProductsCollection } from './products/createProductsCollection.js'
 import { createTransactionsCollection } from './transactions/createTransactionsCollection.js'
 import { translations } from './translations/index.js'
 import { getCollectionSlugMap } from './utilities/getCollectionSlugMap.js'
 import { sanitizePluginConfig } from './utilities/sanitizePluginConfig.js'
-import { createVariantOptionsCollection } from './variants/createVariantOptionsCollection.js'
-import { createVariantsCollection } from './variants/createVariantsCollection/index.js'
-import { createVariantTypesCollection } from './variants/createVariantTypesCollection.js'
 
 export const ecommercePlugin =
   (pluginConfig?: EcommercePluginConfig) =>
@@ -312,3 +312,21 @@ export const ecommercePlugin =
       ...incomingConfig,
     }
   }
+
+export {
+  createAddressesCollection,
+  createCartsCollection,
+  createOrdersCollection,
+  createProductsCollection,
+  createTransactionsCollection,
+  createVariantOptionsCollection,
+  createVariantsCollection,
+  createVariantTypesCollection,
+}
+
+export { EUR, GBP, USD } from './currencies/index.js'
+export { amountField } from './fields/amountField.js'
+export { currencyField } from './fields/currencyField.js'
+export { pricesField } from './fields/pricesField.js'
+export { statusField } from './fields/statusField.js'
+export { variantsFields } from './fields/variantsFields.js'
