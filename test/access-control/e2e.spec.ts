@@ -3,14 +3,6 @@ import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
-import {
-  closeNav,
-  ensureCompilationIsDone,
-  exactText,
-  initPageConsoleErrorCatch,
-  login,
-  saveDocAndAssert,
-} from 'helpers.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
@@ -20,6 +12,14 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
+import {
+  closeNav,
+  ensureCompilationIsDone,
+  exactText,
+  initPageConsoleErrorCatch,
+  login,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'

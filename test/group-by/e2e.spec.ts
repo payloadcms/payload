@@ -3,16 +3,11 @@ import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
-import { addListFilter } from 'helpers/e2e/tables/filters/addListFilter.js'
+import { sortColumn } from 'helpers/e2e/columns/sortColumn.js'
+import { addListFilter } from 'helpers/e2e/filters/addListFilter.js'
 import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
-import {
-  addGroupBy,
-  clearGroupBy,
-  closeGroupBy,
-  openGroupBy,
-} from 'helpers/e2e/tables/groupBy/groupBy.js'
+import { addGroupBy, clearGroupBy, closeGroupBy, openGroupBy } from 'helpers/e2e/groupBy.js'
 import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { sortColumn } from 'helpers/e2e/tables/columns/sortColumn.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
@@ -26,7 +21,7 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   selectTableRow,
-} from 'helpers.js'
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'

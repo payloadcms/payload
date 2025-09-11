@@ -1,18 +1,18 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { mapAsync } from 'payload'
+import * as qs from 'qs-esm'
+
+import type { Config, Geo, Post, Virtual } from '../../payload-types.js'
+
 import {
   ensureCompilationIsDone,
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
   openColumnControls,
-} from 'helpers.js'
-import { mapAsync } from 'payload'
-import * as qs from 'qs-esm'
-
-import type { Config, Geo, Post, Virtual } from '../../payload-types.js'
-
+} from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { customAdminRoutes } from '../../shared.js'

@@ -13,7 +13,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   switchTab,
-} from 'helpers.js'
+} from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../../../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
