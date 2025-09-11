@@ -52,6 +52,13 @@ describe('Auth', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
   })
+
+  async function waitForVisibleAuthFields() {
+    await expect(page.locator('#field-email')).toBeVisible()
+    await expect(page.locator('#field-password')).toBeVisible()
+    await expect(page.locator('#field-confirm-password')).toBeVisible()
+  }
+
   describe('create first user', () => {
     beforeAll(async () => {
       await reInitializeDB({
@@ -71,12 +78,6 @@ describe('Auth', () => {
         },
       })
     })
-
-    async function waitForVisibleAuthFields() {
-      await expect(page.locator('#field-email')).toBeVisible()
-      await expect(page.locator('#field-password')).toBeVisible()
-      await expect(page.locator('#field-confirm-password')).toBeVisible()
-    }
 
     test('should create first user and redirect to admin', async () => {
       const {
@@ -385,6 +386,36 @@ describe('Auth', () => {
         await expect(page.locator('.auth-fields')).toBeHidden()
 
         await saveDocAndAssert(page)
+      })
+
+      test('ensure login page with redirect to users document redirects properly after login, without client error', async () => {
+        await page.goto(url.admin)
+
+        await page.goto(`${serverURL}/admin/logout`)
+
+        await expect(page.locator('.login')).toBeVisible()
+
+        const users = await payload.find({
+          collection: slug,
+          limit: 1,
+        })
+        const userDocumentRoute = `${serverURL}/admin/collections/users/${users?.docs?.[0]?.id}`
+
+        await page.goto(userDocumentRoute)
+
+        await expect(page.locator('#field-email')).toBeVisible()
+        await expect(page.locator('#field-password')).toBeVisible()
+
+        await page.locator('.form-submit > button').click()
+
+        // Expect to be redirected to the correct page
+        await expect
+          .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+          .toBe(userDocumentRoute)
+
+        // Previously, this would crash the page with a "Cannot read properties of undefined (reading 'match')" error
+
+        await expect(page.locator('#field-roles')).toBeVisible()
       })
     })
   })
