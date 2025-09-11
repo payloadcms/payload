@@ -394,7 +394,7 @@ describe('Relationship Field', () => {
       await expect(valueOptions.locator(`text=${idToInclude}`)).toBeVisible()
     })
 
-    test('should apply filter options of nested fields to list view filter controls', async () => {
+    test('should apply `filterOptions` of nested fields to list view filter controls', async () => {
       const { id: idToInclude } = await payload.create({
         collection: slug,
         data: {
@@ -453,7 +453,7 @@ describe('Relationship Field', () => {
       await expect(valueOptions2.locator(`text=${idToInclude}`)).toBeVisible()
     })
 
-    test('should allow usage of relationTo in filterOptions', async () => {
+    test('should allow usage of relationTo in `filterOptions`', async () => {
       const { id: include } = (await payload.create({
         collection: relationOneSlug,
         data: {
@@ -478,7 +478,7 @@ describe('Relationship Field', () => {
       await expect(options).not.toContainText(exclude)
     })
 
-    test('should allow usage of siblingData in filterOptions', async () => {
+    test('should allow usage of siblingData in `filterOptions`', async () => {
       await payload.create({
         collection: relationWithTitleSlug,
         data: {
@@ -499,7 +499,7 @@ describe('Relationship Field', () => {
     })
 
     // TODO: Flaky test in CI - fix. https://github.com/payloadcms/payload/actions/runs/8559547748/job/23456806365
-    test.skip('should not query for a relationship when filterOptions returns false', async () => {
+    test.skip('should not query for a relationship when `filterOptions` returns false', async () => {
       await payload.create({
         collection: relationFalseFilterOptionSlug,
         data: {
@@ -518,7 +518,7 @@ describe('Relationship Field', () => {
     })
 
     // TODO: Flaky test in CI - fix.
-    test('should show a relationship when filterOptions returns true', async () => {
+    test('should show a relationship when `filterOptions` returns true', async () => {
       await payload.create({
         collection: relationTrueFilterOptionSlug,
         data: {
