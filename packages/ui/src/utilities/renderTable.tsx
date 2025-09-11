@@ -10,6 +10,7 @@ import type {
   ListQuery,
   PaginatedDocs,
   Payload,
+  PayloadRequest,
   SanitizedCollectionConfig,
   ViewTypes,
 } from 'payload'
@@ -80,6 +81,7 @@ export const renderTable = ({
   payload,
   query,
   renderRowTypes,
+  req,
   tableAppearance,
   useAsTitle,
   viewType,
@@ -102,6 +104,7 @@ export const renderTable = ({
   payload: Payload
   query?: ListQuery
   renderRowTypes?: boolean
+  req?: PayloadRequest
   tableAppearance?: 'condensed' | 'default'
   useAsTitle: CollectionConfig['admin']['useAsTitle']
   viewType?: ViewTypes
@@ -159,6 +162,7 @@ export const renderTable = ({
     | 'enableRowSelections'
     | 'i18n'
     | 'payload'
+    | 'req'
     | 'serverFields'
     | 'useAsTitle'
     | 'viewType'
@@ -170,6 +174,7 @@ export const renderTable = ({
     // sortColumnProps,
     customCellProps,
     payload,
+    req,
     serverFields,
     useAsTitle,
     viewType,

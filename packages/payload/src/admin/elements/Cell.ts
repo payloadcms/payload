@@ -77,6 +77,7 @@ export type DefaultCellComponentProps<
   customCellProps?: Record<string, any>
   field: TField
   link?: boolean
+  linkURL?: string
   onClick?: (args: {
     cellData: unknown
     collectionSlug: SanitizedCollectionConfig['slug']
