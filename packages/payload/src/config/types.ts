@@ -1126,8 +1126,8 @@ export type Config = {
     afterError?: AfterErrorHook[]
   }
   /**
-   * When defined, throws an error when any operation within a request lifecycle has been invoked more times than the allowed threshold.
-   * This is useful when using self-invoking hooks which can fall into an infinite loop and crash the server if not properly guarded.
+   * When defined, limits the number of times an operation can be invoked during a single request.
+   * This is useful for self-invoking hooks which can fall into an infinite loop and crash the server if not properly guarded.
    * For example, a `beforeChange` hook that updates the same document being saved, @see https://payloadcms.com/docs/hooks/context#preventing-infinite-loops.
    * Note: Ensure you pass `context` between Payload operations to track recursion, @see https://payloadcms.com/docs/hooks/context#hooksMaxRecursion.
    *

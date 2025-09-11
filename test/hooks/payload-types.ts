@@ -110,9 +110,11 @@ export interface Config {
   };
   globals: {
     'data-hooks-global': DataHooksGlobal;
+    'recursive-hooks-global': RecursiveHooksGlobal;
   };
   globalsSelect: {
     'data-hooks-global': DataHooksGlobalSelect<false> | DataHooksGlobalSelect<true>;
+    'recursive-hooks-global': RecursiveHooksGlobalSelect<false> | RecursiveHooksGlobalSelect<true>;
   };
   locale: null;
   user: HooksUser & {
@@ -1027,6 +1029,16 @@ export interface DataHooksGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recursive-hooks-global".
+ */
+export interface RecursiveHooksGlobal {
+  id: string;
+  title: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "data-hooks-global_select".
  */
 export interface DataHooksGlobalSelect<T extends boolean = true> {
@@ -1035,6 +1047,16 @@ export interface DataHooksGlobalSelect<T extends boolean = true> {
   global_afterChange_global?: T;
   global_beforeRead_global?: T;
   global_afterRead_global?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recursive-hooks-global_select".
+ */
+export interface RecursiveHooksGlobalSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

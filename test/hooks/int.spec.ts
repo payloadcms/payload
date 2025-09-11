@@ -342,9 +342,8 @@ describe('Hooks', () => {
         expect(res).toBeFalsy()
       } catch (err: any) {
         expect(err.message).toContain(
-          "Maximum number of hooks invoked on collection 'recursive-hooks' for operation 'read'. There may be a circular dependency between hooks.",
+          'Maximum number of read operations exceeded for this request.',
         )
-        return
       }
     })
   })

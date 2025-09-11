@@ -5,6 +5,7 @@ import { defaultAccess } from '../../auth/defaultAccess.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
+import { detectRecursiveHooks } from '../../utilities/detectRecursiveHooks.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
@@ -28,6 +29,15 @@ export const sanitizeGlobal = async (
   global._sanitized = true
 
   global.label = global.label || toWords(global.slug)
+
+  // Attach recursive hook detection, if enabled
+  if (typeof config.hooksMaxRecursion === 'number' && global.hooks) {
+    if (!global.hooks.beforeOperation) {
+      global.hooks.beforeOperation = []
+    }
+
+    global.hooks.beforeOperation.unshift((args) => detectRecursiveHooks(config, args))
+  }
 
   // /////////////////////////////////
   // Ensure that collection has required object structure

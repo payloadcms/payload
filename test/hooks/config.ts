@@ -22,6 +22,7 @@ import TransformHooks from './collections/Transform/index.js'
 import Users, { seedHooksUsers } from './collections/Users/index.js'
 import { ValueCollection } from './collections/Value/index.js'
 import { DataHooksGlobal } from './globals/Data/index.js'
+import { RecursiveHooksGlobal } from './globals/RecursiveHooks/index.js'
 
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
   admin: {
@@ -46,7 +47,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     ValueCollection,
     RecursiveHooksCollection,
   ],
-  globals: [DataHooksGlobal],
+  globals: [DataHooksGlobal, RecursiveHooksGlobal],
   endpoints: [
     {
       path: '/throw-to-after-error',
