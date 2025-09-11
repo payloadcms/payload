@@ -8,9 +8,7 @@ keywords: plugins, mcp, ai, model context protocol, plugin, payload, cms
 
 ![https://www.npmjs.com/package/@payloadcms/plugin-mcp](https://img.shields.io/npm/v/@payloadcms/plugin-mcp)
 
-This plugin allows you to easily manage MCP (Model Context Protocol) capabilities for your application from within your [Admin Panel](../admin/overview). It does so by adding a `payload-mcp-tools` global to your config that allows you specify MCP capabilities for your application. Your front-end application can use this data to modify which tools are available to the LLM. This is useful for AI integrations and LLM capabilities. This plugin also adds an `api/mcp` endpoint to your application that allows you to use MCP with any client.
-
-For example, if you have a collection called `posts` and you want to allow the LLM to find, create, update, and delete posts, you can enable the `find`, `create`, `update`, and `delete` tools for the `posts` collection. This will ensure that the LLM can find, create, update, and delete posts without penalty. This is a very lightweight plugin that will allow you to integrate MCP capabilities for any front-end framework.
+This plugin adds MCP(Model Context Protocol) capabilities to Payload so that you can use your Payload application as a connector to (LLM)Large Language Model services.
 
 <Banner type="info">
   This plugin is completely open-source and the [source code can be found
@@ -24,11 +22,10 @@ For example, if you have a collection called `posts` and you want to allow the L
 
 ## Core features
 
-- Adds a `payload-mcp-tools` global to your config that:
-  - includes a `find`, `create`, `update`, and `delete` fields for each collection
-  - allows you to enable or disable the tools for each collection
-  - allows you to modify your own custom tools
-- Adds an `api/mcp` endpoint to your application that allows you to use MCP with any client
+- Adds a collection to your config where:
+  - You can allow / disallow `find`, `create`, `update`, and `delete` operations for each collection
+  - You can to allow / disallow capabilities in real time
+  - You can define your own Prompts, Tools and Resources available over MCP
 
 ## Installation
 
