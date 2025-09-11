@@ -8,6 +8,7 @@ import { useSearchParams } from 'next/navigation'
 import React, { useEffect } from 'react'
 
 import { Carousel, CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel'
+import { DefaultDocumentIDType } from 'payload'
 
 type Props = {
   gallery: NonNullable<Product['gallery']>
@@ -25,10 +26,20 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
   }, [api])
 
   useEffect(() => {
-    const variantID = searchParams.get('variant')
+    const values = searchParams.values().toArray()
 
-    if (variantID && api) {
-      const index = gallery.findIndex((item) => item.variantOption === variantID)
+    if (values && api) {
+      const index = gallery.findIndex((item) => {
+        if (!item.variantOption) return false
+
+        let variantID: DefaultDocumentIDType
+
+        if (typeof item.variantOption === 'object') {
+          variantID = item.variantOption.id
+        } else variantID = item.variantOption
+
+        return Boolean(values.find((value) => value === variantID))
+      })
       if (index !== -1) {
         setCurrent(index)
         api.scrollTo(index, true)

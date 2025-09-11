@@ -2,7 +2,7 @@ import type { Category, Media, Product, VariantOption, VariantType } from '@/pay
 import { RequiredDataFromCollectionSlug } from 'payload'
 
 type ProductArgs = {
-  galleryImages: Media[]
+  galleryImages: NonNullable<Product['gallery']>
   metaImage: Media
   variantTypes: VariantType[]
   categories: Category[]
@@ -62,7 +62,7 @@ export const productTshirtData: (
         version: 1,
       },
     },
-    gallery: galleryImages.map((image) => ({ image })),
+    gallery: galleryImages,
     title: 'Tshirt',
     slug: 'tshirt',
     priceInUSDEnabled: true,

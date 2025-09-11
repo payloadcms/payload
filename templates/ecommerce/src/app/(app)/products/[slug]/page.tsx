@@ -69,8 +69,8 @@ export default async function ProductPage({ params }: Args) {
     product.gallery
       ?.filter((item) => typeof item.image === 'object')
       .map((item) => ({
+        ...item,
         image: item.image as Media,
-        variantID: undefined,
       })) || []
 
   const metaImage = typeof product.meta?.image === 'object' ? product.meta?.image : undefined

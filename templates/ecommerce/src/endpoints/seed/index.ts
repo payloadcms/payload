@@ -125,13 +125,13 @@ export const seed = async ({
   const [imageHatBuffer, imageTshirtBlackBuffer, imageTshirtWhiteBuffer, hero1Buffer] =
     await Promise.all([
       fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/website/src/endpoints/seed/hat-logo.png',
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/ecommerce/src/endpoints/seed/hat-logo.png',
       ),
       fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/website/src/endpoints/seed/tshirt-black.png',
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/ecommerce/src/endpoints/seed/tshirt-black.png',
       ),
       fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/website/src/endpoints/seed/tshirt-black.png',
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/ecommerce/src/endpoints/seed/tshirt-white.png',
       ),
       fetchFileByURL(
         'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/website/src/endpoints/seed/image-hero1.webp',
@@ -274,7 +274,10 @@ export const seed = async ({
     collection: 'products',
     depth: 0,
     data: productTshirtData({
-      galleryImages: [imageHat, imageTshirtBlack, imageTshirtWhite],
+      galleryImages: [
+        { image: imageTshirtBlack, variantOption: black },
+        { image: imageTshirtWhite, variantOption: white },
+      ],
       metaImage: imageHat,
       variantTypes: [colorVariantType, sizeVariantType],
       categories: [hoodiesCategory],
