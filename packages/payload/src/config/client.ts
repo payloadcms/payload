@@ -43,19 +43,6 @@ export type ServerOnlyRootProperties = keyof Pick<
 
 export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
 
-/**
- * @deprecated - this type is no longer used
- */
-export type UnsanitizedClientConfig = {
-  admin: {
-    livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
-  } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
-  blocks: ClientBlock[]
-  collections: ClientCollectionConfig[]
-  custom?: Record<string, any>
-  globals: ClientGlobalConfig[]
-} & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
-
 export type ClientConfig = {
   admin: {
     livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
