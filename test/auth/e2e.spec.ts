@@ -53,12 +53,6 @@ describe('Auth', () => {
     initPageConsoleErrorCatch(page)
   })
 
-  async function waitForVisibleAuthFields() {
-    await expect(page.locator('#field-email')).toBeVisible()
-    await expect(page.locator('#field-password')).toBeVisible()
-    await expect(page.locator('#field-confirm-password')).toBeVisible()
-  }
-
   describe('create first user', () => {
     beforeAll(async () => {
       await reInitializeDB({
@@ -78,6 +72,12 @@ describe('Auth', () => {
         },
       })
     })
+
+    async function waitForVisibleAuthFields() {
+      await expect(page.locator('#field-email')).toBeVisible()
+      await expect(page.locator('#field-password')).toBeVisible()
+      await expect(page.locator('#field-confirm-password')).toBeVisible()
+    }
 
     test('should create first user and redirect to admin', async () => {
       const {
