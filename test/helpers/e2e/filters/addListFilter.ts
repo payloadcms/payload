@@ -9,7 +9,7 @@ export const addListFilter = async ({
   page,
   fieldLabel = 'ID',
   operatorLabel = 'equals',
-  value = '',
+  value,
 }: {
   fieldLabel: string
   operatorLabel: string
