@@ -153,10 +153,14 @@ describe('Auth', () => {
     })
   })
 
-  test('protect client config behind auth', async () => {
+  test('should protect client config behind authentication', async () => {
     await page.goto(serverURL + '/admin/logout')
     await page.goto(serverURL + '/admin/login')
+
+    // This element is absolutely positioned and `opacity: 0`
     await expect(page.locator('#unauthenticated-client-config')).toBeAttached()
+
+    // Search for our uniquely identifiable field name
     await expect(
       page.locator('#unauthenticated-client-config', {
         hasText: exactText('shouldNotShowInClientConfigUnlessAuthenticated'),

@@ -189,6 +189,10 @@ export default buildConfigWithDefaults({
           },
           label: 'Auth Debug',
         },
+        {
+          name: 'shouldNotShowInClientConfigUnlessAuthenticated',
+          type: 'text',
+        },
       ],
     },
     {
@@ -253,12 +257,7 @@ export default buildConfigWithDefaults({
       auth: {
         verify: true,
       },
-      fields: [
-        {
-          name: 'shouldNotShowInClientConfigUnlessAuthenticated',
-          type: 'text',
-        },
-      ],
+      fields: [],
     },
     {
       slug: 'relationsCollection',

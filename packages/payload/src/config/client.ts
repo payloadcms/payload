@@ -2,7 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
-import type { ClientBlock } from '../fields/config/types.js'
+import type { ClientBlock, ClientField, Field } from '../fields/config/types.js'
 import type { BlockSlug, TypedUser } from '../index.js'
 import type {
   RootLivePreviewConfig,
@@ -69,7 +69,12 @@ export type UnauthenticatedClientConfig = {
     routes: ClientConfig['admin']['routes']
     user: ClientConfig['admin']['user']
   }
-  collections: [ClientCollectionConfig]
+  collections: [
+    {
+      auth: ClientCollectionConfig['auth']
+      slug: string
+    },
+  ]
   globals: []
   routes: ClientConfig['routes']
   serverURL: ClientConfig['serverURL']
@@ -108,8 +113,9 @@ export type CreateClientConfigArgs = {
    * If unauthenticated, the client config will omit some sensitive properties
    * such as field schemas, etc. This is useful for login and error pages where
    * the page source should not contain this information.
+   *
    * Allow `true` to generate a client config for the "create first user" page
-   * where there is no user yet, but the config should be as complete.
+   * where there is no user yet, but the config should still be complete.
    */
   user: true | TypedUser
 }
@@ -123,12 +129,24 @@ export const createUnauthenticatedClientConfig = ({
    */
   clientConfig: ClientConfig
 }): UnauthenticatedClientConfig => {
+  /**
+   * To share memory, find the admin user collection from the existing client config.
+   */
+  const adminUserCollection = clientConfig.collections.find(
+    ({ slug }) => slug === clientConfig.admin.user,
+  )!
+
   return {
     admin: {
       routes: clientConfig.admin.routes,
       user: clientConfig.admin.user,
     },
-    collections: [clientConfig.collections.find(({ slug }) => slug === clientConfig.admin.user)!],
+    collections: [
+      {
+        slug: adminUserCollection.slug,
+        auth: adminUserCollection.auth,
+      },
+    ],
     globals: [],
     routes: clientConfig.routes,
     serverURL: clientConfig.serverURL,
