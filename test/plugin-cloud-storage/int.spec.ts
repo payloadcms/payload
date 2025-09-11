@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 
 import type { Config } from './payload-types.js'
 
-import { describeIfInCIOrHasLocalstack } from '../helpers.js'
+import { describeIfInCIOrHasLocalstack } from 'helpers.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 import { clearTestBucket, createTestBucket } from './utils.js'

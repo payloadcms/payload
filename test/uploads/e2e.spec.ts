@@ -2,6 +2,12 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { statSync } from 'fs'
+import {
+  ensureCompilationIsDone,
+  exactText,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from 'helpers.js'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
 import { openListFilters } from 'helpers/e2e/tables/filters/openListFilters.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
@@ -13,12 +19,6 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  exactText,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { assertToastErrors } from '../helpers/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'

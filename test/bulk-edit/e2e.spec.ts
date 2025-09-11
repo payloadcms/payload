@@ -19,7 +19,7 @@ import {
   initPageConsoleErrorCatch,
   selectTableRow,
   // throttleTest,
-} from '../helpers.js'
+} from 'helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'

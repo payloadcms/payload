@@ -15,7 +15,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
-} from '../helpers.js'
+} from 'helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { reorderColumns } from '../helpers/e2e/tables/columns/reorderColumns.js'

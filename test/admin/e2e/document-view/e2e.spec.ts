@@ -1,10 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { wait } from 'payload/shared'
-
-import type { Config, Post } from '../../payload-types.js'
-
 import {
   checkBreadcrumb,
   checkPageTitle,
@@ -12,7 +8,11 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../../../helpers.js'
+} from 'helpers.js'
+import { wait } from 'payload/shared'
+
+import type { Config, Post } from '../../payload-types.js'
+
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import {

@@ -13,7 +13,7 @@ import {
   initPageConsoleErrorCatch,
   loginClientSide,
   saveDocAndAssert,
-} from '../helpers.js'
+} from 'helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { goToListDoc } from '../helpers/e2e/goToListDoc.js'
 import {

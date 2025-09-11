@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 
 import { devUser } from '../credentials.js'
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from 'helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc, navigateToTrashedDoc } from '../helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from '../helpers/e2e/preferences.js'
@@ -26,7 +26,7 @@ import {
   selectLivePreviewBreakpoint,
   selectLivePreviewZoom,
   toggleLivePreview,
-} from './helpers.js'
+} from 'helpers.js'
 import {
   collectionLevelConfigSlug,
   desktopBreakpoint,

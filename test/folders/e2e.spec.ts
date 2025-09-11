@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from 'helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import {
   getSelectInputOptions,
