@@ -1,7 +1,1 @@
-export type {
-  Cart,
-  CollectionOverride,
-  CurrenciesConfig,
-  EcommercePluginConfig,
-  FieldsOverride,
-} from '../types.js'
+export type { Cart, CollectionOverride, CurrenciesConfig, EcommercePluginConfig } from '../types.js'

@@ -1,11 +1,6 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-import type {
-  AccessConfig,
-  CurrenciesConfig,
-  FieldsOverride,
-  InventoryConfig,
-} from '../../types.js'
+import type { AccessConfig, CurrenciesConfig, InventoryConfig } from '../../types.js'
 
 import { inventoryField } from '../../fields/inventoryField.js'
 import { pricesField } from '../../fields/pricesField.js'
@@ -23,7 +18,6 @@ type Props = {
    * Defaults to true.
    */
   inventory?: boolean | InventoryConfig
-  overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   /**
    * Slug of the variants collection, defaults to 'variants'.
    */
@@ -40,11 +34,9 @@ export const createProductsCollection: (props: Props) => CollectionConfig = (pro
     currenciesConfig,
     enableVariants = false,
     inventory = true,
-    overrides,
     variantsSlug = 'variants',
     variantTypesSlug = 'variantTypes',
   } = props || {}
-  const fieldsOverride = overrides?.fields
 
   const defaultFields = [
     ...(inventory
@@ -62,20 +54,13 @@ export const createProductsCollection: (props: Props) => CollectionConfig = (pro
     ...(currenciesConfig ? [...pricesField({ currenciesConfig })] : []),
   ]
 
-  const fields =
-    fieldsOverride && typeof fieldsOverride === 'function'
-      ? fieldsOverride({ defaultFields })
-      : defaultFields
-
   const baseConfig: CollectionConfig = {
     slug: 'products',
-    ...overrides,
     access: {
       create: adminOnly,
       delete: adminOnly,
       read: adminOrPublishedStatus,
       update: adminOnly,
-      ...overrides?.access,
     },
     admin: {
       defaultColumns: [
@@ -83,9 +68,8 @@ export const createProductsCollection: (props: Props) => CollectionConfig = (pro
         ...(enableVariants ? ['variants'] : []),
       ],
       group: 'Ecommerce',
-      ...overrides?.admin,
     },
-    fields,
+    fields: defaultFields,
     versions: {
       drafts: {
         autosave: true,
@@ -93,5 +77,5 @@ export const createProductsCollection: (props: Props) => CollectionConfig = (pro
     },
   }
 
-  return { ...baseConfig }
+  return baseConfig
 }

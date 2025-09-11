@@ -86,7 +86,7 @@ export const plugins: Plugin[] = [
       ],
     },
     products: {
-      productsCollection: ProductsCollection,
+      productsCollectionOverride: ProductsCollection,
     },
   }),
 ]

@@ -13,9 +13,9 @@ import type {
 } from 'payload'
 
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
-export type CollectionOverride = { fields?: FieldsOverride } & Partial<
-  Omit<CollectionConfig, 'fields'>
->
+export type CollectionOverride = (args: {
+  defaultCollection: CollectionConfig
+}) => CollectionConfig | Promise<CollectionConfig>
 
 export type CartItem = {
   id: DefaultDocumentIDType
@@ -226,13 +226,13 @@ export type BasePaymentAdapterClientArgs = {
 }
 
 export type VariantsConfig = {
-  variantOptionsCollection?: CollectionOverride
-  variantsCollection?: CollectionOverride
-  variantTypesCollection?: CollectionOverride
+  variantOptionsCollectionOverride?: CollectionOverride
+  variantsCollectionOverride?: CollectionOverride
+  variantTypesCollectionOverride?: CollectionOverride
 }
 
 export type ProductsConfig = {
-  productsCollection?: CollectionOverride
+  productsCollectionOverride?: CollectionOverride
   /**
    * Customise the validation used for checking products or variants before a transaction is created.
    */
@@ -241,11 +241,11 @@ export type ProductsConfig = {
 }
 
 export type OrdersConfig = {
-  ordersCollection?: CollectionOverride
+  ordersCollectionOverride?: CollectionOverride
 }
 
 export type TransactionsConfig = {
-  transactionsCollection?: CollectionOverride
+  transactionsCollectionOverride?: CollectionOverride
 }
 
 export type CustomQuery = {
@@ -273,11 +273,11 @@ export type CountryType = {
 }
 
 type AddressesConfig = {
+  addressesCollectionOverride?: CollectionOverride
   /**
    * These fields will be applied to all locations where addresses are used, such as Orders and Transactions. Preferred use over the collectionOverride config.
    */
   addressFields?: FieldsOverride
-  collectionOverride?: CollectionOverride
   supportedCountries?: CountryType[]
 }
 
@@ -290,7 +290,7 @@ export type CustomersConfig = {
 }
 
 export type CartsConfig = {
-  cartsCollection?: CollectionOverride
+  cartsCollectionOverride?: CollectionOverride
 }
 
 export type InventoryConfig = {

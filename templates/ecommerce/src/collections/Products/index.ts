@@ -20,8 +20,10 @@ import {
 } from '@payloadcms/richtext-lexical'
 import { DefaultDocumentIDType, Field, Where } from 'payload'
 
-export const ProductsCollection: CollectionOverride = {
+export const ProductsCollection: CollectionOverride = ({ defaultCollection }) => ({
+  ...defaultCollection,
   admin: {
+    ...defaultCollection?.admin,
     defaultColumns: ['title', 'enableVariants', '_status', 'variants.variants'],
     livePreview: {
       url: ({ data, req }) => {
@@ -43,6 +45,7 @@ export const ProductsCollection: CollectionOverride = {
     useAsTitle: 'title',
   },
   defaultPopulate: {
+    ...defaultCollection?.defaultPopulate,
     title: true,
     slug: true,
     variantOptions: true,
@@ -53,168 +56,164 @@ export const ProductsCollection: CollectionOverride = {
     inventory: true,
     meta: true,
   },
-  fields: ({ defaultFields }) => {
-    const fields: Field[] = [
-      { name: 'title', type: 'text', required: true },
-      {
-        type: 'tabs',
-        tabs: [
-          {
-            fields: [
-              {
-                name: 'description',
-                type: 'richText',
-                editor: lexicalEditor({
-                  features: ({ rootFeatures }) => {
-                    return [
-                      ...rootFeatures,
-                      HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-                      FixedToolbarFeature(),
-                      InlineToolbarFeature(),
-                      HorizontalRuleFeature(),
-                    ]
-                  },
-                }),
-                label: false,
-                required: false,
-              },
-              {
-                name: 'gallery',
-                type: 'array',
-                minRows: 1,
-                fields: [
-                  {
-                    name: 'image',
-                    type: 'upload',
-                    relationTo: 'media',
-                    required: true,
-                  },
-                  {
-                    name: 'variantOption',
-                    type: 'relationship',
-                    relationTo: 'variantOptions',
-                    admin: {
-                      condition: (data) => {
-                        return data?.enableVariants === true && data?.variantTypes?.length > 0
-                      },
+  fields: [
+    { name: 'title', type: 'text', required: true },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          fields: [
+            {
+              name: 'description',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: ({ rootFeatures }) => {
+                  return [
+                    ...rootFeatures,
+                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+                    FixedToolbarFeature(),
+                    InlineToolbarFeature(),
+                    HorizontalRuleFeature(),
+                  ]
+                },
+              }),
+              label: false,
+              required: false,
+            },
+            {
+              name: 'gallery',
+              type: 'array',
+              minRows: 1,
+              fields: [
+                {
+                  name: 'image',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: true,
+                },
+                {
+                  name: 'variantOption',
+                  type: 'relationship',
+                  relationTo: 'variantOptions',
+                  admin: {
+                    condition: (data) => {
+                      return data?.enableVariants === true && data?.variantTypes?.length > 0
                     },
-                    filterOptions: ({ data }) => {
-                      if (data?.enableVariants && data?.variantTypes?.length) {
-                        const variantTypeIDs = data.variantTypes.map((item: any) => {
-                          if (typeof item === 'object' && item?.id) {
-                            return item.id
-                          }
-                          return item
-                        }) as DefaultDocumentIDType[]
+                  },
+                  filterOptions: ({ data }) => {
+                    if (data?.enableVariants && data?.variantTypes?.length) {
+                      const variantTypeIDs = data.variantTypes.map((item: any) => {
+                        if (typeof item === 'object' && item?.id) {
+                          return item.id
+                        }
+                        return item
+                      }) as DefaultDocumentIDType[]
 
-                        if (variantTypeIDs.length === 0)
-                          return {
-                            variantType: {
-                              in: [],
-                            },
-                          }
-
-                        const query: Where = {
+                      if (variantTypeIDs.length === 0)
+                        return {
                           variantType: {
-                            in: variantTypeIDs,
+                            in: [],
                           },
                         }
 
-                        return query
-                      }
-
-                      return {
+                      const query: Where = {
                         variantType: {
-                          in: [],
+                          in: variantTypeIDs,
                         },
                       }
-                    },
-                  },
-                ],
-              },
 
-              {
-                name: 'layout',
-                type: 'blocks',
-                blocks: [CallToAction, Content, MediaBlock],
-              },
-            ],
-            label: 'Content',
-          },
-          {
-            fields: [
-              ...defaultFields,
-              {
-                name: 'relatedProducts',
-                type: 'relationship',
-                filterOptions: ({ id }) => {
-                  if (id) {
+                      return query
+                    }
+
                     return {
-                      id: {
-                        not_in: [id],
+                      variantType: {
+                        in: [],
                       },
                     }
-                  }
+                  },
+                },
+              ],
+            },
 
-                  // ID comes back as undefined during seeding so we need to handle that case
+            {
+              name: 'layout',
+              type: 'blocks',
+              blocks: [CallToAction, Content, MediaBlock],
+            },
+          ],
+          label: 'Content',
+        },
+        {
+          fields: [
+            ...defaultCollection.fields,
+            {
+              name: 'relatedProducts',
+              type: 'relationship',
+              filterOptions: ({ id }) => {
+                if (id) {
                   return {
                     id: {
-                      exists: true,
+                      not_in: [id],
                     },
                   }
-                },
-                hasMany: true,
-                relationTo: 'products',
+                }
+
+                // ID comes back as undefined during seeding so we need to handle that case
+                return {
+                  id: {
+                    exists: true,
+                  },
+                }
               },
-            ],
-            label: 'Product Details',
-          },
-          {
-            name: 'meta',
-            label: 'SEO',
-            fields: [
-              OverviewField({
-                titlePath: 'meta.title',
-                descriptionPath: 'meta.description',
-                imagePath: 'meta.image',
-              }),
-              MetaTitleField({
-                hasGenerateFn: true,
-              }),
-              MetaImageField({
-                relationTo: 'media',
-              }),
-
-              MetaDescriptionField({}),
-              PreviewField({
-                // if the `generateUrl` function is configured
-                hasGenerateFn: true,
-
-                // field paths to match the target field for data
-                titlePath: 'meta.title',
-                descriptionPath: 'meta.description',
-              }),
-            ],
-          },
-        ],
-      },
-      {
-        name: 'categories',
-        type: 'relationship',
-        admin: {
-          position: 'sidebar',
-          sortOptions: 'title',
+              hasMany: true,
+              relationTo: 'products',
+            },
+          ],
+          label: 'Product Details',
         },
-        hasMany: true,
-        relationTo: 'categories',
-      },
-      ...slugField('title', {
-        slugOverrides: {
-          required: true,
-        },
-      }),
-    ]
+        {
+          name: 'meta',
+          label: 'SEO',
+          fields: [
+            OverviewField({
+              titlePath: 'meta.title',
+              descriptionPath: 'meta.description',
+              imagePath: 'meta.image',
+            }),
+            MetaTitleField({
+              hasGenerateFn: true,
+            }),
+            MetaImageField({
+              relationTo: 'media',
+            }),
 
-    return fields
-  },
-}
+            MetaDescriptionField({}),
+            PreviewField({
+              // if the `generateUrl` function is configured
+              hasGenerateFn: true,
+
+              // field paths to match the target field for data
+              titlePath: 'meta.title',
+              descriptionPath: 'meta.description',
+            }),
+          ],
+        },
+      ],
+    },
+    {
+      name: 'categories',
+      type: 'relationship',
+      admin: {
+        position: 'sidebar',
+        sortOptions: 'title',
+      },
+      hasMany: true,
+      relationTo: 'categories',
+    },
+    ...slugField('title', {
+      slugOverrides: {
+        required: true,
+      },
+    }),
+  ],
+})

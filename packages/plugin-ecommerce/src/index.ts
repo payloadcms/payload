@@ -20,7 +20,7 @@ import { sanitizePluginConfig } from './utilities/sanitizePluginConfig.js'
 
 export const ecommercePlugin =
   (pluginConfig?: EcommercePluginConfig) =>
-  (incomingConfig: Config): Config => {
+  async (incomingConfig: Config): Promise<Config> => {
     if (!pluginConfig) {
       return incomingConfig
     }
@@ -47,16 +47,11 @@ export const ecommercePlugin =
     let addressFields
 
     if (sanitizedPluginConfig.addresses) {
-      const collectionOverrides =
-        typeof sanitizedPluginConfig.addresses === 'object'
-          ? sanitizedPluginConfig.addresses.collectionOverride
-          : undefined
-
       addressFields = sanitizedPluginConfig.addresses.addressFields
 
       const supportedCountries = sanitizedPluginConfig.addresses.supportedCountries
 
-      const addresses = createAddressesCollection({
+      const defaultAddressesCollection = createAddressesCollection({
         access: {
           adminOrCustomerOwner: accessConfig.adminOrCustomerOwner,
           authenticatedOnly: accessConfig.authenticatedOnly,
@@ -64,11 +59,20 @@ export const ecommercePlugin =
         },
         addressFields,
         customersSlug: collectionSlugMap.customers,
-        overrides: collectionOverrides,
         supportedCountries,
       })
 
-      incomingConfig.collections.push(addresses)
+      const addressesCollection =
+        sanitizedPluginConfig.addresses &&
+        typeof sanitizedPluginConfig.addresses === 'object' &&
+        'addressesCollectionOverride' in sanitizedPluginConfig.addresses &&
+        sanitizedPluginConfig.addresses.addressesCollectionOverride
+          ? await sanitizedPluginConfig.addresses.addressesCollectionOverride({
+              defaultCollection: defaultAddressesCollection,
+            })
+          : defaultAddressesCollection
+
+      incomingConfig.collections.push(addressesCollection)
     }
 
     if (sanitizedPluginConfig.products) {
@@ -82,61 +86,94 @@ export const ecommercePlugin =
       enableVariants = Boolean(productsConfig.variants)
 
       if (productsConfig.variants) {
-        const overrides =
+        const variantsConfig =
           typeof productsConfig.variants === 'boolean' ? undefined : productsConfig.variants
 
-        const variants = createVariantsCollection({
+        const defaultVariantsCollection = createVariantsCollection({
           access: {
             adminOnly: accessConfig.adminOnly,
             adminOrPublishedStatus: accessConfig.adminOrPublishedStatus,
           },
           currenciesConfig,
           inventory: sanitizedPluginConfig.inventory,
-          overrides: overrides?.variantsCollection,
           productsSlug: collectionSlugMap.products,
           variantOptionsSlug: collectionSlugMap.variantOptions,
         })
 
-        const variantTypes = createVariantTypesCollection({
+        const variants =
+          variantsConfig &&
+          typeof variantsConfig === 'object' &&
+          'variantsCollectionOverride' in variantsConfig &&
+          variantsConfig.variantsCollectionOverride
+            ? await variantsConfig.variantsCollectionOverride({
+                defaultCollection: defaultVariantsCollection,
+              })
+            : defaultVariantsCollection
+
+        const defaultVariantTypesCollection = createVariantTypesCollection({
           access: {
             adminOnly: accessConfig.adminOnly,
             publicAccess: accessConfig.publicAccess,
           },
-          overrides: overrides?.variantTypesCollection,
           variantOptionsSlug: collectionSlugMap.variantOptions,
         })
 
-        const variantOptions = createVariantOptionsCollection({
+        const variantTypes =
+          variantsConfig &&
+          typeof variantsConfig === 'object' &&
+          'variantTypesCollectionOverride' in variantsConfig &&
+          variantsConfig.variantTypesCollectionOverride
+            ? await variantsConfig.variantTypesCollectionOverride({
+                defaultCollection: defaultVariantTypesCollection,
+              })
+            : defaultVariantTypesCollection
+
+        const defaultVariantOptionsCollection = createVariantOptionsCollection({
           access: {
             adminOnly: accessConfig.adminOnly,
             publicAccess: accessConfig.publicAccess,
           },
-          overrides: overrides?.variantOptionsCollection,
           variantTypesSlug: collectionSlugMap.variantTypes,
         })
+
+        const variantOptions =
+          variantsConfig &&
+          typeof variantsConfig === 'object' &&
+          'variantOptionsCollectionOverride' in variantsConfig &&
+          variantsConfig.variantOptionsCollectionOverride
+            ? await variantsConfig.variantOptionsCollectionOverride({
+                defaultCollection: defaultVariantOptionsCollection,
+              })
+            : defaultVariantOptionsCollection
 
         incomingConfig.collections.push(variants, variantTypes, variantOptions)
       }
 
-      const products = createProductsCollection({
+      const defaultProductsCollection = createProductsCollection({
+        access: {
+          adminOnly: accessConfig.adminOnly,
+          adminOrPublishedStatus: accessConfig.adminOrPublishedStatus,
+        },
         currenciesConfig,
         enableVariants,
         inventory: sanitizedPluginConfig.inventory,
         variantsSlug: collectionSlugMap.variants,
         variantTypesSlug: collectionSlugMap.variantTypes,
-        ...('productsCollection' in productsConfig && productsConfig.productsCollection
-          ? { overrides: productsConfig.productsCollection }
-          : {}),
-        access: {
-          adminOnly: accessConfig.adminOnly,
-          adminOrPublishedStatus: accessConfig.adminOrPublishedStatus,
-        },
       })
 
-      incomingConfig.collections.push(products)
+      const productsCollection =
+        productsConfig &&
+        'productsCollectionOverride' in productsConfig &&
+        productsConfig.productsCollectionOverride
+          ? await productsConfig.productsCollectionOverride({
+              defaultCollection: defaultProductsCollection,
+            })
+          : defaultProductsCollection
+
+      incomingConfig.collections.push(productsCollection)
 
       if (sanitizedPluginConfig.carts) {
-        const carts = createCartsCollection({
+        const defaultCartsCollection = createCartsCollection({
           access: {
             adminOrCustomerOwner: accessConfig.adminOrCustomerOwner,
             publicAccess: accessConfig.publicAccess,
@@ -144,20 +181,26 @@ export const ecommercePlugin =
           currenciesConfig,
           customersSlug: collectionSlugMap.customers,
           enableVariants: Boolean(productsConfig.variants),
-          overrides:
-            sanitizedPluginConfig.carts === true
-              ? undefined
-              : sanitizedPluginConfig.carts.cartsCollection,
           productsSlug: collectionSlugMap.products,
           variantsSlug: collectionSlugMap.variants,
         })
 
-        incomingConfig.collections.push(carts)
+        const cartsCollection =
+          sanitizedPluginConfig.carts &&
+          typeof sanitizedPluginConfig.carts === 'object' &&
+          'cartsCollectionOverride' in sanitizedPluginConfig.carts &&
+          sanitizedPluginConfig.carts.cartsCollectionOverride
+            ? await sanitizedPluginConfig.carts.cartsCollectionOverride({
+                defaultCollection: defaultCartsCollection,
+              })
+            : defaultCartsCollection
+
+        incomingConfig.collections.push(cartsCollection)
       }
     }
 
     if (sanitizedPluginConfig.orders) {
-      const orders = createOrdersCollection({
+      const defaultOrdersCollection = createOrdersCollection({
         access: {
           adminOnly: accessConfig.adminOnly,
           adminOnlyFieldAccess: accessConfig.adminOnlyFieldAccess,
@@ -167,14 +210,21 @@ export const ecommercePlugin =
         currenciesConfig,
         customersSlug: collectionSlugMap.customers,
         enableVariants,
-        overrides:
-          sanitizedPluginConfig.orders === true
-            ? undefined
-            : sanitizedPluginConfig.orders.ordersCollection,
         productsSlug: collectionSlugMap.products,
         variantsSlug: collectionSlugMap.variants,
       })
-      incomingConfig.collections.push(orders)
+
+      const ordersCollection =
+        sanitizedPluginConfig.orders &&
+        typeof sanitizedPluginConfig.orders === 'object' &&
+        'ordersCollectionOverride' in sanitizedPluginConfig.orders &&
+        sanitizedPluginConfig.orders.ordersCollectionOverride
+          ? await sanitizedPluginConfig.orders.ordersCollectionOverride({
+              defaultCollection: defaultOrdersCollection,
+            })
+          : defaultOrdersCollection
+
+      incomingConfig.collections.push(ordersCollection)
     }
 
     const paymentMethods = sanitizedPluginConfig.payments.paymentMethods
@@ -243,7 +293,7 @@ export const ecommercePlugin =
     }
 
     if (sanitizedPluginConfig.transactions) {
-      const transactions = createTransactionsCollection({
+      const defaultTransactionsCollection = createTransactionsCollection({
         access: {
           adminOnly: accessConfig.adminOnly,
         },
@@ -253,16 +303,22 @@ export const ecommercePlugin =
         customersSlug: collectionSlugMap.customers,
         enableVariants,
         ordersSlug: collectionSlugMap.orders,
-        overrides:
-          sanitizedPluginConfig.transactions === true
-            ? undefined
-            : sanitizedPluginConfig.transactions.transactionsCollection,
         paymentMethods,
         productsSlug: collectionSlugMap.products,
         variantsSlug: collectionSlugMap.variants,
       })
 
-      incomingConfig.collections.push(transactions)
+      const transactionsCollection =
+        sanitizedPluginConfig.transactions &&
+        typeof sanitizedPluginConfig.transactions === 'object' &&
+        'transactionsCollectionOverride' in sanitizedPluginConfig.transactions &&
+        sanitizedPluginConfig.transactions.transactionsCollectionOverride
+          ? await sanitizedPluginConfig.transactions.transactionsCollectionOverride({
+              defaultCollection: defaultTransactionsCollection,
+            })
+          : defaultTransactionsCollection
+
+      incomingConfig.collections.push(transactionsCollection)
     }
 
     if (!incomingConfig.i18n) {

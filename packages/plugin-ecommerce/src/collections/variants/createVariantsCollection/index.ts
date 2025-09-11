@@ -2,8 +2,8 @@ import type { CollectionConfig, Field } from 'payload'
 
 import type {
   AccessConfig,
+  CollectionOverride,
   CurrenciesConfig,
-  FieldsOverride,
   InventoryConfig,
 } from '../../../types.js'
 
@@ -22,7 +22,6 @@ type Props = {
    * Enables inventory tracking for variants. Defaults to true.
    */
   inventory?: InventoryConfig
-  overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   /**
    * Slug of the products collection, defaults to 'products'.
    */
@@ -38,12 +37,10 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
     access: { adminOnly, adminOrPublishedStatus },
     currenciesConfig,
     inventory = true,
-    overrides,
     productsSlug = 'products',
     variantOptionsSlug = 'variantOptions',
   } = props || {}
   const { supportedCurrencies } = currenciesConfig || {}
-  const fieldsOverride = overrides?.fields
 
   const defaultFields: Field[] = [
     {
@@ -101,33 +98,22 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
     }
   }
 
-  const fields =
-    fieldsOverride && typeof fieldsOverride === 'function'
-      ? fieldsOverride({ defaultFields })
-      : defaultFields
-
   const baseConfig: CollectionConfig = {
     slug: 'variants',
-    ...overrides,
+
     access: {
       create: adminOnly,
       delete: adminOnly,
       read: adminOrPublishedStatus,
       update: adminOnly,
-      ...overrides?.access,
     },
     admin: {
       group: 'Ecommerce',
       useAsTitle: 'title',
-      ...overrides?.admin,
     },
-    fields,
+    fields: defaultFields,
     hooks: {
-      ...overrides?.hooks,
-      beforeChange: [
-        beforeChange({ productsSlug, variantOptionsSlug }),
-        ...(overrides?.hooks?.beforeChange || []),
-      ],
+      beforeChange: [beforeChange({ productsSlug, variantOptionsSlug })],
     },
     versions: {
       drafts: {
@@ -136,5 +122,5 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
     },
   }
 
-  return { ...baseConfig }
+  return baseConfig
 }
