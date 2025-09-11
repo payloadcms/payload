@@ -15,6 +15,11 @@ import { renderTable } from '@payloadcms/ui/rsc'
 import { formatDate } from '@payloadcms/ui/shared'
 import { flattenAllFields } from 'payload'
 
+import { createFilterValue } from './createFilterValue.js'
+import { createSerializableValue } from './createSerializableValue.js'
+import { extractRelationshipDisplayValue } from './extractRelationshipDisplayValue.js'
+import { getRelationshipKey } from './getRelationshipKey.js'
+
 export const handleGroupBy = async ({
   clientCollectionConfig,
   clientConfig,
@@ -64,29 +69,21 @@ export const handleGroupBy = async ({
 
   const groupByField = flattenedFields.find((f) => f.name === groupByFieldPath)
 
-  const relationshipConfig =
-    groupByField?.type === 'relationship'
-      ? clientConfig.collections.find((c) => c.slug === groupByField.relationTo)
-      : undefined
-
+  // Set up population for relationships
   let populate
-
   if (groupByField?.type === 'relationship' && groupByField.relationTo) {
-    const relationTo =
-      typeof groupByField.relationTo === 'string'
-        ? [groupByField.relationTo]
-        : groupByField.relationTo
+    const relationTo = Array.isArray(groupByField.relationTo)
+      ? groupByField.relationTo
+      : [groupByField.relationTo]
 
-    if (Array.isArray(relationTo)) {
-      relationTo.forEach((rel) => {
-        if (!populate) {
-          populate = {}
-        }
-        populate[rel] = { [relationshipConfig?.admin.useAsTitle || 'id']: true }
-      })
-    }
+    populate = {}
+    relationTo.forEach((rel) => {
+      const config = clientConfig.collections.find((c) => c.slug === rel)
+      populate[rel] = { [config?.admin?.useAsTitle || 'id']: true }
+    })
   }
 
+  // Get distinct values
   const distinct = await req.payload.findDistinct({
     collection: collectionSlug,
     depth: 1,
@@ -102,37 +99,80 @@ export const handleGroupBy = async ({
     where: whereWithMergedSearch,
   })
 
+  // Process values - flatten hasMany arrays and deduplicate
+  let processedValues = distinct.values || []
+
+  if ('hasMany' in groupByField && groupByField?.hasMany) {
+    const flattenedValues = []
+
+    // For hasMany relationships, flatten arrays so each relationship becomes its own group
+    // Example: document with [Category1, Category2] creates separate groups for Category1 and Category2
+    for (const distinctValue of distinct.values || []) {
+      const relationshipValue = distinctValue[groupByFieldPath]
+
+      if (Array.isArray(relationshipValue) && relationshipValue.length > 0) {
+        relationshipValue.forEach((individualRelationship) => {
+          flattenedValues.push({ ...distinctValue, [groupByFieldPath]: individualRelationship })
+        })
+      } else {
+        flattenedValues.push(distinctValue)
+      }
+    }
+
+    // Remove duplicate groups (same relationship appearing in multiple documents)
+    const seenRelationships = new Set()
+    processedValues = flattenedValues.filter((value) => {
+      const relationshipKey = getRelationshipKey(value[groupByFieldPath])
+      if (seenRelationships.has(relationshipKey)) {
+        return false
+      }
+      seenRelationships.add(relationshipKey)
+      return true
+    })
+  }
+
+  // Sort to show populated values first, null values last
+  processedValues = processedValues.sort((a, b) => {
+    const valueA = a[groupByFieldPath]
+    const valueB = b[groupByFieldPath]
+
+    if (valueA === null && valueB !== null) {
+      return 1
+    }
+    if (valueB === null && valueA !== null) {
+      return -1
+    }
+    return 0
+  })
+
   const data = {
     ...distinct,
-    docs: distinct.values?.map(() => ({})) || [],
+    docs: processedValues?.map(() => ({})) || [],
     values: undefined,
   }
 
+  // Process each group
   await Promise.all(
-    distinct.values.map(async (distinctValue, i) => {
-      const potentiallyPopulatedRelationship = distinctValue[groupByFieldPath]
+    processedValues.map(async (distinctValue, i) => {
+      const relationship = distinctValue[groupByFieldPath]
 
-      const valueOrRelationshipID =
-        groupByField?.type === 'relationship' &&
-        potentiallyPopulatedRelationship &&
-        typeof potentiallyPopulatedRelationship === 'object' &&
-        'id' in potentiallyPopulatedRelationship
-          ? potentiallyPopulatedRelationship.id
-          : potentiallyPopulatedRelationship
+      // Create filter value for database query
+      const filterValue = createFilterValue(relationship)
 
+      // Get documents for this group
       const groupData = await req.payload.find({
         collection: collectionSlug,
         depth: 0,
         draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
-        limit: query?.queryByGroup?.[valueOrRelationshipID]?.limit
-          ? Number(query.queryByGroup[valueOrRelationshipID].limit)
+        limit: query?.queryByGroup?.[filterValue]?.limit
+          ? Number(query.queryByGroup[filterValue].limit)
           : undefined,
         locale: req.locale,
         overrideAccess: false,
-        page: query?.queryByGroup?.[valueOrRelationshipID]?.page
-          ? Number(query.queryByGroup[valueOrRelationshipID].page)
+        page: query?.queryByGroup?.[filterValue]?.page
+          ? Number(query.queryByGroup[filterValue].page)
           : undefined,
         req,
         // Note: if we wanted to enable table-by-table sorting, we could use this:
@@ -143,41 +183,34 @@ export const handleGroupBy = async ({
         user,
         where: {
           ...(whereWithMergedSearch || {}),
-          [groupByFieldPath]: {
-            equals: valueOrRelationshipID,
-          },
+          [groupByFieldPath]: { equals: filterValue },
         },
       })
 
-      let heading = valueOrRelationshipID
+      // Extract heading
+      let heading: string
 
-      if (
-        groupByField?.type === 'relationship' &&
-        potentiallyPopulatedRelationship &&
-        typeof potentiallyPopulatedRelationship === 'object'
-      ) {
-        heading =
-          potentiallyPopulatedRelationship[relationshipConfig.admin.useAsTitle || 'id'] ||
-          valueOrRelationshipID
-      }
-
-      if (groupByField.type === 'date' && valueOrRelationshipID) {
+      if (relationship === null) {
+        heading = req.i18n.t('general:noValue')
+      } else if (groupByField?.type === 'relationship') {
+        const relationshipConfig = Array.isArray(groupByField.relationTo)
+          ? undefined
+          : clientConfig.collections.find((c) => c.slug === groupByField.relationTo)
+        heading = extractRelationshipDisplayValue(relationship, clientConfig, relationshipConfig)
+      } else if (groupByField?.type === 'date') {
         heading = formatDate({
-          date: String(valueOrRelationshipID),
+          date: String(filterValue),
           i18n: req.i18n,
           pattern: clientConfig.admin.dateFormat,
         })
+      } else if (groupByField?.type === 'checkbox') {
+        heading = filterValue === true ? req.i18n.t('general:true') : req.i18n.t('general:false')
+      } else {
+        heading = String(filterValue)
       }
 
-      if (groupByField.type === 'checkbox') {
-        if (valueOrRelationshipID === true) {
-          heading = req.i18n.t('general:true')
-        }
-
-        if (valueOrRelationshipID === false) {
-          heading = req.i18n.t('general:false')
-        }
-      }
+      // Create serializable value for client
+      const serializableValue = createSerializableValue(filterValue)
 
       if (groupData.docs && groupData.docs.length > 0) {
         const { columnState: newColumnState, Table: NewTable } = renderTable({
@@ -189,10 +222,10 @@ export const handleGroupBy = async ({
           drawerSlug,
           enableRowSelections,
           groupByFieldPath,
-          groupByValue: valueOrRelationshipID,
+          groupByValue: serializableValue,
           heading: heading || req.i18n.t('general:noValue'),
           i18n: req.i18n,
-          key: `table-${valueOrRelationshipID}`,
+          key: `table-${serializableValue}`,
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,
           query,
@@ -210,7 +243,7 @@ export const handleGroupBy = async ({
           Table = []
         }
 
-        dataByGroup[valueOrRelationshipID] = groupData
+        dataByGroup[serializableValue] = groupData
         ;(Table as Array<React.ReactNode>)[i] = NewTable
       }
     }),
