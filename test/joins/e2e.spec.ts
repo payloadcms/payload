@@ -17,8 +17,8 @@ import {
   // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { reorderColumns } from '../helpers/e2e/columns/index.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
-import { reorderColumns } from '../helpers/e2e/columns/reorderColumns.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'

@@ -36,11 +36,14 @@ let payload: PayloadTestSDK<Config>
 
 import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
 import { devUser } from 'credentials.js'
-import { openListColumns } from 'helpers/e2e/columns/openListColumns.js'
-import { sortColumn } from 'helpers/e2e/columns/sortColumn.js'
-import { toggleColumn, waitForColumnInURL } from 'helpers/e2e/columns/toggleColumn.js'
-import { addListFilter } from 'helpers/e2e/filters/addListFilter.js'
-import { openListFilters } from 'helpers/e2e/filters/openListFilters.js'
+import {
+  openListColumns,
+  reorderColumns,
+  sortColumn,
+  toggleColumn,
+  waitForColumnInURL,
+} from 'helpers/e2e/columns/index.js'
+import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
 import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from 'helpers/e2e/preferences.js'
@@ -52,7 +55,6 @@ import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 
-import { reorderColumns } from '../../../helpers/e2e/columns/reorderColumns.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
