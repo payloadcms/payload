@@ -72,6 +72,7 @@ export const updateOperation = async <
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    const shouldSaveDraft = Boolean(args.draft && args.collection.config.versions.drafts)
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -84,6 +85,7 @@ export const updateOperation = async <
             args,
             collection: args.collection.config,
             context: args.req.context,
+            draft: shouldSaveDraft,
             operation: 'update',
             req: args.req,
           })) || args
@@ -94,7 +96,6 @@ export const updateOperation = async <
       collection: { config: collectionConfig },
       collection,
       depth,
-      draft: draftArg = false,
       limit = 0,
       overrideAccess,
       overrideLock,
@@ -120,7 +121,6 @@ export const updateOperation = async <
     }
 
     const { data: bulkUpdateData } = args
-    const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts)
 
     // /////////////////////////////////////
     // Access
@@ -173,7 +173,7 @@ export const updateOperation = async <
 
     let docs
 
-    if (collectionConfig.versions?.drafts && shouldSaveDraft) {
+    if (shouldSaveDraft) {
       const versionsWhere = appendVersionToQueryKey(fullWhere)
 
       await validateQueryPaths({
@@ -247,7 +247,7 @@ export const updateOperation = async <
           data: deepCopyObjectSimple(data),
           depth: depth!,
           docWithLocales,
-          draftArg,
+          draftArg: shouldSaveDraft,
           fallbackLocale: fallbackLocale!,
           filesToUpload,
           locale: locale!,

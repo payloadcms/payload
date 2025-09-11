@@ -31,6 +31,7 @@ type Args = {
   data: JsonObject
   doc: JsonObject
   docWithLocales: JsonObject
+  draft: boolean
   errors: ValidationFieldError[]
   field: Field | TabAsField
   fieldIndex: number
@@ -73,6 +74,7 @@ export const promise = async ({
   data,
   doc,
   docWithLocales,
+  draft,
   errors,
   field,
   fieldIndex,
@@ -136,6 +138,7 @@ export const promise = async ({
           collection,
           context,
           data,
+          draft,
           field,
           global,
           indexPath: indexPathSegments,
@@ -252,6 +255,7 @@ export const promise = async ({
               data,
               doc,
               docWithLocales,
+              draft,
               errors,
               fieldLabelPath:
                 field?.label === false
@@ -318,6 +322,7 @@ export const promise = async ({
                 data,
                 doc,
                 docWithLocales,
+                draft,
                 errors,
                 fieldLabelPath:
                   field?.label === false
@@ -361,6 +366,7 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
+        draft,
         errors,
         fieldLabelPath:
           field.type === 'row' || field?.label === false
@@ -434,6 +440,7 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
+        draft,
         errors,
         fieldLabelPath:
           field?.label === false
@@ -495,6 +502,7 @@ export const promise = async ({
             context,
             data,
             docWithLocales,
+            draft,
             errors,
             field,
             fieldLabelPath:
@@ -564,6 +572,7 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
+        draft,
         errors,
         fieldLabelPath:
           field?.label === false
@@ -600,6 +609,7 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
+        draft,
         errors,
         fieldLabelPath:
           field?.label === false

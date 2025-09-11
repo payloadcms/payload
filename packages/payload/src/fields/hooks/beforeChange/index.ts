@@ -14,6 +14,7 @@ export type Args<T extends JsonObject> = {
   data: T
   doc: T
   docWithLocales: JsonObject
+  draft: boolean
   global: null | SanitizedGlobalConfig
   id?: number | string
   operation: Operation
@@ -38,6 +39,7 @@ export const beforeChange = async <T extends JsonObject>({
   data: incomingData,
   doc,
   docWithLocales,
+  draft,
   global,
   operation,
   overrideAccess,
@@ -55,6 +57,7 @@ export const beforeChange = async <T extends JsonObject>({
     data,
     doc,
     docWithLocales,
+    draft,
     errors,
     fieldLabelPath: '',
     fields: (collection?.fields || global?.fields)!,

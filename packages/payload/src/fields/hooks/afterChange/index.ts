@@ -16,6 +16,7 @@ type Args<T extends JsonObject> = {
    * The data after hooks
    */
   doc: T
+  draft: boolean
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
   previousDoc: T
@@ -31,6 +32,7 @@ export const afterChange = async <T extends JsonObject>({
   context,
   data,
   doc: incomingDoc,
+  draft,
   global,
   operation,
   previousDoc,
@@ -41,6 +43,7 @@ export const afterChange = async <T extends JsonObject>({
     context,
     data,
     doc: incomingDoc,
+    draft,
     fields: (collection?.fields || global?.fields)!,
     global,
     operation,

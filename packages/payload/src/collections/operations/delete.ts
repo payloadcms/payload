@@ -63,6 +63,7 @@ export const deleteOperation = async <
             args,
             collection: args.collection.config,
             context: args.req.context,
+            draft: false,
             operation: 'delete',
             req: args.req,
           })) || args

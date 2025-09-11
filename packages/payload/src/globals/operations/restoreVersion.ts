@@ -26,6 +26,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
 ): Promise<T> => {
   const { id, depth, draft, globalConfig, overrideAccess, populate, showHiddenFields } = args
   const req = args.req!
+  const shouldSaveDraft = Boolean(draft && globalConfig.versions?.drafts)
   const { fallbackLocale, locale, payload } = req
 
   try {
@@ -78,7 +79,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
 
     // Overwrite draft status if draft is true
 
-    if (draft) {
+    if (shouldSaveDraft) {
       rawVersion.version._status = 'draft'
     }
     // /////////////////////////////////////
@@ -119,7 +120,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
         globalSlug: globalConfig.slug,
         parent: id,
         req,
-        updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
+        updatedAt: shouldSaveDraft ? now : new Date(result.updatedAt).toISOString(),
         versionData: result,
       })
     } else {
@@ -139,7 +140,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       context: req.context,
       depth: depth!,
       doc: result,
-      draft: undefined!,
+      draft: shouldSaveDraft,
       fallbackLocale: fallbackLocale!,
       global: globalConfig,
       locale: locale!,
@@ -174,6 +175,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       context: req.context,
       data: result,
       doc: result,
+      draft: shouldSaveDraft,
       global: globalConfig,
       operation: 'update',
       previousDoc,
