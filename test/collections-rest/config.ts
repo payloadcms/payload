@@ -285,7 +285,7 @@ export default buildConfigWithDefaults({
   ],
   multipartFormdataOptions: {
     limits: {
-      fieldSize: 4 * 1024 * 1024, // 2MB
+      fieldSize: 2 * 1024 * 1024, // 2MB
     },
   },
   endpoints: [

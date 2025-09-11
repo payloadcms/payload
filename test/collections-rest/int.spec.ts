@@ -122,17 +122,20 @@ describe('collections-rest', () => {
       expect(doc.description).toEqual(description) // Check was not modified
     })
 
-    it('can handle PATCH requests with form-data of over 1mb', async () => {
+    it('can handle REST API requests with over 1mb of multipart/form-data', async () => {
       const doc = await payload.create({
         collection: largeDocumentsCollectionSlug,
         data: {},
       })
 
+      const arrayData = new Array(500).fill({ text: randomUUID().repeat(100) })
+
       // Now use the REST API and attempt to PATCH the document with a payload over 1mb
       const dataToSerialize: Record<string, unknown> = {
         _payload: JSON.stringify({
           title: 'Hello, world!',
-          array: new Array(50000).fill({ text: 'Hello, world!' }),
+          // fill with long, random string of text to exceed 1mb
+          array: arrayData,
         }),
       }
 
@@ -141,20 +144,23 @@ describe('collections-rest', () => {
         nullsAsUndefineds: false,
       })
 
-      // Ensure the form data we are about to send is actually over 1mb which is the default limit
+      // Ensure the form data we are about to send is greater than the default limit (1mb)
+      // But less than the increased limit that we've set in the root config (2mb)
       const docSize = getFormDataSize(formData)
       expect(docSize).toBeGreaterThan(1 * 1024 * 1024)
+      expect(docSize).toBeLessThan(2 * 1024 * 1024)
 
       // This request should not fail with error: "Unterminated string in JSON at position..."
       // This is because we set `multipartFormdataOptions.limits.fieldSize` to 2mb in the root config
-      const { doc: updatedDoc } = await restClient
+      const res = await restClient
         .PATCH(`/${largeDocumentsCollectionSlug}/${doc.id}?limit=1`, {
           body: formData,
         })
         .then((res) => res.json())
 
-      expect(updatedDoc.id).toEqual(doc.id)
-      expect(updatedDoc.array[0].text).toEqual('Hello, world!')
+      expect(res).not.toHaveProperty('errors')
+      expect(res.doc.id).toEqual(doc.id)
+      expect(res.doc.array[0].text).toEqual(arrayData[0].text)
     })
 
     describe('Bulk operations', () => {
