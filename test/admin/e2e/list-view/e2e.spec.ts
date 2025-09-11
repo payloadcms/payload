@@ -36,15 +36,14 @@ let payload: PayloadTestSDK<Config>
 
 import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
 import { devUser } from 'credentials.js'
-import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
+import { openListColumns } from 'helpers/e2e/columns/openListColumns.js'
+import { sortColumn } from 'helpers/e2e/columns/sortColumn.js'
+import { toggleColumn, waitForColumnInURL } from 'helpers/e2e/columns/toggleColumn.js'
+import { addListFilter } from 'helpers/e2e/filters/addListFilter.js'
+import { openListFilters } from 'helpers/e2e/filters/openListFilters.js'
 import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
-import { openListColumns } from 'helpers/e2e/openListColumns.js'
 import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { sortColumn } from 'helpers/e2e/tables/columns/sortColumn.js'
-import { addListFilter } from 'helpers/e2e/tables/filters/addListFilter.js'
-import { openListFilters } from 'helpers/e2e/tables/filters/openListFilters.js'
-import { toggleColumn, waitForColumnInURL } from 'helpers/e2e/toggleColumn.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from 'helpers/e2e/toggleListDrawer.js'
 import path from 'path'
@@ -53,9 +52,9 @@ import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 
-import { reorderColumns } from '../../../helpers/e2e/tables/columns/reorderColumns.js'
+import { reorderColumns } from '../../../helpers/e2e/columns/reorderColumns.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)

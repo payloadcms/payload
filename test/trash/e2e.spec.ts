@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { addListFilter } from 'helpers/e2e/tables/filters/addListFilter.js'
+import { addListFilter } from 'helpers/e2e/filters/addListFilter.js'
 import * as path from 'path'
 import { mapAsync } from 'payload'
 import { fileURLToPath } from 'url'

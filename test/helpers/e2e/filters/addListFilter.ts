@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { selectInput } from '../../selectInput.js'
+import { selectInput } from '../selectInput.js'
 import { openListFilters } from './openListFilters.js'
 
 export const addListFilter = async ({

@@ -1,8 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { addListFilter } from 'helpers/e2e/tables/filters/addListFilter.js'
-import { openListFilters } from 'helpers/e2e/tables/filters/openListFilters.js'
+import { addListFilter } from 'helpers/e2e/filters/addListFilter.js'
+import { openListFilters } from 'helpers/e2e/filters/openListFilters.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
