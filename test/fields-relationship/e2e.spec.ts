@@ -3,10 +3,11 @@ import type { CollectionSlug } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { assertToastErrors } from 'helpers/assertToastErrors.js'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import { addArrayRow } from 'helpers/e2e/fields/array/addArrayRow.js'
 import { openCreateDocDrawer } from 'helpers/e2e/fields/relationship/openCreateDocDrawer.js'
 import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { addListFilter } from 'helpers/e2e/tables/filters/addListFilter.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -28,12 +29,12 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-  throttleTest,
+  // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   collection1Slug,
   mixedMediaCollectionSlug,
@@ -382,7 +383,6 @@ describe('Relationship Field', () => {
         page,
         fieldLabel: 'Relationship Filtered By Field',
         operatorLabel: 'equals',
-        skipValueInput: true,
       })
 
       const valueInput = page.locator('.condition__value input')
@@ -402,33 +402,55 @@ describe('Relationship Field', () => {
         },
       })
 
-      // first ensure that filter options are applied in the edit view
+      // First ensure that filter options are applied to the Edit View
       await page.goto(url.edit(idToInclude))
       await wait(300)
-      const field = page.locator('#field-nestedRelationshipFilteredByField')
-      await field.click({ delay: 100 })
-      const options = field.locator('.rs__option')
-      await expect(options).toHaveCount(1)
-      await expect(options).toContainText(idToInclude)
 
-      // now ensure that the same filter options are applied in the list view
+      const fieldInCollapsible = page.locator('#field-filteredByFieldInCollapsible')
+      await fieldInCollapsible.click({ delay: 100 })
+      const optionsInCollapsible = fieldInCollapsible.locator('.rs__option')
+      await expect(optionsInCollapsible).toHaveCount(1)
+      await expect(optionsInCollapsible).toContainText(idToInclude)
+
+      await addArrayRow(page, { fieldName: 'array' })
+
+      const fieldInArray = page.locator('#field-array__0__filteredByFieldInArray')
+      await fieldInArray.click({ delay: 100 })
+      const optionsInArray = fieldInArray.locator('.rs__option')
+      await expect(optionsInArray).toHaveCount(1)
+      await expect(optionsInArray).toContainText(idToInclude)
+
+      // Now ensure that the same filter options are applied in the list view
       await page.goto(url.list)
       await wait(300)
 
-      const { whereBuilder } = await addListFilter({
+      const { condition: condition1 } = await addListFilter({
         page,
-        fieldLabel: 'Collapsible > Nested Relationship Filtered By Field',
+        fieldLabel: 'Collapsible > Filtered By Field In Collapsible',
         operatorLabel: 'equals',
-        skipValueInput: true,
       })
 
-      const valueInput = page.locator('.condition__value input')
+      const valueInput = condition1.locator('.condition__value input')
       await valueInput.click()
-      const valueOptions = whereBuilder.locator('.condition__value .rs__option')
+      const valueOptions = condition1.locator('.condition__value .rs__option')
 
       await expect(valueOptions).toHaveCount(2)
       await expect(valueOptions.locator(`text=None`)).toBeVisible()
       await expect(valueOptions.locator(`text=${idToInclude}`)).toBeVisible()
+
+      const { condition: condition2 } = await addListFilter({
+        page,
+        fieldLabel: 'Array > Filtered By Field In Array',
+        operatorLabel: 'equals',
+      })
+
+      const valueInput2 = condition2.locator('.condition__value input')
+      await valueInput2.click()
+      const valueOptions2 = condition2.locator('.condition__value .rs__option')
+
+      await expect(valueOptions2).toHaveCount(2)
+      await expect(valueOptions2.locator(`text=None`)).toBeVisible()
+      await expect(valueOptions2.locator(`text=${idToInclude}`)).toBeVisible()
     })
 
     test('should allow usage of relationTo in filterOptions', async () => {
@@ -438,6 +460,7 @@ describe('Relationship Field', () => {
           name: 'include',
         },
       })) as any
+
       const { id: exclude } = (await payload.create({
         collection: relationOneSlug,
         data: {
