@@ -43,6 +43,9 @@ export type ServerOnlyRootProperties = keyof Pick<
 
 export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
 
+/**
+ * @deprecated - this type is no longer used
+ */
 export type UnsanitizedClientConfig = {
   admin: {
     livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
@@ -188,6 +191,17 @@ export const createClientConfig = ({
           i18n,
           importMap,
         }).filter((block) => typeof block !== 'string') as ClientBlock[]
+
+        clientConfig.blocksMap = {}
+        if (clientConfig.blocks?.length) {
+          for (const block of clientConfig.blocks) {
+            if (!block?.slug) {
+              continue
+            }
+
+            clientConfig.blocksMap[block.slug] = block as ClientBlock
+          }
+        }
 
         break
       }

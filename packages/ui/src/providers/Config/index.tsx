@@ -6,7 +6,6 @@ import type {
   ClientGlobalConfig,
   CollectionSlug,
   GlobalSlug,
-  UnsanitizedClientConfig,
 } from 'payload'
 
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -40,35 +39,13 @@ export type ClientConfigContext = {
 
 const RootConfigContext = createContext<ClientConfigContext | undefined>(undefined)
 
-function sanitizeClientConfig(
-  unSanitizedConfig: ClientConfig | UnsanitizedClientConfig,
-): ClientConfig {
-  if (!unSanitizedConfig?.blocks?.length || (unSanitizedConfig as ClientConfig).blocksMap) {
-    ;(unSanitizedConfig as ClientConfig).blocksMap = {}
-    return unSanitizedConfig as ClientConfig
-  }
-  const sanitizedConfig: ClientConfig = { ...unSanitizedConfig } as ClientConfig
-
-  sanitizedConfig.blocksMap = {}
-
-  for (const block of unSanitizedConfig.blocks) {
-    sanitizedConfig.blocksMap[block.slug] = block
-  }
-
-  return sanitizedConfig
-}
-
 export const ConfigProvider: React.FC<{
   readonly children: React.ReactNode
-  readonly config: ClientConfig | UnsanitizedClientConfig
+  readonly config: ClientConfig
 }> = ({ children, config: configFromProps }) => {
-  const [config, setConfigFn] = useState<ClientConfig>(() => sanitizeClientConfig(configFromProps))
+  const [config, setConfig] = useState<ClientConfig>(configFromProps)
 
   const isFirstRenderRef = useRef(true)
-
-  const setConfig = useCallback((newConfig: ClientConfig | UnsanitizedClientConfig) => {
-    setConfigFn(sanitizeClientConfig(newConfig))
-  }, [])
 
   // Need to update local config state if config from props changes, for HMR.
   // That way, config changes will be updated in the UI immediately without needing a refresh.
@@ -112,9 +89,49 @@ export const ConfigProvider: React.FC<{
     [collectionsBySlug, globalsBySlug],
   )
 
-  const value = useMemo(() => ({ config, getEntityConfig, setConfig }), [config, getEntityConfig])
+  const value = useMemo(
+    () => ({ config, getEntityConfig, setConfig }),
+    [config, getEntityConfig, setConfig],
+  )
 
   return <RootConfigContext value={value}>{children}</RootConfigContext>
 }
 
 export const useConfig = (): ClientConfigContext => use(RootConfigContext)
+
+/**
+ * This provider shadows the ConfigProvider on the _page_ level, allowing us to
+ * update the config when needed, e.g. after authentication.
+ * The layout ConfigProvider is not updated on page navigation / authentication,
+ * as the layout does not re-render in those cases.
+ *
+ * If the config here has the same reference as the config from the layout, we
+ * simply reuse the context from the layout to avoid unnecessary re-renders.
+ */
+export const RootPageConfigProvider: React.FC<{
+  readonly children: React.ReactNode
+  readonly config: ClientConfig
+}> = ({ children, config: configFromProps }) => {
+  const rootLayoutConfig = useConfig()
+  const { config, getEntityConfig, setConfig } = rootLayoutConfig
+
+  /**
+   * This component is required in order for the _page_ to be able to refresh the client config,
+   * which may have been cached on the _layout_ level, where the ConfigProvider is managed.
+   * Since the layout does not re-render on page navigation / authentication, we need to manually
+   * update the config, as the user may have been authenticated in the process, which affects the client config.
+   */
+  useEffect(() => {
+    setConfig(configFromProps)
+  }, [configFromProps, setConfig])
+
+  if (config !== configFromProps) {
+    return (
+      <RootConfigContext value={{ config: configFromProps, getEntityConfig, setConfig }}>
+        {children}
+      </RootConfigContext>
+    )
+  }
+
+  return <RootConfigContext value={rootLayoutConfig}>{children}</RootConfigContext>
+}
