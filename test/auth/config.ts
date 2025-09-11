@@ -21,6 +21,10 @@ export default buildConfigWithDefaults({
       password: devUser.password,
       prefillOnly: true,
     },
+    components: {
+      beforeDashboard: ['./BeforeDashboard.js#BeforeDashboard'],
+      beforeLogin: ['./BeforeLogin.js#BeforeLogin'],
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -249,7 +253,12 @@ export default buildConfigWithDefaults({
       auth: {
         verify: true,
       },
-      fields: [],
+      fields: [
+        {
+          name: 'shouldNotShowInClientConfigUnlessAuthenticated',
+          type: 'text',
+        },
+      ],
     },
     {
       slug: 'relationsCollection',

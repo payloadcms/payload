@@ -4,7 +4,6 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-
     "noEmit": true,
     "rootDir": ".",
     "target": "ES2022",
@@ -28,7 +27,7 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@payload-config": ["./_community/config.ts"]
+      "@payload-config": ["./auth/config.ts"]
     }
   },
   "exclude": [
