@@ -30,7 +30,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
     } else if (bodyByteSize && contentType?.includes('multipart/')) {
       const { error, fields, files } = await processMultipartFormdata({
         options: {
-          ...(payload.config.multipartFormdataOptions || {}),
+          ...(payload.config.bodyParser || {}),
           ...(payload.config.upload || {}),
         },
         request: req as Request,

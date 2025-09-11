@@ -151,7 +151,7 @@ describe('collections-rest', () => {
       expect(docSize).toBeLessThan(2 * 1024 * 1024)
 
       // This request should not fail with error: "Unterminated string in JSON at position..."
-      // This is because we set `multipartFormdataOptions.limits.fieldSize` to 2mb in the root config
+      // This is because we set `bodyParser.limits.fieldSize` to 2mb in the root config
       const res = await restClient
         .PATCH(`/${largeDocumentsCollectionSlug}/${doc.id}?limit=1`, {
           body: formData,

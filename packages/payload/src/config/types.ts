@@ -996,6 +996,15 @@ export type Config = {
   bin?: BinScriptConfig[]
   blocks?: Block[]
   /**
+   * Pass additional options to the parser used to process `multipart/form-data` requests.
+   * For example, a PATCH request containing HTML form data.
+   * For example, you may want to increase the `limits` imposed by the parser.
+   * Currently using @link {https://www.npmjs.com/package/busboy|busboy} under the hood.
+   *
+   * @experimental This property is experimental and may change in future releases. Use at your own discretion.
+   */
+  bodyParser?: Partial<BusboyConfig>
+  /**
    * Manage the datamodel of your application
    *
    * @see https://payloadcms.com/docs/configuration/collections#collection-configs
@@ -1165,6 +1174,7 @@ export type Config = {
    * ```
    */
   logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
+
   /**
    * Override the log level of errors for Payload's error handler or disable logging with `false`.
    * Levels can be any of the following: 'trace', 'debug', 'info', 'warn', 'error', 'fatal' or false.
@@ -1195,16 +1205,6 @@ export type Config = {
    * @default 10
    */
   maxDepth?: number
-
-  /**
-   * Pass additional options to the parser used to process `multipart/form-data` requests.
-   * For example, a PATCH request containing HTML form data.
-   * For example, you may want to increase the `limits` imposed by the parser.
-   * Currently using @link {https://www.npmjs.com/package/busboy|busboy} under the hood.
-   *
-   * @experimental This property is experimental and may change in future releases. Use at your own discretion.
-   */
-  multipartFormdataOptions?: Partial<BusboyConfig>
 
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void
