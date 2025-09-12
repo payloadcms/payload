@@ -348,6 +348,7 @@ export interface ApiKey {
  */
 export interface PublicUser {
   id: string;
+  shouldNotShowInClientConfigUnlessAuthenticated?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -611,6 +612,7 @@ export interface ApiKeysSelect<T extends boolean = true> {
  * via the `definition` "public-users_select".
  */
 export interface PublicUsersSelect<T extends boolean = true> {
+  shouldNotShowInClientConfigUnlessAuthenticated?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
