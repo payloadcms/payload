@@ -27,6 +27,12 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
   if (isLivePreviewEvent(event, serverURL)) {
     const { collectionSlug, data, globalSlug, locale } = event.data
 
+    // Only attempt to merge when we have a clear target
+    // Either a collectionSlug or a globalSlug must be present
+    if (!collectionSlug && !globalSlug) {
+      return initialData
+    }
+
     const mergedData = await mergeData<T>({
       apiRoute,
       collectionSlug,
