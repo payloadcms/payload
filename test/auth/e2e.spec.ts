@@ -450,8 +450,6 @@ describe('Auth', () => {
           .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
           .toBe(`${serverURL}/admin/collections/relationsCollection/${notInUserCollection.id}`)
 
-        await wait(200000000)
-
         // Previously, this would crash the page with a "Cannot read properties of null (reading 'fields')" error
         await expect(page.locator('#field-rel')).toBeVisible()
       })

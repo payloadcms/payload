@@ -63,7 +63,6 @@ export type UnauthenticatedClientConfig = {
   globals: []
   routes: ClientConfig['routes']
   serverURL: ClientConfig['serverURL']
-  unauthenticated: ClientConfig['unauthenticated']
 }
 
 export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
@@ -123,7 +122,6 @@ export const createUnauthenticatedClientConfig = ({
     globals: [],
     routes: clientConfig.routes,
     serverURL: clientConfig.serverURL,
-    unauthenticated: true,
   }
 }
 
