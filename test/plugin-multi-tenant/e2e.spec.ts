@@ -8,13 +8,9 @@ import { fileURLToPath } from 'url'
 
 import type { Config } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  loginClientSide,
-  saveDocAndAssert,
-} from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { loginClientSide } from '../helpers/e2e/auth/login.js'
 import { goToListDoc } from '../helpers/e2e/goToListDoc.js'
 import {
   clearSelectInput,

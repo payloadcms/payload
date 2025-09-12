@@ -10,7 +10,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { RootPageConfigProvider } from '@payloadcms/ui'
+import { PageConfigProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
@@ -300,7 +300,7 @@ export const RootPage = async ({
   })
 
   return (
-    <RootPageConfigProvider config={clientConfig}>
+    <PageConfigProvider config={clientConfig}>
       {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
       {templateType === 'minimal' && (
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
@@ -331,6 +331,6 @@ export const RootPage = async ({
           {RenderedView}
         </DefaultTemplate>
       )}
-    </RootPageConfigProvider>
+    </PageConfigProvider>
   )
 }
