@@ -21,6 +21,10 @@ export default buildConfigWithDefaults({
       password: devUser.password,
       prefillOnly: true,
     },
+    components: {
+      beforeDashboard: ['./BeforeDashboard.js#BeforeDashboard'],
+      beforeLogin: ['./BeforeLogin.js#BeforeLogin'],
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -184,6 +188,10 @@ export default buildConfigWithDefaults({
             },
           },
           label: 'Auth Debug',
+        },
+        {
+          name: 'shouldNotShowInClientConfigUnlessAuthenticated',
+          type: 'text',
         },
       ],
     },
