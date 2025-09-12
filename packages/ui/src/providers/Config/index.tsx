@@ -128,7 +128,12 @@ export const PageConfigProvider: React.FC<{
 
   // If this component receives a different config than what is in context from the layout, it is stale.
   // While stale, we instantiate a new context provider that provides the new config until the root context is updated.
-  if (rootConfig !== configFromProps) {
+  // Unfortunately, referential equality alone does not work bc the reference is lost during server/client serialization,
+  // so we need to also compare the `unauthenticated` property.
+  if (
+    rootConfig !== configFromProps &&
+    rootConfig.unauthenticated !== configFromProps.unauthenticated
+  ) {
     return <ConfigProvider config={configFromProps}>{children}</ConfigProvider>
   }
 
