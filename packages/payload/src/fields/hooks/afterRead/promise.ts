@@ -150,19 +150,6 @@ export const promise = async ({
       req.payload.config.localization,
   )
 
-  // If locale is `all`, siblingDoc[field.name] will be an object mapping locales to values - locales won't be flattened.
-  // In this case, run the hook for each locale and value pair
-  const shouldRunHookOnAllLocales =
-    locale === 'all' &&
-    'name' in field &&
-    typeof field.name === 'string' &&
-    // If localized values were hoisted, siblingDoc[field.name] will not be an object mapping locales to values
-    // => Object.entries(siblingDoc[field.name]) will be the value of a single locale, not all locales
-    // => do not run the hook for each locale
-    !shouldHoistLocalizedValue &&
-    fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! }) &&
-    typeof siblingDoc[field.name] === 'object'
-
   if (fieldAffectsDataResult && shouldHoistLocalizedValue) {
     // replace actual value with localized value before sanitizing
     // { [locale]: fields } -> fields
@@ -248,6 +235,19 @@ export const promise = async ({
       break
     }
   }
+
+  // If locale is `all`, siblingDoc[field.name] will be an object mapping locales to values - locales won't be flattened.
+  // In this case, run the hook for each locale and value pair
+  const shouldRunHookOnAllLocales =
+    locale === 'all' &&
+    'name' in field &&
+    typeof field.name === 'string' &&
+    // If localized values were hoisted, siblingDoc[field.name] will not be an object mapping locales to values
+    // => Object.entries(siblingDoc[field.name]) will be the value of a single locale, not all locales
+    // => do not run the hook for each locale
+    !shouldHoistLocalizedValue &&
+    fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! }) &&
+    typeof siblingDoc[field.name] === 'object'
 
   if (fieldAffectsDataResult) {
     // Execute hooks
