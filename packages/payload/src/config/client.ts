@@ -105,7 +105,7 @@ export type CreateClientConfigArgs = {
    * such as field schemas, etc. This is useful for login and error pages where
    * the page source should not contain this information.
    *
-   * Allow `true` to generate a client config for the "create first user" page
+   * For example, allow `true` to generate a client config for the "create first user" page
    * where there is no user yet, but the config should still be complete.
    */
   user: true | TypedUser
