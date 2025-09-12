@@ -95,7 +95,7 @@ export const connect: Connect = async function connect(
     }
 
     if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
-      await this.migrate({ migrations: this.prodMigrations })
+      await this.migrate({ failOnDev: true, migrations: this.prodMigrations })
     }
   } catch (err) {
     let msg = `Error: cannot connect to MongoDB.`
