@@ -107,13 +107,14 @@ export const useConfig = (): ClientConfigContext => use(RootConfigContext)
  *
  * If the config here has the same reference as the config from the layout, we
  * simply reuse the context from the layout to avoid unnecessary re-renders.
+ *
+ * @experimental This component is experimental and may change or be removed in future releases. Use at your own discretion.
  */
 export const RootPageConfigProvider: React.FC<{
   readonly children: React.ReactNode
   readonly config: ClientConfig
 }> = ({ children, config: configFromProps }) => {
-  const rootLayoutConfig = useConfig()
-  const { config, getEntityConfig, setConfig } = rootLayoutConfig
+  const { config, setConfig } = useConfig()
 
   /**
    * This useEffect is required in order for the _page_ to be able to refresh the client config,
@@ -129,12 +130,8 @@ export const RootPageConfigProvider: React.FC<{
     // Between the unauthenticated config becoming authenticated (or the other way around) and the useEffect
     // running, the config will be stale. In order to avoid having the wrong config in the context in that
     // brief moment, we shadow the context here on the _page_ level and provide the updated config immediately.
-    return (
-      <RootConfigContext value={{ config: configFromProps, getEntityConfig, setConfig }}>
-        {children}
-      </RootConfigContext>
-    )
+    return <ConfigProvider config={configFromProps}>{children}</ConfigProvider>
   }
 
-  return <RootConfigContext value={rootLayoutConfig}>{children}</RootConfigContext>
+  return children
 }

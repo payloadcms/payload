@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -388,21 +389,26 @@ describe('Auth', () => {
         await saveDocAndAssert(page)
       })
 
-      test('ensure login page with redirect to users document redirects properly after login, without client error', async () => {
-        await page.goto(url.admin)
+      test('ensure `?redirect=` param is injected into the URL and handled properly after login', async () => {
+        const users = await payload.find({
+          collection: slug,
+          limit: 1,
+        })
+
+        const userDocumentRoute = `${serverURL}/admin/collections/users/${users?.docs?.[0]?.id}`
 
         await page.goto(`${serverURL}/admin/logout`)
 
         await expect(page.locator('.login')).toBeVisible()
 
-        const users = await payload.find({
-          collection: slug,
-          limit: 1,
-        })
-        const userDocumentRoute = `${serverURL}/admin/collections/users/${users?.docs?.[0]?.id}`
-
+        // This will send the user back to the login page with a `?redirect=` param
         await page.goto(userDocumentRoute)
 
+        await expect
+          .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+          .toContain('/admin/login?redirect=')
+
+        // Important: do not use the login helper here, as this may clear the redirect param
         await expect(page.locator('#field-email')).toBeVisible()
         await expect(page.locator('#field-password')).toBeVisible()
 
@@ -414,8 +420,40 @@ describe('Auth', () => {
           .toBe(userDocumentRoute)
 
         // Previously, this would crash the page with a "Cannot read properties of undefined (reading 'match')" error
-
         await expect(page.locator('#field-roles')).toBeVisible()
+
+        // Now do this again, only with a page that is not in the user's collection
+        const notInUserCollection = await payload.create({
+          collection: 'relationsCollection',
+          data: {},
+        })
+
+        await page.goto(`${serverURL}/admin/logout`)
+        await expect(page.locator('.login')).toBeVisible()
+
+        await page.goto(
+          `${serverURL}/admin/collections/relationsCollection/${notInUserCollection.id}`,
+        )
+
+        await expect
+          .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+          .toContain('/admin/login?redirect=')
+
+        // Important: do not use the login helper here, as this may clear the redirect param
+        await expect(page.locator('#field-email')).toBeVisible()
+        await expect(page.locator('#field-password')).toBeVisible()
+
+        await page.locator('.form-submit > button').click()
+
+        // Expect to be redirected to the correct page
+        await expect
+          .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+          .toBe(`${serverURL}/admin/collections/relationsCollection/${notInUserCollection.id}`)
+
+        await wait(200000000)
+
+        // Previously, this would crash the page with a "Cannot read properties of null (reading 'fields')" error
+        await expect(page.locator('#field-rel')).toBeVisible()
       })
     })
   })
