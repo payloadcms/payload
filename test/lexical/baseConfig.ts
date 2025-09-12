@@ -70,7 +70,21 @@ export const baseConfig: Partial<Config> = {
   localization: {
     defaultLocale: 'en',
     fallback: true,
-    locales: ['en', 'es'],
+    locales: [
+      {
+        label: 'English',
+        code: 'en',
+      },
+      {
+        label: 'Spanish',
+        code: 'es',
+      },
+      {
+        label: 'Arabic',
+        code: 'ar',
+        rtl: true,
+      },
+    ],
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
