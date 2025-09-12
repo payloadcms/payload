@@ -166,6 +166,18 @@ export const addDefaultsToConfig = (config: Config): Config => {
   }
 
   if (
+    config.hierarchy !== false &&
+    config.collections.some((collection) => Boolean(collection.hierarchy))
+  ) {
+    config.hierarchy = {
+      slug: config.hierarchy?.slug ?? 'payload-hierarchy',
+      ...(config.hierarchy || {}),
+    }
+  } else {
+    config.hierarchy = false
+  }
+
+  if (
     config.folders !== false &&
     config.collections.some((collection) => Boolean(collection.folders))
   ) {
