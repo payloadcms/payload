@@ -175,6 +175,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignLeftLabel: 'Justera till vänster',
     alignRightLabel: 'Justera till höger',
   },
+  ta: {
+    alignCenterLabel: 'மையத்தில் ஒழுங்குபடுத்து',
+    alignJustifyLabel: 'இருபுறமும் ஒழுங்குபடுத்து',
+    alignLeftLabel: 'இடப்புறத்தில் ஒழுங்குபடுத்து',
+    alignRightLabel: 'வலப்புறத்தில் ஒழுங்குபடுத்து',
+  },
   th: {
     alignCenterLabel: 'จัดแนวกึ่งกลาง',
     alignJustifyLabel: 'จัดแนวตรง',

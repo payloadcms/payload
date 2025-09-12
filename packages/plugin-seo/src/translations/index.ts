@@ -31,6 +31,7 @@ import { ru } from './ru.js'
 import { sk } from './sk.js'
 import { sl } from './sl.js'
 import { sv } from './sv.js'
+import { ta } from './ta.js'
 import { th } from './th.js'
 import { tr } from './tr.js'
 import { uk } from './uk.js'
@@ -70,6 +71,7 @@ export const translations = {
   sk,
   sl,
   sv,
+  ta,
   th,
   tr,
   uk,
