@@ -33,6 +33,7 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
+import { formatAbsoluteURL } from '../../utilities/formatAbsoluteURL.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
@@ -132,9 +133,17 @@ export function DefaultEditView({
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
-  const { getFormState } = useServerFunctions()
+  const { getFormState, getLivePreviewURL } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
-  const { isLivePreviewEnabled, isLivePreviewing, previewWindowType } = useLivePreviewContext()
+  const {
+    isLivePreviewEnabled,
+    isLivePreviewing,
+    previewWindowType,
+    setURL: setLivePreviewURL,
+    url: livePreviewURL,
+    urlDeps: livePreviewURLDeps,
+    urlIsFunction: livePreviewURLIsFunction,
+  } = useLivePreviewContext()
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)
@@ -263,8 +272,8 @@ export function DefaultEditView({
   ])
 
   const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
-    async (json, options) => {
-      const { context, formState } = options || {}
+    async (json, ctx) => {
+      const { context, dataSubmitted, formState } = ctx || {}
 
       const controller = handleAbortRef(abortOnSaveRef)
 
@@ -292,6 +301,41 @@ export function DefaultEditView({
 
       if (typeof setData === 'function') {
         void setData(document || {})
+      }
+
+      let shouldFetchLivePreviewURL = false
+
+      const data = dataSubmitted.get('_payload')
+      console.log(data, typeof data)
+
+      if (isLivePreviewEnabled && livePreviewURLIsFunction && livePreviewURLDeps) {
+        if (!livePreviewURLDeps.length) {
+          shouldFetchLivePreviewURL = true
+        } else {
+          /*
+           * Check the deps in the most efficient way possible
+           * One extremely fast way is to simply check if they were submitted in the request
+           * This will prevent us from having to loop over `json` response and compare prev values
+           */
+          console.log(dataSubmitted)
+        }
+      }
+
+      // Refresh live preview url, if needed
+      // One potential optimization here would be to only do this if certain fields changed
+      // And/or also combing this with some other action, like the submit itself
+      if (shouldFetchLivePreviewURL) {
+        const { url: newURLRaw } = await getLivePreviewURL({
+          collectionSlug,
+          data: document,
+          globalSlug,
+        })
+
+        const newLivePreviewURL = formatAbsoluteURL(newURLRaw)
+
+        if (newLivePreviewURL && newLivePreviewURL !== livePreviewURL) {
+          setLivePreviewURL(newLivePreviewURL)
+        }
       }
 
       if (typeof onSaveFromContext === 'function') {
@@ -383,6 +427,12 @@ export function DefaultEditView({
       schemaPathSegments,
       isLockingEnabled,
       setDocumentIsLocked,
+      setLivePreviewURL,
+      livePreviewURL,
+      getLivePreviewURL,
+      isLivePreviewEnabled,
+      livePreviewURLDeps,
+      livePreviewURLIsFunction,
     ],
   )
 

@@ -1,5 +1,5 @@
 'use client'
-import type { LivePreviewConfig } from 'payload'
+import type { LivePreviewConfig, RootLivePreviewConfig } from 'payload'
 import type { Dispatch } from 'react'
 import type React from 'react'
 
@@ -12,12 +12,17 @@ export interface LivePreviewContextType {
   appIsReady: boolean
   breakpoint: LivePreviewConfig['breakpoints'][number]['name']
   breakpoints: LivePreviewConfig['breakpoints']
-  iframeHasLoaded: boolean
   iframeRef: React.RefObject<HTMLIFrameElement | null>
   isLivePreviewEnabled: boolean
   isLivePreviewing: boolean
   isPopupOpen: boolean
   listeningForMessages?: boolean
+  /**
+   * The URL that has finished loading in the iframe or popup.
+   * For example, if you set the `url`, it will begin to load into the iframe,
+   * but `loadedURL` will not be set until the iframe's `onLoad` event fires.
+   */
+  loadedURL?: string
   measuredDeviceSize: {
     height: number
     width: number
@@ -28,12 +33,17 @@ export interface LivePreviewContextType {
   setAppIsReady: (appIsReady: boolean) => void
   setBreakpoint: (breakpoint: LivePreviewConfig['breakpoints'][number]['name']) => void
   setHeight: (height: number) => void
-  setIframeHasLoaded: (loaded: boolean) => void
   setIsLivePreviewing: (isLivePreviewing: boolean) => void
+  setLoadedURL: (loadedURL: string) => void
   setMeasuredDeviceSize: (size: { height: number; width: number }) => void
   setPreviewWindowType: (previewWindowType: 'iframe' | 'popup') => void
   setSize: Dispatch<SizeReducerAction>
   setToolbarPosition: (position: { x: number; y: number }) => void
+  /**
+   * Sets the URL of the preview (either iframe or popup).
+   * Will trigger a reload of the window.
+   */
+  setURL: (url: string) => void
   setWidth: (width: number) => void
   setZoom: (zoom: number) => void
   size: {
@@ -45,6 +55,13 @@ export interface LivePreviewContextType {
     y: number
   }
   url: string | undefined
+  urlDeps?: RootLivePreviewConfig['urlDeps']
+  /**
+   * True when the live preview `url` property in the config is defined as a function.
+   * This tells the client that it needs to call the server to get the URL, rather than using a static string.
+   * Useful to ensure that the server function is only called when necessary.
+   */
+  urlIsFunction?: boolean
   zoom: number
 }
 
@@ -52,7 +69,6 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   appIsReady: false,
   breakpoint: undefined,
   breakpoints: undefined,
-  iframeHasLoaded: false,
   iframeRef: undefined,
   isLivePreviewEnabled: undefined,
   isLivePreviewing: false,
@@ -67,12 +83,13 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   setAppIsReady: () => {},
   setBreakpoint: () => {},
   setHeight: () => {},
-  setIframeHasLoaded: () => {},
   setIsLivePreviewing: () => {},
+  setLoadedURL: () => {},
   setMeasuredDeviceSize: () => {},
   setPreviewWindowType: () => {},
   setSize: () => {},
   setToolbarPosition: () => {},
+  setURL: () => {},
   setWidth: () => {},
   setZoom: () => {},
   size: {
@@ -84,6 +101,8 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
     y: 0,
   },
   url: undefined,
+  urlDeps: [],
+  urlIsFunction: false,
   zoom: 1,
 })
 
