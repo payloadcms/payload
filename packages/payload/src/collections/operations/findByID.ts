@@ -20,7 +20,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { NotFound } from '../../errors/index.js'
-import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/index.js'
 import { validateQueryPaths } from '../../index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
@@ -29,7 +29,7 @@ import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'
 
-export type Arguments = {
+export type FindByIDArgs = {
   collection: Collection
   currentDepth?: number
   /**
@@ -49,14 +49,14 @@ export type Arguments = {
   select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
-}
+} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>
 
 export const findByIDOperation = async <
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<TSlug>,
 >(
-  incomingArgs: Arguments,
+  incomingArgs: FindByIDArgs,
 ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
   let args = incomingArgs
 
@@ -85,6 +85,7 @@ export const findByIDOperation = async <
       depth,
       disableErrors,
       draft: draftEnabled = false,
+      flattenLocales,
       includeLockStatus,
       joins,
       overrideAccess = false,
@@ -279,6 +280,7 @@ export const findByIDOperation = async <
       doc: result,
       draft: draftEnabled,
       fallbackLocale: fallbackLocale!,
+      flattenLocales,
       global: null,
       locale: locale!,
       overrideAccess,

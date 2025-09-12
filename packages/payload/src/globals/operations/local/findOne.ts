@@ -11,7 +11,7 @@ import type { SelectFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
-import { findOneOperation } from '../findOne.js'
+import { findOneOperation, type GlobalFindOneArgs } from '../findOne.js'
 
 export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   /**
@@ -78,7 +78,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<GlobalFindOneArgs, 'flattenLocales'>
 
 export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,
@@ -92,6 +92,7 @@ export async function findOneGlobalLocal<
     data,
     depth,
     draft = false,
+    flattenLocales,
     includeLockStatus,
     overrideAccess = true,
     populate,
@@ -110,6 +111,7 @@ export async function findOneGlobalLocal<
     data,
     depth,
     draft,
+    flattenLocales,
     globalConfig,
     includeLockStatus,
     overrideAccess,

@@ -32,6 +32,12 @@ export const RelationshipsBlock: React.FC<RelationshipsBlockProps> = (props) => 
           <RichText content={data.richTextLexical} renderUploadFilenameOnly />
         )}
         <p>
+          <b>Rich Text — Lexical — Localized:</b>
+        </p>
+        {data?.richTextLexicalLocalized && (
+          <RichText content={data.richTextLexicalLocalized} renderUploadFilenameOnly />
+        )}
+        <p>
           <b>Upload:</b>
         </p>
         {data?.relationshipAsUpload ? (

@@ -93,6 +93,18 @@ export const Pages: CollectionConfig = {
               }),
             },
             {
+              label: 'Rich Text — Lexical — Localized',
+              type: 'richText',
+              name: 'richTextLexicalLocalized',
+              localized: true,
+              editor: lexicalEditor({
+                features: ({ defaultFeatures }) => [
+                  ...defaultFeatures,
+                  BlocksFeature({ blocks: ['mediaBlock'] }),
+                ],
+              }),
+            },
+            {
               name: 'relationshipAsUpload',
               type: 'upload',
               relationTo: 'media',
