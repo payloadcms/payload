@@ -117,6 +117,10 @@ export const i18n: Partial<GenericLanguages> = {
     decreaseLabel: 'Minska indrag',
     increaseLabel: 'Öka indrag',
   },
+  ta: {
+    decreaseLabel: 'இடதுபுறச் செருகலை குறைக்கவும்',
+    increaseLabel: 'இடதுபுறச் செருகலை அதிகரிக்கவும்',
+  },
   th: {
     decreaseLabel: 'ลดการเยื้อง',
     increaseLabel: 'เพิ่มการเยื้อง',
