@@ -70,6 +70,7 @@ export interface Config {
     posts: Post;
     categories: Category;
     media: Media;
+    relationships: Relationship;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -80,6 +81,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    relationships: RelationshipsSelect<false> | RelationshipsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -188,6 +190,39 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships".
+ */
+export interface Relationship {
+  id: string;
+  title?: string | null;
+  PolyHasOneRelationship?:
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null);
+  PolyHasManyRelationship?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: string | Category;
+          }
+        | {
+            relationTo: 'posts';
+            value: string | Post;
+          }
+      )[]
+    | null;
+  MonoHasOneRelationship?: (string | null) | Category;
+  MonoHasManyRelationship?: (string | Category)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -228,6 +263,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'relationships';
+        value: string | Relationship;
       } | null)
     | ({
         relationTo: 'users';
@@ -348,6 +387,19 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships_select".
+ */
+export interface RelationshipsSelect<T extends boolean = true> {
+  title?: T;
+  PolyHasOneRelationship?: T;
+  PolyHasManyRelationship?: T;
+  MonoHasOneRelationship?: T;
+  MonoHasManyRelationship?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

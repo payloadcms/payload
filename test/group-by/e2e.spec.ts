@@ -693,6 +693,117 @@ test.describe('Group By', () => {
     ).toHaveCount(0)
   })
 
+  test('should group by monomorphic has one relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Mono Has One Relationship',
+      fieldPath: 'MonoHasOneRelationship',
+    })
+
+    // Should show populated values first, then "No value"
+    await expect(page.locator('.table-wrap')).toHaveCount(2)
+    await expect(page.locator('.group-by-header')).toHaveCount(2)
+
+    // Check that Category 1 appears as a group
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    // Check that "No value" appears last
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by monomorphic has many relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Mono Has Many Relationship',
+      fieldPath: 'MonoHasManyRelationship',
+    })
+
+    // Should flatten hasMany arrays - each category gets its own group
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+    await expect(page.locator('.group-by-header')).toHaveCount(3)
+
+    // Both categories should appear as separate groups
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
+    ).toBeVisible()
+
+    // "No value" should appear last
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by polymorphic has one relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Poly Has One Relationship',
+      fieldPath: 'PolyHasOneRelationship',
+    })
+
+    // Should show groups for both collection types plus "No value"
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+    await expect(page.locator('.group-by-header')).toHaveCount(3)
+
+    // Check for Category 1 group
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    // Check for Post group (should display the post's title as useAsTitle)
+    await expect(page.locator('.group-by-header__heading', { hasText: 'Find me' })).toBeVisible()
+
+    // "No value" should appear last
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by polymorphic has many relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Poly Has Many Relationship',
+      fieldPath: 'PolyHasManyRelationship',
+    })
+
+    // Should flatten polymorphic hasMany arrays - each relationship gets its own group
+    // Expecting: Category 1, Category 2, Post, and "No value" = 4 groups
+    await expect(page.locator('.table-wrap')).toHaveCount(4)
+    await expect(page.locator('.group-by-header')).toHaveCount(4)
+
+    // Check for both category groups
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
+    ).toBeVisible()
+
+    // Check for post group
+    await expect(page.locator('.group-by-header__heading', { hasText: 'Find me' })).toBeVisible()
+
+    // "No value" should appear last (documents without any relationships)
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
   test.describe('Trash', () => {
     test('should show trashed docs in trash view when group-by is active', async () => {
       await page.goto(url.list)
