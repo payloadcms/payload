@@ -2,7 +2,6 @@ import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical
 import type { CollectionAfterReadHook, CollectionBeforeChangeHook, RichTextField } from 'payload'
 
 import {
-  $convertFromMarkdownString,
   extractFrontmatter,
   frontmatterToObject,
   getEnabledNodes,
@@ -11,7 +10,10 @@ import {
   type SanitizedServerEditorConfig,
 } from '@payloadcms/richtext-lexical'
 import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
-import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/markdown'
+import {
+  $convertFromMarkdownString,
+  $convertToMarkdownString,
+} from '@payloadcms/richtext-lexical/lexical/markdown'
 import fs from 'node:fs'
 import path from 'path'
 import { deepCopyObjectSimple } from 'payload'

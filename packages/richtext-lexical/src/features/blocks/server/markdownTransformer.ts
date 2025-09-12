@@ -2,18 +2,18 @@ import type { ElementNode, SerializedEditorState, SerializedLexicalNode } from '
 import type { Block } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
-import { $parseSerializedNode } from 'lexical'
-
-import type { NodeWithHooks } from '../../typesServer.js'
-
-import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
 import {
   $convertFromMarkdownString,
   $convertToMarkdownString,
   type MultilineElementTransformer,
   type TextMatchTransformer,
   type Transformer,
-} from '../../../packages/@lexical/markdown/index.js'
+} from '@lexical/markdown'
+import { $parseSerializedNode } from 'lexical'
+
+import type { NodeWithHooks } from '../../typesServer.js'
+
+import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
 import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
 import { linesFromStartToContentAndPropsString } from './linesFromMatchToContentAndPropsString.js'

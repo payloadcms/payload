@@ -1,12 +1,12 @@
 import type { SerializedQuoteNode as _SerializedQuoteNode } from '@lexical/rich-text'
 import type { Spread } from 'lexical'
 
+import { QUOTE } from '@lexical/markdown'
 import { QuoteNode } from '@lexical/rich-text'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
-import { MarkdownTransformer } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
 
 export type SerializedQuoteNode = Spread<
@@ -21,7 +21,7 @@ export const BlockquoteFeature = createServerFeature({
     ClientFeature: '@payloadcms/richtext-lexical/client#BlockquoteFeatureClient',
     clientFeatureProps: null,
     i18n,
-    markdownTransformers: [MarkdownTransformer],
+    markdownTransformers: [QUOTE],
     nodes: [
       createNode({
         converters: {

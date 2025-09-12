@@ -1,19 +1,22 @@
 /**
- * Code taken from https://github.com/facebook/lexical/blob/main/packages/lexical-markdown/src/MarkdownTransformers.ts#L357
+ * Code adapted from https://github.com/facebook/lexical/blob/main/packages/lexical-markdown/src/MarkdownTransformers.ts#L357
  */
 
-// Order of text transformers matters:
-//
-// - code should go first as it prevents any transformations inside
+import type { TextMatchTransformer } from '@lexical/markdown'
 
-import { $createTextNode, $isTextNode } from 'lexical'
-
-import type { TextMatchTransformer } from '../../packages/@lexical/markdown/MarkdownTransformers.js'
+import { $createTextNode } from 'lexical'
 
 import { $createLinkNode, $isLinkNode, LinkNode } from './nodes/LinkNode.js'
 
-// - then longer tags match (e.g. ** or __ should go before * or _)
-export const LinkMarkdownTransformer: TextMatchTransformer = {
+/**
+ * Unlike other transformers that use Lexical’s defaults, Payload provides
+ * a custom transformer for links, since it relies on its own LinkNode.
+ *
+ * If you’re working with internal links, you’ll need to customize the
+ * `export` and `replace` methods of this transformer, as Payload cannot
+ * infer the correct URL format on its own.
+ */
+export const PAYLOAD_LINK_TRANSFORMER: TextMatchTransformer = {
   type: 'text-match',
   dependencies: [LinkNode],
   export: (_node, exportChildren) => {

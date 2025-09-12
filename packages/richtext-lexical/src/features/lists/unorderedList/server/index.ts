@@ -1,9 +1,9 @@
 import { ListItemNode, ListNode } from '@lexical/list'
+import { UNORDERED_LIST } from '@lexical/markdown'
 
 import { createServerFeature } from '../../../../utilities/createServerFeature.js'
 import { createNode } from '../../../typeUtilities.js'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../../htmlConverter.js'
-import { UNORDERED_LIST } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
 
 export const UnorderedListFeature = createServerFeature({
