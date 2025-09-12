@@ -9,6 +9,7 @@ import type {
   SelectType,
 } from '../../../types/index.js'
 import type { Block, Field, TabAsField } from '../../config/types.js'
+import type { AfterReadArgs } from './index.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { type RequestContext } from '../../../index.js'
@@ -40,7 +41,6 @@ type Args = {
    */
   fieldPromises: Promise<void>[]
   findMany: boolean
-  flattenLocales: boolean
   global: null | SanitizedGlobalConfig
   locale: null | string
   overrideAccess: boolean
@@ -61,7 +61,7 @@ type Args = {
   siblingFields?: (Field | TabAsField)[]
   triggerAccessControl?: boolean
   triggerHooks?: boolean
-}
+} & Required<Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>>
 
 // This function is responsible for the following actions, in order:
 // - Remove hidden fields from response

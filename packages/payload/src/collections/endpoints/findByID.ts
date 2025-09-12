@@ -15,6 +15,7 @@ export const findByIDHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
   const depth = data ? data.depth : searchParams.get('depth')
   const trash = data ? data.trash : searchParams.get('trash') === 'true'
+  const flattenLocales = data ? data.flattenLocales : searchParams.get('flattenLocales') === 'true'
 
   const result = await findByIDOperation({
     id,
@@ -26,6 +27,7 @@ export const findByIDHandler: PayloadHandler = async (req) => {
         : undefined,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: data ? data.draft : searchParams.get('draft') === 'true',
+    flattenLocales,
     joins: sanitizeJoinParams(req.query.joins as JoinParams),
     populate: sanitizePopulateParam(req.query.populate),
     req,
