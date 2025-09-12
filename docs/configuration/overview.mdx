@@ -319,3 +319,13 @@ Now you can run the command using:
 ```sh
 pnpm payload seed
 ```
+
+## Running bin scripts on a schedule
+
+Every bin script supports being run on a schedule using cron syntax. Simply pass the `--cron` flag followed by the cron expression when running the script. Example:
+
+```sh
+pnpm payload run ./myScript.ts --cron "0 * * * *"
+```
+
+This will use the `run` bin script to execute the specified script on the defined schedule.
