@@ -39,9 +39,16 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   for (let i = 0; i < result.docs.length; i++) {
     const id = result.docs[i].parent
     const localeStatus = result.docs[i].localeStatus || {}
-    if (locale && localeStatus[locale]) {
-      result.docs[i].status = localeStatus[locale]
-      result.docs[i].version._status = localeStatus[locale]
+    const localeUpdatedAt = result.docs[i].localeUpdatedAt || {}
+
+    if (locale) {
+      if (localeStatus[locale]) {
+        result.docs[i].status = localeStatus[locale]
+        result.docs[i].version._status = localeStatus[locale]
+      }
+      if (localeUpdatedAt[locale]) {
+        result.docs[i].version.updatedAt = localeUpdatedAt[locale]
+      }
     }
 
     result.docs[i] = result.docs[i].version ?? {}

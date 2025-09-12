@@ -75,6 +75,7 @@ let client: RESTClient
 let serverURL: string
 let richTextURL: AdminUrlUtil
 let context: BrowserContext
+let existingDraftURL: string
 
 describe('Localization', () => {
   beforeAll(async ({ browser }, testInfo) => {
@@ -320,6 +321,7 @@ describe('Localization', () => {
       await page.locator('#field-title').fill(englishTitle)
       await page.locator('#field-nav__layout .blocks-field__drawer-toggler').click()
       await page.locator('button[title="Text"]').click()
+      await saveDocAndAssert(page)
       await page.fill('#field-nav__layout__0__text', 'test')
       await expect(page.locator('#field-nav__layout__0__text')).toHaveValue('test')
       await saveDocAndAssert(page)
@@ -365,7 +367,6 @@ describe('Localization', () => {
       await expect(localeLabel).not.toHaveText('English')
     })
   })
-
   describe('localized relationships', () => {
     test('ensure relationship field fetches are localized as well', async () => {
       await changeLocale(page, spanishLocale)
@@ -708,6 +709,31 @@ describe('Localization', () => {
     await page.goto(noLocalizedFieldsURL.create)
     await expect(page.locator('#publish-locale')).toHaveCount(0)
   })
+
+  describe('localized timestamps', () => {
+    beforeAll(async () => {
+      await page.goto(urlPostsWithDrafts.create)
+      await fillValues({ title: 'created in english' })
+      await saveDocAndAssert(page)
+      existingDraftURL = page.url()
+      await new Promise((resolve) => setTimeout(resolve, 30000))
+    })
+    test('should show localized updatedAt timestamp', async () => {
+      await page.goto(existingDraftURL)
+      const lastModifiedEnglish = await getDocControlValue(page, 'Last Modified')
+      await new Promise((resolve) => setTimeout(resolve, 30000))
+      await changeLocale(page, spanishLocale)
+      await fillValues({ title: 'updated in spanish' })
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      const lastModifiedSpanish = await getDocControlValue(page, 'Last Modified')
+      expect(lastModifiedSpanish).not.toBe(lastModifiedEnglish)
+
+      await changeLocale(page, defaultLocale)
+      const lastModified = await getDocControlValue(page, 'Last Modified')
+      expect(lastModified).toBe(lastModifiedEnglish)
+    })
+  })
 })
 
 async function createLocalizedArrayItem(page: Page, url: AdminUrlUtil) {
@@ -753,4 +779,12 @@ async function setToLocale(page, locale) {
   await toField.click({ delay: 100 })
   const options = page.locator('.rs__option')
   await options.locator(`text=${locale}`).click()
+}
+
+async function getDocControlValue(page: Page, label: string): Promise<string> {
+  return page
+    .locator(
+      `li.doc-controls__list-item.doc-controls__value-wrap:has(p.doc-controls__label:has-text("${label}")) >> p.doc-controls__value`,
+    )
+    .innerText()
 }

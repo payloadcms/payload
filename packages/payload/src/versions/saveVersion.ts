@@ -131,41 +131,63 @@ export const saveVersion = async ({
 
     if (createNewVersion) {
       let localeStatus = {}
+      let localeUpdatedAt = {}
       const localizationEnabled =
         payload.config.localization && payload.config.localization.locales.length > 0
 
-      if (
-        localizationEnabled &&
-        payload.config.localization !== false &&
-        payload.config.experimental?.localizeStatus
-      ) {
+      if (localizationEnabled && payload.config.localization !== false) {
         const allLocales = (
           (payload.config.localization && payload.config.localization?.locales) ||
           []
         ).map((locale) => (typeof locale === 'string' ? locale : locale.code))
 
-        // If `publish all`, set all locales to published
-        if (versionData._status === 'published' && !publishSpecificLocale) {
-          localeStatus = Object.fromEntries(allLocales.map((code) => [code, 'published']))
-        } else if (publishSpecificLocale || (locale && versionData._status === 'draft')) {
-          const status: 'draft' | 'published' = publishSpecificLocale ? 'published' : 'draft'
-          const incomingLocale = String(publishSpecificLocale || locale)
-          const existing = latestVersion?.localeStatus
+        if (payload.config.experimental?.localizeStatus) {
+          // If `publish all`, set all locales to published
+          if (versionData._status === 'published' && !publishSpecificLocale) {
+            localeStatus = Object.fromEntries(allLocales.map((code) => [code, 'published']))
+          } else if (publishSpecificLocale || (locale && versionData._status === 'draft')) {
+            const status: 'draft' | 'published' = publishSpecificLocale ? 'published' : 'draft'
+            const incomingLocale = String(publishSpecificLocale || locale)
+            const existing = latestVersion?.localeStatus
 
-          // If no locale statuses are set, set it and set all others to draft
+            // If no locale statuses are set, set it and set all others to draft
+            if (!existing) {
+              localeStatus = {
+                ...Object.fromEntries(
+                  allLocales
+                    .filter((code) => code !== incomingLocale)
+                    .map((code) => [code, 'draft']),
+                ),
+                [incomingLocale]: status,
+              }
+            } else {
+              // If locales already exist, update the status for the incoming locale
+              const { [incomingLocale]: _, ...rest } = existing
+              localeStatus = {
+                ...rest,
+                [incomingLocale]: status,
+              }
+            }
+          }
+        }
+
+        if (payload.config.experimental?.localizeUpdatedAt) {
+          const incomingLocale = String(locale)
+          const existing = latestVersion?.localeUpdatedAt
+
           if (!existing) {
-            localeStatus = {
+            localeUpdatedAt = {
               ...Object.fromEntries(
-                allLocales.filter((code) => code !== incomingLocale).map((code) => [code, 'draft']),
+                allLocales
+                  .filter((code) => code !== incomingLocale)
+                  .map((code) => [code, latestVersion?.createdAt || now]),
               ),
-              [incomingLocale]: status,
+              [incomingLocale]: now,
             }
           } else {
-            // If locales already exist, update the status for the incoming locale
-            const { [incomingLocale]: _, ...rest } = existing
-            localeStatus = {
-              ...rest,
-              [incomingLocale]: status,
+            localeUpdatedAt = {
+              ...existing,
+              [incomingLocale]: now,
             }
           }
         }
@@ -177,6 +199,7 @@ export const saveVersion = async ({
         createdAt: operation === 'restoreVersion' ? versionData.createdAt : now,
         globalSlug: undefined as string | undefined,
         localeStatus,
+        localeUpdatedAt,
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,
         req,
