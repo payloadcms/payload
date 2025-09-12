@@ -286,6 +286,8 @@ export const caTranslations: DefaultTranslationsObject = {
     deleted: 'Eliminat',
     deletedAt: 'Eliminat en',
     deletedCountSuccessfully: 'Eliminat {{count}} {{label}} correctament.',
+    deletedInLocale:
+      "S'ha eliminat amb èxit totes les dades de {{locale}}. El document en si no s'ha eliminat.",
     deletedSuccessfully: 'Eliminat correntament.',
     deleteLabel: 'Esborra {{label}}',
     deletePermanently: 'Omet la paperera i elimina permanentment',
@@ -326,6 +328,7 @@ export const caTranslations: DefaultTranslationsObject = {
     goBack: 'Torna enrere',
     groupByLabel: 'Agrupa per {{label}}',
     import: 'Importar',
+    in: 'en',
     isEditing: 'esta editant',
     item: 'Element',
     items: 'articles',

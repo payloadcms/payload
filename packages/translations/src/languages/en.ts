@@ -288,6 +288,8 @@ export const enTranslations = {
     deleted: 'Deleted',
     deletedAt: 'Deleted At',
     deletedCountSuccessfully: 'Deleted {{count}} {{label}} successfully.',
+    deletedInLocale:
+      'Successfully removed all {{locale}} data. The document itself was not deleted.',
     deletedSuccessfully: 'Deleted successfully.',
     deleteLabel: 'Delete {{label}}',
     deletePermanently: 'Skip trash and delete permanently',
@@ -328,6 +330,7 @@ export const enTranslations = {
     goBack: 'Go back',
     groupByLabel: 'Group by {{label}}',
     import: 'Import',
+    in: 'In',
     isEditing: 'is editing',
     item: 'Item',
     items: 'items',

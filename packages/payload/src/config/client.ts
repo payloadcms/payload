@@ -229,6 +229,10 @@ export const createClientConfig = ({
           if (config.experimental?.localizeStatus) {
             clientConfig.experimental.localizeStatus = config.experimental.localizeStatus
           }
+
+          if (config.experimental?.deleteCurrentLocale) {
+            clientConfig.experimental.deleteCurrentLocale = config.experimental.deleteCurrentLocale
+          }
         }
 
         break

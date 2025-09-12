@@ -1,6 +1,6 @@
-import type { Language } from '../types.js'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-export const isTranslations = {
+export const isTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Aðgangur',
     accountOfCurrentUser: 'Aðgangur núverandi notanda',
@@ -27,11 +27,9 @@ export const isTranslations = {
     forgotPassword: 'Gleymdist lykilorð',
     forgotPasswordEmailInstructions:
       'Vinsamlegast sláðu inn netfangið þitt hér að neðan. Þú munt fá tölvupóst með leiðbeiningum um hvernig á að endurstilla lykilorðið þitt.',
+    forgotPasswordQuestion: 'Gleymdist lykilorðið?',
     forgotPasswordUsernameInstructions:
       'Vinsamlegast sláðu inn notandanafnið þitt hér að neðan. Leiðbeiningar um hvernig á að endurstilla lykilorðið þitt verða sendar á netfangið sem tengt er notandanafninu þínu.',
-    usernameNotValid: 'Notandanafnið sem gefið var upp er ekki gilt',
-
-    forgotPasswordQuestion: 'Gleymdist lykilorðið?',
     generate: 'Búa til',
     generateNewAPIKey: 'Búa til nýjan API lykil',
     generatingNewAPIKeyWillInvalidate:
@@ -69,6 +67,7 @@ export const isTranslations = {
     tokenRefreshSuccessful: 'Endurnýjun tokens tókst.',
     unableToVerify: 'Ekki hægt að staðfesta',
     username: 'Notandanafn',
+    usernameNotValid: 'Notandanafnið sem gefið var upp er ekki gilt',
     verified: 'Staðfest',
     verifiedSuccessfully: 'Staðfest',
     verify: 'Staðfesta',
@@ -285,6 +284,8 @@ export const isTranslations = {
     deleted: 'Eytt',
     deletedAt: 'Eytt',
     deletedCountSuccessfully: 'Eyddi {{count}} {{label}}.',
+    deletedInLocale:
+      'All gögn {{locale}} voru með góðum árangri fjarlægð. Dokumentið sjálft var ekki eytt.',
     deletedSuccessfully: 'Eytt.',
     deleteLabel: 'Eyða {{label}}',
     deletePermanently: 'Sleppa rusli og eyða varanlega',
@@ -325,6 +326,7 @@ export const isTranslations = {
     goBack: 'Fara til baka',
     groupByLabel: 'Flokka eftir {{label}}',
     import: 'Flytja inn',
+    in: 'í',
     isEditing: 'er að breyta',
     item: 'hlutur',
     items: 'hlutir',
@@ -601,7 +603,6 @@ export const isTranslations = {
     versionCount_none: 'Engar útgáfur fundust',
     versionCount_one: '{{count}} útgáfa fannst',
     versionCount_other: '{{count}} útgáfur fundust',
-    versionCreatedOn: '{{version}} búin til þann:',
     versionID: 'Útgáfuauðkenni',
     versions: 'Útgáfur',
     viewingVersion: 'Skoða útgáfu fyrir {{entityLabel}} {{documentTitle}}',

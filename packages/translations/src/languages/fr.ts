@@ -295,6 +295,8 @@ export const frTranslations: DefaultTranslationsObject = {
     deleted: 'Supprimé',
     deletedAt: 'Supprimé à',
     deletedCountSuccessfully: '{{count}} {{label}} supprimé avec succès.',
+    deletedInLocale:
+      "Toutes les données {{locale}} ont été supprimées avec succès. Le document lui-même n'a pas été supprimé.",
     deletedSuccessfully: 'Supprimé(e) avec succès.',
     deleteLabel: 'Supprimer {{label}}',
     deletePermanently: 'Ignorer la corbeille et supprimer définitivement',
@@ -335,6 +337,7 @@ export const frTranslations: DefaultTranslationsObject = {
     goBack: 'Retourner',
     groupByLabel: 'Regrouper par {{label}}',
     import: 'Importation',
+    in: 'dans',
     isEditing: 'est en train de modifier',
     item: 'Article',
     items: 'articles',
