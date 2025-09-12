@@ -4,11 +4,12 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { FieldAccess } from 'payload'
 
+import { buildEditorState } from '@payloadcms/richtext-lexical'
+
 import type { Config, User } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { textToLexicalJSON } from '../lexical/collections/LexicalLocalized/textToLexicalJSON.js'
 import { Auth } from './collections/Auth/index.js'
 import { Disabled } from './collections/Disabled/index.js'
 import { Hooks } from './collections/hooks/index.js'
@@ -718,33 +719,33 @@ export default buildConfigWithDefaults(
       await payload.create({
         collection: 'regression1',
         data: {
-          richText4: textToLexicalJSON({ text: 'Text1' }),
-          array: [{ art: textToLexicalJSON({ text: 'Text2' }) }],
-          arrayWithAccessFalse: [{ richText6: textToLexicalJSON({ text: 'Text3' }) }],
+          richText4: buildEditorState({ text: 'Text1' }),
+          array: [{ art: buildEditorState({ text: 'Text2' }) }],
+          arrayWithAccessFalse: [{ richText6: buildEditorState({ text: 'Text3' }) }],
           group1: {
             text: 'Text4',
-            richText1: textToLexicalJSON({ text: 'Text5' }),
+            richText1: buildEditorState({ text: 'Text5' }),
           },
           blocks: [
             {
               blockType: 'myBlock3',
-              richText7: textToLexicalJSON({ text: 'Text6' }),
+              richText7: buildEditorState({ text: 'Text6' }),
               blockName: 'My Block 1',
             },
           ],
           blocks3: [
             {
               blockType: 'myBlock2',
-              richText5: textToLexicalJSON({ text: 'Text7' }),
+              richText5: buildEditorState({ text: 'Text7' }),
               blockName: 'My Block 2',
             },
           ],
           tab1: {
-            richText2: textToLexicalJSON({ text: 'Text8' }),
+            richText2: buildEditorState({ text: 'Text8' }),
             blocks2: [
               {
                 blockType: 'myBlock',
-                richText3: textToLexicalJSON({ text: 'Text9' }),
+                richText3: buildEditorState({ text: 'Text9' }),
                 blockName: 'My Block 3',
               },
             ],
@@ -757,12 +758,12 @@ export default buildConfigWithDefaults(
         data: {
           array: [
             {
-              richText2: textToLexicalJSON({ text: 'Text1' }),
+              richText2: buildEditorState({ text: 'Text1' }),
             },
           ],
           group: {
             text: 'Text2',
-            richText1: textToLexicalJSON({ text: 'Text3' }),
+            richText1: buildEditorState({ text: 'Text3' }),
           },
         },
       })

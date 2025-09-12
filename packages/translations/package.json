@@ -60,8 +60,8 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@swc/core": "1.11.29",
-    "@types/react": "19.1.8",
-    "@types/react-dom": "19.1.6",
+    "@types/react": "19.1.12",
+    "@types/react-dom": "19.1.9",
     "dotenv": "16.4.7",
     "prettier": "3.5.3",
     "typescript": "5.7.3"

@@ -1,5 +1,6 @@
 'use client'
 import type {
+  ClientComponentProps,
   ClientField,
   ClientTab,
   DocumentPreferences,
@@ -249,7 +250,6 @@ export const TabsField = withCondition(TabsFieldComponent)
 type ActiveTabProps = {
   readonly description: StaticDescription
   readonly fields: ClientField[]
-  readonly forceRender?: boolean
   readonly hidden: boolean
   readonly label?: string
   readonly parentIndexPath: string
@@ -258,7 +258,7 @@ type ActiveTabProps = {
   readonly path: string
   readonly permissions: SanitizedFieldPermissions
   readonly readOnly: boolean
-}
+} & Pick<ClientComponentProps, 'forceRender'>
 
 function TabContent({
   description,

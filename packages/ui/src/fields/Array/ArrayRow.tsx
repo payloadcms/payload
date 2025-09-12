@@ -1,5 +1,11 @@
 'use client'
-import type { ArrayField, ClientField, Row, SanitizedFieldPermissions } from 'payload'
+import type {
+  ArrayField,
+  ClientComponentProps,
+  ClientField,
+  Row,
+  SanitizedFieldPermissions,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -26,7 +32,6 @@ type ArrayRowProps = {
   readonly duplicateRow: (rowIndex: number) => void
   readonly errorCount: number
   readonly fields: ClientField[]
-  readonly forceRender?: boolean
   readonly hasMaxRows?: boolean
   readonly isLoading?: boolean
   readonly isSortable?: boolean
@@ -43,7 +48,8 @@ type ArrayRowProps = {
   readonly rowIndex: number
   readonly schemaPath: string
   readonly setCollapse: (rowID: string, collapsed: boolean) => void
-} & UseDraggableSortableReturn
+} & Pick<ClientComponentProps, 'forceRender'> &
+  UseDraggableSortableReturn
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({
   addRow,
