@@ -15,7 +15,12 @@ export const findByIDHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
   const depth = data ? data.depth : searchParams.get('depth')
   const trash = data ? data.trash : searchParams.get('trash') === 'true'
-  const flattenLocales = data ? data.flattenLocales : searchParams.get('flattenLocales') === 'true'
+  const flattenLocales = data
+    ? data.flattenLocales
+    : searchParams.has('flattenLocales')
+      ? searchParams.get('flattenLocales') === 'true'
+      : // flattenLocales should be undfined if not provided, so that the default (true) is applied in the operation
+        undefined
 
   const result = await findByIDOperation({
     id,
