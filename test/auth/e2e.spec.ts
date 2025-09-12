@@ -155,33 +155,6 @@ describe('Auth', () => {
     })
   })
 
-  test('should protect the client config behind authentication', async () => {
-    await page.goto(serverURL + '/admin/logout')
-    await page.goto(serverURL + '/admin/login')
-
-    // This element is absolutely positioned and `opacity: 0`
-    await expect(page.locator('#unauthenticated-client-config')).toBeAttached()
-
-    // Search for our uniquely identifiable field name
-    await expect(
-      page.locator('#unauthenticated-client-config', {
-        hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
-      }),
-    ).toHaveCount(0)
-
-    await login({ page, serverURL })
-
-    await page.goto(serverURL + '/admin')
-
-    await expect(page.locator('#authenticated-client-config')).toBeAttached()
-
-    await expect(
-      page.locator('#authenticated-client-config', {
-        hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
-      }),
-    ).toHaveCount(1)
-  })
-
   describe('non create first user', () => {
     beforeAll(async () => {
       await reInitializeDB({
@@ -207,6 +180,32 @@ describe('Auth', () => {
         await page.locator('#field-password').fill(devUser.password)
         await page.locator('#field-confirm-password').fill(devUser.password)
         await saveDocAndAssert(page, '#action-save')
+      })
+
+      test('should protect the client config behind authentication', async () => {
+        await logout(page, serverURL)
+
+        // This element is absolutely positioned and `opacity: 0`
+        await expect(page.locator('#unauthenticated-client-config')).toBeAttached()
+
+        // Search for our uniquely identifiable field name
+        await expect(
+          page.locator('#unauthenticated-client-config', {
+            hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
+          }),
+        ).toHaveCount(0)
+
+        await login({ page, serverURL })
+
+        await page.goto(serverURL + '/admin')
+
+        await expect(page.locator('#authenticated-client-config')).toBeAttached()
+
+        await expect(
+          page.locator('#authenticated-client-config', {
+            hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
+          }),
+        ).toHaveCount(1)
       })
 
       test('should allow change password', async () => {
