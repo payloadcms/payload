@@ -123,7 +123,7 @@ import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
 
-import type { ClientConfig } from './config/client.js'
+import type { ClientConfig, CreateClientConfigArgs } from './config/client.js'
 import type { BaseJob } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
 
@@ -1269,8 +1269,11 @@ export { buildConfig } from './config/build.js'
 export {
   type ClientConfig,
   createClientConfig,
+  type CreateClientConfigArgs,
+  createUnauthenticatedClientConfig,
   serverOnlyAdminConfigProperties,
   serverOnlyConfigProperties,
+  type UnauthenticatedClientConfig,
   type UnsanitizedClientConfig,
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
@@ -1572,6 +1575,7 @@ export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
   BeforeChangeHook as GlobalBeforeChangeHook,
+  BeforeOperationHook as GlobalBeforeOperationHook,
   BeforeReadHook as GlobalBeforeReadHook,
   BeforeValidateHook as GlobalBeforeValidateHook,
   DataFromGlobalSlug,

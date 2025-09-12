@@ -19,6 +19,7 @@ import { CollectionGroup2A } from './collections/Group2A.js'
 import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { ListDrawer } from './collections/ListDrawer.js'
+import { ListViewSelectAPI } from './collections/ListViewSelectAPI/index.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Placeholder } from './collections/Placeholder.js'
@@ -188,6 +189,7 @@ export default buildConfigWithDefaults({
     UseAsTitleGroupField,
     DisableBulkEdit,
     CustomListDrawer,
+    ListViewSelectAPI,
     Virtuals,
   ],
   globals: [

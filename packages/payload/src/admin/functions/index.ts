@@ -88,6 +88,9 @@ export type ListQuery = {
 } & Record<string, unknown>
 
 export type BuildTableStateArgs = {
+  /**
+   * If an array is provided, the table will be built to support polymorphic collections.
+   */
   collectionSlug: string | string[]
   columns?: ColumnPreference[]
   data?: PaginatedDocs

@@ -24,6 +24,7 @@ export const sanitizeGlobal = async (
   if (global._sanitized) {
     return global as SanitizedGlobalConfig
   }
+
   global._sanitized = true
 
   global.label = global.label || toWords(global.slug)
@@ -33,12 +34,15 @@ export const sanitizeGlobal = async (
   // /////////////////////////////////
 
   global.endpoints = global.endpoints ?? []
+
   if (!global.hooks) {
     global.hooks = {}
   }
+
   if (!global.access) {
     global.access = {}
   }
+
   if (!global.admin) {
     global.admin = {}
   }
@@ -46,6 +50,7 @@ export const sanitizeGlobal = async (
   if (!global.access.read) {
     global.access.read = defaultAccess
   }
+
   if (!global.access.update) {
     global.access.update = defaultAccess
   }
@@ -53,15 +58,19 @@ export const sanitizeGlobal = async (
   if (!global.hooks.beforeValidate) {
     global.hooks.beforeValidate = []
   }
+
   if (!global.hooks.beforeChange) {
     global.hooks.beforeChange = []
   }
+
   if (!global.hooks.afterChange) {
     global.hooks.afterChange = []
   }
+
   if (!global.hooks.beforeRead) {
     global.hooks.beforeRead = []
   }
+
   if (!global.hooks.afterRead) {
     global.hooks.afterRead = []
   }

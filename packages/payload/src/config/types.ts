@@ -275,6 +275,7 @@ export type InitOptions = {
   disableOnInit?: boolean
 
   importMap?: ImportMap
+
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
@@ -954,9 +955,10 @@ export type Config = {
      */
     timezones?: TimezonesConfig
     /**
-     * @experimental
      * Configure toast message behavior and appearance in the admin panel.
      * Currently using [Sonner](https://sonner.emilkowal.ski) for toast notifications.
+     *
+     * @experimental This property is experimental and may change in future releases. Use at your own discretion.
      */
     toast?: {
       /**
@@ -979,6 +981,7 @@ export type Config = {
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
+
   /**
    * Configure authentication-related Payload-wide settings.
    */
@@ -992,6 +995,15 @@ export type Config = {
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
   blocks?: Block[]
+  /**
+   * Pass additional options to the parser used to process `multipart/form-data` requests.
+   * For example, a PATCH request containing HTML form data.
+   * For example, you may want to increase the `limits` imposed by the parser.
+   * Currently using @link {https://www.npmjs.com/package/busboy|busboy} under the hood.
+   *
+   * @experimental This property is experimental and may change in future releases. Use at your own discretion.
+   */
+  bodyParser?: Partial<BusboyConfig>
   /**
    * Manage the datamodel of your application
    *
@@ -1023,10 +1035,8 @@ export type Config = {
   cors?: '*' | CORSConfig | string[]
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
-
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
-
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult
   /** Enable to expose more detailed error information. */
@@ -1063,7 +1073,8 @@ export type Config = {
   experimental?: ExperimentalConfig
   /**
    * Options for folder view within the admin panel
-   * @experimental this feature may change in minor versions until it is fully stable
+   *
+   * @experimental This feature may change in minor versions until it is fully stable
    */
   folders?: false | RootFoldersConfiguration
   /**

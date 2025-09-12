@@ -7,6 +7,7 @@ export { _internal_renderFieldHandler } from '../../forms/fieldSchemasToFormStat
 export { File } from '../../graphics/File/index.js'
 export { CheckIcon } from '../../icons/Check/index.js'
 export { copyDataFromLocaleHandler } from '../../utilities/copyDataFromLocale.js'
+export { getColumns } from '../../utilities/getColumns.js'
 export { getFolderResultsComponentAndData } from '../../utilities/getFolderResultsComponentAndData.js'
 export { renderFilters, renderTable } from '../../utilities/renderTable.js'
 export { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
