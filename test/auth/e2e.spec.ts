@@ -155,7 +155,7 @@ describe('Auth', () => {
     })
   })
 
-  test('should protect client config behind authentication', async () => {
+  test('should protect the client config behind authentication', async () => {
     await page.goto(serverURL + '/admin/logout')
     await page.goto(serverURL + '/admin/login')
 
@@ -165,7 +165,7 @@ describe('Auth', () => {
     // Search for our uniquely identifiable field name
     await expect(
       page.locator('#unauthenticated-client-config', {
-        hasText: exactText('shouldNotShowInClientConfigUnlessAuthenticated'),
+        hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
       }),
     ).toHaveCount(0)
 
@@ -173,11 +173,11 @@ describe('Auth', () => {
 
     await page.goto(serverURL + '/admin')
 
-    await expect(page.locator('#unauthenticated-client-config')).toBeAttached()
+    await expect(page.locator('#authenticated-client-config')).toBeAttached()
 
     await expect(
-      page.locator('#unauthenticated-client-config', {
-        hasText: exactText('shouldNotShowInClientConfigUnlessAuthenticated'),
+      page.locator('#authenticated-client-config', {
+        hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
       }),
     ).toHaveCount(1)
   })

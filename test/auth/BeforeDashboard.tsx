@@ -7,7 +7,7 @@ export const BeforeDashboard = () => {
 
   return (
     <p
-      id="unauthenticated-client-config"
+      id="authenticated-client-config"
       style={{ opacity: 0, pointerEvents: 'none', position: 'absolute' }}
     >
       {JSON.stringify(config, null, 2)}
