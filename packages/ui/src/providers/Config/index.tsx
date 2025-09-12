@@ -116,7 +116,7 @@ export const RootPageConfigProvider: React.FC<{
   const { config, getEntityConfig, setConfig } = rootLayoutConfig
 
   /**
-   * This component is required in order for the _page_ to be able to refresh the client config,
+   * This useEffect is required in order for the _page_ to be able to refresh the client config,
    * which may have been cached on the _layout_ level, where the ConfigProvider is managed.
    * Since the layout does not re-render on page navigation / authentication, we need to manually
    * update the config, as the user may have been authenticated in the process, which affects the client config.
@@ -125,7 +125,10 @@ export const RootPageConfigProvider: React.FC<{
     setConfig(configFromProps)
   }, [configFromProps, setConfig])
 
-  if (config !== configFromProps) {
+  if (config !== configFromProps && config.unauthenticated !== configFromProps.unauthenticated) {
+    // Between the unauthenticated config becoming authenticated (or the other way around) and the useEffect
+    // running, the config will be stale. In order to avoid having the wrong config in the context in that
+    // brief moment, we shadow the context here on the _page_ level and provide the updated config immediately.
     return (
       <RootConfigContext value={{ config: configFromProps, getEntityConfig, setConfig }}>
         {children}

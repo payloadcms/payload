@@ -12,7 +12,6 @@ import type {
 
 import {
   type ClientCollectionConfig,
-  createClientCollectionConfig,
   createClientCollectionConfigs,
 } from '../collections/config/client.js'
 import { createClientBlocks } from '../fields/config/client.js'
@@ -52,6 +51,7 @@ export type ClientConfig = {
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
+  unauthenticated?: boolean
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
 
 export type UnauthenticatedClientConfig = {
@@ -63,6 +63,7 @@ export type UnauthenticatedClientConfig = {
   globals: []
   routes: ClientConfig['routes']
   serverURL: ClientConfig['serverURL']
+  unauthenticated: ClientConfig['unauthenticated']
 }
 
 export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
@@ -122,6 +123,7 @@ export const createUnauthenticatedClientConfig = ({
     globals: [],
     routes: clientConfig.routes,
     serverURL: clientConfig.serverURL,
+    unauthenticated: true,
   }
 }
 
