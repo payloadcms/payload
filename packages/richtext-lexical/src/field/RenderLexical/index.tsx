@@ -25,12 +25,16 @@ export const RenderLexical: React.FC<
    * If neither is passed, it will rely on the parent form to manage the value.
    */
   {
-    setValue?: FieldType<DefaultTypedEditorState | undefined>['setValue']
+    /**
+     * Override the loading state while the field component is being fetched and rendered.
+     */
+    Loading?: React.ReactElement
 
+    setValue?: FieldType<DefaultTypedEditorState | undefined>['setValue']
     value?: FieldType<DefaultTypedEditorState | undefined>['value']
   } & RenderFieldServerFnArgs
 > = (args) => {
-  const { field, initialValue, path, schemaPath, setValue, value } = args
+  const { field, initialValue, Loading, path, schemaPath, setValue, value } = args
   const [Component, setComponent] = React.useState<null | React.ReactNode>(null)
   const serverFunctionContext = useServerFunctions()
   const { _internal_renderField } = serverFunctionContext
@@ -64,7 +68,7 @@ export const RenderLexical: React.FC<
   }, [renderLexical])
 
   if (!Component) {
-    return <ShimmerEffect />
+    return typeof Loading !== 'undefined' ? Loading : <ShimmerEffect />
   }
 
   /**
