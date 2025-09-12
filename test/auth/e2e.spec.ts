@@ -2,9 +2,10 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
+import { login } from 'helpers/e2e/auth/login.js'
+import { logout } from 'helpers/e2e/auth/logout.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -16,7 +17,6 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
-  login,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -397,9 +397,7 @@ describe('Auth', () => {
 
         const userDocumentRoute = `${serverURL}/admin/collections/users/${users?.docs?.[0]?.id}`
 
-        await page.goto(`${serverURL}/admin/logout`)
-
-        await expect(page.locator('.login')).toBeVisible()
+        await logout(page, serverURL)
 
         // This will send the user back to the login page with a `?redirect=` param
         await page.goto(userDocumentRoute)
@@ -428,8 +426,7 @@ describe('Auth', () => {
           data: {},
         })
 
-        await page.goto(`${serverURL}/admin/logout`)
-        await expect(page.locator('.login')).toBeVisible()
+        await logout(page, serverURL)
 
         await page.goto(
           `${serverURL}/admin/collections/relationsCollection/${notInUserCollection.id}`,
