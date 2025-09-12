@@ -11,8 +11,8 @@ const customJestConfig = {
   testMatch: ['<rootDir>/**/*int.spec.ts'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 
-  globalSetup: path.resolve(dirname, './helpers/startMemoryDB.ts'),
-  globalTeardown: path.resolve(dirname, './helpers/stopMemoryDB.ts'),
+  globalSetup: path.resolve(dirname, './helpers/startDatabases.ts'),
+  globalTeardown: path.resolve(dirname, './helpers/stopDatabases.ts'),
 
   moduleNameMapper: {
     '\\.(css|scss)$': '<rootDir>/helpers/mocks/emptyModule.js',
