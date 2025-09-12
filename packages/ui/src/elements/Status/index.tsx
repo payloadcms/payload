@@ -1,17 +1,16 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
 import React, { useCallback } from 'react'
-import { toast } from 'sonner'
 
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { requests } from '../../utilities/api.js'
+import { revertDocument, unpublishDocument } from '../../utilities/documentActions.js'
 import { Button } from '../Button/index.js'
-import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import './index.scss'
+import { ConfirmationModal } from '../ConfirmationModal/index.js'
 
 const baseClass = 'status'
 
@@ -24,7 +23,6 @@ export const Status: React.FC = () => {
     hasPublishedDoc,
     incrementVersionCount,
     isTrashed,
-    savedDocumentData: doc,
     setHasPublishedDoc,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
@@ -41,14 +39,17 @@ export const Status: React.FC = () => {
     getEntityConfig,
   } = useConfig()
 
-  const { reset: resetForm } = useForm()
+  const { getData, reset: resetForm } = useForm()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
 
+  const formData = getData()
   const unPublishModalSlug = `confirm-un-publish-${id}`
   const revertModalSlug = `confirm-revert-${id}`
 
-  let statusToRender: 'changed' | 'draft' | 'published' = 'draft'
+  const [statusToRender, setStatusToRender] = React.useState<'changed' | 'draft' | 'published'>(
+    'draft',
+  )
 
   const collectionConfig = getEntityConfig({ collectionSlug })
   const globalConfig = getEntityConfig({ globalSlug })
@@ -57,13 +58,16 @@ export const Status: React.FC = () => {
   const autosaveEnabled =
     typeof docConfig?.versions?.drafts === 'object' ? docConfig.versions.drafts.autosave : false
 
-  if (autosaveEnabled) {
-    if (hasPublishedDoc) {
-      statusToRender = unpublishedVersionCount > 0 ? 'changed' : 'published'
+  React.useEffect(() => {
+    if (autosaveEnabled) {
+      if (hasPublishedDoc) {
+        setStatusToRender(unpublishedVersionCount > 0 ? 'changed' : 'published')
+      }
+    } else {
+      setStatusToRender(formData._status || 'draft')
     }
-  } else {
-    statusToRender = doc._status || 'draft'
-  }
+  }, [autosaveEnabled, hasPublishedDoc, unpublishedVersionCount, formData._status])
+
   const displayStatusKey = isTrashed
     ? hasPublishedDoc
       ? 'previouslyPublished'
@@ -72,82 +76,36 @@ export const Status: React.FC = () => {
 
   const performAction = useCallback(
     async (action: 'revert' | 'unpublish') => {
-      let url
-      let method
-      let body
+      const baseUrl = collectionSlug
+        ? `${serverURL}${api}/${collectionSlug}/${id}`
+        : globalSlug
+          ? `${serverURL}${api}/globals/${globalSlug}`
+          : ''
 
       if (action === 'unpublish') {
-        body = {
-          _status: 'draft',
-        }
-      }
-
-      if (collectionSlug) {
-        url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null&depth=0`
-        method = 'patch'
-      }
-
-      if (globalSlug) {
-        url = `${serverURL}${api}/globals/${globalSlug}?locale=${locale}&fallback-locale=null&depth=0`
-        method = 'post'
-      }
-
-      if (action === 'revert') {
-        const publishedDoc = await requests
-          .get(url, {
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
-            },
-          })
-          .then((res) => res.json())
-
-        body = publishedDoc
-      }
-
-      const res = await requests[method](url, {
-        body: JSON.stringify(body),
-        headers: {
-          'Accept-Language': i18n.language,
-          'Content-Type': 'application/json',
-        },
-      })
-
-      if (res.status === 200) {
-        let data
-        const json = await res.json()
-
-        if (globalSlug) {
-          data = json.result
-        } else if (collectionSlug) {
-          data = json.doc
-        }
-
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        resetForm(data)
-        toast.success(json.message)
-        incrementVersionCount()
-        setMostRecentVersionIsAutosaved(false)
-
-        if (action === 'unpublish') {
-          setHasPublishedDoc(false)
-        } else if (action === 'revert') {
-          setUnpublishedVersionCount(0)
-        }
+        await unpublishDocument({
+          baseUrl,
+          i18nLanguage: i18n.language,
+          locale,
+          resetForm,
+          setMostRecentVersionIsAutosaved,
+          setStatusToRender,
+          t,
+        })
       } else {
-        try {
-          const json = await res.json()
-          if (json.errors?.[0]?.message) {
-            toast.error(json.errors[0].message)
-          } else if (json.error) {
-            toast.error(json.error)
-          } else {
-            toast.error(t('error:unPublishingDocument'))
-          }
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (err) {
-          toast.error(t('error:unPublishingDocument'))
-        }
+        await revertDocument({
+          baseUrl,
+          collectionSlug,
+          globalSlug,
+          i18nLanguage: i18n.language,
+          incrementVersionCount,
+          locale,
+          resetForm,
+          setHasPublishedDoc,
+          setMostRecentVersionIsAutosaved,
+          setUnpublishedVersionCount,
+          t,
+        })
       }
     },
     [
@@ -155,15 +113,15 @@ export const Status: React.FC = () => {
       collectionSlug,
       globalSlug,
       id,
-      i18n.language,
-      incrementVersionCount,
       locale,
-      resetForm,
       serverURL,
+      i18n.language,
+      resetForm,
+      incrementVersionCount,
       setUnpublishedVersionCount,
       setMostRecentVersionIsAutosaved,
-      t,
       setHasPublishedDoc,
+      t,
     ],
   )
 
@@ -198,8 +156,7 @@ export const Status: React.FC = () => {
               />
             </React.Fragment>
           )}
-          {((!isTrashed && canUpdate && statusToRender === 'changed') ||
-            statusToRender === 'draft') && (
+          {!isTrashed && canUpdate && statusToRender === 'changed' && (
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
