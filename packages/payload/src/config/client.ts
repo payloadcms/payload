@@ -12,7 +12,6 @@ import type {
 
 import {
   type ClientCollectionConfig,
-  createClientCollectionConfig,
   createClientCollectionConfigs,
 } from '../collections/config/client.js'
 import { createClientBlocks } from '../fields/config/client.js'
@@ -43,16 +42,6 @@ export type ServerOnlyRootProperties = keyof Pick<
 
 export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
 
-export type UnsanitizedClientConfig = {
-  admin: {
-    livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
-  } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
-  blocks: ClientBlock[]
-  collections: ClientCollectionConfig[]
-  custom?: Record<string, any>
-  globals: ClientGlobalConfig[]
-} & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
-
 export type ClientConfig = {
   admin: {
     livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
@@ -62,6 +51,7 @@ export type ClientConfig = {
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
+  unauthenticated?: boolean
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
 
 export type UnauthenticatedClientConfig = {
@@ -73,6 +63,7 @@ export type UnauthenticatedClientConfig = {
   globals: []
   routes: ClientConfig['routes']
   serverURL: ClientConfig['serverURL']
+  unauthenticated: ClientConfig['unauthenticated']
 }
 
 export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
@@ -132,6 +123,7 @@ export const createUnauthenticatedClientConfig = ({
     globals: [],
     routes: clientConfig.routes,
     serverURL: clientConfig.serverURL,
+    unauthenticated: true,
   }
 }
 
@@ -188,6 +180,17 @@ export const createClientConfig = ({
           i18n,
           importMap,
         }).filter((block) => typeof block !== 'string') as ClientBlock[]
+
+        clientConfig.blocksMap = {}
+        if (clientConfig.blocks?.length) {
+          for (const block of clientConfig.blocks) {
+            if (!block?.slug) {
+              continue
+            }
+
+            clientConfig.blocksMap[block.slug] = block as ClientBlock
+          }
+        }
 
         break
       }
