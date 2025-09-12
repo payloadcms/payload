@@ -87,6 +87,18 @@ export class LexicalHelpers {
     return {}
   }
 
+  async paste(type: 'html' | 'markdown', text: string) {
+    await this.page.evaluate(
+      async ([text, type]) => {
+        const blob = new Blob([text!], { type: type === 'html' ? 'text/html' : 'text/markdown' })
+        const clipboardItem = new ClipboardItem({ 'text/html': blob })
+        await navigator.clipboard.write([clipboardItem])
+      },
+      [text, type],
+    )
+    await this.page.keyboard.press(`ControlOrMeta+v`)
+  }
+
   async save(container: 'document' | 'drawer') {
     if (container === 'drawer') {
       await this.drawer.getByText('Save').click()

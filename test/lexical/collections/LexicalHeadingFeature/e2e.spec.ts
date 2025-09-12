@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
-import { lexicalLinkFeatureSlug } from 'lexical/slugs.js'
+import { lexicalHeadingFeatureSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -22,7 +22,8 @@ const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
 })
 
-describe('Lexical Link Feature', () => {
+describe('Lexical Fully Featured', () => {
+  let lexical: LexicalHelpers
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
@@ -36,41 +37,22 @@ describe('Lexical Link Feature', () => {
       snapshotKey: 'lexicalTest',
       uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
-    const url = new AdminUrlUtil(serverURL, lexicalLinkFeatureSlug)
-    const lexical = new LexicalHelpers(page)
+    const url = new AdminUrlUtil(serverURL, lexicalHeadingFeatureSlug)
+    lexical = new LexicalHelpers(page)
     await page.goto(url.create)
     await lexical.editor.first().focus()
   })
 
-  test('can add new custom fields in link feature modal', async ({ page }) => {
-    const lexical = new LexicalHelpers(page)
-
-    await lexical.editor.fill('link')
-    await lexical.editor.selectText()
-
-    const linkButtonClass = `.rich-text-lexical__wrap .fixed-toolbar .toolbar-popup__button-link`
-    const linkButton = page.locator(linkButtonClass).first()
-
-    await linkButton.click()
-
-    const customField = lexical.drawer.locator('#field-someText')
-
-    await expect(customField).toBeVisible()
-  })
-
-  test('can set default value of newTab checkbox to checked', async ({ page }) => {
-    const lexical = new LexicalHelpers(page)
-
-    await lexical.editor.fill('link')
-    await lexical.editor.selectText()
-
-    const linkButtonClass = `.rich-text-lexical__wrap .fixed-toolbar .toolbar-popup__button-link`
-    const linkButton = page.locator(linkButtonClass).first()
-
-    await linkButton.click()
-
-    const checkboxField = lexical.drawer.locator(`[id^="field-newTab"]`)
-
-    await expect(checkboxField).toBeChecked()
+  test('unallowed headings should be converted when pasting', async () => {
+    await lexical.paste(
+      'html',
+      '<h1>Hello1</h1><h2>Hello2</h2><h3>Hello3</h3><h4>Hello4</h4><h5>Hello5</h5><h6>Hello6</h6>',
+    )
+    await expect(lexical.editor.locator('h1')).toHaveCount(0)
+    await expect(lexical.editor.locator('h2')).toHaveCount(1)
+    await expect(lexical.editor.locator('h3')).toHaveCount(0)
+    await expect(lexical.editor.locator('h4')).toHaveCount(5)
+    await expect(lexical.editor.locator('h5')).toHaveCount(0)
+    await expect(lexical.editor.locator('h6')).toHaveCount(0)
   })
 })
