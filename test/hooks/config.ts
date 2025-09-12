@@ -16,11 +16,13 @@ import { DataHooks } from './collections/Data/index.js'
 import { FieldPaths } from './collections/FieldPaths/index.js'
 import Hooks, { hooksSlug } from './collections/Hook/index.js'
 import NestedAfterReadHooks from './collections/NestedAfterReadHooks/index.js'
+import { RecursiveHooksCollection } from './collections/RecursiveHooks/index.js'
 import Relations from './collections/Relations/index.js'
 import TransformHooks from './collections/Transform/index.js'
 import Users, { seedHooksUsers } from './collections/Users/index.js'
 import { ValueCollection } from './collections/Value/index.js'
 import { DataHooksGlobal } from './globals/Data/index.js'
+import { RecursiveHooksGlobal } from './globals/RecursiveHooks/index.js'
 
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
   admin: {
@@ -28,6 +30,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  hooksMaxRecursion: 3,
   collections: [
     BeforeChangeHooks,
     BeforeValidateCollection,
@@ -42,8 +45,9 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     DataHooks,
     FieldPaths,
     ValueCollection,
+    RecursiveHooksCollection,
   ],
-  globals: [DataHooksGlobal],
+  globals: [DataHooksGlobal, RecursiveHooksGlobal],
   endpoints: [
     {
       path: '/throw-to-after-error',
