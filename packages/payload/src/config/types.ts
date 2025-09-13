@@ -41,6 +41,7 @@ import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
 import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
+import type { RootHierarchyConfiguration } from '../hierarchy/types.js'
 import type {
   Block,
   FlattenedBlock,
@@ -1126,6 +1127,7 @@ export type Config = {
      */
     validationRules?: (args: GraphQL.ExecutionArgs) => GraphQL.ValidationRule[]
   }
+  hierarchy?: false | RootHierarchyConfiguration
   /**
    * Tap into Payload-wide hooks.
    *

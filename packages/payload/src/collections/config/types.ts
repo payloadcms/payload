@@ -151,6 +151,7 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    */
   operation: CreateOrUpdateOperation
   previousDoc: T
+  previousDocWithLocales: any
   req: PayloadRequest
 }) => any
 
@@ -523,6 +524,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
         singularName?: string
       }
     | false
+  /**
+   * Enables hierarchy support for this collection
+   */
+  hierarchy?: boolean
   /**
    * Hooks to modify Payload functionality
    */
