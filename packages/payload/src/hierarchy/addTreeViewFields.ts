@@ -80,23 +80,44 @@ export function addTreeViewFields({
   collectionConfig.hooks = {
     ...(collectionConfig.hooks || {}),
     afterChange: [
-      async ({ data, doc, previousDoc, previousDocWithLocales, req }) => {
+      async ({ doc, previousDoc, previousDocWithLocales, req }) => {
         // handle this better later
-        if (req.locale === 'all') {
+        const reqLocale = req.locale
+        if (reqLocale === 'all') {
           return
         }
         const { newParentID, newSlug, parentChanged, prevParentID, prevSlug, slugChanged } =
           getTreeChanges({ doc, parentDocFieldName, previousDoc, slugify, titleFieldName })
 
         if (parentChanged || slugChanged) {
-          let updatedSlugPath
-          let updatedTitlePath
-          let updatedParentTree
-          if (parentChanged) {
-            const updatedSlugPaths: Record<string, string> = {}
-            const updatedTitlePaths: Record<string, string> = {}
-            let documentAfterUpdate: JsonObject & TypeWithID = { id: doc.id }
+          /**
+           * should look like:
+           *
+           * {
+           *   [slugPathFieldName]: {
+           *     [locale]: updatedSlugPath
+           *   },
+           *   [titlePathFieldName]: {
+           *     [locale]: updatedTitlePath
+           *   },
+           *   _parentTree: updatedParentTree,
+           * }
+           */
+          const dataToUpdateDoc: {
+            _parentTree: (number | string)[]
+            slugPath: {
+              [locale: string]: string
+            }
+            titlePath: {
+              [locale: string]: string
+            }
+          } = {
+            _parentTree: [],
+            slugPath: {},
+            titlePath: {},
+          }
 
+          if (parentChanged) {
             if (newParentID) {
               // query new parent
               const newParentFullDoc = await req.payload.findByID({
@@ -111,212 +132,187 @@ export function addTreeViewFields({
                 },
               })
 
-              Object.entries(newParentFullDoc).forEach(([key, fieldValue]) => {
-                if (key === slugPathFieldName) {
-                  // assuming localization here for now
-                  Object.entries(fieldValue as Record<string, string>).forEach(
-                    ([locale, localizedParentSlugPath]) => {
-                      updatedSlugPaths[locale] =
-                        `${localizedParentSlugPath}/${slugify(previousDocWithLocales[titleFieldName][locale])}`
-                    },
-                  )
-                } else if (key === titlePathFieldName) {
-                  Object.entries(fieldValue as Record<string, string>).forEach(
-                    ([locale, localizedParentTitlePath]) => {
-                      updatedTitlePaths[locale] =
-                        `${localizedParentTitlePath}/${previousDocWithLocales[titleFieldName][locale]}`
-                    },
-                  )
+              dataToUpdateDoc._parentTree = [...(newParentFullDoc?._parentTree || []), newParentID]
+              req.payload.config.localization.localeCodes.forEach((locale: string) => {
+                const slugPrefix =
+                  newParentFullDoc?.[slugPathFieldName]?.[locale] ||
+                  newParentFullDoc?.[slugPathFieldName]?.[
+                    req.payload.config.localization.defaultLocale
+                  ] ||
+                  ''
+                const titlePrefix =
+                  newParentFullDoc?.[titlePathFieldName]?.[locale] ||
+                  newParentFullDoc?.[titlePathFieldName]?.[
+                    req.payload.config.localization.defaultLocale
+                  ] ||
+                  ''
+                if (reqLocale === locale) {
+                  dataToUpdateDoc.slugPath[locale] = `${slugPrefix}/${slugify(doc[titleFieldName])}`
+                  dataToUpdateDoc.titlePath[locale] = `${titlePrefix}/${doc[titleFieldName]}`
+                } else {
+                  // use prev title on previousDocWithLocales
+                  dataToUpdateDoc.slugPath[locale] =
+                    `${slugPrefix}/${slugify(previousDocWithLocales?.[titleFieldName]?.[locale] ? previousDocWithLocales[titleFieldName][locale] : doc[titleFieldName])}`
+                  dataToUpdateDoc.titlePath[locale] =
+                    `${titlePrefix}/${previousDocWithLocales?.[titleFieldName]?.[locale] ? previousDocWithLocales[titleFieldName][locale] : doc[titleFieldName]}`
                 }
-              })
-
-              // update current document
-              documentAfterUpdate = await req.payload.db.updateOne({
-                id: doc.id,
-                collection: collectionConfig.slug,
-                data: {
-                  _parentTree: [...(newParentFullDoc?._parentTree || []), newParentID],
-                  [slugPathFieldName]: updatedSlugPaths,
-                  [titlePathFieldName]: updatedTitlePaths,
-                },
-                locale: 'all',
-                req,
-                select: {
-                  _parentTree: true,
-                  [slugPathFieldName]: true,
-                  [titlePathFieldName]: true,
-                },
               })
             } else {
               // removed parent
-
-              // update current document
-              documentAfterUpdate = await req.payload.db.updateOne({
-                id: doc.id,
-                collection: collectionConfig.slug,
-                data: {
-                  _parentTree: [],
-                  [slugPathFieldName]: Object.keys(
-                    previousDocWithLocales[titleFieldName],
-                  ).reduce<JsonObject>((acc, locale) => {
-                    if (req.locale === locale) {
-                      acc[locale] = slugify(doc[titleFieldName])
-                    } else {
-                      acc[locale] = slugify(previousDocWithLocales[titleFieldName][locale])
-                    }
-                    return acc
-                  }, {}),
-                  [titlePathFieldName]: Object.keys(
-                    previousDocWithLocales[titleFieldName],
-                  ).reduce<JsonObject>((acc, locale) => {
-                    if (req.locale === locale) {
-                      acc[locale] = doc[titleFieldName]
-                    } else {
-                      acc[locale] = previousDocWithLocales[titleFieldName][locale]
-                    }
-                    return acc
-                  }, {}),
-                },
-                locale: 'all',
-                req,
-                select: {
-                  _parentTree: true,
-                  [slugPathFieldName]: true,
-                  [titlePathFieldName]: true,
-                },
+              dataToUpdateDoc._parentTree = []
+              req.payload.config.localization.localeCodes.forEach((locale: string) => {
+                if (reqLocale === locale) {
+                  // use current title on doc
+                  dataToUpdateDoc.slugPath[locale] = slugify(doc[titleFieldName])
+                  dataToUpdateDoc.titlePath[locale] = doc[titleFieldName]
+                } else {
+                  // use prev title on previousDocWithLocales
+                  dataToUpdateDoc.slugPath[locale] = slugify(
+                    previousDocWithLocales?.[titleFieldName]?.[locale]
+                      ? previousDocWithLocales[titleFieldName][locale]
+                      : doc[titleFieldName],
+                  )
+                  dataToUpdateDoc.titlePath[locale] = previousDocWithLocales?.[titleFieldName]?.[
+                    locale
+                  ]
+                    ? previousDocWithLocales[titleFieldName][locale]
+                    : doc[titleFieldName]
+                }
               })
             }
-
-            updatedSlugPath = documentAfterUpdate[slugPathFieldName][req.locale!]
-            updatedTitlePath = documentAfterUpdate[titlePathFieldName][req.locale!]
-            updatedParentTree = documentAfterUpdate._parentTree
-
-            const affectedDocs = await req.payload.find({
-              collection: collectionConfig.slug,
-              depth: 0,
-              limit: 200,
-              locale: 'all',
-              select: {
-                [titleFieldName]: true,
-              },
-              where: {
-                _parentTree: {
-                  in: [doc.id],
-                },
-              },
-            })
-
-            const updatePromises: Promise<JsonObject & TypeWithID>[] = []
-            affectedDocs.docs.forEach((affectedDoc) => {
-              updatePromises.push(
-                // this pattern has an issue bc it will not run hooks on the affected documents
-                // if we use payload.update, then we will need to loop over `n` locales and run 1 update per locale
-                req.payload.db.updateOne({
-                  id: affectedDoc.id,
-                  collection: collectionConfig.slug,
-                  data: {
-                    _parentTree: [...(documentAfterUpdate._parentTree || []), doc.id],
-                    [slugPathFieldName]: Object.keys(
-                      affectedDoc[titleFieldName],
-                    ).reduce<JsonObject>((acc, locale) => {
-                      acc[locale] =
-                        `${documentAfterUpdate[slugPathFieldName][locale]}/${slugify(affectedDoc[titleFieldName][locale])}`
-                      return acc
-                    }, {}),
-                    [titlePathFieldName]: Object.keys(
-                      affectedDoc[titleFieldName],
-                    ).reduce<JsonObject>((acc, locale) => {
-                      acc[locale] =
-                        `${documentAfterUpdate[titlePathFieldName][locale]}/${affectedDoc[titleFieldName][locale]}`
-                      return acc
-                    }, {}),
-                  },
-                  locale: 'all',
-                  req,
-                }),
-              )
-            })
-            await Promise.all(updatePromises)
           } else {
-            // just slug changed (no localization needed)
-            let updatedDocument = doc
-            let prevParentDoc
+            // only the title field was updated
+            let prevParentDoc: Document
             if (prevParentID) {
               // has parent
               prevParentDoc = await req.payload.findByID({
                 id: prevParentID,
                 collection: collectionConfig.slug,
                 depth: 0,
-                locale: req.locale,
+                locale: 'all',
                 req,
                 select: {
                   _parentTree: true,
                   [slugPathFieldName]: true,
                   [titleFieldName]: true,
+                  [titlePathFieldName]: true,
                 },
               })
             }
 
-            updatedDocument = await req.payload.update({
-              id: doc.id,
-              collection: collectionConfig.slug,
-              data: {
-                [slugPathFieldName]: prevParentDoc
-                  ? `${prevParentDoc[slugPathFieldName]}/${newSlug}`
-                  : newSlug,
-                [titlePathFieldName]: prevParentDoc
-                  ? `${prevParentDoc[titlePathFieldName]}/${doc[titleFieldName]}`
-                  : doc[titleFieldName],
-              },
-              depth: 0,
-              locale: req.locale,
-              req,
-              select: {
-                _parentTree: true,
-                [slugPathFieldName]: true,
-                [titleFieldName]: true,
-              },
+            dataToUpdateDoc._parentTree = prevParentDoc
+              ? [...(prevParentDoc._parentTree || []), prevParentID]
+              : []
+            req.payload.config.localization.localeCodes.forEach((locale: string) => {
+              const slugPrefix = prevParentDoc?.[slugPathFieldName]?.[locale]
+                ? prevParentDoc[slugPathFieldName][locale]
+                : ''
+              const titlePrefix = prevParentDoc?.[titlePathFieldName]?.[locale]
+                ? prevParentDoc[titlePathFieldName][locale]
+                : ''
+              if (reqLocale === locale) {
+                dataToUpdateDoc.slugPath[locale] =
+                  `${slugPrefix ? `${slugPrefix}/` : ''}${slugify(doc[titleFieldName])}`
+                dataToUpdateDoc.titlePath[locale] =
+                  `${titlePrefix ? `${titlePrefix}/` : ''}${doc[titleFieldName]}`
+              } else {
+                // use prev title on previousDocWithLocales
+                dataToUpdateDoc.slugPath[locale] =
+                  `${slugPrefix ? `${slugPrefix}/` : ''}${slugify(previousDocWithLocales?.[titleFieldName]?.[locale] ? previousDocWithLocales[titleFieldName][locale] : doc[titleFieldName])}`
+                dataToUpdateDoc.titlePath[locale] =
+                  `${titlePrefix ? `${titlePrefix}/` : ''}${previousDocWithLocales?.[titleFieldName]?.[locale] ? previousDocWithLocales[titleFieldName][locale] : doc[titleFieldName]}`
+              }
             })
-
-            updatedSlugPath = updatedDocument[slugPathFieldName]
-            updatedTitlePath = updatedDocument[titleFieldName]
-            updatedParentTree = updatedDocument._parentTree
-
-            const affectedDocs = await req.payload.find({
-              collection: collectionConfig.slug,
-              depth: 0,
-              limit: 200,
-              select: {
-                [titleFieldName]: true,
-              },
-              where: {
-                _parentTree: {
-                  in: [doc.id],
-                },
-              },
-            })
-
-            const updatePromises: Promise<JsonObject & TypeWithID>[] = []
-            affectedDocs.docs.forEach((affectedDoc) => {
-              updatePromises.push(
-                // this pattern has an issue bc it will not run hooks on the affected documents
-                // if we use payload.update, then we will need to loop over `n` locales and run 1 update per locale
-                req.payload.update({
-                  id: affectedDoc.id,
-                  collection: collectionConfig.slug,
-                  data: {
-                    _parentTree: [...(doc._parentTree || []), doc.id],
-                    [slugPathFieldName]: `${updatedDocument[slugPathFieldName]}/${slugify(affectedDoc[titleFieldName])}`,
-                    [titlePathFieldName]: `${updatedDocument[titlePathFieldName]}/${affectedDoc[titleFieldName]}`,
-                  },
-                  depth: 0,
-                  req,
-                }),
-              )
-            })
-
-            await Promise.all(updatePromises)
           }
+
+          const documentAfterUpdate = await req.payload.db.updateOne({
+            id: doc.id,
+            collection: collectionConfig.slug,
+            data: {
+              _parentTree: dataToUpdateDoc._parentTree,
+              [slugPathFieldName]: dataToUpdateDoc.slugPath,
+              [titlePathFieldName]: dataToUpdateDoc.titlePath,
+            },
+            locale: 'all',
+            req,
+            select: {
+              _parentTree: true,
+              [slugPathFieldName]: true,
+              [titleFieldName]: true,
+              [titlePathFieldName]: true,
+            },
+          })
+
+          const updatedSlugPath = documentAfterUpdate[slugPathFieldName][reqLocale!]
+          const updatedTitlePath = documentAfterUpdate[titlePathFieldName][reqLocale!]
+          const updatedParentTree = documentAfterUpdate._parentTree
+
+          const affectedDocs = await req.payload.find({
+            collection: collectionConfig.slug,
+            depth: 0,
+            limit: 200,
+            locale: 'all',
+            req,
+            select: {
+              [titleFieldName]: true,
+            },
+            where: {
+              _parentTree: {
+                in: [doc.id],
+              },
+            },
+          })
+
+          const updatePromises: Promise<JsonObject & TypeWithID>[] = []
+          affectedDocs.docs.forEach((affectedDoc) => {
+            updatePromises.push(
+              // this pattern has an issue bc it will not run hooks on the affected documents
+              // if we use payload.update, then we will need to loop over `n` locales and run 1 update per locale
+              req.payload.db.updateOne({
+                id: affectedDoc.id,
+                collection: collectionConfig.slug,
+                data: {
+                  _parentTree: [...(doc._parentTree || []), doc.id],
+                  [slugPathFieldName]:
+                    req.payload.config.localization.localeCodes.reduce<JsonObject>(
+                      (acc: JsonObject, locale: string) => {
+                        const prefix =
+                          documentAfterUpdate?.[slugPathFieldName]?.[locale] ||
+                          documentAfterUpdate?.[slugPathFieldName]?.[
+                            req.payload.config.localization.defaultLocale
+                          ]
+                        const slug =
+                          affectedDoc?.[titleFieldName]?.[locale] ||
+                          affectedDoc[titleFieldName][req.payload.config.localization.defaultLocale]
+                        acc[locale] = `${prefix}/${slugify(slug)}`
+                        return acc
+                      },
+                      {},
+                    ),
+                  [titlePathFieldName]:
+                    req.payload.config.localization.localeCodes.reduce<JsonObject>(
+                      (acc: JsonObject, locale: string) => {
+                        const prefix =
+                          documentAfterUpdate?.[titlePathFieldName]?.[locale] ||
+                          documentAfterUpdate?.[titlePathFieldName]?.[
+                            req.payload.config.localization.defaultLocale
+                          ]
+                        const title =
+                          affectedDoc?.[titleFieldName]?.[locale] ||
+                          affectedDoc[titleFieldName][req.payload.config.localization.defaultLocale]
+                        acc[locale] = `${prefix}/${title}`
+                        return acc
+                      },
+                      {},
+                    ),
+                },
+                locale: 'all',
+                req,
+              }),
+            )
+          })
+
+          await Promise.all(updatePromises)
 
           if (updatedSlugPath) {
             doc[slugPathFieldName] = updatedSlugPath
