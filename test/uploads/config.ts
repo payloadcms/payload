@@ -60,9 +60,14 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  localization: {
+    locales: ['en', 'es', 'fr'],
+    defaultLocale: 'en',
+  },
   collections: [
     {
       slug: relationSlug,
+      versions: { drafts: { autosave: true } },
       fields: [
         {
           name: 'image',
@@ -78,6 +83,42 @@ export default buildConfigWithDefaults({
           name: 'hideFileInputOnCreate',
           type: 'upload',
           relationTo: hideFileInputOnCreateSlug,
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'a',
+              fields: [
+                {
+                  name: 'blocks',
+                  type: 'blocks',
+                  blocks: [
+                    {
+                      slug: 'localizedMediaBlock',
+                      fields: [
+                        {
+                          name: 'media',
+                          type: 'upload',
+                          relationTo: 'media',
+                          localized: true,
+                          required: true,
+                        },
+                        {
+                          name: 'relatedMedia',
+                          type: 'relationship',
+                          relationTo: 'media',
+                          localized: true,
+                          hasMany: true,
+                          maxRows: 5,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     },
@@ -345,6 +386,11 @@ export default buildConfigWithDefaults({
         {
           type: 'text',
           name: 'alt',
+        },
+        {
+          type: 'text',
+          name: 'localized',
+          localized: true,
         },
       ],
       upload: {
