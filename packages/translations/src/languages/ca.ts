@@ -280,6 +280,7 @@ export const caTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'esta editant actualment aquest document. Si prens el control, es bloquejarà per continuar editant i potser perdrà els canvis no desats.',
     custom: 'Personalitzat',
+    customViews: 'Vistes Personalitzades',
     dark: 'Fosc',
     dashboard: 'Tauler',
     delete: 'Eliminar',

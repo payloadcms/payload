@@ -279,6 +279,7 @@ export const svTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'redigerar för närvarande detta dokument. Om du tar över kommer de att blockeras från att fortsätta redigera och kan också förlora osparade ändringar.',
     custom: 'Anpassad',
+    customViews: 'Anpassade Vyer',
     dark: 'Mörkt',
     dashboard: 'Översikt',
     delete: 'Ta bort',

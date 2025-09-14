@@ -275,6 +275,7 @@ export const faTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'در حال حاضر در حال ویرایش این سند است. اگر شما مسئولیت را به عهده بگیرید، از ادامه ویرایش مسدود خواهد شد و ممکن است تغییرات ذخیره نشده را از دست بدهند.',
     custom: 'سفارشی',
+    customViews: 'نماهای سفارشی',
     dark: 'تاریک',
     dashboard: 'پیشخوان',
     delete: 'حذف',

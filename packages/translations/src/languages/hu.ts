@@ -283,6 +283,7 @@ export const huTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'jelenleg szerkeszti ezt a dokumentumot. Ha átveszed, nem tudja folytatni a szerkesztést, és elveszítheti a mentetlen módosításokat.',
     custom: 'Egyéni',
+    customViews: 'Egyéni Nézetek',
     dark: 'Sötét',
     dashboard: 'Irányítópult',
     delete: 'Törlés',

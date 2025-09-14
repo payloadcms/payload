@@ -278,6 +278,7 @@ export const viTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'hiện đang chỉnh sửa tài liệu này. Nếu bạn tiếp quản, họ sẽ bị chặn tiếp tục chỉnh sửa và cũng có thể mất các thay đổi chưa lưu.',
     custom: 'Tùy chỉnh',
+    customViews: 'Custom Views',
     dark: 'Nền tối',
     dashboard: 'Bảng điều khiển',
     delete: 'Xóa',

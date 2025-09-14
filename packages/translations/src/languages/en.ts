@@ -282,6 +282,7 @@ export const enTranslations = {
     currentlyEditing:
       'is currently editing this document. If you take over, they will be blocked from continuing to edit, and may also lose unsaved changes.',
     custom: 'Custom',
+    customViews: 'Custom Views',
     dark: 'Dark',
     dashboard: 'Dashboard',
     delete: 'Delete',

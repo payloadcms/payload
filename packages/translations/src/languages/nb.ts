@@ -278,6 +278,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'redigerer for øyeblikket dette dokumentet. Hvis du tar over, blir de blokkert fra å fortsette å redigere, og de kan også miste ulagrede endringer.',
     custom: 'Tilpasset',
+    customViews: 'Tilpassede Visninger',
     dark: 'Mørk',
     dashboard: 'Kontrollpanel',
     delete: 'Slett',

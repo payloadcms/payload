@@ -180,6 +180,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:close',
   'general:collapse',
   'general:collections',
+  'general:customViews',
   'general:confirmMove',
   'general:yes',
   'general:no',

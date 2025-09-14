@@ -278,6 +278,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'в момента редактира този документ. Ако поемете управлението, те ще бъдат блокирани от продължаване на редактирането и може да загубят незаписаните промени.',
     custom: 'Персонализиран',
+    customViews: 'Персонализирани Изгледи',
     dark: 'Тъмна',
     dashboard: 'Табло',
     delete: 'Изтрий',

@@ -278,6 +278,7 @@ export const slTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'trenutno ureja ta dokument. Če prevzamete, jim bo onemogočeno nadaljnje urejanje in lahko izgubijo neshranjene spremembe.',
     custom: 'Po meri',
+    customViews: 'Prilagojeni Prikazi',
     dark: 'Temno',
     dashboard: 'Nadzorna plošča',
     delete: 'Izbriši',

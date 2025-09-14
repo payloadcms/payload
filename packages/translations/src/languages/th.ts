@@ -272,6 +272,7 @@ export const thTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'กำลังแก้ไขเอกสารนี้อยู่ในขณะนี้ หากคุณเข้าครอบครอง พวกเขาจะถูกบล็อกจากการแก้ไขต่อไป และอาจสูญเสียการเปลี่ยนแปลงที่ไม่ได้บันทึก',
     custom: 'ที่ทำขึ้นเฉพาะ',
+    customViews: 'Custom Views',
     dark: 'มืด',
     dashboard: 'แดชบอร์ด',
     delete: 'ลบ',

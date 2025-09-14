@@ -280,6 +280,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'pašlaik rediģē šo dokumentu. Ja pārņemsiet, viņi tiks bloķēti no turpmākas rediģēšanas un var zaudēt nesaglabātās izmaiņas.',
     custom: 'Pielāgots',
+    customViews: 'Pielāgoti Skati',
     dark: 'Tumšs',
     dashboard: 'Panelis',
     delete: 'Dzēst',

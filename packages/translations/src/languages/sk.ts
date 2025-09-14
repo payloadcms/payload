@@ -280,6 +280,7 @@ export const skTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'práve upravuje tento dokument. Ak prevezmete kontrolu, budú zablokovaní z pokračovania v úpravách a môžu tiež stratiť neuložené zmeny.',
     custom: 'Vlastný',
+    customViews: 'Vlastné Zobrazenia',
     dark: 'Tmavý',
     dashboard: 'Nástenka',
     delete: 'Odstrániť',

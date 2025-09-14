@@ -281,6 +281,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'このドキュメントを編集中です。あなたが引き継ぐと、編集を続けることができなくなり、未保存の変更が失われる可能性があります。',
     custom: 'カスタム',
+    customViews: 'カスタムビュー',
     dark: 'ダークモード',
     dashboard: 'ダッシュボード',
     delete: '削除',

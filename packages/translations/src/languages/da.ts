@@ -277,6 +277,7 @@ export const daTranslations: DefaultTranslationsObject = {
     creatingNewLabel: 'Opretter ny {{label}}',
     currentlyEditing: 'Du redigerer i øjeblikket',
     custom: 'Tilpasset',
+    customViews: 'Brugerdefinerede Visninger',
     dark: 'Mørk',
     dashboard: 'Dashboard',
     delete: 'Slet',

@@ -279,6 +279,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'trenutno uređuje ovaj dokument. Ako preuzmete, bit će im onemogućeno daljnje uređivanje i mogu izgubiti nespremljene promjene.',
     custom: 'Prilagođen',
+    customViews: 'Prilagođeni Prikazi',
     dark: 'Tamno',
     dashboard: 'Nadzorna ploča',
     delete: 'Izbriši',

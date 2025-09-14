@@ -280,6 +280,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'тренутно уређује овај документ. Ако преузмете контролу, биће блокирани да наставе са уређивањем и могу изгубити несачуване измене.',
     custom: 'Prilagođeno',
+    customViews: 'Прилагођени Прикази',
     dark: 'Тамно',
     dashboard: 'Контролни панел',
     delete: 'Обриши',

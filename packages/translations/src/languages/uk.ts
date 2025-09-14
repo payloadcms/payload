@@ -278,6 +278,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'зараз редагує цей документ. Якщо ви переберете контроль, їм буде заблоковано продовження редагування, і вони також можуть втратити незбережені зміни.',
     custom: 'Спеціальне замовлення',
+    customViews: 'Користувацькі Подання',
     dark: 'Темна',
     dashboard: 'Головна',
     delete: 'Видалити',

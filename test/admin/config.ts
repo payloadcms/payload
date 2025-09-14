@@ -93,6 +93,13 @@ export default buildConfigWithDefaults({
         CustomDefaultView: {
           Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
           path: '/custom-default-view',
+          labels: {
+            plural: 'Custom Default Views',
+            singular: 'Custom Default View',
+          },
+          admin: {
+            group: 'One',
+          },
         },
         CustomMinimalView: {
           Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',

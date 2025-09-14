@@ -261,6 +261,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       '当前正在编辑此文档。如果您接管，他们将无法继续编辑，并且可能会丢失未保存的更改。',
     custom: '自定义',
+    customViews: '自定义视图',
     dark: '深色',
     dashboard: '仪表板',
     delete: '删除',

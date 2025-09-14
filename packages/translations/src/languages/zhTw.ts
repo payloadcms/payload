@@ -262,6 +262,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       '目前正在編輯此文件。若您接手，對方將無法繼續編輯，且未儲存的變更可能會遺失。',
     custom: '自訂',
+    customViews: '自定義視圖',
     dark: '深色',
     dashboard: '儀表板',
     delete: '刪除',

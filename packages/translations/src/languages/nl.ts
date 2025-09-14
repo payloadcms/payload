@@ -286,6 +286,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'is momenteel dit document aan het bewerken. Als je het overneemt, wordt voorkomen dat ze doorgaan met bewerken en kunnen ze ook niet-opgeslagen wijzigingen verliezen.',
     custom: 'Aangepast',
+    customViews: 'Aangepaste Weergaven',
     dark: 'Donker',
     dashboard: 'Dashboard',
     delete: 'Verwijderen',

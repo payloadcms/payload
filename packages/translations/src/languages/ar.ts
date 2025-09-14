@@ -269,6 +269,7 @@ export const arTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'يقوم حاليًا بتحرير هذا المستند. إذا توليت، سيتم منعه من الاستمرار في التحرير وقد يفقد التغييرات غير المحفوظة.',
     custom: 'مخصص',
+    customViews: 'العروض المخصصة',
     dark: 'غامق',
     dashboard: 'لوحة التّحكّم',
     delete: 'حذف',

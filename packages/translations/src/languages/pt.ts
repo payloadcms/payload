@@ -280,6 +280,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'está editando este documento no momento. Se você assumir, eles serão impedidos de continuar editando e poderão perder alterações não salvas.',
     custom: 'Personalizado',
+    customViews: 'Visualizações Personalizadas',
     dark: 'Escuro',
     dashboard: 'Painel de Controle',
     delete: 'Excluir',

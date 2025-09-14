@@ -284,6 +284,7 @@ export const roTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'editează în prezent acest document. Dacă preiei controlul, vor fi blocați să continue editarea și ar putea pierde modificările nesalvate.',
     custom: 'Personalizat',
+    customViews: 'Vizualizări Personalizate',
     dark: 'Dark',
     dashboard: 'Panoul de bord',
     delete: 'Șterge',

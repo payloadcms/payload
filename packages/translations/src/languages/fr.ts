@@ -289,6 +289,7 @@ export const frTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'est en train de modifier ce document. Si vous prenez le contrôle, ils seront bloqués pour continuer à modifier et pourraient également perdre les modifications non enregistrées.',
     custom: 'Personnalisé',
+    customViews: 'Vues Personnalisées',
     dark: 'Sombre',
     dashboard: 'Tableau de bord',
     delete: 'Supprimer',
