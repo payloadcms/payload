@@ -79,6 +79,9 @@ export function MobileMenu({ menu }: Props) {
                 <Link href="/orders">Orders</Link>
               </li>
               <li>
+                <Link href="/account/addresses">Addresses</Link>
+              </li>
+              <li>
                 <Link href="/account">Manage account</Link>
               </li>
               <li className="mt-6">

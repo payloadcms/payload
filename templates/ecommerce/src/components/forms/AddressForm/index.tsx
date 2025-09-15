@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAddresses } from '@payloadcms/plugin-ecommerce/client/react'
-import { defaultCountries as supportedCountries } from '@payloadcms/plugin-ecommerce'
+import { defaultCountries as supportedCountries } from '@payloadcms/plugin-ecommerce/client/react'
 import { Address, Config } from '@/payload-types'
 import {
   Select,
@@ -83,7 +83,7 @@ export const AddressForm: React.FC<Props> = ({
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="flex flex-col gap-4 mb-8">
-        <div className="flex gap-4">
+        <div className="flex flex-col md:flex-row gap-4">
           <FormItem className="shrink">
             <Label htmlFor="title">Title</Label>
 

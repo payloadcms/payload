@@ -18,7 +18,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       </div>
 
       <div className="container mt-16 pb-8 flex gap-8">
-        {user && <AccountNav className="max-w-[15.5rem] grow flex flex-col items-start gap-4" />}
+        {user && (
+          <AccountNav className="max-w-[15.5rem] grow flex-col items-start gap-4 hidden md:flex" />
+        )}
 
         <div className="flex flex-col gap-12 grow">{children}</div>
       </div>

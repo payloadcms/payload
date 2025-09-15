@@ -1,11 +1,11 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { AccessConfig, CurrenciesConfig, FieldsOverride, PaymentAdapter } from '../types.js'
+import type { AccessConfig, CurrenciesConfig, FieldsOverride, PaymentAdapter } from '../../types.js'
 
-import { amountField } from '../fields/amountField.js'
-import { cartItemsField } from '../fields/cartItemsField.js'
-import { currencyField } from '../fields/currencyField.js'
-import { statusField } from '../fields/statusField.js'
+import { amountField } from '../../fields/amountField.js'
+import { cartItemsField } from '../../fields/cartItemsField.js'
+import { currencyField } from '../../fields/currencyField.js'
+import { statusField } from '../../fields/statusField.js'
 
 type Props = {
   access: {
@@ -98,7 +98,7 @@ export const createTransactionsCollection: (props: Props) => CollectionConfig = 
             fields: addressFields,
             label: ({ t }) =>
               // @ts-expect-error - translations are not typed in plugins yet
-              t('plugin-ecommerce:shippingAddress'),
+              t('plugin-ecommerce:billingAddress'),
           } as Field,
         ]
       : []),

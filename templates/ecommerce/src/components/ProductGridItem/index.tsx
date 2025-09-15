@@ -29,7 +29,8 @@ export const ProductGridItem: React.FC<Props> = ({ product }) => {
     }
   }
 
-  const image = gallery?.[0] && typeof gallery[0] !== 'string' ? gallery[0]?.image : false
+  const image =
+    gallery?.[0]?.image && typeof gallery[0]?.image !== 'string' ? gallery[0]?.image : false
 
   return (
     <Link className="relative inline-block h-full w-full group" href={`/products/${product.slug}`}>

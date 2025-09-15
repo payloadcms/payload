@@ -70,6 +70,7 @@ export const createProductsCollection: (props: Props) => CollectionConfig = (pro
       group: 'Ecommerce',
     },
     fields: defaultFields,
+    trash: true,
     versions: {
       drafts: {
         autosave: true,

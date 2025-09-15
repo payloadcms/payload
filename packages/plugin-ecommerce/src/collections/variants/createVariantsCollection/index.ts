@@ -115,6 +115,7 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
     hooks: {
       beforeChange: [beforeChange({ productsSlug, variantOptionsSlug })],
     },
+    trash: true,
     versions: {
       drafts: {
         autosave: true,

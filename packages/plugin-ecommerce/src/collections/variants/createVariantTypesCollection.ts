@@ -64,6 +64,7 @@ export const createVariantTypesCollection: (props: Props) => CollectionConfig = 
       ...overrides?.admin,
     },
     fields,
+    trash: true,
   }
 
   return { ...baseConfig }

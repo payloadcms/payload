@@ -42,7 +42,7 @@ const colorVariantOptions = [
 const globals: GlobalSlug[] = ['header', 'footer']
 
 const baseAddressUSData: Transaction['billingAddress'] = {
-  title: 'Dr',
+  title: 'Dr.',
   firstName: 'Otto',
   lastName: 'Octavius',
   phone: '1234567890',
@@ -56,7 +56,7 @@ const baseAddressUSData: Transaction['billingAddress'] = {
 }
 
 const baseAddressUKData: Transaction['billingAddress'] = {
-  title: 'Mr',
+  title: 'Mr.',
   firstName: 'Oliver',
   lastName: 'Twist',
   phone: '1234567890',

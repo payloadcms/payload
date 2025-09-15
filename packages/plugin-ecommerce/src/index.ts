@@ -8,12 +8,12 @@ import { createAddressesCollection } from './collections/addresses/createAddress
 import { createCartsCollection } from './collections/carts/createCartsCollection.js'
 import { createOrdersCollection } from './collections/orders/createOrdersCollection.js'
 import { createProductsCollection } from './collections/products/createProductsCollection.js'
+import { createTransactionsCollection } from './collections/transactions/createTransactionsCollection.js'
 import { createVariantOptionsCollection } from './collections/variants/createVariantOptionsCollection.js'
 import { createVariantsCollection } from './collections/variants/createVariantsCollection/index.js'
 import { createVariantTypesCollection } from './collections/variants/createVariantTypesCollection.js'
 import { confirmOrderHandler } from './endpoints/confirmOrder.js'
 import { initiatePaymentHandler } from './endpoints/initiatePayment.js'
-import { createTransactionsCollection } from './transactions/createTransactionsCollection.js'
 import { translations } from './translations/index.js'
 import { getCollectionSlugMap } from './utilities/getCollectionSlugMap.js'
 import { sanitizePluginConfig } from './utilities/sanitizePluginConfig.js'
@@ -380,7 +380,6 @@ export {
   createVariantTypesCollection,
 }
 
-export { defaultCountries } from './collections/addresses/defaultCountries.js'
 export { EUR, GBP, USD } from './currencies/index.js'
 export { amountField } from './fields/amountField.js'
 export { currencyField } from './fields/currencyField.js'

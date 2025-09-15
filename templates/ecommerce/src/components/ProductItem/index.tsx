@@ -26,14 +26,33 @@ export const ProductItem: React.FC<Props> = ({
 }) => {
   const { title } = product
 
-  let image: MediaType | null = null
+  const metaImage =
+    product.meta?.image && typeof product.meta?.image !== 'string' ? product.meta.image : undefined
 
-  if (variant && variant.gallery?.[0] && typeof variant.gallery[0] === 'object') {
-    image = variant.gallery[0]
-  } else if (product.gallery?.[0] && typeof product.gallery[0] === 'object') {
-    image = product.gallery[0]
-  } else if (product.meta?.image && typeof product.meta.image === 'object') {
-    image = product.meta.image
+  const firstGalleryImage =
+    typeof product.gallery?.[0]?.image !== 'string' ? product.gallery?.[0]?.image : undefined
+
+  let image = firstGalleryImage || metaImage
+
+  const isVariant = Boolean(variant) && typeof variant === 'object'
+
+  if (isVariant) {
+    const imageVariant = product.gallery?.find((item) => {
+      if (!item.variantOption) return false
+      const variantOptionID =
+        typeof item.variantOption === 'object' ? item.variantOption.id : item.variantOption
+
+      const hasMatch = variant?.options?.some((option) => {
+        if (typeof option === 'object') return option.id === variantOptionID
+        else return option === variantOptionID
+      })
+
+      return hasMatch
+    })
+
+    if (imageVariant && typeof imageVariant.image !== 'string') {
+      image = imageVariant.image
+    }
   }
 
   const itemPrice = variant?.priceInUSD || product.priceInUSD

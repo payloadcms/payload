@@ -68,6 +68,7 @@ export const createVariantOptionsCollection: (props: Props) => CollectionConfig 
       ...overrides?.admin,
     },
     fields,
+    trash: true,
   }
 
   return { ...baseConfig }

@@ -109,8 +109,10 @@ export const CheckoutPage: React.FC = () => {
 
   if (cartIsEmpty && isProcessingPayment) {
     return (
-      <div className="prose dark:prose-invert py-12 w-full items-center text-center">
-        <p>Processing your payment...</p>
+      <div className="py-12 w-full items-center justify-center">
+        <div className="prose dark:prose-invert text-center max-w-none self-center mb-8">
+          <p>Processing your payment...</p>
+        </div>
         <LoadingSpinner />
       </div>
     )
@@ -329,11 +331,20 @@ export const CheckoutPage: React.FC = () => {
                 }}
                 stripe={stripe}
               >
-                <CheckoutForm
-                  customerEmail={email}
-                  billingAddress={billingAddress}
-                  setProcessingPayment={setProcessingPayment}
-                />
+                <div className="flex flex-col gap-8">
+                  <CheckoutForm
+                    customerEmail={email}
+                    billingAddress={billingAddress}
+                    setProcessingPayment={setProcessingPayment}
+                  />
+                  <Button
+                    variant="ghost"
+                    className="self-start"
+                    onClick={() => setPaymentData(null)}
+                  >
+                    Cancel payment
+                  </Button>
+                </div>
               </Elements>
             </div>
           )}
@@ -354,11 +365,33 @@ export const CheckoutPage: React.FC = () => {
 
               if (!quantity) return null
 
-              const image = gallery?.[0] || meta?.image
+              let image = gallery?.[0]?.image || meta?.image
+              let price = product?.priceInUSD
 
-              const variantPrice = typeof variant === 'object' ? variant?.priceInUSD : undefined
+              const isVariant = Boolean(variant) && typeof variant === 'object'
 
-              const price = product?.priceInUSD ?? variantPrice
+              if (isVariant) {
+                price = variant?.priceInUSD
+
+                const imageVariant = product.gallery?.find((item) => {
+                  if (!item.variantOption) return false
+                  const variantOptionID =
+                    typeof item.variantOption === 'object'
+                      ? item.variantOption.id
+                      : item.variantOption
+
+                  const hasMatch = variant?.options?.some((option) => {
+                    if (typeof option === 'object') return option.id === variantOptionID
+                    else return option === variantOptionID
+                  })
+
+                  return hasMatch
+                })
+
+                if (imageVariant && typeof imageVariant.image !== 'string') {
+                  image = imageVariant.image
+                }
+              }
 
               return (
                 <div className="flex items-start gap-4" key={index}>
