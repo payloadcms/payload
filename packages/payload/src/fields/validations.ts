@@ -530,7 +530,6 @@ export const array: ArrayFieldValidation = (value, { maxRows, minRows, req: { t 
 export type BlocksFieldValidation = Validate<unknown, unknown, unknown, BlocksField>
 
 /**
- *
  * This function validates the blocks in a blocks field against the provided filterOptions.
  * It will return a list of all block slugs found in the value, the allowed block slugs (if any),
  * and a list of invalid block slugs that are used despite being disallowed.
