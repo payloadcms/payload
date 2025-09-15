@@ -73,7 +73,9 @@ export function CartModal() {
                       : undefined
 
                   const firstGalleryImage =
-                    typeof product.gallery?.[0] !== 'string' ? product.gallery?.[0] : undefined
+                    typeof product.gallery?.[0]?.image !== 'string'
+                      ? product.gallery?.[0]?.image
+                      : undefined
 
                   let image = firstGalleryImage || metaImage
                   let price = product.priceInUSD
@@ -83,8 +85,23 @@ export function CartModal() {
                   if (isVariant) {
                     price = variant?.priceInUSD
 
-                    if (variant && variant.gallery?.[0] && typeof variant.gallery[0] === 'object') {
-                      image = variant.gallery[0]
+                    const imageVariant = product.gallery?.find((item) => {
+                      if (!item.variantOption) return false
+                      const variantOptionID =
+                        typeof item.variantOption === 'object'
+                          ? item.variantOption.id
+                          : item.variantOption
+
+                      const hasMatch = variant?.options?.some((option) => {
+                        if (typeof option === 'object') return option.id === variantOptionID
+                        else return option === variantOptionID
+                      })
+
+                      return hasMatch
+                    })
+
+                    if (imageVariant && typeof imageVariant.image !== 'string') {
+                      image = imageVariant.image
                     }
                   }
 

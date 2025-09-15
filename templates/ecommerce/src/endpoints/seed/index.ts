@@ -122,7 +122,7 @@ export const seed = async ({
 
   payload.logger.info(`— Seeding media...`)
 
-  const [imageHatBuffer, imageTshirtBlackBuffer, imageTshirtWhiteBuffer, hero1Buffer] =
+  const [imageHatBuffer, imageTshirtBlackBuffer, imageTshirtWhiteBuffer, heroBuffer] =
     await Promise.all([
       fetchFileByURL(
         'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/ecommerce/src/endpoints/seed/hat-logo.png',
@@ -143,11 +143,10 @@ export const seed = async ({
     imageHat,
     imageTshirtBlack,
     imageTshirtWhite,
-    imageHome,
+    imageHero,
     accessoriesCategory,
     tshirtsCategory,
     hatsCategory,
-    hoodiesCategory,
   ] = await Promise.all([
     payload.create({
       collection: 'users',
@@ -176,7 +175,7 @@ export const seed = async ({
     payload.create({
       collection: 'media',
       data: imageHero1Data,
-      file: hero1Buffer,
+      file: heroBuffer,
     }),
 
     payload.create({
@@ -200,13 +199,6 @@ export const seed = async ({
       data: {
         title: 'Hats',
         slug: 'hats',
-      },
-    }),
-    payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Hoodies',
-        slug: 'hoodies',
       },
     }),
   ])
@@ -278,9 +270,10 @@ export const seed = async ({
         { image: imageTshirtBlack, variantOption: black },
         { image: imageTshirtWhite, variantOption: white },
       ],
-      metaImage: imageHat,
+      metaImage: imageTshirtBlack,
+      contentImage: imageHero,
       variantTypes: [colorVariantType, sizeVariantType],
-      categories: [hoodiesCategory],
+      categories: [tshirtsCategory],
       relatedProducts: [productHat],
     }),
   })
@@ -338,7 +331,7 @@ export const seed = async ({
       collection: 'pages',
       depth: 0,
       data: homePageData({
-        contentImage: imageHome,
+        contentImage: imageHero,
         metaImage: imageHat,
       }),
     }),

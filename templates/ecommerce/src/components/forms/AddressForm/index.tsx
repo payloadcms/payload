@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAddresses } from '@payloadcms/plugin-ecommerce/client/react'
-import { defaultCountries as supportedCountries } from '@payloadcms/plugin-ecommerce/addresses'
+import { defaultCountries as supportedCountries } from '@payloadcms/plugin-ecommerce'
 import { Address, Config } from '@/payload-types'
 import {
   Select,
