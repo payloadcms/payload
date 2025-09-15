@@ -250,9 +250,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     cancel: 'Annuleren',
     changesNotSaved:
       'Uw wijzigingen zijn niet bewaard. Als u weggaat zullen de wijzigingen verloren gaan.',
-    clear: 'Duidelijk',
+    clear: 'Wissen',
     clearAll: 'Alles wissen',
-    close: 'Dichtbij',
+    close: 'Sluiten',
     collapse: 'Samenvouwen',
     collections: 'Collecties',
     columns: 'Kolommen',

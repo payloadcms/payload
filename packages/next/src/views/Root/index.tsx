@@ -10,6 +10,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
+import { PageConfigProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
@@ -27,7 +28,6 @@ import { isCustomAdminView } from '../../utilities/isCustomAdminView.js'
 import { isPublicAdminRoute } from '../../utilities/isPublicAdminRoute.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getRouteData } from './getRouteData.js'
-import { SyncClientConfig } from './SyncClientConfig.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -300,8 +300,7 @@ export const RootPage = async ({
   })
 
   return (
-    <React.Fragment>
-      <SyncClientConfig clientConfig={clientConfig} />
+    <PageConfigProvider config={clientConfig}>
       {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
       {templateType === 'minimal' && (
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
@@ -332,6 +331,6 @@ export const RootPage = async ({
           {RenderedView}
         </DefaultTemplate>
       )}
-    </React.Fragment>
+    </PageConfigProvider>
   )
 }
