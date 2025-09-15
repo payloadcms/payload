@@ -42,6 +42,11 @@ export type Options<
    */
   currentDepth?: number
   /**
+   * You may pass the document data directly which will skip the `db.findOne` database query.
+   * This is useful if you want to use this endpoint solely for running hooks and populating data.
+   */
+  data?: Record<string, unknown>
+  /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
@@ -77,7 +82,7 @@ export type Options<
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -126,6 +131,7 @@ export async function findByIDLocal<
     id,
     collection: collectionSlug,
     currentDepth,
+    data,
     depth,
     disableErrors = false,
     draft = false,
@@ -150,6 +156,7 @@ export async function findByIDLocal<
     id,
     collection,
     currentDepth,
+    data,
     depth,
     disableErrors,
     draft,

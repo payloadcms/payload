@@ -77,7 +77,7 @@ test.describe('Folders', () => {
 
     test('should create new folder from collection view', async () => {
       await page.goto(postURL.byFolder)
-      await createFolder({ folderName: 'New Folder From Collection', fromDropdown: true, page })
+      await createFolder({ folderName: 'New Folder From Collection', fromDropdown: false, page })
     })
 
     test('should create new folder from document view', async () => {
@@ -367,11 +367,11 @@ test.describe('Folders', () => {
     })
 
     test('should show By Folder button', async () => {
-      const folderButton = page.locator('.list-pills__button', { hasText: 'By Folder' })
+      const folderButton = page.locator('.default-list-view-tabs__button', { hasText: 'By Folder' })
       await expect(folderButton).toBeVisible()
     })
     test('should navigate to By Folder view', async () => {
-      const folderButton = page.locator('.list-pills__button', { hasText: 'By Folder' })
+      const folderButton = page.locator('.default-list-view-tabs__button', { hasText: 'By Folder' })
       await folderButton.click()
       await expect(page).toHaveURL(`${serverURL}/admin/collections/posts/payload-folders`)
       const foldersTitle = page.locator('.collection-folder-list', { hasText: 'Folders' })
@@ -422,12 +422,10 @@ test.describe('Folders', () => {
 
     test('should create folder from By Folder view', async () => {
       await page.goto(postURL.byFolder)
-      const createDropdown = page.locator('.create-new-doc-in-folder__popup-button', {
-        hasText: 'Create',
+      const createButton = page.locator('.create-new-doc-in-folder__button', {
+        hasText: 'Create folder',
       })
-      await createDropdown.click()
-      const createFolderButton = page.locator('.popup-button-list__button', { hasText: 'Folder' })
-      await createFolderButton.click()
+      await createButton.click()
       await createFolderDoc({
         page,
         folderName: 'New Folder From Collection',
@@ -485,7 +483,7 @@ test.describe('Folders', () => {
       await createFolder({
         folderName,
         page,
-        fromDropdown: true,
+        fromDropdown: false,
         folderType: ['Omitted From Browse By', 'Posts'],
       })
 

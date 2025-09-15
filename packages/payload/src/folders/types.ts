@@ -87,8 +87,8 @@ export type RootFoldersConfiguration = {
   collectionOverrides?: (({
     collection,
   }: {
-    collection: CollectionConfig
-  }) => CollectionConfig | Promise<CollectionConfig>)[]
+    collection: Omit<CollectionConfig, 'trash'>
+  }) => Omit<CollectionConfig, 'trash'> | Promise<Omit<CollectionConfig, 'trash'>>)[]
   /**
    * If true, you can scope folders to specific collections.
    *

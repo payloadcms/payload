@@ -5,7 +5,6 @@ import type {
   DocumentPreferences,
   Field,
   FieldSchemaMap,
-  FieldState,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
@@ -105,6 +104,7 @@ export const fieldSchemasToFormState = async ({
   skipValidation,
 }: Args): Promise<FormState> => {
   if (!clientFieldSchemaMap && renderFieldFn) {
+    // eslint-disable-next-line no-console
     console.warn(
       'clientFieldSchemaMap is not passed to fieldSchemasToFormState - this will reduce performance',
     )

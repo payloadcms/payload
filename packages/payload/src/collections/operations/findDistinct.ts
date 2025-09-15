@@ -12,6 +12,7 @@ import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/APIError.js'
 import { Forbidden } from '../../errors/Forbidden.js'
 import { relationshipPopulationPromise } from '../../fields/hooks/afterRead/relationshipPopulationPromise.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { getFieldByPath } from '../../utilities/getFieldByPath.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildAfterOperation } from './utils.js'
@@ -29,6 +30,7 @@ export type Arguments = {
   req?: PayloadRequest
   showHiddenFields?: boolean
   sort?: Sort
+  trash?: boolean
   where?: Where
 }
 export const findDistinctOperation = async (
@@ -60,6 +62,7 @@ export const findDistinctOperation = async (
       overrideAccess,
       populate,
       showHiddenFields = false,
+      trash = false,
       where,
     } = args
 
@@ -96,8 +99,15 @@ export const findDistinctOperation = async (
     // Find Distinct
     // /////////////////////////////////////
 
-    const fullWhere = combineQueries(where!, accessResult!)
+    let fullWhere = combineQueries(where!, accessResult!)
     sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
+
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
 
     await validateQueryPaths({
       collectionConfig,

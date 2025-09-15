@@ -13,16 +13,29 @@ type Args = {
 export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promise<File> => {
   const { filename, url } = data
 
+  let trimAuthCookies = true
   if (typeof url === 'string') {
     let fileURL = url
     if (!url.startsWith('http')) {
+      // URL points to the same server - we can send any cookies safely to our server.
+      trimAuthCookies = false
       const baseUrl = req.headers.get('origin') || `${req.protocol}://${req.headers.get('host')}`
       fileURL = `${baseUrl}${url}`
     }
 
+    let cookies = (req.headers.get('cookie') ?? '').split(';')
+
+    if (trimAuthCookies) {
+      cookies = cookies.filter(
+        (cookie) => !cookie.trim().startsWith(req.payload.config.cookiePrefix),
+      )
+    }
+
     const headers = uploadConfig.externalFileHeaderFilter
       ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
-      : { cookie: req.headers.get('cookie')! }
+      : {
+          cookie: cookies.join(';'),
+        }
 
     // Check if URL is allowed because of skipSafeFetch allowList
     const skipSafeFetch: boolean =

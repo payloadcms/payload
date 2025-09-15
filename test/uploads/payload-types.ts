@@ -83,6 +83,7 @@ export interface Config {
     media: Media;
     'allow-list-media': AllowListMedia;
     'skip-safe-fetch-media': SkipSafeFetchMedia;
+    'skip-safe-fetch-header-filter': SkipSafeFetchHeaderFilter;
     'skip-allow-list-safe-fetch-media': SkipAllowListSafeFetchMedia;
     'restrict-file-types': RestrictFileType;
     'no-restrict-file-types': NoRestrictFileType;
@@ -97,6 +98,7 @@ export interface Config {
     'externally-served-media': ExternallyServedMedia;
     'uploads-1': Uploads1;
     'uploads-2': Uploads2;
+    'any-images': AnyImage;
     'admin-thumbnail-function': AdminThumbnailFunction;
     'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQuery;
     'admin-thumbnail-size': AdminThumbnailSize;
@@ -118,6 +120,8 @@ export interface Config {
     'simple-relationship': SimpleRelationship;
     'file-mime-type': FileMimeType;
     'svg-only': SvgOnly;
+    'media-without-delete-access': MediaWithoutDeleteAccess;
+    'media-with-image-size-admin-props': MediaWithImageSizeAdminProp;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -141,6 +145,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'allow-list-media': AllowListMediaSelect<false> | AllowListMediaSelect<true>;
     'skip-safe-fetch-media': SkipSafeFetchMediaSelect<false> | SkipSafeFetchMediaSelect<true>;
+    'skip-safe-fetch-header-filter': SkipSafeFetchHeaderFilterSelect<false> | SkipSafeFetchHeaderFilterSelect<true>;
     'skip-allow-list-safe-fetch-media': SkipAllowListSafeFetchMediaSelect<false> | SkipAllowListSafeFetchMediaSelect<true>;
     'restrict-file-types': RestrictFileTypesSelect<false> | RestrictFileTypesSelect<true>;
     'no-restrict-file-types': NoRestrictFileTypesSelect<false> | NoRestrictFileTypesSelect<true>;
@@ -155,6 +160,7 @@ export interface Config {
     'externally-served-media': ExternallyServedMediaSelect<false> | ExternallyServedMediaSelect<true>;
     'uploads-1': Uploads1Select<false> | Uploads1Select<true>;
     'uploads-2': Uploads2Select<false> | Uploads2Select<true>;
+    'any-images': AnyImagesSelect<false> | AnyImagesSelect<true>;
     'admin-thumbnail-function': AdminThumbnailFunctionSelect<false> | AdminThumbnailFunctionSelect<true>;
     'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQueriesSelect<false> | AdminThumbnailWithSearchQueriesSelect<true>;
     'admin-thumbnail-size': AdminThumbnailSizeSelect<false> | AdminThumbnailSizeSelect<true>;
@@ -176,6 +182,8 @@ export interface Config {
     'simple-relationship': SimpleRelationshipSelect<false> | SimpleRelationshipSelect<true>;
     'file-mime-type': FileMimeTypeSelect<false> | FileMimeTypeSelect<true>;
     'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
+    'media-without-delete-access': MediaWithoutDeleteAccessSelect<false> | MediaWithoutDeleteAccessSelect<true>;
+    'media-with-image-size-admin-props': MediaWithImageSizeAdminPropsSelect<false> | MediaWithImageSizeAdminPropsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -231,6 +239,7 @@ export interface Relation {
  */
 export interface Media {
   id: string;
+  alt?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -832,6 +841,24 @@ export interface SkipSafeFetchMedia {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-safe-fetch-header-filter".
+ */
+export interface SkipSafeFetchHeaderFilter {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "skip-allow-list-safe-fetch-media".
  */
 export interface SkipAllowListSafeFetchMedia {
@@ -1295,6 +1322,24 @@ export interface AdminThumbnailSize {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "any-images".
+ */
+export interface AnyImage {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "admin-thumbnail-function".
  */
 export interface AdminThumbnailFunction {
@@ -1605,6 +1650,76 @@ export interface SvgOnly {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-delete-access".
+ */
+export interface MediaWithoutDeleteAccess {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-image-size-admin-props".
+ */
+export interface MediaWithImageSizeAdminProp {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    one?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    two?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    three?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    four?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -1699,6 +1814,10 @@ export interface PayloadLockedDocument {
         value: string | SkipSafeFetchMedia;
       } | null)
     | ({
+        relationTo: 'skip-safe-fetch-header-filter';
+        value: string | SkipSafeFetchHeaderFilter;
+      } | null)
+    | ({
         relationTo: 'skip-allow-list-safe-fetch-media';
         value: string | SkipAllowListSafeFetchMedia;
       } | null)
@@ -1753,6 +1872,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'uploads-2';
         value: string | Uploads2;
+      } | null)
+    | ({
+        relationTo: 'any-images';
+        value: string | AnyImage;
       } | null)
     | ({
         relationTo: 'admin-thumbnail-function';
@@ -1837,6 +1960,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'svg-only';
         value: string | SvgOnly;
+      } | null)
+    | ({
+        relationTo: 'media-without-delete-access';
+        value: string | MediaWithoutDeleteAccess;
+      } | null)
+    | ({
+        relationTo: 'media-with-image-size-admin-props';
+        value: string | MediaWithImageSizeAdminProp;
       } | null)
     | ({
         relationTo: 'users';
@@ -2323,6 +2454,7 @@ export interface FocalNoSizesSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2521,6 +2653,23 @@ export interface AllowListMediaSelect<T extends boolean = true> {
  * via the `definition` "skip-safe-fetch-media_select".
  */
 export interface SkipSafeFetchMediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-safe-fetch-header-filter_select".
+ */
+export interface SkipSafeFetchHeaderFilterSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2980,6 +3129,23 @@ export interface Uploads2Select<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "any-images_select".
+ */
+export interface AnyImagesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "admin-thumbnail-function_select".
  */
 export interface AdminThumbnailFunctionSelect<T extends boolean = true> {
@@ -3344,6 +3510,84 @@ export interface SvgOnlySelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-delete-access_select".
+ */
+export interface MediaWithoutDeleteAccessSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-image-size-admin-props_select".
+ */
+export interface MediaWithImageSizeAdminPropsSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        one?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        two?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        three?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        four?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

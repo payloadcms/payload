@@ -76,7 +76,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean

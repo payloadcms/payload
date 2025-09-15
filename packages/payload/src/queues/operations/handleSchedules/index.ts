@@ -23,17 +23,26 @@ export type HandleSchedulesResult = {
  * after they are scheduled
  */
 export async function handleSchedules({
-  queue,
+  allQueues = false,
+  queue: _queue,
   req,
 }: {
   /**
+   * If you want to schedule jobs from all queues, set this to true.
+   * If you set this to true, the `queue` property will be ignored.
+   *
+   * @default false
+   */
+  allQueues?: boolean
+  /**
    * If you want to only schedule jobs that are set to schedule in a specific queue, set this to the queue name.
    *
-   * @default all jobs for all queues will be scheduled.
+   * @default jobs from the `default` queue will be executed.
    */
   queue?: string
   req: PayloadRequest
 }): Promise<HandleSchedulesResult> {
+  const queue = _queue ?? 'default'
   const jobsConfig = req.payload.config.jobs
   const queuesWithSchedules = getQueuesWithSchedules({
     jobsConfig,
@@ -53,7 +62,7 @@ export async function handleSchedules({
   // Need to know when that particular job was last scheduled in that particular queue
 
   for (const [queueName, { schedules }] of Object.entries(queuesWithSchedules)) {
-    if (queue && queueName !== queue) {
+    if (!allQueues && queueName !== queue) {
       // If a queue is specified, only schedule jobs for that queue
       continue
     }

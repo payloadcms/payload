@@ -37,12 +37,55 @@ export const getConfig: () => Partial<Config> = () => ({
   },
   collections: [
     {
+      slug: 'noTimeStamps',
+      timestamps: false,
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+      ],
+    },
+    {
       slug: 'categories',
       versions: { drafts: true },
       fields: [
         {
           type: 'text',
           name: 'title',
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'hideout',
+              fields: [
+                {
+                  label: 'Cameras',
+                  type: 'tabs',
+                  unique: true,
+                  tabs: [
+                    {
+                      name: 'camera1',
+                      fields: [
+                        {
+                          type: 'row',
+                          fields: [
+                            {
+                              name: 'time1Image',
+                              type: 'relationship',
+                              relationTo: 'posts',
+                              unique: true,
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     },
@@ -214,6 +257,22 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'arrayWithIDs',
           type: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+            {
+              name: 'textLocalized',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+        {
+          name: 'arrayWithIDsLocalized',
+          type: 'array',
+          localized: true,
           fields: [
             {
               name: 'text',

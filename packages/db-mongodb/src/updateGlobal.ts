@@ -26,6 +26,8 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
       select,
     }),
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   transform({ adapter: this, data, fields, globalSlug, operation: 'write' })

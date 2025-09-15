@@ -119,8 +119,9 @@ export const OrderableTable: React.FC<Props> = ({
         target,
       }
 
-      const response = await fetch(`${config.routes.api}/reorder`, {
+      const response = await fetch(`${config.serverURL}${config.routes.api}/reorder`, {
         body: JSON.stringify(jsonBody),
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },

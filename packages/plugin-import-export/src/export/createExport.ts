@@ -6,6 +6,7 @@ import { APIError } from 'payload'
 import { Readable } from 'stream'
 
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
+import { validateLimitValue } from '../utilities/validateLimitValue.js'
 import { flattenObject } from './flattenObject.js'
 import { getCustomFieldFunctions } from './getCustomFieldFunctions.js'
 import { getFilename } from './getFilename.js'
@@ -23,8 +24,10 @@ export type Export = {
   format: 'csv' | 'json'
   globals?: string[]
   id: number | string
+  limit?: number
   locale?: string
   name: string
+  page?: number
   slug: string
   sort: Sort
   user: string
@@ -57,6 +60,8 @@ export const createExport = async (args: CreateExportArgs) => {
       locale: localeInput,
       sort,
       user,
+      page,
+      limit: incomingLimit,
       where,
     },
     req: { locale: localeArg, payload },
@@ -87,14 +92,30 @@ export const createExport = async (args: CreateExportArgs) => {
     req.payload.logger.debug({ message: 'Export configuration:', name, isCSV, locale })
   }
 
+  const batchSize = 100 // fixed per request
+
+  const hardLimit =
+    typeof incomingLimit === 'number' && incomingLimit > 0 ? incomingLimit : undefined
+
+  const { totalDocs } = await payload.count({
+    collection: collectionSlug,
+    user,
+    locale,
+    overrideAccess: false,
+  })
+
+  const totalPages = Math.max(1, Math.ceil(totalDocs / batchSize))
+  const requestedPage = page || 1
+  const adjustedPage = requestedPage > totalPages ? 1 : requestedPage
+
   const findArgs = {
     collection: collectionSlug,
     depth: 1,
     draft: drafts === 'yes',
-    limit: 100,
+    limit: batchSize,
     locale,
     overrideAccess: false,
-    page: 0,
+    page: 0, // The page will be incremented manually in the loop
     select,
     sort,
     user,
@@ -156,15 +177,37 @@ export const createExport = async (args: CreateExportArgs) => {
       req.payload.logger.debug('Pre-scanning all columns before streaming')
     }
 
+    const limitErrorMsg = validateLimitValue(
+      incomingLimit,
+      req.t,
+      batchSize, // step i.e. 100
+    )
+    if (limitErrorMsg) {
+      throw new APIError(limitErrorMsg)
+    }
+
     const allColumns: string[] = []
 
     if (isCSV) {
       const allColumnsSet = new Set<string>()
-      let scanPage = 1
+
+      // Use the incoming page value here, defaulting to 1 if undefined
+      let scanPage = adjustedPage
       let hasMore = true
+      let fetched = 0
+      const maxDocs = typeof hardLimit === 'number' ? hardLimit : Number.POSITIVE_INFINITY
 
       while (hasMore) {
-        const result = await payload.find({ ...findArgs, page: scanPage })
+        const remaining = Math.max(0, maxDocs - fetched)
+        if (remaining === 0) {
+          break
+        }
+
+        const result = await payload.find({
+          ...findArgs,
+          page: scanPage,
+          limit: Math.min(batchSize, remaining),
+        })
 
         result.docs.forEach((doc) => {
           const flat = filterDisabledCSV(flattenObject({ doc, fields, toCSVFunctions }))
@@ -176,8 +219,9 @@ export const createExport = async (args: CreateExportArgs) => {
           })
         })
 
-        hasMore = result.hasNextPage
-        scanPage += 1
+        fetched += result.docs.length
+        scanPage += 1 // Increment page for next batch
+        hasMore = result.hasNextPage && fetched < maxDocs
       }
 
       if (debug) {
@@ -187,11 +231,27 @@ export const createExport = async (args: CreateExportArgs) => {
 
     const encoder = new TextEncoder()
     let isFirstBatch = true
-    let streamPage = 1
+    let streamPage = adjustedPage
+    let fetched = 0
+    const maxDocs = typeof hardLimit === 'number' ? hardLimit : Number.POSITIVE_INFINITY
 
     const stream = new Readable({
       async read() {
-        const result = await payload.find({ ...findArgs, page: streamPage })
+        const remaining = Math.max(0, maxDocs - fetched)
+
+        if (remaining === 0) {
+          if (!isCSV) {
+            this.push(encoder.encode(']'))
+          }
+          this.push(null)
+          return
+        }
+
+        const result = await payload.find({
+          ...findArgs,
+          page: streamPage,
+          limit: Math.min(batchSize, remaining),
+        })
 
         if (debug) {
           req.payload.logger.debug(`Streaming batch ${streamPage} with ${result.docs.length} docs`)
@@ -240,10 +300,11 @@ export const createExport = async (args: CreateExportArgs) => {
           }
         }
 
+        fetched += result.docs.length
         isFirstBatch = false
-        streamPage += 1
+        streamPage += 1 // Increment stream page for the next batch
 
-        if (!result.hasNextPage) {
+        if (!result.hasNextPage || fetched >= maxDocs) {
           if (debug) {
             req.payload.logger.debug('Stream complete - no more pages')
           }
@@ -272,18 +333,29 @@ export const createExport = async (args: CreateExportArgs) => {
   const rows: Record<string, unknown>[] = []
   const columnsSet = new Set<string>()
   const columns: string[] = []
-  let page = 1
+
+  // Start from the incoming page value, defaulting to 1 if undefined
+  let currentPage = adjustedPage
+  let fetched = 0
   let hasNextPage = true
+  const maxDocs = typeof hardLimit === 'number' ? hardLimit : Number.POSITIVE_INFINITY
 
   while (hasNextPage) {
+    const remaining = Math.max(0, maxDocs - fetched)
+
+    if (remaining === 0) {
+      break
+    }
+
     const result = await payload.find({
       ...findArgs,
-      page,
+      page: currentPage,
+      limit: Math.min(batchSize, remaining),
     })
 
     if (debug) {
       req.payload.logger.debug(
-        `Processing batch ${findArgs.page} with ${result.docs.length} documents`,
+        `Processing batch ${currentPage} with ${result.docs.length} documents`,
       )
     }
 
@@ -308,10 +380,12 @@ export const createExport = async (args: CreateExportArgs) => {
       outputData.push(batchRows.map((doc) => JSON.stringify(doc)).join(',\n'))
     }
 
-    hasNextPage = result.hasNextPage
-    page += 1
+    fetched += result.docs.length
+    hasNextPage = result.hasNextPage && fetched < maxDocs
+    currentPage += 1 // Increment page for next batch
   }
 
+  // Prepare final output
   if (isCSV) {
     const paddedRows = rows.map((row) => {
       const fullRow: Record<string, unknown> = {}

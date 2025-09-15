@@ -10,6 +10,7 @@ import { CreateSimpleRetries0Task } from './tasks/CreateSimpleRetries0Task.js'
 import { CreateSimpleRetriesUndefinedTask } from './tasks/CreateSimpleRetriesUndefinedTask.js'
 import { CreateSimpleTask } from './tasks/CreateSimpleTask.js'
 import { CreateSimpleWithDuplicateMessageTask } from './tasks/CreateSimpleWithDuplicateMessageTask.js'
+import { DoNothingTask } from './tasks/DoNothingTask.js'
 import { ExternalTask } from './tasks/ExternalTask.js'
 import { ReturnCustomErrorTask } from './tasks/ReturnCustomErrorTask.js'
 import { ReturnErrorTask } from './tasks/ReturnErrorTask.js'
@@ -18,6 +19,7 @@ import { UpdatePostStep2Task } from './tasks/UpdatePostStep2Task.js'
 import { UpdatePostTask } from './tasks/UpdatePostTask.js'
 import { externalWorkflow } from './workflows/externalWorkflow.js'
 import { failsImmediatelyWorkflow } from './workflows/failsImmediately.js'
+import { fastParallelTaskWorkflow } from './workflows/fastParallelTaskWorkflow.js'
 import { inlineTaskTestWorkflow } from './workflows/inlineTaskTest.js'
 import { inlineTaskTestDelayedWorkflow } from './workflows/inlineTaskTestDelayed.js'
 import { longRunningWorkflow } from './workflows/longRunning.js'
@@ -141,6 +143,7 @@ export const getConfig: () => Partial<Config> = () => ({
       ThrowErrorTask,
       ReturnErrorTask,
       ReturnCustomErrorTask,
+      DoNothingTask,
     ],
     workflows: [
       updatePostWorkflow,
@@ -155,6 +158,7 @@ export const getConfig: () => Partial<Config> = () => ({
       workflowRetries2TasksRetries0Workflow,
       inlineTaskTestWorkflow,
       failsImmediatelyWorkflow,
+      fastParallelTaskWorkflow,
       inlineTaskTestDelayedWorkflow,
       externalWorkflow,
       retriesBackoffTestWorkflow,

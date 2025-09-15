@@ -1,0 +1,14 @@
+@layer payload-default {
+  .nullify-locale-field {
+    margin-bottom: 0;
+    .field-type.checkbox {
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+    }
+
+    + .array-field__add-row {
+      margin-top: calc(var(--base) / 2);
+    }
+  }
+}

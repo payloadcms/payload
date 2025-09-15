@@ -1,7 +1,9 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
+import { statSync } from 'fs'
+import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
+import { openListFilters } from 'helpers/e2e/filters/index.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -39,7 +41,9 @@ import {
   imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
+  mediaWithImageSizeAdminPropsSlug,
   mediaWithoutCacheTagsSlug,
+  mediaWithoutDeleteAccessSlug,
   relationPreviewSlug,
   relationSlug,
   svgOnlySlug,
@@ -89,6 +93,8 @@ let stopCollectingErrorsFromPage: () => boolean
 let bulkUploadsURL: AdminUrlUtil
 let fileMimeTypeURL: AdminUrlUtil
 let svgOnlyURL: AdminUrlUtil
+let mediaWithoutDeleteAccessURL: AdminUrlUtil
+let mediaWithImageSizeAdminPropsURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -129,8 +135,11 @@ describe('Uploads', () => {
     bulkUploadsURL = new AdminUrlUtil(serverURL, bulkUploadsSlug)
     fileMimeTypeURL = new AdminUrlUtil(serverURL, fileMimeTypeSlug)
     svgOnlyURL = new AdminUrlUtil(serverURL, svgOnlySlug)
+    mediaWithoutDeleteAccessURL = new AdminUrlUtil(serverURL, mediaWithoutDeleteAccessSlug)
+    mediaWithImageSizeAdminPropsURL = new AdminUrlUtil(serverURL, mediaWithImageSizeAdminPropsSlug)
 
     const context = await browser.newContext()
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     page = await context.newPage()
 
     const { consoleErrors, collectErrors, stopCollectingErrors } = initPageConsoleErrorCatch(page, {
@@ -212,6 +221,22 @@ describe('Uploads', () => {
     await page.locator('.doc-drawer__header-close').click()
 
     await expect(filename).toContainText('test-image.png')
+  })
+
+  test('should copy the file url field to the clipboard', async () => {
+    const mediaDoc = (
+      await payload.find({
+        collection: mediaSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0]
+
+    await page.goto(mediaURL.edit(mediaDoc!.id))
+    await page.locator('.copy-to-clipboard').click()
+    const clipbaordContent = await page.evaluate(() => navigator.clipboard.readText())
+    expect(clipbaordContent).toBe(mediaDoc?.url)
   })
 
   test('should create file upload', async () => {
@@ -1275,7 +1300,7 @@ describe('Uploads', () => {
       const pasteUrlEndpoint = `/api/uploads-1/paste-url?src=${encodedImageURL}`
       const serverSideFetchPromise = page.waitForResponse(
         (response) => response.url().includes(pasteUrlEndpoint) && response.status() === 200,
-        { timeout: 1000 },
+        { timeout: POLL_TOPASS_TIMEOUT },
       )
 
       // Click the "Add File" button
@@ -1598,5 +1623,139 @@ describe('Uploads', () => {
     await expect(filename).toHaveValue('image-as-pdf.pdf')
 
     await saveDocAndAssert(page, '#action-save', 'error')
+  })
+
+  test('should not rewrite file when updating collection fields', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.png'))
+    await saveDocAndAssert(page)
+    const imageID = page.url().split('/').pop()!
+    const { doc } = await client.findByID({ slug: mediaSlug, id: imageID, auth: true })
+    const filename = doc.filename as string
+    const filePath = path.resolve(dirname, 'media', filename)
+    const before = statSync(filePath)
+
+    const altField = page.locator('#field-alt')
+    await altField.fill('test alt')
+
+    await saveDocAndAssert(page)
+    const after = statSync(filePath)
+    expect(after.mtime.getTime()).toEqual(before.mtime.getTime())
+  })
+
+  test('should be able to replace the file even if the user doesnt have delete access', async () => {
+    const docID = (await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 }))
+      .docs[0]?.id as string
+    await page.goto(mediaWithoutDeleteAccessURL.edit(docID))
+    const removeButton = page.locator('.file-details__remove')
+    await expect(removeButton).toBeVisible()
+    await removeButton.click()
+    await expect(page.locator('input[type="file"]')).toBeAttached()
+    await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
+    const filename = page.locator('.file-field__filename')
+    await expect(filename).toHaveValue('test-image.jpg')
+    await saveDocAndAssert(page)
+    const filenameFromAPI = (
+      await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 })
+    ).docs[0]?.filename
+    expect(filenameFromAPI).toBe('test-image.jpg')
+  })
+
+  test('should not show image sizes in column selector in list view if imageSize has admin.disableListColumn true', async () => {
+    await page.goto(mediaWithImageSizeAdminPropsURL.list)
+
+    await openListColumns(page, {})
+
+    await expect(page.locator('button:has-text("Sizes > one > URL")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > one > Width")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > one > Height")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > one > MIME Type")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > one > File Size")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > one > File Name")')).toBeHidden()
+
+    await expect(page.locator('button:has-text("Sizes > two > URL")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > two > Width")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > two > Height")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > two > MIME Type")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > two > File Size")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > two > File Name")')).toBeHidden()
+  })
+
+  test('should show image size in column selector in list view if imageSize has admin.disableListColumn false', async () => {
+    await page.goto(mediaWithImageSizeAdminPropsURL.list)
+
+    await openListColumns(page, {})
+
+    await expect(page.locator('button:has-text("Sizes > three > URL")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > three > Width")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > three > Height")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > three > MIME Type")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > three > File Size")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > three > File Name")')).toBeVisible()
+
+    await expect(page.locator('button:has-text("Sizes > four > URL")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > four > Width")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > four > Height")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > four > MIME Type")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > four > File Size")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > four > File Name")')).toBeVisible()
+  })
+
+  test('should not show image size in where filter drodown in list view if imageSize has admin.disableListFilter true', async () => {
+    await page.goto(mediaWithImageSizeAdminPropsURL.list)
+
+    await openListFilters(page, {})
+
+    const whereBuilder = page.locator('.where-builder')
+    await whereBuilder.locator('.where-builder__add-first-filter').click()
+
+    const conditionField = whereBuilder.locator('.condition__field')
+    await conditionField.click()
+
+    const menuList = conditionField.locator('.rs__menu-list')
+
+    // ensure the image size is not present
+    await expect(menuList.getByText('Sizes > one > URL', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > one > Width', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > one > Height', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > one > MIME Type', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > one > File Size', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > one > File Name', { exact: true })).toHaveCount(0)
+
+    await expect(menuList.getByText('Sizes > three > URL', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > three > Width', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > three > Height', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > three > MIME Type', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > three > File Size', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > three > File Name', { exact: true })).toHaveCount(0)
+  })
+
+  test('should show image size in where filter drodown in list view if imageSize has admin.disableListFilter false', async () => {
+    await page.goto(mediaWithImageSizeAdminPropsURL.list)
+
+    await openListFilters(page, {})
+
+    const whereBuilder = page.locator('.where-builder')
+    await whereBuilder.locator('.where-builder__add-first-filter').click()
+
+    const conditionField = whereBuilder.locator('.condition__field')
+    await conditionField.click()
+
+    const menuList = conditionField.locator('.rs__menu-list')
+
+    // ensure the image size is present
+    await expect(menuList.getByText('Sizes > two > URL', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > two > Width', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > two > Height', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > two > MIME Type', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > two > File Size', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > two > File Name', { exact: true })).toHaveCount(1)
+
+    await expect(menuList.getByText('Sizes > four > URL', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > four > Width', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > four > Height', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > four > MIME Type', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > four > File Size', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > four > File Name', { exact: true })).toHaveCount(1)
   })
 })

@@ -28,9 +28,11 @@ export type SanitizedBlockPermissions =
     }
   | true
 
-export type BlocksPermissions = {
-  [blockSlug: string]: BlockPermissions
-}
+export type BlocksPermissions =
+  | {
+      [blockSlug: string]: BlockPermissions
+    }
+  | true
 
 export type SanitizedBlocksPermissions =
   | {

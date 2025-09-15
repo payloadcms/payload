@@ -40,7 +40,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   VersionToCreatedAtLabel,
   versionToID,
   versionToStatus,
-  versionToUseAsTitle,
 }) => {
   const { config, getEntityConfig } = useConfig()
   const { code } = useLocale()
@@ -275,7 +274,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         isTrashed={isTrashed}
         versionToCreatedAtFormatted={versionToCreatedAtFormatted}
         versionToID={versionToID}
-        versionToUseAsTitle={versionToUseAsTitle}
       />
       <Gutter className={`${baseClass}__diff-wrap`}>
         <SelectedLocalesContext value={{ selectedLocales: locales.map((locale) => locale.name) }}>

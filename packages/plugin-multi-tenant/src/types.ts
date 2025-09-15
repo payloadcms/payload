@@ -1,5 +1,12 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ArrayField, CollectionSlug, Field, RelationshipField, TypedUser } from 'payload'
+import type {
+  ArrayField,
+  CollectionSlug,
+  Field,
+  RelationshipField,
+  SingleRelationshipField,
+  TypedUser,
+} from 'payload'
 
 export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
@@ -24,13 +31,35 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   collections: {
     [key in CollectionSlug]?: {
       /**
+       * Opt out of adding the tenant field and place
+       * it manually using the `tenantField` export from the plugin
+       */
+      customTenantField?: boolean
+      /**
        * Set to `true` if you want the collection to behave as a global
        *
        * @default false
        */
       isGlobal?: boolean
       /**
+       * Overrides for the tenant field, will override the entire tenantField configuration
+       */
+      tenantFieldOverrides?: CollectionTenantFieldConfigOverrides
+      /**
        * Set to `false` if you want to manually apply the baseListFilter
+       * Set to `false` if you want to manually apply the baseFilter
+       *
+       * @default true
+       */
+      useBaseFilter?: boolean
+      /**
+       * @deprecated Use `useBaseFilter` instead. If both are defined,
+       * `useBaseFilter` will take precedence. This property remains only
+       * for backward compatibility and may be removed in a future version.
+       *
+       * Originally, `baseListFilter` was intended to filter only the List View
+       * in the admin panel. However, base filtering is often required in other areas
+       * such as internal link relationships in the Lexical editor.
        *
        * @default true
        */
@@ -57,17 +86,36 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    */
   enabled?: boolean
   /**
+   * Localization for the plugin
+   */
+  i18n?: {
+    translations: {
+      [key in AcceptedLanguages]?: {
+        /**
+         * @default 'You are about to change ownership from <0>{{fromTenant}}</0> to <0>{{toTenant}}</0>'
+         */
+        'confirm-modal-tenant-switch--body'?: string
+        /**
+         * `tenantLabel` defaults to the value of the `nav-tenantSelector-label` translation
+         *
+         * @default 'Confirm {{tenantLabel}} change'
+         */
+        'confirm-modal-tenant-switch--heading'?: string
+        /**
+         * @default 'Assigned Tenant'
+         */
+        'field-assignedTenant-label'?: string
+        /**
+         * @default 'Tenant'
+         */
+        'nav-tenantSelector-label'?: string
+      }
+    }
+  }
+  /**
    * Field configuration for the field added to all tenant enabled collections
    */
-  tenantField?: {
-    access?: RelationshipField['access']
-    /**
-     * The name of the field added to all tenant enabled collections
-     *
-     * @default 'tenant'
-     */
-    name?: string
-  }
+  tenantField?: RootTenantFieldConfigOverrides
   /**
    * Field configuration for the field added to the users collection
    *
@@ -120,6 +168,8 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Customize tenant selector label
    *
    * Either a string or an object where the keys are i18n codes and the values are the string labels
+   *
+   * @deprecated Use `i18n.translations` instead.
    */
   tenantSelectorLabel?:
     | Partial<{
@@ -153,6 +203,30 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    */
   useUsersTenantFilter?: boolean
 }
+
+export type RootTenantFieldConfigOverrides = Partial<
+  Omit<
+    SingleRelationshipField,
+    | '_sanitized'
+    | 'hasMany'
+    | 'hidden'
+    | 'index'
+    | 'localized'
+    | 'max'
+    | 'maxRows'
+    | 'min'
+    | 'minRows'
+    | 'relationTo'
+    | 'required'
+    | 'type'
+    | 'unique'
+    | 'virtual'
+  >
+>
+
+export type CollectionTenantFieldConfigOverrides = Partial<
+  Omit<RootTenantFieldConfigOverrides, 'name'>
+>
 
 export type Tenant<IDType = number | string> = {
   id: IDType

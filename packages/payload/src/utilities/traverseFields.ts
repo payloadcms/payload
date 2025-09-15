@@ -416,20 +416,11 @@ export const traverseFields = ({
           })
         ) {
           if (Array.isArray(currentRef)) {
-            return
-          }
-
-          for (const key in currentRef as Record<string, unknown>) {
-            const localeData = currentRef[key as keyof typeof currentRef]
-            if (!Array.isArray(localeData)) {
-              continue
-            }
-
             traverseArrayOrBlocksField({
               callback,
               callbackStack,
               config,
-              data: localeData,
+              data: currentRef,
               field,
               fillEmpty,
               leavesFirst,
@@ -437,6 +428,26 @@ export const traverseFields = ({
               parentPath,
               parentRef: currentParentRef,
             })
+          } else {
+            for (const key in currentRef as Record<string, unknown>) {
+              const localeData = currentRef[key as keyof typeof currentRef]
+              if (!Array.isArray(localeData)) {
+                continue
+              }
+
+              traverseArrayOrBlocksField({
+                callback,
+                callbackStack,
+                config,
+                data: localeData,
+                field,
+                fillEmpty,
+                leavesFirst,
+                parentIsLocalized: true,
+                parentPath,
+                parentRef: currentParentRef,
+              })
+            }
           }
         } else if (Array.isArray(currentRef)) {
           traverseArrayOrBlocksField({

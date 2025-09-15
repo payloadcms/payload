@@ -1,6 +1,6 @@
 import ObjectIdImport from 'bson-objectid'
 
-import type { PayloadRequest } from '../../index.js'
+import type { JobLog, PayloadRequest } from '../../index.js'
 import type { RunJobsSilent } from '../localAPI.js'
 import type { UpdateJobFunction } from '../operations/runJobs/runJob/getUpdateJobFunction.js'
 import type { TaskError } from './index.js'
@@ -9,8 +9,7 @@ import { getCurrentDate } from '../utilities/getCurrentDate.js'
 import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
 import { getWorkflowRetryBehavior } from './getWorkflowRetryBehavior.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export async function handleTaskError({
   error,
@@ -60,19 +59,6 @@ export async function handleTaskError({
 
   const currentDate = getCurrentDate()
 
-  ;(job.log ??= []).push({
-    id: new ObjectId().toHexString(),
-    completedAt: currentDate.toISOString(),
-    error: errorJSON,
-    executedAt: executedAt.toISOString(),
-    input,
-    output: output ?? {},
-    parent: req.payload.config.jobs.addParentToTaskLog ? parent : undefined,
-    state: 'failed',
-    taskID,
-    taskSlug,
-  })
-
   if (job.waitUntil) {
     // Check if waitUntil is in the past
     const waitUntil = new Date(job.waitUntil)
@@ -100,6 +86,19 @@ export async function handleTaskError({
     maxRetries = retriesConfig.attempts
   }
 
+  const taskLogToPush: JobLog = {
+    id: new ObjectId().toHexString(),
+    completedAt: currentDate.toISOString(),
+    error: errorJSON,
+    executedAt: executedAt.toISOString(),
+    input,
+    output: output ?? {},
+    parent: req.payload.config.jobs.addParentToTaskLog ? parent : undefined,
+    state: 'failed',
+    taskID,
+    taskSlug,
+  }
+
   if (!taskStatus?.complete && (taskStatus?.totalTried ?? 0) >= maxRetries) {
     /**
      * Task reached max retries => workflow will not retry
@@ -108,7 +107,9 @@ export async function handleTaskError({
     await updateJob({
       error: errorJSON,
       hasError: true,
-      log: job.log,
+      log: {
+        $push: taskLogToPush,
+      } as any,
       processing: false,
       totalTried: (job.totalTried ?? 0) + 1,
       waitUntil: job.waitUntil,
@@ -168,7 +169,9 @@ export async function handleTaskError({
   await updateJob({
     error: hasFinalError ? errorJSON : undefined,
     hasError: hasFinalError, // If reached max retries => final error. If hasError is true this job will not be retried
-    log: job.log,
+    log: {
+      $push: taskLogToPush,
+    } as any,
     processing: false,
     totalTried: (job.totalTried ?? 0) + 1,
     waitUntil: job.waitUntil,

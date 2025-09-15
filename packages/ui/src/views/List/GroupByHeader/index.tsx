@@ -15,7 +15,9 @@ export const GroupByHeader: React.FC<{
 }> = ({ collectionConfig, groupByFieldPath, groupByValue, heading }) => {
   return (
     <header className={baseClass}>
-      <h4 className={`${baseClass}__heading`}>{heading}</h4>
+      <h4 className={`${baseClass}__heading`} data-group-id={groupByValue}>
+        {heading}
+      </h4>
       <ListSelection
         collectionConfig={collectionConfig}
         label={heading}

@@ -6,6 +6,7 @@ export {
   parseCookies,
 } from '../auth/cookies.js'
 export { getLoginOptions } from '../auth/getLoginOptions.js'
+export { addSessionToUser, removeExpiredSessions } from '../auth/sessions.js'
 export { getFromImportMap } from '../bin/generateImportMap/utilities/getFromImportMap.js'
 export { parsePayloadComponent } from '../bin/generateImportMap/utilities/parsePayloadComponent.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
@@ -73,8 +74,6 @@ export {
 } from '../utilities/deepMerge.js'
 
 export { extractID } from '../utilities/extractID.js'
-
-export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'

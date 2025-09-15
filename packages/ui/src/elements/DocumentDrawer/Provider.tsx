@@ -20,13 +20,19 @@ export type DocumentDrawerContextProps = {
   }) => Promise<void> | void
   readonly onSave?: (args: {
     collectionConfig?: ClientCollectionConfig
+    /**
+     * If you want to pass additional data to the onSuccess callback, you can use this context object.
+     *
+     * @experimental This property is experimental and may change in the future. Use at your own discretion.
+     */
+    context?: Record<string, unknown>
     doc: TypeWithID
     operation: 'create' | 'update'
     result: Data
   }) => Promise<FormState | void> | void
 }
 
-export type DocumentDrawerContextType = DocumentDrawerContextProps
+export type DocumentDrawerContextType = {} & DocumentDrawerContextProps
 
 export const DocumentDrawerCallbacksContext = createContext({} as DocumentDrawerContextType)
 

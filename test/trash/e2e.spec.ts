@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addListFilter } from 'helpers/e2e/filters/index.js'
 import * as path from 'path'
 import { mapAsync } from 'payload'
 import { fileURLToPath } from 'url'
@@ -14,6 +15,7 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
+import { usersSlug } from './collections/Users/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,10 +27,12 @@ let postsUrl: AdminUrlUtil
 let pagesUrl: AdminUrlUtil
 let payload: PayloadTestSDK<Config>
 let serverURL: string
+let usersUrl: AdminUrlUtil
 
 let pagesDocOne: PageType
 let postsDocOne: Post
 let postsDocTwo: Post
+let devUserID: number | string
 
 describe('Trash', () => {
   beforeAll(async ({ browser }, testInfo) => {
@@ -36,6 +40,7 @@ describe('Trash', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
     pagesUrl = new AdminUrlUtil(serverURL, pagesSlug)
+    usersUrl = new AdminUrlUtil(serverURL, usersSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -537,6 +542,47 @@ describe('Trash', () => {
           })
           .toBe(0)
       })
+
+      test('Should properly filter trashed docs through where query builder', async () => {
+        const createdDocs: Post[] = []
+
+        // Create 2 "Test Post" docs
+        await mapAsync([...Array(2)], async (item, index) => {
+          const doc = await createTrashedPostDoc({
+            title: `Test Post ${index + 1}`,
+          })
+          createdDocs.push(doc)
+        })
+
+        // Create 2 "Some Post" docs
+        await mapAsync([...Array(2)], async (item, index) => {
+          const doc = await createTrashedPostDoc({
+            title: `Some Post ${index + 1}`,
+          })
+          createdDocs.push(doc)
+        })
+
+        await page.goto(postsUrl.trash)
+
+        await addListFilter({
+          page,
+          fieldLabel: 'Title',
+          operatorLabel: 'is like',
+          value: 'Test',
+        })
+
+        await expect(page.locator('.cell-title', { hasText: 'Test Post' })).toHaveCount(2)
+        await expect(page.locator('.cell-title', { hasText: 'Some Post' })).toHaveCount(0)
+
+        // Cleanup: permanently delete the created docs
+        await mapAsync(createdDocs, async (doc) => {
+          await payload.delete({
+            collection: postsSlug,
+            id: doc.id,
+            trash: true, // Force permanent delete
+          })
+        })
+      })
     })
 
     describe('Edit view', () => {
@@ -949,6 +995,110 @@ describe('Trash', () => {
           trash: true,
         })
       })
+    })
+  })
+  describe('Auth enabled collection', () => {
+    beforeAll(async () => {
+      // Ensure Dev user exists and store its ID
+      const { docs } = await payload.find({
+        collection: usersSlug,
+        limit: 1,
+        where: { name: { equals: 'Dev' } },
+        trash: true,
+      })
+      if (docs.length === 0) {
+        throw new Error('Dev user not found! Ensure test seed data includes a Dev user.')
+      }
+      devUserID = docs[0]?.id as number | string
+    })
+
+    async function ensureDevUserTrashed() {
+      const { docs } = await payload.find({
+        collection: usersSlug,
+        where: {
+          and: [{ name: { equals: 'Dev' } }, { deletedAt: { exists: true } }],
+        },
+        limit: 1,
+        trash: true,
+      })
+
+      if (docs.length === 0) {
+        // Trash the user if it's not already trashed
+        await payload.update({
+          collection: usersSlug,
+          id: devUserID,
+          data: { deletedAt: new Date().toISOString() },
+        })
+      }
+    }
+
+    test('Should show trash tab in the list view of a collection with auth enabled', async () => {
+      await page.goto(usersUrl.list)
+
+      await expect(page.locator('#trash-view-pill')).toBeVisible()
+    })
+
+    test('Should successfully trash a user from the list view and show it in the trash view', async () => {
+      await page.goto(usersUrl.list)
+
+      await page.locator('.row-1 .cell-_select input').check()
+      await page.locator('.list-selection__button[aria-label="Delete"]').click()
+
+      // Skip the checkbox to delete permanently and default to trashing
+      await page.locator('#confirm-delete-many-docs #confirm-action').click()
+      await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+        '1 User moved to trash.',
+      )
+      // Navigate to the trash view
+      await page.locator('#trash-view-pill').click()
+      await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
+    })
+
+    test('Should be able to access trashed doc edit view from the trash view', async () => {
+      await ensureDevUserTrashed()
+
+      await page.goto(usersUrl.trash)
+
+      await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
+      await page.locator('.row-1 .cell-name').click()
+
+      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}$/)
+    })
+
+    test('Should properly disable auth fields in the trashed user edit view', async () => {
+      await ensureDevUserTrashed()
+
+      await page.goto(usersUrl.trash)
+
+      await page.locator('.row-1 .cell-name').click()
+
+      await expect(page.locator('input[name="email"]')).toBeDisabled()
+      await expect(page.locator('#change-password')).toBeDisabled()
+
+      await expect(page.locator('#field-name')).toBeDisabled()
+      await expect(page.locator('#field-roles .rs__input')).toBeDisabled()
+    })
+
+    test('Should properly restore trashed user as draft', async () => {
+      await ensureDevUserTrashed()
+
+      await page.goto(usersUrl.trash)
+
+      await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
+      await page.locator('.row-1 .cell-name').click()
+
+      await page.locator('.doc-controls__controls #action-restore').click()
+
+      await expect(page.locator(`#restore-${devUserID} #confirm-action`)).toBeVisible()
+      await expect(
+        page.locator(`#restore-${devUserID} .confirmation-modal__content`),
+      ).toContainText('You are about to restore the User')
+
+      await page.locator(`#restore-${devUserID} #confirm-action`).click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+        'User "Dev" successfully restored.',
+      )
     })
   })
 })

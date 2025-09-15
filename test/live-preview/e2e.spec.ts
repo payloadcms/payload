@@ -13,9 +13,9 @@ import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } 
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc, navigateToTrashedDoc } from '../helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from '../helpers/e2e/preferences.js'
+import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
-import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   ensureDeviceIsCentered,
@@ -66,6 +66,9 @@ describe('Live Preview', () => {
     const context = await browser.newContext()
     page = await context.newPage()
 
+    initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
+
     user = await payload
       .login({
         collection: 'users',
@@ -75,10 +78,6 @@ describe('Live Preview', () => {
         },
       })
       ?.then((res) => res.user) // TODO: this type is wrong
-
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {

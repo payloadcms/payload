@@ -293,7 +293,6 @@ Here's an example of a custom `editMenuItems` component:
 
 ```tsx
 import React from 'react'
-import { PopupList } from '@payloadcms/ui'
 
 import type { EditMenuItemsServerProps } from 'payload'
 
@@ -301,12 +300,12 @@ export const EditMenuItems = async (props: EditMenuItemsServerProps) => {
   const href = `/custom-action?id=${props.id}`
 
   return (
-    <PopupList.ButtonGroup>
-      <PopupList.Button href={href}>Custom Edit Menu Item</PopupList.Button>
-      <PopupList.Button href={href}>
+    <>
+      <a href={href}>Custom Edit Menu Item</a>
+      <a href={href}>
         Another Custom Edit Menu Item - add as many as you need!
-      </PopupList.Button>
-    </PopupList.ButtonGroup>
+      </a>
+    </>
   )
 }
 ```

@@ -71,6 +71,7 @@ export interface Config {
     posts: Post;
     'autosave-posts': AutosavePost;
     'autosave-with-draft-button-posts': AutosaveWithDraftButtonPost;
+    'autosave-multi-select-posts': AutosaveMultiSelectPost;
     'autosave-with-validate-posts': AutosaveWithValidatePost;
     'draft-posts': DraftPost;
     'draft-with-max-posts': DraftWithMaxPost;
@@ -95,6 +96,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
     'autosave-with-draft-button-posts': AutosaveWithDraftButtonPostsSelect<false> | AutosaveWithDraftButtonPostsSelect<true>;
+    'autosave-multi-select-posts': AutosaveMultiSelectPostsSelect<false> | AutosaveMultiSelectPostsSelect<true>;
     'autosave-with-validate-posts': AutosaveWithValidatePostsSelect<false> | AutosaveWithValidatePostsSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     'draft-with-max-posts': DraftWithMaxPostsSelect<false> | DraftWithMaxPostsSelect<true>;
@@ -197,7 +199,39 @@ export interface Post {
 export interface AutosavePost {
   id: string;
   title: string;
+  relationship?: (string | null) | Post;
+  computedTitle?: string | null;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   description: string;
+  array?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -245,6 +279,18 @@ export interface DraftPost {
 export interface AutosaveWithDraftButtonPost {
   id: string;
   title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-multi-select-posts".
+ */
+export interface AutosaveMultiSelectPost {
+  id: string;
+  title: string;
+  tag?: ('blog' | 'essay' | 'portfolio')[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -366,6 +412,8 @@ export interface Diff {
               textInNamedTab1InBlock?: string | null;
             };
             textInUnnamedTab2InBlock?: string | null;
+            textInUnnamedTab2InBlockAccessFalse?: string | null;
+            textInRowInUnnamedTab2InBlock?: string | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'TabsBlock';
@@ -462,11 +510,16 @@ export interface Diff {
     [k: string]: unknown;
   } | null;
   textInRow?: string | null;
+  textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
   namedTab1?: {
     textInNamedTab1?: string | null;
+    textInNamedTab1ReadFalse?: string | null;
+    textInNamedTab1UpdateFalse?: string | null;
   };
   textInUnnamedTab2?: string | null;
+  textInRowInUnnamedTab?: string | null;
+  textInRowInUnnamedTabUpdateFalse?: string | null;
   text?: string | null;
   textArea?: string | null;
   upload?: (string | null) | Media;
@@ -661,6 +714,10 @@ export interface PayloadLockedDocument {
         value: string | AutosaveWithDraftButtonPost;
       } | null)
     | ({
+        relationTo: 'autosave-multi-select-posts';
+        value: string | AutosaveMultiSelectPost;
+      } | null)
+    | ({
         relationTo: 'autosave-with-validate-posts';
         value: string | AutosaveWithValidatePost;
       } | null)
@@ -785,7 +842,17 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
+  relationship?: T;
+  computedTitle?: T;
+  richText?: T;
+  json?: T;
   description?: T;
+  array?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -796,6 +863,17 @@ export interface AutosavePostsSelect<T extends boolean = true> {
  */
 export interface AutosaveWithDraftButtonPostsSelect<T extends boolean = true> {
   title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-multi-select-posts_select".
+ */
+export interface AutosaveMultiSelectPostsSelect<T extends boolean = true> {
+  title?: T;
+  tag?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -958,6 +1036,8 @@ export interface DiffSelect<T extends boolean = true> {
                     textInNamedTab1InBlock?: T;
                   };
               textInUnnamedTab2InBlock?: T;
+              textInUnnamedTab2InBlockAccessFalse?: T;
+              textInRowInUnnamedTab2InBlock?: T;
               id?: T;
               blockName?: T;
             };
@@ -984,13 +1064,18 @@ export interface DiffSelect<T extends boolean = true> {
   richtext?: T;
   richtextWithCustomDiff?: T;
   textInRow?: T;
+  textCannotRead?: T;
   select?: T;
   namedTab1?:
     | T
     | {
         textInNamedTab1?: T;
+        textInNamedTab1ReadFalse?: T;
+        textInNamedTab1UpdateFalse?: T;
       };
   textInUnnamedTab2?: T;
+  textInRowInUnnamedTab?: T;
+  textInRowInUnnamedTabUpdateFalse?: T;
   text?: T;
   textArea?: T;
   upload?: T;

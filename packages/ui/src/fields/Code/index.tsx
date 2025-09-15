@@ -1,7 +1,7 @@
 'use client'
 import type { CodeFieldClientComponent } from 'payload'
 
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -36,6 +36,9 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
     validate,
   } = props
 
+  const inputChangeFromRef = React.useRef<'system' | 'user'>('system')
+  const [editorKey, setEditorKey] = useState<string>('')
+
   const memoizedValidate = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
@@ -48,14 +51,46 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
+    initialValue,
     path,
     setValue,
     showError,
     value,
-  } = useField({
+  } = useField<string>({
     potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
+
+  const [initialStringValue, setInitialStringValue] = useState<string | undefined>(() =>
+    (value || initialValue) !== undefined ? (value ?? initialValue) : undefined,
+  )
+
+  const handleChange = useCallback(
+    (val) => {
+      if (readOnly || disabled) {
+        return
+      }
+      inputChangeFromRef.current = 'user'
+
+      try {
+        setValue(val ? val : null)
+      } catch (e) {
+        setValue(val ? val : null)
+      }
+    },
+    [readOnly, disabled, setValue],
+  )
+
+  useEffect(() => {
+    if (inputChangeFromRef.current === 'system') {
+      setInitialStringValue(
+        (value || initialValue) !== undefined ? (value ?? initialValue) : undefined,
+      )
+      setEditorKey(`${path}-${new Date().toString()}`)
+    }
+
+    inputChangeFromRef.current = 'system'
+  }, [initialValue, path, value])
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
@@ -86,11 +121,15 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         {BeforeInput}
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}
-          onChange={readOnly || disabled ? () => null : (val) => setValue(val)}
+          key={editorKey}
+          onChange={handleChange}
           onMount={onMount}
           options={editorOptions}
           readOnly={readOnly || disabled}
-          value={(value as string) || ''}
+          value={initialStringValue}
+          wrapperProps={{
+            id: `field-${path?.replace(/\./g, '__')}`,
+          }}
         />
         {AfterInput}
       </div>

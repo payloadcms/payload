@@ -395,6 +395,10 @@ describe('transform', () => {
       data,
       fields: config.collections[0].fields,
     })
+    if ('updatedAt' in data) {
+      delete data.updatedAt
+    }
+
     const flattenValuesAfter = Object.values(flattenRelationshipValues(data))
 
     flattenValuesAfter.forEach((value, i) => {

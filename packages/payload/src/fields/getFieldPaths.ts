@@ -49,6 +49,9 @@ export function getFieldPaths({
   }
 }
 
+/**
+ * @deprecated - will be removed in 4.0. Use `getFieldPaths` instead.
+ */
 export function getFieldPathsModified({
   field,
   index,

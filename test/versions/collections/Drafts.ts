@@ -55,12 +55,17 @@ const DraftPosts: CollectionConfig = {
   },
   fields: [
     {
-      name: 'title',
-      type: 'text',
-      label: 'Title',
-      localized: true,
-      required: true,
-      unique: true,
+      type: 'group',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          label: 'Title',
+          localized: true,
+          required: true,
+          unique: true,
+        },
+      ],
     },
     {
       name: 'description',

@@ -2,6 +2,7 @@ import type { BrowserContext, Page } from '@playwright/test'
 import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
+import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { upsertPreferences } from 'helpers/e2e/preferences.js'
@@ -26,10 +27,12 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { blocksCollectionSlug } from './collections/Blocks/index.js'
+import { arrayCollectionSlug } from './collections/Array/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
+import { noLocalizedFieldsCollectionSlug } from './collections/NoLocalizedFields/index.js'
 import { richTextSlug } from './collections/RichText/index.js'
 import {
+  arrayWithFallbackCollectionSlug,
   defaultLocale,
   englishTitle,
   localizedDraftsSlug,
@@ -57,6 +60,9 @@ let urlWithRequiredLocalizedFields: AdminUrlUtil
 let urlRelationshipLocalized: AdminUrlUtil
 let urlCannotCreateDefaultLocale: AdminUrlUtil
 let urlPostsWithDrafts: AdminUrlUtil
+let urlArray: AdminUrlUtil
+let arrayWithFallbackURL: AdminUrlUtil
+let noLocalizedFieldsURL: AdminUrlUtil
 
 const title = 'english title'
 const spanishTitle = 'spanish title'
@@ -81,16 +87,18 @@ describe('Localization', () => {
     urlWithRequiredLocalizedFields = new AdminUrlUtil(serverURL, withRequiredLocalizedFields)
     urlCannotCreateDefaultLocale = new AdminUrlUtil(serverURL, 'cannot-create-default-locale')
     urlPostsWithDrafts = new AdminUrlUtil(serverURL, localizedDraftsSlug)
+    urlArray = new AdminUrlUtil(serverURL, arrayCollectionSlug)
+    arrayWithFallbackURL = new AdminUrlUtil(serverURL, arrayWithFallbackCollectionSlug)
+    noLocalizedFieldsURL = new AdminUrlUtil(serverURL, noLocalizedFieldsCollectionSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
 
     client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {
@@ -416,8 +424,7 @@ describe('Localization', () => {
       const nestedArrayURL = new AdminUrlUtil(serverURL, nestedToArrayAndBlockCollectionSlug)
       await page.goto(nestedArrayURL.create)
       await changeLocale(page, 'ar')
-      const addArrayRow = page.locator('#field-topLevelArray .array-field__add-row')
-      await addArrayRow.click()
+      await addArrayRow(page, { fieldName: 'topLevelArray' })
 
       const arrayField = page.locator('#field-topLevelArray__0__localizedText')
       await expect(arrayField).toBeVisible()
@@ -586,6 +593,66 @@ describe('Localization', () => {
     })
   })
 
+  describe('fallback checkbox', () => {
+    test('should show fallback checkbox for non-default locale', async () => {
+      await createLocalizedArrayItem(page, arrayWithFallbackURL)
+
+      const fallbackCheckbox = page.locator('#field-items', {
+        hasText: 'Fallback to default locale',
+      })
+      await expect(fallbackCheckbox).toBeVisible()
+    })
+
+    test('should save document successfully when fallback checkbox is checked', async () => {
+      await createLocalizedArrayItem(page, arrayWithFallbackURL)
+
+      const checkbox = page.locator('#field-items input[type="checkbox"]')
+      // have to uncheck and check again to allow save
+      await checkbox.click()
+      await expect(checkbox).not.toBeChecked()
+      await checkbox.click()
+      await expect(checkbox).toBeChecked()
+      await saveDocAndAssert(page)
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    })
+
+    test('should save correct data when fallback checkbox is checked', async () => {
+      await createLocalizedArrayItem(page, arrayWithFallbackURL)
+
+      const checkbox = page.locator('#field-items input[type="checkbox"]')
+      // have to uncheck and check again to allow save
+      await checkbox.click()
+      await expect(checkbox).not.toBeChecked()
+      await checkbox.click()
+      await expect(checkbox).toBeChecked()
+      await saveDocAndAssert(page)
+
+      const id = page.url().split('/').pop()
+      const apiURL = `${serverURL}/api/${arrayWithFallbackCollectionSlug}/${id}`
+      await page.goto(apiURL)
+      const data = await page.evaluate(() => {
+        return JSON.parse(document.querySelector('body')?.innerText || '{}')
+      })
+
+      // should see fallback data when querying the locale individually
+      await expect.poll(() => data.items[0].text).toBe('test')
+
+      const apiURLAll = apiURL.replace('es', 'all')
+      await page.goto(apiURLAll)
+      const dataAll = await page.evaluate(() => {
+        return JSON.parse(document.querySelector('body')?.innerText || '{}')
+      })
+      // should not see fallback data when querying all locales
+      // - sql it will be undefined
+      // - mongodb it will be null
+      await expect
+        .poll(() => {
+          return !dataAll.items?.es
+        })
+        .toBeTruthy()
+    })
+  })
+
   test('should use label in search filter when string or object', async () => {
     await page.goto(url.list)
     const searchInput = page.locator('.search-filter__input')
@@ -606,8 +673,52 @@ describe('Localization', () => {
       await changeLocale(page, defaultLocale)
       await expect(page.locator('#field-title')).toBeEmpty()
     })
+
+    test('should show localized status in collection list', async () => {
+      await page.goto(urlPostsWithDrafts.create)
+      const engTitle = 'Eng published'
+      const spanTitle = 'Spanish draft'
+
+      await changeLocale(page, defaultLocale)
+      await fillValues({ title: engTitle })
+      await saveDocAndAssert(page)
+
+      await changeLocale(page, spanishLocale)
+      await fillValues({ title: spanTitle })
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await page.goto(urlPostsWithDrafts.list)
+
+      const columns = page.getByRole('button', { name: 'Columns' })
+      await columns.click()
+      await page.locator('#_status').click()
+
+      await expect(page.locator('.row-1 .cell-title')).toContainText(spanTitle)
+      await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
+
+      await changeLocale(page, defaultLocale)
+      await expect(page.locator('.row-1 .cell-title')).toContainText(engTitle)
+      await expect(page.locator('.row-1 .cell-_status')).toContainText('Published')
+    })
+  })
+
+  test('should not show publish specific locale button when no localized fields exist', async () => {
+    await page.goto(urlPostsWithDrafts.create)
+    await expect(page.locator('#publish-locale')).toHaveCount(1)
+    await page.goto(noLocalizedFieldsURL.create)
+    await expect(page.locator('#publish-locale')).toHaveCount(0)
   })
 })
+
+async function createLocalizedArrayItem(page: Page, url: AdminUrlUtil) {
+  await changeLocale(page, defaultLocale)
+  await page.goto(url.create)
+  await addArrayRow(page, { fieldName: 'items' })
+  const textField = page.locator('#field-items__0__text')
+  await textField.fill('test')
+  await saveDocAndAssert(page)
+  await changeLocale(page, spanishLocale)
+}
 
 async function fillValues(data: Partial<LocalizedPost>) {
   const { description: descVal, title: titleVal } = data

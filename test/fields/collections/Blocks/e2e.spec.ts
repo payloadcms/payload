@@ -1,10 +1,15 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { addBlock } from 'helpers/e2e/addBlock.js'
 import { copyPasteField } from 'helpers/e2e/copyPasteField.js'
-import { openBlocksDrawer } from 'helpers/e2e/openBlocksDrawer.js'
-import { reorderBlocks } from 'helpers/e2e/reorderBlocks.js'
+import { duplicateArrayRow } from 'helpers/e2e/fields/array/index.js'
+import {
+  addBlock,
+  addBlockBelow,
+  duplicateBlock,
+  openBlocksDrawer,
+  reorderBlocks,
+} from 'helpers/e2e/fields/blocks/index.js'
 import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
 import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import path from 'path'
@@ -127,29 +132,14 @@ describe('Block fields', () => {
 
   test('should open blocks drawer from block row and add below', async () => {
     await page.goto(url.create)
-    const firstRow = page.locator('#field-blocks #blocks-row-0')
-    const rowActions = firstRow.locator('.collapsible__actions')
-    await expect(rowActions).toBeVisible()
 
-    await rowActions.locator('.array-actions__button').click()
-    const addBelowButton = rowActions.locator('.array-actions__action.array-actions__add')
-    await expect(addBelowButton).toBeVisible()
-    await addBelowButton.click()
-
-    const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
-    await expect(blocksDrawer).toBeVisible()
-
-    // select the first block in the drawer
-    const firstBlockSelector = blocksDrawer
-      .locator('.blocks-drawer__blocks .blocks-drawer__block')
-      .first()
-
-    await expect(firstBlockSelector).toContainText('Content')
-    await firstBlockSelector.click()
+    await addBlockBelow(page, { fieldName: 'blocks', blockToSelect: 'Content' })
 
     // ensure the block was inserted beneath the first in the rows
     const addedRow = page.locator('#field-blocks #blocks-row-1')
+
     await expect(addedRow).toBeVisible()
+
     await expect(addedRow.locator('.blocks-field__block-header')).toHaveText(
       'Custom Block Label: Content 02',
     ) // went from `Number` to `Content`
@@ -157,32 +147,18 @@ describe('Block fields', () => {
 
   test('should duplicate block', async () => {
     await page.goto(url.create)
-    const firstRow = page.locator('#field-blocks #blocks-row-0')
-    const rowActions = firstRow.locator('.collapsible__actions')
-    await expect(rowActions).toBeVisible()
 
-    await rowActions.locator('.array-actions__button').click()
-    const duplicateButton = rowActions.locator('.array-actions__action.array-actions__duplicate')
-    await expect(duplicateButton).toBeVisible()
-    await duplicateButton.click()
+    const { rowCount } = await duplicateBlock(page, { fieldName: 'blocks' })
 
-    const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
-    expect(await blocks.count()).toEqual(5)
+    expect(rowCount).toEqual(5)
   })
 
   test('should save when duplicating subblocks', async () => {
     await page.goto(url.create)
-    const subblocksRow = page.locator('#field-blocks #blocks-row-2')
-    const rowActions = subblocksRow.locator('.collapsible__actions').first()
-    await expect(rowActions).toBeVisible()
 
-    await rowActions.locator('.array-actions__button').click()
-    const duplicateButton = rowActions.locator('.array-actions__action.array-actions__duplicate')
-    await expect(duplicateButton).toBeVisible()
-    await duplicateButton.click()
+    const { rowCount } = await duplicateBlock(page, { fieldName: 'blocks', rowIndex: 2 })
 
-    const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
-    expect(await blocks.count()).toEqual(5)
+    expect(rowCount).toEqual(5)
 
     await page.click('#action-save')
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')

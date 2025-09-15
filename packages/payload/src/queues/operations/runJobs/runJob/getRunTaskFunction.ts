@@ -13,6 +13,7 @@ import type {
   TaskType,
 } from '../../../config/types/taskTypes.js'
 import type {
+  JobLog,
   SingleTaskStatus,
   WorkflowConfig,
   WorkflowTypes,
@@ -23,8 +24,7 @@ import { TaskError } from '../../../errors/index.js'
 import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { getTaskHandlerFromConfig } from './importHandlerPath.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type TaskParent = {
   taskID: string
@@ -185,7 +185,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         await taskConfig.onSuccess()
       }
 
-      ;(job.log ??= []).push({
+      const newLogItem: JobLog = {
         id: new ObjectId().toHexString(),
         completedAt: getCurrentDate().toISOString(),
         executedAt: executedAt.toISOString(),
@@ -195,10 +195,14 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         state: 'succeeded',
         taskID,
         taskSlug,
-      })
+      }
 
       await updateJob({
-        log: job.log,
+        log: {
+          $push: newLogItem,
+        } as any,
+        // Set to null to skip main row update on postgres. 2 => 1 db round trips
+        updatedAt: null as any,
       })
 
       return output

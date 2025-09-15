@@ -1,10 +1,13 @@
 import type {
+  ClientCollectionConfig,
   ClientConfig,
   Column,
   ListQuery,
   PaginatedDocs,
   PayloadRequest,
   SanitizedCollectionConfig,
+  SelectType,
+  ViewTypes,
   Where,
 } from 'payload'
 
@@ -13,6 +16,7 @@ import { formatDate } from '@payloadcms/ui/shared'
 import { flattenAllFields } from 'payload'
 
 export const handleGroupBy = async ({
+  clientCollectionConfig,
   clientConfig,
   collectionConfig,
   collectionSlug,
@@ -22,9 +26,13 @@ export const handleGroupBy = async ({
   enableRowSelections,
   query,
   req,
+  select,
+  trash = false,
   user,
+  viewType,
   where: whereWithMergedSearch,
 }: {
+  clientCollectionConfig: ClientCollectionConfig
   clientConfig: ClientConfig
   collectionConfig: SanitizedCollectionConfig
   collectionSlug: string
@@ -34,7 +42,10 @@ export const handleGroupBy = async ({
   enableRowSelections?: boolean
   query?: ListQuery
   req: PayloadRequest
+  select?: SelectType
+  trash?: boolean
   user: any
+  viewType?: ViewTypes
   where: Where
 }): Promise<{
   columnState: Column[]
@@ -45,7 +56,6 @@ export const handleGroupBy = async ({
   let columnState: Column[]
 
   const dataByGroup: Record<string, PaginatedDocs> = {}
-  const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
   // NOTE: is there a faster/better way to do this?
   const flattenedFields = flattenAllFields({ fields: collectionConfig.fields })
@@ -88,6 +98,7 @@ export const handleGroupBy = async ({
     populate,
     req,
     sort: query?.groupBy,
+    trash,
     where: whereWithMergedSearch,
   })
 
@@ -126,7 +137,9 @@ export const handleGroupBy = async ({
         req,
         // Note: if we wanted to enable table-by-table sorting, we could use this:
         // sort: query?.queryByGroup?.[valueOrRelationshipID]?.sort,
+        select,
         sort: query?.sort,
+        trash,
         user,
         where: {
           ...(whereWithMergedSearch || {}),
@@ -136,10 +149,11 @@ export const handleGroupBy = async ({
         },
       })
 
-      let heading = valueOrRelationshipID || req.i18n.t('general:noValue')
+      let heading = valueOrRelationshipID
 
       if (
         groupByField?.type === 'relationship' &&
+        potentiallyPopulatedRelationship &&
         typeof potentiallyPopulatedRelationship === 'object'
       ) {
         heading =
@@ -147,12 +161,22 @@ export const handleGroupBy = async ({
           valueOrRelationshipID
       }
 
-      if (groupByField.type === 'date') {
+      if (groupByField.type === 'date' && valueOrRelationshipID) {
         heading = formatDate({
-          date: String(heading),
+          date: String(valueOrRelationshipID),
           i18n: req.i18n,
           pattern: clientConfig.admin.dateFormat,
         })
+      }
+
+      if (groupByField.type === 'checkbox') {
+        if (valueOrRelationshipID === true) {
+          heading = req.i18n.t('general:true')
+        }
+
+        if (valueOrRelationshipID === false) {
+          heading = req.i18n.t('general:false')
+        }
       }
 
       if (groupData.docs && groupData.docs.length > 0) {
@@ -166,13 +190,14 @@ export const handleGroupBy = async ({
           enableRowSelections,
           groupByFieldPath,
           groupByValue: valueOrRelationshipID,
-          heading,
+          heading: heading || req.i18n.t('general:noValue'),
           i18n: req.i18n,
           key: `table-${valueOrRelationshipID}`,
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,
           query,
           useAsTitle: collectionConfig.admin.useAsTitle,
+          viewType,
         })
 
         // Only need to set `columnState` once, using the first table's column state

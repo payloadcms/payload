@@ -70,6 +70,27 @@ export type GenerateImageName = (args: {
 
 export type ImageSize = {
   /**
+   * Admin UI options that control how this image size appears in list views.
+   *
+   * NOTE: In Payload v4, these options (`disableListColumn`, `disableListFilter`)
+   * should default to `true` so image size subfields are hidden from list columns
+   * and filters by default, reducing noise in the admin UI.
+   */
+  admin?: {
+    /**
+     * If set to true, this image size will not be available
+     * as a selectable column in the collection list view.
+     * @default false
+     */
+    disableListColumn?: boolean
+    /**
+     * If set to true, this image size will not be available
+     * as a filter option in the collection list view.
+     * @default false
+     */
+    disableListFilter?: boolean
+  }
+  /**
    * @deprecated prefer position
    */
   crop?: string // comes from sharp package
@@ -173,14 +194,19 @@ export type UploadConfig = {
    */
   displayPreview?: boolean
   /**
-   * Ability to filter/modify Request Headers when fetching a file.
+   *
+   * Accepts existing headers and returns the headers after filtering or modifying.
+   * If using this option, you should handle the removal of any sensitive cookies
+   * (like payload-prefixed cookies) to prevent leaking session information to external
+   * services. By default, Payload automatically filters out payload-prefixed cookies
+   * when this option is NOT defined.
    *
    * Useful for adding custom headers to fetch from external providers.
    * @default undefined
    */
   externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
   /**
-   * Field slugs to use for a compount index instead of the default filename index.
+   * Field slugs to use for a compound index instead of the default filename index.
    */
   filenameCompoundIndex?: string[]
   /**

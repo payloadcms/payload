@@ -5,7 +5,8 @@ import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 import { dequal } from 'dequal/lite'
 import { reduceFieldsToValues, versionDefaults } from 'payload/shared'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
+
+import type { OnSaveContext } from '../../views/Edit/index.js'
 
 import {
   useAllFormFields,
@@ -17,13 +18,11 @@ import { useDebounce } from '../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useQueues } from '../../hooks/useQueues.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
-import { useDocumentDrawerContext } from '../DocumentDrawer/Provider.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
 import './index.scss'
 
@@ -48,19 +47,13 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const {
     docConfig,
-    incrementVersionCount,
     lastUpdateTime,
     mostRecentVersionIsAutosaved,
-    setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
-    updateSavedDocumentData,
   } = useDocumentInfo()
 
-  const { onSave: onSaveFromDocumentDrawer } = useDocumentDrawerContext()
-
-  const { reportUpdate } = useDocumentEvents()
-  const { dispatchFields, isValid, setBackgroundProcessing, setIsValid } = useForm()
+  const { isValid, setBackgroundProcessing, submit } = useForm()
 
   const [formState] = useAllFormFields()
   const modified = useFormModified()
@@ -141,128 +134,51 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
           if (collection && id) {
             entitySlug = collection.slug
-            url = `${serverURL}${api}/${entitySlug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`
+            url = `${serverURL}${api}/${entitySlug}/${id}?depth=0&draft=true&autosave=true&locale=${localeRef.current}`
             method = 'PATCH'
           }
 
           if (globalDoc) {
             entitySlug = globalDoc.slug
-            url = `${serverURL}${api}/globals/${entitySlug}?draft=true&autosave=true&locale=${localeRef.current}`
+            url = `${serverURL}${api}/globals/${entitySlug}?depth=0&draft=true&autosave=true&locale=${localeRef.current}`
             method = 'POST'
           }
 
-          if (url) {
-            if (modifiedRef.current) {
-              const { data, valid } = reduceFieldsToValuesWithValidation(formStateRef.current, true)
+          const { valid } = reduceFieldsToValuesWithValidation(formStateRef.current, true)
 
-              data._status = 'draft'
+          const skipSubmission =
+            submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
 
-              const skipSubmission =
-                submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
+          if (!skipSubmission && modifiedRef.current && url) {
+            const result = await submit<any, OnSaveContext>({
+              acceptValues: {
+                overrideLocalChanges: false,
+              },
+              action: url,
+              context: {
+                getDocPermissions: false,
+                incrementVersionCount: !mostRecentVersionIsAutosaved,
+              },
+              disableFormWhileProcessing: false,
+              disableSuccessStatus: true,
+              method,
+              overrides: {
+                _status: 'draft',
+              },
+              skipValidation: versionsConfig?.drafts && !versionsConfig?.drafts?.validate,
+            })
 
-              if (!skipSubmission) {
-                let res
-
-                try {
-                  res = await fetch(url, {
-                    body: JSON.stringify(data),
-                    credentials: 'include',
-                    headers: {
-                      'Accept-Language': i18n.language,
-                      'Content-Type': 'application/json',
-                    },
-                    method,
-                  })
-                } catch (_err) {
-                  // Swallow Error
-                }
-
-                const newDate = new Date()
-                // We need to log the time in order to figure out if we need to trigger the state off later
-                endTimestamp = newDate.getTime()
-
-                const json = await res.json()
-
-                if (res.status === 200) {
-                  setLastUpdateTime(newDate.getTime())
-
-                  reportUpdate({
-                    id,
-                    entitySlug,
-                    updatedAt: newDate.toISOString(),
-                  })
-
-                  // if onSaveFromDocumentDrawer is defined, call it
-                  if (typeof onSaveFromDocumentDrawer === 'function') {
-                    void onSaveFromDocumentDrawer({
-                      ...json,
-                      operation: 'update',
-                    })
-                  }
-
-                  if (!mostRecentVersionIsAutosaved) {
-                    incrementVersionCount()
-                    setMostRecentVersionIsAutosaved(true)
-                    setUnpublishedVersionCount((prev) => prev + 1)
-                  }
-                }
-
-                if (versionsConfig?.drafts && versionsConfig?.drafts?.validate && json?.errors) {
-                  if (Array.isArray(json.errors)) {
-                    const [fieldErrors, nonFieldErrors] = json.errors.reduce(
-                      ([fieldErrs, nonFieldErrs], err) => {
-                        const newFieldErrs = []
-                        const newNonFieldErrs = []
-
-                        if (err?.message) {
-                          newNonFieldErrs.push(err)
-                        }
-
-                        if (Array.isArray(err?.data)) {
-                          err.data.forEach((dataError) => {
-                            if (dataError?.field) {
-                              newFieldErrs.push(dataError)
-                            } else {
-                              newNonFieldErrs.push(dataError)
-                            }
-                          })
-                        }
-
-                        return [
-                          [...fieldErrs, ...newFieldErrs],
-                          [...nonFieldErrs, ...newNonFieldErrs],
-                        ]
-                      },
-                      [[], []],
-                    )
-
-                    dispatchFields({
-                      type: 'ADD_SERVER_ERRORS',
-                      errors: fieldErrors,
-                    })
-
-                    nonFieldErrors.forEach((err) => {
-                      toast.error(err.message || i18n.t('error:unknown'))
-                    })
-
-                    setIsValid(false)
-                    hideIndicator()
-                    return
-                  }
-                } else {
-                  // If it's not an error then we can update the document data inside the context
-                  const document = json?.doc || json?.result
-
-                  // Manually update the data since this function doesn't fire the `submit` function from useForm
-                  if (document) {
-                    setIsValid(true)
-                    updateSavedDocumentData(document)
-                  }
-                }
-
-                hideIndicator()
-              }
+            if (result && result?.res?.ok && !mostRecentVersionIsAutosaved) {
+              setMostRecentVersionIsAutosaved(true)
+              setUnpublishedVersionCount((prev) => prev + 1)
             }
+
+            const newDate = new Date()
+
+            // We need to log the time in order to figure out if we need to trigger the state off later
+            endTimestamp = newDate.getTime()
+
+            hideIndicator()
           }
         }
       },

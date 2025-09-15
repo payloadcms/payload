@@ -110,17 +110,18 @@ export const renderDocument = async ({
 
   // Fetch the doc required for the view
   let doc =
-    initialData ||
-    (await getDocumentData({
-      id: idFromArgs,
-      collectionSlug,
-      globalSlug,
-      locale,
-      payload,
-      req,
-      segments,
-      user,
-    }))
+    !idFromArgs && !globalSlug
+      ? initialData || null
+      : await getDocumentData({
+          id: idFromArgs,
+          collectionSlug,
+          globalSlug,
+          locale,
+          payload,
+          req,
+          segments,
+          user,
+        })
 
   if (isEditing && !doc) {
     // If it's a collection document that doesn't exist, redirect to collection list
@@ -207,7 +208,7 @@ export const renderDocument = async ({
       globalSlug,
       locale: locale?.code,
       operation,
-      readOnly: isTrashedDoc,
+      readOnly: isTrashedDoc || isLocked,
       renderAllFields: true,
       req,
       schemaPath: collectionSlug || globalSlug,
@@ -332,6 +333,7 @@ export const renderDocument = async ({
   }
 
   const documentSlots = renderDocumentSlots({
+    id,
     collectionConfig,
     globalConfig,
     hasSavePermission,
@@ -416,9 +418,8 @@ export const renderDocument = async ({
             <DocumentHeader
               collectionConfig={collectionConfig}
               globalConfig={globalConfig}
-              i18n={i18n}
-              payload={payload}
               permissions={permissions}
+              req={req}
             />
           )}
           <HydrateAuthProvider permissions={permissions} />

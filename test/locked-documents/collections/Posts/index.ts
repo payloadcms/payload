@@ -17,6 +17,10 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'richText',
+      type: 'richText',
+    },
+    {
       name: 'documentLoaded',
       label: 'Document loaded',
       type: 'date',

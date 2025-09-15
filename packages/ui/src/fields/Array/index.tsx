@@ -381,7 +381,12 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           Fallback={<FieldDescription description={description} path={path} />}
         />
       </header>
-      <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
+      <NullifyLocaleField
+        fieldValue={value}
+        localized={localized}
+        path={path}
+        readOnly={readOnly}
+      />
       {BeforeInput}
       {(rows?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable

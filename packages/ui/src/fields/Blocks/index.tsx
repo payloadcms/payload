@@ -35,6 +35,7 @@ import './index.scss'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { BlockRow } from './BlockRow.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
@@ -45,6 +46,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
+    field,
     field: {
       name,
       type,
@@ -108,6 +110,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     }
 
     const resolvedBlocks: ClientBlock[] = []
+
     for (const blockReference of blockReferences) {
       const block =
         typeof blockReference === 'string' ? config.blocksMap[blockReference] : blockReference
@@ -294,6 +297,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
   const showRequired = readOnly && rows.length === 0
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -305,6 +310,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
+      style={styles}
     >
       {showError && (
         <RenderCustomComponent
@@ -382,7 +388,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         />
       </header>
       {BeforeInput}
-      <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
+      <NullifyLocaleField
+        fieldValue={value}
+        localized={localized}
+        path={path}
+        readOnly={readOnly}
+      />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__rows`}
@@ -391,6 +402,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         >
           {rows.map((row, i) => {
             const { blockType, isLoading } = row
+
             const blockConfig: ClientBlock =
               config.blocksMap[blockType] ??
               ((blockReferences ?? blocks).find(

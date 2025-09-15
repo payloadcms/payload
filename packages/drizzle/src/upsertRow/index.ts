@@ -42,23 +42,54 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   upsertTarget,
   where,
 }: Args): Promise<T> => {
+  if (operation === 'create' && !data.createdAt) {
+    data.createdAt = new Date().toISOString()
+  }
+
   let insertedRow: Record<string, unknown> = { id }
   if (id && shouldUseOptimizedUpsertRow({ data, fields })) {
-    const { row } = transformForWrite({
+    const transformedForWrite = transformForWrite({
       adapter,
       data,
       enableAtomicWrites: true,
       fields,
       tableName,
     })
+    const { row } = transformedForWrite
+    const { arraysToPush } = transformedForWrite
 
     const drizzle = db as LibSQLDatabase
 
+    // First, handle $push arrays
+
+    if (arraysToPush && Object.keys(arraysToPush)?.length) {
+      await insertArrays({
+        adapter,
+        arrays: [arraysToPush],
+        db,
+        parentRows: [insertedRow],
+        uuidMap: {},
+      })
+    }
+
+    // If row.updatedAt is not set, delete it to avoid triggering hasDataToUpdate. `updatedAt` may be explicitly set to null to
+    // disable triggering hasDataToUpdate.
+    if (typeof row.updatedAt === 'undefined' || row.updatedAt === null) {
+      delete row.updatedAt
+    }
+
+    const hasDataToUpdate = row && Object.keys(row)?.length
+
+    // Then, handle regular row update
     if (ignoreResult) {
-      await drizzle
-        .update(adapter.tables[tableName])
-        .set(row)
-        .where(eq(adapter.tables[tableName].id, id))
+      if (hasDataToUpdate) {
+        // Only update row if there is something to update.
+        // Example: if the data only consists of a single $push, calling insertArrays is enough - we don't need to update the row.
+        await drizzle
+          .update(adapter.tables[tableName])
+          .set(row)
+          .where(eq(adapter.tables[tableName].id, id))
+      }
       return ignoreResult === 'idOnly' ? ({ id } as T) : null
     }
 
@@ -73,6 +104,22 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     const findManyKeysLength = Object.keys(findManyArgs).length
     const hasOnlyColumns = Object.keys(findManyArgs.columns || {}).length > 0
+
+    if (!hasDataToUpdate) {
+      // Nothing to update => just fetch current row and return
+      findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
+
+      const doc = await db.query[tableName].findFirst(findManyArgs)
+
+      return transform<T>({
+        adapter,
+        config: adapter.payload.config,
+        data: doc,
+        fields,
+        joinQuery: false,
+        tableName,
+      })
+    }
 
     if (findManyKeysLength === 0 || hasOnlyColumns) {
       // Optimization - No need for joins => can simply use returning(). This is optimal for very simple collections
@@ -429,9 +476,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     await insertArrays({
       adapter,
-      arrays: [rowToInsert.arrays],
+      arrays: [rowToInsert.arrays, rowToInsert.arraysToPush],
       db,
-      parentRows: [insertedRow],
+      parentRows: [insertedRow, insertedRow],
       uuidMap: arraysBlocksUUIDMap,
     })
 

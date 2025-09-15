@@ -87,6 +87,200 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].updatedAt).toBeDefined()
     })
 
+    it('should create a file for collection csv with all documents when limit 0', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+          limit: 0,
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      const { totalDocs: totalNumberOfDocs } = await payload.count({
+        collection: 'pages',
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data).toHaveLength(totalNumberOfDocs)
+    })
+
+    it('should create a file for collection csv with all documents when no limit', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      const { totalDocs: totalNumberOfDocs } = await payload.count({
+        collection: 'pages',
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data).toHaveLength(totalNumberOfDocs)
+    })
+
+    it('should create a file for collection csv from limit and page 1', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+          limit: 100,
+          page: 1,
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].id).toBeDefined()
+      expect(data[0].title).toStrictEqual('Polymorphic 4')
+    })
+
+    it('should create a file for collection csv from limit and page 2', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+          limit: 100,
+          page: 2,
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      // query pages with the same limit and page as the export made above
+      const pages = await payload.find({
+        collection: 'pages',
+        limit: 100,
+        page: 2,
+      })
+
+      const firstDocOnPage2 = pages.docs?.[0]
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].id).toBeDefined()
+      expect(data[0].title).toStrictEqual(firstDocOnPage2?.title)
+    })
+
+    it('should not create a file for collection csv when limit < 0', async () => {
+      await expect(
+        payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            format: 'csv',
+            limit: -1,
+          },
+        }),
+      ).rejects.toThrow(/Limit/)
+    })
+
+    it('should not create a file for collection csv when limit is not a multiple of 100', async () => {
+      await expect(
+        payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            format: 'csv',
+            limit: 99,
+          },
+        }),
+      ).rejects.toThrow(/Limit/)
+    })
+
+    it('should export results sorted ASC by title when sort="title"', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+          sort: 'title',
+          where: {
+            or: [{ title: { contains: 'Title' } }, { title: { contains: 'Array' } }],
+          },
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].id).toBeDefined()
+      expect(data[0].title).toStrictEqual('Array 0')
+    })
+
+    it('should export results sorted DESC by title when sort="-title"', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'csv',
+          sort: '-title',
+          where: {
+            or: [{ title: { contains: 'Title' } }, { title: { contains: 'Array' } }],
+          },
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].id).toBeDefined()
+      expect(data[0].title).toStrictEqual('Title 4')
+    })
+
     it('should create a file for collection csv with draft data', async () => {
       const draftPage = await payload.create({
         collection: 'pages',
@@ -596,6 +790,35 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].hasManyPolymorphic_0_relationTo).toBe('users')
       expect(data[0].hasManyPolymorphic_1_id).toBeDefined()
       expect(data[0].hasManyPolymorphic_1_relationTo).toBe('posts')
+    })
+
+    it('should export hasMany monomorphic relationship fields to CSV', async () => {
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields: ['id', 'hasManyMonomorphic'],
+          format: 'csv',
+          where: {
+            title: { contains: 'Monomorphic' },
+          },
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // hasManyMonomorphic
+      expect(data[0].hasManyMonomorphic_0_id).toBeDefined()
+      expect(data[0].hasManyMonomorphic_0_relationTo).toBeUndefined()
+      expect(data[0].hasManyMonomorphic_0_title).toBeUndefined()
     })
 
     // disabled so we don't always run a massive test
