@@ -1532,6 +1532,35 @@ export type BlocksField = {
   blockReferences?: (Block | BlockSlug)[]
   blocks: Block[]
   defaultValue?: DefaultValue
+  /**
+   * Blocks can be conditionally enabled using the `filterOptions` property on the blocks field.
+   * It allows you to provide a function that returns which block slugs should be available based on the given context.
+   *
+   * @behavior
+   *
+   * - `filterOptions` is re-evaluated as part of the form state request, whenever the document data changes.
+   * - If a block is present in the field but no longer allowed by `filterOptions`, a validation error will occur when saving.
+   *
+   * @example
+   *
+   * ```ts
+   * {
+   *   name: 'blocksWithDynamicFilterOptions',
+   *   type: 'blocks',
+   *   filterOptions: ({ siblingData }) => {
+   *     return siblingData?.enabledBlocks?.length
+   *       ? [siblingData.enabledBlocks] // allow only the matching block
+   *       : true // allow all blocks if no value is set
+   *   },
+   *   blocks: [
+   *     { slug: 'block1', fields: [{ type: 'text', name: 'block1Text' }] },
+   *     { slug: 'block2', fields: [{ type: 'text', name: 'block2Text' }] },
+   *     { slug: 'block3', fields: [{ type: 'text', name: 'block3Text' }] },
+   *   ],
+   * }
+   * ```
+   * In this example, the list of available blocks is determined by the enabledBlocks sibling field. If no value is set, all blocks remain available.
+   */
   filterOptions?: BlocksFilterOptions
   labels?: Labels
   maxRows?: number
