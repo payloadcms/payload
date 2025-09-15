@@ -23,6 +23,14 @@ const config = buildConfig({
   ],
   plugins: [
     ecommercePlugin({
+      // You must add your access control functions here
+      access: {
+        adminOnly,
+        adminOnlyFieldAccess,
+        adminOrCustomerOwner,
+        adminOrPublishedStatus,
+        customerOnlyFieldAccess,
+      },
       customers: { slug: 'users' },
     }),
   ],
@@ -51,11 +59,11 @@ Note that the fields in overrides take a function that receives the default fiel
 ```ts
 ecommercePlugin({
   access: {
-    isAdmin: isAdmin,
-    isAdminField: isAdminField,
-    isAdminOrOwner: isAdminOrOwner,
-    isAdminOrPublished: isAdminOrPublished,
-    isCustomerField: isCustomerField,
+    adminOnly,
+    adminOnlyFieldAccess,
+    adminOrCustomerOwner,
+    adminOrPublishedStatus,
+    customerOnlyFieldAccess,
   },
   customers: {
     slug: 'users',
@@ -82,69 +90,70 @@ ecommercePlugin({
 
 The plugin requires access control functions in order to restrict permissions to certain collections or fields. You can override these functions by providing your own in the `access` option.
 
-| Option               | Type          | Description                                                               |
-| -------------------- | ------------- | ------------------------------------------------------------------------- |
-| `isAuthenticated`    | `Access`      | Authenticated access only, provided by default.                           |
-| `isPublic`           | `Access`      | Public access, provided by default.                                       |
-| `isAdmin`            | `Access`      | Limited to only admin users.                                              |
-| `isAdminField`       | `FieldAccess` | Limited to only admin users, specifically for Field level access control. |
-| `isAdminOrOwner`     | `Access`      | Is the owner of the document via the `customer` field or is an admin.     |
-| `isAdminOrPublished` | `Access`      | The document is published or user is admin.                               |
-| `isCustomerField`    | `FieldAccess` | Limited to customers only, specifically for Field level access control.   |
+| Option                    | Type          | Description                                                               |
+| ------------------------- | ------------- | ------------------------------------------------------------------------- |
+| `authenticatedOnly`       | `Access`      | Authenticated access only, provided by default.                           |
+| `publicAccess`            | `Access`      | Public access, provided by default.                                       |
+| `adminOnly`               | `Access`      | Limited to only admin users.                                              |
+| `adminOnlyFieldAccess`    | `FieldAccess` | Limited to only admin users, specifically for Field level access control. |
+| `adminOrCustomerOwner`    | `Access`      | Is the owner of the document via the `customer` field or is an admin.     |
+| `adminOrPublishedStatus`  | `Access`      | The document is published or user is admin.                               |
+| `customerOnlyFieldAccess` | `FieldAccess` | Limited to customers only, specifically for Field level access control.   |
 
 The default access control functions are:
 
 ```ts
 access: {
-  isAuthenticated: ({ req: { user } }) => Boolean(user),
-  isPublic: () => true,
+  authenticatedOnly: ({ req: { user } }) => Boolean(user),
+  publicAccess: () => true,
 }
 ```
 
-### `isAuthenticated`
+### `authenticatedOnly`
 
 Access control to check if the user is authenticated. By default the following is provided:
 
 ```ts
-isAuthenticated: ({ req: { user } }) => Boolean(user)
+authenticatedOnly: ({ req: { user } }) => Boolean(user)
 ```
 
-### `isPublic`
+### `publicAccess`
 
 Access control to allow public access. By default the following is provided:
 
 ```ts
-isPublic: () => true
+publicAccess: () => true
 ```
 
-### `isAdmin`
+### `adminOnly`
 
 Access control to check if the user has `admin` permissions.
 
 Example:
 
 ```ts
-isAdmin: ({ req: { user } }) => Boolean(user?.roles?.includes('admin'))
+adminOnly: ({ req: { user } }) => Boolean(user?.roles?.includes('admin'))
 ```
 
-### `isAdminField`
+### `adminOnlyFieldAccess`
 
 Field level access control to check if the user has `admin` permissions.
 
 Example:
 
 ```ts
-isAdminField: ({ req: { user } }) => Boolean(user?.roles?.includes('admin'))
+adminOnlyFieldAccess: ({ req: { user } }) =>
+  Boolean(user?.roles?.includes('admin'))
 ```
 
-### `isAdminOrOwner`
+### `adminOrCustomerOwner`
 
 Access control to check if the user has `admin` permissions or is the owner of the document via the `customer` field.
 
 Example:
 
 ```ts
-isAdminOrOwner: ({ req: { user } }) => {
+adminOrCustomerOwner: ({ req: { user } }) => {
   if (user && Boolean(user?.roles?.includes('admin'))) {
     return true
   }
@@ -161,14 +170,14 @@ isAdminOrOwner: ({ req: { user } }) => {
 }
 ```
 
-### `isAdminOrPublished`
+### `adminOrPublishedStatus`
 
 Access control to check if the user has `admin` permissions or if the document is published.
 
 Example:
 
 ```ts
-isAdminOrPublished: ({ req: { user } }) => {
+adminOrPublishedStatus: ({ req: { user } }) => {
   if (user && Boolean(user?.roles?.includes('admin'))) {
     return true
   }
@@ -180,42 +189,78 @@ isAdminOrPublished: ({ req: { user } }) => {
 }
 ```
 
-### `isCustomerField`
+### `customerOnlyFieldAccess`
 
 Field level access control to check if the user has `customer` permissions.
 
 Example:
 
 ```ts
-isCustomerField: ({ req: { user } }) =>
+customerOnlyFieldAccess: ({ req: { user } }) =>
   Boolean(user?.roles?.includes('customer'))
+```
+
+## Addresses
+
+The `addresses` option is used to configure the addresses collection and supported fields. Defaults to `true` which will create an `addresses` collection with default fields. It also takes an object:
+
+| Option                        | Type                 | Description                                                                                                                                                  |
+| ----------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `addressFields`               | `FieldsOverride`     | A function that is given the `defaultFields` as an argument and returns an array of fields. Use this to customise the supported fields for stored addresses. |
+| `addressesCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `addresses` with a function where you can access the `defaultCollection` as an argument.                           |
+| `supportedCountries`          | `CountryType[]`      | An array of supported countries in [ISO 3166-1 alpha-2 format](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Defaults to all countries.                 |
+
+You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
+
+```ts
+addresses: {
+  addressesCollectionOverride: ({ defaultCollection }) => ({
+    ...defaultCollection,
+    fields: [
+      ...defaultCollection.fields,
+      {
+        name: 'googleMapLocation',
+        label: 'Google Map Location',
+        type: 'text',
+      },
+    ],
+  })
+}
+```
+
+### `supportedCountries`
+
+The `supportedCountries` option is an array of country codes in [ISO 3166-1 alpha-2 format](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). This is used to limit the countries that can be selected when creating or updating an address. If not provided, all countries will be supported. Currently used for storing addresses only.
+
+You can import the default list of countries from the plugin:
+
+```ts
+import { defaultCountries } from '@payloadcms/plugin-ecommerce/client/react'
 ```
 
 ## Carts
 
 The `carts` option is used to configure the carts collection. Defaults to `true` which will create a `carts` collection with default fields. It also takes an object:
 
-| Option            | Type                 | Description                                                                                                                                          |
-| ----------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cartsCollection` | `CollectionOverride` | Allows you to override the collection for `carts` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array. |
+| Option                    | Type                 | Description                                                                                                                    |
+| ------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `cartsCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `carts` with a function where you can access the `defaultCollection` as an argument. |
 
 You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
 
 ```ts
 carts: {
-  cartsCollection: {
-    fields: ({ defaultFields }) => {
-      const fields = [
-        ...defaultFields,
-        {
-          name: 'notes',
-          label: 'Notes',
-          type: 'textarea',
-        },
-      ]
-      return fields
-    },
-  }
+  cartsCollectionOverride: ({ defaultCollection }) => ({
+    ...defaultCollection,
+    fields: [
+      ...defaultCollection.fields,
+      {
+        name: 'notes',
+        label: 'Notes',
+        type: 'textarea',
+      },
+    ],
+  })
 }
 ```
 
@@ -231,6 +276,68 @@ The `customers` option is required and is used to provide the customers collecti
 | `slug` | string | The slug of the customers collection. |
 
 While it's recommended to use just one collection for customers and your editors, you can use any collection you want for your customers. Just make sure that your access control is checking for the correct collections as well.
+
+## Currencies
+
+The `currencies` option is used to configure the supported currencies by the store. Defaults to `true` which will support `USD`. It also takes an object:
+
+| Option                | Type         | Description                                                                                                                     |
+| --------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `supportedCurrencies` | `Currency[]` | An array of supported currencies by the store. Defaults to `USD`. See [Currencies](#currencies-list) for available currencies.  |
+| `defaultCurrency`     | `string`     | The default currency code to use for the store. Defaults to the first currency. Must be one of the `supportedCurrencies` codes. |
+
+The `Currency` type is as follows:
+
+```ts
+type Currency = {
+  code: string // The currency code in ISO 4217 format, e.g. 'USD'
+  decimals: number // The number of decimal places for the currency, e.g. 2 for USD
+  label: string // A human-readable label for the currency, e.g. 'US Dollar'
+  symbol: string // The currency symbol, e.g. '$'
+}
+```
+
+For example, to support JYP in addition to USD:
+
+```ts
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+import { USD } from '@payloadcms/plugin-ecommerce'
+
+ecommercePlugin({
+  currencies: {
+    supportedCurrencies: [
+      USD,
+      {
+        code: 'JPY',
+        decimals: 0,
+        label: 'Japanese Yen',
+        symbol: '¥',
+      },
+    ],
+    defaultCurrency: 'USD',
+  },
+})
+```
+
+Note that adding a new currency could generate a new schema migration as it adds new prices fields in your products.
+
+We currently support the following currencies out of the box:
+
+- `USD`
+- `EUR`
+- `GBP`
+
+You can import these from the plugin:
+
+```ts
+import { EUR } from '@payloadcms/plugin-ecommerce'
+```
+
+<Banner type="info">
+  Note that adding new currencies here does not automatically enable them in
+  your payment gateway. Make sure to enable the currencies in your payment
+  gateway dashboard as well.
+</Banner>
 
 ## Inventory
 
@@ -365,135 +472,30 @@ import { stripeAdapterClient } from '@payloadcms/plugin-ecommerce/payments/strip
 </EcommerceProvider>
 ```
 
-## Addresses
-
-The `addresses` option is used to configure the addresses collection and supported fields. Defaults to `true` which will create an `addresses` collection with default fields. It also takes an object:
-
-| Option               | Type                 | Description                                                                                                                                                  |
-| -------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `addressFields`      | `FieldsOverride`     | A function that is given the `defaultFields` as an argument and returns an array of fields. Use this to customise the supported fields for stored addresses. |
-| `collectionOverride` | `CollectionOverride` | Allows you to override the collection for `addresses` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array.     |
-| `supportedCountries` | `CountryType[]`      | An array of supported countries in [ISO 3166-1 alpha-2 format](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Defaults to all countries.                 |
-
-You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
-
-```ts
-addresses: {
-  collectionOverride: {
-    fields: ({ defaultFields }) => {
-      const fields = [
-        ...defaultFields,
-        {
-          name: 'googleMapLocation',
-          label: 'Google Map Location',
-          type: 'text',
-        },
-      ]
-
-      return fields
-    },
-  }
-}
-```
-
-### `supportedCountries`
-
-The `supportedCountries` option is an array of country codes in [ISO 3166-1 alpha-2 format](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). This is used to limit the countries that can be selected when creating or updating an address. If not provided, all countries will be supported. Currently used for storing addresses only.
-
-You can import the default list of countries from the plugin:
-
-```ts
-import { defaultCountries } from '@payloadcms/plugin-ecommerce/addresses'
-```
-
-## Currencies
-
-The `currencies` option is used to configure the supported currencies by the store. Defaults to `true` which will support `USD`. It also takes an object:
-
-| Option                | Type         | Description                                                                                                                     |
-| --------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| `supportedCurrencies` | `Currency[]` | An array of supported currencies by the store. Defaults to `USD`. See [Currencies](#currencies-list) for available currencies.  |
-| `defaultCurrency`     | `string`     | The default currency code to use for the store. Defaults to the first currency. Must be one of the `supportedCurrencies` codes. |
-
-The `Currency` type is as follows:
-
-```ts
-type Currency = {
-  code: string // The currency code in ISO 4217 format, e.g. 'USD'
-  decimals: number // The number of decimal places for the currency, e.g. 2 for USD
-  label: string // A human-readable label for the currency, e.g. 'US Dollar'
-  symbol: string // The currency symbol, e.g. '$'
-}
-```
-
-For example, to support JYP in addition to USD:
-
-```ts
-import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
-import { USD } from '@payloadcms/plugin-ecommerce/currencies'
-
-ecommercePlugin({
-  currencies: {
-    supportedCurrencies: [
-      USD,
-      {
-        code: 'JPY',
-        decimals: 0,
-        label: 'Japanese Yen',
-        symbol: '¥',
-      },
-    ],
-    defaultCurrency: 'USD',
-  },
-})
-```
-
-Note that adding a new currency could generate a new schema migration as it adds new prices fields in your products.
-
-We currently support the following currencies out of the box:
-
-- `USD`
-- `EUR`
-- `GBP`
-
-You can import these from the plugin:
-
-```ts
-import { EUR } from '@payloadcms/plugin-ecommerce/currencies'
-```
-
-<Banner type="info">
-  Note that adding new currencies here does not automatically enable them in
-  your payment gateway. Make sure to enable the currencies in your payment
-  gateway dashboard as well.
-</Banner>
-
 ## Products
 
 The `products` option is used to configure the products and variants collections. Defaults to `true` which will create `products` and `variants` collections with default fields. It also takes an object:
 
-| Option               | Type                 | Description                                                                                                                                             |
-| -------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `productsCollection` | `CollectionOverride` | Allows you to override the collection for `products` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array. |
-| `variants`           | `object`             | Configuration for the variants collection. [More](#variants)                                                                                            |
+| Option                       | Type                 | Description                                                                                                                       |
+| ---------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `productsCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `products` with a function where you can access the `defaultCollection` as an argument. |
+| `variants`                   | `object`             | Configuration for the variants collection. [More](#variants)                                                                      |
 
 You can add your own fields or modify the structure of the existing on in the collections. Example for overriding the default fields:
 
 ```ts
 products: {
-  productsCollection: {
-    fields: ({ defaultFields }) => {
-      const fields = [
-        ...defaultFields,
-        {
-          name: 'customField',
-          label: 'Custom Field',
-          type: 'text',
-        },
-      ]
-      return fields
-    },
-  }
+  productsCollectionOverride: ({ defaultCollection }) => ({
+    ...defaultCollection,
+    fields: [
+      ...defaultCollection.fields,
+      {
+        name: 'notes',
+        label: 'Notes',
+        type: 'textarea',
+      },
+    ],
+  })
 }
 ```
 
@@ -501,29 +503,27 @@ products: {
 
 The `variants` option is used to configure the variants collection. It takes an object:
 
-| Option                     | Type                 | Description                                                                                                                                                   |
-| -------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `variantsCollection`       | `CollectionOverride` | Allows you to override the collection for `variants` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array.       |
-| `variantTypesCollection`   | `CollectionOverride` | Allows you to override the collection for `variantTypes` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array.   |
-| `variantOptionsCollection` | `CollectionOverride` | Allows you to override the collection for `variantOptions` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array. |
+| Option                             | Type                 | Description                                                                                                                             |
+| ---------------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `variantsCollectionOverride`       | `CollectionOverride` | Allows you to override the collection for `variants` with a function where you can access the `defaultCollection` as an argument.       |
+| `variantTypesCollectionOverride`   | `CollectionOverride` | Allows you to override the collection for `variantTypes` with a function where you can access the `defaultCollection` as an argument.   |
+| `variantOptionsCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `variantOptions` with a function where you can access the `defaultCollection` as an argument. |
 
 You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
 
 ```ts
 variants: {
-  variantsCollection: {
-    fields: ({ defaultFields }) => {
-      const fields = [
-        ...defaultFields,
-        {
-          name: 'customField',
-          label: 'Custom Field',
-          type: 'text',
-        },
-      ]
-      return fields
-    },
-  }
+  variantsCollectionOverride: ({ defaultCollection }) => ({
+    ...defaultCollection,
+    fields: [
+      ...defaultCollection.fields,
+      {
+        name: 'customField',
+        label: 'Custom Field',
+        type: 'text',
+      },
+    ],
+  })
 }
 ```
 
@@ -537,27 +537,25 @@ The key differences between these collections:
 
 The `orders` option is used to configure the orders collection. Defaults to `true` which will create an `orders` collection with default fields. It also takes an object:
 
-| Option             | Type                 | Description                                                                                                                                           |
-| ------------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ordersCollection` | `CollectionOverride` | Allows you to override the collection for `orders` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array. |
+| Option                     | Type                 | Description                                                                                                                     |
+| -------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `ordersCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `orders` with a function where you can access the `defaultCollection` as an argument. |
 
 You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
 
 ```ts
 orders: {
-  ordersCollection: {
-    fields: ({ defaultFields }) => {
-      const fields = [
-        ...defaultFields,
-        {
-          name: 'notes',
-          label: 'Notes',
-          type: 'textarea',
-        },
-      ]
-      return fields
-    },
-  }
+  ordersCollectionOverride: ({ defaultCollection }) => ({
+    ...defaultCollection,
+    fields: [
+      ...defaultCollection.fields,
+      {
+        name: 'notes',
+        label: 'Notes',
+        type: 'textarea',
+      },
+    ],
+  })
 }
 ```
 
@@ -565,26 +563,24 @@ orders: {
 
 The `transactions` option is used to configure the transactions collection. Defaults to `true` which will create a `transactions` collection with default fields. It also takes an object:
 
-| Option                           | Type                 | Description                                                                                                                                                 |
-| -------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `transactionsCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `transactions` where the `fields` is a function of type `FieldsOverride` and expects a return of a `Field` array. |
+| Option                           | Type                 | Description                                                                                                                           |
+| -------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `transactionsCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `transactions` with a function where you can access the `defaultCollection` as an argument. |
 
 You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
 
 ```ts
 transactions: {
-  transactionsCollection: {
-    fields: ({ defaultFields }) => {
-      const fields = [
-        ...defaultFields,
-        {
-          name: 'notes',
-          label: 'Notes',
-          type: 'textarea',
-        },
-      ]
-      return fields
-    },
-  }
+  transactionsCollectionOverride: ({ defaultCollection }) => ({
+    ...defaultCollection,
+    fields: [
+      ...defaultCollection.fields,
+      {
+        name: 'notes',
+        label: 'Notes',
+        type: 'textarea',
+      },
+    ],
+  })
 }
 ```

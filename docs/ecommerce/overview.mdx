@@ -62,6 +62,14 @@ const config = buildConfig({
   ],
   plugins: [
     ecommercePlugin({
+      // You must add your access control functions here
+      access: {
+        adminOnly,
+        adminOnlyFieldAccess,
+        adminOrCustomerOwner,
+        adminOrPublishedStatus,
+        customerOnlyFieldAccess,
+      },
       customers: { slug: 'users' },
     }),
   ],
