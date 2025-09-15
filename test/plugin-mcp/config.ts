@@ -5,9 +5,9 @@ import { fileURLToPath } from 'url'
 import { z } from 'zod'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { ExampleProducts } from './collections/ExampleProducts.js'
 import { Media } from './collections/Media.js'
 import { Posts } from './collections/Posts.js'
+import { Products } from './collections/Products.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
@@ -20,12 +20,22 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Posts, ExampleProducts],
+  collections: [Users, Media, Posts, Products],
   onInit: seed,
   plugins: [
     pluginMCP({
+      overrideApiKeyCollection: (collection) => {
+        collection.fields.push({
+          name: 'override',
+          type: 'text',
+          admin: {
+            description: 'This field added by overrideApiKeyCollection',
+          },
+        })
+        return collection
+      },
       collections: {
-        [ExampleProducts.slug]: {
+        [Products.slug]: {
           enabled: true,
         },
         posts: {
@@ -144,7 +154,7 @@ export default buildConfigWithDefaults({
       },
 
       // Experimental MCP tools
-      _experimental: {
+      experimental: {
         tools: {
           collections: {
             collectionsDirPath: 'test/plugin-mcp/collections',

@@ -33,7 +33,8 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "files": [
-    "src"
+    "src",
+    "dist"
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",

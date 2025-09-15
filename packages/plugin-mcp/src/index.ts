@@ -21,7 +21,7 @@ export const pluginMCP =
         description: tool.description,
       })) || []
 
-    const experimentalTools = pluginOptions?._experimental?.tools || {}
+    const experimentalTools = pluginOptions?.experimental?.tools || {}
 
     /**
      * API Keys
@@ -36,7 +36,12 @@ export const pluginMCP =
      *  - If a custom tool has gone haywire, admins can disallow that tool.
      *
      */
-    config.collections.push(createAPIKeysCollection(collections, customTools, experimentalTools))
+    const apiKeyCollection = createAPIKeysCollection(collections, customTools, experimentalTools)
+    if (pluginOptions.overrideApiKeyCollection) {
+      config.collections.push(pluginOptions.overrideApiKeyCollection(apiKeyCollection))
+    } else {
+      config.collections.push(apiKeyCollection)
+    }
 
     /**
      * If the plugin is disabled, we still want to keep added collections/fields so the database schema is consistent which is important for migrations.

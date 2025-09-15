@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-export const ExampleProducts: CollectionConfig = {
-  slug: 'example-products',
+export const Products: CollectionConfig = {
+  slug: 'products',
   fields: [
     {
       name: 'title',
