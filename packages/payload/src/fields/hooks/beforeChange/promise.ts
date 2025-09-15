@@ -2,11 +2,11 @@ import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
 import type { Block, Field, TabAsField, Validate } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
+import { type RequestContext, validateBlocksFilterOptions } from '../../../index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
@@ -207,6 +207,40 @@ export const promise = async ({
           message: validationResult,
           path,
         })
+
+        if (field.type === 'blocks' && field.filterOptions) {
+          // Re-run filteroptions. If the validation error is due to filteroptions, we need to add error paths to all the blocks
+          // that are no longer valid
+          const validationResult = validateBlocksFilterOptions({
+            id,
+            data,
+            filterOptions: field.filterOptions,
+            req,
+            siblingData,
+            value: siblingData[field.name],
+          })
+          if (validationResult?.invalidBlockSlugs?.length) {
+            let rowIndex = -1
+            for (const block of siblingData[field.name] as JsonObject[]) {
+              rowIndex++
+              if (validationResult.invalidBlockSlugs.includes(block.blockType as string)) {
+                const blockLabelPath =
+                  field?.label === false
+                    ? fieldLabelPath
+                    : buildFieldLabel(
+                        fieldLabelPath,
+                        `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
+                      )
+
+                errors.push({
+                  label: blockLabelPath,
+                  message: `${block.blockType} block is not allowed`,
+                  path: `${path}.${rowIndex}.id`,
+                })
+              }
+            }
+          }
+        }
       }
     }
 

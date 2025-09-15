@@ -547,6 +547,12 @@ export const BlockFields: CollectionConfig = {
             {
               type: 'text',
               name: 'block1Text',
+              validate: (value: any) => {
+                if (value === 'error') {
+                  return 'error'
+                }
+                return true
+              },
             },
           ],
         },

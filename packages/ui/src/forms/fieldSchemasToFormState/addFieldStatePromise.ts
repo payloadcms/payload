@@ -252,6 +252,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
 
+    /**
+     * This function adds the error **path** to the current field and all its parents. If a field is invalid, all its parents are also invalid.
+     * It does not add the error **message** to the current field, as that shouldn't apply to all parents.
+     * This is done separately below.
+     */
     const addErrorPathToParent = (errorPath: string) => {
       if (typeof addErrorPathToParentArg === 'function') {
         addErrorPathToParentArg(errorPath)
@@ -407,6 +412,22 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       case 'blocks': {
         const blocksValue = Array.isArray(data[field.name]) ? data[field.name] : []
 
+        // Handle blocks filterOptions
+        let filterOptionsValidationResult: null | ReturnType<typeof validateBlocksFilterOptions> =
+          null
+        if (field.filterOptions) {
+          filterOptionsValidationResult = validateBlocksFilterOptions({
+            id,
+            data: fullData,
+            filterOptions: field.filterOptions,
+            req,
+            siblingData: data,
+            value: data[field.name],
+          })
+
+          fieldState.blocksFilterOptions = filterOptionsValidationResult.allowedBlockSlugs
+        }
+
         const { promises, rowMetadata } = blocksValue.reduce(
           (acc, row, i: number) => {
             const blockTypeToMatch: string = row.blockType
@@ -441,6 +462,17 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 state[idKey] = {
                   initialValue: row.id,
                   value: row.id,
+                }
+
+                // If the blocks field fails filterOptions validation, add error paths to the individual blocks that are no longer allowed
+                if (
+                  filterOptionsValidationResult?.invalidBlockSlugs?.length &&
+                  filterOptionsValidationResult.invalidBlockSlugs.includes(row.blockType)
+                ) {
+                  state[idKey].errorMessage = `${row.blockType} block is not allowed`
+                  state[idKey].valid = false
+                  // No need to run `addErrorPathToParent`, as this has already been run by the main validation above
+                  addErrorPathToParent(idKey)
                 }
 
                 if (includeSchema) {
@@ -579,20 +611,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         }
 
         fieldState.rows = rowMetadata
-
-        // Handle blocks filterOptions
-        if (field.filterOptions) {
-          const validationResult = validateBlocksFilterOptions({
-            id,
-            data: fullData,
-            filterOptions: field.filterOptions,
-            req,
-            siblingData: data,
-            value: data[field.name],
-          })
-
-          fieldState.blocksFilterOptions = validationResult.allowedBlockSlugs
-        }
 
         // Add field to state
         if (!omitParents && (!filter || filter(args))) {

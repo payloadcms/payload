@@ -558,7 +558,7 @@ export function validateBlocksFilterOptions({
   /**
    * A list of block slugs that are used despite being disallowed. If undefined, field passed validation.
    */
-  invalidBlockSlugs: string | string[] | undefined
+  invalidBlockSlugs: string[] | undefined
 } {
   const allBlockSlugs = Array.isArray(value)
     ? (value as Array<{ blockType?: string }>)
