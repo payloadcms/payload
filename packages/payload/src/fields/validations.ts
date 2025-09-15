@@ -603,9 +603,9 @@ export const blocks: BlocksFieldValidation = (
   value,
   { id, data, filterOptions, maxRows, minRows, req: { t }, req, required, siblingData },
 ) => {
-  const arrayLengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
-  if (!arrayLengthValidationResult) {
-    return arrayLengthValidationResult
+  const lengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
+  if (typeof lengthValidationResult === 'string') {
+    return lengthValidationResult
   }
 
   if (filterOptions) {
