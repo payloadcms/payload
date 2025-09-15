@@ -41,7 +41,6 @@ import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
 import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { RootHierarchyConfiguration } from '../hierarchy/types.js'
 import type {
   Block,
   FlattenedBlock,
@@ -1118,7 +1117,6 @@ export type Config = {
      */
     validationRules?: (args: GraphQL.ExecutionArgs) => GraphQL.ValidationRule[]
   }
-  hierarchy?: false | RootHierarchyConfiguration
   /**
    * Tap into Payload-wide hooks.
    *
@@ -1167,7 +1165,6 @@ export type Config = {
    * ```
    */
   logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
-
   /**
    * Override the log level of errors for Payload's error handler or disable logging with `false`.
    * Levels can be any of the following: 'trace', 'debug', 'info', 'warn', 'error', 'fatal' or false.
@@ -1201,6 +1198,7 @@ export type Config = {
 
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void
+
   /**
    * An array of Payload plugins.
    *
@@ -1274,6 +1272,7 @@ export type Config = {
   sharp?: SharpDependency
   /** Send anonymous telemetry data about general usage. */
   telemetry?: boolean
+  treeView?: boolean
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: {
     /**

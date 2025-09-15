@@ -523,10 +523,6 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
       }
     | false
   /**
-   * Enables hierarchy support for this collection
-   */
-  hierarchy?: boolean
-  /**
    * Hooks to modify Payload functionality
    */
   hooks?: {
@@ -615,6 +611,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * @default false
    */
   trash?: boolean
+  /**
+   * Enables tree view support for this collection
+   */
+  treeView?: boolean
   /**
    * Options used in typescript generation
    */

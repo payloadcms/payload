@@ -198,9 +198,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   if (config.folders !== false) {
     validRelationships.push(config.folders!.slug)
   }
-  if (config.hierarchy !== false) {
-    validRelationships.push(config.hierarchy!.slug)
-  }
 
   /**
    * Blocks sanitization needs to happen before collections, as collection/global join field sanitization needs config.blocks
@@ -239,7 +236,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   const folderEnabledCollections: SanitizedCollectionConfig[] = []
-  const hierarchyEnabledCollections: SanitizedCollectionConfig[] = []
 
   for (let i = 0; i < config.collections!.length; i++) {
     if (collectionSlugs.has(config.collections![i]!.slug)) {
@@ -280,10 +276,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
     if (config.folders !== false && config.collections![i]!.folders) {
       folderEnabledCollections.push(config.collections![i]!)
-    }
-
-    if (config.hierarchy !== false && config.collections![i]!.hierarchy) {
-      hierarchyEnabledCollections.push(config.collections![i]!)
     }
   }
 
