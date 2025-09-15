@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 
+import { randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -11,6 +12,7 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 let payload: Payload
 let token: string
 let restClient: NextRESTClient
+let testApiKey: null | string | undefined
 
 const { email, password } = devUser
 const filename = fileURLToPath(import.meta.url)
@@ -64,11 +66,38 @@ describe('@payloadcms/plugin-mcp', () => {
     await payload.destroy()
   })
 
+  it('should create an API Key', async () => {
+    const doc = await payload.create({
+      collection: 'payload-mcp-tool-api-key',
+      data: {
+        enableAPIKey: true,
+        label: 'Test API Key',
+        posts: { find: true, create: true },
+        apiKey: randomUUID(),
+      },
+    })
+
+    testApiKey = doc.apiKey
+
+    expect(doc).toBeDefined()
+    expect(doc.label).toBe('Test API Key')
+    expect(doc.posts?.find).toBe(true)
+    expect(doc.posts?.create).toBe(true)
+    expect(doc.custom?.diceRoll).toBe(true)
+    expect(doc.products?.find).toBe(false)
+    expect(doc.products?.create).toBe(false)
+    expect(doc.products?.update).toBe(false)
+    expect(doc.products?.delete).toBe(false)
+    expect(doc.media?.find).toBe(false)
+    expect(doc.media?.update).toBe(false)
+    expect(testApiKey).toBeDefined()
+  })
+
   it('should not allow GET /api/mcp', async () => {
     const data = await restClient
       .GET(`/mcp`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${testApiKey}`,
         },
       })
       .then((res) => res.json())
@@ -83,7 +112,7 @@ describe('@payloadcms/plugin-mcp', () => {
   it('should list tools', async () => {
     const request = new Request(`${restClient.serverURL}/api/mcp`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${testApiKey}`,
         Accept: 'application/json, text/event-stream',
         'Content-Type': 'application/json',
       },
@@ -105,16 +134,95 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(json.jsonrpc).toBe('2.0')
     expect(json.result).toBeDefined()
     expect(json.result.tools).toBeDefined()
-    expect(json.result.tools).toHaveLength(2)
-    expect(json.result.tools[0].name).toBe('findResource')
-    expect(json.result.tools[0].description).toBe(
-      'Finds documents in a Payload collection using Find or FindByID. Possible collections are: media, posts',
+    expect(json.result.tools).toHaveLength(3)
+    expect(json.result.tools[0].name).toBe('createPosts')
+    expect(json.result.tools[0].description).toContain('Create a document in a Payload collection.')
+    expect(json.result.tools[0].description).toContain(
+      'This is a Payload collection with Post documents.',
     )
     expect(json.result.tools[0].inputSchema).toBeDefined()
-    expect(json.result.tools[1].name).toBe('diceRoll')
-    expect(json.result.tools[1].description).toBe(
-      'Rolls a virtual dice with a specified number of sides',
+    expect(json.result.tools[1].name).toBe('findPosts')
+    expect(json.result.tools[1].description).toContain(
+      'Find documents in a Payload collection using Find or FindByID.',
+    )
+    expect(json.result.tools[1].description).toContain(
+      'This is a Payload collection with Post documents.',
     )
     expect(json.result.tools[1].inputSchema).toBeDefined()
+    expect(json.result.tools[2].name).toBe('diceRoll')
+    expect(json.result.tools[2].description).toContain(
+      'Rolls a virtual dice with a specified number of sides',
+    )
+    expect(json.result.tools[2].inputSchema).toBeDefined()
+  })
+
+  it('should list resources', async () => {
+    const request = new Request(`${restClient.serverURL}/api/mcp`, {
+      headers: {
+        Authorization: `Bearer ${testApiKey}`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'resources/list',
+        params: {},
+      }),
+    })
+
+    const streamJSONString = await fetchStreamResponse(request)
+
+    const json = JSON.parse(streamJSONString)
+
+    expect(json).toBeDefined()
+    expect(json.id).toBe(1)
+    expect(json.jsonrpc).toBe('2.0')
+    expect(json.result).toBeDefined()
+    expect(json.result.resources).toBeDefined()
+    expect(json.result.resources).toHaveLength(1)
+    expect(json.result.resources[0].name).toBe('data')
+    expect(json.result.resources[0].title).toBe('Data')
+    expect(json.result.resources[0].uri).toBe('data://app')
+    expect(json.result.resources[0].description).toBe(
+      'Data is a resource that contains special data.',
+    )
+    expect(json.result.resources[0].mimeType).toBe('text/plain')
+  })
+
+  it('should list prompts', async () => {
+    const request = new Request(`${restClient.serverURL}/api/mcp`, {
+      headers: {
+        Authorization: `Bearer ${testApiKey}`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'prompts/list',
+        params: {},
+      }),
+    })
+
+    const streamJSONString = await fetchStreamResponse(request)
+
+    const json = JSON.parse(streamJSONString)
+
+    expect(json).toBeDefined()
+    expect(json.id).toBe(1)
+    expect(json.jsonrpc).toBe('2.0')
+    expect(json.result).toBeDefined()
+    expect(json.result.prompts).toBeDefined()
+    expect(json.result.prompts).toHaveLength(1)
+    expect(json.result.prompts[0].name).toBe('echo')
+    expect(json.result.prompts[0].title).toBe('Echo Prompt')
+    expect(json.result.prompts[0].description).toBe('Creates a prompt to process a message')
+    expect(json.result.prompts[0].arguments).toBeDefined()
+    expect(json.result.prompts[0].arguments).toHaveLength(1)
+    expect(json.result.prompts[0].arguments[0].name).toBe('message')
+    expect(json.result.prompts[0].arguments[0].required).toBe(true)
   })
 })
