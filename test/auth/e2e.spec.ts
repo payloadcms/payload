@@ -182,13 +182,17 @@ describe('Auth', () => {
         await saveDocAndAssert(page, '#action-save')
       })
 
-      test('should protect the client config behind authentication', async () => {
+      test('should protect field schemas behind authentication', async () => {
         await logout(page, serverURL)
 
-        // This element is absolutely positioned and `opacity: 0`
+        // Inspect the page source (before authentication)
+        const loginPageRes = await page.goto(`${serverURL}/admin/login`)
+        const loginPageSource = await loginPageRes?.text()
+        expect(loginPageSource).not.toContain('shouldNotShowInClientConfigUnlessAuthenticated')
+
+        // Inspect the client config (before authentication)
         await expect(page.locator('#unauthenticated-client-config')).toBeAttached()
 
-        // Search for our uniquely identifiable field name
         await expect(
           page.locator('#unauthenticated-client-config', {
             hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
@@ -199,6 +203,7 @@ describe('Auth', () => {
 
         await page.goto(serverURL + '/admin')
 
+        // Inspect the client config (after authentication)
         await expect(page.locator('#authenticated-client-config')).toBeAttached()
 
         await expect(
@@ -206,6 +211,11 @@ describe('Auth', () => {
             hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
           }),
         ).toHaveCount(1)
+
+        // Inspect the page source (after authentication)
+        const dashboardPageRes = await page.goto(`${serverURL}/admin`)
+        const dashboardPageSource = await dashboardPageRes?.text()
+        expect(dashboardPageSource).toContain('shouldNotShowInClientConfigUnlessAuthenticated')
       })
 
       test('should allow change password', async () => {
