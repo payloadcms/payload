@@ -6,7 +6,12 @@ import { expect, test } from '@playwright/test'
 import { assertElementStaysVisible } from 'helpers/e2e/assertElementStaysVisible.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
-import { addArrayRowAsync, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
+import {
+  addArrayRow,
+  addArrayRowAsync,
+  duplicateArrayRow,
+  removeArrayRow,
+} from 'helpers/e2e/fields/array/index.js'
 import { addBlock } from 'helpers/e2e/fields/blocks/index.js'
 import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
@@ -312,22 +317,18 @@ test.describe('Form State', () => {
 
     // Now test array rows, as their merge logic is different
 
-    await page.locator('#field-array #array-row-0').isVisible()
+    await page.locator('#field-computedArray #computedArray-row-0').isVisible()
 
-    await removeArrayRow(page, { fieldName: 'array' })
+    await removeArrayRow(page, { fieldName: 'computedArray' })
 
-    await page.locator('#field-array .array-row-0').isHidden()
+    await page.locator('#field-computedArray #computedArray-row-0').isHidden()
 
     await saveDocAndAssert(page)
 
-    await expect(page.locator('#field-array #array-row-0')).toBeVisible()
+    await expect(page.locator('#field-computedArray #computedArray-row-0')).toBeVisible()
 
     await expect(
-      page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
-    ).toHaveValue('This is a computed value.')
-
-    await expect(
-      page.locator('#field-array #array-row-0 #field-array__0__defaultTextField'),
+      page.locator('#field-computedArray #computedArray-row-0 #field-computedArray__0__text'),
     ).toHaveValue('This is a computed value.')
   })
 
@@ -456,6 +457,34 @@ test.describe('Form State', () => {
     await titleField.fill('Test Title 2')
     await waitForAutoSaveToRunAndComplete(page)
     await expect(computedTitleField).toHaveValue('Test Title 2')
+  })
+
+  test('array and block rows and maintain consistent row IDs across duplication', async () => {
+    await page.goto(postsUrl.create)
+    await addArrayRow(page, { fieldName: 'array' })
+
+    const row0 = page.locator('#field-array #array-row-0')
+
+    await expect(row0.locator('#custom-array-row-label')).toHaveAttribute('data-id')
+
+    await expect(row0.locator('#field-array__0__id')).toHaveValue(
+      (await row0.locator('#custom-array-row-label').getAttribute('data-id'))!,
+    )
+
+    await duplicateArrayRow(page, { fieldName: 'array' })
+
+    const row1 = page.locator('#field-array #array-row-1')
+
+    await expect(row1.locator('#custom-array-row-label')).toHaveAttribute('data-id')
+
+    await expect(row1.locator('#custom-array-row-label')).not.toHaveAttribute(
+      'data-id',
+      (await row0.locator('#custom-array-row-label').getAttribute('data-id'))!,
+    )
+
+    await expect(row1.locator('#field-array__1__id')).toHaveValue(
+      (await row1.locator('#custom-array-row-label').getAttribute('data-id'))!,
+    )
   })
 
   describe('Throttled tests', () => {

@@ -7,13 +7,14 @@ import React, { useEffect } from 'react'
 
 import { useAllFormFields } from '../../../forms/Form/context.js'
 import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
+import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { DeviceContainer } from '../Device/index.js'
+import './index.scss'
 import { IFrame } from '../IFrame/index.js'
 import { LivePreviewToolbar } from '../Toolbar/index.js'
-import './index.scss'
 
 const baseClass = 'live-preview-window'
 
@@ -21,7 +22,6 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   const {
     appIsReady,
     breakpoint,
-    fieldSchemaJSON,
     iframeHasLoaded,
     iframeRef,
     isLivePreviewing,
@@ -35,10 +35,8 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
 
   const { mostRecentUpdate } = useDocumentEvents()
 
-  const prevWindowType =
-    React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>(undefined)
-
   const [formState] = useAllFormFields()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   // For client-side apps, send data through `window.postMessage`
   // The preview could either be an iframe embedded on the page
@@ -53,20 +51,16 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     if (formState && window && 'postMessage' in window && appIsReady) {
       const values = reduceFieldsToValues(formState, true)
 
-      // To reduce on large `postMessage` payloads, only send `fieldSchemaToJSON` one time
-      // To do this, the underlying JS function maintains a cache of this value
-      // So we need to send it through each time the window type changes
-      // But only once per window type change, not on every render, because this is a potentially large obj
-      const shouldSendSchema =
-        !prevWindowType.current || prevWindowType.current !== previewWindowType
-
-      prevWindowType.current = previewWindowType
+      if (!values.id) {
+        values.id = id
+      }
 
       const message = {
         type: 'payload-live-preview',
+        collectionSlug,
         data: values,
         externallyUpdatedRelationship: mostRecentUpdate,
-        fieldSchemaJSON: shouldSendSchema ? fieldSchemaJSON : undefined,
+        globalSlug,
         locale: locale.code,
       }
 
@@ -83,13 +77,15 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   }, [
     formState,
     url,
+    collectionSlug,
+    globalSlug,
     iframeHasLoaded,
+    id,
     previewWindowType,
     popupRef,
     appIsReady,
     iframeRef,
     setIframeHasLoaded,
-    fieldSchemaJSON,
     mostRecentUpdate,
     locale,
     isLivePreviewing,

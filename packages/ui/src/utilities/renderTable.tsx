@@ -3,7 +3,6 @@ import type {
   ClientConfig,
   ClientField,
   CollectionConfig,
-  CollectionPreferences,
   Column,
   ColumnPreference,
   Field,
@@ -16,7 +15,7 @@ import type {
 } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
+import { fieldAffectsData, fieldIsHiddenOrDisabled } from 'payload/shared'
 import React from 'react'
 
 import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumnState/index.js'
@@ -37,7 +36,6 @@ import {
 } from '../exports/client/index.js'
 import { filterFields } from '../providers/TableColumns/buildColumnState/filterFields.js'
 import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'
-import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'
 
 export const renderFilters = (
   fields: Field[],
@@ -69,7 +67,7 @@ export const renderTable = ({
   clientConfig,
   collectionConfig,
   collections,
-  columns: columnsFromArgs,
+  columns,
   customCellProps,
   data,
   enableRowSelections,
@@ -90,7 +88,7 @@ export const renderTable = ({
   clientConfig?: ClientConfig
   collectionConfig?: SanitizedCollectionConfig
   collections?: string[]
-  columns?: CollectionPreferences['columns']
+  columns: ColumnPreference[]
   customCellProps?: Record<string, unknown>
   data?: PaginatedDocs | undefined
   drawerSlug?: string
@@ -123,10 +121,12 @@ export const renderTable = ({
   if (isPolymorphic) {
     clientFields = []
     serverFields = []
+
     for (const collection of collections) {
       const clientCollectionConfig = clientConfig.collections.find(
         (each) => each.slug === collection,
       )
+
       for (const field of filterFields(clientCollectionConfig.fields)) {
         if (fieldAffectsData(field)) {
           if (clientFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
@@ -138,6 +138,7 @@ export const renderTable = ({
       }
 
       const serverCollectionConfig = payload.collections[collection].config
+
       for (const field of filterFields(serverCollectionConfig.fields)) {
         if (fieldAffectsData(field)) {
           if (serverFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
@@ -149,24 +150,6 @@ export const renderTable = ({
       }
     }
   }
-
-  const columns: ColumnPreference[] = columnsFromArgs
-    ? columnsFromArgs?.filter((column) =>
-        flattenTopLevelFields(clientFields, {
-          i18n,
-          keepPresentationalFields: true,
-          moveSubFieldsToTop: true,
-        })?.some((field) => {
-          const accessor =
-            'accessor' in field ? field.accessor : 'name' in field ? field.name : undefined
-          return accessor === column.accessor
-        }),
-      )
-    : getInitialColumns(
-        isPolymorphic ? clientFields : filterFields(clientFields),
-        useAsTitle,
-        isPolymorphic ? [] : clientCollectionConfig?.admin?.defaultColumns,
-      )
 
   const sharedArgs: Pick<
     BuildColumnStateArgs,

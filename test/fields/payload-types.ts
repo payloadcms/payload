@@ -811,6 +811,7 @@ export interface ConditionalLogic {
   id: string;
   text: string;
   toggleField?: boolean | null;
+  fieldWithDocIDCondition?: string | null;
   fieldWithCondition?: string | null;
   fieldWithOperationCondition?: string | null;
   customFieldWithField?: string | null;
@@ -2452,6 +2453,7 @@ export interface CollapsibleFieldsSelect<T extends boolean = true> {
 export interface ConditionalLogicSelect<T extends boolean = true> {
   text?: T;
   toggleField?: T;
+  fieldWithDocIDCondition?: T;
   fieldWithCondition?: T;
   fieldWithOperationCondition?: T;
   customFieldWithField?: T;

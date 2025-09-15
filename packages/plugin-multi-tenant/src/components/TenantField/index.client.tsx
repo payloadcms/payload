@@ -53,7 +53,7 @@ export const TenantField = (args: Props) => {
     }
   }, [args.unique, options, selectedTenantID, setTenant, value, setEntityType, entityType])
 
-  if (options.length > 1) {
+  if (options.length > 1 && !args.field.admin?.hidden && !args.field.hidden) {
     return (
       <>
         <div className={baseClass}>
@@ -64,7 +64,7 @@ export const TenantField = (args: Props) => {
                 ...args.field,
                 required: true,
               }}
-              readOnly={args.readOnly || args.unique}
+              readOnly={args.readOnly || args.field.admin?.readOnly || args.unique}
             />
           </div>
         </div>

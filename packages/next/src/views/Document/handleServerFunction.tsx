@@ -72,6 +72,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     config,
     i18n,
     importMap: req.payload.importMap,
+    user,
   })
 
   let preferences: DocumentPreferences

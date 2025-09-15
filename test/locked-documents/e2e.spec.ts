@@ -630,6 +630,8 @@ describe('Locked Documents', () => {
     let lockedDoc: PayloadLockedDocument
     let expiredTestDoc: Test
     let expiredTestLockedDoc: PayloadLockedDocument
+    let expiredPostDoc: Post
+    let expiredPostLockedDoc: PayloadLockedDocument
 
     beforeAll(async () => {
       postDoc = await createPostDoc({
@@ -678,6 +680,27 @@ describe('Locked Documents', () => {
           },
         },
       })
+
+      expiredPostDoc = await createPostDoc({
+        text: 'expired post doc',
+      })
+
+      expiredPostLockedDoc = await payload.create({
+        collection: lockedDocumentCollection,
+        data: {
+          document: {
+            relationTo: 'posts',
+            value: expiredPostDoc.id,
+          },
+          globalSlug: undefined,
+          user: {
+            relationTo: 'users',
+            value: user2.id,
+          },
+          createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+          updatedAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+        },
+      })
     })
 
     afterAll(async () => {
@@ -704,6 +727,16 @@ describe('Locked Documents', () => {
       await payload.delete({
         collection: 'tests',
         id: expiredTestDoc.id,
+      })
+
+      await payload.delete({
+        collection: lockedDocumentCollection,
+        id: expiredPostLockedDoc.id,
+      })
+
+      await payload.delete({
+        collection: 'posts',
+        id: expiredPostDoc.id,
       })
     })
 
@@ -739,6 +772,20 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeHidden()
     })
 
+    test('expired lock should render editable fields (no read-only)', async () => {
+      await page.goto(postsUrl.edit(expiredPostDoc.id))
+
+      await expect(page.locator('#field-text')).toBeEnabled()
+
+      const richTextRoot = page
+        .locator('.rich-text-lexical .ContentEditable__root[data-lexical-editor="true"]')
+        .first()
+      await expect(richTextRoot).toBeVisible()
+
+      // ensure richtext is editable
+      await expect(richTextRoot).toHaveAttribute('contenteditable', 'true')
+    })
+
     test('should show fields in read-only if incoming user views locked doc in read-only mode', async () => {
       await page.goto(postsUrl.edit(postDoc.id))
 
@@ -755,6 +802,22 @@ describe('Locked Documents', () => {
 
       // fields should be readOnly / disabled
       await expect(page.locator('#field-text')).toBeDisabled()
+
+      const richTextRoot = page
+        .locator('.rich-text-lexical .ContentEditable__root[data-lexical-editor="true"]')
+        .first()
+
+      // ensure editor is present
+      await expect(richTextRoot).toBeVisible()
+
+      // core read-only checks
+      await expect(richTextRoot).toHaveAttribute('contenteditable', 'false')
+      await expect(richTextRoot).toHaveAttribute('aria-readonly', 'true')
+
+      // wrapper has read-only class (nice-to-have)
+      await expect(page.locator('.rich-text-lexical').first()).toHaveClass(
+        /rich-text-lexical--read-only/,
+      )
     })
   })
 

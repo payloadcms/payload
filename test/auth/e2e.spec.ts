@@ -2,6 +2,8 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
+import { login } from 'helpers/e2e/auth/login.js'
+import { logout } from 'helpers/e2e/auth/logout.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -15,7 +17,6 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
-  login,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -52,6 +53,7 @@ describe('Auth', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
   })
+
   describe('create first user', () => {
     beforeAll(async () => {
       await reInitializeDB({
@@ -124,6 +126,33 @@ describe('Auth', () => {
         .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
         .not.toContain('create-first-user')
     })
+
+    test('richText field should should not be readOnly in create first user view', async () => {
+      const {
+        admin: {
+          routes: { createFirstUser: createFirstUserRoute },
+        },
+        routes: { admin: adminRoute },
+      } = getRoutes({})
+
+      // wait for create first user route
+      await page.goto(serverURL + `${adminRoute}${createFirstUserRoute}`)
+
+      await expect(page.locator('.create-first-user')).toBeVisible()
+
+      await waitForVisibleAuthFields()
+
+      const richTextRoot = page
+        .locator('.rich-text-lexical .ContentEditable__root[data-lexical-editor="true"]')
+        .first()
+
+      // ensure editor is present
+      await expect(richTextRoot).toBeVisible()
+
+      // core read-only checks
+      await expect(richTextRoot).toHaveAttribute('contenteditable', 'true')
+      await expect(richTextRoot).not.toHaveAttribute('aria-readonly', 'true')
+    })
   })
 
   describe('non create first user', () => {
@@ -151,6 +180,42 @@ describe('Auth', () => {
         await page.locator('#field-password').fill(devUser.password)
         await page.locator('#field-confirm-password').fill(devUser.password)
         await saveDocAndAssert(page, '#action-save')
+      })
+
+      test('should protect field schemas behind authentication', async () => {
+        await logout(page, serverURL)
+
+        // Inspect the page source (before authentication)
+        const loginPageRes = await page.goto(`${serverURL}/admin/login`)
+        const loginPageSource = await loginPageRes?.text()
+        expect(loginPageSource).not.toContain('shouldNotShowInClientConfigUnlessAuthenticated')
+
+        // Inspect the client config (before authentication)
+        await expect(page.locator('#unauthenticated-client-config')).toBeAttached()
+
+        await expect(
+          page.locator('#unauthenticated-client-config', {
+            hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
+          }),
+        ).toHaveCount(0)
+
+        await login({ page, serverURL })
+
+        await page.goto(serverURL + '/admin')
+
+        // Inspect the client config (after authentication)
+        await expect(page.locator('#authenticated-client-config')).toBeAttached()
+
+        await expect(
+          page.locator('#authenticated-client-config', {
+            hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
+          }),
+        ).toHaveCount(1)
+
+        // Inspect the page source (after authentication)
+        const dashboardPageRes = await page.goto(`${serverURL}/admin`)
+        const dashboardPageSource = await dashboardPageRes?.text()
+        expect(dashboardPageSource).toContain('shouldNotShowInClientConfigUnlessAuthenticated')
       })
 
       test('should allow change password', async () => {
@@ -358,6 +423,68 @@ describe('Auth', () => {
         await expect(page.locator('.auth-fields')).toBeHidden()
 
         await saveDocAndAssert(page)
+      })
+
+      test('ensure `?redirect=` param is injected into the URL and handled properly after login', async () => {
+        const users = await payload.find({
+          collection: slug,
+          limit: 1,
+        })
+
+        const userDocumentRoute = `${serverURL}/admin/collections/users/${users?.docs?.[0]?.id}`
+
+        await logout(page, serverURL)
+
+        // This will send the user back to the login page with a `?redirect=` param
+        await page.goto(userDocumentRoute)
+
+        await expect
+          .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+          .toContain('/admin/login?redirect=')
+
+        // Important: do not use the login helper here, as this may clear the redirect param
+        await expect(page.locator('#field-email')).toBeVisible()
+        await expect(page.locator('#field-password')).toBeVisible()
+
+        await page.locator('.form-submit > button').click()
+
+        // Expect to be redirected to the correct page
+        await expect
+          .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+          .toBe(userDocumentRoute)
+
+        // Previously, this would crash the page with a "Cannot read properties of undefined (reading 'match')" error
+        await expect(page.locator('#field-roles')).toBeVisible()
+
+        // Now do this again, only with a page that is not in the user's collection
+        const notInUserCollection = await payload.create({
+          collection: 'relationsCollection',
+          data: {},
+        })
+
+        await logout(page, serverURL)
+
+        await page.goto(
+          `${serverURL}/admin/collections/relationsCollection/${notInUserCollection.id}`,
+        )
+
+        await expect
+          .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+          .toContain('/admin/login?redirect=')
+
+        // Important: do not use the login helper here, as this may clear the redirect param
+        await expect(page.locator('#field-email')).toBeVisible()
+        await expect(page.locator('#field-password')).toBeVisible()
+
+        await page.locator('.form-submit > button').click()
+
+        // Expect to be redirected to the correct page
+        await expect
+          .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+          .toBe(`${serverURL}/admin/collections/relationsCollection/${notInUserCollection.id}`)
+
+        // Previously, this would crash the page with a "Cannot read properties of null (reading 'fields')" error
+        await expect(page.locator('#field-rel')).toBeVisible()
       })
     })
   })

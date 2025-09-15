@@ -90,6 +90,7 @@ export const renderListHandler: ServerFunction<
     config,
     i18n,
     importMap: payload.importMap,
+    user,
   })
 
   const preferencesKey = `collection-${collectionSlug}`

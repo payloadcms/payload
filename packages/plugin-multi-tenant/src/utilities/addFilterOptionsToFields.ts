@@ -1,9 +1,12 @@
-import type { Config, Field, RelationshipField, SanitizedConfig } from 'payload'
+import type { Block, Config, Field, RelationshipField, SanitizedConfig, TypedUser } from 'payload'
+
+import type { MultiTenantPluginConfig } from '../types.js'
 
 import { defaults } from '../defaults.js'
 import { filterDocumentsByTenants } from '../filters/filterDocumentsByTenants.js'
 
-type AddFilterOptionsToFieldsArgs = {
+type AddFilterOptionsToFieldsArgs<ConfigType = unknown> = {
+  blockReferencesWithFilters: string[]
   config: Config | SanitizedConfig
   fields: Field[]
   tenantEnabledCollectionSlugs: string[]
@@ -12,9 +15,13 @@ type AddFilterOptionsToFieldsArgs = {
   tenantsArrayFieldName: string
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
+  userHasAccessToAllTenants: Required<
+    MultiTenantPluginConfig<ConfigType>
+  >['userHasAccessToAllTenants']
 }
 
-export function addFilterOptionsToFields({
+export function addFilterOptionsToFields<ConfigType = unknown>({
+  blockReferencesWithFilters,
   config,
   fields,
   tenantEnabledCollectionSlugs,
@@ -23,7 +30,8 @@ export function addFilterOptionsToFields({
   tenantsArrayFieldName = defaults.tenantsArrayFieldName,
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
-}: AddFilterOptionsToFieldsArgs) {
+  userHasAccessToAllTenants,
+}: AddFilterOptionsToFieldsArgs<ConfigType>) {
   fields.forEach((field) => {
     if (field.type === 'relationship') {
       /**
@@ -44,6 +52,7 @@ export function addFilterOptionsToFields({
             tenantsArrayFieldName,
             tenantsArrayTenantFieldName,
             tenantsCollectionSlug,
+            userHasAccessToAllTenants,
           })
         }
       } else {
@@ -61,6 +70,7 @@ export function addFilterOptionsToFields({
               tenantsArrayFieldName,
               tenantsArrayTenantFieldName,
               tenantsCollectionSlug,
+              userHasAccessToAllTenants,
             })
           }
         })
@@ -74,6 +84,7 @@ export function addFilterOptionsToFields({
       field.type === 'group'
     ) {
       addFilterOptionsToFields({
+        blockReferencesWithFilters,
         config,
         fields: field.fields,
         tenantEnabledCollectionSlugs,
@@ -82,19 +93,27 @@ export function addFilterOptionsToFields({
         tenantsArrayFieldName,
         tenantsArrayTenantFieldName,
         tenantsCollectionSlug,
+        userHasAccessToAllTenants,
       })
     }
 
     if (field.type === 'blocks') {
       ;(field.blockReferences ?? field.blocks).forEach((_block) => {
-        const block =
-          typeof _block === 'string'
-            ? // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
-              config?.blocks?.find((b) => b.slug === _block)
-            : _block
+        let block: Block | undefined
+
+        if (typeof _block === 'string') {
+          if (blockReferencesWithFilters.includes(_block)) {
+            return
+          }
+          block = config?.blocks?.find((b) => b.slug === _block)
+          blockReferencesWithFilters.push(_block)
+        } else {
+          block = _block
+        }
 
         if (block?.fields) {
           addFilterOptionsToFields({
+            blockReferencesWithFilters,
             config,
             fields: block.fields,
             tenantEnabledCollectionSlugs,
@@ -103,6 +122,7 @@ export function addFilterOptionsToFields({
             tenantsArrayFieldName,
             tenantsArrayTenantFieldName,
             tenantsCollectionSlug,
+            userHasAccessToAllTenants,
           })
         }
       })
@@ -111,6 +131,7 @@ export function addFilterOptionsToFields({
     if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         addFilterOptionsToFields({
+          blockReferencesWithFilters,
           config,
           fields: tab.fields,
           tenantEnabledCollectionSlugs,
@@ -119,28 +140,33 @@ export function addFilterOptionsToFields({
           tenantsArrayFieldName,
           tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
+          userHasAccessToAllTenants,
         })
       })
     }
   })
 }
 
-type AddFilterArgs = {
+type AddFilterArgs<ConfigType = unknown> = {
   field: RelationshipField
   tenantEnabledCollectionSlugs: string[]
   tenantFieldName: string
   tenantsArrayFieldName: string
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
+  userHasAccessToAllTenants: Required<
+    MultiTenantPluginConfig<ConfigType>
+  >['userHasAccessToAllTenants']
 }
-function addFilter({
+function addFilter<ConfigType = unknown>({
   field,
   tenantEnabledCollectionSlugs,
   tenantFieldName,
   tenantsArrayFieldName = defaults.tenantsArrayFieldName,
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
-}: AddFilterArgs) {
+  userHasAccessToAllTenants,
+}: AddFilterArgs<ConfigType>) {
   // User specified filter
   const originalFilter = field.filterOptions
   field.filterOptions = async (args) => {
@@ -164,6 +190,7 @@ function addFilter({
       tenantsArrayFieldName,
       tenantsArrayTenantFieldName,
       tenantsCollectionSlug,
+      userHasAccessToAllTenants,
     })
 
     // If the tenant filter returns null, meaning no tenant filter, just use the original filter

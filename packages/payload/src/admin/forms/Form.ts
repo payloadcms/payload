@@ -58,9 +58,10 @@ export type FieldState = {
   filterOptions?: FilterOptionsResult
   initialValue?: unknown
   /**
-   * @experimental - Note: this property is experimental and may change in the future. Use at your own discretion.
    * Every time a field is changed locally, this flag is set to true. Prevents form state from server from overwriting local changes.
    * After merging server form state, this flag is reset.
+   *
+   * @experimental This property is experimental and may change in the future. Use at your own discretion.
    */
   isModified?: boolean
   /**
@@ -131,6 +132,14 @@ export type BuildFormStateArgs = {
   returnLockStatus?: boolean
   schemaPath: string
   select?: SelectType
+  /**
+   * When true, sets `user: true` when calling `getClientConfig`.
+   * This will retrieve the client config in its entirety, even when unauthenticated.
+   * For example, the create-first-user view needs the entire config, but there is no user yet.
+   *
+   * @experimental This property is experimental and may change in the future. Use at your own discretion.
+   */
+  skipClientConfigAuth?: boolean
   skipValidation?: boolean
   updateLastEdited?: boolean
 } & (
