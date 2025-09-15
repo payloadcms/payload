@@ -119,16 +119,7 @@ export const handleGroupBy = async ({
       }
     }
 
-    // Remove duplicate groups (same relationship appearing in multiple documents)
-    const seenRelationships = new Set()
-    processedValues = flattenedValues.filter((value) => {
-      const relationshipKey = getRelationshipKey(value[groupByFieldPath])
-      if (seenRelationships.has(relationshipKey)) {
-        return false
-      }
-      seenRelationships.add(relationshipKey)
-      return true
-    })
+    processedValues = flattenedValues
   }
 
   const data = {
