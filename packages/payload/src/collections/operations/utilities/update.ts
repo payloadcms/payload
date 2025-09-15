@@ -301,7 +301,6 @@ export const updateDocument = async <
       data: dataToUpdate,
       locale,
       req,
-      select,
     })
   }
 
@@ -321,7 +320,6 @@ export const updateDocument = async <
       payload,
       publishSpecificLocale,
       req,
-      select,
       snapshot: versionSnapshotResult,
     })
   }
