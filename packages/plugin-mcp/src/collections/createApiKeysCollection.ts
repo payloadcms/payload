@@ -115,7 +115,7 @@ const addEnabledCollectionTools = (collections: PluginMCPServerConfig['collectio
 export const createAPIKeysCollection = (
   collections: PluginMCPServerConfig['collections'],
   customTools: Array<{ description: string; name: string }> = [],
-  experimentalTools: NonNullable<PluginMCPServerConfig['_experimental']>['tools'] = {},
+  experimentalTools: NonNullable<PluginMCPServerConfig['experimental']>['tools'] = {},
 ): CollectionConfig => {
   const customToolsFields = customTools.map((tool) => {
     const camelCasedName = toCamelCase(tool.name)
@@ -194,7 +194,7 @@ export const createAPIKeysCollection = (
                 ...(experimentalTools?.collections?.enabled
                   ? [
                       {
-                        name: '_experimental_collections',
+                        name: 'collections',
                         type: 'group' as const,
                         fields: [
                           {
@@ -240,7 +240,7 @@ export const createAPIKeysCollection = (
                 ...(experimentalTools?.jobs?.enabled
                   ? [
                       {
-                        name: '_experimental_jobs',
+                        name: 'jobs',
                         type: 'group' as const,
                         fields: [
                           {
@@ -277,7 +277,7 @@ export const createAPIKeysCollection = (
                 ...(experimentalTools?.config?.enabled
                   ? [
                       {
-                        name: '_experimental_config',
+                        name: 'config',
                         type: 'group' as const,
                         fields: [
                           {
@@ -305,7 +305,7 @@ export const createAPIKeysCollection = (
                 ...(experimentalTools?.auth?.enabled
                   ? [
                       {
-                        name: '_experimental_auth',
+                        name: 'auth',
                         type: 'group' as const,
                         fields: [
                           {

@@ -71,7 +71,7 @@ export interface Config {
     users: User;
     media: Media;
     posts: Post;
-    'example-products': ExampleProduct;
+    products: Product;
     'payload-mcp-tool-api-key': PayloadMcpToolApiKey;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -82,7 +82,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
-    'example-products': ExampleProductsSelect<false> | ExampleProductsSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
     'payload-mcp-tool-api-key': PayloadMcpToolApiKeySelect<false> | PayloadMcpToolApiKeySelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -211,9 +211,9 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "example-products".
+ * via the `definition` "products".
  */
-export interface ExampleProduct {
+export interface Product {
   id: string;
   title?: string | null;
   description?: string | null;
@@ -235,21 +235,21 @@ export interface PayloadMcpToolApiKey {
    * The purpose of the API key.
    */
   description?: string | null;
-  exampleProducts?: {
+  products?: {
     /**
-     * Allow clients to find example-products.
+     * Allow clients to find products.
      */
     find?: boolean | null;
     /**
-     * Allow clients to create example-products.
+     * Allow clients to create products.
      */
     create?: boolean | null;
     /**
-     * Allow clients to update example-products.
+     * Allow clients to update products.
      */
     update?: boolean | null;
     /**
-     * Allow clients to delete example-products.
+     * Allow clients to delete products.
      */
     delete?: boolean | null;
   };
@@ -279,7 +279,7 @@ export interface PayloadMcpToolApiKey {
      */
     diceRoll?: boolean | null;
   };
-  _experimental_collections?: {
+  collections?: {
     /**
      * Allow LLMs to find and list Payload collections with optional content and document counts.
      */
@@ -297,7 +297,7 @@ export interface PayloadMcpToolApiKey {
      */
     delete?: boolean | null;
   };
-  _experimental_jobs?: {
+  jobs?: {
     /**
      * Allow LLMs to create new Payload jobs (tasks and workflows) with custom schemas and configuration.
      */
@@ -311,7 +311,7 @@ export interface PayloadMcpToolApiKey {
      */
     update?: boolean | null;
   };
-  _experimental_config?: {
+  config?: {
     /**
      * Allow LLMs to read and display a Payload configuration file.
      */
@@ -321,7 +321,7 @@ export interface PayloadMcpToolApiKey {
      */
     update?: boolean | null;
   };
-  _experimental_auth?: {
+  auth?: {
     /**
      * Allow LLMs to check authentication status for a user by setting custom headers. (e.g. {"Authorization": "Bearer <token>"})
      */
@@ -347,6 +347,10 @@ export interface PayloadMcpToolApiKey {
      */
     unlock?: boolean | null;
   };
+  /**
+   * This field added by overrideApiKeyCollection
+   */
+  override?: string | null;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -373,8 +377,8 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
-        relationTo: 'example-products';
-        value: string | ExampleProduct;
+        relationTo: 'products';
+        value: string | Product;
       } | null)
     | ({
         relationTo: 'payload-mcp-tool-api-key';
@@ -488,9 +492,9 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "example-products_select".
+ * via the `definition` "products_select".
  */
-export interface ExampleProductsSelect<T extends boolean = true> {
+export interface ProductsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   price?: T;
@@ -504,7 +508,7 @@ export interface ExampleProductsSelect<T extends boolean = true> {
 export interface PayloadMcpToolApiKeySelect<T extends boolean = true> {
   label?: T;
   description?: T;
-  exampleProducts?:
+  products?:
     | T
     | {
         find?: T;
@@ -529,7 +533,7 @@ export interface PayloadMcpToolApiKeySelect<T extends boolean = true> {
     | {
         diceRoll?: T;
       };
-  _experimental_collections?:
+  collections?:
     | T
     | {
         find?: T;
@@ -537,20 +541,20 @@ export interface PayloadMcpToolApiKeySelect<T extends boolean = true> {
         update?: T;
         delete?: T;
       };
-  _experimental_jobs?:
+  jobs?:
     | T
     | {
         create?: T;
         run?: T;
         update?: T;
       };
-  _experimental_config?:
+  config?:
     | T
     | {
         find?: T;
         update?: T;
       };
-  _experimental_auth?:
+  auth?:
     | T
     | {
         auth?: T;
@@ -560,6 +564,7 @@ export interface PayloadMcpToolApiKeySelect<T extends boolean = true> {
         forgotPassword?: T;
         unlock?: T;
       };
+  override?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
