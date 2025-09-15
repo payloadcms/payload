@@ -99,11 +99,11 @@ export const bin = async () => {
   }
 
   if (script === 'generate:types') {
-    return generateTypes(config)
+    return generateTypes(config).then(() => process.exit(0))
   }
 
   if (script === 'generate:importmap') {
-    return generateImportMap(config)
+    return generateImportMap(config).then(() => process.exit(0))
   }
 
   if (script === 'jobs:run') {
