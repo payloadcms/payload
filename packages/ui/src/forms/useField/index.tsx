@@ -226,7 +226,9 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
 }
 
 /**
- * Context to allow providing useField value for fields directly, if managed outside the form
+ * Context to allow providing useField value for fields directly, if managed outside the Form
+ *
+ * @experimental
  */
 export const FieldContext = React.createContext<FieldType<unknown> | undefined>(undefined)
 
@@ -238,27 +240,28 @@ export const FieldContext = React.createContext<FieldType<unknown> | undefined>(
 export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   const pathFromContext = useFieldPath()
 
-  const ctx = React.use(FieldContext) as FieldType<TValue> | undefined
+  const fieldContext = React.use(FieldContext) as FieldType<TValue> | undefined
 
   // Lock the mode on first render so hook order is stable forever. This ensures
   // that hooks are called in the same order each time a component renders => should
   // not break the rule of hooks.
-  const modeRef = React.useRef<'context' | 'impl' | null>(null)
-  if (modeRef.current === null) {
+  const hasFieldContext = React.useRef<false | null | true>(null)
+  if (hasFieldContext.current === null) {
     // Use field context, if a field context exists **and** the path matches. If the path
     // does not match, this could be the field context of a parent field => there likely is
-    // a nested <Form /> we should use instead => 'impl'
+    // a nested <Form /> we should use instead => 'form'
     const currentPath = options?.path || pathFromContext || options.potentiallyStalePath
 
-    modeRef.current = ctx && currentPath && ctx.path === currentPath ? 'context' : 'impl'
+    hasFieldContext.current =
+      fieldContext && currentPath && fieldContext.path === currentPath ? true : false
   }
 
-  if (modeRef.current === 'context') {
-    if (!ctx) {
+  if (hasFieldContext.current === true) {
+    if (!fieldContext) {
       // Provider was removed after mount. That violates hook guarantees.
       throw new Error('FieldContext was removed after mount. This breaks hook ordering.')
     }
-    return ctx
+    return fieldContext
   }
 
   // We intentionally guard this hook call with a mode that is fixed on first render.
