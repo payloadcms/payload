@@ -59,8 +59,8 @@ export function adjustAffectedTreePaths({
       },
     )
   } else {
-    const slugPathToRemove = previousDocWithLocales[slugPathFieldName] // A/B/C
-    const slugPathToAdd = newDoc[slugPathFieldName] // E/F/G
+    const slugPathToRemove = previousDocWithLocales[slugPathFieldName]
+    const slugPathToAdd = newDoc[slugPathFieldName]
     const titlePathToRemove = previousDocWithLocales[titlePathFieldName]
     const titlePathToAdd = newDoc[titlePathFieldName]
 

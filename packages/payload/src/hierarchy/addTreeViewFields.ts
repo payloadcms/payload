@@ -216,7 +216,7 @@ export function addTreeViewFields({
           affectedDocs.docs.forEach((affectedDoc) => {
             const newTreePaths = adjustAffectedTreePaths({
               affectedDoc,
-              newDoc: doc,
+              newDoc: documentAfterUpdate,
               previousDocWithLocales,
               slugPathFieldName,
               titlePathFieldName,
