@@ -131,20 +131,6 @@ export const handleGroupBy = async ({
     })
   }
 
-  // Sort to show populated values first, null values last
-  processedValues = processedValues.sort((a, b) => {
-    const valueA = a[groupByFieldPath]
-    const valueB = b[groupByFieldPath]
-
-    if (valueA === null && valueB !== null) {
-      return 1
-    }
-    if (valueB === null && valueA !== null) {
-      return -1
-    }
-    return 0
-  })
-
   const data = {
     ...distinct,
     docs: processedValues?.map(() => ({})) || [],
