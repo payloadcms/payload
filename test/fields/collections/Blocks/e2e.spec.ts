@@ -715,8 +715,8 @@ describe('Block fields', () => {
       // There should ONLY be block1 and block2 available
 
       await expect(labels).toHaveCount(2)
-      await expect(labels.nth(0)).toHaveText('Block1')
-      await expect(labels.nth(1)).toHaveText('Block2')
+      await expect(labels.nth(0)).toHaveText('Block A')
+      await expect(labels.nth(1)).toHaveText('Block B')
     })
 
     test('ensure dynamic filterOptions are respected', async () => {

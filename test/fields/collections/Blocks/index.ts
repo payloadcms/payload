@@ -529,40 +529,6 @@ export const BlockFields: CollectionConfig = {
       },
     },
     {
-      name: 'blocksWithFilterOptions',
-      type: 'blocks',
-      filterOptions: ['block1', 'block2'],
-      blocks: [
-        {
-          slug: 'block1',
-          fields: [
-            {
-              type: 'text',
-              name: 'block1Text',
-            },
-          ],
-        },
-        {
-          slug: 'block2',
-          fields: [
-            {
-              type: 'text',
-              name: 'block2Text',
-            },
-          ],
-        },
-        {
-          slug: 'block3',
-          fields: [
-            {
-              type: 'text',
-              name: 'block3Text',
-            },
-          ],
-        },
-      ],
-    },
-    {
       name: 'blocksWithDynamicFilterOptions',
       type: 'blocks',
       filterOptions: ({ siblingData: _siblingData, data }) => {
@@ -595,6 +561,40 @@ export const BlockFields: CollectionConfig = {
         },
         {
           slug: 'block3',
+          fields: [
+            {
+              type: 'text',
+              name: 'block3Text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'blocksWithFilterOptions',
+      type: 'blocks',
+      filterOptions: ['blockA', 'blockB'],
+      blocks: [
+        {
+          slug: 'blockA',
+          fields: [
+            {
+              type: 'text',
+              name: 'block1Text',
+            },
+          ],
+        },
+        {
+          slug: 'blockB',
+          fields: [
+            {
+              type: 'text',
+              name: 'block2Text',
+            },
+          ],
+        },
+        {
+          slug: 'blockC',
           fields: [
             {
               type: 'text',
