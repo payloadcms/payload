@@ -13,6 +13,12 @@ export const findOneHandler: PayloadHandler = async (req) => {
   const globalConfig = getRequestGlobal(req)
   const { data, searchParams } = req
   const depth = data ? data.depth : searchParams.get('depth')
+  const flattenLocales = data
+    ? data.flattenLocales
+    : searchParams.has('flattenLocales')
+      ? searchParams.get('flattenLocales') === 'true'
+      : // flattenLocales should be undfined if not provided, so that the default (true) is applied in the operation
+        undefined
 
   const result = await findOneOperation({
     slug: globalConfig.slug,
@@ -23,6 +29,7 @@ export const findOneHandler: PayloadHandler = async (req) => {
         : undefined,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: data ? data.draft : searchParams.get('draft') === 'true',
+    flattenLocales,
     globalConfig,
     populate: sanitizePopulateParam(req.query.populate),
     req,

@@ -36,15 +36,17 @@ let payload: PayloadTestSDK<Config>
 
 import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
 import { devUser } from 'credentials.js'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
-import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
+import {
+  openListColumns,
+  reorderColumns,
+  sortColumn,
+  toggleColumn,
+  waitForColumnInURL,
+} from 'helpers/e2e/columns/index.js'
+import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
 import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
-import { openListColumns } from 'helpers/e2e/openListColumns.js'
-import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { sortColumn } from 'helpers/e2e/sortColumn.js'
-import { toggleColumn, waitForColumnInURL } from 'helpers/e2e/toggleColumn.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from 'helpers/e2e/toggleListDrawer.js'
 import path from 'path'
@@ -53,9 +55,8 @@ import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 
-import { reorderColumns } from '../../../helpers/e2e/reorderColumns.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -719,7 +720,6 @@ describe('List View', () => {
         page,
         fieldLabel: 'Tab 1 > Title',
         operatorLabel: 'equals',
-        skipValueInput: true,
       })
 
       const valueInput = whereBuilder.locator('.condition__value >> input')
@@ -857,7 +857,6 @@ describe('List View', () => {
         page,
         fieldLabel: 'Self Relation',
         operatorLabel: 'equals',
-        skipValueInput: true,
       })
 
       const valueField = whereBuilder.locator('.condition__value')

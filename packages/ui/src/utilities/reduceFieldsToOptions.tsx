@@ -19,8 +19,8 @@ type ReduceFieldOptionsArgs = {
 }
 
 /**
- * Reduces a field map to a flat array of fields with labels and values.
- * Used in the WhereBuilder component to render the fields in the dropdown.
+ * Transforms a fields schema into a flattened array of fields with labels and values.
+ * Used in the `WhereBuilder` component to render the fields in the dropdown.
  */
 export const reduceFieldsToOptions = ({
   fields,
