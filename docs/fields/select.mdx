@@ -68,6 +68,47 @@ _\* An asterisk denotes that a property is required._
   used as a GraphQL enum.
 </Banner>
 
+### Limitations for Arrays / Nested Fields (especially on MongoDB)
+
+<Banner type="warning">
+  Avoid unique: true on fields nested inside an array or blocks.
+</Banner>
+In MongoDB this creates a collection-wide unique multikey index; missing values
+are treated like null and will collide, causing duplicate-key errors on
+insert/update. If you need uniqueness within a parent document’s array (or
+conditional uniqueness), use a custom validate function or a hook.
+
+If you need collection-wide uniqueness for values that currently live in an array, consider
+normalizing those values into a top-level field or a separate collection where a
+standard unique index makes sense.
+
+Example:
+
+```
+import type { Field } from 'payload';
+
+export const ItemsArray: Field = {
+  name: 'items',
+  type: 'array',
+  fields: [
+    {
+      name: 'code',
+      type: 'text',
+      // DO NOT use unique: true here; see note above
+      validate: async (value, { data }) => {
+        // value is the current 'code'; data.items is the full array
+        if (!value || !Array.isArray(data?.items)) return true;
+        const codes = data.items.map(i => (i?.code ?? '')).filter(Boolean);
+        const duplicates = new Set(
+          codes.filter((c, i) => codes.indexOf(c) !== i)
+        );
+        return duplicates.size === 0 || 'Codes in this array must be unique.';
+      },
+    },
+  ],
+};
+```
+
 ### filterOptions
 
 Used to dynamically filter which options are available based on the current user, document data, or other criteria.
