@@ -28,7 +28,6 @@ export const Providers: React.FC<{
                   },
                   variants: {
                     title: true,
-                    gallery: true,
                   },
                 },
               },

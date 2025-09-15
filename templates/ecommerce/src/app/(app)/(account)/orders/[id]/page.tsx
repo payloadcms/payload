@@ -154,13 +154,13 @@ export default async function Order({ params, searchParams }: PageProps) {
           <div>
             <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">Items</h2>
             <ul className="flex flex-col gap-6">
-              {order.items?.map((item) => {
+              {order.items?.map((item, index) => {
                 if (typeof item.product === 'string') {
                   return null
                 }
 
                 if (!item.product || typeof item.product !== 'object') {
-                  return <div>This item is no longer available.</div>
+                  return <div key={index}>This item is no longer available.</div>
                 }
 
                 const variant =

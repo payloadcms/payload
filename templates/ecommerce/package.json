@@ -1,5 +1,5 @@
 {
-  "name": "@payloadcms/template-ecommerce",
+  "name": "ecommerce",
   "version": "1.0.0",
   "description": "Ecommerce template for Payload",
   "license": "MIT",

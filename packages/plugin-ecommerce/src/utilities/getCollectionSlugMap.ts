@@ -27,57 +27,6 @@ export const getCollectionSlugMap = ({ sanitizedPluginConfig }: Props): Collecti
 
   if (typeof sanitizedPluginConfig.customers === 'object' && sanitizedPluginConfig.customers.slug) {
     collectionSlugsMap.customers = sanitizedPluginConfig.customers.slug
-
-    if (
-      typeof sanitizedPluginConfig.addresses === 'object' &&
-      sanitizedPluginConfig.addresses.collectionOverride?.slug
-    ) {
-      collectionSlugsMap.addresses = sanitizedPluginConfig.addresses.collectionOverride.slug
-    }
-  }
-
-  if (
-    typeof sanitizedPluginConfig.orders === 'object' &&
-    sanitizedPluginConfig.orders.ordersCollection?.slug
-  ) {
-    collectionSlugsMap.orders = sanitizedPluginConfig.orders.ordersCollection.slug
-  }
-
-  if (typeof sanitizedPluginConfig.products === 'object') {
-    if (sanitizedPluginConfig.products.productsCollection?.slug) {
-      collectionSlugsMap.products = sanitizedPluginConfig.products.productsCollection.slug
-    }
-
-    if (typeof sanitizedPluginConfig.products.variants === 'object') {
-      if (sanitizedPluginConfig.products.variants.variantsCollection?.slug) {
-        collectionSlugsMap.variants =
-          sanitizedPluginConfig.products.variants.variantsCollection.slug
-      }
-
-      if (sanitizedPluginConfig.products.variants.variantOptionsCollection?.slug) {
-        collectionSlugsMap.variantOptions =
-          sanitizedPluginConfig.products.variants.variantOptionsCollection.slug
-      }
-
-      if (sanitizedPluginConfig.products.variants.variantTypesCollection?.slug) {
-        collectionSlugsMap.variantTypes =
-          sanitizedPluginConfig.products.variants.variantTypesCollection.slug
-      }
-    }
-  }
-
-  if (
-    typeof sanitizedPluginConfig.transactions === 'object' &&
-    sanitizedPluginConfig.transactions.transactionsCollection?.slug
-  ) {
-    collectionSlugsMap.transactions = sanitizedPluginConfig.transactions.transactionsCollection.slug
-  }
-
-  if (
-    typeof sanitizedPluginConfig.carts === 'object' &&
-    sanitizedPluginConfig.carts.cartsCollection?.slug
-  ) {
-    collectionSlugsMap.carts = sanitizedPluginConfig.carts.cartsCollection.slug
   }
 
   return collectionSlugsMap

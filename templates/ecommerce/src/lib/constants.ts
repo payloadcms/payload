@@ -16,12 +16,3 @@ export const sorting: SortFilterItem[] = [
   { slug: 'priceInUSD', reverse: false, title: 'Price: Low to high' }, // asc
   { slug: '-priceInUSD', reverse: true, title: 'Price: High to low' },
 ]
-
-export const TAGS = {
-  cart: 'cart',
-  collections: 'collections',
-  products: 'products',
-}
-
-export const HIDDEN_PRODUCT_TAG = 'nextjs-frontend-hidden'
-export const DEFAULT_OPTION = 'Default Title'
