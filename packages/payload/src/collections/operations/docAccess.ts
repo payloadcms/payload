@@ -51,11 +51,8 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
       },
     })
 
-    const collections = sanitizedPermissions.collections;
-    if (!collections || !collections[config.slug]) {
-      return { fields: {} }
-    }
-    return collections[config.slug]!
+    const collectionPermissions = sanitizedPermissions?.collections?.[config.slug]
+    return collectionPermissions ?? { fields: {} }
   } catch (e: unknown) {
     await killTransaction(req)
     throw e
