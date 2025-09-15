@@ -1,5 +1,11 @@
 import type { CollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { Document, JsonObject } from '../types/index.js'
+import type { GenerateTreePathsArgs } from './utils/generateTreePaths.js'
+
+import { adjustAffectedTreePaths } from './utils/adjustAffectedTreePaths.js'
+import { defaultSlugify } from './utils/defaultSlugify.js'
+import { generateTreePaths } from './utils/generateTreePaths.js'
+import { getTreeChanges } from './utils/getTreeChanges.js'
 
 type AddTreeViewFieldsArgs = {
   collectionConfig: CollectionConfig
@@ -56,22 +62,24 @@ export function addTreeViewFields({
         name: slugPathFieldName,
         type: 'text',
         admin: {
-          // readOnly: true,
+          readOnly: true,
           // hidden: true,
         },
         index: true,
         label: ({ t }) => t('general:slugPath'),
+        // TODO: these should only be localized if the title field is also localized
         localized: true,
       },
       {
         name: titlePathFieldName,
         type: 'text',
         admin: {
-          // readOnly: true,
+          readOnly: true,
           // hidden: true,
         },
         index: true,
         label: ({ t }) => t('general:titlePath'),
+        // TODO: these should only be localized if the title field is also localized
         localized: true,
       },
     ],
@@ -81,46 +89,41 @@ export function addTreeViewFields({
     ...(collectionConfig.hooks || {}),
     afterChange: [
       async ({ doc, previousDoc, previousDocWithLocales, req }) => {
+        const fieldIsLocalized = Boolean(req.payload.config.localization) // && fieldIsLocalized Arg
         // handle this better later
         const reqLocale = req.locale
         if (reqLocale === 'all') {
           return
         }
-        const { newParentID, newSlug, parentChanged, prevParentID, prevSlug, slugChanged } =
-          getTreeChanges({ doc, parentDocFieldName, previousDoc, slugify, titleFieldName })
+        const { newParentID, parentChanged, prevParentID, slugChanged } = getTreeChanges({
+          doc,
+          parentDocFieldName,
+          previousDoc,
+          slugify,
+          titleFieldName,
+        })
+
+        let parentDocument: Document = undefined
 
         if (parentChanged || slugChanged) {
-          /**
-           * should look like:
-           *
-           * {
-           *   [slugPathFieldName]: {
-           *     [locale]: updatedSlugPath
-           *   },
-           *   [titlePathFieldName]: {
-           *     [locale]: updatedTitlePath
-           *   },
-           *   _parentTree: updatedParentTree,
-           * }
-           */
-          const dataToUpdateDoc: {
-            _parentTree: (number | string)[]
-            slugPath: {
-              [locale: string]: string
-            }
-            titlePath: {
-              [locale: string]: string
-            }
-          } = {
-            _parentTree: [],
-            slugPath: {},
-            titlePath: {},
+          let newParentTree: (number | string)[] = []
+
+          const baseGenerateTreePathsArgs: Omit<
+            GenerateTreePathsArgs,
+            'defaultLocale' | 'localeCodes' | 'localized' | 'parentDocument' | 'reqLocale'
+          > = {
+            newDoc: doc,
+            previousDocWithLocales,
+            slugify,
+            slugPathFieldName,
+            titleFieldName,
+            titlePathFieldName,
           }
 
           if (parentChanged) {
             if (newParentID) {
-              // query new parent
-              const newParentFullDoc = await req.payload.findByID({
+              // set new parent
+              parentDocument = await req.payload.findByID({
                 id: newParentID,
                 collection: collectionConfig.slug,
                 depth: 0,
@@ -132,60 +135,15 @@ export function addTreeViewFields({
                 },
               })
 
-              dataToUpdateDoc._parentTree = [...(newParentFullDoc?._parentTree || []), newParentID]
-              req.payload.config.localization.localeCodes.forEach((locale: string) => {
-                const slugPrefix =
-                  newParentFullDoc?.[slugPathFieldName]?.[locale] ||
-                  newParentFullDoc?.[slugPathFieldName]?.[
-                    req.payload.config.localization.defaultLocale
-                  ] ||
-                  ''
-                const titlePrefix =
-                  newParentFullDoc?.[titlePathFieldName]?.[locale] ||
-                  newParentFullDoc?.[titlePathFieldName]?.[
-                    req.payload.config.localization.defaultLocale
-                  ] ||
-                  ''
-                if (reqLocale === locale) {
-                  dataToUpdateDoc.slugPath[locale] = `${slugPrefix}/${slugify(doc[titleFieldName])}`
-                  dataToUpdateDoc.titlePath[locale] = `${titlePrefix}/${doc[titleFieldName]}`
-                } else {
-                  // use prev title on previousDocWithLocales
-                  dataToUpdateDoc.slugPath[locale] =
-                    `${slugPrefix}/${slugify(previousDocWithLocales?.[titleFieldName]?.[locale] ? previousDocWithLocales[titleFieldName][locale] : doc[titleFieldName])}`
-                  dataToUpdateDoc.titlePath[locale] =
-                    `${titlePrefix}/${previousDocWithLocales?.[titleFieldName]?.[locale] ? previousDocWithLocales[titleFieldName][locale] : doc[titleFieldName]}`
-                }
-              })
+              newParentTree = [...(parentDocument?._parentTree || []), newParentID]
             } else {
               // removed parent
-              dataToUpdateDoc._parentTree = []
-              req.payload.config.localization.localeCodes.forEach((locale: string) => {
-                if (reqLocale === locale) {
-                  // use current title on doc
-                  dataToUpdateDoc.slugPath[locale] = slugify(doc[titleFieldName])
-                  dataToUpdateDoc.titlePath[locale] = doc[titleFieldName]
-                } else {
-                  // use prev title on previousDocWithLocales
-                  dataToUpdateDoc.slugPath[locale] = slugify(
-                    previousDocWithLocales?.[titleFieldName]?.[locale]
-                      ? previousDocWithLocales[titleFieldName][locale]
-                      : doc[titleFieldName],
-                  )
-                  dataToUpdateDoc.titlePath[locale] = previousDocWithLocales?.[titleFieldName]?.[
-                    locale
-                  ]
-                    ? previousDocWithLocales[titleFieldName][locale]
-                    : doc[titleFieldName]
-                }
-              })
+              newParentTree = []
             }
           } else {
-            // only the title field was updated
-            let prevParentDoc: Document
+            // only the title updated
             if (prevParentID) {
-              // has parent
-              prevParentDoc = await req.payload.findByID({
+              parentDocument = await req.payload.findByID({
                 id: prevParentID,
                 collection: collectionConfig.slug,
                 depth: 0,
@@ -194,58 +152,47 @@ export function addTreeViewFields({
                 select: {
                   _parentTree: true,
                   [slugPathFieldName]: true,
-                  [titleFieldName]: true,
                   [titlePathFieldName]: true,
                 },
               })
             }
 
-            dataToUpdateDoc._parentTree = prevParentDoc
-              ? [...(prevParentDoc._parentTree || []), prevParentID]
-              : []
-            req.payload.config.localization.localeCodes.forEach((locale: string) => {
-              const slugPrefix = prevParentDoc?.[slugPathFieldName]?.[locale]
-                ? prevParentDoc[slugPathFieldName][locale]
-                : ''
-              const titlePrefix = prevParentDoc?.[titlePathFieldName]?.[locale]
-                ? prevParentDoc[titlePathFieldName][locale]
-                : ''
-              if (reqLocale === locale) {
-                dataToUpdateDoc.slugPath[locale] =
-                  `${slugPrefix ? `${slugPrefix}/` : ''}${slugify(doc[titleFieldName])}`
-                dataToUpdateDoc.titlePath[locale] =
-                  `${titlePrefix ? `${titlePrefix}/` : ''}${doc[titleFieldName]}`
-              } else {
-                // use prev title on previousDocWithLocales
-                dataToUpdateDoc.slugPath[locale] =
-                  `${slugPrefix ? `${slugPrefix}/` : ''}${slugify(previousDocWithLocales?.[titleFieldName]?.[locale] ? previousDocWithLocales[titleFieldName][locale] : doc[titleFieldName])}`
-                dataToUpdateDoc.titlePath[locale] =
-                  `${titlePrefix ? `${titlePrefix}/` : ''}${previousDocWithLocales?.[titleFieldName]?.[locale] ? previousDocWithLocales[titleFieldName][locale] : doc[titleFieldName]}`
-              }
-            })
+            newParentTree = doc._parentTree
           }
+
+          const treePaths = generateTreePaths({
+            ...baseGenerateTreePathsArgs,
+            parentDocument,
+            ...(fieldIsLocalized && req.payload.config.localization
+              ? {
+                  defaultLocale: req.payload.config.localization.defaultLocale,
+                  localeCodes: req.payload.config.localization.localeCodes,
+                  localized: true,
+                  reqLocale: reqLocale as string,
+                }
+              : {
+                  localized: false,
+                }),
+          })
+          const newSlugPath = treePaths.slugPath
+          const newTitlePath = treePaths.titlePath
 
           const documentAfterUpdate = await req.payload.db.updateOne({
             id: doc.id,
             collection: collectionConfig.slug,
             data: {
-              _parentTree: dataToUpdateDoc._parentTree,
-              [slugPathFieldName]: dataToUpdateDoc.slugPath,
-              [titlePathFieldName]: dataToUpdateDoc.titlePath,
+              _parentTree: newParentTree,
+              [slugPathFieldName]: newSlugPath,
+              [titlePathFieldName]: newTitlePath,
             },
             locale: 'all',
             req,
             select: {
               _parentTree: true,
               [slugPathFieldName]: true,
-              [titleFieldName]: true,
               [titlePathFieldName]: true,
             },
           })
-
-          const updatedSlugPath = documentAfterUpdate[slugPathFieldName][reqLocale!]
-          const updatedTitlePath = documentAfterUpdate[titlePathFieldName][reqLocale!]
-          const updatedParentTree = documentAfterUpdate._parentTree
 
           const affectedDocs = await req.payload.find({
             collection: collectionConfig.slug,
@@ -254,7 +201,9 @@ export function addTreeViewFields({
             locale: 'all',
             req,
             select: {
-              [titleFieldName]: true,
+              _parentTree: true,
+              [slugPathFieldName]: true,
+              [titlePathFieldName]: true,
             },
             where: {
               _parentTree: {
@@ -265,6 +214,26 @@ export function addTreeViewFields({
 
           const updatePromises: Promise<JsonObject & TypeWithID>[] = []
           affectedDocs.docs.forEach((affectedDoc) => {
+            const newTreePaths = adjustAffectedTreePaths({
+              affectedDoc,
+              newDoc: doc,
+              previousDocWithLocales,
+              slugPathFieldName,
+              titlePathFieldName,
+              ...(req.payload.config.localization && fieldIsLocalized
+                ? {
+                    localeCodes: req.payload.config.localization.localeCodes,
+                    localized: true,
+                  }
+                : {
+                    localized: false,
+                  }),
+            })
+
+            // Find the index of doc.id in affectedDoc's parent tree
+            const docIndex = affectedDoc._parentTree?.indexOf(doc.id) ?? -1
+            const descendants = docIndex >= 0 ? affectedDoc._parentTree.slice(docIndex) : []
+
             updatePromises.push(
               // this pattern has an issue bc it will not run hooks on the affected documents
               // if we use payload.update, then we will need to loop over `n` locales and run 1 update per locale
@@ -272,39 +241,9 @@ export function addTreeViewFields({
                 id: affectedDoc.id,
                 collection: collectionConfig.slug,
                 data: {
-                  _parentTree: [...(doc._parentTree || []), doc.id],
-                  [slugPathFieldName]:
-                    req.payload.config.localization.localeCodes.reduce<JsonObject>(
-                      (acc: JsonObject, locale: string) => {
-                        const prefix =
-                          documentAfterUpdate?.[slugPathFieldName]?.[locale] ||
-                          documentAfterUpdate?.[slugPathFieldName]?.[
-                            req.payload.config.localization.defaultLocale
-                          ]
-                        const slug =
-                          affectedDoc?.[titleFieldName]?.[locale] ||
-                          affectedDoc[titleFieldName][req.payload.config.localization.defaultLocale]
-                        acc[locale] = `${prefix}/${slugify(slug)}`
-                        return acc
-                      },
-                      {},
-                    ),
-                  [titlePathFieldName]:
-                    req.payload.config.localization.localeCodes.reduce<JsonObject>(
-                      (acc: JsonObject, locale: string) => {
-                        const prefix =
-                          documentAfterUpdate?.[titlePathFieldName]?.[locale] ||
-                          documentAfterUpdate?.[titlePathFieldName]?.[
-                            req.payload.config.localization.defaultLocale
-                          ]
-                        const title =
-                          affectedDoc?.[titleFieldName]?.[locale] ||
-                          affectedDoc[titleFieldName][req.payload.config.localization.defaultLocale]
-                        acc[locale] = `${prefix}/${title}`
-                        return acc
-                      },
-                      {},
-                    ),
+                  _parentTree: [...(doc._parentTree || []), ...descendants],
+                  [slugPathFieldName]: newTreePaths.slugPath,
+                  [titlePathFieldName]: newTreePaths.titlePath,
                 },
                 locale: 'all',
                 req,
@@ -313,6 +252,14 @@ export function addTreeViewFields({
           })
 
           await Promise.all(updatePromises)
+
+          const updatedSlugPath = fieldIsLocalized
+            ? documentAfterUpdate[slugPathFieldName][reqLocale!]
+            : documentAfterUpdate[slugPathFieldName]
+          const updatedTitlePath = fieldIsLocalized
+            ? documentAfterUpdate[titlePathFieldName][reqLocale!]
+            : documentAfterUpdate[titlePathFieldName]
+          const updatedParentTree = documentAfterUpdate._parentTree
 
           if (updatedSlugPath) {
             doc[slugPathFieldName] = updatedSlugPath
@@ -327,56 +274,8 @@ export function addTreeViewFields({
           return doc
         }
       },
-      // specifically run other hooks _after_ the document tree is updated
+      // purposefully run other hooks _after_ the document tree is updated
       ...(collectionConfig.hooks?.afterChange || []),
     ],
-  }
-}
-
-// default slugify function
-const defaultSlugify = (title: string): string => {
-  return title
-    .toLowerCase()
-    .trim()
-    .replace(/\W+/g, '-') // Replace spaces and non-word chars with hyphens
-    .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
-}
-
-type GetTreeChanges = {
-  doc: Document
-  parentDocFieldName: string
-  previousDoc: Document
-  slugify: (text: string) => string
-  titleFieldName: string
-}
-
-type GetTreeChangesResult = {
-  newParentID: null | number | string | undefined
-  newSlug: string | undefined
-  parentChanged: boolean
-  prevParentID: null | number | string | undefined
-  prevSlug: string | undefined
-  slugChanged: boolean
-}
-
-function getTreeChanges({
-  doc,
-  parentDocFieldName,
-  previousDoc,
-  slugify,
-  titleFieldName,
-}: GetTreeChanges): GetTreeChangesResult {
-  const prevParentID = previousDoc[parentDocFieldName] || null
-  const newParentID = doc[parentDocFieldName] || null
-  const newSlug = doc[titleFieldName] ? slugify(doc[titleFieldName]) : undefined
-  const prevSlug = previousDoc[titleFieldName] ? slugify(previousDoc[titleFieldName]) : undefined
-
-  return {
-    newParentID,
-    newSlug,
-    parentChanged: prevParentID !== newParentID,
-    prevParentID,
-    prevSlug,
-    slugChanged: newSlug !== prevSlug,
   }
 }
