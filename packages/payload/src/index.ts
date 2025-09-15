@@ -1528,7 +1528,7 @@ export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/bef
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
-export { validations } from './fields/validations.js'
+export { validateBlocksFilterOptions, validations } from './fields/validations.js'
 
 export type {
   ArrayFieldValidation,

@@ -104,6 +104,7 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   // to prevent unnecessary rerenders
   const result: FieldType<TValue> = useMemo(
     () => ({
+      blocksFilterOptions: field?.blocksFilterOptions,
       customComponents: field?.customComponents,
       disabled: processing || initializing,
       errorMessage: field?.errorMessage,

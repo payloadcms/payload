@@ -323,10 +323,22 @@ export type FilterOptionsFunc<TData = any> = (
   options: FilterOptionsProps<TData>,
 ) => boolean | Promise<boolean | Where> | Where
 
-export type FilterOptions<TData = any> =
-  | ((options: FilterOptionsProps<TData>) => boolean | Promise<boolean | Where> | Where)
-  | null
-  | Where
+export type FilterOptions<TData = any> = FilterOptionsFunc<TData> | null | Where
+
+type BlockSlugOrString = (({} & string) | BlockSlug)[]
+
+export type BlocksFilterOptionsProps<TData = any> = {
+  /**
+   * The `id` of the current document being edited. Will be undefined during the `create` operation.
+   */
+  id: number | string
+} & Pick<FilterOptionsProps<TData>, 'data' | 'req' | 'siblingData' | 'user'>
+
+export type BlocksFilterOptions<TData = any> =
+  | ((
+      options: BlocksFilterOptionsProps<TData>,
+    ) => BlockSlugOrString | Promise<BlockSlugOrString | true> | true)
+  | BlockSlugOrString
 
 type Admin = {
   className?: string
@@ -1520,6 +1532,7 @@ export type BlocksField = {
   blockReferences?: (Block | BlockSlug)[]
   blocks: Block[]
   defaultValue?: DefaultValue
+  filterOptions?: BlocksFilterOptions
   labels?: Labels
   maxRows?: number
   minRows?: number

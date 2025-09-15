@@ -20,7 +20,7 @@ import type {
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { getBlockSelect, stripUnselectedFields } from 'payload'
+import { getBlockSelect, stripUnselectedFields, validateBlocksFilterOptions } from 'payload'
 import {
   deepCopyObjectSimple,
   fieldAffectsData,
@@ -579,6 +579,20 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         }
 
         fieldState.rows = rowMetadata
+
+        // Handle blocks filterOptions
+        if (field.filterOptions) {
+          const validationResult = validateBlocksFilterOptions({
+            id,
+            data: fullData,
+            filterOptions: field.filterOptions,
+            req,
+            siblingData: data,
+            value: data[field.name],
+          })
+
+          fieldState.blocksFilterOptions = validationResult.allowedBlockSlugs
+        }
 
         // Add field to state
         if (!omitParents && (!filter || filter(args))) {

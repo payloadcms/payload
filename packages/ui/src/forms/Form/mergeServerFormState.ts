@@ -133,6 +133,12 @@ export const mergeServerFormState = ({
       newState[path].passesCondition = true
     }
 
+    /**
+     * Undefined values for blocksFilterOptions coming back should be treated as "all blocks allowed" and
+     * should always be merged in.
+     */
+    newState[path].blocksFilterOptions = incomingField.blocksFilterOptions
+
     // Strip away the `addedByServer` property from the client
     // This will prevent it from being passed back to the server
     delete newState[path].addedByServer

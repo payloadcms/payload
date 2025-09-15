@@ -136,7 +136,7 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
   required: true,
 })
 
-const BlockFields: CollectionConfig = {
+export const BlockFields: CollectionConfig = {
   slug: blockFieldsSlug,
   fields: [
     getBlocksField(),
@@ -520,7 +520,89 @@ const BlockFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'enabledBlocks',
+      type: 'text',
+      admin: {
+        description:
+          "Change the value of this field to change the enabled blocks of the blocksWithDynamicFilterOptions field. If it's empty, all blocks are enabled.",
+      },
+    },
+    {
+      name: 'blocksWithFilterOptions',
+      type: 'blocks',
+      filterOptions: ['block1', 'block2'],
+      blocks: [
+        {
+          slug: 'block1',
+          fields: [
+            {
+              type: 'text',
+              name: 'block1Text',
+            },
+          ],
+        },
+        {
+          slug: 'block2',
+          fields: [
+            {
+              type: 'text',
+              name: 'block2Text',
+            },
+          ],
+        },
+        {
+          slug: 'block3',
+          fields: [
+            {
+              type: 'text',
+              name: 'block3Text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'blocksWithDynamicFilterOptions',
+      type: 'blocks',
+      filterOptions: ({ siblingData: _siblingData, data }) => {
+        const siblingData = _siblingData as { enabledBlocks: string }
+
+        if (siblingData?.enabledBlocks !== data?.enabledBlocks) {
+          // Just an extra assurance that the field is working as intended
+          throw new Error('enabledBlocks and siblingData.enabledBlocks must be identical')
+        }
+        return siblingData?.enabledBlocks?.length ? [siblingData.enabledBlocks] : true
+      },
+      blocks: [
+        {
+          slug: 'block1',
+          fields: [
+            {
+              type: 'text',
+              name: 'block1Text',
+            },
+          ],
+        },
+        {
+          slug: 'block2',
+          fields: [
+            {
+              type: 'text',
+              name: 'block2Text',
+            },
+          ],
+        },
+        {
+          slug: 'block3',
+          fields: [
+            {
+              type: 'text',
+              name: 'block3Text',
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
-
-export default BlockFields
