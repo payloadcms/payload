@@ -18,6 +18,7 @@ type Args<T> = {
    * The original data (not modified by any hooks)
    */
   doc: T
+  draft?: boolean
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
@@ -45,6 +46,7 @@ export const traverseFields = async <T>({
   context,
   data,
   doc,
+  draft = false,
   fields,
   global,
   operation,
@@ -68,6 +70,7 @@ export const traverseFields = async <T>({
         context,
         data,
         doc,
+        draft,
         field,
         fieldIndex,
         global,

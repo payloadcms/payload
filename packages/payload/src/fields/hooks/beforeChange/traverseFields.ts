@@ -23,6 +23,7 @@ type Args = {
    * The original data with locales (not modified by any hooks)
    */
   docWithLocales: JsonObject
+  draft?: boolean
   errors: ValidationFieldError[]
   /**
    * Built up labels of parent fields
@@ -72,6 +73,7 @@ export const traverseFields = async ({
   data,
   doc,
   docWithLocales,
+  draft = false,
   errors,
   fieldLabelPath,
   fields,
@@ -101,6 +103,7 @@ export const traverseFields = async ({
         data,
         doc,
         docWithLocales,
+        draft,
         errors,
         field,
         fieldIndex,

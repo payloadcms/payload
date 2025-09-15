@@ -15,6 +15,7 @@ type Args = {
   context: RequestContext
   data: JsonObject
   doc: JsonObject
+  draft?: boolean
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
@@ -39,6 +40,7 @@ export const traverseFields = async ({
   context,
   data,
   doc,
+  draft = false,
   fields,
   global,
   operation,
@@ -63,6 +65,7 @@ export const traverseFields = async ({
         context,
         data,
         doc,
+        draft,
         field,
         fieldIndex,
         global,
