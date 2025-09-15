@@ -391,47 +391,14 @@ The function should return:
   fallback for your custom logic.
 </Banner>
 
-#### Common Use Cases
+#### Examples
 
-**Disable linking for certain documents:**
-
-```ts
-formatDocURL: ({ doc }) => {
-  if (doc.status === 'archived') {
-    return null // No link rendered
-  }
-  return defaultURL
-}
-```
-
-**User-based URL modification:**
+**Disable linking for certain users:**
 
 ```ts
 formatDocURL: ({ defaultURL, req }) => {
   if (req.user?.role === 'editor') {
-    return defaultURL + '?editor=true'
-  }
-  return defaultURL
-}
-```
-
-**View-specific behavior:**
-
-```ts
-formatDocURL: ({ defaultURL, viewType }) => {
-  if (viewType === 'trash') {
-    return defaultURL + '?from=trash'
-  }
-  return defaultURL
-}
-```
-
-**Custom destinations:**
-
-```ts
-formatDocURL: ({ doc }) => {
-  if (doc.type === 'redirect') {
-    return '/admin/redirects'
+    return null // No link rendered
   }
   return defaultURL
 }
