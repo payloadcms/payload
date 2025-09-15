@@ -360,6 +360,19 @@ export interface LocalizedPost {
   id: string;
   text?: string | null;
   description?: string | null;
+  blocks?:
+    | {
+        array?:
+          | {
+              relationship?: (string | null) | Post;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -968,6 +981,22 @@ export interface ErrorOnUnpublishSelect<T extends boolean = true> {
 export interface LocalizedPostsSelect<T extends boolean = true> {
   text?: T;
   description?: T;
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              array?:
+                | T
+                | {
+                    relationship?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
