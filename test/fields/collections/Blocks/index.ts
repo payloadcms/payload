@@ -542,7 +542,7 @@ export const BlockFields: CollectionConfig = {
       },
       blocks: [
         {
-          slug: 'block1',
+          slug: 'blockOne',
           fields: [
             {
               type: 'text',
@@ -551,7 +551,7 @@ export const BlockFields: CollectionConfig = {
           ],
         },
         {
-          slug: 'block2',
+          slug: 'blockTwo',
           fields: [
             {
               type: 'text',
@@ -560,7 +560,7 @@ export const BlockFields: CollectionConfig = {
           ],
         },
         {
-          slug: 'block3',
+          slug: 'blockThree',
           fields: [
             {
               type: 'text',
@@ -573,10 +573,10 @@ export const BlockFields: CollectionConfig = {
     {
       name: 'blocksWithFilterOptions',
       type: 'blocks',
-      filterOptions: ['blockA', 'blockB'],
+      filterOptions: ['blockFour', 'blockFive'],
       blocks: [
         {
-          slug: 'blockA',
+          slug: 'blockFour',
           fields: [
             {
               type: 'text',
@@ -585,7 +585,7 @@ export const BlockFields: CollectionConfig = {
           ],
         },
         {
-          slug: 'blockB',
+          slug: 'blockFive',
           fields: [
             {
               type: 'text',
@@ -594,7 +594,7 @@ export const BlockFields: CollectionConfig = {
           ],
         },
         {
-          slug: 'blockC',
+          slug: 'blockSix',
           fields: [
             {
               type: 'text',
