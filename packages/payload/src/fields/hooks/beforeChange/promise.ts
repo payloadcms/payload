@@ -129,7 +129,7 @@ export const promise = async ({
     }
 
     // Execute hooks
-    if (field.hooks?.beforeChange) {
+    if ('hooks' in field && field.hooks?.beforeChange) {
       for (const hook of field.hooks.beforeChange) {
         const hookedValue = await hook({
           blockData,
@@ -143,17 +143,17 @@ export const promise = async ({
           originalDoc: doc,
           path: pathSegments,
           previousSiblingDoc: siblingDoc,
-          previousValue: siblingDoc[field.name!],
+          previousValue: siblingDoc[field.name],
           req,
           schemaPath: schemaPathSegments,
           siblingData,
           siblingDocWithLocales,
           siblingFields: siblingFields!,
-          value: siblingData[field.name!],
+          value: siblingData[field.name],
         })
 
         if (hookedValue !== undefined) {
-          siblingData[field.name!] = hookedValue
+          siblingData[field.name] = hookedValue
         }
       }
     }

@@ -1981,6 +1981,22 @@ describe('Versions', () => {
 
       const hiddenField2 = page.locator('[data-field-path="textCannotRead"]')
       await expect(hiddenField2).toBeHidden()
+
+      const hiddenField3 = page.locator('[data-field-path="namedTab1.textInNamedTab1ReadFalse"]')
+      await expect(hiddenField3).toBeHidden()
+
+      const visibleFieldWithUpdateFalse1 = page.locator(
+        '[data-field-path="namedTab1.textInNamedTab1UpdateFalse"]',
+      )
+      await expect(visibleFieldWithUpdateFalse1).toBeVisible()
+
+      const visibleField2 = page.locator('[data-field-path="textInRowInUnnamedTab"]')
+      await expect(visibleField2).toBeVisible()
+
+      const visibleFieldWithUpdateFalse3 = page.locator(
+        '[data-field-path="textInRowInUnnamedTabUpdateFalse"]',
+      )
+      await expect(visibleFieldWithUpdateFalse3).toBeVisible()
     })
 
     test('correctly renders diff for relationship fields with deleted relation', async () => {

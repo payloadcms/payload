@@ -1708,6 +1708,9 @@ importers:
       react:
         specifier: 19.1.0
         version: 19.1.0
+      react-dom:
+        specifier: 19.1.0
+        version: 19.1.0(react@19.1.0)
       sharp:
         specifier: 0.34.2
         version: 0.34.2
@@ -2112,6 +2115,9 @@ importers:
       nodemailer:
         specifier: 6.9.16
         version: 6.9.16
+      object-to-formdata:
+        specifier: 4.5.1
+        version: 4.5.1
       payload:
         specifier: workspace:*
         version: link:../packages/payload
