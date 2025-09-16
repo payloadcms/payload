@@ -130,4 +130,30 @@ describe('Lexical Fully Featured', () => {
     const someButton = dropdownItems!.locator(`[data-item-key="bg-red"]`)
     await expect(someButton).toHaveAttribute('aria-disabled', 'false')
   })
+
+  test('ensure code block can be created using slash commands', async () => {
+    await lexical.slashCommand('code')
+    const codeBlock = lexical.editor.locator('.lexical-block-Code')
+    await expect(codeBlock).toHaveCount(1)
+    await expect(codeBlock).toBeVisible()
+
+    await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
+    await expect(codeBlock.locator('#field-language .react-select--single-value')).toHaveText(
+      'JavaScript', // JavaScript is the default language
+    )
+  })
+
+  test('ensure code block can be created using client-side markdown shortcuts', async ({
+    page,
+  }) => {
+    await page.keyboard.type('```ts ')
+    const codeBlock = lexical.editor.locator('.lexical-block-Code')
+    await expect(codeBlock).toHaveCount(1)
+    await expect(codeBlock).toBeVisible()
+
+    await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
+    await expect(codeBlock.locator('#field-language .react-select--single-value')).toHaveText(
+      'TypeScript',
+    )
+  })
 })

@@ -98,8 +98,8 @@ export class LexicalHelpers {
 
   async slashCommand(
     // prettier-ignore
-    command: 'block' | 'check' | 'code' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' |'h6' | 'inline'
-    | 'link' | 'ordered' | 'paragraph' | 'quote' | 'relationship' | 'unordered' | 'upload',
+    command: ('block' | 'check' | 'code' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' |'h6' | 'inline'
+    | 'link' | 'ordered' | 'paragraph' | 'quote' | 'relationship' | 'unordered' | 'upload') | ({} & string),
   ) {
     await this.page.keyboard.press(`/`)
 
