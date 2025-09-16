@@ -19,6 +19,7 @@ export { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 export { useResize } from '../../hooks/useResize.js'
 export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 export { useEffectEvent } from '../../hooks/useEffectEvent.js'
+export { FieldPathContext, useFieldPath } from '../../forms/RenderFields/context.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
@@ -303,7 +304,7 @@ export {
   RouteTransitionProvider,
   useRouteTransition,
 } from '../../providers/RouteTransition/index.js'
-export { ConfigProvider, useConfig } from '../../providers/Config/index.js'
+export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 export { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
