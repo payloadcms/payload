@@ -158,8 +158,31 @@ export const promise = async ({
     let hoistedValue = value
 
     if (fallbackLocale && fallbackLocale !== locale) {
-      const fallbackValue = siblingDoc[field.name!][fallbackLocale]
+      let fallbackValue
       const isNullOrUndefined = typeof value === 'undefined' || value === null
+      const fallbackIsArray =
+        Array.isArray(fallbackLocale) ||
+        (fallbackLocale.startsWith('[') && fallbackLocale.endsWith(']'))
+
+      if (fallbackIsArray) {
+        const formattedFallback = Array.isArray(fallbackLocale)
+          ? fallbackLocale
+          : fallbackLocale
+              .slice(1, -1)
+              .split(',')
+              .map((l) => l.trim())
+
+        for (const locale of formattedFallback) {
+          const val = siblingDoc[field.name!]?.[locale]
+
+          if (val !== undefined && val !== null && val !== '') {
+            fallbackValue = val
+            break
+          }
+        }
+      } else {
+        fallbackValue = siblingDoc[field.name!][fallbackLocale]
+      }
 
       if (fallbackValue) {
         switch (field.type) {
