@@ -21,6 +21,10 @@ export default buildConfigWithDefaults({
       password: devUser.password,
       prefillOnly: true,
     },
+    components: {
+      beforeDashboard: ['./BeforeDashboard.js#BeforeDashboard'],
+      beforeLogin: ['./BeforeLogin.js#BeforeLogin'],
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -74,6 +78,10 @@ export default buildConfigWithDefaults({
           defaultValue: namedSaveToJWTValue,
           label: 'Named Save To JWT',
           saveToJWT: saveToJWTKey,
+        },
+        {
+          name: 'richText',
+          type: 'richText',
         },
         {
           name: 'group',
@@ -180,6 +188,16 @@ export default buildConfigWithDefaults({
             },
           },
           label: 'Auth Debug',
+        },
+        {
+          // This is a uniquely identifiable field that we use to ensure it doesn't appear in the page source when unauthenticated
+          // E.g. if the user is authenticated, it will appear in the both the client config
+          name: 'shouldNotShowInClientConfigUnlessAuthenticated',
+          type: 'text',
+          access: {
+            // Setting this forces the field to show up in the permissions object
+            read: () => true,
+          },
         },
       ],
     },

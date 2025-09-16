@@ -123,7 +123,7 @@ import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
 
-import type { ClientConfig } from './config/client.js'
+import type { ClientConfig, CreateClientConfigArgs } from './config/client.js'
 import type { BaseJob } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
 
@@ -637,38 +637,45 @@ export class BasePayload {
 
       await Promise.all(
         cronJobs.map((cronConfig) => {
-          const jobAutorunCron = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
-            if (
-              _internal_jobSystemGlobals.shouldAutoSchedule &&
-              !cronConfig.disableScheduling &&
-              this.config.jobs.scheduling
-            ) {
-              await this.jobs.handleSchedules({
-                allQueues: cronConfig.allQueues,
-                queue: cronConfig.queue,
-              })
-            }
+          const jobAutorunCron = new Cron(
+            cronConfig.cron ?? DEFAULT_CRON,
+            async () => {
+              if (
+                _internal_jobSystemGlobals.shouldAutoSchedule &&
+                !cronConfig.disableScheduling &&
+                this.config.jobs.scheduling
+              ) {
+                await this.jobs.handleSchedules({
+                  allQueues: cronConfig.allQueues,
+                  queue: cronConfig.queue,
+                })
+              }
 
-            if (!_internal_jobSystemGlobals.shouldAutoRun) {
-              return
-            }
-
-            if (typeof this.config.jobs.shouldAutoRun === 'function') {
-              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
-
-              if (!shouldAutoRun) {
-                jobAutorunCron.stop()
+              if (!_internal_jobSystemGlobals.shouldAutoRun) {
                 return
               }
-            }
 
-            await this.jobs.run({
-              allQueues: cronConfig.allQueues,
-              limit: cronConfig.limit ?? DEFAULT_LIMIT,
-              queue: cronConfig.queue,
-              silent: cronConfig.silent,
-            })
-          })
+              if (typeof this.config.jobs.shouldAutoRun === 'function') {
+                const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+
+                if (!shouldAutoRun) {
+                  jobAutorunCron.stop()
+                  return
+                }
+              }
+
+              await this.jobs.run({
+                allQueues: cronConfig.allQueues,
+                limit: cronConfig.limit ?? DEFAULT_LIMIT,
+                queue: cronConfig.queue,
+                silent: cronConfig.silent,
+              })
+            },
+            {
+              // Do not run consecutive crons if previous crons still ongoing
+              protect: true,
+            },
+          )
 
           this.crons.push(jobAutorunCron)
         }),
@@ -942,6 +949,7 @@ export const reload = async (
   config: SanitizedConfig,
   payload: Payload,
   skipImportMapGeneration?: boolean,
+  options?: InitOptions,
 ): Promise<void> => {
   if (typeof payload.db.destroy === 'function') {
     // Only destroy db, as we then later only call payload.db.init and not payload.init
@@ -991,9 +999,11 @@ export const reload = async (
     })
   }
 
-  await payload.db.init?.()
+  if (payload.db?.init) {
+    await payload.db.init()
+  }
 
-  if (payload.db.connect) {
+  if (!options?.disableDBConnect && payload.db.connect) {
     await payload.db.connect({ hotReload: true })
   }
 
@@ -1037,7 +1047,7 @@ export const getPayload = async (
      * @default 'default'
      */
     key?: string
-  } & Pick<InitOptions, 'config' | 'cron' | 'disableOnInit' | 'importMap'>,
+  } & InitOptions,
 ): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayload to work.')
@@ -1080,7 +1090,7 @@ export const getPayload = async (
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
       const config = await options.config
-      await reload(config, cached.payload, !options.importMap)
+      await reload(config, cached.payload, !options.importMap, options)
 
       resolve()
     }
@@ -1269,9 +1279,11 @@ export { buildConfig } from './config/build.js'
 export {
   type ClientConfig,
   createClientConfig,
+  type CreateClientConfigArgs,
+  createUnauthenticatedClientConfig,
   serverOnlyAdminConfigProperties,
   serverOnlyConfigProperties,
-  type UnsanitizedClientConfig,
+  type UnauthenticatedClientConfig,
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
 
@@ -1572,6 +1584,7 @@ export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
   BeforeChangeHook as GlobalBeforeChangeHook,
+  BeforeOperationHook as GlobalBeforeOperationHook,
   BeforeReadHook as GlobalBeforeReadHook,
   BeforeValidateHook as GlobalBeforeValidateHook,
   DataFromGlobalSlug,
@@ -1671,7 +1684,6 @@ export {
   type CustomVersionParser,
 } from './utilities/dependencies/dependencyChecker.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
-export type { FieldSchemaJSON } from './utilities/fieldSchemaToJSON.js'
 export {
   findUp,
   findUpSync,

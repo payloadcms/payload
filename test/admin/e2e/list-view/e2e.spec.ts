@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
 import * as qs from 'qs-esm'
 
-import type { Config, Geo, Post } from '../../payload-types.js'
+import type { Config, Geo, Post, Virtual } from '../../payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -23,6 +23,7 @@ import {
   listDrawerSlug,
   placeholderCollectionSlug,
   postsCollectionSlug,
+  virtualsSlug,
   with300DocumentsSlug,
 } from '../../slugs.js'
 
@@ -33,15 +34,19 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
+import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
 import { devUser } from 'credentials.js'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import {
+  openListColumns,
+  reorderColumns,
+  sortColumn,
+  toggleColumn,
+  waitForColumnInURL,
+} from 'helpers/e2e/columns/index.js'
+import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
 import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
-import { openListColumns } from 'helpers/e2e/openListColumns.js'
-import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { sortColumn } from 'helpers/e2e/sortColumn.js'
-import { toggleColumn, waitForColumnInURL } from 'helpers/e2e/toggleColumn.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from 'helpers/e2e/toggleListDrawer.js'
 import path from 'path'
@@ -50,9 +55,8 @@ import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 
-import { reorderColumns } from '../../../helpers/e2e/reorderColumns.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -70,6 +74,7 @@ describe('List View', () => {
   let placeholderUrl: AdminUrlUtil
   let disableBulkEditUrl: AdminUrlUtil
   let user: any
+  let virtualsUrl: AdminUrlUtil
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -94,6 +99,7 @@ describe('List View', () => {
     withListViewUrl = new AdminUrlUtil(serverURL, listDrawerSlug)
     placeholderUrl = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
     disableBulkEditUrl = new AdminUrlUtil(serverURL, 'disable-bulk-edit')
+    virtualsUrl = new AdminUrlUtil(serverURL, virtualsSlug)
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -416,6 +422,44 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
+    test('should not allow search by virtual: true field in field dropdown', async () => {
+      await page.goto(virtualsUrl.list)
+
+      await openListFilters(page, {})
+
+      const whereBuilder = page.locator('.where-builder')
+      await whereBuilder.locator('.where-builder__add-first-filter').click()
+
+      const conditionField = whereBuilder.locator('.condition__field')
+      await conditionField.click()
+
+      const menuList = conditionField.locator('.rs__menu-list')
+
+      // ensure the virtual field is not present
+      await expect(menuList.locator('div', { hasText: exactText('Virtual Text') })).toHaveCount(0)
+    })
+
+    test('should allow to filter by virtual relationship field', async () => {
+      const post1 = await createPost({ title: 'somePost' })
+      const post2 = await createPost({ title: 'otherPost' })
+
+      await createVirtualDoc({ post: post1.id })
+      await createVirtualDoc({ post: post2.id })
+
+      await page.goto(virtualsUrl.list)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
+      await addListFilter({
+        page,
+        fieldLabel: 'Virtual Title From Post',
+        operatorLabel: 'equals',
+        value: 'somePost',
+      })
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+    })
+
     test('should allow to filter in array field', async () => {
       await createArray()
 
@@ -676,7 +720,6 @@ describe('List View', () => {
         page,
         fieldLabel: 'Tab 1 > Title',
         operatorLabel: 'equals',
-        skipValueInput: true,
       })
 
       const valueInput = whereBuilder.locator('.condition__value >> input')
@@ -814,7 +857,6 @@ describe('List View', () => {
         page,
         fieldLabel: 'Self Relation',
         operatorLabel: 'equals',
-        skipValueInput: true,
       })
 
       const valueField = whereBuilder.locator('.condition__value')
@@ -927,7 +969,7 @@ describe('List View', () => {
       ).toBeHidden()
     })
 
-    test('should toggle columns and effect table', async () => {
+    test('should toggle columns and affect table', async () => {
       const tableHeaders = 'table > thead > tr > th'
 
       await openListColumns(page, {})
@@ -949,6 +991,60 @@ describe('List View', () => {
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
       await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+    })
+
+    test('should use select API in the list view when `enableListViewSelectAPI` is true', async () => {
+      const doc = await payload.create({
+        collection: listViewSelectAPISlug,
+        data: {
+          title: 'This is a test title',
+          description: 'This is a test description',
+        },
+      })
+
+      const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
+
+      await page.goto(selectAPIUrl.list)
+
+      const printedResults = page.locator('#table-state')
+
+      await expect
+        .poll(
+          async () => {
+            const resultText = await printedResults.innerText()
+            const parsedResult = JSON.parse(resultText)
+            return Boolean(parsedResult[0].id && parsedResult[0].description)
+          },
+          {
+            timeout: 3000,
+            intervals: [100, 250, 500, 1000],
+          },
+        )
+        .toBeTruthy()
+
+      await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+
+      await toggleColumn(page, {
+        columnLabel: 'Description',
+        columnName: 'description',
+        targetState: 'off',
+      })
+
+      // Poll until the "description" field is removed from the response BUT `id` is still present
+      // The `id` field will remain selected despite it being inactive
+      await expect
+        .poll(
+          async () => {
+            const resultText = await printedResults.innerText()
+            const parsedResult = JSON.parse(resultText)
+            return Boolean(parsedResult[0].description === undefined && parsedResult[0].id)
+          },
+          {
+            timeout: 3000,
+            intervals: [100, 250, 500, 1000],
+          },
+        )
+        .toBeTruthy()
     })
 
     test('should toggle columns and save to preferences', async () => {
@@ -1785,4 +1881,14 @@ async function createArray() {
       array: [{ text: 'test' }],
     },
   })
+}
+
+async function createVirtualDoc(overrides?: Partial<Virtual>): Promise<Virtual> {
+  return payload.create({
+    collection: virtualsSlug,
+    data: {
+      post: overrides?.post,
+      ...overrides,
+    },
+  }) as unknown as Promise<Virtual>
 }

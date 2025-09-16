@@ -19,19 +19,33 @@ type ReduceFieldOptionsArgs = {
 }
 
 /**
- * Reduces a field map to a flat array of fields with labels and values.
- * Used in the WhereBuilder component to render the fields in the dropdown.
+ * Transforms a fields schema into a flattened array of fields with labels and values.
+ * Used in the `WhereBuilder` component to render the fields in the dropdown.
  */
 export const reduceFieldsToOptions = ({
   fields,
   i18n,
   labelPrefix,
-  pathPrefix,
+  pathPrefix: pathPrefixFromArgs,
 }: ReduceFieldOptionsArgs): ReducedField[] => {
   return fields.reduce((reduced, field) => {
+    let pathPrefix = pathPrefixFromArgs
     // Do not filter out `field.admin.disableListFilter` fields here, as these should still render as disabled if they appear in the URL query
-    if (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) {
+    // Filter out `virtual: true` fields since they are regular virtuals and not backed by a DB field
+    if (
+      (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||
+      ('virtual' in field && field.virtual === true)
+    ) {
       return reduced
+    }
+
+    // Handle virtual:string fields (virtual relationships, e.g. "post.title")
+    if ('virtual' in field && typeof field.virtual === 'string') {
+      pathPrefix = pathPrefix ? pathPrefix + '.' + field.virtual : field.virtual
+      if (fieldAffectsData(field)) {
+        // ignore virtual field names
+        field.name = ''
+      }
     }
 
     if (field.type === 'tabs' && 'tabs' in field) {

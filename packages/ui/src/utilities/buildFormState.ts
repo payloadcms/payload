@@ -128,6 +128,7 @@ export const buildFormState = async (
     returnLockStatus,
     schemaPath = collectionSlug || globalSlug,
     select,
+    skipClientConfigAuth,
     skipValidation,
     updateLastEdited,
   } = args
@@ -147,7 +148,12 @@ export const buildFormState = async (
 
   const clientSchemaMap = getClientSchemaMap({
     collectionSlug,
-    config: getClientConfig({ config, i18n, importMap: req.payload.importMap }),
+    config: getClientConfig({
+      config,
+      i18n,
+      importMap: req.payload.importMap,
+      user: skipClientConfigAuth ? true : req.user,
+    }),
     globalSlug,
     i18n,
     payload,
@@ -203,6 +209,12 @@ export const buildFormState = async (
     : 'fields' in fieldOrEntityConfig
       ? fieldOrEntityConfig.fields
       : [fieldOrEntityConfig]
+
+  // Ensure data.id is present during form state requests, where the data
+  // is passed from the client as an argument, without the ID
+  if (!data.id && id) {
+    data.id = id
+  }
 
   const formStateResult = await fieldSchemasToFormState({
     id,
