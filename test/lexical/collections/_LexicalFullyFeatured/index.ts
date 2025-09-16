@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
+  CodeBlock,
   defaultColors,
   EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
@@ -37,6 +38,7 @@ export const LexicalFullyFeatured: CollectionConfig = {
           }),
           BlocksFeature({
             blocks: [
+              CodeBlock(),
               {
                 slug: 'myBlock',
                 fields: [
