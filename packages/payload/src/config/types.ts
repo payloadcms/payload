@@ -172,6 +172,11 @@ export type LivePreviewConfig = {
     | string
 }
 
+export type RootLivePreviewConfig = {
+  collections?: string[]
+  globals?: string[]
+} & LivePreviewConfig
+
 export type OGImageConfig = {
   alt?: string
   height?: number | string
@@ -202,7 +207,7 @@ export type MetaConfig = {
   titleSuffix?: string
 } & DeepClone<Metadata>
 
-export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
+export type ServerOnlyLivePreviewProperties = keyof Pick<RootLivePreviewConfig, 'url'>
 
 type GeneratePreviewURLOptions = {
   locale: string
@@ -252,6 +257,13 @@ export type InitOptions = {
    * and the backend functionality
    */
   config: Promise<SanitizedConfig> | SanitizedConfig
+  /**
+   * If set to `true`, payload will initialize crons for things like autorunning jobs on initialization.
+   *
+   * @default false
+   */
+  cron?: boolean
+
   /**
    * Disable connect to the database on init
    */
@@ -370,7 +382,7 @@ type BaseDocumentViewConfig = {
 export type CustomDocumentViewConfig =
   | ({
       Component: DocumentViewComponent
-      path: string
+      path: `/${string}`
     } & BaseDocumentViewConfig)
   | ({
       Component?: DocumentViewComponent
@@ -391,6 +403,7 @@ export type Params = { [key: string]: string | string[] | undefined }
 export type ServerProps = {
   readonly documentSubViewType?: DocumentSubViewTypes
   readonly i18n: I18nClient
+  readonly id?: number | string
   readonly locale?: Locale
   readonly params?: Params
   readonly payload: Payload
@@ -709,6 +722,14 @@ export type ImportMapGenerators = Array<
   }) => void
 >
 
+/**
+ * Experimental features.
+ * These may be unstable and may change or be removed in future releases.
+ */
+export type ExperimentalConfig = {
+  localizeStatus?: boolean
+}
+
 export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
@@ -740,7 +761,12 @@ export type Config = {
           username?: string
         }
       | false
-
+    /**
+     * Automatically refresh user tokens for users logged into the dashboard
+     *
+     * @default false
+     */
+    autoRefresh?: boolean
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?:
       | 'default'
@@ -748,6 +774,7 @@ export type Config = {
       | {
           Component: PayloadComponent
         }
+
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -861,10 +888,7 @@ export type Config = {
        */
       importMapFile?: string
     }
-    livePreview?: {
-      collections?: string[]
-      globals?: string[]
-    } & LivePreviewConfig
+    livePreview?: RootLivePreviewConfig
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: MetaConfig
     routes?: {
@@ -930,9 +954,34 @@ export type Config = {
      * Configure timezone related settings for the admin panel.
      */
     timezones?: TimezonesConfig
+    /**
+     * Configure toast message behavior and appearance in the admin panel.
+     * Currently using [Sonner](https://sonner.emilkowal.ski) for toast notifications.
+     *
+     * @experimental This property is experimental and may change in future releases. Use at your own discretion.
+     */
+    toast?: {
+      /**
+       * Time in milliseconds until the toast automatically closes.
+       * @default 4000
+       */
+      duration?: number
+      /**
+       * If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction.
+       * Otherwise only the latest notification can be read until the user hovers the stack.
+       * @default false
+       */
+      expand?: boolean
+      /**
+       * The maximum number of toasts that can be visible on the screen at once.
+       * @default 5
+       */
+      limit?: number
+    }
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
+
   /**
    * Configure authentication-related Payload-wide settings.
    */
@@ -946,6 +995,15 @@ export type Config = {
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
   blocks?: Block[]
+  /**
+   * Pass additional options to the parser used to process `multipart/form-data` requests.
+   * For example, a PATCH request containing HTML form data.
+   * For example, you may want to increase the `limits` imposed by the parser.
+   * Currently using @link {https://www.npmjs.com/package/busboy|busboy} under the hood.
+   *
+   * @experimental This property is experimental and may change in future releases. Use at your own discretion.
+   */
+  bodyParser?: Partial<BusboyConfig>
   /**
    * Manage the datamodel of your application
    *
@@ -977,10 +1035,8 @@ export type Config = {
   cors?: '*' | CORSConfig | string[]
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
-
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
-
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult
   /** Enable to expose more detailed error information. */
@@ -1010,8 +1066,15 @@ export type Config = {
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
+   * Configure experimental features for Payload.
+   *
+   * These features may be unstable and may change or be removed in future releases.
+   */
+  experimental?: ExperimentalConfig
+  /**
    * Options for folder view within the admin panel
-   * @experimental this feature may change in minor versions until it is fully stable
+   *
+   * @experimental This feature may change in minor versions until it is fully stable
    */
   folders?: false | RootFoldersConfiguration
   /**
@@ -1027,6 +1090,17 @@ export type Config = {
    */
   graphQL?: {
     disable?: boolean
+    /**
+     * Disable introspection queries in production.
+     *
+     * @default true
+     */
+    disableIntrospectionInProduction?: boolean
+    /**
+     * Disable the GraphQL Playground in production.
+     *
+     * @default true
+     */
     disablePlaygroundInProduction?: boolean
     maxComplexity?: number
     /**
@@ -1160,18 +1234,35 @@ export type Config = {
     filterConstraints?: SelectField['filterOptions']
     labels?: CollectionConfig['labels']
   }
-  /** Control the routing structure that Payload binds itself to. */
+  /**
+   * Control the routing structure that Payload binds itself to.
+   * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+   */
   routes?: {
-    /** The route for the admin panel.
-     * @example "/my-admin"
+    /**
+     * The route for the admin panel.
+     * @example "/my-admin" or "/"
      * @default "/admin"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
      */
     admin?: string
-    /** @default "/api"  */
+    /**
+     * The base route for all REST API endpoints.
+     * @default "/api"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     api?: string
-    /** @default "/graphql"  */
+    /**
+     * The base route for all GraphQL endpoints.
+     * @default "/graphql"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     graphQL?: string
-    /** @default "/graphql-playground" */
+    /**
+     * The route for the GraphQL Playground.
+     * @default "/graphql-playground"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     graphQLPlayground?: string
   }
   /** Secure string that Payload will use for any encryption workflows */
@@ -1249,6 +1340,7 @@ export type SanitizedConfig = {
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
+  experimental?: ExperimentalConfig
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
   jobs: SanitizedJobsConfig

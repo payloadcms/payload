@@ -16,9 +16,29 @@ export type ImportExportPluginConfig = {
    */
   debug?: boolean
   /**
+   * If true, disables the download button in the export preview UI
+   * @default false
+   */
+  disableDownload?: boolean
+  /**
    * Enable to force the export to run synchronously
    */
   disableJobsQueue?: boolean
+  /**
+   * If true, disables the save button in the export preview UI
+   * @default false
+   */
+  disableSave?: boolean
+  /**
+   * Forces a specific export format (`csv` or `json`) and hides the format dropdown from the UI.
+   *
+   * When defined, this overrides the user's ability to choose a format manually. The export will
+   * always use the specified format, and the format selection field will be hidden.
+   *
+   * If not set, the user can choose between CSV and JSON in the export UI.
+   * @default undefined
+   */
+  format?: 'csv' | 'json'
   /**
    * This function takes the default export collection configured in the plugin and allows you to override it by modifying and returning it
    * @param collection
@@ -35,6 +55,11 @@ export type ToCSVFunction = (args: {
    * The path of the column for the field, for arrays this includes the index (zero-based)
    */
   columnName: string
+  /**
+   * Alias for `row`, the object that accumulates CSV output.
+   * Use this to write additional fields into the exported row.
+   */
+  data: Record<string, unknown>
   /**
    * The top level document
    */

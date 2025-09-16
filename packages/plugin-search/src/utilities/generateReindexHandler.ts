@@ -149,17 +149,23 @@ export const generateReindexHandler =
 
     await initTransaction(req)
 
-    for (const collection of collections) {
-      try {
-        await deleteIndexes(collection)
-        await reindexCollection(collection)
-      } catch (err) {
-        const message = t('error:unableToReindexCollection', { collection })
-        payload.logger.error({ err, msg: message })
+    try {
+      const promises = collections.map(async (collection) => {
+        try {
+          await deleteIndexes(collection)
+          await reindexCollection(collection)
+        } catch (err) {
+          const message = t('error:unableToReindexCollection', { collection })
+          payload.logger.error({ err, msg: message })
 
-        await killTransaction(req)
-        return Response.json({ message }, { headers, status: 500 })
-      }
+          await killTransaction(req)
+          throw new Error(message)
+        }
+      })
+
+      await Promise.all(promises)
+    } catch (err: any) {
+      return Response.json({ message: err.message }, { headers, status: 500 })
     }
 
     const message = t('general:successfullyReindexed', {

@@ -3,7 +3,7 @@ import type { UpdateJobsArgs } from '../../database/types.js'
 import type { Job } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 
-import { jobAfterRead, jobsCollectionSlug } from '../config/index.js'
+import { jobAfterRead, jobsCollectionSlug } from '../config/collection.js'
 
 type BaseArgs = {
   data: Partial<Job>
@@ -40,6 +40,11 @@ export async function updateJob(args: ArgsByID & BaseArgs) {
   }
 }
 
+/**
+ * Helper for updating jobs in the most performant way possible.
+ * Handles deciding whether it can used direct db methods or not, and if so,
+ * manually runs the afterRead hook that populates the `taskStatus` property.
+ */
 export async function updateJobs({
   id,
   data,
@@ -76,6 +81,11 @@ export async function updateJobs({
       req.payload.db.name !== 'mongoose'
         ? ((await req.payload.db.beginTransaction()) as string)
         : undefined,
+  }
+
+  if (typeof data.updatedAt === 'undefined') {
+    // Ensure updatedAt date is always updated
+    data.updatedAt = new Date().toISOString()
   }
 
   const args: UpdateJobsArgs = id

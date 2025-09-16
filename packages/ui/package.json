@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.43.0",
+  "version": "3.55.1",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -35,6 +35,16 @@
     "./scss": {
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
+    },
+    "./icons/*": {
+      "import": "./src/icons/*/index.tsx",
+      "types": "./src/icons/*/index.tsx",
+      "default": "./src/icons/*/index.tsx"
+    },
+    "./elements/*": {
+      "import": "./src/elements/*/index.tsx",
+      "types": "./src/elements/*/index.tsx",
+      "default": "./src/elements/*/index.tsx"
     },
     "./elements/RenderServerComponent": {
       "import": "./src/elements/RenderServerComponent/index.tsx",
@@ -111,8 +121,10 @@
   "scripts": {
     "build": "pnpm build:reactcompiler",
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
-    "build:esbuild": "node bundle.js && rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client",
-    "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:types",
+    "build:bundle-for-analysis": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild esbuild --no-split",
+    "build:esbuild": "node bundle.js",
+    "build:esbuild:postprocess": "rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client && rm -rf dist/exports/shared && mv dist/exports/shared_optimized dist/exports/shared",
+    "build:reactcompiler": "rm -rf dist esbuild && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:esbuild:postprocess && pnpm build:types",
     "build:remove-artifact": "rm dist/prod/index.js",
     "build:swc": "swc ./src -d dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
@@ -156,8 +168,8 @@
     "@babel/preset-typescript": "7.27.1",
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.1.0",
-    "@types/react-dom": "19.1.2",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.1.0-rc.2",
     "esbuild": "0.25.5",

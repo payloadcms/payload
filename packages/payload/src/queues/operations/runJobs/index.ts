@@ -2,11 +2,14 @@ import type { Job } from '../../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
 import type { WorkflowConfig, WorkflowHandler } from '../../config/types/workflowTypes.js'
+import type { RunJobsSilent } from '../../localAPI.js'
 import type { RunJobResult } from './runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
-import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
-import { jobsCollectionSlug } from '../../config/index.js'
+import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
+import { jobsCollectionSlug } from '../../config/collection.js'
+import { JobCancelledError } from '../../errors/index.js'
+import { getCurrentDate } from '../../utilities/getCurrentDate.js'
 import { updateJob, updateJobs } from '../../utilities/updateJob.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
 import { importHandlerPath } from './runJob/importHandlerPath.js'
@@ -52,6 +55,15 @@ export type RunJobsArgs = {
    * If you want to run them in sequence, set this to true.
    */
   sequential?: boolean
+  /**
+   * If set to true, the job system will not log any output to the console (for both info and error logs).
+   * Can be an option for more granular control over logging.
+   *
+   * This will not automatically affect user-configured logs (e.g. if you call `console.log` or `payload.logger.info` in your job code).
+   *
+   * @default false
+   */
+  silent?: RunJobsSilent
   where?: Where
 }
 
@@ -83,6 +95,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       },
     },
     sequential,
+    silent = false,
     where: whereFromProps,
   } = args
 
@@ -118,7 +131,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         },
         {
           waitUntil: {
-            less_than: new Date().toISOString(),
+            less_than: getCurrentDate().toISOString(),
           },
         },
       ],
@@ -218,15 +231,22 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
-  payload.logger.info({
-    msg: `Running ${jobs.length} jobs.`,
-    new: newJobs?.length,
-    retrying: existingJobs?.length,
-  })
+  if (!silent || (typeof silent === 'object' && !silent.info)) {
+    payload.logger.info({
+      msg: `Running ${jobs.length} jobs.`,
+      new: newJobs?.length,
+      retrying: existingJobs?.length,
+    })
+  }
 
   const successfullyCompletedJobs: (number | string)[] = []
 
-  const runSingleJob = async (job: Job) => {
+  const runSingleJob = async (
+    job: Job,
+  ): Promise<{
+    id: number | string
+    result: RunJobResult
+  }> => {
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }
@@ -245,68 +265,94 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
           }
 
     if (!workflowConfig) {
-      return null // Skip jobs with no workflow configuration
+      return {
+        id: job.id,
+        result: {
+          status: 'error',
+        },
+      } // Skip jobs with no workflow configuration
     }
 
-    const updateJob = getUpdateJobFunction(job, jobReq)
+    try {
+      const updateJob = getUpdateJobFunction(job, jobReq)
 
-    // the runner will either be passed to the config
-    // OR it will be a path, which we will need to import via eval to avoid
-    // Next.js compiler dynamic import expression errors
-    let workflowHandler: WorkflowHandler | WorkflowJSON
-    if (
-      typeof workflowConfig.handler === 'function' ||
-      (typeof workflowConfig.handler === 'object' && Array.isArray(workflowConfig.handler))
-    ) {
-      workflowHandler = workflowConfig.handler
-    } else {
-      workflowHandler = await importHandlerPath<typeof workflowHandler>(workflowConfig.handler)
+      // the runner will either be passed to the config
+      // OR it will be a path, which we will need to import via eval to avoid
+      // Next.js compiler dynamic import expression errors
+      let workflowHandler: WorkflowHandler | WorkflowJSON
+      if (
+        typeof workflowConfig.handler === 'function' ||
+        (typeof workflowConfig.handler === 'object' && Array.isArray(workflowConfig.handler))
+      ) {
+        workflowHandler = workflowConfig.handler
+      } else {
+        workflowHandler = await importHandlerPath<typeof workflowHandler>(workflowConfig.handler)
 
-      if (!workflowHandler) {
-        const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
-        const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${jobLabel}.`
-        payload.logger.error(errorMessage)
+        if (!workflowHandler) {
+          const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
+          const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${jobLabel}.`
+          if (!silent || (typeof silent === 'object' && !silent.error)) {
+            payload.logger.error(errorMessage)
+          }
 
-        await updateJob({
-          error: {
-            error: errorMessage,
-          },
-          hasError: true,
-          processing: false,
+          await updateJob({
+            error: {
+              error: errorMessage,
+            },
+            hasError: true,
+            processing: false,
+          })
+
+          return {
+            id: job.id,
+            result: {
+              status: 'error-reached-max-retries',
+            },
+          }
+        }
+      }
+
+      if (typeof workflowHandler === 'function') {
+        const result = await runJob({
+          job,
+          req: jobReq,
+          silent,
+          updateJob,
+          workflowConfig,
+          workflowHandler,
         })
 
-        return
+        if (result.status === 'success') {
+          successfullyCompletedJobs.push(job.id)
+        }
+
+        return { id: job.id, result }
+      } else {
+        const result = await runJSONJob({
+          job,
+          req: jobReq,
+          silent,
+          updateJob,
+          workflowConfig,
+          workflowHandler,
+        })
+
+        if (result.status === 'success') {
+          successfullyCompletedJobs.push(job.id)
+        }
+
+        return { id: job.id, result }
       }
-    }
-
-    if (typeof workflowHandler === 'function') {
-      const result = await runJob({
-        job,
-        req: jobReq,
-        updateJob,
-        workflowConfig,
-        workflowHandler,
-      })
-
-      if (result.status !== 'error') {
-        successfullyCompletedJobs.push(job.id)
+    } catch (error) {
+      if (error instanceof JobCancelledError) {
+        return {
+          id: job.id,
+          result: {
+            status: 'error-reached-max-retries',
+          },
+        }
       }
-
-      return { id: job.id, result }
-    } else {
-      const result = await runJSONJob({
-        job,
-        req: jobReq,
-        updateJob,
-        workflowConfig,
-        workflowHandler,
-      })
-
-      if (result.status !== 'error') {
-        successfullyCompletedJobs.push(job.id)
-      }
-
-      return { id: job.id, result }
+      throw error
     }
   }
 
@@ -342,10 +388,12 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         })
       }
     } catch (err) {
-      payload.logger.error({
-        err,
-        msg: `Failed to delete jobs ${successfullyCompletedJobs.join(', ')} on complete`,
-      })
+      if (!silent || (typeof silent === 'object' && !silent.error)) {
+        payload.logger.error({
+          err,
+          msg: `Failed to delete jobs ${successfullyCompletedJobs.join(', ')} on complete`,
+        })
+      }
     }
   }
 

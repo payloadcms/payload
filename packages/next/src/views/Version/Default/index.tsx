@@ -40,7 +40,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   VersionToCreatedAtLabel,
   versionToID,
   versionToStatus,
-  versionToUseAsTitle,
 }) => {
   const { config, getEntityConfig } = useConfig()
   const { code } = useLocale()
@@ -67,7 +66,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     }
   }, [code, config.localization, selectedLocalesFromProps])
 
-  const { id: originalDocID, collectionSlug, globalSlug } = useDocumentInfo()
+  const { id: originalDocID, collectionSlug, globalSlug, isTrashed } = useDocumentInfo()
   const { startRouteTransition } = useRouteTransition()
 
   const { collectionConfig, globalConfig } = useMemo(() => {
@@ -238,6 +237,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             <SelectComparison
               collectionSlug={collectionSlug}
               docID={originalDocID}
+              globalSlug={globalSlug}
               onChange={onChangeVersionFrom}
               versionFromID={versionFromID}
               versionFromOptions={versionFromOptions}
@@ -251,7 +251,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             </div>
             <div className={`${baseClass}__version-to-version`}>
               {VersionToCreatedAtLabel}
-              {canUpdate && (
+              {canUpdate && !isTrashed && (
                 <Restore
                   className={`${baseClass}__restore`}
                   collectionConfig={collectionConfig}
@@ -271,9 +271,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         collectionConfig={collectionConfig}
         globalConfig={globalConfig}
         id={originalDocID}
+        isTrashed={isTrashed}
         versionToCreatedAtFormatted={versionToCreatedAtFormatted}
         versionToID={versionToID}
-        versionToUseAsTitle={versionToUseAsTitle}
       />
       <Gutter className={`${baseClass}__diff-wrap`}>
         <SelectedLocalesContext value={{ selectedLocales: locales.map((locale) => locale.name) }}>

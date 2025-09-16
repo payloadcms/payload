@@ -81,7 +81,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -115,8 +115,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   user?: Document
 }
 
-// eslint-disable-next-line no-restricted-exports
-export default async function createLocal<
+export async function createLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
 >(

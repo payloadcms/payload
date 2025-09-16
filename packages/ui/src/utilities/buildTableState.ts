@@ -2,9 +2,9 @@ import type {
   BuildTableStateArgs,
   ClientCollectionConfig,
   ClientConfig,
+  CollectionPreferences,
   Column,
   ErrorResult,
-  ListPreferences,
   PaginatedDocs,
   SanitizedCollectionConfig,
   ServerFunction,
@@ -15,6 +15,7 @@ import { APIError, formatErrors } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import { getClientConfig } from './getClientConfig.js'
+import { getColumns } from './getColumns.js'
 import { renderFilters, renderTable } from './renderTable.js'
 import { upsertPreferences } from './upsertPreferences.js'
 
@@ -22,7 +23,7 @@ type BuildTableStateSuccessResult = {
   clientConfig?: ClientConfig
   data: PaginatedDocs
   errors?: never
-  preferences: ListPreferences
+  preferences: CollectionPreferences
   renderedFilters: Map<string, React.ReactNode>
   state: Column[]
   Table: React.ReactNode
@@ -73,8 +74,8 @@ const buildTableState = async (
 ): Promise<BuildTableStateSuccessResult> => {
   const {
     collectionSlug,
-    columns,
-    docs: docsFromArgs,
+    columns: columnsFromArgs,
+    data: dataFromArgs,
     enableRowSelections,
     orderableFieldName,
     parent,
@@ -128,6 +129,7 @@ const buildTableState = async (
     config,
     i18n,
     importMap: payload.importMap,
+    user,
   })
 
   let collectionConfig: SanitizedCollectionConfig
@@ -142,24 +144,23 @@ const buildTableState = async (
     }
   }
 
-  const listPreferences = await upsertPreferences<ListPreferences>({
+  const collectionPreferences = await upsertPreferences<CollectionPreferences>({
     key: Array.isArray(collectionSlug)
       ? `${parent.collectionSlug}-${parent.joinPath}`
-      : `${collectionSlug}-list`,
+      : `collection-${collectionSlug}`,
     req,
     value: {
-      columns,
+      columns: columnsFromArgs,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       sort: query?.sort as string,
     },
   })
 
-  let docs = docsFromArgs
-  let data: PaginatedDocs
+  let data: PaginatedDocs = dataFromArgs
 
   // lookup docs, if desired, i.e. within `join` field which initialize with `depth: 0`
 
-  if (!docs || query) {
+  if (!data?.docs || query) {
     if (Array.isArray(collectionSlug)) {
       if (!parent) {
         throw new APIError('Unexpected array of collectionSlug, parent must be provided')
@@ -205,7 +206,6 @@ const buildTableState = async (
       for (let i = 0; i < segments.length; i++) {
         if (i === segments.length - 1) {
           data = parentDoc[segments[i]]
-          docs = data.docs
         } else {
           parentDoc = parentDoc[segments[i]]
         }
@@ -214,15 +214,15 @@ const buildTableState = async (
       data = await payload.find({
         collection: collectionSlug,
         depth: 0,
-        limit: query?.limit ? parseInt(query.limit, 10) : undefined,
+        draft: true,
+        limit: query?.limit,
         locale: req.locale,
         overrideAccess: false,
-        page: query?.page ? parseInt(query.page, 10) : undefined,
+        page: query?.page,
         sort: query?.sort,
         user: req.user,
         where: query?.where,
       })
-      docs = data.docs
     }
   }
 
@@ -231,13 +231,19 @@ const buildTableState = async (
     clientConfig,
     collectionConfig,
     collections: Array.isArray(collectionSlug) ? collectionSlug : undefined,
-    columnPreferences: Array.isArray(collectionSlug) ? listPreferences?.columns : undefined, // TODO, might not be neededcolumns,
-    columns,
-    docs,
+    columns: getColumns({
+      clientConfig,
+      collectionConfig: clientCollectionConfig,
+      collectionSlug,
+      columns: columnsFromArgs,
+      i18n: req.i18n,
+    }),
+    data,
     enableRowSelections,
     i18n: req.i18n,
     orderableFieldName,
     payload,
+    query,
     renderRowTypes,
     tableAppearance,
     useAsTitle: Array.isArray(collectionSlug)
@@ -253,7 +259,7 @@ const buildTableState = async (
 
   return {
     data,
-    preferences: listPreferences,
+    preferences: collectionPreferences,
     renderedFilters,
     state: columnState,
     Table,

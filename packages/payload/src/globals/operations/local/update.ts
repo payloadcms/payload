@@ -51,7 +51,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -93,7 +93,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   user?: Document
 }
 
-export default async function updateLocal<
+export async function updateGlobalLocal<
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
 >(

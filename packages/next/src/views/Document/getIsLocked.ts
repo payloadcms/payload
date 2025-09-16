@@ -42,10 +42,28 @@ export const getIsLocked = async ({
 
   const where: Where = {}
 
+  const lockDurationDefault = 300 // Default 5 minutes in seconds
+  const lockDuration =
+    typeof entityConfig.lockDocuments === 'object'
+      ? entityConfig.lockDocuments.duration
+      : lockDurationDefault
+  const lockDurationInMilliseconds = lockDuration * 1000
+
+  const now = new Date().getTime()
+
   if (globalConfig) {
-    where.globalSlug = {
-      equals: globalConfig.slug,
-    }
+    where.and = [
+      {
+        globalSlug: {
+          equals: globalConfig.slug,
+        },
+      },
+      {
+        updatedAt: {
+          greater_than: new Date(now - lockDurationInMilliseconds),
+        },
+      },
+    ]
   } else {
     where.and = [
       {
@@ -56,6 +74,11 @@ export const getIsLocked = async ({
       {
         'document.relationTo': {
           equals: collectionConfig.slug,
+        },
+      },
+      {
+        updatedAt: {
+          greater_than: new Date(now - lockDurationInMilliseconds),
         },
       },
     ]

@@ -24,6 +24,7 @@ export const customDocumentControlsSlug = 'custom-document-controls'
 export const customFieldsSlug = 'custom-fields'
 
 export const listDrawerSlug = 'with-list-drawer'
+export const virtualsSlug = 'virtuals'
 export const collectionSlugs = [
   usersCollectionSlug,
   customViews1CollectionSlug,
@@ -41,6 +42,7 @@ export const collectionSlugs = [
   customFieldsSlug,
   disableDuplicateSlug,
   listDrawerSlug,
+  virtualsSlug,
 ]
 
 export const customGlobalDocumentControlsSlug = 'custom-global-document-controls'

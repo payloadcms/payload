@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-exports */
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -7,8 +6,10 @@ import { Array } from './collections/Array.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CollectionCustomDocumentControls } from './collections/CustomDocumentControls.js'
 import { CustomFields } from './collections/CustomFields/index.js'
+import { CustomListDrawer } from './collections/CustomListDrawer/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
+import { DisableBulkEdit } from './collections/DisableBulkEdit.js'
 import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { EditMenuItems } from './collections/editMenuItems.js'
@@ -19,6 +20,7 @@ import { CollectionGroup2A } from './collections/Group2A.js'
 import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { ListDrawer } from './collections/ListDrawer.js'
+import { ListViewSelectAPI } from './collections/ListViewSelectAPI/index.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Placeholder } from './collections/Placeholder.js'
@@ -28,6 +30,7 @@ import { UploadCollection } from './collections/Upload.js'
 import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { UseAsTitleGroupField } from './collections/UseAsTitleGroupField.js'
 import { Users } from './collections/Users.js'
+import { Virtuals } from './collections/Virtuals.js'
 import { with300Documents } from './collections/With300Documents.js'
 import { GlobalCustomDocumentControls } from './globals/CustomDocumentControls.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
@@ -85,6 +88,10 @@ export default buildConfigWithDefaults({
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
+        collections: {
+          Component: '/components/views/CustomView/index.js#CustomView',
+          path: '/collections',
+        },
         CustomDefaultView: {
           Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
           path: '/custom-default-view',
@@ -183,6 +190,10 @@ export default buildConfigWithDefaults({
     ListDrawer,
     Placeholder,
     UseAsTitleGroupField,
+    DisableBulkEdit,
+    CustomListDrawer,
+    ListViewSelectAPI,
+    Virtuals,
   ],
   globals: [
     GlobalHidden,

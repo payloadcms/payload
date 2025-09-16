@@ -1,7 +1,7 @@
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import {
@@ -27,6 +27,23 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
     const { disableErrors, global, overrideAccess, where } = args
     const req = args.req!
     const { payload } = req
+
+    // /////////////////////////////////////
+    // beforeOperation - Global
+    // /////////////////////////////////////
+
+    if (global.hooks?.beforeOperation?.length) {
+      for (const hook of global.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            context: req.context,
+            global,
+            operation: 'countVersions',
+            req,
+          })) || args
+      }
+    }
 
     // /////////////////////////////////////
     // Access

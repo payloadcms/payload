@@ -1,5 +1,3 @@
-/* eslint-disable no-restricted-exports */
-
 import type { CollectionSlug, File } from 'payload'
 
 import path from 'path'
@@ -13,7 +11,11 @@ import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/ind
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWithSearchQueries/index.js'
 import { AdminUploadControl } from './collections/AdminUploadControl/index.js'
+import { AnyImageTypeCollection } from './collections/AnyImageType/index.js'
+import { BulkUploadsCollection } from './collections/BulkUploads/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
+import { FileMimeType } from './collections/FileMimeType/index.js'
+import { SimpleRelationshipCollection } from './collections/SimpleRelationship/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
 import {
@@ -25,19 +27,30 @@ import {
   enlargeSlug,
   focalNoSizesSlug,
   hideFileInputOnCreateSlug,
+  imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
+  mediaWithImageSizeAdminPropsSlug,
   mediaWithoutCacheTagsSlug,
+  mediaWithoutDeleteAccessSlug,
   mediaWithoutRelationPreviewSlug,
   mediaWithRelationPreviewSlug,
+  noRestrictFileMimeTypesSlug,
+  noRestrictFileTypesSlug,
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
+  restrictFileTypesSlug,
+  skipAllowListSafeFetchMediaSlug,
+  skipSafeFetchHeaderFilterSlug,
+  skipSafeFetchMediaSlug,
+  svgOnlySlug,
   threeDimensionalSlug,
   unstoredMediaSlug,
   versionSlug,
   withoutEnlargeSlug,
 } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -297,6 +310,26 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: imageSizesOnlySlug,
+      fields: [],
+      upload: {
+        crop: false,
+        focalPoint: false,
+        imageSizes: [
+          {
+            name: 'sizeOne',
+            height: 300,
+            width: 400,
+          },
+          {
+            name: 'sizeTwo',
+            height: 400,
+            width: 300,
+          },
+        ],
+      },
+    },
+    {
       slug: focalNoSizesSlug,
       fields: [],
       upload: {
@@ -308,7 +341,12 @@ export default buildConfigWithDefaults({
     },
     {
       slug: mediaSlug,
-      fields: [],
+      fields: [
+        {
+          type: 'text',
+          name: 'alt',
+        },
+      ],
       upload: {
         staticDir: path.resolve(dirname, './media'),
         // crop: false,
@@ -427,6 +465,52 @@ export default buildConfigWithDefaults({
           ],
         },
         staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
+      slug: skipSafeFetchMediaSlug,
+      fields: [],
+      upload: {
+        skipSafeFetch: true,
+        staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
+      slug: skipSafeFetchHeaderFilterSlug,
+      fields: [],
+      upload: {
+        skipSafeFetch: true,
+        staticDir: path.resolve(dirname, './media'),
+        externalFileHeaderFilter: (headers) => headers, // Keep all headers including cookies
+      },
+    },
+    {
+      slug: skipAllowListSafeFetchMediaSlug,
+      fields: [],
+      upload: {
+        skipSafeFetch: [{ protocol: 'http', hostname: '127.0.0.1', port: '', search: '' }],
+        staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
+      slug: restrictFileTypesSlug,
+      fields: [],
+      upload: {
+        allowRestrictedFileTypes: false,
+      },
+    },
+    {
+      slug: noRestrictFileTypesSlug,
+      fields: [],
+      upload: {
+        allowRestrictedFileTypes: true,
+      },
+    },
+    {
+      slug: noRestrictFileMimeTypesSlug,
+      fields: [],
+      upload: {
+        mimeTypes: ['text/html'],
       },
     },
     {
@@ -638,6 +722,7 @@ export default buildConfigWithDefaults({
     },
     Uploads1,
     Uploads2,
+    AnyImageTypeCollection,
     AdminThumbnailFunction,
     AdminThumbnailWithSearchQueries,
     AdminThumbnailSize,
@@ -843,6 +928,62 @@ export default buildConfigWithDefaults({
         staticDir: path.resolve(dirname, './media'),
       },
     },
+    BulkUploadsCollection,
+    SimpleRelationshipCollection,
+    FileMimeType,
+    {
+      slug: svgOnlySlug,
+      fields: [],
+      upload: {
+        mimeTypes: ['image/svg+xml'],
+        staticDir: path.resolve(dirname, './svg-only'),
+      },
+    },
+    {
+      slug: mediaWithoutDeleteAccessSlug,
+      fields: [],
+      upload: true,
+      access: { delete: () => false },
+    },
+    {
+      slug: mediaWithImageSizeAdminPropsSlug,
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'one',
+            height: 200,
+            width: 200,
+            admin: {
+              disableListFilter: true,
+              disableListColumn: true,
+            },
+          },
+          {
+            name: 'two',
+            height: 300,
+            width: 300,
+            admin: {
+              disableListColumn: true,
+            },
+          },
+          {
+            name: 'three',
+            height: 400,
+            width: 400,
+            admin: {
+              disableListColumn: false,
+              disableListFilter: true,
+            },
+          },
+          {
+            name: 'four',
+            height: 400,
+            width: 300,
+          },
+        ],
+      },
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
@@ -865,6 +1006,8 @@ export default buildConfigWithDefaults({
       data: {},
       file: imageFile,
     })
+
+    await payload.create({ collection: mediaWithoutDeleteAccessSlug, data: {}, file: imageFile })
 
     const { id: versionedImage } = await payload.create({
       collection: versionSlug,

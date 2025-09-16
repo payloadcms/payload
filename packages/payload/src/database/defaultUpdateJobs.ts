@@ -1,7 +1,7 @@
 import type { DatabaseAdapter, Job } from '../index.js'
 import type { UpdateJobs } from './types.js'
 
-import { jobsCollectionSlug } from '../queues/config/index.js'
+import { jobsCollectionSlug } from '../queues/config/collection.js'
 
 export const defaultUpdateJobs: UpdateJobs = async function updateMany(
   this: DatabaseAdapter,

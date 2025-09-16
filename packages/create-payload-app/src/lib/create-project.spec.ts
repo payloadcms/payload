@@ -7,7 +7,7 @@ import path from 'path'
 
 import type { CliArgs, DbType, ProjectExample, ProjectTemplate } from '../types.js'
 
-import { createProject } from './create-project.js'
+import { createProject, updatePackageJSONDependencies } from './create-project.js'
 import { dbReplacements } from './replacements.js'
 import { getValidTemplates } from './templates.js'
 
@@ -177,6 +177,38 @@ describe('createProject', () => {
         expect(content).not.toContain('// database-adapter-config-start')
         expect(content).not.toContain('// database-adapter-config-end')
         expect(content).toContain(dbReplacement.configReplacement().join('\n'))
+      })
+    })
+
+    describe('updates package.json', () => {
+      it('updates package name and bumps workspace versions', async () => {
+        const latestVersion = '3.0.0'
+        const initialJSON = {
+          name: 'test-project',
+          version: '1.0.0',
+          dependencies: {
+            '@payloadcms/db-mongodb': 'workspace:*',
+            payload: 'workspace:*',
+            '@payloadcms/ui': 'workspace:*',
+          },
+        }
+
+        const correctlyModifiedJSON = {
+          name: 'test-project',
+          version: '1.0.0',
+          dependencies: {
+            '@payloadcms/db-mongodb': `${latestVersion}`,
+            payload: `${latestVersion}`,
+            '@payloadcms/ui': `${latestVersion}`,
+          },
+        }
+
+        updatePackageJSONDependencies({
+          latestVersion,
+          packageJson: initialJSON,
+        })
+
+        expect(initialJSON).toEqual(correctlyModifiedJSON)
       })
     })
   })

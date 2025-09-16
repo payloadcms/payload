@@ -1,10 +1,16 @@
 import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
 
+import { JobCancelledError } from '../../../errors/index.js'
 import { updateJob } from '../../../utilities/updateJob.js'
 
 export type UpdateJobFunction = (jobData: Partial<Job>) => Promise<Job>
 
+/**
+ * Helper for updating a job that does the following, additionally to updating the job:
+ * - Merges incoming data from the updated job into the original job object
+ * - Handles job cancellation by throwing a `JobCancelledError` if the job was cancelled.
+ */
 export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFunction {
   return async (jobData) => {
     const updatedJob = await updateJob({
@@ -14,6 +20,10 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
       disableTransaction: true,
       req,
     })
+
+    if (!updatedJob) {
+      return job
+    }
 
     // Update job object like this to modify the original object - that way, incoming changes (e.g. taskStatus field that will be re-generated through the hook) will be reflected in the calling function
     for (const key in updatedJob) {
@@ -31,11 +41,9 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
     }
 
     if ((updatedJob?.error as Record<string, unknown>)?.cancelled) {
-      const cancelledError = new Error('Job cancelled') as { cancelled: boolean } & Error
-      cancelledError.cancelled = true
-      throw cancelledError
+      throw new JobCancelledError({ job })
     }
 
-    return updatedJob!
+    return updatedJob
   }
 }

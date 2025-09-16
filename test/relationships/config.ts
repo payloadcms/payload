@@ -230,9 +230,32 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
+          name: 'select',
+          type: 'select',
+          hasMany: true,
+          options: ['a', 'b', 'c'],
+        },
+        {
           name: 'director',
           type: 'relationship',
           relationTo: 'directors',
+        },
+        {
+          type: 'array',
+          name: 'array',
+          fields: [
+            {
+              name: 'director',
+              type: 'relationship',
+              relationTo: 'directors',
+              hasMany: true,
+            },
+            {
+              name: 'polymorphic',
+              type: 'relationship',
+              relationTo: ['directors'],
+            },
+          ],
         },
       ],
     },

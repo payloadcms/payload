@@ -106,6 +106,7 @@ export interface Config {
       ThrowError: TaskThrowError;
       ReturnError: TaskReturnError;
       ReturnCustomError: TaskReturnCustomError;
+      DoNothingTask: TaskDoNothingTask;
       inline: {
         input: unknown;
         output: unknown;
@@ -123,6 +124,8 @@ export interface Config {
       workflowRetries2TasksRetriesUndefined: WorkflowWorkflowRetries2TasksRetriesUndefined;
       workflowRetries2TasksRetries0: WorkflowWorkflowRetries2TasksRetries0;
       inlineTaskTest: WorkflowInlineTaskTest;
+      failsImmediately: WorkflowFailsImmediately;
+      fastParallelTask: WorkflowFastParallelTask;
       inlineTaskTestDelayed: WorkflowInlineTaskTestDelayed;
       externalWorkflow: WorkflowExternalWorkflow;
       retriesBackoffTest: WorkflowRetriesBackoffTest;
@@ -203,6 +206,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -268,7 +278,8 @@ export interface PayloadJob {
           | 'ExternalTask'
           | 'ThrowError'
           | 'ReturnError'
-          | 'ReturnCustomError';
+          | 'ReturnCustomError'
+          | 'DoNothingTask';
         taskID: string;
         input?:
           | {
@@ -314,6 +325,8 @@ export interface PayloadJob {
         | 'workflowRetries2TasksRetriesUndefined'
         | 'workflowRetries2TasksRetries0'
         | 'inlineTaskTest'
+        | 'failsImmediately'
+        | 'fastParallelTask'
         | 'inlineTaskTestDelayed'
         | 'externalWorkflow'
         | 'retriesBackoffTest'
@@ -336,6 +349,7 @@ export interface PayloadJob {
         | 'ThrowError'
         | 'ReturnError'
         | 'ReturnCustomError'
+        | 'DoNothingTask'
       )
     | null;
   queue?: string | null;
@@ -444,6 +458,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -625,6 +646,16 @@ export interface TaskReturnCustomError {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskDoNothingTask".
+ */
+export interface TaskDoNothingTask {
+  input: {
+    message: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MyUpdatePostWorkflowType".
  */
 export interface MyUpdatePostWorkflowType {
@@ -722,6 +753,22 @@ export interface WorkflowWorkflowRetries2TasksRetries0 {
 export interface WorkflowInlineTaskTest {
   input: {
     message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowFailsImmediately".
+ */
+export interface WorkflowFailsImmediately {
+  input?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowFastParallelTask".
+ */
+export interface WorkflowFastParallelTask {
+  input: {
+    amount: number;
   };
 }
 /**

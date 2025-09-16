@@ -1,17 +1,10 @@
-import type { FlattenedField } from 'payload'
-
 import { sql } from 'drizzle-orm'
+import { APIError, type FlattenedField } from 'payload'
 import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
-import type {
-  ArrayRowToInsert,
-  BlockRowToInsert,
-  NumberToDelete,
-  RelationshipToDelete,
-  TextToDelete,
-} from './types.js'
+import type { NumberToDelete, RelationshipToDelete, RowToInsert, TextToDelete } from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
 import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
@@ -24,16 +17,20 @@ import { transformTexts } from './texts.js'
 
 type Args = {
   adapter: DrizzleAdapter
-  arrays: {
-    [tableName: string]: ArrayRowToInsert[]
-  }
+  /**
+   * This will delete the array table and then re-insert all the new array rows.
+   */
+  arrays: RowToInsert['arrays']
+  /**
+   * Array rows to push to the existing array. This will simply create
+   * a new row in the array table.
+   */
+  arraysToPush: RowToInsert['arraysToPush']
   /**
    * This is the name of the base table
    */
   baseTableName: string
-  blocks: {
-    [blockType: string]: BlockRowToInsert[]
-  }
+  blocks: RowToInsert['blocks']
   blocksToDelete: Set<string>
   /**
    * A snake-case field prefix, representing prior fields
@@ -41,6 +38,7 @@ type Args = {
    */
   columnPrefix: string
   data: Record<string, unknown>
+  enableAtomicWrites?: boolean
   existingLocales?: Record<string, unknown>[]
   /**
    * A prefix that will retain camel-case formatting, representing prior fields
@@ -82,11 +80,13 @@ type Args = {
 export const traverseFields = ({
   adapter,
   arrays,
+  arraysToPush,
   baseTableName,
   blocks,
   blocksToDelete,
   columnPrefix,
   data,
+  enableAtomicWrites,
   existingLocales,
   fieldPrefix,
   fields,
@@ -128,13 +128,24 @@ export const traverseFields = ({
     if (field.type === 'array') {
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
 
-      if (!arrays[arrayTableName]) {
-        arrays[arrayTableName] = []
-      }
-
       if (isLocalized) {
-        if (typeof data[field.name] === 'object' && data[field.name] !== null) {
-          Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
+        let value: {
+          [locale: string]: unknown[]
+        } = data[field.name] as any
+
+        let push = false
+        if (typeof value === 'object' && '$push' in value) {
+          value = value.$push as any
+          push = true
+        }
+
+        if (typeof value === 'object' && value !== null) {
+          Object.entries(value).forEach(([localeKey, _localeData]) => {
+            let localeData = _localeData
+            if (push && !Array.isArray(localeData)) {
+              localeData = [localeData]
+            }
+
             if (Array.isArray(localeData)) {
               const newRows = transformArray({
                 adapter,
@@ -157,18 +168,35 @@ export const traverseFields = ({
                 withinArrayOrBlockLocale: localeKey,
               })
 
-              arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
+              if (push) {
+                if (!arraysToPush[arrayTableName]) {
+                  arraysToPush[arrayTableName] = []
+                }
+                arraysToPush[arrayTableName] = arraysToPush[arrayTableName].concat(newRows)
+              } else {
+                if (!arrays[arrayTableName]) {
+                  arrays[arrayTableName] = []
+                }
+                arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
+              }
             }
           })
         }
       } else {
+        let value = data[field.name]
+        let push = false
+        if (typeof value === 'object' && '$push' in value) {
+          value = Array.isArray(value.$push) ? value.$push : [value.$push]
+          push = true
+        }
+
         const newRows = transformArray({
           adapter,
           arrayTableName,
           baseTableName,
           blocks,
           blocksToDelete,
-          data: data[field.name],
+          data: value,
           field,
           numbers,
           numbersToDelete,
@@ -182,7 +210,17 @@ export const traverseFields = ({
           withinArrayOrBlockLocale,
         })
 
-        arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
+        if (push) {
+          if (!arraysToPush[arrayTableName]) {
+            arraysToPush[arrayTableName] = []
+          }
+          arraysToPush[arrayTableName] = arraysToPush[arrayTableName].concat(newRows)
+        } else {
+          if (!arrays[arrayTableName]) {
+            arrays[arrayTableName] = []
+          }
+          arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
+        }
       }
 
       return
@@ -263,11 +301,13 @@ export const traverseFields = ({
             traverseFields({
               adapter,
               arrays,
+              arraysToPush,
               baseTableName,
               blocks,
               blocksToDelete,
               columnPrefix: `${columnName}_`,
               data: localeData as Record<string, unknown>,
+              enableAtomicWrites,
               existingLocales,
               fieldPrefix: `${fieldName}_`,
               fields: field.flattenedFields,
@@ -296,6 +336,7 @@ export const traverseFields = ({
           traverseFields({
             adapter,
             arrays,
+            arraysToPush,
             baseTableName,
             blocks,
             blocksToDelete,
@@ -544,6 +585,19 @@ export const traverseFields = ({
     valuesToTransform.forEach(({ localeKey, ref, value }) => {
       let formattedValue = value
 
+      if (field.type === 'date') {
+        if (fieldName === 'updatedAt' && typeof formattedValue === 'undefined') {
+          // let the db handle this. If formattedValue is explicitly set to `null` we should not set it - this means we don't want to change the value of updatedAt.
+          formattedValue = new Date().toISOString()
+        } else {
+          if (typeof value === 'number' && !Number.isNaN(value)) {
+            formattedValue = new Date(value).toISOString()
+          } else if (value instanceof Date) {
+            formattedValue = value.toISOString()
+          }
+        }
+      }
+
       if (typeof value !== 'undefined') {
         if (value && field.type === 'point' && adapter.name !== 'sqlite') {
           formattedValue = sql`ST_GeomFromGeoJSON(${JSON.stringify(value)})`
@@ -553,18 +607,21 @@ export const traverseFields = ({
           formattedValue = JSON.stringify(value)
         }
 
-        if (field.type === 'date') {
-          if (typeof value === 'number' && !Number.isNaN(value)) {
-            formattedValue = new Date(value).toISOString()
-          } else if (value instanceof Date) {
-            formattedValue = value.toISOString()
+        if (
+          field.type === 'number' &&
+          value &&
+          typeof value === 'object' &&
+          '$inc' in value &&
+          typeof value.$inc === 'number'
+        ) {
+          if (!enableAtomicWrites) {
+            throw new APIError(
+              'The passed data must not contain any nested fields for atomic writes',
+            )
           }
-        }
-      }
 
-      if (field.type === 'date' && fieldName === 'updatedAt') {
-        // let the db handle this
-        formattedValue = new Date().toISOString()
+          formattedValue = sql.raw(`${columnName} + ${value.$inc}`)
+        }
       }
 
       if (typeof formattedValue !== 'undefined') {

@@ -2,10 +2,11 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const etTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-tenant-switch--body':
-      'Te olete tegemas omandiõiguse muudatust <0>{{fromTenant}}</0>lt <0>{{toTenant}}</0>le.',
-    'confirm-tenant-switch--heading': 'Kinnita {{tenantLabel}} muutus',
-    'field-assignedTentant-label': 'Määratud üürnik',
+    'confirm-modal-tenant-switch--body':
+      'Te olete just muutmas omandiõigust <0>{{fromTenant}}</0> -lt <0>{{toTenant}}</0> -le.',
+    'confirm-modal-tenant-switch--heading': 'Kinnita {{tenantLabel}} muutus',
+    'field-assignedTenant-label': 'Määratud üürnik',
+    'nav-tenantSelector-label': 'Üürnik',
   },
 }
 

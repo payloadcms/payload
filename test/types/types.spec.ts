@@ -164,12 +164,12 @@ describe('Types testing', () => {
   describe('views', () => {
     test('default view config', () => {
       expect<DefaultDocumentViewConfig>().type.not.toBeAssignableWith<{
-        path: string
+        path: `/${string}`
       }>()
 
       expect<CustomDocumentViewConfig>().type.toBeAssignableWith<{
         Component: string
-        path: string
+        path: `/${string}`
       }>()
     })
   })

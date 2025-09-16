@@ -142,6 +142,7 @@ import type {
   JsonObject,
   Operation,
   PayloadRequest,
+  PickPreserveOptional,
   Where,
 } from '../../types/index.js'
 import type {
@@ -632,8 +633,8 @@ export type TextField = {
   Omit<FieldBase, 'validate'>
 
 export type TextFieldClient = {
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  admin?: AdminClient & Pick<TextField['admin'], 'autoComplete' | 'placeholder' | 'rtl'>
+  admin?: AdminClient &
+    PickPreserveOptional<NonNullable<TextField['admin']>, 'autoComplete' | 'placeholder' | 'rtl'>
 } & FieldBaseClient &
   Pick<TextField, 'hasMany' | 'maxLength' | 'maxRows' | 'minLength' | 'minRows' | 'type'>
 
@@ -653,8 +654,8 @@ export type EmailField = {
 } & Omit<FieldBase, 'validate'>
 
 export type EmailFieldClient = {
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  admin?: AdminClient & Pick<EmailField['admin'], 'autoComplete' | 'placeholder'>
+  admin?: AdminClient &
+    PickPreserveOptional<NonNullable<EmailField['admin']>, 'autoComplete' | 'placeholder'>
 } & FieldBaseClient &
   Pick<EmailField, 'type'>
 
@@ -677,8 +678,8 @@ export type TextareaField = {
 } & Omit<FieldBase, 'validate'>
 
 export type TextareaFieldClient = {
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  admin?: AdminClient & Pick<TextareaField['admin'], 'placeholder' | 'rows' | 'rtl'>
+  admin?: AdminClient &
+    PickPreserveOptional<NonNullable<TextareaField['admin']>, 'placeholder' | 'rows' | 'rtl'>
 } & FieldBaseClient &
   Pick<TextareaField, 'maxLength' | 'minLength' | 'type'>
 
@@ -752,7 +753,7 @@ export type NamedGroupField = {
 export type UnnamedGroupField = {
   interfaceName?: never
   localized?: never
-} & Omit<GroupBase, 'name' | 'virtual'>
+} & Omit<GroupBase, 'hooks' | 'name' | 'virtual'>
 
 export type GroupField = NamedGroupField | UnnamedGroupField
 
@@ -776,7 +777,7 @@ export type RowField = {
   admin?: Omit<Admin, 'description'>
   fields: Field[]
   type: 'row'
-} & Omit<FieldBase, 'admin' | 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
+} & Omit<FieldBase, 'admin' | 'hooks' | 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
 
 export type RowFieldClient = {
   admin?: Omit<AdminClient, 'description'>
@@ -815,7 +816,7 @@ export type CollapsibleField = {
       label: Required<FieldBase['label']>
     }
 ) &
-  Omit<FieldBase, 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
+  Omit<FieldBase, 'hooks' | 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
 
 export type CollapsibleFieldClient = {
   admin?: {
@@ -862,7 +863,7 @@ export type UnnamedTab = {
     | LabelFunction
     | string
   localized?: never
-} & Omit<TabBase, 'name' | 'virtual'>
+} & Omit<TabBase, 'hooks' | 'name' | 'virtual'>
 
 export type Tab = NamedTab | UnnamedTab
 export type TabsField = {
@@ -1268,6 +1269,8 @@ export type RichTextField<
 > = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Error?: CustomComponent
       Label?: CustomComponent
     } & Admin['components']

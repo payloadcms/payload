@@ -52,7 +52,7 @@ export type Options<TSlug extends CollectionSlug> = {
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -86,6 +86,15 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   sort?: Sort
   /**
+   * When set to `true`, the query will include both normal and trashed (soft-deleted) documents.
+   * To query only trashed documents, pass `trash: true` and combine with a `where` clause filtering by `deletedAt`.
+   * By default (`false`), the query will only include normal documents and exclude those with a `deletedAt` field.
+   *
+   * This argument has no effect unless `trash` is enabled on the collection.
+   * @default false
+   */
+  trash?: boolean
+  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
@@ -95,7 +104,7 @@ export type Options<TSlug extends CollectionSlug> = {
   where?: Where
 }
 
-export default async function findVersionsLocal<TSlug extends CollectionSlug>(
+export async function findVersionsLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<PaginatedDocs<TypeWithVersion<DataFromCollectionSlug<TSlug>>>> {
@@ -109,6 +118,7 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     select,
     showHiddenFields,
     sort,
+    trash = false,
     where,
   } = options
 
@@ -131,6 +141,7 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     select,
     showHiddenFields,
     sort,
+    trash,
     where,
   })
 }

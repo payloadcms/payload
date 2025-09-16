@@ -15,7 +15,7 @@ import type {
   SelectFromGlobalSlug,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -76,6 +76,23 @@ export const updateOperation = async <
 
   try {
     const shouldCommit = !disableTransaction && (await initTransaction(req))
+
+    // /////////////////////////////////////
+    // beforeOperation - Global
+    // /////////////////////////////////////
+
+    if (globalConfig.hooks?.beforeOperation?.length) {
+      for (const hook of globalConfig.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            context: args.req.context,
+            global: globalConfig,
+            operation: 'update',
+            req: args.req,
+          })) || args
+      }
+    }
 
     let { data } = args
 
@@ -256,6 +273,9 @@ export const updateOperation = async <
         result.createdAt = new Date().toISOString()
       }
 
+      // Ensure updatedAt date is always updated
+      result.updatedAt = new Date().toISOString()
+
       if (globalExists) {
         result = await payload.db.updateGlobal({
           slug,
@@ -282,6 +302,8 @@ export const updateOperation = async <
         docWithLocales: result,
         draft: shouldSaveDraft,
         global: globalConfig,
+        locale,
+        operation: 'update',
         payload,
         publishSpecificLocale,
         req,

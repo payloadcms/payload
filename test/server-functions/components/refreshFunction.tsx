@@ -7,7 +7,6 @@ import config from '../config.js'
 export async function refreshFunction() {
   try {
     return await refresh({
-      collection: 'users', // update this to your collection slug
       config,
     })
   } catch (error) {

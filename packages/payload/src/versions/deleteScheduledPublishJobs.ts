@@ -1,7 +1,7 @@
 import type { PayloadRequest } from '../types/index.js'
 
 import { type Payload } from '../index.js'
-import { jobsCollectionSlug } from '../queues/config/index.js'
+import { jobsCollectionSlug } from '../queues/config/collection.js'
 
 type Args = {
   id?: number | string

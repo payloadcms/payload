@@ -11,7 +11,7 @@ import type { SelectFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
-import { findOneOperation } from '../findOne.js'
+import { findOneOperation, type GlobalFindOneArgs } from '../findOne.js'
 
 export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   /**
@@ -21,6 +21,11 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * to determine if it should run or not.
    */
   context?: RequestContext
+  /**
+   * You may pass the document data directly which will skip the `db.findOne` database query.
+   * This is useful if you want to use this endpoint solely for running hooks and populating data.
+   */
+  data?: Record<string, unknown>
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
@@ -43,7 +48,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -73,9 +78,9 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<GlobalFindOneArgs, 'flattenLocales'>
 
-export default async function findOneLocal<
+export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
 >(
@@ -84,8 +89,10 @@ export default async function findOneLocal<
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
   const {
     slug: globalSlug,
+    data,
     depth,
     draft = false,
+    flattenLocales,
     includeLockStatus,
     overrideAccess = true,
     populate,
@@ -101,8 +108,10 @@ export default async function findOneLocal<
 
   return findOneOperation({
     slug: globalSlug as string,
+    data,
     depth,
     draft,
+    flattenLocales,
     globalConfig,
     includeLockStatus,
     overrideAccess,

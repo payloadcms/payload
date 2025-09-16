@@ -4,15 +4,52 @@ import { expect } from '@playwright/test'
 
 import { exactText } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
+import { navigateToDoc, navigateToTrashedDoc } from '../helpers/e2e/navigateToDoc.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
+
+export const toggleLivePreview = async (
+  page: Page,
+  options?: {
+    targetState?: 'off' | 'on'
+  },
+): Promise<void> => {
+  const toggler = page.locator('#live-preview-toggler')
+  await expect(toggler).toBeVisible()
+
+  const isActive = await toggler.evaluate((el) =>
+    el.classList.contains('live-preview-toggler--active'),
+  )
+
+  if (isActive && (options?.targetState === 'off' || !options?.targetState)) {
+    await toggler.click()
+    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+  }
+
+  if (!isActive && (options?.targetState === 'on' || !options?.targetState)) {
+    await toggler.click()
+    await expect(toggler).toHaveClass(/live-preview-toggler--active/)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
+  }
+}
 
 export const goToCollectionLivePreview = async (
   page: Page,
   urlUtil: AdminUrlUtil,
 ): Promise<void> => {
   await navigateToDoc(page, urlUtil)
-  await page.goto(`${page.url()}/preview`)
+
+  await toggleLivePreview(page, {
+    targetState: 'on',
+  })
+}
+
+export const goToTrashedLivePreview = async (page: Page, urlUtil: AdminUrlUtil): Promise<void> => {
+  await navigateToTrashedDoc(page, urlUtil)
+
+  await toggleLivePreview(page, {
+    targetState: 'on',
+  })
 }
 
 export const goToGlobalLivePreview = async (
@@ -20,9 +57,12 @@ export const goToGlobalLivePreview = async (
   slug: string,
   serverURL: string,
 ): Promise<void> => {
-  const global = new AdminUrlUtil(serverURL, slug)
-  const previewURL = `${global.global(slug)}/preview`
-  await page.goto(previewURL)
+  const globalUrlUtil = new AdminUrlUtil(serverURL, slug)
+  await page.goto(globalUrlUtil.global(slug))
+
+  await toggleLivePreview(page, {
+    targetState: 'on',
+  })
 }
 
 export const selectLivePreviewBreakpoint = async (page: Page, breakpointLabel: string) => {

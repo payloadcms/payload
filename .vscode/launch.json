@@ -140,6 +140,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm tsx --no-deprecation test/dev.ts trash",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Trash",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm tsx --no-deprecation test/dev.ts uploads",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Uploads",
@@ -150,6 +157,13 @@
       "command": "pnpm tsx --no-deprecation test/dev.ts field-error-states",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Field Error States",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "pnpm tsx --no-deprecation test/dev.ts plugin-search",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev plugin-search",
       "request": "launch",
       "type": "node-terminal"
     },

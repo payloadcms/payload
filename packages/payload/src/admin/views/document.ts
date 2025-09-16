@@ -2,6 +2,7 @@ import type { SanitizedPermissions } from '../../auth/types.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { PayloadComponent, SanitizedConfig, ServerProps } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { Data, DocumentSlots, FormState } from '../types.js'
 import type { InitPageResult, ViewTypes } from './index.js'
 
@@ -43,13 +44,14 @@ export type DocumentViewClientProps = {
 /**
  * @todo: This should be renamed to `DocumentSubViewType` (singular)
  */
-export type DocumentSubViewTypes = 'api' | 'default' | 'livePreview' | 'version' | 'versions'
+export type DocumentSubViewTypes = 'api' | 'default' | 'version' | 'versions'
 
 export type DocumentTabServerPropsOnly = {
   readonly apiURL?: string
   readonly collectionConfig?: SanitizedCollectionConfig
   readonly globalConfig?: SanitizedGlobalConfig
   readonly permissions: SanitizedPermissions
+  readonly req: PayloadRequest
 } & ServerProps
 
 export type DocumentTabClientProps = {
@@ -60,9 +62,13 @@ export type DocumentTabServerProps = DocumentTabClientProps & DocumentTabServerP
 
 export type DocumentTabCondition = (args: {
   collectionConfig: SanitizedCollectionConfig
+  /**
+   * @deprecated: Use `req.payload.config` instead. This will be removed in v4.
+   */
   config: SanitizedConfig
   globalConfig: SanitizedGlobalConfig
   permissions: SanitizedPermissions
+  req: PayloadRequest
 }) => boolean
 
 // Everything is optional because we merge in the defaults

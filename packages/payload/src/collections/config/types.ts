@@ -67,7 +67,7 @@ export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
 
 export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
   TData,
-  'createdAt' | 'id' | 'sizes' | 'updatedAt'
+  'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'
 >
 
 export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
@@ -82,15 +82,19 @@ export type HookOperationType =
   | 'forgotPassword'
   | 'login'
   | 'read'
+  | 'readDistinct'
   | 'refresh'
   | 'resetPassword'
+  | 'restoreVersion'
   | 'update'
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
 
 export type BeforeOperationHook = (args: {
   args?: any
-  /** The collection which this hook is being run on */
+  /**
+   *  The collection which this hook is being run on
+   */
   collection: SanitizedCollectionConfig
   context: RequestContext
   /**
@@ -268,7 +272,7 @@ export type EnableFoldersOptions = {
   debug?: boolean
 }
 
-export type BaseListFilter = (args: {
+export type BaseFilter = (args: {
   limit: number
   locale?: TypedLocale
   page: number
@@ -276,7 +280,31 @@ export type BaseListFilter = (args: {
   sort: string
 }) => null | Promise<null | Where> | Where
 
+/**
+ * @deprecated Use `BaseFilter` instead.
+ */
+export type BaseListFilter = BaseFilter
+
 export type CollectionAdminOptions = {
+  /**
+   * Defines a default base filter which will be applied in the following parts of the admin panel:
+   * - List View
+   * - Relationship fields for internal links within the Lexical editor
+   *
+   * This is especially useful for plugins like multi-tenant. For example,
+   * a user may have access to multiple tenants, but should only see content
+   * related to the currently active or selected tenant in those places.
+   */
+  baseFilter?: BaseFilter
+  /**
+   * @deprecated Use `baseFilter` instead. If both are defined,
+   * `baseFilter` will take precedence. This property remains only
+   * for backward compatibility and may be removed in a future version.
+   *
+   * Originally, `baseListFilter` was intended to filter only the List View
+   * in the admin panel. However, base filtering is often required in other areas
+   * such as internal link relationships in the Lexical editor.
+   */
   baseListFilter?: BaseListFilter
   /**
    * Custom admin components
@@ -361,6 +389,15 @@ export type CollectionAdminOptions = {
    * @default false
    */
   disableCopyToLocale?: boolean
+  /**
+   * Performance opt-in. If true, will use the [Select API](https://payloadcms.com/docs/queries/select) when
+   * loading the list view to query only the active columns, as opposed to the entire documents.
+   * If your cells require specific fields that may be unselected, such as within hooks, etc.,
+   * use `forceSelect` in conjunction with this property.
+   *
+   * @experimental This is an experimental feature and may change in the future. Use at your own discretion.
+   */
+  enableListViewSelectAPI?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
@@ -370,6 +407,13 @@ export type CollectionAdminOptions = {
    * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
    */
   group?: false | Record<string, string> | string
+  /**
+   * @description Enable grouping by a field in the list view.
+   * Uses `payload.findDistinct` under the hood to populate the group-by options.
+   *
+   * @experimental This option is currently in beta and may change in future releases. Use at your own discretion.
+   */
+  groupBy?: boolean
   /**
    * Exclude the collection from the admin nav and routes
    */
@@ -444,6 +488,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Default field to sort by in collection list view
    */
   defaultSort?: Sort
+  /**
+   * Disable the bulk edit operation for the collection in the admin panel and the API
+   */
+  disableBulkEdit?: boolean
   /**
    * When true, do not show the "Duplicate" button while editing documents within this collection and prevent `duplicate` from all APIs
    */
@@ -552,11 +600,22 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   orderable?: boolean
   slug: string
   /**
-   * Add `createdAt` and `updatedAt` fields
+   * Add `createdAt`, `deletedAt` and `updatedAt` fields
    *
    * @default true
    */
   timestamps?: boolean
+  /**
+   * Enables trash support for this collection.
+   *
+   * When enabled, documents will include a `deletedAt` timestamp field.
+   * This allows documents to be marked as deleted without being permanently removed.
+   * The `deletedAt` field will be set to the current date and time when a document is trashed.
+   *
+   * @experimental This is a beta feature and its behavior may be refined in future releases.
+   * @default false
+   */
+  trash?: boolean
   /**
    * Options used in typescript generation
    */
@@ -668,6 +727,7 @@ export type AuthCollection = {
 }
 
 export type TypeWithID = {
+  deletedAt?: null | string
   docId?: any
   id: number | string
 }
@@ -675,6 +735,7 @@ export type TypeWithID = {
 export type TypeWithTimestamps = {
   [key: string]: unknown
   createdAt: string
+  deletedAt?: null | string
   id: number | string
   updatedAt: string
 }

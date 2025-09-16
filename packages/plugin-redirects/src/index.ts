@@ -28,6 +28,7 @@ export const redirectsPlugin =
         index: true,
         label: 'From URL',
         required: true,
+        unique: true,
       },
       {
         name: 'to',

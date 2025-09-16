@@ -2,7 +2,7 @@ import type { PayloadRequest, PopulateType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -30,6 +30,23 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
 
   try {
     const shouldCommit = await initTransaction(req)
+
+    // /////////////////////////////////////
+    // beforeOperation - Global
+    // /////////////////////////////////////
+
+    if (globalConfig.hooks?.beforeOperation?.length) {
+      for (const hook of globalConfig.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            context: req.context,
+            global: globalConfig,
+            operation: 'restoreVersion',
+            req,
+          })) || args
+      }
+    }
 
     // /////////////////////////////////////
     // Access
@@ -86,6 +103,8 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     let result = rawVersion.version
 
     if (global) {
+      // Ensure updatedAt date is always updated
+      result.updatedAt = new Date().toISOString()
       result = await payload.db.updateGlobal({
         slug: globalConfig.slug,
         data: result,

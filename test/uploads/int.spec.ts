@@ -1,24 +1,37 @@
-import type { Payload } from 'payload'
+import type { AddressInfo } from 'net'
+import type { CollectionSlug, Payload } from 'payload'
 
+import { randomUUID } from 'crypto'
 import fs from 'fs'
+import { createServer } from 'http'
 import path from 'path'
-import { getFileByPath } from 'payload'
+import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   allowListMediaSlug,
+  anyImagesSlug,
   enlargeSlug,
   focalNoSizesSlug,
   focalOnlySlug,
   mediaSlug,
+  noRestrictFileMimeTypesSlug,
+  noRestrictFileTypesSlug,
   reduceSlug,
   relationSlug,
+  restrictFileTypesSlug,
+  skipAllowListSafeFetchMediaSlug,
+  skipSafeFetchHeaderFilterSlug,
+  skipSafeFetchMediaSlug,
+  svgOnlySlug,
   unstoredMediaSlug,
   usersSlug,
 } from './shared.js'
@@ -364,6 +377,53 @@ describe('Collections - Uploads', () => {
   })
 
   describe('Local API', () => {
+    describe('create', () => {
+      it('should create documents when passing filePath', async () => {
+        const expectedPath = path.join(dirname, './svg-only')
+
+        const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
+        const doc = await payload.create({
+          collection: svgOnlySlug as CollectionSlug,
+          data: {},
+          filePath: svgFilePath,
+        })
+
+        expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+      })
+
+      it('should create documents when passing file', async () => {
+        const expectedPath = path.join(dirname, './with-any-image-type')
+
+        const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
+        const fileBuffer = fs.readFileSync(svgFilePath)
+        const doc = await payload.create({
+          collection: anyImagesSlug as CollectionSlug,
+          data: {},
+          file: {
+            data: fileBuffer,
+            mimetype: 'image/svg+xml',
+            name: 'svgWithXml.svg',
+            size: fileBuffer.length,
+          },
+        })
+
+        expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+      })
+
+      it('should upload svg files', async () => {
+        const expectedPath = path.join(dirname, './with-any-image-type')
+
+        const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
+        const doc = await payload.create({
+          collection: anyImagesSlug as CollectionSlug,
+          data: {},
+          filePath: svgFilePath,
+        })
+        expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+        expect(doc.mimeType).toEqual('image/svg+xml')
+      })
+    })
+
     describe('update', () => {
       it('should remove existing media on re-upload - by ID', async () => {
         // Create temp file
@@ -545,6 +605,112 @@ describe('Collections - Uploads', () => {
       })
     })
 
+    describe('cookie filtering', () => {
+      it('should filter out payload cookies when externalFileHeaderFilter is not defined', async () => {
+        const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
+          '; ',
+        )
+
+        const fetchSpy = jest.spyOn(global, 'fetch')
+
+        await payload.create({
+          collection: skipSafeFetchMediaSlug,
+          data: {
+            filename: 'fat-head-nate.png',
+            url: 'https://www.payload.marketing/fat-head-nate.png',
+          },
+          req: {
+            headers: new Headers({
+              cookie: testCookies,
+            }),
+          },
+        })
+
+        const [[, options]] = fetchSpy.mock.calls
+        const cookieHeader = options.headers.cookie
+
+        expect(cookieHeader).not.toContain('payload-token=123')
+        expect(cookieHeader).not.toContain('payload-something=789')
+        expect(cookieHeader).toContain('other-cookie=456')
+
+        fetchSpy.mockRestore()
+      })
+
+      it('getExternalFile should not filter out payload cookies when externalFileHeaderFilter is not defined and the URL is not external', async () => {
+        const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
+          '; ',
+        )
+
+        const fetchSpy = jest.spyOn(global, 'fetch')
+
+        // spin up a temporary server so fetch to the local doesn't fail
+        const server = createServer((req, res) => {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ ok: true }))
+        })
+        await new Promise((res) => server.listen(0, undefined, undefined, res))
+
+        const port = (server.address() as AddressInfo).port
+        const baseUrl = `http://localhost:${port}`
+
+        const req = await createPayloadRequest({
+          config: payload.config,
+          request: new Request(baseUrl, {
+            headers: new Headers({
+              cookie: testCookies,
+              origin: baseUrl,
+            }),
+          }),
+        })
+
+        await getExternalFile({
+          data: { url: '/api/media/image.png' },
+          req,
+          uploadConfig: { skipSafeFetch: true },
+        })
+
+        const [[, options]] = fetchSpy.mock.calls
+        const cookieHeader = options.headers.cookie
+
+        expect(cookieHeader).toContain('payload-token=123')
+        expect(cookieHeader).toContain('payload-something=789')
+        expect(cookieHeader).toContain('other-cookie=456')
+
+        fetchSpy.mockRestore()
+        await new Promise((res) => server.close(res))
+      })
+
+      it('should keep all cookies when externalFileHeaderFilter is defined', async () => {
+        const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
+          '; ',
+        )
+
+        const fetchSpy = jest.spyOn(global, 'fetch')
+
+        await payload.create({
+          collection: skipSafeFetchHeaderFilterSlug,
+          data: {
+            filename: 'fat-head-nate.png',
+            url: 'https://www.payload.marketing/fat-head-nate.png',
+          },
+          req: {
+            headers: new Headers({
+              cookie: testCookies,
+            }),
+          },
+        })
+
+        const [[, options]] = fetchSpy.mock.calls
+        const cookieHeader = options.headers.cookie
+
+        expect(cookieHeader).toContain('other-cookie=456')
+        expect(cookieHeader).toContain('payload-token=123')
+        expect(cookieHeader).toContain('payload-something=789')
+
+        fetchSpy.mockRestore()
+      })
+    })
+
     describe('filters', () => {
       it.each`
         url                                  | collection            | errorContains
@@ -569,6 +735,46 @@ describe('Collections - Uploads', () => {
       `(
         'should block or filter uploading from $collection with URL: $url',
         async ({ url, collection, errorContains }) => {
+          const globalCachedFn = _internal_safeFetchGlobal.lookup
+
+          let hostname = new URL(url).hostname
+
+          const isIPV6 = hostname.includes('::')
+
+          // Strip brackets from IPv6 addresses
+          // eslint-disable-next-line jest/no-conditional-in-test
+          if (isIPV6) {
+            hostname = hostname.slice(1, -1)
+          }
+
+          // Here we're essentially mocking our own DNS provider, to get 'https://www.payloadcms.com/test.png' to resolve to the IP
+          // we'd like to test for
+          // @ts-expect-error this does not need to be mocked 100% correctly
+          _internal_safeFetchGlobal.lookup = (_hostname, _options, callback) => {
+            // eslint-disable-next-line jest/no-conditional-in-test
+            callback(null, hostname as any, isIPV6 ? 6 : 4)
+          }
+
+          await expect(
+            payload.create({
+              collection,
+              data: {
+                filename: 'test.png',
+                // Need to pass a domain for lookup to be called. We monkey patch the IP lookup function above
+                // to return the IP address we want to test.
+                url: 'https://www.payloadcms.com/test.png',
+              },
+            }),
+          ).rejects.toThrow(
+            expect.objectContaining({
+              name: 'FileRetrievalError',
+              message: expect.stringContaining(errorContains),
+            }),
+          )
+
+          _internal_safeFetchGlobal.lookup = globalCachedFn
+
+          // Now ensure this throws if we pass the IP address directly, without the mock
           await expect(
             payload.create({
               collection,
@@ -585,6 +791,84 @@ describe('Collections - Uploads', () => {
           )
         },
       )
+      it('should fetch when skipSafeFetch is set with a boolean', async () => {
+        await expect(
+          payload.create({
+            collection: skipSafeFetchMediaSlug as CollectionSlug,
+            data: {
+              filename: 'test.png',
+              url: 'http://127.0.0.1/file.png',
+            },
+          }),
+          // We're expecting this to throw because the file doesn't exist -- not because the url is unsafe
+        ).rejects.toThrow(
+          expect.objectContaining({
+            name: 'FileRetrievalError',
+            message: expect.not.stringContaining('unsafe'),
+          }),
+        )
+      })
+
+      it('should fetch when skipSafeFetch is set with an AllowList', async () => {
+        await expect(
+          payload.create({
+            collection: skipAllowListSafeFetchMediaSlug as CollectionSlug,
+            data: {
+              filename: 'test.png',
+              url: 'http://127.0.0.1/file.png',
+            },
+          }),
+          // We're expecting this to throw because the file doesn't exist -- not because the url is unsafe
+        ).rejects.toThrow(
+          expect.objectContaining({
+            name: 'FileRetrievalError',
+            message: expect.not.stringContaining('unsafe'),
+          }),
+        )
+      })
+    })
+
+    describe('file restrictions', () => {
+      const file: File = {
+        name: `test-${randomUUID()}.html`,
+        data: Buffer.from('<html><script>alert("test")</script></html>'),
+        mimetype: 'text/html',
+        size: 100,
+      }
+      it('should not allow files with restricted file types', async () => {
+        await expect(async () =>
+          payload.create({
+            collection: restrictFileTypesSlug as CollectionSlug,
+            data: {},
+            file,
+          }),
+        ).rejects.toThrow(
+          expect.objectContaining({
+            name: 'ValidationError',
+            message: `The following field is invalid: file`,
+          }),
+        )
+      })
+
+      it('should allow files with restricted file types when allowRestrictedFileTypes is true', async () => {
+        await expect(
+          payload.create({
+            collection: noRestrictFileTypesSlug as CollectionSlug,
+            data: {},
+            file,
+          }),
+        ).resolves.not.toThrow()
+      })
+
+      it('should allow files with restricted file types when mimeTypes are set', async () => {
+        await expect(
+          payload.create({
+            collection: noRestrictFileMimeTypesSlug as CollectionSlug,
+            data: {},
+            file,
+          }),
+        ).resolves.not.toThrow()
+      })
     })
   })
 

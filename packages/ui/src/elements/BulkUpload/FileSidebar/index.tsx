@@ -14,12 +14,13 @@ import { Drawer } from '../../Drawer/index.js'
 import { ErrorPill } from '../../ErrorPill/index.js'
 import { Pill } from '../../Pill/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
+import { createThumbnail } from '../../Thumbnail/createThumbnail.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import { Actions } from '../ActionsBar/index.js'
-import './index.scss'
 import { AddFilesView } from '../AddFilesView/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { useBulkUpload } from '../index.js'
+import './index.scss'
 
 const addMoreFilesDrawerSlug = 'bulk-upload-drawer--add-more-files'
 
@@ -33,7 +34,6 @@ export function FileSidebar() {
     isInitializing,
     removeFile,
     setActiveIndex,
-    thumbnailUrls,
     totalErrorCount,
   } = useFormsManager()
   const { initialFiles, maxFiles } = useBulkUpload()
@@ -139,7 +139,7 @@ export function FileSidebar() {
                   />
                 ))
               : null}
-            {forms.map(({ errorCount, formState }, index) => {
+            {forms.map(({ errorCount, formID, formState }, index) => {
               const currentFile = (formState?.file?.value as File) || ({} as File)
 
               return (
@@ -151,17 +151,14 @@ export function FileSidebar() {
                   ]
                     .filter(Boolean)
                     .join(' ')}
-                  key={index}
+                  key={formID}
                 >
                   <button
                     className={`${baseClass}__fileRow`}
                     onClick={() => setActiveIndex(index)}
                     type="button"
                   >
-                    <Thumbnail
-                      className={`${baseClass}__thumbnail`}
-                      fileSrc={isImage(currentFile.type) ? thumbnailUrls[index] : null}
-                    />
+                    <SidebarThumbnail file={currentFile} formID={formID} />
                     <div className={`${baseClass}__fileDetails`}>
                       <p className={`${baseClass}__fileName`} title={currentFile.name}>
                         {currentFile.name || t('upload:noFile')}
@@ -198,5 +195,56 @@ export function FileSidebar() {
         </AnimateHeight>
       </div>
     </div>
+  )
+}
+
+function SidebarThumbnail({ file, formID }: { file: File; formID: string }) {
+  const [thumbnailURL, setThumbnailURL] = React.useState<null | string>(null)
+  const [isLoading, setIsLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    let isCancelled = false
+
+    async function generateThumbnail() {
+      setIsLoading(true)
+      setThumbnailURL(null)
+
+      try {
+        if (isImage(file.type)) {
+          const url = await createThumbnail(file)
+          if (!isCancelled) {
+            setThumbnailURL(url)
+          }
+        } else {
+          setThumbnailURL(null)
+        }
+      } catch (_) {
+        if (!isCancelled) {
+          setThumbnailURL(null)
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void generateThumbnail()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [file])
+
+  if (isLoading) {
+    return <ShimmerEffect className={`${baseClass}__thumbnail-shimmer`} disableInlineStyles />
+  }
+
+  return (
+    <Thumbnail
+      className={`${baseClass}__thumbnail`}
+      fileSrc={thumbnailURL}
+      key={`${formID}-${thumbnailURL || 'placeholder'}`}
+    />
   )
 }

@@ -3,9 +3,11 @@ import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -14,6 +16,7 @@ export type Arguments = {
   disableErrors?: boolean
   overrideAccess?: boolean
   req?: PayloadRequest
+  trash?: boolean
   where?: Where
 }
 
@@ -46,6 +49,7 @@ export const countOperation = async <TSlug extends CollectionSlug>(
       disableErrors,
       overrideAccess,
       req,
+      trash = false,
       where,
     } = args
 
@@ -70,7 +74,15 @@ export const countOperation = async <TSlug extends CollectionSlug>(
 
     let result: { totalDocs: number }
 
-    const fullWhere = combineQueries(where!, accessResult!)
+    let fullWhere = combineQueries(where!, accessResult!)
+    sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
+
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
 
     await validateQueryPaths({
       collectionConfig,

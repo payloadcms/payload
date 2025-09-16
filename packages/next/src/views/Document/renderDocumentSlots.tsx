@@ -1,6 +1,5 @@
 import type {
   BeforeDocumentControlsServerPropsOnly,
-  DefaultServerFunctionArgs,
   DocumentSlots,
   EditMenuItemsServerPropsOnly,
   PayloadRequest,
@@ -27,10 +26,11 @@ export const renderDocumentSlots: (args: {
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   hasSavePermission: boolean
+  id?: number | string
   permissions: SanitizedDocumentPermissions
   req: PayloadRequest
 }) => DocumentSlots = (args) => {
-  const { collectionConfig, globalConfig, hasSavePermission, req } = args
+  const { id, collectionConfig, globalConfig, hasSavePermission, req } = args
 
   const components: DocumentSlots = {} as DocumentSlots
 
@@ -39,6 +39,7 @@ export const renderDocumentSlots: (args: {
   const isPreviewEnabled = collectionConfig?.admin?.preview || globalConfig?.admin?.preview
 
   const serverProps: ServerProps = {
+    id,
     i18n: req.i18n,
     payload: req.payload,
     user: req.user,
@@ -183,10 +184,11 @@ export const renderDocumentSlots: (args: {
   return components
 }
 
-export const renderDocumentSlotsHandler: ServerFunction<{ collectionSlug: string }> = async (
-  args,
-) => {
-  const { collectionSlug, req } = args
+export const renderDocumentSlotsHandler: ServerFunction<{
+  collectionSlug: string
+  id?: number | string
+}> = async (args) => {
+  const { id, collectionSlug, req } = args
 
   const collectionConfig = req.payload.collections[collectionSlug]?.config
 
@@ -201,6 +203,7 @@ export const renderDocumentSlotsHandler: ServerFunction<{ collectionSlug: string
   })
 
   return renderDocumentSlots({
+    id,
     collectionConfig,
     hasSavePermission,
     permissions: docPermissions,

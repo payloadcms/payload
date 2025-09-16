@@ -14,7 +14,27 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         name: 'name value',
       },
     })
+    // Seed posts
+    const posts = []
+    for (let i = 0; i < 2; i++) {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: `Post ${i}`,
+        },
+      })
+      posts.push(post)
+    }
     // create pages
+    for (let i = 0; i < 195; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Doc ${i}`,
+        },
+      })
+    }
+
     for (let i = 0; i < 5; i++) {
       await payload.create({
         collection: 'pages',
@@ -144,6 +164,39 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         collection: 'pages',
         data: {
           title: `Jobs ${i}`,
+        },
+      })
+    }
+
+    for (let i = 0; i < 2; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Monomorphic ${i}`,
+          hasManyMonomorphic: [posts[1]?.id ?? ''],
+        },
+      })
+    }
+
+    for (let i = 0; i < 5; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Polymorphic ${i}`,
+          hasOnePolymorphic: {
+            relationTo: 'posts',
+            value: posts[0]?.id ?? '',
+          },
+          hasManyPolymorphic: [
+            {
+              relationTo: 'users',
+              value: user.id,
+            },
+            {
+              relationTo: 'posts',
+              value: posts[1]?.id ?? '',
+            },
+          ],
         },
       })
     }

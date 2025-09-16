@@ -11,6 +11,7 @@ import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
 import { canResizeImage } from './canResizeImage.js'
+import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { cropImage } from './cropImage.js'
 import { getExternalFile } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
@@ -19,7 +20,6 @@ import { getSafeFileName } from './getSafeFilename.js'
 import { resizeAndTransformImageSizes } from './imageResizer.js'
 import { isImage } from './isImage.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
-
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
@@ -36,6 +36,33 @@ type Result<T> = Promise<{
   data: T
   files: FileToSave[]
 }>
+
+const shouldReupload = (
+  uploadEdits: UploadEdits,
+  fileData: Record<string, unknown> | undefined,
+) => {
+  if (!fileData) {
+    return false
+  }
+
+  if (uploadEdits.crop || uploadEdits.heightInPixels || uploadEdits.widthInPixels) {
+    return true
+  }
+
+  // Since uploadEdits always has focalPoint, compare to the value in the data if it was changed
+  if (uploadEdits.focalPoint) {
+    const incomingFocalX = uploadEdits.focalPoint.x
+    const incomingFocalY = uploadEdits.focalPoint.y
+
+    const currentFocalX = 'focalX' in fileData && fileData.focalX
+    const currentFocalY = 'focalY' in fileData && fileData.focalY
+
+    const isEqual = incomingFocalX === currentFocalX && incomingFocalY === currentFocalY
+    return !isEqual
+  }
+
+  return false
+}
 
 export const generateFileData = async <T>({
   collection: { config: collectionConfig },
@@ -67,7 +94,7 @@ export const generateFileData = async <T>({
   })
 
   const {
-    constructorOptions = {},
+    constructorOptions,
     disableLocalStorage,
     focalPoint: focalPointEnabled = true,
     formatOptions,
@@ -82,7 +109,10 @@ export const generateFileData = async <T>({
 
   const incomingFileData = isDuplicating ? originalDoc : data
 
-  if (!file && uploadEdits && incomingFileData) {
+  if (
+    !file &&
+    (isDuplicating || shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
+  ) {
     const { filename, url } = incomingFileData as unknown as FileData
 
     if (filename && (filename.includes('../') || filename.includes('..\\'))) {
@@ -122,6 +152,12 @@ export const generateFileData = async <T>({
       files: [],
     }
   }
+
+  await checkFileRestrictions({
+    collection: collectionConfig,
+    file,
+    req,
+  })
 
   if (!disableLocalStorage) {
     await fs.mkdir(staticPath!, { recursive: true })

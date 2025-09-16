@@ -78,6 +78,22 @@ export type AfterReadHook = (args: {
   req: PayloadRequest
 }) => any
 
+export type HookOperationType = 'countVersions' | 'read' | 'restoreVersion' | 'update'
+
+export type BeforeOperationHook = (args: {
+  args?: any
+  context: RequestContext
+  /**
+   * The Global which this hook is being run on
+   * */
+  global: SanitizedGlobalConfig
+  /**
+   * Hook operation being performed
+   */
+  operation: HookOperationType
+  req: PayloadRequest
+}) => any
+
 export type GlobalAdminOptions = {
   /**
    * Custom admin components
@@ -192,6 +208,7 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
     afterChange?: AfterChangeHook[]
     afterRead?: AfterReadHook[]
     beforeChange?: BeforeChangeHook[]
+    beforeOperation?: BeforeOperationHook[]
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
   }

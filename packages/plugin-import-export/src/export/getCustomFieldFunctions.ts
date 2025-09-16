@@ -1,21 +1,12 @@
-import {
-  type FlattenedField,
-  type SelectIncludeType,
-  traverseFields,
-  type TraverseFieldsCallback,
-} from 'payload'
+import { type FlattenedField, traverseFields, type TraverseFieldsCallback } from 'payload'
 
 import type { ToCSVFunction } from '../types.js'
 
 type Args = {
   fields: FlattenedField[]
-  select: SelectIncludeType | undefined
 }
 
-export const getCustomFieldFunctions = ({
-  fields,
-  select,
-}: Args): Record<string, ToCSVFunction> => {
+export const getCustomFieldFunctions = ({ fields }: Args): Record<string, ToCSVFunction> => {
   const result: Record<string, ToCSVFunction> = {}
 
   const buildCustomFunctions: TraverseFieldsCallback = ({ field, parentRef, ref }) => {
@@ -42,11 +33,19 @@ export const getCustomFieldFunctions = ({
           // polymorphic single
           // @ts-expect-error ref is untyped
           result[`${ref.prefix}${field.name}`] = ({ data, value }) => {
-            // @ts-expect-error ref is untyped
-            data[`${ref.prefix}${field.name}_id`] = value.id
-            // @ts-expect-error ref is untyped
-            data[`${ref.prefix}${field.name}_relationTo`] = value.relationTo
-            return undefined
+            if (value && typeof value === 'object' && 'relationTo' in value && 'value' in value) {
+              const relationTo = (value as { relationTo: string; value: { id: number | string } })
+                .relationTo
+              const relatedDoc = (value as { relationTo: string; value: { id: number | string } })
+                .value
+              if (relatedDoc && typeof relatedDoc === 'object') {
+                // @ts-expect-error ref is untyped
+                data[`${ref.prefix}${field.name}_id`] = relatedDoc.id
+                // @ts-expect-error ref is untyped
+                data[`${ref.prefix}${field.name}_relationTo`] = relationTo
+              }
+            }
+            return undefined // prevents further flattening
           }
         }
       } else {
@@ -54,13 +53,21 @@ export const getCustomFieldFunctions = ({
           // monomorphic many
           // @ts-expect-error ref is untyped
           result[`${ref.prefix}${field.name}`] = ({
+            data,
             value,
           }: {
-            value: Record<string, unknown>[]
-          }) =>
-            value.map((val: number | Record<string, unknown> | string) =>
-              typeof val === 'object' ? val.id : val,
-            )
+            data: Record<string, unknown>
+            value: Array<number | Record<string, any> | string> | undefined
+          }) => {
+            if (Array.isArray(value)) {
+              value.forEach((val, i) => {
+                const id = typeof val === 'object' && val ? val.id : val
+                // @ts-expect-error ref is untyped
+                data[`${ref.prefix}${field.name}_${i}_id`] = id
+              })
+            }
+            return undefined // prevents further flattening
+          }
         } else {
           // polymorphic many
           // @ts-expect-error ref is untyped
@@ -69,22 +76,27 @@ export const getCustomFieldFunctions = ({
             value,
           }: {
             data: Record<string, unknown>
-            value: Record<string, unknown>[]
-          }) =>
-            value.map((val: number | Record<string, unknown> | string, i) => {
-              // @ts-expect-error ref is untyped
-              data[`${ref.prefix}${field.name}_${i}_id`] = val.id
-              // @ts-expect-error ref is untyped
-              data[`${ref.prefix}${field.name}_${i}_relationTo`] = val.relationTo
-              return undefined
-            })
+            value: Array<Record<string, any>> | undefined
+          }) => {
+            if (Array.isArray(value)) {
+              value.forEach((val, i) => {
+                if (val && typeof val === 'object') {
+                  const relationTo = val.relationTo
+                  const relatedDoc = val.value
+                  if (relationTo && relatedDoc && typeof relatedDoc === 'object') {
+                    // @ts-expect-error ref is untyped
+                    data[`${ref.prefix}${field.name}_${i}_id`] = relatedDoc.id
+                    // @ts-expect-error ref is untyped
+                    data[`${ref.prefix}${field.name}_${i}_relationTo`] = relationTo
+                  }
+                }
+              })
+            }
+            return undefined
+          }
         }
       }
     }
-
-    // TODO: do this so we only return the functions needed based on the select used
-    ////@ts-expect-error ref is untyped
-    // ref.select = typeof select !== 'undefined' || select[field.name] ? select : {}
   }
 
   traverseFields({ callback: buildCustomFunctions, fields })

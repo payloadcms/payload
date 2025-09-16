@@ -29,7 +29,7 @@ export type ServerOnlyCollectionProperties = keyof Pick<
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
   SanitizedCollectionConfig['admin'],
-  'baseListFilter' | 'components' | 'hidden'
+  'baseFilter' | 'baseListFilter' | 'components' | 'hidden'
 >
 
 export type ServerOnlyUploadProperties = keyof Pick<
@@ -94,6 +94,7 @@ const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
 
 const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
   'hidden',
+  'baseFilter',
   'baseListFilter',
   'components',
   // 'preview' is handled separately
@@ -122,7 +123,9 @@ export const createClientCollectionConfig = ({
         if (!collection.admin) {
           break
         }
+
         clientCollection.admin = {} as ClientCollectionConfig['admin']
+
         for (const adminKey in collection.admin) {
           if (serverOnlyCollectionAdminProperties.includes(adminKey as any)) {
             continue
@@ -139,56 +142,72 @@ export const createClientCollectionConfig = ({
                 }
               } else if (typeof collection.admin.description === 'function') {
                 const description = collection.admin.description({ t: i18n.t as TFunction })
+
                 if (description) {
                   clientCollection.admin.description = description
                 }
               }
               break
+
             case 'livePreview':
-              clientCollection.admin.livePreview =
-                {} as ClientCollectionConfig['admin']['livePreview']
+              clientCollection.admin.livePreview = {}
+
               if (collection.admin.livePreview?.breakpoints) {
-                clientCollection.admin.livePreview!.breakpoints =
+                clientCollection.admin.livePreview.breakpoints =
                   collection.admin.livePreview.breakpoints
               }
+
               break
+
             case 'preview':
               if (collection.admin.preview) {
                 clientCollection.admin.preview = true
               }
+
               break
+
             default:
               ;(clientCollection as any).admin[adminKey] =
                 collection.admin[adminKey as keyof SanitizedCollectionConfig['admin']]
           }
         }
+
         break
+
       case 'auth':
         if (!collection.auth) {
           break
         }
+
         clientCollection.auth = {} as { verify?: true } & SanitizedCollectionConfig['auth']
+
         if (collection.auth.cookies) {
           clientCollection.auth.cookies = collection.auth.cookies
         }
+
         if (collection.auth.depth !== undefined) {
           // Check for undefined as it can be a number (0)
           clientCollection.auth.depth = collection.auth.depth
         }
+
         if (collection.auth.disableLocalStrategy) {
           clientCollection.auth.disableLocalStrategy = collection.auth.disableLocalStrategy
         }
+
         if (collection.auth.lockTime !== undefined) {
           // Check for undefined as it can be a number (0)
           clientCollection.auth.lockTime = collection.auth.lockTime
         }
+
         if (collection.auth.loginWithUsername) {
           clientCollection.auth.loginWithUsername = collection.auth.loginWithUsername
         }
+
         if (collection.auth.maxLoginAttempts !== undefined) {
           // Check for undefined as it can be a number (0)
           clientCollection.auth.maxLoginAttempts = collection.auth.maxLoginAttempts
         }
+
         if (collection.auth.removeTokenFromResponses) {
           clientCollection.auth.removeTokenFromResponses = collection.auth.removeTokenFromResponses
         }
@@ -196,13 +215,17 @@ export const createClientCollectionConfig = ({
         if (collection.auth.useAPIKey) {
           clientCollection.auth.useAPIKey = collection.auth.useAPIKey
         }
+
         if (collection.auth.tokenExpiration) {
           clientCollection.auth.tokenExpiration = collection.auth.tokenExpiration
         }
+
         if (collection.auth.verify) {
           clientCollection.auth.verify = true
         }
+
         break
+
       case 'fields':
         clientCollection.fields = createClientFields({
           defaultIDType,
@@ -210,7 +233,9 @@ export const createClientCollectionConfig = ({
           i18n,
           importMap,
         })
+
         break
+
       case 'labels':
         clientCollection.labels = {
           plural:
@@ -222,16 +247,21 @@ export const createClientCollectionConfig = ({
               ? collection.labels.singular({ i18n, t: i18n.t as TFunction })
               : collection.labels.singular,
         }
+
         break
+
       case 'upload':
         if (!collection.upload) {
           break
         }
+
         clientCollection.upload = {} as SanitizedUploadConfig
+
         for (const uploadKey in collection.upload) {
           if (serverOnlyUploadProperties.includes(uploadKey as any)) {
             continue
           }
+
           if (uploadKey === 'imageSizes') {
             clientCollection.upload.imageSizes = collection.upload.imageSizes?.map((size) => {
               const sanitizedSize = { ...size }
@@ -245,6 +275,7 @@ export const createClientCollectionConfig = ({
               collection.upload[uploadKey as keyof SanitizedUploadConfig]
           }
         }
+
         break
 
       default:

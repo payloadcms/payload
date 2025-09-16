@@ -76,7 +76,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -113,6 +113,13 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * @default false
    */
   showHiddenFields?: boolean
+  /**
+   * When set to `true`, the operation will update both normal and trashed (soft-deleted) documents.
+   * To update only trashed documents, pass `trash: true` and combine with a `where` clause filtering by `deletedAt`.
+   * By default (`false`), the update will only include normal documents and exclude those with a `deletedAt` field.
+   * @default false
+   */
+  trash?: boolean
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
@@ -219,6 +226,7 @@ async function updateLocal<
     select,
     showHiddenFields,
     sort,
+    trash = false,
     where,
   } = options
 
@@ -252,6 +260,7 @@ async function updateLocal<
     select,
     showHiddenFields,
     sort,
+    trash,
     where,
   }
 
@@ -263,4 +272,4 @@ async function updateLocal<
   return updateOperation<TSlug, TSelect>(args)
 }
 
-export default updateLocal
+export { updateLocal }

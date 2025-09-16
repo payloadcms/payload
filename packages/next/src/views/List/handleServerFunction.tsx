@@ -1,4 +1,4 @@
-import type { ListPreferences, ListQuery, ServerFunction, VisibleEntities } from 'payload'
+import type { CollectionPreferences, ListQuery, ServerFunction, VisibleEntities } from 'payload'
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
@@ -8,7 +8,7 @@ import { renderListView } from './index.js'
 
 type RenderListResult = {
   List: React.ReactNode
-  preferences: ListPreferences
+  preferences: CollectionPreferences
 }
 
 export const renderListHandler: ServerFunction<
@@ -90,9 +90,10 @@ export const renderListHandler: ServerFunction<
     config,
     i18n,
     importMap: payload.importMap,
+    user,
   })
 
-  const preferencesKey = `${collectionSlug}-list`
+  const preferencesKey = `collection-${collectionSlug}`
 
   const preferences = await payload
     .find({
@@ -119,7 +120,7 @@ export const renderListHandler: ServerFunction<
         ],
       },
     })
-    .then((res) => res.docs[0]?.value as ListPreferences)
+    .then((res) => res.docs[0]?.value as CollectionPreferences)
 
   const visibleEntities: VisibleEntities = {
     collections: payload.config.collections

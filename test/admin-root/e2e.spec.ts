@@ -2,18 +2,17 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
-import { wait } from 'payload/shared'
 import { adminRoute } from 'shared.js'
 import { fileURLToPath } from 'url'
 
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
-  login,
   saveDocAndAssert,
-  throttleTest,
+  // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { login } from '../helpers/e2e/auth/login.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
@@ -64,6 +63,13 @@ test.describe('Admin Panel (Root)', () => {
   //     delay: 'Fast 4G',
   //   })
   // })
+
+  test('should redirect `${adminRoute}/collections` to `${adminRoute}', async () => {
+    const collectionsURL = `${url.admin}/collections`
+    await page.goto(collectionsURL)
+    // Should redirect to dashboard
+    await expect.poll(() => page.url()).toBe(`${url.admin}`)
+  })
 
   test('renders admin panel at root', async () => {
     await page.goto(url.admin)
@@ -133,5 +139,10 @@ test.describe('Admin Panel (Root)', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
     await expect(page.locator('#field-theme')).toBeHidden()
     await expect(page.locator('#field-theme-auto')).toBeHidden()
+  })
+
+  test('should mount custom root views', async () => {
+    await page.goto(`${url.admin}/custom-view`)
+    await expect(page.locator('#custom-view')).toBeVisible()
   })
 })

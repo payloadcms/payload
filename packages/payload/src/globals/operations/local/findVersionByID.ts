@@ -39,7 +39,7 @@ export type Options<TSlug extends GlobalSlug> = {
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -71,8 +71,7 @@ export type Options<TSlug extends GlobalSlug> = {
   user?: Document
 }
 
-// eslint-disable-next-line no-restricted-exports
-export default async function findVersionByIDLocal<TSlug extends GlobalSlug>(
+export async function findGlobalVersionByIDLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<TypeWithVersion<DataFromGlobalSlug<TSlug>>> {

@@ -1,5 +1,5 @@
 import type { TFunction } from '@payloadcms/translations'
-import type { FolderOrDocument } from 'payload/shared'
+import type { FolderSortKeys } from 'payload'
 
 import React from 'react'
 
@@ -15,9 +15,9 @@ const baseClass = 'sort-by-pill'
 
 const sortOnOptions: {
   label: (t: TFunction) => React.ReactNode
-  value: keyof FolderOrDocument['value']
+  value: FolderSortKeys
 }[] = [
-  { label: (t) => t('general:name'), value: '_folderOrDocumentTitle' },
+  { label: (t) => t('general:name'), value: 'name' },
   { label: (t) => t('general:createdAt'), value: 'createdAt' },
   { label: (t) => t('general:updatedAt'), value: 'updatedAt' },
 ]
@@ -48,9 +48,9 @@ export function SortByPill() {
   const { refineFolderData, sort } = useFolder()
   const { t } = useTranslation()
   const sortDirection = sort.startsWith('-') ? 'desc' : 'asc'
-  const [selectedSortOption] = sortOnOptions.filter(
-    ({ value }) => value === (sort.startsWith('-') ? sort.slice(1) : sort),
-  )
+  const [selectedSortOption] =
+    sortOnOptions.filter(({ value }) => value === (sort.startsWith('-') ? sort.slice(1) : sort)) ||
+    sortOnOptions
   const [selectedOrderOption] = orderOnOptions.filter(({ value }) => value === sortDirection)
 
   return (
@@ -62,7 +62,7 @@ export function SortByPill() {
           ) : (
             <SortDownIcon className={`${baseClass}__sort-icon`} />
           )}
-          {selectedSortOption.label(t)}
+          {selectedSortOption?.label(t)}
         </Pill>
       }
       className={baseClass}
@@ -73,12 +73,13 @@ export function SortByPill() {
           <PopupList.ButtonGroup>
             {sortOnOptions.map(({ label, value }) => (
               <PopupList.Button
-                active={selectedSortOption.value === value}
+                active={selectedSortOption?.value === value}
                 key={value}
                 onClick={() => {
                   refineFolderData({
                     query: {
-                      sort: value,
+                      page: '1',
+                      sort: sortDirection === 'desc' ? `-${value}` : value,
                     },
                     updateURL: true,
                   })
@@ -94,19 +95,23 @@ export function SortByPill() {
           <PopupList.ButtonGroup>
             {orderOnOptions.map(({ label, value }) => (
               <PopupList.Button
-                active={selectedOrderOption.value === value}
+                active={selectedOrderOption?.value === value}
                 className={`${baseClass}__order-option`}
                 key={value}
                 onClick={() => {
-                  if (value === 'asc') {
+                  if (sortDirection !== value) {
                     refineFolderData({
                       query: {
-                        sort: value === 'asc' ? `-${sort}` : sort,
+                        page: '1',
+                        sort:
+                          value === 'desc'
+                            ? `-${selectedSortOption?.value}`
+                            : selectedSortOption?.value,
                       },
                       updateURL: true,
                     })
+                    close()
                   }
-                  close()
                 }}
               >
                 {label(t)}

@@ -15,21 +15,28 @@ import type {
   TypeWithID,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { NotFound } from '../../errors/index.js'
-import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/index.js'
 import { validateQueryPaths } from '../../index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'
 
-export type Arguments = {
+export type FindByIDArgs = {
   collection: Collection
   currentDepth?: number
+  /**
+   * You may pass the document data directly which will skip the `db.findOne` database query.
+   * This is useful if you want to use this endpoint solely for running hooks and populating data.
+   */
+  data?: Record<string, unknown>
   depth?: number
   disableErrors?: boolean
   draft?: boolean
@@ -41,14 +48,15 @@ export type Arguments = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
-}
+  trash?: boolean
+} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>
 
 export const findByIDOperation = async <
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<TSlug>,
 >(
-  incomingArgs: Arguments,
+  incomingArgs: FindByIDArgs,
 ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
   let args = incomingArgs
 
@@ -77,6 +85,7 @@ export const findByIDOperation = async <
       depth,
       disableErrors,
       draft: draftEnabled = false,
+      flattenLocales,
       includeLockStatus,
       joins,
       overrideAccess = false,
@@ -85,6 +94,7 @@ export const findByIDOperation = async <
       req,
       select: incomingSelect,
       showHiddenFields,
+      trash = false,
     } = args
 
     const select = sanitizeSelect({
@@ -108,7 +118,20 @@ export const findByIDOperation = async <
 
     const where = { id: { equals: id } }
 
-    const fullWhere = combineQueries(where, accessResult)
+    let fullWhere = combineQueries(where, accessResult)
+
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
+
+    sanitizeWhereQuery({
+      fields: collectionConfig.flattenedFields,
+      payload: args.req.payload,
+      where: fullWhere,
+    })
 
     const sanitizedJoins = await sanitizeJoinQuery({
       collectionConfig,
@@ -146,7 +169,8 @@ export const findByIDOperation = async <
       throw new NotFound(t)
     }
 
-    let result: DataFromCollectionSlug<TSlug> = (await req.payload.db.findOne(findOneArgs))!
+    let result: DataFromCollectionSlug<TSlug> =
+      (args.data as DataFromCollectionSlug<TSlug>) ?? (await req.payload.db.findOne(findOneArgs))!
 
     if (!result) {
       if (!disableErrors) {
@@ -256,6 +280,7 @@ export const findByIDOperation = async <
       doc: result,
       draft: draftEnabled,
       fallbackLocale: fallbackLocale!,
+      flattenLocales,
       global: null,
       locale: locale!,
       overrideAccess,

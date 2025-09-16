@@ -14,7 +14,7 @@ import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useConfig } from '../Config/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 import { useTranslation } from '../Translation/index.js'
-import { getMetaSelection, getShiftSelection, groupItemIDsByRelation } from './selection.js'
+import { groupItemIDsByRelation } from './groupItemIDsByRelation.js'
 
 type FolderQueryParams = {
   page?: string
@@ -43,20 +43,22 @@ export type FolderContextValue = {
   readonly allCollectionFolderSlugs?: CollectionSlug[]
   allowCreateCollectionSlugs: CollectionSlug[]
   breadcrumbs?: FolderBreadcrumb[]
+  checkIfItemIsDisabled: (item: FolderOrDocument) => boolean
   clearSelections: () => void
   currentFolder?: FolderOrDocument | null
   documents?: FolderOrDocument[]
+  dragOverlayItem?: FolderOrDocument | undefined
   focusedRowIndex: number
   folderCollectionConfig: ClientCollectionConfig
   folderCollectionSlug: string
   folderFieldName: string
   folderID?: number | string
   FolderResultsComponent: React.ReactNode
+  folderType: CollectionSlug[] | undefined
   getFolderRoute: (toFolderID?: number | string) => string
   getSelectedItems?: () => FolderOrDocument[]
   isDragging: boolean
   itemKeysToMove?: Set<FolderDocumentItemKey>
-  lastSelectedIndex: null | number
   moveToFolder: (args: {
     itemsToMove: FolderOrDocument[]
     toFolderID?: number | string
@@ -69,6 +71,7 @@ export type FolderContextValue = {
   }) => void
   refineFolderData: (args: { query?: FolderQueryParams; updateURL: boolean }) => void
   search: string
+  selectedFolderCollections?: CollectionSlug[]
   readonly selectedItemKeys: Set<FolderDocumentItemKey>
   setBreadcrumbs: React.Dispatch<React.SetStateAction<FolderBreadcrumb[]>>
   setFocusedRowIndex: React.Dispatch<React.SetStateAction<number>>
@@ -82,30 +85,33 @@ const Context = React.createContext<FolderContextValue>({
   allCollectionFolderSlugs: [],
   allowCreateCollectionSlugs: [],
   breadcrumbs: [],
+  checkIfItemIsDisabled: () => false,
   clearSelections: () => {},
   currentFolder: null,
   documents: [],
+  dragOverlayItem: undefined,
   focusedRowIndex: -1,
   folderCollectionConfig: null,
   folderCollectionSlug: '',
   folderFieldName: 'folder',
   folderID: undefined,
   FolderResultsComponent: null,
+  folderType: undefined,
   getFolderRoute: () => '',
   getSelectedItems: () => [],
   isDragging: false,
   itemKeysToMove: undefined,
-  lastSelectedIndex: null,
   moveToFolder: () => Promise.resolve(undefined),
   onItemClick: () => undefined,
   onItemKeyPress: () => undefined,
   refineFolderData: () => undefined,
   search: '',
+  selectedFolderCollections: undefined,
   selectedItemKeys: new Set<FolderDocumentItemKey>(),
   setBreadcrumbs: () => {},
   setFocusedRowIndex: () => -1,
   setIsDragging: () => false,
-  sort: '_folderOrDocumentTitle',
+  sort: 'name',
   subfolders: [],
 })
 
@@ -191,7 +197,7 @@ export function FolderProvider({
   FolderResultsComponent: InitialFolderResultsComponent,
   onItemClick: onItemClickFromProps,
   search,
-  sort = '_folderOrDocumentTitle',
+  sort = 'name',
   subfolders,
 }: FolderProviderProps) {
   const parentFolderContext = useFolder()
@@ -202,6 +208,11 @@ export function FolderProvider({
   const router = useRouter()
   const { startRouteTransition } = useRouteTransition()
 
+  const currentlySelectedIndexes = React.useRef(new Set<number>())
+
+  const [selectedFolderCollections, setSelectedFolderCollections] = React.useState<
+    CollectionSlug[]
+  >([])
   const [FolderResultsComponent, setFolderResultsComponent] = React.useState(
     InitialFolderResultsComponent || (() => null),
   )
@@ -221,7 +232,8 @@ export function FolderProvider({
     () => new Set(),
   )
   const [focusedRowIndex, setFocusedRowIndex] = React.useState(-1)
-  const [lastSelectedIndex, setLastSelectedIndex] = React.useState<null | number>(null)
+  // This is used to determine what data to display on the drag overlay
+  const [dragOverlayItem, setDragOverlayItem] = React.useState<FolderOrDocument | undefined>()
   const [breadcrumbs, setBreadcrumbs] =
     React.useState<FolderContextValue['breadcrumbs']>(_breadcrumbsFromProps)
   const lastClickTime = React.useRef<null | number>(null)
@@ -230,7 +242,8 @@ export function FolderProvider({
   const clearSelections = React.useCallback(() => {
     setFocusedRowIndex(-1)
     setSelectedItemKeys(new Set())
-    setLastSelectedIndex(undefined)
+    setDragOverlayItem(undefined)
+    currentlySelectedIndexes.current = new Set()
   }, [])
 
   const mergeQuery = React.useCallback(
@@ -245,6 +258,7 @@ export function FolderProvider({
         ...currentQuery,
         ...newQuery,
         page,
+        relationTo: 'relationTo' in newQuery ? newQuery.relationTo : currentQuery?.relationTo,
         search: 'search' in newQuery ? newQuery.search : currentQuery?.search,
         sort: 'sort' in newQuery ? newQuery.sort : (currentQuery?.sort ?? undefined),
       }
@@ -258,8 +272,11 @@ export function FolderProvider({
     ({ query, updateURL }) => {
       if (updateURL) {
         const newQuery = mergeQuery(query)
+
         startRouteTransition(() =>
-          router.replace(`${qs.stringify(newQuery, { addQueryPrefix: true })}`),
+          router.replace(
+            `${qs.stringify({ ...newQuery, relationTo: JSON.stringify(newQuery.relationTo) }, { addQueryPrefix: true })}`,
+          ),
         )
 
         setCurrentQuery(newQuery)
@@ -301,10 +318,12 @@ export function FolderProvider({
     ({ collectionSlug, docID }: { collectionSlug: string; docID?: number | string }) => {
       if (drawerDepth === 1) {
         // not in a drawer (default is 1)
-        clearSelections()
         if (collectionSlug === folderCollectionSlug) {
           // clicked on folder, take the user to the folder view
-          startRouteTransition(() => router.push(getFolderRoute(docID)))
+          startRouteTransition(() => {
+            router.push(getFolderRoute(docID))
+            clearSelections()
+          })
         } else if (collectionSlug) {
           // clicked on document, take the user to the documet view
           startRouteTransition(() => {
@@ -314,8 +333,11 @@ export function FolderProvider({
                 path: `/collections/${collectionSlug}/${docID}`,
               }),
             )
+            clearSelections()
           })
         }
+      } else {
+        clearSelections()
       }
 
       if (typeof onItemClickFromProps === 'function') {
@@ -335,97 +357,205 @@ export function FolderProvider({
     ],
   )
 
+  const handleShiftSelection = React.useCallback(
+    (targetIndex: number) => {
+      const allItems = [...subfolders, ...documents]
+
+      // Find existing selection boundaries
+      const existingIndexes = allItems.reduce((acc, item, idx) => {
+        if (selectedItemKeys.has(item.itemKey)) {
+          acc.push(idx)
+        }
+        return acc
+      }, [])
+
+      if (existingIndexes.length === 0) {
+        // No existing selection, just select target
+        return [targetIndex]
+      }
+
+      const firstSelectedIndex = Math.min(...existingIndexes)
+      const lastSelectedIndex = Math.max(...existingIndexes)
+      const isWithinBounds = targetIndex >= firstSelectedIndex && targetIndex <= lastSelectedIndex
+
+      // Choose anchor based on whether we're contracting or extending
+      let anchorIndex = targetIndex
+      if (isWithinBounds) {
+        // Contracting: if target is at a boundary, use target as anchor
+        // Otherwise, use furthest boundary to maintain opposite edge
+        if (targetIndex === firstSelectedIndex || targetIndex === lastSelectedIndex) {
+          anchorIndex = targetIndex
+        } else {
+          const distanceToFirst = Math.abs(targetIndex - firstSelectedIndex)
+          const distanceToLast = Math.abs(targetIndex - lastSelectedIndex)
+          anchorIndex = distanceToFirst >= distanceToLast ? firstSelectedIndex : lastSelectedIndex
+        }
+      } else {
+        // Extending: use closest boundary
+        const distanceToFirst = Math.abs(targetIndex - firstSelectedIndex)
+        const distanceToLast = Math.abs(targetIndex - lastSelectedIndex)
+        anchorIndex = distanceToFirst <= distanceToLast ? firstSelectedIndex : lastSelectedIndex
+      }
+
+      // Create range from anchor to target
+      const startIndex = Math.min(anchorIndex, targetIndex)
+      const endIndex = Math.max(anchorIndex, targetIndex)
+      const newRangeIndexes = Array.from(
+        { length: endIndex - startIndex + 1 },
+        (_, i) => startIndex + i,
+      )
+
+      if (isWithinBounds) {
+        // Contracting: replace with new range
+        return newRangeIndexes
+      } else {
+        // Extending: union with existing
+        return [...new Set([...existingIndexes, ...newRangeIndexes])]
+      }
+    },
+    [subfolders, documents, selectedItemKeys],
+  )
+
+  const updateSelections = React.useCallback(
+    ({ indexes }: { indexes: number[] }) => {
+      const allItems = [...subfolders, ...documents]
+      const { newSelectedFolderCollections, newSelectedItemKeys } = allItems.reduce(
+        (acc, item, index) => {
+          if (indexes.includes(index)) {
+            acc.newSelectedItemKeys.add(item.itemKey)
+            if (item.relationTo === folderCollectionSlug) {
+              item.value.folderType?.forEach((collectionSlug) => {
+                if (!acc.newSelectedFolderCollections.includes(collectionSlug)) {
+                  acc.newSelectedFolderCollections.push(collectionSlug)
+                }
+              })
+            } else {
+              if (!acc.newSelectedFolderCollections.includes(item.relationTo)) {
+                acc.newSelectedFolderCollections.push(item.relationTo)
+              }
+            }
+          }
+          return acc
+        },
+        {
+          newSelectedFolderCollections: [] satisfies CollectionSlug[],
+          newSelectedItemKeys: new Set<FolderDocumentItemKey>(),
+        },
+      )
+
+      setSelectedFolderCollections(newSelectedFolderCollections)
+      setSelectedItemKeys(newSelectedItemKeys)
+    },
+    [documents, folderCollectionSlug, subfolders],
+  )
+
   const onItemKeyPress: FolderContextValue['onItemKeyPress'] = React.useCallback(
-    ({ event, index, item }) => {
+    ({ event, item: currentItem }) => {
       const { code, ctrlKey, metaKey, shiftKey } = event
       const isShiftPressed = shiftKey
       const isCtrlPressed = ctrlKey || metaKey
-      let newSelectedIndexes: Set<number> | undefined = undefined
+      const isCurrentlySelected = selectedItemKeys.has(currentItem.itemKey)
+      const allItems = [...subfolders, ...documents]
+      const currentItemIndex = allItems.findIndex((item) => item.itemKey === currentItem.itemKey)
 
       switch (code) {
-        case 'ArrowDown': {
-          event.preventDefault()
-          const nextIndex = Math.min(index + 1, totalCount - 1)
-          setFocusedRowIndex(nextIndex)
-
-          if (isCtrlPressed) {
-            break
-          }
-
-          if (allowMultiSelection && isShiftPressed) {
-            newSelectedIndexes = getShiftSelection({
-              selectFromIndex: Math.min(lastSelectedIndex, totalCount),
-              selectToIndex: Math.min(nextIndex, totalCount),
-            })
-          } else {
-            setLastSelectedIndex(nextIndex)
-            newSelectedIndexes = new Set([nextIndex])
-          }
-          break
-        }
+        case 'ArrowDown':
+        case 'ArrowLeft':
+        case 'ArrowRight':
         case 'ArrowUp': {
           event.preventDefault()
-          const prevIndex = Math.max(index - 1, 0)
-          setFocusedRowIndex(prevIndex)
+
+          if (currentItemIndex === -1) {
+            break
+          }
+
+          const isBackward = code === 'ArrowLeft' || code === 'ArrowUp'
+          const newItemIndex = isBackward ? currentItemIndex - 1 : currentItemIndex + 1
+
+          if (newItemIndex < 0 || newItemIndex > totalCount - 1) {
+            // out of bounds, keep current selection
+            return
+          }
+
+          setFocusedRowIndex(newItemIndex)
 
           if (isCtrlPressed) {
             break
           }
 
-          if (allowMultiSelection && isShiftPressed) {
-            newSelectedIndexes = getShiftSelection({
-              selectFromIndex: lastSelectedIndex,
-              selectToIndex: prevIndex,
-            })
-          } else {
-            setLastSelectedIndex(prevIndex)
-            newSelectedIndexes = new Set([prevIndex])
+          if (isShiftPressed && allowMultiSelection) {
+            const selectedIndexes = handleShiftSelection(newItemIndex)
+            updateSelections({ indexes: selectedIndexes })
+            return
           }
+
+          // Single selection without shift
+          if (!isShiftPressed) {
+            const newItem = allItems[newItemIndex]
+            setSelectedItemKeys(new Set([newItem.itemKey]))
+          }
+
           break
         }
         case 'Enter': {
           if (selectedItemKeys.size === 1) {
-            newSelectedIndexes = new Set([])
             setFocusedRowIndex(undefined)
+            navigateAfterSelection({
+              collectionSlug: currentItem.relationTo,
+              docID: extractID(currentItem.value),
+            })
+            return
           }
           break
         }
         case 'Escape': {
-          setFocusedRowIndex(undefined)
-          newSelectedIndexes = new Set([])
+          clearSelections()
           break
         }
         case 'KeyA': {
           if (allowMultiSelection && isCtrlPressed) {
             event.preventDefault()
             setFocusedRowIndex(totalCount - 1)
-            newSelectedIndexes = new Set(Array.from({ length: totalCount }, (_, i) => i))
+            updateSelections({
+              indexes: Array.from({ length: totalCount }, (_, i) => i),
+            })
           }
           break
         }
         case 'Space': {
           if (allowMultiSelection && isShiftPressed) {
             event.preventDefault()
-            newSelectedIndexes = getMetaSelection({
-              currentSelection: newSelectedIndexes,
-              toggleIndex: index,
+            const allItems = [...subfolders, ...documents]
+            updateSelections({
+              indexes: allItems.reduce((acc, item, idx) => {
+                if (item.itemKey === currentItem.itemKey) {
+                  if (isCurrentlySelected) {
+                    return acc
+                  } else {
+                    acc.push(idx)
+                  }
+                } else if (selectedItemKeys.has(item.itemKey)) {
+                  acc.push(idx)
+                }
+                return acc
+              }, []),
             })
-            setLastSelectedIndex(index)
           } else {
             event.preventDefault()
-            newSelectedIndexes = new Set([index])
-            setLastSelectedIndex(index)
+            updateSelections({
+              indexes: isCurrentlySelected ? [] : [currentItemIndex],
+            })
           }
           break
         }
         case 'Tab': {
           if (allowMultiSelection && isShiftPressed) {
-            const prevIndex = index - 1
-            if (prevIndex < 0 && newSelectedIndexes?.size > 0) {
+            const prevIndex = currentItemIndex - 1
+            if (prevIndex < 0 && selectedItemKeys?.size > 0) {
               setFocusedRowIndex(prevIndex)
             }
           } else {
-            const nextIndex = index + 1
+            const nextIndex = currentItemIndex + 1
             if (nextIndex === totalCount && selectedItemKeys.size > 0) {
               setFocusedRowIndex(totalCount - 1)
             }
@@ -433,101 +563,100 @@ export function FolderProvider({
           break
         }
       }
-
-      if (!newSelectedIndexes) {
-        return
-      }
-
-      setSelectedItemKeys(
-        [...subfolders, ...documents].reduce((acc, item, index) => {
-          if (newSelectedIndexes?.size && newSelectedIndexes.has(index)) {
-            acc.add(item.itemKey)
-          }
-          return acc
-        }, new Set<FolderDocumentItemKey>()),
-      )
-
-      if (selectedItemKeys.size === 1 && code === 'Enter') {
-        navigateAfterSelection({
-          collectionSlug: item.relationTo,
-          docID: extractID(item.value),
-        })
-      }
     },
     [
-      allowMultiSelection,
-      documents,
-      lastSelectedIndex,
-      navigateAfterSelection,
-      subfolders,
-      totalCount,
       selectedItemKeys,
+      subfolders,
+      documents,
+      allowMultiSelection,
+      handleShiftSelection,
+      updateSelections,
+      navigateAfterSelection,
+      clearSelections,
+      totalCount,
     ],
   )
 
   const onItemClick: FolderContextValue['onItemClick'] = React.useCallback(
-    ({ event, index, item }) => {
+    ({ event, item: clickedItem }) => {
       let doubleClicked: boolean = false
       const isCtrlPressed = event.ctrlKey || event.metaKey
       const isShiftPressed = event.shiftKey
-      let newSelectedIndexes: Set<number> | undefined = undefined
+      const isCurrentlySelected = selectedItemKeys.has(clickedItem.itemKey)
+      const allItems = [...subfolders, ...documents]
+      const currentItemIndex = allItems.findIndex((item) => item.itemKey === clickedItem.itemKey)
 
       if (allowMultiSelection && isCtrlPressed) {
-        newSelectedIndexes = getMetaSelection({
-          currentSelection: newSelectedIndexes,
-          toggleIndex: index,
-        })
-      } else if (allowMultiSelection && isShiftPressed && lastSelectedIndex !== undefined) {
-        newSelectedIndexes = getShiftSelection({
-          selectFromIndex: lastSelectedIndex,
-          selectToIndex: index,
-        })
+        event.preventDefault()
+        let overlayItemKey: FolderDocumentItemKey | undefined
+        const indexes = allItems.reduce((acc, item, idx) => {
+          if (item.itemKey === clickedItem.itemKey) {
+            if (isCurrentlySelected && event.type !== 'pointermove') {
+              return acc
+            } else {
+              acc.push(idx)
+              overlayItemKey = item.itemKey
+            }
+          } else if (selectedItemKeys.has(item.itemKey)) {
+            acc.push(idx)
+          }
+          return acc
+        }, [])
+
+        updateSelections({ indexes })
+
+        if (overlayItemKey) {
+          setDragOverlayItem(getItem(overlayItemKey))
+        }
+      } else if (allowMultiSelection && isShiftPressed) {
+        if (currentItemIndex !== -1) {
+          const selectedIndexes = handleShiftSelection(currentItemIndex)
+          updateSelections({ indexes: selectedIndexes })
+        }
       } else if (allowMultiSelection && event.type === 'pointermove') {
         // on drag start of an unselected item
-        if (!selectedItemKeys.has(item.itemKey)) {
-          newSelectedIndexes = new Set([index])
+        if (!isCurrentlySelected) {
+          updateSelections({
+            indexes: allItems.reduce((acc, item, idx) => {
+              if (item.itemKey === clickedItem.itemKey) {
+                acc.push(idx)
+              }
+              return acc
+            }, []),
+          })
         }
-        setLastSelectedIndex(index)
+        setDragOverlayItem(getItem(clickedItem.itemKey))
       } else {
         // Normal click - select single item
-        newSelectedIndexes = new Set([index])
         const now = Date.now()
-        doubleClicked = now - lastClickTime.current < 400 && lastSelectedIndex === index
+        doubleClicked =
+          now - lastClickTime.current < 400 && dragOverlayItem?.itemKey === clickedItem.itemKey
         lastClickTime.current = now
-        setLastSelectedIndex(index)
-      }
-
-      if (!newSelectedIndexes) {
-        setFocusedRowIndex(undefined)
-      } else {
-        setFocusedRowIndex(index)
-      }
-
-      if (newSelectedIndexes) {
-        setSelectedItemKeys(
-          [...subfolders, ...documents].reduce((acc, item, index) => {
-            if (newSelectedIndexes.size && newSelectedIndexes.has(index)) {
-              acc.add(item.itemKey)
-            }
-            return acc
-          }, new Set<FolderDocumentItemKey>()),
-        )
+        if (!doubleClicked) {
+          updateSelections({
+            indexes: isCurrentlySelected && selectedItemKeys.size === 1 ? [] : [currentItemIndex],
+          })
+        }
+        setDragOverlayItem(getItem(clickedItem.itemKey))
       }
 
       if (doubleClicked) {
         navigateAfterSelection({
-          collectionSlug: item.relationTo,
-          docID: extractID(item.value),
+          collectionSlug: clickedItem.relationTo,
+          docID: extractID(clickedItem.value),
         })
       }
     },
     [
       selectedItemKeys,
-      allowMultiSelection,
-      lastSelectedIndex,
       subfolders,
       documents,
+      allowMultiSelection,
+      dragOverlayItem,
+      getItem,
+      updateSelections,
       navigateAfterSelection,
+      handleShiftSelection,
     ],
   )
 
@@ -602,6 +731,70 @@ export function FolderProvider({
     [folderID, clearSelections, folderCollectionSlug, folderFieldName, routes.api, serverURL, t],
   )
 
+  const checkIfItemIsDisabled: FolderContextValue['checkIfItemIsDisabled'] = React.useCallback(
+    (item) => {
+      function folderAcceptsItem({
+        item,
+        selectedFolderCollections,
+      }: {
+        item: FolderOrDocument
+        selectedFolderCollections: string[]
+      }): boolean {
+        if (
+          !item.value.folderType ||
+          (Array.isArray(item.value.folderType) && item.value.folderType.length === 0)
+        ) {
+          // Enable folder that accept all collections
+          return false
+        }
+
+        if (selectedFolderCollections.length === 0) {
+          // If no collections are selected, enable folders that accept all collections
+          return Boolean(item.value.folderType || item.value.folderType.length > 0)
+        }
+
+        // Disable folders that do not accept all of the selected collections
+        return selectedFolderCollections.some((slug) => {
+          return !item.value.folderType.includes(slug)
+        })
+      }
+
+      if (isDragging) {
+        const isSelected = selectedItemKeys.has(item.itemKey)
+        if (isSelected) {
+          return true
+        } else if (item.relationTo === folderCollectionSlug) {
+          return folderAcceptsItem({ item, selectedFolderCollections })
+        } else {
+          // Non folder items are disabled on drag
+          return true
+        }
+      } else if (parentFolderContext?.selectedItemKeys?.size) {
+        // Disable selected items from being navigated to in move to drawer
+        if (parentFolderContext.selectedItemKeys.has(item.itemKey)) {
+          return true
+        }
+        // Moving items to folder
+        if (item.relationTo === folderCollectionSlug) {
+          return folderAcceptsItem({
+            item,
+            selectedFolderCollections: parentFolderContext.selectedFolderCollections,
+          })
+        }
+        // If the item is not a folder, it is disabled on move
+        return true
+      }
+    },
+    [
+      selectedFolderCollections,
+      isDragging,
+      selectedItemKeys,
+      folderCollectionSlug,
+      parentFolderContext?.selectedFolderCollections,
+      parentFolderContext?.selectedItemKeys,
+    ],
+  )
+
   // If a new component is provided, update the state so children can re-render with the new component
   React.useEffect(() => {
     if (InitialFolderResultsComponent) {
@@ -616,33 +809,37 @@ export function FolderProvider({
         allCollectionFolderSlugs,
         allowCreateCollectionSlugs,
         breadcrumbs,
+        checkIfItemIsDisabled,
         clearSelections,
-        currentFolder: breadcrumbs?.[0]?.id
-          ? formatFolderOrDocumentItem({
-              folderFieldName,
-              isUpload: false,
-              relationTo: folderCollectionSlug,
-              useAsTitle: folderCollectionConfig.admin.useAsTitle,
-              value: breadcrumbs[breadcrumbs.length - 1],
-            })
-          : null,
+        currentFolder:
+          breadcrumbs?.[breadcrumbs.length - 1]?.id !== undefined
+            ? formatFolderOrDocumentItem({
+                folderFieldName,
+                isUpload: false,
+                relationTo: folderCollectionSlug,
+                useAsTitle: folderCollectionConfig.admin.useAsTitle,
+                value: breadcrumbs[breadcrumbs.length - 1],
+              })
+            : null,
         documents,
+        dragOverlayItem,
         focusedRowIndex,
         folderCollectionConfig,
         folderCollectionSlug,
         folderFieldName,
         folderID,
         FolderResultsComponent,
+        folderType: breadcrumbs?.[breadcrumbs.length - 1]?.folderType,
         getFolderRoute,
         getSelectedItems,
         isDragging,
         itemKeysToMove: parentFolderContext.selectedItemKeys,
-        lastSelectedIndex,
         moveToFolder,
         onItemClick,
         onItemKeyPress,
         refineFolderData,
         search,
+        selectedFolderCollections,
         selectedItemKeys,
         setBreadcrumbs,
         setFocusedRowIndex,

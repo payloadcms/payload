@@ -15,27 +15,10 @@ import shelljs from 'shelljs'
 import { setTimeout } from 'timers/promises'
 
 import { devUser } from './credentials.js'
+import { openNav } from './helpers/e2e/toggleNav.js'
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
-type AdminRoutes = NonNullable<Config['admin']>['routes']
-
-type FirstRegisterArgs = {
-  customAdminRoutes?: AdminRoutes
-  customRoutes?: Config['routes']
-  page: Page
-  serverURL: string
-}
-
-type LoginArgs = {
-  customAdminRoutes?: AdminRoutes
-  customRoutes?: Config['routes']
-  data?: {
-    email: string
-    password: string
-  }
-  page: Page
-  serverURL: string
-}
+export type AdminRoutes = NonNullable<Config['admin']>['routes']
 
 const random = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 
@@ -104,10 +87,26 @@ export async function ensureCompilationIsDone({
 
       await page.goto(adminURL)
 
-      await page.waitForURL(
-        readyURL ??
-          (noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL),
-      )
+      if (readyURL) {
+        await page.waitForURL(readyURL)
+      } else {
+        await expect
+          .poll(
+            () => {
+              if (noAutoLogin) {
+                const baseAdminURL = adminURL + (adminURL.endsWith('/') ? '' : '/')
+                return (
+                  page.url() === `${baseAdminURL}create-first-user` ||
+                  page.url() === `${baseAdminURL}login`
+                )
+              } else {
+                return page.url() === adminURL
+              }
+            },
+            { timeout: POLL_TOPASS_TIMEOUT },
+          )
+          .toBe(true)
+      }
 
       console.log('Successfully compiled')
       return
@@ -167,68 +166,6 @@ export async function throttleTest({
   return client
 }
 
-export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
-  const { customAdminRoutes, customRoutes, page, serverURL } = args
-
-  const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
-
-  await page.goto(`${serverURL}${adminRoute}`)
-  await page.fill('#field-email', devUser.email)
-  await page.fill('#field-password', devUser.password)
-  await page.fill('#field-confirm-password', devUser.password)
-  await wait(500)
-  await page.click('[type=submit]')
-  await page.waitForURL(`${serverURL}${adminRoute}`)
-}
-
-export async function login(args: LoginArgs): Promise<void> {
-  const { customAdminRoutes, customRoutes, data = devUser, page, serverURL } = args
-
-  const {
-    admin: {
-      routes: { createFirstUser, login: incomingLoginRoute, logout: incomingLogoutRoute } = {},
-    },
-    routes: { admin: incomingAdminRoute } = {},
-  } = getRoutes({ customAdminRoutes, customRoutes })
-
-  const logoutRoute = formatAdminURL({
-    serverURL,
-    adminRoute: incomingAdminRoute,
-    path: incomingLogoutRoute,
-  })
-
-  await page.goto(logoutRoute)
-  await wait(500)
-
-  const adminRoute = formatAdminURL({ serverURL, adminRoute: incomingAdminRoute, path: '' })
-  const loginRoute = formatAdminURL({
-    serverURL,
-    adminRoute: incomingAdminRoute,
-    path: incomingLoginRoute,
-  })
-  const createFirstUserRoute = formatAdminURL({
-    serverURL,
-    adminRoute: incomingAdminRoute,
-    path: createFirstUser,
-  })
-
-  await page.goto(loginRoute)
-  await wait(500)
-  await page.fill('#field-email', data.email)
-  await page.fill('#field-password', data.password)
-  await wait(500)
-  await page.click('[type=submit]')
-  await page.waitForURL(adminRoute)
-
-  await expect(() => expect(page.url()).not.toContain(loginRoute)).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
-  await expect(() => expect(page.url()).not.toContain(createFirstUserRoute)).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-}
-
 export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
   const ua = page.evaluate(() => navigator.userAgent)
   const isMac = (await ua).includes('Mac OS X')
@@ -248,7 +185,12 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
 
 export async function saveDocAndAssert(
   page: Page,
-  selector = '#action-save',
+  selector:
+    | '#action-publish'
+    | '#action-save'
+    | '#action-save-draft'
+    | '#publish-locale'
+    | string = '#action-save',
   expectation: 'error' | 'success' = 'success',
 ): Promise<void> {
   await wait(500) // TODO: Fix this
@@ -355,22 +297,26 @@ export const checkBreadcrumb = async (page: Page, text: string) => {
     .toBe(text)
 }
 
-export const selectTableRow = async (page: Page, title: string): Promise<void> => {
+export const selectTableRow = async (scope: Locator | Page, title: string): Promise<void> => {
   const selector = `tbody tr:has-text("${title}") .select-row__checkbox input[type=checkbox]`
-  await page.locator(selector).check()
-  await expect(page.locator(selector)).toBeChecked()
+  await scope.locator(selector).check()
+  await expect(scope.locator(selector)).toBeChecked()
 }
 
-export const findTableCell = (page: Page, fieldName: string, rowTitle?: string): Locator => {
-  const parentEl = rowTitle ? findTableRow(page, rowTitle) : page.locator('tbody tr')
+export const findTableCell = async (
+  page: Page,
+  fieldName: string,
+  rowTitle?: string,
+): Promise<Locator> => {
+  const parentEl = rowTitle ? await findTableRow(page, rowTitle) : page.locator('tbody tr')
   const cell = parentEl.locator(`td.cell-${fieldName}`)
-  expect(cell).toBeTruthy()
+  await expect(cell).toBeVisible()
   return cell
 }
 
-export const findTableRow = (page: Page, title: string): Locator => {
+export const findTableRow = async (page: Page, title: string): Promise<Locator> => {
   const row = page.locator(`tbody tr:has-text("${title}")`)
-  expect(row).toBeTruthy()
+  await expect(row).toBeVisible()
   return row
 }
 

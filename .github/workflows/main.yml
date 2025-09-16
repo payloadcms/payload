@@ -1,4 +1,4 @@
-name: build
+name: ci
 
 on:
   pull_request:
@@ -6,7 +6,6 @@ on:
       - opened
       - reopened
       - synchronize
-      - labeled
   push:
     branches:
       - main
@@ -17,8 +16,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 23.11.0
-  PNPM_VERSION: 9.7.1
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
@@ -36,7 +33,7 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -65,16 +62,12 @@ jobs:
   lint:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Node setup
         uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Lint
         run: pnpm lint -- --quiet
@@ -85,14 +78,10 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - run: pnpm run build:all
         env:
@@ -109,16 +98,13 @@ jobs:
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -136,16 +122,13 @@ jobs:
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -163,17 +146,20 @@ jobs:
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     name: int-${{ matrix.database }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         database:
           - mongodb
+          - firestore
           - postgres
           - postgres-custom-schema
           - postgres-uuid
           - supabase
           - sqlite
           - sqlite-uuid
+
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -185,7 +171,8 @@ jobs:
 
     services:
       postgres:
-        image: ${{ (startsWith(matrix.database, 'postgres') ) && 'postgis/postgis:16-3.4' || '' }}
+        # Custom postgres 17 docker image that supports both pg-vector and postgis: https://github.com/payloadcms/postgis-vector
+        image: ${{ (startsWith(matrix.database, 'postgres') ) && 'ghcr.io/payloadcms/postgis-vector:latest' || '' }}
         env:
           # must specify password for PG Docker container image, see: https://registry.hub.docker.com/_/postgres?tab=description&page=1&name=10
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
@@ -197,16 +184,13 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -258,6 +242,7 @@ jobs:
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     name: e2e-${{ matrix.suite }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -298,6 +283,8 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - group-by
+          - folders
           - hooks
           - lexical__collections__Lexical__e2e__main
           - lexical__collections__Lexical__e2e__blocks
@@ -312,24 +299,23 @@ jobs:
           - plugin-cloud-storage
           - plugin-form-builder
           - plugin-import-export
+          - plugin-multi-tenant
           - plugin-nested-docs
           - plugin-seo
           - sort
+          - trash
           - versions
           - uploads
     env:
       SUITE_NAME: ${{ matrix.suite }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -384,6 +370,7 @@ jobs:
       #     report-tag: ${{ matrix.suite }}
       #     job-summary: true
 
+  # This is unused, keeping it here for reference and possibly enabling in the future
   tests-e2e-turbo:
     runs-on: ubuntu-24.04
     needs: [changes, build]
@@ -434,6 +421,8 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - group-by
+          - folders
           - hooks
           - lexical__collections__Lexical__e2e__main
           - lexical__collections__Lexical__e2e__blocks
@@ -448,24 +437,23 @@ jobs:
           - plugin-cloud-storage
           - plugin-form-builder
           - plugin-import-export
+          - plugin-multi-tenant
           - plugin-nested-docs
           - plugin-seo
           - sort
+          - trash
           - versions
           - uploads
     env:
       SUITE_NAME: ${{ matrix.suite }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -520,24 +508,32 @@ jobs:
       #     report-tag: ${{ matrix.suite }}
       #     job-summary: true
 
-  # Build listed templates with packed local packages
-  build-templates:
+  # Build listed templates with packed local packages and then runs their int and e2e tests
+  build-and-test-templates:
     runs-on: ubuntu-24.04
-    needs: build
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_build == 'true' }}
+    name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - template: blank
             database: mongodb
+
           - template: website
             database: mongodb
+
           - template: with-payload-cloud
             database: mongodb
+
           - template: with-vercel-mongodb
             database: mongodb
+
           # Postgres
           - template: with-postgres
             database: postgres
+
           - template: with-vercel-postgres
             database: postgres
 
@@ -547,8 +543,6 @@ jobs:
           # - template: with-vercel-website
           #   database: postgres
 
-    name: ${{ matrix.template }}-${{ matrix.database }}
-
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -556,16 +550,13 @@ jobs:
       MONGODB_VERSION: 6.0
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -612,21 +603,57 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=8096
 
+      - name: Store Playwright's Version
+        run: |
+          # Extract the version number using a more targeted regex pattern with awk
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
+
+      - name: Cache Playwright Browsers for Playwright's Version
+        id: cache-playwright-browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Setup Playwright - Browsers and Dependencies
+        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Setup Playwright - Dependencies-only
+        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Runs Template Int Tests
+        run: pnpm --filter ${{ matrix.template }} run test:int
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+          PAYLOAD_DATABASE: ${{ matrix.database }}
+          POSTGRES_URL: ${{ env.POSTGRES_URL }}
+          MONGODB_URL: mongodb://localhost:27017/payloadtests
+
+      - name: Runs Template E2E Tests
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.template }}.json pnpm --filter ${{ matrix.template }} test:e2e
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+          PAYLOAD_DATABASE: ${{ matrix.database }}
+          POSTGRES_URL: ${{ env.POSTGRES_URL }}
+          MONGODB_URL: mongodb://localhost:27017/payloadtests
+          NEXT_TELEMETRY_DISABLED: 1
+
   tests-type-generation:
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -647,7 +674,7 @@ jobs:
     needs:
       - lint
       - build
-      - build-templates
+      - build-and-test-templates
       - tests-unit
       - tests-int
       - tests-e2e
@@ -670,3 +697,36 @@ jobs:
       - run: |
           echo github.ref: ${{ github.ref }}
           echo isV3: ${{ github.ref == 'refs/heads/main' }}
+  analyze:
+    runs-on: ubuntu-latest
+    needs: [changes, build]
+    timeout-minutes: 5
+    permissions:
+      contents: read # for checkout repository
+      actions: read # for fetching base branch bundle stats
+      pull-requests: write # for comments
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - run: pnpm run build:bundle-for-analysis # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
+        env:
+          DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+
+      - name: Analyze esbuild bundle size
+        # Temporarily disable this for community PRs until this can be implemented in a separate workflow
+        if: github.event.pull_request.head.repo.fork == false
+        uses: exoego/esbuild-bundle-analyzer@v1
+        with:
+          metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'

@@ -1,10 +1,11 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import { openCreateDocDrawer } from 'helpers/e2e/fields/relationship/openCreateDocDrawer.js'
+import { addListFilter } from 'helpers/e2e/filters/index.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
-import { openCreateDocDrawer, openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
+import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -23,7 +24,6 @@ import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { assertToastErrors } from '../../../helpers/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
 const filename = fileURLToPath(import.meta.url)
@@ -33,7 +33,6 @@ const dirname = path.resolve(currentFolder, '../../')
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let client: RESTClient
 let page: Page
 let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
@@ -58,12 +57,6 @@ describe('relationship', () => {
       snapshotKey: 'fieldsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-
-    if (client) {
-      await client.logout()
-    }
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -693,7 +686,7 @@ describe('relationship', () => {
     await createRelationshipFieldDoc({ value: textDoc.id, relationTo: 'text-fields' })
 
     await page.goto(url.list)
-    await wait(300)
+    await wait(1000) // wait for page to load
 
     await addListFilter({
       page,

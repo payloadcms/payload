@@ -32,18 +32,18 @@ The Admin Panel serves as the entire HTTP layer for Payload, providing a full CR
 Once you [install Payload](../getting-started/installation), the following files and directories will be created in your app:
 
 ```plaintext
-app/
-├─ (payload)/
-├── admin/
-├─── [[...segments]]/
+app
+├─ (payload)
+├── admin
+├─── [[...segments]]
 ├──── page.tsx
 ├──── not-found.tsx
-├── api/
-├─── [...slug]/
+├── api
+├─── [...slug]
 ├──── route.ts
-├── graphql/
+├── graphql
 ├──── route.ts
-├── graphql-playground/
+├── graphql-playground
 ├──── route.ts
 ├── custom.scss
 ├── layout.tsx
@@ -77,36 +77,39 @@ All auto-generated files will contain the following comments at the top of each 
 
 ## Admin Options
 
-All options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` property:
+All root-level options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` property:
 
 ```ts
 import { buildConfig } from 'payload'
 
 const config = buildConfig({
   // ...
+  // highlight-start
   admin: {
-    // highlight-line
     // ...
   },
+  // highlight-end
 })
 ```
 
 The following options are available:
 
-| Option                         | Description                                                                                                                                     |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`avatar`**                   | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                        |
-| **`autoLogin`**                | Used to automate log-in for dev and demonstration convenience. [More details](../authentication/overview).                                      |
-| **`components`**               | Component overrides that affect the entirety of the Admin Panel. [More details](../custom-components/overview).                                 |
-| **`custom`**                   | Any custom properties you wish to pass to the Admin Panel.                                                                                      |
-| **`dateFormat`**               | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used. |
-| **`livePreview`**              | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                   |
-| **`meta`**                     | Base metadata to use for the Admin Panel. [More details](./metadata).                                                                           |
-| **`routes`**                   | Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                           |
-| **`suppressHydrationWarning`** | If set to `true`, suppresses React hydration mismatch warnings during the hydration of the root `<html>` tag. Defaults to `false`.              |
-| **`theme`**                    | Restrict the Admin Panel theme to use only one of your choice. Default is `all`.                                                                |
-| **`timezones`**                | Configure the timezone settings for the admin panel. [More details](#timezones)                                                                 |
-| **`user`**                     | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                    |
+| Option                     | Description                                                                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `avatar`                   | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                        |
+| `autoLogin`                | Used to automate log-in for dev and demonstration convenience. [More details](../authentication/overview).                                      |
+| `autoRefresh`              | Used to automatically refresh user tokens for users logged into the dashboard. [More details](../authentication/overview).                      |
+| `components`               | Component overrides that affect the entirety of the Admin Panel. [More details](../custom-components/overview).                                 |
+| `custom`                   | Any custom properties you wish to pass to the Admin Panel.                                                                                      |
+| `dateFormat`               | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used. |
+| `livePreview`              | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                   |
+| `meta`                     | Base metadata to use for the Admin Panel. [More details](./metadata).                                                                           |
+| `routes`                   | Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                           |
+| `suppressHydrationWarning` | If set to `true`, suppresses React hydration mismatch warnings during the hydration of the root `<html>` tag. Defaults to `false`.              |
+| `theme`                    | Restrict the Admin Panel theme to use only one of your choice. Default is `all`.                                                                |
+| `timezones`                | Configure the timezone settings for the admin panel. [More details](#timezones)                                                                 |
+| `toast`                    | Customize the handling of toast messages within the Admin Panel. [More details](#toasts)                                                        |
+| `user`                     | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                    |
 
 <Banner type="success">
   **Reminder:** These are the _root-level_ options for the Admin Panel. You can
@@ -186,6 +189,12 @@ The following options are available:
 | `graphQL`           | `/graphql`            | The [GraphQL API](../graphql/overview) base path. |
 | `graphQLPlayground` | `/graphql-playground` | The GraphQL Playground.                           |
 
+<Banner type="warning">
+  **Important:** Changing Root-level Routes also requires a change to [Project
+  Structure](#project-structure) to match the new route. [More
+  details](#customizing-root-level-routes).
+</Banner>
+
 <Banner type="success">
   **Tip:** You can easily add _new_ routes to the Admin Panel through [Custom
   Endpoints](../rest-api/overview#custom-endpoints) and [Custom
@@ -196,13 +205,29 @@ The following options are available:
 
 You can change the Root-level Routes as needed, such as to mount the Admin Panel at the root of your application.
 
-Changing Root-level Routes also requires a change to [Project Structure](#project-structure) to match the new route. For example, if you set `routes.admin` to `/`, you would need to completely remove the `admin` directory from the project structure:
+This change, however, also requires a change to your [Project Structure](#project-structure) to match the new route.
+
+For example, if you set `routes.admin` to `/`:
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  routes: {
+    admin: '/', // highlight-line
+  },
+})
+```
+
+Then you would need to completely remove the `admin` directory from the project structure:
 
 ```plaintext
-app/
-├─ (payload)/
-├── [[...segments]]/
+app
+├─ (payload)
+├── [[...segments]]
 ├──── ...
+├── layout.tsx
 ```
 
 <Banner type="warning">
@@ -275,3 +300,20 @@ We validate the supported timezones array by checking the value against the list
   `timezone: true`. See [Date Fields](../fields/overview#date) for more
   information.
 </Banner>
+
+## Toast
+
+The `admin.toast` configuration allows you to customize the handling of toast messages within the Admin Panel, such as increasing the duration they are displayed and limiting the number of visible toasts at once.
+
+<Banner type="info">
+  **Note:** The Admin Panel currently uses the
+  [Sonner](https://sonner.emilkowal.ski) library for toast notifications.
+</Banner>
+
+The following options are available for the `admin.toast` configuration:
+
+| Option     | Description                                                                                                      | Default |
+| ---------- | ---------------------------------------------------------------------------------------------------------------- | ------- |
+| `duration` | The length of time (in milliseconds) that a toast message is displayed.                                          | `4000`  |
+| `expand`   | If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction. | `false` |
+| `limit`    | The maximum number of toasts that can be visible on the screen at once.                                          | `5`     |

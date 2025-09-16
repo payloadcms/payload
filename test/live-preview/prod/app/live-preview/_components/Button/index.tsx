@@ -7,7 +7,7 @@ import React from 'react'
 
 import classes from './index.module.scss'
 
-const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
+const Link = 'default' in LinkWithDefault ? LinkWithDefault.default : LinkWithDefault
 
 export type Props = {
   appearance?: 'default' | 'none' | 'primary' | 'secondary'

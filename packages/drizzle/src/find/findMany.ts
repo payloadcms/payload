@@ -80,7 +80,7 @@ export const findMany = async function find({
   if (orderBy) {
     for (const key in selectFields) {
       const column = selectFields[key]
-      if (column.primary) {
+      if (!column || column.primary) {
         continue
       }
 

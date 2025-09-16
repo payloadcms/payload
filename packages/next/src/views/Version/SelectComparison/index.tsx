@@ -17,13 +17,14 @@ export const SelectComparison: React.FC<Props> = memo((props) => {
   const {
     collectionSlug,
     docID,
+    globalSlug,
     onChange: onChangeFromProps,
     versionFromID,
     versionFromOptions,
   } = props
   const { t } = useTranslation()
 
-  const { Drawer, openDrawer } = useVersionDrawer({ collectionSlug, docID })
+  const { Drawer, openDrawer } = useVersionDrawer({ collectionSlug, docID, globalSlug })
 
   const options = useMemo(() => {
     return [

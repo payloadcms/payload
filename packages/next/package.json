@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.43.0",
+  "version": "3.55.1",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -22,6 +22,10 @@
   ],
   "type": "module",
   "exports": {
+    "./css": {
+      "import": "./src/dummy.css",
+      "default": "./src/dummy.css"
+    },
     ".": {
       "import": "./src/index.js",
       "types": "./src/index.js",
@@ -70,6 +74,7 @@
   "scripts": {
     "build": "pnpm build:reactcompiler",
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
+    "build:bundle-for-analysis": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && node ./bundle.js esbuild",
     "build:cjs": "swc ./src/withPayload.js -o ./dist/cjs/withPayload.cjs --config-file .swcrc-cjs --strip-leading-paths",
     "build:esbuild": "node bundleScss.js",
     "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:types && pnpm build:esbuild  && pnpm build:cjs",
@@ -112,11 +117,11 @@
     "@babel/preset-env": "7.27.2",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@next/eslint-plugin-next": "15.3.2",
+    "@next/eslint-plugin-next": "15.4.4",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
-    "@types/react": "19.1.0",
-    "@types/react-dom": "19.1.2",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.1.0-rc.2",
     "esbuild": "0.25.5",

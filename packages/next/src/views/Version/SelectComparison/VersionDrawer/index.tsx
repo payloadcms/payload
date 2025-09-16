@@ -3,6 +3,7 @@ import {
   Drawer,
   LoadingOverlay,
   toast,
+  useDocumentInfo,
   useEditDepth,
   useModal,
   useServerFunctions,
@@ -24,11 +25,13 @@ export const formatVersionDrawerSlug = ({
 }) => `version-drawer_${depth}_${uuid}`
 
 export const VersionDrawerContent: React.FC<{
-  collectionSlug: string
-  docID: number | string
+  collectionSlug?: string
+  docID?: number | string
   drawerSlug: string
+  globalSlug?: string
 }> = (props) => {
-  const { collectionSlug, docID, drawerSlug } = props
+  const { collectionSlug, docID, drawerSlug, globalSlug } = props
+  const { isTrashed } = useDocumentInfo()
   const { closeModal } = useModal()
   const searchParams = useSearchParams()
   const prevSearchParams = useRef(searchParams)
@@ -46,12 +49,21 @@ export const VersionDrawerContent: React.FC<{
         setIsLoading(true)
 
         try {
+          const isGlobal = Boolean(globalSlug)
+          const entitySlug = collectionSlug ?? globalSlug
+
           const result = await renderDocument({
-            collectionSlug,
+            collectionSlug: entitySlug,
             docID,
             drawerSlug,
             paramsOverride: {
-              segments: ['collections', collectionSlug, String(docID), 'versions'],
+              segments: [
+                isGlobal ? 'globals' : 'collections',
+                entitySlug,
+                ...(isTrashed ? ['trash'] : []),
+                isGlobal ? undefined : String(docID),
+                'versions',
+              ].filter(Boolean),
             },
             redirectAfterDelete: false,
             redirectAfterDuplicate: false,
@@ -75,7 +87,16 @@ export const VersionDrawerContent: React.FC<{
 
       void fetchDocumentView()
     },
-    [closeModal, collectionSlug, drawerSlug, renderDocument, searchParams, t],
+    [
+      closeModal,
+      collectionSlug,
+      drawerSlug,
+      globalSlug,
+      isTrashed,
+      renderDocument,
+      searchParams,
+      t,
+    ],
   )
 
   useEffect(() => {
@@ -93,11 +114,12 @@ export const VersionDrawerContent: React.FC<{
   return DocumentView
 }
 export const VersionDrawer: React.FC<{
-  collectionSlug: string
-  docID: number | string
+  collectionSlug?: string
+  docID?: number | string
   drawerSlug: string
+  globalSlug?: string
 }> = (props) => {
-  const { collectionSlug, docID, drawerSlug } = props
+  const { collectionSlug, docID, drawerSlug, globalSlug } = props
   const { t } = useTranslation()
 
   return (
@@ -107,7 +129,12 @@ export const VersionDrawer: React.FC<{
       slug={drawerSlug}
       title={t('version:selectVersionToCompare')}
     >
-      <VersionDrawerContent collectionSlug={collectionSlug} docID={docID} drawerSlug={drawerSlug} />
+      <VersionDrawerContent
+        collectionSlug={collectionSlug}
+        docID={docID}
+        drawerSlug={drawerSlug}
+        globalSlug={globalSlug}
+      />
     </Drawer>
   )
 }
@@ -115,9 +142,11 @@ export const VersionDrawer: React.FC<{
 export const useVersionDrawer = ({
   collectionSlug,
   docID,
+  globalSlug,
 }: {
-  collectionSlug: string
-  docID: number | string
+  collectionSlug?: string
+  docID?: number | string
+  globalSlug?: string
 }) => {
   const drawerDepth = useEditDepth()
   const uuid = useId()
@@ -147,9 +176,14 @@ export const useVersionDrawer = ({
 
   const MemoizedDrawer = useMemo(() => {
     return () => (
-      <VersionDrawer collectionSlug={collectionSlug} docID={docID} drawerSlug={drawerSlug} />
+      <VersionDrawer
+        collectionSlug={collectionSlug}
+        docID={docID}
+        drawerSlug={drawerSlug}
+        globalSlug={globalSlug}
+      />
     )
-  }, [collectionSlug, docID, drawerSlug])
+  }, [collectionSlug, docID, drawerSlug, globalSlug])
 
   return useMemo(
     () => ({

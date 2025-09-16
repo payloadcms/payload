@@ -59,6 +59,7 @@ export const Button: React.FC<Props> = (props) => {
     disabled,
     el = 'button',
     enableSubMenu,
+    extraButtonProps = {},
     icon,
     iconPosition = 'right',
     iconStyle = 'without-border',
@@ -124,6 +125,8 @@ export const Button: React.FC<Props> = (props) => {
     onPointerLeave: tooltip ? () => setShowTooltip(false) : undefined,
     rel: newTab ? 'noopener noreferrer' : undefined,
     target: newTab ? '_blank' : undefined,
+    title: ariaLabel,
+    ...extraButtonProps,
   }
 
   let buttonElement

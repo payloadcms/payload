@@ -25,6 +25,7 @@
 import type { BrowserContext, Dialog, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { postsCollectionSlug } from 'admin/slugs.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -37,26 +38,29 @@ import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
+  openDocDrawer,
   saveDocAndAssert,
+  // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
+import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
-import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
   autosaveWithDraftButtonGlobal,
   autosaveWithDraftButtonSlug,
-  autosaveWithValidateCollectionSlug,
+  autosaveWithDraftValidateSlug,
   customIDSlug,
   diffCollectionSlug,
   disablePublishGlobalSlug,
   disablePublishSlug,
   draftCollectionSlug,
   draftGlobalSlug,
+  draftWithChangeHookCollectionSlug,
   draftWithMaxCollectionSlug,
   draftWithMaxGlobalSlug,
   draftWithValidateCollectionSlug,
@@ -82,8 +86,9 @@ describe('Versions', () => {
   let serverURL: string
   let autosaveURL: AdminUrlUtil
   let autosaveWithDraftButtonURL: AdminUrlUtil
-  let autosaveWithValidateURL: AdminUrlUtil
+  let autosaveWithDraftValidateURL: AdminUrlUtil
   let draftWithValidateURL: AdminUrlUtil
+  let draftWithChangeHookURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
@@ -103,11 +108,12 @@ describe('Versions', () => {
   })
 
   beforeEach(async () => {
-    /* await throttleTest({
-      page,
-      context,
-      delay: 'Slow 4G',
-    }) */
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Fast 4G',
+    // })
+
     await reInitializeDB({
       serverURL,
       snapshotKey: 'versionsTest',
@@ -121,7 +127,7 @@ describe('Versions', () => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       autosaveWithDraftButtonURL = new AdminUrlUtil(serverURL, autosaveWithDraftButtonSlug)
-      autosaveWithValidateURL = new AdminUrlUtil(serverURL, autosaveWithValidateCollectionSlug)
+      autosaveWithDraftValidateURL = new AdminUrlUtil(serverURL, autosaveWithDraftValidateSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
@@ -175,6 +181,37 @@ describe('Versions', () => {
       }).toPass({ timeout: 10000, intervals: [100] })
     })
 
+    test('autosave relationships - should select doc after creating from relationship field', async () => {
+      await page.goto(postURL.create)
+      const autosaveRelationField = page.locator('#field-relationToAutosaves')
+      await expect(autosaveRelationField).toBeVisible()
+      const addNewButton = autosaveRelationField.locator(
+        '.relationship-add-new__add-button.doc-drawer__toggler',
+      )
+      await addNewButton.click()
+      const titleField = page.locator('#field-title')
+      const descriptionField = page.locator('#field-description')
+      await titleField.fill('test')
+      await descriptionField.fill('test')
+
+      const createdDate = await page.textContent(
+        'li:has(p:has-text("Created:")) .doc-controls__value',
+      )
+
+      // wait for modified date and created date to be different
+      await expect(async () => {
+        const modifiedDateLocator = page.locator(
+          'li:has(p:has-text("Last Modified:")) .doc-controls__value',
+        )
+        await expect(modifiedDateLocator).not.toHaveText(createdDate ?? '')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
+
+      const closeDrawer = page.locator('.doc-drawer__header-close')
+      await closeDrawer.click()
+      const fieldValue = autosaveRelationField.locator('.value-container')
+      await expect(fieldValue).toContainText('test')
+    })
+
     test('should show collection versions view level action in collection versions view', async () => {
       await page.goto(url.list)
       await page.locator('tbody tr .cell-title a').first().click()
@@ -201,11 +238,43 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await expect(page.locator('.render-field-diffs')).toBeVisible()
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
       await page.locator('.restore-version__restore-as-draft-button').click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
       await expect(page.locator('#field-title')).toHaveValue('v1')
+    })
+
+    test('should restore version as draft', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('v1')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await page.locator('#field-title').fill('v2')
+      await page.locator('#field-description').fill('restore me as draft')
+      await saveDocAndAssert(page)
+      await page.locator('#field-title').fill('v3')
+      await page.locator('#field-description').fill('published')
+      await saveDocAndAssert(page)
+
+      const savedDocURL = page.url()
+      await page.goto(`${savedDocURL}/versions`)
+      const row2 = page.locator('tbody .row-2')
+      const versionID = await row2.locator('.cell-id').textContent()
+      await page.goto(`${savedDocURL}/versions/${versionID}`)
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+      await page.locator('.restore-version .popup__trigger-wrap button').click()
+      await page.getByRole('button', { name: 'Restore as draft' }).click()
+      await page.locator('button:has-text("Confirm")').click()
+      await page.waitForURL(savedDocURL)
+
+      await expect(page.locator('#field-title')).toHaveValue('v2')
+      await page.goto(`${savedDocURL}/api`)
+      const values = page.locator('.query-inspector__value')
+      const count = await values.count()
+
+      for (let i = 0; i < count; i++) {
+        await expect(values.nth(i)).not.toHaveText(/published/i)
+      }
     })
 
     test('should show currently published version status in versions view', async () => {
@@ -354,6 +423,48 @@ describe('Versions', () => {
       const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
       await expect(drawer).toBeVisible()
       await expect(drawer.locator('.id-label')).toBeVisible()
+    })
+
+    test('collection - should autosave using proper depth', async () => {
+      const { id: postID } = await payload.create({
+        collection: postCollectionSlug,
+        data: {
+          title: 'post title',
+          description: 'post description',
+        },
+      })
+
+      const { id: docID } = await payload.create({
+        collection: autosaveCollectionSlug,
+        data: {
+          title: 'autosave title',
+          description: 'autosave description',
+          relationship: postID,
+        },
+      })
+
+      await page.goto(autosaveURL.edit(docID))
+
+      await expect(page.locator('#custom-field-label')).toHaveText(
+        `Value in DocumentInfoContext: ${postID}`,
+      )
+
+      await assertNetworkRequests(
+        page,
+        // Important: assert that depth is 0 in this request
+        `${serverURL}/api/autosave-posts/${docID}?depth=0&draft=true&autosave=true&locale=en`,
+        async () => {
+          await page.locator('#field-title').fill('changed title')
+        },
+        {
+          allowedNumberOfRequests: 1,
+        },
+      )
+
+      // Ensure that the value in context remains consistent across saves
+      await expect(page.locator('#custom-field-label')).toHaveText(
+        `Value in DocumentInfoContext: ${postID}`,
+      )
     })
 
     test('collection - should show "save as draft" button when showSaveDraftButton is true', async () => {
@@ -809,6 +920,51 @@ describe('Versions', () => {
       await page.goto(url.global(disablePublishGlobalSlug))
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
+
+    test('global — should show versions drawer when SelectComparison more option is clicked', async () => {
+      await payload.updateGlobal({
+        slug: draftGlobalSlug,
+        data: {
+          title: 'initial title',
+        },
+      })
+      await payload.updateGlobal({
+        slug: draftGlobalSlug,
+        data: {
+          title: 'initial title 2',
+        },
+      })
+
+      const url = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(`${url.global(draftGlobalSlug)}/versions`)
+
+      const versionsTable = page.locator('.table table')
+      await expect(versionsTable).toBeVisible()
+
+      const versionAnchor = versionsTable.locator('tbody tr.row-1 td.cell-updatedAt a')
+      await expect(versionAnchor).toBeVisible()
+      await versionAnchor.click()
+
+      const compareFromContainer = page.locator(
+        '.view-version__version-from .field-type.compare-version',
+      )
+      await expect(compareFromContainer).toBeVisible()
+
+      const fromSelect = compareFromContainer.locator('.react-select .rs__control')
+      await expect(fromSelect).toBeVisible()
+      await fromSelect.click()
+
+      const moreVersions = compareFromContainer.locator('.rs__option:has-text("More versions...")')
+      await expect(moreVersions).toBeVisible()
+      await moreVersions.click()
+
+      const versionDrawer = page.locator('dialog.version-drawer')
+      await expect(versionDrawer).toBeVisible()
+
+      const versionsDrawerTableBody = versionDrawer.locator('main.versions table tbody')
+      await expect(versionsDrawerTableBody).toBeVisible()
+      await expect(versionsDrawerTableBody.locator('tr')).toHaveCount(2)
+    })
   })
 
   describe('Scheduled publish', () => {
@@ -941,7 +1097,7 @@ describe('Versions', () => {
 
       await textField.fill('spanish draft')
       await saveDocAndAssert(page, '#action-save-draft')
-      await expect(status).toContainText('Changed')
+      await expect(status).toContainText('Draft')
 
       await changeLocale(page, 'en')
       await textField.fill('english published')
@@ -974,7 +1130,7 @@ describe('Versions', () => {
 
       const publishedDoc = data.docs[0]
 
-      expect(publishedDoc.text).toStrictEqual({
+      expect(publishedDoc?.text).toStrictEqual({
         en: 'english published',
         es: 'spanish published',
       })
@@ -983,8 +1139,9 @@ describe('Versions', () => {
 
   describe('Collections with draft validation', () => {
     beforeAll(() => {
-      autosaveWithValidateURL = new AdminUrlUtil(serverURL, autosaveWithValidateCollectionSlug)
+      autosaveWithDraftValidateURL = new AdminUrlUtil(serverURL, autosaveWithDraftValidateSlug)
       draftWithValidateURL = new AdminUrlUtil(serverURL, draftWithValidateCollectionSlug)
+      draftWithChangeHookURL = new AdminUrlUtil(serverURL, draftWithChangeHookCollectionSlug)
     })
 
     test('- can save', async () => {
@@ -1004,6 +1161,50 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('New title')
     })
 
+    test('- can save draft with error thrown in beforeChange hook and continue editing without being shown publishing validation', async () => {
+      await page.goto(draftWithChangeHookURL.create)
+
+      const titleField = page.locator('#field-title')
+      const descriptionField = page.locator('#field-description')
+
+      await titleField.fill('Initial title')
+      await descriptionField.fill('Initial description')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Provoke an error being thrown in the beforeChange hook
+      await titleField.fill('Invalid title')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Verify that the form retains its client state and that no validation errors are shown
+      await expect(page.locator('#field-title')).toHaveValue('Invalid title')
+      await expect(page.locator('#field-description')).toHaveValue('Initial description')
+      await expect(page.locator('.field-error')).toHaveCount(0)
+
+      // Make another field invalid
+      await descriptionField.fill('')
+
+      // Verify that no validation errors are shown even after the debounced validation would have been triggered and processed.
+      await wait(2000)
+      await expect(page.locator('.field-error')).toHaveCount(0)
+
+      // Make the form valid again (`beforeChange` hook not throwing, `required` validation passing)
+      await titleField.fill('New valid title')
+      await descriptionField.fill('New valid description')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Verify that valid draft submissions can be saved
+      await expect(page.locator('#field-title')).toHaveValue('New valid title')
+      await expect(page.locator('#field-description')).toHaveValue('New valid description')
+      await expect(page.locator('.field-error')).toHaveCount(0)
+
+      await page.reload()
+
+      // Verify that valid draft submissions are persisted
+      await expect(page.locator('#field-title')).toHaveValue('New valid title')
+      await expect(page.locator('#field-description')).toHaveValue('New valid description')
+      await expect(page.locator('.field-error')).toHaveCount(0)
+    })
+
     test('- can safely trigger validation errors and then continue editing', async () => {
       await page.goto(draftWithValidateURL.create)
 
@@ -1015,6 +1216,10 @@ describe('Versions', () => {
       await expect(titleField).toBeEnabled()
       await titleField.fill('')
       await saveDocAndAssert(page, '#action-save-draft', 'error')
+
+      const parentFieldType = page.locator('.field-type:has(#field-title)')
+      await expect(parentFieldType.locator('.tooltip--show')).toBeVisible()
+      await expect(parentFieldType).toHaveClass(/error/)
 
       await titleField.fill('New title')
 
@@ -1097,7 +1302,7 @@ describe('Versions', () => {
     })
 
     test('- with autosave - can save', async () => {
-      await page.goto(autosaveWithValidateURL.create)
+      await page.goto(autosaveWithDraftValidateURL.create)
 
       const titleField = page.locator('#field-title')
       await titleField.fill('Initial')
@@ -1115,7 +1320,7 @@ describe('Versions', () => {
 
     test('- with autosave - can safely trigger validation errors and then continue editing', async () => {
       // This test has to make sure we don't enter an infinite loop when draft.validate is on and we have autosave enabled
-      await page.goto(autosaveWithValidateURL.create)
+      await page.goto(autosaveWithDraftValidateURL.create)
 
       const titleField = page.locator('#field-title')
       await titleField.fill('Initial')
@@ -1137,7 +1342,7 @@ describe('Versions', () => {
     })
 
     test('- with autosave - shows a prevent leave alert when form is submitted but invalid', async () => {
-      await page.goto(autosaveWithValidateURL.create)
+      await page.goto(autosaveWithDraftValidateURL.create)
 
       // Flag to check against if window alert has been displayed and dismissed since we can only check via events
       let alertDisplayed = false
@@ -1207,6 +1412,99 @@ describe('Versions', () => {
       // Remove listener
       page.removeListener('dialog', acceptAlert)
     })
+
+    test('- with autosave - applies field hooks to form state after autosave runs', async () => {
+      const url = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      await page.goto(url.create)
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+
+      await waitForAutoSaveToRunAndComplete(page)
+
+      const computedTitleField = page.locator('#field-computedTitle')
+      await expect(computedTitleField).toHaveValue('Initial')
+    })
+
+    test('- with autosave - does not override local changes to form state after autosave runs', async () => {
+      const url = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      await page.goto(url.create)
+      const titleField = page.locator('#field-title')
+
+      // press slower than the autosave interval, but not faster than the response and processing
+      await titleField.pressSequentially('Initial', {
+        delay: 150,
+      })
+
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await expect(titleField).toHaveValue('Initial')
+      const computedTitleField = page.locator('#field-computedTitle')
+      await expect(computedTitleField).toHaveValue('Initial')
+    })
+
+    test('- with autosave - does not override local changes to form state after autosave runs within document drawer', async () => {
+      await payload.create({
+        collection: autosaveCollectionSlug,
+        data: {
+          title: 'This is a test',
+          description: 'some description',
+        },
+      })
+
+      const url = new AdminUrlUtil(serverURL, postsCollectionSlug)
+      await page.goto(url.create)
+
+      await page.locator('#field-relationToAutosaves .rs__control').click()
+      await page.locator('.rs__option:has-text("This is a test")').click()
+
+      await openDocDrawer(
+        page,
+        '#field-relationToAutosaves .relationship--single-value__drawer-toggler',
+      )
+
+      const titleField = page.locator('#field-title')
+
+      await titleField.fill('')
+
+      // press slower than the autosave interval, but not faster than the response and processing
+      await titleField.pressSequentially('Initial', {
+        delay: 150,
+      })
+
+      const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
+
+      await waitForAutoSaveToRunAndComplete(drawer)
+
+      await expect(titleField).toHaveValue('Initial')
+    })
+
+    test('- with autosave - does not display success toast after autosave complete', async () => {
+      const url = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      await page.goto(url.create)
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+
+      let hasDisplayedToast = false
+
+      const startTime = Date.now()
+      const timeout = 5000
+      const interval = 100
+
+      while (Date.now() - startTime < timeout) {
+        const isHidden = await page.locator('.payload-toast-item').isHidden()
+        console.log(`Toast is hidden: ${isHidden}`)
+
+        // eslint-disable-next-line playwright/no-conditional-in-test
+        if (!isHidden) {
+          hasDisplayedToast = true
+          break
+        }
+
+        await wait(interval)
+      }
+
+      expect(hasDisplayedToast).toBe(false)
+    })
   })
 
   describe('Globals - publish individual locale', () => {
@@ -1235,6 +1533,7 @@ describe('Versions', () => {
   describe('Versions diff view', () => {
     let postID: string
     let versionID: string
+    let oldVersionID: string
     let diffID: string
     let versionDiffID: string
 
@@ -1260,7 +1559,7 @@ describe('Versions', () => {
         draft: true,
         depth: 0,
         data: {
-          title: 'draft post',
+          title: 'current draft post title',
           description: 'draft description',
           blocksField: [
             {
@@ -1274,7 +1573,7 @@ describe('Versions', () => {
 
       const versions = await payload.findVersions({
         collection: draftCollectionSlug,
-        limit: 1,
+        limit: 2,
         depth: 0,
         where: {
           parent: { equals: postID },
@@ -1282,6 +1581,7 @@ describe('Versions', () => {
       })
 
       versionID = versions.docs[0].id
+      oldVersionID = versions.docs[1].id
 
       const diffDoc = (
         await payload.find({
@@ -1307,7 +1607,7 @@ describe('Versions', () => {
       versionDiffID = versionDiff.id
     })
 
-    async function navigateToDraftVersionView() {
+    async function navigateToDraftVersionView(versionID: string) {
       const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
       await page.goto(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
@@ -1320,12 +1620,22 @@ describe('Versions', () => {
     }
 
     test('should render diff', async () => {
-      await navigateToDraftVersionView()
+      await navigateToDraftVersionView(versionID)
       expect(true).toBe(true)
     })
 
+    test('should show the current version title in step nav for all versions', async () => {
+      await navigateToDraftVersionView(versionID)
+      // Document title part of the step nav should be the current version title
+      await expect(page.locator('.step-nav')).toContainText('current draft post title')
+
+      await navigateToDraftVersionView(oldVersionID)
+      // Document title part of the step nav should still be the current version title
+      await expect(page.locator('.step-nav')).toContainText('current draft post title')
+    })
+
     test('should render diff for nested fields', async () => {
-      await navigateToDraftVersionView()
+      await navigateToDraftVersionView(versionID)
 
       const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
       await expect(blocksDiffLabel).toBeVisible()
@@ -1344,7 +1654,7 @@ describe('Versions', () => {
     })
 
     test('should render diff collapser for nested fields', async () => {
-      await navigateToDraftVersionView()
+      await navigateToDraftVersionView(versionID)
 
       const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
       await expect(blocksDiffLabel).toBeVisible()
@@ -1491,6 +1801,19 @@ describe('Versions', () => {
       )
       await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
         'textInUnnamedTab2InBlock2',
+      )
+    })
+
+    test('correctly renders diff for text within rows within unnamed tabs within block fields', async () => {
+      await navigateToDiffVersionView()
+
+      const textInBlock = page.locator('[data-field-path="blocks.2.textInRowInUnnamedTab2InBlock"]')
+
+      await expect(textInBlock.locator('.html-diff__diff-old')).toHaveText(
+        'textInRowInUnnamedTab2InBlock',
+      )
+      await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
+        'textInRowInUnnamedTab2InBlock2',
       )
     })
 
@@ -1697,6 +2020,69 @@ describe('Versions', () => {
       await expect(upload.locator('.html-diff__diff-new .upload-diff__info')).toHaveText(
         String(uploadDocs?.docs?.[1]?.filename),
       )
+    })
+
+    test('does not render diff for fields with read access control false', async () => {
+      await navigateToDiffVersionView()
+
+      const hiddenField1 = page.locator(
+        '[data-field-path="blocks.2.textInUnnamedTab2InBlockAccessFalse"]',
+      )
+      await expect(hiddenField1).toBeHidden()
+
+      const hiddenField2 = page.locator('[data-field-path="textCannotRead"]')
+      await expect(hiddenField2).toBeHidden()
+
+      const hiddenField3 = page.locator('[data-field-path="namedTab1.textInNamedTab1ReadFalse"]')
+      await expect(hiddenField3).toBeHidden()
+
+      const visibleFieldWithUpdateFalse1 = page.locator(
+        '[data-field-path="namedTab1.textInNamedTab1UpdateFalse"]',
+      )
+      await expect(visibleFieldWithUpdateFalse1).toBeVisible()
+
+      const visibleField2 = page.locator('[data-field-path="textInRowInUnnamedTab"]')
+      await expect(visibleField2).toBeVisible()
+
+      const visibleFieldWithUpdateFalse3 = page.locator(
+        '[data-field-path="textInRowInUnnamedTabUpdateFalse"]',
+      )
+      await expect(visibleFieldWithUpdateFalse3).toBeVisible()
+    })
+
+    test('correctly renders diff for relationship fields with deleted relation', async () => {
+      await payload.delete({
+        collection: 'draft-posts',
+      })
+
+      await navigateToDiffVersionView()
+
+      const diffsToCheck = [
+        'relationship',
+        'relationshipHasMany',
+        'relationshipHasManyPolymorphic',
+        'relationshipHasManyPolymorphic2',
+      ]
+      const checkPromises = diffsToCheck.map(async (dataFieldPath) => {
+        const relation = page.locator(`[data-field-path="${dataFieldPath}"]`)
+        return expect(relation).toBeVisible()
+      })
+      await Promise.all(checkPromises)
+    })
+
+    test('correctly renders diff for upload fields with deleted upload', async () => {
+      await payload.delete({
+        collection: 'media',
+      })
+
+      await navigateToDiffVersionView()
+
+      const diffsToCheck = ['upload', 'uploadHasMany']
+      const checkPromises = diffsToCheck.map(async (dataFieldPath) => {
+        const relation = page.locator(`[data-field-path="${dataFieldPath}"]`)
+        return expect(relation).toBeVisible()
+      })
+      await Promise.all(checkPromises)
     })
   })
 

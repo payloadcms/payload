@@ -17,6 +17,7 @@ import {
   deleteVersions,
   destroy,
   find,
+  findDistinct,
   findGlobal,
   findGlobalVersions,
   findMigrationDir,
@@ -37,6 +38,7 @@ import {
   updateMany,
   updateOne,
   updateVersion,
+  upsert,
 } from '@payloadcms/drizzle'
 import {
   columnToCodeConverter,
@@ -119,6 +121,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
         json: true,
       },
       fieldConstraints: {},
+      findDistinct,
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'pg-core',
@@ -207,7 +210,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       updateMany,
       updateOne,
       updateVersion,
-      upsert: updateOne,
+      upsert,
     })
   }
 

@@ -137,9 +137,8 @@ export async function Account({ initPageResult, params, searchParams }: AdminVie
           <DocumentHeader
             collectionConfig={collectionConfig}
             hideTabs
-            i18n={i18n}
-            payload={payload}
             permissions={permissions}
+            req={req}
           />
           <HydrateAuthProvider permissions={permissions} />
           {RenderServerComponent({

@@ -19,6 +19,7 @@ export const previewHandler: PayloadHandler = async (req) => {
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: searchParams.get('draft') === 'true',
     req,
+    trash: true,
   })
 
   let previewURL!: string

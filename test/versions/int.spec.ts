@@ -4,9 +4,11 @@ import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublish
 import path from 'path'
 import { createLocalReq, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
+import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { AutosaveMultiSelectPost } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -16,6 +18,7 @@ import AutosaveGlobal from './globals/Autosave.js'
 import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
+  autosaveWithMultiSelectCollectionSlug,
   draftCollectionSlug,
   draftGlobalSlug,
   localizedCollectionSlug,
@@ -362,6 +365,37 @@ describe('Versions', () => {
         // When creating new version - updatedAt should match version.updatedAt
         expect(fromNonVersionsTable.updatedAt).toBe(latestVersionData.version.updatedAt)
       })
+
+      it('should allow to create with a localized relationships inside a localized array and a block', async () => {
+        const post = await payload.create({ collection: 'posts', data: {} })
+        global.d = true
+        const res = await payload.create({
+          collection: 'localized-posts',
+          draft: true,
+          depth: 0,
+          data: {
+            blocks: [
+              {
+                blockType: 'block',
+                array: [
+                  {
+                    relationship: post.id,
+                  },
+                ],
+              },
+            ],
+          },
+        })
+        expect(res.blocks[0]?.array[0]?.relationship).toEqual(post.id)
+        const {
+          docs: [resFromVersions],
+        } = await payload.findVersions({
+          collection: 'localized-posts',
+          where: { parent: { equals: res.id } },
+          depth: 0,
+        })
+        expect(resFromVersions?.version.blocks[0]?.array[0]?.relationship).toEqual(post.id)
+      })
     })
 
     describe('Restore', () => {
@@ -652,6 +686,71 @@ describe('Versions', () => {
         expect(Number(updatedUpdatedAt)).toBeGreaterThan(Number(createdUpdatedAt))
       })
 
+      it('should update correct version at doc that has hasMany field when saving with autosave', async () => {
+        const firstDocTag: AutosaveMultiSelectPost['tag'] = ['blog', 'essay']
+        const doc = await payload.create({
+          collection: autosaveWithMultiSelectCollectionSlug,
+          data: {
+            title: 'title 1',
+            tag: firstDocTag,
+            _status: 'published',
+          },
+          draft: false,
+        })
+        await payload.update({
+          collection: autosaveWithMultiSelectCollectionSlug,
+          id: doc.id,
+          data: {
+            title: 'title 2',
+            tag: firstDocTag,
+          },
+          draft: true,
+          autosave: true,
+        })
+
+        const doc2 = await payload.create({
+          collection: autosaveWithMultiSelectCollectionSlug,
+          data: {
+            title: 'title 1-2',
+            tag: ['blog'],
+            _status: 'published',
+          },
+          draft: false,
+        })
+
+        await payload.update({
+          collection: autosaveWithMultiSelectCollectionSlug,
+          id: doc2.id,
+          data: {
+            tag: ['blog'],
+            title: 'title 2-2',
+          },
+          draft: true,
+          autosave: true,
+        })
+        await payload.update({
+          collection: autosaveWithMultiSelectCollectionSlug,
+          id: doc2.id,
+          data: {
+            tag: ['blog'],
+            title: 'title 3-2',
+          },
+          draft: true,
+          autosave: true,
+        })
+
+        const lastDocVersion = await payload.findVersions({
+          collection: autosaveWithMultiSelectCollectionSlug,
+          where: {
+            parent: {
+              equals: doc.id,
+            },
+          },
+          limit: 1,
+        })
+        expect(lastDocVersion.docs[0]?.version.tag).toEqual(firstDocTag)
+      })
+
       it('should validate when publishing with the draft arg', async () => {
         // no title (not valid for publishing)
         const doc = await payload.create({
@@ -684,7 +783,7 @@ describe('Versions', () => {
 
         expect(updateManyResult.docs).toHaveLength(0)
         expect(updateManyResult.errors).toStrictEqual([
-          { id: doc.id, message: 'The following field is invalid: Title' },
+          { id: doc.id, message: 'The following field is invalid: Group > Title' },
         ])
       })
 
@@ -1503,6 +1602,79 @@ describe('Versions', () => {
       expect(responseByID.status).toBe(200)
       const jsonByID = await responseByID.json()
       expect(jsonByID.parent).toBe(collectionLocalPostID)
+    })
+
+    it('should allow query by latest', async () => {
+      async function createVersion({ title }: { title: string }) {
+        return payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title,
+            description: 'Test Description',
+          },
+        })
+      }
+
+      async function updateVersion({
+        id,
+        data,
+      }: {
+        data: Partial<DraftPost>
+        id: number | string
+      }) {
+        return payload.update({
+          collection: draftCollectionSlug,
+          id,
+          data,
+        })
+      }
+
+      const version1 = await createVersion({
+        title: 'test1',
+      })
+
+      await updateVersion({
+        id: version1.id,
+        data: {
+          title: 'test1 updated',
+        },
+      })
+
+      const newestVersion = await updateVersion({
+        id: version1.id,
+        data: {
+          title: 'test2 updated',
+        },
+      })
+
+      const query = qs.stringify(
+        {
+          where: {
+            and: [
+              {
+                latest: {
+                  equals: true,
+                },
+              },
+              {
+                parent: {
+                  equals: version1.id,
+                },
+              },
+            ],
+          },
+        },
+        {
+          addQueryPrefix: true,
+        },
+      )
+
+      const response = await restClient.GET(`/${draftCollectionSlug}/versions${query}`)
+      expect(response.status).toBe(200)
+      const json = await response.json()
+      expect(json.docs).toHaveLength(1)
+
+      expect(json.docs[0].version.title).toBe(newestVersion.title)
     })
   })
 

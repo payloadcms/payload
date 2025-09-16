@@ -103,6 +103,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
         locale,
         overrideAccess: true,
         req,
+        trash: true,
       })
     }
   }

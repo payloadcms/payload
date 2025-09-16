@@ -13,7 +13,7 @@ import { updateOperation } from '../operations/update.js'
 
 export const updateHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { depth, draft, limit, overrideLock, populate, select, sort, where } = req.query as {
+  const { depth, draft, limit, overrideLock, populate, select, sort, trash, where } = req.query as {
     depth?: string
     draft?: string
     limit?: string
@@ -21,6 +21,7 @@ export const updateHandler: PayloadHandler = async (req) => {
     populate?: Record<string, unknown>
     select?: Record<string, unknown>
     sort?: string
+    trash?: string
     where?: Where
   }
 
@@ -35,6 +36,7 @@ export const updateHandler: PayloadHandler = async (req) => {
     req,
     select: sanitizeSelectParam(select),
     sort: typeof sort === 'string' ? sort.split(',') : undefined,
+    trash: trash === 'true',
     where: where!,
   })
 

@@ -1551,7 +1551,7 @@ describe('lexicalMain', () => {
     await closeTagInMultiSelect.click()
     await expect(decoratorLocator).toBeHidden()
 
-    const labelInsideCollapsableBody = page.locator('label').getByText('Sub Blocks')
+    const labelInsideCollapsableBody = page.locator('h3>span').getByText('Sub Blocks')
     await labelInsideCollapsableBody.click()
     await expectInsideSelectedDecorator(labelInsideCollapsableBody)
 

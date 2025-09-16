@@ -293,13 +293,14 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   if (!shouldSaveDraft) {
+    // Ensure updatedAt date is always updated
+    dataToUpdate.updatedAt = new Date().toISOString()
     result = await req.payload.db.updateOne({
       id,
       collection: collectionConfig.slug,
       data: dataToUpdate,
       locale,
       req,
-      select,
     })
   }
 
@@ -314,10 +315,11 @@ export const updateDocument = async <
       collection: collectionConfig,
       docWithLocales: result,
       draft: shouldSaveDraft,
+      locale,
+      operation: 'update',
       payload,
       publishSpecificLocale,
       req,
-      select,
       snapshot: versionSnapshotResult,
     })
   }
