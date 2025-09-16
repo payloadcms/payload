@@ -6,7 +6,7 @@ import { z } from 'zod'
 import type { PluginMCPServerConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
-import { convertFieldsToZod } from '../../../utils/convertFieldsToZod.js'
+import { convertCollectionConfigToZod } from '../../../utils/convertCollectionConfigToZod.js'
 import { toolSchemas } from '../schemas.js'
 export const updateResourceTool = (
   server: McpServer,
@@ -194,7 +194,7 @@ ${JSON.stringify(errors, null, 2)}
   }
 
   if (collections?.[collectionSlug]?.enabled) {
-    const convertedFields = convertFieldsToZod(collectionConfig.fields)
+    const convertedFields = convertCollectionConfigToZod(collectionConfig)
 
     // Create a new schema that combines the converted fields with update-specific parameters
     const updateResourceSchema = z.object({
@@ -231,27 +231,28 @@ ${JSON.stringify(errors, null, 2)}
       `update${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
       `${toolSchemas.updateResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
       updateResourceSchema.shape,
-      async ({
-        id,
-        depth,
-        draft,
-        filePath,
-        overrideLock,
-        overwriteExistingFiles,
-        where,
-        ...fieldData
-      }) => {
+      async (params: Record<string, unknown>) => {
+        const {
+          id,
+          depth,
+          draft,
+          filePath,
+          overrideLock,
+          overwriteExistingFiles,
+          where,
+          ...fieldData
+        } = params
         // Convert field data back to JSON string format expected by the tool
         const data = JSON.stringify(fieldData)
         return await tool(
           data,
-          id,
-          where,
-          draft,
-          depth,
-          overrideLock,
-          filePath,
-          overwriteExistingFiles,
+          id as string | undefined,
+          where as string | undefined,
+          draft as boolean,
+          depth as number,
+          overrideLock as boolean,
+          filePath as string | undefined,
+          overwriteExistingFiles as boolean,
         )
       },
     )

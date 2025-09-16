@@ -1,12 +1,10 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { CollectionConfig, PayloadRequest } from 'payload'
 
-import { z } from 'zod'
-
 import type { PluginMCPServerConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
-import { convertFieldsToZod } from '../../../utils/convertFieldsToZod.js'
+import { convertCollectionConfigToZod } from '../../../utils/convertCollectionConfigToZod.js'
 import { toolSchemas } from '../schemas.js'
 export const createResourceTool = (
   server: McpServer,
@@ -83,13 +81,13 @@ ${JSON.stringify(result, null, 2)}
   }
 
   if (collections?.[collectionSlug]?.enabled) {
-    const convertedFields = convertFieldsToZod(collectionConfig.fields)
+    const convertedFields = convertCollectionConfigToZod(collectionConfig)
 
     server.tool(
       `create${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
       `${toolSchemas.createResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
       convertedFields.shape,
-      async (params) => {
+      async (params: Record<string, unknown>) => {
         const data = JSON.stringify(params)
         return await tool(data)
       },
