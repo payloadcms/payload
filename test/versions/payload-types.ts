@@ -128,6 +128,7 @@ export interface Config {
     'disable-publish-global': DisablePublishGlobal;
     'localized-global': LocalizedGlobal;
     'max-versions': MaxVersion;
+    'draft-unlimited-global': DraftUnlimitedGlobal;
   };
   globalsSelect: {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
@@ -137,6 +138,7 @@ export interface Config {
     'disable-publish-global': DisablePublishGlobalSelect<false> | DisablePublishGlobalSelect<true>;
     'localized-global': LocalizedGlobalSelect<false> | LocalizedGlobalSelect<true>;
     'max-versions': MaxVersionsSelect<false> | MaxVersionsSelect<true>;
+    'draft-unlimited-global': DraftUnlimitedGlobalSelect<false> | DraftUnlimitedGlobalSelect<true>;
   };
   locale: 'en' | 'es' | 'de';
   user: User & {
@@ -1350,6 +1352,17 @@ export interface MaxVersion {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-unlimited-global".
+ */
+export interface DraftUnlimitedGlobal {
+  id: string;
+  title: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autosave-global_select".
  */
 export interface AutosaveGlobalSelect<T extends boolean = true> {
@@ -1428,6 +1441,17 @@ export interface MaxVersionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-unlimited-global_select".
+ */
+export interface DraftUnlimitedGlobalSelect<T extends boolean = true> {
+  title?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskSchedulePublish".
  */
 export interface TaskSchedulePublish {
@@ -1447,7 +1471,7 @@ export interface TaskSchedulePublish {
           relationTo: 'draft-posts-with-change-hook';
           value: string | DraftPostsWithChangeHook;
         } | null);
-    global?: 'draft-global' | null;
+    global?: ('draft-global' | 'draft-unlimited-global') | null;
     user?: (string | null) | User;
   };
   output?: unknown;
