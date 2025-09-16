@@ -14,7 +14,7 @@ import { getTreeChanges } from '../utils/getTreeChanges.js'
 
 type Ags = {
   titleField: FieldAffectingData
-} & Required<Omit<AddTreeViewFieldsArgs, 'collectionConfig'>>
+} & Required<Omit<AddTreeViewFieldsArgs, 'collectionConfig' | 'config'>>
 export const collectionTreeViewAfterChange =
   ({
     parentDocFieldName,

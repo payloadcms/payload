@@ -6,12 +6,14 @@ import { findUseAsTitleField } from './utils/findUseAsTitleField.js'
 
 export function addTreeViewFields({
   collectionConfig,
+  config,
   parentDocFieldName = '_parentDoc',
   slugify = defaultSlugify,
   slugPathFieldName = 'slugPath',
   titlePathFieldName = 'titlePath',
 }: AddTreeViewFieldsArgs): void {
   const titleField = findUseAsTitleField(collectionConfig)
+  const localizeField: boolean = Boolean(config.localization && titleField.localized)
 
   collectionConfig.fields.push({
     type: 'group',
@@ -46,8 +48,7 @@ export function addTreeViewFields({
         },
         index: true,
         label: ({ t }) => t('general:slugPath'),
-        // TODO: these should only be localized if the title field is also localized
-        localized: true,
+        localized: localizeField,
       },
       {
         name: titlePathFieldName,
@@ -58,8 +59,7 @@ export function addTreeViewFields({
         },
         index: true,
         label: ({ t }) => t('general:titlePath'),
-        // TODO: these should only be localized if the title field is also localized
-        localized: true,
+        localized: localizeField,
       },
       {
         name: '_parentTree',
@@ -78,6 +78,14 @@ export function addTreeViewFields({
     ],
     label: 'Document Tree',
   })
+
+  if (!collectionConfig.admin) {
+    collectionConfig.admin = {}
+  }
+  if (!collectionConfig.admin.listSearchableFields) {
+    collectionConfig.admin.listSearchableFields = []
+  }
+  collectionConfig.admin.listSearchableFields.push(titlePathFieldName)
 
   collectionConfig.hooks = {
     ...(collectionConfig.hooks || {}),

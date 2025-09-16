@@ -20,6 +20,7 @@ function iterateFields({
   for (const field of fields) {
     switch (field.type) {
       case 'text':
+      case 'number':
       case 'textarea':
         if (field.name === titleFieldName) {
           titleField = field

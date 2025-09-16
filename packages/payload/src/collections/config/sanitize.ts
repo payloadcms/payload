@@ -209,6 +209,7 @@ export const sanitizeCollection = async (
   if (sanitized.treeView) {
     addTreeViewFields({
       collectionConfig: sanitized,
+      config,
     })
   }
 
