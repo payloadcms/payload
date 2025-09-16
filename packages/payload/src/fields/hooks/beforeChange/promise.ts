@@ -216,12 +216,23 @@ export const promise = async ({
             for (const block of siblingData[field.name] as JsonObject[]) {
               rowIndex++
               if (validationResult.invalidBlockSlugs.includes(block.blockType as string)) {
+                const blockConfigOrSlug = (field.blockReferences ?? field.blocks).find(
+                  (blockFromField) =>
+                    typeof blockFromField === 'string'
+                      ? blockFromField === block.blockType
+                      : blockFromField.slug === block.blockType,
+                ) as Block | undefined
+                const blockConfig =
+                  typeof blockConfigOrSlug !== 'string'
+                    ? blockConfigOrSlug
+                    : req.payload.config?.blocks?.[blockConfigOrSlug]
+
                 const blockLabelPath =
                   field?.label === false
                     ? fieldLabelPath
                     : buildFieldLabel(
                         fieldLabelPath,
-                        `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
+                        `${getTranslatedLabel(field?.label || field?.name, req.i18n)} > ${getTranslatedLabel(blockConfig?.labels?.singular || block.blockType, req.i18n)} (${rowIndex + 1})`,
                       )
 
                 errors.push({
@@ -349,6 +360,14 @@ export const promise = async ({
               (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
             ) as Block | undefined)
 
+          const blockLabelPath =
+            field?.label === false
+              ? fieldLabelPath
+              : buildFieldLabel(
+                  fieldLabelPath,
+                  `${getTranslatedLabel(field?.label || field?.name, req.i18n)} > ${getTranslatedLabel(block?.labels?.singular || blockTypeToMatch, req.i18n)} (${rowIndex + 1})`,
+                )
+
           if (block) {
             promises.push(
               traverseFields({
@@ -360,13 +379,8 @@ export const promise = async ({
                 doc,
                 docWithLocales,
                 errors,
-                fieldLabelPath:
-                  field?.label === false
-                    ? fieldLabelPath
-                    : buildFieldLabel(
-                        fieldLabelPath,
-                        `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
-                      ),
+                fieldLabelPath: blockLabelPath,
+
                 fields: block.fields,
                 global,
                 mergeLocaleActions,
