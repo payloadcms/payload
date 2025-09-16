@@ -86,6 +86,16 @@ export const allDatabaseAdapters = {
     readReplicas: [process.env.POSTGRES_REPLICA_URL],
   })
   `,
+  'content-api': `
+import { contentAPIAdapter } from '@payloadcms/db-content-api'
+
+export const databaseAdapter = contentAPIAdapter({ contentAPIURL: 'http://localhost:8000' })
+  `,
+  'content-api-jsonb': `
+import { contentAPIAdapter } from '@payloadcms/db-content-api-jsonb'
+
+export const databaseAdapter = contentAPIAdapter({ contentAPIURL: 'http://localhost:8001' })
+  `,
   sqlite: `
   import { sqliteAdapter } from '@payloadcms/db-sqlite'
 

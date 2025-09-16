@@ -26,5 +26,14 @@
   "bun.test.filePattern": "bun.test.ts",
   "playwright.env": {
     "NODE_OPTIONS": "--no-deprecation --no-experimental-strip-types"
-  }
+  },
+  "jest.virtualFolders": [
+    {
+      "name": "test",
+      "rootPath": "test",
+      "runMode": {
+        "type": "on-demand"
+      }
+    }
+  ]
 }

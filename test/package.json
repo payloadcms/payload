@@ -27,6 +27,8 @@
     "@date-fns/tz": "1.2.0",
     "@next/env": "15.4.4",
     "@payloadcms/admin-bar": "workspace:*",
+    "@payloadcms/db-content-api": "workspace:*",
+    "@payloadcms/db-content-api-jsonb": "workspace:*",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/db-sqlite": "workspace:*",
