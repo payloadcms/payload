@@ -87,10 +87,10 @@ It's important to understand overall how the plugin works and the relationships 
   as roles on the customer collection or by collection slug if you've opted to keep them separate. Customers are linked to Carts and Orders.
 
 - **Products and Variants:**
-  Products are the items you are selling and they will contain a price and optionally variants via a join field as well as allowed Variant Types.
+  Products are the items you are selling and they will contain a price and optionally variants via a join field as well as allowed Variant Types.<br/>
   Each Variant Type can contain a set of Variant Options. For example, a T-Shirt product can have a Variant Type of Size with options Small, Medium, and Large and each Variant can therefore have those options assigned to it.
 
-- **Carts:**
+- **Carts**<br/>
   Carts are linked to Customers or they're left entirely public for guests users and can contain multiple Products and Variants. Carts are stored in the database and can be retrieved at any time. Carts are automatically created for Customers when they add a product to their cart for the first time.
 
 - **Transactions and Orders:**
