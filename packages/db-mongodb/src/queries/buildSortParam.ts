@@ -211,9 +211,8 @@ export const buildSortParam = ({
 
       if (sortRelProperty) {
         acc[sortRelProperty] = sortDirection
+        return acc
       }
-
-      return acc
     }
 
     const localizedProperty = getLocalizedSortProperty({
