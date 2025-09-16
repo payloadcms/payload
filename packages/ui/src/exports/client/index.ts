@@ -19,6 +19,7 @@ export { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 export { useResize } from '../../hooks/useResize.js'
 export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 export { useEffectEvent } from '../../hooks/useEffectEvent.js'
+export { FieldPathContext, useFieldPath } from '../../forms/RenderFields/context.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
