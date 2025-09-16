@@ -17,7 +17,6 @@ export const codeConverter: BlockJSX = {
   },
   import: ({ children, closeMatch, openMatch }) => {
     const language = openMatch?.[1]
-    console.log('Importing code block:', { children, closeMatch, language, openMatch })
 
     // Removed first and last \n from children if present
     if (children.startsWith('\n')) {
