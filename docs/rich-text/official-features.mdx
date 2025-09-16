@@ -418,6 +418,60 @@ BlocksFeature({
 })
 ```
 
+#### Code Blocks
+
+Payload exports a premade CodeBlock that you can import and use in your project. It supports syntax highlighting, dynamically selecting the language and loading in external type definitions:
+
+```ts
+import { BlocksFeature, CodeBlock } from '@payloadcms/richtext-lexical'
+
+// ...
+BlocksFeature({
+  blocks: [
+    CodeBlock({
+      defaultLanguage: 'ts',
+      languages: {
+        js: 'JavaScript',
+        plaintext: 'Plain Text',
+        ts: 'TypeScript',
+      },
+    }),
+  ],
+}),
+// ...
+```
+
+When using TypeScript, you can also pass in additional type definitions that will be available in the editor. Here's an example of how to make `payload` available in the editor:
+
+```ts
+import { BlocksFeature, CodeBlock } from '@payloadcms/richtext-lexical'
+
+// ...
+BlocksFeature({
+  blocks: [
+    CodeBlock({
+      slug: 'PayloadCode',
+      languages: {
+        ts: 'TypeScript',
+      },
+      typescript: {
+        fetchTypes: [
+          {
+            url: 'https://unpkg.com/payload@latest/dist/index.d.ts',
+            filePath: 'file:///node_modules/payload/index.d.ts',
+          },
+        ],
+        paths: {
+          payload: ['file:///node_modules/payload/index.d.ts'],
+        },
+        typeRoots: ['node_modules/@types', 'node_modules/payload'],
+      },
+    }),
+  ],
+}),
+// ...
+```
+
 ### TreeViewFeature
 
 - Description: Provides a debug panel below the editor showing the editor's internal state, DOM tree, and time travel debugging.
