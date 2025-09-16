@@ -368,7 +368,6 @@ describe('Versions', () => {
 
       it('should allow to create with a localized relationships inside a localized array and a block', async () => {
         const post = await payload.create({ collection: 'posts', data: {} })
-        global.d = true
         const res = await payload.create({
           collection: 'localized-posts',
           draft: true,
