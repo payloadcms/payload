@@ -197,16 +197,7 @@ export const promise = async ({
       })
 
       if (typeof validationResult === 'string') {
-        const fieldLabel = buildFieldLabel(
-          fieldLabelPath,
-          getTranslatedLabel(field?.label || field?.name, req.i18n),
-        )
-
-        errors.push({
-          label: fieldLabel,
-          message: validationResult,
-          path,
-        })
+        let filterOptionsError = false
 
         if (field.type === 'blocks' && field.filterOptions) {
           // Re-run filteroptions. If the validation error is due to filteroptions, we need to add error paths to all the blocks
@@ -220,6 +211,7 @@ export const promise = async ({
             value: siblingData[field.name],
           })
           if (validationResult?.invalidBlockSlugs?.length) {
+            filterOptionsError = true
             let rowIndex = -1
             for (const block of siblingData[field.name] as JsonObject[]) {
               rowIndex++
@@ -240,6 +232,21 @@ export const promise = async ({
               }
             }
           }
+        }
+
+        if (!filterOptionsError) {
+          // If the error is due to block filterOptions, we want to push the errors for each individual block, not the blocks
+          // field itself => only push the error if the field is not a block field with validation failure due to filterOptions
+          const fieldLabel = buildFieldLabel(
+            fieldLabelPath,
+            getTranslatedLabel(field?.label || field?.name, req.i18n),
+          )
+
+          errors.push({
+            label: fieldLabel,
+            message: validationResult,
+            path,
+          })
         }
       }
     }

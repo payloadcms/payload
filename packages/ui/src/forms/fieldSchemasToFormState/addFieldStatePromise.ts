@@ -473,8 +473,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                     block: row.blockType,
                   })
                   state[idKey].valid = false
-                  // No need to run `addErrorPathToParent`, as this has already been run by the main validation above
                   addErrorPathToParent(idKey)
+
+                  // If the error is due to block filterOptions, we want the blocks field (fieldState) to include all the filterOptions-related
+                  // error paths for each sub-block, not for the validation result of the block itself. Otherwise, say there are 2 invalid blocks,
+                  // the blocks field will have 3 instead of 2 error paths - one for itself, and one for each invalid block.
+                  // Instead, we want only the 2 error paths for the individual, invalid blocks.
+                  fieldState.errorPaths = fieldState.errorPaths.filter(
+                    (errorPath) => errorPath !== path,
+                  )
                 }
 
                 if (includeSchema) {
