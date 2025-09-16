@@ -5,6 +5,7 @@ import path from 'path'
 import type { DbType, StorageAdapterType } from '../types.js'
 
 import { warning } from '../utils/log.js'
+import { addPluginsToConfig } from './add-plugins-to-config.js'
 import { dbReplacements, storageReplacements } from './replacements.js'
 
 /** Update payload config with necessary imports and adapters */
@@ -138,6 +139,12 @@ export async function configurePayloadConfig(args: {
     }
 
     fse.writeFileSync(payloadConfigPath, configLines.join('\n'))
+
+    // Hard-coded plugin for POC
+    await addPluginsToConfig({
+      configPath: payloadConfigPath,
+      plugins: ['@payloadcms/plugin-search'],
+    })
   } catch (err: unknown) {
     warning(
       `Unable to update payload.config.ts with plugins: ${err instanceof Error ? err.message : ''}`,
