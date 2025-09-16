@@ -305,6 +305,45 @@ export const Media: CollectionConfig = {
 }
 ```
 
+3. Dynamic thumbnails via hooks
+
+```
+import type { CollectionConfig, AfterChangeHook, AfterReadHook } from 'payload'
+
+// Example helper that builds a CDN URL (your logic here)
+const buildThumbURL = ({ filename }: { filename?: string }) =>
+  filename ? `https://cdn.example.com/thumbs/${filename}.jpg` : undefined
+
+const setThumbURL: AfterChangeHook = async ({ doc, operation }) => {
+  // compute a thumbnail URL (first frame, resized, etc.)
+  const thumbnailURL = buildThumbURL({ filename: doc?.filename })
+  // persist to the same doc so the Admin can reuse it
+  return { ...doc, thumbnailURL }
+}
+
+const exposeThumbURL: AfterReadHook = async ({ doc }) => {
+  // ensure the field is always present on reads
+  return { ...doc, thumbnailURL: doc.thumbnailURL ?? buildThumbURL({ filename: doc?.filename }) }
+}
+
+export const Media: CollectionConfig = {
+  slug: 'media',
+  upload: true,
+  admin: {
+    // Use the field value for the Admin thumbnail
+    adminThumbnail: ({ doc }) => doc?.thumbnailURL,
+  },
+  hooks: {
+    afterChange: [setThumbURL],
+    afterRead: [exposeThumbURL],
+  },
+  fields: [
+    // store the dynamic URL (hidden from editors if you like)
+    { name: 'thumbnailURL', type: 'text', admin: { readOnly: true, condition: () => false } },
+  ],
+}
+```
+
 ## Restricted File Types
 
 Possibly problematic file types are automatically restricted from being uploaded to your application.
