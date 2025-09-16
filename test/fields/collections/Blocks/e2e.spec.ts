@@ -804,6 +804,16 @@ describe('Block fields', () => {
       // Save page and ensure validation error is thrown
       await saveDocAndAssert(page, '#action-save', 'error')
 
+      await expect(
+        page.locator(
+          '#field-blocksWithDynamicFilterOptions .blocks-field__header .error-pill__count',
+        ),
+      ).toHaveText('1')
+
+      await expect(
+        page.locator('#blocksWithDynamicFilterOptions-row-0 .error-pill__count'),
+      ).toHaveText('1')
+
       /**
        * ######## Enable only Block One, no validation error should be thrown ########
        */
