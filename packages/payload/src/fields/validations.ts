@@ -618,7 +618,7 @@ export const blocks: BlocksFieldValidation = (
       value,
     })
     if (invalidBlockSlugs?.length) {
-      return t('validation:invalidSelections')
+      return t('validation:invalidBlocks', { blocks: invalidBlockSlugs.join(', ') })
     }
   }
 

@@ -509,6 +509,8 @@ export const plTranslations: DefaultTranslationsObject = {
     enterNumber: 'Wprowadź poprawny numer telefonu.',
     fieldHasNo: 'To pole nie posiada {{label}}',
     greaterThanMax: '{{value}} jest większe niż maksymalnie dozwolony {{label}} wynoszący {{max}}.',
+    invalidBlock: 'Blok "{{block}}" jest niedozwolony.',
+    invalidBlocks: 'To pole zawiera bloki, które już nie są dozwolone: {{blocks}}.',
     invalidInput: 'To pole zawiera nieprawidłowe dane.',
     invalidSelection: 'To pole ma nieprawidłowy wybór.',
     invalidSelections: 'To pole zawiera następujące, nieprawidłowe wybory:',

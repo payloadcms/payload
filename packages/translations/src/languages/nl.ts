@@ -519,6 +519,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     enterNumber: 'Voer een geldig nummer in.',
     fieldHasNo: 'Dit veld heeft geen {{label}}',
     greaterThanMax: '{{value}} is groter dan de maximaal toegestane {{label}} van {{max}}.',
+    invalidBlock: 'Het blok "{{block}}" is niet toegestaan.',
+    invalidBlocks: 'Dit veld bevat blokken die niet langer zijn toegestaan: {{blocks}}.',
     invalidInput: 'Dit veld heeft een ongeldige invoer.',
     invalidSelection: 'Dit veld heeft een ongeldige selectie.',
     invalidSelections: 'Dit veld heeft de volgende ongeldige selecties:',

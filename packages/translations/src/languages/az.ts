@@ -515,6 +515,8 @@ export const azTranslations: DefaultTranslationsObject = {
     enterNumber: 'Xahiş edirik doğru nömrəni daxil edin.',
     fieldHasNo: 'Bu sahədə heç bir {{label}} yoxdur',
     greaterThanMax: '{{value}} icazə verilən maksimal {{label}} olan {{max}}-dən böyükdür.',
+    invalidBlock: '"{{block}}" bloku icazə verilmir.',
+    invalidBlocks: 'Bu sahə artıq icazə verilməyən blokları içərir: {{blocks}}.',
     invalidInput: 'Bu sahə yanlış daxil edilmişdir.',
     invalidSelection: 'Bu sahədə yanlış seçim edilmişdir.',
     invalidSelections: 'Bu sahədə aşağıdakı yanlış seçimlər edilmişdir:',

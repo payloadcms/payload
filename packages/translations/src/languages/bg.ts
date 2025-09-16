@@ -510,6 +510,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     enterNumber: 'Моля, въведи валиден номер.',
     fieldHasNo: 'Това поле няма {{label}}',
     greaterThanMax: '{{value}} е по-голямо от максимално допустимото {{label}} от {{max}}.',
+    invalidBlock: 'Блокът "{{block}}" не е разрешен.',
+    invalidBlocks: 'Това поле съдържа блокове, които вече не са разрешени: {{blocks}}.',
     invalidInput: 'Това поле има невалиден вход.',
     invalidSelection: 'Това поле има невалидна селекция.',
     invalidSelections: 'Това поле има следните невалидни селекции:',

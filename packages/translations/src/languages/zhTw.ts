@@ -488,6 +488,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     enterNumber: '請輸入有效的數字。',
     fieldHasNo: '此欄位沒有 {{label}}',
     greaterThanMax: '{{value}} 超過允許的最大 {{label}} 值 {{max}}。',
+    invalidBlock: '該區塊 "{{block}}" 是不被允許的。',
+    invalidBlocks: '此欄位包含已不再允許的區塊：{{blocks}}。',
     invalidInput: '此欄位的輸入無效。',
     invalidSelection: '此欄位的選取項目無效。',
     invalidSelections: '此欄位包含以下無效選項：',

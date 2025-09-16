@@ -469,7 +469,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   filterOptionsValidationResult?.invalidBlockSlugs?.length &&
                   filterOptionsValidationResult.invalidBlockSlugs.includes(row.blockType)
                 ) {
-                  state[idKey].errorMessage = `${row.blockType} block is not allowed`
+                  state[idKey].errorMessage = req.t('validation:invalidBlock', {
+                    block: row.blockType,
+                  })
                   state[idKey].valid = false
                   // No need to run `addErrorPathToParent`, as this has already been run by the main validation above
                   addErrorPathToParent(idKey)

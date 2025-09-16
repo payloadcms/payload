@@ -523,6 +523,8 @@ export const deTranslations: DefaultTranslationsObject = {
     enterNumber: 'Bitte gib eine gültige Nummer an.',
     fieldHasNo: 'Dieses Feld hat kein {{label}}',
     greaterThanMax: '{{value}} ist größer als der maximal erlaubte {{label}} von {{max}}.',
+    invalidBlock: 'Der Block "{{block}}" ist nicht erlaubt.',
+    invalidBlocks: 'Dieses Feld enthält Blöcke, die nicht mehr erlaubt sind: {{blocks}}.',
     invalidInput: 'Dieses Feld hat einen inkorrekten Wert.',
     invalidSelection: 'Dieses Feld hat eine inkorrekte Auswahl.',
     invalidSelections: 'Dieses Feld enthält die folgenden inkorrekten Auswahlmöglichkeiten:',

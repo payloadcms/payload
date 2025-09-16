@@ -512,6 +512,8 @@ export const svTranslations: DefaultTranslationsObject = {
     enterNumber: 'Vänligen skriv in ett giltigt nummer.',
     fieldHasNo: 'Detta fält har ingen {{label}}',
     greaterThanMax: '{{value}} är större än den maximalt tillåtna {{label}} av {{max}}.',
+    invalidBlock: 'Blockeringen "{{block}}" är inte tillåten.',
+    invalidBlocks: 'Detta fält innehåller block som inte längre är tillåtna: {{blocks}}.',
     invalidInput: 'Det här fältet har en ogiltig inmatning.',
     invalidSelection: 'Det här fältet har ett ogiltigt urval.',
     invalidSelections: 'Det här fältet har följande ogiltiga val:',

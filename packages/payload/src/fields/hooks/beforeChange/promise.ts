@@ -234,7 +234,7 @@ export const promise = async ({
 
                 errors.push({
                   label: blockLabelPath,
-                  message: `${block.blockType} block is not allowed`,
+                  message: req.t('validation:invalidBlock', { block: block.blockType }),
                   path: `${path}.${rowIndex}.id`,
                 })
               }
