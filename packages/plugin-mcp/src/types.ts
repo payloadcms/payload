@@ -248,8 +248,7 @@ export type MCPServerOptions = {
 }
 
 export type ToolSettings = {
-  custom?: Record<string, boolean>
-  experimentalAuth?: {
+  auth?: {
     auth?: boolean
     forgotPassword?: boolean
     login?: boolean
@@ -257,17 +256,18 @@ export type ToolSettings = {
     unlock?: boolean
     verify?: boolean
   }
-  experimentalCollections?: {
+  collections?: {
     create?: boolean
     delete?: boolean
     find?: boolean
     update?: boolean
   }
-  experimentalConfig?: {
+  config?: {
     find?: boolean
     update?: boolean
   }
-  experimentalJobs?: {
+  custom?: Record<string, boolean>
+  jobs?: {
     create?: boolean
     run?: boolean
     update?: boolean
