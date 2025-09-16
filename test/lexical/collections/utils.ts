@@ -1,6 +1,7 @@
 import type { Locator, Page } from 'playwright'
 
 import { expect } from '@playwright/test'
+import { wait } from 'payload/shared'
 
 export class LexicalHelpers {
   page: Page
@@ -107,6 +108,7 @@ export class LexicalHelpers {
     const slashMenuPopover = this.page.locator('#slash-menu .slash-menu-popup')
     await expect(slashMenuPopover).toBeVisible()
     await this.page.keyboard.type(command)
+    await wait(200)
     await this.page.keyboard.press(`Enter`)
     if (expectMenuToClose) {
       await expect(slashMenuPopover).toBeHidden()
