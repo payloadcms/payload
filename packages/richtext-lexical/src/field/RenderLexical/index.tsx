@@ -1,4 +1,6 @@
 'use client'
+import type { RichTextField } from 'payload'
+
 import {
   FieldContext,
   FieldPathContext,
@@ -46,7 +48,13 @@ export const RenderLexical: React.FC<
   const renderLexical = useCallback(() => {
     async function render() {
       const { Field } = await _internal_renderField({
-        field,
+        field: {
+          ...((field as RichTextField) || {}),
+          type: 'richText',
+          admin: {
+            hidden: false,
+          },
+        },
         initialValue: initialValue ?? undefined,
         path,
         schemaPath,

@@ -8,7 +8,7 @@ import React, { useState } from 'react'
 
 import { lexicalFullyFeaturedSlug } from '../../slugs.js'
 
-export const Component: JSONFieldClientComponent = (args) => {
+export const Component: JSONFieldClientComponent = () => {
   const [value, setValue] = useState<DefaultTypedEditorState | undefined>(() =>
     buildEditorState({ text: 'state default' }),
   )

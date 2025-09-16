@@ -6,7 +6,7 @@ import { buildEditorState, RenderLexical } from '@payloadcms/richtext-lexical/cl
 
 import { lexicalFullyFeaturedSlug } from '../../slugs.js'
 
-export const Component: JSONFieldClientComponent = (args) => {
+export const Component: JSONFieldClientComponent = () => {
   return (
     <div>
       Fully-Featured Component:

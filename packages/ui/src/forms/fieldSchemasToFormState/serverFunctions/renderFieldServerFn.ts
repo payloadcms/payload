@@ -1,4 +1,4 @@
-import { type Field, type FieldState, type ServerFunction } from 'payload'
+import { deepMerge, type Field, type FieldState, type ServerFunction } from 'payload'
 
 import { getClientConfig } from '../../../utilities/getClientConfig.js'
 import { getClientSchemaMap } from '../../../utilities/getClientSchemaMap.js'
@@ -78,10 +78,7 @@ export const _internal_renderFieldHandler: ServerFunction<
     throw new Error(`Could not find target field at schemaPath: ${schemaPath}`)
   }
 
-  const field: Field = {
-    ...(targetField || {}),
-    ...(fieldArg || {}),
-  } as Field
+  const field: Field = fieldArg ? deepMerge(targetField, fieldArg, { clone: false }) : targetField
 
   let data = {}
   if (typeof initialValue !== 'undefined') {
