@@ -277,6 +277,7 @@ export const csTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'právě upravuje tento dokument. Pokud převezmete kontrolu, budou zablokováni v pokračování úprav a mohou také přijít o neuložené změny.',
     custom: 'Vlastní',
+    customViews: 'Vlastní Zobrazení',
     dark: 'Tmavý',
     dashboard: 'Nástěnka',
     delete: 'Odstranit',

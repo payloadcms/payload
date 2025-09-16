@@ -283,6 +283,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'বর্তমানে এই ডকুমেন্টটি সম্পাদনা করছেন। আপনি যদি দায়িত্ব নেন, তাহলে তারা সম্পাদনা করা থেকে ব্লক হয়ে যাবে এবং সংরক্ষণ না করা পরিবর্তনগুলি হারাতে পারে।',
     custom: 'কাস্টম',
+    customViews: 'কাস্টম ভিউ',
     dark: 'ডার্ক',
     dashboard: 'ড্যাশবোর্ড',
     delete: 'মুছুন',

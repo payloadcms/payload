@@ -283,6 +283,7 @@ export const idTranslations = {
     currentlyEditing:
       'sedang mengedit dokumen ini. Jika Anda mengambil alih, mereka akan diblokir untuk melanjutkan pengeditan, dan mungkin juga kehilangan perubahan yang belum disimpan.',
     custom: 'Kustom',
+    customViews: 'Tampilan Khusus',
     dark: 'Gelap',
     dashboard: 'Dasbor',
     delete: 'Hapus',

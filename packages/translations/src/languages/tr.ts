@@ -282,6 +282,7 @@ export const trTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'şu anda bu belgeyi düzenliyor. Devralırsanız, düzenlemeye devam etmeleri engellenecek ve kaydedilmemiş değişiklikleri de kaybedebilirler.',
     custom: 'Özel',
+    customViews: 'Özel Görünümler',
     dark: 'Karanlık',
     dashboard: 'Anasayfa',
     delete: 'Sil',

@@ -282,6 +282,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'šiuo metu redaguoja šį dokumentą. Jei perimsite, jie bus užblokuoti ir negalės toliau redaguoti, o taip pat gali prarasti neišsaugotus pakeitimus.',
     custom: 'Paprastas',
+    customViews: 'Pasirinktiniai Rodiniai',
     dark: 'Tamsus',
     dashboard: 'Prietaisų skydelis',
     delete: 'Ištrinti',

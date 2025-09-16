@@ -282,6 +282,7 @@ export const itTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'sta attualmente modificando questo documento. Se prendi il controllo, verranno bloccati dal continuare a modificare e potrebbero anche perdere le modifiche non salvate.',
     custom: 'Personalizzato',
+    customViews: 'Viste Personalizzate',
     dark: 'Scuro',
     dashboard: 'Dashboard',
     delete: 'Elimina',

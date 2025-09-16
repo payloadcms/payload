@@ -279,6 +279,7 @@ export const isTranslations = {
     currentlyEditing:
       'er núna að breyta þessu skjali. Ef þú tekur yfir munu þeir verða hindraðir frá því að halda áfram að breyta og gætu líka misst óvistaðar breytingar.',
     custom: 'Sérsniðið',
+    customViews: 'Sérsniðnar Skoðanir',
     dark: 'Dökkt',
     dashboard: 'Stjórnborð',
     delete: 'Eyða',
