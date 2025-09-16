@@ -36,6 +36,7 @@ let payload: PayloadTestSDK<Config>
 
 import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
 import { devUser } from 'credentials.js'
+import { getRowByCellValueAndAssert } from 'helpers/e2e/getRowByCellValueAndAssert.js'
 import {
   openListColumns,
   reorderColumns,
@@ -993,58 +994,101 @@ describe('List View', () => {
       await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
     })
 
-    test('should use select API in the list view when `enableListViewSelectAPI` is true', async () => {
-      const doc = await payload.create({
-        collection: listViewSelectAPISlug,
-        data: {
-          title: 'This is a test title',
-          description: 'This is a test description',
-        },
+    describe('enableListViewSelectAPI', () => {
+      test('`id` should always be selected even when toggled off', async () => {
+        const doc = await payload.create({
+          collection: listViewSelectAPISlug,
+          data: {
+            title: 'This is a test title',
+            description: 'This is a test description',
+          },
+        })
+
+        const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
+
+        await page.goto(selectAPIUrl.list)
+
+        const printedResults = page.locator('#table-state')
+
+        await expect
+          .poll(
+            async () => {
+              const resultText = await printedResults.innerText()
+              const parsedResult = JSON.parse(resultText)
+              return Boolean(parsedResult[0].id && parsedResult[0].description)
+            },
+            {
+              timeout: 3000,
+              intervals: [100, 250, 500, 1000],
+            },
+          )
+          .toBeTruthy()
+
+        await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+
+        await toggleColumn(page, {
+          columnLabel: 'Description',
+          columnName: 'description',
+          targetState: 'off',
+        })
+
+        // Poll until the "description" field is removed from the response BUT `id` is still present
+        // The `id` field will remain selected despite it being inactive
+        await expect
+          .poll(
+            async () => {
+              const resultText = await printedResults.innerText()
+              const parsedResult = JSON.parse(resultText)
+              return Boolean(parsedResult[0].description === undefined && parsedResult[0].id)
+            },
+            {
+              timeout: 3000,
+              intervals: [100, 250, 500, 1000],
+            },
+          )
+          .toBeTruthy()
       })
 
-      const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
-
-      await page.goto(selectAPIUrl.list)
-
-      const printedResults = page.locator('#table-state')
-
-      await expect
-        .poll(
-          async () => {
-            const resultText = await printedResults.innerText()
-            const parsedResult = JSON.parse(resultText)
-            return Boolean(parsedResult[0].id && parsedResult[0].description)
+      test('group fields should populate with the select API', async () => {
+        const doc = await payload.create({
+          collection: listViewSelectAPISlug,
+          data: {
+            title: 'This is a test title',
+            description: 'This is a test description',
+            group: {
+              groupNameField: 'Select Nested Field',
+            },
           },
-          {
-            timeout: 3000,
-            intervals: [100, 250, 500, 1000],
-          },
-        )
-        .toBeTruthy()
+        })
 
-      await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+        const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
 
-      await toggleColumn(page, {
-        columnLabel: 'Description',
-        columnName: 'description',
-        targetState: 'off',
+        await page.goto(selectAPIUrl.list)
+
+        await toggleColumn(page, {
+          columnLabel: 'Group > Group Name Field',
+          columnName: 'group.groupNameField',
+          targetState: 'off',
+        })
+
+        await toggleColumn(page, {
+          columnLabel: 'Group > Group Name Field',
+          columnName: 'group.groupNameField',
+          targetState: 'on',
+        })
+
+        await getRowByCellValueAndAssert({
+          cellClass: `.cell-group__groupNameField`,
+          page,
+          textToMatch: 'Select Nested Field',
+        })
+
+        // cleanup after run
+        await payload.delete({
+          id: doc.id,
+          collection: listViewSelectAPISlug,
+        })
       })
-
-      // Poll until the "description" field is removed from the response BUT `id` is still present
-      // The `id` field will remain selected despite it being inactive
-      await expect
-        .poll(
-          async () => {
-            const resultText = await printedResults.innerText()
-            const parsedResult = JSON.parse(resultText)
-            return Boolean(parsedResult[0].description === undefined && parsedResult[0].id)
-          },
-          {
-            timeout: 3000,
-            intervals: [100, 250, 500, 1000],
-          },
-        )
-        .toBeTruthy()
     })
 
     test('should toggle columns and save to preferences', async () => {
