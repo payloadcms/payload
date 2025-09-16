@@ -26,6 +26,7 @@ import type { BrowserContext, Dialog, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { postsCollectionSlug } from 'admin/slugs.js'
+import mongoose from 'mongoose'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -1620,54 +1621,6 @@ describe('Versions', () => {
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 
-    test('diff is displayed correctly when editing 2nd block in a blocks field with 3 blocks', async () => {
-      await payload.update({
-        collection: 'diff',
-        data: {
-          blocks: [
-            ...diffDoc!.blocks!.map((block, i) => {
-              if (i === 1) {
-                return {
-                  ...block,
-                  textInRowInCollapsibleBlock: 'textInRowInCollapsibleBlock3',
-                }
-              }
-              return block
-            }),
-          ],
-        },
-        id: diffID,
-      })
-
-      const latestVersionDiff = (
-        await payload.findVersions({
-          collection: diffCollectionSlug,
-          depth: 0,
-          limit: 1,
-          where: {
-            parent: { equals: diffID },
-          },
-        })
-      ).docs[0] as Diff
-
-      await navigateToDiffVersionView(latestVersionDiff.id)
-
-      const blocks = page.locator('[data-field-path="blocks"]')
-
-      await expect(blocks.locator('.iterable-diff__label')).toHaveCount(1)
-
-      await expect(blocks.locator('.iterable-diff__label')).toHaveText('Block 02')
-
-      const blockDiff = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
-
-      await expect(blockDiff.locator('.html-diff__diff-old')).toHaveText(
-        'textInRowInCollapsibleBlock2',
-      )
-      await expect(blockDiff.locator('.html-diff__diff-new')).toHaveText(
-        'textInRowInCollapsibleBlock3',
-      )
-    })
-
     test('should render diff', async () => {
       await navigateToDraftVersionView(versionID)
       expect(true).toBe(true)
@@ -2132,6 +2085,118 @@ describe('Versions', () => {
         return expect(relation).toBeVisible()
       })
       await Promise.all(checkPromises)
+    })
+
+    test('diff is displayed correctly when editing 2nd block in a blocks field with 3 blocks', async () => {
+      await payload.update({
+        collection: 'diff',
+        data: {
+          blocks: [
+            ...diffDoc!.blocks!.map((block, i) => {
+              if (i === 1) {
+                return {
+                  ...block,
+                  textInRowInCollapsibleBlock: 'textInRowInCollapsibleBlock3',
+                }
+              }
+              return block
+            }),
+          ],
+        },
+        id: diffID,
+      })
+
+      const latestVersionDiff = (
+        await payload.findVersions({
+          collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
+          where: {
+            parent: { equals: diffID },
+          },
+        })
+      ).docs[0] as Diff
+
+      await navigateToDiffVersionView(latestVersionDiff.id)
+
+      const blocks = page.locator('[data-field-path="blocks"]')
+
+      await expect(blocks.locator('.iterable-diff__label')).toHaveCount(1)
+
+      await expect(blocks.locator('.iterable-diff__label')).toHaveText('Block 02')
+
+      const blockDiff = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
+
+      await expect(blockDiff.locator('.html-diff__diff-old')).toHaveText(
+        'textInRowInCollapsibleBlock2',
+      )
+      await expect(blockDiff.locator('.html-diff__diff-new')).toHaveText(
+        'textInRowInCollapsibleBlock3',
+      )
+    })
+
+    test('diff is displayed correctly when editing 2nd array in a arrays field with 3 arrays', async () => {
+      const newArray = [
+        {
+          id: new mongoose.Types.ObjectId().toHexString(),
+          textInArray: 'textInArray1',
+        },
+        {
+          id: new mongoose.Types.ObjectId().toHexString(),
+          textInArray: 'textInArray2',
+        },
+        {
+          id: new mongoose.Types.ObjectId().toHexString(),
+          textInArray: 'textInArray3',
+        },
+      ]
+      await payload.update({
+        collection: 'diff',
+        data: {
+          array: newArray,
+        },
+        id: diffID,
+      })
+
+      await payload.update({
+        collection: 'diff',
+        data: {
+          array: newArray.map((arrayItem, i) => {
+            if (i === 1) {
+              return {
+                ...arrayItem,
+                textInArray: 'textInArray2Modified',
+              }
+            }
+            return arrayItem
+          }),
+        },
+        id: diffID,
+      })
+
+      const latestVersionDiff = (
+        await payload.findVersions({
+          collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
+          where: {
+            parent: { equals: diffID },
+          },
+        })
+      ).docs[0] as Diff
+
+      await navigateToDiffVersionView(latestVersionDiff.id)
+
+      const blocks = page.locator('[data-field-path="array"]')
+
+      await expect(blocks.locator('.iterable-diff__label')).toHaveCount(1)
+
+      await expect(blocks.locator('.iterable-diff__label')).toHaveText('Item 02')
+
+      const blockDiff = page.locator('[data-field-path="array.1.textInArray"]')
+
+      await expect(blockDiff.locator('.html-diff__diff-old')).toHaveText('textInArray2')
+      await expect(blockDiff.locator('.html-diff__diff-new')).toHaveText('textInArray2Modified')
     })
   })
 
