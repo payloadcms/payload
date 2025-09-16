@@ -131,13 +131,15 @@ export type TaskCallbackArgs = {
   /**
    * Input data passed to the task
    */
-  input: object
+  input?: object
   job: Job
   req: PayloadRequest
-  taskStatus: SingleTaskStatus<string>
+  taskStatus: null | SingleTaskStatus<string>
 }
 
-export type ShouldRestoreFn = (args: TaskCallbackArgs) => boolean | Promise<boolean>
+export type ShouldRestoreFn = (
+  args: { taskStatus: SingleTaskStatus<string> } & Omit<TaskCallbackArgs, 'taskStatus'>,
+) => boolean | Promise<boolean>
 export type TaskCallbackFn = (args: TaskCallbackArgs) => Promise<void> | void
 
 export type RetryConfig = {
