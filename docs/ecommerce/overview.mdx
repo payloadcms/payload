@@ -82,28 +82,27 @@ export default config
 
 It's important to understand overall how the plugin works and the relationships between the different collections.
 
-- **Customers**
+- **Customers:**
   Can be any collection of users in your application. You can then limit access control only to customers depending on individual fields such
   as roles on the customer collection or by collection slug if you've opted to keep them separate. Customers are linked to Carts and Orders.
 
-- **Products and Variants**
+- **Products and Variants:**
   Products are the items you are selling and they will contain a price and optionally variants via a join field as well as allowed Variant Types.
-
   Each Variant Type can contain a set of Variant Options. For example, a T-Shirt product can have a Variant Type of Size with options Small, Medium, and Large and each Variant can therefore have those options assigned to it.
 
-- **Carts**
+- **Carts:**
   Carts are linked to Customers or they're left entirely public for guests users and can contain multiple Products and Variants. Carts are stored in the database and can be retrieved at any time. Carts are automatically created for Customers when they add a product to their cart for the first time.
 
-- **Transactions and Orders**
+- **Transactions and Orders:**
   Transactions are created when a payment is initiated. They contain the payment status and are linked to a Cart and Customer. Orders are created when a Transaction is successful and contain the final details of the purchase including the items, total, and customer information.
 
-- **Addresses**
+- **Addresses:**
   Addresses are linked to Customers and can be used for billing and shipping information. They can be reused across multiple Orders.
 
-- **Payments**
+- **Payments:**
   The plugin uses an adapter pattern to allow for different payment gateways. The default adapter is for Stripe, but you can create your own by implementing the `PaymentAdapter` interface.
 
-- **Currencies**
+- **Currencies:**
   The plugin supports using multiple currencies at the configuration level. Each currency will create a separate price field on the Product and Variants collections.
 
 The package can also be used piece-meal if you only want to re-use certain parts of it, such as just the creation of Products and Variants.
