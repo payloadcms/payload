@@ -1535,6 +1535,7 @@ describe('Versions', () => {
     let versionID: string
     let oldVersionID: string
     let diffID: string
+    let diffDoc: Diff
     let versionDiffID: string
 
     beforeAll(() => {
@@ -1583,7 +1584,7 @@ describe('Versions', () => {
       versionID = versions.docs[0].id
       oldVersionID = versions.docs[1].id
 
-      const diffDoc = (
+      diffDoc = (
         await payload.find({
           collection: diffCollectionSlug,
           depth: 0,
@@ -1613,11 +1614,59 @@ describe('Versions', () => {
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 
-    async function navigateToDiffVersionView() {
-      const versionURL = `${serverURL}/admin/collections/${diffCollectionSlug}/${diffID}/versions/${versionDiffID}`
+    async function navigateToDiffVersionView(versionID?: string) {
+      const versionURL = `${serverURL}/admin/collections/${diffCollectionSlug}/${diffID}/versions/${versionID ?? versionDiffID}`
       await page.goto(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
+
+    test('diff is displayed correctly when editing 2nd block in a blocks field with 3 blocks', async () => {
+      await payload.update({
+        collection: 'diff',
+        data: {
+          blocks: [
+            ...diffDoc!.blocks!.map((block, i) => {
+              if (i === 1) {
+                return {
+                  ...block,
+                  textInRowInCollapsibleBlock: 'textInRowInCollapsibleBlock3',
+                }
+              }
+              return block
+            }),
+          ],
+        },
+        id: diffID,
+      })
+
+      const latestVersionDiff = (
+        await payload.findVersions({
+          collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
+          where: {
+            parent: { equals: diffID },
+          },
+        })
+      ).docs[0] as Diff
+
+      await navigateToDiffVersionView(latestVersionDiff.id)
+
+      const blocks = page.locator('[data-field-path="blocks"]')
+
+      await expect(blocks.locator('.iterable-diff__label')).toHaveCount(1)
+
+      await expect(blocks.locator('.iterable-diff__label')).toHaveText('Block 02')
+
+      const blockDiff = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
+
+      await expect(blockDiff.locator('.html-diff__diff-old')).toHaveText(
+        'textInRowInCollapsibleBlock2',
+      )
+      await expect(blockDiff.locator('.html-diff__diff-new')).toHaveText(
+        'textInRowInCollapsibleBlock3',
+      )
+    })
 
     test('should render diff', async () => {
       await navigateToDraftVersionView(versionID)
