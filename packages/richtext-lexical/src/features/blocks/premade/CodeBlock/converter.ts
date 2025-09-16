@@ -1,5 +1,9 @@
 import type { BlockJSX } from 'payload'
 
+/**
+ * @internal
+ * @experimental - API may change in minor releases
+ */
 export const codeConverter: BlockJSX = {
   customEndRegex: {
     optional: true,
