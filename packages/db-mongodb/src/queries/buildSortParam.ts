@@ -94,6 +94,10 @@ const relationshipSort = ({
         )
       }
 
+      if (nextPath.join('.') === 'id') {
+        return `${previousField}${localizedRelationshipPath}`
+      }
+
       const as = `__${previousField}${localizedRelationshipPath}`
 
       sortAggregation.push({
