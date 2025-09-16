@@ -830,6 +830,17 @@ describe('Block fields', () => {
       )
       await wait(200) // To be safe, wait to ensure form state has been merged back on the client-side
 
+      // After form state request, error pills should disappear
+      await expect(
+        page.locator(
+          '#field-blocksWithDynamicFilterOptions .blocks-field__header .error-pill__count',
+        ),
+      ).toBeHidden()
+
+      await expect(
+        page.locator('#blocksWithDynamicFilterOptions-row-0 .error-pill__count'),
+      ).toBeHidden()
+
       await addButton.click()
       await expect(blocksDrawer).toBeVisible()
       await expect(labels).toHaveCount(1)
