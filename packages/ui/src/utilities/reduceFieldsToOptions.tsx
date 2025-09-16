@@ -43,6 +43,11 @@ export const reduceFieldsToOptions = ({
       const baseLabel = ('label' in field && field.label) || ('name' in field && field.name) || ''
       const localizedLabel = getTranslation(baseLabel, i18n)
 
+      // Skip virtual fields with unsupported field types i.e. groups
+      if (!fieldTypes[field.type]) {
+        return reduced
+      }
+
       reduced.push({
         label: localizedLabel,
         plainTextLabel: localizedLabel,
