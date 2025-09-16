@@ -39,6 +39,23 @@ export const LexicalFullyFeatured: CollectionConfig = {
           BlocksFeature({
             blocks: [
               CodeBlock(),
+              CodeBlock({
+                slug: 'PayloadCode',
+                defaultLanguage: 'ts',
+                typescript: {
+                  fetchTypes: [
+                    {
+                      url: 'https://unpkg.com/payload@latest/dist/index.d.ts',
+                      filePath: 'file:///node_modules/payload/index.d.ts',
+                    },
+                  ],
+                  paths: {
+                    payload: ['file:///node_modules/payload/index.d.ts'],
+                  },
+                  typeRoots: ['node_modules/@types', 'node_modules/payload'],
+                },
+              }),
+
               {
                 slug: 'myBlock',
                 fields: [

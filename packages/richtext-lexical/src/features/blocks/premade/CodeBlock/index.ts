@@ -4,6 +4,9 @@ import type { AdditionalCodeComponentProps } from './Component.js'
 
 import { codeConverter } from './converter.js'
 
+/**
+ * @experimental - this API may change in future, minor releases
+ */
 export const CodeBlock: (args?: AdditionalCodeComponentProps) => Block = (args) => {
   const languages = args?.languages || {
     js: 'JavaScript',
@@ -12,7 +15,7 @@ export const CodeBlock: (args?: AdditionalCodeComponentProps) => Block = (args) 
   }
 
   return {
-    slug: 'Code',
+    slug: args?.slug || 'Code',
     admin: {
       jsx: '@payloadcms/richtext-lexical/client#codeConverterClient',
     },

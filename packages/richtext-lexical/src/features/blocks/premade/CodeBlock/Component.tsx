@@ -20,6 +20,12 @@ export type AdditionalCodeComponentProps = {
    */
   languages?: Record<string, string>
   /**
+   * Override the name of the block.
+   *
+   * @default 'Code'
+   */
+  slug?: string
+  /**
    * Configure typescript settings for the editor
    */
   typescript?: {
