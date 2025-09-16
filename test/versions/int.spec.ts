@@ -365,6 +365,36 @@ describe('Versions', () => {
         // When creating new version - updatedAt should match version.updatedAt
         expect(fromNonVersionsTable.updatedAt).toBe(latestVersionData.version.updatedAt)
       })
+
+      it('should allow to create with a localized relationships inside a localized array and a block', async () => {
+        const post = await payload.create({ collection: 'posts', data: {} })
+        const res = await payload.create({
+          collection: 'localized-posts',
+          draft: true,
+          depth: 0,
+          data: {
+            blocks: [
+              {
+                blockType: 'block',
+                array: [
+                  {
+                    relationship: post.id,
+                  },
+                ],
+              },
+            ],
+          },
+        })
+        expect(res.blocks[0]?.array[0]?.relationship).toEqual(post.id)
+        const {
+          docs: [resFromVersions],
+        } = await payload.findVersions({
+          collection: 'localized-posts',
+          where: { parent: { equals: res.id } },
+          depth: 0,
+        })
+        expect(resFromVersions?.version.blocks[0]?.array[0]?.relationship).toEqual(post.id)
+      })
     })
 
     describe('Restore', () => {

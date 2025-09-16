@@ -35,6 +35,20 @@ Something needs to actually trigger the scheduling of jobs (execute the scheduli
 
 You can disable this behavior by setting `disableScheduling: true` in your `autorun` configuration, or by passing `disableScheduling=true` to the `/api/payload-jobs/run` endpoint. This is useful if you want to handle scheduling manually, for example, by using a cron job or a serverless function that calls the `/api/payload-jobs/handle-schedules` endpoint or the `payload.jobs.handleSchedules()` local API method.
 
+### Bin Scripts
+
+Payload provides a set of bin scripts that can be used to handle schedules. If you're already using the `jobs:run` bin script, you can set it to also handle schedules by passing the `--handle-schedules` flag:
+
+```sh
+pnpm payload jobs:run --cron "*/5 * * * *" --queue myQueue --handle-schedules # This will both schedule jobs according to the configuration and run them
+```
+
+If you only want to handle schedules, you can use the dedicated `jobs:handle-schedules` bin script:
+
+```sh
+pnpm payload jobs:handle-schedules --cron "*/5 * * * *" --queue myQueue # or --all-queues
+```
+
 ## Defining schedules on Tasks or Workflows
 
 Schedules are defined using the `schedule` property:
