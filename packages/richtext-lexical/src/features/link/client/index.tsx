@@ -14,7 +14,7 @@ import { LinkIcon } from '../../../lexical/ui/icons/Link/index.js'
 import { getSelectedNode } from '../../../lexical/utils/getSelectedNode.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { toolbarFeatureButtonsGroupWithItems } from '../../shared/toolbar/featureButtonsGroup.js'
-import { LinkMarkdownTransformer } from '../markdownTransformer.js'
+import { PAYLOAD_LINK_TRANSFORMER } from '../markdownTransformer.js'
 import { AutoLinkNode } from '../nodes/AutoLinkNode.js'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from '../nodes/LinkNode.js'
 import { AutoLinkPlugin } from './plugins/autoLink/index.js'
@@ -82,7 +82,7 @@ const toolbarGroups: ToolbarGroup[] = [
 ]
 
 export const LinkFeatureClient = createClientFeature<ClientProps>(({ props }) => ({
-  markdownTransformers: [LinkMarkdownTransformer],
+  markdownTransformers: [PAYLOAD_LINK_TRANSFORMER],
   nodes: [LinkNode, props?.disableAutoLinks === true ? null : AutoLinkNode].filter(
     Boolean,
   ) as Array<Klass<LexicalNode>>,

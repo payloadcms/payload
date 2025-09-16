@@ -1,10 +1,11 @@
-import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import {
   BOLD_ITALIC_STAR,
   BOLD_ITALIC_UNDERSCORE,
   BOLD_STAR,
   BOLD_UNDERSCORE,
-} from './markdownTransformers.js'
+} from '@lexical/markdown'
+
+import { createServerFeature } from '../../../utilities/createServerFeature.js'
 
 export const BoldFeature = createServerFeature({
   dependenciesSoft: ['italic'],
