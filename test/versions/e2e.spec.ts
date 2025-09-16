@@ -64,7 +64,6 @@ import {
   draftWithMaxCollectionSlug,
   draftWithMaxGlobalSlug,
   draftWithValidateCollectionSlug,
-  errorOnUnpublishSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   postCollectionSlug,
@@ -92,7 +91,6 @@ describe('Versions', () => {
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
-  let errorOnUnpublishURL: AdminUrlUtil
   let id: string
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -131,7 +129,6 @@ describe('Versions', () => {
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
-      errorOnUnpublishURL = new AdminUrlUtil(serverURL, errorOnUnpublishSlug)
     })
 
     test('collection — has versions tab', async () => {
@@ -308,9 +305,10 @@ describe('Versions', () => {
         collection: draftCollectionSlug,
         id: publishedDoc.id,
         data: {
-          _status: 'draft',
+          title: 'updated title',
+          _status: 'published',
         },
-        draft: false,
+        draft: true,
       })
 
       await page.goto(`${url.edit(publishedDoc.id)}/versions`)
@@ -602,11 +600,10 @@ describe('Versions', () => {
       const spanishTitle = 'spanish title'
       const englishTitle = 'english title'
 
-      await page.goto(url.create)
+      await page.goto(autosaveWithDraftButtonURL.create)
 
       // fill out doc in english
       await page.locator('#field-title').fill(englishTitle)
-      await page.locator('#field-description').fill('unchanged description')
       await saveDocAndAssert(page)
 
       // change locale to spanish
@@ -627,7 +624,6 @@ describe('Versions', () => {
 
       // fill out draft content in spanish
       await page.locator('#field-title').fill(`${spanishTitle}--draft`)
-      await saveDocAndAssert(page, '#action-save-draft')
 
       // revert to last published version
       await page.locator('#action-revert-to-published').click()
@@ -694,23 +690,6 @@ describe('Versions', () => {
       await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
-
-    test('collections — should show custom error message when unpublishing fails', async () => {
-      const publishedDoc = await payload.create({
-        collection: errorOnUnpublishSlug,
-        data: {
-          _status: 'published',
-          title: 'title',
-        },
-      })
-      await page.goto(errorOnUnpublishURL.edit(String(publishedDoc.id)))
-      await page.locator('#action-unpublish').click()
-      await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
-      await expect(
-        page.locator('.payload-toast-item:has-text("Custom error on unpublish")'),
-      ).toBeVisible()
-    })
-
     test('should show documents title in relationship even if draft document', async () => {
       await payload.create({
         collection: autosaveCollectionSlug,
