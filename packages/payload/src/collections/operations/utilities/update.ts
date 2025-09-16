@@ -241,7 +241,7 @@ export const updateDocument = async <
         collectionConfig.versions.drafts &&
         !collectionConfig.versions.drafts.validate) ||
       // Skip validation for trash operations since they're just metadata updates
-      data?.deletedAt != null,
+      Boolean(data?.deletedAt),
   }
 
   if (publishSpecificLocale) {
