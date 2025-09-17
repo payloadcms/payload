@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "3.55.1",
+  "version": "3.56.0",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -414,7 +414,7 @@
     "swc-plugin-transform-remove-imports": "4.0.4"
   },
   "peerDependencies": {
-    "@faceless-ui/modal": "3.0.0-beta.2",
+    "@faceless-ui/modal": "3.0.0",
     "@faceless-ui/scroll-info": "2.0.0",
     "@payloadcms/next": "workspace:*",
     "payload": "workspace:*",
