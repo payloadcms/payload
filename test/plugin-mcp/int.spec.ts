@@ -12,7 +12,6 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 let payload: Payload
 let token: string
 let restClient: NextRESTClient
-let testApiKey: null | string | undefined
 
 const { email, password } = devUser
 const filename = fileURLToPath(import.meta.url)
@@ -45,6 +44,20 @@ async function fetchStreamResponse(request: Request): Promise<string> {
   return streamJSONString
 }
 
+const getApiKey = async (): Promise<string> => {
+  const doc = await payload.create({
+    collection: 'payload-mcp-api-keys',
+    data: {
+      enableAPIKey: true,
+      label: 'Test API Key',
+      posts: { find: true, create: true },
+      apiKey: randomUUID(),
+    },
+  })
+
+  return doc.apiKey as string
+}
+
 describe('@payloadcms/plugin-mcp', () => {
   beforeAll(async () => {
     const initialized = await initPayloadInt(dirname)
@@ -68,7 +81,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
   it('should create an API Key', async () => {
     const doc = await payload.create({
-      collection: 'payload-mcp-tool-api-key',
+      collection: 'payload-mcp-api-keys',
       data: {
         enableAPIKey: true,
         label: 'Test API Key',
@@ -76,8 +89,6 @@ describe('@payloadcms/plugin-mcp', () => {
         apiKey: randomUUID(),
       },
     })
-
-    testApiKey = doc.apiKey
 
     expect(doc).toBeDefined()
     expect(doc.label).toBe('Test API Key')
@@ -90,14 +101,16 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(doc.products?.delete).toBe(false)
     expect(doc.media?.find).toBe(false)
     expect(doc.media?.update).toBe(false)
-    expect(testApiKey).toBeDefined()
+    expect(typeof doc.apiKey).toBe('string')
+    expect(doc.apiKey).toHaveLength(36)
   })
 
   it('should not allow GET /api/mcp', async () => {
+    const apiKey = await getApiKey()
     const data = await restClient
       .GET(`/mcp`, {
         headers: {
-          Authorization: `Bearer ${testApiKey}`,
+          Authorization: `Bearer ${apiKey}`,
         },
       })
       .then((res) => res.json())
@@ -109,10 +122,35 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(data.error.message).toBe('Method not allowed.')
   })
 
-  it('should list tools', async () => {
+  it('should ping', async () => {
+    const apiKey = await getApiKey()
     const request = new Request(`${restClient.serverURL}/api/mcp`, {
       headers: {
-        Authorization: `Bearer ${testApiKey}`,
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'ping',
+        params: {},
+      }),
+    })
+
+    const streamJSONString = await fetchStreamResponse(request)
+
+    const json = JSON.parse(streamJSONString)
+
+    expect(json).toBeDefined()
+  })
+
+  it('should list tools', async () => {
+    const apiKey = await getApiKey()
+    const request = new Request(`${restClient.serverURL}/api/mcp`, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
         Accept: 'application/json, text/event-stream',
         'Content-Type': 'application/json',
       },
@@ -157,9 +195,10 @@ describe('@payloadcms/plugin-mcp', () => {
   })
 
   it('should list resources', async () => {
+    const apiKey = await getApiKey()
     const request = new Request(`${restClient.serverURL}/api/mcp`, {
       headers: {
-        Authorization: `Bearer ${testApiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         Accept: 'application/json, text/event-stream',
         'Content-Type': 'application/json',
       },
@@ -192,9 +231,10 @@ describe('@payloadcms/plugin-mcp', () => {
   })
 
   it('should list prompts', async () => {
+    const apiKey = await getApiKey()
     const request = new Request(`${restClient.serverURL}/api/mcp`, {
       headers: {
-        Authorization: `Bearer ${testApiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         Accept: 'application/json, text/event-stream',
         'Content-Type': 'application/json',
       },
@@ -224,5 +264,128 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(json.result.prompts[0].arguments).toHaveLength(1)
     expect(json.result.prompts[0].arguments[0].name).toBe('message')
     expect(json.result.prompts[0].arguments[0].required).toBe(true)
+  })
+
+  it('should call diceRoll', async () => {
+    const apiKey = await getApiKey()
+    const request = new Request(`${restClient.serverURL}/api/mcp`, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'tools/call',
+        params: {
+          name: 'diceRoll',
+          arguments: {
+            sides: 6,
+          },
+        },
+      }),
+    })
+
+    const streamJSONString = await fetchStreamResponse(request)
+
+    const json = JSON.parse(streamJSONString)
+
+    expect(json).toBeDefined()
+    expect(json.result).toBeDefined()
+    expect(json.result.content).toHaveLength(1)
+    expect(json.result.content[0].type).toBe('text')
+    expect(json.result.content[0].text).toContain('**Sides:** 6')
+    expect(json.result.content[0].text).toContain('**Result:**')
+    expect(json.result.content[0].text).toContain('🎲 You rolled a **')
+    expect(json.result.content[0].text).toContain('** on a 6-sided die!')
+  })
+
+  it('should call createPosts', async () => {
+    const apiKey = await getApiKey()
+    const request = new Request(`${restClient.serverURL}/api/mcp`, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'tools/call',
+        params: {
+          name: 'createPosts',
+          arguments: {
+            title: 'Test Post',
+            content: 'Content for test post.',
+          },
+        },
+      }),
+    })
+
+    const streamJSONString = await fetchStreamResponse(request)
+
+    const json = JSON.parse(streamJSONString)
+
+    expect(json).toBeDefined()
+    expect(json.result).toBeDefined()
+    expect(json.result.content).toHaveLength(1)
+    expect(json.result.content[0].type).toBe('text')
+    expect(json.result.content[0].text).toContain(
+      'Resource created successfully in collection "posts"!',
+    )
+    expect(json.result.content[0].text).toContain('Created resource:')
+    expect(json.result.content[0].text).toContain('```json')
+    expect(json.result.content[0].text).toContain('"title": "Test Post"')
+    expect(json.result.content[0].text).toContain('"content": "Content for test post."')
+  })
+
+  it('should call findPosts', async () => {
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'Test Post for Finding',
+        content: 'Content for test post.',
+      },
+    })
+
+    const apiKey = await getApiKey()
+    const request = new Request(`${restClient.serverURL}/api/mcp`, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'tools/call',
+        params: {
+          name: 'findPosts',
+          arguments: {
+            limit: 1,
+            page: 1,
+            where: '{"title": {"contains": "Test Post for Finding"}}',
+          },
+        },
+      }),
+    })
+
+    const streamJSONString = await fetchStreamResponse(request)
+
+    const json = JSON.parse(streamJSONString)
+
+    expect(json).toBeDefined()
+    expect(json.result).toBeDefined()
+    expect(json.result.content).toHaveLength(1)
+    expect(json.result.content[0].type).toBe('text')
+    expect(json.result.content[0].text).toContain('Collection: "posts"')
+    expect(json.result.content[0].text).toContain('Total: 1 documents')
+    expect(json.result.content[0].text).toContain('Page: 1 of 1')
+    expect(json.result.content[0].text).toContain('```json')
+    expect(json.result.content[0].text).toContain('"title": "Test Post for Finding"')
   })
 })
