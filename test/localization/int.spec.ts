@@ -3183,28 +3183,33 @@ describe('Localization', () => {
       describe('GraphQL', () => {
         describe('Collections', () => {
           it('should allow fallback locale to be an array', async () => {
-            const query = `query {
-              LocalizedPost(id: "${postWithLocalizedData.id}") {
-                title
-              }
-            }`
+            const query = `
+      {
+        LocalizedPost(id: ${idToString(postWithLocalizedData.id, payload)}, locale: pt) {
+          title
+        }
+      }
+      `
 
-            const { data: queryResult } = await restClient
+            const { data } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
                 query: { locale: 'pt', fallbackLocale: '[es, en]' },
               })
               .then((res) => res.json())
+            console.log(data)
 
-            expect(queryResult.LocalizedPost.title).toBe(spanishTitle)
+            expect(data.LocalizedPost.title).toStrictEqual(spanishTitle)
           })
 
           it('should pass over fallback locales until it finds one that exists', async () => {
-            const query = `query {
-              LocalizedPost(id: "${postWithLocalizedData.id}") {
-                title
-              }
-            }`
+            const query = `
+      {
+        LocalizedPost(id: ${idToString(postWithLocalizedData.id, payload)}, locale: pt) {
+          title
+        }
+      }
+      `
 
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
@@ -3217,11 +3222,13 @@ describe('Localization', () => {
           })
 
           it('should return null if no fallback locales exist', async () => {
-            const query = `query {
-              LocalizedPost(id: "${postWithLocalizedData.id}") {
-                title
-              }
-            }`
+            const query = `
+      {
+        LocalizedPost(id: ${idToString(postWithLocalizedData.id, payload)}, locale: pt) {
+          title
+        }
+      }
+      `
 
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
