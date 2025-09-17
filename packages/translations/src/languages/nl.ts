@@ -575,6 +575,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Alleen gewijzigd',
     moreVersions: 'Meer versies...',
     noFurtherVersionsFound: 'Geen verdere versies gevonden',
+    noLabelGroup: 'Naamloze Groep',
     noRowsFound: 'Geen {{label}} gevonden',
     noRowsSelected: 'Geen {{label}} geselecteerd',
     preview: 'Voorbeeld',

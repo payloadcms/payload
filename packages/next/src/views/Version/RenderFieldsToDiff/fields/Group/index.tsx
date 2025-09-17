@@ -30,12 +30,14 @@ export const Group: GroupFieldDiffClientComponent = ({
       <DiffCollapser
         fields={field.fields}
         Label={
-          'label' in field &&
-          field.label &&
-          typeof field.label !== 'function' && (
+          'label' in field && field.label && typeof field.label !== 'function' ? (
             <span>
               {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
               {getTranslation(field.label, i18n)}
+            </span>
+          ) : (
+            <span className={`${baseClass}__locale-label ${baseClass}__locale-label--no-label`}>
+              &lt;{i18n.t('version:noLabelGroup')}&gt;
             </span>
           )
         }
