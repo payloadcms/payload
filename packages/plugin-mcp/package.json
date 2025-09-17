@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.2",
+    "@types/json-schema": "7.0.15",
     "@vercel/mcp-adapter": "^1.0.0",
     "json-schema-to-zod": "2.6.1",
     "zod": "^3.25.50"
