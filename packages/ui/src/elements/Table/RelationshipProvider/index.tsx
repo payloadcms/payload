@@ -38,6 +38,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
 
   const {
     config: {
+      collections,
       routes: { api },
       serverURL,
     },
@@ -66,14 +67,15 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
           params.append('depth', '0')
           params.append('limit', '250')
 
+          const fieldToSelect = collections.find((c) => c.slug === slug)?.admin?.useAsTitle ?? 'id'
+          params.append(`select[${fieldToSelect}]`, 'true')
+
           if (locale) {
             params.append('locale', locale)
           }
 
-          if (idsToLoad && idsToLoad.length > 0) {
-            const idsToString = idsToLoad.map((id) => String(id))
-            params.append('where[id][in]', idsToString.join(','))
-          }
+          const idsToString = idsToLoad.map((id) => String(id))
+          params.append('where[id][in]', idsToString.join(','))
 
           const query = `?${params.toString()}`
 
@@ -100,7 +102,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
         }
       })
     },
-    [debouncedDocuments, serverURL, api, i18n, locale],
+    [debouncedDocuments, serverURL, api, i18n, locale, collections],
   )
 
   useEffect(() => {
