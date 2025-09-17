@@ -560,6 +560,7 @@ export const faTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'تنها تغییر یافته',
     moreVersions: 'نسخه های بیشتر...',
     noFurtherVersionsFound: 'نگارش دیگری یافت نشد',
+    noLabelGroup: 'گروه نام‌گذاری نشده',
     noRowsFound: 'هیچ {{label}} یافت نشد',
     noRowsSelected: 'هیچ {{label}} ای انتخاب نشده است',
     preview: 'پیش‌نمایش',

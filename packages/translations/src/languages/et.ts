@@ -558,6 +558,7 @@ export const etTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Muudetud ainult',
     moreVersions: 'Rohkem versioone...',
     noFurtherVersionsFound: 'Rohkem versioone ei leitud',
+    noLabelGroup: 'Nimetamata rühm',
     noRowsFound: '{{label}} ei leitud',
     noRowsSelected: '{{label}} pole valitud',
     preview: 'Eelvaade',

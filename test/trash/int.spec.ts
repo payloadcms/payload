@@ -648,6 +648,43 @@ describe('trash', () => {
       })
     })
 
+    describe('trashing documents with validation issues', () => {
+      it('should allow trashing documents with empty required fields (draft scenario)', async () => {
+        // Create a draft document with empty required field
+        const draftDoc = await payload.create({
+          collection: postsSlug,
+          data: {
+            title: '', // Empty required field
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        expect(draftDoc.title).toBe('')
+        expect(draftDoc._status).toBe('draft')
+
+        // Should be able to trash the document even with empty required field
+        const trashedDoc = await payload.update({
+          collection: postsSlug,
+          id: draftDoc.id,
+          data: {
+            deletedAt: new Date().toISOString(),
+          },
+        })
+
+        expect(trashedDoc.deletedAt).toBeDefined()
+        expect(trashedDoc.title).toBe('') // Title should still be empty
+        expect(trashedDoc._status).toBe('draft')
+
+        // Clean up
+        await payload.delete({
+          collection: postsSlug,
+          id: draftDoc.id,
+          trash: true,
+        })
+      })
+    })
+
     describe('deleteByID operation', () => {
       it('should throw NotFound error when trying to delete a soft-deleted document w/o trash: true', async () => {
         await expect(

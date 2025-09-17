@@ -566,6 +566,7 @@ export const svTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Endast modifierad',
     moreVersions: 'Fler versioner...',
     noFurtherVersionsFound: 'Inga fler versioner hittades',
+    noLabelGroup: 'Onämnd grupp',
     noRowsFound: 'Inga {{label}} hittades',
     noRowsSelected: 'Inget {{etikett}} valt',
     preview: 'Förhandsgranska',

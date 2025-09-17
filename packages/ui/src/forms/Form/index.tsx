@@ -60,6 +60,11 @@ export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
     useDocumentInfo()
 
+  const validateDrafts =
+    docConfig?.versions?.drafts && typeof docConfig?.versions?.drafts === 'object'
+      ? (docConfig.versions.drafts.validate ?? false)
+      : false
+
   const {
     action,
     beforeSubmit,
@@ -99,7 +104,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { startRouteTransition } = useRouteTransition()
   const { getUploadHandler } = useUploadHandlers()
 
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const [disabled, setDisabled] = useState(disabledFromProps || false)
   const [isMounted, setIsMounted] = useState(false)
@@ -403,6 +408,12 @@ export const Form: React.FC<FormProps> = (props) => {
         } else {
           setProcessing(false)
           setSubmitted(true)
+
+          // When there was an error submitting a draft,
+          // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
+          if (!validateDrafts && overridesFromArgs['_status'] === 'draft') {
+            setSubmitted(false)
+          }
 
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
 
