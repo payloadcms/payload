@@ -67,8 +67,11 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
           params.append('depth', '0')
           params.append('limit', '250')
 
-          const fieldToSelect = collections.find((c) => c.slug === slug)?.admin?.useAsTitle ?? 'id'
-          params.append(`select[${fieldToSelect}]`, 'true')
+          const collection = collections.find((c) => c.slug === slug)
+          if (!collection?.upload) {
+            const fieldToSelect = collection?.admin?.useAsTitle ?? 'id'
+            params.append(`select[${fieldToSelect}]`, 'true')
+          }
 
           if (locale) {
             params.append('locale', locale)
