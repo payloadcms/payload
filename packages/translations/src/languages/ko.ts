@@ -559,6 +559,7 @@ export const koTranslations: DefaultTranslationsObject = {
     modifiedOnly: '수정된 것만',
     moreVersions: '더 많은 버전...',
     noFurtherVersionsFound: '더 이상의 버전을 찾을 수 없습니다.',
+    noLabelGroup: '이름이 없는 그룹',
     noRowsFound: '{{label}}을(를) 찾을 수 없음',
     noRowsSelected: '선택된 {{label}} 없음',
     preview: '미리보기',

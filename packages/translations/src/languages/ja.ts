@@ -566,6 +566,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     modifiedOnly: '変更済みのみ',
     moreVersions: 'さらに多くのバージョン...',
     noFurtherVersionsFound: 'その他のバージョンは見つかりませんでした。',
+    noLabelGroup: '名前のないグループ',
     noRowsFound: '{{label}} は未設定です',
     noRowsSelected: '選択された{{label}}はありません',
     preview: 'プレビュー',

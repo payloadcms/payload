@@ -412,7 +412,7 @@ export const traverseFields = ({
         if (
           fieldShouldBeLocalized({
             field,
-            parentIsLocalized: parentIsLocalized ?? field.localized ?? false,
+            parentIsLocalized: parentIsLocalized ?? false,
           })
         ) {
           if (Array.isArray(currentRef)) {

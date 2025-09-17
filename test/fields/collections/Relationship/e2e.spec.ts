@@ -1,8 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { openCreateDocDrawer } from 'helpers/e2e/fields/relationship/openCreateDocDrawer.js'
+import { addListFilter } from 'helpers/e2e/filters/index.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'

@@ -2,7 +2,8 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { statSync } from 'fs'
-import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
+import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
+import { openListFilters } from 'helpers/e2e/filters/index.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -40,6 +41,7 @@ import {
   imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
+  mediaWithImageSizeAdminPropsSlug,
   mediaWithoutCacheTagsSlug,
   mediaWithoutDeleteAccessSlug,
   relationPreviewSlug,
@@ -92,6 +94,7 @@ let bulkUploadsURL: AdminUrlUtil
 let fileMimeTypeURL: AdminUrlUtil
 let svgOnlyURL: AdminUrlUtil
 let mediaWithoutDeleteAccessURL: AdminUrlUtil
+let mediaWithImageSizeAdminPropsURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -133,6 +136,7 @@ describe('Uploads', () => {
     fileMimeTypeURL = new AdminUrlUtil(serverURL, fileMimeTypeSlug)
     svgOnlyURL = new AdminUrlUtil(serverURL, svgOnlySlug)
     mediaWithoutDeleteAccessURL = new AdminUrlUtil(serverURL, mediaWithoutDeleteAccessSlug)
+    mediaWithImageSizeAdminPropsURL = new AdminUrlUtil(serverURL, mediaWithImageSizeAdminPropsSlug)
 
     const context = await browser.newContext()
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
@@ -1655,5 +1659,103 @@ describe('Uploads', () => {
       await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 })
     ).docs[0]?.filename
     expect(filenameFromAPI).toBe('test-image.jpg')
+  })
+
+  test('should not show image sizes in column selector in list view if imageSize has admin.disableListColumn true', async () => {
+    await page.goto(mediaWithImageSizeAdminPropsURL.list)
+
+    await openListColumns(page, {})
+
+    await expect(page.locator('button:has-text("Sizes > one > URL")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > one > Width")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > one > Height")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > one > MIME Type")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > one > File Size")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > one > File Name")')).toBeHidden()
+
+    await expect(page.locator('button:has-text("Sizes > two > URL")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > two > Width")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > two > Height")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > two > MIME Type")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > two > File Size")')).toBeHidden()
+    await expect(page.locator('button:has-text("Sizes > two > File Name")')).toBeHidden()
+  })
+
+  test('should show image size in column selector in list view if imageSize has admin.disableListColumn false', async () => {
+    await page.goto(mediaWithImageSizeAdminPropsURL.list)
+
+    await openListColumns(page, {})
+
+    await expect(page.locator('button:has-text("Sizes > three > URL")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > three > Width")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > three > Height")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > three > MIME Type")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > three > File Size")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > three > File Name")')).toBeVisible()
+
+    await expect(page.locator('button:has-text("Sizes > four > URL")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > four > Width")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > four > Height")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > four > MIME Type")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > four > File Size")')).toBeVisible()
+    await expect(page.locator('button:has-text("Sizes > four > File Name")')).toBeVisible()
+  })
+
+  test('should not show image size in where filter drodown in list view if imageSize has admin.disableListFilter true', async () => {
+    await page.goto(mediaWithImageSizeAdminPropsURL.list)
+
+    await openListFilters(page, {})
+
+    const whereBuilder = page.locator('.where-builder')
+    await whereBuilder.locator('.where-builder__add-first-filter').click()
+
+    const conditionField = whereBuilder.locator('.condition__field')
+    await conditionField.click()
+
+    const menuList = conditionField.locator('.rs__menu-list')
+
+    // ensure the image size is not present
+    await expect(menuList.getByText('Sizes > one > URL', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > one > Width', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > one > Height', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > one > MIME Type', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > one > File Size', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > one > File Name', { exact: true })).toHaveCount(0)
+
+    await expect(menuList.getByText('Sizes > three > URL', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > three > Width', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > three > Height', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > three > MIME Type', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > three > File Size', { exact: true })).toHaveCount(0)
+    await expect(menuList.getByText('Sizes > three > File Name', { exact: true })).toHaveCount(0)
+  })
+
+  test('should show image size in where filter drodown in list view if imageSize has admin.disableListFilter false', async () => {
+    await page.goto(mediaWithImageSizeAdminPropsURL.list)
+
+    await openListFilters(page, {})
+
+    const whereBuilder = page.locator('.where-builder')
+    await whereBuilder.locator('.where-builder__add-first-filter').click()
+
+    const conditionField = whereBuilder.locator('.condition__field')
+    await conditionField.click()
+
+    const menuList = conditionField.locator('.rs__menu-list')
+
+    // ensure the image size is present
+    await expect(menuList.getByText('Sizes > two > URL', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > two > Width', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > two > Height', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > two > MIME Type', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > two > File Size', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > two > File Name', { exact: true })).toHaveCount(1)
+
+    await expect(menuList.getByText('Sizes > four > URL', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > four > Width', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > four > Height', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > four > MIME Type', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > four > File Size', { exact: true })).toHaveCount(1)
+    await expect(menuList.getByText('Sizes > four > File Name', { exact: true })).toHaveCount(1)
   })
 })

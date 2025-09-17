@@ -14,6 +14,12 @@ const _payloadLivePreview: {
   previousData: undefined,
 }
 
+// Reset the internal cached merged data. This is useful when navigating
+// between routes where a new subscription should not inherit prior data.
+export const resetCache = (): void => {
+  _payloadLivePreview.previousData = undefined
+}
+
 export const handleMessage = async <T extends Record<string, any>>(args: {
   apiRoute?: string
   depth?: number
@@ -26,6 +32,12 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
 
   if (isLivePreviewEvent(event, serverURL)) {
     const { collectionSlug, data, globalSlug, locale } = event.data
+
+    // Only attempt to merge when we have a clear target
+    // Either a collectionSlug or a globalSlug must be present
+    if (!collectionSlug && !globalSlug) {
+      return initialData
+    }
 
     const mergedData = await mergeData<T>({
       apiRoute,

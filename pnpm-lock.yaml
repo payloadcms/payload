@@ -1049,8 +1049,8 @@ importers:
   packages/plugin-import-export:
     dependencies:
       '@faceless-ui/modal':
-        specifier: 3.0.0-beta.2
-        version: 3.0.0-beta.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: 3.0.0
+        version: 3.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
@@ -1241,8 +1241,8 @@ importers:
   packages/richtext-lexical:
     dependencies:
       '@faceless-ui/modal':
-        specifier: 3.0.0-beta.2
-        version: 3.0.0-beta.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: 3.0.0
+        version: 3.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@faceless-ui/scroll-info':
         specifier: 2.0.0
         version: 2.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1564,8 +1564,8 @@ importers:
         specifier: 3.2.2
         version: 3.2.2(react@19.1.0)
       '@faceless-ui/modal':
-        specifier: 3.0.0-beta.2
-        version: 3.0.0-beta.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: 3.0.0
+        version: 3.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@faceless-ui/scroll-info':
         specifier: 2.0.0
         version: 2.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1701,13 +1701,16 @@ importers:
         version: 16.9.0
       next:
         specifier: 15.4.4
-        version: 15.4.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+        version: 15.4.4(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
       payload:
         specifier: workspace:*
         version: link:../../packages/payload
       react:
         specifier: 19.1.0
         version: 19.1.0
+      react-dom:
+        specifier: 19.1.0
+        version: 19.1.0(react@19.1.0)
       sharp:
         specifier: 0.34.2
         version: 0.34.2
@@ -1822,7 +1825,7 @@ importers:
         version: 16.4.7
       geist:
         specifier: ^1.3.0
-        version: 1.4.2(next@15.4.4(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))
+        version: 1.4.2(next@15.4.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))
       graphql:
         specifier: ^16.8.1
         version: 16.9.0
@@ -1831,10 +1834,10 @@ importers:
         version: 0.378.0(react@19.1.0)
       next:
         specifier: 15.4.4
-        version: 15.4.4(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+        version: 15.4.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
       next-sitemap:
         specifier: ^4.2.3
-        version: 4.2.3(next@15.4.4(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))
+        version: 4.2.3(next@15.4.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))
       payload:
         specifier: workspace:*
         version: link:../../packages/payload
@@ -2112,6 +2115,9 @@ importers:
       nodemailer:
         specifier: 6.9.16
         version: 6.9.16
+      object-to-formdata:
+        specifier: 4.5.1
+        version: 4.5.1
       payload:
         specifier: workspace:*
         version: link:../packages/payload
@@ -3909,8 +3915,8 @@ packages:
     resolution: {integrity: sha512-JubJ5B2pJ4k4yGxaNLdbjrnk9d/iDz6/q8wOilpIowd6PJPgaxCuHBnBszq7Ce2TyMrywm5r4PnKm6V3iiZF+g==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@faceless-ui/modal@3.0.0-beta.2':
-    resolution: {integrity: sha512-UmXvz7Iw3KMO4Pm3llZczU4uc5pPQDb6rdqwoBvYDFgWvkraOAHKx0HxSZgwqQvqOhn8joEFBfFp6/Do2562ow==}
+  '@faceless-ui/modal@3.0.0':
+    resolution: {integrity: sha512-o3oEFsot99EQ8RJc1kL3s/nNMHX+y+WMXVzSSmca9L0l2MR6ez2QM1z1yIelJX93jqkLXQ9tW+R9tmsYa+O4Qg==}
     peerDependencies:
       react: 19.1.0
       react-dom: 19.1.0
@@ -14820,7 +14826,7 @@ snapshots:
       '@eslint/core': 0.12.0
       levn: 0.4.1
 
-  '@faceless-ui/modal@3.0.0-beta.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@faceless-ui/modal@3.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       body-scroll-lock: 4.0.0-beta.0
       focus-trap: 7.5.4
@@ -20258,9 +20264,9 @@ snapshots:
       - encoding
       - supports-color
 
-  geist@1.4.2(next@15.4.4(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)):
+  geist@1.4.2(next@15.4.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)):
     dependencies:
-      next: 15.4.4(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+      next: 15.4.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
 
   gel@2.0.1:
     dependencies:
@@ -22045,13 +22051,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  next-sitemap@4.2.3(next@15.4.4(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)):
+  next-sitemap@4.2.3(next@15.4.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)):
     dependencies:
       '@corex/deepmerge': 4.0.43
       '@next/env': 13.5.11
       fast-glob: 3.3.2
       minimist: 1.2.8
-      next: 15.4.4(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+      next: 15.4.4(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
 
   next@15.2.3(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4):
     dependencies:

@@ -105,6 +105,7 @@ export const buildFormState = async (
     returnLockStatus,
     schemaPath = collectionSlug || globalSlug,
     select,
+    skipClientConfigAuth,
     skipValidation,
     updateLastEdited,
   } = args
@@ -124,7 +125,12 @@ export const buildFormState = async (
 
   const clientSchemaMap = getClientSchemaMap({
     collectionSlug,
-    config: getClientConfig({ config, i18n, importMap: req.payload.importMap }),
+    config: getClientConfig({
+      config,
+      i18n,
+      importMap: req.payload.importMap,
+      user: skipClientConfigAuth ? true : req.user,
+    }),
     globalSlug,
     i18n,
     payload,

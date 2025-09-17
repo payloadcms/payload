@@ -97,6 +97,7 @@ const buildTableState = async (
     config,
     i18n,
     importMap: payload.importMap,
+    user,
   })
 
   let collectionConfig: SanitizedCollectionConfig
