@@ -64,7 +64,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'payload-mcp-tool-api-key': PayloadMcpToolApiKeyAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -72,7 +72,7 @@ export interface Config {
     media: Media;
     posts: Post;
     products: Product;
-    'payload-mcp-tool-api-key': PayloadMcpToolApiKey;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -83,7 +83,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
-    'payload-mcp-tool-api-key': PayloadMcpToolApiKeySelect<false> | PayloadMcpToolApiKeySelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -98,8 +98,8 @@ export interface Config {
     | (User & {
         collection: 'users';
       })
-    | (PayloadMcpToolApiKey & {
-        collection: 'payload-mcp-tool-api-key';
+    | (PayloadMcpApiKey & {
+        collection: 'payload-mcp-api-keys';
       });
   jobs: {
     tasks: unknown;
@@ -124,7 +124,7 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-export interface PayloadMcpToolApiKeyAuthOperations {
+export interface PayloadMcpApiKeyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -223,9 +223,9 @@ export interface Product {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-tool-api-key".
+ * via the `definition` "payload-mcp-api-keys".
  */
-export interface PayloadMcpToolApiKey {
+export interface PayloadMcpApiKey {
   id: string;
   /**
    * A useful label for the API key.
@@ -381,8 +381,8 @@ export interface PayloadLockedDocument {
         value: string | Product;
       } | null)
     | ({
-        relationTo: 'payload-mcp-tool-api-key';
-        value: string | PayloadMcpToolApiKey;
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user:
@@ -391,8 +391,8 @@ export interface PayloadLockedDocument {
         value: string | User;
       }
     | {
-        relationTo: 'payload-mcp-tool-api-key';
-        value: string | PayloadMcpToolApiKey;
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       };
   updatedAt: string;
   createdAt: string;
@@ -409,8 +409,8 @@ export interface PayloadPreference {
         value: string | User;
       }
     | {
-        relationTo: 'payload-mcp-tool-api-key';
-        value: string | PayloadMcpToolApiKey;
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       };
   key?: string | null;
   value?:
@@ -503,9 +503,9 @@ export interface ProductsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-tool-api-key_select".
+ * via the `definition` "payload-mcp-api-keys_select".
  */
-export interface PayloadMcpToolApiKeySelect<T extends boolean = true> {
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
   label?: T;
   description?: T;
   products?:
