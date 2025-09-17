@@ -128,6 +128,12 @@ export const getConfig: () => Partial<Config> = () => ({
         },
         {
           type: 'relationship',
+          relationTo: 'categories',
+          hasMany: true,
+          name: 'categories',
+        },
+        {
+          type: 'relationship',
           relationTo: 'categories-custom-id',
           name: 'categoryCustomID',
         },

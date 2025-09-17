@@ -155,6 +155,10 @@ export const findDistinctOperation = async (
       args.depth
     ) {
       const populationPromises: Promise<void>[] = []
+      const sanitizedField = { ...fieldResult.field }
+      if (fieldResult.field.hasMany) {
+        sanitizedField.hasMany = false
+      }
       for (const doc of result.values) {
         populationPromises.push(
           relationshipPopulationPromise({
@@ -162,7 +166,7 @@ export const findDistinctOperation = async (
             depth: args.depth,
             draft: false,
             fallbackLocale: req.fallbackLocale || null,
-            field: fieldResult.field,
+            field: sanitizedField,
             locale: req.locale || null,
             overrideAccess: args.overrideAccess ?? true,
             parentIsLocalized: false,
