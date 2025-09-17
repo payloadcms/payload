@@ -1,3 +1,6 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from 'eslint-plugin-storybook'
+
 import payloadEsLintConfig from '@payloadcms/eslint-config'
 import payloadPlugin from '@payloadcms/eslint-plugin'
 
@@ -93,4 +96,5 @@ export default [
       'no-restricted-exports': 'off',
     },
   },
+  ...storybook.configs['flat/recommended'],
 ]

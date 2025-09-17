@@ -120,6 +120,7 @@
   ],
   "scripts": {
     "build": "pnpm build:reactcompiler",
+    "build-storybook": "storybook build",
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
     "build:bundle-for-analysis": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild esbuild --no-split",
     "build:esbuild": "node bundle.js",
@@ -133,7 +134,8 @@
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "prepublishOnly": "pnpm clean && pnpm turbo build",
+    "storybook": "storybook dev -p 6006"
   },
   "dependencies": {
     "@date-fns/tz": "1.2.0",
@@ -168,13 +170,18 @@
     "@babel/preset-typescript": "7.27.1",
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@payloadcms/eslint-config": "workspace:*",
+    "@storybook/addon-docs": "^9.1.6",
+    "@storybook/addon-onboarding": "^9.1.6",
+    "@storybook/react-vite": "^9.1.6",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.1.0-rc.2",
     "esbuild": "0.25.5",
     "esbuild-sass-plugin": "3.3.1",
-    "payload": "workspace:*"
+    "eslint-plugin-storybook": "^9.1.6",
+    "payload": "workspace:*",
+    "storybook": "^9.1.6"
   },
   "peerDependencies": {
     "next": "^15.2.3",

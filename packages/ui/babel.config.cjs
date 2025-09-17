@@ -25,6 +25,24 @@ const ReactCompilerConfig = {
 module.exports = function (api) {
   api.cache(false)
 
+  // Check if we're in Storybook context
+  const isStorybook = process.env.STORYBOOK === 'true' || process.env.NODE_ENV === 'test'
+
+  if (isStorybook) {
+    // Configuration for Storybook - includes TypeScript support
+    return {
+      presets: [
+        ['@babel/preset-env', { targets: { node: 'current' } }],
+        ['@babel/preset-react', { runtime: 'automatic' }],
+        '@babel/preset-typescript',
+      ],
+      plugins: [
+        // Add any Storybook-specific plugins here if needed
+      ],
+    }
+  }
+
+  // Original configuration for build process
   return {
     plugins: [
       ['babel-plugin-react-compiler', ReactCompilerConfig], // must run first!
