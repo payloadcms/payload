@@ -160,19 +160,9 @@ export const promise = async ({
     if (fallbackLocale && fallbackLocale !== locale) {
       let fallbackValue
       const isNullOrUndefined = typeof value === 'undefined' || value === null
-      const fallbackIsArray =
-        Array.isArray(fallbackLocale) ||
-        (fallbackLocale.startsWith('[') && fallbackLocale.endsWith(']'))
 
-      if (fallbackIsArray) {
-        const formattedFallback = Array.isArray(fallbackLocale)
-          ? fallbackLocale
-          : fallbackLocale
-              .slice(1, -1)
-              .split(',')
-              .map((l) => l.trim())
-
-        for (const locale of formattedFallback) {
+      if (Array.isArray(fallbackLocale)) {
+        for (const locale of fallbackLocale) {
           const val = siblingDoc[field.name!]?.[locale]
 
           if (val !== undefined && val !== null && val !== '') {
