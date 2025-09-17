@@ -12,12 +12,10 @@ import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
 import { renderField } from '../forms/fieldSchemasToFormState/renderField.js'
-import { canAccessAdmin } from './canAccessAdmin.js'
 import { getClientConfig } from './getClientConfig.js'
 import { getClientSchemaMap } from './getClientSchemaMap.js'
 import { getSchemaMap } from './getSchemaMap.js'
 import { handleFormStateLocking } from './handleFormStateLocking.js'
-import { handleLivePreview } from './handleLivePreview.js'
 
 export type LockedState = {
   isLocked: boolean
@@ -29,13 +27,11 @@ type BuildFormStateSuccessResult = {
   clientConfig?: ClientConfig
   errors?: never
   indexPath?: string
-  livePreviewURL?: string
   lockedState?: LockedState
   state: FormState
 }
 
 type BuildFormStateErrorResult = {
-  livePreviewURL?: never
   lockedState?: never
   state?: never
 } & (
@@ -53,9 +49,38 @@ export const buildFormStateHandler: ServerFunction<
 > = async (args) => {
   const { req } = args
 
+  const incomingUserSlug = req.user?.collection
+  const adminUserSlug = req.payload.config.admin.user
+
   try {
     // If we have a user slug, test it against the functions
-    await canAccessAdmin({ req })
+    if (incomingUserSlug) {
+      const adminAccessFunction = req.payload.collections[incomingUserSlug].config.access?.admin
+
+      // Run the admin access function from the config if it exists
+      if (adminAccessFunction) {
+        const canAccessAdmin = await adminAccessFunction({ req })
+
+        if (!canAccessAdmin) {
+          throw new Error('Unauthorized')
+        }
+        // Match the user collection to the global admin config
+      } else if (adminUserSlug !== incomingUserSlug) {
+        throw new Error('Unauthorized')
+      }
+    } else {
+      const hasUsers = await req.payload.find({
+        collection: adminUserSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+
+      // If there are users, we should not allow access because of /create-first-user
+      if (hasUsers.docs.length) {
+        throw new Error('Unauthorized')
+      }
+    }
 
     const res = await buildFormState(args)
     return res
@@ -100,7 +125,6 @@ export const buildFormState = async (
       payload,
       payload: { config },
     },
-    returnLivePreviewURL,
     returnLockStatus,
     schemaPath = collectionSlug || globalSlug,
     select,
@@ -235,20 +259,7 @@ export const buildFormState = async (
     })
   }
 
-  let livePreviewURL: string | undefined
-
-  if (returnLivePreviewURL) {
-    ;({ livePreviewURL } = await handleLivePreview({
-      collectionSlug,
-      config,
-      data,
-      globalSlug,
-      req,
-    }))
-  }
-
   return {
-    livePreviewURL,
     lockedState: lockedStateResult,
     state: formStateResult,
   }

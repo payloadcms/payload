@@ -10,7 +10,6 @@ export { filterFields } from '../../providers/TableColumns/buildColumnState/filt
 export { getInitialColumns } from '../../providers/TableColumns/getInitialColumns.js'
 export { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 export { requests } from '../../utilities/api.js'
-export { canAccessAdmin } from '../../utilities/canAccessAdmin.js'
 export { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 export { formatAdminURL } from '../../utilities/formatAdminURL.js'
 export { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
