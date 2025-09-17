@@ -563,6 +563,7 @@ export const slTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Samo spremenjeno',
     moreVersions: 'Več različic...',
     noFurtherVersionsFound: 'Ni najdenih nadaljnjih različic',
+    noLabelGroup: 'Neimenovana skupina',
     noRowsFound: 'Ni najdenih {{label}}',
     noRowsSelected: 'Ni izbranih {{label}}',
     preview: 'Predogled',

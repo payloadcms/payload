@@ -564,6 +564,7 @@ export const plTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Tylko zmodyfikowany',
     moreVersions: 'Więcej wersji...',
     noFurtherVersionsFound: 'Nie znaleziono dalszych wersji',
+    noLabelGroup: 'Nienazwana grupa',
     noRowsFound: 'Nie znaleziono {{label}}',
     noRowsSelected: 'Nie wybrano {{etykieta}}',
     preview: 'Podgląd',
