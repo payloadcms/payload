@@ -1,3 +1,5 @@
+import type { Payload } from 'payload'
+
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -25,6 +27,8 @@ export default buildConfigWithDefaults({
     MenuGlobal,
   ],
   onInit: async (payload) => {
+    await deleteAllDocuments(payload)
+
     await payload.create({
       collection: 'users',
       data: {
@@ -44,3 +48,15 @@ export default buildConfigWithDefaults({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
+
+async function deleteAllDocuments(payload: Payload) {
+  const collections = ['posts', 'media'] as const
+  for (const collection of collections) {
+    await payload.delete({
+      collection,
+      where: {
+        id: { exists: true },
+      },
+    })
+  }
+}
