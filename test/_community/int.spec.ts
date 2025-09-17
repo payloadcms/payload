@@ -25,26 +25,6 @@ describe('_Community Tests', () => {
     const initialized = await initPayloadInt(dirname)
     ;({ payload, restClient } = initialized)
 
-    const users = await payload.find({
-      collection: 'users',
-      limit: 1,
-      where: {
-        email: {
-          equals: devUser.email,
-        },
-      },
-    })
-
-    if (users.docs.length === 0) {
-      await payload.create({
-        collection: 'users',
-        data: {
-          email: devUser.email,
-          password: devUser.password,
-        },
-      })
-    }
-
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
