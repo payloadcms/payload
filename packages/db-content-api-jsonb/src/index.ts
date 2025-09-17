@@ -647,7 +647,7 @@ const findMany = async ({
   page: number
   pagination?: boolean
   skip?: number
-  sort?: string
+  sort?: string | string[]
   where: Where
 }) => {
   const whereConstraints = transformWhereIntoWhereConstraints({
@@ -685,6 +685,11 @@ const findMany = async ({
   }
 
   let orderBy: OrderBy
+
+  // temp
+  if (Array.isArray(sort)) {
+    sort = sort[0]
+  }
 
   if (sort) {
     const fieldPath = sort.startsWith('-') ? sort.replace('-', '') : sort
@@ -726,7 +731,7 @@ const findMany = async ({
       }
 
       // TODO ARRAYS
-      orderBy = { type, order: sort.startsWith('-') ? 'desc' : 'asc', path: findPath }
+      orderBy = { type, order: sort.startsWith('-') ? 'desc' : 'asc', path: fieldPath }
     }
   } else {
     orderBy = { type: 'date', order: 'desc', path: 'createdAt' }
@@ -782,7 +787,7 @@ const findMany = async ({
 
 const find: Find = async function find(
   this: ContentAPIAdapter,
-  { collection: collectionSlug, limit = 0, page = 1, pagination, skip, where },
+  { collection: collectionSlug, limit = 0, page = 1, pagination, skip, sort, where },
 ) {
   const fields = this.payload.collections[collectionSlug]?.config.flattenedFields
 
@@ -796,13 +801,14 @@ const find: Find = async function find(
     page,
     pagination,
     skip,
+    sort,
     where,
   })
 }
 
 const findVersions: FindVersions = async function find(
   this: ContentAPIAdapter,
-  { collection: collectionSlug, limit = 0, page = 1, pagination, where },
+  { collection: collectionSlug, limit = 0, page = 1, pagination, skip, sort, where },
 ) {
   const fields = buildVersionCollectionFields(
     this.payload.config,
@@ -819,6 +825,8 @@ const findVersions: FindVersions = async function find(
     limit,
     page,
     pagination,
+    skip,
+    sort,
     where,
   })
 
