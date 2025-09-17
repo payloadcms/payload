@@ -131,7 +131,7 @@ export const createAPIKeysCollection = (
   })
 
   return {
-    slug: 'payload-mcp-tool-api-key',
+    slug: 'payload-mcp-api-keys',
     admin: {
       group: 'MCP',
       useAsTitle: 'label',
