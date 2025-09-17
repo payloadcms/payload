@@ -29,13 +29,25 @@ export default buildConfigWithDefaults({
   onInit: async (payload) => {
     await deleteAllDocuments(payload)
 
-    await payload.create({
+    const users = await payload.find({
       collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
+      limit: 1,
+      where: {
+        email: {
+          equals: devUser.email,
+        },
       },
     })
+
+    if (users.docs.length === 0) {
+      await payload.create({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+    }
 
     await payload.create({
       collection: postsSlug,
