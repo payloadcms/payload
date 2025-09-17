@@ -267,7 +267,7 @@ export const buildFormState = async (
           collectionConfig,
           data,
           globalConfig,
-          locale: req.locale,
+          locale: { code: req.locale, label: '' },
           payload,
           req,
         })

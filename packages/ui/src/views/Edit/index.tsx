@@ -33,7 +33,6 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
-import { formatAbsoluteURL } from '../../utilities/formatAbsoluteURL.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
@@ -140,8 +139,7 @@ export function DefaultEditView({
     isLivePreviewing,
     previewWindowType,
     setURL: setLivePreviewURL,
-    url: livePreviewURL,
-    urlIsFunction: livePreviewURLIsFunction,
+    typeofLivePreviewURL,
   } = useLivePreviewContext()
 
   const abortOnChangeRef = useRef<AbortController>(null)
@@ -346,7 +344,7 @@ export function DefaultEditView({
           globalSlug,
           operation,
           renderAllFields: false,
-          returnLivePreviewURL: isLivePreviewEnabled && livePreviewURLIsFunction,
+          returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
           returnLockStatus: false,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
@@ -395,7 +393,7 @@ export function DefaultEditView({
       docPermissions,
       operation,
       isLivePreviewEnabled,
-      livePreviewURLIsFunction,
+      typeofLivePreviewURL,
       schemaPathSegments,
       isLockingEnabled,
       setDocumentIsLocked,
@@ -426,7 +424,6 @@ export function DefaultEditView({
         globalSlug,
         operation,
         renderAllFields: false,
-        returnLivePreviewURL: isLivePreviewEnabled && livePreviewURLIsFunction,
         returnLockStatus: isLockingEnabled,
         schemaPath: schemaPathSegments.join('.'),
         signal: controller.signal,
@@ -438,14 +435,10 @@ export function DefaultEditView({
         return
       }
 
-      const { livePreviewURL, lockedState, state } = result
+      const { lockedState, state } = result
 
       if (isLockingEnabled) {
         handleDocumentLocking(lockedState)
-      }
-
-      if (livePreviewURL) {
-        setLivePreviewURL(livePreviewURL)
       }
 
       abortOnChangeRef.current = null
@@ -453,20 +446,17 @@ export function DefaultEditView({
       return state
     },
     [
-      id,
-      collectionSlug,
+      editSessionStartTime,
+      isLockingEnabled,
       getDocPreferences,
       getFormState,
+      id,
+      collectionSlug,
+      docPermissions,
       globalSlug,
-      handleDocumentLocking,
-      isLockingEnabled,
-      isLivePreviewEnabled,
-      livePreviewURLIsFunction,
-      setLivePreviewURL,
       operation,
       schemaPathSegments,
-      docPermissions,
-      editSessionStartTime,
+      handleDocumentLocking,
     ],
   )
 

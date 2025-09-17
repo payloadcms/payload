@@ -54,13 +54,12 @@ export interface LivePreviewContextType {
     x: number
     y: number
   }
-  url: string | undefined
   /**
-   * True when the live preview `url` property in the config is defined as a function.
-   * This tells the client that it needs to call the server to get the URL, rather than using a static string.
-   * Useful to ensure that the server function is only called when necessary.
+   * The live preview url property can be either a string or a function that returns a string.
+   * It is important to know which one it is, so that we can opt in/out of certain behaviors, e.g. calling the server to get the URL.
    */
-  urlIsFunction?: boolean
+  typeofLivePreviewURL?: 'function' | 'string'
+  url: string | undefined
   zoom: number
 }
 
@@ -99,8 +98,8 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
     x: 0,
     y: 0,
   },
+  typeofLivePreviewURL: undefined,
   url: undefined,
-  urlIsFunction: false,
   zoom: 1,
 })
 

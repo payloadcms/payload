@@ -156,8 +156,9 @@ export type LivePreviewConfig = {
    * The frontend application is responsible for receiving the message and updating the UI accordingly.
    * Use the `useLivePreview` hook to get started in React applications.
    *
-   * Note: this function may run very often, so it must be performant. Avoid doing long-running or expensive operations in this function.
-   * If you need to do something more complex, consider implementing your own caching mechanism to prevent those operations from running too often.
+   * Note: this function may run often if autosave is enabled with a small interval.
+   * For performance, avoid long-running tasks or expensive operations within this function,
+   * or if you need to do something more complex, cache your function as needed.
    */
   url?:
     | ((args: {

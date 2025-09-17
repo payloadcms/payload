@@ -412,8 +412,8 @@ export const renderDocument = async ({
           breakpoints={livePreviewConfig?.breakpoints}
           isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
           isLivePreviewing={entityPreferences?.value?.editViewType === 'live-preview'}
+          typeofLivePreviewURL={typeof livePreviewConfig?.url as 'function' | 'string' | undefined}
           url={livePreviewURL}
-          urlIsFunction={typeof livePreviewConfig?.url === 'function'}
         >
           {showHeader && !drawerSlug && (
             <DocumentHeader

@@ -24,15 +24,15 @@ export type LivePreviewProviderProps = {
   }
   isLivePreviewEnabled?: boolean
   isLivePreviewing: boolean
-} & Pick<LivePreviewContextType, 'url' | 'urlIsFunction'>
+} & Pick<LivePreviewContextType, 'typeofLivePreviewURL' | 'url'>
 
 export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   breakpoints: incomingBreakpoints,
   children,
   isLivePreviewEnabled,
   isLivePreviewing: incomingIsLivePreviewing,
+  typeofLivePreviewURL,
   url: urlFromProps,
-  urlIsFunction,
 }) => {
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
   const [isLivePreviewing, setIsLivePreviewing] = useState(incomingIsLivePreviewing)
@@ -236,8 +236,8 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         setZoom,
         size,
         toolbarPosition: position,
+        typeofLivePreviewURL,
         url,
-        urlIsFunction,
         zoom,
       }}
     >
