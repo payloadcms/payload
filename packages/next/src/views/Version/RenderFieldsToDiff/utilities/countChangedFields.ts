@@ -227,7 +227,7 @@ export function countChangedFieldsInRows({
   let count = 0
   let i = 0
 
-  while (valueFromRows[i] || valueFromRows[i]) {
+  while (valueFromRows[i] || valueToRows[i]) {
     const valueFromRow = valueFromRows?.[i] || {}
     const valueToRow = valueToRows?.[i] || {}
 
