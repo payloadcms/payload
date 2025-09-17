@@ -620,6 +620,9 @@ importers:
       graphql:
         specifier: ^16.8.1
         version: 16.9.0
+      graphql-fields:
+        specifier: 2.0.3
+        version: 2.0.3
       graphql-scalars:
         specifier: 1.22.2
         version: 1.22.2(graphql@16.9.0)
@@ -636,6 +639,9 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@types/graphql-fields':
+        specifier: 1.3.9
+        version: 1.3.9
       '@types/pluralize':
         specifier: ^0.0.33
         version: 0.0.33
@@ -6300,6 +6306,9 @@ packages:
   '@types/graceful-fs@4.1.9':
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
 
+  '@types/graphql-fields@1.3.9':
+    resolution: {integrity: sha512-HynTnp1HrE58uYcFcAK5UOfdrHSOIHDLCjvMU4yCmQLMj21uo7ZiZqnDGrD27pgCgHH5a1e8GYNK98Ndmma7ig==}
+
   '@types/hast@3.0.4':
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
 
@@ -8770,6 +8779,9 @@ packages:
 
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
+
+  graphql-fields@2.0.3:
+    resolution: {integrity: sha512-x3VE5lUcR4XCOxPIqaO4CE+bTK8u6gVouOdpQX9+EKHr+scqtK5Pp/l8nIGqIpN1TUlkKE6jDCCycm/WtLRAwA==}
 
   graphql-http@1.22.2:
     resolution: {integrity: sha512-OpUJJoefHlyfYoOyhzIVjKxFPIDylmX34wy2y8M/i9i+DcQTGYmuThLGenuS92tFRzJnAXO2HJYQoz8O9TLcEg==}
@@ -17504,6 +17516,10 @@ snapshots:
     dependencies:
       '@types/node': 22.15.30
 
+  '@types/graphql-fields@1.3.9':
+    dependencies:
+      graphql: 16.9.0
+
   '@types/hast@3.0.4':
     dependencies:
       '@types/unist': 3.0.3
@@ -20484,6 +20500,8 @@ snapshots:
   graceful-fs@4.2.11: {}
 
   graphemer@1.4.0: {}
+
+  graphql-fields@2.0.3: {}
 
   graphql-http@1.22.2(graphql@16.9.0):
     dependencies:

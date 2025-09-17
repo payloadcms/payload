@@ -1,8 +1,11 @@
-import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
+import type { GraphQLResolveInfo } from 'graphql'
+import type { Collection, CollectionSlug, DataFromCollectionSlug } from 'payload'
 
 import { findByIDOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { graphqlSelectFromCollection } from '../../utilities/graphqlSelect.js'
 
 export type Resolver<TData> = (
   _: unknown,
@@ -13,15 +16,14 @@ export type Resolver<TData> = (
     locale?: string
     trash?: boolean
   },
-  context: {
-    req: PayloadRequest
-  },
+  context: Context,
+  info: GraphQLResolveInfo,
 ) => Promise<TData>
 
 export function findByIDResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<DataFromCollectionSlug<TSlug>> {
-  return async function resolver(_, args, context: Context) {
+  return async function resolver(_, args, context, info) {
     let { req } = context
     const locale = req.locale
     const fallbackLocale = req.fallbackLocale
@@ -51,6 +53,7 @@ export function findByIDResolver<TSlug extends CollectionSlug>(
       depth: 0,
       draft: args.draft,
       req: isolateObjectProperty(req, 'transactionID'),
+      select: graphqlSelectFromCollection(info),
       trash: args.trash,
     }
 
