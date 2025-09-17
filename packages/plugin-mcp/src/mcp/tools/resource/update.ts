@@ -1,12 +1,13 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { JSONSchema4 } from 'json-schema'
+import type { PayloadRequest } from 'payload'
 
 import { z } from 'zod'
 
 import type { PluginMCPServerConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
-import { convertCollectionConfigToZod } from '../../../utils/convertCollectionConfigToZod.js'
+import { convertCollectionSchemaToZod } from '../../../utils/convertCollectionSchemaToZod.js'
 import { toolSchemas } from '../schemas.js'
 export const updateResourceTool = (
   server: McpServer,
@@ -14,7 +15,7 @@ export const updateResourceTool = (
   verboseLogs: boolean,
   collectionSlug: string,
   collections: PluginMCPServerConfig['collections'],
-  collectionConfig: CollectionConfig,
+  schema: JSONSchema4,
 ) => {
   const tool = async (
     data: string,
@@ -194,7 +195,7 @@ ${JSON.stringify(errors, null, 2)}
   }
 
   if (collections?.[collectionSlug]?.enabled) {
-    const convertedFields = convertCollectionConfigToZod(collectionConfig)
+    const convertedFields = convertCollectionSchemaToZod(schema)
 
     // Create a new schema that combines the converted fields with update-specific parameters
     const updateResourceSchema = z.object({
