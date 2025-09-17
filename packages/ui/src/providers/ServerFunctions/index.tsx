@@ -89,14 +89,6 @@ type CopyDataFromLocaleClient = (
   } & Omit<CopyDataFromLocaleArgs, 'req'>,
 ) => Promise<{ data: Data }>
 
-export type GetLivePreviewURLArgs = {
-  collectionSlug: CollectionSlug
-  data: Data
-  globalSlug?: string
-}
-
-type GetLivePreviewURLClient = (args: GetLivePreviewURLArgs) => Promise<{ url: null | string }>
-
 type GetDocumentSlots = (args: {
   collectionSlug: string
   id?: number | string
@@ -114,11 +106,6 @@ type ServerFunctionsContextType = {
   getDocumentSlots: GetDocumentSlots
   getFolderResultsComponentAndData: GetFolderResultsComponentAndDataClient
   getFormState: GetFormStateClient
-  getLivePreviewURL: (args: {
-    collectionSlug?: string
-    data?: Data
-    globalSlug?: string
-  }) => Promise<{ url: null | string }>
   getTableState: GetTableStateClient
   renderDocument: RenderDocumentServerFunctionHookFn
   schedulePublish: SchedulePublishClient
@@ -272,23 +259,6 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
-  const getLivePreviewURL = useCallback<GetLivePreviewURLClient>(
-    async (args) => {
-      try {
-        const result = (await serverFunction({
-          name: 'get-live-preview-url',
-          args,
-        })) as { url: null | string }
-
-        return result
-      } catch (_err) {
-        console.error(_err) // eslint-disable-line no-console
-      }
-      return { url: null }
-    },
-    [serverFunction],
-  )
-
   const getFolderResultsComponentAndData = useCallback<GetFolderResultsComponentAndDataClient>(
     async (args) => {
       const { signal: remoteSignal, ...rest } = args || {}
@@ -316,7 +286,6 @@ export const ServerFunctionsProvider: React.FC<{
         getDocumentSlots,
         getFolderResultsComponentAndData,
         getFormState,
-        getLivePreviewURL,
         getTableState,
         renderDocument,
         schedulePublish,

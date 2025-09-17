@@ -9,14 +9,12 @@ import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublish
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
-import { getLivePreviewURLHandler } from './getLivePreviewURL.js'
 import { initReq } from './initReq.js'
 
 const serverFunctions: Record<string, ServerFunction> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
   'form-state': buildFormStateHandler,
   'get-folder-results-component-and-data': getFolderResultsComponentAndDataHandler,
-  'get-live-preview-url': getLivePreviewURLHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
   'render-list': renderListHandler,

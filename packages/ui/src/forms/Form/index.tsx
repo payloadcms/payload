@@ -379,7 +379,6 @@ export const Form: React.FC<FormProps> = (props) => {
           if (typeof onSuccess === 'function') {
             const newFormState = await onSuccess(json, {
               context,
-              dataSubmitted: formData,
               formState: serializableFormState,
             })
 

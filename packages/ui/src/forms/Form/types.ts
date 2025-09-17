@@ -24,10 +24,6 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
      */
     context?: C
     /**
-     * The data that was sent with the request when retrieving the `json` arg.
-     */
-    dataSubmitted?: Data
-    /**
      * The form state that was sent with the request when retrieving the `json` arg.
      */
     formState?: FormState

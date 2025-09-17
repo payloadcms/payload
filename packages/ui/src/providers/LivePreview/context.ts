@@ -55,7 +55,6 @@ export interface LivePreviewContextType {
     y: number
   }
   url: string | undefined
-  urlDeps?: RootLivePreviewConfig['urlDeps']
   /**
    * True when the live preview `url` property in the config is defined as a function.
    * This tells the client that it needs to call the server to get the URL, rather than using a static string.
@@ -101,7 +100,6 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
     y: 0,
   },
   url: undefined,
-  urlDeps: [],
   urlIsFunction: false,
   zoom: 1,
 })

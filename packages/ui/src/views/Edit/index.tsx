@@ -133,7 +133,7 @@ export function DefaultEditView({
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
-  const { getFormState, getLivePreviewURL } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
   const {
     isLivePreviewEnabled,
@@ -141,7 +141,6 @@ export function DefaultEditView({
     previewWindowType,
     setURL: setLivePreviewURL,
     url: livePreviewURL,
-    urlDeps: livePreviewURLDeps,
     urlIsFunction: livePreviewURLIsFunction,
   } = useLivePreviewContext()
 
@@ -273,7 +272,7 @@ export function DefaultEditView({
 
   const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
     async (json, ctx) => {
-      const { context, dataSubmitted, formState } = ctx || {}
+      const { context, formState } = ctx || {}
 
       const controller = handleAbortRef(abortOnSaveRef)
 
@@ -301,41 +300,6 @@ export function DefaultEditView({
 
       if (typeof setData === 'function') {
         void setData(document || {})
-      }
-
-      let shouldFetchLivePreviewURL = false
-
-      const data = dataSubmitted.get('_payload')
-      console.log(data, typeof data)
-
-      if (isLivePreviewEnabled && livePreviewURLIsFunction && livePreviewURLDeps) {
-        if (!livePreviewURLDeps.length) {
-          shouldFetchLivePreviewURL = true
-        } else {
-          /*
-           * Check the deps in the most efficient way possible
-           * One extremely fast way is to simply check if they were submitted in the request
-           * This will prevent us from having to loop over `json` response and compare prev values
-           */
-          console.log(dataSubmitted)
-        }
-      }
-
-      // Refresh live preview url, if needed
-      // One potential optimization here would be to only do this if certain fields changed
-      // And/or also combing this with some other action, like the submit itself
-      if (shouldFetchLivePreviewURL) {
-        const { url: newURLRaw } = await getLivePreviewURL({
-          collectionSlug,
-          data: document,
-          globalSlug,
-        })
-
-        const newLivePreviewURL = formatAbsoluteURL(newURLRaw)
-
-        if (newLivePreviewURL && newLivePreviewURL !== livePreviewURL) {
-          setLivePreviewURL(newLivePreviewURL)
-        }
       }
 
       if (typeof onSaveFromContext === 'function') {
@@ -372,7 +336,7 @@ export function DefaultEditView({
       if (id || globalSlug) {
         const docPreferences = await getDocPreferences()
 
-        const { state } = await getFormState({
+        const { livePreviewURL, state } = await getFormState({
           id,
           collectionSlug,
           data: document,
@@ -382,6 +346,7 @@ export function DefaultEditView({
           globalSlug,
           operation,
           renderAllFields: false,
+          returnLivePreviewURL: isLivePreviewEnabled && livePreviewURLIsFunction,
           returnLockStatus: false,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
@@ -391,6 +356,10 @@ export function DefaultEditView({
         // Unlock the document after save
         if (isLockingEnabled) {
           setDocumentIsLocked(false)
+        }
+
+        if (livePreviewURL) {
+          setLivePreviewURL(livePreviewURL)
         }
 
         abortOnSaveRef.current = null
@@ -411,7 +380,7 @@ export function DefaultEditView({
       isEditing,
       depth,
       redirectAfterCreate,
-      getDocPermissions,
+      setLivePreviewURL,
       globalSlug,
       refreshCookieAsync,
       incrementVersionCount,
@@ -420,19 +389,16 @@ export function DefaultEditView({
       startRouteTransition,
       router,
       resetUploadEdits,
+      getDocPermissions,
       getDocPreferences,
       getFormState,
       docPermissions,
       operation,
+      isLivePreviewEnabled,
+      livePreviewURLIsFunction,
       schemaPathSegments,
       isLockingEnabled,
       setDocumentIsLocked,
-      setLivePreviewURL,
-      livePreviewURL,
-      getLivePreviewURL,
-      isLivePreviewEnabled,
-      livePreviewURLDeps,
-      livePreviewURLIsFunction,
     ],
   )
 
@@ -460,6 +426,7 @@ export function DefaultEditView({
         globalSlug,
         operation,
         renderAllFields: false,
+        returnLivePreviewURL: isLivePreviewEnabled && livePreviewURLIsFunction,
         returnLockStatus: isLockingEnabled,
         schemaPath: schemaPathSegments.join('.'),
         signal: controller.signal,
@@ -471,10 +438,14 @@ export function DefaultEditView({
         return
       }
 
-      const { lockedState, state } = result
+      const { livePreviewURL, lockedState, state } = result
 
       if (isLockingEnabled) {
         handleDocumentLocking(lockedState)
+      }
+
+      if (livePreviewURL) {
+        setLivePreviewURL(livePreviewURL)
       }
 
       abortOnChangeRef.current = null
@@ -489,6 +460,9 @@ export function DefaultEditView({
       globalSlug,
       handleDocumentLocking,
       isLockingEnabled,
+      isLivePreviewEnabled,
+      livePreviewURLIsFunction,
+      setLivePreviewURL,
       operation,
       schemaPathSegments,
       docPermissions,
