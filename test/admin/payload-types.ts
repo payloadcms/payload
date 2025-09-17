@@ -609,6 +609,9 @@ export interface ListViewSelectApi {
   id: string;
   title?: string | null;
   description?: string | null;
+  group?: {
+    groupNameField?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1182,6 +1185,11 @@ export interface CustomListDrawerSelect<T extends boolean = true> {
 export interface ListViewSelectApiSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  group?:
+    | T
+    | {
+        groupNameField?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
