@@ -93,7 +93,6 @@ describe('Versions', () => {
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
   let errorOnUnpublishURL: AdminUrlUtil
-  let id: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -1118,7 +1117,7 @@ describe('Versions', () => {
         timeout: POLL_TOPASS_TIMEOUT,
       })
 
-      id = await page.locator('.id-label').getAttribute('title')
+      const id = await page.locator('.id-label').getAttribute('title')
 
       const data = await payload.find({
         collection: localizedCollectionSlug,
