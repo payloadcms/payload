@@ -19,6 +19,9 @@ process.env.PAYLOAD_CI_DEPENDENCY_CHECKER = 'true'
 // @todo remove in 4.0 - will behave like this by default in 4.0
 process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
 
+// process.env.PAYLOAD_DATABASE = 'content-api'
+process.env.PAYLOAD_DATABASE = 'content-api-jsonb'
+
 // Mock createTestAccount to prevent calling external services
 jest.spyOn(nodemailer, 'createTestAccount').mockImplementation(() => {
   return Promise.resolve({
@@ -37,3 +40,37 @@ if (!process.env.PAYLOAD_DATABASE) {
 }
 
 generateDatabaseAdapter(process.env.PAYLOAD_DATABASE)
+
+// Clear database tables based on the database adapter
+async function clearDatabase() {
+  const database = process.env.PAYLOAD_DATABASE
+
+  if (database === 'content-api') {
+    try {
+      await fetch('http://localhost:8000/clear-db', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      console.log('Cleared content-api database tables')
+    } catch (error) {
+      console.warn('Failed to clear content-api database:', error.message)
+    }
+  } else if (database === 'content-api-jsonb') {
+    try {
+      await fetch('http://localhost:8001/clear-db', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      console.log('Cleared content-api-jsonb database tables')
+    } catch (error) {
+      console.warn('Failed to clear content-api-jsonb database:', error.message)
+    }
+  }
+}
+
+// Run database clearing
+clearDatabase()
