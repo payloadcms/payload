@@ -1049,8 +1049,8 @@ importers:
   packages/plugin-import-export:
     dependencies:
       '@faceless-ui/modal':
-        specifier: 3.0.0-beta.2
-        version: 3.0.0-beta.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: 3.0.0
+        version: 3.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
@@ -1266,8 +1266,8 @@ importers:
   packages/richtext-lexical:
     dependencies:
       '@faceless-ui/modal':
-        specifier: 3.0.0-beta.2
-        version: 3.0.0-beta.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: 3.0.0
+        version: 3.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@faceless-ui/scroll-info':
         specifier: 2.0.0
         version: 2.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1589,8 +1589,8 @@ importers:
         specifier: 3.2.2
         version: 3.2.2(react@19.1.0)
       '@faceless-ui/modal':
-        specifier: 3.0.0-beta.2
-        version: 3.0.0-beta.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: 3.0.0
+        version: 3.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@faceless-ui/scroll-info':
         specifier: 2.0.0
         version: 2.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -3970,8 +3970,8 @@ packages:
     resolution: {integrity: sha512-Z5kJ+wU3oA7MMIqVR9tyZRtjYPr4OC004Q4Rw7pgOKUOKkJfZ3O24nz3WYfGRpMDNmcOi3TwQOmgm7B7Tpii0w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@faceless-ui/modal@3.0.0-beta.2':
-    resolution: {integrity: sha512-UmXvz7Iw3KMO4Pm3llZczU4uc5pPQDb6rdqwoBvYDFgWvkraOAHKx0HxSZgwqQvqOhn8joEFBfFp6/Do2562ow==}
+  '@faceless-ui/modal@3.0.0':
+    resolution: {integrity: sha512-o3oEFsot99EQ8RJc1kL3s/nNMHX+y+WMXVzSSmca9L0l2MR6ez2QM1z1yIelJX93jqkLXQ9tW+R9tmsYa+O4Qg==}
     peerDependencies:
       react: 19.1.0
       react-dom: 19.1.0
@@ -15189,7 +15189,7 @@ snapshots:
       '@eslint/core': 0.15.2
       levn: 0.4.1
 
-  '@faceless-ui/modal@3.0.0-beta.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@faceless-ui/modal@3.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       body-scroll-lock: 4.0.0-beta.0
       focus-trap: 7.5.4
