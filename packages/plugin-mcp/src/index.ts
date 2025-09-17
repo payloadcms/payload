@@ -61,7 +61,7 @@ export const pluginMCP =
      * NOTE: This is only transport method until we add full support for SSE which will be another endpoint at `/api/sse`
      */
     config.endpoints.push({
-      handler: initializeMCPHandler(pluginOptions, config),
+      handler: initializeMCPHandler(pluginOptions),
       method: 'post',
       path: '/mcp',
     })
@@ -71,7 +71,7 @@ export const pluginMCP =
      * This is expected behavior and MCP clients should always use the POST endpoint.
      */
     config.endpoints.push({
-      handler: initializeMCPHandler(pluginOptions, config),
+      handler: initializeMCPHandler(pluginOptions),
       method: 'get',
       path: '/mcp',
     })
