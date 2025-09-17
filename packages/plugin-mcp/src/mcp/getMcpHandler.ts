@@ -1,6 +1,8 @@
+import type { JSONSchema4 } from 'json-schema'
+
 import { createMcpHandler } from '@vercel/mcp-adapter'
 import { join } from 'path'
-import { type CollectionConfig, type Config, type PayloadRequest } from 'payload'
+import { APIError, configToJSONSchema, type PayloadRequest } from 'payload'
 
 import type { PluginMCPServerConfig, ToolSettings } from '../types.js'
 
@@ -34,9 +36,9 @@ export const getMCPHandler = (
   pluginOptions: PluginMCPServerConfig,
   toolSettings: ToolSettings,
   req: PayloadRequest,
-  config: Config,
 ) => {
-  const payload = req.payload
+  const { payload } = req
+  const configSchema = configToJSONSchema(payload.config)
 
   // MCP Server and Handler Options
   const MCPOptions = pluginOptions.mcp || {}
@@ -65,350 +67,359 @@ export const getMCPHandler = (
       ? experimentalTools.jobs.jobsDirPath
       : join(process.cwd(), 'src/jobs')
 
-  return createMcpHandler(
-    (server) => {
-      // Custom prompts
-      customMCPPrompts.forEach((prompt) => {
-        server.registerPrompt(
-          prompt.name,
-          {
-            argsSchema: prompt.argsSchema,
-            description: prompt.description,
-            title: prompt.title,
-          },
-          prompt.handler,
-        )
-        if (useVerboseLogs) {
-          payload.logger.info(`[payload-mcp] ✅ Prompt: ${prompt.title} Registered.`)
-        }
-      })
-
-      // Custom resources
-      customMCPResources.forEach((resource) => {
-        server.registerResource(
-          resource.name,
-          //@ts-expect-error - Overload type is not working however -- ResourceTemplate OR String is a valid type
-          resource.uri,
-          {
-            description: resource.description,
-            mimeType: resource.mimeType,
-            title: resource.title,
-          },
-          resource.handler,
-        )
-
-        if (useVerboseLogs) {
-          payload.logger.info(`[payload-mcp] ✅ Resource: ${resource.title} Registered.`)
-        }
-      })
-
-      const enabledCollectionSlugs = Object.keys(collectionsPluginConfig || {}).filter(
-        (collection) => {
-          const fullyEnabled =
-            typeof collectionsPluginConfig?.[collection]?.enabled === 'boolean' &&
-            collectionsPluginConfig?.[collection]?.enabled
-
-          if (fullyEnabled) {
-            return true
+  try {
+    return createMcpHandler(
+      (server) => {
+        // Custom prompts
+        customMCPPrompts.forEach((prompt) => {
+          server.registerPrompt(
+            prompt.name,
+            {
+              argsSchema: prompt.argsSchema,
+              description: prompt.description,
+              title: prompt.title,
+            },
+            prompt.handler,
+          )
+          if (useVerboseLogs) {
+            payload.logger.info(`[payload-mcp] ✅ Prompt: ${prompt.title} Registered.`)
           }
+        })
 
-          const partiallyEnabled =
-            typeof collectionsPluginConfig?.[collection]?.enabled !== 'boolean' &&
-            ((typeof collectionsPluginConfig?.[collection]?.enabled?.find === 'boolean' &&
-              collectionsPluginConfig?.[collection]?.enabled?.find === true) ||
-              (typeof collectionsPluginConfig?.[collection]?.enabled?.create === 'boolean' &&
-                collectionsPluginConfig?.[collection]?.enabled?.create === true) ||
-              (typeof collectionsPluginConfig?.[collection]?.enabled?.update === 'boolean' &&
-                collectionsPluginConfig?.[collection]?.enabled?.update === true) ||
-              (typeof collectionsPluginConfig?.[collection]?.enabled?.delete === 'boolean' &&
-                collectionsPluginConfig?.[collection]?.enabled?.delete === true))
+        // Custom resources
+        customMCPResources.forEach((resource) => {
+          server.registerResource(
+            resource.name,
+            //@ts-expect-error - Overload type is not working however -- ResourceTemplate OR String is a valid type
+            resource.uri,
+            {
+              description: resource.description,
+              mimeType: resource.mimeType,
+              title: resource.title,
+            },
+            resource.handler,
+          )
 
-          if (partiallyEnabled) {
-            return true
+          if (useVerboseLogs) {
+            payload.logger.info(`[payload-mcp] ✅ Resource: ${resource.title} Registered.`)
           }
-        },
-      )
+        })
 
-      // Collection Operation Tools
-      enabledCollectionSlugs.forEach((enabledCollectionSlug) => {
-        const collectionConfig = config.collections?.filter(
-          (collection) => collection.slug === enabledCollectionSlug,
-        )[0]
-        const toolCapabilities = toolSettings?.[`${toCamelCase(enabledCollectionSlug)}`] as Record<
-          string,
-          unknown
-        >
-        const allowCreate: boolean | undefined = toolCapabilities['create'] as boolean
-        const allowDelete: boolean | undefined = toolCapabilities['delete'] as boolean
-        const allowFind: boolean | undefined = toolCapabilities['find'] as boolean
-        const allowUpdate: boolean | undefined = toolCapabilities['update'] as boolean
+        const enabledCollectionSlugs = Object.keys(collectionsPluginConfig || {}).filter(
+          (collection) => {
+            const fullyEnabled =
+              typeof collectionsPluginConfig?.[collection]?.enabled === 'boolean' &&
+              collectionsPluginConfig?.[collection]?.enabled
 
-        if (allowCreate) {
-          registerTool(
-            allowCreate,
-            `Create ${enabledCollectionSlug}`,
-            () =>
-              createResourceTool(
-                server,
-                req,
+            if (fullyEnabled) {
+              return true
+            }
+
+            const partiallyEnabled =
+              typeof collectionsPluginConfig?.[collection]?.enabled !== 'boolean' &&
+              ((typeof collectionsPluginConfig?.[collection]?.enabled?.find === 'boolean' &&
+                collectionsPluginConfig?.[collection]?.enabled?.find === true) ||
+                (typeof collectionsPluginConfig?.[collection]?.enabled?.create === 'boolean' &&
+                  collectionsPluginConfig?.[collection]?.enabled?.create === true) ||
+                (typeof collectionsPluginConfig?.[collection]?.enabled?.update === 'boolean' &&
+                  collectionsPluginConfig?.[collection]?.enabled?.update === true) ||
+                (typeof collectionsPluginConfig?.[collection]?.enabled?.delete === 'boolean' &&
+                  collectionsPluginConfig?.[collection]?.enabled?.delete === true))
+
+            if (partiallyEnabled) {
+              return true
+            }
+          },
+        )
+
+        // Collection Operation Tools
+        enabledCollectionSlugs.forEach((enabledCollectionSlug) => {
+          try {
+            const schema = configSchema.definitions?.[enabledCollectionSlug] as JSONSchema4
+
+            const toolCapabilities = toolSettings?.[
+              `${toCamelCase(enabledCollectionSlug)}`
+            ] as Record<string, unknown>
+            const allowCreate: boolean | undefined = toolCapabilities['create'] as boolean
+            const allowUpdate: boolean | undefined = toolCapabilities['update'] as boolean
+            const allowFind: boolean | undefined = toolCapabilities['find'] as boolean
+            const allowDelete: boolean | undefined = toolCapabilities['delete'] as boolean
+
+            if (allowCreate) {
+              registerTool(
+                allowCreate,
+                `Create ${enabledCollectionSlug}`,
+                () =>
+                  createResourceTool(
+                    server,
+                    req,
+                    useVerboseLogs,
+                    enabledCollectionSlug,
+                    collectionsPluginConfig,
+                    schema,
+                  ),
+                payload,
                 useVerboseLogs,
-                enabledCollectionSlug,
-                collectionsPluginConfig,
-                collectionConfig as unknown as CollectionConfig,
-              ),
+              )
+            }
+            if (allowUpdate) {
+              registerTool(
+                allowUpdate,
+                `Update ${enabledCollectionSlug}`,
+                () =>
+                  updateResourceTool(
+                    server,
+                    req,
+                    useVerboseLogs,
+                    enabledCollectionSlug,
+                    collectionsPluginConfig,
+                    schema,
+                  ),
+                payload,
+                useVerboseLogs,
+              )
+            }
+            if (allowFind) {
+              registerTool(
+                allowFind,
+                `Find ${enabledCollectionSlug}`,
+                () =>
+                  findResourceTool(
+                    server,
+                    req,
+                    useVerboseLogs,
+                    enabledCollectionSlug,
+                    collectionsPluginConfig,
+                  ),
+                payload,
+                useVerboseLogs,
+              )
+            }
+            if (allowDelete) {
+              registerTool(
+                allowDelete,
+                `Delete ${enabledCollectionSlug}`,
+                () =>
+                  deleteResourceTool(
+                    server,
+                    req,
+                    useVerboseLogs,
+                    enabledCollectionSlug,
+                    collectionsPluginConfig,
+                  ),
+                payload,
+                useVerboseLogs,
+              )
+            }
+          } catch (error) {
+            throw new APIError(
+              `Error registering tools for collection ${enabledCollectionSlug}: ${String(error)}`,
+              500,
+            )
+          }
+        })
+
+        // Custom tools
+        customMCPTools.forEach((tool) => {
+          const camelCasedToolName = toCamelCase(tool.name)
+          const isToolEnabled = toolSettings.custom?.[camelCasedToolName] ?? true
+
+          registerTool(
+            isToolEnabled,
+            tool.name,
+            () => server.tool(tool.name, tool.description, tool.parameters, tool.handler),
+            payload,
+            useVerboseLogs,
+          )
+        })
+
+        // Experimental - Collection Schema Modfication Tools
+        if (
+          toolSettings.collections?.create &&
+          experimentalTools.collections?.enabled &&
+          isDevelopment
+        ) {
+          registerTool(
+            toolSettings.collections.create,
+            'Create Collection',
+            () =>
+              createCollectionTool(server, req, useVerboseLogs, collectionsDirPath, configFilePath),
             payload,
             useVerboseLogs,
           )
         }
-        if (allowDelete) {
+        if (
+          toolSettings.collections?.delete &&
+          experimentalTools.collections?.enabled &&
+          isDevelopment
+        ) {
           registerTool(
-            allowDelete,
-            `Delete ${enabledCollectionSlug}`,
+            toolSettings.collections.delete,
+            'Delete Collection',
             () =>
-              deleteResourceTool(
-                server,
-                req,
-                useVerboseLogs,
-                enabledCollectionSlug,
-                collectionsPluginConfig,
-              ),
+              deleteCollectionTool(server, req, useVerboseLogs, collectionsDirPath, configFilePath),
             payload,
             useVerboseLogs,
           )
         }
-        if (allowFind) {
+
+        if (
+          toolSettings.collections?.find &&
+          experimentalTools.collections?.enabled &&
+          isDevelopment
+        ) {
           registerTool(
-            allowFind,
-            `Find ${enabledCollectionSlug}`,
-            () =>
-              findResourceTool(
-                server,
-                req,
-                useVerboseLogs,
-                enabledCollectionSlug,
-                collectionsPluginConfig,
-              ),
+            toolSettings.collections.find,
+            'Find Collection',
+            () => findCollectionTool(server, req, useVerboseLogs, collectionsDirPath),
             payload,
             useVerboseLogs,
           )
         }
-        if (allowUpdate) {
+
+        if (
+          toolSettings.collections?.update &&
+          experimentalTools.collections?.enabled &&
+          isDevelopment
+        ) {
           registerTool(
-            allowUpdate,
-            `Update ${enabledCollectionSlug}`,
+            toolSettings.collections.update,
+            'Update Collection',
             () =>
-              updateResourceTool(
-                server,
-                req,
-                useVerboseLogs,
-                enabledCollectionSlug,
-                collectionsPluginConfig,
-                collectionConfig as unknown as CollectionConfig,
-              ),
+              updateCollectionTool(server, req, useVerboseLogs, collectionsDirPath, configFilePath),
             payload,
             useVerboseLogs,
           )
         }
-      })
 
-      // Custom tools
-      customMCPTools.forEach((tool) => {
-        const camelCasedToolName = toCamelCase(tool.name)
-        const isToolEnabled = toolSettings.custom?.[camelCasedToolName] ?? true
+        // Experimental - Payload Config Modification Tools
+        if (toolSettings.config?.find && experimentalTools.config?.enabled && isDevelopment) {
+          registerTool(
+            toolSettings.config.find,
+            'Find Config',
+            () => findConfigTool(server, req, useVerboseLogs, configFilePath),
+            payload,
+            useVerboseLogs,
+          )
+        }
 
-        registerTool(
-          isToolEnabled,
-          tool.name,
-          () => server.tool(tool.name, tool.description, tool.parameters, tool.handler),
-          payload,
-          useVerboseLogs,
-        )
-      })
+        if (toolSettings.config?.update && experimentalTools.config?.enabled && isDevelopment) {
+          registerTool(
+            toolSettings.config.update,
+            'Update Config',
+            () => updateConfigTool(server, req, useVerboseLogs, configFilePath),
+            payload,
+            useVerboseLogs,
+          )
+        }
 
-      // Experimental - Collection Schema Modfication Tools
-      if (
-        toolSettings.collections?.create &&
-        experimentalTools.collections?.enabled &&
-        isDevelopment
-      ) {
-        registerTool(
-          toolSettings.collections.create,
-          'Create Collection',
-          () =>
-            createCollectionTool(server, req, useVerboseLogs, collectionsDirPath, configFilePath),
-          payload,
-          useVerboseLogs,
-        )
-      }
-      if (
-        toolSettings.collections?.delete &&
-        experimentalTools.collections?.enabled &&
-        isDevelopment
-      ) {
-        registerTool(
-          toolSettings.collections.delete,
-          'Delete Collection',
-          () =>
-            deleteCollectionTool(server, req, useVerboseLogs, collectionsDirPath, configFilePath),
-          payload,
-          useVerboseLogs,
-        )
-      }
+        // Experimental - Job Modification Tools
+        if (toolSettings.jobs?.create && experimentalTools.jobs?.enabled && isDevelopment) {
+          registerTool(
+            toolSettings.jobs.create,
+            'Create Job',
+            () => createJobTool(server, req, useVerboseLogs, jobsDirPath),
+            payload,
+            useVerboseLogs,
+          )
+        }
 
-      if (
-        toolSettings.collections?.find &&
-        experimentalTools.collections?.enabled &&
-        isDevelopment
-      ) {
-        registerTool(
-          toolSettings.collections.find,
-          'Find Collection',
-          () => findCollectionTool(server, req, useVerboseLogs, collectionsDirPath),
-          payload,
-          useVerboseLogs,
-        )
-      }
+        if (toolSettings.jobs?.update && experimentalTools.jobs?.enabled && isDevelopment) {
+          registerTool(
+            toolSettings.jobs.update,
+            'Update Job',
+            () => updateJobTool(server, req, useVerboseLogs, jobsDirPath),
+            payload,
+            useVerboseLogs,
+          )
+        }
 
-      if (
-        toolSettings.collections?.update &&
-        experimentalTools.collections?.enabled &&
-        isDevelopment
-      ) {
-        registerTool(
-          toolSettings.collections.update,
-          'Update Collection',
-          () =>
-            updateCollectionTool(server, req, useVerboseLogs, collectionsDirPath, configFilePath),
-          payload,
-          useVerboseLogs,
-        )
-      }
+        if (toolSettings.jobs?.run && experimentalTools.jobs?.enabled && isDevelopment) {
+          registerTool(
+            toolSettings.jobs.run,
+            'Run Job',
+            () => runJobTool(server, req, useVerboseLogs),
+            payload,
+            useVerboseLogs,
+          )
+        }
 
-      // Experimental - Payload Config Modification Tools
-      if (toolSettings.config?.find && experimentalTools.config?.enabled && isDevelopment) {
-        registerTool(
-          toolSettings.config.find,
-          'Find Config',
-          () => findConfigTool(server, req, useVerboseLogs, configFilePath),
-          payload,
-          useVerboseLogs,
-        )
-      }
+        // Experimental - Auth Modification Tools
+        if (toolSettings.auth?.auth && experimentalTools.auth?.enabled && isDevelopment) {
+          registerTool(
+            toolSettings.auth.auth,
+            'Auth',
+            () => authTool(server, req, useVerboseLogs),
+            payload,
+            useVerboseLogs,
+          )
+        }
 
-      if (toolSettings.config?.update && experimentalTools.config?.enabled && isDevelopment) {
-        registerTool(
-          toolSettings.config.update,
-          'Update Config',
-          () => updateConfigTool(server, req, useVerboseLogs, configFilePath),
-          payload,
-          useVerboseLogs,
-        )
-      }
+        if (toolSettings.auth?.login && experimentalTools.auth?.enabled && isDevelopment) {
+          registerTool(
+            toolSettings.auth.login,
+            'Login',
+            () => loginTool(server, req, useVerboseLogs),
+            payload,
+            useVerboseLogs,
+          )
+        }
 
-      // Experimental - Job Modification Tools
-      if (toolSettings.jobs?.create && experimentalTools.jobs?.enabled && isDevelopment) {
-        registerTool(
-          toolSettings.jobs.create,
-          'Create Job',
-          () => createJobTool(server, req, useVerboseLogs, jobsDirPath),
-          payload,
-          useVerboseLogs,
-        )
-      }
+        if (toolSettings.auth?.verify && experimentalTools.auth?.enabled && isDevelopment) {
+          registerTool(
+            toolSettings.auth.verify,
+            'Verify',
+            () => verifyTool(server, req, useVerboseLogs),
+            payload,
+            useVerboseLogs,
+          )
+        }
 
-      if (toolSettings.jobs?.update && experimentalTools.jobs?.enabled && isDevelopment) {
-        registerTool(
-          toolSettings.jobs.update,
-          'Update Job',
-          () => updateJobTool(server, req, useVerboseLogs, jobsDirPath),
-          payload,
-          useVerboseLogs,
-        )
-      }
+        if (toolSettings.auth?.resetPassword && experimentalTools.auth?.enabled) {
+          registerTool(
+            toolSettings.auth.resetPassword,
+            'Reset Password',
+            () => resetPasswordTool(server, req, useVerboseLogs),
+            payload,
+            useVerboseLogs,
+          )
+        }
 
-      if (toolSettings.jobs?.run && experimentalTools.jobs?.enabled && isDevelopment) {
-        registerTool(
-          toolSettings.jobs.run,
-          'Run Job',
-          () => runJobTool(server, req, useVerboseLogs),
-          payload,
-          useVerboseLogs,
-        )
-      }
+        if (toolSettings.auth?.forgotPassword && experimentalTools.auth?.enabled) {
+          registerTool(
+            toolSettings.auth.forgotPassword,
+            'Forgot Password',
+            () => forgotPasswordTool(server, req, useVerboseLogs),
+            payload,
+            useVerboseLogs,
+          )
+        }
 
-      // Experimental - Auth Modification Tools
-      if (toolSettings.auth?.auth && experimentalTools.auth?.enabled && isDevelopment) {
-        registerTool(
-          toolSettings.auth.auth,
-          'Auth',
-          () => authTool(server, req, useVerboseLogs),
-          payload,
-          useVerboseLogs,
-        )
-      }
+        if (toolSettings.auth?.unlock && experimentalTools.auth?.enabled) {
+          registerTool(
+            toolSettings.auth.unlock,
+            'Unlock',
+            () => unlockTool(server, req, useVerboseLogs),
+            payload,
+            useVerboseLogs,
+          )
+        }
 
-      if (toolSettings.auth?.login && experimentalTools.auth?.enabled && isDevelopment) {
-        registerTool(
-          toolSettings.auth.login,
-          'Login',
-          () => loginTool(server, req, useVerboseLogs),
-          payload,
-          useVerboseLogs,
-        )
-      }
-
-      if (toolSettings.auth?.verify && experimentalTools.auth?.enabled && isDevelopment) {
-        registerTool(
-          toolSettings.auth.verify,
-          'Verify',
-          () => verifyTool(server, req, useVerboseLogs),
-          payload,
-          useVerboseLogs,
-        )
-      }
-
-      if (toolSettings.auth?.resetPassword && experimentalTools.auth?.enabled) {
-        registerTool(
-          toolSettings.auth.resetPassword,
-          'Reset Password',
-          () => resetPasswordTool(server, req, useVerboseLogs),
-          payload,
-          useVerboseLogs,
-        )
-      }
-
-      if (toolSettings.auth?.forgotPassword && experimentalTools.auth?.enabled) {
-        registerTool(
-          toolSettings.auth.forgotPassword,
-          'Forgot Password',
-          () => forgotPasswordTool(server, req, useVerboseLogs),
-          payload,
-          useVerboseLogs,
-        )
-      }
-
-      if (toolSettings.auth?.unlock && experimentalTools.auth?.enabled) {
-        registerTool(
-          toolSettings.auth.unlock,
-          'Unlock',
-          () => unlockTool(server, req, useVerboseLogs),
-          payload,
-          useVerboseLogs,
-        )
-      }
-
-      if (useVerboseLogs) {
-        payload.logger.info('[payload-mcp] 🚀 MCP Server Ready.')
-      }
-    },
-    {
-      serverInfo: serverOptions.serverInfo,
-    },
-    {
-      basePath: MCPHandlerOptions.basePath || '/api',
-      maxDuration: MCPHandlerOptions.maxDuration || 60,
-      redisUrl: MCPHandlerOptions.redisUrl || process.env.REDIS_URL,
-      verboseLogs: useVerboseLogs,
-    },
-  )
+        if (useVerboseLogs) {
+          payload.logger.info('[payload-mcp] 🚀 MCP Server Ready.')
+        }
+      },
+      {
+        serverInfo: serverOptions.serverInfo,
+      },
+      {
+        basePath: MCPHandlerOptions.basePath || '/api',
+        maxDuration: MCPHandlerOptions.maxDuration || 60,
+        redisUrl: MCPHandlerOptions.redisUrl || process.env.REDIS_URL,
+        verboseLogs: useVerboseLogs,
+      },
+    )
+  } catch (error) {
+    throw new APIError(`Error initializing MCP handler: ${String(error)}`, 500)
+  }
 }
