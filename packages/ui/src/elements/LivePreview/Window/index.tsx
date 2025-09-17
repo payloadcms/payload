@@ -120,9 +120,6 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     return null
   }
 
-  // AFTER the url changes, we need to send the JSON schema again
-  // we cannot simply do this in an effect like above, because it needs to happen AFTER the new app loads
-
   return (
     <div
       className={[
