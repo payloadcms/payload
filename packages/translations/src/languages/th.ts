@@ -553,6 +553,8 @@ export const thTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'แก้ไขเท่านั้น',
     moreVersions: 'เพิ่มเวอร์ชั่น...',
     noFurtherVersionsFound: 'ไม่พบเวอร์ชันอื่น ๆ',
+    noLabelGroup:
+      'ร่วมให้ความหมายของข้อความต้นฉบับภายในบริบทของ Payload นี่คือรายการของคำศัพท์ Payload ทั่วไปที่มีความหมายที่แน่นอนมาก :\n    - Collection: Collection คือกลุ่มของเอกสารที่มีโครงสร้างและจุดประสงค์ที่เหม',
     noRowsFound: 'ไม่พบ {{label}}',
     noRowsSelected: 'ไม่มี {{label}} ที่ถูกเลือก',
     preview: 'ตัวอย่าง',

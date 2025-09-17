@@ -94,7 +94,6 @@ describe('Versions', () => {
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
   let errorOnUnpublishURL: AdminUrlUtil
-  let id: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -1119,7 +1118,7 @@ describe('Versions', () => {
         timeout: POLL_TOPASS_TIMEOUT,
       })
 
-      id = await page.locator('.id-label').getAttribute('title')
+      const id = await page.locator('.id-label').getAttribute('title')
 
       const data = await payload.find({
         collection: localizedCollectionSlug,
@@ -1866,13 +1865,43 @@ describe('Versions', () => {
       await expect(email.locator('.html-diff__diff-new')).toHaveText('email2@email.com')
     })
 
-    test('correctly renders diff for group fields', async () => {
+    test('correctly renders diff for named group fields', async () => {
       await navigateToDiffVersionView()
+
+      await expect(
+        page.locator('[data-field-path="group"] .diff-collapser__label').first(),
+      ).toHaveText('Group')
 
       const group = page.locator('[data-field-path="group.textInGroup"]')
 
       await expect(group.locator('.html-diff__diff-old')).toHaveText('textInGroup')
       await expect(group.locator('.html-diff__diff-new')).toHaveText('textInGroup2')
+    })
+
+    test('correctly renders diff for unnamed, unlabeled group fields', async () => {
+      await navigateToDiffVersionView()
+
+      await expect(
+        page.locator('[data-field-path="_index-9"] .diff-collapser__label').first(),
+      ).toHaveText('<Unnamed Group>')
+
+      const group = page.locator('[data-field-path="textInUnnamedGroup"]')
+
+      await expect(group.locator('.html-diff__diff-old')).toHaveText('textInUnnamedGroup')
+      await expect(group.locator('.html-diff__diff-new')).toHaveText('textInUnnamedGroup2')
+    })
+
+    test('correctly renders diff for unnamed, labeled group fields', async () => {
+      await navigateToDiffVersionView()
+
+      await expect(
+        page.locator('[data-field-path="_index-10"] .diff-collapser__label').first(),
+      ).toHaveText('Unnamed Labeled Group')
+
+      const group = page.locator('[data-field-path="textInUnnamedLabeledGroup"]')
+
+      await expect(group.locator('.html-diff__diff-old')).toHaveText('textInUnnamedLabeledGroup')
+      await expect(group.locator('.html-diff__diff-new')).toHaveText('textInUnnamedLabeledGroup2')
     })
 
     test('correctly renders diff for number fields', async () => {

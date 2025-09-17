@@ -457,6 +457,8 @@ export interface Diff {
   group?: {
     textInGroup?: string | null;
   };
+  textInUnnamedGroup?: string | null;
+  textInUnnamedLabeledGroup?: string | null;
   number?: number | null;
   /**
    * @minItems 2
@@ -1112,6 +1114,8 @@ export interface DiffSelect<T extends boolean = true> {
     | {
         textInGroup?: T;
       };
+  textInUnnamedGroup?: T;
+  textInUnnamedLabeledGroup?: T;
   number?: T;
   point?: T;
   json?: T;
