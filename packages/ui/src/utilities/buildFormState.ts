@@ -15,10 +15,9 @@ import { renderField } from '../forms/fieldSchemasToFormState/renderField.js'
 import { canAccessAdmin } from './canAccessAdmin.js'
 import { getClientConfig } from './getClientConfig.js'
 import { getClientSchemaMap } from './getClientSchemaMap.js'
-import { getLivePreviewConfig } from './getLivePreviewConfig.js'
 import { getSchemaMap } from './getSchemaMap.js'
 import { handleFormStateLocking } from './handleFormStateLocking.js'
-import { isLivePreviewEnabled } from './isLivePreviewEnabled.js'
+import { handleLivePreview } from './handleLivePreview.js'
 
 export type LockedState = {
   isLocked: boolean
@@ -239,49 +238,13 @@ export const buildFormState = async (
   let livePreviewURL: string | undefined
 
   if (returnLivePreviewURL) {
-    const collectionConfig = collectionSlug
-      ? payload.collections[collectionSlug]?.config
-      : undefined
-    const globalConfig = globalSlug ? config.globals.find((g) => g.slug === globalSlug) : undefined
-
-    const livePreviewEnabled = isLivePreviewEnabled({
-      collectionConfig,
+    ;({ livePreviewURL } = await handleLivePreview({
+      collectionSlug,
       config,
-      globalConfig,
-    })
-
-    const livePreviewConfig = getLivePreviewConfig({
-      collectionConfig,
-      config,
-      globalConfig,
-      isLivePreviewEnabled: livePreviewEnabled,
-    })
-
-    if (typeof livePreviewConfig?.url === 'string') {
-      livePreviewURL = livePreviewConfig.url
-    }
-
-    if (typeof livePreviewConfig?.url === 'function') {
-      try {
-        const result = await livePreviewConfig.url({
-          collectionConfig,
-          data,
-          globalConfig,
-          locale: { code: req.locale, label: '' },
-          payload,
-          req,
-        })
-
-        if (typeof result === 'string') {
-          livePreviewURL = result
-        }
-      } catch (err) {
-        req.payload.logger.error({
-          err,
-          msg: `There was an error executing the live preview URL function for ${collectionSlug || globalSlug}`,
-        })
-      }
-    }
+      data,
+      globalSlug,
+      req,
+    }))
   }
 
   return {
