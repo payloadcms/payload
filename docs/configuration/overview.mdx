@@ -111,10 +111,6 @@ _\* An asterisk denotes that a property is required._
   details](../custom-components/overview#accessing-the-payload-config).
 </Banner>
 
-<Banner type="warning">
-  Payload does not use your secret key directly for encryption. Instead, it first processes the secret using the SHA-256 hash function, then reduces the encrypted string to its first 32 characters. This final processed value is what Payload actually uses for encryption and JWT token generation.
-</Banner>
-
 ### TypeScript Config
 
 Payload exposes a variety of TypeScript settings that you can leverage. These settings are used to auto-generate TypeScript interfaces for your [Collections](./collections) and [Globals](./globals), and to ensure that Payload uses your [Generated Types](../typescript/overview) for all [Local API](../local-api/overview) methods.
