@@ -53,12 +53,9 @@ const slugIsGlobal = (slug: string) => slug.startsWith('_global-')
 const getGlobalSlug = (slug: string) => `_global-${slug}`
 
 async function init(this: ContentAPIAdapter) {
-  if (!this.cmsID) {
-    this.payload.logger.info('cmsID was not provided, creating a CMS...')
-    const { id } = await this.request('/create-cms')
-    this.payload.logger.info(`Created CMS, ID=${id}`)
-    this.cmsID = id
-  }
+  await this.request('/create-cms')
+  this.payload.logger.info(`Created CMS with ID 1`)
+  this.cmsID = 1
 
   for (const collection of this.payload.config.collections) {
     const { id, status } = await this.request('/create-collection', {
@@ -751,6 +748,11 @@ const findMany = async ({
     hasNextPage = false
   }
 
+  // Ensure rawDocs is an array before attempting to map
+  if (!Array.isArray(rawDocs)) {
+    throw new Error(`Expected rawDocs to be an array, but received: ${typeof rawDocs}`)
+  }
+
   return {
     docs: rawDocs.map((each) => {
       const transformedData = transformResponseFromContentAPI({
@@ -1080,18 +1082,36 @@ const deleteOne: DeleteOne = async function deleteOne(
 }
 
 const create: Create = async function create(this: ContentAPIAdapter, args) {
+  const collectionConfig = this.payload.collections[args.collection]?.config
+  const hasVersions = Boolean(collectionConfig?.versions)
+
+  const now = new Date().toISOString()
+  const documentData = {
+    ...args.data,
+    createdAt: now,
+    updatedAt: now,
+  }
+
   const { id } = await this.request('/create', {
     collectionSlug: args.collection,
     data: transformDataIntoContentAPIFields({
       contentAPIURL: this.contentAPIURL,
-      data: {
-        ...args.data,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
+      data: documentData,
       fields: getFields({ adapter: this, collectionSlug: args.collection }),
     }),
   })
+
+  // If versioning is enabled, create an initial version
+  if (hasVersions) {
+    await this.createVersion({
+      autosave: false,
+      collectionSlug: args.collection,
+      createdAt: now,
+      parent: id,
+      updatedAt: now,
+      versionData: { ...documentData, id },
+    })
+  }
 
   const [doc] = await this.request('/find', {
     collectionSlug: args.collection,
@@ -1240,8 +1260,20 @@ const request = async function <T = any>(this: ContentAPIAdapter, path, body = {
   const text = await res.text()
 
   try {
-    return JSON.parse(text) as T
+    const parsed = JSON.parse(text)
+
+    // Check if the response is an error object
+    if (parsed && typeof parsed === 'object' && 'error' in parsed) {
+      throw new Error(`Content API error: ${parsed.message || parsed.error}`)
+    }
+
+    return parsed as T
   } catch (error) {
+    // If it's already our custom error, re-throw it
+    if (error instanceof Error && error.message.startsWith('Content API error:')) {
+      throw error
+    }
+
     console.error(`Failed to parse JSON response from ${path}:`, text)
     console.error('Parse error:', error)
     throw new Error(`Invalid JSON response from content API: ${text.substring(0, 100)}...`)
