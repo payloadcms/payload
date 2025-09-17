@@ -1,12 +1,12 @@
 import crypto from 'crypto'
-import { APIError, type Config, type PayloadHandler, type Where } from 'payload'
+import { APIError, type PayloadHandler, type Where } from 'payload'
 
 import type { PluginMCPServerConfig, ToolSettings } from '../types.js'
 
 import { createRequestFromPayloadRequest } from '../mcp/createRequest.js'
 import { getMCPHandler } from '../mcp/getMcpHandler.js'
 
-export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig, config: Config) => {
+export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
   const mcpHandler: PayloadHandler = async (req) => {
     const { payload } = req
     const MCPOptions = pluginOptions.mcp || {}
@@ -21,21 +21,12 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig, confi
       throw new APIError('API Key is required', 401)
     }
 
-    const sha1APIKeyIndex = crypto
-      .createHmac('sha1', payload.secret)
-      .update(apiKey || '')
-      .digest('hex')
     const sha256APIKeyIndex = crypto
       .createHmac('sha256', payload.secret)
       .update(apiKey || '')
       .digest('hex')
 
     const apiKeyConstraints = [
-      {
-        apiKeyIndex: {
-          equals: sha1APIKeyIndex,
-        },
-      },
       {
         apiKeyIndex: {
           equals: sha256APIKeyIndex,
@@ -47,7 +38,7 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig, confi
     }
 
     const { docs } = await payload.find({
-      collection: 'payload-mcp-tool-api-key',
+      collection: 'payload-mcp-api-keys',
       where,
     })
 
@@ -62,7 +53,7 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig, confi
     }
 
     const request = createRequestFromPayloadRequest(req)
-    const handler = getMCPHandler(pluginOptions, MCPToolCapabilities, req, config)
+    const handler = getMCPHandler(pluginOptions, MCPToolCapabilities, req)
     return await handler(request)
   }
   return mcpHandler
