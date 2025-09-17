@@ -23,6 +23,33 @@ const config: StorybookConfig = {
     // Set environment variable for Babel configuration
     process.env.STORYBOOK = 'true'
 
+    // Suppress Sass deprecation warnings via environment variables
+    process.env.SASS_SILENCE_DEPRECATIONS = 'legacy-js-api'
+    process.env.SASS_QUIET_DEPS = 'true'
+
+    // Define process global for Next.js compatibility
+    config.define = {
+      ...config.define,
+      'process.env': {
+        ...process.env,
+        SASS_SILENCE_DEPRECATIONS: 'legacy-js-api',
+        SASS_QUIET_DEPS: 'true',
+      },
+      global: 'globalThis',
+    }
+
+    // Configure SCSS processing
+    config.css = {
+      ...config.css,
+      preprocessorOptions: {
+        ...config.css?.preprocessorOptions,
+        scss: {
+          ...config.css?.preprocessorOptions?.scss,
+          quietDeps: true,
+        },
+      },
+    }
+
     return config
   },
   typescript: {

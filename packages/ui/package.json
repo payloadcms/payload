@@ -173,6 +173,7 @@
     "@storybook/addon-docs": "^9.1.6",
     "@storybook/addon-onboarding": "^9.1.6",
     "@storybook/react-vite": "^9.1.6",
+    "@storybook/test": "8.6.14",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
     "@types/uuid": "10.0.0",
