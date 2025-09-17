@@ -565,6 +565,7 @@ export const daTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Kun ændret',
     moreVersions: 'Flere versioner...',
     noFurtherVersionsFound: 'Ingen yderligere versioner fundet',
+    noLabelGroup: 'Unavngivet Gruppe',
     noRowsFound: 'Ingen {{label}} fundet',
     noRowsSelected: 'Ingen {{label}} valgt',
     preview: 'Forhåndsvisning',

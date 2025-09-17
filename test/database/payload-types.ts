@@ -197,6 +197,7 @@ export interface Post {
   id: string;
   title: string;
   category?: (string | null) | Category;
+  categories?: (string | Category)[] | null;
   categoryCustomID?: (number | null) | CategoriesCustomId;
   localized?: string | null;
   text?: string | null;
@@ -822,6 +823,7 @@ export interface CategoriesCustomIdSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  categories?: T;
   categoryCustomID?: T;
   localized?: T;
   text?: T;
