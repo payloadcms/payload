@@ -57,6 +57,20 @@ export const LexicalFullyFeatured: CollectionConfig = {
                   },
                 ],
               },
+              {
+                slug: 'inlineBlockWithRelationship',
+                fields: [
+                  {
+                    name: 'relationship',
+                    type: 'relationship',
+                    relationTo: 'text-fields',
+                    admin: {
+                      // Required to reproduce issue: https://github.com/payloadcms/payload/issues/13778
+                      appearance: 'drawer',
+                    },
+                  },
+                ],
+              },
             ],
           }),
         ],

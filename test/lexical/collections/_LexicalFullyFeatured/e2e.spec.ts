@@ -130,4 +130,26 @@ describe('Lexical Fully Featured', () => {
     const someButton = dropdownItems!.locator(`[data-item-key="bg-red"]`)
     await expect(someButton).toHaveAttribute('aria-disabled', 'false')
   })
+
+  test('ensure opening relationship field with appearance: "drawer" inside rich text inline block does not close drawer', async ({
+    page,
+  }) => {
+    // https://github.com/payloadcms/payload/pull/13830
+
+    await lexical.slashCommand('inlineblockwithrelationship')
+
+    await expect(lexical.drawer).toBeVisible()
+
+    await lexical.drawer.locator('.react-select').click()
+    // At this point, the drawer would close if the issue is not fixed
+
+    await page.getByText('Seeded text document').click()
+
+    await expect(
+      lexical.drawer.locator('.react-select .relationship--single-value__text'),
+    ).toHaveText('Seeded text document')
+
+    await lexical.drawer.getByText('Save changes').click()
+    await expect(lexical.drawer).toBeHidden()
+  })
 })
