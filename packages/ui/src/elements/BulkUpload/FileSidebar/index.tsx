@@ -90,8 +90,11 @@ export function FileSidebar() {
             isClearable={false}
             name="groupBy"
             onChange={(e) => {
-              const val = typeof e === 'object' && 'value' in e ? e?.value : e
-              setCollectionSlug(val as string)
+              const val: string =
+                typeof e === 'object' && 'value' in e
+                  ? (e?.value as string)
+                  : (e as unknown as string)
+              setCollectionSlug(val)
             }}
             options={
               selectableCollections?.map((coll) => {
