@@ -17,9 +17,8 @@ const { email, password } = devUser
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-async function fetchStreamResponse(request: Request): Promise<string | undefined> {
+async function parseStreamResponse(response: Response): Promise<any> {
   try {
-    const response = await fetch(request)
     const reader = response.body?.getReader()
     const decoder = new TextDecoder()
 
@@ -42,7 +41,7 @@ async function fetchStreamResponse(request: Request): Promise<string | undefined
       ? streamJSONDataLine.slice('data:'.length).trim()
       : streamData.trim()
 
-    return streamJSONString
+    return JSON.parse(streamJSONString)
   } catch (error) {
     console.error(error)
     throw error
@@ -129,13 +128,12 @@ describe('@payloadcms/plugin-mcp', () => {
 
   it('should ping', async () => {
     const apiKey = await getApiKey()
-    const request = new Request(`${restClient.serverURL}/api/mcp`, {
+    const response = await restClient.POST('/mcp', {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         Accept: 'application/json, text/event-stream',
         'Content-Type': 'application/json',
       },
-      method: 'POST',
       body: JSON.stringify({
         id: 1,
         jsonrpc: '2.0',
@@ -144,25 +142,18 @@ describe('@payloadcms/plugin-mcp', () => {
       }),
     })
 
-    const streamJSONString = await fetchStreamResponse(request)
-
-    try {
-      const json = JSON.parse(streamJSONString as string)
-      expect(json).toBeDefined()
-    } catch (error) {
-      expect(error).not.toBeDefined()
-    }
+    const json = await parseStreamResponse(response)
+    expect(json).toBeDefined()
   })
 
   it('should list tools', async () => {
     const apiKey = await getApiKey()
-    const request = new Request(`${restClient.serverURL}/api/mcp`, {
+    const response = await restClient.POST('/mcp', {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         Accept: 'application/json, text/event-stream',
         'Content-Type': 'application/json',
       },
-      method: 'POST',
       body: JSON.stringify({
         id: 1,
         jsonrpc: '2.0',
@@ -171,9 +162,7 @@ describe('@payloadcms/plugin-mcp', () => {
       }),
     })
 
-    const streamJSONString = await fetchStreamResponse(request)
-
-    const json = JSON.parse(streamJSONString)
+    const json = await parseStreamResponse(response)
 
     expect(json).toBeDefined()
     expect(json.id).toBe(1)
@@ -204,13 +193,12 @@ describe('@payloadcms/plugin-mcp', () => {
 
   it('should list resources', async () => {
     const apiKey = await getApiKey()
-    const request = new Request(`${restClient.serverURL}/api/mcp`, {
+    const response = await restClient.POST('/mcp', {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         Accept: 'application/json, text/event-stream',
         'Content-Type': 'application/json',
       },
-      method: 'POST',
       body: JSON.stringify({
         id: 1,
         jsonrpc: '2.0',
@@ -219,9 +207,7 @@ describe('@payloadcms/plugin-mcp', () => {
       }),
     })
 
-    const streamJSONString = await fetchStreamResponse(request)
-
-    const json = JSON.parse(streamJSONString)
+    const json = await parseStreamResponse(response)
 
     expect(json).toBeDefined()
     expect(json.id).toBe(1)
@@ -240,13 +226,12 @@ describe('@payloadcms/plugin-mcp', () => {
 
   it('should list prompts', async () => {
     const apiKey = await getApiKey()
-    const request = new Request(`${restClient.serverURL}/api/mcp`, {
+    const response = await restClient.POST('/mcp', {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         Accept: 'application/json, text/event-stream',
         'Content-Type': 'application/json',
       },
-      method: 'POST',
       body: JSON.stringify({
         id: 1,
         jsonrpc: '2.0',
@@ -255,9 +240,7 @@ describe('@payloadcms/plugin-mcp', () => {
       }),
     })
 
-    const streamJSONString = await fetchStreamResponse(request)
-
-    const json = JSON.parse(streamJSONString)
+    const json = await parseStreamResponse(response)
 
     expect(json).toBeDefined()
     expect(json.id).toBe(1)
@@ -276,13 +259,12 @@ describe('@payloadcms/plugin-mcp', () => {
 
   it('should call diceRoll', async () => {
     const apiKey = await getApiKey()
-    const request = new Request(`${restClient.serverURL}/api/mcp`, {
+    const response = await restClient.POST('/mcp', {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         Accept: 'application/json, text/event-stream',
         'Content-Type': 'application/json',
       },
-      method: 'POST',
       body: JSON.stringify({
         id: 1,
         jsonrpc: '2.0',
@@ -296,9 +278,7 @@ describe('@payloadcms/plugin-mcp', () => {
       }),
     })
 
-    const streamJSONString = await fetchStreamResponse(request)
-
-    const json = JSON.parse(streamJSONString)
+    const json = await parseStreamResponse(response)
 
     expect(json).toBeDefined()
     expect(json.result).toBeDefined()
@@ -312,13 +292,12 @@ describe('@payloadcms/plugin-mcp', () => {
 
   it('should call createPosts', async () => {
     const apiKey = await getApiKey()
-    const request = new Request(`${restClient.serverURL}/api/mcp`, {
+    const response = await restClient.POST('/mcp', {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         Accept: 'application/json, text/event-stream',
         'Content-Type': 'application/json',
       },
-      method: 'POST',
       body: JSON.stringify({
         id: 1,
         jsonrpc: '2.0',
@@ -333,9 +312,7 @@ describe('@payloadcms/plugin-mcp', () => {
       }),
     })
 
-    const streamJSONString = await fetchStreamResponse(request)
-
-    const json = JSON.parse(streamJSONString)
+    const json = await parseStreamResponse(response)
 
     expect(json).toBeDefined()
     expect(json.result).toBeDefined()
@@ -346,7 +323,7 @@ describe('@payloadcms/plugin-mcp', () => {
     )
     expect(json.result.content[0].text).toContain('Created resource:')
     expect(json.result.content[0].text).toContain('```json')
-    expect(json.result.content[0].text).toContain('"title": "Test Post"')
+    expect(json.result.content[0].text).toContain('"title": "Title Override: Test Post"')
     expect(json.result.content[0].text).toContain('"content": "Content for test post."')
   })
 
@@ -360,13 +337,12 @@ describe('@payloadcms/plugin-mcp', () => {
     })
 
     const apiKey = await getApiKey()
-    const request = new Request(`${restClient.serverURL}/api/mcp`, {
+    const response = await restClient.POST('/mcp', {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         Accept: 'application/json, text/event-stream',
         'Content-Type': 'application/json',
       },
-      method: 'POST',
       body: JSON.stringify({
         id: 1,
         jsonrpc: '2.0',
@@ -382,9 +358,7 @@ describe('@payloadcms/plugin-mcp', () => {
       }),
     })
 
-    const streamJSONString = await fetchStreamResponse(request)
-
-    const json = JSON.parse(streamJSONString)
+    const json = await parseStreamResponse(response)
 
     expect(json).toBeDefined()
     expect(json.result).toBeDefined()
