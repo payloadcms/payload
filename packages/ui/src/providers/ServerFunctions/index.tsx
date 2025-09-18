@@ -2,7 +2,6 @@ import type {
   AdminViewServerPropsOnly,
   BuildFormStateArgs,
   BuildTableStateArgs,
-  CollectionSlug,
   Data,
   DocumentPreferences,
   DocumentSlots,

@@ -161,7 +161,13 @@ describe('Live Preview', () => {
     await goToCollectionLivePreview(page, pagesURLUtil)
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()
-    expect(iframe.getAttribute('src')).toContain('/live-preview')
+
+    await expect
+      .poll(async () => {
+        const src = await iframe.getAttribute('src')
+        return src
+      })
+      .toMatch(/\/live-preview/)
   })
 
   test('collection — regenerates iframe src on save and retains live preview connection', async () => {
