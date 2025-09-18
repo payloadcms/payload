@@ -22,7 +22,7 @@ const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
 })
 
-describe('Lexical Fully Featured', () => {
+describe('Lexical Heading Feature', () => {
   let lexical: LexicalHelpers
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)

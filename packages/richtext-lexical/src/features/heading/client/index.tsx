@@ -124,7 +124,7 @@ export const HeadingFeatureClient = createClientFeature<HeadingFeatureProps>(({ 
 
 const HeadingPlugin: PluginComponent<HeadingFeatureProps> = ({ clientProps }) => {
   const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = clientProps
-  const lowestAllowed = enabledHeadingSizes.sort().at(-1)
+  const lowestAllowed = enabledHeadingSizes.at(-1)
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
