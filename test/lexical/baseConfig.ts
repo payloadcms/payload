@@ -21,7 +21,7 @@ import { OnDemandForm } from './collections/OnDemandForm/index.js'
 import { OnDemandOutsideForm } from './collections/OnDemandOutsideForm/index.js'
 import RichTextFields from './collections/RichText/index.js'
 import TextFields from './collections/Text/index.js'
-import Uploads from './collections/Upload/index.js'
+import { Uploads, Uploads2, Uploads3 } from './collections/Upload/index.js'
 import TabsWithRichText from './globals/TabsWithRichText.js'
 import { seed } from './seed.js'
 
@@ -47,6 +47,8 @@ export const baseConfig: Partial<Config> = {
     RichTextFields,
     TextFields,
     Uploads,
+    Uploads2,
+    Uploads3,
     ArrayFields,
     OnDemandForm,
     OnDemandOutsideForm,
