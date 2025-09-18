@@ -94,11 +94,6 @@ export const toolSchemas = {
         .optional()
         .default(0)
         .describe('Depth of population for relationships in response'),
-      overrideAccess: z
-        .boolean()
-        .optional()
-        .default(true)
-        .describe('Whether to override access controls'),
       where: z
         .string()
         .optional()

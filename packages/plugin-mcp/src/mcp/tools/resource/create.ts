@@ -1,6 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { JSONSchema4 } from 'json-schema'
-import type { PayloadRequest } from 'payload'
+import type { PayloadRequest, TypedUser } from 'payload'
 
 import type { PluginMCPServerConfig } from '../../../types.js'
 
@@ -10,6 +10,7 @@ import { toolSchemas } from '../schemas.js'
 export const createResourceTool = (
   server: McpServer,
   req: PayloadRequest,
+  user: TypedUser,
   verboseLogs: boolean,
   collectionSlug: string,
   collections: PluginMCPServerConfig['collections'],
@@ -43,7 +44,7 @@ export const createResourceTool = (
       const result = await payload.create({
         collection: collectionSlug,
         data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
-        overrideAccess: true,
+        user,
       })
 
       if (verboseLogs) {

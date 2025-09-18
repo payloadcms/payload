@@ -217,8 +217,9 @@ export type MCPHandlerOptions = {
   /**
    * Set the Redis URL for the MCP handler. This is the URL that will be used to access the Redis server.
    * @default process.env.REDIS_URL
+   * INFO: Disabled until developer clarity is reached for server side streaming and we have an auth pattern for all SSE patterns
    */
-  redisUrl?: string
+  // redisUrl?: string
   /**
    * Set verbose logging.
    * @default false

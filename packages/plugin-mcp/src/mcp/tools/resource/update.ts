@@ -1,6 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { JSONSchema4 } from 'json-schema'
-import type { PayloadRequest } from 'payload'
+import type { PayloadRequest, TypedUser } from 'payload'
 
 import { z } from 'zod'
 
@@ -12,6 +12,7 @@ import { toolSchemas } from '../schemas.js'
 export const updateResourceTool = (
   server: McpServer,
   req: PayloadRequest,
+  user: TypedUser,
   verboseLogs: boolean,
   collectionSlug: string,
   collections: PluginMCPServerConfig['collections'],
@@ -87,8 +88,8 @@ export const updateResourceTool = (
           data: parsedData,
           depth,
           draft,
-          overrideAccess: true,
           overrideLock,
+          user,
           ...(filePath && { filePath }),
           ...(overwriteExistingFiles && { overwriteExistingFiles }),
         }
