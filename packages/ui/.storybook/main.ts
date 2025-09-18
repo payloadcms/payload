@@ -15,10 +15,7 @@ const config: StorybookConfig = {
     getAbsolutePath('@storybook/addon-docs'),
     getAbsolutePath('@storybook/addon-onboarding'),
   ],
-  framework: {
-    name: getAbsolutePath('@storybook/react-vite'),
-    options: {},
-  },
+  framework: '@storybook/nextjs-vite', // 👈 Add this,
   viteFinal: async (config) => {
     // Set environment variable for Babel configuration
     process.env.STORYBOOK = 'true'

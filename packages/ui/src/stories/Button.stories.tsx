@@ -69,13 +69,7 @@ const meta: Meta<typeof Button> = {
     },
   },
   component: Button,
-  decorators: [
-    (Story) => (
-      <div style={{ fontFamily: 'system-ui, sans-serif', padding: '20px' }}>
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <Story />],
   parameters: {
     docs: {
       description: {

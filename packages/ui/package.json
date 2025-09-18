@@ -172,6 +172,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@storybook/addon-docs": "^9.1.6",
     "@storybook/addon-onboarding": "^9.1.6",
+    "@storybook/nextjs-vite": "9.1.6",
     "@storybook/react-vite": "^9.1.6",
     "@storybook/test": "8.6.14",
     "@types/react": "19.1.8",
