@@ -152,6 +152,25 @@ export const Diff: CollectionConfig = {
       ],
     },
     {
+      type: 'group',
+      fields: [
+        {
+          name: 'textInUnnamedGroup',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: 'Unnamed Labeled Group',
+      fields: [
+        {
+          name: 'textInUnnamedLabeledGroup',
+          type: 'text',
+        },
+      ],
+    },
+    {
       type: 'number',
       name: 'number',
     },

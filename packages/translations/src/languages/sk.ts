@@ -564,6 +564,7 @@ export const skTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Iba upravené',
     moreVersions: 'Viac verzií...',
     noFurtherVersionsFound: 'Nenájdené ďalšie verzie',
+    noLabelGroup: 'Nepomenovaná skupina',
     noRowsFound: 'Nenájdené {{label}}',
     noRowsSelected: 'Nie je vybraté žiadne {{označenie}}',
     preview: 'Náhľad',

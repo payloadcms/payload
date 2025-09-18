@@ -566,6 +566,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Endret kun',
     moreVersions: 'Flere versjoner...',
     noFurtherVersionsFound: 'Ingen flere versjoner funnet',
+    noLabelGroup: 'Uten navn Gruppe',
     noRowsFound: 'Ingen {{label}} funnet',
     noRowsSelected: 'Ingen {{label}} valgt',
     preview: 'Forhåndsvisning',

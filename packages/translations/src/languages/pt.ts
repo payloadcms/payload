@@ -568,6 +568,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Modificado apenas',
     moreVersions: 'Mais versões...',
     noFurtherVersionsFound: 'Nenhuma outra versão encontrada',
+    noLabelGroup: 'Grupo Sem Nome',
     noRowsFound: 'Nenhum(a) {{label}} encontrado(a)',
     noRowsSelected: 'Nenhum {{rótulo}} selecionado',
     preview: 'Pré-visualização',
