@@ -90,7 +90,7 @@ export const getMCPHandler = (
         customMCPResources.forEach((resource) => {
           server.registerResource(
             resource.name,
-            //@ts-expect-error - Overload type is not working however -- ResourceTemplate OR String is a valid type
+            // @ts-expect-error - Overload type is not working however -- ResourceTemplate OR String is a valid type
             resource.uri,
             {
               description: resource.description,
