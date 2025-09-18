@@ -68,9 +68,26 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
           params.append('limit', '250')
 
           const collection = collections.find((c) => c.slug === slug)
-          if (!collection?.upload) {
-            const fieldToSelect = collection?.admin?.useAsTitle ?? 'id'
+          if (collection.admin.enableListViewSelectAPI) {
+            const fieldToSelect = collection.admin.useAsTitle ?? 'id'
             params.append(`select[${fieldToSelect}]`, 'true')
+
+            if (collection.upload) {
+              // for upload enabled collections, the FileCell component needs the following fields:
+              const fieldsToSelect = [
+                'thumbnailURL',
+                'url',
+                'mimeType',
+                'filesize',
+                'width',
+                'height',
+                'focalX',
+                'focalY',
+                'sizes',
+              ]
+
+              fieldsToSelect.forEach((field) => params.append(`select[${field}]`, 'true'))
+            }
           }
 
           if (locale) {
