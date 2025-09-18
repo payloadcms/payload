@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig, SelectType } from 'payload'
 
 /**
  * Mutates the incoming select object to append fields required for upload thumbnails
@@ -10,9 +10,9 @@ export const appendUploadSelectFields = ({
   select,
 }: {
   collectionConfig: SanitizedCollectionConfig
-  select: Record<string, unknown>
+  select: SelectType
 }) => {
-  if (!collectionConfig.upload) {
+  if (!collectionConfig.upload || !select) {
     return
   }
 

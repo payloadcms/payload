@@ -1,19 +1,20 @@
+import type {
+  AdminViewServerProps,
+  CollectionPreferences,
+  Column,
+  ColumnPreference,
+  ListQuery,
+  ListViewClientProps,
+  ListViewServerPropsOnly,
+  PaginatedDocs,
+  QueryPreset,
+  SanitizedCollectionPermission,
+} from 'payload'
+
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
-import {
-  type AdminViewServerProps,
-  type CollectionPreferences,
-  type Column,
-  type ColumnPreference,
-  type ListQuery,
-  type ListViewClientProps,
-  type ListViewServerPropsOnly,
-  type PaginatedDocs,
-  type QueryPreset,
-  type SanitizedCollectionPermission,
-} from 'payload'
 import {
   combineWhereConstraints,
   formatAdminURL,
