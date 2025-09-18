@@ -1,28 +1,26 @@
-import type { ElementNode, SerializedEditorState, SerializedLexicalNode } from 'lexical'
+import type { ElementNode, SerializedLexicalNode } from 'lexical'
 import type { Block } from 'payload'
 
-import { createHeadlessEditor } from '@lexical/headless'
 import { $parseSerializedNode } from 'lexical'
 
-import type { NodeWithHooks } from '../../typesServer.js'
+import type { NodeWithHooks } from '../../../typesServer.js'
 
-import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
 import {
-  $convertFromMarkdownString,
-  $convertToMarkdownString,
   type MultilineElementTransformer,
   type TextMatchTransformer,
   type Transformer,
-} from '../../../packages/@lexical/markdown/index.js'
-import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
-import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
-import { linesFromStartToContentAndPropsString } from './linesFromMatchToContentAndPropsString.js'
-import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from './nodes/BlocksNode.js'
+} from '../../../../packages/@lexical/markdown/index.js'
+import { extractPropsFromJSXPropsString } from '../../../../utilities/jsx/extractPropsFromJSXPropsString.js'
+import { propsToJSXString } from '../../../../utilities/jsx/jsx.js'
+import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from '../nodes/BlocksNode.js'
 import {
   $createServerInlineBlockNode,
   $isServerInlineBlockNode,
   ServerInlineBlockNode,
-} from './nodes/InlineBlocksNode.js'
+} from '../nodes/InlineBlocksNode.js'
+import { getLexicalToMarkdown } from './getLexicalToMarkdown.js'
+import { getMarkdownToLexical } from './getMarkdownToLexical.js'
+import { linesFromStartToContentAndPropsString } from './linesFromMatchToContentAndPropsString.js'
 
 export function createTagRegexes(tagName: string) {
   const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -445,54 +443,4 @@ function getMarkdownTransformerForBlock(
   }))
 
   return toReturn
-}
-
-export function getMarkdownToLexical(
-  allNodes: Array<NodeWithHooks>,
-  allTransformers: Transformer[],
-): (args: { markdown: string }) => SerializedEditorState {
-  const markdownToLexical = ({ markdown }: { markdown: string }): SerializedEditorState => {
-    const headlessEditor = createHeadlessEditor({
-      nodes: getEnabledNodesFromServerNodes({
-        nodes: allNodes,
-      }),
-    })
-
-    headlessEditor.update(
-      () => {
-        $convertFromMarkdownString(markdown, allTransformers)
-      },
-      { discrete: true },
-    )
-
-    return headlessEditor.getEditorState().toJSON()
-  }
-  return markdownToLexical
-}
-
-export function getLexicalToMarkdown(
-  allNodes: Array<NodeWithHooks>,
-  allTransformers: Transformer[],
-): (args: { editorState: Record<string, any> }) => string {
-  const lexicalToMarkdown = ({ editorState }: { editorState: Record<string, any> }): string => {
-    const headlessEditor = createHeadlessEditor({
-      nodes: getEnabledNodesFromServerNodes({
-        nodes: allNodes,
-      }),
-    })
-
-    try {
-      headlessEditor.setEditorState(headlessEditor.parseEditorState(editorState as any)) // This should commit the editor state immediately
-    } catch (e) {
-      console.error('getLexicalToMarkdown: ERROR parsing editor state', e)
-    }
-
-    let markdown: string = ''
-    headlessEditor.getEditorState().read(() => {
-      markdown = $convertToMarkdownString(allTransformers)
-    })
-
-    return markdown
-  }
-  return lexicalToMarkdown
 }
