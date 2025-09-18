@@ -27,7 +27,12 @@ export const updateResourceTool = (
     overrideLock: boolean = true,
     filePath?: string,
     overwriteExistingFiles: boolean = false,
-  ) => {
+  ): Promise<{
+    content: Array<{
+      text: string
+      type: 'text'
+    }>
+  }> => {
     const payload = req.payload
 
     if (verboseLogs) {
@@ -48,18 +53,32 @@ export const updateResourceTool = (
         }
       } catch (_parseError) {
         payload.logger.error(`[payload-mcp] Invalid JSON data provided: ${data}`)
-        return {
+        const response = {
           content: [{ type: 'text' as const, text: 'Error: Invalid JSON data provided' }],
+        }
+        return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
+          response) as {
+          content: Array<{
+            text: string
+            type: 'text'
+          }>
         }
       }
 
       // Validate that either id or where is provided
       if (!id && !where) {
         payload.logger.error('[payload-mcp] Either id or where clause must be provided')
-        return {
+        const response = {
           content: [
             { type: 'text' as const, text: 'Error: Either id or where clause must be provided' },
           ],
+        }
+        return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
+          response) as {
+          content: Array<{
+            text: string
+            type: 'text'
+          }>
         }
       }
 
@@ -73,8 +92,15 @@ export const updateResourceTool = (
           }
         } catch (_parseError) {
           payload.logger.error(`[payload-mcp] Invalid where clause JSON: ${where}`)
-          return {
+          const response = {
             content: [{ type: 'text' as const, text: 'Error: Invalid JSON in where clause' }],
+          }
+          return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
+            response) as {
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
           }
         }
       }
@@ -106,7 +132,7 @@ export const updateResourceTool = (
           payload.logger.info(`[payload-mcp] Successfully updated document with ID: ${id}`)
         }
 
-        return {
+        const response = {
           content: [
             {
               type: 'text' as const,
@@ -117,6 +143,14 @@ ${JSON.stringify(result, null, 2)}
 \`\`\``,
             },
           ],
+        }
+
+        return (collections?.[collectionSlug]?.overrideResponse?.(response, result, req) ||
+          response) as {
+          content: Array<{
+            text: string
+            type: 'text'
+          }>
         }
       } else {
         // Multiple documents update
@@ -169,13 +203,24 @@ ${JSON.stringify(errors, null, 2)}
 \`\`\``
         }
 
-        return {
+        const response = {
           content: [
             {
               type: 'text' as const,
               text: responseText,
             },
           ],
+        }
+
+        return (collections?.[collectionSlug]?.overrideResponse?.(
+          response,
+          { docs, errors },
+          req,
+        ) || response) as {
+          content: Array<{
+            text: string
+            type: 'text'
+          }>
         }
       }
     } catch (error) {
@@ -184,13 +229,20 @@ ${JSON.stringify(errors, null, 2)}
         `[payload-mcp] Error updating resource in ${collectionSlug}: ${errorMessage}`,
       )
 
-      return {
+      const response = {
         content: [
           {
             type: 'text' as const,
             text: `Error updating resource in collection "${collectionSlug}": ${errorMessage}`,
           },
         ],
+      }
+
+      return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) || response) as {
+        content: Array<{
+          text: string
+          type: 'text'
+        }>
       }
     }
   }

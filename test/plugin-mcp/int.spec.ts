@@ -324,7 +324,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
     expect(json).toBeDefined()
     expect(json.result).toBeDefined()
-    expect(json.result.content).toHaveLength(1)
+    expect(json.result.content).toHaveLength(2)
     expect(json.result.content[0].type).toBe('text')
     expect(json.result.content[0].text).toContain(
       'Resource created successfully in collection "posts"!',
@@ -333,6 +333,8 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(json.result.content[0].text).toContain('```json')
     expect(json.result.content[0].text).toContain('"title": "Title Override: Test Post"')
     expect(json.result.content[0].text).toContain('"content": "Content for test post."')
+    expect(json.result.content[1].type).toBe('text')
+    expect(json.result.content[1].text).toContain('Override MCP response for Posts!')
   })
 
   it('should call findPosts', async () => {
@@ -370,12 +372,14 @@ describe('@payloadcms/plugin-mcp', () => {
 
     expect(json).toBeDefined()
     expect(json.result).toBeDefined()
-    expect(json.result.content).toHaveLength(1)
+    expect(json.result.content).toHaveLength(2)
     expect(json.result.content[0].type).toBe('text')
     expect(json.result.content[0].text).toContain('Collection: "posts"')
     expect(json.result.content[0].text).toContain('Total: 1 documents')
     expect(json.result.content[0].text).toContain('Page: 1 of 1')
     expect(json.result.content[0].text).toContain('```json')
     expect(json.result.content[0].text).toContain('"title": "Test Post for Finding"')
+    expect(json.result.content[1].type).toBe('text')
+    expect(json.result.content[1].text).toContain('Override MCP response for Posts!')
   })
 })
