@@ -77,21 +77,35 @@ export default config
 | `collections[slug].enabled.create`     | `boolean`           | Whether to allow the LLM to create documents in the collection.                                         |
 | `collections[slug].enabled.update`     | `boolean`           | Whether to allow the LLM to update documents in the collection.                                         |
 | `collections[slug].enabled.delete`     | `boolean`           | Whether to allow the LLM to delete documents in the collection.                                         |
+| `disabled`                             | `boolean`           | Disable the MCP plugin while keeping database schema consistent.                                        |
+| `overrideApiKeyCollection`             | `function`          | A function that allows you to override the automatically generated API Keys collection.                 |
 | `mcp`                                  | `object`            | MCP options that allow you to customize the MCP server.                                                 |
 | `mcp.tools`                            | `array`             | An array of custom tools to add to the MCP server.                                                      |
 | `mcp.tools.name`                       | `string`            | The name of the tool.                                                                                   |
 | `mcp.tools.description`                | `string`            | The description of the tool.                                                                            |
 | `mcp.tools.handler`                    | `function`          | The handler function for the tool.                                                                      |
-| `mcp.tools.parameters`                 | `object`            | The parameters for the tool.                                                                            |
+| `mcp.tools.parameters`                 | `object`            | The parameters for the tool (Zod schema).                                                               |
+| `mcp.prompts`                          | `array`             | An array of custom prompts to add to the MCP server.                                                    |
+| `mcp.prompts.name`                     | `string`            | The name of the prompt.                                                                                 |
+| `mcp.prompts.title`                    | `string`            | The title of the prompt (used by LLMs to determine when to use it).                                     |
+| `mcp.prompts.description`              | `string`            | The description of the prompt.                                                                          |
+| `mcp.prompts.handler`                  | `function`          | The handler function for the prompt.                                                                    |
+| `mcp.prompts.argsSchema`               | `object`            | The arguments schema for the prompt (Zod schema).                                                       |
+| `mcp.resources`                        | `array`             | An array of custom resources to add to the MCP server.                                                  |
+| `mcp.resources.name`                   | `string`            | The name of the resource.                                                                               |
+| `mcp.resources.title`                  | `string`            | The title of the resource (used by LLMs to determine when to use it).                                   |
+| `mcp.resources.description`            | `string`            | The description of the resource.                                                                        |
+| `mcp.resources.handler`                | `function`          | The handler function for the resource.                                                                  |
+| `mcp.resources.uri`                    | `string or object`  | The URI of the resource (can be a string or ResourceTemplate for dynamic URIs).                         |
+| `mcp.resources.mimeType`               | `string`            | The MIME type of the resource.                                                                          |
 | `mcp.handlerOptions`                   | `object`            | The handler options for the MCP server.                                                                 |
-| `mcp.handlerOptions.basePath`          | `string`            | The base path for the MCP server.                                                                       |
-| `mcp.handlerOptions.verboseLogs`       | `boolean`           | Whether to log verbose logs to the console.                                                             |
-| `mcp.handlerOptions.maxDuration`       | `number`            | The maximum duration for the MCP server requests.                                                       |
-| `mcp.handlerOptions.redisUrl`          | `string`            | The Redis URL for the MCP server for SSE support.                                                       |
+| `mcp.handlerOptions.basePath`          | `string`            | The base path for the MCP server (default: '/api').                                                     |
+| `mcp.handlerOptions.verboseLogs`       | `boolean`           | Whether to log verbose logs to the console (default: false).                                            |
+| `mcp.handlerOptions.maxDuration`       | `number`            | The maximum duration for the MCP server requests (default: 60).                                         |
 | `mcp.serverOptions`                    | `object`            | The server options for the MCP server.                                                                  |
 | `mcp.serverOptions.serverInfo`         | `object`            | The server info for the MCP server.                                                                     |
-| `mcp.serverOptions.serverInfo.name`    | `string`            | The name of the MCP server.                                                                             |
-| `mcp.serverOptions.serverInfo.version` | `string`            | The version of the MCP server.                                                                          |
+| `mcp.serverOptions.serverInfo.name`    | `string`            | The name of the MCP server (default: 'Payload MCP Server').                                             |
+| `mcp.serverOptions.serverInfo.version` | `string`            | The version of the MCP server (default: '1.0.0').                                                       |
 
 ```ts
 pluginMCP({
@@ -102,8 +116,8 @@ pluginMCP({
         create: true,
       },
       description: 'This is a Payload collection with Post documents.',
-      override: (original) => {
-        console.log('[Override MCP resource call for Posts]:', original)
+      override: (original, req) => {
+        req.payload.logger.info('[Override MCP resource call for Posts]:', original)
         return { ...original, myCustomOverrideProp: true }
       },
     },
@@ -156,6 +170,223 @@ pluginMCP({
         }).shape,
       },
     ],
+    prompts: [
+      {
+        name: 'echo',
+        title: 'Echo Prompt',
+        description: 'Creates a prompt to process a message',
+        argsSchema: {
+          message: z.string().describe('The message to process')
+        },
+        handler: ({ message }: { message: string }) => ({
+          messages: [
+            {
+              content: {
+                type: 'text',
+                text: `Please process this message: ${message}`,
+              },
+              role: 'user',
+            },
+          ],
+        }),
+      },
+    ],
+    resources: [
+      // Static resource
+      {
+        name: 'data',
+        title: 'Data',
+        description: 'Data is a resource that contains special data.',
+        uri: 'data://app',
+        mimeType: 'text/plain',
+        handler: (uri) => ({
+          contents: [
+            {
+              uri: uri.href,
+              text: 'My special data.',
+            },
+          ],
+        }),
+      },
+      // Dynamic resource with template
+      {
+        name: 'dataByID',
+        title: 'Data By ID',
+        description: 'Data resource with dynamic ID parameter.',
+        uri: new ResourceTemplate('data://app/{id}', { list: undefined }),
+        mimeType: 'text/plain',
+        handler: (uri, { id }) => ({
+          contents: [
+            {
+              uri: uri.href,
+              text: `My special data for ID: ${id}`,
+            },
+          ],
+        }),
+      },
+    ],
   },
 }),
+```
+
+## Override API Keys Collection
+
+The plugin automatically creates an **API Keys** collection that provides high-resolution control over MCP capabilities. This collection allows admins to:
+
+- Create API keys for MCP clients
+- Allow or disallow specific MCP capabilities in real-time
+- Control which collections can be accessed via MCP
+- Enable or disable custom tools
+
+You can customize this collection using the `overrideApiKeyCollection` option:
+
+```ts
+pluginMCP({
+  overrideApiKeyCollection: (collection) => {
+    // Add custom fields to the API Keys collection
+    collection.fields.push({
+      name: 'department',
+      type: 'select',
+      options: [
+        { label: 'Development', value: 'dev' },
+        { label: 'Marketing', value: 'marketing' },
+      ],
+    })
+    return collection
+  },
+  // ... other options
+})
+```
+
+## Custom Prompts
+
+Prompts allow LLMs to generate structured messages for specific tasks. Each prompt defines a schema for arguments and returns formatted messages:
+
+```ts
+prompts: [
+  {
+    name: 'reviewContent',
+    title: 'Content Review Prompt',
+    description: 'Creates a prompt for reviewing content quality',
+    argsSchema: {
+      content: z.string().describe('The content to review'),
+      criteria: z.array(z.string()).describe('Review criteria'),
+    },
+    handler: ({ content, criteria }) => ({
+      messages: [
+        {
+          content: {
+            type: 'text',
+            text: `Please review this content based on the following criteria: ${criteria.join(', ')}\n\nContent: ${content}`,
+          },
+          role: 'user',
+        },
+      ],
+    }),
+  },
+]
+```
+
+## Custom Resources
+
+Resources provide access to data or content that LLMs can read. They can be static or dynamic with parameterized URIs:
+
+```ts
+resources: [
+  // Static resource
+  {
+    name: 'guidelines',
+    title: 'Content Guidelines',
+    description: 'Company content creation guidelines',
+    uri: 'guidelines://company',
+    mimeType: 'text/markdown',
+    handler: (uri) => ({
+      contents: [
+        {
+          uri: uri.href,
+          text: '# Content Guidelines\n\n1. Keep it concise\n2. Use clear language',
+        },
+      ],
+    }),
+  },
+
+  // Dynamic resource with template
+  {
+    name: 'userProfile',
+    title: 'User Profile',
+    description: 'Access user profile information',
+    uri: new ResourceTemplate('users://profile/{userId}', { list: undefined }),
+    mimeType: 'application/json',
+    handler: async (uri, { userId }) => {
+      // Fetch user data from your system
+      const userData = await getUserById(userId)
+      return {
+        contents: [
+          {
+            uri: uri.href,
+            text: JSON.stringify(userData, null, 2),
+          },
+        ],
+      }
+    },
+  },
+]
+```
+
+### Data Override Example
+
+Use override functions to modify data before it's processed:
+
+```ts
+collections: {
+  posts: {
+    enabled: true,
+    override: (original, req) => {
+      // Log the operation
+      req.payload.logger.info('MCP operation on posts:', original)
+
+      // Sanitize or validate data
+      const sanitized = {
+        ...original,
+        title: sanitizeTitle(original.title),
+        publishedAt: original.publishedAt || new Date().toISOString(),
+      }
+
+      return sanitized
+    },
+  },
+}
+```
+
+### Custom Tool with Database Access
+
+```ts
+tools: [
+  {
+    name: 'getPostStats',
+    description: 'Get statistics about posts in the system',
+    handler: async (args, { payload }) => {
+      const stats = await payload.find({
+        collection: 'posts',
+        where: {
+          createdAt: {
+            greater_than: args.since,
+          },
+        },
+      })
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Found ${stats.totalDocs} posts created since ${args.since}`,
+          },
+        ],
+      }
+    },
+    parameters: z.object({
+      since: z.string().describe('ISO date string for filtering posts'),
+    }).shape,
+  },
+]
 ```
