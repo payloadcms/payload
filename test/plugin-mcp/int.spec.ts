@@ -146,9 +146,12 @@ describe('@payloadcms/plugin-mcp', () => {
 
     const streamJSONString = await fetchStreamResponse(request)
 
-    const json = JSON.parse(streamJSONString)
-
-    expect(json).toBeDefined()
+    try {
+      const json = JSON.parse(streamJSONString as string)
+      expect(json).toBeDefined()
+    } catch (error) {
+      expect(error).not.toBeDefined()
+    }
   })
 
   it('should list tools', async () => {
