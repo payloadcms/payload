@@ -561,6 +561,7 @@ export const viTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Chỉ được sửa đổi',
     moreVersions: 'Thêm phiên bản...',
     noFurtherVersionsFound: 'Không tìm thấy phiên bản cũ hơn',
+    noLabelGroup: 'Nhóm Chưa có tên',
     noRowsFound: 'Không tìm thấy: {{label}}',
     noRowsSelected: 'Không có {{label}} được chọn',
     preview: 'Bản xem trước',

@@ -7,7 +7,7 @@ import type {
   ServerFunction,
 } from 'payload'
 
-import { formatErrors } from 'payload'
+import { canAccessAdmin, formatErrors } from 'payload'
 import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
@@ -49,40 +49,10 @@ export const buildFormStateHandler: ServerFunction<
 > = async (args) => {
   const { req } = args
 
-  const incomingUserSlug = req.user?.collection
-  const adminUserSlug = req.payload.config.admin.user
-
   try {
-    // If we have a user slug, test it against the functions
-    if (incomingUserSlug) {
-      const adminAccessFunction = req.payload.collections[incomingUserSlug].config.access?.admin
-
-      // Run the admin access function from the config if it exists
-      if (adminAccessFunction) {
-        const canAccessAdmin = await adminAccessFunction({ req })
-
-        if (!canAccessAdmin) {
-          throw new Error('Unauthorized')
-        }
-        // Match the user collection to the global admin config
-      } else if (adminUserSlug !== incomingUserSlug) {
-        throw new Error('Unauthorized')
-      }
-    } else {
-      const hasUsers = await req.payload.find({
-        collection: adminUserSlug,
-        depth: 0,
-        limit: 1,
-        pagination: false,
-      })
-
-      // If there are users, we should not allow access because of /create-first-user
-      if (hasUsers.docs.length) {
-        throw new Error('Unauthorized')
-      }
-    }
-
+    await canAccessAdmin({ req })
     const res = await buildFormState(args)
+
     return res
   } catch (err) {
     req.payload.logger.error({ err, msg: `There was an error building form state` })
@@ -128,6 +98,7 @@ export const buildFormState = async (
     returnLockStatus,
     schemaPath = collectionSlug || globalSlug,
     select,
+    skipClientConfigAuth,
     skipValidation,
     updateLastEdited,
   } = args
@@ -147,7 +118,12 @@ export const buildFormState = async (
 
   const clientSchemaMap = getClientSchemaMap({
     collectionSlug,
-    config: getClientConfig({ config, i18n, importMap: req.payload.importMap }),
+    config: getClientConfig({
+      config,
+      i18n,
+      importMap: req.payload.importMap,
+      user: skipClientConfigAuth ? true : req.user,
+    }),
     globalSlug,
     i18n,
     payload,

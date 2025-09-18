@@ -243,11 +243,15 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       code: 'code',
       date: '2021-04-01T00:00:00.000Z',
       email: 'email@email.com',
+      textInUnnamedGroup: 'textInUnnamedGroup',
+      textInUnnamedLabeledGroup: 'textInUnnamedLabeledGroup',
       group: {
         textInGroup: 'textInGroup',
       },
       namedTab1: {
         textInNamedTab1: 'textInNamedTab1',
+        textInNamedTab1ReadFalse: 'textInNamedTab1ReadFalse',
+        textInNamedTab1UpdateFalse: 'textInNamedTab1UpdateFalse',
       },
       number: 1,
       point: [1, 2],
@@ -276,6 +280,9 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       textInCollapsible: 'textInCollapsible',
       textInRow: 'textInRow',
       textInUnnamedTab2: 'textInUnnamedTab2',
+      textInRowInUnnamedTab: 'textInRowInUnnamedTab',
+      textInRowInUnnamedTabUpdateFalse: 'textInRowInUnnamedTabUpdateFalse',
+
       textCannotRead: 'textCannotRead',
       relationshipPolymorphic: {
         relationTo: 'text',
@@ -381,11 +388,15 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       code: 'code2',
       date: '2023-04-01T00:00:00.000Z',
       email: 'email2@email.com',
+      textInUnnamedGroup: 'textInUnnamedGroup2',
+      textInUnnamedLabeledGroup: 'textInUnnamedLabeledGroup2',
       group: {
         textInGroup: 'textInGroup2',
       },
       namedTab1: {
         textInNamedTab1: 'textInNamedTab12',
+        textInNamedTab1ReadFalse: 'textInNamedTab1ReadFalse2',
+        textInNamedTab1UpdateFalse: 'textInNamedTab1UpdateFalse2',
       },
       number: 2,
       json: {
@@ -439,6 +450,9 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       textInRow: 'textInRow2',
       textCannotRead: 'textCannotRead2',
       textInUnnamedTab2: 'textInUnnamedTab22',
+      textInRowInUnnamedTab: 'textInRowInUnnamedTab2',
+      textInRowInUnnamedTabUpdateFalse: 'textInRowInUnnamedTabUpdateFalse2',
+
       upload: uploadedImage2,
       uploadHasMany: [uploadedImage, uploadedImage2],
     },

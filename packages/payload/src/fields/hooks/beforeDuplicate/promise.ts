@@ -65,7 +65,7 @@ export const promise = async <T>({
 
     // Run field beforeDuplicate hooks.
     // These hooks are responsible for resetting the `id` field values of array and block rows. See `baseIDField`.
-    if (Array.isArray(field.hooks?.beforeDuplicate)) {
+    if (Array.isArray('hooks' in field && field.hooks?.beforeDuplicate)) {
       if (fieldIsLocalized) {
         const localeData: JsonObject = {}
 
@@ -90,8 +90,10 @@ export const promise = async <T>({
           }
 
           let hookResult
-          for (const hook of field.hooks.beforeDuplicate) {
-            hookResult = await hook(beforeDuplicateArgs)
+          if ('hooks' in field && field.hooks?.beforeDuplicate) {
+            for (const hook of field.hooks.beforeDuplicate) {
+              hookResult = await hook(beforeDuplicateArgs)
+            }
           }
 
           if (typeof hookResult !== 'undefined') {
@@ -121,8 +123,10 @@ export const promise = async <T>({
         }
 
         let hookResult
-        for (const hook of field.hooks.beforeDuplicate) {
-          hookResult = await hook(beforeDuplicateArgs)
+        if ('hooks' in field && field.hooks?.beforeDuplicate) {
+          for (const hook of field.hooks.beforeDuplicate) {
+            hookResult = await hook(beforeDuplicateArgs)
+          }
         }
 
         if (typeof hookResult !== 'undefined') {

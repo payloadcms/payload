@@ -359,6 +359,9 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       updateResultsEffectEvent({
         filterOptions,
         lastLoadedPage: {},
+        onSuccess: () => {
+          setIsLoading(false)
+        },
         search: searchArg,
         sort: true,
         ...(hasManyArg === true
@@ -379,6 +382,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const handleInputChange = useCallback(
     (options: { search: string } & HasManyValueUnion) => {
       if (search !== options.search) {
+        setIsLoading(true)
         setLastLoadedPage({})
         updateSearch(options)
       }
@@ -814,10 +818,14 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 }
               }}
               onMenuScrollToBottom={() => {
+                setIsLoading(true)
                 updateResultsEffectEvent({
                   filterOptions,
                   lastFullyLoadedRelation,
                   lastLoadedPage,
+                  onSuccess: () => {
+                    setIsLoading(false)
+                  },
                   search,
                   sort: false,
                   ...(hasMany === true

@@ -1,4 +1,4 @@
-import type { SQL } from 'drizzle-orm'
+import type { SQL, Table } from 'drizzle-orm'
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
 import type {
   FlattenedBlock,
@@ -8,7 +8,7 @@ import type {
   TextField,
 } from 'payload'
 
-import { and, eq, like, sql } from 'drizzle-orm'
+import { and, eq, getTableName, like, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
 import { APIError, getFieldByPath } from 'payload'
 import { fieldShouldBeLocalized, tabHasName } from 'payload/shared'
@@ -537,13 +537,22 @@ export const getTableColumnFromPath = ({
         if (Array.isArray(field.relationTo) || field.hasMany) {
           let relationshipFields: FlattenedField[]
           const relationTableName = `${rootTableName}${adapter.relationshipsSuffix}`
-          const {
-            newAliasTable: aliasRelationshipTable,
-            newAliasTableName: aliasRelationshipTableName,
-          } = getTableAlias({
-            adapter,
-            tableName: relationTableName,
-          })
+
+          const existingJoin = joins.find((e) => e.queryPath === `${constraintPath}.${field.name}`)
+
+          let aliasRelationshipTable: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+          let aliasRelationshipTableName: string
+          if (existingJoin) {
+            aliasRelationshipTable = existingJoin.table
+            aliasRelationshipTableName = getTableName(existingJoin.table)
+          } else {
+            const res = getTableAlias({
+              adapter,
+              tableName: relationTableName,
+            })
+            aliasRelationshipTable = res.newAliasTable
+            aliasRelationshipTableName = res.newAliasTableName
+          }
 
           if (selectLocale && isFieldLocalized && adapter.payload.config.localization) {
             selectFields._locale = aliasRelationshipTable.locale

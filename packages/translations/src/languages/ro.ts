@@ -575,6 +575,7 @@ export const roTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Modificat doar',
     moreVersions: 'Mai multe versiuni...',
     noFurtherVersionsFound: 'Nu s-au găsit alte versiuni',
+    noLabelGroup: 'Grup Fără Nume',
     noRowsFound: 'Nu s-a găsit niciun {{label}}',
     noRowsSelected: 'Niciun {{etichetă}} selectat',
     preview: 'Previzualizare',

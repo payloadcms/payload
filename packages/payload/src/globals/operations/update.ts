@@ -77,6 +77,23 @@ export const updateOperation = async <
   try {
     const shouldCommit = !disableTransaction && (await initTransaction(req))
 
+    // /////////////////////////////////////
+    // beforeOperation - Global
+    // /////////////////////////////////////
+
+    if (globalConfig.hooks?.beforeOperation?.length) {
+      for (const hook of globalConfig.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            context: args.req.context,
+            global: globalConfig,
+            operation: 'update',
+            req: args.req,
+          })) || args
+      }
+    }
+
     let { data } = args
 
     const shouldSaveDraft = Boolean(draftArg && globalConfig.versions?.drafts)

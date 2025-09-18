@@ -569,6 +569,7 @@ export const azTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Yalnızca dəyişdirilmişdir',
     moreVersions: 'Daha çox versiyalar...',
     noFurtherVersionsFound: 'Başqa versiyalar tapılmadı',
+    noLabelGroup: 'Adlandırılmamış Qrup',
     noRowsFound: 'Heç bir {{label}} tapılmadı',
     noRowsSelected: 'Heç bir {{label}} seçilməyib',
     preview: 'Öncədən baxış',

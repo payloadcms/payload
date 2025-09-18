@@ -7,7 +7,7 @@ import { isEligibleRequest } from './isEligibleRequest.js'
 import { processMultipart } from './processMultipart.js'
 import { debugLog } from './utilities.js'
 
-const DEFAULT_OPTIONS: FetchAPIFileUploadOptions = {
+const DEFAULT_UPLOAD_OPTIONS: FetchAPIFileUploadOptions = {
   abortOnLimit: false,
   createParentPath: false,
   debug: false,
@@ -53,16 +53,22 @@ type FetchAPIFileUpload = (args: {
   options?: FetchAPIFileUploadOptions
   request: Request
 }) => Promise<FetchAPIFileUploadResponse>
-export const fetchAPIFileUpload: FetchAPIFileUpload = async ({ options, request }) => {
-  const uploadOptions: FetchAPIFileUploadOptions = { ...DEFAULT_OPTIONS, ...options }
+
+export const processMultipartFormdata: FetchAPIFileUpload = async ({
+  options: incomingOptions,
+  request,
+}) => {
+  const options: FetchAPIFileUploadOptions = { ...DEFAULT_UPLOAD_OPTIONS, ...incomingOptions }
+
   if (!isEligibleRequest(request)) {
-    debugLog(uploadOptions, 'Request is not eligible for file upload!')
+    debugLog(options, 'Request is not eligible for file upload!')
+
     return {
       error: new APIError('Request is not eligible for file upload', 500),
       fields: undefined!,
       files: undefined!,
     }
   } else {
-    return processMultipart({ options: uploadOptions, request })
+    return processMultipart({ options, request })
   }
 }

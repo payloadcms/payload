@@ -92,7 +92,9 @@ type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
 
 export type BeforeOperationHook = (args: {
   args?: any
-  /** The collection which this hook is being run on */
+  /**
+   *  The collection which this hook is being run on
+   */
   collection: SanitizedCollectionConfig
   context: RequestContext
   /**
@@ -383,6 +385,15 @@ export type CollectionAdminOptions = {
    * @default false
    */
   disableCopyToLocale?: boolean
+  /**
+   * Performance opt-in. If true, will use the [Select API](https://payloadcms.com/docs/queries/select) when
+   * loading the list view to query only the active columns, as opposed to the entire documents.
+   * If your cells require specific fields that may be unselected, such as within hooks, etc.,
+   * use `forceSelect` in conjunction with this property.
+   *
+   * @experimental This is an experimental feature and may change in the future. Use at your own discretion.
+   */
+  enableListViewSelectAPI?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
@@ -393,10 +404,10 @@ export type CollectionAdminOptions = {
    */
   group?: false | Record<string, string> | string
   /**
-   * @experimental This option is currently in beta and may change in future releases and/or contain bugs.
-   * Use at your own risk.
    * @description Enable grouping by a field in the list view.
    * Uses `payload.findDistinct` under the hood to populate the group-by options.
+   *
+   * @experimental This option is currently in beta and may change in future releases. Use at your own discretion.
    */
   groupBy?: boolean
   /**
