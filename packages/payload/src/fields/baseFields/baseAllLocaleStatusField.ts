@@ -2,7 +2,7 @@ import type { Field } from '../config/types.js'
 
 export const baseAllLocaleStatusField: Field[] = [
   {
-    name: '_allLocaleStatus',
+    name: '_localeStatus',
     type: 'json',
     admin: {
       components: {
@@ -18,7 +18,11 @@ export const baseAllLocaleStatusField: Field[] = [
           if (id && collection && collection.versions) {
             const version = await req.payload.findVersions({
               collection: collection.slug,
+              depth: 0,
               limit: 1,
+              select: {
+                localeStatus: true,
+              },
               where: {
                 parent: {
                   equals: id,
