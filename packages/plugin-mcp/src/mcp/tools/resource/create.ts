@@ -16,7 +16,14 @@ export const createResourceTool = (
   collections: PluginMCPServerConfig['collections'],
   schema: JSONSchema4,
 ) => {
-  const tool = async (data: string) => {
+  const tool = async (
+    data: string,
+  ): Promise<{
+    content: Array<{
+      text: string
+      type: 'text'
+    }>
+  }> => {
     const payload = req.payload
 
     if (verboseLogs) {
@@ -53,7 +60,7 @@ export const createResourceTool = (
         )
       }
 
-      return {
+      const response = {
         content: [
           {
             type: 'text' as const,
@@ -65,19 +72,34 @@ ${JSON.stringify(result, null, 2)}
           },
         ],
       }
+
+      return (collections?.[collectionSlug]?.overrideResponse?.(response, result, req) ||
+        response) as {
+        content: Array<{
+          text: string
+          type: 'text'
+        }>
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       payload.logger.error(
         `[payload-mcp] Error creating resource in ${collectionSlug}: ${errorMessage}`,
       )
 
-      return {
+      const response = {
         content: [
           {
             type: 'text' as const,
             text: `Error creating resource in collection "${collectionSlug}": ${errorMessage}`,
           },
         ],
+      }
+
+      return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) || response) as {
+        content: Array<{
+          text: string
+          type: 'text'
+        }>
       }
     }
   }

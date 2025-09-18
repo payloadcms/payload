@@ -14,7 +14,16 @@ export const deleteResourceTool = (
   collectionSlug: string,
   collections: PluginMCPServerConfig['collections'],
 ) => {
-  const tool = async (id?: string, where?: string, depth: number = 0) => {
+  const tool = async (
+    id?: string,
+    where?: string,
+    depth: number = 0,
+  ): Promise<{
+    content: Array<{
+      text: string
+      type: 'text'
+    }>
+  }> => {
     const payload = req.payload
 
     if (verboseLogs) {
@@ -27,10 +36,17 @@ export const deleteResourceTool = (
       // Validate that either id or where is provided
       if (!id && !where) {
         payload.logger.error('[payload-mcp] Either id or where clause must be provided')
-        return {
+        const response = {
           content: [
             { type: 'text' as const, text: 'Error: Either id or where clause must be provided' },
           ],
+        }
+        return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
+          response) as {
+          content: Array<{
+            text: string
+            type: 'text'
+          }>
         }
       }
 
@@ -44,8 +60,15 @@ export const deleteResourceTool = (
           }
         } catch (_parseError) {
           payload.logger.warn(`[payload-mcp] Invalid where clause JSON: ${where}`)
-          return {
+          const response = {
             content: [{ type: 'text' as const, text: 'Error: Invalid JSON in where clause' }],
+          }
+          return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
+            response) as {
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
           }
         }
       }
@@ -79,7 +102,7 @@ export const deleteResourceTool = (
           payload.logger.info(`[payload-mcp] Successfully deleted document with ID: ${id}`)
         }
 
-        return {
+        const response = {
           content: [
             {
               type: 'text' as const,
@@ -90,6 +113,14 @@ ${JSON.stringify(result, null, 2)}
 \`\`\``,
             },
           ],
+        }
+
+        return (collections?.[collectionSlug]?.overrideResponse?.(response, result, req) ||
+          response) as {
+          content: Array<{
+            text: string
+            type: 'text'
+          }>
         }
       } else {
         // Multiple documents deletion
@@ -122,13 +153,24 @@ ${JSON.stringify(errors, null, 2)}
 \`\`\``
         }
 
-        return {
+        const response = {
           content: [
             {
               type: 'text' as const,
               text: responseText,
             },
           ],
+        }
+
+        return (collections?.[collectionSlug]?.overrideResponse?.(
+          response,
+          { docs, errors },
+          req,
+        ) || response) as {
+          content: Array<{
+            text: string
+            type: 'text'
+          }>
         }
       }
     } catch (error) {
@@ -137,13 +179,20 @@ ${JSON.stringify(errors, null, 2)}
         `[payload-mcp] Error deleting resource from ${collectionSlug}: ${errorMessage}`,
       )
 
-      return {
+      const response = {
         content: [
           {
             type: 'text' as const,
             text: `Error deleting resource from collection "${collectionSlug}": ${errorMessage}`,
           },
         ],
+      }
+
+      return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) || response) as {
+        content: Array<{
+          text: string
+          type: 'text'
+        }>
       }
     }
   }

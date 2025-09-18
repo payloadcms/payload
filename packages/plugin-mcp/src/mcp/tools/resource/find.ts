@@ -20,7 +20,12 @@ export const findResourceTool = (
     page: number = 1,
     sort?: string,
     where?: string,
-  ) => {
+  ): Promise<{
+    content: Array<{
+      text: string
+      type: 'text'
+    }>
+  }> => {
     const payload = req.payload
 
     if (verboseLogs) {
@@ -40,8 +45,15 @@ export const findResourceTool = (
           }
         } catch (_parseError) {
           payload.logger.warn(`[payload-mcp] Invalid where clause JSON: ${where}`)
-          return {
+          const response = {
             content: [{ type: 'text' as const, text: 'Error: Invalid JSON in where clause' }],
+          }
+          return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
+            response) as {
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
           }
         }
       }
@@ -59,7 +71,7 @@ export const findResourceTool = (
             payload.logger.info(`[payload-mcp] Found document with ID: ${id}`)
           }
 
-          return {
+          const response = {
             content: [
               {
                 type: 'text' as const,
@@ -68,17 +80,32 @@ ${JSON.stringify(doc, null, 2)}`,
               },
             ],
           }
+
+          return (collections?.[collectionSlug]?.overrideResponse?.(response, doc, req) ||
+            response) as {
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
+          }
         } catch (_findError) {
           payload.logger.warn(
             `[payload-mcp] Document not found with ID: ${id} in collection: ${collectionSlug}`,
           )
-          return {
+          const response = {
             content: [
               {
                 type: 'text' as const,
                 text: `Error: Document with ID "${id}" not found in collection "${collectionSlug}"`,
               },
             ],
+          }
+          return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
+            response) as {
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
           }
         }
       }
@@ -116,7 +143,7 @@ Page: ${result.page} of ${result.totalPages}
         responseText += `\n\`\`\`json\n${JSON.stringify(doc, null, 2)}\n\`\`\``
       }
 
-      return {
+      const response = {
         content: [
           {
             type: 'text' as const,
@@ -124,18 +151,32 @@ Page: ${result.page} of ${result.totalPages}
           },
         ],
       }
+
+      return (collections?.[collectionSlug]?.overrideResponse?.(response, result, req) ||
+        response) as {
+        content: Array<{
+          text: string
+          type: 'text'
+        }>
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       payload.logger.error(
         `[payload-mcp] Error reading resources from collection ${collectionSlug}: ${errorMessage}`,
       )
-      return {
+      const response = {
         content: [
           {
             type: 'text' as const,
             text: `❌ **Error reading resources from collection "${collectionSlug}":** ${errorMessage}`,
           },
         ],
+      }
+      return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) || response) as {
+        content: Array<{
+          text: string
+          type: 'text'
+        }>
       }
     }
   }

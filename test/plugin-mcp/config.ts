@@ -50,8 +50,16 @@ export default buildConfigWithDefaults({
               ...original,
               title: `Title Override: ${original?.title as string}`,
             }
-            req.payload.logger.info('[Override MCP call for Posts]:', updatedOriginal)
+            req.payload.logger.info('[Override MCP call for Posts]:')
             return updatedOriginal
+          },
+          overrideResponse: (response, doc, req) => {
+            req.payload.logger.info('[Override MCP response for Posts]:')
+            response.content.push({
+              type: 'text',
+              text: `Override MCP response for Posts!`,
+            })
+            return response
           },
         },
         media: {
