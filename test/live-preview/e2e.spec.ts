@@ -284,10 +284,16 @@ describe('Live Preview', () => {
 
     await page.goto(pagesURLUtil.edit(testDoc.id))
 
-    await toggleLivePreview(page)
+    await toggleLivePreview(page, {
+      targetState: 'on',
+    })
 
     const titleField = page.locator('#field-title')
     const iframe = page.locator('iframe.live-preview-iframe')
+
+    await expect(iframe).toBeVisible()
+    const pattern1 = new RegExp(`/live-preview/${testDoc.slug}`)
+    await expect.poll(async () => iframe.getAttribute('src')).toMatch(pattern1)
 
     const slugField = page.locator('#field-slug')
     const newSlug = 'this-is-a-test-2'
@@ -296,8 +302,8 @@ describe('Live Preview', () => {
 
     // expect the iframe to have a new src that reflects the updated slug
     await expect(iframe).toBeVisible()
-    const pattern = new RegExp(`/live-preview/${ssrAutosavePagesSlug}/${newSlug}`)
-    await expect(iframe).toHaveAttribute('src', pattern)
+    const pattern2 = new RegExp(`/live-preview/${newSlug}`)
+    await expect.poll(async () => iframe.getAttribute('src')).toMatch(pattern2)
 
     const frame = page.frameLocator('iframe.live-preview-iframe').first()
 
@@ -418,7 +424,9 @@ describe('Live Preview', () => {
 
     await page.goto(ssrAutosavePagesURLUtil.edit(testDoc.id))
 
-    await toggleLivePreview(page)
+    await toggleLivePreview(page, {
+      targetState: 'on',
+    })
 
     const titleField = page.locator('#field-title')
     const iframe = page.locator('iframe.live-preview-iframe')
@@ -431,7 +439,7 @@ describe('Live Preview', () => {
     // expect the iframe to have a new src that reflects the updated slug
     await expect(iframe).toBeVisible()
     const pattern = new RegExp(`/live-preview/${ssrAutosavePagesSlug}/${newSlug}`)
-    await expect(iframe).toHaveAttribute('src', pattern)
+    await expect.poll(async () => iframe.getAttribute('src')).toMatch(pattern)
 
     const frame = page.frameLocator('iframe.live-preview-iframe').first()
 
