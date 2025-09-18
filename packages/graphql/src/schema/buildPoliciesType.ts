@@ -69,7 +69,7 @@ const buildFields = (label, fieldsToBuild) =>
         }
       }
 
-      if (!field.name && field.fields) {
+      if (!field.name && field.fields && field.fields.length) {
         const subFields = buildFields(label, field.fields)
 
         return {
@@ -82,12 +82,14 @@ const buildFields = (label, fieldsToBuild) =>
         return field.tabs.reduce(
           (fieldsWithTabFields, tab) => {
             if ('name' in tab) {
-              const tabName = formatName(tab.name)
-              fieldsWithTabFields[tabName] = {
-                type: new GraphQLObjectType({
-                  name: `${label}_${tabName}`,
-                  fields: buildFields(`${label}_${tabName}`, tab.fields),
-                }),
+              if (tab.fields.length) {
+                const tabName = formatName(tab.name)
+                fieldsWithTabFields[tabName] = {
+                  type: new GraphQLObjectType({
+                    name: `${label}_${tabName}`,
+                    fields: buildFields(`${label}_${tabName}`, tab.fields),
+                  }),
+                }
               }
               return fieldsWithTabFields
             }
