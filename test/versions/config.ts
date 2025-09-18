@@ -25,6 +25,7 @@ import AutosaveGlobal from './globals/Autosave.js'
 import AutosaveWithDraftButtonGlobal from './globals/AutosaveWithDraftButton.js'
 import DisablePublishGlobal from './globals/DisablePublish.js'
 import DraftGlobal from './globals/Draft.js'
+import DraftUnlimitedGlobal from './globals/DraftUnlimited.js'
 import DraftWithMaxGlobal from './globals/DraftWithMax.js'
 import LocalizedGlobal from './globals/LocalizedGlobal.js'
 import { MaxVersions } from './globals/MaxVersions.js'
@@ -66,6 +67,7 @@ export default buildConfigWithDefaults({
     DisablePublishGlobal,
     LocalizedGlobal,
     MaxVersions,
+    DraftUnlimitedGlobal,
   ],
   indexSortableFields: true,
   localization: {

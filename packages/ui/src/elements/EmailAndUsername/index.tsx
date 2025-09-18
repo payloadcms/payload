@@ -9,6 +9,7 @@ import React from 'react'
 import { EmailField } from '../../fields/Email/index.js'
 import { TextField } from '../../fields/Text/index.js'
 import './index.scss'
+import { FieldPathContext } from '../../forms/RenderFields/context.js'
 
 const baseClass = 'login-fields'
 type RenderEmailAndUsernameFieldsProps = {
@@ -79,36 +80,41 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
     return (
       <div className={[baseClass, className && className].filter(Boolean).join(' ')}>
         {showEmailField ? (
-          <EmailField
-            field={{
-              name: 'email',
-              admin: {
-                autoComplete: 'off',
-              },
-              label: t('general:email'),
-              required: !loginWithUsername || (loginWithUsername && loginWithUsername.requireEmail),
-            }}
-            path="email"
-            readOnly={readOnly || !emailPermissions.update}
-            schemaPath="email"
-            validate={email}
-          />
+          <FieldPathContext value="email">
+            <EmailField
+              field={{
+                name: 'email',
+                admin: {
+                  autoComplete: 'off',
+                },
+                label: t('general:email'),
+                required:
+                  !loginWithUsername || (loginWithUsername && loginWithUsername.requireEmail),
+              }}
+              path="email"
+              readOnly={readOnly || !emailPermissions.update}
+              schemaPath="email"
+              validate={email}
+            />
+          </FieldPathContext>
         ) : null}
         {showUsernameField && (
-          <TextField
-            field={{
-              name: 'username',
-              admin: {
-                autoComplete: 'off',
-              },
-              label: t('authentication:username'),
-              required: loginWithUsername && loginWithUsername.requireUsername,
-            }}
-            path="username"
-            readOnly={readOnly || !usernamePermissions.update}
-            schemaPath="username"
-            validate={username}
-          />
+          <FieldPathContext value="username">
+            <TextField
+              field={{
+                name: 'username',
+                admin: {
+                  autoComplete: 'off',
+                },
+                label: t('authentication:username'),
+                required: loginWithUsername && loginWithUsername.requireUsername,
+              }}
+              path="username"
+              readOnly={readOnly || !usernamePermissions.update}
+              schemaPath="username"
+              validate={username}
+            />
+          </FieldPathContext>
         )}
       </div>
     )

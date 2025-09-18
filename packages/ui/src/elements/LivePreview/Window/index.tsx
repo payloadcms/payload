@@ -43,12 +43,12 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   // Or it could be a separate popup window
   // We need to transmit data to both accordingly
   useEffect(() => {
-    if (!isLivePreviewing) {
+    if (!isLivePreviewing || !appIsReady) {
       return
     }
 
-    // For performance, do no reduce fields to values until after the iframe or popup has loaded
-    if (formState && window && 'postMessage' in window && appIsReady) {
+    // For performance, do not reduce fields to values until after the iframe or popup has loaded
+    if (formState) {
       const values = reduceFieldsToValues(formState, true)
 
       if (!values.id) {
@@ -95,7 +95,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   // This is because the event will ultimately trigger a server-side roundtrip
   // i.e., save, save draft, autosave, etc. will fire `router.refresh()`
   useEffect(() => {
-    if (!isLivePreviewing) {
+    if (!isLivePreviewing || !appIsReady) {
       return
     }
 
@@ -112,7 +112,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     if (previewWindowType === 'iframe' && iframeRef.current) {
       iframeRef.current.contentWindow?.postMessage(message, url)
     }
-  }, [mostRecentUpdate, iframeRef, popupRef, previewWindowType, url, isLivePreviewing])
+  }, [mostRecentUpdate, iframeRef, popupRef, previewWindowType, url, isLivePreviewing, appIsReady])
 
   if (previewWindowType === 'iframe') {
     return (

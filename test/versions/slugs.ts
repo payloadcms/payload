@@ -48,6 +48,8 @@ export const autosaveWithDraftButtonGlobal = 'autosave-with-draft-button-global'
 
 export const draftGlobalSlug = 'draft-global'
 
+export const draftUnlimitedGlobalSlug = 'draft-unlimited-global'
+
 export const draftWithMaxGlobalSlug = 'draft-with-max-global'
 
 export const globalSlugs = [autoSaveGlobalSlug, draftGlobalSlug]

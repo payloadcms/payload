@@ -79,11 +79,15 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     // Find
     // /////////////////////////////////////
 
+    const usePagination = pagination && limit !== 0
+    const sanitizedLimit = limit ?? (usePagination ? 10 : 0)
+    const sanitizedPage = page || 1
+
     const paginatedDocs = await payload.db.findGlobalVersions<T>({
       global: globalConfig.slug,
-      limit: limit ?? 10,
+      limit: sanitizedLimit,
       locale: locale!,
-      page: page || 1,
+      page: sanitizedPage,
       pagination,
       req,
       select,
