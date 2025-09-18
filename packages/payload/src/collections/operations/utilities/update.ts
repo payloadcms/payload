@@ -391,6 +391,7 @@ export const updateDocument = async <
           doc: result,
           operation: 'update',
           previousDoc: originalDoc,
+          previousDocWithLocales: docWithLocales,
           req,
         })) || result
     }

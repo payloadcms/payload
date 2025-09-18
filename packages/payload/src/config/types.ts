@@ -1174,7 +1174,6 @@ export type Config = {
    * ```
    */
   logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
-
   /**
    * Override the log level of errors for Payload's error handler or disable logging with `false`.
    * Levels can be any of the following: 'trace', 'debug', 'info', 'warn', 'error', 'fatal' or false.
@@ -1208,6 +1207,7 @@ export type Config = {
 
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void
+
   /**
    * An array of Payload plugins.
    *
@@ -1281,6 +1281,7 @@ export type Config = {
   sharp?: SharpDependency
   /** Send anonymous telemetry data about general usage. */
   telemetry?: boolean
+  treeView?: boolean
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: {
     /**
