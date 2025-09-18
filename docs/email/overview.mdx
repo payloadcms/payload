@@ -164,18 +164,26 @@ const email = await payload.sendEmail({
 
 Works with `@payloadcms/email-nodemailer` and any Nodemailer transport.
 
-```
+```ts
 await payload.sendEmail({
   to: 'user@example.com',
   subject: 'Your report',
   html: '<p>See attached.</p>',
   attachments: [
     // From a file path (local disk, mounted volume, etc.)
-    { filename: 'invoice.pdf', path: '/var/data/invoice.pdf', contentType: 'application/pdf' },
+    {
+      filename: 'invoice.pdf',
+      path: '/var/data/invoice.pdf',
+      contentType: 'application/pdf',
+    },
     // From a Buffer you generated at runtime
-    { filename: 'report.csv', content: Buffer.from('col1,col2\nA,B\n'), contentType: 'text/csv' },
+    {
+      filename: 'report.csv',
+      content: Buffer.from('col1,col2\nA,B\n'),
+      contentType: 'text/csv',
+    },
   ],
-});
+})
 ```
 
 Anything supported by Nodemailer’s attachments—streams, Buffers, URLs, content IDs for inline images (cid), etc.—will work here.
@@ -186,7 +194,7 @@ Works with @payloadcms/email-resend.
 
 For attachments from remote URLs
 
-```
+```ts
 await payload.sendEmail({
   to: 'user@example.com',
   subject: 'Your invoice',
@@ -198,15 +206,15 @@ await payload.sendEmail({
       filename: 'invoice-1234.pdf',
     },
   ],
-});
+})
 ```
 
 For a local file
 
-```
-import { readFile } from 'node:fs/promises';
+```ts
+import { readFile } from 'node:fs/promises'
 
-const pdf = await readFile('/var/data/invoice.pdf');
+const pdf = await readFile('/var/data/invoice.pdf')
 await payload.sendEmail({
   to: 'user@example.com',
   subject: 'Your invoice',
@@ -218,7 +226,7 @@ await payload.sendEmail({
       content: pdf.toString('base64'),
     },
   ],
-});
+})
 ```
 
 ## Using multiple mail providers

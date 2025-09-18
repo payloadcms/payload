@@ -84,8 +84,8 @@ standard unique index makes sense.
 
 Example:
 
-```
-import type { Field } from 'payload';
+```ts
+import type { Field } from 'payload'
 
 export const ItemsArray: Field = {
   name: 'items',
@@ -97,16 +97,16 @@ export const ItemsArray: Field = {
       // DO NOT use unique: true here; see note above
       validate: async (value, { data }) => {
         // value is the current 'code'; data.items is the full array
-        if (!value || !Array.isArray(data?.items)) return true;
-        const codes = data.items.map(i => (i?.code ?? '')).filter(Boolean);
+        if (!value || !Array.isArray(data?.items)) return true
+        const codes = data.items.map((i) => i?.code ?? '').filter(Boolean)
         const duplicates = new Set(
-          codes.filter((c, i) => codes.indexOf(c) !== i)
-        );
-        return duplicates.size === 0 || 'Codes in this array must be unique.';
+          codes.filter((c, i) => codes.indexOf(c) !== i),
+        )
+        return duplicates.size === 0 || 'Codes in this array must be unique.'
       },
     },
   ],
-};
+}
 ```
 
 ### filterOptions

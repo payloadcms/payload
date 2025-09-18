@@ -307,7 +307,7 @@ export const Media: CollectionConfig = {
 
 3. Dynamic thumbnails via hooks
 
-```
+```ts
 import type { CollectionConfig, AfterChangeHook, AfterReadHook } from 'payload'
 
 // Example helper that builds a CDN URL (your logic here)
@@ -323,7 +323,11 @@ const setThumbURL: AfterChangeHook = async ({ doc, operation }) => {
 
 const exposeThumbURL: AfterReadHook = async ({ doc }) => {
   // ensure the field is always present on reads
-  return { ...doc, thumbnailURL: doc.thumbnailURL ?? buildThumbURL({ filename: doc?.filename }) }
+  return {
+    ...doc,
+    thumbnailURL:
+      doc.thumbnailURL ?? buildThumbURL({ filename: doc?.filename }),
+  }
 }
 
 export const Media: CollectionConfig = {
@@ -339,7 +343,11 @@ export const Media: CollectionConfig = {
   },
   fields: [
     // store the dynamic URL (hidden from editors if you like)
-    { name: 'thumbnailURL', type: 'text', admin: { readOnly: true, condition: () => false } },
+    {
+      name: 'thumbnailURL',
+      type: 'text',
+      admin: { readOnly: true, condition: () => false },
+    },
   ],
 }
 ```
