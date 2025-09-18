@@ -94,11 +94,22 @@ type BulkUploadContext = {
   maxFiles: number
   onCancel: () => void
   onSuccess: (newDocs: JsonObject[], errorCount: number) => void
+  /**
+   * An array of collection slugs that can be selected in the collection dropdown (if applicable)
+   * @default null - collection cannot be selected
+   */
+  selectableCollections?: null | string[]
   setCollectionSlug: (slug: string) => void
   setInitialFiles: (files: FileList) => void
   setMaxFiles: (maxFiles: number) => void
   setOnCancel: (onCancel: BulkUploadContext['onCancel']) => void
   setOnSuccess: (onSuccess: BulkUploadContext['onSuccess']) => void
+  /**
+   * Set the collections that can be selected in the collection dropdown (if applicable)
+   *
+   * @default null - collection cannot be selected
+   */
+  setSelectableCollections: (collections: null | string[]) => void
 }
 
 const Context = React.createContext<BulkUploadContext>({
@@ -108,11 +119,13 @@ const Context = React.createContext<BulkUploadContext>({
   maxFiles: undefined,
   onCancel: () => null,
   onSuccess: () => null,
+  selectableCollections: null,
   setCollectionSlug: () => null,
   setInitialFiles: () => null,
   setMaxFiles: () => null,
   setOnCancel: () => null,
   setOnSuccess: () => null,
+  setSelectableCollections: () => null,
 })
 export function BulkUploadProvider({
   children,
@@ -121,16 +134,13 @@ export function BulkUploadProvider({
   readonly children: React.ReactNode
   readonly drawerSlugPrefix?: string
 }) {
+  const [selectableCollections, setSelectableCollections] = React.useState<null | string[]>(null)
   const [collection, setCollection] = React.useState<string>()
   const [onSuccessFunction, setOnSuccessFunction] = React.useState<BulkUploadContext['onSuccess']>()
   const [onCancelFunction, setOnCancelFunction] = React.useState<BulkUploadContext['onCancel']>()
   const [initialFiles, setInitialFiles] = React.useState<FileList>(undefined)
   const [maxFiles, setMaxFiles] = React.useState<number>(undefined)
   const drawerSlug = `${drawerSlugPrefix ? `${drawerSlugPrefix}-` : ''}${useBulkUploadDrawerSlug()}`
-
-  const setCollectionSlug: BulkUploadContext['setCollectionSlug'] = (slug) => {
-    setCollection(slug)
-  }
 
   const setOnSuccess: BulkUploadContext['setOnSuccess'] = (onSuccess) => {
     setOnSuccessFunction(() => onSuccess)
@@ -153,11 +163,13 @@ export function BulkUploadProvider({
             onSuccessFunction(docIDs, errorCount)
           }
         },
-        setCollectionSlug,
+        selectableCollections,
+        setCollectionSlug: setCollection,
         setInitialFiles,
         setMaxFiles,
         setOnCancel: setOnCancelFunction,
         setOnSuccess,
+        setSelectableCollections,
       }}
     >
       <React.Fragment>

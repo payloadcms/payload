@@ -5,8 +5,10 @@ import { useWindowInfo } from '@faceless-ui/window-info'
 import { isImage } from 'payload/shared'
 import React from 'react'
 
+import { SelectInput } from '../../../fields/Select/Input.js'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { XIcon } from '../../../icons/X/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { AnimateHeight } from '../../AnimateHeight/index.js'
 import { Button } from '../../Button/index.js'
@@ -18,9 +20,9 @@ import { createThumbnail } from '../../Thumbnail/createThumbnail.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import { Actions } from '../ActionsBar/index.js'
 import { AddFilesView } from '../AddFilesView/index.js'
+import './index.scss'
 import { useFormsManager } from '../FormsManager/index.js'
 import { useBulkUpload } from '../index.js'
-import './index.scss'
 
 const addMoreFilesDrawerSlug = 'bulk-upload-drawer--add-more-files'
 
@@ -68,12 +70,40 @@ export function FileSidebar() {
 
   const totalFileCount = isInitializing ? initialFiles.length : forms.length
 
+  const {
+    collectionSlug: bulkUploadCollectionSlug,
+    selectableCollections,
+    setCollectionSlug,
+  } = useBulkUpload()
+
+  const { getEntityConfig } = useConfig()
+
   return (
     <div
       className={[baseClass, showFiles && `${baseClass}__showingFiles`].filter(Boolean).join(' ')}
     >
       {breakpoints.m && showFiles ? <div className={`${baseClass}__mobileBlur`} /> : null}
       <div className={`${baseClass}__header`}>
+        {selectableCollections?.length > 1 && (
+          <SelectInput
+            className={`${baseClass}__collectionSelect`}
+            isClearable={false}
+            name="groupBy"
+            onChange={(e) => {
+              const val = typeof e === 'object' && 'value' in e ? e?.value : e
+              setCollectionSlug(val as string)
+            }}
+            options={
+              selectableCollections?.map((coll) => {
+                const config = getEntityConfig({ collectionSlug: coll })
+                return { label: config.labels.singular, value: config.slug }
+              }) || []
+            }
+            path="groupBy"
+            required
+            value={bulkUploadCollectionSlug}
+          />
+        )}
         <div className={`${baseClass}__headerTopRow`}>
           <div className={`${baseClass}__header__text`}>
             <ErrorPill count={totalErrorCount} i18n={i18n} withMessage />
