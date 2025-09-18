@@ -1,19 +1,20 @@
+import type {
+  AdminViewServerProps,
+  CollectionPreferences,
+  Column,
+  ColumnPreference,
+  ListQuery,
+  ListViewClientProps,
+  ListViewServerPropsOnly,
+  PaginatedDocs,
+  QueryPreset,
+  SanitizedCollectionPermission,
+} from 'payload'
+
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
-import {
-  type AdminViewServerProps,
-  type CollectionPreferences,
-  type Column,
-  type ColumnPreference,
-  type ListQuery,
-  type ListViewClientProps,
-  type ListViewServerPropsOnly,
-  type PaginatedDocs,
-  type QueryPreset,
-  type SanitizedCollectionPermission,
-} from 'payload'
 import {
   combineWhereConstraints,
   formatAdminURL,
@@ -25,6 +26,7 @@ import {
 import React, { Fragment } from 'react'
 
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
+import { appendUploadSelectFields } from './appendUploadSelectFields.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
@@ -222,6 +224,12 @@ export const renderListView = async (
     const select = collectionConfig.admin.enableListViewSelectAPI
       ? transformColumnsToSelect(columns)
       : undefined
+
+    /** Force select image fields for list view thumbnails */
+    appendUploadSelectFields({
+      collectionConfig,
+      select,
+    })
 
     try {
       if (collectionConfig.admin.groupBy && query.groupBy) {

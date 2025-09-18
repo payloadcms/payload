@@ -537,6 +537,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     modifiedOnly: '僅顯示已變更的內容',
     moreVersions: '更多版本…',
     noFurtherVersionsFound: '找不到更多版本',
+    noLabelGroup: '未命名群組',
     noRowsFound: '找不到 {{label}}',
     noRowsSelected: '尚未選取任何 {{label}}',
     preview: '預覽',

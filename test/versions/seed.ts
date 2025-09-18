@@ -243,6 +243,8 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       code: 'code',
       date: '2021-04-01T00:00:00.000Z',
       email: 'email@email.com',
+      textInUnnamedGroup: 'textInUnnamedGroup',
+      textInUnnamedLabeledGroup: 'textInUnnamedLabeledGroup',
       group: {
         textInGroup: 'textInGroup',
       },
@@ -386,6 +388,8 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       code: 'code2',
       date: '2023-04-01T00:00:00.000Z',
       email: 'email2@email.com',
+      textInUnnamedGroup: 'textInUnnamedGroup2',
+      textInUnnamedLabeledGroup: 'textInUnnamedLabeledGroup2',
       group: {
         textInGroup: 'textInGroup2',
       },

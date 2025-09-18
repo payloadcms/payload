@@ -574,6 +574,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Միայն փոփոխված',
     moreVersions: 'Ավելի շատ տարբերակներ...',
     noFurtherVersionsFound: 'Այլ տարբերակներ չեն գտնվել',
+    noLabelGroup: 'Անանուն խումբ',
     noRowsFound: ' Ոչ մի {{label}} չի գտնվել',
     noRowsSelected: 'Ոչ մի {{label}} ընտրված չէ',
     preview: 'Նախադիտում',

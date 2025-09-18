@@ -569,6 +569,7 @@ export const enTranslations = {
     modifiedOnly: 'Modified only',
     moreVersions: 'More versions...',
     noFurtherVersionsFound: 'No further versions found',
+    noLabelGroup: 'Unnamed Group',
     noRowsFound: 'No {{label}} found',
     noRowsSelected: 'No {{label}} selected',
     preview: 'Preview',
