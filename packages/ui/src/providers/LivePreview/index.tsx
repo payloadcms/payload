@@ -52,9 +52,16 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
 
   const [url, setURL] = useState<string>('')
 
+  /**
+   * Formats an absolute URL if needed before setting into the `url` state
+   */
+  const setLivePreviewURL = useCallback((urlFromArgs: typeof url) => {
+    setURL(formatAbsoluteURL(urlFromArgs))
+  }, [])
+
   useEffect(() => {
-    setURL(formatAbsoluteURL(urlFromProps))
-  }, [urlFromProps])
+    setLivePreviewURL(urlFromProps)
+  }, [urlFromProps, setLivePreviewURL])
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
@@ -231,7 +238,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         setPreviewWindowType: handleWindowChange,
         setSize,
         setToolbarPosition: setPosition,
-        setURL,
+        setURL: setLivePreviewURL,
         setWidth,
         setZoom,
         size,

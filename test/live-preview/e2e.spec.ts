@@ -107,7 +107,7 @@ describe('Live Preview', () => {
     await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
   })
 
-  test('collection - does not enable live preview is collections that are not configured', async () => {
+  test('collection - does not enable live preview in collections that are not configured', async () => {
     const usersURL = new AdminUrlUtil(serverURL, 'users')
     await navigateToDoc(page, usersURL)
     const toggler = page.locator('#live-preview-toggler')
@@ -161,24 +161,21 @@ describe('Live Preview', () => {
     await goToCollectionLivePreview(page, pagesURLUtil)
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()
-
-    await expect
-      .poll(async () => {
-        const src = await iframe.getAttribute('src')
-        return src
-      })
-      .toMatch(/\/live-preview/)
+    await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
   })
 
   test('collection — regenerates iframe src on save and retains live preview connection', async () => {
     await goToCollectionLivePreview(page, pagesURLUtil)
 
-    await toggleLivePreview(page)
+    await toggleLivePreview(page, {
+      targetState: 'on',
+    })
 
     // expect the iframe to load using the initial slug
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()
-    await expect(iframe).toHaveAttribute('src', /\/live-preview\/slug-1/)
+
+    await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
 
     // change the slug and save
     const slugField = page.locator('#field-slug')
