@@ -223,17 +223,40 @@ export const renderListView = async (
       ? transformColumnsToSelect(columns)
       : undefined
 
-    // force select image fields for list view thumbnails
+    /** Force select image fields for list view thumbnails */
     if (collectionConfig.upload && select) {
       select.mimeType = true
-      select.url = true
 
-      if (collectionConfig.upload.imageSizes) {
-        select.sizes = true
+      if (collectionConfig.upload.adminThumbnail) {
+        select.thumbnailURL = true
+      }
 
-        if (collectionConfig.upload.adminThumbnail) {
-          select.thumbnailURL = true
+      if (collectionConfig.upload.imageSizes && collectionConfig.upload.imageSizes.length > 0) {
+        if (
+          collectionConfig.upload.adminThumbnail &&
+          typeof collectionConfig.upload.adminThumbnail === 'string'
+        ) {
+          /** Only return image size properties that are required to generate the adminThumbnailURL */
+          select.sizes = {
+            [collectionConfig.upload.adminThumbnail]: {
+              filename: true,
+            },
+          }
+        } else {
+          /** Only return image size properties that are required for thumbnails */
+          select.sizes = collectionConfig.upload.imageSizes.reduce((acc, imageSizeConfig) => {
+            return {
+              ...acc,
+              [imageSizeConfig.name]: {
+                filename: true,
+                url: true,
+                width: true,
+              },
+            }
+          }, {})
         }
+      } else {
+        select.url = true
       }
     }
 
