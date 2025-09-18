@@ -142,12 +142,20 @@ export const createAPIKeysCollection = (
     },
     fields: [
       {
+        name: 'user',
+        type: 'relationship',
+        admin: {
+          description: 'The user that the API key is associated with.',
+        },
+        relationTo: 'users',
+        required: true,
+      },
+      {
         name: 'label',
         type: 'text',
         admin: {
           description: 'A useful label for the API key.',
         },
-        required: true,
       },
       {
         name: 'description',

@@ -31,6 +31,7 @@ export default buildConfigWithDefaults({
           admin: {
             description: 'This field added by overrideApiKeyCollection',
           },
+          defaultValue: 'This field added by overrideApiKeyCollection',
         })
         return collection
       },

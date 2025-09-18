@@ -228,9 +228,13 @@ export interface Product {
 export interface PayloadMcpApiKey {
   id: string;
   /**
+   * The user that the API key is associated with.
+   */
+  user: string | User;
+  /**
    * A useful label for the API key.
    */
-  label: string;
+  label?: string | null;
   /**
    * The purpose of the API key.
    */
@@ -506,6 +510,7 @@ export interface ProductsSelect<T extends boolean = true> {
  * via the `definition` "payload-mcp-api-keys_select".
  */
 export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
   label?: T;
   description?: T;
   products?:

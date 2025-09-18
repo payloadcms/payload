@@ -11,6 +11,7 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
 let payload: Payload
 let token: string
+let userId: string
 let restClient: NextRESTClient
 
 const { email, password } = devUser
@@ -56,6 +57,7 @@ const getApiKey = async (): Promise<string> => {
       label: 'Test API Key',
       posts: { find: true, create: true },
       apiKey: randomUUID(),
+      user: userId,
     },
   })
 
@@ -77,6 +79,7 @@ describe('@payloadcms/plugin-mcp', () => {
       .then((res) => res.json())
 
     token = data.token
+    userId = data.user.id
   })
 
   afterAll(async () => {
@@ -91,10 +94,14 @@ describe('@payloadcms/plugin-mcp', () => {
         label: 'Test API Key',
         posts: { find: true, create: true },
         apiKey: randomUUID(),
+        user: userId,
       },
     })
 
     expect(doc).toBeDefined()
+    expect(doc.user).toBeDefined()
+    // @ts-expect-error - doc.user is a string | User
+    expect(doc.user?.id).toBe(userId)
     expect(doc.label).toBe('Test API Key')
     expect(doc.posts?.find).toBe(true)
     expect(doc.posts?.create).toBe(true)
@@ -107,6 +114,7 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(doc.media?.update).toBe(false)
     expect(typeof doc.apiKey).toBe('string')
     expect(doc.apiKey).toHaveLength(36)
+    expect(doc.override).toBe('This field added by overrideApiKeyCollection')
   })
 
   it('should not allow GET /api/mcp', async () => {

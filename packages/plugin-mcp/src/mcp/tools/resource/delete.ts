@@ -1,5 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { PayloadRequest } from 'payload'
+import type { PayloadRequest, TypedUser } from 'payload'
 
 import type { PluginMCPServerConfig } from '../../../types.js'
 
@@ -9,16 +9,12 @@ import { toolSchemas } from '../schemas.js'
 export const deleteResourceTool = (
   server: McpServer,
   req: PayloadRequest,
+  user: TypedUser,
   verboseLogs: boolean,
   collectionSlug: string,
   collections: PluginMCPServerConfig['collections'],
 ) => {
-  const tool = async (
-    id?: string,
-    where?: string,
-    depth: number = 0,
-    overrideAccess: boolean = true,
-  ) => {
+  const tool = async (id?: string, where?: string, depth: number = 0) => {
     const payload = req.payload
 
     if (verboseLogs) {
@@ -58,7 +54,7 @@ export const deleteResourceTool = (
       const deleteOptions: Record<string, unknown> = {
         collection: collectionSlug,
         depth,
-        overrideAccess,
+        user,
       }
 
       // Delete by ID or where clause
@@ -157,8 +153,8 @@ ${JSON.stringify(errors, null, 2)}
       `delete${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
       `${toolSchemas.deleteResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
       toolSchemas.deleteResource.parameters.shape,
-      async ({ id, depth, overrideAccess, where }) => {
-        return await tool(id, where, depth, overrideAccess)
+      async ({ id, depth, where }) => {
+        return await tool(id, where, depth)
       },
     )
   }

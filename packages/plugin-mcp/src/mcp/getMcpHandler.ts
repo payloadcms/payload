@@ -2,7 +2,7 @@ import type { JSONSchema4 } from 'json-schema'
 
 import { createMcpHandler } from '@vercel/mcp-adapter'
 import { join } from 'path'
-import { APIError, configToJSONSchema, type PayloadRequest } from 'payload'
+import { APIError, configToJSONSchema, type PayloadRequest, type TypedUser } from 'payload'
 
 import type { PluginMCPServerConfig, ToolSettings } from '../types.js'
 
@@ -40,6 +40,9 @@ export const getMCPHandler = (
   const { payload } = req
   const configSchema = configToJSONSchema(payload.config)
 
+  // User
+  const user = toolSettings.user as TypedUser
+
   // MCP Server and Handler Options
   const MCPOptions = pluginOptions.mcp || {}
   const customMCPTools = MCPOptions.tools || []
@@ -70,41 +73,6 @@ export const getMCPHandler = (
   try {
     return createMcpHandler(
       (server) => {
-        // Custom prompts
-        customMCPPrompts.forEach((prompt) => {
-          server.registerPrompt(
-            prompt.name,
-            {
-              argsSchema: prompt.argsSchema,
-              description: prompt.description,
-              title: prompt.title,
-            },
-            prompt.handler,
-          )
-          if (useVerboseLogs) {
-            payload.logger.info(`[payload-mcp] ✅ Prompt: ${prompt.title} Registered.`)
-          }
-        })
-
-        // Custom resources
-        customMCPResources.forEach((resource) => {
-          server.registerResource(
-            resource.name,
-            // @ts-expect-error - Overload type is not working however -- ResourceTemplate OR String is a valid type
-            resource.uri,
-            {
-              description: resource.description,
-              mimeType: resource.mimeType,
-              title: resource.title,
-            },
-            resource.handler,
-          )
-
-          if (useVerboseLogs) {
-            payload.logger.info(`[payload-mcp] ✅ Resource: ${resource.title} Registered.`)
-          }
-        })
-
         const enabledCollectionSlugs = Object.keys(collectionsPluginConfig || {}).filter(
           (collection) => {
             const fullyEnabled =
@@ -153,6 +121,7 @@ export const getMCPHandler = (
                   createResourceTool(
                     server,
                     req,
+                    user,
                     useVerboseLogs,
                     enabledCollectionSlug,
                     collectionsPluginConfig,
@@ -170,6 +139,7 @@ export const getMCPHandler = (
                   updateResourceTool(
                     server,
                     req,
+                    user,
                     useVerboseLogs,
                     enabledCollectionSlug,
                     collectionsPluginConfig,
@@ -187,6 +157,7 @@ export const getMCPHandler = (
                   findResourceTool(
                     server,
                     req,
+                    user,
                     useVerboseLogs,
                     enabledCollectionSlug,
                     collectionsPluginConfig,
@@ -203,6 +174,7 @@ export const getMCPHandler = (
                   deleteResourceTool(
                     server,
                     req,
+                    user,
                     useVerboseLogs,
                     enabledCollectionSlug,
                     collectionsPluginConfig,
@@ -231,6 +203,41 @@ export const getMCPHandler = (
             payload,
             useVerboseLogs,
           )
+        })
+
+        // Custom prompts
+        customMCPPrompts.forEach((prompt) => {
+          server.registerPrompt(
+            prompt.name,
+            {
+              argsSchema: prompt.argsSchema,
+              description: prompt.description,
+              title: prompt.title,
+            },
+            prompt.handler,
+          )
+          if (useVerboseLogs) {
+            payload.logger.info(`[payload-mcp] ✅ Prompt: ${prompt.title} Registered.`)
+          }
+        })
+
+        // Custom resources
+        customMCPResources.forEach((resource) => {
+          server.registerResource(
+            resource.name,
+            // @ts-expect-error - Overload type is not working however -- ResourceTemplate OR String is a valid type
+            resource.uri,
+            {
+              description: resource.description,
+              mimeType: resource.mimeType,
+              title: resource.title,
+            },
+            resource.handler,
+          )
+
+          if (useVerboseLogs) {
+            payload.logger.info(`[payload-mcp] ✅ Resource: ${resource.title} Registered.`)
+          }
         })
 
         // Experimental - Collection Schema Modfication Tools
@@ -415,7 +422,8 @@ export const getMCPHandler = (
       {
         basePath: MCPHandlerOptions.basePath || '/api',
         maxDuration: MCPHandlerOptions.maxDuration || 60,
-        redisUrl: MCPHandlerOptions.redisUrl || process.env.REDIS_URL,
+        // INFO: Disabled until developer clarity is reached for server side streaming and we have an auth pattern for all SSE patterns
+        // redisUrl: MCPHandlerOptions.redisUrl || process.env.REDIS_URL,
         verboseLogs: useVerboseLogs,
       },
     )
