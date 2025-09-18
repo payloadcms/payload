@@ -223,6 +223,20 @@ export const renderListView = async (
       ? transformColumnsToSelect(columns)
       : undefined
 
+    // force select image fields for list view thumbnails
+    if (collectionConfig.upload && select) {
+      select.mimeType = true
+      select.url = true
+
+      if (collectionConfig.upload.imageSizes) {
+        select.sizes = true
+
+        if (collectionConfig.upload.adminThumbnail) {
+          select.thumbnailURL = true
+        }
+      }
+    }
+
     try {
       if (collectionConfig.admin.groupBy && query.groupBy) {
         ;({ columnState, data, Table } = await handleGroupBy({
