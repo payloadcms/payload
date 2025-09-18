@@ -46,14 +46,14 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
       throw new APIError('API Key is invalid', 401)
     }
 
-    const MCPToolCapabilities = docs[0] as ToolSettings
+    const toolSettings = docs[0] as ToolSettings
 
     if (useVerboseLogs) {
       payload.logger.info('[payload-mcp] API Key is valid')
     }
 
+    const handler = getMCPHandler(pluginOptions, toolSettings, req)
     const request = createRequestFromPayloadRequest(req)
-    const handler = getMCPHandler(pluginOptions, MCPToolCapabilities, req)
     return await handler(request)
   }
   return mcpHandler
