@@ -56,6 +56,9 @@ fi
 FROM nginx:alpine AS runner
 WORKDIR /usr/share/nginx/html
 
+# Install curl for health checks
+RUN apk add --no-cache curl
+
 # Copy built Storybook
 COPY --from=builder /app/storybook-static ./
 
@@ -76,5 +79,9 @@ RUN echo 'server { \
 }' > /etc/nginx/conf.d/default.conf
 
 EXPOSE 6006
+
+# Add health check for Coolify
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:6006/health || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
