@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect } from 'react'
 
+import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
@@ -19,6 +20,7 @@ export const DocumentTakeOver: React.FC<{
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()
   const { startRouteTransition } = useRouteTransition()
+  const { clearRouteCache } = useRouteCache()
 
   useEffect(() => {
     if (isActive) {
@@ -52,6 +54,7 @@ export const DocumentTakeOver: React.FC<{
             onClick={() => {
               onReadOnly()
               closeModal(modalSlug)
+              clearRouteCache()
             }}
             size="large"
           >

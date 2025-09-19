@@ -3,6 +3,7 @@ import type { ClientUser } from 'payload'
 
 import React, { useEffect } from 'react'
 
+import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { isClientUserObject } from '../../utilities/isClientUserObject.js'
@@ -38,6 +39,7 @@ export const DocumentLocked: React.FC<{
 }> = ({ handleGoBack, isActive, onReadOnly, onTakeOver, updatedAt, user }) => {
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()
+  const { clearRouteCache } = useRouteCache()
   const { startRouteTransition } = useRouteTransition()
 
   useEffect(() => {
@@ -86,6 +88,7 @@ export const DocumentLocked: React.FC<{
             onClick={() => {
               onReadOnly()
               closeModal(modalSlug)
+              clearRouteCache()
             }}
             size="large"
           >
@@ -95,7 +98,7 @@ export const DocumentLocked: React.FC<{
             buttonStyle="primary"
             id={`${modalSlug}-take-over`}
             onClick={() => {
-              void onTakeOver()
+              onTakeOver()
               closeModal(modalSlug)
             }}
             size="large"

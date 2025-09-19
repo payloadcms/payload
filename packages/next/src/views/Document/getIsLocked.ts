@@ -7,6 +7,7 @@ import type {
 } from 'payload'
 
 import { sanitizeID } from '@payloadcms/ui/shared'
+import { extractID } from 'payload/shared'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
@@ -93,12 +94,12 @@ export const getIsLocked = async ({
   })
 
   if (docs.length > 0) {
-    const newEditor = docs[0].user?.value
+    const currentEditor = docs[0].user?.value
     const lastUpdateTime = new Date(docs[0].updatedAt).getTime()
 
-    if (newEditor?.id !== req.user.id) {
+    if (extractID(currentEditor) !== req.user.id) {
       return {
-        currentEditor: newEditor,
+        currentEditor,
         isLocked: true,
         lastUpdateTime,
       }
