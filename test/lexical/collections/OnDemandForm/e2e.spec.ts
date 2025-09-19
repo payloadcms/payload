@@ -105,7 +105,7 @@ describe('Lexical On Demand', () => {
     })
 
     test('on-demand editor renders label', async ({ page }) => {
-      await expect(page.locator('#field-myField .field-label')).toHaveText('My Label')
+      await expect(page.locator('.field-label[for="field-myField"]')).toHaveText('My Label')
     })
 
     test('ensure anchor richText field is hidden', async ({ page }) => {
