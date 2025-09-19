@@ -116,6 +116,8 @@ export class LexicalHelpers {
   }
 
   async paste(type: 'html' | 'markdown', text: string) {
+    await this.page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+
     await this.page.evaluate(
       async ([text, type]) => {
         const blob = new Blob([text!], { type: type === 'html' ? 'text/html' : 'text/markdown' })
