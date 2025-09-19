@@ -16,9 +16,8 @@ export const baseAllLocaleStatusField: Field[] = [
           const { collection, data, req } = args
           const id = data?.id
           if (id && collection && collection.versions) {
-            const version = await req.payload.findVersions({
+            const version = await req.payload.db.findVersions({
               collection: collection.slug,
-              depth: 0,
               limit: 1,
               select: {
                 localeStatus: true,
