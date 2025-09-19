@@ -104,7 +104,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { startRouteTransition } = useRouteTransition()
   const { getUploadHandler } = useUploadHandlers()
 
-  const { config, getEntityConfig } = useConfig()
+  const { config } = useConfig()
 
   const [disabled, setDisabled] = useState(disabledFromProps || false)
   const [isMounted, setIsMounted] = useState(false)
