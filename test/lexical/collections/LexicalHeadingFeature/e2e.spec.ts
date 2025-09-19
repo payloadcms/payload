@@ -1,6 +1,5 @@
 import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import { lexicalHeadingFeatureSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'

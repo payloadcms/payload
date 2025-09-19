@@ -20,7 +20,7 @@ import React, { useCallback, useEffect, useMemo } from 'react'
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
 import type { PopulateDocs, ReloadDoc } from './types.js'
 
-import { useBulkUpload } from '../../elements/BulkUpload/index.js'
+import { type BulkUploadContext, useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { Dropzone } from '../../elements/Dropzone/index.js'
@@ -244,33 +244,33 @@ export function UploadInput(props: UploadInputProps) {
     [code, serverURL, api, i18n.language, t, hasMany],
   )
 
-  const onUploadSuccess = useCallback(
-    (newDocs: JsonObject[]) => {
+  const onUploadSuccess: BulkUploadContext['onSuccess'] = useCallback(
+    (uploadedForms) => {
       if (hasMany) {
         const mergedValue = [
           ...(Array.isArray(value) ? value : []),
-          ...newDocs.map((doc) => doc.id),
+          ...uploadedForms.map((form) => form.doc.id),
         ]
         onChange(mergedValue)
         setPopulatedDocs((currentDocs) => [
           ...(currentDocs || []),
-          ...newDocs.map((doc) => ({
-            relationTo: activeRelationTo,
-            value: doc,
+          ...uploadedForms.map((form) => ({
+            relationTo: form.collectionSlug,
+            value: form.doc,
           })),
         ])
       } else {
-        const firstDoc = newDocs[0]
+        const firstDoc = uploadedForms[0].doc
         onChange(firstDoc.id)
         setPopulatedDocs([
           {
-            relationTo: activeRelationTo,
+            relationTo: firstDoc.collectionSlug,
             value: firstDoc,
           },
         ])
       }
     },
-    [value, onChange, activeRelationTo, hasMany],
+    [value, onChange, hasMany],
   )
 
   const onLocalFileSelection = React.useCallback(
