@@ -339,6 +339,16 @@ export const multiTenantPlugin =
           collection.disableDuplicate = true
         }
 
+        if (!pluginConfig.debug) {
+          collection.admin ??= {}
+          collection.admin.components ??= {}
+          collection.admin.components.edit ??= {}
+          collection.admin.components.edit.editMenuItems ??= []
+          collection.admin.components.edit.editMenuItems.push({
+            path: '@payloadcms/plugin-multi-tenant/client#UpdateTenantFieldTrigger',
+          })
+        }
+
         /**
          * Add filter options to all relationship fields
          */
