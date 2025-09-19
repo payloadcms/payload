@@ -135,6 +135,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
+    "serve-storybook": "npx serve storybook-static -p 6006",
     "storybook": "storybook dev -p 6006"
   },
   "dependencies": {
@@ -157,6 +158,7 @@
     "react-image-crop": "10.1.8",
     "react-select": "5.9.0",
     "scheduler": "0.25.0",
+    "serve": "14.2.5",
     "sonner": "^1.7.2",
     "ts-essentials": "10.0.3",
     "use-context-selector": "2.0.0",
