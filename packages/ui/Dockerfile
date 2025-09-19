@@ -41,16 +41,13 @@ ENV STORYBOOK=true
 ENV SASS_SILENCE_DEPRECATIONS=legacy-js-api
 ENV SASS_QUIET_DEPS=true
 
-# Install dependencies in builder stage to ensure all tools are available
-RUN corepack enable pnpm && pnpm install --frozen-lockfile
-
-# Build Storybook
+# Build Storybook (dependencies are already installed from deps stage)
 RUN corepack enable pnpm && \
     cd packages/ui && \
     pnpm build-storybook
 
 # Production stage - minimal with serve
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
 
 # Install serve globally
 RUN npm install -g serve
