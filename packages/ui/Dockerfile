@@ -16,18 +16,7 @@ COPY src ./src/
 COPY ../../packages/translations ./node_modules/@payloadcms/translations/
 
 # Create a temporary package.json without workspace dependencies
-RUN node -e "
-const pkg = require('./package.json');
-// Replace workspace dependencies with file paths
-if (pkg.dependencies && pkg.dependencies['@payloadcms/translations']) {
-  pkg.dependencies['@payloadcms/translations'] = 'file:./node_modules/@payloadcms/translations';
-}
-// Remove peer dependencies that might cause issues
-delete pkg.peerDependencies.payload;
-delete pkg.devDependencies.payload;
-delete pkg.devDependencies['@payloadcms/eslint-config'];
-fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2));
-" 2>/dev/null || echo "Node script failed, continuing..."
+RUN node -e "const pkg = require('./package.json'); const fs = require('fs'); if (pkg.dependencies && pkg.dependencies['@payloadcms/translations']) { pkg.dependencies['@payloadcms/translations'] = 'file:./node_modules/@payloadcms/translations'; } if (pkg.peerDependencies) { delete pkg.peerDependencies.payload; } if (pkg.devDependencies) { delete pkg.devDependencies.payload; delete pkg.devDependencies['@payloadcms/eslint-config']; } fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2));"
 
 # Enable pnpm and install dependencies
 RUN corepack enable pnpm && pnpm i --no-frozen-lockfile
