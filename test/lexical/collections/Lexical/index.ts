@@ -354,6 +354,7 @@ export const getLexicalFieldsCollection: (args: {
           components: {
             Description: '/collections/Lexical/components/Description.js#Description',
           },
+          description: 'Should not be rendered',
         },
         editor: lexicalEditor({
           admin: {

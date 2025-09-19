@@ -1454,6 +1454,8 @@ describe('lexicalMain', () => {
 
     await expect(lexicalWithBlocks.locator('.lexical-blocks-custom-description')).toHaveCount(1)
     await expect(lexicalWithBlocks.locator('.lexical-blocks-custom-description')).toBeVisible()
+
+    await expect(lexicalWithBlocks.locator('.field-description')).toHaveCount(0)
   })
 
   test('ensure admin.description property is rendered', async () => {
