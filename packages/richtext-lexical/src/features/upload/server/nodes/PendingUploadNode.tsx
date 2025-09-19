@@ -93,6 +93,7 @@ export class PendingUploadServerNode extends DecoratorBlockNode {
   override exportDOM(): DOMExportOutput {
     const element = document.createElement('img')
     element.setAttribute('data-lexical-pending-upload-form-id', String(this.__data?.formID))
+    element.setAttribute('src', this.__data?.src || '')
 
     return { element }
   }
