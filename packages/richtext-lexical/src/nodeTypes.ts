@@ -1,5 +1,6 @@
 import type {
   SerializedLineBreakNode as _SerializedLineBreakNode,
+  SerializedRootNode as _SerializedRootNode,
   SerializedTabNode as _SerializedTabNode,
   SerializedTextNode as _SerializedTextNode,
   SerializedEditorState,
@@ -40,6 +41,12 @@ export type {
   SerializedUploadNode,
 }
 
+export type SerializedRootNode<T extends SerializedLexicalNode = SerializedLexicalNode> = Spread<
+  {
+    type: 'root'
+  },
+  _SerializedRootNode<T>
+>
 export type SerializedParagraphNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
   Spread<
     {
