@@ -40,11 +40,6 @@ ENV STORYBOOK=true
 ENV SASS_SILENCE_DEPRECATIONS=legacy-js-api
 ENV SASS_QUIET_DEPS=true
 
-# Build the UI package first (required for Storybook)
-RUN corepack enable pnpm && \
-    cd packages/ui && \
-    pnpm build
-
 # Build Storybook
 RUN corepack enable pnpm && \
     cd packages/ui && \
@@ -64,15 +59,15 @@ COPY --from=builder /app/packages/ui/storybook-static ./storybook-static
 
 # Create a simple health check script
 RUN echo '#!/bin/sh' > /usr/local/bin/health-check.sh && \
-    echo 'wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1' >> /usr/local/bin/health-check.sh && \
+    echo 'wget --no-verbose --tries=1 --spider http://localhost:6006/health || exit 1' >> /usr/local/bin/health-check.sh && \
     chmod +x /usr/local/bin/health-check.sh
 
-# Expose port 3000
-EXPOSE 3000
+# Expose port 6006
+EXPOSE 6006
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD /usr/local/bin/health-check.sh
 
-# Start serve with health check endpoint
-CMD ["sh", "-c", "echo 'healthy' > storybook-static/health && serve -s storybook-static -l 3000"]
+# Start serve with health check endpoint on port 6006
+CMD ["sh", "-c", "echo 'healthy' > storybook-static/health && serve -s storybook-static -l 6006"]
