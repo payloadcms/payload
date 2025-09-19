@@ -80,6 +80,7 @@ export interface Config {
     'data-hooks': DataHook;
     'field-paths': FieldPath;
     'value-hooks': ValueHook;
+    'recursive-hooks': RecursiveHook;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -99,6 +100,7 @@ export interface Config {
     'data-hooks': DataHooksSelect<false> | DataHooksSelect<true>;
     'field-paths': FieldPathsSelect<false> | FieldPathsSelect<true>;
     'value-hooks': ValueHooksSelect<false> | ValueHooksSelect<true>;
+    'recursive-hooks': RecursiveHooksSelect<false> | RecursiveHooksSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -108,9 +110,11 @@ export interface Config {
   };
   globals: {
     'data-hooks-global': DataHooksGlobal;
+    'recursive-hooks-global': RecursiveHooksGlobal;
   };
   globalsSelect: {
     'data-hooks-global': DataHooksGlobalSelect<false> | DataHooksGlobalSelect<true>;
+    'recursive-hooks-global': RecursiveHooksGlobalSelect<false> | RecursiveHooksGlobalSelect<true>;
   };
   locale: null;
   user: HooksUser & {
@@ -278,6 +282,13 @@ export interface HooksUser {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -627,6 +638,16 @@ export interface ValueHook {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recursive-hooks".
+ */
+export interface RecursiveHook {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -683,6 +704,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'value-hooks';
         value: string | ValueHook;
+      } | null)
+    | ({
+        relationTo: 'recursive-hooks';
+        value: string | RecursiveHook;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -851,6 +876,13 @@ export interface HooksUsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -942,6 +974,15 @@ export interface ValueHooksSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recursive-hooks_select".
+ */
+export interface RecursiveHooksSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -988,6 +1029,16 @@ export interface DataHooksGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recursive-hooks-global".
+ */
+export interface RecursiveHooksGlobal {
+  id: string;
+  title: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "data-hooks-global_select".
  */
 export interface DataHooksGlobalSelect<T extends boolean = true> {
@@ -996,6 +1047,16 @@ export interface DataHooksGlobalSelect<T extends boolean = true> {
   global_afterChange_global?: T;
   global_beforeRead_global?: T;
   global_afterRead_global?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recursive-hooks-global_select".
+ */
+export interface RecursiveHooksGlobalSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
