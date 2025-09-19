@@ -12,16 +12,17 @@ COPY packages/ui/babel.config.cjs packages/ui/bundle.js packages/ui/tsconfig.jso
 COPY packages/ui/.storybook ./.storybook/
 COPY packages/ui/src ./src/
 
-# Copy translations package (workspace dependency) - create a minimal version
-RUN mkdir -p ./node_modules/@payloadcms/translations
-COPY packages/translations/package.json ./node_modules/@payloadcms/translations/package.json
-COPY packages/translations/src ./node_modules/@payloadcms/translations/src
-
 # Create a temporary package.json without workspace dependencies
-RUN node -e "const pkg = require('./package.json'); const fs = require('fs'); if (pkg.dependencies && pkg.dependencies['@payloadcms/translations']) { pkg.dependencies['@payloadcms/translations'] = 'file:./node_modules/@payloadcms/translations'; } if (pkg.peerDependencies) { delete pkg.peerDependencies.payload; } if (pkg.devDependencies) { delete pkg.devDependencies.payload; delete pkg.devDependencies['@payloadcms/eslint-config']; } fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2));"
+RUN node -e "const pkg = require('./package.json'); const fs = require('fs'); if (pkg.dependencies && pkg.dependencies['@payloadcms/translations']) { delete pkg.dependencies['@payloadcms/translations']; } if (pkg.peerDependencies) { delete pkg.peerDependencies.payload; } if (pkg.devDependencies) { delete pkg.devDependencies.payload; delete pkg.devDependencies['@payloadcms/eslint-config']; } fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2));"
+
+# Copy translations package after pnpm install to avoid conflicts
+COPY packages/translations ./translations_temp
 
 # Enable pnpm and install dependencies
 RUN corepack enable pnpm && pnpm i --no-frozen-lockfile
+
+# Move translations package to node_modules after install
+RUN mkdir -p ./node_modules/@payloadcms && mv ./translations_temp ./node_modules/@payloadcms/translations
 
 # Build stage
 FROM base AS builder
