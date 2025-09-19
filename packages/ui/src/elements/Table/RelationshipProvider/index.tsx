@@ -1,6 +1,8 @@
 'use client'
-import type { TypeWithID } from 'payload'
+import type { SelectType, TypeWithID } from 'payload'
 
+import { appendUploadSelectFields } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useReducer, useRef } from 'react'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
@@ -63,6 +65,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
           const url = `${serverURL}${api}/${slug}`
 
           const params = new URLSearchParams()
+          const select: SelectType = {}
 
           params.append('depth', '0')
           params.append('limit', '250')
@@ -70,23 +73,10 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
           const collection = collections.find((c) => c.slug === slug)
           if (collection.admin.enableListViewSelectAPI) {
             const fieldToSelect = collection.admin.useAsTitle ?? 'id'
-            params.append(`select[${fieldToSelect}]`, 'true')
+            select[fieldToSelect] = true
 
             if (collection.upload) {
-              // for upload enabled collections, the FileCell component needs the following fields:
-              const fieldsToSelect = [
-                'thumbnailURL',
-                'url',
-                'mimeType',
-                'filesize',
-                'width',
-                'height',
-                'focalX',
-                'focalY',
-                'sizes',
-              ]
-
-              fieldsToSelect.forEach((field) => params.append(`select[${field}]`, 'true'))
+              appendUploadSelectFields({ collectionConfig: collection, select })
             }
           }
 
@@ -97,7 +87,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
           const idsToString = idsToLoad.map((id) => String(id))
           params.append('where[id][in]', idsToString.join(','))
 
-          const query = `?${params.toString()}`
+          const query = `?${params.toString()}&${qs.stringify({ select })}`
 
           const result = await fetch(`${url}${query}`, {
             credentials: 'include',
