@@ -13,6 +13,7 @@ import {
   COMMAND_PRIORITY_EDITOR,
   COMMAND_PRIORITY_LOW,
   createCommand,
+  DROP_COMMAND,
   PASTE_COMMAND,
 } from 'lexical'
 import React, { useEffect } from 'react'
@@ -226,6 +227,72 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
           }
 
           if (files.length) {
+            // Insert a PendingUploadNode for each image
+            editor.update(() => {
+              const selection = $getSelection() || $getPreviousSelection()
+
+              if ($isRangeSelection(selection)) {
+                for (const file of files) {
+                  const pendingUploadNode = new PendingUploadNode({
+                    data: {
+                      formID: file.formID,
+                      src: URL.createObjectURL(file.file),
+                    },
+                  })
+                  // we need to get the focus node before inserting the upload node, as $insertNodeToNearestRoot can change the focus node
+                  const { focus } = selection
+                  const focusNode = focus.getNode()
+                  // Insert upload node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
+                  $insertNodeToNearestRoot(pendingUploadNode)
+
+                  // Delete the node it it's an empty paragraph
+                  if ($isParagraphNode(focusNode) && !focusNode.__first) {
+                    focusNode.remove()
+                  }
+                }
+              }
+            })
+
+            // Open the bulk drawer - the node transform will not open it for us, as it does not handle blob/file uploads
+            openBulkUpload({ files })
+
+            return true
+          }
+
+          return false
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+      // Handle drag & drop of files from the desktop into the editor
+      editor.registerCommand(
+        DROP_COMMAND,
+        (event) => {
+          if (!(event instanceof DragEvent)) {
+            return false
+          }
+
+          const dt = event.dataTransfer
+
+          if (!dt?.types?.length) {
+            return false
+          }
+
+          const files: FileToUpload[] = []
+          if (dt?.files?.length) {
+            Array.from(dt.files).forEach((file) => {
+              files.push({
+                alt: '',
+                file,
+                formID: new ObjectID.default().toHexString(),
+              })
+            })
+          }
+
+          if (files.length) {
+            // Prevent the default browser drop handling, which would open the file in the browser
+            event.preventDefault()
+            event.stopPropagation()
+
             // Insert a PendingUploadNode for each image
             editor.update(() => {
               const selection = $getSelection() || $getPreviousSelection()
