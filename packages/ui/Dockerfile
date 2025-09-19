@@ -1,5 +1,5 @@
 # Multi-stage Dockerfile for Payload UI Storybook deployment
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -41,10 +41,8 @@ ENV STORYBOOK=true
 ENV SASS_SILENCE_DEPRECATIONS=legacy-js-api
 ENV SASS_QUIET_DEPS=true
 
-# Build the UI package first (required for Storybook)
-RUN corepack enable pnpm && \
-    cd packages/ui && \
-    pnpm build
+# Install dependencies in builder stage to ensure all tools are available
+RUN corepack enable pnpm && pnpm install --frozen-lockfile
 
 # Build Storybook
 RUN corepack enable pnpm && \
