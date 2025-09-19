@@ -15,8 +15,8 @@ COPY packages/ui/package.json ./packages/ui/
 COPY packages/translations/package.json ./packages/translations/
 COPY packages/payload/package.json ./packages/payload/
 
-# Install dependencies
-RUN corepack enable pnpm && pnpm install --frozen-lockfile
+# Install dependencies (including devDependencies for Storybook)
+RUN corepack enable pnpm && pnpm install --frozen-lockfile --include=dev
 
 # Build stage
 FROM base AS builder
@@ -41,8 +41,8 @@ ENV STORYBOOK=true
 ENV SASS_SILENCE_DEPRECATIONS=legacy-js-api
 ENV SASS_QUIET_DEPS=true
 
-# Install dependencies in builder stage to ensure proper linking
-RUN corepack enable pnpm && pnpm install --frozen-lockfile
+# Install dependencies in builder stage to ensure proper linking (including devDependencies for Storybook)
+RUN corepack enable pnpm && pnpm install --frozen-lockfile --include=dev
 
 # Build Storybook using npx directly
 RUN corepack enable pnpm && \
