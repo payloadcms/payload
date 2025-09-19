@@ -7,6 +7,7 @@ import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { slashMenuBasicGroupWithItems } from '../../shared/slashMenu/basicGroup.js'
 import { toolbarAddDropdownGroupWithItems } from '../../shared/toolbar/addDropdownGroup.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer/commands.js'
+import { PendingUploadNode } from './nodes/PendingUploadNode.js'
 import { $isUploadNode, UploadNode } from './nodes/UploadNode.js'
 import { UploadPlugin } from './plugin/index.js'
 
@@ -19,7 +20,7 @@ export type UploadFeaturePropsClient = {
 }
 
 export const UploadFeatureClient = createClientFeature<UploadFeaturePropsClient>({
-  nodes: [UploadNode],
+  nodes: [UploadNode, PendingUploadNode],
   plugins: [
     {
       Component: UploadPlugin,

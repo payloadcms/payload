@@ -1,12 +1,13 @@
 'use client'
 
-import type { JsonObject } from 'payload'
+import type { CollectionSlug, JsonObject } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { validateMimeType } from 'payload/shared'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { toast } from 'sonner'
 
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -72,12 +73,34 @@ export type BulkUploadProps = {
 }
 
 export function BulkUploadDrawer() {
-  const { drawerSlug } = useBulkUpload()
-  const { isModalOpen } = useModal()
+  const { drawerSlug, onCancel } = useBulkUpload()
+  const { modalState } = useModal()
+  const previousModalStateRef = React.useRef(modalState)
 
-  if (!isModalOpen(drawerSlug)) {
-    return null
-  }
+  /**
+   * This is used to trigger onCancel when the drawer is closed (=> forms reset, as FormsManager is unmounted)
+   */
+  const onModalStateChanged = useEffectEvent((modalState) => {
+    const previousModalState = previousModalStateRef.current[drawerSlug]
+    const currentModalState = modalState[drawerSlug]
+
+    if (typeof currentModalState === 'undefined' && typeof previousModalState === 'undefined') {
+      return
+    }
+
+    if (previousModalState?.isOpen !== currentModalState?.isOpen) {
+      if (!currentModalState?.isOpen) {
+        if (typeof onCancel === 'function') {
+          onCancel()
+        }
+      }
+    }
+    previousModalStateRef.current = modalState
+  })
+
+  useEffect(() => {
+    onModalStateChanged(modalState)
+  }, [modalState])
 
   return (
     <Drawer gutter={false} Header={null} slug={drawerSlug}>
@@ -93,7 +116,7 @@ export function BulkUploadDrawer() {
 }
 
 type BulkUploadContext = {
-  collectionSlug: string
+  collectionSlug: CollectionSlug
   drawerSlug: string
   initialFiles: FileList
   /**
@@ -102,7 +125,17 @@ type BulkUploadContext = {
   initialForms: InitialForms
   maxFiles: number
   onCancel: () => void
-  onSuccess: (newDocs: JsonObject[], errorCount: number) => void
+  onSuccess: (
+    newDocs: Array<{
+      collectionSlug: CollectionSlug
+      doc: JsonObject
+      /**
+       * ID of the form that created this document
+       */
+      formID: string
+    }>,
+    errorCount: number,
+  ) => void
   /**
    * An array of collection slugs that can be selected in the collection dropdown (if applicable)
    * @default null - collection cannot be selected
@@ -158,6 +191,9 @@ export function BulkUploadProvider({
   const setOnSuccess: BulkUploadContext['setOnSuccess'] = (onSuccess) => {
     setOnSuccessFunction(() => onSuccess)
   }
+  const setOnCancel: BulkUploadContext['setOnCancel'] = (onCancel) => {
+    setOnCancelFunction(() => onCancel)
+  }
 
   return (
     <Context
@@ -172,9 +208,9 @@ export function BulkUploadProvider({
             onCancelFunction()
           }
         },
-        onSuccess: (docIDs, errorCount) => {
+        onSuccess: (newDocs, errorCount) => {
           if (typeof onSuccessFunction === 'function') {
-            onSuccessFunction(docIDs, errorCount)
+            onSuccessFunction(newDocs, errorCount)
           }
         },
         selectableCollections,
@@ -182,7 +218,7 @@ export function BulkUploadProvider({
         setInitialFiles,
         setInitialForms,
         setMaxFiles,
-        setOnCancel: setOnCancelFunction,
+        setOnCancel,
         setOnSuccess,
         setSelectableCollections,
       }}

@@ -1,7 +1,6 @@
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import type {
   DOMConversionMap,
-  DOMConversionOutput,
   DOMExportOutput,
   ElementFormatType,
   LexicalNode,
@@ -20,7 +19,8 @@ import type { JSX } from 'react'
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
-import * as React from 'react'
+
+import { $convertUploadElement } from './conversions.js'
 
 export type UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
   [TCollectionSlug in CollectionSlug]: {
@@ -59,43 +59,6 @@ export type UploadDataImproved<TUploadExtraFieldsData extends JsonObject = JsonO
   }
 }[UploadCollectionSlug]
 
-export function isGoogleDocCheckboxImg(img: HTMLImageElement): boolean {
-  return (
-    img.parentElement != null &&
-    img.parentElement.tagName === 'LI' &&
-    img.previousSibling === null &&
-    img.getAttribute('aria-roledescription') === 'checkbox'
-  )
-}
-
-function $convertUploadServerElement(domNode: HTMLImageElement): DOMConversionOutput | null {
-  if (
-    domNode.hasAttribute('data-lexical-upload-relation-to') &&
-    domNode.hasAttribute('data-lexical-upload-id')
-  ) {
-    const id = domNode.getAttribute('data-lexical-upload-id')
-    const relationTo = domNode.getAttribute('data-lexical-upload-relation-to')
-
-    if (id != null && relationTo != null) {
-      const node = $createUploadServerNode({
-        data: {
-          fields: {},
-          relationTo,
-          value: id,
-        },
-      })
-      return { node }
-    }
-  }
-  const img = domNode
-  if (img.src.startsWith('file:///') || isGoogleDocCheckboxImg(img)) {
-    return null
-  }
-  // TODO: Auto-upload functionality here!
-  //}
-  return null
-}
-
 export type SerializedUploadNode = {
   children?: never // required so that our typed editor state doesn't automatically add children
   type: 'upload'
@@ -132,7 +95,7 @@ export class UploadServerNode extends DecoratorBlockNode {
   static override importDOM(): DOMConversionMap<HTMLImageElement> {
     return {
       img: (node) => ({
-        conversion: $convertUploadServerElement,
+        conversion: (domNode) => $convertUploadElement(domNode, $createUploadServerNode),
         priority: 0,
       }),
     }
@@ -165,8 +128,7 @@ export class UploadServerNode extends DecoratorBlockNode {
   }
 
   override decorate(): JSX.Element {
-    // @ts-expect-error
-    return <RawUploadComponent data={this.__data} format={this.__format} nodeKey={this.getKey()} />
+    return null as unknown as JSX.Element
   }
 
   override exportDOM(): DOMExportOutput {

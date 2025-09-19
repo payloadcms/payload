@@ -1,9 +1,11 @@
 'use client'
 
 import type {
+  CollectionSlug,
   Data,
   DocumentSlots,
   FormState,
+  JsonObject,
   SanitizedDocumentPermissions,
   UploadEdits,
 } from 'payload'
@@ -316,7 +318,14 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         formState: currentFormsData,
         uploadEdits: currentForms[activeIndex].uploadEdits,
       }
-      const newDocs = []
+      const newDocs: Array<{
+        collectionSlug: CollectionSlug
+        doc: JsonObject
+        /**
+         * ID of the form that created this document
+         */
+        formID: string
+      }> = []
 
       setIsUploading(true)
 
@@ -350,7 +359,11 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           const json = await req.json()
 
           if (req.status === 201 && json?.doc) {
-            newDocs.push(json.doc)
+            newDocs.push({
+              collectionSlug,
+              doc: json.doc,
+              formID: form.formID,
+            })
           }
 
           // should expose some sort of helper for this
