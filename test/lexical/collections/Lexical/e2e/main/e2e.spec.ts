@@ -1446,6 +1446,27 @@ describe('lexicalMain', () => {
     page.getByText('Creating new User')
   })
 
+  test('ensure custom Description component is rendered only once', async () => {
+    await navigateToLexicalFields()
+    const lexicalWithBlocks = page.locator('.rich-text-lexical').nth(2)
+    await lexicalWithBlocks.scrollIntoViewIfNeeded()
+    await expect(lexicalWithBlocks).toBeVisible()
+
+    await expect(lexicalWithBlocks.locator('.lexical-blocks-custom-description')).toHaveCount(1)
+    await expect(lexicalWithBlocks.locator('.lexical-blocks-custom-description')).toBeVisible()
+  })
+
+  test('ensure admin.description property is rendered', async () => {
+    await navigateToLexicalFields()
+    const lexicalSimple = page.locator('.rich-text-lexical').nth(1)
+    await lexicalSimple.scrollIntoViewIfNeeded()
+    await expect(lexicalSimple).toBeVisible()
+
+    await expect(lexicalSimple.locator('.field-description')).toHaveCount(1)
+    await expect(lexicalSimple.locator('.field-description')).toBeVisible()
+    await expect(lexicalSimple.locator('.field-description')).toHaveText('A simple lexical field')
+  })
+
   test('ensure links can created from clipboard and deleted', async () => {
     await navigateToLexicalFields()
     const richTextField = page.locator('.rich-text-lexical').first()
