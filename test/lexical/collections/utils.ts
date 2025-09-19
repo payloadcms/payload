@@ -1,7 +1,34 @@
 import type { Locator, Page } from 'playwright'
 
 import { expect } from '@playwright/test'
+import fs from 'fs'
+import path from 'path'
 import { wait } from 'payload/shared'
+
+export type PasteMode = 'blob' | 'html'
+
+function inferMimeFromExt(ext: string): string {
+  switch (ext.toLowerCase()) {
+    case '.gif':
+      return 'image/gif'
+    case '.jpeg':
+    case '.jpg':
+      return 'image/jpeg'
+    case '.png':
+      return 'image/png'
+    case '.svg':
+      return 'image/svg+xml'
+    case '.webp':
+      return 'image/webp'
+    default:
+      return 'application/octet-stream'
+  }
+}
+
+async function readAsBase64(filePath: string): Promise<string> {
+  const buf = await fs.promises.readFile(filePath)
+  return Buffer.from(buf).toString('base64')
+}
 
 export class LexicalHelpers {
   page: Page
@@ -86,6 +113,62 @@ export class LexicalHelpers {
       await this.inlineToolbar.locator(`[data-item-key="${buttonKey}"]`).click()
     }
     return {}
+  }
+
+  async pasteFile({ filePath, mode: modeFromArgs }: { filePath: string; mode?: PasteMode }) {
+    const page = this.page
+    const mode: PasteMode = modeFromArgs ?? 'blob'
+    const name = path.basename(filePath)
+    const ext = path.extname(name)
+    const mime = inferMimeFromExt(ext)
+
+    // Build payloads per mode
+    let payload:
+      | { bytes: number[]; kind: 'blob'; mime: string; name: string }
+      | { html: string; kind: 'html'; plain?: string } = { html: '', kind: 'html' }
+
+    if (mode === 'blob') {
+      const buf = await fs.promises.readFile(filePath)
+      payload = { kind: 'blob', bytes: Array.from(buf), name, mime }
+    } else if (mode === 'html') {
+      const b64 = await readAsBase64(filePath)
+      const src = `data:${mime};base64,${b64}`
+      const html = `<img src="${src}" alt="${name}">`
+      payload = { kind: 'html', html, plain: src }
+    }
+
+    // Dispatch a real 'paste' with a populated DataTransfer at the focused element
+    await page.evaluate((p) => {
+      const target =
+        (document.activeElement as HTMLElement | null) ||
+        document.querySelector('[contenteditable="true"]') ||
+        document.body
+
+      const dt = new DataTransfer()
+
+      if (p.kind === 'blob') {
+        const file = new File([new Uint8Array(p.bytes)], p.name, { type: p.mime })
+        dt.items.add(file)
+      } else if (p.kind === 'html') {
+        dt.setData('text/html', p.html)
+        if (p.plain) {
+          dt.setData('text/plain', p.plain)
+        }
+      }
+
+      // Try spec-compliant ClipboardEvent first; fall back to defining clipboardData
+      try {
+        const evt = new ClipboardEvent('paste', {
+          clipboardData: dt,
+          bubbles: true,
+          cancelable: true,
+        })
+        console.log('Clipboard data', dt)
+        target.dispatchEvent(evt)
+      } catch {
+        /* ignore */
+      }
+    }, payload)
   }
 
   async save(container: 'document' | 'drawer') {
