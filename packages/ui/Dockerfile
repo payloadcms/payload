@@ -1,77 +1,63 @@
-# Multi-stage Dockerfile for Payload UI Storybook deployment
-FROM node:20-alpine AS base
+# Production Dockerfile for @payloadcms/ui Storybook
+FROM node:22.17.0-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat python3 make g++ py3-pip
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy workspace configuration files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY tsconfig.base.json ./
+# Copy package files for dependency installation
+COPY package.json pnpm-lock.yaml* ./
+COPY ../../pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY ../../tsconfig.base.json ./tsconfig.base.json
 
-# Copy package.json files for all dependencies
-COPY packages/ui/package.json ./packages/ui/
-COPY packages/translations/package.json ./packages/translations/
-COPY packages/payload/package.json ./packages/payload/
-
-# Install dependencies (including devDependencies for Storybook)
-RUN corepack enable pnpm && pnpm install --frozen-lockfile --include=dev
+# Enable pnpm and install dependencies
+RUN corepack enable pnpm && pnpm i --frozen-lockfile
 
 # Build stage
 FROM base AS builder
-RUN apk add --no-cache libc6-compat python3 make g++ py3-pip
 WORKDIR /app
 
-# Copy dependencies
+# Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/package.json ./package.json
 COPY --from=deps /app/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=deps /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=deps /app/tsconfig.base.json ./tsconfig.base.json
 
-# Copy source code
-COPY packages/ui ./packages/ui
-COPY packages/translations ./packages/translations
-COPY packages/payload ./packages/payload
+# Copy source code and config files
+COPY . .
 
-# Set environment variables for build
+# Set production environment
 ENV NODE_ENV=production
-ENV STORYBOOK=true
 ENV SASS_SILENCE_DEPRECATIONS=legacy-js-api
 ENV SASS_QUIET_DEPS=true
 
-# Install dependencies in builder stage to ensure proper linking (including devDependencies for Storybook)
-RUN corepack enable pnpm && pnpm install --frozen-lockfile --include=dev
+# Build Storybook for production
+RUN corepack enable pnpm && pnpm build-storybook
 
-# Build Storybook using npx directly
-RUN corepack enable pnpm && \
-    cd packages/ui && \
-    npx storybook build
+# Production stage
+FROM nginx:alpine AS runner
+WORKDIR /usr/share/nginx/html
 
-# Production stage - minimal with serve
-FROM node:20-alpine AS runner
+# Copy built Storybook
+COPY --from=builder /app/storybook-static ./
 
-# Install serve globally
-RUN npm install -g serve
+# Create nginx config for serving Storybook
+RUN echo 'server { \
+    listen 80; \
+    server_name localhost; \
+    location / { \
+        root /usr/share/nginx/html; \
+        index index.html; \
+        try_files $uri $uri/ /index.html; \
+    } \
+    location /health { \
+        access_log off; \
+        return 200 "healthy\n"; \
+        add_header Content-Type text/plain; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
 
-# Set working directory
-WORKDIR /app
+EXPOSE 80
 
-# Copy the built Storybook static files
-COPY --from=builder /app/packages/ui/storybook-static ./storybook-static
-
-# Create a simple health check script
-RUN echo '#!/bin/sh' > /usr/local/bin/health-check.sh && \
-    echo 'wget --no-verbose --tries=1 --spider http://localhost:6006/health || exit 1' >> /usr/local/bin/health-check.sh && \
-    chmod +x /usr/local/bin/health-check.sh
-
-# Expose port 6006
-EXPOSE 6006
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD /usr/local/bin/health-check.sh
-
-# Start serve with health check endpoint on port 6006
-CMD ["sh", "-c", "echo 'healthy' > storybook-static/health && serve -s storybook-static -l 6006"]
+CMD ["nginx", "-g", "daemon off;"]
