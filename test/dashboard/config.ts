@@ -15,6 +15,13 @@ export default buildConfigWithDefaults({
     components: {
       afterDashboard: ['./components/BeforeOrAfterDashboard.js'],
       beforeDashboard: ['./components/BeforeOrAfterDashboard.js'],
+      views: {
+        dashboard: {
+          Component: {
+            path: './components/Revenue.js#Revenue',
+          },
+        },
+      },
     },
     dashboard: {
       defaults: [
@@ -25,6 +32,15 @@ export default buildConfigWithDefaults({
       ],
     },
   },
+  collections: [
+    {
+      slug: 'revenue',
+      admin: {
+        group: 'Revenue',
+      },
+      fields: [],
+    },
+  ],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
