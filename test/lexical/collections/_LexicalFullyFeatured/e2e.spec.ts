@@ -16,6 +16,7 @@ const dirname = path.resolve(currentFolder, '../../')
 const { beforeAll, beforeEach, describe } = test
 
 // Unlike the other suites, this one runs in parallel, as they run on the `lexical-fully-featured/create` URL and are "pure" tests
+// PLEASE do not reset the database or perform any operations that modify it in this file.
 test.describe.configure({ mode: 'parallel' })
 
 const { serverURL } = await initPayloadE2ENoConfig({
@@ -32,11 +33,6 @@ describe('Lexical Fully Featured', () => {
     await page.close()
   })
   beforeEach(async ({ page }) => {
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'lexicalTest',
-      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
-    })
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
