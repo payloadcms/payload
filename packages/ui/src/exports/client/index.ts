@@ -236,12 +236,13 @@ export type { FieldAction } from '../../forms/Form/types.js'
 export { fieldReducer } from '../../forms/Form/fieldReducer.js'
 export { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 export { RenderFields } from '../../forms/RenderFields/index.js'
+
 export { RowLabel, type RowLabelProps } from '../../forms/RowLabel/index.js'
 export { RowLabelProvider, useRowLabel } from '../../forms/RowLabel/Context/index.js'
 
 export { FormSubmit } from '../../forms/Submit/index.js'
 export { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
-export { useField } from '../../forms/useField/index.js'
+export { FieldContext, useField } from '../../forms/useField/index.js'
 export type { FieldType, Options } from '../../forms/useField/types.js'
 
 export { withCondition } from '../../forms/withCondition/index.js'
@@ -288,6 +289,8 @@ export { Warning as WarningIcon } from '../../providers/ToastContainer/icons/War
 export {
   type RenderDocumentResult,
   type RenderDocumentServerFunction,
+  ServerFunctionsContext,
+  type ServerFunctionsContextType,
   ServerFunctionsProvider,
   useServerFunctions,
 } from '../../providers/ServerFunctions/index.js'
@@ -408,3 +411,7 @@ export { parseSearchParams } from '../../utilities/parseSearchParams.js'
 export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
 export { FieldDiffContainer } from '../../elements/FieldDiffContainer/index.js'
 export { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
+export type {
+  RenderFieldServerFnArgs,
+  RenderFieldServerFnReturnType,
+} from '../../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'

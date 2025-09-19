@@ -16,7 +16,7 @@ const dirname = path.resolve(currentFolder, '../../')
 const { beforeAll, beforeEach, describe } = test
 
 // Unlike the other suites, this one runs in parallel, as they run on the `lexical-fully-featured/create` URL and are "pure" tests
-test.describe.configure({ mode: 'parallel' })
+//test.describe.configure({ mode: 'parallel' })
 
 const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
@@ -46,6 +46,7 @@ describe('Lexical Fully Featured', () => {
     page,
   }) => {
     await lexical.slashCommand('block')
+    await expect(lexical.editor.locator('.lexical-block')).toBeVisible()
     await lexical.slashCommand('relationship')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
     await lexical.save('drawer')

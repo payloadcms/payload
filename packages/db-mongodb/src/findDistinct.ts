@@ -48,28 +48,56 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     fieldPath = fieldPathResult.localizedPath.replace('<locale>', args.locale)
   }
 
+  const isHasManyValue =
+    fieldPathResult && 'hasMany' in fieldPathResult.field && fieldPathResult.field.hasMany
+
   const page = args.page || 1
 
   const sortProperty = Object.keys(sort)[0]! // assert because buildSortParam always returns at least 1 key.
   const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
+
+  let $unwind: string = ''
+  let $group: any
+  if (
+    isHasManyValue &&
+    sortAggregation.length &&
+    sortAggregation[0] &&
+    '$lookup' in sortAggregation[0]
+  ) {
+    $unwind = `$${sortAggregation[0].$lookup.as}`
+    $group = {
+      _id: {
+        _field: `$${sortAggregation[0].$lookup.as}._id`,
+        _sort: `$${sortProperty}`,
+      },
+    }
+  } else {
+    $group = {
+      _id: {
+        _field: `$${fieldPath}`,
+        ...(sortProperty === fieldPath
+          ? {}
+          : {
+              _sort: `$${sortProperty}`,
+            }),
+      },
+    }
+  }
 
   const pipeline: PipelineStage[] = [
     {
       $match: query,
     },
     ...(sortAggregation.length > 0 ? sortAggregation : []),
-
+    ...($unwind
+      ? [
+          {
+            $unwind,
+          },
+        ]
+      : []),
     {
-      $group: {
-        _id: {
-          _field: `$${fieldPath}`,
-          ...(sortProperty === fieldPath
-            ? {}
-            : {
-                _sort: `$${sortProperty}`,
-              }),
-        },
-      },
+      $group,
     },
     {
       $sort: {
