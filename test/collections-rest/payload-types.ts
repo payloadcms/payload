@@ -76,6 +76,7 @@ export interface Config {
     'error-on-hooks': ErrorOnHook;
     endpoints: Endpoint;
     'disabled-bulk-edit-docs': DisabledBulkEditDoc;
+    'large-documents': LargeDocument;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,6 +93,7 @@ export interface Config {
     'error-on-hooks': ErrorOnHooksSelect<false> | ErrorOnHooksSelect<true>;
     endpoints: EndpointsSelect<false> | EndpointsSelect<true>;
     'disabled-bulk-edit-docs': DisabledBulkEditDocsSelect<false> | DisabledBulkEditDocsSelect<true>;
+    'large-documents': LargeDocumentsSelect<false> | LargeDocumentsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -261,6 +263,21 @@ export interface DisabledBulkEditDoc {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "large-documents".
+ */
+export interface LargeDocument {
+  id: string;
+  array?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -274,6 +291,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -318,6 +342,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'disabled-bulk-edit-docs';
         value: string | DisabledBulkEditDoc;
+      } | null)
+    | ({
+        relationTo: 'large-documents';
+        value: string | LargeDocument;
       } | null)
     | ({
         relationTo: 'users';
@@ -473,6 +501,20 @@ export interface DisabledBulkEditDocsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "large-documents_select".
+ */
+export interface LargeDocumentsSelect<T extends boolean = true> {
+  array?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -485,6 +527,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

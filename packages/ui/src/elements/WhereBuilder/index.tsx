@@ -143,12 +143,12 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                     {Array.isArray(or?.and) &&
                       or.and.map((_, andIndex) => {
                         const condition = conditions[orIndex].and[andIndex]
-                        const fieldName = Object.keys(condition)[0]
+                        const fieldPath = Object.keys(condition)[0]
 
                         const operator =
-                          (Object.keys(condition?.[fieldName] || {})?.[0] as Operator) || undefined
+                          (Object.keys(condition?.[fieldPath] || {})?.[0] as Operator) || undefined
 
-                        const value = condition?.[fieldName]?.[operator] || undefined
+                        const value = condition?.[fieldPath]?.[operator] || undefined
 
                         return (
                           <li key={andIndex}>
@@ -158,13 +158,13 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                             <Condition
                               addCondition={addCondition}
                               andIndex={andIndex}
-                              fieldName={fieldName}
-                              filterOptions={resolvedFilterOptions?.get(fieldName)}
+                              fieldPath={fieldPath}
+                              filterOptions={resolvedFilterOptions?.get(fieldPath)}
                               operator={operator}
                               orIndex={orIndex}
                               reducedFields={reducedFields}
                               removeCondition={removeCondition}
-                              RenderedFilter={renderedFilters?.get(fieldName)}
+                              RenderedFilter={renderedFilters?.get(fieldPath)}
                               updateCondition={updateCondition}
                               value={value}
                             />

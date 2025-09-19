@@ -856,6 +856,75 @@ describe('database', () => {
     }
   })
 
+  it('should populate distinct relationships of hasMany: true when depth>0', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+
+    const categories = ['category-1', 'category-2', 'category-3', 'category-4'].map((title) => ({
+      title,
+    }))
+
+    const categoriesIDS: { categories: string }[] = []
+
+    for (const { title } of categories) {
+      const doc = await payload.create({ collection: 'categories', data: { title } })
+      categoriesIDS.push({ categories: doc.id })
+    }
+
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: '1',
+        categories: [categoriesIDS[0]?.categories, categoriesIDS[1]?.categories],
+      },
+    })
+
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: '2',
+        categories: [
+          categoriesIDS[0]?.categories,
+          categoriesIDS[2]?.categories,
+          categoriesIDS[3]?.categories,
+        ],
+      },
+    })
+
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: '3',
+        categories: [
+          categoriesIDS[0]?.categories,
+          categoriesIDS[3]?.categories,
+          categoriesIDS[1]?.categories,
+        ],
+      },
+    })
+
+    const resultDepth0 = await payload.findDistinct({
+      collection: 'posts',
+      sort: 'categories.title',
+      field: 'categories',
+    })
+    expect(resultDepth0.values).toStrictEqual(categoriesIDS)
+    const resultDepth1 = await payload.findDistinct({
+      depth: 1,
+      collection: 'posts',
+      field: 'categories',
+      sort: 'categories.title',
+    })
+
+    for (let i = 0; i < resultDepth1.values.length; i++) {
+      const fromRes = resultDepth1.values[i] as any
+      const id = categoriesIDS[i].categories as any
+      const title = categories[i]?.title
+      expect(fromRes.categories.title).toBe(title)
+      expect(fromRes.categories.id).toBe(id)
+    }
+  })
+
   describe('Compound Indexes', () => {
     beforeEach(async () => {
       await payload.delete({ collection: 'compound-indexes', where: {} })

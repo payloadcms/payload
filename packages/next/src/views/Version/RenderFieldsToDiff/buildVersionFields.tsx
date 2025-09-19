@@ -384,7 +384,7 @@ const buildVersionField = ({
         const fromRow = (Array.isArray(valueFrom) && valueFrom?.[i]) || {}
         const toRow = (Array.isArray(valueTo) && valueTo?.[i]) || {}
 
-        baseVersionField.rows[i] = buildVersionFields({
+        const versionFields = buildVersionFields({
           clientSchemaMap,
           customDiffComponents,
           entitySlug,
@@ -402,6 +402,10 @@ const buildVersionField = ({
           versionFromSiblingData: fromRow,
           versionToSiblingData: toRow,
         }).versionFields
+
+        if (versionFields?.length) {
+          baseVersionField.rows[i] = versionFields
+        }
       }
 
       if (!baseVersionField.rows?.length && modifiedOnly) {
@@ -486,7 +490,7 @@ const buildVersionField = ({
         }
       }
 
-      baseVersionField.rows[i] = buildVersionFields({
+      const versionFields = buildVersionFields({
         clientSchemaMap,
         customDiffComponents,
         entitySlug,
@@ -504,7 +508,12 @@ const buildVersionField = ({
         versionFromSiblingData: fromRow,
         versionToSiblingData: toRow,
       }).versionFields
+
+      if (versionFields?.length) {
+        baseVersionField.rows[i] = versionFields
+      }
     }
+
     if (!baseVersionField.rows?.length && modifiedOnly) {
       return null
     }
