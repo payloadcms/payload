@@ -53,10 +53,6 @@ export function RenderField({
 }: RenderFieldProps) {
   const CustomField = useFormFields(([fields]) => fields && fields?.[path]?.customComponents?.Field)
 
-  if (CustomField !== undefined) {
-    return CustomField || null
-  }
-
   const baseFieldProps: Pick<
     ClientComponentProps,
     'forceRender' | 'permissions' | 'readOnly' | 'schemaPath'
@@ -67,15 +63,19 @@ export function RenderField({
     schemaPath,
   }
 
+  if (clientFieldConfig.admin?.hidden) {
+    return <HiddenField {...baseFieldProps} path={path} />
+  }
+
+  if (CustomField !== undefined) {
+    return CustomField || null
+  }
+
   const iterableFieldProps = {
     ...baseFieldProps,
     indexPath,
     parentPath,
     parentSchemaPath,
-  }
-
-  if (clientFieldConfig.admin?.hidden) {
-    return <HiddenField {...baseFieldProps} path={path} />
   }
 
   switch (clientFieldConfig.type) {

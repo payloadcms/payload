@@ -108,6 +108,8 @@ export const _internal_renderFieldHandler: ServerFunction<
     preferences: {
       fields: {},
     },
+    // If we are passed a field override, we want to ensure we create a new client field based on that override
+    forceCreateClientField: fieldArg ? true : false,
     previousFieldState: undefined,
     renderAllFields: true,
     req,
