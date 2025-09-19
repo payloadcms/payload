@@ -73,7 +73,15 @@ export type BulkUploadProps = {
 }
 
 export function BulkUploadDrawer() {
-  const { drawerSlug, onCancel } = useBulkUpload()
+  const {
+    drawerSlug,
+    onCancel,
+    setInitialFiles,
+    setInitialForms,
+    setOnCancel,
+    setOnSuccess,
+    setSelectableCollections,
+  } = useBulkUpload()
   const { modalState } = useModal()
   const previousModalStateRef = React.useRef(modalState)
 
@@ -93,6 +101,12 @@ export function BulkUploadDrawer() {
         if (typeof onCancel === 'function') {
           onCancel()
         }
+        // Reset everything to defaults
+        setInitialFiles(undefined)
+        setInitialForms(undefined)
+        setOnCancel(() => () => null)
+        setOnSuccess(() => () => null)
+        setSelectableCollections(null)
       }
     }
     previousModalStateRef.current = modalState
