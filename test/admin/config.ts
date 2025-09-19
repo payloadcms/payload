@@ -12,6 +12,7 @@ import { DisableBulkEdit } from './collections/DisableBulkEdit.js'
 import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { EditMenuItems } from './collections/editMenuItems.js'
+import { FormatDocURL } from './collections/FormatDocURL/index.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
 import { CollectionGroup1B } from './collections/Group1B.js'
@@ -182,6 +183,7 @@ export default buildConfigWithDefaults({
     DisableDuplicate,
     DisableCopyToLocale,
     EditMenuItems,
+    FormatDocURL,
     BaseListFilter,
     with300Documents,
     ListDrawer,

@@ -24,6 +24,7 @@ export const customFieldsSlug = 'custom-fields'
 
 export const listDrawerSlug = 'with-list-drawer'
 export const virtualsSlug = 'virtuals'
+export const formatDocURLCollectionSlug = 'format-doc-url'
 export const collectionSlugs = [
   usersCollectionSlug,
   customViews1CollectionSlug,
@@ -41,6 +42,7 @@ export const collectionSlugs = [
   disableDuplicateSlug,
   listDrawerSlug,
   virtualsSlug,
+  formatDocURLCollectionSlug,
 ]
 
 export const customGlobalViews1GlobalSlug = 'custom-global-views-one'
