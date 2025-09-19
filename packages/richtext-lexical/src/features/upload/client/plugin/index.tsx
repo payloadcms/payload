@@ -77,6 +77,19 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
         },
       ])
 
+      setOnCancel(() => {
+        // Remove all the images that were added but not uploaded
+        editor.update(() => {
+          for (const dfsNode of $dfsIterator()) {
+            const node = dfsNode.node
+
+            if ($isPendingUploadNode(node)) {
+              node.remove()
+            }
+          }
+        })
+      })
+
       setOnSuccess((newDocs) => {
         const newDocsMap = new Map(newDocs.map((doc) => [doc.formID, doc]))
         editor.update(() => {
