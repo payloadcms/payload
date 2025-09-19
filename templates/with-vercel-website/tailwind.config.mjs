@@ -107,7 +107,8 @@ const config = {
           to: { height: '0' },
         },
       },
-      typography: () => ({
+
+      typography: {
         DEFAULT: {
           css: [
             {
@@ -145,7 +146,7 @@ const config = {
             },
           ],
         },
-      }),
+      },
     },
   },
 }
