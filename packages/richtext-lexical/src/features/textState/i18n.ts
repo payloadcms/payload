@@ -30,6 +30,7 @@ export const i18n: Partial<GenericLanguages> = {
   sk: { defaultStyle: 'Predvolený štýl' },
   sl: { defaultStyle: 'Privzeti slog' },
   sv: { defaultStyle: 'Standardstil' },
+  ta: { defaultStyle: 'பொது பாணி' },
   th: { defaultStyle: 'สไตล์เริ่มต้น' },
   tr: { defaultStyle: 'Varsayılan stil' },
   uk: { defaultStyle: 'Стиль за замовчуванням' },

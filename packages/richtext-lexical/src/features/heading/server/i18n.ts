@@ -88,6 +88,9 @@ export const i18n: Partial<GenericLanguages> = {
   sv: {
     label: 'Rubrik {{headingLevel}}',
   },
+  ta: {
+    label: 'தலைப்பு {{headingLevel}}',
+  },
   th: {
     label: 'หัวข้อ {{headingLevel}}',
   },

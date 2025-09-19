@@ -262,6 +262,15 @@ export const i18n: Partial<GenericLanguages> = {
     },
     label: 'Block',
   },
+  ta: {
+    inlineBlocks: {
+      create: '{{label}} உருவாக்கவும்',
+      edit: '{{label}} திருத்தவும்',
+      label: 'இன்லைன் தொகுதிகள்',
+      remove: '{{label}} நீக்கவும்',
+    },
+    label: 'தொகுதிகள்',
+  },
   th: {
     inlineBlocks: {
       create: 'สร้าง {{label}}',

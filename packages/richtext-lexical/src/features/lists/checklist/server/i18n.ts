@@ -88,6 +88,9 @@ export const i18n: Partial<GenericLanguages> = {
   sv: {
     label: 'Kontrollista',
   },
+  ta: {
+    label: 'சரிபார்ப்பு பட்டியல்',
+  },
   th: {
     label: 'รายการตรวจสอบ',
   },
