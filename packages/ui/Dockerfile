@@ -6,14 +6,14 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy workspace configuration files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY tsconfig.base.json ./
+# Copy workspace configuration files from root
+COPY ../../package.json ../../pnpm-lock.yaml ../../pnpm-workspace.yaml ./
+COPY ../../tsconfig.base.json ./
 
 # Copy package.json files for all dependencies
-COPY packages/ui/package.json ./packages/ui/
-COPY packages/translations/package.json ./packages/translations/
-COPY packages/payload/package.json ./packages/payload/
+COPY package.json ./packages/ui/
+COPY ../../packages/translations/package.json ./packages/translations/
+COPY ../../packages/payload/package.json ./packages/payload/
 
 # Install dependencies
 RUN corepack enable pnpm && pnpm install --frozen-lockfile
@@ -30,9 +30,9 @@ COPY --from=deps /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=deps /app/tsconfig.base.json ./tsconfig.base.json
 
 # Copy source code
-COPY packages/ui ./packages/ui
-COPY packages/translations ./packages/translations
-COPY packages/payload ./packages/payload
+COPY . ./packages/ui
+COPY ../../packages/translations ./packages/translations
+COPY ../../packages/payload ./packages/payload
 
 # Set environment variables for build
 ENV NODE_ENV=production

@@ -4,8 +4,8 @@ This guide explains how to deploy the Payload UI package's Storybook to Coolify 
 
 ## Files Created
 
-- `Dockerfile.storybook` - Multi-stage Dockerfile optimized for Storybook deployment
-- `.dockerignore.storybook` - Docker ignore file to optimize build performance
+- `Dockerfile` - Multi-stage Dockerfile optimized for Storybook deployment
+- `.dockerignore` - Docker ignore file to optimize build performance
 - `COOLIFY_DEPLOYMENT.md` - This deployment guide
 
 ## Coolify Configuration
@@ -20,17 +20,9 @@ This guide explains how to deploy the Payload UI package's Storybook to Coolify 
 
 **Dockerfile Settings:**
 
-- **Dockerfile Path**: `./Dockerfile.storybook`
-- **Build Context**: `.` (root of repository)
+- **Dockerfile Path**: `./packages/ui/Dockerfile`
+- **Build Context**: `./packages/ui` (UI package directory)
 - **Build Command**: Leave empty (Docker handles this automatically)
-
-**Alternative Dockerfile Path:**
-If you prefer to rename the file:
-
-```bash
-mv Dockerfile.storybook Dockerfile
-mv .dockerignore.storybook .dockerignore
-```
 
 ### 3. Environment Variables
 

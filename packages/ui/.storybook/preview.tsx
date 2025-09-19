@@ -164,6 +164,7 @@ const preview: Preview = {
           globals: {},
         }}
         serverFunction={function (args: ServerFunctionClientArgs): Promise<unknown> | unknown {
+          console.log('serverFunction called')
           // Mock server function for Storybook
           return Promise.resolve({})
         }}
