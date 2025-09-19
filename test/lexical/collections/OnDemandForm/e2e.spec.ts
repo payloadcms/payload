@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, saveDocAndAssert } from '../../../helpers.js'
@@ -101,6 +102,20 @@ describe('Lexical On Demand', () => {
 
       await expect(lexical.drawer.locator('#field-rows')).toHaveValue('5')
       await expect(lexical.drawer.locator('#field-columns')).toHaveValue('5')
+    })
+
+    test('on-demand editor renders label', async ({ page }) => {
+      await expect(page.locator('#field-myField .field-label')).toHaveText('My Label')
+    })
+
+    test('ensure anchor richText field is hidden', async ({ page }) => {
+      // Important: Wait for all fields to render
+      await wait(1000)
+      await expect(page.locator('.shimmer')).toHaveCount(0)
+
+      await expect(page.locator('.field-label[for="field-hiddenAnchor"]')).toHaveCount(0)
+
+      await expect(page.locator('.rich-text-lexical')).toHaveCount(1)
     })
   })
 })

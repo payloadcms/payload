@@ -12,5 +12,12 @@ export const OnDemandOutsideForm: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'hiddenAnchor',
+      type: 'richText',
+      admin: {
+        hidden: true,
+      },
+    },
   ],
 }
