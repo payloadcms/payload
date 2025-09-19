@@ -44,10 +44,10 @@ ENV SASS_QUIET_DEPS=true
 # Install dependencies in builder stage to ensure proper linking
 RUN corepack enable pnpm && pnpm install --frozen-lockfile
 
-# Build Storybook
+# Build Storybook using npx directly
 RUN corepack enable pnpm && \
     cd packages/ui && \
-    pnpm build-storybook
+    npx storybook build
 
 # Production stage - minimal with serve
 FROM node:20-alpine AS runner

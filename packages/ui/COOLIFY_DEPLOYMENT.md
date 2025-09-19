@@ -140,8 +140,15 @@ The Dockerfile uses a multi-stage build:
    - Verify file permissions in container
 
 4. **Memory Issues**
+
    - Increase memory allocation in Coolify
    - Check if build process is using too much RAM
+
+5. **Coolify-Specific Issues**
+   - **"storybook: not found" error**: This is usually a Coolify-specific issue. The Dockerfile uses `npx storybook build` to avoid pnpm script resolution issues
+   - **Build fails on Coolify but works locally**: Try clearing Coolify's build cache
+   - **Dependencies not found**: Ensure Coolify has access to the entire monorepo structure
+   - **Port configuration**: Make sure Coolify is configured to use port 6006
 
 ### Debug Commands
 
