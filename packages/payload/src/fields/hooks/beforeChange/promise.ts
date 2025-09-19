@@ -235,7 +235,7 @@ export const promise = async ({
                     ? fieldLabelPath
                     : buildFieldLabel(
                         fieldLabelPath,
-                        `${getTranslatedLabel(field?.label || field?.name, req.i18n)} > ${getTranslatedLabel(blockConfig?.labels?.singular || block.blockType, req.i18n)} (${rowIndex + 1})`,
+                        `${getTranslatedLabel(field?.label || field?.name, req.i18n)} > ${req.t('fields:block')} ${rowIndex + 1} (${getTranslatedLabel(blockConfig?.labels?.singular || block.blockType, req.i18n)})`,
                       )
 
                 errors.push({
@@ -368,7 +368,7 @@ export const promise = async ({
               ? fieldLabelPath
               : buildFieldLabel(
                   fieldLabelPath,
-                  `${getTranslatedLabel(field?.label || field?.name, req.i18n)} > ${getTranslatedLabel(block?.labels?.singular || blockTypeToMatch, req.i18n)} (${rowIndex + 1})`,
+                  `${getTranslatedLabel(field?.label || field?.name, req.i18n)} > ${req.t('fields:block')} ${rowIndex + 1} (${getTranslatedLabel(block?.labels?.singular || blockTypeToMatch, req.i18n)})`,
                 )
 
           if (block) {
