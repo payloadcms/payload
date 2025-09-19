@@ -510,6 +510,8 @@ export const slTranslations: DefaultTranslationsObject = {
     enterNumber: 'Vnesite veljavno številko.',
     fieldHasNo: 'To polje nima {{label}}',
     greaterThanMax: '{{value}} je večje od največje dovoljene {{label}} {{max}}.',
+    invalidBlock: 'Blok "{{block}}" ni dovoljen.',
+    invalidBlocks: 'To polje vsebuje bloke, ki niso več dovoljeni: {{blocks}}.',
     invalidInput: 'To polje ima neveljaven vnos.',
     invalidSelection: 'To polje ima neveljavno izbiro.',
     invalidSelections: 'To polje ima naslednje neveljavne izbire:',

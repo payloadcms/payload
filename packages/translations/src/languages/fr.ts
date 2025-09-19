@@ -523,6 +523,8 @@ export const frTranslations: DefaultTranslationsObject = {
     enterNumber: 'S’il vous plait, veuillez entrer un nombre valide.',
     fieldHasNo: 'Ce champ n’a pas de {{label}}',
     greaterThanMax: '{{value}} est supérieur au max autorisé {{label}} de {{max}}.',
+    invalidBlock: 'Le bloc "{{block}}" n\'est pas autorisé.',
+    invalidBlocks: 'Ce champ contient des blocs qui ne sont plus autorisés : {{blocks}}.',
     invalidInput: 'Ce champ a une entrée invalide.',
     invalidSelection: 'Ce champ a une sélection invalide.',
     invalidSelections: 'Ce champ contient les sélections invalides suivantes :',

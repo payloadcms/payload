@@ -529,11 +529,100 @@ export const array: ArrayFieldValidation = (value, { maxRows, minRows, req: { t 
 
 export type BlocksFieldValidation = Validate<unknown, unknown, unknown, BlocksField>
 
+/**
+ * This function validates the blocks in a blocks field against the provided filterOptions.
+ * It will return a list of all block slugs found in the value, the allowed block slugs (if any),
+ * and a list of invalid block slugs that are used despite being disallowed.
+ *
+ * @internal - this may break or be removed at any time
+ */
+export function validateBlocksFilterOptions({
+  id,
+  data,
+  filterOptions,
+  req,
+  siblingData,
+  value,
+}: { value: Parameters<BlocksFieldValidation>[0] } & Pick<
+  Parameters<BlocksFieldValidation>[1],
+  'data' | 'filterOptions' | 'id' | 'req' | 'siblingData'
+>): {
+  /**
+   * All block slugs found in the value of the blocks field
+   */
+  allBlockSlugs: string[]
+  /**
+   * All block slugs that are allowed. If undefined, all blocks are allowed.
+   */
+  allowedBlockSlugs: string[] | undefined
+  /**
+   * A list of block slugs that are used despite being disallowed. If undefined, field passed validation.
+   */
+  invalidBlockSlugs: string[] | undefined
+} {
+  const allBlockSlugs = Array.isArray(value)
+    ? (value as Array<{ blockType?: string }>)
+        .map((b) => b.blockType)
+        .filter((s): s is string => Boolean(s))
+    : []
+
+  // if undefined => all blocks allowed
+  let allowedBlockSlugs: string[] | undefined = undefined
+
+  if (typeof filterOptions === 'function') {
+    const result = filterOptions({
+      id: id!, // original code asserted presence
+      data,
+      req,
+      siblingData,
+      user: req.user,
+    })
+    if (result !== true && Array.isArray(result)) {
+      allowedBlockSlugs = result
+    }
+  } else if (Array.isArray(filterOptions)) {
+    allowedBlockSlugs = filterOptions
+  }
+
+  const invalidBlockSlugs: string[] = []
+  if (allowedBlockSlugs) {
+    for (const blockSlug of allBlockSlugs) {
+      if (!allowedBlockSlugs.includes(blockSlug)) {
+        invalidBlockSlugs.push(blockSlug)
+      }
+    }
+  }
+
+  return {
+    allBlockSlugs,
+    allowedBlockSlugs,
+    invalidBlockSlugs,
+  }
+}
 export const blocks: BlocksFieldValidation = (
   value,
-  { maxRows, minRows, req: { t }, required },
+  { id, data, filterOptions, maxRows, minRows, req: { t }, req, required, siblingData },
 ) => {
-  return validateArrayLength(value, { maxRows, minRows, required, t })
+  const lengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
+  if (typeof lengthValidationResult === 'string') {
+    return lengthValidationResult
+  }
+
+  if (filterOptions) {
+    const { invalidBlockSlugs } = validateBlocksFilterOptions({
+      id,
+      data,
+      filterOptions,
+      req,
+      siblingData,
+      value,
+    })
+    if (invalidBlockSlugs?.length) {
+      return t('validation:invalidBlocks', { blocks: invalidBlockSlugs.join(', ') })
+    }
+  }
+
+  return true
 }
 
 const validateFilterOptions: Validate<

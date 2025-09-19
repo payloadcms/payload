@@ -431,6 +431,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'validation:invalidSelections',
   'validation:lessThanMin',
   'validation:limitReached',
+  'validation:invalidBlock',
+  'validation:invalidBlocks',
   'validation:longerThanMin',
   'validation:notValidDate',
   'validation:required',

@@ -517,6 +517,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     enterNumber: 'একটি বৈধ সংখ্যা লিখুন।',
     fieldHasNo: 'এই ক্ষেত্রে কোনো {{label}} নেই',
     greaterThanMax: '{{value}} সর্বাধিক অনুমোদিত {{label}} {{max}} এর চেয়ে বড়।',
+    invalidBlock: 'ব্লক "{{block}}" অনুমোদিত নয়।',
+    invalidBlocks: 'এই ক্ষেত্রটি আর অনুমোদিত না থাকা ব্লকগুলি ধারণ করে: {{blocks}}।',
     invalidInput: 'এই ক্ষেত্রে একটি অবৈধ ইনপুট রয়েছে।',
     invalidSelection: 'এই ক্ষেত্রে একটি অবৈধ নির্বাচন রয়েছে।',
     invalidSelections: 'এই ক্ষেত্রে নিম্নলিখিত অবৈধ নির্বাচনগুলি রয়েছে:',

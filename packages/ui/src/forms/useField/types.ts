@@ -1,4 +1,4 @@
-import type { FieldState, FilterOptionsResult, Option, Row, Validate } from 'payload'
+import type { FieldState, Validate } from 'payload'
 
 export type Options = {
   disableFormData?: boolean
@@ -28,21 +28,27 @@ export type Options = {
 }
 
 export type FieldType<T> = {
-  customComponents?: FieldState['customComponents']
   disabled: boolean
-  errorMessage?: string
-  errorPaths?: string[]
-  filterOptions?: FilterOptionsResult
   formInitializing: boolean
   formProcessing: boolean
   formSubmitted: boolean
   initialValue?: T
   path: string
+  /**
+   * @deprecated - readOnly is no longer returned from useField. Remove this in 4.0.
+   */
   readOnly?: boolean
-  rows?: Row[]
-  selectFilterOptions?: Option[]
   setValue: (val: unknown, disableModifyingForm?: boolean) => void
   showError: boolean
-  valid?: boolean
   value: T
-}
+} & Pick<
+  FieldState,
+  | 'blocksFilterOptions'
+  | 'customComponents'
+  | 'errorMessage'
+  | 'errorPaths'
+  | 'filterOptions'
+  | 'rows'
+  | 'selectFilterOptions'
+  | 'valid'
+>

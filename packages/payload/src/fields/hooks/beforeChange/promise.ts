@@ -2,11 +2,11 @@ import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
 import type { Block, Field, TabAsField, Validate } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
+import { type RequestContext, validateBlocksFilterOptions } from '../../../index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
@@ -200,16 +200,68 @@ export const promise = async ({
       })
 
       if (typeof validationResult === 'string') {
-        const fieldLabel = buildFieldLabel(
-          fieldLabelPath,
-          getTranslatedLabel(field?.label || field?.name, req.i18n),
-        )
+        let filterOptionsError = false
 
-        errors.push({
-          label: fieldLabel,
-          message: validationResult,
-          path,
-        })
+        if (field.type === 'blocks' && field.filterOptions) {
+          // Re-run filteroptions. If the validation error is due to filteroptions, we need to add error paths to all the blocks
+          // that are no longer valid
+          const validationResult = validateBlocksFilterOptions({
+            id,
+            data,
+            filterOptions: field.filterOptions,
+            req,
+            siblingData,
+            value: siblingData[field.name],
+          })
+          if (validationResult?.invalidBlockSlugs?.length) {
+            filterOptionsError = true
+            let rowIndex = -1
+            for (const block of siblingData[field.name] as JsonObject[]) {
+              rowIndex++
+              if (validationResult.invalidBlockSlugs.includes(block.blockType as string)) {
+                const blockConfigOrSlug = (field.blockReferences ?? field.blocks).find(
+                  (blockFromField) =>
+                    typeof blockFromField === 'string'
+                      ? blockFromField === block.blockType
+                      : blockFromField.slug === block.blockType,
+                ) as Block | undefined
+                const blockConfig =
+                  typeof blockConfigOrSlug !== 'string'
+                    ? blockConfigOrSlug
+                    : req.payload.config?.blocks?.[blockConfigOrSlug]
+
+                const blockLabelPath =
+                  field?.label === false
+                    ? fieldLabelPath
+                    : buildFieldLabel(
+                        fieldLabelPath,
+                        `${getTranslatedLabel(field?.label || field?.name, req.i18n)} > ${req.t('fields:block')} ${rowIndex + 1} (${getTranslatedLabel(blockConfig?.labels?.singular || block.blockType, req.i18n)})`,
+                      )
+
+                errors.push({
+                  label: blockLabelPath,
+                  message: req.t('validation:invalidBlock', { block: block.blockType }),
+                  path: `${path}.${rowIndex}.id`,
+                })
+              }
+            }
+          }
+        }
+
+        if (!filterOptionsError) {
+          // If the error is due to block filterOptions, we want to push the errors for each individual block, not the blocks
+          // field itself => only push the error if the field is not a block field with validation failure due to filterOptions
+          const fieldLabel = buildFieldLabel(
+            fieldLabelPath,
+            getTranslatedLabel(field?.label || field?.name, req.i18n),
+          )
+
+          errors.push({
+            label: fieldLabel,
+            message: validationResult,
+            path,
+          })
+        }
       }
     }
 
@@ -311,6 +363,14 @@ export const promise = async ({
               (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
             ) as Block | undefined)
 
+          const blockLabelPath =
+            field?.label === false
+              ? fieldLabelPath
+              : buildFieldLabel(
+                  fieldLabelPath,
+                  `${getTranslatedLabel(field?.label || field?.name, req.i18n)} > ${req.t('fields:block')} ${rowIndex + 1} (${getTranslatedLabel(block?.labels?.singular || blockTypeToMatch, req.i18n)})`,
+                )
+
           if (block) {
             promises.push(
               traverseFields({
@@ -322,13 +382,8 @@ export const promise = async ({
                 doc,
                 docWithLocales,
                 errors,
-                fieldLabelPath:
-                  field?.label === false
-                    ? fieldLabelPath
-                    : buildFieldLabel(
-                        fieldLabelPath,
-                        `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
-                      ),
+                fieldLabelPath: blockLabelPath,
+
                 fields: block.fields,
                 global,
                 mergeLocaleActions,

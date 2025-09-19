@@ -509,6 +509,8 @@ export const isTranslations: DefaultTranslationsObject = {
     enterNumber: 'Vinsamlegast settu inn gilda tölu.',
     fieldHasNo: 'Þetta svæði hefur ekkert {{label}}',
     greaterThanMax: '{{value}} er stærra en hámarks leyfða {{label}} sem er {{max}}.',
+    invalidBlock: 'Blokkið "{{block}}" er ekki leyft.',
+    invalidBlocks: 'Þessi reitur inniheldur blokkir sem eru ekki lengur leyfðar: {{blocks}}.',
     invalidInput: 'Þetta svæði hefur ógilt inntak.',
     invalidSelection: 'Þetta svæði hefur ógilt val.',
     invalidSelections: 'Þetta svæði hefur eftirfarandi ógild völ:',

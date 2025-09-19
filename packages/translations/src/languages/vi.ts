@@ -510,6 +510,8 @@ export const viTranslations: DefaultTranslationsObject = {
     enterNumber: 'Vui lòng nhập số.',
     fieldHasNo: 'Field này không có: {{label}}',
     greaterThanMax: '{{value}} lớn hơn giá trị tối đa cho phép của {{label}} là {{max}}.',
+    invalidBlock: 'Khối "{{block}}" không được phép sử dụng.',
+    invalidBlocks: 'Trường này chứa các khối không còn được phép sử dụng: {{blocks}}.',
     invalidInput: 'Dữ liệu nhập vào không hợp lệ.',
     invalidSelection: 'Lựa chọn ở field này không hợp lệ.',
     invalidSelections: "'Field này có những lựa chọn không hợp lệ sau:'",

@@ -510,6 +510,8 @@ export const daTranslations: DefaultTranslationsObject = {
     enterNumber: 'Indtast venligst et gyldigt nummer.',
     fieldHasNo: 'Dette felt har ingen {{label}}',
     greaterThanMax: '{{value}} er større end det maksimalt tilladte {{label}} of {{max}}.',
+    invalidBlock: 'Blokken "{{block}}" er ikke tilladt.',
+    invalidBlocks: 'Dette felt indeholder blokke, der ikke længere er tilladte: {{blocks}}.',
     invalidInput: 'Dette felt har et ugyldigt indtastning.',
     invalidSelection: 'Dette felt har en ugyldig valg.',
     invalidSelections: 'Dette felt har følgende ugyldige valg:',

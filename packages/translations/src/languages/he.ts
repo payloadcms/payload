@@ -497,6 +497,8 @@ export const heTranslations: DefaultTranslationsObject = {
     enterNumber: 'נא להזין מספר תקני.',
     fieldHasNo: 'שדה זה אינו מכיל {{label}}',
     greaterThanMax: '{{value}} גדול מהערך המרבי המותר של {{label}} שהוא {{max}}.',
+    invalidBlock: 'הבלוק "{{block}}" אינו מותר.',
+    invalidBlocks: 'שדה זה מכיל בלוקים שכבר אינם מותרים: {{blocks}}.',
     invalidInput: 'שדה זה מכיל קלט לא תקני.',
     invalidSelection: 'שדה זה מכיל בחירה לא תקנית.',
     invalidSelections: 'שדה זה מכיל את הבחירות הבאות שאינן תקניות:',

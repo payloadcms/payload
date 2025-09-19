@@ -515,6 +515,9 @@ export const huTranslations: DefaultTranslationsObject = {
     enterNumber: 'Kérjük, adjon meg egy érvényes számot.',
     fieldHasNo: 'Ennek a mezőnek nincs {{label}}',
     greaterThanMax: '{{value}} nagyobb, mint a megengedett maximum {{label}} érték, ami {{max}}.',
+    invalidBlock: 'A "{{block}}" blokk nem engedélyezett.',
+    invalidBlocks:
+      'Ez a mező olyan blokkokat tartalmaz, amelyek már nem megengedettek: {{blocks}}.',
     invalidInput: 'Ez a mező érvénytelen értéket tartalmaz.',
     invalidSelection: 'Ez a mező érvénytelen kijelöléssel rendelkezik.',
     invalidSelections: 'Ez a mező a következő érvénytelen kijelöléseket tartalmazza:',

@@ -515,6 +515,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     enterNumber: 'Խնդրում ենք մուտքագրել վավեր հեռախոսահամար։',
     fieldHasNo: 'Այս դաշտում {{label}} չկա',
     greaterThanMax: '{{value}}-ը մեծ է {{max}} {{label}}-ի թույլատրելի առավելագույնից։',
+    invalidBlock: '"{{block}}" բլոկը չի թույլատրվում:',
+    invalidBlocks: 'Այս դաշտում առկա են բլոկներ, որոնք այլևս թույլատրված չեն: {{blocks}}.',
     invalidInput: 'Ներմուծված արժեքն անվավեր է',
     invalidSelection: 'Այս դաշտն ունի անվավեր ընտրություն։',
     invalidSelections: 'Այս դաշտն ունի հետևյալ անվավեր ընտրությունները։',

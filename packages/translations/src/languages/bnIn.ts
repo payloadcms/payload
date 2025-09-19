@@ -516,6 +516,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     enterNumber: 'একটি বৈধ সংখ্যা লিখুন।',
     fieldHasNo: 'এই ক্ষেত্রে কোনো {{label}} নেই',
     greaterThanMax: '{{value}} সর্বাধিক অনুমোদিত {{label}} {{max}} এর চেয়ে বড়।',
+    invalidBlock: '"{{block}}" ব্লকটি অনুমোদিত নয়।',
+    invalidBlocks: 'এই ক্ষেত্রটিতে আর অনুমতি নেই এমন ব্লকগুলি রয়েছে: {{blocks}}.',
     invalidInput: 'এই ক্ষেত্রে একটি অবৈধ ইনপুট রয়েছে।',
     invalidSelection: 'এই ক্ষেত্রে একটি অবৈধ নির্বাচন রয়েছে।',
     invalidSelections: 'এই ক্ষেত্রে নিম্নলিখিত অবৈধ নির্বাচনগুলি রয়েছে:',

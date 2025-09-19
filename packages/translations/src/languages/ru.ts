@@ -514,6 +514,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     enterNumber: 'Пожалуйста, введите корректный номер.',
     fieldHasNo: 'У этого поля нет {{label}}',
     greaterThanMax: '{{value}} больше максимально допустимого значения {{label}} {{max}}.',
+    invalidBlock: 'Блок "{{block}}" не разрешен.',
+    invalidBlocks: 'В этом поле содержатся блоки, которые больше не разрешены: {{blocks}}.',
     invalidInput: 'Это поле имеет недопустимое значение.',
     invalidSelection: 'В этом поле выбран недопустимый вариант.',
     invalidSelections: "'Это поле содержит следующие неправильные варианты:'",
