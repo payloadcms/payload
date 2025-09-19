@@ -130,8 +130,7 @@ export class LexicalHelpers {
   async pasteFile({ filePath, mode: modeFromArgs }: { filePath: string; mode?: PasteMode }) {
     const mode: PasteMode = modeFromArgs ?? 'blob'
     const name = path.basename(filePath)
-    const ext = path.extname(name)
-    const mime = inferMimeFromExt(ext)
+    const mime = inferMimeFromExt(path.extname(name))
 
     // Build payloads per mode
     let payload:

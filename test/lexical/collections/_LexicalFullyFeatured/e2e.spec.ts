@@ -1,6 +1,5 @@
-import { expect, type Page, test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import { lexicalFullyFeaturedSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -11,7 +10,7 @@ import type { Config } from '../../payload-types.js'
 import { ensureCompilationIsDone } from '../../../helpers.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
-import { LexicalHelpers, type PasteMode } from '../utils.js'
+import { LexicalHelpers } from '../utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -129,40 +128,5 @@ describe('Lexical Fully Featured', () => {
 
     const someButton = dropdownItems!.locator(`[data-item-key="bg-red"]`)
     await expect(someButton).toHaveAttribute('aria-disabled', 'false')
-  })
-
-  async function uploadsTest(page: Page, mode: PasteMode, expectedFileName?: string) {
-    const filePath = path.resolve(dirname, './collections/Upload/payload.jpg')
-    await lexical.pasteFile({ filePath, mode })
-
-    await expect(lexical.drawer).toBeVisible()
-    // Click Save button
-    await lexical.drawer.locator('.bulk-upload--actions-bar').getByText('Save').click()
-    await expect(lexical.drawer).toBeHidden()
-
-    await expect(lexical.editor.locator('.lexical-upload')).toHaveCount(1)
-    await expect(lexical.editor.locator('.lexical-upload')).toBeVisible()
-    await expect(lexical.editor.locator('.lexical-upload__doc-drawer-toggler')).toHaveText(
-      expectedFileName || 'payload-1.jpg',
-    )
-
-    const uploadedImage = await payload.find({
-      collection: 'uploads',
-      where: { filename: { equals: expectedFileName || 'payload-1.jpg' } },
-    })
-    expect(uploadedImage.totalDocs).toBe(1)
-  }
-
-  // eslint-disable-next-line playwright/expect-expect
-  test('ensure auto upload by copy & pasting image works when pasting a blob', async ({ page }) => {
-    await uploadsTest(page, 'blob')
-  })
-
-  // eslint-disable-next-line playwright/expect-expect
-  test('ensure auto upload by copy & pasting image works when pasting as html', async ({
-    page,
-  }) => {
-    // blob will be put in src of img tag => cannot infer file name
-    await uploadsTest(page, 'html', 'pasted-image.jpeg')
   })
 })
