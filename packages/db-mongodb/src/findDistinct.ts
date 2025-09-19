@@ -57,7 +57,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
   const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
 
   let $unwind: string = ''
-  let $group: any
+  let $group: any = null
   if (
     isHasManyValue &&
     sortAggregation.length &&
@@ -74,7 +74,8 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
   } else if (isHasManyValue) {
     $unwind = `$${args.field}`
   }
-  {
+
+  if (!$group) {
     $group = {
       _id: {
         _field: `$${fieldPath}`,

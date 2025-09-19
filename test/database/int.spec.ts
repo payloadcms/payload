@@ -924,6 +924,12 @@ describe('database', () => {
       expect(fromRes.categories.id).toBe(id)
     }
 
+    // Non-consistent sorting by ID
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (process.env.PAYLOAD_DATABASE?.includes('uuid')) {
+      return
+    }
+
     const resultDepth1NoSort = await payload.findDistinct({
       depth: 1,
       collection: 'posts',
