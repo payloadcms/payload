@@ -229,6 +229,11 @@ export const createClientConfig = ({
           if (config.experimental?.localizeStatus) {
             clientConfig.experimental.localizeStatus = config.experimental.localizeStatus
           }
+
+          if (config.experimental?.duplicateSelectedLocales) {
+            clientConfig.experimental.duplicateSelectedLocales =
+              config.experimental.duplicateSelectedLocales
+          }
         }
 
         break

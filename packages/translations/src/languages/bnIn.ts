@@ -461,7 +461,9 @@ export const bnInTranslations: DefaultTranslationsObject = {
     copyTo: 'কপি করুন',
     copyToLocale: 'লোকেলে কপি করুন',
     localeToPublish: 'প্রকাশ করার লোকেল',
+    selectedLocales: 'নির্বাচিত ভাষা বা অঞ্চল',
     selectLocaleToCopy: 'কপি করার জন্য লোকেল নির্বাচন করুন',
+    selectLocaleToDuplicate: 'নকল করার জন্য লোকেলস নির্বাচন করুন',
   },
   operators: {
     contains: 'ধারণ করে',

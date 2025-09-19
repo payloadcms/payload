@@ -457,7 +457,9 @@ export const ltTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopijuoti į',
     copyToLocale: 'Kopijuoti į vietovę',
     localeToPublish: 'Publikuoti lokacijoje',
+    selectedLocales: 'Pasirinktos lokalės',
     selectLocaleToCopy: 'Pasirinkite lokalės kopijavimui',
+    selectLocaleToDuplicate: 'Pasirinkite vietoves, kurias norite dubliuoti',
   },
   operators: {
     contains: 'yra',

@@ -727,6 +727,11 @@ export type ImportMapGenerators = Array<
  * These may be unstable and may change or be removed in future releases.
  */
 export type ExperimentalConfig = {
+  /**
+   * Enables UI button that allows duplicating only selected locales.
+   * @default false
+   */
+  duplicateSelectedLocales?: boolean
   localizeStatus?: boolean
 }
 

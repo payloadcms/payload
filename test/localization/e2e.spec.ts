@@ -708,6 +708,53 @@ describe('Localization', () => {
     await page.goto(noLocalizedFieldsURL.create)
     await expect(page.locator('#publish-locale')).toHaveCount(0)
   })
+
+  describe('duplicate selected locales', () => {
+    test('should duplicate only selected locales', async () => {
+      await page.goto(urlPostsWithDrafts.create)
+      await changeLocale(page, defaultLocale)
+      await fillValues({ title: 'English Title' })
+      await saveDocAndAssert(page)
+      const id = await page.locator('.id-label').innerText()
+
+      await changeLocale(page, spanishLocale)
+      await fillValues({ title: 'Spanish Title' })
+      await saveDocAndAssert(page)
+
+      await changeLocale(page, 'pt')
+      await fillValues({ title: 'Portuguese Title' })
+      await saveDocAndAssert(page)
+
+      await openDocControls(page)
+      await page.locator('#action-duplicate-locales').click()
+
+      await expect(page.locator('.duplicate-selected-locales__content')).toBeVisible()
+      await page
+        .locator('.duplicate-selected-locales__item', { hasText: 'English' })
+        .locator('input')
+        .click()
+      await page
+        .locator('.duplicate-selected-locales__item', { hasText: 'Portuguese' })
+        .locator('input')
+        .click()
+      const confirmButton = page.locator('#\\#action-duplicate-confirm')
+      await expect(confirmButton).toBeEnabled()
+      await confirmButton.click()
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'successfully duplicated',
+      )
+
+      await expect.poll(() => page.url()).not.toContain(id)
+      await page.waitForURL((url) => !url.toString().includes(id))
+
+      await changeLocale(page, defaultLocale)
+      await expect(page.locator('#field-title')).toHaveValue('English Title')
+      await changeLocale(page, spanishLocale)
+      await expect(page.locator('#field-title')).toBeEmpty()
+      await changeLocale(page, 'pt')
+      await expect(page.locator('#field-title')).toHaveValue('Portuguese Title')
+    })
+  })
 })
 
 async function createLocalizedArrayItem(page: Page, url: AdminUrlUtil) {

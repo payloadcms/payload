@@ -144,15 +144,17 @@ export default buildConfig({
   // ...
   experimental: {
     localizeStatus: true,
+    duplicateSelectLocales: true,
   },
 })
 ```
 
 The following experimental options are available related to localization:
 
-| Option               | Description                                                                                                                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`localizeStatus`** | **Boolean.** When `true`, shows document status per locale in the admin panel instead of always showing the latest overall status. Opt-in for backwards compatibility. Defaults to `false`. |
+| Option                       | Description                                                                                                                                                                                 |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`localizeStatus`**         | **Boolean.** When `true`, shows document status per locale in the admin panel instead of always showing the latest overall status. Opt-in for backwards compatibility. Defaults to `false`. |
+| **`duplicateSelectLocales`** | **Boolean.** Adds a new docment control option `Duplicate Selected Locales` allowing the user to select specific locales to duplicate. Defaults to `false`.                                 |
 
 ## Field Localization
 

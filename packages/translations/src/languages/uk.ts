@@ -454,7 +454,9 @@ export const ukTranslations: DefaultTranslationsObject = {
     copyTo: 'Копіювати в',
     copyToLocale: 'Копіювати до локалі',
     localeToPublish: 'Місце публікації',
+    selectedLocales: 'Вибрані локалі',
     selectLocaleToCopy: 'Виберіть локалізацію для копіювання',
+    selectLocaleToDuplicate: 'Виберіть локалі для дублювання',
   },
   operators: {
     contains: 'містить',
