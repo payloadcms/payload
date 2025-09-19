@@ -11,7 +11,9 @@ import {
   $isParagraphNode,
   $isRangeSelection,
   COMMAND_PRIORITY_EDITOR,
+  COMMAND_PRIORITY_LOW,
   createCommand,
+  PASTE_COMMAND,
 } from 'lexical'
 import React, { useEffect } from 'react'
 
@@ -28,10 +30,14 @@ export type InsertUploadPayload = Readonly<Omit<UploadData, 'id'> & Partial<Pick
 export const INSERT_UPLOAD_COMMAND: LexicalCommand<InsertUploadPayload> =
   createCommand('INSERT_UPLOAD_COMMAND')
 
-type ImageToUpload = {
+type FileToUpload = {
   alt?: string
   file: File
-  id: string
+  /**
+   * Bulk Upload Form ID that should be created, which can then be matched
+   * against the node formID if the upload is successful
+   */
+  formID: string
 }
 
 export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
@@ -51,17 +57,17 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
 
   const { isModalOpen, openModal } = useModal()
 
-  const openBulkUpload = useEffectEvent(({ image }: { image: ImageToUpload }) => {
-    if (!image) {
+  const openBulkUpload = useEffectEvent(({ files }: { files: FileToUpload[] }) => {
+    if (files?.length === 0) {
       return
     }
 
     setInitialForms((initialForms) => [
       ...(initialForms ?? []),
-      {
-        file: image.file,
-        formID: image.id,
-      },
+      ...files.map((file) => ({
+        file: file.file,
+        formID: file.formID,
+      })),
     ])
 
     if (!isModalOpen(bulkUploadDrawerSlug)) {
@@ -69,7 +75,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
       setSelectableCollections(collections.filter(({ upload }) => !!upload).map(({ slug }) => slug))
 
       setOnCancel(() => {
-        // Remove all the images that were added but not uploaded
+        // Remove all the pending upload nodes that were added but not uploaded
         editor.update(() => {
           for (const dfsNode of $dfsIterator()) {
             const node = dfsNode.node
@@ -116,12 +122,12 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
 
     return mergeRegister(
       /**
-       * Handle auto-uploading images if you copy & paste an image from the clipboard
+       * Handle auto-uploading files if you copy & paste an image dom element from the clipboard
        */
       editor.registerNodeTransform(PendingUploadNode, (node) => {
         const nodeData = node.getData()
         async function upload() {
-          let transformedImage: ImageToUpload | null = null
+          let transformedImage: FileToUpload | null = null
 
           const src = nodeData.src
           const formID = nodeData.formID
@@ -140,7 +146,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
             const file = new File([byteArray], 'pasted-image.' + mimeType?.split('/')[1], {
               type: mimeType,
             })
-            transformedImage = { id: formID, alt: undefined, file }
+            transformedImage = { alt: undefined, file, formID }
           } else if (src.startsWith('http') || src.startsWith('https')) {
             // It's an image URL
             const res = await fetch(src)
@@ -149,14 +155,14 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
               type: blob.type,
             })
 
-            transformedImage = { id: formID, alt: undefined, file }
+            transformedImage = { alt: undefined, file, formID }
           }
 
           if (!transformedImage) {
             return
           }
 
-          openBulkUpload({ image: transformedImage })
+          openBulkUpload({ files: [transformedImage] })
         }
         void upload()
       }),
@@ -191,6 +197,70 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
           return true
         },
         COMMAND_PRIORITY_EDITOR,
+      ),
+      editor.registerCommand(
+        PASTE_COMMAND,
+        (event) => {
+          // PendingUploadNodes are automatically created when importDOM is called. However, if you paste a file from your computer
+          // directly, importDOM won't be called, as it's not a HTML dom element. So we need to handle that case here.
+
+          if (!(event instanceof ClipboardEvent)) {
+            return false
+          }
+          const clipboardData = event.clipboardData
+
+          if (!clipboardData?.types?.length || clipboardData?.types?.includes('text/html')) {
+            // HTML is handled through importDOM => registerNodeTransform for PendingUploadNode
+            return false
+          }
+
+          const files: FileToUpload[] = []
+          if (clipboardData?.files?.length) {
+            Array.from(clipboardData.files).forEach((file) => {
+              files.push({
+                alt: '',
+                file,
+                formID: new ObjectID.default().toHexString(),
+              })
+            })
+          }
+
+          if (files.length) {
+            // Insert a PendingUploadNode for each image
+            editor.update(() => {
+              const selection = $getSelection() || $getPreviousSelection()
+
+              if ($isRangeSelection(selection)) {
+                for (const file of files) {
+                  const pendingUploadNode = new PendingUploadNode({
+                    data: {
+                      formID: file.formID,
+                      src: URL.createObjectURL(file.file),
+                    },
+                  })
+                  // we need to get the focus node before inserting the upload node, as $insertNodeToNearestRoot can change the focus node
+                  const { focus } = selection
+                  const focusNode = focus.getNode()
+                  // Insert upload node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
+                  $insertNodeToNearestRoot(pendingUploadNode)
+
+                  // Delete the node it it's an empty paragraph
+                  if ($isParagraphNode(focusNode) && !focusNode.__first) {
+                    focusNode.remove()
+                  }
+                }
+              }
+            })
+
+            // Open the bulk drawer - the node transform will not open it for us, as it does not handle blob/file uploads
+            openBulkUpload({ files })
+
+            return true
+          }
+
+          return false
+        },
+        COMMAND_PRIORITY_LOW,
       ),
     )
   }, [editor])
