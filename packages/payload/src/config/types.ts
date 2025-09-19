@@ -727,6 +727,11 @@ export type ImportMapGenerators = Array<
  * These may be unstable and may change or be removed in future releases.
  */
 export type ExperimentalConfig = {
+  /**
+   * Adds a button to the UI to delete data for the current locale while keeping the data in other locales.
+   * @default false
+   */
+  deleteCurrentLocale?: boolean
   localizeStatus?: boolean
 }
 

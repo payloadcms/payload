@@ -284,6 +284,8 @@ export const plTranslations: DefaultTranslationsObject = {
     deleted: 'Usunięte',
     deletedAt: 'Usunięto o',
     deletedCountSuccessfully: 'Pomyślnie usunięto {{count}} {{label}}.',
+    deletedInLocale:
+      'Pomyślnie usunięto wszystkie dane {{locale}}. Sam dokument nie został usunięty.',
     deletedSuccessfully: 'Pomyślnie usunięto.',
     deleteLabel: 'Usuń {{label}}',
     deletePermanently: 'Pomiń kosz i usuń na stałe',
@@ -324,6 +326,7 @@ export const plTranslations: DefaultTranslationsObject = {
     goBack: 'Wróć',
     groupByLabel: 'Grupuj według {{label}}',
     import: 'Import',
+    in: 'W',
     isEditing: 'edytuje',
     item: 'Przedmiot',
     items: 'przedmioty',

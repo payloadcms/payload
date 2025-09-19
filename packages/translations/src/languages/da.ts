@@ -283,6 +283,8 @@ export const daTranslations: DefaultTranslationsObject = {
     deleted: 'Slettet',
     deletedAt: 'Slettet Ved',
     deletedCountSuccessfully: 'Slettet {{count}} {{label}}.',
+    deletedInLocale:
+      'Har med succes fjernet alle {{locale}} data. Dokumentet selv blev ikke slettet.',
     deletedSuccessfully: 'Slettet.',
     deleteLabel: 'Slet {{label}}',
     deletePermanently: 'Spring affald over og slet permanent',
@@ -323,6 +325,7 @@ export const daTranslations: DefaultTranslationsObject = {
     goBack: 'Gå tilbage',
     groupByLabel: 'Gruppér efter {{label}}',
     import: 'Import',
+    in: 'i',
     isEditing: 'redigerer',
     item: 'Vare',
     items: 'elementer',

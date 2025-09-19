@@ -284,6 +284,8 @@ export const slTranslations: DefaultTranslationsObject = {
     deleted: 'Izbrisano',
     deletedAt: 'Izbrisano ob',
     deletedCountSuccessfully: 'Uspešno izbrisano {{count}} {{label}}.',
+    deletedInLocale:
+      'Uspešno odstranjene vse podatkovne vsebine {{locale}}. Sam dokument ni bil izbrisan.',
     deletedSuccessfully: 'Uspešno izbrisano.',
     deleteLabel: 'Izbriši {{label}}',
     deletePermanently: 'Preskoči smetnjak in trajno izbriši',
@@ -324,6 +326,7 @@ export const slTranslations: DefaultTranslationsObject = {
     goBack: 'Nazaj',
     groupByLabel: 'Razvrsti po {{label}}',
     import: 'Uvoz',
+    in: 'v',
     isEditing: 'ureja',
     item: 'Predmet',
     items: 'predmeti',

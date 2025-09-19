@@ -286,6 +286,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     deleted: 'Excluído',
     deletedAt: 'Excluído Em',
     deletedCountSuccessfully: 'Excluído {{count}} {{label}} com sucesso.',
+    deletedInLocale:
+      'Removido com sucesso todos os dados do {{locale}}. O documento em si não foi excluído.',
     deletedSuccessfully: 'Apagado com sucesso.',
     deleteLabel: 'Apagar {{label}}',
     deletePermanently: 'Pular lixeira e excluir permanentemente',
@@ -326,6 +328,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     goBack: 'Voltar',
     groupByLabel: 'Agrupar por {{label}}',
     import: 'Importar',
+    in: 'em',
     isEditing: 'está editando',
     item: 'Item',
     items: 'itens',
