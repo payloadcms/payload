@@ -144,15 +144,17 @@ export default buildConfig({
   // ...
   experimental: {
     localizeStatus: true,
+    localizeUpdatedAt: true,
   },
 })
 ```
 
 The following experimental options are available related to localization:
 
-| Option               | Description                                                                                                                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`localizeStatus`** | **Boolean.** When `true`, shows document status per locale in the admin panel instead of always showing the latest overall status. Opt-in for backwards compatibility. Defaults to `false`. |
+| Option                  | Description                                                                                                                                                                                   |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`localizeStatus`**    | **Boolean.** When `true`, shows document status per locale in the admin panel instead of always showing the latest overall status. Opt-in for backwards compatibility. Defaults to `false`.   |
+| **`localizeUpdatedAt`** | **Boolean.** When `true`, shows `updatedAt` timestamp per locale in the admin panel instead of showing the latest overall timestamp. Opt-in for backwards compatibility. Defaults to `false`. |
 
 ## Field Localization
 
