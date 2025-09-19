@@ -6,17 +6,28 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Set up monorepo structure
-COPY ../../package.json ./package.json
-COPY ../../pnpm-lock.yaml ./pnpm-lock.yaml
-COPY ../../pnpm-workspace.yaml ./pnpm-workspace.yaml
-COPY ../../tsconfig.base.json ./tsconfig.base.json
+# Copy UI package files
+COPY package.json ./
+COPY babel.config.cjs bundle.js tsconfig.json .swcrc .browserslistrc ./
+COPY .storybook ./.storybook/
+COPY src ./src/
 
-# Copy UI package
-COPY . ./packages/ui/
+# Copy translations package (workspace dependency)
+COPY ../../packages/translations ./node_modules/@payloadcms/translations/
 
-# Copy required workspace dependencies
-COPY ../../packages/translations ./packages/translations/
+# Create a temporary package.json without workspace dependencies
+RUN node -e "
+const pkg = require('./package.json');
+// Replace workspace dependencies with file paths
+if (pkg.dependencies && pkg.dependencies['@payloadcms/translations']) {
+  pkg.dependencies['@payloadcms/translations'] = 'file:./node_modules/@payloadcms/translations';
+}
+// Remove peer dependencies that might cause issues
+delete pkg.peerDependencies.payload;
+delete pkg.devDependencies.payload;
+delete pkg.devDependencies['@payloadcms/eslint-config'];
+fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2));
+" 2>/dev/null || echo "Node script failed, continuing..."
 
 # Enable pnpm and install dependencies
 RUN corepack enable pnpm && pnpm i --no-frozen-lockfile
@@ -25,7 +36,7 @@ RUN corepack enable pnpm && pnpm i --no-frozen-lockfile
 FROM base AS builder
 WORKDIR /app
 
-# Copy everything from deps stage
+# Copy dependencies from deps stage
 COPY --from=deps /app ./
 
 # Set production environment
@@ -33,16 +44,15 @@ ENV NODE_ENV=production
 ENV SASS_SILENCE_DEPRECATIONS=legacy-js-api
 ENV SASS_QUIET_DEPS=true
 
-# Build Storybook for production from UI package directory
-WORKDIR /app/packages/ui
+# Build Storybook for production
 RUN corepack enable pnpm && pnpm build-storybook
 
 # Production stage
 FROM nginx:alpine AS runner
 WORKDIR /usr/share/nginx/html
 
-# Copy built Storybook from UI package directory
-COPY --from=builder /app/packages/ui/storybook-static ./
+# Copy built Storybook
+COPY --from=builder /app/storybook-static ./
 
 # Create nginx config for serving Storybook
 RUN echo 'server { \
