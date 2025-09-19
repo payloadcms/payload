@@ -18,13 +18,13 @@ export type Preferences = {
 
 export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
   json: T,
-  options?: {
+  ctx?: {
     /**
      * Arbitrary context passed to the onSuccess callback.
      */
     context?: C
     /**
-     * Form state at the time of the request used to retrieve the JSON response.
+     * The form state that was sent with the request when retrieving the `json` arg.
      */
     formState?: FormState
   },

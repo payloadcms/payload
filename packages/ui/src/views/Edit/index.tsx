@@ -134,7 +134,13 @@ export function DefaultEditView({
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
-  const { isLivePreviewEnabled, isLivePreviewing, previewWindowType } = useLivePreviewContext()
+  const {
+    isLivePreviewEnabled,
+    isLivePreviewing,
+    previewWindowType,
+    setURL: setLivePreviewURL,
+    typeofLivePreviewURL,
+  } = useLivePreviewContext()
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)
@@ -263,8 +269,8 @@ export function DefaultEditView({
   ])
 
   const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
-    async (json, options) => {
-      const { context, formState } = options || {}
+    async (json, ctx) => {
+      const { context, formState } = ctx || {}
 
       const controller = handleAbortRef(abortOnSaveRef)
 
@@ -328,7 +334,7 @@ export function DefaultEditView({
       if (id || globalSlug) {
         const docPreferences = await getDocPreferences()
 
-        const { state } = await getFormState({
+        const { livePreviewURL, state } = await getFormState({
           id,
           collectionSlug,
           data: document,
@@ -338,6 +344,7 @@ export function DefaultEditView({
           globalSlug,
           operation,
           renderAllFields: false,
+          returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
           returnLockStatus: false,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
@@ -347,6 +354,10 @@ export function DefaultEditView({
         // Unlock the document after save
         if (isLockingEnabled) {
           setDocumentIsLocked(false)
+        }
+
+        if (livePreviewURL) {
+          setLivePreviewURL(livePreviewURL)
         }
 
         abortOnSaveRef.current = null
@@ -367,7 +378,7 @@ export function DefaultEditView({
       isEditing,
       depth,
       redirectAfterCreate,
-      getDocPermissions,
+      setLivePreviewURL,
       globalSlug,
       refreshCookieAsync,
       incrementVersionCount,
@@ -376,10 +387,13 @@ export function DefaultEditView({
       startRouteTransition,
       router,
       resetUploadEdits,
+      getDocPermissions,
       getDocPreferences,
       getFormState,
       docPermissions,
       operation,
+      isLivePreviewEnabled,
+      typeofLivePreviewURL,
       schemaPathSegments,
       isLockingEnabled,
       setDocumentIsLocked,
@@ -432,17 +446,17 @@ export function DefaultEditView({
       return state
     },
     [
-      id,
-      collectionSlug,
+      editSessionStartTime,
+      isLockingEnabled,
       getDocPreferences,
       getFormState,
+      id,
+      collectionSlug,
+      docPermissions,
       globalSlug,
-      handleDocumentLocking,
-      isLockingEnabled,
       operation,
       schemaPathSegments,
-      docPermissions,
-      editSessionStartTime,
+      handleDocumentLocking,
     ],
   )
 

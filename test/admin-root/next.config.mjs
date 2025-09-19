@@ -20,7 +20,11 @@ export default withBundleAnalyzer(
       ignoreBuildErrors: true,
     },
     images: {
-      domains: ['localhost'],
+      remotePatterns: [
+        {
+          hostname: 'localhost',
+        },
+      ],
     },
     env: {
       PAYLOAD_CORE_DEV: 'true',

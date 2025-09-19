@@ -129,6 +129,12 @@ export type BuildFormStateArgs = {
    */
   renderAllFields?: boolean
   req: PayloadRequest
+  /**
+   * If true, will return a fresh URL for live preview based on the current form state.
+   * Note: this will run on every form state event, so if your `livePreview.url` function is long running or expensive,
+   * ensure it caches itself as needed.
+   */
+  returnLivePreviewURL?: boolean
   returnLockStatus?: boolean
   schemaPath: string
   select?: SelectType

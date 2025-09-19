@@ -233,9 +233,7 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
 export interface SanitizedGlobalConfig
   extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {
   endpoints: Endpoint[] | false
-
   fields: Field[]
-
   /**
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
