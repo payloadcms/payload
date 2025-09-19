@@ -86,7 +86,7 @@ if (!suiteName) {
     .resolve(dirname, inputSuitePath)
     .replaceAll('__', '/')
 
-  const allSuitesInFolder = await globby(`${suiteFolderPath.replace(/\\/g, '/')}/**/*e2e.spec.ts`)
+  const allSuitesInFolder = await globby(`${suiteFolderPath.replace(/\\/g, '/')}/*e2e.spec.ts`)
 
   const baseTestFolder = inputSuitePath.split('__')[0]
 

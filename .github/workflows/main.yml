@@ -287,6 +287,7 @@ jobs:
           - folders
           - hooks
           - lexical__collections___LexicalFullyFeatured
+          - lexical__collections___LexicalFullyFeatured__db
           - lexical__collections__LexicalHeadingFeature
           - lexical__collections__LexicalJSXConverter
           - lexical__collections__LexicalLinkFeature
@@ -430,6 +431,7 @@ jobs:
           - folders
           - hooks
           - lexical__collections___LexicalFullyFeatured
+          - lexical__collections___LexicalFullyFeatured__db
           - lexical__collections__LexicalHeadingFeature
           - lexical__collections__LexicalJSXConverter
           - lexical__collections__LexicalLinkFeature
