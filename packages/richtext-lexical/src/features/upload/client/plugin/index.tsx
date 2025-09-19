@@ -194,7 +194,9 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
             // It's an image URL
             const res = await fetch(src)
             const blob = await res.blob()
-            const file = new File([blob], 'pasted-image.' + blob.type.split('/')[1], {
+            const inferredFileName =
+              src.split('/').pop() || 'pasted-image' + blob.type.split('/')[1]
+            const file = new File([blob], inferredFileName, {
               type: blob.type,
             })
 
