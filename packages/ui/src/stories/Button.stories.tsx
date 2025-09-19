@@ -114,20 +114,6 @@ export const Transparent: Story = {
   },
 }
 
-export const Error: Story = {
-  args: {
-    buttonStyle: 'error',
-    children: 'Error Button',
-  },
-}
-
-export const Pill: Story = {
-  args: {
-    buttonStyle: 'pill',
-    children: 'Pill Button',
-  },
-}
-
 // Sizes
 export const ExtraSmall: Story = {
   args: {
@@ -174,34 +160,10 @@ export const WithIconLeft: Story = {
   },
 }
 
-export const IconOnly: Story = {
-  args: {
-    'aria-label': 'Close',
-    icon: 'x',
-  },
-}
-
 export const CustomIcon: Story = {
   args: {
     children: 'Custom Icon',
     icon: <ChevronIcon />,
-  },
-}
-
-// Icon styles
-export const IconWithBorder: Story = {
-  args: {
-    children: 'Add with Border',
-    icon: 'plus',
-    iconStyle: 'with-border',
-  },
-}
-
-export const IconWithoutBorder: Story = {
-  args: {
-    children: 'Add without Border',
-    icon: 'plus',
-    iconStyle: 'without-border',
   },
 }
 
@@ -221,77 +183,6 @@ export const DisabledPrimary: Story = {
   },
 }
 
-// Round variant
-export const Round: Story = {
-  args: {
-    children: 'Round Button',
-    round: true,
-  },
-}
-
-export const RoundIconOnly: Story = {
-  args: {
-    'aria-label': 'Add',
-    icon: 'plus',
-    round: true,
-  },
-}
-
-// With tooltip
-export const WithTooltip: Story = {
-  args: {
-    children: 'Hover for tooltip',
-    tooltip: 'This is a helpful tooltip',
-  },
-}
-
-// Different elements
-export const AsLink: Story = {
-  args: {
-    children: 'Link Button',
-    el: 'link',
-    to: '#',
-  },
-}
-
-export const AsAnchor: Story = {
-  args: {
-    children: 'External Link',
-    el: 'anchor',
-    newTab: true,
-    url: 'https://payloadcms.com',
-  },
-}
-
-// Combinations
-export const LargePrimaryWithIcon: Story = {
-  args: {
-    buttonStyle: 'primary',
-    children: 'Create New',
-    icon: 'plus',
-    iconPosition: 'left',
-    size: 'large',
-  },
-}
-
-export const SmallSecondaryIconOnly: Story = {
-  args: {
-    'aria-label': 'Edit item',
-    buttonStyle: 'secondary',
-    icon: 'edit',
-    size: 'small',
-  },
-}
-
-export const ErrorWithTooltip: Story = {
-  args: {
-    buttonStyle: 'error',
-    children: 'Delete',
-    icon: 'x',
-    tooltip: 'This action cannot be undone',
-  },
-}
-
 // All variants showcase
 export const AllVariants: Story = {
   parameters: {
@@ -304,42 +195,6 @@ export const AllVariants: Story = {
   render: () => (
     <div
       style={{ alignItems: 'flex-start', display: 'flex', flexDirection: 'column', gap: '16px' }}
-    >
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-        <Button buttonStyle="primary">Primary</Button>
-        <Button buttonStyle="secondary">Secondary</Button>
-        <Button buttonStyle="subtle">Subtle</Button>
-        <Button buttonStyle="transparent">Transparent</Button>
-        <Button buttonStyle="error">Error</Button>
-        <Button buttonStyle="pill">Pill</Button>
-      </div>
-
-      <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-        <Button size="xsmall">Extra Small</Button>
-        <Button size="small">Small</Button>
-        <Button size="medium">Medium</Button>
-        <Button size="large">Large</Button>
-      </div>
-
-      <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-        <Button icon="plus" iconPosition="left">
-          Add Item
-        </Button>
-        <Button icon="edit" iconPosition="right">
-          Edit
-        </Button>
-        <Button aria-label="Close" icon="x" />
-        <Button icon="plus" iconStyle="with-border">
-          With Border
-        </Button>
-      </div>
-
-      <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-        <Button round>Round</Button>
-        <Button aria-label="Add" icon="plus" round />
-        <Button disabled>Disabled</Button>
-        <Button tooltip="This is a tooltip">With Tooltip</Button>
-      </div>
-    </div>
+    ></div>
   ),
 }
