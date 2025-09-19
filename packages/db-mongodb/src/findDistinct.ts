@@ -71,7 +71,10 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
         _sort: `$${sortProperty}`,
       },
     }
-  } else {
+  } else if (isHasManyValue) {
+    $unwind = `$${args.field}`
+  }
+  {
     $group = {
       _id: {
         _field: `$${fieldPath}`,
