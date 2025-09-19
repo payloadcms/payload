@@ -137,7 +137,7 @@ export function BulkUploadDrawer() {
   )
 }
 
-type BulkUploadContext = {
+export type BulkUploadContext = {
   collectionSlug: CollectionSlug
   drawerSlug: string
   initialFiles: FileList
@@ -148,7 +148,7 @@ type BulkUploadContext = {
   maxFiles: number
   onCancel: () => void
   onSuccess: (
-    newDocs: Array<{
+    uploadedForms: Array<{
       collectionSlug: CollectionSlug
       doc: JsonObject
       /**
