@@ -72,8 +72,13 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
     ])
 
     if (!isModalOpen(bulkUploadDrawerSlug)) {
-      setCollectionSlug('uploads') // TODO
-      setSelectableCollections(collections.filter(({ upload }) => !!upload).map(({ slug }) => slug))
+      const uploadCollections = collections.filter(({ upload }) => !!upload).map(({ slug }) => slug)
+      if (!uploadCollections.length || !uploadCollections[0]) {
+        return
+      }
+
+      setCollectionSlug(uploadCollections[0])
+      setSelectableCollections(uploadCollections)
 
       setOnCancel(() => {
         // Remove all the pending upload nodes that were added but not uploaded
