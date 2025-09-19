@@ -40,6 +40,7 @@
     "build:plugin-cloud-storage": "turbo build --filter \"@payloadcms/plugin-cloud-storage\"",
     "build:plugin-form-builder": "turbo build --filter \"@payloadcms/plugin-form-builder\"",
     "build:plugin-import-export": "turbo build --filter \"@payloadcms/plugin-import-export\"",
+    "build:plugin-mcp": "turbo build --filter \"@payloadcms/plugin-mcp\"",
     "build:plugin-multi-tenant": "turbo build --filter \"@payloadcms/plugin-multi-tenant\"",
     "build:plugin-nested-docs": "turbo build --filter \"@payloadcms/plugin-nested-docs\"",
     "build:plugin-redirects": "turbo build --filter \"@payloadcms/plugin-redirects\"",

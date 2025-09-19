@@ -36,7 +36,6 @@ let payload: PayloadTestSDK<Config>
 
 import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
 import { devUser } from 'credentials.js'
-import { getRowByCellValueAndAssert } from 'helpers/e2e/getRowByCellValueAndAssert.js'
 import {
   openListColumns,
   reorderColumns,
@@ -45,6 +44,7 @@ import {
   waitForColumnInURL,
 } from 'helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
+import { getRowByCellValueAndAssert } from 'helpers/e2e/getRowByCellValueAndAssert.js'
 import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from 'helpers/e2e/preferences.js'
