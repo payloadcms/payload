@@ -19,7 +19,7 @@ type RequestOptions = {
   auth?: boolean
   query?: { [key: string]: unknown } & {
     depth?: number
-    fallbackLocale?: string
+    fallbackLocale?: string | string[]
     joins?: JoinQuery
     limit?: number
     locale?: string
