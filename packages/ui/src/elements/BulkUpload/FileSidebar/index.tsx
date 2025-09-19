@@ -38,7 +38,7 @@ export function FileSidebar() {
     setActiveIndex,
     totalErrorCount,
   } = useFormsManager()
-  const { initialFiles, maxFiles } = useBulkUpload()
+  const { initialFiles, initialForms, maxFiles } = useBulkUpload()
   const { i18n, t } = useTranslation()
   const { closeModal, openModal } = useModal()
   const [showFiles, setShowFiles] = React.useState(false)
@@ -68,7 +68,9 @@ export function FileSidebar() {
     return formattedSize
   }, [])
 
-  const totalFileCount = isInitializing ? initialFiles.length : forms.length
+  const totalFileCount = isInitializing
+    ? (initialFiles?.length ?? initialForms?.length)
+    : forms.length
 
   const {
     collectionSlug: bulkUploadCollectionSlug,
@@ -163,8 +165,10 @@ export function FileSidebar() {
       <div className={`${baseClass}__animateWrapper`}>
         <AnimateHeight height={!breakpoints.m || showFiles ? 'auto' : 0}>
           <div className={`${baseClass}__filesContainer`}>
-            {isInitializing && forms.length === 0 && initialFiles.length > 0
-              ? Array.from(initialFiles).map((file, index) => (
+            {isInitializing &&
+            forms.length === 0 &&
+            (initialFiles?.length > 0 || initialForms?.length > 0)
+              ? (initialFiles ? Array.from(initialFiles) : initialForms).map((file, index) => (
                   <ShimmerEffect
                     animationDelay={`calc(${index} * ${60}ms)`}
                     height="35px"
