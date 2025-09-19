@@ -2,6 +2,9 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const csTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
+    'assign-document-modal-description':
+      'Nastavte vlastnictví tohoto dokumentu. Aktualizujte níže uvedený výběr a potvrďte své změny.',
+    'assign-document-modal-title': 'Přiřadit dokument',
     'confirm-modal-tenant-switch--body':
       'Chystáte se změnit vlastnictví z <0>{{fromTenant}}</0> na <0>{{toTenant}}</0>',
     'confirm-modal-tenant-switch--heading': 'Potvrďte změnu {{tenantLabel}}',

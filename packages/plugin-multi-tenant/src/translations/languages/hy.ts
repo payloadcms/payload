@@ -2,6 +2,9 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const hyTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
+    'assign-document-modal-description':
+      'Նշեք այս փաստաթուղթի սեփականությունը։ Թարմացրեք ստորև նշված ընտրությունը և հաստ',
+    'assign-document-modal-title': 'Նշագրեք Փաստաթուղթ',
     'confirm-modal-tenant-switch--body':
       'Դուք պատրաստվում եք փոխել սեփականությունը <0>{{fromTenant}}</0>-ից <0>{{toTenant}}</0>-ին:',
     'confirm-modal-tenant-switch--heading': 'Հաստատեք {{tenantLabel}}֊ի փոփոխությունը',
