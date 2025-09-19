@@ -135,6 +135,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     onSuccess,
     setInitialFiles,
     setInitialForms,
+    setSuccessfullyUploaded,
   } = useBulkUpload()
 
   const [isUploading, setIsUploading] = React.useState(false)
@@ -434,6 +435,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
       if (successCount) {
         toast.success(`Successfully saved ${successCount} files`)
+        setSuccessfullyUploaded(true)
 
         if (typeof onSuccess === 'function') {
           onSuccess(newDocs, errorCount)
@@ -470,6 +472,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       getUploadHandler,
       onSuccess,
       closeModal,
+      setSuccessfullyUploaded,
       drawerSlug,
       setInitialFiles,
       setInitialForms,

@@ -81,6 +81,8 @@ export function BulkUploadDrawer() {
     setOnCancel,
     setOnSuccess,
     setSelectableCollections,
+    setSuccessfullyUploaded,
+    successfullyUploaded,
   } = useBulkUpload()
   const { modalState } = useModal()
   const previousModalStateRef = React.useRef(modalState)
@@ -98,15 +100,21 @@ export function BulkUploadDrawer() {
 
     if (previousModalState?.isOpen !== currentModalState?.isOpen) {
       if (!currentModalState?.isOpen) {
-        if (typeof onCancel === 'function') {
-          onCancel()
+        if (!successfullyUploaded) {
+          // It's only cancelled if successfullyUploaded is not set. Otherwise, this would simply be a modal close after success
+          // => do not call cancel, just reset everything
+          if (typeof onCancel === 'function') {
+            onCancel()
+          }
         }
+
         // Reset everything to defaults
         setInitialFiles(undefined)
         setInitialForms(undefined)
         setOnCancel(() => () => null)
         setOnSuccess(() => () => null)
         setSelectableCollections(null)
+        setSuccessfullyUploaded(false)
       }
     }
     previousModalStateRef.current = modalState
@@ -169,6 +177,8 @@ type BulkUploadContext = {
    * @default null - collection cannot be selected
    */
   setSelectableCollections: (collections: null | string[]) => void
+  setSuccessfullyUploaded: (successfullyUploaded: boolean) => void
+  successfullyUploaded: boolean
 }
 
 const Context = React.createContext<BulkUploadContext>({
@@ -187,6 +197,8 @@ const Context = React.createContext<BulkUploadContext>({
   setOnCancel: () => null,
   setOnSuccess: () => null,
   setSelectableCollections: () => null,
+  setSuccessfullyUploaded: () => false,
+  successfullyUploaded: false,
 })
 export function BulkUploadProvider({
   children,
@@ -202,6 +214,8 @@ export function BulkUploadProvider({
   const [initialFiles, setInitialFiles] = React.useState<FileList>(undefined)
   const [initialForms, setInitialForms] = React.useState<InitialForms>(undefined)
   const [maxFiles, setMaxFiles] = React.useState<number>(undefined)
+  const [successfullyUploaded, setSuccessfullyUploaded] = React.useState<boolean>(false)
+
   const drawerSlug = `${drawerSlugPrefix ? `${drawerSlugPrefix}-` : ''}${useBulkUploadDrawerSlug()}`
 
   const setOnSuccess: BulkUploadContext['setOnSuccess'] = (onSuccess) => {
@@ -237,6 +251,8 @@ export function BulkUploadProvider({
         setOnCancel,
         setOnSuccess,
         setSelectableCollections,
+        setSuccessfullyUploaded,
+        successfullyUploaded,
       }}
     >
       <React.Fragment>
