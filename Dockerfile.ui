@@ -12,6 +12,9 @@ COPY packages/ui/babel.config.cjs packages/ui/bundle.js packages/ui/tsconfig.jso
 COPY packages/ui/.storybook ./.storybook/
 COPY packages/ui/src ./src/
 
+# Copy monorepo TypeScript configuration (required by Storybook)
+COPY tsconfig.base.json ./tsconfig.base.json
+
 # Create a temporary package.json without workspace dependencies
 RUN node -e "const pkg = require('./package.json'); const fs = require('fs'); if (pkg.dependencies && pkg.dependencies['@payloadcms/translations']) { delete pkg.dependencies['@payloadcms/translations']; } if (pkg.peerDependencies) { delete pkg.peerDependencies.payload; } if (pkg.devDependencies) { delete pkg.devDependencies.payload; delete pkg.devDependencies['@payloadcms/eslint-config']; } fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2));"
 
@@ -46,9 +49,9 @@ WORKDIR /usr/share/nginx/html
 # Copy built Storybook
 COPY --from=builder /app/storybook-static ./
 
-# Create nginx config for serving Storybook
+# Create nginx config for serving Storybook on port 6006
 RUN echo 'server { \
-    listen 80; \
+    listen 6006; \
     server_name localhost; \
     location / { \
         root /usr/share/nginx/html; \
@@ -62,6 +65,6 @@ RUN echo 'server { \
     } \
 }' > /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+EXPOSE 6006
 
 CMD ["nginx", "-g", "daemon off;"]
