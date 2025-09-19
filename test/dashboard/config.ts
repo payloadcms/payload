@@ -13,7 +13,16 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
     components: {
-      afterNavLinks: ['/components/Revenue.js#Revenue'],
+      afterDashboard: ['./components/BeforeOrAfterDashboard.js'],
+      beforeDashboard: ['./components/BeforeOrAfterDashboard.js'],
+    },
+    dashboard: {
+      defaults: [
+        {
+          Component: '/components/Revenue.js#Revenue',
+          slug: 'revenue',
+        },
+      ],
     },
   },
   onInit: async (payload) => {
