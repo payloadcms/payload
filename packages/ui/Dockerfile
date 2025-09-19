@@ -12,8 +12,10 @@ COPY babel.config.cjs bundle.js tsconfig.json .swcrc .browserslistrc ./
 COPY .storybook ./.storybook/
 COPY src ./src/
 
-# Copy translations package (workspace dependency)
-COPY ../../packages/translations ./node_modules/@payloadcms/translations/
+# Copy translations package (workspace dependency) - create a minimal version
+RUN mkdir -p ./node_modules/@payloadcms/translations
+COPY ../../packages/translations/package.json ./node_modules/@payloadcms/translations/package.json
+COPY ../../packages/translations/src ./node_modules/@payloadcms/translations/src
 
 # Create a temporary package.json without workspace dependencies
 RUN node -e "const pkg = require('./package.json'); const fs = require('fs'); if (pkg.dependencies && pkg.dependencies['@payloadcms/translations']) { pkg.dependencies['@payloadcms/translations'] = 'file:./node_modules/@payloadcms/translations'; } if (pkg.peerDependencies) { delete pkg.peerDependencies.payload; } if (pkg.devDependencies) { delete pkg.devDependencies.payload; delete pkg.devDependencies['@payloadcms/eslint-config']; } fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2));"

@@ -76,7 +76,7 @@ scripts/
 # Keep only necessary UI package files
 src/**/*.stories.tsx
 src/**/*.stories.ts
-.storybook
+# .storybook  # Allow .storybook directory for Docker builds
 package.json
 tsconfig.json
 .swcrc
