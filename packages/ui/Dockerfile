@@ -19,7 +19,7 @@ COPY . ./packages/ui/
 COPY ../../packages/translations ./packages/translations/
 
 # Enable pnpm and install dependencies
-RUN corepack enable pnpm && pnpm i --frozen-lockfile
+RUN corepack enable pnpm && pnpm i --no-frozen-lockfile
 
 # Build stage
 FROM base AS builder
