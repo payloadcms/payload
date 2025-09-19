@@ -43,7 +43,7 @@ export type StripeAdapterArgs = {
   publishableKey: string
   secretKey: string
   webhooks?: StripeWebhookHandlers
-  webhookSecret: string
+  webhookSecret?: string
 } & BasePaymentAdapterArgs
 
 export const stripeAdapter: (props: StripeAdapterArgs) => PaymentAdapter = (props) => {

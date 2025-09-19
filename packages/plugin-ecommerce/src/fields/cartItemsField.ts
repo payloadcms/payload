@@ -40,6 +40,9 @@ export const cartItemsField: (props?: Props) => ArrayField = (props) => {
   const field: ArrayField = {
     name: 'items',
     type: 'array',
+    admin: {
+      initCollapsed: true,
+    },
     fields: [
       {
         name: 'product',

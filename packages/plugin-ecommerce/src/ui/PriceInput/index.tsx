@@ -21,6 +21,7 @@ export const PriceInput: React.FC<Props> = (args) => {
     i18n: { t },
     i18n,
     path,
+    readOnly,
   } = args
 
   const description = field.admin?.description
@@ -36,6 +37,7 @@ export const PriceInput: React.FC<Props> = (args) => {
       description={description}
       label={label}
       path={path}
+      readOnly={readOnly}
       supportedCurrencies={currenciesConfig?.supportedCurrencies}
     />
   )

@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { AccessConfig, CurrenciesConfig, FieldsOverride } from '../../types.js'
+import type { AccessConfig, CurrenciesConfig } from '../../types.js'
 
 import { amountField } from '../../fields/amountField.js'
 import { cartItemsField } from '../../fields/cartItemsField.js'
@@ -23,7 +23,6 @@ type Props = {
    * Defaults to false.
    */
   enableVariants?: boolean
-  overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   /**
    * Slug of the products collection, defaults to 'products'.
    */
@@ -40,16 +39,35 @@ export const createCartsCollection: (props: Props) => CollectionConfig = (props)
     currenciesConfig,
     customersSlug = 'users',
     enableVariants = false,
-    overrides,
     productsSlug = 'products',
     variantsSlug = 'variants',
   } = props || {}
-  const fieldsOverride = overrides?.fields
 
-  const defaultFields: Field[] = [
+  const fields: Field[] = [
+    cartItemsField({
+      enableVariants,
+      overrides: {
+        label: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-ecommerce:items'),
+        labels: {
+          plural: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-ecommerce:items'),
+          singular: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-ecommerce:item'),
+        },
+      },
+      productsSlug,
+      variantsSlug,
+    }),
     {
       name: 'customer',
       type: 'relationship',
+      admin: {
+        position: 'sidebar',
+      },
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
         t('plugin-ecommerce:customer'),
@@ -60,6 +78,7 @@ export const createCartsCollection: (props: Props) => CollectionConfig = (props)
       type: 'date',
       admin: {
         date: { pickerAppearance: 'dayAndTime' },
+        position: 'sidebar',
       },
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
@@ -69,6 +88,7 @@ export const createCartsCollection: (props: Props) => CollectionConfig = (props)
       name: 'status',
       type: 'select',
       admin: {
+        position: 'sidebar',
         readOnly: true,
       },
       hooks: {
@@ -98,70 +118,60 @@ export const createCartsCollection: (props: Props) => CollectionConfig = (props)
     },
     ...(currenciesConfig
       ? [
-          currencyField({
-            currenciesConfig,
-          }),
-          amountField({
-            currenciesConfig,
-            overrides: {
-              name: 'subtotal',
-              label: ({ t }) =>
-                // @ts-expect-error - translations are not typed in plugins yet
-                t('plugin-ecommerce:subtotal'),
-            },
-          }),
+          {
+            type: 'row',
+            admin: { position: 'sidebar' },
+            fields: [
+              amountField({
+                currenciesConfig,
+                overrides: {
+                  name: 'subtotal',
+
+                  label: ({ t }) =>
+                    // @ts-expect-error - translations are not typed in plugins yet
+                    t('plugin-ecommerce:subtotal'),
+                },
+              }),
+              currencyField({
+                currenciesConfig,
+              }),
+            ],
+          } as Field,
         ]
       : []),
-    cartItemsField({
-      enableVariants,
-      overrides: {
-        label: ({ t }) =>
-          // @ts-expect-error - translations are not typed in plugins yet
-          t('plugin-ecommerce:items'),
-        labels: {
-          plural: ({ t }) =>
-            // @ts-expect-error - translations are not typed in plugins yet
-            t('plugin-ecommerce:items'),
-          singular: ({ t }) =>
-            // @ts-expect-error - translations are not typed in plugins yet
-            t('plugin-ecommerce:item'),
-        },
-      },
-      productsSlug,
-      variantsSlug,
-    }),
   ]
-
-  const fields =
-    fieldsOverride && typeof fieldsOverride === 'function'
-      ? fieldsOverride({ defaultFields })
-      : defaultFields
 
   const baseConfig: CollectionConfig = {
     slug: 'carts',
-    timestamps: true,
-    ...overrides,
     access: {
       create: publicAccess,
       delete: adminOrCustomerOwner,
       read: adminOrCustomerOwner,
       update: adminOrCustomerOwner,
-      ...overrides?.access,
     },
     admin: {
+      description: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:cartsCollectionDescription'),
       group: 'Ecommerce',
       useAsTitle: 'createdAt',
-      ...overrides?.admin,
     },
     fields,
     hooks: {
       beforeChange: [
         // This hook can be used to update the subtotal before saving the cart
         beforeChangeCart({ productsSlug, variantsSlug }),
-        ...(overrides?.hooks?.beforeChange || []),
       ],
-      ...overrides?.hooks,
     },
+    labels: {
+      plural: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:carts'),
+      singular: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:cart'),
+    },
+    timestamps: true,
   }
 
   return { ...baseConfig }

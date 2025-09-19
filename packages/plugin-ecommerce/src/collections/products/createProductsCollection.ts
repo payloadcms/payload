@@ -38,7 +38,7 @@ export const createProductsCollection: (props: Props) => CollectionConfig = (pro
     variantTypesSlug = 'variantTypes',
   } = props || {}
 
-  const defaultFields = [
+  const fields = [
     ...(inventory
       ? [
           inventoryField({
@@ -69,7 +69,15 @@ export const createProductsCollection: (props: Props) => CollectionConfig = (pro
       ],
       group: 'Ecommerce',
     },
-    fields: defaultFields,
+    fields,
+    labels: {
+      plural: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:products'),
+      singular: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:product'),
+    },
     trash: true,
     versions: {
       drafts: {

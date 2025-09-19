@@ -1,11 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type {
-  AccessConfig,
-  CollectionOverride,
-  CurrenciesConfig,
-  InventoryConfig,
-} from '../../../types.js'
+import type { AccessConfig, CurrenciesConfig, InventoryConfig } from '../../../types.js'
 
 import { inventoryField } from '../../../fields/inventoryField.js'
 import { pricesField } from '../../../fields/pricesField.js'
@@ -42,7 +37,7 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
   } = props || {}
   const { supportedCurrencies } = currenciesConfig || {}
 
-  const defaultFields: Field[] = [
+  const fields: Field[] = [
     {
       name: 'title',
       type: 'text',
@@ -55,8 +50,7 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
       name: 'product',
       type: 'relationship',
       admin: {
-        description:
-          'this should not be editable, or at least, should be able to be pre-filled via default',
+        position: 'sidebar',
         readOnly: true,
       },
       relationTo: productsSlug,
@@ -94,13 +88,12 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
     })
 
     if (currenciesConfig) {
-      defaultFields.push(...pricesField({ currenciesConfig }))
+      fields.push(...pricesField({ currenciesConfig }))
     }
   }
 
   const baseConfig: CollectionConfig = {
     slug: 'variants',
-
     access: {
       create: adminOnly,
       delete: adminOnly,
@@ -108,12 +101,23 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
       update: adminOnly,
     },
     admin: {
-      group: 'Ecommerce',
+      description: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:variantsCollectionDescription'),
+      group: false,
       useAsTitle: 'title',
     },
-    fields: defaultFields,
+    fields,
     hooks: {
       beforeChange: [beforeChange({ productsSlug, variantOptionsSlug })],
+    },
+    labels: {
+      plural: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:variants'),
+      singular: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:variant'),
     },
     trash: true,
     versions: {

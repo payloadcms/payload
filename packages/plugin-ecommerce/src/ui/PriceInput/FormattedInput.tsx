@@ -19,19 +19,21 @@ interface Props {
   label?: StaticLabel
   path: string
   placeholder?: string
+  readOnly?: boolean
   supportedCurrencies: Currency[]
 }
 
 const baseClass = 'formattedPrice'
 
 export const FormattedInput: React.FC<Props> = ({
-  id,
+  id: idFromProps,
   currency: currencyFromProps,
   description,
   disabled = false,
   label,
   path,
   placeholder = '0.00',
+  readOnly,
   supportedCurrencies,
 }) => {
   const { setValue, value } = useField<number>({ path })
@@ -47,6 +49,7 @@ export const FormattedInput: React.FC<Props> = ({
   const currencyFromSelectField = useFormFields(([fields, _]) => fields[currencyPath])
 
   const currencyCode = currencyFromProps?.code ?? (currencyFromSelectField?.value as string)
+  const id = idFromProps || path
 
   const currency = useMemo<Currency>(() => {
     if (currencyCode && supportedCurrencies) {
@@ -133,7 +136,7 @@ export const FormattedInput: React.FC<Props> = ({
 
   return (
     <div className={`field-type number ${baseClass}`}>
-      {label && <FieldLabel htmlFor={id} label={label} />}
+      {label && <FieldLabel as="label" htmlFor={id} label={label} />}
 
       <div className={`${baseClass}Container`}>
         <div className={`${baseClass}CurrencySymbol`}>
@@ -143,7 +146,7 @@ export const FormattedInput: React.FC<Props> = ({
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
           className={`${baseClass}Input`}
-          disabled={disabled}
+          disabled={disabled || readOnly}
           id={id}
           onBlur={handleInputBlur}
           onChange={handleInputChange}

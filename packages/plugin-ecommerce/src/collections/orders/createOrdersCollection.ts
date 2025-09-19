@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { AccessConfig, CurrenciesConfig, FieldsOverride } from '../../types.js'
+import type { AccessConfig, CurrenciesConfig } from '../../types.js'
 
 import { amountField } from '../../fields/amountField.js'
 import { cartItemsField } from '../../fields/cartItemsField.js'
@@ -22,7 +22,6 @@ type Props = {
    */
   customersSlug?: string
   enableVariants?: boolean
-  overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   /**
    * Slug of the products collection, defaults to 'products'.
    */
@@ -44,17 +43,68 @@ export const createOrdersCollection: (props: Props) => CollectionConfig = (props
     currenciesConfig,
     customersSlug = 'users',
     enableVariants = false,
-    overrides,
     productsSlug = 'products',
     transactionsSlug = 'transactions',
     variantsSlug = 'variants',
   } = props || {}
-  const fieldsOverride = overrides?.fields
 
-  const defaultFields: Field[] = [
+  const fields: Field[] = [
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          fields: [
+            cartItemsField({
+              enableVariants,
+              overrides: {
+                name: 'items',
+                label: ({ t }) =>
+                  // @ts-expect-error - translations are not typed in plugins yet
+                  t('plugin-ecommerce:items'),
+                labels: {
+                  plural: ({ t }) =>
+                    // @ts-expect-error - translations are not typed in plugins yet
+                    t('plugin-ecommerce:items'),
+                  singular: ({ t }) =>
+                    // @ts-expect-error - translations are not typed in plugins yet
+                    t('plugin-ecommerce:item'),
+                },
+              },
+              productsSlug,
+              variantsSlug,
+            }),
+          ],
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-ecommerce:orderDetails'),
+        },
+        {
+          fields: [
+            ...(addressFields
+              ? [
+                  {
+                    name: 'shippingAddress',
+                    type: 'group',
+                    fields: addressFields,
+                    label: ({ t }) =>
+                      // @ts-expect-error - translations are not typed in plugins yet
+                      t('plugin-ecommerce:shippingAddress'),
+                  } as Field,
+                ]
+              : []),
+          ],
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-ecommerce:shipping'),
+        },
+      ],
+    },
     {
       name: 'customer',
       type: 'relationship',
+      admin: {
+        position: 'sidebar',
+      },
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
         t('plugin-ecommerce:customer'),
@@ -63,6 +113,9 @@ export const createOrdersCollection: (props: Props) => CollectionConfig = (props
     {
       name: 'customerEmail',
       type: 'email',
+      admin: {
+        position: 'sidebar',
+      },
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
         t('plugin-ecommerce:customerEmail'),
@@ -75,6 +128,9 @@ export const createOrdersCollection: (props: Props) => CollectionConfig = (props
         read: adminOnlyFieldAccess,
         update: adminOnlyFieldAccess,
       },
+      admin: {
+        position: 'sidebar',
+      },
       hasMany: true,
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
@@ -84,6 +140,9 @@ export const createOrdersCollection: (props: Props) => CollectionConfig = (props
     {
       name: 'status',
       type: 'select',
+      admin: {
+        position: 'sidebar',
+      },
       defaultValue: 'processing',
       interfaceName: 'OrderStatus',
       label: ({ t }) =>
@@ -112,64 +171,52 @@ export const createOrdersCollection: (props: Props) => CollectionConfig = (props
         },
       ],
     },
-    ...(addressFields
+
+    ...(currenciesConfig
       ? [
           {
-            name: 'shippingAddress',
-            type: 'group',
-            fields: addressFields,
-            label: ({ t }) =>
-              // @ts-expect-error - translations are not typed in plugins yet
-              t('plugin-ecommerce:shippingAddress'),
+            type: 'row',
+            admin: {
+              position: 'sidebar',
+            },
+            fields: [
+              amountField({
+                currenciesConfig,
+              }),
+              currencyField({
+                currenciesConfig,
+              }),
+            ],
           } as Field,
         ]
       : []),
-    ...(currenciesConfig
-      ? [amountField({ currenciesConfig }), currencyField({ currenciesConfig })]
-      : []),
-    cartItemsField({
-      enableVariants,
-      overrides: {
-        name: 'items',
-        label: ({ t }) =>
-          // @ts-expect-error - translations are not typed in plugins yet
-          t('plugin-ecommerce:items'),
-        labels: {
-          plural: ({ t }) =>
-            // @ts-expect-error - translations are not typed in plugins yet
-            t('plugin-ecommerce:items'),
-          singular: ({ t }) =>
-            // @ts-expect-error - translations are not typed in plugins yet
-            t('plugin-ecommerce:item'),
-        },
-      },
-      productsSlug,
-      variantsSlug,
-    }),
   ]
-
-  const fields =
-    fieldsOverride && typeof fieldsOverride === 'function'
-      ? fieldsOverride({ defaultFields })
-      : defaultFields
 
   const baseConfig: CollectionConfig = {
     slug: 'orders',
-    timestamps: true,
-    ...overrides,
     access: {
       create: adminOnly,
       delete: adminOnly,
       read: adminOrCustomerOwner,
       update: adminOnly,
-      ...overrides?.access,
     },
     admin: {
+      description: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:ordersCollectionDescription'),
       group: 'Ecommerce',
       useAsTitle: 'createdAt',
-      ...overrides?.admin,
     },
     fields,
+    labels: {
+      plural: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:orders'),
+      singular: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:order'),
+    },
+    timestamps: true,
   }
 
   return { ...baseConfig }

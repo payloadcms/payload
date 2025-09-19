@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { AccessConfig, CountryType, FieldsOverride } from '../../types.js'
+import type { AccessConfig, CountryType } from '../../types.js'
 
 import { defaultCountries } from './defaultCountries.js'
 import { beforeChange } from './hooks/beforeChange.js'
@@ -19,7 +19,6 @@ type Props = {
    * Slug of the customers collection, defaults to 'users'.
    */
   customersSlug?: string
-  overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   supportedCountries?: CountryType[]
 }
 
@@ -28,18 +27,19 @@ export const createAddressesCollection: (props: Props) => CollectionConfig = (pr
     access: { adminOrCustomerOwner, authenticatedOnly, customerOnlyFieldAccess },
     addressFields,
     customersSlug = 'users',
-    overrides,
   } = props || {}
-  const fieldsOverride = overrides?.fields
 
   const { supportedCountries: supportedCountriesFromProps } = props || {}
   const supportedCountries = supportedCountriesFromProps || defaultCountries
   const hasOnlyOneCountry = supportedCountries && supportedCountries.length === 1
 
-  const defaultFields: Field[] = [
+  const fields: Field[] = [
     {
       name: 'customer',
       type: 'relationship',
+      admin: {
+        position: 'sidebar',
+      },
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
         t('plugin-ecommerce:customer'),
@@ -67,34 +67,34 @@ export const createAddressesCollection: (props: Props) => CollectionConfig = (pr
     }),
   ]
 
-  const fields =
-    fieldsOverride && typeof fieldsOverride === 'function'
-      ? fieldsOverride({ defaultFields })
-      : defaultFields
-
   const baseConfig: CollectionConfig = {
     slug: 'addresses',
     timestamps: true,
-    ...overrides,
+
     access: {
       create: authenticatedOnly,
       delete: adminOrCustomerOwner,
       read: adminOrCustomerOwner,
       update: adminOrCustomerOwner,
-      ...overrides?.access,
     },
     admin: {
+      description: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:addressesCollectionDescription'),
       group: 'Ecommerce',
       useAsTitle: 'createdAt',
-      ...overrides?.admin,
     },
     fields,
     hooks: {
-      ...(overrides?.hooks || {}),
-      beforeChange: [
-        beforeChange({ customerOnlyFieldAccess }),
-        ...(overrides?.hooks?.beforeChange || []),
-      ],
+      beforeChange: [beforeChange({ customerOnlyFieldAccess })],
+    },
+    labels: {
+      plural: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:addresses'),
+      singular: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:address'),
     },
   }
 

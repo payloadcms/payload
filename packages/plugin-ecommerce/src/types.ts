@@ -13,6 +13,7 @@ import type {
 } from 'payload'
 
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
+
 export type CollectionOverride = (args: {
   defaultCollection: CollectionConfig
 }) => CollectionConfig | Promise<CollectionConfig>
@@ -35,7 +36,11 @@ type DefaultCartType = {
 export type Cart = DefaultCartType
 
 type InitiatePaymentReturnType = {
-  [key: string]: any // Allows for additional data to be returned, such as payment method specific data
+  /**
+   * Allows for additional data to be returned, such as payment method specific data
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any
   message: string
 }
 
@@ -72,7 +77,11 @@ type InitiatePayment = (args: {
 }) => InitiatePaymentReturnType | Promise<InitiatePaymentReturnType>
 
 type ConfirmOrderReturnType = {
-  [key: string]: any // Allows for additional data to be returned, such as payment method specific data
+  /**
+   * Allows for additional data to be returned, such as payment method specific data
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any
   message: string
   orderID: DefaultDocumentIDType
   transactionID: DefaultDocumentIDType
@@ -226,25 +235,156 @@ export type BasePaymentAdapterClientArgs = {
 }
 
 export type VariantsConfig = {
+  /**
+   * Override the default variants collection. If you override the collection, you should ensure it has the required fields for variants or re-use the default fields.
+   *
+   * @example
+   *
+   * ```ts
+   * variants: {
+      variantOptionsCollectionOverride: ({ defaultCollection }) => ({
+        ...defaultCollection,
+        fields: [
+          ...defaultCollection.fields,
+          {
+            name: 'customField',
+            label: 'Custom Field',
+            type: 'text',
+          },
+        ],
+      })
+    }
+  ```
+   */
   variantOptionsCollectionOverride?: CollectionOverride
+  /**
+   * Override the default variants collection. If you override the collection, you should ensure it has the required fields for variants or re-use the default fields.
+   *
+   * @example
+   *
+   * ```ts
+   * variants: {
+      variantsCollectionOverride: ({ defaultCollection }) => ({
+        ...defaultCollection,
+        fields: [
+          ...defaultCollection.fields,
+          {
+            name: 'customField',
+            label: 'Custom Field',
+            type: 'text',
+          },
+        ],
+      })
+    }
+  ```
+   */
   variantsCollectionOverride?: CollectionOverride
+  /**
+   * Override the default variants collection. If you override the collection, you should ensure it has the required fields for variants or re-use the default fields.
+   *
+   * @example
+   *
+   * ```ts
+   * variants: {
+      variantTypesCollectionOverride: ({ defaultCollection }) => ({
+        ...defaultCollection,
+        fields: [
+          ...defaultCollection.fields,
+          {
+            name: 'customField',
+            label: 'Custom Field',
+            type: 'text',
+          },
+        ],
+      })
+    }
+  ```
+   */
   variantTypesCollectionOverride?: CollectionOverride
 }
 
 export type ProductsConfig = {
+  /**
+   * Override the default products collection. If you override the collection, you should ensure it has the required fields for products or re-use the default fields.
+   *
+   * @example
+   *
+   * ```ts
+    products: {
+      productsCollectionOverride: ({ defaultCollection }) => ({
+        ...defaultCollection,
+        fields: [
+          ...defaultCollection.fields,
+          {
+            name: 'notes',
+            label: 'Notes',
+            type: 'textarea',
+          },
+        ],
+      })
+    }
+    ```
+   */
   productsCollectionOverride?: CollectionOverride
   /**
-   * Customise the validation used for checking products or variants before a transaction is created.
+   * Customise the validation used for checking products or variants before a transaction is created or a payment can be confirmed.
    */
   validation?: ProductsValidation
-  variants?: true | VariantsConfig
+  /**
+   * Enable variants and provide configuration for the variant collections.
+   *
+   * Defaults to true.
+   */
+  variants?: boolean | VariantsConfig
 }
 
 export type OrdersConfig = {
+  /**
+   * Override the default orders collection. If you override the collection, you should ensure it has the required fields for orders or re-use the default fields.
+   *
+   * @example
+   *
+   * ```ts
+      orders: {
+        ordersCollectionOverride: ({ defaultCollection }) => ({
+          ...defaultCollection,
+          fields: [
+            ...defaultCollection.fields,
+            {
+              name: 'notes',
+              label: 'Notes',
+              type: 'textarea',
+            },
+          ],
+        })
+      }
+    ```
+   */
   ordersCollectionOverride?: CollectionOverride
 }
 
 export type TransactionsConfig = {
+  /**
+   * Override the default transactions collection. If you override the collection, you should ensure it has the required fields for transactions or re-use the default fields.
+   *
+   * @example
+   *
+   * ```ts
+    transactions: {
+      transactionsCollectionOverride: ({ defaultCollection }) => ({
+        ...defaultCollection,
+        fields: [
+          ...defaultCollection.fields,
+          {
+            name: 'notes',
+            label: 'Notes',
+            type: 'textarea',
+          },
+        ],
+      })
+    }
+    ```
+   */
   transactionsCollectionOverride?: CollectionOverride
 }
 
@@ -272,12 +412,43 @@ export type CountryType = {
   value: string
 }
 
+/**
+ * Configuration for the addresses used by the Ecommerce plugin. Use this to override the default collection or fields used throughout
+ */
 type AddressesConfig = {
+  /**
+   * Override the default addresses collection. If you override the collection, you should ensure it has the required fields for addresses or re-use the default fields.
+   *
+   * @example
+   * ```ts
+   * addressesCollectionOverride: (defaultCollection) => {
+   *  return {
+   *    ...defaultCollection,
+   *    fields: [
+   *      ...defaultCollection.fields,
+   *      // add custom fields here
+   *    ],
+   *  }
+   * }
+   * ```
+   */
   addressesCollectionOverride?: CollectionOverride
   /**
    * These fields will be applied to all locations where addresses are used, such as Orders and Transactions. Preferred use over the collectionOverride config.
    */
   addressFields?: FieldsOverride
+  /**
+   * Provide an array of countries to support for addresses. This will be used in the admin interface to provide a select field of countries.
+   *
+   * Defaults to a set of commonly used countries.
+   *
+   * @example
+   * ```
+   * [
+      { label: 'United States', value: 'US' },
+      { label: 'Canada', value: 'CA' },
+    ]
+   */
   supportedCountries?: CountryType[]
 }
 
@@ -318,13 +489,25 @@ export type CurrenciesConfig = {
  * This should throw an error if validation fails as it will be caught by the function calling it.
  */
 export type ProductsValidation = (args: {
+  /**
+   * The full currencies config, allowing you to check against supported currencies and their settings.
+   */
   currenciesConfig?: CurrenciesConfig
+  /**
+   * The ISO 4217 currency code being usen in this transaction.
+   */
   currency?: string
+  /**
+   * The full product data.
+   */
   product: TypedCollection['products']
   /**
    * Quantity to check the inventory amount against.
    */
   quantity: number
+  /**
+   * The full variant data, if a variant was selected for the product otherwise it will be undefined.
+   */
   variant?: TypedCollection['variants']
 }) => Promise<void> | void
 
@@ -344,6 +527,22 @@ export type CollectionSlugMap = {
   variantTypes: string
 }
 
+/**
+ * Access control functions used throughout the Ecommerce plugin.
+ * You must provide these when configuring the plugin.
+ *
+ * @example
+ *
+ * ```ts
+ *  access: {
+      adminOnly,
+      adminOnlyFieldAccess,
+      adminOrCustomerOwner,
+      adminOrPublishedStatus,
+      customerOnlyFieldAccess,
+    }
+  ```
+ */
 export type AccessConfig = {
   /**
    * Limited to only admin users.

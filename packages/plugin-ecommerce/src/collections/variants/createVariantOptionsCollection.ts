@@ -1,13 +1,12 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { AccessConfig, FieldsOverride } from '../../types.js'
+import type { AccessConfig } from '../../types.js'
 
 type Props = {
   access: {
     adminOnly: NonNullable<AccessConfig['adminOnly']>
     publicAccess: NonNullable<AccessConfig['publicAccess']>
   }
-  overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   /**
    * Slug of the variant types collection, defaults to 'variantTypes'.
    */
@@ -17,12 +16,10 @@ type Props = {
 export const createVariantOptionsCollection: (props: Props) => CollectionConfig = (props) => {
   const {
     access: { adminOnly, publicAccess },
-    overrides,
     variantTypesSlug = 'variantTypes',
   } = props || {}
-  const fieldsOverride = overrides?.fields
 
-  const variantOptionsDefaultFields: Field[] = [
+  const fields: Field[] = [
     {
       name: 'variantType',
       type: 'relationship',
@@ -47,27 +44,27 @@ export const createVariantOptionsCollection: (props: Props) => CollectionConfig 
     },
   ]
 
-  const fields =
-    fieldsOverride && typeof fieldsOverride === 'function'
-      ? fieldsOverride({ defaultFields: variantOptionsDefaultFields })
-      : variantOptionsDefaultFields
-
   const baseConfig: CollectionConfig = {
     slug: 'variantOptions',
-    ...overrides,
     access: {
       create: adminOnly,
       delete: adminOnly,
       read: publicAccess,
       update: adminOnly,
-      ...overrides?.access,
     },
     admin: {
-      group: 'Ecommerce',
+      group: false,
       useAsTitle: 'label',
-      ...overrides?.admin,
     },
     fields,
+    labels: {
+      plural: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:variantOptions'),
+      singular: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:variantOption'),
+    },
     trash: true,
   }
 

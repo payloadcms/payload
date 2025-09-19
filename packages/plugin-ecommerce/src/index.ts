@@ -334,36 +334,6 @@ export const ecommercePlugin =
       incomingConfig.i18n?.translations,
     )
 
-    // incomingConfig.typescript = {
-    //   ...incomingConfig.typescript,
-    //   schema: [
-    //     ({ jsonSchema }) => {
-    //       if (jsonSchema.definitions) {
-    //         const supportedCurrencies = pluginConfig.currencies?.supportedCurrencies || []
-    //         const defaultCurrency = pluginConfig.currencies?.defaultCurrency || 'USD'
-
-    //         // Generate JSON Schema4 for supported currencies
-
-    //         const currenciesSchema = {
-    //           type: 'array',
-    //           description: 'A list of supported currency codes.',
-    //           items: {
-    //             type: 'string',
-    //             enum: (supportedCurrencies || []).map((currency) => currency.code),
-    //           },
-    //           title: 'Supported Currencies',
-    //         }
-
-    //         console.log({ defs: jsonSchema.definitions })
-
-    //         jsonSchema.definitions.SupportedCurrencies = currenciesSchema
-    //       }
-
-    //       return jsonSchema
-    //     },
-    //   ],
-    // }
-
     return {
       ...incomingConfig,
     }
