@@ -6,14 +6,18 @@ import { $dfsIterator, $insertNodeToNearestRoot, mergeRegister } from '@lexical/
 import { useBulkUpload, useConfig, useEffectEvent, useModal } from '@payloadcms/ui'
 import ObjectID from 'bson-objectid'
 import {
+  $createRangeSelection,
   $getPreviousSelection,
   $getSelection,
   $isParagraphNode,
   $isRangeSelection,
+  $setSelection,
   COMMAND_PRIORITY_EDITOR,
   COMMAND_PRIORITY_LOW,
   createCommand,
   DROP_COMMAND,
+  getDOMSelectionFromTarget,
+  isHTMLElement,
   PASTE_COMMAND,
 } from 'lexical'
 import React, { useEffect } from 'react'
@@ -27,6 +31,39 @@ import { $isPendingUploadNode, PendingUploadNode } from '../nodes/PendingUploadN
 import { $createUploadNode, UploadNode } from '../nodes/UploadNode.js'
 
 export type InsertUploadPayload = Readonly<Omit<UploadData, 'id'> & Partial<Pick<UploadData, 'id'>>>
+
+declare global {
+  interface DragEvent {
+    rangeOffset?: number
+    rangeParent?: Node
+  }
+}
+
+function canDropImage(event: DragEvent): boolean {
+  const target = event.target
+  return !!(
+    isHTMLElement(target) &&
+    !target.closest('code, span.editor-image') &&
+    isHTMLElement(target.parentElement) &&
+    target.parentElement.closest('div.ContentEditable__root')
+  )
+}
+
+function getDragSelection(event: DragEvent): null | Range | undefined {
+  // Source: https://github.com/AlessioGr/lexical/blob/main/packages/lexical-playground/src/plugins/ImagesPlugin/index.tsx
+  let range
+  const domSelection = getDOMSelectionFromTarget(event.target)
+  if (document.caretRangeFromPoint) {
+    range = document.caretRangeFromPoint(event.clientX, event.clientY)
+  } else if (event.rangeParent && domSelection !== null) {
+    domSelection.collapse(event.rangeParent, event.rangeOffset || 0)
+    range = domSelection.getRangeAt(0)
+  } else {
+    throw Error(`Cannot get the selection when dragging`)
+  }
+
+  return range
+}
 
 export const INSERT_UPLOAD_COMMAND: LexicalCommand<InsertUploadPayload> =
   createCommand('INSERT_UPLOAD_COMMAND')
@@ -300,9 +337,14 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
 
             // Insert a PendingUploadNode for each image
             editor.update(() => {
-              const selection = $getSelection() || $getPreviousSelection()
+              if (canDropImage(event)) {
+                const range = getDragSelection(event)
+                const selection = $createRangeSelection()
+                if (range !== null && range !== undefined) {
+                  selection.applyDOMRange(range)
+                }
+                $setSelection(selection)
 
-              if ($isRangeSelection(selection)) {
                 for (const file of files) {
                   const pendingUploadNode = new PendingUploadNode({
                     data: {
