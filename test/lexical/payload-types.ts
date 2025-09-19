@@ -97,7 +97,6 @@ export interface Config {
     'text-fields': TextField;
     uploads: Upload;
     uploads2: Uploads2;
-    uploads3: Uploads3;
     'array-fields': ArrayField;
     OnDemandForm: OnDemandForm;
     OnDemandOutsideForm: OnDemandOutsideForm;
@@ -122,7 +121,6 @@ export interface Config {
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     uploads2: Uploads2Select<false> | Uploads2Select<true>;
-    uploads3: Uploads3Select<false> | Uploads3Select<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     OnDemandForm: OnDemandFormSelect<false> | OnDemandFormSelect<true>;
     OnDemandOutsideForm: OnDemandOutsideFormSelect<false> | OnDemandOutsideFormSelect<true>;
@@ -746,26 +744,6 @@ export interface Uploads2 {
   id: string;
   text?: string | null;
   media?: (string | null) | Upload;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "uploads3".
- */
-export interface Uploads3 {
-  id: string;
-  text?: string | null;
-  media?: (string | null) | Upload;
   altText?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -999,10 +977,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'uploads2';
         value: string | Uploads2;
-      } | null)
-    | ({
-        relationTo: 'uploads3';
-        value: string | Uploads3;
       } | null)
     | ({
         relationTo: 'array-fields';
@@ -1292,25 +1266,6 @@ export interface UploadsSelect<T extends boolean = true> {
  * via the `definition` "uploads2_select".
  */
 export interface Uploads2Select<T extends boolean = true> {
-  text?: T;
-  media?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "uploads3_select".
- */
-export interface Uploads3Select<T extends boolean = true> {
   text?: T;
   media?: T;
   altText?: T;

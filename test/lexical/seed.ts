@@ -17,7 +17,6 @@ import {
   richTextFieldsSlug,
   textFieldsSlug,
   uploads2Slug,
-  uploads3Slug,
   uploadsSlug,
   usersSlug,
 } from './slugs.js'
@@ -130,16 +129,6 @@ export const seed = async (_payload: Payload) => {
   const createdPNGDoc2 = await _payload.create({
     collection: uploads2Slug,
     data: {},
-    file: pngFile,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  const createdPNGDoc3 = await _payload.create({
-    collection: uploads3Slug,
-    data: {
-      altText: 'An image',
-    },
     file: pngFile,
     depth: 0,
     overrideAccess: true,

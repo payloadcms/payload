@@ -16,8 +16,6 @@ export const textFieldsSlug = 'text-fields'
 export const uploadsSlug = 'uploads'
 export const uploads2Slug = 'uploads2'
 
-export const uploads3Slug = 'uploads3'
-
 export const arrayFieldsSlug = 'array-fields'
 
 export const collectionSlugs = [
