@@ -20,6 +20,7 @@ RUN corepack enable pnpm && pnpm install --frozen-lockfile
 
 # Build stage
 FROM base AS builder
+RUN apk add --no-cache libc6-compat python3 make g++ py3-pip
 WORKDIR /app
 
 # Copy dependencies
@@ -39,6 +40,11 @@ ENV NODE_ENV=production
 ENV STORYBOOK=true
 ENV SASS_SILENCE_DEPRECATIONS=legacy-js-api
 ENV SASS_QUIET_DEPS=true
+
+# Build the UI package first (required for Storybook)
+RUN corepack enable pnpm && \
+    cd packages/ui && \
+    pnpm build
 
 # Build Storybook
 RUN corepack enable pnpm && \
