@@ -2,6 +2,9 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const jaTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
+    'assign-document-modal-description':
+      'このドキュメントの所有権を設定します。以下の選択を更新して、変更を確認してください。',
+    'assign-document-modal-title': 'ドキュメントを割り当てる',
     'confirm-modal-tenant-switch--body':
       'あなたは、<0>{{fromTenant}}</0>から<0>{{toTenant}}</0>への所有権を変更しようとしています。',
     'confirm-modal-tenant-switch--heading': '{{tenantLabel}}の変更を確認します',

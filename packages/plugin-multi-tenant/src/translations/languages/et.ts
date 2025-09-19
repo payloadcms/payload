@@ -2,6 +2,9 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const etTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
+    'assign-document-modal-description':
+      'Määrake selle dokumendi omanik. Uuendage allpool olevat valikut ja kinnitage oma muudatused.',
+    'assign-document-modal-title': 'Määra dokument',
     'confirm-modal-tenant-switch--body':
       'Te olete just muutmas omandiõigust <0>{{fromTenant}}</0> -lt <0>{{toTenant}}</0> -le.',
     'confirm-modal-tenant-switch--heading': 'Kinnita {{tenantLabel}} muutus',
