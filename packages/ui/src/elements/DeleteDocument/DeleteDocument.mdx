@@ -1,0 +1,96 @@
+# DeleteDocument
+
+A component that provides functionality to delete documents in PayloadCMS with confirmation modal and trash support. It renders as a popup button that opens a confirmation dialog.
+
+## Basic Usage
+
+The DeleteDocument component appears as a "Delete" button in popup menus and opens a confirmation modal when clicked. It supports both permanent deletion and soft deletion (trash) depending on collection configuration.
+
+## Props
+
+- **buttonId** (`string`, optional) - Custom ID for the delete button
+- **collectionSlug** (`SanitizedCollectionConfig['slug']`, required) - The slug of the collection containing the document
+- **id** (`string`, optional) - The ID of the document to delete
+- **onDelete** (`(data: { id: string, collectionConfig: any }) => void`, optional) - Callback function called after successful deletion
+- **redirectAfterDelete** (`boolean`, optional) - Whether to redirect to collection list after deletion (default: true)
+- **singularLabel** (`SanitizedCollectionConfig['labels']['singular']`, required) - The singular label for the collection
+- **title** (`string`, optional) - Custom title for the document (falls back to document title or ID)
+- **useAsTitle** (`SanitizedCollectionConfig['admin']['useAsTitle']`, required) - The field used as document title
+
+## Features
+
+- **Confirmation Modal**: Shows a confirmation dialog before deletion
+- **Trash Support**: Supports soft deletion when collection has trash enabled
+- **Permanent Delete Option**: Option to permanently delete when trash is enabled
+- **Error Handling**: Comprehensive error handling with user feedback
+- **Navigation**: Automatic redirect to collection list after deletion
+- **Loading States**: Shows loading state during deletion process
+- **Custom Callbacks**: Optional callback for custom deletion handling
+
+## Important Notes
+
+1. **Trash Behavior**
+
+   - If collection has trash enabled, documents are soft-deleted by default
+   - Users can choose to permanently delete by checking "Delete Permanently"
+   - If trash is disabled, documents are permanently deleted immediately
+
+2. **Confirmation Flow**
+
+   - Shows document title and collection label in confirmation message
+   - Provides clear messaging about what will happen
+   - Different messages for trash vs permanent deletion
+
+3. **Error Handling**
+
+   - Displays specific error messages from the server
+   - Falls back to generic error message if no specific errors
+   - Uses toast notifications for user feedback
+
+4. **Navigation**
+   - Redirects to collection list by default after deletion
+   - Can be disabled with `redirectAfterDelete: false`
+   - Uses route transitions for smooth navigation
+
+## Example Usage
+
+```tsx
+import { DeleteDocument } from '@payloadcms/ui'
+
+function DocumentEditView({ document }) {
+  return (
+    <div>
+      {/* Document content */}
+
+      {/* DeleteDocument appears in popup menus */}
+      <PopupList>
+        <DeleteDocument
+          id={document.id}
+          collectionSlug="posts"
+          singularLabel="Post"
+          useAsTitle="title"
+          title={document.title}
+        />
+      </PopupList>
+    </div>
+  )
+}
+```
+
+## Accessibility
+
+- Proper button labels through translation keys
+- Clear confirmation messaging
+- Loading states for better user feedback
+- Error handling with descriptive messages
+- Keyboard navigation support through ConfirmationModal
+
+## Dependencies
+
+The component requires several context providers:
+
+- Config provider for collection configuration
+- Translation provider for internationalization
+- Route transition provider for navigation
+- Form provider for form state management
+- Document title provider for document titles

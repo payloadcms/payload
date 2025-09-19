@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import React, { useState } from 'react'
 
-import { Hamburger } from '../elements/Hamburger/index.js'
+import { Hamburger } from '../Hamburger/index.js'
 
 // Global styles are imported in .storybook/preview.ts
 
@@ -200,18 +200,62 @@ export const InNavigation: Story = {
         {isMenuOpen && (
           <div style={{ backgroundColor: 'white', padding: '20px' }}>
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <a href="#" style={{ color: '#333', padding: '8px 0', textDecoration: 'none' }}>
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#333',
+                  cursor: 'pointer',
+                  padding: '8px 0',
+                  textAlign: 'left',
+                  textDecoration: 'none',
+                }}
+                type="button"
+              >
                 Dashboard
-              </a>
-              <a href="#" style={{ color: '#333', padding: '8px 0', textDecoration: 'none' }}>
+              </button>
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#333',
+                  cursor: 'pointer',
+                  padding: '8px 0',
+                  textAlign: 'left',
+                  textDecoration: 'none',
+                }}
+                type="button"
+              >
                 Documents
-              </a>
-              <a href="#" style={{ color: '#333', padding: '8px 0', textDecoration: 'none' }}>
+              </button>
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#333',
+                  cursor: 'pointer',
+                  padding: '8px 0',
+                  textAlign: 'left',
+                  textDecoration: 'none',
+                }}
+                type="button"
+              >
                 Settings
-              </a>
-              <a href="#" style={{ color: '#333', padding: '8px 0', textDecoration: 'none' }}>
+              </button>
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#333',
+                  cursor: 'pointer',
+                  padding: '8px 0',
+                  textAlign: 'left',
+                  textDecoration: 'none',
+                }}
+                type="button"
+              >
                 Profile
-              </a>
+              </button>
             </nav>
           </div>
         )}
@@ -265,18 +309,62 @@ export const InSidebar: Story = {
           {/* Sidebar content */}
           {isSidebarOpen && (
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '20px' }}>
-              <a href="#" style={{ color: 'white', padding: '8px 0', textDecoration: 'none' }}>
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  padding: '8px 0',
+                  textAlign: 'left',
+                  textDecoration: 'none',
+                }}
+                type="button"
+              >
                 Dashboard
-              </a>
-              <a href="#" style={{ color: 'white', padding: '8px 0', textDecoration: 'none' }}>
+              </button>
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  padding: '8px 0',
+                  textAlign: 'left',
+                  textDecoration: 'none',
+                }}
+                type="button"
+              >
                 Documents
-              </a>
-              <a href="#" style={{ color: 'white', padding: '8px 0', textDecoration: 'none' }}>
+              </button>
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  padding: '8px 0',
+                  textAlign: 'left',
+                  textDecoration: 'none',
+                }}
+                type="button"
+              >
                 Settings
-              </a>
-              <a href="#" style={{ color: 'white', padding: '8px 0', textDecoration: 'none' }}>
+              </button>
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  padding: '8px 0',
+                  textAlign: 'left',
+                  textDecoration: 'none',
+                }}
+                type="button"
+              >
                 Profile
-              </a>
+              </button>
             </nav>
           )}
         </div>

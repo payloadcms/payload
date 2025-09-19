@@ -1,0 +1,48 @@
+# ClipboardAction
+
+The ClipboardAction component provides copy and paste functionality for Arrays and Blocks in PayloadCMS. It renders as a popup menu with copy and paste actions, using localStorage for data persistence instead of the Clipboard API.
+
+## Basic Usage
+
+The component appears as a "More" icon button that opens a popup menu with copy and paste options. It's commonly used within Array and Block fields to allow users to duplicate and transfer field content.
+
+## Props
+
+- **allowCopy** (`boolean`, optional) - Enable copy functionality
+- **allowPaste** (`boolean`, optional) - Enable paste functionality
+- **className** (`string`, optional) - Additional CSS class for the popup
+- **copyClassName** (`string`, optional) - Additional CSS class for the copy button
+- **pasteClassName** (`string`, optional) - Additional CSS class for the paste button
+- **disabled** (`boolean`, optional) - Disable all clipboard actions
+- **getDataToCopy** (`() => FormStateWithoutComponents`, required) - Function that returns the data to be copied
+- **isRow** (`boolean`, optional) - Whether the action is used in a row context (affects label text)
+- **onPaste** (`(data: ClipboardPasteData) => void`, required) - Callback when data is pasted
+- **path** (`string`, required) - Field path for the clipboard action
+- **type** (`'array' | 'blocks'`, required) - Type of field being copied/pasted
+- **fields** (`ClientField[]`, required for arrays) - Schema fields for array validation
+- **blocks** (`ClientBlock[]`, required for blocks) - Schema blocks for block validation
+
+## Important Notes
+
+1. Uses localStorage instead of Clipboard API for better data type support
+2. Validates pasted data against the field schema
+3. Shows success/error toasts for user feedback
+4. Supports both array fields and block fields
+5. Includes translation support for labels and messages
+
+## Accessibility
+
+- Button includes proper ARIA labels through translation keys
+- Popup menu follows WAI-ARIA best practices
+- Keyboard navigation support through the Popup component
+
+## Error Handling
+
+The component handles several error cases:
+
+- Invalid data format in clipboard
+- Schema validation failures
+- Missing required data
+- Type mismatches between source and target
+
+Error messages are displayed to the user via toast notifications.

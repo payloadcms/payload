@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import React from 'react'
 
-import { Gutter } from '../elements/Gutter/index.js'
+import { Gutter } from '../Gutter/index.js'
 
 // Global styles are imported in .storybook/preview.ts
 

@@ -1,0 +1,294 @@
+# DefaultListViewTabs
+
+The `DefaultListViewTabs` component provides tab navigation for collection list views, enabling users to switch between different view modes including standard list view, folders view, and trash view.
+
+## Features
+
+- **Conditional Rendering**: Only displays when trash or folders are enabled
+- **Dynamic Navigation**: Automatically generates appropriate URLs for different view types
+- **Preference Persistence**: Saves user's view preference for future sessions
+- **Internationalization**: Full translation support for all labels
+- **Accessibility**: Proper ARIA attributes and keyboard navigation
+- **Responsive Design**: Flexible layout that adapts to content
+
+## Props
+
+**Props:**
+
+- **collectionConfig** (`ClientCollectionConfig`, required) - Configuration for the collection including labels and feature flags
+- **config** (`ClientConfig`, required) - Global PayloadCMS configuration including routes and server URL
+- **viewType** (`ViewTypes`, optional) - Current active view type ('list', 'folders', 'trash')
+- **onChange** (`(viewType: ViewTypes) => void`, optional) - Callback when view type changes
+
+## Usage
+
+### Basic Implementation
+
+```tsx
+import { DefaultListViewTabs } from '@payloadcms/ui'
+
+function CollectionListPage() {
+  const [viewType, setViewType] = useState<ViewTypes>('list')
+
+  return (
+    <DefaultListViewTabs
+      collectionConfig={collectionConfig}
+      config={config}
+      viewType={viewType}
+      onChange={setViewType}
+    />
+  )
+}
+```
+
+### With Collection Configuration
+
+```tsx
+const collectionConfig = {
+  slug: 'posts',
+  labels: {
+    plural: 'Posts',
+    singular: 'Post',
+  },
+  trash: true,        // Enable trash functionality
+  folders: true,      // Enable folders functionality
+}
+
+<DefaultListViewTabs
+  collectionConfig={collectionConfig}
+  config={config}
+  viewType="list"
+  onChange={(newViewType) => {
+    // Handle view change
+    console.log('Switching to:', newViewType)
+  }}
+/>
+```
+
+## View Types
+
+### List View (Default)
+
+Standard collection list view showing all documents.
+
+```tsx
+// URL: /admin/collections/posts
+viewType = 'list'
+```
+
+### Folders View
+
+Organized view using folder structure when folders are enabled.
+
+```tsx
+// URL: /admin/collections/posts/folders
+viewType = 'folders'
+```
+
+### Trash View
+
+View showing deleted documents when trash is enabled.
+
+```tsx
+// URL: /admin/collections/posts/trash
+viewType = 'trash'
+```
+
+## Conditional Rendering
+
+The component automatically handles conditional rendering based on collection configuration:
+
+```tsx
+// Only shows "All Posts" and "By Folder" tabs
+const collectionWithFolders = {
+  slug: 'posts',
+  trash: false,
+  folders: true,
+}
+
+// Only shows "All Users" and "Trash" tabs
+const collectionWithTrash = {
+  slug: 'users',
+  trash: true,
+  folders: false,
+}
+
+// Shows all three tabs: "All Posts", "By Folder", "Trash"
+const collectionWithBoth = {
+  slug: 'posts',
+  trash: true,
+  folders: true,
+}
+
+// Component returns null - no tabs shown
+const collectionWithNeither = {
+  slug: 'posts',
+  trash: false,
+  folders: false,
+}
+```
+
+## URL Generation
+
+The component automatically generates appropriate URLs for each view type:
+
+```tsx
+// Based on config.routes.admin and config.serverURL
+const urls = {
+  list: '/admin/collections/posts',
+  folders: '/admin/collections/posts/folders',
+  trash: '/admin/collections/posts/trash',
+}
+```
+
+## Preference Management
+
+View preferences are automatically saved and restored:
+
+```tsx
+// Saves preference when switching to list or folders view
+await setPreference(`collection-${collectionConfig.slug}`, {
+  listViewType: newViewType,
+})
+```
+
+## Styling
+
+The component uses CSS classes for styling:
+
+- `.default-list-view-tabs` - Main container with flex layout
+- `.default-list-view-tabs__button` - Individual tab button styling
+- `.default-list-view-tabs__button--active` - Active tab state
+
+### Custom Styling
+
+```scss
+.default-list-view-tabs {
+  gap: calc(var(--base) * 0.75); // Increase gap between tabs
+
+  &__button {
+    // Custom tab button styling
+    border-radius: 4px;
+
+    &--active {
+      // Active tab styling
+      background-color: var(--theme-success-100);
+    }
+  }
+}
+```
+
+## Internationalization
+
+All labels are automatically translated based on the user's language preference:
+
+```tsx
+// Uses translation keys
+const labels = {
+  all: t('general:all'), // "All"
+  byFolder: t('folder:byFolder'), // "By Folder"
+  trash: t('general:trash'), // "Trash"
+  plural: getTranslation(collectionConfig?.labels?.plural, i18n),
+}
+```
+
+## Accessibility
+
+- **Semantic HTML**: Uses proper button elements for navigation
+- **ARIA Labels**: Includes descriptive IDs for screen readers
+- **Keyboard Navigation**: Full keyboard support for tab switching
+- **Focus Management**: Clear focus indicators for active states
+
+## Integration with PayloadCMS
+
+### Required Configuration
+
+```tsx
+// Collection config must include feature flags
+const collectionConfig = {
+  slug: 'posts',
+  trash: true, // Enable trash functionality
+  folders: true, // Enable folders functionality
+  labels: {
+    plural: 'Posts',
+    singular: 'Post',
+  },
+}
+
+// Global config must include folders configuration
+const config = {
+  folders: {
+    slug: 'folders',
+  },
+  admin: {
+    routes: {
+      admin: '/admin',
+    },
+  },
+  serverURL: 'http://localhost:3000',
+}
+```
+
+### Router Integration
+
+The component uses Next.js router for navigation:
+
+```tsx
+import { useRouter } from 'next/navigation'
+
+const router = useRouter()
+
+// Navigates to appropriate URL when view changes
+router.push(url)
+```
+
+## Best Practices
+
+1. **Feature Flags**: Always check if trash or folders are enabled before using
+2. **URL Structure**: Ensure your routing matches the generated URL patterns
+3. **Preference Handling**: Let the component manage view preferences automatically
+4. **Translation Keys**: Ensure all required translation keys are available
+5. **Collection Labels**: Provide clear plural labels for better UX
+
+## Common Use Cases
+
+### Collection List Page
+
+```tsx
+function PostsListPage() {
+  const [viewType, setViewType] = useState<ViewTypes>('list')
+
+  return (
+    <div>
+      <DefaultListViewTabs
+        collectionConfig={postsCollectionConfig}
+        config={config}
+        viewType={viewType}
+        onChange={setViewType}
+      />
+      {/* List content based on viewType */}
+    </div>
+  )
+}
+```
+
+### Admin Dashboard Integration
+
+```tsx
+function AdminCollectionView() {
+  return (
+    <div className="admin-collection-view">
+      <header>
+        <h1>Posts Collection</h1>
+        <DefaultListViewTabs
+          collectionConfig={collectionConfig}
+          config={config}
+          viewType={currentView}
+          onChange={handleViewChange}
+        />
+      </header>
+      <main>{/* Collection content */}</main>
+    </div>
+  )
+}
+```

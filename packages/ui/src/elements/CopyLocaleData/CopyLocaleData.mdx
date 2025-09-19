@@ -1,0 +1,119 @@
+# CopyLocaleData
+
+A component that provides functionality to copy localized data from one locale to another in PayloadCMS. It renders as a popup button that opens a drawer with locale selection and copy options.
+
+## Basic Usage
+
+The CopyLocaleData component appears as a button in popup menus and opens a drawer interface for copying content between locales. It's commonly used in localized collections and globals to duplicate content across different languages.
+
+## Example Usage
+
+```tsx
+import { CopyLocaleData } from '@payloadcms/ui'
+
+// In a document edit view with localization enabled
+function DocumentEditView() {
+  return (
+    <div>
+      {/* Other document fields */}
+
+      {/* CopyLocaleData appears in popup menus */}
+      <PopupList>
+        <CopyLocaleData />
+        {/* Other popup actions */}
+      </PopupList>
+    </div>
+  )
+}
+```
+
+## Required Context Providers
+
+This component requires several context providers to function properly:
+
+```tsx
+import {
+  ConfigProvider,
+  DocumentInfoProvider,
+  LocaleProvider,
+  TranslationProvider,
+  ServerFunctionsProvider,
+  RouteTransitionProvider,
+  FormProvider,
+} from '@payloadcms/ui'
+import { ModalProvider } from '@faceless-ui/modal'
+
+function App() {
+  return (
+    <ModalProvider>
+      <ConfigProvider config={config}>
+        <DocumentInfoProvider id="123" collectionSlug="posts">
+          <LocaleProvider code="en">
+            <TranslationProvider translations={translations}>
+              <ServerFunctionsProvider serverFunction={serverFunctions}>
+                <RouteTransitionProvider>
+                  <FormProvider>
+                    <CopyLocaleData />
+                  </FormProvider>
+                </RouteTransitionProvider>
+              </ServerFunctionsProvider>
+            </TranslationProvider>
+          </LocaleProvider>
+        </DocumentInfoProvider>
+      </ConfigProvider>
+    </ModalProvider>
+  )
+}
+```
+
+## Features
+
+- **Locale Selection**: Choose source and target locales for copying
+- **Overwrite Protection**: Option to overwrite existing data or preserve it
+- **Form Validation**: Prevents copying to the same locale
+- **Unsaved Changes Detection**: Warns users about unsaved changes before copying
+- **Loading States**: Shows progress during copy operations
+- **Navigation**: Automatically redirects to the copied locale after completion
+
+## Important Notes
+
+1. **Context Requirements**
+
+   - Requires localization configuration to be enabled
+   - Needs document ID or global slug to identify the content
+   - Uses multiple providers (Config, DocumentInfo, Locale, etc.)
+
+2. **Validation**
+
+   - Prevents copying from and to the same locale
+   - Checks for unsaved form changes before allowing copy
+   - Validates that both source and target locales are selected
+
+3. **User Experience**
+
+   - Shows clear labels for source and target locales
+   - Provides feedback through toast notifications
+   - Automatically navigates to the new locale after copying
+
+4. **Data Handling**
+   - Uses server functions for the actual copy operation
+   - Supports overwriting existing data or preserving it
+   - Handles errors gracefully with user feedback
+
+## Accessibility
+
+- Proper button labels through translation keys
+- Clear form labels and instructions
+- Loading states for better user feedback
+- Error handling with descriptive messages
+
+## Dependencies
+
+The component requires several context providers:
+
+- Config provider for localization settings
+- DocumentInfo provider for document identification
+- Locale provider for current locale information
+- Translation provider for internationalization
+- Modal provider for drawer functionality
+- ServerFunctions provider for copy operations

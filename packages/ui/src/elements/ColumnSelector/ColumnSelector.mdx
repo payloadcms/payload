@@ -1,0 +1,49 @@
+# ColumnSelector
+
+A component that provides an interactive interface for selecting and reordering table columns in PayloadCMS. It renders as a set of draggable pills that represent table columns.
+
+## Basic Usage
+
+The ColumnSelector is used in list views to allow users to customize which columns are visible and in what order. It automatically filters out hidden, disabled, and non-listable columns.
+
+## Props
+
+- **collectionSlug** (`SanitizedCollectionConfig['slug']`, required) - The slug of the collection to show columns for
+
+## Important Notes
+
+1. **Column Filtering**
+
+   - Automatically excludes hidden or disabled fields
+   - Excludes fields with `disableListColumn` set to true
+   - Includes ID fields even if hidden
+   - Uses field labels or names for display
+
+2. **Drag and Drop**
+
+   - Columns can be reordered by dragging
+   - Maintains order state through TableColumns provider
+   - Provides visual feedback during drag operations
+
+3. **Column Toggle**
+
+   - Clicking a pill toggles column visibility
+   - Active state is maintained through TableColumns provider
+   - Updates are reflected immediately in the table
+
+4. **Context Dependencies**
+   - Requires TableColumns provider for state management
+   - Uses EditDepth provider for unique keys
+   - Integrates with FieldLabel for consistent labeling
+
+## Accessibility
+
+- Supports keyboard navigation through PillSelector
+- Maintains proper focus management during drag operations
+- Uses semantic HTML through underlying PillSelector component
+
+## Performance
+
+- Memoizes filtered columns and pills for efficient re-renders
+- Uses stable keys based on collection, edit depth, and UUID
+- Optimizes re-renders through React.memo patterns

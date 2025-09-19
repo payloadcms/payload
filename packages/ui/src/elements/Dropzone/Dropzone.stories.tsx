@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import React, { useState } from 'react'
 
-import { Button } from '../elements/Button/index.js'
-import { Dropzone } from '../elements/Dropzone/index.js'
+import { Button } from '../Button/index.js'
+import { Dropzone } from '../Dropzone/index.js'
 
 // Global styles are imported in .storybook/preview.ts
 

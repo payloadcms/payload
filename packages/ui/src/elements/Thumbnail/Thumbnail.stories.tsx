@@ -1,8 +1,9 @@
+/* eslint-disable no-restricted-exports */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import React from 'react'
 
-import { Thumbnail, ThumbnailComponent } from '../elements/Thumbnail/index.js'
+import { Thumbnail } from './index.js'
 
 // Global styles are imported in .storybook/preview.ts
 

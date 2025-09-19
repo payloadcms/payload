@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import React from 'react'
 
-import { ErrorPill } from '../elements/ErrorPill/index.js'
+import { ErrorPill } from '../ErrorPill/index.js'
 
 // Global styles are imported in .storybook/preview.ts
 

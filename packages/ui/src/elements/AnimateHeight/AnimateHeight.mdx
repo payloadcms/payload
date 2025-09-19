@@ -1,0 +1,162 @@
+# AnimateHeight Component
+
+The `AnimateHeight` component is a smooth height animation wrapper that provides elegant transitions for collapsible content. It's perfect for dropdowns, accordions, FAQ sections, and any UI element that needs to expand and collapse with smooth height animations.
+
+## Features
+
+- **Smooth Height Animations**: Seamlessly animates between different height states
+- **Auto Height Support**: Automatically calculates content height for natural animations
+- **Modern CSS Integration**: Uses `interpolate-size` when available, falls back to JavaScript
+- **ResizeObserver Integration**: Tracks content changes during animation
+- **Accessibility Support**: Proper ARIA attributes and semantic HTML
+- **Performance Optimized**: Efficient animation handling with proper cleanup
+- **Flexible Duration**: Customizable animation timing
+
+## How It Works
+
+The `AnimateHeight` component is built around the `usePatchAnimateHeight` hook, which provides the core animation logic:
+
+### Animation Strategy
+
+1. **Modern Browsers**: Uses CSS `interpolate-size: allow-keywords` for smooth auto-height animations
+2. **Fallback**: JavaScript-based animation that measures content height and animates between values
+3. **Content Tracking**: ResizeObserver monitors content changes during animation
+4. **State Management**: Handles display states, overflow, and transition timing
+
+### Key Implementation Details
+
+- **Height Control**: The `height` prop controls animation state (0 = closed, 'auto' or number = open)
+- **Duration Control**: Smooth transitions with customizable timing
+- **Content Preservation**: Content remains in DOM but hidden when closed
+- **Memory Management**: Proper cleanup of timers and observers
+
+## Basic Usage
+
+The component wraps any content and animates its height based on the `height` prop value. Click the "Open/Close" button in the Basic story to see the smooth animation in action.
+
+## Props
+
+**Props:**
+
+- **children** (`React.ReactNode`, required) - Content to animate in and out
+- **height** (`'auto' | number`, required) - Height value that controls animation state (0 = closed, 'auto' or number = open)
+- **duration** (`number`, optional) - Animation duration in milliseconds (default: 300)
+- **className** (`string`, optional) - Additional CSS class names
+- **id** (`string`, optional) - HTML id attribute
+
+## Usage Examples
+
+### Simple Toggle
+
+```tsx
+import { AnimateHeight } from '@payloadcms/ui'
+import { useState } from 'react'
+
+const ToggleExample = () => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <div>
+      <button onClick={() => setIsOpen(!isOpen)}>{isOpen ? 'Close' : 'Open'}</button>
+      <AnimateHeight height={isOpen ? 'auto' : 0}>
+        <div style={{ padding: '16px', background: '#f5f5f5' }}>
+          This content will animate smoothly in and out.
+        </div>
+      </AnimateHeight>
+    </div>
+  )
+}
+```
+
+### Custom Duration
+
+```tsx
+<AnimateHeight height={isOpen ? 'auto' : 0} duration={600}>
+  <div>Slow animation content</div>
+</AnimateHeight>
+```
+
+### Fixed Height Animation
+
+```tsx
+<AnimateHeight height={isOpen ? 200 : 0} duration={400}>
+  <div>Content with fixed height animation</div>
+</AnimateHeight>
+```
+
+## Real-World Examples
+
+### FAQ Section
+
+Perfect for creating collapsible FAQ sections with smooth animations. See the FAQExample story for a complete implementation with multiple collapsible items.
+
+## Technical Implementation
+
+### The usePatchAnimateHeight Hook
+
+The component uses a custom hook that handles the complex animation logic:
+
+```typescript
+const usePatchAnimateHeight = ({
+  containerRef,
+  contentRef,
+  duration,
+  open,
+}: {
+  containerRef: React.RefObject<HTMLDivElement>
+  contentRef: React.RefObject<HTMLDivElement>
+  duration: number
+  open: boolean
+}) => {
+  // Animation logic implementation
+}
+```
+
+### Browser Support
+
+- **Modern Browsers**: Uses CSS `interpolate-size` for optimal performance
+- **Fallback**: JavaScript-based animation for older browsers
+- **Progressive Enhancement**: Automatically detects browser capabilities
+
+### CSS Classes
+
+The component applies several CSS classes for styling:
+
+- `.rah-static` - Base container class
+- `.rah-static--height-auto` - Applied when height is 'auto'
+- `.rah-animating--down` - Applied during opening animation
+- `.rah-animating--up` - Applied during closing animation
+- `.rah-animating--to-height-auto` - Applied when animating to auto height
+
+## Common Use Cases
+
+1. **Dropdown Menus**: Smooth expand/collapse for navigation dropdowns
+2. **Accordion Components**: FAQ sections, help documentation
+3. **Form Sections**: Collapsible form groups, advanced options
+4. **Content Previews**: Expandable content previews, "read more" functionality
+5. **Settings Panels**: Collapsible configuration sections
+6. **Search Results**: Smooth filtering and result display
+
+## Best Practices
+
+- **Use 'auto' height** for most cases to accommodate varying content sizes
+- **Set appropriate duration** - 200-400ms works well for most UI interactions
+- **Test with different content sizes** to ensure smooth animations
+- **Consider accessibility** - ensure keyboard navigation works properly
+- **Avoid rapid toggling** - respect animation timing to prevent jarring effects
+
+## Accessibility
+
+The component includes built-in accessibility features:
+
+- **ARIA Support**: Sets `aria-hidden` when closed
+- **Semantic HTML**: Uses proper div structure
+- **Focus Management**: Content is properly hidden from screen readers when closed
+- **Keyboard Navigation**: Works with standard keyboard interactions
+
+## Troubleshooting
+
+- **Animation Not Smooth**: Check if content height is changing during animation
+- **Content Flickering**: Ensure content doesn't change size during animation
+- **Performance Issues**: Avoid animating very large content or rapid toggling
+- **Browser Compatibility**: Test fallback behavior in older browsers

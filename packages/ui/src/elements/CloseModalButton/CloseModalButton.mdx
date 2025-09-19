@@ -1,0 +1,122 @@
+# CloseModalButton
+
+The CloseModalButton component provides a standardized close button for modals with an X icon. It integrates with PayloadCMS's modal system and includes proper accessibility features.
+
+## Basic Usage
+
+```tsx
+<CloseModalButton slug="my-modal" />
+```
+
+## Props
+
+- **slug** (`string`, required) - The modal slug to close when clicked
+- **className** (`string`, optional) - Additional CSS class name
+
+## Features
+
+### Modal Integration
+
+- Uses `@faceless-ui/modal` for modal management
+- Automatically closes the modal with the provided slug
+- Integrates with PayloadCMS's modal system
+
+### Accessibility
+
+- Proper ARIA label for screen readers
+- Keyboard navigation support
+- Semantic button element
+
+### Styling
+
+The component uses CSS custom properties and follows PayloadCMS design system:
+
+```scss
+.close-modal-button {
+  flex-shrink: 0;
+  border: 0;
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  overflow: hidden;
+  width: var(--base);
+  height: var(--base);
+  align-self: flex-start;
+
+  svg {
+    width: calc(var(--base) * 2);
+    height: calc(var(--base) * 2);
+    position: relative;
+    inset-inline-start: calc(var(--base) * -0.5);
+    top: calc(var(--base) * -0.5);
+
+    .stroke {
+      stroke-width: 2px;
+      vector-effect: non-scaling-stroke;
+    }
+  }
+}
+```
+
+## Integration with PayloadCMS
+
+### Common Use Cases
+
+1. **Modal Headers**
+
+   ```tsx
+   <div className="modal-header">
+     <h2>Modal Title</h2>
+     <CloseModalButton slug="example-modal" />
+   </div>
+   ```
+
+2. **Drawer Headers**
+   ```tsx
+   <div className="drawer-header">
+     <h2>{title}</h2>
+     <CloseModalButton slug={drawerSlug} />
+   </div>
+   ```
+
+### Translation Support
+
+The component uses PayloadCMS's translation system for the close button label:
+
+- Uses `general:close` translation key
+- Automatically updates with language changes
+- Screen reader friendly translations
+
+## Examples
+
+See the Basic story for an interactive demonstration of:
+
+- Button positioning
+- X icon styling
+- Click behavior
+- Modal integration
+
+## Technical Details
+
+### Component Structure
+
+- Uses semantic button element
+- Integrates XIcon component
+- Handles modal closing through context
+
+### Event Handling
+
+```tsx
+<button aria-label={t('general:close')} onClick={() => closeModal(slug)} type="button">
+  <XIcon />
+</button>
+```
+
+### Context Requirements
+
+The component requires:
+
+- Modal context from @faceless-ui/modal
+- Translation context for labels
+- Proper modal slug configuration

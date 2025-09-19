@@ -1,0 +1,136 @@
+# CheckboxPopup
+
+The CheckboxPopup component provides a popup menu with a list of checkboxes, typically used for multi-select filtering and configuration options.
+
+## Basic Usage
+
+```tsx
+<CheckboxPopup
+  Button={<Button>Select Options</Button>}
+  onChange={({ selectedValues }) => {
+    setSelectedValues(selectedValues)
+  }}
+  options={[
+    { label: 'Option 1', value: 'option1' },
+    { label: 'Option 2', value: 'option2' },
+  ]}
+  selectedValues={selectedValues}
+/>
+```
+
+## Props
+
+- **Button** (`React.ReactNode`, required) - The button element that triggers the popup
+- **onChange** (`(args: { close: () => void; selectedValues: string[] }) => void`, required) - Callback when selection changes
+- **options** (`Array<{ label: string; value: string }>`, required) - Array of options to display
+- **selectedValues** (`string[]`, required) - Array of currently selected values
+- **className** (`string`, optional) - Additional CSS class name
+- Additional props are passed to the underlying Popup component
+
+## Features
+
+### Selection Management
+
+- Maintains list of selected values
+- Provides easy toggle functionality
+- Supports pre-selected values
+- Returns updated selection list on change
+
+### Popup Behavior
+
+- Right-aligned popup positioning
+- Bottom vertical alignment
+- Built-in scrollbar for long lists
+- Automatic close function provided
+
+### Styling
+
+The component uses CSS custom properties and follows PayloadCMS design system:
+
+```scss
+.checkbox-popup {
+  &__options {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) * 0.5);
+    padding: 0 3px;
+  }
+
+  .checkbox-input {
+    align-items: center;
+    label {
+      padding-bottom: 0;
+    }
+  }
+}
+```
+
+## Integration with PayloadCMS
+
+### Common Use Cases
+
+1. **Filter Selection**
+
+   ```tsx
+   <CheckboxPopup
+     Button={<Button>Filter Items</Button>}
+     onChange={({ selectedValues }) => applyFilters(selectedValues)}
+     options={filterOptions}
+     selectedValues={activeFilters}
+   />
+   ```
+
+2. **Configuration Options**
+   ```tsx
+   <CheckboxPopup
+     Button={<Button>Configure View</Button>}
+     onChange={({ selectedValues }) => updateViewSettings(selectedValues)}
+     options={viewOptions}
+     selectedValues={currentSettings}
+   />
+   ```
+
+### Popup Positioning
+
+The component automatically handles:
+
+- Right alignment for dropdown menus
+- Bottom vertical alignment
+- Scrolling for long option lists
+- Proper positioning within the viewport
+
+## Examples
+
+See the Basic and WithPreselectedValues stories for interactive demonstrations of:
+
+- Basic checkbox popup functionality
+- Selection state management
+- Pre-selected values handling
+- Option toggling behavior
+
+## Technical Details
+
+### Component Structure
+
+- Uses Popup component for positioning and visibility
+- Integrates CheckboxInput for individual options
+- Maintains internal selection state
+- Provides close function for manual popup control
+
+### Event Handling
+
+```tsx
+onChange={({ close, selectedValues }) => {
+  // Update selection state
+  setSelectedValues(selectedValues)
+  // Optionally close the popup
+  close()
+}}
+```
+
+### Accessibility
+
+- Uses semantic checkbox inputs
+- Proper ARIA labels through CheckboxInput
+- Keyboard navigation support
+- Focus management through Popup component

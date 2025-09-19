@@ -1,0 +1,62 @@
+# Collapsible
+
+A flexible collapsible component that provides smooth height animation and nested collapsible support. Used extensively throughout PayloadCMS for expandable sections and block fields.
+
+## Basic Usage
+
+The Collapsible component creates an expandable section with a header, optional actions, and animated content. It supports both controlled and uncontrolled collapse states.
+
+## Props
+
+- **children** (`React.ReactNode`, required) - Content to be collapsed/expanded
+- **header** (`React.ReactNode`, optional) - Content to show in the header area
+- **actions** (`React.ReactNode`, optional) - Actions to show in the top-right corner
+- **className** (`string`, optional) - Additional CSS class
+- **collapsibleStyle** (`'default' | 'error'`, optional) - Visual style variant (default: 'default')
+- **dragHandleProps** (`DragHandleProps`, optional) - Props for making the collapsible draggable
+- **initCollapsed** (`boolean`, optional) - Initial collapsed state for uncontrolled usage
+- **isCollapsed** (`boolean`, optional) - Controlled collapsed state
+- **onToggle** (`(collapsed: boolean) => Promise<void> | void`, optional) - Called when collapse state changes
+
+## Important Notes
+
+1. **State Management**
+
+   - Supports both controlled (isCollapsed) and uncontrolled (initCollapsed) modes
+   - Maintains local state when uncontrolled
+   - Provides context for nested collapsibles
+
+2. **Animation**
+
+   - Uses AnimateHeight for smooth transitions
+   - Automatically adjusts to content height
+   - Supports nested animations
+
+3. **Styling**
+
+   - Default and error styles available
+   - Supports custom className for extended styling
+   - Handles hover states and nested styling
+
+4. **Drag & Drop**
+   - Optional drag handle integration
+   - Works with DraggableSortable components
+   - Visual feedback during drag operations
+
+## Accessibility
+
+- Button has proper ARIA label through translation
+- Keyboard navigation support
+- Visual feedback for hover states
+- Clear expand/collapse indicators
+
+## Context Provider
+
+The component includes a CollapsibleProvider that manages:
+
+- Collapse state
+- Visibility state
+- Nested collapsible relationships
+- Toggle functionality
+
+Use the `useCollapsible` hook to access the context in child components.

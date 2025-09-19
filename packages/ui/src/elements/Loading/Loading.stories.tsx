@@ -1,8 +1,9 @@
+/* eslint-disable no-restricted-exports */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import React from 'react'
 
-import { LoadingOverlay } from '../elements/Loading/index.js'
+import { LoadingOverlay } from '../Loading/index.js'
 
 // Global styles are imported in .storybook/preview.ts
 

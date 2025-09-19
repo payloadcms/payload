@@ -1,9 +1,10 @@
+/* eslint-disable no-restricted-exports */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import React from 'react'
 
-import { Button } from '../elements/Button/index.js'
-import { NoListResults } from '../elements/NoListResults/index.js'
+import { Button } from '../Button/index.js'
+import { NoListResults } from '../NoListResults/index.js'
 
 // Global styles are imported in .storybook/preview.ts
 

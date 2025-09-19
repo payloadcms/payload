@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import React from 'react'
 
-import { CopyToClipboard } from '../elements/CopyToClipboard/index.js'
+import { CopyToClipboard } from '../CopyToClipboard/index.js'
 
 // Global styles are imported in .storybook/preview.ts
 

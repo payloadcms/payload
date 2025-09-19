@@ -1,0 +1,224 @@
+# AppHeader Component
+
+The `AppHeader` component is the main application header that provides navigation, actions, and user account access throughout the PayloadCMS admin interface. It's a comprehensive header solution that adapts to different screen sizes and includes various customization options.
+
+## Features
+
+- **Step Navigation**: Breadcrumb-style navigation showing current location
+- **Custom Actions**: Dynamic action buttons that can be added by plugins or custom code
+- **User Account Access**: Quick access to user account settings
+- **Mobile Navigation**: Hamburger menu for mobile devices
+- **Localization Support**: Language selector when localization is enabled
+- **Responsive Design**: Adapts to different screen sizes
+- **Customizable**: Support for custom avatars and icons
+- **Scrollable Actions**: Handles overflow with horizontal scrolling and gradient indicators
+
+## How It Works
+
+The AppHeader component integrates with several PayloadCMS providers and contexts:
+
+### Context Dependencies
+
+- **ConfigProvider**: Provides admin routes and localization settings
+- **ActionsProvider**: Supplies custom action components
+- **TranslationProvider**: Provides internationalization support
+- **NavProvider**: Manages mobile navigation state
+
+### Key Functionality
+
+- **Responsive Behavior**: Shows hamburger menu on mobile, full navigation on desktop
+- **Action Management**: Dynamically renders action components from the Actions context
+- **Scroll Detection**: Monitors action overflow and shows gradient indicators
+- **Route Generation**: Uses PayloadCMS utilities to generate proper admin URLs
+
+## Basic Usage
+
+The AppHeader is typically used at the top of admin pages and doesn't require any props for basic functionality.
+
+## Props
+
+**Props:**
+
+- **CustomAvatar** (`React.ReactNode`, optional) - Custom avatar component to render instead of default Account icon
+- **CustomIcon** (`React.ReactNode`, optional) - Custom icon component to render in the step navigation
+
+## Usage Examples
+
+### Basic Implementation
+
+```tsx
+import { AppHeader } from '@payloadcms/ui'
+
+const AdminLayout = () => {
+  return (
+    <div>
+      <AppHeader />
+      <main>Page content</main>
+    </div>
+  )
+}
+```
+
+### With Custom Avatar
+
+```tsx
+<AppHeader CustomAvatar={<CustomAvatarComponent />} />
+```
+
+### With Custom Step Nav Icon
+
+```tsx
+<AppHeader CustomIcon={<CustomLogo />} />
+```
+
+## Real-World Examples
+
+### Standard Admin Header
+
+The Basic story shows the standard AppHeader as it appears in most PayloadCMS admin pages, with step navigation, actions area, and account access.
+
+### Mobile Responsive
+
+The MobileView story demonstrates how the header adapts to mobile screens with the hamburger menu visible and proper touch-friendly sizing.
+
+### Custom Branding
+
+The AppHeader supports custom avatars and icons through the CustomAvatar and CustomIcon props for consistent branding.
+
+## Component Structure
+
+The AppHeader consists of several key sections:
+
+### Mobile Navigation
+
+- **Hamburger Menu**: Toggle button for mobile navigation
+- **NavToggler**: Handles mobile menu state
+
+### Step Navigation
+
+- **StepNav**: Breadcrumb-style navigation
+- **Custom Icon Support**: Optional custom icon in step nav
+
+### Actions Area
+
+- **Dynamic Actions**: Rendered from Actions context
+- **Horizontal Scrolling**: When actions overflow
+- **Gradient Indicator**: Shows when more actions are available
+
+### User Account
+
+- **Account Link**: Links to user account settings
+- **Custom Avatar**: Optional custom avatar component
+- **Accessibility**: Proper ARIA labels and keyboard navigation
+
+### Localization
+
+- **Localizer**: Language selector (when enabled)
+- **Responsive Positioning**: Adapts to different screen sizes
+
+## Styling and Theming
+
+The component uses CSS custom properties and adapts to different themes:
+
+### CSS Classes
+
+- `.app-header` - Main container
+- `.app-header--nav-open` - Applied when mobile nav is open
+- `.app-header__mobile-nav-toggler` - Mobile hamburger button
+- `.app-header__step-nav-wrapper` - Step navigation container
+- `.app-header__actions-wrapper` - Actions container
+- `.app-header__account` - Account link
+- `.app-header__localizer` - Localization selector
+
+### Theme Support
+
+- **Light Theme**: Default styling
+- **Dark Theme**: Automatically adapts with data-theme="dark"
+- **Custom Properties**: Uses CSS variables for consistent theming
+
+## Responsive Behavior
+
+### Desktop (768px and above)
+
+- Full step navigation visible
+- All actions displayed
+- Account link with avatar
+- Localization selector (if enabled)
+
+### Mobile (under 768px)
+
+- Hamburger menu for navigation
+- Condensed action display
+- Touch-friendly sizing
+- Optimized for small screens
+
+## Accessibility
+
+The AppHeader includes comprehensive accessibility features:
+
+- **ARIA Labels**: Proper labeling for screen readers
+- **Keyboard Navigation**: Full keyboard support
+- **Focus Management**: Proper focus handling
+- **Semantic HTML**: Uses appropriate HTML elements
+- **Screen Reader Support**: Content is properly announced
+
+## Integration with PayloadCMS
+
+### Required Providers
+
+The AppHeader requires several PayloadCMS context providers:
+
+```tsx
+<ConfigProvider config={config}>
+  <ActionsProvider>
+    <TranslationProvider>
+      <NavProvider>
+        <AppHeader />
+      </NavProvider>
+    </TranslationProvider>
+  </ActionsProvider>
+</ConfigProvider>
+```
+
+### Action Integration
+
+Actions are provided through the Actions context:
+
+```tsx
+// In your config or plugin
+const actions = {
+  save: <SaveButton />,
+  publish: <PublishButton />,
+  // ... other actions
+}
+
+<ActionsProvider actions={actions}>
+  <AppHeader />
+</ActionsProvider>
+```
+
+## Common Use Cases
+
+1. **Admin Dashboard**: Main header for all admin pages
+2. **Content Management**: Header for content editing pages
+3. **Settings Pages**: Header for configuration pages
+4. **Custom Admin Areas**: Header for custom admin interfaces
+
+## Best Practices
+
+- **Keep Actions Relevant**: Only include actions that are relevant to the current page
+- **Test Mobile Experience**: Ensure the header works well on mobile devices
+- **Custom Branding**: Use CustomAvatar and CustomIcon for consistent branding
+- **Accessibility**: Test with screen readers and keyboard navigation
+- **Performance**: Avoid too many actions that could impact performance
+
+## Troubleshooting
+
+- **Actions Not Showing**: Check that ActionsProvider is properly configured
+- **Mobile Menu Not Working**: Ensure NavProvider is included in the component tree
+- **Styling Issues**: Check that CSS custom properties are properly defined
+- **Localization Not Appearing**: Verify that localization is enabled in the config
+
+---
+
+_This component provides a comprehensive header solution for PayloadCMS admin interfaces, with excellent responsive behavior and customization options._

@@ -1,0 +1,161 @@
+# Autosave
+
+The Autosave component provides automatic saving functionality for document forms in PayloadCMS. It integrates with form state management, version control, and localization to provide a seamless autosaving experience.
+
+## Basic Usage
+
+The Autosave component is typically used within document forms to provide automatic saving of draft versions:
+
+```tsx
+<Autosave
+  collection={{
+    slug: 'posts',
+    versions: {
+      drafts: {
+        autosave: {
+          interval: 2000,
+        },
+      },
+    },
+  }}
+  id="123"
+  publishedDocUpdatedAt={lastUpdateTime}
+/>
+```
+
+## Props
+
+- **collection** (`ClientCollectionConfig`, optional) - Collection configuration for the document being edited
+- **global** (`ClientGlobalConfig`, optional) - Global configuration when editing a global document
+- **id** (`string | number`, optional) - Document ID when editing an existing document
+- **publishedDocUpdatedAt** (`string`, required) - ISO timestamp of when the published document was last updated
+
+## Features
+
+### Autosave Behavior
+
+- **Debounced Saving** - Changes are saved after a configurable interval of inactivity
+- **Minimum Animation Time** - Save indicator shows for at least 1 second for better UX
+- **Form State Integration** - Monitors form changes through PayloadCMS form context
+- **Version Control** - Integrates with PayloadCMS versioning system for drafts
+- **Validation Support** - Respects draft validation settings from collection config
+
+### Status Indicators
+
+- Shows "Saving..." while changes are being saved
+- Displays "Last saved X minutes ago" after successful save
+- Integrates with LeaveWithoutSaving component for validation warnings
+
+### Localization Support
+
+- Automatically handles locale-specific saving
+- Uses PayloadCMS translation system for status messages
+- Maintains proper locale context during autosave operations
+
+## Integration with PayloadCMS
+
+### Form Context
+
+The component uses several form-related hooks:
+
+- `useAllFormFields` - Monitors form field changes
+- `useFormModified` - Tracks form modification state
+- `useFormSubmitted` - Handles form submission state
+
+### Document Info Context
+
+Integrates with document metadata:
+
+- `lastUpdateTime` - For displaying last save time
+- `mostRecentVersionIsAutosaved` - Tracks version state
+- `setUnpublishedVersionCount` - Manages version counts
+
+### Configuration Context
+
+Uses PayloadCMS configuration for:
+
+- API routes
+- Server URL
+- Version settings
+- Validation rules
+
+## Technical Implementation
+
+### Save Process
+
+1. **Change Detection**
+
+   - Debounces form changes using configured interval
+   - Compares form data to prevent unnecessary saves
+   - Handles both collection and global document saves
+
+2. **API Integration**
+
+   - Constructs appropriate API URLs based on document type
+   - Handles both PATCH (collections) and POST (globals) methods
+   - Includes proper query parameters for drafts and locales
+
+3. **State Management**
+   - Uses refs to maintain latest state during async operations
+   - Manages save indicator timing for smooth UX
+   - Cleans up timeouts on unmount
+
+### Error Handling
+
+- Validates form data before saving if configured
+- Skips submission if validation fails and is required
+- Provides visual feedback through LeaveWithoutSaving component
+
+## Common Patterns
+
+### Document Form Integration
+
+```tsx
+<Form>
+  <DocumentControls>
+    <Autosave
+      collection={collectionConfig}
+      id={documentId}
+      publishedDocUpdatedAt={lastUpdateTime}
+    />
+  </DocumentControls>
+  {/* Form fields */}
+</Form>
+```
+
+### Global Document Integration
+
+```tsx
+<Form>
+  <DocumentControls>
+    <Autosave global={globalConfig} publishedDocUpdatedAt={lastUpdateTime} />
+  </DocumentControls>
+  {/* Form fields */}
+</Form>
+```
+
+## Examples
+
+See the Basic and DocumentFormExample stories for interactive demonstrations of:
+
+- Basic autosave functionality
+- Integration with document forms
+- Status indicator behavior
+- Form state management
+
+## Styling
+
+The component uses minimal styling through CSS custom properties:
+
+```scss
+.autosave {
+  white-space: nowrap;
+}
+```
+
+## Translation Keys
+
+Required translation keys:
+
+- `general:saving` - "Saving..." indicator
+- `version:lastSavedAgo` - "Last saved 12 minutes ago" message

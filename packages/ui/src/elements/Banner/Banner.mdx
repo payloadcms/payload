@@ -1,0 +1,186 @@
+# Banner Component
+
+The `Banner` component is a versatile notification and alert component for displaying messages, warnings, and information to users. It supports multiple visual types, icons, and interactive behaviors including click handlers and navigation links.
+
+## Features
+
+- **Multiple Types**: Success, error, info, and default visual styles
+- **Icon Support**: Optional icons with left or right alignment
+- **Interactive Behaviors**: Click handlers and link navigation
+- **Responsive Design**: Adapts to different screen sizes
+- **Accessibility**: Proper ARIA attributes and keyboard support
+- **Flexible Content**: Supports any React content as children
+- **Customizable Styling**: Additional CSS classes and theming support
+
+## How It Works
+
+The Banner component dynamically renders as different HTML elements based on its props:
+
+### Rendering Logic
+
+- **Default**: Renders as a `<div>` for static content
+- **With onClick**: Renders as a `<button>` for interactive content
+- **With to prop**: Renders as a `<Link>` component for navigation
+
+### Visual Types
+
+- **default**: Neutral gray styling for general information
+- **success**: Green styling for positive feedback
+- **error**: Red styling for errors and warnings
+- **info**: Blue styling for informational messages
+
+## Basic Usage
+
+The Banner component can be used for various notification scenarios.
+
+## Props
+
+**Props:**
+
+- **children** (`React.ReactNode`, optional) - Content to display in the banner
+- **type** (`'default' | 'error' | 'info' | 'success'`, optional) - Visual style variant (default: 'default')
+- **icon** (`React.ReactNode`, optional) - Icon to display in the banner
+- **alignIcon** (`'left' | 'right'`, optional) - Position of the icon relative to content (default: 'right')
+- **onClick** (`(event: MouseEvent) => void`, optional) - Click handler for interactive banners
+- **to** (`string`, optional) - URL for link banners
+- **className** (`string`, optional) - Additional CSS class names
+
+## Usage Examples
+
+### Basic Implementation
+
+```tsx
+import { Banner } from '@payloadcms/ui'
+;<Banner type="success">Your changes have been saved successfully!</Banner>
+```
+
+### With Icon
+
+```tsx
+<Banner type="error" icon={<ErrorIcon />}>
+  Something went wrong. Please try again.
+</Banner>
+```
+
+### Interactive Banner
+
+```tsx
+<Banner type="default" onClick={() => handleAction()} icon={<ActionIcon />}>
+  Click to perform an action
+</Banner>
+```
+
+### Link Banner
+
+```tsx
+<Banner type="info" to="/admin/settings" icon={<SettingsIcon />}>
+  Go to settings
+</Banner>
+```
+
+## Real-World Examples
+
+### Success Notifications
+
+The Basic story shows various banner types including success messages for completed actions, error alerts for problems, and info banners for helpful information.
+
+### Mobile Responsive
+
+The MobileView story demonstrates how banners adapt to mobile screens with proper spacing and touch-friendly interactions.
+
+## Component Structure
+
+The Banner consists of several key elements:
+
+### Content Area
+
+- **Main Content**: The children prop content wrapped in a span
+- **Icon Support**: Optional icon with configurable alignment
+- **Flexible Layout**: Adapts to content length and icon presence
+
+### Interactive Elements
+
+- **Click Handlers**: onClick prop for button-like behavior
+- **Navigation Links**: to prop for link-like behavior
+- **Hover States**: Visual feedback for interactive banners
+
+### Visual Styling
+
+- **Type-based Colors**: Different color schemes for each type
+- **Icon Alignment**: Left or right positioning of icons
+- **Responsive Spacing**: Proper padding and margins for all screen sizes
+
+## Styling and Theming
+
+The component uses CSS custom properties and adapts to different themes:
+
+### CSS Classes
+
+- `.banner` - Main container
+- `.banner--type-{type}` - Type-specific styling
+- `.banner--has-action` - Applied when interactive
+- `.banner--has-icon` - Applied when icon is present
+- `.banner--align-icon-{position}` - Icon alignment
+- `.banner--has-link` - Applied when used as link
+
+### Type Styles
+
+- **default**: Gray background with dark text
+- **success**: Green background with success colors
+- **error**: Red background with error colors
+- **info**: Blue background with info colors
+
+## Responsive Behavior
+
+### Desktop
+
+- Full padding and spacing
+- Hover effects for interactive banners
+- Proper icon sizing and alignment
+
+### Mobile
+
+- Touch-friendly sizing
+- Optimized spacing for small screens
+- Readable text and icons
+- Proper touch targets
+
+## Accessibility
+
+The Banner includes comprehensive accessibility features:
+
+- **Semantic HTML**: Uses appropriate elements (div, button, link)
+- **Keyboard Navigation**: Full keyboard support for interactive banners
+- **Screen Reader Support**: Proper content announcement
+- **Focus Management**: Clear focus indicators
+- **ARIA Attributes**: Appropriate labeling when needed
+
+## Common Use Cases
+
+1. **Success Messages**: Confirming successful actions
+2. **Error Alerts**: Displaying error messages and warnings
+3. **Info Notifications**: Providing helpful information
+4. **Action Prompts**: Encouraging user interactions
+5. **Navigation Hints**: Guiding users to other pages
+6. **Status Updates**: Showing current system status
+
+## Best Practices
+
+- **Choose Appropriate Types**: Use the right type for the message context
+- **Keep Messages Clear**: Write concise, actionable messages
+- **Use Icons Wisely**: Icons should enhance, not replace, the message
+- **Test Interactions**: Ensure click handlers and links work properly
+- **Consider Mobile**: Test on mobile devices for proper display
+- **Accessibility**: Ensure screen readers can understand the content
+
+## Troubleshooting
+
+- **Banner Not Interactive**: Check that onClick or to prop is provided
+- **Icon Not Displaying**: Verify icon prop is a valid React element
+- **Styling Issues**: Check that CSS custom properties are defined
+- **Link Not Working**: Ensure to prop is a valid URL path
+- **Mobile Layout Issues**: Test responsive behavior on small screens
+
+---
+
+_This component provides a flexible and accessible solution for displaying notifications and alerts in PayloadCMS admin interfaces._

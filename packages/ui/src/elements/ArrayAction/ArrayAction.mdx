@@ -1,0 +1,127 @@
+# ArrayAction
+
+The ArrayAction component provides a dropdown menu of actions for managing array field rows in PayloadCMS. It renders as a three-dot menu button that opens a popup with context-sensitive actions based on the row position and array constraints.
+
+## Basic Usage
+
+The ArrayAction component is used within array field rows to provide actions for managing individual rows. It automatically shows/hides actions based on the row's position and whether maximum row limits are reached.
+
+## Props
+
+- **addRow** (`(current: number, blockType?: string) => Promise<void> | void`, required) - Function called when adding a new row. The current parameter indicates the index where the new row should be inserted.
+- **copyRow** (`(index: number) => void`, required) - Function called when copying a row to clipboard
+- **duplicateRow** (`(current: number) => void`, required) - Function called when duplicating a row at the current position
+- **hasMaxRows** (`boolean`, required) - Whether the array has reached its maximum number of rows
+- **index** (`number`, required) - The current row's index position in the array
+- **isSortable** (`boolean`, optional) - Whether the array allows reordering of rows
+- **moveRow** (`(from: number, to: number) => void`, required) - Function called when moving a row to a different position
+- **pasteRow** (`(index: number) => void`, required) - Function called when pasting a copied row at the specified index
+- **removeRow** (`(index: number) => void`, required) - Function called when removing a row
+- **rowCount** (`number`, required) - Total number of rows in the array
+
+## Available Actions
+
+The component intelligently shows different actions based on context:
+
+### Move Actions (when `isSortable` is true)
+
+- **Move Up** - Only shown for rows after the first row (index > 0)
+- **Move Down** - Only shown for rows before the last row (index < rowCount - 1)
+
+### Add/Duplicate Actions (when `hasMaxRows` is false)
+
+- **Add Below** - Inserts a new row after the current row
+- **Duplicate** - Creates a copy of the current row and inserts it after
+
+### Clipboard Actions
+
+- **Copy** - Copies the current row data to clipboard
+- **Paste** - Pastes previously copied row data after the current row
+
+### Remove Action
+
+- **Remove** - Deletes the current row (always available)
+
+## Real-World Usage
+
+ArrayAction is primarily used within the ArrayField component system:
+
+```tsx
+// Used in ArrayRow component
+<ArrayAction
+  addRow={addRow}
+  copyRow={copyRow}
+  duplicateRow={duplicateRow}
+  hasMaxRows={hasMaxRows}
+  index={rowIndex}
+  isSortable={isSortable}
+  moveRow={moveRow}
+  pasteRow={pasteRow}
+  removeRow={removeRow}
+  rowCount={rowCount}
+/>
+```
+
+## Integration with Array Fields
+
+The component integrates seamlessly with PayloadCMS array fields:
+
+- **Collapsible Integration** - Used within Collapsible component's actions prop
+- **Drag and Drop** - Works alongside DraggableSortable for reordering
+- **Form State Management** - Integrates with PayloadCMS form state management
+- **Permission-Based Rendering** - Respects field-level permissions
+
+## Accessibility
+
+- Uses semantic button elements with proper ARIA labels
+- Keyboard navigation support through Popup component
+- Screen reader friendly with descriptive action labels
+- Focus management when popup opens/closes
+
+## Styling
+
+The component uses CSS custom properties and follows PayloadCMS design system:
+
+- Hover states with elevation changes
+- Consistent icon sizing and spacing
+- Responsive design that works across different screen sizes
+- Theme-aware colors using CSS custom properties
+
+## Translation Support
+
+All action labels are translatable through the PayloadCMS translation system:
+
+- `general:moveUp` - "Move Up" action
+- `general:moveDown` - "Move Down" action
+- `general:addBelow` - "Add Below" action
+- `general:duplicate` - "Duplicate" action
+- `general:remove` - "Remove" action
+- Clipboard actions use `ClipboardActionLabel` component for copy/paste labels
+
+## Technical Implementation
+
+The component uses:
+
+- **Popup Component** - For the dropdown menu functionality
+- **PopupList.ButtonGroup** - For action button layout
+- **Icon Components** - ChevronIcon, CopyIcon, PlusIcon, XIcon, MoreIcon
+- **Translation Hook** - `useTranslation()` for internationalization
+- **Event Handling** - Proper async/await handling for addRow function
+
+## Common Patterns
+
+### Array Field Integration
+
+Most commonly used within array field rows to provide row management actions.
+
+### Form Validation Context
+
+Actions respect form validation state and don't interfere with field validation.
+
+### Permission-Based Actions
+
+Actions can be conditionally rendered based on user permissions (handled at the parent component level).
+
+## Examples
+
+See the Basic and ArrayFieldExample stories for interactive demonstrations of the component's functionality and real-world usage patterns.

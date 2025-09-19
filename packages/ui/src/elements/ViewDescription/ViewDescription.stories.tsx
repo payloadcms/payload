@@ -1,8 +1,9 @@
+/* eslint-disable no-restricted-exports */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import React from 'react'
 
-import { ViewDescription } from '../elements/ViewDescription/index.js'
+import { ViewDescription } from './index.js'
 
 // Global styles are imported in .storybook/preview.ts
 
@@ -112,10 +113,14 @@ export const InFormSection: Story = {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '4px' }}>
+          <label
+            htmlFor="display-name"
+            style={{ display: 'block', fontWeight: 'bold', marginBottom: '4px' }}
+          >
             Display Name
           </label>
           <input
+            id="display-name"
             placeholder="Enter your display name"
             style={{
               border: '1px solid #ccc',
@@ -128,8 +133,14 @@ export const InFormSection: Story = {
         </div>
 
         <div>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '4px' }}>Email</label>
+          <label
+            htmlFor="email"
+            style={{ display: 'block', fontWeight: 'bold', marginBottom: '4px' }}
+          >
+            Email
+          </label>
           <input
+            id="email"
             placeholder="Enter your email"
             style={{
               border: '1px solid #ccc',
@@ -177,6 +188,7 @@ export const InCard: Story = {
             cursor: 'pointer',
             padding: '8px 16px',
           }}
+          type="button"
         >
           Configure
         </button>
@@ -189,6 +201,7 @@ export const InCard: Story = {
             cursor: 'pointer',
             padding: '8px 16px',
           }}
+          type="button"
         >
           Cancel
         </button>
@@ -246,6 +259,7 @@ export const InModal: Story = {
               cursor: 'pointer',
               padding: '8px 16px',
             }}
+            type="button"
           >
             Cancel
           </button>
@@ -258,6 +272,7 @@ export const InModal: Story = {
               cursor: 'pointer',
               padding: '8px 16px',
             }}
+            type="button"
           >
             Delete
           </button>

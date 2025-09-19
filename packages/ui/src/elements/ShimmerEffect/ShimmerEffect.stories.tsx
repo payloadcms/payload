@@ -1,8 +1,9 @@
+/* eslint-disable no-restricted-exports */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import React from 'react'
 
-import { ShimmerEffect, StaggeredShimmers } from '../elements/ShimmerEffect/index.js'
+import { ShimmerEffect, StaggeredShimmers } from './index.js'
 
 // Global styles are imported in .storybook/preview.ts
 

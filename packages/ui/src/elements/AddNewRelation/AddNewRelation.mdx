@@ -1,0 +1,142 @@
+# AddNewRelation Component
+
+The `AddNewRelation` component is a specialized UI element designed for creating new related documents within PayloadCMS relationship fields. It provides an intuitive interface for users to add new related documents without leaving the current form context.
+
+## Features
+
+- **Single Collection Support**: Direct creation of documents in a single collection
+- **Multiple Collection Support**: Popup selection when multiple collections are available
+- **Permission-Based Rendering**: Only shows when user has create permissions
+- **Document Drawer Integration**: Opens document creation interface
+- **Customizable Button**: Supports custom button components
+- **Accessibility**: Full keyboard navigation and ARIA support
+- **Tooltip Support**: Helpful tooltips for better UX
+
+## Basic Usage
+
+The component renders a plus icon button that opens a document creation drawer when clicked. In this example, clicking the button will open a drawer to create a new post.
+
+## Props
+
+**Props:**
+
+- **hasMany** (`boolean`, required) - Whether this relationship can have multiple values
+- **onChange** (`(value: ValueWithRelation | ValueWithRelation[]) => void`, required) - Callback when a new relation is added
+- **path** (`string`, required) - Field path for the relationship
+- **relationTo** (`string | string[]`, required) - Collection slug(s) this relationship points to
+- **Button** (`React.ReactNode`, optional) - Custom button component to render instead of default
+- **unstyled** (`boolean`, optional) - Whether to render without default styling
+- **value** (`ValueWithRelation | ValueWithRelation[] | null`, optional) - Current relationship value(s)
+
+## Usage Examples
+
+### Single Collection
+
+```tsx
+import { AddNewRelation } from '@payloadcms/ui'
+;<AddNewRelation
+  hasMany={false}
+  onChange={(value) => console.log('Added relation:', value)}
+  path="author"
+  relationTo="posts"
+  value={null}
+/>
+```
+
+### Multiple Collections
+
+```tsx
+<AddNewRelation
+  hasMany={false}
+  onChange={(value) => console.log('Added relation:', value)}
+  path="relatedItem"
+  relationTo={['posts', 'categories']}
+  value={null}
+/>
+```
+
+### Has Many Relationship
+
+```tsx
+<AddNewRelation
+  hasMany={true}
+  onChange={(value) => console.log('Added relations:', value)}
+  path="tags"
+  relationTo="categories"
+  value={[]}
+/>
+```
+
+## Requirements
+
+### Context Dependencies
+
+The component requires several PayloadCMS context providers to function correctly:
+
+- **ConfigProvider**: Provides collection configuration
+- **AuthProvider**: Provides user permissions
+- **TranslationProvider**: Provides internationalization support
+- **DocumentDrawerProvider**: Provides document creation interface
+
+### Permissions
+
+The component respects user permissions and only renders when:
+
+- User has `canAccessAdmin` permission
+- User has `create` permission for the target collection(s)
+- Collection exists in the configuration
+
+### Required Translations
+
+The component uses the following translation keys:
+
+- `fields:addNew` - Tooltip text for the add button
+- Collection label translations for popup options
+
+## Behavior
+
+### Single Collection Mode
+
+When `relationTo` is a single string:
+
+- Shows a plus icon button
+- Clicking opens the document drawer directly
+- Creates a new document in the specified collection
+
+### Multiple Collections Mode
+
+When `relationTo` is an array of strings:
+
+- Shows a plus icon button
+- Clicking opens a popup with collection options
+- User selects collection type, then document drawer opens
+- Creates a new document in the selected collection
+
+### Permission Handling
+
+- Component only renders if user has create permissions
+- Individual collection options are filtered by permissions
+- Gracefully handles missing permissions
+
+## Common Use Cases
+
+1. **Blog Post Author**: Adding new authors while creating posts
+2. **Product Categories**: Creating categories while adding products
+3. **Content Tags**: Adding new tags to content items
+4. **User Roles**: Creating roles while managing users
+5. **Media Galleries**: Adding new media items to galleries
+
+## Best Practices
+
+- Always provide meaningful `path` values
+- Use descriptive collection names in `relationTo`
+- Handle the `onChange` callback appropriately
+- Consider user permissions when designing forms
+- Provide helpful tooltips and labels
+- Test with different permission scenarios
+
+## Troubleshooting
+
+- **Component Not Visible**: Check permissions for the target collection (`create` access). Ensure `fields:addNew` translation is present.
+- **"Failed to fetch" Errors**: Verify the global fetch mock in `preview.tsx` is correctly configured and covers all API endpoints accessed by the component.
+- **Incorrect Behavior with Multiple Collections**: Ensure `relationTo` is an array and that all referenced collections are defined in `payload.config.ts` with appropriate permissions.

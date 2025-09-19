@@ -1,0 +1,54 @@
+# CodeEditor
+
+A Monaco-based code editor component that automatically adjusts its height based on content and supports both light and dark themes.
+
+## Basic Usage
+
+The CodeEditor provides syntax highlighting, code editing capabilities, and automatic height adjustment. It's commonly used in PayloadCMS for code fields and configuration editors.
+
+## Props
+
+- **className** (`string`, optional) - Additional CSS class for the editor
+- **maxHeight** (`number`, optional) - Maximum height in pixels that the editor can grow to
+- **minHeight** (`number`, optional) - Minimum height in pixels (default: 56, equivalent to 3 lines)
+- **readOnly** (`boolean`, optional) - Whether the editor is in read-only mode
+- **defaultLanguage** (`string`, optional) - The programming language for syntax highlighting
+- **value** (`string`, optional) - The initial value of the editor
+- **onChange** (`(value: string, event: any) => void`, optional) - Called when the editor content changes
+- **onMount** (`(editor: any, monaco: any) => void`, optional) - Called when the editor is mounted
+- **options** (`object`, optional) - Monaco editor options
+  - **insertSpaces** (`boolean`) - Use spaces for indentation
+  - **tabSize** (`number`) - Number of spaces per tab
+  - **trimAutoWhitespace** (`boolean`) - Trim auto whitespace
+  - **padding** (`{ top?: number, bottom?: number }`) - Editor padding
+
+## Important Notes
+
+1. **Height Behavior**
+
+   - Automatically adjusts height based on content
+   - Respects minHeight (default: 56px)
+   - Optional maxHeight constraint
+   - Height calculation: 18px per line + 2px + padding
+
+2. **Theme Support**
+
+   - Automatically syncs with PayloadCMS theme
+   - Uses 'vs-dark' for dark theme
+   - Uses 'vs' for light theme
+
+3. **Editor Features**
+   - Word wrap enabled by default
+   - Minimap disabled
+   - Simplified scrollbar behavior
+   - Per-model indentation settings
+
+## Accessibility
+
+- Supports keyboard navigation
+- Maintains proper focus management
+- Compatible with screen readers through Monaco editor's accessibility features
+
+## Performance
+
+The editor is client-side only ('use client') and uses dynamic imports for better initial load performance. A shimmer effect is shown while loading.

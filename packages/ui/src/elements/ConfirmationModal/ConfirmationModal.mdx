@@ -1,0 +1,150 @@
+# ConfirmationModal
+
+The `ConfirmationModal` component provides a standardized modal interface for confirming user actions. It includes customizable heading, body content, button labels, and handles both synchronous and asynchronous confirmation actions.
+
+## Features
+
+- **Customizable Content**: Support for both string and React node content in heading and body
+- **Flexible Labels**: Customizable button labels for confirm, cancel, and confirming states
+- **Async Support**: Built-in handling of asynchronous confirmation actions with loading states
+- **Accessibility**: Proper ARIA attributes and keyboard navigation support
+- **Modal Integration**: Uses `@faceless-ui/modal` for consistent modal behavior
+- **Z-index Management**: Automatically handles z-index based on drawer depth
+
+## Props
+
+**Props:**
+
+- **body** (`React.ReactNode`, required) - The main content/description of the confirmation
+- **heading** (`React.ReactNode`, required) - The modal title/heading
+- **modalSlug** (`string`, required) - Unique identifier for the modal instance
+- **onConfirm** (`() => Promise<void> | void`, required) - Handler called when user confirms the action
+- **cancelLabel** (`string`, optional) - Label for the cancel button (defaults to `t('general:cancel')`)
+- **confirmLabel** (`string`, optional) - Label for the confirm button (defaults to `t('general:confirm')`)
+- **confirmingLabel** (`string`, optional) - Label shown while confirming (defaults to `t('general:loading')...`)
+- **onCancel** (`() => void`, optional) - Handler called when user cancels
+- **className** (`string`, optional) - Additional CSS class for styling
+
+## Usage
+
+### Basic Confirmation
+
+```tsx
+import { ConfirmationModal } from '@payloadcms/ui'
+
+function MyComponent() {
+  const { openModal } = useModal()
+
+  const handleDelete = async () => {
+    // Perform delete operation
+    await deleteItem()
+  }
+
+  return (
+    <>
+      <button onClick={() => openModal('delete-confirm')}>Delete Item</button>
+
+      <ConfirmationModal
+        heading="Delete Item"
+        body="Are you sure you want to delete this item? This action cannot be undone."
+        modalSlug="delete-confirm"
+        onConfirm={handleDelete}
+        confirmLabel="Delete"
+      />
+    </>
+  )
+}
+```
+
+### With Custom Labels and Cancel Handler
+
+```tsx
+<ConfirmationModal
+  heading="Publish Article"
+  body="This will make your article visible to all users."
+  modalSlug="publish-confirm"
+  confirmLabel="Publish Now"
+  cancelLabel="Keep Draft"
+  confirmingLabel="Publishing..."
+  onConfirm={handlePublish}
+  onCancel={handleCancel}
+/>
+```
+
+### With Rich Content
+
+```tsx
+<ConfirmationModal
+  heading={<h2>Custom Heading</h2>}
+  body={
+    <div>
+      <p>This action will:</p>
+      <ul>
+        <li>Remove the item permanently</li>
+        <li>Delete all associated files</li>
+        <li>Notify team members</li>
+      </ul>
+    </div>
+  }
+  modalSlug="complex-confirm"
+  onConfirm={handleComplexAction}
+/>
+```
+
+## Integration with Modal System
+
+The `ConfirmationModal` integrates seamlessly with PayloadCMS's modal system:
+
+```tsx
+import { ModalProvider, useModal } from '@faceless-ui/modal'
+
+function App() {
+  return (
+    <ModalProvider>
+      <MyComponent />
+    </ModalProvider>
+  )
+}
+```
+
+## Styling
+
+The component uses CSS classes for styling:
+
+- `.confirmation-modal` - Main modal container
+- `.confirmation-modal__wrapper` - Content wrapper
+- `.confirmation-modal__content` - Heading and body content area
+- `.confirmation-modal__controls` - Button controls area
+
+### Custom Styling
+
+```scss
+.confirmation-modal {
+  &__wrapper {
+    max-width: 600px; // Override default max-width
+  }
+
+  &__content {
+    h1,
+    h2,
+    h3 {
+      color: var(--theme-text);
+    }
+  }
+}
+```
+
+## Accessibility
+
+- Uses semantic HTML with proper heading hierarchy
+- Supports keyboard navigation (Escape to close)
+- Provides clear button labels and states
+- Maintains focus management during modal operations
+
+## Best Practices
+
+1. **Clear Actions**: Use descriptive button labels that clearly indicate the action
+2. **Meaningful Content**: Provide clear explanations of what the action will do
+3. **Async Handling**: Always handle async operations properly to show loading states
+4. **Error Handling**: Consider adding error handling for failed confirmation actions
+5. **Consistent Labels**: Use consistent terminology across your application

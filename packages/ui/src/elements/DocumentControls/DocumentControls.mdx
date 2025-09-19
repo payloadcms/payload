@@ -1,0 +1,164 @@
+# DocumentControls
+
+A comprehensive component that provides document management controls for PayloadCMS, including save/publish buttons, metadata display, and action menus. It's the main control bar for document editing views.
+
+## Basic Usage
+
+The DocumentControls component appears at the top of document edit views and provides a complete set of controls for managing documents. It includes save/publish buttons, document metadata, status indicators, and action menus.
+
+## Example Usage
+
+```tsx
+import { DocumentControls } from '@payloadcms/ui'
+
+function DocumentEditView({ document, permissions }) {
+  return (
+    <div>
+      <DocumentControls
+        apiURL="/api/posts"
+        slug="posts"
+        id={document.id}
+        data={document}
+        permissions={permissions}
+        isEditing={true}
+        hasSavePermission={permissions.update}
+        hasPublishPermission={permissions.update}
+      />
+
+      {/* Document form content */}
+    </div>
+  )
+}
+```
+
+## Props
+
+- **apiURL** (`string`, required) - The API URL for the collection
+- **BeforeDocumentControls** (`React.ReactNode`, optional) - Custom content to render before the controls
+- **customComponents** (`object`, optional) - Custom components to override default buttons
+  - **PreviewButton** (`React.ReactNode`) - Custom preview button
+  - **PublishButton** (`React.ReactNode`) - Custom publish button
+  - **SaveButton** (`React.ReactNode`) - Custom save button
+  - **SaveDraftButton** (`React.ReactNode`) - Custom save draft button
+- **data** (`Data`, optional) - Document data for metadata display
+- **disableActions** (`boolean`, optional) - Disable all action buttons
+- **disableCreate** (`boolean`, optional) - Disable create new functionality
+- **EditMenuItems** (`React.ReactNode`, optional) - Additional menu items for the popup menu
+- **hasPublishPermission** (`boolean`, optional) - Whether user has publish permission
+- **hasSavePermission** (`boolean`, optional) - Whether user has save permission
+- **id** (`number | string`, optional) - Document ID
+- **isAccountView** (`boolean`, optional) - Whether this is an account view
+- **isEditing** (`boolean`, optional) - Whether document is being edited
+- **isInDrawer** (`boolean`, optional) - Whether component is in a drawer
+- **isTrashed** (`boolean`, optional) - Whether document is trashed
+- **onDelete** (`function`, optional) - Callback for delete operations
+- **onDrawerCreateNew** (`function`, optional) - Callback for creating new documents in drawer
+- **onDuplicate** (`function`, optional) - Callback for duplicate operations
+- **onRestore** (`function`, optional) - Callback for restore operations
+- **onSave** (`function`, optional) - Callback for save operations
+- **onTakeOver** (`function`, optional) - Callback for taking over locked documents
+- **permissions** (`SanitizedCollectionPermission | SanitizedGlobalPermission`, required) - User permissions
+- **readOnlyForIncomingUser** (`boolean`, optional) - Whether document is read-only for incoming user
+- **redirectAfterDelete** (`boolean`, optional) - Whether to redirect after delete
+- **redirectAfterDuplicate** (`boolean`, optional) - Whether to redirect after duplicate
+- **redirectAfterRestore** (`boolean`, optional) - Whether to redirect after restore
+- **slug** (`SanitizedCollectionConfig['slug']`, required) - Collection or global slug
+- **user** (`ClientUser`, optional) - Current user information
+
+## Required Context Providers
+
+This component requires several context providers to function properly:
+
+```tsx
+import {
+  ConfigProvider,
+  TranslationProvider,
+  FormProvider,
+  EditDepthProvider,
+  LivePreviewProvider,
+  DocumentTitleProvider,
+  RouteTransitionProvider,
+} from '@payloadcms/ui'
+
+function App() {
+  return (
+    <ConfigProvider config={config}>
+      <TranslationProvider translations={translations}>
+        <FormProvider>
+          <EditDepthProvider>
+            <LivePreviewProvider>
+              <DocumentTitleProvider>
+                <RouteTransitionProvider>
+                  <DocumentControls
+                    apiURL="/api/posts"
+                    slug="posts"
+                    permissions={permissions}
+                    // ... other props
+                  />
+                </RouteTransitionProvider>
+              </DocumentTitleProvider>
+            </LivePreviewProvider>
+          </EditDepthProvider>
+        </FormProvider>
+      </TranslationProvider>
+    </ConfigProvider>
+  )
+}
+```
+
+## Features
+
+- **Save/Publish Controls**: Save draft and publish buttons with permission checking
+- **Document Metadata**: Shows creation date, last modified date, and status
+- **Action Menu**: Popup menu with duplicate, delete, and other actions
+- **Permission-Based Rendering**: Shows/hides controls based on user permissions
+- **Live Preview**: Toggle for live preview when enabled
+- **Autosave**: Autosave functionality when configured
+- **Status Indicators**: Shows document status (draft, published, etc.)
+- **Lock Management**: Shows locked status and take-over functionality
+- **Folder Support**: Folder management when folders are enabled
+- **Localization**: Copy to locale functionality when enabled
+- **Trash Support**: Restore and permanently delete for trashed documents
+
+## Important Notes
+
+1. **Permission System**
+
+   - Controls are shown/hidden based on user permissions
+   - Save and publish buttons respect permission settings
+   - Action menu items are filtered by permissions
+
+2. **Draft System**
+
+   - Shows different controls for drafts vs published documents
+   - Autosave functionality when enabled
+   - Save draft button when configured
+
+3. **Context Awareness**
+
+   - Adapts to collection vs global contexts
+   - Shows different controls in drawers vs main views
+   - Handles edit depth for nested documents
+
+4. **State Management**
+   - Integrates with form state for processing indicators
+   - Shows locked status and user information
+   - Handles trashed document states
+
+## Accessibility
+
+- Proper button labels and ARIA attributes
+- Keyboard navigation support
+- Loading states for better user feedback
+- Clear status indicators and metadata display
+- Screen reader friendly structure
+
+## Dependencies
+
+The component integrates with many other UI elements:
+
+- SaveButton, PublishButton, SaveDraftButton
+- DeleteDocument, DuplicateDocument
+- Status, Autosave, PreviewButton
+- CopyLocaleData, MoveDocToFolder
+- Locked, RestoreButton, PermanentlyDeleteButton

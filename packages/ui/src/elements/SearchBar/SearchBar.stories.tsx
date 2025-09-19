@@ -1,15 +1,18 @@
+/* eslint-disable no-restricted-exports */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import React, { useState } from 'react'
 
-import { Button } from '../elements/Button/index.js'
-import { SearchBar } from '../elements/SearchBar/index.js'
+import { Button } from '../Button/index.js'
+import { SearchBar } from './index.js'
 
 // Global styles are imported in .storybook/preview.ts
 
 const meta: Meta<typeof SearchBar> = {
   args: {
-    onSearchChange: (search: string) => console.log('Search:', search),
+    onSearchChange: (search: string) => {
+      // Search changed: search
+    },
   },
   argTypes: {
     Actions: {
@@ -175,6 +178,7 @@ export const Interactive: Story = {
                       cursor: 'pointer',
                       textDecoration: 'underline',
                     }}
+                    type="button"
                   >
                     {term}
                   </button>
@@ -228,7 +232,9 @@ export const MultipleSearchBars: Story = {
         <h3 style={{ marginBottom: '8px' }}>Basic Search</h3>
         <SearchBar
           label="Search documents..."
-          onSearchChange={(search) => console.log('Basic:', search)}
+          onSearchChange={(search) => {
+            // Basic search: search
+          }}
         />
       </div>
 
@@ -244,7 +250,9 @@ export const MultipleSearchBars: Story = {
             </Button>,
           ]}
           label="Search with actions..."
-          onSearchChange={(search) => console.log('With actions:', search)}
+          onSearchChange={(search) => {
+            // With actions search: search
+          }}
         />
       </div>
 
@@ -252,7 +260,9 @@ export const MultipleSearchBars: Story = {
         <h3 style={{ marginBottom: '8px' }}>With URL Persistence</h3>
         <SearchBar
           label="Search with URL persistence..."
-          onSearchChange={(search) => console.log('URL persistent:', search)}
+          onSearchChange={(search) => {
+            // URL persistent search: search
+          }}
           searchQueryParam="search"
         />
       </div>
@@ -261,7 +271,9 @@ export const MultipleSearchBars: Story = {
         <h3 style={{ marginBottom: '8px' }}>Custom Label</h3>
         <SearchBar
           label="Find anything you're looking for..."
-          onSearchChange={(search) => console.log('Custom label:', search)}
+          onSearchChange={(search) => {
+            // Custom label search: search
+          }}
         />
       </div>
     </div>

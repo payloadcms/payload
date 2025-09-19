@@ -1,0 +1,101 @@
+# DeleteMany
+
+A component that provides bulk deletion functionality for multiple documents in PayloadCMS with confirmation modal and trash support. It appears in list views when documents are selected.
+
+## Basic Usage
+
+The DeleteMany component appears as a "Delete" button in list views when documents are selected. It supports both permanent deletion and soft deletion (trash) depending on collection configuration and view type.
+
+## Props
+
+- **collection** (`ClientCollectionConfig`, required) - The collection configuration object
+- **modalPrefix** (`string`, optional) - Prefix for modal slugs when multiple DeleteMany components are rendered
+- **title** (`string`, optional) - Custom title for the component
+- **viewType** (`ViewTypes`, optional) - The current view type (e.g., 'trash' for deleted documents)
+
+## Features
+
+- **Bulk Operations**: Delete multiple selected documents at once
+- **Select All Support**: Handles "select all" operations for large datasets
+- **Trash Support**: Supports soft deletion when collection has trash enabled
+- **Permanent Delete Option**: Option to permanently delete when trash is enabled
+- **Confirmation Modal**: Shows detailed confirmation with document counts
+- **Error Handling**: Comprehensive error handling with user feedback
+- **Loading States**: Shows loading state during deletion process
+- **Polymorphic Support**: Can delete documents from multiple collections
+- **Search Integration**: Respects current search filters
+
+## Important Notes
+
+1. **Selection Behavior**
+
+   - Only appears when documents are selected
+   - Requires delete permissions for the collection
+   - Handles both individual selection and "select all"
+   - Automatically clears selection after deletion
+
+2. **Trash Behavior**
+
+   - If collection has trash enabled, documents are soft-deleted by default
+   - Users can choose to permanently delete by checking "Delete Permanently"
+   - In trash view, documents are permanently deleted
+   - Different confirmation messages for each scenario
+
+3. **Confirmation Flow**
+
+   - Shows exact count of documents to be deleted
+   - Displays collection labels (singular/plural based on count)
+   - Provides clear messaging about what will happen
+   - Different messages for trash vs permanent deletion
+
+4. **Error Handling**
+   - Displays specific error messages from the server
+   - Shows count of successfully deleted documents
+   - Handles partial failures gracefully
+   - Uses toast notifications for user feedback
+
+## Example Usage
+
+```tsx
+import { DeleteMany } from '@payloadcms/ui'
+
+function ListView({ collection }) {
+  return (
+    <div>
+      {/* List content */}
+
+      {/* DeleteMany appears when documents are selected */}
+      <DeleteMany collection={collection} viewType="default" />
+    </div>
+  )
+}
+```
+
+## Context Requirements
+
+The component requires several context providers:
+
+- Selection provider for managing selected documents
+- Config provider for collection configuration
+- Translation provider for internationalization
+- Modal provider for confirmation dialogs
+- Auth provider for permission checking
+- Locale provider for localization
+
+## Accessibility
+
+- Proper button labels through translation keys
+- Clear confirmation messaging with counts
+- Loading states for better user feedback
+- Error handling with descriptive messages
+- ARIA labels for screen readers
+
+## Dependencies
+
+The component integrates with:
+
+- Selection system for managing selected documents
+- ConfirmationModal for user confirmation
+- Toast system for user feedback
+- Route cache for navigation updates
+- Search and filter systems

@@ -1,9 +1,10 @@
+/* eslint-disable no-restricted-exports */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import React from 'react'
 
-import { Pill } from '../elements/Pill/index.js'
 import { XIcon } from '../icons/X/index.js'
+import { Pill } from '../Pill/index.js'
 
 // Global styles are imported in .storybook/preview.ts
 

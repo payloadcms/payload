@@ -1,0 +1,219 @@
+# DatePicker
+
+The `DatePickerField` component provides a comprehensive date and time selection interface with multiple appearance modes, internationalization support, and customizable formatting options.
+
+## Features
+
+- **Multiple Appearance Modes**: Default, day and time, time only, day only, and month only
+- **Internationalization**: Automatic locale support based on user preferences
+- **Custom Formatting**: Flexible date and time format options
+- **Date Constraints**: Min/max date and time validation
+- **Accessibility**: Full keyboard navigation and screen reader support
+- **Clear Functionality**: Built-in clear button to reset selection
+- **Lazy Loading**: Optimized performance with code splitting
+
+## Props
+
+**Props:**
+
+- **value** (`Date | string`, optional) - The selected date value
+- **onChange** (`(val: Date) => void`, optional) - Callback when date selection changes
+- **placeholder** (`string`, optional) - Placeholder text for the input
+- **readOnly** (`boolean`, optional) - Whether the picker is read-only
+- **id** (`string`, optional) - HTML id attribute for the input
+- **pickerAppearance** (`'default' | 'dayAndTime' | 'timeOnly' | 'dayOnly' | 'monthOnly'`, optional) - Visual appearance mode (defaults to 'default')
+- **displayFormat** (`string`, optional) - Custom date format string
+- **minDate** (`Date`, optional) - Minimum selectable date
+- **maxDate** (`Date`, optional) - Maximum selectable date
+- **minTime** (`Date`, optional) - Minimum selectable time
+- **maxTime** (`Date`, optional) - Maximum selectable time
+- **timeFormat** (`string`, optional) - Time format string (defaults to 'h:mm aa')
+- **timeIntervals** (`number`, optional) - Time selection intervals in minutes (defaults to 30)
+- **monthsToShow** (`number`, optional) - Number of months to display (defaults to 1)
+- **overrides** (`object`, optional) - Additional props to pass to react-datepicker
+
+## Usage
+
+### Basic Date Selection
+
+```tsx
+import { DatePickerField } from '@payloadcms/ui'
+
+function MyComponent() {
+  const [selectedDate, setSelectedDate] = useState<Date>()
+
+  return (
+    <DatePickerField value={selectedDate} onChange={setSelectedDate} placeholder="Select a date" />
+  )
+}
+```
+
+### Date and Time Selection
+
+```tsx
+<DatePickerField
+  pickerAppearance="dayAndTime"
+  value={selectedDateTime}
+  onChange={setSelectedDateTime}
+  placeholder="Select date and time"
+  timeFormat="HH:mm"
+  timeIntervals={15}
+/>
+```
+
+### Time Only Selection
+
+```tsx
+<DatePickerField
+  pickerAppearance="timeOnly"
+  value={selectedTime}
+  onChange={setSelectedTime}
+  placeholder="Select time"
+  timeFormat="h:mm a"
+/>
+```
+
+### Date Constraints
+
+```tsx
+<DatePickerField
+  value={selectedDate}
+  onChange={setSelectedDate}
+  minDate={new Date()} // Only future dates
+  maxDate={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)} // 30 days from now
+  placeholder="Select date within next 30 days"
+/>
+```
+
+### Custom Formatting
+
+```tsx
+<DatePickerField
+  pickerAppearance="dayOnly"
+  displayFormat="MMMM dd, yyyy"
+  value={selectedDate}
+  onChange={setSelectedDate}
+  placeholder="Select date"
+/>
+```
+
+## Appearance Modes
+
+### Default
+
+Standard date picker with full date selection (MM/dd/yyyy format).
+
+### Day and Time
+
+Combines date and time selection with customizable time intervals.
+
+### Time Only
+
+Time selection only, useful for scheduling or time-based fields.
+
+### Day Only
+
+Date selection without time component, shows abbreviated format (MMM dd).
+
+### Month Only
+
+Month and year selection only, useful for recurring events or monthly data.
+
+## Internationalization
+
+The DatePicker automatically detects and uses the user's language preference from the PayloadCMS admin interface:
+
+```tsx
+// Automatically uses user's locale from i18n settings
+<DatePickerField
+  value={selectedDate}
+  onChange={setSelectedDate}
+  // Locale is handled automatically
+/>
+```
+
+## Styling
+
+The component uses CSS classes for styling:
+
+- `.date-time-picker` - Main container
+- `.date-time-picker__icon-wrap` - Icon container (calendar and clear button)
+- `.date-time-picker__input-wrapper` - Input field wrapper
+- `.date-time-picker__clear-button` - Clear button styling
+- `.date-time-picker__appearance--{mode}` - Appearance-specific styles
+
+### Custom Styling
+
+```scss
+.date-time-picker {
+  &__icon-wrap {
+    // Customize icon positioning
+  }
+
+  &__input-wrapper {
+    // Customize input styling
+  }
+
+  &__appearance--dayAndTime {
+    // Customize day and time appearance
+  }
+}
+```
+
+## Accessibility
+
+- **Keyboard Navigation**: Full keyboard support for date selection
+- **Screen Reader Support**: Proper ARIA labels and descriptions
+- **Focus Management**: Clear focus indicators and logical tab order
+- **Clear Button**: Accessible clear functionality with proper labeling
+
+## Performance
+
+- **Lazy Loading**: The DatePicker component is loaded asynchronously to improve initial page load
+- **Shimmer Effect**: Shows a loading placeholder while the component loads
+- **Optimized Rendering**: Efficient re-rendering with proper state management
+
+## Best Practices
+
+1. **Choose Appropriate Mode**: Select the right `pickerAppearance` for your use case
+2. **Set Date Constraints**: Use `minDate` and `maxDate` to prevent invalid selections
+3. **Provide Clear Labels**: Always include descriptive placeholder text
+4. **Handle Time Zones**: Be aware of timezone handling for date and time selections
+5. **Test Internationalization**: Verify date formats work correctly in different locales
+
+## Common Use Cases
+
+### Event Scheduling
+
+```tsx
+<DatePickerField
+  pickerAppearance="dayAndTime"
+  minDate={new Date()}
+  value={eventDate}
+  onChange={setEventDate}
+  placeholder="Select event date and time"
+/>
+```
+
+### Birth Date Selection
+
+```tsx
+<DatePickerField
+  pickerAppearance="default"
+  maxDate={new Date()}
+  value={birthDate}
+  onChange={setBirthDate}
+  placeholder="Select birth date"
+/>
+```
+
+### Monthly Reporting
+
+```tsx
+<DatePickerField
+  pickerAppearance="monthOnly"
+  value={reportMonth}
+  onChange={setReportMonth}
+  placeholder="Select month"
+/>
+```

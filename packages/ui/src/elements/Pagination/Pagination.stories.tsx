@@ -1,8 +1,9 @@
+/* eslint-disable no-restricted-exports */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import React, { useState } from 'react'
 
-import { Pagination } from '../elements/Pagination/index.js'
+import { Pagination } from '../Pagination/index.js'
 
 // Global styles are imported in .storybook/preview.ts
 
@@ -221,24 +222,28 @@ export const Interactive: Story = {
           <button
             onClick={() => setCurrentPage(1)}
             style={{ fontSize: '12px', padding: '4px 8px' }}
+            type="button"
           >
             First
           </button>
           <button
             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
             style={{ fontSize: '12px', padding: '4px 8px' }}
+            type="button"
           >
             Previous
           </button>
           <button
             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
             style={{ fontSize: '12px', padding: '4px 8px' }}
+            type="button"
           >
             Next
           </button>
           <button
             onClick={() => setCurrentPage(totalPages)}
             style={{ fontSize: '12px', padding: '4px 8px' }}
+            type="button"
           >
             Last
           </button>
