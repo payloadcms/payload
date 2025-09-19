@@ -41,7 +41,10 @@ ENV STORYBOOK=true
 ENV SASS_SILENCE_DEPRECATIONS=legacy-js-api
 ENV SASS_QUIET_DEPS=true
 
-# Build Storybook (dependencies are already installed from deps stage)
+# Install dependencies in builder stage to ensure proper linking
+RUN corepack enable pnpm && pnpm install --frozen-lockfile
+
+# Build Storybook
 RUN corepack enable pnpm && \
     cd packages/ui && \
     pnpm build-storybook
