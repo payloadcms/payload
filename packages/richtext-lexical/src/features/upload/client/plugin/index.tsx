@@ -42,7 +42,6 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
 
   const {
     drawerSlug: bulkUploadDrawerSlug,
-    initialForms,
     setCollectionSlug,
     setInitialForms,
     setOnCancel,
@@ -57,25 +56,17 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
       return
     }
 
-    if (isModalOpen(bulkUploadDrawerSlug)) {
-      // Modal already open => just add form, rest has already been done
-      setInitialForms([
-        ...(initialForms ?? []),
-        {
-          file: image.file,
-          formID: image.id,
-        },
-      ])
-    } else {
+    setInitialForms((initialForms) => [
+      ...(initialForms ?? []),
+      {
+        file: image.file,
+        formID: image.id,
+      },
+    ])
+
+    if (!isModalOpen(bulkUploadDrawerSlug)) {
       setCollectionSlug('uploads') // TODO
       setSelectableCollections(collections.filter(({ upload }) => !!upload).map(({ slug }) => slug))
-
-      setInitialForms([
-        {
-          file: image.file,
-          formID: image.id,
-        },
-      ])
 
       setOnCancel(() => {
         // Remove all the images that were added but not uploaded
@@ -112,23 +103,6 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
             }
           }
         })
-
-        /*
-         // Create all the lexical nodes pointing to images that do not exist yet
-      images.forEach((image) => {
-        // TODO: Should be done in node importDOM for
-        // - optimal positioning
-        //
-        // Inside onSuccess we'd then find each node and update it.
-        // Maybe even add a pending state to node OR create a PendingUploadNode.
-        // TODO: We would only do this if you actually drag image files in here
-        editor.dispatchCommand(INSERT_UPLOAD_COMMAND, {
-          fields: null,
-          relationTo: 'uploads', // TODO: Should be undefined and set later,
-          value: image.id,
-        })
-      })
-        */
       })
 
       openModal(bulkUploadDrawerSlug)
@@ -151,6 +125,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
 
           const src = nodeData.src
           const formID = nodeData.formID
+
           if (src.startsWith('data:')) {
             // It's a base64-encoded image
             const mimeMatch = src.match(/data:(image\/[a-zA-Z]+);base64,/)

@@ -143,7 +143,9 @@ type BulkUploadContext = {
   selectableCollections?: null | string[]
   setCollectionSlug: (slug: string) => void
   setInitialFiles: (files: FileList) => void
-  setInitialForms: (forms: InitialForms) => void
+  setInitialForms: (
+    forms: ((forms: InitialForms | undefined) => InitialForms | undefined) | InitialForms,
+  ) => void
   setMaxFiles: (maxFiles: number) => void
   setOnCancel: (onCancel: BulkUploadContext['onCancel']) => void
   setOnSuccess: (onSuccess: BulkUploadContext['onSuccess']) => void
