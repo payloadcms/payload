@@ -85,6 +85,7 @@ export interface Config {
   collections: {
     'lexical-fully-featured': LexicalFullyFeatured;
     'lexical-link-feature': LexicalLinkFeature;
+    'lexical-heading-feature': LexicalHeadingFeature;
     'lexical-jsx-converter': LexicalJsxConverter;
     'lexical-fields': LexicalField;
     'lexical-migrate-fields': LexicalMigrateField;
@@ -109,6 +110,7 @@ export interface Config {
   collectionsSelect: {
     'lexical-fully-featured': LexicalFullyFeaturedSelect<false> | LexicalFullyFeaturedSelect<true>;
     'lexical-link-feature': LexicalLinkFeatureSelect<false> | LexicalLinkFeatureSelect<true>;
+    'lexical-heading-feature': LexicalHeadingFeatureSelect<false> | LexicalHeadingFeatureSelect<true>;
     'lexical-jsx-converter': LexicalJsxConverterSelect<false> | LexicalJsxConverterSelect<true>;
     'lexical-fields': LexicalFieldsSelect<false> | LexicalFieldsSelect<true>;
     'lexical-migrate-fields': LexicalMigrateFieldsSelect<false> | LexicalMigrateFieldsSelect<true>;
@@ -200,6 +202,30 @@ export interface LexicalLinkFeature {
       type: string;
       children: {
         type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-heading-feature".
+ */
+export interface LexicalHeadingFeature {
+  id: string;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
         version: number;
         [k: string]: unknown;
       }[];
@@ -931,6 +957,10 @@ export interface PayloadLockedDocument {
         value: string | LexicalLinkFeature;
       } | null)
     | ({
+        relationTo: 'lexical-heading-feature';
+        value: string | LexicalHeadingFeature;
+      } | null)
+    | ({
         relationTo: 'lexical-jsx-converter';
         value: string | LexicalJsxConverter;
       } | null)
@@ -1050,6 +1080,15 @@ export interface LexicalFullyFeaturedSelect<T extends boolean = true> {
  * via the `definition` "lexical-link-feature_select".
  */
 export interface LexicalLinkFeatureSelect<T extends boolean = true> {
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-heading-feature_select".
+ */
+export interface LexicalHeadingFeatureSelect<T extends boolean = true> {
   richText?: T;
   updatedAt?: T;
   createdAt?: T;

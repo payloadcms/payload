@@ -23,7 +23,8 @@ let serverURL: string
 const { beforeAll, beforeEach, describe } = test
 
 // Unlike the other suites, this one runs in parallel, as they run on the `lexical-fully-featured/create` URL and are "pure" tests
-//test.describe.configure({ mode: 'parallel' })
+// PLEASE do not reset the database or perform any operations that modify it in this file.
+test.describe.configure({ mode: 'parallel' })
 
 describe('Lexical Fully Featured', () => {
   let lexical: LexicalHelpers
@@ -37,19 +38,12 @@ describe('Lexical Fully Featured', () => {
     await page.close()
   })
   beforeEach(async ({ page }) => {
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'lexicalTest',
-      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
-    })
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
     await lexical.editor.first().focus()
   })
-  test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async ({
-    page,
-  }) => {
+  test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async () => {
     await lexical.slashCommand('block')
     await expect(lexical.editor.locator('.lexical-block')).toBeVisible()
     await lexical.slashCommand('relationship')

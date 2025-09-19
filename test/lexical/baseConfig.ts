@@ -10,6 +10,7 @@ import {
   lexicalInlineBlocks,
 } from './collections/Lexical/index.js'
 import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
+import { LexicalHeadingFeature } from './collections/LexicalHeadingFeature/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalJSXConverter } from './collections/LexicalJSXConverter/index.js'
 import { LexicalLinkFeature } from './collections/LexicalLinkFeature/index.js'
@@ -33,6 +34,7 @@ export const baseConfig: Partial<Config> = {
   collections: [
     LexicalFullyFeatured,
     LexicalLinkFeature,
+    LexicalHeadingFeature,
     LexicalJSXConverter,
     getLexicalFieldsCollection({
       blocks: lexicalBlocks,
