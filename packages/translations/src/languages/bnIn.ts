@@ -572,6 +572,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'শুধুমাত্র পরিবর্তিত',
     moreVersions: 'আরও সংস্করণ...',
     noFurtherVersionsFound: 'আর কোনো সংস্করণ পাওয়া যায়নি',
+    noLabelGroup: 'অনামকো দল',
     noRowsFound: 'কোনো {{label}} পাওয়া যায়নি',
     noRowsSelected: 'কোনো {{label}} নির্বাচিত হয়নি',
     preview: 'প্রাকদর্শন',

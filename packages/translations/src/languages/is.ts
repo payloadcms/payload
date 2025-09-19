@@ -566,6 +566,7 @@ export const isTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Aðeins breytt',
     moreVersions: 'Fleiri útgáfur...',
     noFurtherVersionsFound: 'Engar fleiri útgáfur fundust',
+    noLabelGroup: 'Ónefnd hópur',
     noRowsFound: 'Ekkert {{label}} fannst',
     noRowsSelected: 'Ekkert {{label}} valið',
     preview: 'Forskoðun',

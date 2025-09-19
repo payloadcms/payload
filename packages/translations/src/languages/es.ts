@@ -574,6 +574,7 @@ export const esTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Modificado solamente',
     moreVersions: 'Más versiones...',
     noFurtherVersionsFound: 'No se encontraron más versiones',
+    noLabelGroup: 'Grupo sin nombre',
     noRowsFound: 'No se encontraron {{label}}.',
     noRowsSelected: 'No se ha seleccionado ningún {{label}}.',
     preview: 'Vista previa',

@@ -572,6 +572,7 @@ export const caTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Només modificat',
     moreVersions: 'Més versions...',
     noFurtherVersionsFound: "No s'han trobat més versions",
+    noLabelGroup: 'Grup sense nom',
     noRowsFound: "No s'han trobat {{label}}",
     noRowsSelected: "No s'han seleccionat {{label}}",
     preview: 'Vista prèvia',

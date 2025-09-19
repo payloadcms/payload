@@ -76,6 +76,7 @@ export const testEslintConfig = [
             'createFolderFromDoc',
             'assertURLParams',
             'uploadImage',
+            'getRowByCellValueAndAssert',
           ],
         },
       ],

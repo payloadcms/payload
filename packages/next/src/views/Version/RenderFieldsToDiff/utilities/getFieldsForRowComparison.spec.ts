@@ -17,10 +17,11 @@ describe('getFieldsForRowComparison', () => {
 
       const { fields } = getFieldsForRowComparison({
         field,
-        versionRow: {},
-        comparisonRow: {},
+        valueToRow: {},
+        valueFromRow: {},
         row: 0,
-        baseVersionField: { fields: [] },
+        baseVersionField: { fields: [], path: 'items', schemaPath: 'items', type: 'array' },
+        config: {} as any,
       })
 
       expect(fields).toEqual(arrayFields)
@@ -45,15 +46,16 @@ describe('getFieldsForRowComparison', () => {
         ],
       }
 
-      const versionRow = { blockType: 'blockA' }
-      const comparisonRow = { blockType: 'blockA' }
+      const valueToRow = { blockType: 'blockA' }
+      const valueFromRow = { blockType: 'blockA' }
 
       const { fields } = getFieldsForRowComparison({
         field,
-        versionRow,
-        comparisonRow,
+        valueToRow,
+        valueFromRow,
         row: 0,
-        baseVersionField: { fields: [] },
+        baseVersionField: { fields: [], path: 'myBlocks', schemaPath: 'myBlocks', type: 'blocks' },
+        config: {} as any,
       })
 
       expect(fields).toEqual(blockAFields)
@@ -81,15 +83,16 @@ describe('getFieldsForRowComparison', () => {
         ],
       }
 
-      const versionRow = { blockType: 'blockA' }
-      const comparisonRow = { blockType: 'blockB' }
+      const valueToRow = { blockType: 'blockA' }
+      const valueFromRow = { blockType: 'blockB' }
 
       const { fields } = getFieldsForRowComparison({
         field,
-        versionRow,
-        comparisonRow,
+        valueToRow,
+        valueFromRow,
         row: 0,
-        baseVersionField: { fields: [] },
+        baseVersionField: { fields: [], path: 'myBlocks', schemaPath: 'myBlocks', type: 'blocks' },
+        config: {} as any,
       })
 
       // Should contain all unique fields from both blocks

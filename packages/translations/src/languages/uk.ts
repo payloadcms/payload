@@ -566,6 +566,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Модифіковано тільки',
     moreVersions: 'Більше версій...',
     noFurtherVersionsFound: 'Інших версій не знайдено',
+    noLabelGroup: 'Незатверджена група',
     noRowsFound: 'Не знайдено {{label}}',
     noRowsSelected: 'Не вибрано {{label}}',
     preview: 'Попередній перегляд',

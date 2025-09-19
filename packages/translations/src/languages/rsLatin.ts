@@ -566,6 +566,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Samo izmenjen',
     moreVersions: 'Više verzija...',
     noFurtherVersionsFound: 'Nisu pronađene naredne verzije',
+    noLabelGroup: 'Nepomenuta Grupa',
     noRowsFound: '{{label}} nije pronađeno',
     noRowsSelected: 'Nije odabrana {{label}}',
     preview: 'Pregled',

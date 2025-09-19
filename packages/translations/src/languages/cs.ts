@@ -565,6 +565,7 @@ export const csTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Pouze upraveno',
     moreVersions: 'Více verzí...',
     noFurtherVersionsFound: 'Nenalezeny další verze',
+    noLabelGroup: 'Nepojmenovaná skupina',
     noRowsFound: 'Nenalezen {{label}}',
     noRowsSelected: 'Nebyl vybrán žádný {{label}}',
     preview: 'Náhled',

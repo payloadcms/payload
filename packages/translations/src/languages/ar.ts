@@ -553,6 +553,7 @@ export const arTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'تم التعديل فقط',
     moreVersions: 'المزيد من الإصدارات...',
     noFurtherVersionsFound: 'لم يتمّ العثور على نسخات أخرى',
+    noLabelGroup: 'المجموعة غير المسماة',
     noRowsFound: 'لم يتمّ العثور على {{label}}',
     noRowsSelected: 'لم يتم اختيار {{label}}',
     preview: 'معاينة',

@@ -569,6 +569,7 @@ export const idTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Hanya yang diubah',
     moreVersions: 'Versi lainnya...',
     noFurtherVersionsFound: 'Tidak ada versi lebih lanjut yang ditemukan',
+    noLabelGroup: 'Grup Tanpa Nama',
     noRowsFound: 'Tidak ada {{label}} yang ditemukan',
     noRowsSelected: 'Tidak ada {{label}} yang dipilih',
     preview: 'Pratinjau',

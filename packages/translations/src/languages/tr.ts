@@ -570,6 +570,7 @@ export const trTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Yalnızca değiştirilmiş',
     moreVersions: 'Daha fazla versiyon...',
     noFurtherVersionsFound: 'Başka sürüm bulunamadı.',
+    noLabelGroup: 'İsimsiz Grup',
     noRowsFound: '{{label}} bulunamadı',
     noRowsSelected: 'Seçilen {{label}} yok',
     preview: 'Önizleme',

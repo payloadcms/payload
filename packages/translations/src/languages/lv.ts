@@ -568,6 +568,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Tikai modificētie',
     moreVersions: 'Vairāk versijas...',
     noFurtherVersionsFound: 'Papildu versijas nav atrastas',
+    noLabelGroup: 'Nenosaukta grupa',
     noRowsFound: 'Nav atrasts neviens {{label}}',
     noRowsSelected: 'Nav atlasīts neviens {{label}}',
     preview: 'Priekšskatījums',

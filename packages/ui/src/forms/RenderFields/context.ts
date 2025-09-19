@@ -14,7 +14,7 @@ import React from 'react'
  *
  * export const MyCustomField: TextFieldClientComponent = (props) => {
  *   return (
- *     <FieldPathContext path="path.to.some.other.field">
+ *     <FieldPathContext value="path.to.some.other.field">
  *       <TextField {...props} />
  *     </FieldPathContext>
  *   )

@@ -769,19 +769,14 @@ export type UnnamedGroupField = {
 
 export type GroupField = NamedGroupField | UnnamedGroupField
 
-export type NamedGroupFieldClient = {
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  admin?: AdminClient & Pick<NamedGroupField['admin'], 'hideGutter'>
-  fields: ClientField[]
-} & Omit<FieldBaseClient, 'required'> &
-  Pick<NamedGroupField, 'interfaceName' | 'type'>
-
 export type UnnamedGroupFieldClient = {
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<UnnamedGroupField['admin'], 'hideGutter'>
   fields: ClientField[]
 } & Omit<FieldBaseClient, 'name' | 'required'> &
   Pick<UnnamedGroupField, 'label' | 'type'>
+
+export type NamedGroupFieldClient = Pick<NamedGroupField, 'name'> & UnnamedGroupFieldClient
 
 export type GroupFieldClient = NamedGroupFieldClient | UnnamedGroupFieldClient
 

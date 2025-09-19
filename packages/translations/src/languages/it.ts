@@ -573,6 +573,7 @@ export const itTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Modificato solo',
     moreVersions: 'Altre versioni...',
     noFurtherVersionsFound: 'Non sono state trovate ulteriori versioni',
+    noLabelGroup: 'Gruppo Senza Nome',
     noRowsFound: 'Nessun {{label}} trovato',
     noRowsSelected: 'Nessuna {{etichetta}} selezionata',
     preview: 'Anteprima',

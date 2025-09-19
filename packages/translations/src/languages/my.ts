@@ -577,6 +577,7 @@ export const myTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Hanya diubah',
     moreVersions: 'ပိုမိုများသော ဗားရှင်းများ...',
     noFurtherVersionsFound: 'နောက်ထပ်ဗားရှင်းများ မတွေ့ပါ။',
+    noLabelGroup: 'Tumpuan yang Bernama',
     noRowsFound: '{{label}} အားမတွေ့ပါ။',
     noRowsSelected: 'Tiada {{label}} yang dipilih',
     preview: 'နမူနာပြရန်',

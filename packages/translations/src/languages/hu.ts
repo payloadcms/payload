@@ -575,6 +575,7 @@ export const huTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Módosítva csak',
     moreVersions: 'További verziók...',
     noFurtherVersionsFound: 'További verziók nem találhatók',
+    noLabelGroup: 'Névtelen Csoport',
     noRowsFound: 'Nem található {{label}}',
     noRowsSelected: 'Nincs {{címke}} kiválasztva',
     preview: 'Előnézet',

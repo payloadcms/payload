@@ -565,6 +565,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Samo modificirano',
     moreVersions: 'Više verzija...',
     noFurtherVersionsFound: 'Nisu pronađene daljnje verzije',
+    noLabelGroup:
+      'Poštujte značenje izvornog teksta unutar konteksta Payloada. Evo popisa uobičajenih Payload izraza koji nose vrlo specifična značenja:\n    - Zbirka: Zbirka je skupina dokumenata koji dijele zajedničku strukturu i svrhu. Zbirke se koriste za organiziranje i upravljanje sadržajem u Payloadu.\n    - Polje: Polje je specifičan dio podataka unutar dokumenta u zbirci. Polja definiraju strukturu i vrstu podataka koji se mogu p',
     noRowsFound: '{{label}} nije pronađeno',
     noRowsSelected: 'Nije odabrana {{oznaka}}',
     preview: 'Pregled',

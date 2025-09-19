@@ -572,6 +572,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Tik modifikuotas',
     moreVersions: 'Daugiau versijų...',
     noFurtherVersionsFound: 'Nerasta daugiau versijų',
+    noLabelGroup: 'Nepavadintas grupė',
     noRowsFound: 'Nerasta {{label}}',
     noRowsSelected: 'Pasirinkta ne viena {{label}}',
     preview: 'Peržiūra',

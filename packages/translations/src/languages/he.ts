@@ -549,6 +549,7 @@ export const heTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'מותאם בלבד',
     moreVersions: 'עוד גרסאות...',
     noFurtherVersionsFound: 'לא נמצאו עוד גרסאות',
+    noLabelGroup: 'קבוצה ללא שם',
     noRowsFound: 'לא נמצאו {{label}}',
     noRowsSelected: 'לא נבחר {{תווית}}',
     preview: 'תצוגה מקדימה',

@@ -567,6 +567,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Само променени',
     moreVersions: 'Още версии...',
     noFurtherVersionsFound: 'Не са открити повече версии',
+    noLabelGroup: 'Неименувана група',
     noRowsFound: 'Не е открит {{label}}',
     noRowsSelected: 'Не е избран {{label}}',
     preview: 'Предварителен преглед',

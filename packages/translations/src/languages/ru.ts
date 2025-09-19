@@ -570,6 +570,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Модифицирован только',
     moreVersions: 'Больше версий...',
     noFurtherVersionsFound: 'Другие версии не найдены',
+    noLabelGroup: 'Неименованная Группа',
     noRowsFound: 'Не найдено {{label}}',
     noRowsSelected: 'Не выбран {{label}}',
     preview: 'Предпросмотр',
