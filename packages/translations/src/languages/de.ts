@@ -577,6 +577,7 @@ export const deTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Nur modifiziert',
     moreVersions: 'Mehr Versionen...',
     noFurtherVersionsFound: 'Keine weiteren Versionen vorhanden',
+    noLabelGroup: 'Unbenannte Gruppe',
     noRowsFound: 'Kein {{label}} gefunden',
     noRowsSelected: 'Kein {{label}} ausgewählt',
     preview: 'Vorschau',

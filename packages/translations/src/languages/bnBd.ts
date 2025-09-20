@@ -571,6 +571,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'শুধুমাত্র পরিবর্তিত',
     moreVersions: 'আরও সংস্করণ...',
     noFurtherVersionsFound: 'আর কোনো সংস্করণ পাওয়া যায়নি',
+    noLabelGroup:
+      'মূল বাক্যের অর্থ প্রেিত্ষ্যে সম্মান রাখুন। নিম্নে পেলোডের কিছু সাধারণ শর্তাবলীর তালিকা প্রদান করেছে যা খুব নির্দিষ্ট অর্থ বহন করে:',
     noRowsFound: 'কোনো {{label}} পাওয়া যায়নি',
     noRowsSelected: 'কোনো {{label}} নির্বাচিত হয়নি',
     preview: 'প্রাকদর্শন',

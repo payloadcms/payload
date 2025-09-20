@@ -856,6 +856,75 @@ describe('database', () => {
     }
   })
 
+  it('should populate distinct relationships of hasMany: true when depth>0', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+
+    const categories = ['category-1', 'category-2', 'category-3', 'category-4'].map((title) => ({
+      title,
+    }))
+
+    const categoriesIDS: { categories: string }[] = []
+
+    for (const { title } of categories) {
+      const doc = await payload.create({ collection: 'categories', data: { title } })
+      categoriesIDS.push({ categories: doc.id })
+    }
+
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: '1',
+        categories: [categoriesIDS[0]?.categories, categoriesIDS[1]?.categories],
+      },
+    })
+
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: '2',
+        categories: [
+          categoriesIDS[0]?.categories,
+          categoriesIDS[2]?.categories,
+          categoriesIDS[3]?.categories,
+        ],
+      },
+    })
+
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: '3',
+        categories: [
+          categoriesIDS[0]?.categories,
+          categoriesIDS[3]?.categories,
+          categoriesIDS[1]?.categories,
+        ],
+      },
+    })
+
+    const resultDepth0 = await payload.findDistinct({
+      collection: 'posts',
+      sort: 'categories.title',
+      field: 'categories',
+    })
+    expect(resultDepth0.values).toStrictEqual(categoriesIDS)
+    const resultDepth1 = await payload.findDistinct({
+      depth: 1,
+      collection: 'posts',
+      field: 'categories',
+      sort: 'categories.title',
+    })
+
+    for (let i = 0; i < resultDepth1.values.length; i++) {
+      const fromRes = resultDepth1.values[i] as any
+      const id = categoriesIDS[i].categories as any
+      const title = categories[i]?.title
+      expect(fromRes.categories.title).toBe(title)
+      expect(fromRes.categories.id).toBe(id)
+    }
+  })
+
   describe('Compound Indexes', () => {
     beforeEach(async () => {
       await payload.delete({ collection: 'compound-indexes', where: {} })
@@ -2918,6 +2987,58 @@ describe('database', () => {
         sort: '-textHooked',
       })
       expect(docs).toHaveLength(1)
+    })
+
+    it('should automatically add hasMany: true to a virtual field that references a hasMany relationship', () => {
+      const field = payload.collections['virtual-relations'].config.fields.find(
+        // eslint-disable-next-line jest/no-conditional-in-test
+        (each) => 'name' in each && each.name === 'postsTitles',
+      )!
+
+      // eslint-disable-next-line jest/no-conditional-in-test
+      expect('hasMany' in field && field.hasMany).toBe(true)
+    })
+
+    it('should the value populate with hasMany: true relationship field', async () => {
+      await payload.delete({ collection: 'categories', where: {} })
+      await payload.delete({ collection: 'posts', where: {} })
+      await payload.delete({ collection: 'virtual-relations', where: {} })
+
+      const post1 = await payload.create({ collection: 'posts', data: { title: 'post 1' } })
+      const post2 = await payload.create({ collection: 'posts', data: { title: 'post 2' } })
+
+      const res = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { posts: [post1.id, post2.id] },
+      })
+      expect(res.postsTitles).toEqual(['post 1', 'post 2'])
+    })
+
+    it('should the value populate with nested hasMany: true relationship field', async () => {
+      await payload.delete({ collection: 'categories', where: {} })
+      await payload.delete({ collection: 'posts', where: {} })
+      await payload.delete({ collection: 'virtual-relations', where: {} })
+
+      const category_1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'category 1' },
+      })
+      const category_2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'category 2' },
+      })
+      const post1 = await payload.create({
+        collection: 'posts',
+        data: { title: 'post 1', categories: [category_1.id, category_2.id] },
+      })
+
+      const res = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post1.id },
+      })
+      expect(res.postCategoriesTitles).toEqual(['category 1', 'category 2'])
     })
   })
 

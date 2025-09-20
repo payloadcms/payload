@@ -287,6 +287,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           const actionURLWithParams = `${actionURL}${qs.stringify(
             {
+              locale: code,
               uploadEdits: form?.uploadEdits || undefined,
             },
             {
@@ -415,6 +416,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       closeModal,
       drawerSlug,
       onSuccess,
+      code,
     ],
   )
 
