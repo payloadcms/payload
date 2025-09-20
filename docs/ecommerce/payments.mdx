@@ -1,0 +1,103 @@
+---
+title: Payment Adapters
+label: Payment Adapters
+order: 40
+desc: Add ecommerce functionality to your Payload CMS application with this plugin.
+keywords: plugins, ecommerce, stripe, plugin, payload, cms, shop, payments
+---
+
+A deeper look into the payment adapter pattern used by the Ecommerce Plugin, and how to create your own.
+
+The current list of supported payment adapters are:
+
+- [Stripe](#stripe)
+
+## Stripe
+
+Out of the box we integrate with Stripe to handle one-off purchases. To use Stripe, you will need to install the Stripe package:
+
+```bash
+  pnpm add stripe
+```
+
+We recommend at least `18.5.0` to ensure compatibility with the plugin.
+
+Then, in your `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with:
+
+```ts
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // Payload config...
+  plugins: [
+    ecommercePlugin({
+      // rest of config...
+      payments: {
+        paymentMethods: [
+          stripeAdapter({
+            secretKey: process.env.STRIPE_SECRET_KEY,
+            publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+            // Optional - only required if you want to use webhooks
+            webhookSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET,
+          }),
+        ],
+      },
+    }),
+  ],
+})
+```
+
+### Configuration
+
+### Webhooks
+
+You can also add your own webhooks to handle [events from Stripe](https://docs.stripe.com/api/events). This is optional and the plugin internally does not use webhooks for any core functionality. It receives the following arguments:
+
+| Argument | Type             | Description                     |
+| -------- | ---------------- | ------------------------------- |
+| event    | `Stripe.Event`   | The Stripe event object         |
+| req      | `PayloadRequest` | The Payload request object      |
+| stripe   | `Stripe`         | The initialized Stripe instance |
+
+You can add a webhook like so:
+
+```ts
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // Payload config...
+  plugins: [
+    ecommercePlugin({
+      // rest of config...
+      payments: {
+        paymentMethods: [
+          stripeAdapter({
+            secretKey: process.env.STRIPE_SECRET_KEY,
+            publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+            // Required
+            webhookSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET,
+            webhooks: {
+              'payment_intent.succeeded': ({ event, req }) => {
+                console.log({ event, data: event.data.object })
+                req.payload.logger.info('Payment succeeded')
+              },
+            },
+          }),
+        ],
+      },
+    }),
+  ],
+})
+```
+
+To use webhooks you also need to have them configured in your Stripe Dashboard.
+
+You can use the [Stripe CLI](https://stripe.com/docs/stripe-cli) to forward webhooks to your local development environment.
+
+### Stripe Dashboard & Best Practices
+
+## Making your own Payment Adapter
