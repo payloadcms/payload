@@ -278,6 +278,7 @@ export const plTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'obecnie edytuje ten dokument. Jeśli przejmiesz kontrolę, zostaną zablokowani przed dalszą edycją i mogą również utracić niezapisane zmiany.',
     custom: 'Niestandardowy',
+    customViews: 'Niestandardowe Widoki',
     dark: 'Ciemny',
     dashboard: 'Panel',
     delete: 'Usuń',

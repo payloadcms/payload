@@ -57,6 +57,11 @@ export const DefaultNavClient: React.FC<{
                 id = `nav-global-${slug}`
               }
 
+              if (type === EntityType.customView) {
+                href = formatAdminURL({ adminRoute, path: slug })
+                id = `nav-custom-view-${slug}`
+              }
+
               const isActive =
                 pathname.startsWith(href) && ['/', undefined].includes(pathname[href.length])
 

@@ -40,7 +40,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
 
   const {
     admin: {
-      components: { afterNavLinks, beforeNavLinks, logout },
+      components: { afterNavLinks, beforeNavLinks, logout, views },
     },
     collections,
     globals,
@@ -66,11 +66,27 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
               entity: global,
             }) satisfies EntityToGroup,
         ),
+      ...Object.values(views || {})
+        .filter(
+          ({ path }) =>
+            // Include when visibleEntities.customViews is missing or includes the path
+            !visibleEntities.customViews || visibleEntities.customViews.includes(path),
+        )
+        .map(
+          (customView) =>
+            ({
+              type: EntityType.customView,
+              entity: {
+                slug: customView.path,
+                admin: customView.admin,
+                labels: customView.labels,
+              },
+            }) satisfies EntityToGroup,
+        ),
     ],
     permissions,
     i18n,
   )
-
   const navPreferences = await getNavPrefs(req)
 
   const LogoutComponent = RenderServerComponent({

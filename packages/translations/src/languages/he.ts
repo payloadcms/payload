@@ -269,6 +269,7 @@ export const heTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'עורך כעת את המסמך הזה. אם תשתלט, הם ייחסמו מהמשך העריכה וייתכן שגם יאבדו שינויים שלא נשמרו.',
     custom: 'מותאם אישית',
+    customViews: 'תצוגות מותאמות אישית',
     dark: 'כהה',
     dashboard: 'לוח מחוונים',
     delete: 'מחיקה',

@@ -284,6 +284,7 @@ export const esTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'está editando este documento. Si tomas el control, se le impedirá continuar editando y podría perder los cambios no guardados.',
     custom: 'Personalizado',
+    customViews: 'Vistas Personalizadas',
     dark: 'Oscuro',
     dashboard: 'Panel de Control',
     delete: 'Eliminar',

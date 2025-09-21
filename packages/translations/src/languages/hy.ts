@@ -280,6 +280,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'ներկայումս խմբագրում է այս փաստաթուղթը։ Եթե Դուք ստանձնեք վերահսկողությունը, նա չի կարողանա շարունակել խմբագրումը և կարող է կորցնել չպահպանված փոփոխությունները։',
     custom: 'Հատուկ',
+    customViews: 'Հատուկ Տեսքեր',
     dark: 'Մուգ',
     dashboard: 'Վահանակ',
     delete: 'Ջնջել',

@@ -288,6 +288,7 @@ export const deTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'bearbeitet gerade dieses Dokument. Wenn du übernimmst, wird die Bearbeitung blockiert und nicht gespeicherte Änderungen können verloren gehen.',
     custom: 'Benutzerdefiniert',
+    customViews: 'Benutzerdefinierte Ansichten',
     dark: 'Dunkel',
     dashboard: 'Übersicht',
     delete: 'Löschen',

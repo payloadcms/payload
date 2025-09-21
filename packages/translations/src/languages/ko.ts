@@ -276,6 +276,7 @@ export const koTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       '현재 이 문서를 편집 중입니다. 당신이 인수하면, 편집을 계속할 수 없게 되고, 저장되지 않은 변경 사항이 손실될 수 있습니다.',
     custom: '사용자 정의',
+    customViews: '사용자 정의 뷰',
     dark: '다크',
     dashboard: '대시보드',
     delete: '삭제',

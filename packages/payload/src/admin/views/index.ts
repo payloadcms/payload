@@ -2,15 +2,20 @@ import type { ClientTranslationsObject } from '@payloadcms/translations'
 
 import type { SanitizedPermissions } from '../../auth/index.js'
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
-import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
+import type {
+  CollectionAdminOptions,
+  SanitizedCollectionConfig,
+} from '../../collections/config/types.js'
 import type { ClientConfig } from '../../config/client.js'
 import type {
   CustomComponent,
+  LabelFunction,
   Locale,
   MetaConfig,
   PayloadComponent,
   SanitizedConfig,
   ServerProps,
+  StaticLabel,
 } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
@@ -19,9 +24,17 @@ import type { Data, StaticDescription } from '../types.js'
 import type { DocumentSubViewTypes } from './document.js'
 
 export type AdminViewConfig = {
+  admin?: {
+    group?: CollectionAdminOptions['group']
+    hidden?: CollectionAdminOptions['hidden']
+  }
   Component: PayloadComponent
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
+  labels?: {
+    plural?: LabelFunction | StaticLabel
+    singular?: LabelFunction | StaticLabel
+  }
   meta?: MetaConfig
   /**
    * Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands. Must begin with a forward slash (`/`).
@@ -29,6 +42,12 @@ export type AdminViewConfig = {
   path?: `/${string}`
   sensitive?: boolean
   strict?: boolean
+}
+
+export type SanitizedCustomViewConfig = {
+  admin: AdminViewConfig['admin']
+  labels: AdminViewConfig['labels']
+  slug: AdminViewConfig['path']
 }
 
 export type AdminViewClientProps = {
@@ -68,6 +87,7 @@ export type AdminViewComponent = PayloadComponent<AdminViewServerProps>
 
 export type VisibleEntities = {
   collections: SanitizedCollectionConfig['slug'][]
+  customViews: SanitizedCustomViewConfig['slug'][]
   globals: SanitizedGlobalConfig['slug'][]
 }
 

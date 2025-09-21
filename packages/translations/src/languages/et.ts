@@ -276,6 +276,7 @@ export const etTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'muudab praegu seda dokumenti. Kui võtate üle, blokeeritakse neil muutmise jätkamine ja nad võivad kaotada salvestamata muudatused.',
     custom: 'Kohandatud',
+    customViews: 'Kohandatud Vaated',
     dark: 'Tume',
     dashboard: 'Töölaud',
     delete: 'Kustuta',

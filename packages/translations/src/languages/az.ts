@@ -281,6 +281,7 @@ export const azTranslations: DefaultTranslationsObject = {
     currentlyEditing:
       'hazırda bu sənədi redaktə edir. Siz öhdəliyi götürsəniz, redaktəni davam etdirməkdən bloklanacaqlar və qeydə alınmamış dəyişiklikləri itirə bilərlər.',
     custom: 'Xüsusi',
+    customViews: 'Fərdi Görünüşlər',
     dark: 'Tünd',
     dashboard: 'Panel',
     delete: 'Sil',

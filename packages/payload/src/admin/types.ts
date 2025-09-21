@@ -666,6 +666,7 @@ export type {
   AdminViewServerProps,
   AdminViewServerPropsOnly,
   InitPageResult,
+  SanitizedCustomViewConfig,
   ServerPropsFromView,
   ViewDescriptionClientProps,
   ViewDescriptionServerProps,
