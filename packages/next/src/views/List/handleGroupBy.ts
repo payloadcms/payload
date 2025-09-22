@@ -18,7 +18,6 @@ import { flattenAllFields } from 'payload'
 import { createFilterValue } from './createFilterValue.js'
 import { createSerializableValue } from './createSerializableValue.js'
 import { extractRelationshipDisplayValue } from './extractRelationshipDisplayValue.js'
-import { getRelationshipKey } from './getRelationshipKey.js'
 
 export const handleGroupBy = async ({
   clientCollectionConfig,
@@ -121,6 +120,24 @@ export const handleGroupBy = async ({
 
     processedValues = flattenedValues
   }
+
+  // For relationship fields, ensure we always have a null value to represent "No Value" documents
+  // if (groupByField?.type === 'relationship') {
+  //   const hasNullValue = processedValues.some((value) => value[groupByFieldPath] === null)
+  //   if (!hasNullValue) {
+  //     const nullValue = { [groupByFieldPath]: null }
+
+  //     // Insert null value in correct sorted position following natural null sorting behavior
+  //     const isDescending = query?.groupBy?.startsWith('-')
+  //     if (isDescending) {
+  //       // For descending sort, null should be last
+  //       processedValues.push(nullValue)
+  //     } else {
+  //       // For ascending sort, null should be first
+  //       processedValues.unshift(nullValue)
+  //     }
+  //   }
+  // }
 
   const data = {
     ...distinct,
