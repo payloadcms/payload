@@ -15,7 +15,7 @@ export function ModularDashboard(props: DashboardViewServerProps) {
   return (
     <div>
       <h1>Modular Dashboard</h1>
-      {/* <ModularDashboardClient dashboardConfig={dashboardConfig} /> */}
+      <ModularDashboardClient dashboardConfig={dashboardConfig} />
       <p>after dashboard</p>
     </div>
   )
