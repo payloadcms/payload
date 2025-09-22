@@ -90,7 +90,7 @@ export const afterTenantDelete =
           collection: slug,
           where: {
             [tenantFieldName]: {
-              in: [id],
+              equals: id,
             },
           },
         }),
@@ -104,7 +104,7 @@ export const afterTenantDelete =
         limit: 0,
         where: {
           [`${usersTenantsArrayFieldName}.${usersTenantsArrayTenantFieldName}`]: {
-            in: [id],
+            equals: id,
           },
         },
       })) as PaginatedDocs<UserWithTenantsField>

@@ -76,7 +76,7 @@ export async function getGlobalViewRedirect({
         },
         where: {
           [tenantFieldName]: {
-            in: [tenant],
+            equals: tenant,
           },
         },
       })

@@ -1,4 +1,4 @@
-import type { RelationshipFieldValidation, SingleRelationshipField } from 'payload'
+import type { RelationshipFieldSingleValidation, SingleRelationshipField } from 'payload'
 
 import type { RootTenantFieldConfigOverrides } from '../../types.js'
 
@@ -8,7 +8,7 @@ import { getTenantFromCookie } from '../../utilities/getTenantFromCookie.js'
 import { getUserTenantIDs } from '../../utilities/getUserTenantIDs.js'
 
 const fieldValidation =
-  (validateFunction?: RelationshipFieldValidation): RelationshipFieldValidation =>
+  (validateFunction?: RelationshipFieldSingleValidation): RelationshipFieldSingleValidation =>
   (value, options) => {
     if (validateFunction) {
       const result = validateFunction(value, options)
@@ -17,14 +17,8 @@ const fieldValidation =
       }
     }
 
-    if (options.hasMany) {
-      if (!value || (Array.isArray(value) && value.length === 0)) {
-        return options.req.t('validation:required')
-      }
-    } else {
-      if (!value) {
-        return options.req.t('validation:required')
-      }
+    if (!value) {
+      return options.req.t('validation:required')
     }
 
     return true
@@ -48,7 +42,7 @@ export const tenantField = ({
   tenantsCollectionSlug = defaults.tenantCollectionSlug,
   unique,
 }: Args): SingleRelationshipField => {
-  const { hasMany, validate, ...overrides } = _overrides || {}
+  const { validate, ...overrides } = _overrides || {}
   return {
     ...(overrides || {}),
     name,
@@ -95,7 +89,7 @@ export const tenantField = ({
             user: req.user,
             where: {
               id: {
-                in: [tenantFromCookie],
+                equals: tenantFromCookie,
               },
             },
           })
@@ -120,20 +114,12 @@ export const tenantField = ({
 
         return true
       }),
+    hasMany: false,
     index: true,
     relationTo: tenantsCollectionSlug,
     unique,
-    ...(hasMany
-      ? {
-          hasMany: true,
-          // TODO: V4 - replace validation with required: true
-          validate: fieldValidation(validate as RelationshipFieldValidation),
-        }
-      : {
-          hasMany: false,
-          // TODO: V4 - replace validation with required: true
-          validate: fieldValidation(validate as RelationshipFieldValidation),
-        }),
+    // TODO: V4 - replace validation with required: true
+    validate: fieldValidation(validate as RelationshipFieldSingleValidation),
     // @ts-expect-error translations are not typed for this plugin
     label: overrides.label || (({ t }) => t('plugin-multi-tenant:field-assignedTenant-label')),
   }
