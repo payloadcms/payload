@@ -130,7 +130,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
         },
         {
           $group: {
-            _id: { path: `$${fieldPath}`, preserveNullAndEmptyArrays: true },
+            _id: `$${fieldPath}`,
           },
         },
         { $count: 'count' },
