@@ -139,22 +139,28 @@ const Component: React.FC<ElementProps> = (props) => {
     [editor, nodeKey],
   )
 
+  const aspectRatio =
+    thumbnailSRC && data?.width && data?.height
+      ? data.width > data.height
+        ? 'landscape'
+        : 'portrait'
+      : 'landscape'
+
   return (
-    <div className={baseClass} contentEditable={false} ref={uploadRef}>
+    <div className={`${baseClass} ${baseClass}--${aspectRatio}`} ref={uploadRef}>
       <div className={`${baseClass}__card`}>
-        <div className={`${baseClass}__topRow`}>
-          <div className={`${baseClass}__thumbnail`}>
-            <Thumbnail
-              collectionSlug={relationTo}
-              fileSrc={isImage(data?.mimeType) ? thumbnailSRC : null}
-            />
-          </div>
-          <div className={`${baseClass}__topRowRightPanel`}>
-            <div className={`${baseClass}__collectionLabel`}>
-              {getTranslation(relatedCollection.labels.singular, i18n)}
-            </div>
-            {editor.isEditable() && (
-              <div className={`${baseClass}__actions`}>
+        <div className={`${baseClass}__media`}>
+          <Thumbnail
+            collectionSlug={relationTo}
+            fileSrc={isImage(data?.mimeType) ? thumbnailSRC : null}
+            height={data?.height}
+            size="none"
+            width={data?.width}
+          />
+
+          {editor.isEditable() && (
+            <div className={`${baseClass}__overlay`}>
+              <div className={`${baseClass}__actions`} role="toolbar">
                 {hasExtraFields ? (
                   <Button
                     buttonStyle="icon-label"
@@ -162,10 +168,9 @@ const Component: React.FC<ElementProps> = (props) => {
                     disabled={readOnly}
                     el="button"
                     icon="edit"
-                    onClick={() => {
-                      toggleDrawer()
-                    }}
+                    onClick={toggleDrawer}
                     round
+                    size="medium"
                     tooltip={t('fields:editRelationship')}
                   />
                 ) : null}
@@ -182,8 +187,10 @@ const Component: React.FC<ElementProps> = (props) => {
                     })
                   }}
                   round
+                  size="medium"
                   tooltip={t('fields:swapUpload')}
                 />
+
                 <Button
                   buttonStyle="icon-label"
                   className={`${baseClass}__removeButton`}
@@ -194,18 +201,26 @@ const Component: React.FC<ElementProps> = (props) => {
                     removeUpload()
                   }}
                   round
+                  size="medium"
                   tooltip={t('fields:removeUpload')}
                 />
               </div>
-            )}
+            </div>
+          )}
+        </div>
+
+        <div className={`${baseClass}__metaOverlay`}>
+          <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
+            <strong className={`${baseClass}__filename`}>
+              {data?.filename || t('general:untitled')}
+            </strong>
+          </DocumentDrawerToggler>
+          <div className={`${baseClass}__collectionLabel`}>
+            {getTranslation(relatedCollection.labels.singular, i18n)}
           </div>
         </div>
-        <div className={`${baseClass}__bottomRow`}>
-          <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
-            <strong>{data?.filename}</strong>
-          </DocumentDrawerToggler>
-        </div>
       </div>
+
       {value ? <DocumentDrawer onSave={updateUpload} /> : null}
       {hasExtraFields ? (
         <FieldsDrawer
