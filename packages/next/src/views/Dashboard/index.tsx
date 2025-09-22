@@ -1,5 +1,5 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
-import type { AdminViewServerProps, DashboardConfig } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -9,6 +9,7 @@ import React, { Fragment } from 'react'
 import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './Default/index.js'
 
 import { DefaultDashboard } from './Default/index.js'
+import { ModularDashboard } from './Modular/index.js'
 
 export async function Dashboard({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {
@@ -106,7 +107,7 @@ export async function Dashboard({ initPageResult, params, searchParams }: AdminV
           locale,
         } satisfies DashboardViewClientProps,
         Component: config.admin?.dashboard
-          ? renderDashboardComponent(config.admin?.dashboard)
+          ? ModularDashboard
           : config.admin?.components?.views?.dashboard?.Component,
         Fallback: DefaultDashboard,
         importMap: payload.importMap,
@@ -126,21 +127,3 @@ export async function Dashboard({ initPageResult, params, searchParams }: AdminV
     </Fragment>
   )
 }
-
-function renderDashboardComponent(dashboardConfig: DashboardConfig) {
-  return [
-    {
-      path: './components/Count.js',
-      serverProps: {
-        dashboardConfig,
-      },
-    },
-  ]
-}
-
-// {
-//   clientProps?: object | TComponentClientProps
-//   exportName?: string
-//   path: string
-//   serverProps?: object | TComponentServerProps
-// }

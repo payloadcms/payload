@@ -1,0 +1,14 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .grid-layout {
+    border: 1px solid red;
+  }
+
+  .widget {
+    background-color: darkgray;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  }
+}
