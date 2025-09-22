@@ -34,6 +34,12 @@ export type FieldState = {
    * See `mergeServerFormState` for more details.
    */
   addedByServer?: boolean
+  /**
+   * If the field is a `blocks` field, this will contain the slugs of blocks that are allowed, based on the result of `field.filterOptions`.
+   * If this is undefined, all blocks are allowed.
+   * If this is an empty array, no blocks are allowed.
+   */
+  blocksFilterOptions?: string[]
   customComponents?: {
     /**
      * This is used by UI fields, as they can have arbitrary components defined if used

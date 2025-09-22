@@ -505,6 +505,8 @@ export const etTranslations: DefaultTranslationsObject = {
     enterNumber: 'Palun sisesta kehtiv number.',
     fieldHasNo: 'Sellel väljal pole {{label}}',
     greaterThanMax: '{{value}} on suurem kui lubatud maksimaalne {{label}} {{max}}.',
+    invalidBlock: 'Plokk "{{block}}" pole lubatud.',
+    invalidBlocks: 'See väli sisaldab plokke, mis pole enam lubatud: {{blocks}}.',
     invalidInput: 'Sellel väljal on vigane sisend.',
     invalidSelection: 'Sellel väljal on vigane valik.',
     invalidSelections: 'Sellel väljal on järgmised vigased valikud:',

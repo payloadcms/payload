@@ -514,6 +514,8 @@ export const enTranslations = {
     enterNumber: 'Please enter a valid number.',
     fieldHasNo: 'This field has no {{label}}',
     greaterThanMax: '{{value}} is greater than the max allowed {{label}} of {{max}}.',
+    invalidBlock: 'The block "{{block}}" is not allowed.',
+    invalidBlocks: 'This field contains blocks that are no longer allowed: {{blocks}}.',
     invalidInput: 'This field has an invalid input.',
     invalidSelection: 'This field has an invalid selection.',
     invalidSelections: 'This field has the following invalid selections:',
