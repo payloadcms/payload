@@ -3827,6 +3827,313 @@ describe('database', () => {
     })
   })
 
+  describe('relationship $append', () => {
+    it('should allow appending relationships using $append with single value', async () => {
+      // First create some category documents
+      const cat1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const cat2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+
+      // Create a post with initial relationship
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          categories: [cat1.id],
+        },
+      })
+
+      expect(post.categories).toHaveLength(1)
+      expect(post.categories[0].id || post.categories[0]).toBe(cat1.id)
+
+      // Append another relationship using $append
+      const result = await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          categories: {
+            $append: cat2.id,
+          },
+        },
+      })
+
+      expect(result.categories).toHaveLength(2)
+      // Handle both populated and non-populated relationships
+      const resultIds = result.categories.map((cat) => cat.id || cat)
+      expect(resultIds).toContain(cat1.id)
+      expect(resultIds).toContain(cat2.id)
+    })
+
+    it('should allow appending relationships using $append with array', async () => {
+      // Create category documents
+      const cat1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const cat2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+      const cat3 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 3' },
+      })
+
+      // Create post with initial relationship
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          categories: [cat1.id],
+        },
+      })
+
+      // Append multiple relationships using $append
+      const result = await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          categories: {
+            $append: [cat2.id, cat3.id],
+          },
+        },
+      })
+
+      expect(result.categories).toHaveLength(3)
+      // Handle both populated and non-populated relationships
+      const resultIds = result.categories.map((cat) => cat.id || cat)
+      expect(resultIds).toContain(cat1.id)
+      expect(resultIds).toContain(cat2.id)
+      expect(resultIds).toContain(cat3.id)
+    })
+
+    it('should prevent duplicates when using $append', async () => {
+      // Create category documents
+      const cat1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const cat2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+
+      // Create post with initial relationships
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          categories: [cat1.id, cat2.id],
+        },
+      })
+
+      // Try to append existing relationship - should not create duplicates
+      const result = await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          categories: {
+            $append: [cat1.id, cat2.id], // Appending existing items
+          },
+        },
+      })
+
+      expect(result.categories).toHaveLength(2) // Should still be 2, no duplicates
+      // Handle both populated and non-populated relationships
+      const resultIds = result.categories.map((cat) => cat.id || cat)
+      expect(resultIds).toContain(cat1.id)
+      expect(resultIds).toContain(cat2.id)
+    })
+
+    it('should work with updateMany for bulk append operations', async () => {
+      // Create category documents
+      const cat1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const cat2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+
+      // Create multiple posts with initial relationships
+      const post1 = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post 1',
+          categories: [cat1.id],
+        },
+      })
+      const post2 = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post 2',
+          categories: [cat1.id],
+        },
+      })
+
+      // Append cat2 to all posts using updateMany
+      const result = await payload.db.updateMany({
+        collection: 'posts',
+        where: {
+          id: { in: [post1.id, post2.id] },
+        },
+        data: {
+          categories: {
+            $append: cat2.id,
+          },
+        },
+      })
+
+      expect(result).toHaveLength(2)
+      result.forEach((post) => {
+        expect(post.categories).toHaveLength(2)
+        const categoryIds = post.categories.map((cat) => cat.id || cat)
+        expect(categoryIds).toContain(cat1.id)
+        expect(categoryIds).toContain(cat2.id)
+      })
+    })
+  })
+
+  describe('relationship $remove', () => {
+    it('should allow removing relationships using $remove with single value', async () => {
+      // Create category documents
+      const cat1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const cat2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+
+      // Create post with relationships
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          categories: [cat1.id, cat2.id],
+        },
+      })
+
+      expect(post.categories).toHaveLength(2)
+
+      // Remove one relationship using $remove
+      const result = await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          categories: {
+            $remove: cat1.id,
+          },
+        },
+      })
+
+      expect(result.categories).toHaveLength(1)
+      expect(result.categories[0].id || result.categories[0]).toBe(cat2.id)
+    })
+
+    it('should allow removing relationships using $remove with array', async () => {
+      // Create category documents
+      const cat1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const cat2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+      const cat3 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 3' },
+      })
+
+      // Create post with relationships
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          categories: [cat1.id, cat2.id, cat3.id],
+        },
+      })
+
+      expect(post.categories).toHaveLength(3)
+
+      // Remove multiple relationships using $remove
+      const result = await payload.db.updateOne({
+        collection: 'posts',
+        id: post.id,
+        data: {
+          categories: {
+            $remove: [cat1.id, cat3.id],
+          },
+        },
+      })
+
+      expect(result.categories).toHaveLength(1)
+      expect(result.categories[0].id || result.categories[0]).toBe(cat2.id)
+    })
+
+    it('should work with updateMany for bulk remove operations', async () => {
+      // Create category documents
+      const cat1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 1' },
+      })
+      const cat2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 2' },
+      })
+      const cat3 = await payload.create({
+        collection: 'categories',
+        data: { title: 'Category 3' },
+      })
+
+      // Create multiple posts with relationships
+      const post1 = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post 1',
+          categories: [cat1.id, cat2.id, cat3.id],
+        },
+      })
+      const post2 = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post 2',
+          categories: [cat1.id, cat2.id, cat3.id],
+        },
+      })
+
+      // Remove cat1 and cat3 from all posts using updateMany
+      const result = await payload.db.updateMany({
+        collection: 'posts',
+        where: {
+          id: { in: [post1.id, post2.id] },
+        },
+        data: {
+          categories: {
+            $remove: [cat1.id, cat3.id],
+          },
+        },
+      })
+
+      expect(result).toHaveLength(2)
+      result.forEach((post) => {
+        expect(post.categories).toHaveLength(1)
+        const categoryIds = post.categories.map((cat) => cat.id || cat)
+        expect(categoryIds).toContain(cat2.id)
+        expect(categoryIds).not.toContain(cat1.id)
+        expect(categoryIds).not.toContain(cat3.id)
+      })
+    })
+  })
+
   it('should support x3 nesting blocks', async () => {
     const res = await payload.create({
       collection: 'posts',

@@ -45,6 +45,13 @@ export const shouldUseOptimizedUpsertRow = ({
       return false
     }
 
+    // Handle relationship $append and $remove operations
+    if ((field.type === 'relationship' || field.type === 'upload') && field.hasMany) {
+      if (typeof value === 'object' && ('$append' in value || '$remove' in value)) {
+        return false // Use full upsertRow for relationship operations
+      }
+    }
+
     if (
       (field.type === 'group' || field.type === 'tab') &&
       value &&

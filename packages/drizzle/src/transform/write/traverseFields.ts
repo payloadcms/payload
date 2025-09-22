@@ -4,7 +4,13 @@ import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
-import type { NumberToDelete, RelationshipToDelete, RowToInsert, TextToDelete } from './types.js'
+import type {
+  NumberToDelete,
+  RelationshipToAppend,
+  RelationshipToDelete,
+  RowToInsert,
+  TextToDelete,
+} from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
 import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
@@ -63,6 +69,7 @@ type Args = {
   parentTableName: string
   path: string
   relationships: Record<string, unknown>[]
+  relationshipsToAppend: RelationshipToAppend[]
   relationshipsToDelete: RelationshipToDelete[]
   row: Record<string, unknown>
   selects: {
@@ -99,6 +106,7 @@ export const traverseFields = ({
   parentTableName,
   path,
   relationships,
+  relationshipsToAppend,
   relationshipsToDelete,
   row,
   selects,
@@ -320,6 +328,7 @@ export const traverseFields = ({
               parentTableName,
               path: `${path || ''}${field.name}.`,
               relationships,
+              relationshipsToAppend: [],
               relationshipsToDelete,
               row,
               selects,
@@ -353,6 +362,7 @@ export const traverseFields = ({
             parentTableName,
             path: `${path || ''}${field.name}.`,
             relationships,
+            relationshipsToAppend: [],
             relationshipsToDelete,
             row,
             selects,
@@ -368,6 +378,74 @@ export const traverseFields = ({
 
     if (field.type === 'relationship' || field.type === 'upload') {
       const relationshipPath = `${path || ''}${field.name}`
+
+      // Handle $append operation for relationship fields
+      if (
+        fieldData &&
+        typeof fieldData === 'object' &&
+        '$append' in fieldData &&
+        'hasMany' in field &&
+        field.hasMany
+      ) {
+        const itemsToAppend = Array.isArray(fieldData.$append)
+          ? fieldData.$append
+          : [fieldData.$append]
+
+        itemsToAppend.forEach((item) => {
+          const relationshipToAppend: RelationshipToAppend = {
+            locale: isLocalized ? withinArrayOrBlockLocale : undefined,
+            path: relationshipPath,
+            value: item,
+          }
+
+          // Handle polymorphic relationships
+          if (
+            Array.isArray(field.relationTo) &&
+            item &&
+            typeof item === 'object' &&
+            'relationTo' in item
+          ) {
+            relationshipToAppend.relationTo = item.relationTo
+            relationshipToAppend.value = item.value
+          } else if (typeof field.relationTo === 'string') {
+            // Simple relationship
+            relationshipToAppend.relationTo = field.relationTo
+            relationshipToAppend.value = item
+          }
+
+          relationshipsToAppend.push(relationshipToAppend)
+        })
+        return
+      }
+
+      // Handle $remove operation for relationship fields
+      if (
+        fieldData &&
+        typeof fieldData === 'object' &&
+        '$remove' in fieldData &&
+        'hasMany' in field &&
+        field.hasMany
+      ) {
+        const itemsToRemove = Array.isArray(fieldData.$remove)
+          ? fieldData.$remove
+          : [fieldData.$remove]
+
+        itemsToRemove.forEach((item) => {
+          const relationshipToDelete: RelationshipToDelete = {
+            itemToRemove: item,
+            locale: isLocalized ? withinArrayOrBlockLocale : undefined,
+            path: relationshipPath,
+          }
+
+          // Store relationTo for simple relationships
+          if (typeof field.relationTo === 'string') {
+            relationshipToDelete.relationTo = field.relationTo
+          }
+
+          relationshipsToDelete.push(relationshipToDelete)
+        })
+        return
+      }
 
       if (
         isLocalized &&

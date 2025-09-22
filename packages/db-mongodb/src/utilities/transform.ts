@@ -208,7 +208,9 @@ const sanitizeDate = ({
 }
 
 type Args = {
+  $addToSet?: Record<string, { $each: any[] } | any>
   $inc?: Record<string, number>
+  $pull?: Record<string, { $in: any[] } | any>
   $push?: Record<string, { $each: any[] } | any>
   /** instance of the adapter */
   adapter: MongooseAdapter
@@ -398,7 +400,9 @@ const stripFields = ({
 }
 
 export const transform = ({
+  $addToSet,
   $inc,
+  $pull,
   $push,
   adapter,
   data,
@@ -415,7 +419,9 @@ export const transform = ({
   if (Array.isArray(data)) {
     for (const item of data) {
       transform({
+        $addToSet,
         $inc,
+        $pull,
         $push,
         adapter,
         data: item,
@@ -513,6 +519,152 @@ export const transform = ({
           } else if (typeof push === 'object') {
             $push[`${parentPath}${field.name}`] = push
           }
+        }
+
+        delete ref[field.name]
+      }
+    }
+
+    // Handle $append operation for relationship fields (converts to $addToSet)
+    if (
+      $addToSet &&
+      (field.type === 'relationship' || field.type === 'upload') &&
+      'hasMany' in field &&
+      field.hasMany &&
+      operation === 'write' &&
+      field.name in ref &&
+      ref[field.name]
+    ) {
+      const value = ref[field.name]
+      if (value && typeof value === 'object' && '$append' in value) {
+        // Transform $append to MongoDB $addToSet with $each
+        const itemsToAppend = Array.isArray(value.$append) ? value.$append : [value.$append]
+
+        // Process relationship values through normal sanitization
+        const processedItems = itemsToAppend.map((item) => {
+          // Handle polymorphic relationships
+          if (Array.isArray(field.relationTo) && isValidRelationObject(item)) {
+            const relatedCollection = config.collections?.find(
+              ({ slug }) => slug === item.relationTo,
+            )
+            if (relatedCollection) {
+              return {
+                relationTo: item.relationTo,
+                value: convertRelationshipValue({
+                  operation,
+                  relatedCollection,
+                  validateRelationships,
+                  value: item.value,
+                }),
+              }
+            }
+            return item
+          }
+
+          // Handle simple relationships
+          if (typeof field.relationTo === 'string') {
+            const relatedCollection = config.collections?.find(
+              ({ slug }) => slug === field.relationTo,
+            )
+            if (relatedCollection) {
+              return convertRelationshipValue({
+                operation,
+                relatedCollection,
+                validateRelationships,
+                value: item,
+              })
+            }
+          }
+
+          return item
+        })
+
+        if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
+          if (
+            typeof value.$append === 'object' &&
+            value.$append !== null &&
+            !Array.isArray(value.$append)
+          ) {
+            Object.entries(value.$append).forEach(([localeKey, localeData]) => {
+              const localeItems = Array.isArray(localeData) ? localeData : [localeData]
+              $addToSet[`${parentPath}${field.name}.${localeKey}`] = { $each: localeItems }
+            })
+          }
+        } else {
+          $addToSet[`${parentPath}${field.name}`] = { $each: processedItems }
+        }
+
+        delete ref[field.name]
+      }
+    }
+
+    // Handle $remove operation for relationship fields (converts to $pull)
+    if (
+      $pull &&
+      (field.type === 'relationship' || field.type === 'upload') &&
+      'hasMany' in field &&
+      field.hasMany &&
+      operation === 'write' &&
+      field.name in ref &&
+      ref[field.name]
+    ) {
+      const value = ref[field.name]
+      if (value && typeof value === 'object' && '$remove' in value) {
+        // Transform $remove to MongoDB $pull with $in
+        const itemsToRemove = Array.isArray(value.$remove) ? value.$remove : [value.$remove]
+
+        // Process relationship values through normal sanitization
+        const processedItems = itemsToRemove.map((item) => {
+          // Handle polymorphic relationships
+          if (Array.isArray(field.relationTo) && isValidRelationObject(item)) {
+            const relatedCollection = config.collections?.find(
+              ({ slug }) => slug === item.relationTo,
+            )
+            if (relatedCollection) {
+              return {
+                relationTo: item.relationTo,
+                value: convertRelationshipValue({
+                  operation,
+                  relatedCollection,
+                  validateRelationships,
+                  value: item.value,
+                }),
+              }
+            }
+            return item
+          }
+
+          // Handle simple relationships
+          if (typeof field.relationTo === 'string') {
+            const relatedCollection = config.collections?.find(
+              ({ slug }) => slug === field.relationTo,
+            )
+            if (relatedCollection) {
+              return convertRelationshipValue({
+                operation,
+                relatedCollection,
+                validateRelationships,
+                value: item,
+              })
+            }
+          }
+
+          return item
+        })
+
+        if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
+          if (
+            typeof value.$remove === 'object' &&
+            value.$remove !== null &&
+            !Array.isArray(value.$remove)
+          ) {
+            Object.entries(value.$remove).forEach(([localeKey, localeData]) => {
+              const localeItems = Array.isArray(localeData) ? localeData : [localeData]
+              $pull[`${parentPath}${field.name}.${localeKey}`] = { $in: localeItems }
+            })
+          }
+        } else {
+          $pull[`${parentPath}${field.name}`] = { $in: processedItems }
         }
 
         delete ref[field.name]

@@ -314,6 +314,11 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
 
     if (operation === 'update') {
+      // Filter out specific item deletions (those with itemToRemove) from general path deletions
+      const generalRelationshipDeletes = rowToInsert.relationshipsToDelete.filter(
+        (rel) => !('itemToRemove' in rel),
+      )
+
       await deleteExistingRowsByPath({
         adapter,
         db,
@@ -321,7 +326,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
-        rows: [...relationsToInsert, ...rowToInsert.relationshipsToDelete],
+        rows: [...relationsToInsert, ...generalRelationshipDeletes],
         tableName: relationshipsTableName,
       })
     }
@@ -332,6 +337,155 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         tableName: relationshipsTableName,
         values: relationsToInsert,
       })
+    }
+
+    // //////////////////////////////////
+    // HANDLE RELATIONSHIP $append OPERATIONS
+    // //////////////////////////////////
+
+    if (rowToInsert.relationshipsToAppend.length > 0) {
+      // Use timestamp-based ordering for better performance (avoids separate MAX query)
+      const baseOrder = Date.now() * 1000
+
+      // Prepare all relationships for batch insert
+      const relationshipsToInsert = rowToInsert.relationshipsToAppend.map((rel, index) => {
+        const row: Record<string, any> = {
+          order: baseOrder + index,
+          parent_id: id || insertedRow.id,
+          path: rel.path,
+        }
+
+        // Only add locale if this relationship table has a locale column
+        const relationshipTable = adapter.rawTables[relationshipsTableName]
+        if (rel.locale && relationshipTable && relationshipTable.columns.locale) {
+          row.locale = rel.locale
+        }
+
+        if (rel.relationTo) {
+          row[`${rel.relationTo}_id`] = rel.value
+        }
+
+        return row
+      })
+
+      if (relationshipsToInsert.length > 0) {
+        // Since relationship tables don't have unique constraints by default,
+        // we need to check for existing relationships to prevent duplicates
+        const existingCheckConditions: string[] = []
+
+        relationshipsToInsert.forEach((row) => {
+          let condition = `("parent_id" = ${row.parent_id} AND "path" = '${row.path}'`
+
+          // Add locale condition if present
+          if (row.locale) {
+            condition += ` AND "locale" = '${row.locale}'`
+          } else if (adapter.rawTables[relationshipsTableName]?.columns.locale) {
+            condition += ` AND "locale" IS NULL`
+          }
+
+          // Add relationship value condition
+          Object.keys(row).forEach((key) => {
+            if (key.endsWith('_id')) {
+              condition += ` AND "${key}" = ${row[key]}`
+            }
+          })
+
+          condition += ')'
+          existingCheckConditions.push(condition)
+        })
+
+        // Single query to check all potential duplicates
+        const existingQuery = `SELECT * FROM "${relationshipsTableName}" WHERE ${existingCheckConditions.join(' OR ')}`
+        const existingRels = await adapter.execute({ db, raw: existingQuery })
+        const existingRows = Array.isArray(existingRels) ? existingRels : existingRels.rows || []
+
+        // Filter out relationships that already exist
+        const relationshipsToActuallyInsert = relationshipsToInsert.filter((newRow) => {
+          return !existingRows.some((existingRow) => {
+            // Check if this relationship already exists
+            let matches =
+              existingRow.parent_id === newRow.parent_id && existingRow.path === newRow.path
+
+            if (newRow.locale !== undefined) {
+              matches = matches && existingRow.locale === newRow.locale
+            }
+
+            // Check relationship value matches
+            for (const key of Object.keys(newRow)) {
+              if (key.endsWith('_id')) {
+                matches = matches && existingRow[key] === newRow[key]
+              }
+            }
+
+            return matches
+          })
+        })
+
+        // Insert only non-duplicate relationships
+        if (relationshipsToActuallyInsert.length > 0) {
+          const columns = Object.keys(relationshipsToActuallyInsert[0])
+            .map((col) => `"${col}"`)
+            .join(', ')
+          const values = relationshipsToActuallyInsert
+            .map(
+              (row) =>
+                `(${Object.values(row)
+                  .map((val) =>
+                    val === null
+                      ? 'NULL'
+                      : typeof val === 'string'
+                        ? `'${val.replace(/'/g, "''")}'`
+                        : val,
+                  )
+                  .join(', ')})`,
+            )
+            .join(', ')
+
+          await adapter.execute({
+            db,
+            raw: `INSERT INTO "${relationshipsTableName}" (${columns}) VALUES ${values}`,
+          })
+        }
+      }
+    }
+
+    // //////////////////////////////////
+    // HANDLE RELATIONSHIP $remove OPERATIONS
+    // //////////////////////////////////
+
+    if (rowToInsert.relationshipsToDelete.some((rel) => 'itemToRemove' in rel)) {
+      for (const relToDelete of rowToInsert.relationshipsToDelete) {
+        if ('itemToRemove' in relToDelete && relToDelete.itemToRemove) {
+          const item = relToDelete.itemToRemove
+
+          let deleteQuery = `DELETE FROM "${relationshipsTableName}" WHERE "parent_id" = ${id || insertedRow.id} AND "path" = '${relToDelete.path}'`
+
+          // Only add locale condition if this relationship table has a locale column
+          // (i.e., if the relationship field is localized)
+          const relationshipTable = adapter.rawTables[relationshipsTableName]
+          if (relationshipTable && relationshipTable.columns.locale) {
+            if (relToDelete.locale) {
+              deleteQuery += ` AND "locale" = '${relToDelete.locale}'`
+            } else {
+              deleteQuery += ` AND "locale" IS NULL`
+            }
+          }
+
+          // Handle polymorphic vs simple relationships
+          if (typeof item === 'object' && 'relationTo' in item) {
+            // Polymorphic relationship
+            deleteQuery += ` AND "${item.relationTo}_id" = ${item.value}`
+          } else if (relToDelete.relationTo) {
+            // Simple relationship
+            deleteQuery += ` AND "${relToDelete.relationTo}_id" = ${item}`
+          }
+
+          await adapter.execute({
+            db,
+            raw: deleteQuery,
+          })
+        }
+      }
     }
 
     // //////////////////////////////////
