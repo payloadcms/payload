@@ -16,7 +16,7 @@ type Props = {
   /**
    * Enables inventory tracking for variants. Defaults to true.
    */
-  inventory?: InventoryConfig
+  inventory?: boolean | InventoryConfig
   /**
    * Slug of the products collection, defaults to 'products'.
    */

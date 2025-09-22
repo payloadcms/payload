@@ -69,8 +69,6 @@ export const createAddressesCollection: (props: Props) => CollectionConfig = (pr
 
   const baseConfig: CollectionConfig = {
     slug: 'addresses',
-    timestamps: true,
-
     access: {
       create: authenticatedOnly,
       delete: adminOrCustomerOwner,
@@ -96,6 +94,7 @@ export const createAddressesCollection: (props: Props) => CollectionConfig = (pr
         // @ts-expect-error - translations are not typed in plugins yet
         t('plugin-ecommerce:address'),
     },
+    timestamps: true,
   }
 
   return { ...baseConfig }

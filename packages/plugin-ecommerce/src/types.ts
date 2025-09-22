@@ -123,6 +123,27 @@ type ConfirmOrder = (args: {
  * You can insert this type directly or return it from a function constructing it.
  */
 export type PaymentAdapter = {
+  /**
+   * The function that is called via the `/api/payments/{provider_name}/confirm-order` endpoint to confirm an order after a payment has been made.
+   *
+   * You should handle the order confirmation logic here.
+   *
+   * @example
+   *
+   * ```ts
+   * const confirmOrder: ConfirmOrder = async ({ data: { customerEmail }, ordersSlug, req, transactionsSlug }) => {
+      // Confirm the payment with Stripe or another payment provider here
+      // Create an order in the orders collection here
+      // Update the record of the payment intent in the transactions collection here
+      return {
+        message: 'Order confirmed successfully',
+        orderID: 'order_123',
+        transactionID: 'txn_123',
+        // Include any additional data required for the payment method here
+      }
+    }
+   * ```
+   */
   confirmOrder: ConfirmOrder
   /**
    * An array of endpoints to be bootstrapped to Payload's API in order to support the payment method. All API paths are relative to `/api/payments/{provider_name}`.
@@ -163,7 +184,22 @@ export type PaymentAdapter = {
    */
   group: GroupField
   /**
-   * Hooks used to manage the lifecycle of the payment method. These are run on transactions at various stages when they update.
+   * The function that is called via the `/api/payments/{provider_name}/initiate` endpoint to initiate a payment for an order.
+   *
+   * You should handle the payment initiation logic here.
+   *
+   * @example
+   *
+   * ```ts
+   * const initiatePayment: InitiatePayment = async ({ data: { cart, currency, customerEmail, billingAddress, shippingAddress }, req, transactionsSlug }) => {
+      // Create a payment intent with Stripe or another payment provider here
+      // Create a record of the payment intent in the transactions collection here
+      return {
+        message: 'Payment initiated successfully',
+        // Include any additional data required for the payment method here
+      }
+    }
+   * ```
    */
   initiatePayment: InitiatePayment
   /**
@@ -211,7 +247,7 @@ export type Currency = {
 /**
  * Commonly used arguments for a Payment Adapter function, it's use is entirely optional.
  */
-export type BasePaymentAdapterArgs = {
+export type PaymentAdapterArgs = {
   /**
    * Overrides the default fields of the collection. Affects the payment fields on collections such as transactions.
    */
@@ -226,7 +262,7 @@ export type BasePaymentAdapterArgs = {
 /**
  * Commonly used arguments for a Payment Adapter function, it's use is entirely optional.
  */
-export type BasePaymentAdapterClientArgs = {
+export type PaymentAdapterClientArgs = {
   /**
    * The visually readable label for the payment method.
    * @example 'Bank Transfer'

@@ -2,10 +2,10 @@ import type { Field, GroupField, PayloadRequest } from 'payload'
 import type { Stripe } from 'stripe'
 
 import type {
-  BasePaymentAdapterArgs,
-  BasePaymentAdapterClientArgs,
   PaymentAdapter,
+  PaymentAdapterArgs,
   PaymentAdapterClient,
+  PaymentAdapterClientArgs,
 } from '../../../types.js'
 
 import { confirmOrder } from './confirmOrder.js'
@@ -44,7 +44,7 @@ export type StripeAdapterArgs = {
   secretKey: string
   webhooks?: StripeWebhookHandlers
   webhookSecret?: string
-} & BasePaymentAdapterArgs
+} & PaymentAdapterArgs
 
 export const stripeAdapter: (props: StripeAdapterArgs) => PaymentAdapter = (props) => {
   const { apiVersion, appInfo, groupOverrides, secretKey, webhooks, webhookSecret } = props
@@ -115,7 +115,7 @@ export type StripeAdapterClientArgs = {
   apiVersion?: Stripe.StripeConfig['apiVersion']
   appInfo?: Stripe.StripeConfig['appInfo']
   publishableKey: string
-} & BasePaymentAdapterClientArgs
+} & PaymentAdapterClientArgs
 
 export const stripeAdapterClient: (props: StripeAdapterClientArgs) => PaymentAdapterClient = (
   props,
