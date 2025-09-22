@@ -9,11 +9,11 @@ import type { BlockRowToInsert } from '../transform/write/types.js'
 import type { Args } from './types.js'
 
 type RelationshipRow = {
-  [key: string]: number | string | undefined // For relationship ID columns like movies_id, categories_id, etc.
+  [key: string]: number | string | undefined // For relationship ID columns like categoriesID, moviesID, etc.
   id?: number | string
   locale?: string
   order: number
-  parent_id: number | string
+  parent: number | string // Drizzle table uses 'parent' key
   path: string
 }
 
@@ -370,9 +370,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       // Prepare all relationships for batch insert
       const relationshipsToInsert = rowToInsert.relationshipsToAppend.map((rel, index) => {
         const parentId = id || insertedRow.id
-        const row: RelationshipRow = {
+        const row: Record<string, unknown> = {
           order: baseOrder + index,
-          parent_id: parentId as number | string,
+          parent: parentId as number | string, // Use 'parent' key for Drizzle table
           path: rel.path,
         }
 
@@ -383,7 +383,8 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         }
 
         if (rel.relationTo) {
-          row[`${rel.relationTo}_id`] = rel.value
+          // Use camelCase key for Drizzle table (e.g., categoriesID not categories_id)
+          row[`${rel.relationTo}ID`] = rel.value
         }
 
         return row
@@ -394,48 +395,60 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         const relationshipTable = adapter.tables[relationshipsTableName]
 
         if (relationshipTable) {
+          // Build conditions only if we have relationships to check
+          if (relationshipsToInsert.length === 0) {
+            return // No relationships to insert
+          }
+
           const conditions = relationshipsToInsert.map((row: RelationshipRow) => {
             const parts = [
-              eq(relationshipTable.parent_id, row.parent_id),
+              eq(relationshipTable.parent, row.parent),
               eq(relationshipTable.path, row.path),
             ]
 
             // Add locale condition
-            if (row.locale !== undefined) {
+            if (row.locale !== undefined && relationshipTable.locale) {
               parts.push(eq(relationshipTable.locale, row.locale))
-            } else if (adapter.rawTables[relationshipsTableName]?.columns.locale) {
+            } else if (relationshipTable.locale) {
               parts.push(isNull(relationshipTable.locale))
             }
 
-            // Add all *_id matches using schema fields
+            // Add all relationship ID matches using schema fields
             for (const [key, value] of Object.entries(row)) {
-              if (key.endsWith('_id') && value != null && key in relationshipTable) {
-                parts.push(eq(relationshipTable[key], value))
+              if (key.endsWith('ID') && value != null) {
+                const column = relationshipTable[key]
+                if (column && typeof column === 'object') {
+                  parts.push(eq(column, value))
+                }
               }
             }
 
             return and(...parts)
           })
 
-          const existingRels = await (db as any)
-            .select()
-            .from(relationshipTable)
-            .where(or(...conditions))
+          // Only proceed if we have valid conditions
+          let existingRels: Record<string, unknown>[] = []
+          if (conditions.length > 0) {
+            existingRels = await (db as any)
+              .select()
+              .from(relationshipTable)
+              .where(or(...conditions))
+          }
 
           // Filter out relationships that already exist
           const relationshipsToActuallyInsert = relationshipsToInsert.filter((newRow) => {
             return !existingRels.some((existingRow: Record<string, unknown>) => {
               // Check if this relationship already exists
-              let matches =
-                existingRow.parent_id === newRow.parent_id && existingRow.path === newRow.path
+              let matches = existingRow.parent === newRow.parent && existingRow.path === newRow.path
 
               if (newRow.locale !== undefined) {
                 matches = matches && existingRow.locale === newRow.locale
               }
 
-              // Check relationship value matches
+              // Check relationship value matches - convert to camelCase for comparison
               for (const key of Object.keys(newRow)) {
-                if (key.endsWith('_id')) {
+                if (key.endsWith('ID')) {
+                  // Now using camelCase keys
                   matches = matches && existingRow[key] === newRow[key]
                 }
               }
@@ -470,7 +483,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
             const parentId = (id || insertedRow.id) as number | string
 
             const conditions = [
-              eq(relationshipTable.parent_id, parentId),
+              eq(relationshipTable.parent, parentId),
               eq(relationshipTable.path, relToDelete.path),
             ]
 
@@ -485,14 +498,16 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
             // Handle polymorphic vs simple relationships
             if (typeof item === 'object' && 'relationTo' in item) {
-              // Polymorphic relationship
-              if (relationshipTable[`${item.relationTo}_id`]) {
-                conditions.push(eq(relationshipTable[`${item.relationTo}_id`], item.value))
+              // Polymorphic relationship - convert to camelCase key
+              const camelKey = `${item.relationTo}ID`
+              if (relationshipTable[camelKey]) {
+                conditions.push(eq(relationshipTable[camelKey], item.value))
               }
             } else if (relToDelete.relationTo) {
-              // Simple relationship
-              if (relationshipTable[`${relToDelete.relationTo}_id`]) {
-                conditions.push(eq(relationshipTable[`${relToDelete.relationTo}_id`], item))
+              // Simple relationship - convert to camelCase key
+              const camelKey = `${relToDelete.relationTo}ID`
+              if (relationshipTable[camelKey]) {
+                conditions.push(eq(relationshipTable[camelKey], item))
               }
             }
 
