@@ -7,7 +7,6 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { pagesSlug, postsSlug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -33,35 +32,15 @@ describe('ecommerce', () => {
   })
 
   beforeEach(async () => {
-    await payload.delete({
-      collection: 'search',
-      depth: 0,
-      where: {
-        id: {
-          exists: true,
-        },
-      },
-    })
-    await Promise.all([
-      payload.delete({
-        collection: postsSlug,
-        depth: 0,
-        where: {
-          id: {
-            exists: true,
-          },
-        },
-      }),
-      payload.delete({
-        collection: pagesSlug,
-        depth: 0,
-        where: {
-          id: {
-            exists: true,
-          },
-        },
-      }),
-    ])
+    // await payload.delete({
+    //   collection: 'search',
+    //   depth: 0,
+    //   where: {
+    //     id: {
+    //       exists: true,
+    //     },
+    //   },
+    // })
   })
 
   afterAll(async () => {
