@@ -198,6 +198,16 @@ export interface Post {
   title: string;
   category?: (string | null) | Category;
   categories?: (string | Category)[] | null;
+  categoryPoly?: {
+    relationTo: 'categories';
+    value: string | Category;
+  } | null;
+  categoryPolyMany?:
+    | {
+        relationTo: 'categories';
+        value: string | Category;
+      }[]
+    | null;
   categoryCustomID?: (number | null) | CategoriesCustomId;
   localized?: string | null;
   text?: string | null;
@@ -827,6 +837,8 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
   categories?: T;
+  categoryPoly?: T;
+  categoryPolyMany?: T;
   categoryCustomID?: T;
   localized?: T;
   text?: T;

@@ -567,6 +567,7 @@ export const taTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'மாற்றப்பட்டவை மட்டும்',
     moreVersions: 'மேலும் பதிப்புகள்...',
     noFurtherVersionsFound: 'மேலும் பதிப்புகள் எதுவும் கிடைக்கவில்லை',
+    noLabelGroup: 'பெயரிடப்படாத குழு',
     noRowsFound: '{{label}} எதுவும் கிடைக்கவில்லை',
     noRowsSelected: '{{label}} எதுவும் தேர்வு செய்யப்படவில்லை',
     preview: 'முன் நோக்கு',
