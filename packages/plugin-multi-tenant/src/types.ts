@@ -208,6 +208,7 @@ export type RootTenantFieldConfigOverrides = Partial<
   Omit<
     SingleRelationshipField,
     | '_sanitized'
+    | 'hasMany'
     | 'hidden'
     | 'index'
     | 'localized'
