@@ -365,7 +365,8 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     if (rowToInsert.relationshipsToAppend.length > 0) {
       // Use timestamp-based ordering for better performance (avoids separate MAX query)
-      const baseOrder = Date.now()
+      // Use seconds to avoid Postgres integer overflow (max 2^31-1 = 2,147,483,647)
+      const baseOrder = Math.floor(Date.now() / 1000)
 
       // Prepare all relationships for batch insert
       const relationshipsToInsert = rowToInsert.relationshipsToAppend.map((rel, index) => {
