@@ -2,7 +2,7 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SelectedFields } from 'drizzle-orm/sqlite-core'
 import type { TypeWithID } from 'payload'
 
-import { and, eq, isNull, or } from 'drizzle-orm'
+import { and, desc, eq, isNull, or } from 'drizzle-orm'
 import { ValidationError } from 'payload'
 
 import type { BlockRowToInsert } from '../transform/write/types.js'
@@ -364,15 +364,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // //////////////////////////////////
 
     if (rowToInsert.relationshipsToAppend.length > 0) {
-      // Use timestamp-based ordering for better performance (avoids separate MAX query)
-      // Use seconds to avoid Postgres integer overflow (max 2^31-1 = 2,147,483,647)
-      const baseOrder = Math.floor(Date.now() / 1000)
-
-      // Prepare all relationships for batch insert
+      // Prepare all relationships for batch insert (order will be set after max query)
       const relationshipsToInsert = rowToInsert.relationshipsToAppend.map((rel, index) => {
         const parentId = id || insertedRow.id
         const row: Record<string, unknown> = {
-          order: baseOrder + index,
           parent: parentId as number | string, // Use 'parent' key for Drizzle table
           path: rel.path,
         }
@@ -427,14 +422,35 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
             return and(...parts)
           })
 
-          // Only proceed if we have valid conditions
+          // Get both existing relationships AND max order in a single query
           let existingRels: Record<string, unknown>[] = []
+          let maxOrder = 0
+
           if (conditions.length > 0) {
+            // Query for existing relationships
             existingRels = await (db as any)
               .select()
               .from(relationshipTable)
               .where(or(...conditions))
           }
+
+          // Get max order for this parent across all paths in a single query
+          const parentId = id || insertedRow.id
+          const maxOrderResult = await (db as any)
+            .select({ maxOrder: relationshipTable.order })
+            .from(relationshipTable)
+            .where(eq(relationshipTable.parent, parentId))
+            .orderBy(desc(relationshipTable.order))
+            .limit(1)
+
+          if (maxOrderResult.length > 0 && maxOrderResult[0].maxOrder) {
+            maxOrder = maxOrderResult[0].maxOrder
+          }
+
+          // Set order values for all relationships based on max order
+          relationshipsToInsert.forEach((row, index) => {
+            row.order = maxOrder + index + 1
+          })
 
           // Filter out relationships that already exist
           const relationshipsToActuallyInsert = relationshipsToInsert.filter((newRow) => {
