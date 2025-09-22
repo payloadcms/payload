@@ -164,29 +164,6 @@ describe('Live Preview', () => {
     await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
   })
 
-  test('collection — regenerates iframe src on save and retains live preview connection', async () => {
-    await goToCollectionLivePreview(page, pagesURLUtil)
-
-    await toggleLivePreview(page, {
-      targetState: 'on',
-    })
-
-    // expect the iframe to load using the initial slug
-    const iframe = page.locator('iframe.live-preview-iframe')
-    await expect(iframe).toBeVisible()
-
-    await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
-
-    // change the slug and save
-    const slugField = page.locator('#field-slug')
-    await slugField.fill('slug-1-updated')
-    await saveDocAndAssert(page)
-
-    // expect the iframe to have a new `src` attribute that reflects the updated slug
-    await expect(iframe).toBeVisible()
-    await expect(iframe).toHaveAttribute('src', /\/live-preview\/slug-1-updated/)
-  })
-
   test('collection csr — iframe reflects form state on change', async () => {
     await goToCollectionLivePreview(page, pagesURLUtil)
 
@@ -272,10 +249,10 @@ describe('Live Preview', () => {
     const initialTitle = 'This is a test'
 
     const testDoc = await payload.create({
-      collection: 'pages',
+      collection: pagesSlug,
       data: {
         title: initialTitle,
-        slug: 'this-is-a-test',
+        slug: 'csr-test',
         hero: {
           type: 'none',
         },
@@ -296,7 +273,7 @@ describe('Live Preview', () => {
     await expect.poll(async () => iframe.getAttribute('src')).toMatch(pattern1)
 
     const slugField = page.locator('#field-slug')
-    const newSlug = 'this-is-a-test-2'
+    const newSlug = `${testDoc.slug}-2`
     await slugField.fill(newSlug)
     await saveDocAndAssert(page)
 
@@ -415,7 +392,7 @@ describe('Live Preview', () => {
       collection: ssrAutosavePagesSlug,
       data: {
         title: initialTitle,
-        slug: 'this-is-a-test',
+        slug: 'ssr-test',
         hero: {
           type: 'none',
         },
@@ -432,8 +409,8 @@ describe('Live Preview', () => {
     const iframe = page.locator('iframe.live-preview-iframe')
 
     const slugField = page.locator('#field-slug')
-    const newSlug = 'this-is-a-test-2'
-    await slugField.pressSequentially(newSlug)
+    const newSlug = `${testDoc.slug}-2`
+    await slugField.fill(newSlug)
     await waitForAutoSaveToRunAndComplete(page)
 
     // expect the iframe to have a new src that reflects the updated slug

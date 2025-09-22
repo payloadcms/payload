@@ -1,5 +1,5 @@
 'use client'
-import type { LivePreviewConfig, RootLivePreviewConfig } from 'payload'
+import type { LivePreviewConfig } from 'payload'
 import type { Dispatch } from 'react'
 import type React from 'react'
 

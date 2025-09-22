@@ -52,17 +52,6 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
 
   const [url, setURL] = useState<string>('')
 
-  /**
-   * Formats an absolute URL if needed before setting into the `url` state
-   */
-  const setLivePreviewURL = useCallback((urlFromArgs: typeof url) => {
-    setURL(formatAbsoluteURL(urlFromArgs))
-  }, [])
-
-  useEffect(() => {
-    setLivePreviewURL(urlFromProps)
-  }, [urlFromProps, setLivePreviewURL])
-
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
     url,
@@ -94,6 +83,31 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
 
   const [breakpoint, setBreakpoint] =
     React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
+
+  /**
+   * A "middleware" callback fn that does some additional work before `setURL`.
+   * This is what we provide through context, bc it:
+   *  - ensures the URL is absolute
+   *  - resets `appIsReady` to `false` while the new URL is loading
+   */
+  const setLivePreviewURL = useCallback<LivePreviewContextType['setURL']>(
+    (_incomingURL) => {
+      const incomingURL = formatAbsoluteURL(_incomingURL)
+
+      if (incomingURL !== url) {
+        setAppIsReady(false)
+        setURL(incomingURL)
+      }
+    },
+    [url],
+  )
+
+  /**
+   * `url` needs to be relative to the window, which cannot be done on initial render.
+   */
+  useEffect(() => {
+    setURL(formatAbsoluteURL(urlFromProps))
+  }, [urlFromProps])
 
   // The toolbar needs to freely drag and drop around the page
   const handleDragEnd = (ev) => {

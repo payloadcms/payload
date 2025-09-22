@@ -278,12 +278,6 @@ export function DefaultEditView({
 
       const updatedAt = document?.updatedAt || new Date().toISOString()
 
-      reportUpdate({
-        id,
-        entitySlug,
-        updatedAt,
-      })
-
       // If we're editing the doc of the logged-in user,
       // Refresh the cookie to get new permissions
       if (user && collectionSlug === userSlug && id === user.id) {
@@ -356,9 +350,15 @@ export function DefaultEditView({
           setDocumentIsLocked(false)
         }
 
-        if (livePreviewURL) {
+        if (isLivePreviewEnabled) {
           setLivePreviewURL(livePreviewURL)
         }
+
+        reportUpdate({
+          id,
+          entitySlug,
+          updatedAt,
+        })
 
         abortOnSaveRef.current = null
 
