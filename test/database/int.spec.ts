@@ -3165,6 +3165,58 @@ describe('database', () => {
       })
       expect(docs).toHaveLength(1)
     })
+
+    it('should automatically add hasMany: true to a virtual field that references a hasMany relationship', () => {
+      const field = payload.collections['virtual-relations'].config.fields.find(
+        // eslint-disable-next-line jest/no-conditional-in-test
+        (each) => 'name' in each && each.name === 'postsTitles',
+      )!
+
+      // eslint-disable-next-line jest/no-conditional-in-test
+      expect('hasMany' in field && field.hasMany).toBe(true)
+    })
+
+    it('should the value populate with hasMany: true relationship field', async () => {
+      await payload.delete({ collection: 'categories', where: {} })
+      await payload.delete({ collection: 'posts', where: {} })
+      await payload.delete({ collection: 'virtual-relations', where: {} })
+
+      const post1 = await payload.create({ collection: 'posts', data: { title: 'post 1' } })
+      const post2 = await payload.create({ collection: 'posts', data: { title: 'post 2' } })
+
+      const res = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { posts: [post1.id, post2.id] },
+      })
+      expect(res.postsTitles).toEqual(['post 1', 'post 2'])
+    })
+
+    it('should the value populate with nested hasMany: true relationship field', async () => {
+      await payload.delete({ collection: 'categories', where: {} })
+      await payload.delete({ collection: 'posts', where: {} })
+      await payload.delete({ collection: 'virtual-relations', where: {} })
+
+      const category_1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'category 1' },
+      })
+      const category_2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'category 2' },
+      })
+      const post1 = await payload.create({
+        collection: 'posts',
+        data: { title: 'post 1', categories: [category_1.id, category_2.id] },
+      })
+
+      const res = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post1.id },
+      })
+      expect(res.postCategoriesTitles).toEqual(['category 1', 'category 2'])
+    })
   })
 
   it('should convert numbers to text', async () => {
