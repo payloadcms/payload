@@ -108,6 +108,7 @@
     "http-status": "2.1.0",
     "path-to-regexp": "6.3.0",
     "qs-esm": "7.0.2",
+    "react-grid-layout": "1.5.2",
     "sass": "1.77.4",
     "uuid": "10.0.0"
   },
@@ -122,6 +123,7 @@
     "@types/busboy": "1.5.4",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
+    "@types/react-grid-layout": "1.3.5",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.1.0-rc.2",
     "esbuild": "0.25.5",
