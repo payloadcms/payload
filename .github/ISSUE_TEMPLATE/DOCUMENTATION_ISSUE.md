@@ -1,7 +1,7 @@
 ---
 name: Documentation Issue
 about: Suggest fix to Payload documentation
-labels: 'area: docs'
+labels: 'documentation'
 assignees: 'zubricks'
 ---
 
