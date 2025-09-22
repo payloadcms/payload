@@ -12,14 +12,18 @@
     margin-block: base(0.5);
 
     &--landscape {
-      img {
+      img,
+      svg {
         max-width: 450px;
         width: auto;
+        min-width: 450px;
       }
     }
     &--portrait {
-      img {
+      img,
+      svg {
         max-height: 450px;
+        min-height: 450px;
         width: auto;
       }
     }
@@ -28,8 +32,11 @@
       border: 1px solid var(--theme-elevation-150);
     }
 
-    .btn {
+    button {
       margin: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     &__card {
