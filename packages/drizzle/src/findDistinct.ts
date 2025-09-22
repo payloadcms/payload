@@ -74,7 +74,11 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
       const relationTo = Object.keys(json).find((each) => Boolean(json[each]))
       const value = json[relationTo]
 
-      row._selected = { relationTo, value }
+      if (!value) {
+        row._selected = null
+      } else {
+        row._selected = { relationTo, value }
+      }
     }
   }
 

@@ -1063,13 +1063,21 @@ describe('database', () => {
       },
     })
 
+    const post_6 = await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'post_6',
+        categoryPolyMany: null,
+      },
+    })
+
     const result = await payload.findDistinct({
       depth: 0,
       collection: 'posts',
       field: 'categoryPolyMany',
     })
 
-    expect(result.values).toHaveLength(3)
+    expect(result.values).toHaveLength(4)
     expect(
       result.values.some(
         (v) =>
@@ -1091,6 +1099,7 @@ describe('database', () => {
           v.categoryPolyMany.value === category_3.id,
       ),
     ).toBe(true)
+    expect(result.values.some((v) => v.categoryPolyMany === null)).toBe(true)
   })
 
   describe('Compound Indexes', () => {

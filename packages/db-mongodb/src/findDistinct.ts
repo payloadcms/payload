@@ -56,7 +56,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
   const sortProperty = Object.keys(sort)[0]! // assert because buildSortParam always returns at least 1 key.
   const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
 
-  let $unwind: string = ''
+  let $unwind: any = ''
   let $group: any = null
   if (
     isHasManyValue &&
@@ -64,7 +64,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     sortAggregation[0] &&
     '$lookup' in sortAggregation[0]
   ) {
-    $unwind = `$${sortAggregation[0].$lookup.as}`
+    $unwind = { path: `$${sortAggregation[0].$lookup.as}`, preserveNullAndEmptyArrays: true }
     $group = {
       _id: {
         _field: `$${sortAggregation[0].$lookup.as}._id`,
@@ -72,7 +72,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
       },
     }
   } else if (isHasManyValue) {
-    $unwind = `$${args.field}`
+    $unwind = { path: `$${args.field}`, preserveNullAndEmptyArrays: true }
   }
 
   if (!$group) {
@@ -130,7 +130,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
         },
         {
           $group: {
-            _id: `$${fieldPath}`,
+            _id: { path: `$${fieldPath}`, preserveNullAndEmptyArrays: true },
           },
         },
         { $count: 'count' },
