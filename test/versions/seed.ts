@@ -1,3 +1,4 @@
+import { buildEditorState } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { getFileByPath, type Payload } from 'payload'
 import { fileURLToPath } from 'url'
@@ -14,7 +15,6 @@ import {
   media2CollectionSlug,
   mediaCollectionSlug,
 } from './slugs.js'
-import { textToLexicalJSON } from './textToLexicalJSON.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -273,7 +273,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         textID: doc1ID,
         updated: false,
       }) as any,
-      richtextWithCustomDiff: textToLexicalJSON({ text: 'richtextWithCustomDiff' }),
+      richtextWithCustomDiff: buildEditorState({ text: 'richtextWithCustomDiff' }),
       select: 'option1',
       text: 'text',
       textArea: 'textArea',
@@ -442,7 +442,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         textID: doc2ID,
         updated: true,
       }) as any,
-      richtextWithCustomDiff: textToLexicalJSON({ text: 'richtextWithCustomDiff2' }),
+      richtextWithCustomDiff: buildEditorState({ text: 'richtextWithCustomDiff2' }),
       select: 'option2',
       text: 'text2',
       textArea: 'textArea2',
