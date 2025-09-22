@@ -26,7 +26,7 @@ export default buildConfigWithDefaults({
     dashboard: {
       defaults: [
         {
-          Component: '/components/Revenue.js#Revenue',
+          Component: './components/Count.js#default',
           slug: 'revenue',
         },
       ],

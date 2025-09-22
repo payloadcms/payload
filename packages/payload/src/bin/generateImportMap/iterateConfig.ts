@@ -79,6 +79,19 @@ export function iterateConfig({
     }
   }
 
+  // Handle dashboard components
+  if (config.admin?.dashboard?.defaults?.length) {
+    for (const dashboardWidget of config.admin.dashboard.defaults) {
+      addToImportMap(dashboardWidget.Component)
+    }
+  }
+
+  if (config.admin?.dashboard?.components?.length) {
+    for (const dashboardWidget of config.admin.dashboard.components) {
+      addToImportMap(dashboardWidget.Component)
+    }
+  }
+
   if (config?.admin?.importMap?.generators?.length) {
     for (const generator of config.admin.importMap.generators) {
       generator({
