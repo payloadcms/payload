@@ -738,6 +738,11 @@ export type DashboardWidget = {
   slug: string
 }
 
+export type DashboardConfig = {
+  components?: Array<DashboardWidget>
+  defaults?: Array<DashboardWidget>
+}
+
 /**
  * This is the central configuration
  *
@@ -852,10 +857,7 @@ export type Config = {
     /**
      * Customize the dashboard widgets
      */
-    dashboard?: {
-      components?: Array<DashboardWidget>
-      defaults?: Array<DashboardWidget>
-    }
+    dashboard?: DashboardConfig
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /**

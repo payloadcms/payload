@@ -1,5 +1,5 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
-import type { AdminViewServerProps } from 'payload'
+import type { AdminViewServerProps, DashboardConfig } from 'payload'
 
 import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -105,7 +105,9 @@ export async function Dashboard({ initPageResult, params, searchParams }: AdminV
         clientProps: {
           locale,
         } satisfies DashboardViewClientProps,
-        Component: config.admin?.components?.views?.dashboard?.Component,
+        Component: config.admin?.dashboard
+          ? renderDashboardComponent(config.admin?.dashboard)
+          : config.admin?.components?.views?.dashboard?.Component,
         Fallback: DefaultDashboard,
         importMap: payload.importMap,
         serverProps: {
@@ -124,3 +126,21 @@ export async function Dashboard({ initPageResult, params, searchParams }: AdminV
     </Fragment>
   )
 }
+
+function renderDashboardComponent(dashboardConfig: DashboardConfig) {
+  return [
+    {
+      path: './components/Count.js',
+      serverProps: {
+        dashboardConfig,
+      },
+    },
+  ]
+}
+
+// {
+//   clientProps?: object | TComponentClientProps
+//   exportName?: string
+//   path: string
+//   serverProps?: object | TComponentServerProps
+// }
