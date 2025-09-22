@@ -88,6 +88,9 @@ export const i18n: Partial<GenericLanguages> = {
   sv: {
     label: 'Horisontell linje',
   },
+  ta: {
+    label: 'குறுக்கு வரி',
+  },
   th: {
     label: 'เส้นขอบแนวนอน',
   },
