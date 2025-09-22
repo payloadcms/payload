@@ -2,7 +2,7 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SelectedFields } from 'drizzle-orm/sqlite-core'
 import type { TypeWithID } from 'payload'
 
-import { eq } from 'drizzle-orm'
+import { and, eq, isNull, or } from 'drizzle-orm'
 import { ValidationError } from 'payload'
 
 import type { BlockRowToInsert } from '../transform/write/types.js'
@@ -16,12 +16,6 @@ type RelationshipRow = {
   parent_id: number | string
   path: string
 }
-
-type DatabaseQueryResult =
-  | {
-      rows?: RelationshipRow[]
-    }
-  | RelationshipRow[]
 
 import { buildFindManyArgs } from '../find/buildFindManyArgs.js'
 import { transform } from '../transform/read/index.js'
@@ -201,21 +195,32 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     if (operation === 'update') {
       const target = upsertTarget || adapter.tables[tableName].id
 
-      if (id) {
-        rowToInsert.row.id = id
-        ;[insertedRow] = await adapter.insert({
-          db,
-          onConflictDoUpdate: { set: rowToInsert.row, target },
-          tableName,
-          values: rowToInsert.row,
-        })
+      // Check if we only have relationship operations and no main row data to update
+      // Exclude timestamp-only updates when we only have relationship operations
+      const rowKeys = Object.keys(rowToInsert.row)
+      const hasMainRowData =
+        rowKeys.length > 0 && !rowKeys.every((key) => key === 'updatedAt' || key === 'createdAt')
+
+      if (hasMainRowData) {
+        if (id) {
+          rowToInsert.row.id = id
+          ;[insertedRow] = await adapter.insert({
+            db,
+            onConflictDoUpdate: { set: rowToInsert.row, target },
+            tableName,
+            values: rowToInsert.row,
+          })
+        } else {
+          ;[insertedRow] = await adapter.insert({
+            db,
+            onConflictDoUpdate: { set: rowToInsert.row, target, where },
+            tableName,
+            values: rowToInsert.row,
+          })
+        }
       } else {
-        ;[insertedRow] = await adapter.insert({
-          db,
-          onConflictDoUpdate: { set: rowToInsert.row, target, where },
-          tableName,
-          values: rowToInsert.row,
-        })
+        // No main row data to update, just use the existing ID
+        insertedRow = { id }
       }
     } else {
       if (adapter.allowIDOnCreate && data.id) {
@@ -360,7 +365,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     if (rowToInsert.relationshipsToAppend.length > 0) {
       // Use timestamp-based ordering for better performance (avoids separate MAX query)
-      const baseOrder = Date.now() * 1000
+      const baseOrder = Date.now()
 
       // Prepare all relationships for batch insert
       const relationshipsToInsert = rowToInsert.relationshipsToAppend.map((rel, index) => {
@@ -385,87 +390,68 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       })
 
       if (relationshipsToInsert.length > 0) {
-        // Since relationship tables don't have unique constraints by default,
-        // we need to check for existing relationships to prevent duplicates
-        const existingCheckConditions: string[] = []
+        // Check for potential duplicates
+        const relationshipTable = adapter.tables[relationshipsTableName]
 
-        relationshipsToInsert.forEach((row: RelationshipRow) => {
-          let condition = `("parent_id" = ${row.parent_id} AND "path" = '${row.path}'`
+        if (relationshipTable) {
+          const conditions = relationshipsToInsert.map((row: RelationshipRow) => {
+            const parts = [
+              eq(relationshipTable.parent_id, row.parent_id),
+              eq(relationshipTable.path, row.path),
+            ]
 
-          // Add locale condition if present
-          if (row.locale) {
-            condition += ` AND "locale" = '${row.locale}'`
-          } else if (adapter.rawTables[relationshipsTableName]?.columns.locale) {
-            condition += ` AND "locale" IS NULL`
-          }
-
-          // Add relationship value condition
-          Object.keys(row).forEach((key) => {
-            if (key.endsWith('_id')) {
-              condition += ` AND "${key}" = ${row[key]}`
-            }
-          })
-
-          condition += ')'
-          existingCheckConditions.push(condition)
-        })
-
-        // Single query to check all potential duplicates
-        const existingQuery = `SELECT * FROM "${relationshipsTableName}" WHERE ${existingCheckConditions.join(' OR ')}`
-        const existingRels = (await adapter.execute({
-          db,
-          raw: existingQuery,
-        })) as DatabaseQueryResult
-        const existingRows: RelationshipRow[] = Array.isArray(existingRels)
-          ? existingRels
-          : existingRels.rows || []
-
-        // Filter out relationships that already exist
-        const relationshipsToActuallyInsert = relationshipsToInsert.filter((newRow) => {
-          return !existingRows.some((existingRow) => {
-            // Check if this relationship already exists
-            let matches =
-              existingRow.parent_id === newRow.parent_id && existingRow.path === newRow.path
-
-            if (newRow.locale !== undefined) {
-              matches = matches && existingRow.locale === newRow.locale
+            // Add locale condition
+            if (row.locale !== undefined) {
+              parts.push(eq(relationshipTable.locale, row.locale))
+            } else if (adapter.rawTables[relationshipsTableName]?.columns.locale) {
+              parts.push(isNull(relationshipTable.locale))
             }
 
-            // Check relationship value matches
-            for (const key of Object.keys(newRow)) {
-              if (key.endsWith('_id')) {
-                matches = matches && existingRow[key] === newRow[key]
+            // Add all *_id matches using schema fields
+            for (const [key, value] of Object.entries(row)) {
+              if (key.endsWith('_id') && value != null && key in relationshipTable) {
+                parts.push(eq(relationshipTable[key], value))
               }
             }
 
-            return matches
+            return and(...parts)
           })
-        })
 
-        // Insert only non-duplicate relationships
-        if (relationshipsToActuallyInsert.length > 0) {
-          const columns = Object.keys(relationshipsToActuallyInsert[0])
-            .map((col) => `"${col}"`)
-            .join(', ')
-          const values = relationshipsToActuallyInsert
-            .map(
-              (row) =>
-                `(${Object.values(row)
-                  .map((val) =>
-                    val === null
-                      ? 'NULL'
-                      : typeof val === 'string'
-                        ? `'${val.replace(/'/g, "''")}'`
-                        : val,
-                  )
-                  .join(', ')})`,
-            )
-            .join(', ')
+          const existingRels = await (db as any)
+            .select()
+            .from(relationshipTable)
+            .where(or(...conditions))
 
-          await adapter.execute({
-            db,
-            raw: `INSERT INTO "${relationshipsTableName}" (${columns}) VALUES ${values}`,
+          // Filter out relationships that already exist
+          const relationshipsToActuallyInsert = relationshipsToInsert.filter((newRow) => {
+            return !existingRels.some((existingRow: Record<string, unknown>) => {
+              // Check if this relationship already exists
+              let matches =
+                existingRow.parent_id === newRow.parent_id && existingRow.path === newRow.path
+
+              if (newRow.locale !== undefined) {
+                matches = matches && existingRow.locale === newRow.locale
+              }
+
+              // Check relationship value matches
+              for (const key of Object.keys(newRow)) {
+                if (key.endsWith('_id')) {
+                  matches = matches && existingRow[key] === newRow[key]
+                }
+              }
+
+              return matches
+            })
           })
+
+          // Insert only non-duplicate relationships
+          if (relationshipsToActuallyInsert.length > 0) {
+            await adapter.insert({
+              db,
+              tableName: relationshipsTableName,
+              values: relationshipsToActuallyInsert,
+            })
+          }
         }
       }
     }
@@ -475,37 +461,48 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // //////////////////////////////////
 
     if (rowToInsert.relationshipsToDelete.some((rel) => 'itemToRemove' in rel)) {
-      for (const relToDelete of rowToInsert.relationshipsToDelete) {
-        if ('itemToRemove' in relToDelete && relToDelete.itemToRemove) {
-          const item = relToDelete.itemToRemove
+      const relationshipTable = adapter.tables[relationshipsTableName]
 
-          const parentId = (id || insertedRow.id) as number | string
-          let deleteQuery = `DELETE FROM "${relationshipsTableName}" WHERE "parent_id" = ${parentId} AND "path" = '${relToDelete.path}'`
+      if (relationshipTable) {
+        for (const relToDelete of rowToInsert.relationshipsToDelete) {
+          if ('itemToRemove' in relToDelete && relToDelete.itemToRemove) {
+            const item = relToDelete.itemToRemove
+            const parentId = (id || insertedRow.id) as number | string
 
-          // Only add locale condition if this relationship table has a locale column
-          // (i.e., if the relationship field is localized)
-          const relationshipTable = adapter.rawTables[relationshipsTableName]
-          if (relationshipTable && relationshipTable.columns.locale) {
-            if (relToDelete.locale) {
-              deleteQuery += ` AND "locale" = '${relToDelete.locale}'`
-            } else {
-              deleteQuery += ` AND "locale" IS NULL`
+            const conditions = [
+              eq(relationshipTable.parent_id, parentId),
+              eq(relationshipTable.path, relToDelete.path),
+            ]
+
+            // Add locale condition if this relationship table has a locale column
+            if (adapter.rawTables[relationshipsTableName]?.columns.locale) {
+              if (relToDelete.locale) {
+                conditions.push(eq(relationshipTable.locale, relToDelete.locale))
+              } else {
+                conditions.push(isNull(relationshipTable.locale))
+              }
             }
-          }
 
-          // Handle polymorphic vs simple relationships
-          if (typeof item === 'object' && 'relationTo' in item) {
-            // Polymorphic relationship
-            deleteQuery += ` AND "${item.relationTo}_id" = ${item.value}`
-          } else if (relToDelete.relationTo) {
-            // Simple relationship
-            deleteQuery += ` AND "${relToDelete.relationTo}_id" = ${item}`
-          }
+            // Handle polymorphic vs simple relationships
+            if (typeof item === 'object' && 'relationTo' in item) {
+              // Polymorphic relationship
+              if (relationshipTable[`${item.relationTo}_id`]) {
+                conditions.push(eq(relationshipTable[`${item.relationTo}_id`], item.value))
+              }
+            } else if (relToDelete.relationTo) {
+              // Simple relationship
+              if (relationshipTable[`${relToDelete.relationTo}_id`]) {
+                conditions.push(eq(relationshipTable[`${relToDelete.relationTo}_id`], item))
+              }
+            }
 
-          await adapter.execute({
-            db,
-            raw: deleteQuery,
-          })
+            // Execute DELETE using Drizzle query builder
+            await adapter.deleteWhere({
+              db,
+              tableName: relationshipsTableName,
+              where: and(...conditions),
+            })
+          }
         }
       }
     }
