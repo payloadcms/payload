@@ -8,6 +8,21 @@ import { ValidationError } from 'payload'
 import type { BlockRowToInsert } from '../transform/write/types.js'
 import type { Args } from './types.js'
 
+type RelationshipRow = {
+  [key: string]: number | string | undefined // For relationship ID columns like movies_id, categories_id, etc.
+  id?: number | string
+  locale?: string
+  order: number
+  parent_id: number | string
+  path: string
+}
+
+type DatabaseQueryResult =
+  | {
+      rows?: RelationshipRow[]
+    }
+  | RelationshipRow[]
+
 import { buildFindManyArgs } from '../find/buildFindManyArgs.js'
 import { transform } from '../transform/read/index.js'
 import { transformForWrite } from '../transform/write/index.js'
@@ -349,9 +364,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       // Prepare all relationships for batch insert
       const relationshipsToInsert = rowToInsert.relationshipsToAppend.map((rel, index) => {
-        const row: Record<string, any> = {
+        const parentId = id || insertedRow.id
+        const row: RelationshipRow = {
           order: baseOrder + index,
-          parent_id: id || insertedRow.id,
+          parent_id: parentId as number | string,
           path: rel.path,
         }
 
@@ -373,7 +389,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         // we need to check for existing relationships to prevent duplicates
         const existingCheckConditions: string[] = []
 
-        relationshipsToInsert.forEach((row) => {
+        relationshipsToInsert.forEach((row: RelationshipRow) => {
           let condition = `("parent_id" = ${row.parent_id} AND "path" = '${row.path}'`
 
           // Add locale condition if present
@@ -396,8 +412,13 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
         // Single query to check all potential duplicates
         const existingQuery = `SELECT * FROM "${relationshipsTableName}" WHERE ${existingCheckConditions.join(' OR ')}`
-        const existingRels = await adapter.execute({ db, raw: existingQuery })
-        const existingRows = Array.isArray(existingRels) ? existingRels : existingRels.rows || []
+        const existingRels = (await adapter.execute({
+          db,
+          raw: existingQuery,
+        })) as DatabaseQueryResult
+        const existingRows: RelationshipRow[] = Array.isArray(existingRels)
+          ? existingRels
+          : existingRels.rows || []
 
         // Filter out relationships that already exist
         const relationshipsToActuallyInsert = relationshipsToInsert.filter((newRow) => {
@@ -458,7 +479,8 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         if ('itemToRemove' in relToDelete && relToDelete.itemToRemove) {
           const item = relToDelete.itemToRemove
 
-          let deleteQuery = `DELETE FROM "${relationshipsTableName}" WHERE "parent_id" = ${id || insertedRow.id} AND "path" = '${relToDelete.path}'`
+          const parentId = (id || insertedRow.id) as number | string
+          let deleteQuery = `DELETE FROM "${relationshipsTableName}" WHERE "parent_id" = ${parentId} AND "path" = '${relToDelete.path}'`
 
           // Only add locale condition if this relationship table has a locale column
           // (i.e., if the relationship field is localized)
@@ -651,7 +673,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       }
 
       if (Object.keys(arraysBlocksUUIDMap).length > 0) {
-        tableRows.forEach((row: any) => {
+        tableRows.forEach((row: Record<string, number | string>) => {
           if (row.parent in arraysBlocksUUIDMap) {
             row.parent = arraysBlocksUUIDMap[row.parent]
           }
