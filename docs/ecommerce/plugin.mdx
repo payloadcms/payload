@@ -109,7 +109,7 @@ access: {
 }
 ```
 
-### `authenticatedOnly`
+### authenticatedOnly
 
 Access control to check if the user is authenticated. By default the following is provided:
 
@@ -117,7 +117,7 @@ Access control to check if the user is authenticated. By default the following i
 authenticatedOnly: ({ req: { user } }) => Boolean(user)
 ```
 
-### `publicAccess`
+### publicAccess
 
 Access control to allow public access. By default the following is provided:
 
@@ -125,7 +125,7 @@ Access control to allow public access. By default the following is provided:
 publicAccess: () => true
 ```
 
-### `adminOnly`
+### adminOnly
 
 Access control to check if the user has `admin` permissions.
 
@@ -135,7 +135,7 @@ Example:
 adminOnly: ({ req: { user } }) => Boolean(user?.roles?.includes('admin'))
 ```
 
-### `adminOnlyFieldAccess`
+### adminOnlyFieldAccess
 
 Field level access control to check if the user has `admin` permissions.
 
@@ -146,7 +146,7 @@ adminOnlyFieldAccess: ({ req: { user } }) =>
   Boolean(user?.roles?.includes('admin'))
 ```
 
-### `adminOrCustomerOwner`
+### adminOrCustomerOwner
 
 Access control to check if the user has `admin` permissions or is the owner of the document via the `customer` field.
 
@@ -170,7 +170,7 @@ adminOrCustomerOwner: ({ req: { user } }) => {
 }
 ```
 
-### `adminOrPublishedStatus`
+### adminOrPublishedStatus
 
 Access control to check if the user has `admin` permissions or if the document is published.
 
@@ -189,7 +189,7 @@ adminOrPublishedStatus: ({ req: { user } }) => {
 }
 ```
 
-### `customerOnlyFieldAccess`
+### customerOnlyFieldAccess
 
 Field level access control to check if the user has `customer` permissions.
 
