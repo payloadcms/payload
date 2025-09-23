@@ -700,6 +700,7 @@ async function selectDocumentTenant({
   payload: PayloadTestSDK<Config>
   tenant: string
 }): Promise<void> {
+  await closeNav(page)
   await openAssignTenantModal({ page, payload })
   await selectInput({
     selectLocator: page.locator('.tenantField'),
