@@ -98,28 +98,8 @@ export const handleGroupBy = async ({
     where: whereWithMergedSearch,
   })
 
-  // Process values - flatten hasMany arrays and deduplicate
-  let processedValues = distinct.values || []
-
-  if ('hasMany' in groupByField && groupByField?.hasMany) {
-    const flattenedValues = []
-
-    // For hasMany relationships, flatten arrays so each relationship becomes its own group
-    // Example: document with [Category1, Category2] creates separate groups for Category1 and Category2
-    for (const distinctValue of distinct.values || []) {
-      const relationshipValue = distinctValue[groupByFieldPath]
-
-      if (Array.isArray(relationshipValue) && relationshipValue.length > 0) {
-        relationshipValue.forEach((individualRelationship) => {
-          flattenedValues.push({ ...distinctValue, [groupByFieldPath]: individualRelationship })
-        })
-      } else {
-        flattenedValues.push(distinctValue)
-      }
-    }
-
-    processedValues = flattenedValues
-  }
+  // Use distinct values directly since findDistinct already handles flattening for hasMany fields
+  const processedValues = distinct.values || []
 
   const data = {
     ...distinct,
