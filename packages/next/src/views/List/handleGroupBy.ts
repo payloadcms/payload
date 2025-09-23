@@ -15,9 +15,9 @@ import { renderTable } from '@payloadcms/ui/rsc'
 import { formatDate } from '@payloadcms/ui/shared'
 import { flattenAllFields } from 'payload'
 
-import { createFilterValue } from './createFilterValue.js'
 import { createSerializableValue } from './createSerializableValue.js'
 import { extractRelationshipDisplayValue } from './extractRelationshipDisplayValue.js'
+import { extractValueOrRelationshipID } from './extractValueOrRelationshipID.js'
 
 export const handleGroupBy = async ({
   clientCollectionConfig,
@@ -98,22 +98,19 @@ export const handleGroupBy = async ({
     where: whereWithMergedSearch,
   })
 
-  // Use distinct values directly since findDistinct already handles flattening for hasMany fields
-  const processedValues = distinct.values || []
-
   const data = {
     ...distinct,
-    docs: processedValues?.map(() => ({})) || [],
+    docs: distinct.values?.map(() => ({})) || [],
     values: undefined,
   }
 
   // Process each group
   await Promise.all(
-    processedValues.map(async (distinctValue, i) => {
+    (distinct.values || []).map(async (distinctValue, i) => {
       const relationship = distinctValue[groupByFieldPath]
 
-      // Create filter value for database query
-      const filterValue = createFilterValue(relationship)
+      // Extract value or relationship ID for database query
+      const valueOrRelationshipID = extractValueOrRelationshipID(relationship)
 
       // Get documents for this group
       const groupData = await req.payload.find({
@@ -122,13 +119,13 @@ export const handleGroupBy = async ({
         draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
-        limit: query?.queryByGroup?.[filterValue]?.limit
-          ? Number(query.queryByGroup[filterValue].limit)
+        limit: query?.queryByGroup?.[valueOrRelationshipID]?.limit
+          ? Number(query.queryByGroup[valueOrRelationshipID].limit)
           : undefined,
         locale: req.locale,
         overrideAccess: false,
-        page: query?.queryByGroup?.[filterValue]?.page
-          ? Number(query.queryByGroup[filterValue].page)
+        page: query?.queryByGroup?.[valueOrRelationshipID]?.page
+          ? Number(query.queryByGroup[valueOrRelationshipID].page)
           : undefined,
         req,
         // Note: if we wanted to enable table-by-table sorting, we could use this:
@@ -139,7 +136,7 @@ export const handleGroupBy = async ({
         user,
         where: {
           ...(whereWithMergedSearch || {}),
-          [groupByFieldPath]: { equals: filterValue },
+          [groupByFieldPath]: { equals: valueOrRelationshipID },
         },
       })
 
@@ -155,18 +152,23 @@ export const handleGroupBy = async ({
         heading = extractRelationshipDisplayValue(relationship, clientConfig, relationshipConfig)
       } else if (groupByField?.type === 'date') {
         heading = formatDate({
-          date: String(filterValue),
+          date: String(valueOrRelationshipID),
           i18n: req.i18n,
           pattern: clientConfig.admin.dateFormat,
         })
       } else if (groupByField?.type === 'checkbox') {
-        heading = filterValue === true ? req.i18n.t('general:true') : req.i18n.t('general:false')
+        if (valueOrRelationshipID === true) {
+          heading = req.i18n.t('general:true')
+        }
+        if (valueOrRelationshipID === false) {
+          heading = req.i18n.t('general:false')
+        }
       } else {
-        heading = String(filterValue)
+        heading = String(valueOrRelationshipID)
       }
 
       // Create serializable value for client
-      const serializableValue = createSerializableValue(filterValue)
+      const serializableValue = createSerializableValue(valueOrRelationshipID)
 
       if (groupData.docs && groupData.docs.length > 0) {
         const { columnState: newColumnState, Table: NewTable } = renderTable({

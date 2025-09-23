@@ -1,5 +1,5 @@
-// Helper function to create filter value for database queries
-export const createFilterValue = (relationship: any): any => {
+// Helper function to extract value or relationship ID for database queries
+export const extractValueOrRelationshipID = (relationship: any): any => {
   if (!relationship || typeof relationship !== 'object') {
     return relationship
   }
