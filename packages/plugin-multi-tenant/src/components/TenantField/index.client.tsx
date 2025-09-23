@@ -15,9 +15,9 @@ import React from 'react'
 
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
 import {
-  UpdateTenantFieldModal,
-  updateTenantFieldModalSlug,
-} from '../UpdateTenantFieldModal/index.client.js'
+  AssignTenantFieldModal,
+  assignTenantModalSlug,
+} from '../AssignTenantFieldModal/index.client.js'
 import './index.scss'
 
 const baseClass = 'tenantField'
@@ -34,10 +34,15 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   const { setModified } = useForm()
   const { id: docID } = useDocumentInfo()
   const { openModal } = useModal()
+  const isConfirmingRef = React.useRef<boolean>(false)
   const prevModified = React.useRef(modified)
   const prevValue = React.useRef<typeof value>(value)
   const showField =
     (options.length > 1 && !fieldArgs.field.admin?.hidden && !fieldArgs.field.hidden) || debug
+
+  const onConfirm = React.useCallback(() => {
+    isConfirmingRef.current = true
+  }, [])
 
   const afterModalOpen = React.useCallback(() => {
     prevModified.current = modified
@@ -46,31 +51,33 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
 
   const afterModalClose = React.useCallback(() => {
     let didChange = true
-    // see if the values are actually different
-    if (fieldArgs.field.hasMany) {
-      const prev = (prevValue.current || []) as (number | string)[]
-      const newValue = (value || []) as (number | string)[]
-      if (prev.length !== newValue.length) {
-        didChange = true
-      } else {
-        const allMatch = newValue.every((val) => prev.includes(val))
-        if (allMatch) {
-          didChange = false
+    if (isConfirmingRef.current) {
+      // did the values actually change?
+      if (fieldArgs.field.hasMany) {
+        const prev = (prevValue.current || []) as (number | string)[]
+        const newValue = (value || []) as (number | string)[]
+        if (prev.length !== newValue.length) {
+          didChange = true
+        } else {
+          const allMatch = newValue.every((val) => prev.includes(val))
+          if (allMatch) {
+            didChange = false
+          }
         }
+      } else if (value === prevValue.current) {
+        didChange = false
       }
-    } else if (value === prevValue.current) {
-      didChange = false
+
+      if (didChange) {
+        prevModified.current = true
+        prevValue.current = value
+      }
     }
 
-    if (didChange) {
-      prevModified.current = true
-      prevValue.current = value
-    }
-
-    // reset the form value to what it was before opening the modal
     setValue(prevValue.current, true)
-    // reset modified state to what it was before opening the modal
     setModified(prevModified.current)
+
+    isConfirmingRef.current = false
   }, [setValue, setModified, value, fieldArgs.field.hasMany])
 
   React.useEffect(() => {
@@ -101,22 +108,28 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   }, [unique, options, selectedTenantID, setTenant, value, setEntityType, entityType])
 
   React.useEffect(() => {
-    if ((showError && showField) || (!value && !docID && !selectedTenantID)) {
-      openModal(updateTenantFieldModalSlug)
+    if (unique) {
+      return
     }
-  }, [showError, showField, openModal, value, docID, selectedTenantID])
+    if ((showError && showField) || (!value && !docID && !selectedTenantID)) {
+      openModal(assignTenantModalSlug)
+    }
+  }, [showError, showField, openModal, value, docID, selectedTenantID, unique])
 
   if (showField) {
     if (debug) {
-      /** Always show the field on create (for now) */
-      return <CustomField debug={debug} fieldArgs={fieldArgs} unique={unique} />
+      return <TenantFieldInModal debug={debug} fieldArgs={fieldArgs} unique={unique} />
     }
 
     if (!unique) {
       /** Editing a non-global tenant document */
       return (
-        <UpdateTenantFieldModal afterModalClose={afterModalClose} afterModalOpen={afterModalOpen}>
-          <CustomField
+        <AssignTenantFieldModal
+          afterModalClose={afterModalClose}
+          afterModalOpen={afterModalOpen}
+          onConfirm={onConfirm}
+        >
+          <TenantFieldInModal
             debug={debug}
             fieldArgs={{
               ...fieldArgs,
@@ -126,7 +139,7 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
             }}
             unique={unique}
           />
-        </UpdateTenantFieldModal>
+        </AssignTenantFieldModal>
       )
     }
 
@@ -136,7 +149,7 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   return null
 }
 
-const CustomField: React.FC<{
+const TenantFieldInModal: React.FC<{
   debug?: boolean
   fieldArgs: RelationshipFieldClientProps
   unique?: boolean

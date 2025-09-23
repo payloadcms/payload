@@ -339,13 +339,13 @@ export const multiTenantPlugin =
           collection.disableDuplicate = true
         }
 
-        if (!pluginConfig.debug) {
+        if (!pluginConfig.debug && !isGlobal) {
           collection.admin ??= {}
           collection.admin.components ??= {}
           collection.admin.components.edit ??= {}
           collection.admin.components.edit.editMenuItems ??= []
           collection.admin.components.edit.editMenuItems.push({
-            path: '@payloadcms/plugin-multi-tenant/client#UpdateTenantFieldTrigger',
+            path: '@payloadcms/plugin-multi-tenant/client#AssignTenantFieldTrigger',
           })
         }
 
