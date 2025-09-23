@@ -7,7 +7,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 import ArrayFields from './collections/Array/index.js'
-import BlockFields from './collections/Blocks/index.js'
+import { BlockFields } from './collections/Blocks/index.js'
 import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'

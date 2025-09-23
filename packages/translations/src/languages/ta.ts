@@ -510,6 +510,8 @@ export const taTranslations: DefaultTranslationsObject = {
     enterNumber: 'சரியான எண் ஒன்றை உள்ளிடவும்.',
     fieldHasNo: 'இந்த புலத்தில் {{label}} இல்லை',
     greaterThanMax: '{{value}} அதிகபட்சமாக அனுமதிக்கப்பட்ட {{label}} {{max}}-ஐ விட அதிகமாக உள்ளது.',
+    invalidBlock: '"{{block}}" அனுமதிக்கப்படாது.',
+    invalidBlocks: 'இந்த புலம் இனி அனுமதிக்கப்படாத தொகுதிகளைக் கொண்டுள்ளது: {{blocks}}.',
     invalidInput: 'இந்த புலத்தில் தவறான உள்ளீடு உள்ளது.',
     invalidSelection: 'இந்த புலத்தில் தவறான தேர்வு உள்ளது.',
     invalidSelections: 'இந்த புலத்தில் பின்வரும் தவறான தேர்வுகள் உள்ளன:',

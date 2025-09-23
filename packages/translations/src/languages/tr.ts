@@ -516,6 +516,8 @@ export const trTranslations: DefaultTranslationsObject = {
     enterNumber: 'Lütfen geçerli bir sayı girin.',
     fieldHasNo: 'Bu alanda {{label}} girili değil.',
     greaterThanMax: '{{value}} izin verilen maksimum {{label}} değerinden daha büyük.',
+    invalidBlock: '"Blok "{{block}}" izin verilmiyor.',
+    invalidBlocks: 'Bu alan, artık izin verilmeyen blokları içerir: {{bloklar}}.',
     invalidInput: 'Bu alanda geçersiz bir giriş mevcut.',
     invalidSelection: 'Bu alanda geçersiz bir seçim mevcut.',
     invalidSelections: "'Bu alan şu geçersiz seçimlere sahip:'",
