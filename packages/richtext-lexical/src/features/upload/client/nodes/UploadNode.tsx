@@ -6,10 +6,15 @@ import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
 
-import type { SerializedUploadNode, UploadData } from '../../server/nodes/UploadNode.js'
+import type {
+  Internal_UploadData,
+  SerializedUploadNode,
+  UploadData,
+} from '../../server/nodes/UploadNode.js'
 
 import { $convertUploadElement } from '../../server/nodes/conversions.js'
 import { UploadServerNode } from '../../server/nodes/UploadNode.js'
+import { PendingUploadComponent } from '../component/pending/index.js'
 
 const RawUploadComponent = React.lazy(() =>
   import('../../client/component/index.js').then((module) => ({ default: module.UploadComponent })),
@@ -42,9 +47,10 @@ export class UploadNode extends UploadServerNode {
       serializedNode.version = 3
     }
 
-    const importedData: UploadData = {
+    const importedData: Internal_UploadData = {
       id: serializedNode.id,
       fields: serializedNode.fields,
+      pending: (serializedNode as Internal_UploadData).pending,
       relationTo: serializedNode.relationTo,
       value: serializedNode.value,
     }
@@ -56,6 +62,9 @@ export class UploadNode extends UploadServerNode {
   }
 
   override decorate(): JSX.Element {
+    if ((this.__data as Internal_UploadData).pending) {
+      return <PendingUploadComponent />
+    }
     return <RawUploadComponent data={this.__data} nodeKey={this.getKey()} />
   }
 
@@ -72,6 +81,7 @@ export function $createUploadNode({
   if (!data?.id) {
     data.id = new ObjectID.default().toHexString()
   }
+
   return $applyNodeReplacement(new UploadNode({ data: data as UploadData }))
 }
 

@@ -18,7 +18,6 @@ import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { uploadPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
-import { PendingUploadServerNode } from './nodes/PendingUploadNode.js'
 import { UploadServerNode } from './nodes/UploadNode.js'
 import { uploadValidation } from './validate.js'
 
@@ -280,9 +279,6 @@ export const UploadFeature = createServerFeature<
           node: UploadServerNode,
           validations: [uploadValidation(props)],
         }),
-        {
-          node: PendingUploadServerNode,
-        },
       ],
       sanitizedServerFeatureProps: props,
     }

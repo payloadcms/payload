@@ -23,12 +23,11 @@ import {
 import React, { useEffect } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
-import type { UploadData } from '../../server/nodes/UploadNode.js'
+import type { Internal_UploadData, UploadData } from '../../server/nodes/UploadNode.js'
 import type { UploadFeaturePropsClient } from '../index.js'
 
 import { UploadDrawer } from '../drawer/index.js'
-import { $isPendingUploadNode, PendingUploadNode } from '../nodes/PendingUploadNode.js'
-import { $createUploadNode, UploadNode } from '../nodes/UploadNode.js'
+import { $createUploadNode, $isUploadNode, UploadNode } from '../nodes/UploadNode.js'
 
 export type InsertUploadPayload = Readonly<Omit<UploadData, 'id'> & Partial<Pick<UploadData, 'id'>>>
 
@@ -123,8 +122,11 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
           for (const dfsNode of $dfsIterator()) {
             const node = dfsNode.node
 
-            if ($isPendingUploadNode(node)) {
-              node.remove()
+            if ($isUploadNode(node)) {
+              const nodeData = node.getData()
+              if ((nodeData as Internal_UploadData)?.pending) {
+                node.remove()
+              }
             }
           }
         })
@@ -135,19 +137,23 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
         editor.update(() => {
           for (const dfsNode of $dfsIterator()) {
             const node = dfsNode.node
-            if ($isPendingUploadNode(node)) {
-              const newDoc = newDocsMap.get(node.getData().formID)
-              if (newDoc) {
-                node.replace(
-                  $createUploadNode({
-                    data: {
-                      id: new ObjectID.default().toHexString(),
-                      fields: newDoc.doc,
-                      relationTo: newDoc.collectionSlug,
-                      value: newDoc.doc.id,
-                    },
-                  }),
-                )
+            if ($isUploadNode(node)) {
+              const nodeData: Internal_UploadData = node.getData()
+
+              if (nodeData?.pending) {
+                const newDoc = newDocsMap.get(nodeData.pending?.formID)
+                if (newDoc) {
+                  node.replace(
+                    $createUploadNode({
+                      data: {
+                        id: new ObjectID.default().toHexString(),
+                        fields: newDoc.doc,
+                        relationTo: newDoc.collectionSlug,
+                        value: newDoc.doc.id,
+                      },
+                    }),
+                  )
+                }
               }
             }
           }
@@ -167,15 +173,19 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
       /**
        * Handle auto-uploading files if you copy & paste an image dom element from the clipboard
        */
-      editor.registerNodeTransform(PendingUploadNode, (node) => {
-        const nodeData = node.getData()
+      editor.registerNodeTransform(UploadNode, (node) => {
+        const nodeData: Internal_UploadData = node.getData()
+        if (!nodeData?.pending) {
+          return
+        }
+
         async function upload() {
           let transformedImage: FileToUpload | null = null
 
-          const src = nodeData.src
-          const formID = nodeData.formID
+          const src = nodeData?.pending?.src
+          const formID = nodeData?.pending?.formID as string
 
-          if (src.startsWith('data:')) {
+          if (src?.startsWith('data:')) {
             // It's a base64-encoded image
             const mimeMatch = src.match(/data:(image\/[a-zA-Z]+);base64,/)
             const mimeType = mimeMatch ? mimeMatch[1] : 'image/png' // Default to PNG if MIME type not found
@@ -190,7 +200,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
               type: mimeType,
             })
             transformedImage = { alt: undefined, file, formID }
-          } else if (src.startsWith('http') || src.startsWith('https')) {
+          } else if (src?.startsWith('http') || src?.startsWith('https')) {
             // It's an image URL
             const res = await fetch(src)
             const blob = await res.blob()
@@ -246,7 +256,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
       editor.registerCommand(
         PASTE_COMMAND,
         (event) => {
-          // PendingUploadNodes are automatically created when importDOM is called. However, if you paste a file from your computer
+          // Pending UploadNodes are automatically created when importDOM is called. However, if you paste a file from your computer
           // directly, importDOM won't be called, as it's not a HTML dom element. So we need to handle that case here.
 
           if (!(event instanceof ClipboardEvent)) {
@@ -255,7 +265,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
           const clipboardData = event.clipboardData
 
           if (!clipboardData?.types?.length || clipboardData?.types?.includes('text/html')) {
-            // HTML is handled through importDOM => registerNodeTransform for PendingUploadNode
+            // HTML is handled through importDOM => registerNodeTransform for pending UploadNode
             return false
           }
 
@@ -271,17 +281,19 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
           }
 
           if (files.length) {
-            // Insert a PendingUploadNode for each image
+            // Insert a pending UploadNode for each image
             editor.update(() => {
               const selection = $getSelection() || $getPreviousSelection()
 
               if ($isRangeSelection(selection)) {
                 for (const file of files) {
-                  const pendingUploadNode = new PendingUploadNode({
+                  const pendingUploadNode = new UploadNode({
                     data: {
-                      formID: file.formID,
-                      src: URL.createObjectURL(file.file),
-                    },
+                      pending: {
+                        formID: file.formID,
+                        src: URL.createObjectURL(file.file),
+                      },
+                    } as Internal_UploadData,
                   })
                   // we need to get the focus node before inserting the upload node, as $insertNodeToNearestRoot can change the focus node
                   const { focus } = selection
@@ -348,11 +360,13 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
                 $setSelection(selection)
 
                 for (const file of files) {
-                  const pendingUploadNode = new PendingUploadNode({
+                  const pendingUploadNode = new UploadNode({
                     data: {
-                      formID: file.formID,
-                      src: URL.createObjectURL(file.file),
-                    },
+                      pending: {
+                        formID: file.formID,
+                        src: URL.createObjectURL(file.file),
+                      },
+                    } as Internal_UploadData,
                   })
                   // we need to get the focus node before inserting the upload node, as $insertNodeToNearestRoot can change the focus node
                   const { focus } = selection

@@ -38,6 +38,23 @@ export type UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> =
 }[CollectionSlug]
 
 /**
+ * Internal use only - UploadData type that can contain a pending state
+ * @internal
+ */
+export type Internal_UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
+  pending?: {
+    /**
+     * ID that corresponds to the bulk upload form ID
+     */
+    formID: string
+    /**
+     * src value of the image dom element
+     */
+    src: string
+  }
+} & UploadData<TUploadExtraFieldsData>
+
+/**
  * UploadDataImproved is a more precise type, and will replace UploadData in Payload v4.
  * This type is for internal use only as it will be deprecated in the future.
  * @internal
@@ -110,9 +127,10 @@ export class UploadServerNode extends DecoratorBlockNode {
       serializedNode.version = 3
     }
 
-    const importedData: UploadData = {
+    const importedData: Internal_UploadData = {
       id: serializedNode.id,
       fields: serializedNode.fields,
+      pending: (serializedNode as Internal_UploadData).pending,
       relationTo: serializedNode.relationTo,
       value: serializedNode.value,
     }
@@ -133,8 +151,14 @@ export class UploadServerNode extends DecoratorBlockNode {
 
   override exportDOM(): DOMExportOutput {
     const element = document.createElement('img')
-    element.setAttribute('data-lexical-upload-id', String(this.__data?.value))
-    element.setAttribute('data-lexical-upload-relation-to', this.__data?.relationTo)
+    const data = this.__data as Internal_UploadData
+    if (data.pending) {
+      element.setAttribute('data-lexical-pending-upload-form-id', String(data?.pending?.formID))
+      element.setAttribute('src', data?.pending?.src || '')
+    } else {
+      element.setAttribute('data-lexical-upload-id', String(data?.value))
+      element.setAttribute('data-lexical-upload-relation-to', data?.relationTo)
+    }
 
     return { element }
   }

@@ -4,37 +4,8 @@ import type { DOMConversionOutput } from 'lexical'
 
 import ObjectID from 'bson-objectid'
 
-import type { $createPendingUploadNode } from '../../client/nodes/PendingUploadNode.js'
 import type { $createUploadNode } from '../../client/nodes/UploadNode.js'
-import type { $createPendingUploadServerNode } from './PendingUploadNode.js'
-import type { $createUploadServerNode } from './UploadNode.js'
-
-export function $convertPendingUploadElement(
-  domNode: HTMLImageElement,
-  $createNode: typeof $createPendingUploadNode | typeof $createPendingUploadServerNode,
-): DOMConversionOutput | null {
-  if (domNode.hasAttribute('data-lexical-pending-upload-form-id')) {
-    const formID = domNode.getAttribute('data-lexical-pending-upload-form-id')
-
-    if (formID != null) {
-      const node = $createNode({
-        data: {
-          formID,
-          src: domNode.getAttribute('src') || '',
-        },
-      })
-      return { node }
-    }
-  }
-  // Create a new pending upload node with a new form ID
-  const node = $createNode({
-    data: {
-      formID: new ObjectID.default().toHexString(),
-      src: domNode.getAttribute('src') || '',
-    },
-  })
-  return { node }
-}
+import type { $createUploadServerNode, Internal_UploadData } from './UploadNode.js'
 
 export function isGoogleDocCheckboxImg(img: HTMLImageElement): boolean {
   return (
@@ -49,6 +20,21 @@ export function $convertUploadElement(
   domNode: HTMLImageElement,
   $createNode: typeof $createUploadNode | typeof $createUploadServerNode,
 ): DOMConversionOutput | null {
+  if (domNode.hasAttribute('data-lexical-pending-upload-form-id')) {
+    const formID = domNode.getAttribute('data-lexical-pending-upload-form-id')
+
+    if (formID != null) {
+      const node = $createNode({
+        data: {
+          pending: {
+            formID,
+            src: domNode.getAttribute('src') || '',
+          },
+        } as Internal_UploadData,
+      })
+      return { node }
+    }
+  }
   if (
     domNode.hasAttribute('data-lexical-upload-relation-to') &&
     domNode.hasAttribute('data-lexical-upload-id')
@@ -67,6 +53,16 @@ export function $convertUploadElement(
       return { node }
     }
   }
-  // Auto-upload functionality is handled here by the PendingUploadNode
-  return null
+
+  // Create pending UploadNode. Auto-Upload functionality will then be handled by the node transform
+  const node = $createNode({
+    data: {
+      pending: {
+        formID: new ObjectID.default().toHexString(),
+        src: domNode.getAttribute('src') || '',
+      },
+    } as Internal_UploadData,
+  })
+
+  return { node }
 }
