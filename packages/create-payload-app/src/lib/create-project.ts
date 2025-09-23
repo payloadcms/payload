@@ -138,11 +138,13 @@ export async function createProject(
     await verifyVersionForPackage({ version: versionFromCli })
 
     payloadVersion = versionFromCli
+
+    spinner.stop(`Using provided version of Payload ${payloadVersion}`)
   } else {
     payloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
-  }
 
-  spinner.stop(`Found latest version of Payload ${payloadVersion}`)
+    spinner.stop(`Found latest version of Payload ${payloadVersion}`)
+  }
 
   await updatePackageJSON({ latestVersion: payloadVersion, projectDir, projectName })
 
