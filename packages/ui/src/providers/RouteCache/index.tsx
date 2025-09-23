@@ -22,7 +22,6 @@ export const RouteCache: React.FC<{ cachingEnabled?: boolean; children: React.Re
   const clearAfterPathnameChange = useRef(false)
 
   const clearRouteCache = useCallback(() => {
-    console.log('CLEARNING~')
     router.refresh()
   }, [router])
 

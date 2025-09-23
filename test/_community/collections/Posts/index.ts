@@ -10,6 +10,9 @@ export const PostsCollection: CollectionConfig = {
     useAsTitle: 'title',
     enableListViewSelectAPI: true,
   },
+  versions: {
+    drafts: true,
+  },
   fields: [
     {
       name: 'title',
