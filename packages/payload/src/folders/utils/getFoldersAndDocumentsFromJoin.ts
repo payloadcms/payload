@@ -52,6 +52,7 @@ export async function queryDocumentsAndFoldersFromJoin({
     req,
     select: {
       documentsAndFolders: true,
+      folderType: true,
     },
     user,
     where: {
