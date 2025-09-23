@@ -159,7 +159,7 @@ const Component: React.FC<ElementProps> = (props) => {
           />
 
           {editor.isEditable() && (
-            <div className={`${baseClass}__overlay`}>
+            <div className={`${baseClass}__overlay ${baseClass}__floater`}>
               <div className={`${baseClass}__actions`} role="toolbar">
                 {hasExtraFields ? (
                   <Button
@@ -209,7 +209,7 @@ const Component: React.FC<ElementProps> = (props) => {
           )}
         </div>
 
-        <div className={`${baseClass}__metaOverlay`}>
+        <div className={`${baseClass}__metaOverlay ${baseClass}__floater`}>
           <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
             <strong className={`${baseClass}__filename`}>
               {data?.filename || t('general:untitled')}

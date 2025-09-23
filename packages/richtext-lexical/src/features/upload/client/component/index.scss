@@ -11,16 +11,20 @@
     font-family: var(--font-body);
     margin-block: base(0.5);
 
+    &:hover {
+      border: 1px solid var(--theme-elevation-150);
+    }
+
     img,
     svg {
       border-radius: $style-radius-s;
+      width: auto;
     }
 
     &--landscape {
       img,
       svg {
         max-width: 450px;
-        width: auto;
         min-width: 450px;
       }
     }
@@ -29,12 +33,7 @@
       svg {
         max-height: 450px;
         min-height: 450px;
-        width: auto;
       }
-    }
-
-    &:hover {
-      border: 1px solid var(--theme-elevation-150);
     }
 
     button {
@@ -51,31 +50,38 @@
       width: 100%;
     }
 
-    /* --- Floating Action Buttons (top-right) ------------------------------------- */
-    &__overlay {
+    &__floater {
       @include shadow-lg;
       position: absolute;
-      top: calc(var(--base) * 0.5);
-      right: calc(var(--base) * 0.5);
-      padding: calc(var(--base) * 0.2) calc(var(--base) * 0.2);
-      display: flex;
-
-      background: var(--theme-elevation-50);
-      border-radius: $style-radius-m;
 
       /* hidden by default */
       opacity: 0;
-      transform: translateY(-6px);
-      pointer-events: none;
       transition:
         opacity 0.15s ease,
         transform 0.15s ease;
+      pointer-events: none;
+    }
+
+    &:hover .lexical-upload__floater,
+    &__media:focus-within .lexical-upload__floater {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* --- Floating Action Buttons (top-right) ------------------------------------- */
+    &__overlay {
+      display: flex;
+      top: calc(var(--base) * 0.5);
+      right: calc(var(--base) * 0.5);
+      padding: calc(var(--base) * 0.2) calc(var(--base) * 0.2);
+
+      background: var(--theme-elevation-50);
+      border-radius: $style-radius-m;
+      transform: translateY(-6px);
     }
     &:hover .lexical-upload__overlay,
     &__media:focus-within .lexical-upload__overlay {
-      opacity: 1;
       transform: translateY(0);
-      pointer-events: auto;
     }
 
     &__actions {
@@ -90,31 +96,20 @@
     }
     /* --- Floating Metadata (bottom-center) ------------------------------------- */
     &__metaOverlay {
-      @include shadow-lg;
-      position: absolute;
-      width: 100%;
+      display: inline-flex;
       left: 50%;
       bottom: 0;
+      width: 100%;
+      padding: calc(var(--base) * 0.5) calc(var(--base) * 0.75);
       transform: translateX(-50%);
-      display: inline-flex;
+
       flex-wrap: wrap;
       gap: calc(var(--base) * 0.5);
       row-gap: 0;
-      padding: calc(var(--base) * 0.5) calc(var(--base) * 0.75);
 
-      backdrop-filter: saturate(1.2) blur(8px);
-      border-radius: 0 0 $style-radius-s $style-radius-s;
-      /* hidden by default */
-      opacity: 0;
-
-      transition:
-        transform 0.15s ease,
-        opacity 0.15s ease;
-    }
-    &:hover .lexical-upload__metaOverlay,
-    &__media:focus-within .lexical-upload__metaOverlay {
       background: color-mix(in oklab, var(--theme-elevation-50) 55%, transparent);
-      opacity: 1;
+      border-radius: 0 0 $style-radius-s $style-radius-s;
+      backdrop-filter: saturate(1.2) blur(8px);
     }
 
     &__filename {
