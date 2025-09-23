@@ -117,6 +117,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Länk',
     loadingWithEllipsis: 'Laddar...',
   },
+  ta: {
+    label: 'இணைப்பு',
+    loadingWithEllipsis: 'போர்த்துவருகிறது...',
+  },
   th: {
     label: 'ลิงค์',
     loadingWithEllipsis: 'กำลังโหลด...',

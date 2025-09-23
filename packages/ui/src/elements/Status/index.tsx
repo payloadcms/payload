@@ -198,27 +198,29 @@ export const Status: React.FC = () => {
               />
             </React.Fragment>
           )}
-          {((!isTrashed && canUpdate && statusToRender === 'changed') ||
-            statusToRender === 'draft') && (
-            <React.Fragment>
-              &nbsp;&mdash;&nbsp;
-              <Button
-                buttonStyle="none"
-                className={`${baseClass}__action`}
-                id="action-revert-to-published"
-                onClick={() => toggleModal(revertModalSlug)}
-              >
-                {t('version:revertToPublished')}
-              </Button>
-              <ConfirmationModal
-                body={t('version:aboutToRevertToPublished')}
-                confirmingLabel={t('version:reverting')}
-                heading={t('version:confirmRevertToSaved')}
-                modalSlug={revertModalSlug}
-                onConfirm={() => performAction('revert')}
-              />
-            </React.Fragment>
-          )}
+          {!isTrashed &&
+            canUpdate &&
+            hasPublishedDoc &&
+            (statusToRender === 'changed' || statusToRender === 'draft') && (
+              <React.Fragment>
+                &nbsp;&mdash;&nbsp;
+                <Button
+                  buttonStyle="none"
+                  className={`${baseClass}__action`}
+                  id="action-revert-to-published"
+                  onClick={() => toggleModal(revertModalSlug)}
+                >
+                  {t('version:revertToPublished')}
+                </Button>
+                <ConfirmationModal
+                  body={t('version:aboutToRevertToPublished')}
+                  confirmingLabel={t('version:reverting')}
+                  heading={t('version:confirmRevertToSaved')}
+                  modalSlug={revertModalSlug}
+                  onConfirm={() => performAction('revert')}
+                />
+              </React.Fragment>
+            )}
         </div>
       </div>
     )
