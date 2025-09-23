@@ -2,7 +2,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const lvTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'assign-tenant-button-label': 'Piešķirt Apakšgrupu',
+    'assign-tenant-button-label': 'Piešķirt Tenant',
     'assign-tenant-modal-fallback-title': 'Piešķirt jaunu {{entity}}',
     'field-assignedTenant-label': 'Piešķirtais tenants',
     'nav-tenantSelector-label': 'Filtrēt pēc Tenant',

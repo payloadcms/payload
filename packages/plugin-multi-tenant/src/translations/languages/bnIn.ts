@@ -4,8 +4,8 @@ export const bnInTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'টেনেন্ট নির্ধারণ করুন',
     'assign-tenant-modal-fallback-title': 'নতুন {{entity}} নির্ধারণ করুন',
-    'field-assignedTenant-label': 'নির্ধারিত ভাড়াটিয়া',
-    'nav-tenantSelector-label': 'টেনেন্ট অনুসারে ফিল্টার করুন',
+    'field-assignedTenant-label': 'নির্ধারিত টেনেন্ট',
+    'nav-tenantSelector-label': 'টেনেন্ট দ্বারা বাছাই করুন',
   },
 }
 
