@@ -18,6 +18,10 @@
       grid-template-columns: auto 1fr auto;
     }
 
+    &:has(.popup--active) {
+      z-index: 1;
+    }
+
     .icon--search {
       grid-column: 1/2;
       grid-row: 1/2;
