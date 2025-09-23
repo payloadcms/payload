@@ -2,14 +2,10 @@ import type { PluginLanguage } from '../types.js'
 
 export const enTranslations = {
   'plugin-multi-tenant': {
-    'assign-document-modal-description':
-      'Set the ownership of this document. Update the selection below and confirm your changes.',
-    'assign-document-modal-title': 'Assign Document',
-    'confirm-modal-tenant-switch--body':
-      'You are about to change ownership from <0>{{fromTenant}}</0> to <0>{{toTenant}}</0>',
-    'confirm-modal-tenant-switch--heading': 'Confirm {{tenantLabel}} change',
+    'assign-tenant-button-label': 'Assign Tenant',
+    'assign-tenant-modal-fallback-title': 'Assign new {{entity}}',
     'field-assignedTenant-label': 'Assigned Tenant',
-    'nav-tenantSelector-label': 'Tenant',
+    'nav-tenantSelector-label': 'Filter by Tenant',
   },
 }
 

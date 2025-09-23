@@ -2,14 +2,10 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const bnBdTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'assign-document-modal-description':
-      'এই নথিটির মালিকানা নির্ধারণ করুন। নিচের নির্বাচনটি আপডেট করুন এবং আপনার পরিবর্তনগুলি নিশ্চিত করুন।',
-    'assign-document-modal-title': 'নথি নির্ধারণ করুন',
-    'confirm-modal-tenant-switch--body':
-      'আপনি যাচ্ছেন মালিকানা পরিবর্তন করতে <0>{{fromTenant}}</0> থেকে <0>{{toTenant}}</0> এ।',
-    'confirm-modal-tenant-switch--heading': '{{tenantLabel}} পরিবর্তন নিশ্চিত করুন',
+    'assign-tenant-button-label': 'টেনেন্ট নির্ধারণ করুন',
+    'assign-tenant-modal-fallback-title': 'নতুন {{entity}} নিয়োগ করুন',
     'field-assignedTenant-label': 'নির্ধারিত টেনেন্ট',
-    'nav-tenantSelector-label': 'ভাড়াটিয়া',
+    'nav-tenantSelector-label': 'টেনেন্ট দ্বারা ফিল্টার করুন',
   },
 }
 

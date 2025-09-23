@@ -2,12 +2,8 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const rsTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'assign-document-modal-description':
-      'Postavite vlasništvo ovog dokumenta. Ažurirajte donji izbor i potvrdite svoje promene.',
-    'assign-document-modal-title': 'Dodeli dokument',
-    'confirm-modal-tenant-switch--body':
-      'Na putu ste da promenite vlasništvo od <0>{{fromTenant}}</0> do <0>{{toTenant}}</0>',
-    'confirm-modal-tenant-switch--heading': 'Potvrdite promenu {{tenantLabel}}',
+    'assign-tenant-button-label': 'Dodeli Tenant',
+    'assign-tenant-modal-fallback-title': 'Dodeli novi {{entity}}',
     'field-assignedTenant-label': 'Dodeljen stanar',
     'nav-tenantSelector-label': 'Podstanar',
   },
