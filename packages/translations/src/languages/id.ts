@@ -514,6 +514,8 @@ export const idTranslations: DefaultTranslationsObject = {
     enterNumber: 'Harap masukkan nomor yang valid.',
     fieldHasNo: 'Isian ini tidak memiliki {{label}}',
     greaterThanMax: '{{value}} lebih besar dari {{label}} maksimum yang diizinkan yaitu {{max}}.',
+    invalidBlock: 'Blok "{{block}}" tidak diperbolehkan.',
+    invalidBlocks: 'Bidang ini berisi blok yang tidak lagi diizinkan: {{blocks}}.',
     invalidInput: 'Isian ini memiliki masukan yang tidak valid.',
     invalidSelection: 'Isian ini memiliki pilihan yang tidak valid.',
     invalidSelections: 'Isian ini memiliki pilihan tidak valid berikut:',
