@@ -33,7 +33,7 @@ export const syncDocAsSearchIndex = async ({
      * this can happen when hooks call `payload.update` within the create lifecycle
      * like the nested-docs plugin does
      */
-    return
+    return doc
   } else {
     syncedDocsSet.add(docKey)
   }
