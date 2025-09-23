@@ -70,6 +70,7 @@ export const handleGroupBy = async ({
 
   // Set up population for relationships
   let populate
+
   if (groupByField?.type === 'relationship' && groupByField.relationTo) {
     const relationTo = Array.isArray(groupByField.relationTo)
       ? groupByField.relationTo
@@ -82,7 +83,6 @@ export const handleGroupBy = async ({
     })
   }
 
-  // Get distinct values
   const distinct = await req.payload.findDistinct({
     collection: collectionSlug,
     depth: 1,
@@ -104,15 +104,13 @@ export const handleGroupBy = async ({
     values: undefined,
   }
 
-  // Process each group
   await Promise.all(
     (distinct.values || []).map(async (distinctValue, i) => {
-      const relationship = distinctValue[groupByFieldPath]
+      const potentiallyPopulatedRelationship = distinctValue[groupByFieldPath]
 
       // Extract value or relationship ID for database query
-      const valueOrRelationshipID = extractValueOrRelationshipID(relationship)
+      const valueOrRelationshipID = extractValueOrRelationshipID(potentiallyPopulatedRelationship)
 
-      // Get documents for this group
       const groupData = await req.payload.find({
         collection: collectionSlug,
         depth: 0,
@@ -136,20 +134,26 @@ export const handleGroupBy = async ({
         user,
         where: {
           ...(whereWithMergedSearch || {}),
-          [groupByFieldPath]: { equals: valueOrRelationshipID },
+          [groupByFieldPath]: {
+            equals: valueOrRelationshipID,
+          },
         },
       })
 
       // Extract heading
       let heading: string
 
-      if (relationship === null) {
+      if (potentiallyPopulatedRelationship === null) {
         heading = req.i18n.t('general:noValue')
       } else if (groupByField?.type === 'relationship') {
         const relationshipConfig = Array.isArray(groupByField.relationTo)
           ? undefined
           : clientConfig.collections.find((c) => c.slug === groupByField.relationTo)
-        heading = extractRelationshipDisplayValue(relationship, clientConfig, relationshipConfig)
+        heading = extractRelationshipDisplayValue(
+          potentiallyPopulatedRelationship,
+          clientConfig,
+          relationshipConfig,
+        )
       } else if (groupByField?.type === 'date') {
         heading = formatDate({
           date: String(valueOrRelationshipID),
