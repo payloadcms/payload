@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../../helpers/sdk/index.js'
 import type { Config } from '../../../payload-types.js'
 
-import { ensureCompilationIsDone } from '../../../../helpers.js'
+import { ensureCompilationIsDone, saveDocAndAssert } from '../../../../helpers.js'
 import { AdminUrlUtil } from '../../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../../helpers/reInitializeDB.js'
@@ -26,6 +26,7 @@ const { beforeAll, beforeEach, describe } = test
 // Use this for tests that modify the database.
 describe('Lexical Fully Featured - database', () => {
   let lexical: LexicalHelpers
+  let url: AdminUrlUtil
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
@@ -41,7 +42,7 @@ describe('Lexical Fully Featured - database', () => {
       snapshotKey: 'lexicalTest',
       uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
-    const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
+    url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
     await lexical.editor.first().focus()
@@ -50,8 +51,13 @@ describe('Lexical Fully Featured - database', () => {
   describe('auto upload', () => {
     const filePath = path.resolve(dirname, './collections/Upload/payload.jpg')
 
-    async function uploadsTest(page: Page, mode: PasteMode, expectedFileName?: string) {
-      await lexical.pasteFile({ filePath, mode })
+    async function uploadsTest(page: Page, mode: 'cmd+v' | PasteMode, expectedFileName?: string) {
+      if (mode === 'cmd+v') {
+        await page.keyboard.press('Meta+V')
+        await page.keyboard.press('Control+V')
+      } else {
+        await lexical.pasteFile({ filePath, mode })
+      }
 
       await expect(lexical.drawer).toBeVisible()
       await lexical.drawer.locator('.bulk-upload--actions-bar').getByText('Save').click()
@@ -82,6 +88,40 @@ describe('Lexical Fully Featured - database', () => {
     }) => {
       // blob will be put in src of img tag => cannot infer file name
       await uploadsTest(page, 'html', 'pasted-image.jpeg')
+    })
+
+    test('ensure auto upload by copy & pasting image works when pasting from website', async ({
+      page,
+    }) => {
+      await page.goto(url.admin + '/custom-image')
+      await page.keyboard.press('Meta+A')
+      await page.keyboard.press('Control+A')
+
+      await page.keyboard.press('Meta+C')
+      await page.keyboard.press('Control+C')
+
+      await page.goto(url.create)
+      await lexical.editor.first().focus()
+      await expect(lexical.editor).toBeFocused()
+
+      await uploadsTest(page, 'cmd+v')
+
+      // Save page
+      await saveDocAndAssert(page)
+
+      const lexicalFullyFeatured = await payload.find({
+        collection: lexicalFullyFeaturedSlug,
+        limit: 1,
+      })
+      const richText = lexicalFullyFeatured?.docs?.[0]?.richText
+
+      const headingNode = richText?.root?.children[0]
+      expect(headingNode).toBeDefined()
+      expect(headingNode?.children?.[1]?.text).toBe('This is an image:')
+
+      const uploadNode = richText?.root?.children?.[1]?.children?.[0]
+      // @ts-expect-error unsafe access is fine in tests
+      expect(uploadNode.value?.filename).toBe('payload-1.jpg')
     })
   })
 })

@@ -147,7 +147,6 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = () => {
                     $createUploadNode({
                       data: {
                         id: new ObjectID.default().toHexString(),
-                        fields: newDoc.doc,
                         relationTo: newDoc.collectionSlug,
                         value: newDoc.doc.id,
                       },

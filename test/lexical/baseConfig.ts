@@ -61,9 +61,15 @@ export const baseConfig: Partial<Config> = {
       baseDir: path.resolve(dirname),
     },
     components: {
+      views: {
+        custom: {
+          Component: './components/Image.js#Image',
+          path: '/custom-image',
+        },
+      },
       beforeDashboard: [
         {
-          path: './components/CollectionsExplained.tsx#CollectionsExplained',
+          path: './components/CollectionsExplained.js#CollectionsExplained',
         },
       ],
     },
