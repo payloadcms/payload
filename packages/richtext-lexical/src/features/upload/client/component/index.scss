@@ -11,6 +11,11 @@
     font-family: var(--font-body);
     margin-block: base(0.5);
 
+    img,
+    svg {
+      border-radius: $style-radius-s;
+    }
+
     &--landscape {
       img,
       svg {
@@ -54,7 +59,6 @@
       right: calc(var(--base) * 0.5);
       padding: calc(var(--base) * 0.2) calc(var(--base) * 0.2);
       display: flex;
-      z-index: 1000;
 
       background: var(--theme-elevation-50);
       border-radius: $style-radius-m;
@@ -88,8 +92,9 @@
     &__metaOverlay {
       @include shadow-lg;
       position: absolute;
+      width: 100%;
       left: 50%;
-      bottom: calc(var(--base) * 0.5);
+      bottom: 0;
       transform: translateX(-50%);
       display: inline-flex;
       flex-wrap: wrap;
@@ -97,22 +102,19 @@
       row-gap: 0;
       padding: calc(var(--base) * 0.5) calc(var(--base) * 0.75);
 
-      background: color-mix(in oklab, var(--theme-elevation-50) 55%, transparent);
       backdrop-filter: saturate(1.2) blur(8px);
-      border-radius: $style-radius-l;
+      border-radius: 0 0 $style-radius-s $style-radius-s;
+      /* hidden by default */
+      opacity: 0;
 
-      width: max-content;
-      max-width: 90%;
-
-      /* keep it visible, but let it "pop" slightly on hover */
       transition:
         transform 0.15s ease,
-        background-color 0.15s ease;
+        opacity 0.15s ease;
     }
     &:hover .lexical-upload__metaOverlay,
     &__media:focus-within .lexical-upload__metaOverlay {
-      transform: translateX(-50%) translateY(-1px);
-      background: color-mix(in oklab, var(--theme-elevation-50) 60%, transparent);
+      background: color-mix(in oklab, var(--theme-elevation-50) 55%, transparent);
+      opacity: 1;
     }
 
     &__filename {
