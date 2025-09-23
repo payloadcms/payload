@@ -32,7 +32,7 @@ export default buildConfigWithDefaults({
   onInit: seed,
   plugins: [
     multiTenantPlugin<ConfigType>({
-      debug: true,
+      // debug: true,
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
       useTenantsCollectionAccess: false,
       tenantField: {
@@ -52,8 +52,8 @@ export default buildConfigWithDefaults({
       i18n: {
         translations: {
           en: {
-            'field-assignedTenant-label': 'Currently Assigned Site',
-            'nav-tenantSelector-label': 'Filter By Site',
+            'field-assignedTenant-label': 'Site',
+            'nav-tenantSelector-label': 'Filter by Site',
             'confirm-modal-tenant-switch--heading': 'Confirm Site Change',
           },
         },
