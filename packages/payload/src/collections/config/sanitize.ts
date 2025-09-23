@@ -257,7 +257,11 @@ export const sanitizeCollection = async (
     sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
   }
 
-  if (config.localization !== false && config.experimental?.allLocaleStatus) {
+  if (
+    config.localization !== false &&
+    config.experimental?.allLocaleStatus &&
+    collection.versions
+  ) {
     sanitized.fields = mergeBaseFields(sanitized.fields, baseAllLocaleStatusField)
   }
 
