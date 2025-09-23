@@ -224,9 +224,6 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
             components: {
               Field: '@payloadcms/plugin-import-export/rsc#CollectionField',
             },
-            style: {
-              display: 'none',
-            },
           },
           required: true,
         },
