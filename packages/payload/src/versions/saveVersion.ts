@@ -153,7 +153,7 @@ export const saveVersion = async ({
 
           // If no locale statuses are set, set it and set all others to draft
           if (!existing) {
-            const localeStatus: Record<string, 'draft' | typeof status> = {}
+            const localeStatus: Record<string, typeof status> = {}
             for (const code of payload.config.localization.localeCodes) {
               localeStatus[code] = code === incomingLocale ? status : 'draft'
             }
