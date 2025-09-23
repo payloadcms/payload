@@ -180,6 +180,22 @@ async function main() {
       skipReadme: true,
       workspace: true,
     },
+    {
+      name: 'ecommerce',
+      db: 'mongodb',
+      dirname: 'ecommerce',
+      generateLockfile: true,
+      sharp: true,
+      skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      storage: 'localDisk',
+      // The blank template is used as a base for create-payload-app functionality,
+      // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
+      configureConfig: false,
+      base: 'none',
+      skipDockerCompose: true,
+      skipReadme: true,
+      workspace: true,
+    },
   ]
 
   // If template is set, only generate that template
