@@ -130,7 +130,7 @@ export const saveVersion = async ({
     }
 
     if (createNewVersion) {
-      let localeStatus = {}
+      let localeStatus: Record<string, 'draft' | 'published'> = {}
       const localizationEnabled =
         payload.config.localization && payload.config.localization.locales.length > 0
 
@@ -142,7 +142,6 @@ export const saveVersion = async ({
       ) {
         // If `publish all`, set all locales to published
         if (versionData._status === 'published' && !publishSpecificLocale) {
-          const localeStatus: Record<string, 'published'> = {}
           for (const code of payload.config.localization.localeCodes) {
             localeStatus[code] = 'published'
           }
@@ -153,7 +152,6 @@ export const saveVersion = async ({
 
           // If no locale statuses are set, set it and set all others to draft
           if (!existing) {
-            const localeStatus: Record<string, typeof status> = {}
             for (const code of payload.config.localization.localeCodes) {
               localeStatus[code] = code === incomingLocale ? status : 'draft'
             }
