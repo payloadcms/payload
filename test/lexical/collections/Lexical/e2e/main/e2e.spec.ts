@@ -1211,7 +1211,6 @@ describe('lexicalMain', () => {
 
     await expect(slashMenuPopover).toBeHidden()
 
-    await newUploadNode.click() // Focus the upload node
     await newUploadNode.hover()
 
     await expect(newUploadNode.locator('.lexical-upload__filename')).toHaveText('payload.png')
