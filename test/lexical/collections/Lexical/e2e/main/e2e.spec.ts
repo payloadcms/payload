@@ -1562,12 +1562,9 @@ describe('lexicalMain', () => {
 
     // test
     await navigateToLexicalFields()
-    const bottomOfUploadNode = page
-      .locator('.lexical-upload div')
-      .filter({ hasText: /^payload\.jpg$/ })
-      .first()
-    await bottomOfUploadNode.click()
-    await expectInsideSelectedDecorator(bottomOfUploadNode)
+    const uploadNode = page.locator('.lexical-upload[data-filename="payload.jpg"]').first()
+    await uploadNode.click()
+    await expectInsideSelectedDecorator(uploadNode)
 
     const textNode = page.getByText('Upload Node:', { exact: true })
     await textNode.click()

@@ -147,7 +147,11 @@ const Component: React.FC<ElementProps> = (props) => {
       : 'landscape'
 
   return (
-    <div className={`${baseClass} ${baseClass}--${aspectRatio}`} ref={uploadRef}>
+    <div
+      className={`${baseClass} ${baseClass}--${aspectRatio}`}
+      data-filename={data?.filename}
+      ref={uploadRef}
+    >
       <div className={`${baseClass}__card`}>
         <div className={`${baseClass}__media`}>
           <Thumbnail
