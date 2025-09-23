@@ -12,6 +12,7 @@ import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { checkDependencies } from './checkDependencies.js'
 import { NestProviders } from './NestProviders.js'
+import { RouteRefreshProvider } from './RouteRefreshProvider.client.js'
 
 import '@payloadcms/ui/scss/app.scss'
 
@@ -130,23 +131,25 @@ export const RootLayout = async ({
           user={req.user}
         >
           <ProgressBar />
-          {Array.isArray(config.admin?.components?.providers) &&
-          config.admin?.components?.providers.length > 0 ? (
-            <NestProviders
-              importMap={req.payload.importMap}
-              providers={config.admin?.components?.providers}
-              serverProps={{
-                i18n: req.i18n,
-                payload: req.payload,
-                permissions,
-                user: req.user,
-              }}
-            >
-              {children}
-            </NestProviders>
-          ) : (
-            children
-          )}
+          <RouteRefreshProvider>
+            {Array.isArray(config.admin?.components?.providers) &&
+            config.admin?.components?.providers.length > 0 ? (
+              <NestProviders
+                importMap={req.payload.importMap}
+                providers={config.admin?.components?.providers}
+                serverProps={{
+                  i18n: req.i18n,
+                  payload: req.payload,
+                  permissions,
+                  user: req.user,
+                }}
+              >
+                {children}
+              </NestProviders>
+            ) : (
+              children
+            )}
+          </RouteRefreshProvider>
         </RootProvider>
         <div id="portal" />
       </body>
