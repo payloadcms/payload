@@ -21,6 +21,7 @@ import { CollectionHidden } from './collections/Hidden.js'
 import { ListDrawer } from './collections/ListDrawer.js'
 import { ListViewSelectAPI } from './collections/ListViewSelectAPI/index.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
+import { NoTimestampsCollection } from './collections/NoTimestamps.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
@@ -191,6 +192,7 @@ export default buildConfigWithDefaults({
     CustomListDrawer,
     ListViewSelectAPI,
     Virtuals,
+    NoTimestampsCollection,
   ],
   globals: [
     GlobalHidden,
