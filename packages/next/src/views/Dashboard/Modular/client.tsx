@@ -1,19 +1,15 @@
 'use client'
 
-import type { DefaultDashboardWidget } from 'payload'
-
-import { type ReactNode } from 'react'
+import { type ReactNode as _ } from 'react'
 import { Responsive, WidthProvider } from 'react-grid-layout'
 
-interface ModularDashboardClientProps {
-  widgets: Array<{ component: ReactNode; id: string } & DefaultDashboardWidget>
-}
+import type { RenderedWidget } from './index.js'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
 const BREAKPOINT = 768
 
-export function ModularDashboardClient({ widgets }: ModularDashboardClientProps) {
+export function ModularDashboardClient({ widgets }: { widgets: RenderedWidget[] }) {
   console.log('widgets', widgets)
   // Generate layout based on widget width and height
   const layout = widgets.map((widget, index) => {

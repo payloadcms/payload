@@ -1,3 +1,5 @@
+import type { DefaultDashboardWidget } from 'payload'
+
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
@@ -6,12 +8,10 @@ import type { DashboardViewServerProps } from '../Default/index.js'
 import { ModularDashboardClient } from './client.js'
 import './index.scss'
 
-interface RenderedWidget {
+export type RenderedWidget = {
   component: React.ReactNode
-  height: number
   id: string
-  width: number
-}
+} & Pick<DefaultDashboardWidget, 'height' | 'width'>
 
 export function ModularDashboard(props: DashboardViewServerProps) {
   const {
@@ -51,9 +51,7 @@ export function ModularDashboard(props: DashboardViewServerProps) {
 
   return (
     <div>
-      <h1>Modular Dashboard</h1>
       <ModularDashboardClient widgets={renderedWidgets} />
-      <p>after dashboard</p>
     </div>
   )
 }
