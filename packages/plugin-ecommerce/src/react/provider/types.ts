@@ -3,6 +3,9 @@ import type React from 'react'
 
 import type { CurrenciesConfig, Currency, PaymentAdapterClient } from '../../types.js'
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+type GeneratedTypes = import('payload').GeneratedTypes
+
 export type SyncLocalStorageConfig = {
   /**
    * Key to use for localStorage.
@@ -107,7 +110,8 @@ export type EcommerceContext = {
   /**
    * The current data of the cart.
    */
-  cart?: TypedCollection['carts']
+  // @ts-ignore
+  cart?: GeneratedTypes['collections']['carts']
   /**
    * The ID of the current cart corresponding to the cart in the database or local storage.
    */
