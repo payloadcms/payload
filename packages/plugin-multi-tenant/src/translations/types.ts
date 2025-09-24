@@ -4,8 +4,8 @@ import type { enTranslations } from './languages/en.js'
 
 export type PluginLanguage = Language<{
   'plugin-multi-tenant': {
-    'confirm-modal-tenant-switch--body': string
-    'confirm-modal-tenant-switch--heading': string
+    'assign-tenant-button-label': string
+    'assign-tenant-modal-title': string
     'field-assignedTenant-label': string
     'nav-tenantSelector-label': string
   }

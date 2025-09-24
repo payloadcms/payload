@@ -6,6 +6,7 @@ import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
@@ -18,7 +19,7 @@ import {
   getSelectInputValue,
   selectInput,
 } from '../helpers/e2e/selectInput.js'
-import { openNav } from '../helpers/e2e/toggleNav.js'
+import { closeNav, openNav } from '../helpers/e2e/toggleNav.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -37,16 +38,19 @@ test.describe('Multi Tenant', () => {
   let menuItemsURL: AdminUrlUtil
   let usersURL: AdminUrlUtil
   let tenantsURL: AdminUrlUtil
+  let payload: PayloadTestSDK<Config>
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
-    const { serverURL: serverFromInit, payload } = await initPayloadE2ENoConfig<Config>({ dirname })
+    const { serverURL: serverFromInit, payload: payloadFromInit } =
+      await initPayloadE2ENoConfig<Config>({ dirname })
     serverURL = serverFromInit
     globalMenuURL = new AdminUrlUtil(serverURL, menuSlug)
     menuItemsURL = new AdminUrlUtil(serverURL, menuItemsSlug)
     usersURL = new AdminUrlUtil(serverURL, usersSlug)
     tenantsURL = new AdminUrlUtil(serverURL, tenantsSlug)
+    payload = payloadFromInit
     autosaveGlobalURL = new AdminUrlUtil(serverURL, autosaveGlobalSlug)
 
     const context = await browser.newContext()
@@ -72,7 +76,7 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
-        await clearGlobalTenant({ page })
+        await clearTenantFilter({ page })
 
         await page.goto(tenantsURL.list)
 
@@ -99,8 +103,8 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
-        await page.goto(tenantsURL.list)
-        await selectTenant({
+        await setTenantFilter({
+          urlUtil: tenantsURL,
           page,
           tenant: 'Blue Dog',
         })
@@ -127,7 +131,7 @@ test.describe('Multi Tenant', () => {
         })
 
         await page.goto(menuItemsURL.list)
-        await clearGlobalTenant({ page })
+        await clearTenantFilter({ page })
 
         await expect(
           page.locator('.collection-list .table .cell-name', {
@@ -147,8 +151,8 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
-        await page.goto(menuItemsURL.list)
-        await selectTenant({
+        await setTenantFilter({
+          urlUtil: menuItemsURL,
           page,
           tenant: 'Blue Dog',
         })
@@ -172,7 +176,7 @@ test.describe('Multi Tenant', () => {
         })
 
         await page.goto(menuItemsURL.list)
-        await clearGlobalTenant({ page })
+        await clearTenantFilter({ page })
 
         await expect(
           page.locator('.collection-list .table .cell-name', {
@@ -188,7 +192,7 @@ test.describe('Multi Tenant', () => {
         })
 
         await page.goto(menuItemsURL.list)
-        await clearGlobalTenant({ page })
+        await clearTenantFilter({ page })
 
         await expect(
           page.locator('.collection-list .table .cell-name', {
@@ -207,7 +211,7 @@ test.describe('Multi Tenant', () => {
         })
 
         await page.goto(usersURL.list)
-        await clearGlobalTenant({ page })
+        await clearTenantFilter({ page })
 
         await expect(
           page.locator('.collection-list .table .cell-email', {
@@ -233,8 +237,8 @@ test.describe('Multi Tenant', () => {
           data: credentials.admin,
         })
 
-        await page.goto(usersURL.list)
-        await selectTenant({
+        await setTenantFilter({
+          urlUtil: usersURL,
           page,
           tenant: 'Blue Dog',
         })
@@ -267,7 +271,7 @@ test.describe('Multi Tenant', () => {
       })
 
       await page.goto(menuItemsURL.list)
-      await clearGlobalTenant({ page })
+      await clearTenantFilter({ page })
 
       await goToListDoc({
         page,
@@ -287,7 +291,7 @@ test.describe('Multi Tenant', () => {
         .toBe('Blue Dog')
     })
 
-    test('should prompt for confirmation upon tenant switching', async () => {
+    test('should allow tenant switching cancellation', async () => {
       await loginClientSide({
         page,
         serverURL,
@@ -295,7 +299,7 @@ test.describe('Multi Tenant', () => {
       })
 
       await page.goto(menuItemsURL.list)
-      await clearGlobalTenant({ page })
+      await clearTenantFilter({ page })
 
       await goToListDoc({
         page,
@@ -307,14 +311,46 @@ test.describe('Multi Tenant', () => {
       await selectDocumentTenant({
         page,
         tenant: 'Steel Cat',
+        action: 'cancel',
+        payload,
       })
 
-      const confirmationModal = page.locator('#confirm-switch-tenant')
-      await expect(confirmationModal).toBeVisible()
-      await expect(
-        confirmationModal.getByText('You are about to change ownership from Blue Dog to Steel Cat'),
-      ).toBeVisible()
+      await expect(page.locator('#action-save')).toBeDisabled()
+
+      await page.goto(menuItemsURL.list)
+      await expect
+        .poll(async () => {
+          return await getSelectedTenantFilterName({ page, payload })
+        })
+        .toBe('Blue Dog')
     })
+
+    test('should allow tenant switching confirmation', async () => {
+      await loginClientSide({
+        page,
+        serverURL,
+        data: credentials.admin,
+      })
+
+      await page.goto(menuItemsURL.list)
+      await clearTenantFilter({ page })
+
+      await goToListDoc({
+        page,
+        cellClass: '.cell-name',
+        textToMatch: 'Spicy Mac',
+        urlUtil: menuItemsURL,
+      })
+
+      await selectDocumentTenant({
+        page,
+        payload,
+        tenant: 'Steel Cat',
+      })
+
+      await saveDocAndAssert(page)
+    })
+
     test('should filter internal links in Lexical editor', async () => {
       await loginClientSide({
         page,
@@ -324,6 +360,7 @@ test.describe('Multi Tenant', () => {
       await page.goto(menuItemsURL.create)
       await selectDocumentTenant({
         page,
+        payload,
         tenant: 'Blue Dog',
       })
       const editor = page.locator('[data-lexical-editor="true"]')
@@ -364,8 +401,8 @@ test.describe('Multi Tenant', () => {
         serverURL,
         data: credentials.admin,
       })
-      await page.goto(tenantsURL.list)
-      await selectTenant({
+      await setTenantFilter({
+        urlUtil: tenantsURL,
         page,
         tenant: 'Blue Dog',
       })
@@ -381,8 +418,8 @@ test.describe('Multi Tenant', () => {
         data: credentials.admin,
       })
 
-      await page.goto(tenantsURL.list)
-      await selectTenant({
+      await setTenantFilter({
+        urlUtil: tenantsURL,
         page,
         tenant: 'Blue Dog',
       })
@@ -391,7 +428,7 @@ test.describe('Multi Tenant', () => {
 
       // Attempt to switch tenants with unsaved changes
       await page.fill('#field-title', 'New Global Menu Name')
-      await selectTenant({
+      await switchGlobalDocTenant({
         page,
         tenant: 'Steel Cat',
       })
@@ -424,15 +461,25 @@ test.describe('Multi Tenant', () => {
         data: credentials.admin,
       })
       await page.goto(tenantsURL.list)
-      await clearGlobalTenant({ page })
+      await clearTenantFilter({ page })
       await page.goto(autosaveGlobalURL.list)
       await expect(page.locator('.doc-header__title')).toBeVisible()
-      const globalTenant = await getGlobalTenant({ page })
-      await expect
-        .poll(async () => {
-          return await getDocumentTenant({ page })
-        })
-        .toBe(globalTenant)
+      const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
+      await expect.poll(() => docID).not.toBeUndefined()
+      const globalTenant = await getSelectedTenantFilterName({ page, payload })
+      const autosaveGlobal = await payload.find({
+        collection: autosaveGlobalSlug,
+        where: {
+          id: {
+            equals: docID,
+          },
+          'tenant.name': {
+            equals: globalTenant,
+          },
+        },
+      })
+      await expect.poll(() => autosaveGlobal?.totalDocs).toBe(1)
+      await expect.poll(() => autosaveGlobal?.docs?.[0]?.tenant).toBeDefined()
     })
   })
 
@@ -515,7 +562,7 @@ test.describe('Multi Tenant', () => {
       })
 
       await page.goto(tenantsURL.list)
-      await clearGlobalTenant({ page })
+      await clearTenantFilter({ page })
 
       await expect(
         page.locator('.collection-list .table .cell-name', {
@@ -602,24 +649,6 @@ test.describe('Multi Tenant', () => {
 /**
  * Helper Functions
  */
-
-async function getGlobalTenant({ page }: { page: Page }): Promise<string | undefined> {
-  await openNav(page)
-  return await getSelectInputValue<false>({
-    selectLocator: page.locator('.tenant-selector'),
-    multiSelect: false,
-  })
-}
-
-async function getDocumentTenant({ page }: { page: Page }): Promise<string | undefined> {
-  await openNav(page)
-  return await getSelectInputValue<false>({
-    selectLocator: page.locator('#field-tenant'),
-    multiSelect: false,
-    valueLabelClass: '.relationship--single-value',
-  })
-}
-
 async function getTenantOptions({ page }: { page: Page }): Promise<string[]> {
   await openNav(page)
   return await getSelectInputOptions({
@@ -627,7 +656,106 @@ async function getTenantOptions({ page }: { page: Page }): Promise<string[]> {
   })
 }
 
+async function openAssignTenantModal({
+  page,
+  payload,
+}: {
+  page: Page
+  payload: PayloadTestSDK<Config>
+}): Promise<void> {
+  const assignTenantModal = page.locator('#assign-tenant-field-modal')
+
+  const globalTenant = await getSelectedTenantFilterName({ page, payload })
+  if (!globalTenant) {
+    await expect(assignTenantModal).toBeVisible()
+    return
+  }
+
+  // Open the assign tenant modal
+  const docControlsPopup = page.locator('.doc-controls__popup')
+  const docControlsButton = docControlsPopup.locator('.popup-button')
+  await expect(docControlsButton).toBeVisible()
+  await docControlsButton.click()
+
+  const assignTenantButtonLocator = docControlsPopup.locator('button', { hasText: 'Assign Site' })
+  await expect(assignTenantButtonLocator).toBeVisible()
+  await assignTenantButtonLocator.click()
+
+  await expect(assignTenantModal).toBeVisible()
+}
+
 async function selectDocumentTenant({
+  page,
+  tenant,
+  action = 'confirm',
+  payload,
+}: {
+  action?: 'cancel' | 'confirm'
+  page: Page
+  payload: PayloadTestSDK<Config>
+  tenant: string
+}): Promise<void> {
+  await closeNav(page)
+  await openAssignTenantModal({ page, payload })
+  await selectInput({
+    selectLocator: page.locator('.tenantField'),
+    option: tenant,
+    multiSelect: false,
+  })
+
+  const assignTenantModal = page.locator('#assign-tenant-field-modal')
+  if (action === 'confirm') {
+    await assignTenantModal.locator('button', { hasText: 'Confirm' }).click()
+    await expect(assignTenantModal).toBeHidden()
+  } else {
+    await assignTenantModal.locator('button', { hasText: 'Cancel' }).click()
+    await expect(assignTenantModal).toBeHidden()
+  }
+}
+
+async function getSelectedTenantFilterName({
+  page,
+  payload,
+}: {
+  page: Page
+  payload: PayloadTestSDK<Config>
+}): Promise<string | undefined> {
+  const cookies = await page.context().cookies()
+  const tenantIDFromCookie = cookies.find((c) => c.name === 'payload-tenant')?.value
+  if (tenantIDFromCookie) {
+    const tenant = await payload.find({
+      collection: 'tenants',
+      where: {
+        id: {
+          equals: tenantIDFromCookie,
+        },
+      },
+    })
+    return tenant?.docs?.[0]?.name || undefined
+  }
+
+  return undefined
+}
+
+async function setTenantFilter({
+  page,
+  tenant,
+  urlUtil,
+}: {
+  page: Page
+  tenant: string
+  urlUtil: AdminUrlUtil
+}): Promise<void> {
+  await page.goto(urlUtil.list)
+  await openNav(page)
+  await selectInput({
+    selectLocator: page.locator('.tenant-selector'),
+    option: tenant,
+    multiSelect: false,
+  })
+}
+
+async function switchGlobalDocTenant({
   page,
   tenant,
 }: {
@@ -635,25 +763,17 @@ async function selectDocumentTenant({
   tenant: string
 }): Promise<void> {
   await openNav(page)
-  return selectInput({
-    selectLocator: page.locator('.tenantField'),
-    option: tenant,
-    multiSelect: false,
-  })
-}
-
-async function selectTenant({ page, tenant }: { page: Page; tenant: string }): Promise<void> {
-  await openNav(page)
-  return selectInput({
+  await selectInput({
     selectLocator: page.locator('.tenant-selector'),
     option: tenant,
     multiSelect: false,
   })
 }
 
-async function clearGlobalTenant({ page }: { page: Page }): Promise<void> {
+async function clearTenantFilter({ page }: { page: Page }): Promise<void> {
   await openNav(page)
-  return clearSelectInput({
+  await clearSelectInput({
     selectLocator: page.locator('.tenant-selector'),
   })
+  await closeNav(page)
 }
