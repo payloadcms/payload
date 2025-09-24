@@ -31,7 +31,12 @@ export const DocumentTakeOver: React.FC<{
   }, [isActive, openModal, closeModal])
 
   return (
-    <Modal className={baseClass} slug={modalSlug}>
+    <Modal
+      className={baseClass}
+      // // Fixes https://github.com/payloadcms/payload/issues/13778
+      closeOnBlur={false}
+      slug={modalSlug}
+    >
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
           <h1>{t('general:editingTakenOver')}</h1>
