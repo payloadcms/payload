@@ -379,7 +379,11 @@ describe('General', () => {
       await expect.poll(() => page.url()).toBe(`${serverURL}/admin`)
     })
 
-    test("should clear the router's bfcache when navigating via the forward/back browser controls", async () => {
+    /**
+     * This test is skipped because `page.goBack()` and `page.goForward()` do not trigger navigation in the Next.js app.
+     * I also tried rendering buttons that call `router.back()` and click those instead, but that also does not work.
+     */
+    test.skip("should clear the router's bfcache when navigating via the forward/back browser controls", async () => {
       const { id } = await createPost({
         title: 'Post to test bfcache',
       })
