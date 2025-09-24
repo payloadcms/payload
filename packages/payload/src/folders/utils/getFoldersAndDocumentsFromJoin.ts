@@ -39,6 +39,7 @@ export async function queryDocumentsAndFoldersFromJoin({
 
   const subfolderDoc = (await payload.find({
     collection: payload.config.folders.slug,
+    depth: 1,
     joins: {
       documentsAndFolders: {
         limit: 100_000_000,
@@ -49,6 +50,10 @@ export async function queryDocumentsAndFoldersFromJoin({
     limit: 1,
     overrideAccess: false,
     req,
+    select: {
+      documentsAndFolders: true,
+      folderType: true,
+    },
     user,
     where: {
       id: {

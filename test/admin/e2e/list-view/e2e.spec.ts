@@ -35,8 +35,8 @@ const description = 'Description'
 let payload: PayloadTestSDK<Config>
 
 import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
+import { noTimestampsSlug } from 'admin/collections/NoTimestamps.js'
 import { devUser } from 'credentials.js'
-import { getRowByCellValueAndAssert } from 'helpers/e2e/getRowByCellValueAndAssert.js'
 import {
   openListColumns,
   reorderColumns,
@@ -45,6 +45,7 @@ import {
   waitForColumnInURL,
 } from 'helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
+import { getRowByCellValueAndAssert } from 'helpers/e2e/getRowByCellValueAndAssert.js'
 import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from 'helpers/e2e/preferences.js'
@@ -76,6 +77,7 @@ describe('List View', () => {
   let disableBulkEditUrl: AdminUrlUtil
   let user: any
   let virtualsUrl: AdminUrlUtil
+  let noTimestampsUrl: AdminUrlUtil
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -101,6 +103,7 @@ describe('List View', () => {
     placeholderUrl = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
     disableBulkEditUrl = new AdminUrlUtil(serverURL, 'disable-bulk-edit')
     virtualsUrl = new AdminUrlUtil(serverURL, virtualsSlug)
+    noTimestampsUrl = new AdminUrlUtil(serverURL, noTimestampsSlug)
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -1568,6 +1571,24 @@ describe('List View', () => {
       await expect(page.locator('.per-page')).toContainText('Per Page: 15') // ensure this hasn't changed
       await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16')
     })
+
+    test('should paginate when timestamps are disabled', async () => {
+      await mapAsync([...Array(6)], async () => {
+        await createNoTimestampPost()
+      })
+
+      await page.goto(noTimestampsUrl.list)
+
+      await page.locator('.per-page .popup-button').click()
+      await page.getByRole('button', { name: '5', exact: true }).click()
+      await page.waitForURL(/limit=5/)
+
+      const firstPageIds = await page.locator('.cell-id').allInnerTexts()
+      await goToNextPage(page)
+      const secondPageIds = await page.locator('.cell-id').allInnerTexts()
+
+      expect(firstPageIds).not.toContain(secondPageIds[0])
+    })
   })
 
   // TODO: Troubleshoot flaky suite
@@ -1916,6 +1937,16 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
       ...overrides,
     },
   }) as unknown as Promise<Geo>
+}
+
+async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
+  return payload.create({
+    collection: noTimestampsSlug,
+    data: {
+      title,
+      ...overrides,
+    },
+  }) as unknown as Promise<Post>
 }
 
 async function createArray() {

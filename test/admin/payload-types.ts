@@ -96,6 +96,7 @@ export interface Config {
     'custom-list-drawer': CustomListDrawer;
     'list-view-select-api': ListViewSelectApi;
     virtuals: Virtual;
+    'no-timestamps': NoTimestamp;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -131,6 +132,7 @@ export interface Config {
     'custom-list-drawer': CustomListDrawerSelect<false> | CustomListDrawerSelect<true>;
     'list-view-select-api': ListViewSelectApiSelect<false> | ListViewSelectApiSelect<true>;
     virtuals: VirtualsSelect<false> | VirtualsSelect<true>;
+    'no-timestamps': NoTimestampsSelect<false> | NoTimestampsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -614,6 +616,14 @@ export interface Virtual {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-timestamps".
+ */
+export interface NoTimestamp {
+  id: string;
+  title?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -734,6 +744,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'virtuals';
         value: string | Virtual;
+      } | null)
+    | ({
+        relationTo: 'no-timestamps';
+        value: string | NoTimestamp;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1174,6 +1188,13 @@ export interface VirtualsSelect<T extends boolean = true> {
   post?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-timestamps_select".
+ */
+export interface NoTimestampsSelect<T extends boolean = true> {
+  title?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

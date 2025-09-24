@@ -15,6 +15,10 @@ import { renderTable } from '@payloadcms/ui/rsc'
 import { formatDate } from '@payloadcms/ui/shared'
 import { flattenAllFields } from 'payload'
 
+import { createSerializableValue } from './createSerializableValue.js'
+import { extractRelationshipDisplayValue } from './extractRelationshipDisplayValue.js'
+import { extractValueOrRelationshipID } from './extractValueOrRelationshipID.js'
+
 export const handleGroupBy = async ({
   clientCollectionConfig,
   clientConfig,
@@ -64,27 +68,19 @@ export const handleGroupBy = async ({
 
   const groupByField = flattenedFields.find((f) => f.name === groupByFieldPath)
 
-  const relationshipConfig =
-    groupByField?.type === 'relationship'
-      ? clientConfig.collections.find((c) => c.slug === groupByField.relationTo)
-      : undefined
-
+  // Set up population for relationships
   let populate
 
   if (groupByField?.type === 'relationship' && groupByField.relationTo) {
-    const relationTo =
-      typeof groupByField.relationTo === 'string'
-        ? [groupByField.relationTo]
-        : groupByField.relationTo
+    const relationTo = Array.isArray(groupByField.relationTo)
+      ? groupByField.relationTo
+      : [groupByField.relationTo]
 
-    if (Array.isArray(relationTo)) {
-      relationTo.forEach((rel) => {
-        if (!populate) {
-          populate = {}
-        }
-        populate[rel] = { [relationshipConfig?.admin.useAsTitle || 'id']: true }
-      })
-    }
+    populate = {}
+    relationTo.forEach((rel) => {
+      const config = clientConfig.collections.find((c) => c.slug === rel)
+      populate[rel] = { [config?.admin?.useAsTitle || 'id']: true }
+    })
   }
 
   const distinct = await req.payload.findDistinct({
@@ -109,16 +105,11 @@ export const handleGroupBy = async ({
   }
 
   await Promise.all(
-    distinct.values.map(async (distinctValue, i) => {
+    (distinct.values || []).map(async (distinctValue, i) => {
       const potentiallyPopulatedRelationship = distinctValue[groupByFieldPath]
 
-      const valueOrRelationshipID =
-        groupByField?.type === 'relationship' &&
-        potentiallyPopulatedRelationship &&
-        typeof potentiallyPopulatedRelationship === 'object' &&
-        'id' in potentiallyPopulatedRelationship
-          ? potentiallyPopulatedRelationship.id
-          : potentiallyPopulatedRelationship
+      // Extract value or relationship ID for database query
+      const valueOrRelationshipID = extractValueOrRelationshipID(potentiallyPopulatedRelationship)
 
       const groupData = await req.payload.find({
         collection: collectionSlug,
@@ -149,35 +140,39 @@ export const handleGroupBy = async ({
         },
       })
 
-      let heading = valueOrRelationshipID
+      // Extract heading
+      let heading: string
 
-      if (
-        groupByField?.type === 'relationship' &&
-        potentiallyPopulatedRelationship &&
-        typeof potentiallyPopulatedRelationship === 'object'
-      ) {
-        heading =
-          potentiallyPopulatedRelationship[relationshipConfig.admin.useAsTitle || 'id'] ||
-          valueOrRelationshipID
-      }
-
-      if (groupByField.type === 'date' && valueOrRelationshipID) {
+      if (potentiallyPopulatedRelationship === null) {
+        heading = req.i18n.t('general:noValue')
+      } else if (groupByField?.type === 'relationship') {
+        const relationshipConfig = Array.isArray(groupByField.relationTo)
+          ? undefined
+          : clientConfig.collections.find((c) => c.slug === groupByField.relationTo)
+        heading = extractRelationshipDisplayValue(
+          potentiallyPopulatedRelationship,
+          clientConfig,
+          relationshipConfig,
+        )
+      } else if (groupByField?.type === 'date') {
         heading = formatDate({
           date: String(valueOrRelationshipID),
           i18n: req.i18n,
           pattern: clientConfig.admin.dateFormat,
         })
-      }
-
-      if (groupByField.type === 'checkbox') {
+      } else if (groupByField?.type === 'checkbox') {
         if (valueOrRelationshipID === true) {
           heading = req.i18n.t('general:true')
         }
-
         if (valueOrRelationshipID === false) {
           heading = req.i18n.t('general:false')
         }
+      } else {
+        heading = String(valueOrRelationshipID)
       }
+
+      // Create serializable value for client
+      const serializableValue = createSerializableValue(valueOrRelationshipID)
 
       if (groupData.docs && groupData.docs.length > 0) {
         const { columnState: newColumnState, Table: NewTable } = renderTable({
@@ -189,10 +184,10 @@ export const handleGroupBy = async ({
           drawerSlug,
           enableRowSelections,
           groupByFieldPath,
-          groupByValue: valueOrRelationshipID,
+          groupByValue: serializableValue,
           heading: heading || req.i18n.t('general:noValue'),
           i18n: req.i18n,
-          key: `table-${valueOrRelationshipID}`,
+          key: `table-${serializableValue}`,
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,
           query,
@@ -210,7 +205,7 @@ export const handleGroupBy = async ({
           Table = []
         }
 
-        dataByGroup[valueOrRelationshipID] = groupData
+        dataByGroup[serializableValue] = groupData
         ;(Table as Array<React.ReactNode>)[i] = NewTable
       }
     }),
