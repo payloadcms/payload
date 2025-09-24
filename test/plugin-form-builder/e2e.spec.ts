@@ -136,15 +136,19 @@ test.describe('Form Builder Plugin', () => {
       await page.locator('#field-form').click({ delay: 100 })
       const options = page.locator('.rs__option')
       await options.locator('text=Contact Form').click()
+
       await expect(page.locator('#field-form').locator('.rs__value-container')).toContainText(
         'Contact Form',
       )
+
       await page.locator('#field-submissionData button.array-field__add-row').click()
       await page.locator('#field-submissionData__0__field').fill('name')
-      await expect(page.locator('#field-submissionData__0__field')).toHaveValue('name')
       await page.locator('#field-submissionData__0__value').fill('Test Submission')
-      await expect(page.locator('#field-submissionData__0__value')).toHaveValue('Test Submission')
       await saveDocAndAssert(page)
+
+      // Check that the fields are still editable, as this user is an admin
+      await expect(page.locator('#field-submissionData__0__field')).toBeEditable()
+      await expect(page.locator('#field-submissionData__0__value')).toBeEditable()
     })
 
     test('can create form submission - with date field', async () => {
