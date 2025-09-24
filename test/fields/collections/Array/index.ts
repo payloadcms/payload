@@ -277,6 +277,15 @@ const ArrayFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'getDataByPathTest',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/collections/Array/GetDataByPathTest.js',
+        },
+      },
+    },
   ],
   slug: arrayFieldsSlug,
   versions: true,
