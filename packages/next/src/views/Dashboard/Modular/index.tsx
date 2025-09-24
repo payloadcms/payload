@@ -8,7 +8,9 @@ import './index.scss'
 
 interface RenderedWidget {
   component: React.ReactNode
+  height: number
   id: string
+  width: number
 }
 
 export function ModularDashboard(props: DashboardViewServerProps) {
@@ -41,6 +43,8 @@ export function ModularDashboard(props: DashboardViewServerProps) {
       return {
         id: widget.slug,
         component: WidgetComponent,
+        height: widget.height,
+        width: widget.width,
       }
     })
   }, [dashboardConfig, importMap, props])

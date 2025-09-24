@@ -5,7 +5,9 @@ import { Responsive, WidthProvider } from 'react-grid-layout'
 
 interface RenderedWidget {
   component: ReactNode
+  height: '1' | '2'
   id: string
+  width: '1' | '1/2' | '1/3' | '1/4' | '2/3' | '3/4'
 }
 
 interface ModularDashboardClientProps {
@@ -14,17 +16,78 @@ interface ModularDashboardClientProps {
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
+const WIDTH_TO_COLS_MAP = {
+  '1': 12,
+  '1/2': 6,
+  '1/3': 4,
+  '1/4': 3,
+  '2/3': 8,
+  '3/4': 9,
+}
+
+const HEIGHT_TO_ROWS_MAP = {
+  '1': 3,
+  '2': 6,
+}
+
 export function ModularDashboardClient({ widgets }: ModularDashboardClientProps) {
+  console.log('widgets', widgets)
+  // Generate layout based on widget width and height
+  const layout = widgets.map((widget, index) => {
+    const colsPerRow = 12
+    let x = 0
+    let y = 0
+
+    // Simple layout algorithm: place widgets left to right, then wrap to next row
+    let currentX = 0
+    let currentY = 0
+
+    for (let i = 0; i < index; i++) {
+      const prevWidget = widgets[i]
+      currentX += WIDTH_TO_COLS_MAP[prevWidget.width]
+
+      // If we exceed the row width, wrap to next row
+      if (currentX > colsPerRow) {
+        currentY += widgets
+          .slice(0, i)
+          .reduce((maxH, w) => Math.max(maxH, HEIGHT_TO_ROWS_MAP[w.height]), 0)
+        currentX = WIDTH_TO_COLS_MAP[prevWidget.width]
+      }
+    }
+
+    x = currentX
+    y = currentY
+
+    return {
+      h: HEIGHT_TO_ROWS_MAP[widget.height],
+      i: widget.id,
+      maxH: 6,
+      maxW: 12,
+      minH: 1,
+      minW: 1,
+      w: WIDTH_TO_COLS_MAP[widget.width],
+      x,
+      y: 0,
+    }
+  })
+
+  console.log('layout', layout)
+
   return (
     <ResponsiveGridLayout
-      breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+      // 640 or 768?
+      breakpoints={{ lg: 768, xxs: 0 }}
       className="grid-layout"
-      cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-      //   layout={layout}
-      rowHeight={100}
-      //   width={1200} not needed / doesn't have effect when using WidthProvider
-      //   resizeHandle
-      //   onLayoutChange={onLayoutChange}
+      cols={{ lg: 12, xxs: 6 }}
+      isDraggable={true}
+      isResizable={true}
+      layouts={{ lg: layout }}
+      onLayoutChange={(newLayout) => {
+        // TODO: Save layout to user preferences
+        // eslint-disable-next-line no-console
+        console.log('Layout changed:', newLayout)
+      }}
+      rowHeight={64}
     >
       {widgets.map((widget) => (
         <div className="widget" key={widget.id}>

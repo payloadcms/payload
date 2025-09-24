@@ -67,7 +67,9 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    tickets: Ticket;
     revenue: Revenue;
+    events: Event;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -75,7 +77,9 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    tickets: TicketsSelect<false> | TicketsSelect<true>;
     revenue: RevenueSelect<false> | RevenueSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -115,10 +119,15 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "revenue".
+ * via the `definition` "tickets".
  */
-export interface Revenue {
+export interface Ticket {
   id: string;
+  title: string;
+  description?: string | null;
+  status: 'open' | 'in-progress' | 'closed';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  assignee?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -148,14 +157,53 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "revenue".
+ */
+export interface Revenue {
+  id: string;
+  amount: number;
+  description: string;
+  date: string;
+  category: 'sales' | 'subscriptions' | 'services' | 'other';
+  source?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: string;
+  title: string;
+  description?: string | null;
+  startDate: string;
+  endDate?: string | null;
+  location?: string | null;
+  type: 'meeting' | 'conference' | 'workshop' | 'webinar' | 'other';
+  organizer?: (string | null) | User;
+  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'tickets';
+        value: string | Ticket;
+      } | null)
+    | ({
         relationTo: 'revenue';
         value: string | Revenue;
+      } | null)
+    | ({
+        relationTo: 'events';
+        value: string | Event;
       } | null)
     | ({
         relationTo: 'users';
@@ -205,9 +253,43 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tickets_select".
+ */
+export interface TicketsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  status?: T;
+  priority?: T;
+  assignee?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "revenue_select".
  */
 export interface RevenueSelect<T extends boolean = true> {
+  amount?: T;
+  description?: T;
+  date?: T;
+  category?: T;
+  source?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  startDate?: T;
+  endDate?: T;
+  location?: T;
+  type?: T;
+  organizer?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

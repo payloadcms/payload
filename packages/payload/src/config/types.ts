@@ -738,9 +738,14 @@ export type DashboardWidget = {
   slug: string
 }
 
+export type DefaultDashboardWidget = {
+  height: '1' | '2'
+  width: '1' | '1/2' | '1/3' | '1/4' | '2/3' | '3/4'
+} & DashboardWidget
+
 export type DashboardConfig = {
   components?: Array<DashboardWidget>
-  defaults?: Array<DashboardWidget>
+  defaults?: Array<DefaultDashboardWidget>
 }
 
 /**
