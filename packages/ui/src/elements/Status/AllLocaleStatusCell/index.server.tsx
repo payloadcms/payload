@@ -9,12 +9,13 @@ import './index.scss'
 const baseClass = 'locale-status-cell'
 
 export const AllLocaleStatusCell = async ({
-  cellData,
+  collectionConfig,
   payload,
   rowData,
 }: DefaultServerCellComponentProps) => {
   const localization = payload.config.localization as SanitizedLocalizationConfig
   const req = await createLocalReq({}, payload)
+  const fallbackStatus = rowData?._status
 
   const availableLocales =
     (await localization.filterAvailableLocales?.({
@@ -22,15 +23,38 @@ export const AllLocaleStatusCell = async ({
       req,
     })) ?? localization.locales
 
-  const fallbackStatus = rowData?._status
-  if (!cellData && !fallbackStatus) {
+  const selectLocales: Record<string, true> = {}
+  availableLocales.forEach((locale) => {
+    if (typeof locale === 'string') {
+      selectLocales[locale] = true
+    } else {
+      selectLocales[locale.code] = true
+    }
+  })
+
+  const versionStatus = await payload.db
+    .findVersions({
+      collection: collectionConfig.slug,
+      limit: 1,
+      select: {
+        localeStatus: selectLocales,
+      },
+      where: {
+        parent: {
+          equals: rowData.id,
+        },
+      },
+    })
+    .then((result) => result.docs[0])
+
+  if (!fallbackStatus && !versionStatus?.localeStatus) {
     return null
   }
 
   return (
     <div className={baseClass}>
       {availableLocales.map((locale) => {
-        const status = cellData[locale.code] || fallbackStatus
+        const status = versionStatus?.localeStatus?.[locale.code] || fallbackStatus
 
         return (
           <Pill

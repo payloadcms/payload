@@ -1,40 +1,22 @@
 import type { Field } from '../config/types.js'
 
+/**
+ * This field is never used directly.
+ * The field type is `text` just so the column appears.
+ *
+ * It adds a custom cell component to display the status for all locales in the admin list view.
+ * The component queries the versions table for the `localeStatus` field on the latest version.
+ */
 export const baseAllLocaleStatusField: Field[] = [
   {
-    name: '_localeStatus',
-    type: 'json',
+    name: '_localeStatusCell',
+    type: 'text',
     admin: {
       components: {
         Cell: '@payloadcms/ui/rsc#AllLocaleStatusCell',
       },
+      disableListFilter: true,
       hidden: true,
-    },
-    hooks: {
-      afterRead: [
-        async (args) => {
-          const { collection, data, req } = args
-          const id = data?.id
-          if (id && collection && collection.versions) {
-            const version = await req.payload.db.findVersions({
-              collection: collection.slug,
-              limit: 1,
-              select: {
-                localeStatus: true,
-              },
-              where: {
-                parent: {
-                  equals: id,
-                },
-              },
-            })
-
-            if (version.docs && version.docs[0]?.localeStatus) {
-              return version.docs[0].localeStatus
-            }
-          }
-        },
-      ],
     },
     label: 'Status - All Locales',
   },
