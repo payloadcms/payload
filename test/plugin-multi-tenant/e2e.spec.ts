@@ -9,12 +9,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import {
-  closeNav,
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { loginClientSide } from '../helpers/e2e/auth/login.js'
 import { goToListDoc } from '../helpers/e2e/goToListDoc.js'
@@ -24,7 +19,7 @@ import {
   getSelectInputValue,
   selectInput,
 } from '../helpers/e2e/selectInput.js'
-import { openNav } from '../helpers/e2e/toggleNav.js'
+import { closeNav, openNav } from '../helpers/e2e/toggleNav.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
