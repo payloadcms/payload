@@ -19,6 +19,7 @@ type Args = {
 
 export default async function SSRAutosavePage({ params: paramsPromise }: Args) {
   const { slug = '' } = await paramsPromise
+
   const data = await getDoc<Page>({
     slug,
     collection: ssrAutosavePagesSlug,
@@ -45,7 +46,9 @@ export async function generateStaticParams() {
   process.env.PAYLOAD_DROP_DATABASE = 'false'
   try {
     const ssrPages = await getDocs<Page>(ssrAutosavePagesSlug)
-    return ssrPages?.map(({ slug }) => slug)
+    return ssrPages?.map((page) => {
+      return { slug: page.slug }
+    })
   } catch (_err) {
     return []
   }

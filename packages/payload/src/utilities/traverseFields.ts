@@ -1,8 +1,12 @@
-// @ts-strict-ignore
 import type { Config, SanitizedConfig } from '../config/types.js'
 import type { ArrayField, Block, BlocksField, Field, TabAsField } from '../fields/config/types.js'
 
-import { fieldHasSubFields } from '../fields/config/types.js'
+import {
+  fieldAffectsData,
+  fieldHasSubFields,
+  fieldShouldBeLocalized,
+  tabHasName,
+} from '../fields/config/types.js'
 
 const traverseArrayOrBlocksField = ({
   callback,
@@ -12,6 +16,8 @@ const traverseArrayOrBlocksField = ({
   field,
   fillEmpty,
   leavesFirst,
+  parentIsLocalized,
+  parentPath,
   parentRef,
 }: {
   callback: TraverseFieldsCallback
@@ -21,6 +27,8 @@ const traverseArrayOrBlocksField = ({
   field: ArrayField | BlocksField
   fillEmpty: boolean
   leavesFirst: boolean
+  parentIsLocalized: boolean
+  parentPath: string
   parentRef?: unknown
 }) => {
   if (fillEmpty) {
@@ -32,6 +40,8 @@ const traverseArrayOrBlocksField = ({
         fields: field.fields,
         isTopLevel: false,
         leavesFirst,
+        parentIsLocalized: parentIsLocalized || field.localized,
+        parentPath: `${parentPath}${field.name}.`,
         parentRef,
       })
     }
@@ -48,6 +58,8 @@ const traverseArrayOrBlocksField = ({
             fields: block.fields,
             isTopLevel: false,
             leavesFirst,
+            parentIsLocalized: parentIsLocalized || field.localized,
+            parentPath: `${parentPath}${field.name}.`,
             parentRef,
           })
         }
@@ -56,7 +68,7 @@ const traverseArrayOrBlocksField = ({
     return
   }
   for (const ref of data) {
-    let fields: Field[]
+    let fields!: Field[]
     if (field.type === 'blocks' && typeof ref?.blockType === 'string') {
       // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
       const block = field.blockReferences
@@ -66,7 +78,7 @@ const traverseArrayOrBlocksField = ({
             )) as Block)
         : field.blocks.find((b) => b.slug === ref.blockType)
 
-      fields = block?.fields
+      fields = block?.fields as Field[]
     } else if (field.type === 'array') {
       fields = field.fields
     }
@@ -80,6 +92,8 @@ const traverseArrayOrBlocksField = ({
         fillEmpty,
         isTopLevel: false,
         leavesFirst,
+        parentIsLocalized: parentIsLocalized || field.localized,
+        parentPath: `${parentPath}${field.name}.`,
         parentRef,
         ref,
       })
@@ -96,6 +110,8 @@ export type TraverseFieldsCallback = (args: {
    * Function that when called will skip the current field and continue to the next
    */
   next?: () => void
+  parentIsLocalized: boolean
+  parentPath: string
   /**
    * The parent reference object
    */
@@ -120,6 +136,8 @@ type TraverseFieldsArgs = {
    * The return value of the callback function will be ignored.
    */
   leavesFirst?: boolean
+  parentIsLocalized?: boolean
+  parentPath?: string
   parentRef?: Record<string, unknown> | unknown
   ref?: Record<string, unknown> | unknown
 }
@@ -141,6 +159,8 @@ export const traverseFields = ({
   fillEmpty = true,
   isTopLevel = true,
   leavesFirst = false,
+  parentIsLocalized,
+  parentPath = '',
   parentRef = {},
   ref = {},
 }: TraverseFieldsArgs): void => {
@@ -158,10 +178,23 @@ export const traverseFields = ({
       return
     }
 
-    if (!leavesFirst && callback && callback({ field, next, parentRef, ref })) {
+    if (
+      !leavesFirst &&
+      callback &&
+      callback({ field, next, parentIsLocalized: parentIsLocalized!, parentPath, parentRef, ref })
+    ) {
       return true
     } else if (leavesFirst) {
-      callbackStack.push(() => callback({ field, next, parentRef, ref }))
+      callbackStack.push(() =>
+        callback({
+          field,
+          next,
+          parentIsLocalized: parentIsLocalized!,
+          parentPath,
+          parentRef,
+          ref,
+        }),
+      )
     }
 
     if (skip) {
@@ -181,12 +214,15 @@ export const traverseFields = ({
         }
 
         if ('name' in tab && tab.name) {
-          if (!ref[tab.name] || typeof ref[tab.name] !== 'object') {
+          if (
+            !ref[tab.name as keyof typeof ref] ||
+            typeof ref[tab.name as keyof typeof ref] !== 'object'
+          ) {
             if (fillEmpty) {
               if (tab.localized) {
-                ref[tab.name] = { en: {} }
+                ;(ref as Record<string, any>)[tab.name] = { en: {} }
               } else {
-                ref[tab.name] = {}
+                ;(ref as Record<string, any>)[tab.name] = {}
               }
             } else {
               continue
@@ -199,6 +235,8 @@ export const traverseFields = ({
             callback({
               field: { ...tab, type: 'tab' },
               next,
+              parentIsLocalized: parentIsLocalized!,
+              parentPath,
               parentRef: currentParentRef,
               ref: tabRef,
             })
@@ -209,17 +247,22 @@ export const traverseFields = ({
               callback({
                 field: { ...tab, type: 'tab' },
                 next,
+                parentIsLocalized: parentIsLocalized!,
+                parentPath,
                 parentRef: currentParentRef,
                 ref: tabRef,
               }),
             )
           }
 
-          tabRef = tabRef[tab.name]
+          tabRef = tabRef[tab.name as keyof typeof tabRef]
 
           if (tab.localized) {
             for (const key in tabRef as Record<string, unknown>) {
-              if (tabRef[key] && typeof tabRef[key] === 'object') {
+              if (
+                tabRef[key as keyof typeof tabRef] &&
+                typeof tabRef[key as keyof typeof tabRef] === 'object'
+              ) {
                 traverseFields({
                   callback,
                   callbackStack,
@@ -228,8 +271,10 @@ export const traverseFields = ({
                   fillEmpty,
                   isTopLevel: false,
                   leavesFirst,
+                  parentIsLocalized: true,
+                  parentPath: `${parentPath}${tab.name}.`,
                   parentRef: currentParentRef,
-                  ref: tabRef[key],
+                  ref: tabRef[key as keyof typeof tabRef],
                 })
               }
             }
@@ -241,6 +286,8 @@ export const traverseFields = ({
             callback({
               field: { ...tab, type: 'tab' },
               next,
+              parentIsLocalized: parentIsLocalized!,
+              parentPath,
               parentRef: currentParentRef,
               ref: tabRef,
             })
@@ -251,6 +298,8 @@ export const traverseFields = ({
               callback({
                 field: { ...tab, type: 'tab' },
                 next,
+                parentIsLocalized: parentIsLocalized!,
+                parentPath,
                 parentRef: currentParentRef,
                 ref: tabRef,
               }),
@@ -267,6 +316,8 @@ export const traverseFields = ({
             fillEmpty,
             isTopLevel: false,
             leavesFirst,
+            parentIsLocalized: false,
+            parentPath: tabHasName(tab) ? `${parentPath}${tab.name}` : parentPath,
             parentRef: currentParentRef,
             ref: tabRef,
           })
@@ -280,56 +331,70 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type !== 'tab' && (fieldHasSubFields(field) || field.type === 'blocks')) {
+    if (field.type === 'tab' || fieldHasSubFields(field) || field.type === 'blocks') {
       if ('name' in field && field.name) {
         currentParentRef = currentRef
-        if (!ref[field.name]) {
+        if (!ref[field.name as keyof typeof ref]) {
           if (fillEmpty) {
-            if (field.type === 'group') {
-              if (field.localized) {
-                ref[field.name] = {
-                  en: {},
-                }
+            if (field.type === 'group' || field.type === 'tab') {
+              if (fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! })) {
+                ;(ref as Record<string, any>)[field.name] = { en: {} }
               } else {
-                ref[field.name] = {}
+                ;(ref as Record<string, any>)[field.name] = {}
               }
             } else if (field.type === 'array' || field.type === 'blocks') {
-              if (field.localized) {
-                ref[field.name] = {
-                  en: [],
-                }
+              if (fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! })) {
+                ;(ref as Record<string, any>)[field.name] = { en: [] }
               } else {
-                ref[field.name] = []
+                ;(ref as Record<string, any>)[field.name] = []
               }
             }
           } else {
             return
           }
         }
-        currentRef = ref[field.name]
+        currentRef = ref[field.name as keyof typeof ref]
       }
 
       if (
-        field.type === 'group' &&
-        field.localized &&
+        (field.type === 'tab' || field.type === 'group') &&
+        fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! }) &&
         currentRef &&
         typeof currentRef === 'object'
       ) {
-        for (const key in currentRef as Record<string, unknown>) {
-          if (currentRef[key]) {
-            traverseFields({
-              callback,
-              callbackStack,
-              config,
-              fields: field.fields,
-              fillEmpty,
-              isTopLevel: false,
-              leavesFirst,
-              parentRef: currentParentRef,
-              ref: currentRef[key],
-            })
+        if (fieldAffectsData(field)) {
+          for (const key in currentRef as Record<string, unknown>) {
+            if (currentRef[key as keyof typeof currentRef]) {
+              traverseFields({
+                callback,
+                callbackStack,
+                config,
+                fields: field.fields,
+                fillEmpty,
+                isTopLevel: false,
+                leavesFirst,
+                parentIsLocalized: true,
+                parentPath: field.name ? `${parentPath}${field.name}` : parentPath,
+                parentRef: currentParentRef,
+                ref: currentRef[key as keyof typeof currentRef],
+              })
+            }
           }
+        } else {
+          traverseFields({
+            callback,
+            callbackStack,
+            config,
+            fields: field.fields,
+            fillEmpty,
+            isTopLevel: false,
+            leavesFirst,
+            parentIsLocalized,
+            parentRef: currentParentRef,
+            ref: currentRef,
+          })
         }
+
         return
       }
 
@@ -338,27 +403,51 @@ export const traverseFields = ({
         currentRef &&
         typeof currentRef === 'object'
       ) {
-        if (field.localized) {
+        // TODO: `?? field.localized ?? false` shouldn't be necessary, but right now it
+        // is so that all fields are correctly traversed in copyToLocale and
+        // therefore pass the localization integration tests.
+        // I tried replacing the `!parentIsLocalized` condition with `parentIsLocalized === false`
+        // in `fieldShouldBeLocalized`, but several tests failed. We must be calling it with incorrect
+        // parameters somewhere.
+        if (
+          fieldShouldBeLocalized({
+            field,
+            parentIsLocalized: parentIsLocalized ?? false,
+          })
+        ) {
           if (Array.isArray(currentRef)) {
-            return
-          }
-
-          for (const key in currentRef as Record<string, unknown>) {
-            const localeData = currentRef[key]
-            if (!Array.isArray(localeData)) {
-              continue
-            }
-
             traverseArrayOrBlocksField({
               callback,
               callbackStack,
               config,
-              data: localeData,
+              data: currentRef,
               field,
               fillEmpty,
               leavesFirst,
+              parentIsLocalized: true,
+              parentPath,
               parentRef: currentParentRef,
             })
+          } else {
+            for (const key in currentRef as Record<string, unknown>) {
+              const localeData = currentRef[key as keyof typeof currentRef]
+              if (!Array.isArray(localeData)) {
+                continue
+              }
+
+              traverseArrayOrBlocksField({
+                callback,
+                callbackStack,
+                config,
+                data: localeData,
+                field,
+                fillEmpty,
+                leavesFirst,
+                parentIsLocalized: true,
+                parentPath,
+                parentRef: currentParentRef,
+              })
+            }
           }
         } else if (Array.isArray(currentRef)) {
           traverseArrayOrBlocksField({
@@ -369,6 +458,8 @@ export const traverseFields = ({
             field,
             fillEmpty,
             leavesFirst,
+            parentIsLocalized: parentIsLocalized!,
+            parentPath,
             parentRef: currentParentRef,
           })
         }
@@ -381,6 +472,8 @@ export const traverseFields = ({
           fillEmpty,
           isTopLevel: false,
           leavesFirst,
+          parentIsLocalized,
+          parentPath,
           parentRef: currentParentRef,
           ref: currentRef,
         })

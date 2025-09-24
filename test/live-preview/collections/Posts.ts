@@ -15,6 +15,7 @@ export const Posts: CollectionConfig = {
     update: () => true,
     delete: () => true,
   },
+  trash: true,
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],

@@ -24,20 +24,63 @@ import type {
   Row,
 } from './forms/Form.js'
 
+export type {
+  /**
+   * @deprecated
+   * The `CustomPreviewButton` type is deprecated and will be removed in the next major version.
+   * This type is only used for the Payload Config. Use `PreviewButtonClientProps` instead.
+   */
+  CustomComponent as CustomPreviewButton,
+  /**
+   * @deprecated
+   * The `CustomPublishButton` type is deprecated and will be removed in the next major version.
+   * This type is only used for the Payload Config. Use `PreviewButtonClientProps` instead.
+   */
+  CustomComponent as CustomPublishButton,
+  /**
+   * @deprecated
+   * The `CustomSaveButton` type is deprecated and will be removed in the next major version.
+   * This type is only used for the Payload Config. Use `PreviewButtonClientProps` instead.
+   */
+  CustomComponent as CustomSaveButton,
+  /**
+   * @deprecated
+   * The `CustomSaveDraftButton` type is deprecated and will be removed in the next major version.
+   * This type is only used for the Payload Config. Use `PreviewButtonClientProps` instead.
+   */
+  CustomComponent as CustomSaveDraftButton,
+} from '../config/types.js'
 export type { DefaultCellComponentProps, DefaultServerCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
-export type { NavGroupPreferences, NavPreferences } from './elements/Nav.js'
-export type { CustomPreviewButton } from './elements/PreviewButton.js'
-export type { CustomPublishButton } from './elements/PublishButton.js'
-export type { CustomSaveButton } from './elements/SaveButton.js'
-export type { CustomSaveDraftButton } from './elements/SaveDraftButton.js'
 export type {
-  DocumentTabComponent,
-  DocumentTabCondition,
-  DocumentTabConfig,
-  DocumentTabProps,
-} from './elements/Tab.js'
+  EditMenuItemsClientProps,
+  EditMenuItemsServerProps,
+  EditMenuItemsServerPropsOnly,
+} from './elements/EditMenuItems.js'
+export type { NavGroupPreferences, NavPreferences } from './elements/Nav.js'
+export type {
+  PreviewButtonClientProps,
+  PreviewButtonServerProps,
+  PreviewButtonServerPropsOnly,
+} from './elements/PreviewButton.js'
+export type {
+  PublishButtonClientProps,
+  PublishButtonServerProps,
+  PublishButtonServerPropsOnly,
+} from './elements/PublishButton.js'
+export type {
+  SaveButtonClientProps,
+  SaveButtonServerProps,
+  SaveButtonServerPropsOnly,
+} from './elements/SaveButton.js'
+export type {
+  SaveDraftButtonClientProps,
+  SaveDraftButtonServerProps,
+  SaveDraftButtonServerPropsOnly,
+} from './elements/SaveDraftButton.js'
+
+export type { Column } from './elements/Table.js'
 
 export type { CustomUpload } from './elements/Upload.js'
 
@@ -398,14 +441,6 @@ export type {
 } from './forms/Diff.js'
 
 export type {
-  FieldErrorClientComponent,
-  FieldErrorClientProps,
-  FieldErrorServerComponent,
-  FieldErrorServerProps,
-  GenericErrorProps,
-} from './forms/Error.js'
-
-export type {
   BuildFormStateArgs,
   Data,
   FieldState as FormField,
@@ -415,6 +450,14 @@ export type {
   FormStateWithoutComponents,
   Row,
 }
+
+export type {
+  FieldErrorClientComponent,
+  FieldErrorClientProps,
+  FieldErrorServerComponent,
+  FieldErrorServerProps,
+  GenericErrorProps,
+} from './forms/Error.js'
 
 export type {
   ClientComponentProps,
@@ -437,18 +480,6 @@ export type {
 } from './forms/Label.js'
 
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel.js'
-
-export type {
-  BuildTableStateArgs,
-  DefaultServerFunctionArgs,
-  ListQuery,
-  ServerFunction,
-  ServerFunctionArgs,
-  ServerFunctionClient,
-  ServerFunctionClientArgs,
-  ServerFunctionConfig,
-  ServerFunctionHandler,
-} from './functions/index.js'
 
 export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
   Component?: React.ComponentType<TComponentClientProps>
@@ -527,28 +558,141 @@ export type FieldRow = {
 }
 
 export type DocumentSlots = {
+  BeforeDocumentControls?: React.ReactNode
   Description?: React.ReactNode
+  EditMenuItems?: React.ReactNode
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
   Upload?: React.ReactNode
+  UploadControls?: React.ReactNode
 }
+
+export type {
+  BuildCollectionFolderViewResult,
+  BuildTableStateArgs,
+  DefaultServerFunctionArgs,
+  GetFolderResultsComponentAndDataArgs,
+  ListQuery,
+  ServerFunction,
+  ServerFunctionArgs,
+  ServerFunctionClient,
+  ServerFunctionClientArgs,
+  ServerFunctionConfig,
+  ServerFunctionHandler,
+} from './functions/index.js'
 
 export type { LanguageOptions } from './LanguageOptions.js'
 
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
 
 export type {
+  BeforeDocumentControlsClientProps,
+  BeforeDocumentControlsServerProps,
+  BeforeDocumentControlsServerPropsOnly,
+  DocumentSubViewTypes,
+  DocumentTabClientProps,
+  /**
+   * @deprecated
+   * The `DocumentTabComponent` type is deprecated and will be removed in the next major version.
+   * Use `DocumentTabServerProps`or `DocumentTabClientProps` instead.
+   */
+  DocumentTabComponent,
+  DocumentTabCondition,
+  DocumentTabConfig,
+  /**
+   * @deprecated
+   * The `DocumentTabProps` type is deprecated and will be removed in the next major version.
+   * Use `DocumentTabServerProps` instead.
+   */
+  DocumentTabServerProps as DocumentTabProps,
+  DocumentTabServerProps,
+  DocumentTabServerPropsOnly,
+  /**
+   * @deprecated
+   * The `ClientSideEditViewProps` type is deprecated and will be removed in the next major version.
+   * Use `DocumentViewClientProps` instead.
+   */
+  DocumentViewClientProps as ClientSideEditViewProps,
+  DocumentViewClientProps,
+  /**
+   * @deprecated
+   * The `ServerSideEditViewProps` is deprecated and will be removed in the next major version.
+   * Use `DocumentViewServerProps` instead.
+   */
+  DocumentViewServerProps as ServerSideEditViewProps,
+  DocumentViewServerProps,
+  DocumentViewServerPropsOnly,
+  EditViewProps,
+  RenderDocumentVersionsProperties,
+} from './views/document.js'
+
+export type {
+  AfterFolderListClientProps,
+  AfterFolderListServerProps,
+  AfterFolderListServerPropsOnly,
+  AfterFolderListTableClientProps,
+  AfterFolderListTableServerProps,
+  AfterFolderListTableServerPropsOnly,
+  BeforeFolderListClientProps,
+  BeforeFolderListServerProps,
+  BeforeFolderListServerPropsOnly,
+  BeforeFolderListTableClientProps,
+  BeforeFolderListTableServerProps,
+  BeforeFolderListTableServerPropsOnly,
+  FolderListViewClientProps,
+  FolderListViewServerProps,
+  FolderListViewServerPropsOnly,
+  FolderListViewSlots,
+  FolderListViewSlotSharedClientProps,
+} from './views/folderList.js'
+
+export type {
+  AdminViewClientProps,
+  /**
+   * @deprecated
+   * The `AdminViewComponent` type is deprecated and will be removed in the next major version.
+   * Type your component props directly instead.
+   */
   AdminViewComponent,
   AdminViewConfig,
-  AdminViewProps,
-  ClientSideEditViewProps,
-  EditViewProps,
+  /**
+   * @deprecated
+   * The `AdminViewProps` type is deprecated and will be removed in the next major version.
+   * Use `AdminViewServerProps` instead.
+   */
+  AdminViewServerProps as AdminViewProps,
+  AdminViewServerProps,
+  AdminViewServerPropsOnly,
   InitPageResult,
-  ServerSideEditViewProps,
+  ServerPropsFromView,
+  ViewDescriptionClientProps,
+  ViewDescriptionServerProps,
+  ViewDescriptionServerPropsOnly,
+  ViewTypes,
   VisibleEntities,
-} from './views/types.js'
+} from './views/index.js'
+
+export type {
+  AfterListClientProps,
+  AfterListServerProps,
+  AfterListServerPropsOnly,
+  AfterListTableClientProps,
+  AfterListTableServerProps,
+  AfterListTableServerPropsOnly,
+  BeforeListClientProps,
+  BeforeListServerProps,
+  BeforeListServerPropsOnly,
+  BeforeListTableClientProps,
+  BeforeListTableServerProps,
+  BeforeListTableServerPropsOnly,
+  ListViewClientProps,
+  ListViewServerProps,
+  ListViewServerPropsOnly,
+  ListViewSlots,
+  ListViewSlotSharedClientProps,
+} from './views/list.js'
 
 type SchemaPath = {} & string
 export type FieldSchemaMap = Map<

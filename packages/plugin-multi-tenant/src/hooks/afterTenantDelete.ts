@@ -115,7 +115,13 @@ export const afterTenantDelete =
             id: user.id,
             collection: usersSlug,
             data: {
-              tenants: (user.tenants || []).filter(({ tenant: tenantID }) => tenantID !== id),
+              [usersTenantsArrayFieldName]: (user[usersTenantsArrayFieldName] || []).filter(
+                (row: Record<string, string>) => {
+                  if (row[usersTenantsArrayTenantFieldName]) {
+                    return row[usersTenantsArrayTenantFieldName] !== id
+                  }
+                },
+              ),
             },
           }),
         )

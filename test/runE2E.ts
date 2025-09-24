@@ -9,14 +9,20 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 
+// @todo remove in 4.0 - will behave like this by default in 4.0
+process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
+
 shelljs.env.DISABLE_LOGGING = 'true'
 
 const prod = process.argv.includes('--prod')
-process.argv = process.argv.filter((arg) => arg !== '--prod')
 if (prod) {
   process.env.PAYLOAD_TEST_PROD = 'true'
   shelljs.env.PAYLOAD_TEST_PROD = 'true'
 }
+
+const turbo = process.argv.includes('--no-turbo') ? false : true
+
+process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--no-turbo')
 
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
@@ -117,6 +123,10 @@ function executePlaywright(
   ]
   if (prod) {
     spawnDevArgs.push('--prod')
+  }
+
+  if (!turbo) {
+    spawnDevArgs.push('--no-turbo')
   }
 
   process.env.START_MEMORY_DB = 'true'

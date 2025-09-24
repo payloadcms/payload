@@ -15,25 +15,10 @@ import shelljs from 'shelljs'
 import { setTimeout } from 'timers/promises'
 
 import { devUser } from './credentials.js'
+import { openNav } from './helpers/e2e/toggleNav.js'
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
-type FirstRegisterArgs = {
-  customAdminRoutes?: Config['admin']['routes']
-  customRoutes?: Config['routes']
-  page: Page
-  serverURL: string
-}
-
-type LoginArgs = {
-  customAdminRoutes?: Config['admin']['routes']
-  customRoutes?: Config['routes']
-  data?: {
-    email: string
-    password: string
-  }
-  page: Page
-  serverURL: string
-}
+export type AdminRoutes = NonNullable<Config['admin']>['routes']
 
 const random = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 
@@ -45,7 +30,7 @@ const networkConditions = {
   },
   'Slow 3G': {
     download: ((500 * 1000) / 8) * 0.8,
-    latency: 400 * 5,
+    latency: 2500,
     upload: ((500 * 1000) / 8) * 0.8,
   },
   'Slow 4G': {
@@ -78,16 +63,14 @@ export async function ensureCompilationIsDone({
   noAutoLogin,
   readyURL,
 }: {
-  customAdminRoutes?: Config['admin']['routes']
+  customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   noAutoLogin?: boolean
   page: Page
   readyURL?: string
   serverURL: string
 }): Promise<void> {
-  const {
-    routes: { admin: adminRoute },
-  } = getRoutes({ customAdminRoutes, customRoutes })
+  const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
   const adminURL = `${serverURL}${adminRoute}`
 
@@ -103,10 +86,27 @@ export async function ensureCompilationIsDone({
       )
 
       await page.goto(adminURL)
-      await page.waitForURL(
-        readyURL ??
-          (noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL),
-      )
+
+      if (readyURL) {
+        await page.waitForURL(readyURL)
+      } else {
+        await expect
+          .poll(
+            () => {
+              if (noAutoLogin) {
+                const baseAdminURL = adminURL + (adminURL.endsWith('/') ? '' : '/')
+                return (
+                  page.url() === `${baseAdminURL}create-first-user` ||
+                  page.url() === `${baseAdminURL}login`
+                )
+              } else {
+                return page.url() === adminURL
+              }
+            },
+            { timeout: POLL_TOPASS_TIMEOUT },
+          )
+          .toBe(true)
+      }
 
       console.log('Successfully compiled')
       return
@@ -166,62 +166,6 @@ export async function throttleTest({
   return client
 }
 
-export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
-  const { customAdminRoutes, customRoutes, page, serverURL } = args
-
-  const {
-    routes: { admin: adminRoute },
-  } = getRoutes({ customAdminRoutes, customRoutes })
-
-  await page.goto(`${serverURL}${adminRoute}`)
-  await page.fill('#field-email', devUser.email)
-  await page.fill('#field-password', devUser.password)
-  await page.fill('#field-confirm-password', devUser.password)
-  await wait(500)
-  await page.click('[type=submit]')
-  await page.waitForURL(`${serverURL}${adminRoute}`)
-}
-
-export async function login(args: LoginArgs): Promise<void> {
-  const { customAdminRoutes, customRoutes, data = devUser, page, serverURL } = args
-
-  const {
-    admin: {
-      routes: { createFirstUser, login: incomingLoginRoute },
-    },
-    routes: { admin: incomingAdminRoute },
-  } = getRoutes({ customAdminRoutes, customRoutes })
-
-  const adminRoute = formatAdminURL({ serverURL, adminRoute: incomingAdminRoute, path: '' })
-  const loginRoute = formatAdminURL({
-    serverURL,
-    adminRoute: incomingAdminRoute,
-    path: incomingLoginRoute,
-  })
-  const createFirstUserRoute = formatAdminURL({
-    serverURL,
-    adminRoute: incomingAdminRoute,
-    path: createFirstUser,
-  })
-
-  await page.goto(loginRoute)
-  await page.waitForURL(loginRoute)
-  await wait(500)
-  await page.fill('#field-email', data.email)
-  await page.fill('#field-password', data.password)
-  await wait(500)
-  await page.click('[type=submit]')
-  await page.waitForURL(adminRoute)
-
-  await expect(() => expect(page.url()).not.toContain(loginRoute)).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
-  await expect(() => expect(page.url()).not.toContain(createFirstUserRoute)).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-}
-
 export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
   const ua = page.evaluate(() => navigator.userAgent)
   const isMac = (await ua).includes('Mac OS X')
@@ -241,7 +185,12 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
 
 export async function saveDocAndAssert(
   page: Page,
-  selector = '#action-save',
+  selector:
+    | '#action-publish'
+    | '#action-save'
+    | '#action-save-draft'
+    | '#publish-locale'
+    | string = '#action-save',
   expectation: 'error' | 'success' = 'success',
 ): Promise<void> {
   await wait(500) // TODO: Fix this
@@ -249,22 +198,10 @@ export async function saveDocAndAssert(
 
   if (expectation === 'success') {
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('/create')
   } else {
     await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
   }
-}
-
-export async function openNav(page: Page): Promise<void> {
-  // check to see if the nav is already open and if not, open it
-  // use the `--nav-open` modifier class to check if the nav is open
-  // this will prevent clicking nav links that are bleeding off the screen
-  if (await page.locator('.template-default.template-default--nav-open').isVisible()) {
-    return
-  }
-  // playwright: get first element with .nav-toggler which is VISIBLE (not hidden), could be 2 elements with .nav-toggler on mobile and desktop but only one is visible
-  await page.locator('.nav-toggler >> visible=true').click()
-  await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
 }
 
 export async function openDocDrawer(page: Page, selector: string): Promise<void> {
@@ -360,22 +297,26 @@ export const checkBreadcrumb = async (page: Page, text: string) => {
     .toBe(text)
 }
 
-export const selectTableRow = async (page: Page, title: string): Promise<void> => {
+export const selectTableRow = async (scope: Locator | Page, title: string): Promise<void> => {
   const selector = `tbody tr:has-text("${title}") .select-row__checkbox input[type=checkbox]`
-  await page.locator(selector).check()
-  await expect(page.locator(selector)).toBeChecked()
+  await scope.locator(selector).check()
+  await expect(scope.locator(selector)).toBeChecked()
 }
 
-export const findTableCell = (page: Page, fieldName: string, rowTitle?: string): Locator => {
-  const parentEl = rowTitle ? findTableRow(page, rowTitle) : page.locator('tbody tr')
+export const findTableCell = async (
+  page: Page,
+  fieldName: string,
+  rowTitle?: string,
+): Promise<Locator> => {
+  const parentEl = rowTitle ? await findTableRow(page, rowTitle) : page.locator('tbody tr')
   const cell = parentEl.locator(`td.cell-${fieldName}`)
-  expect(cell).toBeTruthy()
+  await expect(cell).toBeVisible()
   return cell
 }
 
-export const findTableRow = (page: Page, title: string): Locator => {
+export const findTableRow = async (page: Page, title: string): Promise<Locator> => {
   const row = page.locator(`tbody tr:has-text("${title}")`)
-  expect(row).toBeTruthy()
+  await expect(row).toBeVisible()
   return row
 }
 
@@ -385,15 +326,24 @@ export async function switchTab(page: Page, selector: string) {
   await expect(page.locator(`${selector}.tabs-field__tab-button--active`)).toBeVisible()
 }
 
+export const openColumnControls = async (page: Page) => {
+  await page.locator('.list-controls__toggle-columns').click()
+  await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+}
+
 /**
  * Throws an error when browser console error messages (with some exceptions) are thrown, thus resulting
  * in the e2e test failing.
  *
  * Useful to prevent the e2e test from passing when, for example, there are react missing key prop errors
  * @param page
+ * @param options
  */
 export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: boolean }) {
   const { ignoreCORS = false } = options || {} // Default to not ignoring CORS errors
+  const consoleErrors: string[] = []
+
+  let shouldCollectErrors = false
 
   page.on('console', (msg) => {
     if (
@@ -435,6 +385,21 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       console.log(`Ignoring expected network error: ${msg.text()}`)
     }
   })
+
+  // Capture uncaught errors that do not appear in the console
+  page.on('pageerror', (error) => {
+    if (shouldCollectErrors) {
+      consoleErrors.push(`Page error: ${error.message}`)
+    } else {
+      throw new Error(`Page error: ${error.message}`)
+    }
+  })
+
+  return {
+    consoleErrors,
+    collectErrors: () => (shouldCollectErrors = true), // Enable collection of errors for specific tests
+    stopCollectingErrors: () => (shouldCollectErrors = false), // Disable collection of errors after the test
+  }
 }
 
 export function describeIfInCIOrHasLocalstack(): jest.Describe {
@@ -455,8 +420,6 @@ export function describeIfInCIOrHasLocalstack(): jest.Describe {
   return describe
 }
 
-type AdminRoutes = Config['admin']['routes']
-
 export function getRoutes({
   customAdminRoutes,
   customRoutes,
@@ -470,7 +433,7 @@ export function getRoutes({
   routes: Config['routes']
 } {
   let routes = defaults.routes
-  let adminRoutes = defaults.admin.routes
+  let adminRoutes = defaults.admin?.routes
 
   if (customAdminRoutes) {
     adminRoutes = {

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import crypto from 'crypto'
 import { status as httpStatus } from 'http-status'
 import { URL } from 'url'
@@ -13,7 +12,9 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { APIError } from '../../errors/index.js'
 import { Forbidden } from '../../index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getLoginOptions } from '../getLoginOptions.js'
@@ -64,18 +65,18 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection?.config,
-          context: args.req.context,
-          operation: 'forgotPassword',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection?.config,
+            context: args.req.context,
+            operation: 'forgotPassword',
+            req: args.req,
+          })) || args
+      }
+    }
 
     const {
       collection: { config: collectionConfig },
@@ -123,6 +124,13 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       }
     }
 
+    // Exclude trashed users unless `trash: true`
+    whereConstraint = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash: false,
+      where: whereConstraint,
+    })
+
     let user = await payload.db.findOne<UserDoc>({
       collection: collectionConfig.slug,
       req,
@@ -137,27 +145,33 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       return null
     }
 
-    user.resetPasswordToken = token
-    user.resetPasswordExpiration = new Date(
+    const resetPasswordExpiration = new Date(
       Date.now() + (collectionConfig.auth?.forgotPassword?.expiration ?? expiration ?? 3600000),
     ).toISOString()
 
     user = await payload.update({
       id: user.id,
       collection: collectionConfig.slug,
-      data: user,
+      data: {
+        resetPasswordExpiration,
+        resetPasswordToken: token,
+      },
       req,
     })
 
     if (!disableEmail && user.email) {
-      const protocol = new URL(req.url).protocol // includes the final :
+      const protocol = new URL(req.url!).protocol // includes the final :
       const serverURL =
         config.serverURL !== null && config.serverURL !== ''
           ? config.serverURL
           : `${protocol}//${req.headers.get('host')}`
-
+      const forgotURL = formatAdminURL({
+        adminRoute: config.routes.admin,
+        path: `${config.admin.routes.reset}/${token}`,
+        serverURL,
+      })
       let html = `${req.t('authentication:youAreReceivingResetPassword')}
-    <a href="${serverURL}${config.routes.admin}${config.admin.routes.reset}/${token}">${serverURL}${config.routes.admin}${config.admin.routes.reset}/${token}</a>
+    <a href="${forgotURL}">${forgotURL}</a>
     ${req.t('authentication:youDidNotRequestPassword')}`
 
       if (typeof collectionConfig.auth.forgotPassword?.generateEmailHTML === 'function') {
@@ -190,10 +204,11 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     // afterForgotPassword - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterForgotPassword.reduce(async (priorHook, hook) => {
-      await priorHook
-      await hook({ args, collection: args.collection?.config, context: req.context })
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterForgotPassword?.length) {
+      for (const hook of collectionConfig.hooks.afterForgotPassword) {
+        await hook({ args, collection: args.collection?.config, context: req.context })
+      }
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

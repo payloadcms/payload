@@ -1,34 +1,38 @@
-import type { DocumentTabConfig, DocumentTabProps } from 'payload'
+import type {
+  DocumentTabConfig,
+  DocumentTabServerPropsOnly,
+  PayloadRequest,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+  SanitizedPermissions,
+} from 'payload'
 import type React from 'react'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { Fragment } from 'react'
 
-import './index.scss'
 import { DocumentTabLink } from './TabLink.js'
+import './index.scss'
 
 export const baseClass = 'doc-tab'
 
-export const DocumentTab: React.FC<
-  { readonly Pill_Component?: React.FC } & DocumentTabConfig & DocumentTabProps
-> = (props) => {
+export const DefaultDocumentTab: React.FC<{
+  apiURL?: string
+  collectionConfig?: SanitizedCollectionConfig
+  globalConfig?: SanitizedGlobalConfig
+  path?: string
+  permissions?: SanitizedPermissions
+  req: PayloadRequest
+  tabConfig: { readonly Pill_Component?: React.FC } & DocumentTabConfig
+}> = (props) => {
   const {
     apiURL,
     collectionConfig,
-    condition,
     globalConfig,
-    href: tabHref,
-    i18n,
-    isActive: tabIsActive,
-    label,
-    newTab,
-    payload,
     permissions,
-    Pill,
-    Pill_Component,
+    req,
+    tabConfig: { href: tabHref, isActive: tabIsActive, label, newTab, Pill, Pill_Component },
   } = props
-  const { config } = payload
-  const { routes } = config
 
   let href = typeof tabHref === 'string' ? tabHref : ''
   let isActive = typeof tabIsActive === 'boolean' ? tabIsActive : false
@@ -38,7 +42,7 @@ export const DocumentTab: React.FC<
       apiURL,
       collection: collectionConfig,
       global: globalConfig,
-      routes,
+      routes: req.payload.config.routes,
     })
   }
 
@@ -48,49 +52,42 @@ export const DocumentTab: React.FC<
     })
   }
 
-  const meetsCondition =
-    !condition ||
-    (condition && Boolean(condition({ collectionConfig, config, globalConfig, permissions })))
+  const labelToRender =
+    typeof label === 'function'
+      ? label({
+          t: req.i18n.t,
+        })
+      : label
 
-  if (meetsCondition) {
-    const labelToRender =
-      typeof label === 'function'
-        ? label({
-            t: i18n.t,
-          })
-        : label
-
-    return (
-      <DocumentTabLink
-        adminRoute={routes.admin}
-        ariaLabel={labelToRender}
-        baseClass={baseClass}
-        href={href}
-        isActive={isActive}
-        isCollection={!!collectionConfig && !globalConfig}
-        newTab={newTab}
-      >
-        <span className={`${baseClass}__label`}>
-          {labelToRender}
-          {Pill || Pill_Component ? (
-            <Fragment>
-              &nbsp;
-              {RenderServerComponent({
-                Component: Pill,
-                Fallback: Pill_Component,
-                importMap: payload.importMap,
-                serverProps: {
-                  i18n,
-                  payload,
-                  permissions,
-                },
-              })}
-            </Fragment>
-          ) : null}
-        </span>
-      </DocumentTabLink>
-    )
-  }
-
-  return null
+  return (
+    <DocumentTabLink
+      adminRoute={req.payload.config.routes.admin}
+      ariaLabel={labelToRender}
+      baseClass={baseClass}
+      href={href}
+      isActive={isActive}
+      newTab={newTab}
+    >
+      <span className={`${baseClass}__label`}>
+        {labelToRender}
+        {Pill || Pill_Component ? (
+          <Fragment>
+            &nbsp;
+            {RenderServerComponent({
+              Component: Pill,
+              Fallback: Pill_Component,
+              importMap: req.payload.importMap,
+              serverProps: {
+                i18n: req.i18n,
+                payload: req.payload,
+                permissions,
+                req,
+                user: req.user,
+              } satisfies DocumentTabServerPropsOnly,
+            })}
+          </Fragment>
+        ) : null}
+      </span>
+    </DocumentTabLink>
+  )
 }

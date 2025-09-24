@@ -7,6 +7,7 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { tenantsSlug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -32,19 +33,16 @@ describe('@payloadcms/plugin-multi-tenant', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('tenants', () => {
     it('should create a tenant', async () => {
       const tenant1 = await payload.create({
-        collection: 'tenants',
+        collection: tenantsSlug,
         data: {
           name: 'tenant1',
           domain: 'tenant1.com',
-          slug: 'tenant1',
         },
       })
 

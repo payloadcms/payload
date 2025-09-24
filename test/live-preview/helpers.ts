@@ -2,9 +2,9 @@ import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { exactText } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
+import { toggleLivePreview } from '../helpers/e2e/live-preview/toggleLivePreview.js'
+import { navigateToDoc, navigateToTrashedDoc } from '../helpers/e2e/navigateToDoc.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 
 export const goToCollectionLivePreview = async (
@@ -12,8 +12,18 @@ export const goToCollectionLivePreview = async (
   urlUtil: AdminUrlUtil,
 ): Promise<void> => {
   await navigateToDoc(page, urlUtil)
-  await page.goto(`${page.url()}/preview`)
-  await page.waitForURL(`**/preview`)
+
+  await toggleLivePreview(page, {
+    targetState: 'on',
+  })
+}
+
+export const goToTrashedLivePreview = async (page: Page, urlUtil: AdminUrlUtil): Promise<void> => {
+  await navigateToTrashedDoc(page, urlUtil)
+
+  await toggleLivePreview(page, {
+    targetState: 'on',
+  })
 }
 
 export const goToGlobalLivePreview = async (
@@ -21,63 +31,12 @@ export const goToGlobalLivePreview = async (
   slug: string,
   serverURL: string,
 ): Promise<void> => {
-  const global = new AdminUrlUtil(serverURL, slug)
-  const previewURL = `${global.global(slug)}/preview`
-  await page.goto(previewURL)
-  await page.waitForURL(previewURL)
-}
+  const globalUrlUtil = new AdminUrlUtil(serverURL, slug)
+  await page.goto(globalUrlUtil.global(slug))
 
-export const selectLivePreviewBreakpoint = async (page: Page, breakpointLabel: string) => {
-  const breakpointSelector = page.locator(
-    '.live-preview-toolbar-controls__breakpoint button.popup-button',
-  )
-
-  await expect(() => expect(breakpointSelector).toBeTruthy()).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
+  await toggleLivePreview(page, {
+    targetState: 'on',
   })
-
-  await breakpointSelector.first().click()
-
-  await page
-    .locator(`.live-preview-toolbar-controls__breakpoint button.popup-button-list__button`)
-    .filter({ hasText: breakpointLabel })
-    .click()
-
-  await expect(breakpointSelector).toContainText(breakpointLabel)
-
-  const option = page.locator(
-    '.live-preview-toolbar-controls__breakpoint button.popup-button-list__button--selected',
-  )
-
-  await expect(option).toHaveText(breakpointLabel)
-}
-
-export const selectLivePreviewZoom = async (page: Page, zoomLabel: string) => {
-  const zoomSelector = page.locator('.live-preview-toolbar-controls__zoom button.popup-button')
-
-  await expect(() => expect(zoomSelector).toBeTruthy()).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
-  await zoomSelector.first().click()
-
-  const zoomOption = page.locator(
-    '.live-preview-toolbar-controls__zoom button.popup-button-list__button',
-    {
-      hasText: exactText(zoomLabel),
-    },
-  )
-
-  expect(zoomOption).toBeTruthy()
-  await zoomOption.click()
-
-  await expect(zoomSelector).toContainText(zoomLabel)
-
-  const option = page.locator(
-    '.live-preview-toolbar-controls__zoom button.popup-button-list__button--selected',
-  )
-
-  await expect(option).toHaveText(zoomLabel)
 }
 
 export const ensureDeviceIsCentered = async (page: Page) => {

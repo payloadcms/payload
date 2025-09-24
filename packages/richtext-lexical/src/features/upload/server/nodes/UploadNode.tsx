@@ -8,7 +8,13 @@ import type {
   NodeKey,
   Spread,
 } from 'lexical'
-import type { FileData, JsonObject, TypedCollection, TypeWithID } from 'payload'
+import type {
+  CollectionSlug,
+  DataFromCollectionSlug,
+  JsonObject,
+  TypedUploadCollection,
+  UploadCollectionSlug,
+} from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
@@ -17,28 +23,41 @@ import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
 
 export type UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
-  fields: TUploadExtraFieldsData
-  /** Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document */
-  id: string
-  relationTo: string
-  /** Value can be just the document ID, or the full, populated document */
-  value: number | string | TypedCollection
-}
+  [TCollectionSlug in CollectionSlug]: {
+    fields: TUploadExtraFieldsData
+    /**
+     * Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
+     */
+    id: string
+    relationTo: TCollectionSlug
+    /**
+     * Value can be just the document ID, or the full, populated document
+     */
+    value: DataFromCollectionSlug<TCollectionSlug> | number | string
+  }
+}[CollectionSlug]
 
-// TODO: deprecate in Payload v4.
 /**
  * UploadDataImproved is a more precise type, and will replace UploadData in Payload v4.
  * This type is for internal use only as it will be deprecated in the future.
  * @internal
+ *
+ * @todo Replace UploadData with UploadDataImproved in 4.0
  */
 export type UploadDataImproved<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
-  fields: TUploadExtraFieldsData
-  // Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
-  id: string
-  relationTo: string
-  // Value can be just the document ID, or the full, populated document
-  value: (FileData & TypeWithID) | number | string
-}
+  [TCollectionSlug in UploadCollectionSlug]: {
+    fields: TUploadExtraFieldsData
+    /**
+     * Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
+     */
+    id: string
+    relationTo: TCollectionSlug
+    /**
+     * Value can be just the document ID, or the full, populated document
+     */
+    value: number | string | TypedUploadCollection[TCollectionSlug]
+  }
+}[UploadCollectionSlug]
 
 export function isGoogleDocCheckboxImg(img: HTMLImageElement): boolean {
   return (

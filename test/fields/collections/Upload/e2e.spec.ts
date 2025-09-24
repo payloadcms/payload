@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -11,13 +12,11 @@ import type { Config } from '../../payload-types.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
-  openDocDrawer,
   saveDocAndAssert,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { uploadsSlug } from '../../slugs.js'
 
@@ -28,7 +27,6 @@ const dirname = path.resolve(currentFolder, '../../')
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let client: RESTClient
 let page: Page
 let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
@@ -57,12 +55,6 @@ describe('Upload', () => {
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
-    if (client) {
-      await client.logout()
-    }
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
-
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -82,8 +74,6 @@ describe('Upload', () => {
   })
 
   test('should upload files from remote URL', async () => {
-    await uploadImage()
-
     await page.goto(url.create)
 
     const pasteURLButton = page.locator('.file-field__upload button', {
@@ -91,7 +81,8 @@ describe('Upload', () => {
     })
     await pasteURLButton.click()
 
-    const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
+    const remoteImage =
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg'
 
     const inputField = page.locator('.file-field__upload .file-field__remote-file')
     await inputField.fill(remoteImage)
@@ -117,14 +108,15 @@ describe('Upload', () => {
     })
     await pasteURLButton.click()
 
-    const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
+    const remoteImage =
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg'
 
     const inputField = page.locator('.file-field__upload .file-field__remote-file')
     await inputField.fill(remoteImage)
 
     // Intercept the upload request
     await page.route(
-      'https://payloadcms.com/images/og-image.jpg',
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg',
       (route) => setTimeout(() => route.continue(), 2000), // Artificial 2-second delay
     )
 
@@ -135,7 +127,9 @@ describe('Upload', () => {
     await expect(submitButton).toBeDisabled()
 
     // Wait for the upload to complete
-    await page.waitForResponse('https://payloadcms.com/images/og-image.jpg')
+    await page.waitForResponse(
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg',
+    )
 
     // Assert the submit button is re-enabled after upload
     await expect(submitButton).toBeEnabled()
@@ -155,14 +149,16 @@ describe('Upload', () => {
     await wait(1000)
     // Open the media drawer and create a png upload
 
-    await openDocDrawer(page, '#field-media .upload__createNewToggler')
+    await openDocDrawer({ page, selector: '#field-media .upload__createNewToggler' })
 
     await page
       .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
+
     await expect(
       page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
     ).toHaveValue('payload.png')
+
     await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
@@ -170,9 +166,11 @@ describe('Upload', () => {
     await expect(
       page.locator('.field-type.upload .upload-relationship-details__filename a'),
     ).toHaveAttribute('href', '/api/uploads/file/payload-1.png')
+
     await expect(
       page.locator('.field-type.upload .upload-relationship-details__filename a'),
     ).toContainText('payload-1.png')
+
     await expect(
       page.locator('.field-type.upload .upload-relationship-details img'),
     ).toHaveAttribute('src', '/api/uploads/file/payload-1.png')
@@ -184,7 +182,7 @@ describe('Upload', () => {
     await wait(1000)
     // Open the media drawer and create a png upload
 
-    await openDocDrawer(page, '#field-media .upload__createNewToggler')
+    await openDocDrawer({ page, selector: '#field-media .upload__createNewToggler' })
 
     await page
       .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
@@ -222,7 +220,7 @@ describe('Upload', () => {
     await uploadImage()
     await wait(1000) // TODO: Fix this. Need to wait a bit until the form in the drawer mounted, otherwise values sometimes disappear. This is an issue for all drawers
 
-    await openDocDrawer(page, '#field-media .upload__createNewToggler')
+    await openDocDrawer({ page, selector: '#field-media .upload__createNewToggler' })
 
     await wait(1000)
 
@@ -240,7 +238,7 @@ describe('Upload', () => {
   test('should select using the list drawer and restrict mimetype based on filterOptions', async () => {
     await uploadImage()
 
-    await openDocDrawer(page, '.field-type.upload .upload__listToggler')
+    await openDocDrawer({ page, selector: '.field-type.upload .upload__listToggler' })
 
     const jpgImages = page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]')
     await expect
@@ -262,7 +260,7 @@ describe('Upload', () => {
     await wait(200)
 
     // open drawer
-    await openDocDrawer(page, '.field-type.upload .list-drawer__toggler')
+    await openDocDrawer({ page, selector: '.field-type.upload .list-drawer__toggler' })
     // check title
     await expect(page.locator('.list-drawer__header-text')).toContainText('Uploads 3')
   })

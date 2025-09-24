@@ -6,13 +6,18 @@ export const Global: GlobalConfig = {
   slug: globalSlug,
   admin: {
     components: {
+      elements: {
+        beforeDocumentControls: [
+          '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
+        ],
+      },
       views: {
         edit: {
           api: {
-            actions: ['/components/GlobalAPIButton/index.js#GlobalAPIButton'],
+            actions: ['/components/actions/GlobalAPIButton/index.js#GlobalAPIButton'],
           },
           default: {
-            actions: ['/components/GlobalEditButton/index.js#GlobalEditButton'],
+            actions: ['/components/actions/GlobalEditButton/index.js#GlobalEditButton'],
           },
         },
       },

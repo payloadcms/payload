@@ -15,9 +15,11 @@ export async function createVersion<T extends TypeWithID>(
     autosave,
     collectionSlug,
     createdAt,
+    localeStatus,
     parent,
     publishedLocale,
     req,
+    returning,
     select,
     snapshot,
     updatedAt,
@@ -39,6 +41,7 @@ export async function createVersion<T extends TypeWithID>(
     autosave,
     createdAt,
     latest: true,
+    localeStatus,
     parent,
     publishedLocale,
     snapshot,
@@ -70,6 +73,10 @@ export async function createVersion<T extends TypeWithID>(
           AND ${table.updatedAt} < ${result.updatedAt}
       `,
     })
+  }
+
+  if (returning === false) {
+    return null
   }
 
   return result

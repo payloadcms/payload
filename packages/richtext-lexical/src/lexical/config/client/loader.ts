@@ -16,12 +16,14 @@ import type { ClientEditorConfig } from '../types.js'
  */
 export function loadClientFeatures({
   config,
+  featureClientImportMap,
   featureClientSchemaMap,
   field,
   schemaPath,
   unSanitizedEditorConfig,
 }: {
   config: ClientConfig
+  featureClientImportMap: Record<string, any>
   featureClientSchemaMap: FeatureClientSchemaMap
   field?: RichTextFieldClient
   schemaPath: string
@@ -58,6 +60,7 @@ export function loadClientFeatures({
       typeof featureProvider.feature === 'function'
         ? featureProvider.feature({
             config,
+            featureClientImportMap,
             featureClientSchemaMap,
             featureProviderMap,
             field,

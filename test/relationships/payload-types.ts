@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -86,6 +87,7 @@ export interface Config {
     'deep-nested': DeepNested;
     relations: Relation1;
     items: Item;
+    blocks: Block;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -117,6 +119,7 @@ export interface Config {
     'deep-nested': DeepNestedSelect<false> | DeepNestedSelect<true>;
     relations: RelationsSelect<false> | RelationsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
+    blocks: BlocksSelect<false> | BlocksSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -263,9 +266,21 @@ export interface Screening {
 export interface Movie {
   id: string;
   name?: string | null;
+  select?: ('a' | 'b' | 'c')[] | null;
   director?: (string | null) | Director;
+  array?:
+    | {
+        director?: (string | Director)[] | null;
+        polymorphic?: {
+          relationTo: 'directors';
+          value: string | Director;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -274,7 +289,9 @@ export interface Movie {
 export interface Director {
   id: string;
   name?: string | null;
+  localized?: string | null;
   movies?: (string | Movie)[] | null;
+  movie?: (string | null) | Movie;
   directors?: (string | Director)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -306,6 +323,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -458,9 +482,27 @@ export interface Item {
   id: string;
   status?: ('completed' | 'failed' | 'pending') | null;
   relation?: {
-    docs?: (string | Relation1)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Relation1)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks".
+ */
+export interface Block {
+  id: string;
+  blocks?:
+    | {
+        director?: (string | null) | Director;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'some';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -550,6 +592,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'items';
         value: string | Item;
+      } | null)
+    | ({
+        relationTo: 'blocks';
+        value: string | Block;
       } | null)
     | ({
         relationTo: 'users';
@@ -702,9 +748,18 @@ export interface ScreeningsSelect<T extends boolean = true> {
  */
 export interface MoviesSelect<T extends boolean = true> {
   name?: T;
+  select?: T;
   director?: T;
+  array?:
+    | T
+    | {
+        director?: T;
+        polymorphic?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -712,7 +767,9 @@ export interface MoviesSelect<T extends boolean = true> {
  */
 export interface DirectorsSelect<T extends boolean = true> {
   name?: T;
+  localized?: T;
   movies?: T;
+  movie?: T;
   directors?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -842,6 +899,25 @@ export interface ItemsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks_select".
+ */
+export interface BlocksSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        some?:
+          | T
+          | {
+              director?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -854,6 +930,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -1,5 +1,5 @@
 'use client'
-import React, { createContext, useContext } from 'react'
+import React, { createContext, use } from 'react'
 
 export const GroupContext = createContext(false)
 
@@ -7,7 +7,7 @@ export const GroupProvider: React.FC<{ children?: React.ReactNode; withinGroup?:
   children,
   withinGroup = true,
 }) => {
-  return <GroupContext.Provider value={withinGroup}>{children}</GroupContext.Provider>
+  return <GroupContext value={withinGroup}>{children}</GroupContext>
 }
 
-export const useGroup = (): boolean => useContext(GroupContext)
+export const useGroup = (): boolean => use(GroupContext)

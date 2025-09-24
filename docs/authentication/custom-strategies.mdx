@@ -7,8 +7,9 @@ keywords: authentication, config, configuration, overview, documentation, Conten
 ---
 
 <Banner type="warning">
-  This is an advanced feature, so only attempt this if you are an experienced developer. Otherwise,
-  just let Payload's built-in authentication handle user auth for you.
+  This is an advanced feature, so only attempt this if you are an experienced
+  developer. Otherwise, just let Payload's built-in authentication handle user
+  auth for you.
 </Banner>
 
 ### Creating a strategy
@@ -17,19 +18,19 @@ At the core, a strategy is a way to authenticate a user making a request. As of 
 
 A strategy is made up of the following:
 
-| Parameter                   | Description                                                               |
-| --------------------------- | ------------------------------------------------------------------------- |
-| **`name`** *               | The name of your strategy                                                 |
-| **`authenticate`** *  | A function that takes in the parameters below and returns a user or null. |
+| Parameter             | Description                                                               |
+| --------------------- | ------------------------------------------------------------------------- |
+| **`name`** \*         | The name of your strategy                                                 |
+| **`authenticate`** \* | A function that takes in the parameters below and returns a user or null. |
 
 The `authenticate` function is passed the following arguments:
 
-| Argument            | Description                                                                                       |
-| ------------------- | ------------------------------------------------------------------------------------------------- |
-| **`headers`** *    | The headers on the incoming request. Useful for retrieving identifiable information on a request. |
-| **`payload`** *    | The Payload class. Useful for authenticating the identifiable information against Payload.        |
-| **`isGraphQL`**     | Whether or not the request was made from a GraphQL endpoint. Default is `false`.                  |
-
+| Argument               | Description                                                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **`canSetHeaders`** \* | Whether or not the strategy is being executed from a context where response headers can be set. Default is `false`. |
+| **`headers`** \*       | The headers on the incoming request. Useful for retrieving identifiable information on a request.                   |
+| **`payload`** \*       | The Payload class. Useful for authenticating the identifiable information against Payload.                          |
+| **`isGraphQL`**        | Whether or not the strategy is being executed within the GraphQL endpoint. Default is `false`.                      |
 
 ### Example Strategy
 
@@ -48,7 +49,7 @@ export const Users: CollectionConfig = {
     strategies: [
       {
         name: 'custom-strategy',
-        authenticate: ({ payload, headers }) => {
+        authenticate: async ({ payload, headers }) => {
           const usersQuery = await payload.find({
             collection: 'users',
             where: {
@@ -62,9 +63,12 @@ export const Users: CollectionConfig = {
           })
 
           return {
-            // Send the user back to authenticate,
+            // Send the user with the collection slug back to authenticate,
             // or send null if no user should be authenticated
-            user: usersQuery.docs[0] || null,
+            user: usersQuery.docs[0] ? {
+              collection: 'users',
+              ...usersQuery.docs[0],
+            } : null,
 
             // Optionally, you can return headers
             // that you'd like Payload to set here when

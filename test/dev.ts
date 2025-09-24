@@ -16,6 +16,9 @@ import { runInit } from './runInit.js'
 import { child } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
 
+// @todo remove in 4.0 - will behave like this by default in 4.0
+process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
+
 const prod = process.argv.includes('--prod')
 if (prod) {
   process.argv = process.argv.filter((arg) => arg !== '--prod')
@@ -52,9 +55,12 @@ if (!testSuiteArg || !fs.existsSync(path.resolve(dirname, testSuiteArg))) {
   process.exit(0)
 }
 
-console.log(`Selected test suite: ${testSuiteArg}`)
+// Enable turbopack by default, unless --no-turbo is passed
+const enableTurbo = args.turbo !== false
 
-if (args.turbo === true) {
+console.log(`Selected test suite: ${testSuiteArg}${enableTurbo ? ' [Turbopack]' : ' [Webpack]'}`)
+
+if (enableTurbo) {
   process.env.TURBOPACK = '1'
 }
 
@@ -98,12 +104,18 @@ const port = process.env.PORT ? Number(process.env.PORT) : 3000
 
 const availablePort = await findOpenPort(port)
 
+// Assign the available port to process.env.PORT so that the next and our HMR server uses it
+// @ts-expect-error - PORT is a string from somewhere
+process.env.PORT = availablePort
+
 // @ts-expect-error the same as in test/helpers/initPayloadE2E.ts
 const app = nextImport({
   dev: true,
   hostname: 'localhost',
   port: availablePort,
   dir: rootDir,
+  turbo: enableTurbo,
+  turbopack: enableTurbo,
 })
 
 const handle = app.getRequestHandler()

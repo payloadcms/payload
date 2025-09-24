@@ -1,17 +1,22 @@
 import type { groupNavItems } from '@payloadcms/ui/shared'
-import type { ClientUser, SanitizedPermissions, ServerProps, VisibleEntities } from 'payload'
+import type { ClientUser, Locale, ServerProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Button, Card, Gutter, Locked } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { EntityType, formatAdminURL } from '@payloadcms/ui/shared'
+import { EntityType } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import './index.scss'
 
 const baseClass = 'dashboard'
 
-export type DashboardProps = {
+export type DashboardViewClientProps = {
+  locale: Locale
+}
+
+export type DashboardViewServerPropsOnly = {
   globalData: Array<{
     data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: ClientUser | number | string }
     lockDuration?: number
@@ -24,11 +29,11 @@ export type DashboardProps = {
    */
   Link?: React.ComponentType
   navGroups?: ReturnType<typeof groupNavItems>
-  permissions: SanitizedPermissions
-  visibleEntities: VisibleEntities
 } & ServerProps
 
-export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
+export type DashboardViewServerProps = DashboardViewClientProps & DashboardViewServerPropsOnly
+
+export function DefaultDashboard(props: DashboardViewServerProps) {
   const {
     globalData,
     i18n,
@@ -65,7 +70,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
               permissions,
               searchParams,
               user,
-            },
+            } satisfies ServerProps,
           })}
 
         <Fragment>
@@ -182,7 +187,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
               permissions,
               searchParams,
               user,
-            },
+            } satisfies ServerProps,
           })}
       </Gutter>
     </div>

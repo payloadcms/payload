@@ -12,42 +12,55 @@ const withBundleAnalyzer = bundleAnalyzer({
 })
 
 export default withBundleAnalyzer(
-  withPayload({
-    eslint: {
-      ignoreDuringBuilds: true,
-    },
-    typescript: {
-      ignoreBuildErrors: true,
-    },
-    experimental: {
-      serverActions: {
-        bodySizeLimit: '5mb',
+  withPayload(
+    {
+      devIndicators: {
+        position: 'bottom-right',
+      },
+      eslint: {
+        ignoreDuringBuilds: true,
+      },
+      typescript: {
+        ignoreBuildErrors: true,
+      },
+      experimental: {
+        fullySpecified: true,
+        serverActions: {
+          bodySizeLimit: '5mb',
+        },
+      },
+      env: {
+        PAYLOAD_CORE_DEV: 'true',
+        ROOT_DIR: path.resolve(dirname),
+        // @todo remove in 4.0 - will behave like this by default in 4.0
+        PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY: 'true',
+      },
+      async redirects() {
+        return [
+          {
+            destination: '/admin',
+            permanent: true,
+            source: '/',
+          },
+        ]
+      },
+      images: {
+        remotePatterns: [
+          {
+            hostname: 'localhost',
+          },
+        ],
+      },
+      webpack: (webpackConfig) => {
+        webpackConfig.resolve.extensionAlias = {
+          '.cjs': ['.cts', '.cjs'],
+          '.js': ['.ts', '.tsx', '.js', '.jsx'],
+          '.mjs': ['.mts', '.mjs'],
+        }
+
+        return webpackConfig
       },
     },
-    env: {
-      PAYLOAD_CORE_DEV: 'true',
-      ROOT_DIR: path.resolve(dirname),
-    },
-    async redirects() {
-      return [
-        {
-          destination: '/admin',
-          permanent: true,
-          source: '/',
-        },
-      ]
-    },
-    images: {
-      domains: ['localhost'],
-    },
-    webpack: (webpackConfig) => {
-      webpackConfig.resolve.extensionAlias = {
-        '.cjs': ['.cts', '.cjs'],
-        '.js': ['.ts', '.tsx', '.js', '.jsx'],
-        '.mjs': ['.mts', '.mjs'],
-      }
-
-      return webpackConfig
-    },
-  }),
+    { devBundleServerPackages: false },
+  ),
 )

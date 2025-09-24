@@ -260,6 +260,23 @@ const ArrayFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'arrayWithCustomID',
+      type: 'array',
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+          admin: {
+            disableListFilter: true,
+          },
+        },
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
   ],
   slug: arrayFieldsSlug,
   versions: true,

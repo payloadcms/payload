@@ -1,6 +1,6 @@
 import type { GroupField } from '../../payload-types.js'
 
-export const groupDoc: Partial<GroupField> = {
+export const namedGroupDoc: Partial<GroupField> = {
   group: {
     text: 'some text within a group',
     subGroup: {
@@ -11,5 +11,9 @@ export const groupDoc: Partial<GroupField> = {
         },
       ],
     },
+  },
+  insideUnnamedGroup: 'text in unnamed group',
+  deeplyNestedGroup: {
+    insideNestedUnnamedGroup: 'text in nested unnamed group',
   },
 }

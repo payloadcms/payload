@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -64,6 +65,7 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     'fields-relationship': FieldsRelationship;
     'relation-filter-false': RelationFilterFalse;
@@ -176,6 +178,10 @@ export interface FieldsRelationship {
    * This will filter the relationship options if the filter field in this document is set to "Include me"
    */
   relationshipFilteredByField?: (string | null) | FieldsRelationship;
+  /**
+   * This will filter the relationship options if the filter field in this document is set to "Include me"
+   */
+  nestedRelationshipFilteredByField?: (string | null) | FieldsRelationship;
   relationshipFilteredAsync?: (string | null) | RelationOne;
   relationshipManyFiltered?:
     | (
@@ -381,6 +387,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -505,6 +518,7 @@ export interface FieldsRelationshipSelect<T extends boolean = true> {
   relationshipWithTitle?: T;
   relationshipFilteredByID?: T;
   relationshipFilteredByField?: T;
+  nestedRelationshipFilteredByField?: T;
   relationshipFilteredAsync?: T;
   relationshipManyFiltered?: T;
   filter?: T;
@@ -654,6 +668,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -46,9 +46,7 @@ describe('@payloadcms/plugin-seo', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should add meta title', async () => {

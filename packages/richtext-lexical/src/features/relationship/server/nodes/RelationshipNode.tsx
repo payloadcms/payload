@@ -104,8 +104,8 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     return false
   }
 
-  override decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element | null {
-    return null
+  override decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element {
+    return null as unknown as JSX.Element
   }
 
   override exportDOM(): DOMExportOutput {

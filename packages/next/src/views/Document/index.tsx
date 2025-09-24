@@ -1,32 +1,58 @@
-import type { AdminViewProps, Data, PayloadComponent, ServerSideEditViewProps } from 'payload'
+import type {
+  AdminViewServerProps,
+  CollectionPreferences,
+  Data,
+  DocumentViewClientProps,
+  DocumentViewServerProps,
+  DocumentViewServerPropsOnly,
+  EditViewComponent,
+  PayloadComponent,
+  RenderDocumentVersionsProperties,
+} from 'payload'
 
-import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import {
+  DocumentInfoProvider,
+  EditDepthProvider,
+  HydrateAuthProvider,
+  LivePreviewProvider,
+} from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared'
+import { handleLivePreview } from '@payloadcms/ui/rsc'
+import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
 import { logError } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
-import type { ViewFromConfig } from './getViewsFromConfig.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
+import { getPreferences } from '../../utilities/getPreferences.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocPreferences } from './getDocPreferences.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
+import { getDocumentView } from './getDocumentView.js'
 import { getIsLocked } from './getIsLocked.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { getVersions } from './getVersions.js'
-import { getViewsFromConfig } from './getViewsFromConfig.js'
 import { renderDocumentSlots } from './renderDocumentSlots.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
-// This function will be responsible for rendering an Edit Document view
-// it will be called on the server for Edit page views as well as
-// called on-demand from document drawers
+export type ViewToRender =
+  | EditViewComponent
+  | PayloadComponent<DocumentViewServerProps>
+  | React.FC
+  | React.FC<DocumentViewClientProps>
+
+/**
+ * This function is responsible for rendering
+ * an Edit Document view on the server for both:
+ *  - default document edit views
+ *  - on-demand edit views within drawers
+ */
 export const renderDocument = async ({
   disableActions,
   documentSubViewType,
@@ -36,13 +62,22 @@ export const renderDocument = async ({
   initPageResult,
   overrideEntityVisibility,
   params,
+  redirectAfterCreate,
   redirectAfterDelete,
   redirectAfterDuplicate,
+  redirectAfterRestore,
   searchParams,
+  versions,
   viewType,
 }: {
+  drawerSlug?: string
   overrideEntityVisibility?: boolean
-} & AdminViewProps): Promise<{
+  readonly redirectAfterCreate?: boolean
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
+  readonly redirectAfterRestore?: boolean
+  versions?: RenderDocumentVersionsProperties
+} & AdminViewServerProps): Promise<{
   data: Data
   Document: React.ReactNode
 }> => {
@@ -73,34 +108,43 @@ export const renderDocument = async ({
   const globalSlug = globalConfig?.slug || undefined
   let isEditing = getIsEditing({ id: idFromArgs, collectionSlug, globalSlug })
 
-  let RootViewOverride: PayloadComponent
-  let CustomView: ViewFromConfig<ServerSideEditViewProps>
-  let DefaultView: ViewFromConfig<ServerSideEditViewProps>
-  let ErrorView: ViewFromConfig<AdminViewProps>
-
-  let apiURL: string
-
   // Fetch the doc required for the view
   let doc =
-    initialData ||
-    (await getDocumentData({
-      id: idFromArgs,
-      collectionSlug,
-      globalSlug,
-      locale,
-      payload,
-      req,
-      user,
-    }))
+    !idFromArgs && !globalSlug
+      ? initialData || null
+      : await getDocumentData({
+          id: idFromArgs,
+          collectionSlug,
+          globalSlug,
+          locale,
+          payload,
+          req,
+          segments,
+          user,
+        })
 
   if (isEditing && !doc) {
-    throw new Error('not-found')
+    // If it's a collection document that doesn't exist, redirect to collection list
+    if (collectionSlug) {
+      const redirectURL = formatAdminURL({
+        adminRoute,
+        path: `/collections/${collectionSlug}?notFound=${encodeURIComponent(idFromArgs)}`,
+        serverURL,
+      })
+      redirect(redirectURL)
+    } else {
+      // For globals or other cases, keep the 404 behavior
+      throw new Error('not-found')
+    }
   }
+
+  const isTrashedDoc = typeof doc?.deletedAt === 'string'
 
   const [
     docPreferences,
     { docPermissions, hasPublishPermission, hasSavePermission },
     { currentEditor, isLocked, lastUpdateTime },
+    entityPreferences,
   ] = await Promise.all([
     // Get document preferences
     getDocPreferences({
@@ -128,7 +172,17 @@ export const renderDocument = async ({
       isEditing,
       req,
     }),
+
+    // get entity preferences
+    getPreferences<CollectionPreferences>(
+      collectionSlug ? `collection-${collectionSlug}` : `global-${globalSlug}`,
+      payload,
+      req.user.id,
+      req.user.collection,
+    ),
   ])
+
+  const operation = (collectionSlug && idFromArgs) || globalSlug ? 'update' : 'create'
 
   const [
     { hasPublishedDoc, mostRecentVersionIsAutosaved, unpublishedVersionCount, versionCount },
@@ -153,7 +207,8 @@ export const renderDocument = async ({
       fallbackLocale: false,
       globalSlug,
       locale: locale?.code,
-      operation: (collectionSlug && idFromArgs) || globalSlug ? 'update' : 'create',
+      operation,
+      readOnly: isTrashedDoc || isLocked,
       renderAllFields: true,
       req,
       schemaPath: collectionSlug || globalSlug,
@@ -161,8 +216,9 @@ export const renderDocument = async ({
     }),
   ])
 
-  const serverProps: ServerSideEditViewProps = {
+  const documentViewServerProps: DocumentViewServerPropsOnly = {
     doc,
+    hasPublishedDoc,
     i18n,
     initPageResult,
     locale,
@@ -172,99 +228,64 @@ export const renderDocument = async ({
     routeSegments: segments,
     searchParams,
     user,
+    versions,
   }
 
-  if (collectionConfig) {
-    if (
-      !visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug) &&
-      !overrideEntityVisibility
-    ) {
-      throw new Error('not-found')
-    }
-
-    const params = new URLSearchParams()
-    if (collectionConfig.versions?.drafts) {
-      params.append('draft', 'true')
-    }
-    if (locale?.code) {
-      params.append('locale', locale.code)
-    }
-
-    const apiQueryParams = `?${params.toString()}`
-
-    apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${idFromArgs}${apiQueryParams}`
-
-    RootViewOverride =
-      collectionConfig?.admin?.components?.views?.edit?.root &&
-      'Component' in collectionConfig.admin.components.views.edit.root
-        ? collectionConfig?.admin?.components?.views?.edit?.root?.Component
-        : null
-
-    if (!RootViewOverride) {
-      const collectionViews = getViewsFromConfig({
-        collectionConfig,
-        config,
-        docPermissions,
-        routeSegments: segments,
-      })
-
-      CustomView = collectionViews?.CustomView
-      DefaultView = collectionViews?.DefaultView
-      ErrorView = collectionViews?.ErrorView
-    }
-
-    if (!CustomView && !DefaultView && !RootViewOverride && !ErrorView) {
-      ErrorView = {
-        Component: NotFoundView,
-      }
-    }
+  if (
+    !overrideEntityVisibility &&
+    ((collectionSlug &&
+      !visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) ||
+      (globalSlug && !visibleEntities?.globals?.find((visibleSlug) => visibleSlug === globalSlug)))
+  ) {
+    throw new Error('not-found')
   }
 
-  if (globalConfig) {
-    if (!visibleEntities?.globals?.find((visibleSlug) => visibleSlug === globalSlug)) {
-      throw new Error('not-found')
-    }
+  const formattedParams = new URLSearchParams()
 
-    const params = new URLSearchParams({
-      locale: locale?.code,
-    })
+  if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
+    formattedParams.append('draft', 'true')
+  }
 
-    if (globalConfig.versions?.drafts) {
-      params.append('draft', 'true')
-    }
+  if (locale?.code) {
+    formattedParams.append('locale', locale.code)
+  }
 
-    if (locale?.code) {
-      params.append('locale', locale.code)
-    }
+  const apiQueryParams = `?${formattedParams.toString()}`
 
-    const apiQueryParams = `?${params.toString()}`
+  const apiURL = collectionSlug
+    ? `${serverURL}${apiRoute}/${collectionSlug}/${idFromArgs}${apiQueryParams}`
+    : globalSlug
+      ? `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
+      : ''
 
-    apiURL = `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
+  let View: ViewToRender = null
 
-    RootViewOverride =
-      globalConfig?.admin?.components?.views?.edit?.root &&
-      'Component' in globalConfig.admin.components.views.edit.root
+  let showHeader = true
+
+  const RootViewOverride =
+    collectionConfig?.admin?.components?.views?.edit?.root &&
+    'Component' in collectionConfig.admin.components.views.edit.root
+      ? collectionConfig?.admin?.components?.views?.edit?.root?.Component
+      : globalConfig?.admin?.components?.views?.edit?.root &&
+          'Component' in globalConfig.admin.components.views.edit.root
         ? globalConfig?.admin?.components?.views?.edit?.root?.Component
         : null
 
-    if (!RootViewOverride) {
-      const globalViews = getViewsFromConfig({
-        config,
-        docPermissions,
-        globalConfig,
-        routeSegments: segments,
-      })
+  if (RootViewOverride) {
+    View = RootViewOverride
+    showHeader = false
+  } else {
+    ;({ View } = getDocumentView({
+      collectionConfig,
+      config,
+      docPermissions,
+      globalConfig,
+      routeSegments: segments,
+    }))
+  }
 
-      CustomView = globalViews?.CustomView
-      DefaultView = globalViews?.DefaultView
-      ErrorView = globalViews?.ErrorView
-
-      if (!CustomView && !DefaultView && !RootViewOverride && !ErrorView) {
-        ErrorView = {
-          Component: NotFoundView,
-        }
-      }
-    }
+  if (!View) {
+    View = NotFoundView
   }
 
   /**
@@ -297,7 +318,7 @@ export const renderDocument = async ({
       id = doc.id
       isEditing = getIsEditing({ id: doc.id, collectionSlug, globalSlug })
 
-      if (!drawerSlug) {
+      if (!drawerSlug && redirectAfterCreate !== false) {
         const redirectURL = formatAdminURL({
           adminRoute,
           path: `/collections/${collectionSlug}/${doc.id}`,
@@ -312,6 +333,7 @@ export const renderDocument = async ({
   }
 
   const documentSlots = renderDocumentSlots({
+    id,
     collectionConfig,
     globalConfig,
     hasSavePermission,
@@ -319,7 +341,21 @@ export const renderDocument = async ({
     req,
   })
 
-  const clientProps = { formState, ...documentSlots, documentSubViewType, viewType }
+  const clientProps: DocumentViewClientProps = {
+    formState,
+    ...documentSlots,
+    documentSubViewType,
+    viewType,
+  }
+
+  const { isLivePreviewEnabled, livePreviewConfig, livePreviewURL } = await handleLivePreview({
+    collectionSlug,
+    config,
+    data: doc,
+    globalSlug,
+    operation,
+    req,
+  })
 
   return {
     data: doc,
@@ -339,58 +375,57 @@ export const renderDocument = async ({
         initialState={formState}
         isEditing={isEditing}
         isLocked={isLocked}
+        isTrashed={isTrashedDoc}
         key={locale?.code}
         lastUpdateTime={lastUpdateTime}
         mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
+        redirectAfterCreate={redirectAfterCreate}
         redirectAfterDelete={redirectAfterDelete}
         redirectAfterDuplicate={redirectAfterDuplicate}
+        redirectAfterRestore={redirectAfterRestore}
         unpublishedVersionCount={unpublishedVersionCount}
         versionCount={versionCount}
       >
-        {!RootViewOverride && !drawerSlug && (
-          <DocumentHeader
-            collectionConfig={collectionConfig}
-            globalConfig={globalConfig}
-            i18n={i18n}
-            payload={payload}
-            permissions={permissions}
-          />
-        )}
-        <HydrateAuthProvider permissions={permissions} />
-        <EditDepthProvider>
-          {ErrorView
-            ? RenderServerComponent({
-                clientProps,
-                Component: ErrorView.ComponentConfig || ErrorView.Component,
-                importMap,
-                serverProps,
-              })
-            : RenderServerComponent({
-                clientProps,
-                Component: RootViewOverride
-                  ? RootViewOverride
-                  : CustomView?.ComponentConfig || CustomView?.Component
-                    ? CustomView?.ComponentConfig || CustomView?.Component
-                    : DefaultView?.ComponentConfig || DefaultView?.Component,
-                importMap,
-                serverProps,
-              })}
-        </EditDepthProvider>
+        <LivePreviewProvider
+          breakpoints={livePreviewConfig?.breakpoints}
+          isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
+          isLivePreviewing={entityPreferences?.value?.editViewType === 'live-preview'}
+          typeofLivePreviewURL={typeof livePreviewConfig?.url as 'function' | 'string' | undefined}
+          url={livePreviewURL}
+        >
+          {showHeader && !drawerSlug && (
+            <DocumentHeader
+              collectionConfig={collectionConfig}
+              globalConfig={globalConfig}
+              permissions={permissions}
+              req={req}
+            />
+          )}
+          <HydrateAuthProvider permissions={permissions} />
+          <EditDepthProvider>
+            {RenderServerComponent({
+              clientProps,
+              Component: View,
+              importMap,
+              serverProps: documentViewServerProps,
+            })}
+          </EditDepthProvider>
+        </LivePreviewProvider>
       </DocumentInfoProvider>
     ),
   }
 }
 
-export const Document: React.FC<AdminViewProps> = async (args) => {
+export async function Document(props: AdminViewServerProps) {
   try {
-    const { Document: RenderedDocument } = await renderDocument(args)
+    const { Document: RenderedDocument } = await renderDocument(props)
     return RenderedDocument
   } catch (error) {
     if (error?.message === 'NEXT_REDIRECT') {
       throw error
     }
 
-    logError({ err: error, payload: args.initPageResult.req.payload })
+    logError({ err: error, payload: props.initPageResult.req.payload })
 
     if (error.message === 'not-found') {
       notFound()

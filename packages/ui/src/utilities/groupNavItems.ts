@@ -53,7 +53,9 @@ export function groupNavItems(
             : entityToGroup.entity.label
 
         const label =
-          typeof labelOrFunction === 'function' ? labelOrFunction({ t: i18n.t }) : labelOrFunction
+          typeof labelOrFunction === 'function'
+            ? labelOrFunction({ i18n, t: i18n.t })
+            : labelOrFunction
 
         if (entityToGroup.entity.admin.group) {
           const existingGroup = groups.find(

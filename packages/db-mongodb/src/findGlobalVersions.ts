@@ -1,25 +1,35 @@
 import type { PaginateOptions, QueryOptions } from 'mongoose'
 import type { FindGlobalVersions } from 'payload'
 
-import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
+import { APIError, buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getGlobal } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { transform } from './utilities/transform.js'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: MongooseAdapter,
-  { global, limit, locale, page, pagination, req, select, skip, sort: sortArg, where },
+  {
+    global: globalSlug,
+    limit,
+    locale,
+    page,
+    pagination,
+    req,
+    select,
+    skip,
+    sort: sortArg,
+    where = {},
+  },
 ) {
-  const Model = this.versions[global]
-  const versionFields = buildVersionGlobalFields(
-    this.payload.config,
-    this.payload.globals.config.find(({ slug }) => slug === global),
-    true,
-  )
+  const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug, versions: true })
+
+  const versionFields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
 
   const session = await getSession(this, req)
   const options: QueryOptions = {
@@ -38,6 +48,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   let sort
   if (!hasNearConstraint) {
     sort = buildSortParam({
+      adapter: this,
       config: this.payload.config,
       fields: versionFields,
       locale,
@@ -46,10 +57,10 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     })
   }
 
-  const query = await Model.buildQuery({
-    globalSlug: global,
+  const query = await buildQuery({
+    adapter: this,
+    fields: versionFields,
     locale,
-    payload: this.payload,
     where,
   })
 
@@ -90,10 +101,11 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     }
   }
 
-  if (limit >= 0) {
+  if (limit && limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit
+
+    paginationOptions.options!.limit = limit
 
     // Disable pagination if limit is 0
     if (limit === 0) {
@@ -102,13 +114,13 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   }
 
   const result = await Model.paginate(query, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
 
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      doc.id = doc._id
-      return sanitizeInternalFields(doc)
-    }),
-  }
+  transform({
+    adapter: this,
+    data: result.docs,
+    fields: buildVersionGlobalFields(this.payload.config, globalConfig),
+    operation: 'read',
+  })
+
+  return result
 }

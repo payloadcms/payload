@@ -59,7 +59,7 @@ export const stripePlugin =
       })
     }
 
-    for (const collection of collections) {
+    for (const collection of collections!) {
       const { hooks: existingHooks } = collection
 
       const syncConfig = pluginConfig.sync?.find((sync) => sync.collection === collection.slug)

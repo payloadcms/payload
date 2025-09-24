@@ -1,7 +1,7 @@
 'use client'
 
 import {
-  LoadingOverlay,
+  ConfirmationModal,
   Popup,
   PopupList,
   toast,
@@ -16,7 +16,6 @@ import React, { useCallback, useMemo, useState } from 'react'
 import type { ReindexButtonProps } from './types.js'
 
 import { ReindexButtonLabel } from './ReindexButtonLabel/index.js'
-import { ReindexConfirmModal } from './ReindexConfirmModal/index.js'
 
 const confirmReindexModalSlug = 'confirm-reindex-modal'
 
@@ -25,7 +24,7 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
   searchCollections,
   searchSlug,
 }) => {
-  const { closeModal, openModal } = useModal()
+  const { openModal } = useModal()
 
   const { config } = useConfig()
 
@@ -37,45 +36,36 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
   const router = useRouter()
 
   const [reindexCollections, setReindexCollections] = useState<string[]>([])
-  const [isLoading, setLoading] = useState<boolean>(false)
 
   const openConfirmModal = useCallback(() => openModal(confirmReindexModalSlug), [openModal])
-  const closeConfirmModal = useCallback(() => closeModal(confirmReindexModalSlug), [closeModal])
 
   const handleReindexSubmit = useCallback(async () => {
-    if (isLoading || !reindexCollections.length) {
+    if (!reindexCollections.length) {
       return
     }
 
-    closeConfirmModal()
-    setLoading(true)
-
     try {
-      const endpointRes = await fetch(
-        `${config.routes.api}/${searchSlug}/reindex?locale=${locale.code}`,
-        {
-          body: JSON.stringify({
-            collections: reindexCollections,
-          }),
-          method: 'POST',
-        },
-      )
+      const res = await fetch(`${config.routes.api}/${searchSlug}/reindex?locale=${locale.code}`, {
+        body: JSON.stringify({
+          collections: reindexCollections,
+        }),
+        method: 'POST',
+      })
 
-      const { message } = (await endpointRes.json()) as { message: string }
+      const { message } = (await res.json()) as { message: string }
 
-      if (!endpointRes.ok) {
+      if (!res.ok) {
         toast.error(message)
       } else {
         toast.success(message)
-        router.refresh()
+        return router.refresh()
       }
     } catch (_err: unknown) {
       // swallow error, toast shown above
     } finally {
       setReindexCollections([])
-      setLoading(false)
     }
-  }, [closeConfirmModal, isLoading, reindexCollections, router, searchSlug, locale, config])
+  }, [reindexCollections, router, searchSlug, locale, config])
 
   const handleShowConfirmModal = useCallback(
     (collections: string | string[] = searchCollections) => {
@@ -99,7 +89,7 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
       if (typeof label === 'string') {
         return label
       } else {
-        return Object.hasOwn(label, locale.code) ? label[locale.code] : slug
+        return label && Object.hasOwn(label, locale.code) ? label[locale.code] : slug
       }
     },
     [collectionLabels, locale.code],
@@ -107,7 +97,10 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
 
   const pluralizedLabels = useMemo(() => {
     return searchCollections.reduce<Record<string, string>>((acc, slug) => {
-      acc[slug] = getPluralizedLabel(slug)
+      const label = getPluralizedLabel(slug)
+      if (label) {
+        acc[slug] = label
+      }
       return acc
     }, {})
   }, [searchCollections, getPluralizedLabel])
@@ -121,9 +114,6 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
   const modalDescription = selectedAll
     ? t('general:confirmReindexDescriptionAll')
     : t('general:confirmReindexDescription', { collections: selectedLabels })
-  const loadingText = selectedAll
-    ? t('general:reindexingAll', { collections: t('general:collections') })
-    : t('general:reindexingAll', { collections: selectedLabels })
 
   return (
     <div>
@@ -148,14 +138,12 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
         size="large"
         verticalAlign="bottom"
       />
-      <ReindexConfirmModal
-        description={modalDescription}
-        onCancel={closeConfirmModal}
+      <ConfirmationModal
+        body={modalDescription}
+        heading={modalTitle}
+        modalSlug={confirmReindexModalSlug}
         onConfirm={handleReindexSubmit}
-        slug={confirmReindexModalSlug}
-        title={modalTitle}
       />
-      {isLoading && <LoadingOverlay loadingText={loadingText} />}
     </div>
   )
 }

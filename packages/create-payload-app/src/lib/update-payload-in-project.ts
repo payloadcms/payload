@@ -1,4 +1,3 @@
-import execa from 'execa'
 import fse from 'fs-extra'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -9,6 +8,7 @@ const dirname = path.dirname(filename)
 import type { NextAppDetails } from '../types.js'
 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
+import { getLatestPackageVersion } from '../utils/getLatestPackageVersion.js'
 import { info } from '../utils/log.js'
 import { getPackageManager } from './get-package-manager.js'
 import { installPackages } from './install-packages.js'
@@ -36,15 +36,8 @@ export async function updatePayloadInProject(
 
   const packageManager = await getPackageManager({ projectDir })
 
-  // Fetch latest Payload version from npm
-  const { exitCode: getLatestVersionExitCode, stdout: latestPayloadVersion } = await execa('npm', [
-    'show',
-    'payload',
-    'version',
-  ])
-  if (getLatestVersionExitCode !== 0) {
-    throw new Error('Failed to fetch latest Payload version')
-  }
+  // Fetch latest Payload version
+  const latestPayloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
 
   if (payloadVersion === latestPayloadVersion) {
     return { message: `Payload v${payloadVersion} is already up to date.`, success: true }

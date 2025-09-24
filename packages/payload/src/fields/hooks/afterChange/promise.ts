@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
@@ -25,6 +24,7 @@ type Args = {
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   previousDoc: JsonObject
@@ -49,6 +49,7 @@ export const promise = async ({
   global,
   operation,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   previousDoc,
@@ -72,11 +73,9 @@ export const promise = async ({
 
   if (fieldAffectsData(field)) {
     // Execute hooks
-    if (field.hooks?.afterChange) {
-      await field.hooks.afterChange.reduce(async (priorHook, currentHook) => {
-        await priorHook
-
-        const hookedValue = await currentHook({
+    if ('hooks' in field && field.hooks?.afterChange) {
+      for (const hook of field.hooks.afterChange) {
+        const hookedValue = await hook({
           blockData,
           collection,
           context,
@@ -89,18 +88,18 @@ export const promise = async ({
           path: pathSegments,
           previousDoc,
           previousSiblingDoc,
-          previousValue: previousDoc[field.name],
+          previousValue: previousDoc?.[field.name],
           req,
           schemaPath: schemaPathSegments,
           siblingData,
-          siblingFields,
-          value: siblingDoc[field.name],
+          siblingFields: siblingFields!,
+          value: siblingDoc?.[field.name],
         })
 
         if (hookedValue !== undefined) {
           siblingDoc[field.name] = hookedValue
         }
-      }, Promise.resolve())
+      }
     }
   }
 
@@ -110,7 +109,7 @@ export const promise = async ({
       const rows = siblingDoc[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = []
+        const promises: Promise<void>[] = []
         rows.forEach((row, rowIndex) => {
           promises.push(
             traverseFields({
@@ -123,6 +122,7 @@ export const promise = async ({
               global,
               operation,
               parentIndexPath: '',
+              parentIsLocalized: parentIsLocalized || field.localized,
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               previousDoc,
@@ -143,7 +143,7 @@ export const promise = async ({
       const rows = siblingDoc[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = []
+        const promises: Promise<void>[] = []
 
         rows.forEach((row, rowIndex) => {
           const blockTypeToMatch = (row as JsonObject).blockType
@@ -166,6 +166,7 @@ export const promise = async ({
                 global,
                 operation,
                 parentIndexPath: '',
+                parentIsLocalized: parentIsLocalized || field.localized,
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 previousDoc,
@@ -196,6 +197,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath: schemaPath,
         previousDoc,
@@ -209,24 +211,47 @@ export const promise = async ({
     }
 
     case 'group': {
-      await traverseFields({
-        blockData,
-        collection,
-        context,
-        data,
-        doc,
-        fields: field.fields,
-        global,
-        operation,
-        parentIndexPath: '',
-        parentPath: path,
-        parentSchemaPath: schemaPath,
-        previousDoc,
-        previousSiblingDoc: previousDoc[field.name] as JsonObject,
-        req,
-        siblingData: (siblingData?.[field.name] as JsonObject) || {},
-        siblingDoc: siblingDoc[field.name] as JsonObject,
-      })
+      if (fieldAffectsData(field)) {
+        await traverseFields({
+          blockData,
+          collection,
+          context,
+          data,
+          doc,
+          fields: field.fields,
+          global,
+          operation,
+          parentIndexPath: '',
+          parentIsLocalized: parentIsLocalized || field.localized,
+          parentPath: path,
+          parentSchemaPath: schemaPath,
+          previousDoc,
+          previousSiblingDoc: (previousDoc?.[field.name] as JsonObject) || {},
+          req,
+          siblingData: (siblingData?.[field.name] as JsonObject) || {},
+          siblingDoc: (siblingDoc?.[field.name] as JsonObject) || {},
+        })
+      } else {
+        await traverseFields({
+          blockData,
+          collection,
+          context,
+          data,
+          doc,
+          fields: field.fields,
+          global,
+          operation,
+          parentIndexPath: indexPath,
+          parentIsLocalized,
+          parentPath,
+          parentSchemaPath: schemaPath,
+          previousDoc,
+          previousSiblingDoc: { ...previousSiblingDoc },
+          req,
+          siblingData: siblingData || {},
+          siblingDoc: { ...siblingDoc },
+        })
+      }
 
       break
     }
@@ -236,17 +261,15 @@ export const promise = async ({
         throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
       }
 
-      if (typeof field?.editor === 'function') {
+      if (typeof field.editor === 'function') {
         throw new Error('Attempted to access unsanitized rich text editor.')
       }
 
-      const editor: RichTextAdapter = field?.editor
+      const editor: RichTextAdapter = field.editor
 
       if (editor?.hooks?.afterChange?.length) {
-        await editor.hooks.afterChange.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
+        for (const hook of editor.hooks.afterChange) {
+          const hookedValue = await hook({
             collection,
             context,
             data,
@@ -255,20 +278,21 @@ export const promise = async ({
             indexPath: indexPathSegments,
             operation,
             originalDoc: doc,
+            parentIsLocalized,
             path: pathSegments,
             previousDoc,
             previousSiblingDoc,
-            previousValue: previousDoc[field.name],
+            previousValue: previousDoc?.[field.name],
             req,
             schemaPath: schemaPathSegments,
             siblingData,
-            value: siblingDoc[field.name],
+            value: siblingDoc?.[field.name],
           })
 
           if (hookedValue !== undefined) {
             siblingDoc[field.name] = hookedValue
           }
-        }, Promise.resolve())
+        }
       }
       break
     }
@@ -281,9 +305,9 @@ export const promise = async ({
       const isNamedTab = tabHasName(field)
 
       if (isNamedTab) {
-        tabSiblingData = (siblingData[field.name] as JsonObject) ?? {}
-        tabSiblingDoc = (siblingDoc[field.name] as JsonObject) ?? {}
-        tabPreviousSiblingDoc = (previousDoc[field.name] as JsonObject) ?? {}
+        tabSiblingData = (siblingData?.[field.name] ?? {}) as JsonObject
+        tabSiblingDoc = (siblingDoc?.[field.name] ?? {}) as JsonObject
+        tabPreviousSiblingDoc = (previousDoc?.[field.name] ?? {}) as JsonObject
       }
 
       await traverseFields({
@@ -296,6 +320,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: isNamedTab ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         previousDoc,
@@ -319,6 +344,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         previousDoc,

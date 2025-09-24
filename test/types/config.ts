@@ -19,8 +19,65 @@ export default buildConfigWithDefaults({
           name: 'text',
         },
         {
+          type: 'richText',
+          name: 'richText',
+          required: true,
+        },
+        {
           type: 'text',
           name: 'title',
+        },
+        {
+          name: 'selectField',
+          type: 'select',
+          required: true,
+          interfaceName: 'MySelectOptions',
+          options: [
+            {
+              label: 'Option 1',
+              value: 'option-1',
+            },
+            {
+              label: 'Option 2',
+              value: 'option-2',
+            },
+          ],
+        },
+        {
+          type: 'group',
+          label: 'Unnamed Group',
+          fields: [
+            {
+              type: 'text',
+              name: 'insideUnnamedGroup',
+            },
+          ],
+        },
+        {
+          type: 'group',
+          name: 'namedGroup',
+          fields: [
+            {
+              type: 'text',
+              name: 'insideNamedGroup',
+            },
+          ],
+        },
+        {
+          name: 'radioField',
+          type: 'radio',
+          required: true,
+          interfaceName: 'MyRadioOptions',
+          options: [
+            {
+              label: 'Option 1',
+              value: 'option-1',
+            },
+            {
+              label: 'Option 2',
+              value: 'option-2',
+            },
+          ],
         },
       ],
     },

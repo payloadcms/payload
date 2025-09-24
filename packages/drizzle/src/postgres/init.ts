@@ -35,4 +35,11 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
   })
 
   await executeSchemaHooks({ type: 'afterSchemaInit', adapter: this })
+
+  this.schema = {
+    pgSchema: this.pgSchema,
+    ...this.tables,
+    ...this.relations,
+    ...this.enums,
+  }
 }

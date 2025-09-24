@@ -3,8 +3,9 @@ import type { ArrayField, Payload, RelationshipField } from 'payload'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import type { Page } from './payload-types.js'
+
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { Page } from './payload-types.js'
 
 let payload: Payload
 
@@ -17,9 +18,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('seed', () => {
@@ -76,7 +75,6 @@ describe('@payloadcms/plugin-nested-docs', () => {
           },
         })
       }
-
       // update parent doc
       await payload.update({
         collection: 'pages',
@@ -99,8 +97,8 @@ describe('@payloadcms/plugin-nested-docs', () => {
         },
       })
 
-      const firstUpdatedChildBreadcrumbs = docs[0]?.breadcrumbs as Page['breadcrumbs']
-      const lastUpdatedChildBreadcrumbs = docs[10]?.breadcrumbs as Page['breadcrumbs']
+      const firstUpdatedChildBreadcrumbs = docs[0]?.breadcrumbs
+      const lastUpdatedChildBreadcrumbs = docs[10]?.breadcrumbs
 
       expect(firstUpdatedChildBreadcrumbs).toHaveLength(2)
       // @ts-ignore
@@ -109,6 +107,87 @@ describe('@payloadcms/plugin-nested-docs', () => {
       expect(firstUpdatedChildBreadcrumbs).toBeDefined()
       // @ts-ignore
       expect(lastUpdatedChildBreadcrumbs[0].url).toStrictEqual('/11-children-updated')
+    })
+
+    it('should return breadcrumbs as an array of objects', async () => {
+      const parentDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'parent doc',
+          slug: 'parent-doc',
+          _status: 'published',
+        },
+      })
+
+      const childDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'child doc',
+          slug: 'child-doc',
+          parent: parentDoc.id,
+          _status: 'published',
+        },
+      })
+
+      // expect breadcrumbs to be an array
+      expect(childDoc.breadcrumbs).toBeInstanceOf(Array)
+      expect(childDoc.breadcrumbs).toBeDefined()
+
+      // expect each to be objects
+      childDoc.breadcrumbs?.map((breadcrumb) => {
+        expect(breadcrumb).toBeInstanceOf(Object)
+      })
+    })
+
+    it('should update child doc breadcrumb without affecting any other data', async () => {
+      const parentDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'parent doc',
+          slug: 'parent',
+        },
+      })
+
+      const childDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'child doc',
+          slug: 'child',
+          parent: parentDoc.id,
+          _status: 'published',
+        },
+      })
+
+      await payload.update({
+        collection: 'pages',
+        id: parentDoc.id,
+        data: {
+          title: 'parent updated',
+          slug: 'parent-updated',
+          _status: 'published',
+        },
+      })
+
+      const updatedChild = await payload
+        .find({
+          collection: 'pages',
+          where: {
+            id: {
+              equals: childDoc.id,
+            },
+          },
+        })
+        .then(({ docs }) => docs[0])
+
+      // breadcrumbs should be updated
+      expect(updatedChild!.breadcrumbs).toHaveLength(2)
+
+      expect(updatedChild!.breadcrumbs?.[0]?.url).toStrictEqual('/parent-updated')
+      expect(updatedChild!.breadcrumbs?.[1]?.url).toStrictEqual('/parent-updated/child')
+
+      // no other data should be affected
+      expect(updatedChild!.title).toEqual('child doc')
+      expect(updatedChild!.slug).toEqual('child')
     })
   })
 

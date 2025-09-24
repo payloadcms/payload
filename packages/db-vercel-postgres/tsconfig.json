@@ -1,10 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    /* TODO: remove the following lines */
-    "strict": false,
-    "noUncheckedIndexedAccess": false,
-  },
   "references": [
     {
       "path": "../payload"
@@ -15,5 +10,9 @@
     {
       "path": "../drizzle"
     }
-  ]
+  ],
+  "compilerOptions": {
+    // Do not include DOM and DOM.Iterable as this is a server-only package.
+    "lib": ["ES2022"],
+  }
 }

@@ -18,10 +18,19 @@ export async function getRequestLocale({ req }: GetRequestLocalesArgs): Promise<
     }
 
     return (
-      findLocaleFromCode(
-        req.payload.config.localization,
-        localeFromParams || (await getPreferences<Locale['code']>('locale', req.payload, req.user)),
-      ) ||
+      (req.user &&
+        findLocaleFromCode(
+          req.payload.config.localization,
+          localeFromParams ||
+            (
+              await getPreferences<Locale['code']>(
+                'locale',
+                req.payload,
+                req.user.id,
+                req.user.collection,
+              )
+            )?.value,
+        )) ||
       findLocaleFromCode(
         req.payload.config.localization,
         req.payload.config.localization.defaultLocale || 'en',

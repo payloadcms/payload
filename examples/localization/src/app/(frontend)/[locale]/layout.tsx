@@ -5,7 +5,6 @@ import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
 import React from 'react'
 
-import { AdminBar } from '@/components/AdminBar'
 import { Footer } from '@/globals/Footer/Component'
 import { Header } from '@/globals/Header/Component'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
@@ -57,13 +56,7 @@ export default async function RootLayout({ children, params }: Args) {
       <body>
         <Providers>
           <NextIntlClientProvider messages={messages}>
-            <AdminBar
-              adminBarProps={{
-                preview: isEnabled,
-              }}
-            />
             <LivePreviewListener />
-
             <Header locale={locale} />
             {children}
             <Footer locale={locale} />

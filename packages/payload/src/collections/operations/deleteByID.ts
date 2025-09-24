@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { CollectionSlug } from '../../index.js'
 import type {
   PayloadRequest,
@@ -6,19 +5,21 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
-import type { BeforeOperationHook, Collection, DataFromCollectionSlug } from '../config/types.js'
+import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utils.js'
@@ -34,6 +35,7 @@ export type Arguments = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
+  trash?: boolean
 }
 
 export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect extends SelectType>(
@@ -48,10 +50,8 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(
-      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-        await priorHook
-
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
         args =
           (await hook({
             args,
@@ -60,9 +60,8 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
             operation: 'delete',
             req: args.req,
           })) || args
-      },
-      Promise.resolve(),
-    )
+      }
+    }
 
     const {
       id,
@@ -78,8 +77,9 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
         payload,
       },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
+      trash = false,
     } = args
 
     // /////////////////////////////////////
@@ -95,26 +95,35 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // beforeDelete - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeDelete.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      return hook({
-        id,
-        collection: collectionConfig,
-        context: req.context,
-        req,
-      })
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.beforeDelete?.length) {
+      for (const hook of collectionConfig.hooks.beforeDelete) {
+        await hook({
+          id,
+          collection: collectionConfig,
+          context: req.context,
+          req,
+        })
+      }
+    }
 
     // /////////////////////////////////////
     // Retrieve document
     // /////////////////////////////////////
 
+    let where = combineQueries({ id: { equals: id } }, accessResults)
+
+    // Exclude trashed documents when trash: false
+    where = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where,
+    })
+
     const docToDelete = await req.payload.db.findOne({
       collection: collectionConfig.slug,
-      locale: req.locale,
+      locale: req.locale!,
       req,
-      where: combineQueries({ id: { equals: id } }, accessResults),
+      where,
     })
 
     if (!docToDelete && !hasWhereAccess) {
@@ -139,7 +148,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     await deleteAssociatedFiles({
       collectionConfig,
       config,
-      doc: docToDelete,
+      doc: docToDelete!,
       overrideDelete: true,
       req,
     })
@@ -168,6 +177,12 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
         req,
       })
     }
+
+    const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Delete document
@@ -198,51 +213,51 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     result = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: result,
-      draft: undefined,
-      fallbackLocale,
+      draft: undefined!,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////
     // afterRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterRead?.length) {
+      for (const hook of collectionConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterDelete - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          id,
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterDelete?.length) {
+      for (const hook of collectionConfig.hooks.afterDelete) {
+        result =
+          (await hook({
+            id,
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

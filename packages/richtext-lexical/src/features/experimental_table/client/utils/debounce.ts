@@ -88,12 +88,12 @@ const nativeMax = Math.max,
  * @category Function
  * @param {Function} func The function to debounce.
  * @param {number} [wait=0] The number of milliseconds to delay.
- * @param {Object} [options={}] The options object.
- * @param {boolean} [options.leading=false]
+ * @param {Object} [sortOnOptions={}] The options object.
+ * @param {boolean} [sortOnOptions.leading=false]
  *  Specify invoking on the leading edge of the timeout.
- * @param {number} [options.maxWait]
+ * @param {number} [sortOnOptions.maxWait]
  *  The maximum time `func` is allowed to be delayed before it's invoked.
- * @param {boolean} [options.trailing=true]
+ * @param {boolean} [sortOnOptions.trailing=true]
  *  Specify invoking on the trailing edge of the timeout.
  * @returns {Function} Returns the new debounced function.
  * @example

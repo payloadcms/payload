@@ -1,0 +1,12 @@
+.debug-jsx-converter {
+  // this is to match the editor component, and be able to compare aligned styles
+  padding-left: 36px;
+
+  // We revert to the browser defaults (user-agent), because we want to see
+  // the indentations look good without the need for CSS.
+  ul,
+  ol {
+    padding-left: revert;
+    margin: revert;
+  }
+}

@@ -14,6 +14,8 @@ type TransformArgs = {
   fields: FlattenedField[]
   joinQuery?: JoinQuery
   locale?: string
+  parentIsLocalized?: boolean
+  tableName: string
 }
 
 // This is the entry point to transform Drizzle output data
@@ -24,6 +26,8 @@ export const transform = <T extends Record<string, unknown> | TypeWithID>({
   data,
   fields,
   joinQuery,
+  parentIsLocalized,
+  tableName,
 }: TransformArgs): T => {
   let relationships: Record<string, Record<string, unknown>[]> = {}
   let texts: Record<string, Record<string, unknown>[]> = {}
@@ -45,12 +49,14 @@ export const transform = <T extends Record<string, unknown> | TypeWithID>({
   }
 
   const blocks = createBlocksMap(data)
+
   const deletions = []
 
   const result = traverseFields<T>({
     adapter,
     blocks,
     config,
+    currentTableName: tableName,
     dataRef: {
       id: data.id,
     },
@@ -59,10 +65,13 @@ export const transform = <T extends Record<string, unknown> | TypeWithID>({
     fields,
     joinQuery,
     numbers,
+    parentIsLocalized,
     path: '',
     relationships,
     table: data,
+    tablePath: '',
     texts,
+    topLevelTableName: tableName,
   })
 
   deletions.forEach((deletion) => deletion())

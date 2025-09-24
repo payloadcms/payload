@@ -1,7 +1,8 @@
-@import '../../../../scss/styles.scss';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .draggable-block-menu {
+    border: none;
     border-radius: $style-radius-m;
     padding: 0;
     cursor: grab;
@@ -24,6 +25,7 @@
     }
 
     .icon {
+      background-color: transparent;
       width: 18px;
       height: 24px;
       opacity: 0.3;

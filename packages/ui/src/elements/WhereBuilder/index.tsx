@@ -1,19 +1,18 @@
 'use client'
-import type { Operator, Where } from 'payload'
+import type { Operator } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { transformWhereQuery, validateWhereQuery } from 'payload/shared'
 import React, { useMemo } from 'react'
 
-import type { AddCondition, UpdateCondition, WhereBuilderProps } from './types.js'
+import type { AddCondition, RemoveCondition, UpdateCondition, WhereBuilderProps } from './types.js'
 
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { reduceFieldsToOptions } from '../../utilities/reduceFieldsToOptions.js'
 import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
 import fieldTypes from './field-types.js'
-import { reduceFields } from './reduceFields.js'
-import { transformWhereQuery } from './transformWhereQuery.js'
-import validateWhereQuery from './validateWhereQuery.js'
 import './index.scss'
 
 const baseClass = 'where-builder'
@@ -28,12 +27,11 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { collectionPluralLabel, fields, renderedFilters, resolvedFilterOptions } = props
   const { i18n, t } = useTranslation()
 
-  const reducedFields = useMemo(() => reduceFields({ fields, i18n }), [fields, i18n])
+  const reducedFields = useMemo(() => reduceFieldsToOptions({ fields, i18n }), [fields, i18n])
 
   const { handleWhereChange, query } = useListQuery()
-  const [shouldUpdateQuery, setShouldUpdateQuery] = React.useState(false)
 
-  const [conditions, setConditions] = React.useState<Where[]>(() => {
+  const conditions = useMemo(() => {
     const whereFromSearch = query.where
 
     if (whereFromSearch) {
@@ -52,17 +50,17 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     }
 
     return []
-  })
+  }, [query.where])
 
   const addCondition: AddCondition = React.useCallback(
-    ({ andIndex, field, orIndex, relation }) => {
+    async ({ andIndex, field, orIndex, relation }) => {
       const newConditions = [...conditions]
 
       const defaultOperator = fieldTypes[field.field.type].operators[0].value
 
       if (relation === 'and') {
         newConditions[orIndex].and.splice(andIndex, 0, {
-          [field.value]: {
+          [String(field.value)]: {
             [defaultOperator]: undefined,
           },
         })
@@ -70,7 +68,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         newConditions.push({
           and: [
             {
-              [field.value]: {
+              [String(field.value)]: {
                 [defaultOperator]: undefined,
               },
             },
@@ -78,37 +76,43 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         })
       }
 
-      setConditions(newConditions)
+      await handleWhereChange({ or: newConditions })
     },
-    [conditions],
+    [conditions, handleWhereChange],
   )
 
   const updateCondition: UpdateCondition = React.useCallback(
-    ({ andIndex, field, operator: incomingOperator, orIndex, value: valueArg }) => {
-      const existingRowCondition = conditions[orIndex].and[andIndex]
+    async ({ andIndex, field, operator: incomingOperator, orIndex, value: valueArg }) => {
+      const existingCondition = conditions[orIndex].and[andIndex]
 
       const defaults = fieldTypes[field.field.type]
       const operator = incomingOperator || defaults.operators[0].value
 
-      if (typeof existingRowCondition === 'object' && field.value) {
-        const value = valueArg ?? existingRowCondition?.[operator]
+      if (typeof existingCondition === 'object' && field.value) {
+        const value = valueArg ?? existingCondition?.[operator]
 
-        const newRowCondition = {
-          [field.value]: { [operator]: value },
+        const valueChanged = value !== existingCondition?.[String(field.value)]?.[String(operator)]
+
+        const operatorChanged =
+          operator !== Object.keys(existingCondition?.[String(field.value)] || {})?.[0]
+
+        if (valueChanged || operatorChanged) {
+          const newRowCondition = {
+            [String(field.value)]: { [operator]: value },
+          }
+
+          const newConditions = [...conditions]
+          newConditions[orIndex].and[andIndex] = newRowCondition
+
+          await handleWhereChange({ or: newConditions })
         }
-
-        const newConditions = [...conditions]
-        newConditions[orIndex].and[andIndex] = newRowCondition
-
-        setConditions(newConditions)
-        setShouldUpdateQuery(true)
       }
     },
-    [conditions],
+    [conditions, handleWhereChange],
   )
 
-  const removeCondition = React.useCallback(
-    ({ andIndex, orIndex }) => {
+  const removeCondition: RemoveCondition = React.useCallback(
+    async ({ andIndex, orIndex }) => {
       const newConditions = [...conditions]
       newConditions[orIndex].and.splice(andIndex, 1)
 
@@ -116,29 +120,18 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         newConditions.splice(orIndex, 1)
       }
 
-      setConditions(newConditions)
-      setShouldUpdateQuery(true)
+      await handleWhereChange({ or: newConditions })
     },
-    [conditions],
+    [conditions, handleWhereChange],
   )
-
-  React.useEffect(() => {
-    if (shouldUpdateQuery) {
-      async function handleChange() {
-        await handleWhereChange({ or: conditions })
-        setShouldUpdateQuery(false)
-      }
-      void handleChange()
-    }
-  }, [conditions, handleWhereChange, shouldUpdateQuery])
 
   return (
     <div className={baseClass}>
       {conditions.length > 0 && (
         <React.Fragment>
-          <div className={`${baseClass}__label`}>
+          <p className={`${baseClass}__label`}>
             {t('general:filterWhere', { label: getTranslation(collectionPluralLabel, i18n) })}
-          </div>
+          </p>
           <ul className={`${baseClass}__or-filters`}>
             {conditions.map((or, orIndex) => {
               const compoundOrKey = `${orIndex}_${Array.isArray(or?.and) ? or.and.length : ''}`
@@ -150,12 +143,12 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                     {Array.isArray(or?.and) &&
                       or.and.map((_, andIndex) => {
                         const condition = conditions[orIndex].and[andIndex]
-                        const fieldName = Object.keys(condition)[0]
+                        const fieldPath = Object.keys(condition)[0]
 
                         const operator =
-                          (Object.keys(condition?.[fieldName] || {})?.[0] as Operator) || undefined
+                          (Object.keys(condition?.[fieldPath] || {})?.[0] as Operator) || undefined
 
-                        const value = condition?.[fieldName]?.[operator] || undefined
+                        const value = condition?.[fieldPath]?.[operator] || undefined
 
                         return (
                           <li key={andIndex}>
@@ -165,13 +158,13 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                             <Condition
                               addCondition={addCondition}
                               andIndex={andIndex}
-                              fieldName={fieldName}
-                              filterOptions={resolvedFilterOptions?.get(fieldName)}
+                              fieldPath={fieldPath}
+                              filterOptions={resolvedFilterOptions?.get(fieldPath)}
                               operator={operator}
                               orIndex={orIndex}
                               reducedFields={reducedFields}
                               removeCondition={removeCondition}
-                              RenderedFilter={renderedFilters?.get(fieldName)}
+                              RenderedFilter={renderedFilters?.get(fieldPath)}
                               updateCondition={updateCondition}
                               value={value}
                             />
@@ -189,10 +182,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             icon="plus"
             iconPosition="left"
             iconStyle="with-border"
-            onClick={() => {
-              addCondition({
+            onClick={async () => {
+              await addCondition({
                 andIndex: 0,
-                field: reducedFields[0],
+                field: reducedFields.find((field) => !field.field.admin?.disableListFilter),
                 orIndex: conditions.length,
                 relation: 'or',
               })
@@ -211,9 +204,9 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             icon="plus"
             iconPosition="left"
             iconStyle="with-border"
-            onClick={() => {
+            onClick={async () => {
               if (reducedFields.length > 0) {
-                addCondition({
+                await addCondition({
                   andIndex: 0,
                   field: reducedFields.find((field) => !field.field.admin?.disableListFilter),
                   orIndex: conditions.length,

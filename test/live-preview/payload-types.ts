@@ -6,9 +6,67 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
+  };
+  blocks: {
+    mediaBlock: MediaBlock;
   };
   collections: {
     users: User;
@@ -19,6 +77,7 @@ export interface Config {
     tenants: Tenant;
     categories: Category;
     media: Media;
+    'collection-level-config': CollectionLevelConfig;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -33,6 +92,7 @@ export interface Config {
     tenants: TenantsSelect<false> | TenantsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'collection-level-config': CollectionLevelConfigSelect<false> | CollectionLevelConfigSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -77,6 +137,37 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "mediaBlock".
+ */
+export interface MediaBlock {
+  invertBackground?: boolean | null;
+  position?: ('default' | 'fullscreen') | null;
+  media: string | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mediaBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -90,6 +181,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -249,6 +347,21 @@ export interface Page {
     };
     [k: string]: unknown;
   } | null;
+  richTextLexicalLocalized?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   relationshipAsUpload?: (string | null) | Media;
   relationshipMonoHasOne?: (string | null) | Post;
   relationshipMonoHasMany?: (string | Post)[] | null;
@@ -316,25 +429,6 @@ export interface Tenant {
   clientURL: string;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -480,6 +574,7 @@ export interface Post {
   };
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -779,6 +874,18 @@ export interface SsrAutosave {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Live Preview is enabled on this collection's own config, not the root config.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-level-config".
+ */
+export interface CollectionLevelConfig {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
@@ -816,6 +923,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'collection-level-config';
+        value: string | CollectionLevelConfig;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -873,6 +984,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -968,6 +1086,7 @@ export interface PagesSelect<T extends boolean = true> {
   relationToLocalized?: T;
   richTextSlate?: T;
   richTextLexical?: T;
+  richTextLexicalLocalized?: T;
   relationshipAsUpload?: T;
   relationshipMonoHasOne?: T;
   relationshipMonoHasMany?: T;
@@ -1100,6 +1219,7 @@ export interface PostsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1338,6 +1458,15 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-level-config_select".
+ */
+export interface CollectionLevelConfigSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

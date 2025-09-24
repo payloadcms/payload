@@ -1,7 +1,6 @@
-// @ts-strict-ignore
 import fs from 'fs'
 
-export function iteratorToStream(iterator) {
+export function iteratorToStream(iterator: AsyncIterator<Uint8Array>) {
   return new ReadableStream({
     async pull(controller) {
       const { done, value } = await iterator.next()
