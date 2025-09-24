@@ -136,21 +136,27 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
     translations: {
       [key in AcceptedLanguages]?: {
         /**
-         * @default 'You are about to change ownership from <0>{{fromTenant}}</0> to <0>{{toTenant}}</0>'
-         */
-        'confirm-modal-tenant-switch--body'?: string
-        /**
-         * `tenantLabel` defaults to the value of the `nav-tenantSelector-label` translation
+         * Shown inside 3 dot menu on edit document view
          *
-         * @default 'Confirm {{tenantLabel}} change'
+         * @default 'Assign Tenant'
          */
-        'confirm-modal-tenant-switch--heading'?: string
+        'assign-tenant-button-label'?: string
         /**
+         * Shown as the title of the assign tenant modal
+         *
+         * @default 'Assign "{{title}}"'
+         */
+        'assign-tenant-modal-title'?: string
+        /**
+         * Shown as the label for the assigned tenant field in the assign tenant modal
+         *
          * @default 'Assigned Tenant'
          */
         'field-assignedTenant-label'?: string
         /**
-         * @default 'Tenant'
+         * Shown as the label for the global tenant selector in the admin UI
+         *
+         * @default 'Filter by Tenant'
          */
         'nav-tenantSelector-label'?: string
       }
