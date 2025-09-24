@@ -45,7 +45,7 @@ describe('Lexical Fully Featured', () => {
   test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async () => {
     await lexical.slashCommand('block')
     await expect(lexical.editor.locator('.lexical-block')).toBeVisible()
-    await lexical.slashCommand('relationship')
+    await lexical.slashCommand('relationship', true, 'Relationship')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
     await lexical.save('drawer')
     await expect(lexical.decorator).toHaveCount(2)
