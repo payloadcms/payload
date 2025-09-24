@@ -10,7 +10,25 @@
       border-radius: 4px;
       padding: 16px;
       overflow: hidden;
+      // ONLY WHEN DND IS ACTIVE (START)
+      cursor: grab;
     }
+
+    .react-draggable-dragging {
+      z-index: 10;
+      cursor: grabbing !important;
+    }
+
+    &:has(.react-grid-placeholder) {
+      cursor: grabbing !important;
+    }
+
+    .widget-content {
+      user-select: none;
+      -webkit-user-select: none;
+      pointer-events: none;
+    }
+    // ONLY WHEN DND IS ACTIVE (END)
 
     .react-grid-item > .react-resizable-handle {
       position: absolute;

@@ -63,11 +63,12 @@ export function ModularDashboardClient({ widgets }: ModularDashboardClientProps)
       isDraggable
       isResizable
       layouts={{ lg: layout }}
+      preventCollision // not sure if this gives a better UX
       rowHeight={(BREAKPOINT / 12) * 3}
     >
       {widgets.map((widget) => (
         <div className="widget" key={widget.id}>
-          {widget.component}
+          <div className="widget-content">{widget.component}</div>
         </div>
       ))}
     </ResponsiveGridLayout>
