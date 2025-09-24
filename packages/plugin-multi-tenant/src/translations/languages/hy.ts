@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const hyTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'Տեղադրել Tenant',
-    'assign-tenant-modal-fallback-title': 'Նշանակել նոր {{entity}}',
+    'assign-tenant-modal-title': 'Հանձնել "{{title}}"',
     'field-assignedTenant-label': 'Հանձնարարված վարձակալ',
     'nav-tenantSelector-label': 'Տենանտ',
   },

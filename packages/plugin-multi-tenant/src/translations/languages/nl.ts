@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const nlTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'Toewijzen Tenant',
-    'assign-tenant-modal-fallback-title': 'Wijs nieuwe {{entity}} toe',
+    'assign-tenant-modal-title': 'Wijs "{{title}}" toe',
     'field-assignedTenant-label': 'Toegewezen Huurder',
     'nav-tenantSelector-label': 'Huurder',
   },

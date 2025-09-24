@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const caTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'Assignar Tenant',
-    'assign-tenant-modal-fallback-title': 'Assigna nou {{entity}}',
+    'assign-tenant-modal-title': 'Assigna "{{title}}"',
     'field-assignedTenant-label': 'Llogater Assignat',
     'nav-tenantSelector-label': 'Inquilí',
   },

@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const csTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'Přiřadit nájemce',
-    'assign-tenant-modal-fallback-title': 'Přiřadit nový {{entity}}',
+    'assign-tenant-modal-title': 'Přiřadit "{{title}}"',
     'field-assignedTenant-label': 'Přiřazený nájemce',
     'nav-tenantSelector-label': 'Nájemce',
   },

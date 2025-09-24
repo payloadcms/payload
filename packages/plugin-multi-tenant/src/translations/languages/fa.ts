@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const faTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'اختصاص Tenant',
-    'assign-tenant-modal-fallback-title': 'اختصاص {{entity}} جدید',
+    'assign-tenant-modal-title': 'اختصاص "{{title}}"',
     'field-assignedTenant-label': 'مستاجر اختصاص یافته',
     'nav-tenantSelector-label': 'مستاجر',
   },

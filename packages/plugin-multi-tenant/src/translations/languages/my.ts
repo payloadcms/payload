@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const myTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'အသစ်ထည့်သည့် Tenant',
-    'assign-tenant-modal-fallback-title': 'Tetapkan {{entity}} baru',
+    'assign-tenant-modal-title': 'Tetapkan "{{title}}"',
     'field-assignedTenant-label': 'ခွဲစိုက်ထားသော အငှားယူသူ',
     'nav-tenantSelector-label': 'Penyewa',
   },

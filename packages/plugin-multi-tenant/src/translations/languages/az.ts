@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const azTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'Kirayəçiyə təyin et',
-    'assign-tenant-modal-fallback-title': 'Yeni {{entity}} təyin et',
+    'assign-tenant-modal-title': '"{{title}}" təyin edin',
     'field-assignedTenant-label': 'Təyin edilmiş İcarəçi',
     'nav-tenantSelector-label': 'Kirayəçi',
   },

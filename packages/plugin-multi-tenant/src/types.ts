@@ -98,11 +98,11 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
          */
         'assign-tenant-button-label'?: string
         /**
-         * Shown as the title of the assign tenant modal when creating a new document
+         * Shown as the title of the assign tenant modal
          *
-         * @default 'Assign new {{entity}}'
+         * @default 'Assign "{{title}}"'
          */
-        'assign-tenant-modal-fallback-title'?: string
+        'assign-tenant-modal-title'?: string
         /**
          * Shown as the label for the assigned tenant field in the assign tenant modal
          *

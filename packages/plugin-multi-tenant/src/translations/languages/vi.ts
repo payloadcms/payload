@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const viTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'Giao Tenant',
-    'assign-tenant-modal-fallback-title': 'Gán mới {{entity}}',
+    'assign-tenant-modal-title': 'Gán "{{title}}"',
     'field-assignedTenant-label': 'Người thuê đã được chỉ định',
     'nav-tenantSelector-label': 'Người thuê',
   },

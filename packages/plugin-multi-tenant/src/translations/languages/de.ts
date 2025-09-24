@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const deTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'Mieter zuweisen',
-    'assign-tenant-modal-fallback-title': 'Weisen Sie eine neue {{entity}} zu',
+    'assign-tenant-modal-title': 'Weisen Sie "{{title}}" zu',
     'field-assignedTenant-label': 'Zugewiesener Mandant',
     'nav-tenantSelector-label': 'Mieter',
   },

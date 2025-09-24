@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const rsLatinTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'Dodeli Tenant',
-    'assign-tenant-modal-fallback-title': 'Dodeli novi {{entity}}',
+    'assign-tenant-modal-title': 'Dodeli "{{title}}"',
     'field-assignedTenant-label': 'Dodeljen stanar',
     'nav-tenantSelector-label': 'Podstanar',
   },

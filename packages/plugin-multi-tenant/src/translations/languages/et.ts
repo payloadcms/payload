@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const etTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'Määra Tenant',
-    'assign-tenant-modal-fallback-title': 'Määra uus {{entity}}',
+    'assign-tenant-modal-title': 'Määra "{{title}}"',
     'field-assignedTenant-label': 'Määratud üürnik',
     'nav-tenantSelector-label': 'Üürnik',
   },

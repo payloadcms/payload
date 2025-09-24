@@ -2,10 +2,10 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const bnInTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'assign-tenant-button-label': 'টেনেন্ট নির্ধারণ করুন',
-    'assign-tenant-modal-fallback-title': 'নতুন {{entity}} নির্ধারণ করুন',
+    'assign-tenant-button-label': 'টেনেন্ট নিয়োগ করুন',
+    'assign-tenant-modal-title': '"{{title}}" এর দায়িত্ব দিন',
     'field-assignedTenant-label': 'নির্ধারিত টেনেন্ট',
-    'nav-tenantSelector-label': 'টেনেন্ট দ্বারা বাছাই করুন',
+    'nav-tenantSelector-label': 'টেনেন্ট অনুসারে ফিল্টার করুন',
   },
 }
 

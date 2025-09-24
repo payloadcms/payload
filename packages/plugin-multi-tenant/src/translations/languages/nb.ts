@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const nbTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'Tildel Leietaker',
-    'assign-tenant-modal-fallback-title': 'Tildel ny {{entity}}',
+    'assign-tenant-modal-title': 'Tildel "{{title}}"',
     'field-assignedTenant-label': 'Tildelt leietaker',
     'nav-tenantSelector-label': 'Leietaker',
   },

@@ -9,6 +9,7 @@ import {
   PopupList,
   useConfig,
   useDocumentInfo,
+  useDocumentTitle,
   useModal,
   useTranslation,
 } from '@payloadcms/ui'
@@ -47,7 +48,8 @@ export const AssignTenantFieldModal: React.FC<{
 }> = ({ afterModalClose, afterModalOpen, children, onCancel, onConfirm }) => {
   const editDepth = useDrawerDepth()
   const { t } = useTranslation<PluginMultiTenantTranslations, PluginMultiTenantTranslationKeys>()
-  const { id, collectionSlug, title } = useDocumentInfo()
+  const { collectionSlug } = useDocumentInfo()
+  const { title } = useDocumentTitle()
   const { getEntityConfig } = useConfig()
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
   const { closeModal, isModalOpen: isModalOpenFn } = useModal()
@@ -101,17 +103,13 @@ export const AssignTenantFieldModal: React.FC<{
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__header`}>
           <h3>
-            {id
-              ? title
-              : t('plugin-multi-tenant:assign-tenant-modal-fallback-title', {
-                  entity: collectionConfig?.labels.singular,
-                })}
+            {t('plugin-multi-tenant:assign-tenant-modal-title', {
+              title,
+            })}
           </h3>
-          {Boolean(id) && (
-            <Pill className={`${baseClass}__collection-pill`} size="small">
-              <>{collectionConfig.labels.singular}</>
-            </Pill>
-          )}
+          <Pill className={`${baseClass}__collection-pill`} size="small">
+            <>{collectionConfig.labels.singular}</>
+          </Pill>
         </div>
         <div className={`${baseClass}__content`}>{children}</div>
         <div className={`${baseClass}__actions`}>

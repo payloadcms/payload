@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const ruTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'Назначить Арендатора',
-    'assign-tenant-modal-fallback-title': 'Назначить новый {{entity}}',
+    'assign-tenant-modal-title': 'Назначить "{{title}}"',
     'field-assignedTenant-label': 'Назначенный Арендатор',
     'nav-tenantSelector-label': 'Арендатор',
   },

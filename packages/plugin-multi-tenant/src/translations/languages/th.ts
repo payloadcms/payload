@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const thTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'กำหนดผู้เช่า',
-    'assign-tenant-modal-fallback-title': 'มอบหมาย {{entity}} ใหม่',
+    'assign-tenant-modal-title': 'มอบหมาย "{{title}}"',
     'field-assignedTenant-label': 'ผู้เช่าที่ได้รับการกำหนด',
     'nav-tenantSelector-label': 'ผู้เช่า',
   },

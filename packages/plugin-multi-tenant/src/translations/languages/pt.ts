@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const ptTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'Atribuir Inquilino',
-    'assign-tenant-modal-fallback-title': 'Atribuir novo {{entity}}',
+    'assign-tenant-modal-title': 'Atribuir "{{title}}"',
     'field-assignedTenant-label': 'Inquilino Atribuído',
     'nav-tenantSelector-label': 'Inquilino',
   },

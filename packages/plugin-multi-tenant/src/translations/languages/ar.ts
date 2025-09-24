@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const arTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'تعيين المستأجر',
-    'assign-tenant-modal-fallback-title': 'قم بتعيين {{entity}} جديد',
+    'assign-tenant-modal-title': 'قم بتعيين "{{title}}"',
     'field-assignedTenant-label': 'المستأجر المعين',
     'nav-tenantSelector-label': 'المستأجر',
   },

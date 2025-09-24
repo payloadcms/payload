@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const ltTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'assign-tenant-button-label': 'Priskirkite nuomininką',
-    'assign-tenant-modal-fallback-title': 'Priskirkite naują {{entity}}',
+    'assign-tenant-modal-title': 'Paskirkite "{{title}}"',
     'field-assignedTenant-label': 'Paskirtas nuomininkas',
     'nav-tenantSelector-label': 'Nuomininkas',
   },
