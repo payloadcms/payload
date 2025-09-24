@@ -5,7 +5,7 @@ import type { StaticDescription, StaticLabel } from 'payload'
 import { FieldDescription, FieldLabel, useField, useFormFields } from '@payloadcms/ui'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { Currency } from '../../types.js'
+import type { Currency } from '../../types/index.js'
 
 import { USD } from '../../currencies/index.js'
 import { convertFromBaseValue, convertToBaseValue } from '../utilities.js'

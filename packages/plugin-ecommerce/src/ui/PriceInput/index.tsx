@@ -2,7 +2,7 @@ import type { NumberFieldServerProps } from 'payload'
 
 import './index.css'
 
-import type { CurrenciesConfig, Currency } from '../../types.js'
+import type { CurrenciesConfig, Currency } from '../../types/index.js'
 
 import { FormattedInput } from './FormattedInput.js'
 

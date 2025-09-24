@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { AccessConfig, CountryType } from '../../types.js'
+import type { AccessConfig, CountryType } from '../../types/index.js'
 
 import { defaultCountries } from './defaultCountries.js'
 import { beforeChange } from './hooks/beforeChange.js'

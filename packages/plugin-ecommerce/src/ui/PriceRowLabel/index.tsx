@@ -3,7 +3,7 @@
 import { useRowLabel } from '@payloadcms/ui'
 import { useMemo } from 'react'
 
-import type { CurrenciesConfig } from '../../types.js'
+import type { CurrenciesConfig } from '../../types/index.js'
 
 import './index.css'
 import { convertFromBaseValue } from '../utilities.js'

@@ -1,6 +1,6 @@
 import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from 'payload'
 
-import type { CurrenciesConfig, PaymentAdapter, ProductsValidation } from '../types.js'
+import type { CurrenciesConfig, PaymentAdapter, ProductsValidation } from '../types/index.js'
 
 type Args = {
   /**

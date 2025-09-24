@@ -1,6 +1,6 @@
 import Stripe from 'stripe'
 
-import type { PaymentAdapter } from '../../../types.js'
+import type { PaymentAdapter } from '../../../types/index.js'
 import type { StripeAdapterArgs } from './index.js'
 
 type Props = {

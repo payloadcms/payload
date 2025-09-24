@@ -1,4 +1,4 @@
-import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from '../types.js'
+import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from '../types/index.js'
 
 import { defaultAddressFields } from '../collections/addresses/defaultAddressFields.js'
 import { USD } from '../currencies/index.js'

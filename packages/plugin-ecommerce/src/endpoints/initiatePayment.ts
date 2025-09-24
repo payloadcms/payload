@@ -5,7 +5,7 @@ import type {
   PaymentAdapter,
   ProductsValidation,
   SanitizedEcommercePluginConfig,
-} from '../types.js'
+} from '../types/index.js'
 
 import { defaultProductsValidation } from '../utilities/defaultProductsValidation.js'
 

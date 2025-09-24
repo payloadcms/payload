@@ -5,12 +5,15 @@ import { deepMergeSimple } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { CartItem, Currency } from '../../types.js'
 import type {
+  AddressesCollection,
+  CartItem,
+  CartsCollection,
   ContextProps,
-  EcommerceContext as EcommerceContextType,
-  TypedEcommerce,
-} from './types.js'
+  Currency,
+  EcommerceContextType,
+} from '../../types/index.js'
+import type { TypedEcommerce } from '../../types/utilities.js'
 
 const defaultContext: EcommerceContextType = {
   addItem: async () => {},
@@ -83,7 +86,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
   const [user, setUser] = useState<null | TypedUser>(null)
 
-  const [addresses, setAddresses] = useState<TypedEcommerce['addressesCollection'][]>()
+  const [addresses, setAddresses] = useState<AddressesCollection[]>()
 
   const hasRendered = useRef(false)
 
@@ -93,7 +96,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
    * It can be null if no cart has been created yet.
    */
   const [cartID, setCartID] = useState<DefaultDocumentIDType>()
-  const [cart, setCart] = useState<TypedEcommerce['cartsCollection']>()
+  const [cart, setCart] = useState<CartsCollection>()
 
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(
     () =>
@@ -155,7 +158,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         throw new Error(`Cart creation error: ${data.error}`)
       }
 
-      return data.doc as TypedEcommerce['cartsCollection']
+      return data.doc as CartsCollection
     },
     [baseAPIURL, cartQuery, cartsSlug, selectedCurrency.code, user?.id],
   )
@@ -180,13 +183,13 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         throw new Error(`Cart fetch error: ${data.error}`)
       }
 
-      return data as TypedEcommerce['cartsCollection']
+      return data as CartsCollection
     },
     [baseAPIURL, cartQuery, cartsSlug],
   )
 
   const updateCart = useCallback(
-    async (cartID: DefaultDocumentIDType, data: Partial<TypedEcommerce['cartsCollection']>) => {
+    async (cartID: DefaultDocumentIDType, data: Partial<CartsCollection>) => {
       const query = qs.stringify(cartQuery)
 
       const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}?${query}`, {
@@ -204,7 +207,8 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       }
 
       const updatedCart = await response.json()
-      setCart(updatedCart.doc as TypedEcommerce['cartsCollection'])
+
+      setCart(updatedCart.doc as CartsCollection)
     },
     [baseAPIURL, cartQuery, cartsSlug],
   )
@@ -252,21 +256,23 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         }
 
         // Check if the item already exists in the cart
-        const existingItemIndex = existingCart.items.findIndex((cartItem: CartItem) => {
-          const productID =
-            typeof cartItem.product === 'object' ? cartItem.product.id : item.product
-          const variantID =
-            cartItem.variant && typeof cartItem.variant === 'object'
-              ? cartItem.variant.id
-              : item.variant
+        const existingItemIndex =
+          existingCart.items?.findIndex((cartItem: CartItem) => {
+            const productID =
+              typeof cartItem.product === 'object' ? cartItem.product.id : item.product
+            const variantID =
+              cartItem.variant && typeof cartItem.variant === 'object'
+                ? cartItem.variant.id
+                : item.variant
 
-          return (
-            productID === item.product &&
-            (item.variant && variantID ? variantID === item.variant : true)
-          )
-        })
+            return (
+              productID === item.product &&
+              (item.variant && variantID ? variantID === item.variant : true)
+            )
+          }) ?? -1
 
-        let updatedItems = [...existingCart.items]
+        let updatedItems = existingCart.items ? [...existingCart.items] : []
+
         if (existingItemIndex !== -1) {
           // If the item exists, update its quantity
           updatedItems[existingItemIndex].quantity =
@@ -278,7 +284,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
           })
         } else {
           // If the item does not exist, add it to the cart
-          updatedItems = [...existingCart.items, { ...item, quantity }]
+          updatedItems = [...(existingCart.items ?? []), { ...item, quantity }]
         }
 
         // Update the cart with the new items
@@ -312,13 +318,12 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       }
 
       // Check if the item already exists in the cart
-      const existingItemIndex = existingCart.items.findIndex(
-        (cartItem: CartItem) => cartItem.id === targetID,
-      )
+      const existingItemIndex =
+        existingCart.items?.findIndex((cartItem: CartItem) => cartItem.id === targetID) ?? -1
 
       if (existingItemIndex !== -1) {
         // If the item exists, remove it from the cart
-        const updatedItems = [...existingCart.items]
+        const updatedItems = existingCart.items ? [...existingCart.items] : []
         updatedItems.splice(existingItemIndex, 1)
 
         // Update the cart with the new items
@@ -346,11 +351,10 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       }
 
       // Check if the item already exists in the cart
-      const existingItemIndex = existingCart.items.findIndex(
-        (cartItem: CartItem) => cartItem.id === targetID,
-      )
+      const existingItemIndex =
+        existingCart.items?.findIndex((cartItem: CartItem) => cartItem.id === targetID) ?? -1
 
-      let updatedItems = [...existingCart.items]
+      let updatedItems = existingCart.items ? [...existingCart.items] : []
 
       if (existingItemIndex !== -1) {
         // If the item exists, increment its quantity
@@ -361,7 +365,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         })
       } else {
         // If the item does not exist, add it to the cart with quantity 1
-        updatedItems = [...existingCart.items, { product: targetID, quantity: 1 }]
+        updatedItems = [...(existingCart.items ?? []), { product: targetID, quantity: 1 }]
         // Update the cart with the new items
         await updateCart(cartID, {
           items: updatedItems,
@@ -387,11 +391,10 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       }
 
       // Check if the item already exists in the cart
-      const existingItemIndex = existingCart.items.findIndex(
-        (cartItem: CartItem) => cartItem.id === targetID,
-      )
+      const existingItemIndex =
+        existingCart.items?.findIndex((cartItem: CartItem) => cartItem.id === targetID) ?? -1
 
-      const updatedItems = [...existingCart.items]
+      const updatedItems = existingCart.items ? [...existingCart.items] : []
 
       if (existingItemIndex !== -1) {
         // If the item exists, decrement its quantity
@@ -861,14 +864,14 @@ export const useCurrency = () => {
   }
 }
 
-export const useCart = () => {
+export function useCart<T extends CartsCollection>() {
   const { addItem, cart, clearCart, decrementItem, incrementItem, removeItem } = useEcommerce()
 
   if (!addItem) {
     throw new Error('useCart must be used within an EcommerceProvider')
   }
 
-  return { addItem, cart, clearCart, decrementItem, incrementItem, removeItem }
+  return { addItem, cart: cart as T, clearCart, decrementItem, incrementItem, removeItem }
 }
 
 export const usePayments = () => {
@@ -881,12 +884,12 @@ export const usePayments = () => {
   return { confirmOrder, initiatePayment, paymentMethods, selectedPaymentMethod }
 }
 
-export const useAddresses = () => {
+export function useAddresses<T extends AddressesCollection>() {
   const { addresses, createAddress, updateAddress } = useEcommerce()
 
   if (!createAddress) {
     throw new Error('usePayments must be used within an EcommerceProvider')
   }
 
-  return { addresses, createAddress, updateAddress }
+  return { addresses: addresses as T[], createAddress, updateAddress }
 }

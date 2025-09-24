@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { AccessConfig, CurrenciesConfig, PaymentAdapter } from '../../types.js'
+import type { AccessConfig, CurrenciesConfig, PaymentAdapter } from '../../types/index.js'
 
 import { amountField } from '../../fields/amountField.js'
 import { cartItemsField } from '../../fields/cartItemsField.js'

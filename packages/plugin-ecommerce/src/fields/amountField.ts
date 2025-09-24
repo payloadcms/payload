@@ -1,6 +1,6 @@
 import type { NumberField } from 'payload'
 
-import type { CurrenciesConfig, Currency } from '../types.js'
+import type { CurrenciesConfig, Currency } from '../types/index.js'
 
 type Props = {
   currenciesConfig: CurrenciesConfig

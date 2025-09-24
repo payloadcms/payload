@@ -1,4 +1,4 @@
-import type { CollectionSlugMap, SanitizedEcommercePluginConfig } from '../types.js'
+import type { CollectionSlugMap, SanitizedEcommercePluginConfig } from '../types/index.js'
 
 type Props = {
   sanitizedPluginConfig: SanitizedEcommercePluginConfig
@@ -21,13 +21,11 @@ export const getCollectionSlugMap = ({ sanitizedPluginConfig }: Props): Collecti
     variantTypes: 'variantTypes',
   }
 
-  const collectionSlugsMap: CollectionSlugMap = {
-    ...defaultSlugMap,
-  }
+  const collectionSlugsMap: CollectionSlugMap = defaultSlugMap
 
   if (typeof sanitizedPluginConfig.customers === 'object' && sanitizedPluginConfig.customers.slug) {
     collectionSlugsMap.customers = sanitizedPluginConfig.customers.slug
   }
 
-  return collectionSlugsMap
+  return { ...collectionSlugsMap, ...(sanitizedPluginConfig.slugMap || {}) }
 }

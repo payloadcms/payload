@@ -1,6 +1,6 @@
 import type { GroupField } from 'payload'
 
-import type { CurrenciesConfig } from '../types.js'
+import type { CurrenciesConfig } from '../types/index.js'
 
 import { amountField } from './amountField.js'
 

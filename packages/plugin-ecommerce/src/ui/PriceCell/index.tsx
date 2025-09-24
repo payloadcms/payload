@@ -3,7 +3,7 @@ import type { DefaultCellComponentProps, TypedCollection } from 'payload'
 
 import { useTranslation } from '@payloadcms/ui'
 
-import type { CurrenciesConfig, Currency } from '../../types.js'
+import type { CurrenciesConfig, Currency } from '../../types/index.js'
 
 import { convertFromBaseValue } from '../utilities.js'
 

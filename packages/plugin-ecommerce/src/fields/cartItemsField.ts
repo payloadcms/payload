@@ -1,6 +1,6 @@
 import type { ArrayField, Field } from 'payload'
 
-import type { CurrenciesConfig } from '../types.js'
+import type { CurrenciesConfig } from '../types/index.js'
 
 import { amountField } from './amountField.js'
 import { currencyField } from './currencyField.js'

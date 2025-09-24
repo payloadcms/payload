@@ -2,7 +2,7 @@ import type { Config, Endpoint } from 'payload'
 
 import { deepMergeSimple } from 'payload/shared'
 
-import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from './types.js'
+import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from './types/index.js'
 
 import { createAddressesCollection } from './collections/addresses/createAddressesCollection.js'
 import { createCartsCollection } from './collections/carts/createCartsCollection.js'
@@ -344,7 +344,11 @@ export const ecommercePlugin =
     }
 
     incomingConfig.typescript.schema.push((args) =>
-      pushTypeScriptProperties({ ...args, sanitizedPluginConfig }),
+      pushTypeScriptProperties({
+        ...args,
+        collectionSlugMap,
+        sanitizedPluginConfig,
+      }),
     )
 
     return incomingConfig

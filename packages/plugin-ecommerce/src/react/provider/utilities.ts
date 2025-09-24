@@ -1,4 +1,4 @@
-import type { Currency } from '../../types.js'
+import type { Currency } from '../../types/index.js'
 
 /**
  * Convert base value to display value with decimal point (e.g., 2500 to $25.00)

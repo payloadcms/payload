@@ -1,4 +1,4 @@
-import type { Currency } from '../types.js'
+import type { Currency } from '../types/index.js'
 
 export const EUR: Currency = {
   code: 'EUR',

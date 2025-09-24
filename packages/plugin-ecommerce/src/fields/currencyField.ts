@@ -1,6 +1,6 @@
 import type { SelectField } from 'payload'
 
-import type { CurrenciesConfig } from '../types.js'
+import type { CurrenciesConfig } from '../types/index.js'
 
 type Props = {
   currenciesConfig: CurrenciesConfig

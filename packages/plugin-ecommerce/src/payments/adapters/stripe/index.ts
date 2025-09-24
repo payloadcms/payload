@@ -6,7 +6,7 @@ import type {
   PaymentAdapterArgs,
   PaymentAdapterClient,
   PaymentAdapterClientArgs,
-} from '../../../types.js'
+} from '../../../types/index.js'
 
 import { confirmOrder } from './confirmOrder.js'
 import { webhooksEndpoint } from './endpoints/webhooks.js'
