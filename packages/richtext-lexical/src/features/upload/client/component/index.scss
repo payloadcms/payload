@@ -112,6 +112,17 @@
       backdrop-filter: saturate(1.2) blur(8px);
     }
 
+    html[data-theme='light'] & {
+      &__metaOverlay {
+        background: color-mix(in oklab, var(--theme-elevation-800) 55%, transparent);
+        color: var(--theme-elevation-50);
+      }
+
+      &__collectionLabel {
+        color: var(--theme-elevation-300);
+      }
+    }
+
     &__filename {
       white-space: nowrap;
       text-overflow: ellipsis;
