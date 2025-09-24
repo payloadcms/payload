@@ -541,6 +541,8 @@ export const isTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Þú ert að fara að snúa breytingum þessa skjals til baka í útgefna ástandið. Ertu viss?',
     aboutToUnpublish: 'Þú ert að fara að fela þetta skjal. Ertu viss?',
+    aboutToUnpublishIn:
+      'Þú ert um það bil að afturkalla útgáfuna af þessum skjali í {{locale}}. Ertu viss?',
     aboutToUnpublishSelection: 'Þú ert að fara að fela öll {{label}} í valinu. Ertu viss?',
     autosave: 'Sjálfvirk vistun',
     autosavedSuccessfully: 'Sjálfvirk vistun tókst.',
@@ -586,6 +588,7 @@ export const isTranslations: DefaultTranslationsObject = {
     restoring: 'Endurheimti...',
     reverting: 'Sný til baka...',
     revertToPublished: 'Snúa til baka í útgefið',
+    revertUnsuccessful: 'Afturköllun mistókst. Engin fyrri útgáfu fundin.',
     saveDraft: 'Vista drög',
     scheduledSuccessfully: 'Áætlað.',
     schedulePublish: 'Áætla útgáfu',
@@ -596,6 +599,8 @@ export const isTranslations: DefaultTranslationsObject = {
     specificVersion: 'Tiltekin útgáfa',
     status: 'Staða',
     unpublish: 'Fela',
+    unpublishedSuccessfully: 'Óbirtist heppilega.',
+    unpublishIn: 'Afbóka í {{locale}}',
     unpublishing: 'Fel...',
     version: 'Útgáfa',
     versionAgo: '{{distance}} síðan',

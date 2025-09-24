@@ -546,6 +546,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Jūs ketinate atšaukti šio dokumento pakeitimus ir grįžti prie publikuotos versijos. Ar esate įsitikinęs?',
     aboutToUnpublish: 'Jūs ketinate panaikinti šio dokumento publikavimą. Ar esate tikri?',
+    aboutToUnpublishIn:
+      'Jūs ketinate panaikinti šio dokumento publikaciją {{locale}}. Ar esate tikri?',
     aboutToUnpublishSelection:
       'Jūs ketinate atšaukti visų {{label}} pasirinkime. Ar esate įsitikinęs?',
     autosave: 'Automatinis išsaugojimas',
@@ -592,6 +594,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     restoring: 'Atkuriamas...',
     reverting: 'Grįžtama...',
     revertToPublished: 'Grįžti prie publikuotojo',
+    revertUnsuccessful: 'Atkūrimas nepavyko. Ankstesnės publikuotos versijos nerasta.',
     saveDraft: 'Išsaugoti juodraštį',
     scheduledSuccessfully: 'Sėkmingai suplanuota.',
     schedulePublish: 'Suplanuokite publikaciją',
@@ -602,6 +605,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifinė versija',
     status: 'Būsena',
     unpublish: 'Nebepublikuoti',
+    unpublishedSuccessfully: 'Sėkmingai nepublikuota.',
+    unpublishIn: 'Nepublikuoti {{locale}}',
     unpublishing: 'Nebepublikuojama...',
     version: 'Versija',
     versionAgo: 'prieš {{distance}}',

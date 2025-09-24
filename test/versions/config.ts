@@ -14,7 +14,6 @@ import DraftPosts from './collections/Drafts.js'
 import DraftWithChangeHook from './collections/DraftsWithChangeHook.js'
 import DraftWithMax from './collections/DraftsWithMax.js'
 import DraftsWithValidate from './collections/DraftsWithValidate.js'
-import ErrorOnUnpublish from './collections/ErrorOnUnpublish.js'
 import LocalizedPosts from './collections/Localized.js'
 import { Media } from './collections/Media.js'
 import { Media2 } from './collections/Media2.js'
@@ -50,7 +49,6 @@ export default buildConfigWithDefaults({
     DraftWithMax,
     DraftWithChangeHook,
     DraftsWithValidate,
-    ErrorOnUnpublish,
     LocalizedPosts,
     VersionPosts,
     CustomIDs,

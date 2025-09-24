@@ -539,6 +539,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Ви бажаєте повернути зміни цього документа до його опублікованого стану. Ви впевнені?',
     aboutToUnpublish: 'Ви бажаєте скасувати публікацю цього документа. Ви впевнені?',
+    aboutToUnpublishIn: 'Ви збираєтесь зняти з публікації цей документ у {{locale}}. Ви впевнені?',
     aboutToUnpublishSelection:
       'Ви бажаєте скасувати публікацію всіх {{label}} у вибірці. Ви впевнені?',
     autosave: 'Автозбереження',
@@ -585,6 +586,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     restoring: 'Відновлення...',
     reverting: 'Повернення до опублікованого стану...',
     revertToPublished: 'Повернутися до опублікованого стану',
+    revertUnsuccessful: 'Повернення невдале. Не знайдено жодної раніше опублікованої версії.',
     saveDraft: 'Зберегти чернетку',
     scheduledSuccessfully: 'Успішно заплановано.',
     schedulePublish: 'Розклад публікації',
@@ -595,6 +597,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     specificVersion: 'Специфічна версія',
     status: 'Статус',
     unpublish: 'Скасувати публікацію',
+    unpublishedSuccessfully: 'Успішно відмінено публікацію.',
+    unpublishIn: 'Зняти з публікації в {{locale}}',
     unpublishing: 'Скасування публікації...',
     version: 'Версія',
     versionAgo: '{{distance}} тому',

@@ -15,7 +15,9 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { unpublishDocument } from '../../utilities/documentActions.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
+import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
 import { ScheduleDrawer } from './ScheduleDrawer/index.js'
 
@@ -35,21 +37,22 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   } = useDocumentInfo()
 
   const { config, getEntityConfig } = useConfig()
-  const { submit } = useForm()
+  const { getData, reset: resetForm, submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
   const { code: localeCode } = useLocale()
   const { isModalOpen, toggleModal } = useModal()
-
+  const data = getData()
   const drawerSlug = `schedule-publish-${id}`
-
+  const localeUnPublishModalSlug = `confirm-un-publish-locale-${id}`
   const {
+    experimental: { unpublishSpecificLocale: enableUnpublishSpecificLocale } = {},
     localization,
     routes: { api },
     serverURL,
   } = config
 
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const label = labelProp || t('version:publishChanges')
 
   const entityConfig = React.useMemo(() => {
@@ -82,9 +85,9 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
 
   const canSchedulePublish = Boolean(
     scheduledPublishEnabled &&
-      hasPublishPermission &&
-      (globalSlug || (collectionSlug && id)) &&
-      (hasAutosave || !modified),
+    hasPublishPermission &&
+    (globalSlug || (collectionSlug && id)) &&
+    (hasAutosave || !modified),
   )
 
   const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
@@ -173,9 +176,8 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         publishSpecificLocale: locale,
       })
 
-      const action = `${serverURL}${api}${
-        globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}/${id ? `${'/' + id}` : ''}`
-      }${params ? '?' + params : ''}`
+      const action = `${serverURL}${api}${globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}/${id ? `${'/' + id}` : ''}`
+        }${params ? '?' + params : ''}`
 
       const result = await submit({
         action,
@@ -189,6 +191,38 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       }
     },
     [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit, uploadStatus],
+  )
+
+  const unpublishSpecificLocale = useCallback(
+    async () => {
+      const baseUrl = collectionSlug
+        ? `${serverURL}${api}/${collectionSlug}/${id}`
+        : globalSlug
+          ? `${serverURL}${api}/globals/${globalSlug}`
+          : ''
+
+      await unpublishDocument({
+        baseUrl,
+        i18nLanguage: i18n.language,
+        locale: localeCode,
+        resetForm,
+        setMostRecentVersionIsAutosaved,
+        t,
+        unpublishSpecificLocale: true,
+      })
+    },
+    [
+      api,
+      collectionSlug,
+      globalSlug,
+      id,
+      localeCode,
+      serverURL,
+      i18n.language,
+      resetForm,
+      setMostRecentVersionIsAutosaved,
+      t,
+    ],
   )
 
   const publishAll =
@@ -214,6 +248,8 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     ? t('version:publishIn', { locale: activeLocaleLabel })
     : t('version:publishAllLocales')
 
+  const hasAdditionalOptions = canPublishSpecificLocale || canSchedulePublish || enableUnpublishSpecificLocale
+
   if (!hasPublishPermission) {
     return null
   }
@@ -227,30 +263,38 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         onClick={defaultPublish}
         size="medium"
         SubMenuPopupContent={
-          canPublishSpecificLocale || canSchedulePublish
+          hasAdditionalOptions
             ? ({ close }) => {
-                return (
-                  <React.Fragment>
-                    {canSchedulePublish && (
-                      <PopupList.ButtonGroup key="schedule-publish">
-                        <PopupList.Button
-                          id="schedule-publish"
-                          onClick={() => [toggleModal(drawerSlug), close()]}
-                        >
-                          {t('version:schedulePublish')}
-                        </PopupList.Button>
-                      </PopupList.ButtonGroup>
-                    )}
-                    {canPublishSpecificLocale && (
-                      <PopupList.ButtonGroup>
-                        <PopupList.Button id="publish-locale" onClick={secondaryPublish}>
-                          {secondaryLabel}
-                        </PopupList.Button>
-                      </PopupList.ButtonGroup>
-                    )}
-                  </React.Fragment>
-                )
-              }
+              return (
+                <React.Fragment>
+                  {canSchedulePublish && (
+                    <PopupList.ButtonGroup key="schedule-publish">
+                      <PopupList.Button
+                        id="schedule-publish"
+                        onClick={() => [toggleModal(drawerSlug), close()]}
+                      >
+                        {t('version:schedulePublish')}
+                      </PopupList.Button>
+                    </PopupList.ButtonGroup>
+                  )}
+                  {canPublishSpecificLocale && (
+                    <PopupList.ButtonGroup>
+                      <PopupList.Button id="publish-locale" onClick={secondaryPublish}>
+                        {secondaryLabel}
+                      </PopupList.Button>
+                    </PopupList.ButtonGroup>
+                  )}
+                  {enableUnpublishSpecificLocale && data && data._status === 'published' && (
+                    <PopupList.ButtonGroup>
+                      <PopupList.Button id="unpublish-locale" onClick={() => toggleModal(localeUnPublishModalSlug)}>
+                        {t('version:unpublishIn', { locale: localeCode })}
+                      </PopupList.Button>
+                    </PopupList.ButtonGroup>
+                  )}
+
+                </React.Fragment>
+              )
+            }
             : undefined
         }
         type="button"
@@ -264,6 +308,15 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
           slug={drawerSlug}
         />
       )}
+      {enableUnpublishSpecificLocale &&
+        <ConfirmationModal
+          body={t('version:aboutToUnpublishIn', { locale: localeCode })}
+          confirmingLabel={t('version:unpublishing')}
+          heading={t('version:confirmUnpublish')}
+          modalSlug={localeUnPublishModalSlug}
+          onConfirm={() => unpublishSpecificLocale()}
+        />
+      }
     </React.Fragment>
   )
 }

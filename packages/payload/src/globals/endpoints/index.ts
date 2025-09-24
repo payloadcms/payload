@@ -7,6 +7,7 @@ import { findVersionByIDHandler } from './findVersionByID.js'
 import { findVersionsHandler } from './findVersions.js'
 import { previewHandler } from './preview.js'
 import { restoreVersionHandler } from './restoreVersion.js'
+import { unpublishHandler } from './unpublish.js'
 import { updateHandler } from './update.js'
 
 export const defaultGlobalEndpoints: Endpoint[] = wrapInternalEndpoints([
@@ -39,6 +40,11 @@ export const defaultGlobalEndpoints: Endpoint[] = wrapInternalEndpoints([
     handler: restoreVersionHandler,
     method: 'post',
     path: '/versions/:id',
+  },
+  {
+    handler: unpublishHandler,
+    method: 'post',
+    path: '/unpublish',
   },
   {
     handler: updateHandler,
