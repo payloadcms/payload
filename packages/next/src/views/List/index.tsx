@@ -16,6 +16,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
 import {
+  appendUploadSelectFields,
   combineWhereConstraints,
   formatAdminURL,
   isNumber,
@@ -26,7 +27,6 @@ import {
 import React, { Fragment } from 'react'
 
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
-import { appendUploadSelectFields } from './appendUploadSelectFields.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
@@ -280,6 +280,7 @@ export const renderListView = async (
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,
           query,
+          req,
           useAsTitle: collectionConfig.admin.useAsTitle,
           viewType,
         }))

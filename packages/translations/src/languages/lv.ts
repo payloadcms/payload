@@ -512,6 +512,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     enterNumber: 'Lūdzu, ievadiet derīgu numuru.',
     fieldHasNo: 'Šim laukam nav {{label}}',
     greaterThanMax: '{{value}} ir lielāks par maksimāli atļauto {{label}}: {{max}}.',
+    invalidBlock: 'Blokam "{{block}}" nav atļauts.',
+    invalidBlocks: 'Šajā laukā ir bloki, kuri vairs nav atļauti: {{blocks}}.',
     invalidInput: 'Šim laukam ir nederīga ievade.',
     invalidSelection: 'Šim laukam ir nederīga izvēle.',
     invalidSelections: 'Šim laukam ir šādas nederīgas izvēles:',

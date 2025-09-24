@@ -27,6 +27,7 @@ export const Pages: CollectionConfig = {
     {
       name: 'slug',
       type: 'text',
+      unique: true,
       required: true,
       admin: {
         position: 'sidebar',

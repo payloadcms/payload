@@ -7,17 +7,21 @@ import type {
   SanitizedJoins,
 } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { GlobalConfig } from '../../globals/config/types.js'
 import type { Field } from './types.js'
 
 import {
   DuplicateFieldName,
+  InvalidConfiguration,
   InvalidFieldName,
   InvalidFieldRelationship,
   MissingEditorProp,
   MissingFieldType,
 } from '../../errors/index.js'
 import { ReservedFieldName } from '../../errors/ReservedFieldName.js'
+import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
+import { getFieldByPath } from '../../utilities/getFieldByPath.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
@@ -31,13 +35,19 @@ import {
   reservedVerifyFieldNames,
 } from './reservedFieldNames.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
-import { fieldAffectsData as _fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
+import {
+  fieldAffectsData as _fieldAffectsData,
+  fieldIsLocalized,
+  fieldIsVirtual,
+  tabHasName,
+} from './types.js'
 
 type Args = {
   collectionConfig?: CollectionConfig
   config: Config
   existingFieldNames?: Set<string>
   fields: Field[]
+  globalConfig?: GlobalConfig
   /**
    * Used to prevent unnecessary sanitization of fields that are not top-level.
    */
@@ -72,6 +82,7 @@ export const sanitizeFields = async ({
   config,
   existingFieldNames = new Set(),
   fields,
+  globalConfig,
   isTopLevelField = true,
   joinPath = '',
   joins,
@@ -415,6 +426,51 @@ export const sanitizeFields = async ({
       })
 
       fields.splice(++i, 0, timezoneField)
+    }
+
+    if ('virtual' in field && typeof field.virtual === 'string') {
+      const virtualField = field
+      const fields = (collectionConfig || globalConfig)?.fields
+      if (fields) {
+        let flattenFields = flattenAllFields({ fields })
+        const paths = field.virtual.split('.')
+        let isHasMany = false
+
+        for (const [i, segment] of paths.entries()) {
+          const field = flattenFields.find((e) => e.name === segment)
+          if (!field) {
+            break
+          }
+
+          if (field.type === 'group' || field.type === 'tab' || field.type === 'array') {
+            flattenFields = field.flattenedFields
+          } else if (
+            (field.type === 'relationship' || field.type === 'upload') &&
+            i !== paths.length - 1 &&
+            typeof field.relationTo === 'string'
+          ) {
+            if (
+              field.hasMany &&
+              (virtualField.type === 'text' ||
+                virtualField.type === 'number' ||
+                virtualField.type === 'select')
+            ) {
+              if (isHasMany) {
+                throw new InvalidConfiguration(
+                  `Virtual field ${virtualField.name} in ${globalConfig ? `global ${globalConfig.slug}` : `collection ${collectionConfig?.slug}`} references 2 or more hasMany relationships on the path ${virtualField.virtual} which is not allowed.`,
+                )
+              }
+
+              isHasMany = true
+              virtualField.hasMany = true
+            }
+            const relatedCollection = config.collections?.find((e) => e.slug === field.relationTo)
+            if (relatedCollection) {
+              flattenFields = flattenAllFields({ fields: relatedCollection.fields })
+            }
+          }
+        }
+      }
     }
   }
 
