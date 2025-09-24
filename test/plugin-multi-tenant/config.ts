@@ -54,7 +54,7 @@ export default buildConfigWithDefaults({
           en: {
             'field-assignedTenant-label': 'Site',
             'nav-tenantSelector-label': 'Filter by Site',
-            'confirm-modal-tenant-switch--heading': 'Confirm Site Change',
+            'assign-tenant-button-label': 'Assign Site',
           },
         },
       },
