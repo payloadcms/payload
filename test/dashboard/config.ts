@@ -41,8 +41,8 @@ export default buildConfigWithDefaults({
             },
           },
           slug: 'total-tickets',
-          width: '1/4',
-          height: '1',
+          width: 3,
+          height: 1,
         },
         {
           Component: {
@@ -57,8 +57,8 @@ export default buildConfigWithDefaults({
             },
           },
           slug: 'total-revenue',
-          width: '1/4',
-          height: '1',
+          width: 3,
+          height: 1,
         },
         {
           Component: {
@@ -73,8 +73,8 @@ export default buildConfigWithDefaults({
             },
           },
           slug: 'upcoming-events',
-          width: '1/4',
-          height: '1',
+          width: 3,
+          height: 1,
         },
         {
           Component: {
@@ -89,14 +89,14 @@ export default buildConfigWithDefaults({
             },
           },
           slug: 'total-events',
-          width: '1/4',
-          height: '1',
+          width: 3,
+          height: 1,
         },
         {
           Component: './components/Revenue.tsx#default',
           slug: 'revenue-chart',
-          width: '1',
-          height: '2',
+          width: 12,
+          height: 2,
         },
       ],
     },
