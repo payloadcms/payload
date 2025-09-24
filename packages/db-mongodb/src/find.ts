@@ -54,7 +54,7 @@ export const find: Find = async function find(
       locale,
       sort: sortArg || collectionConfig.defaultSort,
       sortAggregation,
-      timestamps: true,
+      timestamps: collectionConfig.timestamps || false,
     })
   }
 
