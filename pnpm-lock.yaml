@@ -1033,6 +1033,9 @@ importers:
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../next
+      '@types/json-schema':
+        specifier: 7.0.15
+        version: 7.0.15
       '@types/react':
         specifier: 19.1.0
         version: 19.1.0
