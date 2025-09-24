@@ -22,6 +22,7 @@ import type {
 } from '../../translations/index.js'
 
 import './index.scss'
+import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
 
 export const assignTenantModalSlug = 'assign-tenant-field-modal'
 const baseClass = 'assign-tenant-field-modal'
@@ -29,6 +30,11 @@ const baseClass = 'assign-tenant-field-modal'
 export const AssignTenantFieldTrigger: React.FC = () => {
   const { openModal } = useModal()
   const { t } = useTranslation<PluginMultiTenantTranslations, PluginMultiTenantTranslationKeys>()
+  const { options } = useTenantSelection()
+
+  if (options.length <= 1) {
+    return null
+  }
 
   return (
     <>
