@@ -16,7 +16,7 @@ export const AllLocaleStatusCell = async ({
   const localization = payload.config.localization as SanitizedLocalizationConfig
   const req = await createLocalReq({}, payload)
 
-  const availableLocale =
+  const availableLocales =
     (await localization.filterAvailableLocales?.({
       locales: localization.locales,
       req,
@@ -29,7 +29,7 @@ export const AllLocaleStatusCell = async ({
 
   return (
     <div className={baseClass}>
-      {availableLocale.map((locale) => {
+      {availableLocales.map((locale) => {
         const status = cellData[locale.code] || fallbackStatus
 
         return (
