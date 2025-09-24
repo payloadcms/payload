@@ -111,7 +111,7 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
     if (unique) {
       return
     }
-    if ((showError && showField) || (!value && !docID && !selectedTenantID)) {
+    if ((showError && showField) || (!value && !selectedTenantID)) {
       openModal(assignTenantModalSlug)
     }
   }, [showError, showField, openModal, value, docID, selectedTenantID, unique])

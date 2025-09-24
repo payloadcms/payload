@@ -8,6 +8,10 @@
 
     &[open] {
       pointer-events: auto;
+
+      .assign-tenant-field-modal__wrapper {
+        display: flex;
+      }
     }
 
     &__bg {
@@ -28,7 +32,7 @@
     &__wrapper {
       z-index: 1;
       position: relative;
-      display: flex;
+      display: none;
       flex-direction: column;
       max-width: calc(var(--base) * 30);
       min-width: min(500px, calc(100% - (var(--base) * 2)));
