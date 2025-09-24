@@ -1,12 +1,9 @@
 import type {
-  Collection,
   DefaultDocumentIDType,
   GeneratedTypes,
-  JsonObject,
   PopulateType,
   SelectType,
   TypedCollection,
-  TypeWithID,
 } from 'payload'
 import type React from 'react'
 
@@ -112,7 +109,7 @@ export type EcommerceContext = {
    * All current addresses for the current user.
    * This is used to manage shipping and billing addresses.
    */
-  addresses?: TypedCollection['addresses'][]
+  addresses?: TypedEcommerce['addressesCollection'][]
   /**
    * The current data of the cart.
    */
@@ -137,7 +134,7 @@ export type EcommerceContext = {
   /**
    * Create a new address by providing the data.
    */
-  createAddress: (data: Partial<TypedCollection['addresses']>) => Promise<void>
+  createAddress: (data: Partial<TypedEcommerce['addressesCollection']>) => Promise<void>
   /**
    * The configuration for the currencies used in the ecommerce context.
    */
@@ -198,7 +195,8 @@ export type TypedEcommerce = ResolveEcommerceType<GeneratedTypes>
 declare module 'payload' {
   export interface GeneratedTypes {
     ecommerceUntyped: {
-      cartsCollection: JsonObject & TypeWithID
+      addressesCollection: TypedCollection['addresses']
+      cartsCollection: TypedCollection['carts']
     }
   }
 }

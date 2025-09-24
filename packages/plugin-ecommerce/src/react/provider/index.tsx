@@ -6,10 +6,11 @@ import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { CartItem, Currency } from '../../types.js'
-import type { ContextProps, EcommerceContext as EcommerceContextType } from './types.js'
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-type GeneratedTypes = import('payload').GeneratedTypes
+import type {
+  ContextProps,
+  EcommerceContext as EcommerceContextType,
+  TypedEcommerce,
+} from './types.js'
 
 const defaultContext: EcommerceContextType = {
   addItem: async () => {},
@@ -82,7 +83,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
   const [user, setUser] = useState<null | TypedUser>(null)
 
-  const [addresses, setAddresses] = useState<TypedCollection['addresses'][]>()
+  const [addresses, setAddresses] = useState<TypedEcommerce['addressesCollection'][]>()
 
   const hasRendered = useRef(false)
 
@@ -92,8 +93,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
    * It can be null if no cart has been created yet.
    */
   const [cartID, setCartID] = useState<DefaultDocumentIDType>()
-  // @ts-ignore
-  const [cart, setCart] = useState<GeneratedTypes['collections']['carts']>()
+  const [cart, setCart] = useState<TypedEcommerce['cartsCollection']>()
 
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(
     () =>
