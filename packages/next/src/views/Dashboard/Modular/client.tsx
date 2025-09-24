@@ -79,14 +79,37 @@ export function ModularDashboardClient({ widgets }: ModularDashboardClientProps)
       breakpoints={{ lg: 768, xxs: 0 }}
       className="grid-layout"
       cols={{ lg: 12, xxs: 6 }}
-      isDraggable={true}
-      isResizable={true}
+      compactType={null}
+      isDraggable
+      isResizable
       layouts={{ lg: layout }}
-      onLayoutChange={(newLayout) => {
-        // TODO: Save layout to user preferences
-        // eslint-disable-next-line no-console
-        console.log('Layout changed:', newLayout)
+      onDrag={(currLayout, oldItem, layoutItem, placeholder) => {
+        // Optional: lock height while dragging to avoid illegal sizes
+        const h = layoutItem.h <= 3 ? 3 : 6
+        layoutItem.h = h
+        if (placeholder) {
+          placeholder.h = h
+        }
       }}
+      onResize={(currLayout, oldItem, layoutItem, placeholder) => {
+        const allowedW = [12, 9, 8, 6, 4, 3]
+        const allowedH = [3, 6]
+
+        const snap = (val: number, allowed: number[]) =>
+          allowed.reduce((p, c) => (Math.abs(c - val) < Math.abs(p - val) ? c : p))
+
+        const w = snap(layoutItem.w, allowedW)
+        const h = snap(layoutItem.h, allowedH)
+
+        // snap live while resizing
+        layoutItem.w = w
+        layoutItem.h = h
+        if (placeholder) {
+          placeholder.w = w
+          placeholder.h = h
+        }
+      }}
+      preventCollision
       rowHeight={64}
     >
       {widgets.map((widget) => (
