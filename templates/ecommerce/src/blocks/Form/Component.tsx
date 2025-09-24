@@ -32,9 +32,9 @@ export type FormBlockType = {
 }
 
 export const FormBlock: React.FC<
-  {
+  FormBlockType & {
     id?: DefaultDocumentIDType
-  } & FormBlockType
+  }
 > = (props) => {
   const {
     enableIntro,
@@ -143,7 +143,8 @@ export const FormBlock: React.FC<
                 {formFromProps &&
                   formFromProps.fields &&
                   formFromProps.fields?.map((field, index) => {
-                    const Field: React.FC<any> = fields?.[field.blockType]
+                    const Field: React.FC<any> | undefined =
+                      fields?.[field.blockType as keyof typeof fields]
 
                     if (Field) {
                       return (

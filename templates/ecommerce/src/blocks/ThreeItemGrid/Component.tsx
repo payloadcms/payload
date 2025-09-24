@@ -1,8 +1,9 @@
 import type { Media, Product, ThreeItemGridBlock as ThreeItemGridBlockProps } from '@/payload-types'
 
-import { GridTileImage } from '@/components/grid/tile'
+import { GridTileImage } from '@/components/Grid/tile'
 import Link from 'next/link'
 import React from 'react'
+import type { DefaultDocumentIDType } from 'payload'
 
 type Props = { item: Product; priority?: boolean; size: 'full' | 'half' }
 
@@ -35,7 +36,12 @@ export const ThreeItemGridItem: React.FC<Props> = ({ item, size }) => {
   )
 }
 
-export const ThreeItemGridBlock: React.FC<ThreeItemGridBlockProps> = async ({ products }) => {
+export const ThreeItemGridBlock: React.FC<
+  ThreeItemGridBlockProps & {
+    id?: DefaultDocumentIDType
+    className?: string
+  }
+> = async ({ products }) => {
   if (!products || !products[0] || !products[1] || !products[2]) return null
 
   const [firstProduct, secondProduct, thirdProduct] = products

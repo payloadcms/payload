@@ -16,6 +16,8 @@ export const AddressListing: React.FC = () => {
       <ul className="flex flex-col gap-8">
         {addresses.map((address) => (
           <li key={address.id} className="border-b pb-8 last:border-none">
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+            {/* @ts-ignore - todo fix types not being inherited from generated types here */}
             <AddressItem address={address} />
           </li>
         ))}

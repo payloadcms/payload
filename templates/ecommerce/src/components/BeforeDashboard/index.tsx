@@ -17,6 +17,7 @@ export const BeforeDashboard: React.FC = () => {
         <li>
           <SeedButton />
           {' with a few products and pages to jump-start your new project, then '}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/">visit your website</a>
           {' to see the results.'}
         </li>

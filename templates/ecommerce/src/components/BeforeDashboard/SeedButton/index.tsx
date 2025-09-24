@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Fragment, useCallback, useState } from 'react'
+import React, { Fragment, useCallback, useState, MouseEvent } from 'react'
 import { toast } from '@payloadcms/ui'
 
 import './index.scss'
@@ -17,10 +17,10 @@ const SuccessMessage: React.FC = () => (
 export const SeedButton: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [seeded, setSeeded] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<unknown>(null)
 
   const handleClick = useCallback(
-    async (e) => {
+    async (e: MouseEvent<HTMLButtonElement>) => {
       e.preventDefault()
 
       if (seeded) {

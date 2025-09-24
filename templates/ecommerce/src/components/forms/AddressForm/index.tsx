@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -53,7 +53,7 @@ export const AddressForm: React.FC<Props> = ({
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     setValue,
   } = useForm<AddressFormValues>({
     defaultValues: initialData,
@@ -77,7 +77,7 @@ export const AddressForm: React.FC<Props> = ({
         callback(newData)
       }
     },
-    [addressID, initialData, callback, skipSubmission],
+    [initialData, skipSubmission, callback, addressID, updateAddress, createAddress],
   )
 
   return (

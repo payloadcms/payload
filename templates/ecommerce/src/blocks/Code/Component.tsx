@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { Code } from './Component.client'
+import type { DefaultDocumentIDType } from 'payload'
 
 export type CodeBlockProps = {
   code: string
@@ -8,11 +9,12 @@ export type CodeBlockProps = {
   blockType: 'code'
 }
 
-type Props = CodeBlockProps & {
-  className?: string
-}
-
-export const CodeBlock: React.FC<Props> = ({ className, code, language }) => {
+export const CodeBlock: React.FC<
+  CodeBlockProps & {
+    id?: DefaultDocumentIDType
+    className?: string
+  }
+> = ({ className, code, language }) => {
   return (
     <div className={[className, 'not-prose'].filter(Boolean).join(' ')}>
       <Code code={code} language={language} />

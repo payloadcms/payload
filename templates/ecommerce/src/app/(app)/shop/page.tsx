@@ -1,4 +1,4 @@
-import { Grid } from '@/components/grid'
+import { Grid } from '@/components/Grid'
 import { ProductGridItem } from '@/components/ProductGridItem'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
