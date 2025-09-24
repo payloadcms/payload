@@ -4,7 +4,7 @@ import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useRouter } from 'next/navigation'
-import React, { useCallback } from 'react'
+import React, { useCallback, FormEvent } from 'react'
 import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { Address } from '@/payload-types'
 
@@ -29,7 +29,7 @@ export const CheckoutForm: React.FC<Props> = ({
   const { confirmOrder } = usePayments()
 
   const handleSubmit = useCallback(
-    async (e) => {
+    async (e: FormEvent) => {
       e.preventDefault()
       setIsLoading(true)
       setProcessingPayment(true)
@@ -102,7 +102,22 @@ export const CheckoutForm: React.FC<Props> = ({
         }
       }
     },
-    [stripe, elements, clearCart, router],
+    [
+      setProcessingPayment,
+      stripe,
+      elements,
+      customerEmail,
+      billingAddress?.phone,
+      billingAddress?.addressLine1,
+      billingAddress?.addressLine2,
+      billingAddress?.city,
+      billingAddress?.state,
+      billingAddress?.postalCode,
+      billingAddress?.country,
+      confirmOrder,
+      clearCart,
+      router,
+    ],
   )
 
   return (

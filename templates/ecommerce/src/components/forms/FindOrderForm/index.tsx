@@ -2,13 +2,12 @@
 
 import { FormError } from '@/components/forms/FormError'
 import { FormItem } from '@/components/forms/FormItem'
-import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/providers/Auth'
 import { useRouter } from 'next/navigation'
-import React, { Fragment, useCallback, useState } from 'react'
+import React, { Fragment, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 
 type FormData = {
@@ -34,9 +33,12 @@ export const FindOrderForm: React.FC<Props> = ({ initialEmail }) => {
     },
   })
 
-  const onSubmit = useCallback(async (data: FormData) => {
-    router.push(`/orders/${data.orderID}?email=${data.email}`)
-  }, [])
+  const onSubmit = useCallback(
+    async (data: FormData) => {
+      router.push(`/orders/${data.orderID}?email=${data.email}`)
+    },
+    [router],
+  )
 
   return (
     <Fragment>
