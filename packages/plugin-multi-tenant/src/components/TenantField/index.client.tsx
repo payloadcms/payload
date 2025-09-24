@@ -31,7 +31,7 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   const { entityType, options, selectedTenantID, setEntityType, setTenant } = useTenantSelection()
   const { setValue, showError, value } = useField<(number | string)[] | (number | string)>()
   const modified = useFormModified()
-  const { setModified } = useForm()
+  const { isValid: isFormValid, setModified } = useForm()
   const { id: docID } = useDocumentInfo()
   const { openModal } = useModal()
   const isConfirmingRef = React.useRef<boolean>(false)
@@ -111,10 +111,10 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
     if (unique) {
       return
     }
-    if ((showError && showField) || (!value && !selectedTenantID)) {
+    if ((!isFormValid && showError && showField) || (!value && !selectedTenantID)) {
       openModal(assignTenantModalSlug)
     }
-  }, [showError, showField, openModal, value, docID, selectedTenantID, unique])
+  }, [isFormValid, showError, showField, openModal, value, docID, selectedTenantID, unique])
 
   if (showField) {
     if (debug) {
