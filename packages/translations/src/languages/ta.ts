@@ -142,6 +142,7 @@ export const taTranslations: DefaultTranslationsObject = {
     addNewLabel: 'புதிய {{label}} சேர்க்கவும்',
     addRelationship: 'உறவைக் (Relationship) சேர்க்கவும்',
     addUpload: 'பதிவேற்றத்தைச் சேர்க்கவும்',
+    allLocaleStatus: 'நிலை - அனைத்து மாவட்டங்கள்',
     block: 'தொகுதி',
     blocks: 'தொகுதிகள்',
     blockType: 'தொகுதி வகை',
