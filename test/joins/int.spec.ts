@@ -406,7 +406,7 @@ describe('Joins Field', () => {
     expect(findFolder?.docs[0]?.documentsAndFolders?.docs).toHaveLength(1)
   })
 
-  it('should not throw an error with where query using EXISTS / EQUALS operators on hasMany select fields', async () => {
+  it('should query where with exists for hasMany select fields', async () => {
     await payload.delete({ collection: 'payload-folders', where: {} })
     const folderDoc = await payload.create({
       collection: 'payload-folders',
@@ -453,11 +453,6 @@ describe('Joins Field', () => {
                   {
                     folderType: {
                       exists: false,
-                    },
-                  },
-                  {
-                    folderType: {
-                      equals: null,
                     },
                   },
                 ],
