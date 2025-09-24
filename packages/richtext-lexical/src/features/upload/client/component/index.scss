@@ -140,11 +140,25 @@
     }
 
     @include small-break {
+      img,
+      svg {
+        // Allow images to shrink < 450px on small screens to
+        // maintain aspect ratio
+        min-width: unset;
+        min-height: unset;
+      }
+
       &__metaOverlay {
         gap: 0;
         padding: calc(var(--base) * 0.5) calc(var(--base) * 0.6);
         flex-direction: column;
+
+        button {
+          display: flex;
+          justify-content: flex-start;
+        }
       }
+
       &__collectionLabel {
         max-width: 100%;
       }
