@@ -368,7 +368,6 @@ describe('Versions', () => {
 
       it('should allow to create with a localized relationships inside a localized array and a block', async () => {
         const post = await payload.create({ collection: 'posts', data: {} })
-        global.d = true
         const res = await payload.create({
           collection: 'localized-posts',
           draft: true,
@@ -572,6 +571,44 @@ describe('Versions', () => {
       // assert it has the original post content
       expect(latestDraft.title).toStrictEqual('v1')
       expect(restoredVersion.title).toStrictEqual('v1')
+    })
+
+    it('findVersions - pagination should work correctly', async () => {
+      const post = await payload.create({
+        collection: 'draft-posts',
+        data: { description: 'a', title: 'title' },
+      })
+      for (let i = 0; i < 100; i++) {
+        await payload.update({ collection: 'draft-posts', id: post.id, data: {} })
+      }
+      const res = await payload.findVersions({
+        collection: 'draft-posts',
+        where: { parent: { equals: post.id } },
+      })
+      expect(res.totalDocs).toBe(101)
+      expect(res.docs).toHaveLength(10)
+      const resPaginationFalse = await payload.findVersions({
+        collection: 'draft-posts',
+        where: { parent: { equals: post.id } },
+        pagination: false,
+      })
+      const resPaginationFalse2 = await payload.find({
+        collection: 'draft-posts',
+        // where: { parent: { equals: post.id } },
+        pagination: false,
+      })
+
+      expect(resPaginationFalse.docs).toHaveLength(101)
+      expect(resPaginationFalse.totalDocs).toBe(101)
+
+      const resPaginationFalseLimit0 = await payload.findVersions({
+        collection: 'draft-posts',
+        where: { parent: { equals: post.id } },
+        pagination: false,
+        limit: 0,
+      })
+      expect(resPaginationFalseLimit0.docs).toHaveLength(101)
+      expect(resPaginationFalseLimit0.totalDocs).toBe(101)
     })
 
     describe('Update', () => {
@@ -1801,6 +1838,31 @@ describe('Versions', () => {
         disableErrors: true,
       })
       expect(version_1_deleted).toBeFalsy()
+    })
+
+    it('findGlobalVersions - pagination should work correctly', async () => {
+      for (let i = 0; i < 100; i++) {
+        await payload.updateGlobal({ slug: 'draft-unlimited-global', data: { title: 'title' } })
+      }
+      const res = await payload.findGlobalVersions({
+        slug: 'draft-unlimited-global',
+      })
+      expect(res.totalDocs).toBe(100)
+      expect(res.docs).toHaveLength(10)
+      const resPaginationFalse = await payload.findGlobalVersions({
+        slug: 'draft-unlimited-global',
+        pagination: false,
+      })
+      expect(resPaginationFalse.docs).toHaveLength(100)
+      expect(resPaginationFalse.totalDocs).toBe(100)
+
+      const resPaginationFalseLimit0 = await payload.findGlobalVersions({
+        slug: 'draft-unlimited-global',
+        pagination: false,
+        limit: 0,
+      })
+      expect(resPaginationFalseLimit0.docs).toHaveLength(100)
+      expect(resPaginationFalseLimit0.totalDocs).toBe(100)
     })
 
     describe('Read', () => {

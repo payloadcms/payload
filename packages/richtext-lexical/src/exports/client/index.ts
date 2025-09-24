@@ -152,3 +152,6 @@ export { useBlockComponentContext } from '../../features/blocks/client/component
 export { getRestPopulateFn } from '../../features/converters/utilities/restPopulateFn.js'
 export { codeConverterClient } from '../../features/blocks/premade/CodeBlock/converterClient.js'
 export { CodeComponent } from '../../features/blocks/premade/CodeBlock/Component.js'
+
+export { RenderLexical } from '../../field/RenderLexical/index.js'
+export { buildEditorState } from '../../utilities/buildEditorState.js'

@@ -28,6 +28,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
+import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
@@ -87,6 +88,7 @@ export function DefaultEditView({
     initialState,
     isEditing,
     isInitializing,
+    isLocked,
     isTrashed,
     lastUpdateTime,
     redirectAfterCreate,
@@ -134,7 +136,14 @@ export function DefaultEditView({
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
-  const { isLivePreviewEnabled, isLivePreviewing, previewWindowType } = useLivePreviewContext()
+  const { clearRouteCache } = useRouteCache()
+  const {
+    isLivePreviewEnabled,
+    isLivePreviewing,
+    previewWindowType,
+    setURL: setLivePreviewURL,
+    typeofLivePreviewURL,
+  } = useLivePreviewContext()
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)
@@ -263,20 +272,14 @@ export function DefaultEditView({
   ])
 
   const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
-    async (json, options) => {
-      const { context, formState } = options || {}
+    async (json, ctx) => {
+      const { context, formState } = ctx || {}
 
       const controller = handleAbortRef(abortOnSaveRef)
 
       const document = json?.doc || json?.result
 
       const updatedAt = document?.updatedAt || new Date().toISOString()
-
-      reportUpdate({
-        id,
-        entitySlug,
-        updatedAt,
-      })
 
       // If we're editing the doc of the logged-in user,
       // Refresh the cookie to get new permissions
@@ -328,7 +331,7 @@ export function DefaultEditView({
       if (id || globalSlug) {
         const docPreferences = await getDocPreferences()
 
-        const { state } = await getFormState({
+        const { livePreviewURL, state } = await getFormState({
           id,
           collectionSlug,
           data: document,
@@ -338,6 +341,7 @@ export function DefaultEditView({
           globalSlug,
           operation,
           renderAllFields: false,
+          returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
           returnLockStatus: false,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
@@ -348,6 +352,16 @@ export function DefaultEditView({
         if (isLockingEnabled) {
           setDocumentIsLocked(false)
         }
+
+        if (isLivePreviewEnabled) {
+          setLivePreviewURL(livePreviewURL)
+        }
+
+        reportUpdate({
+          id,
+          entitySlug,
+          updatedAt,
+        })
 
         abortOnSaveRef.current = null
 
@@ -367,7 +381,7 @@ export function DefaultEditView({
       isEditing,
       depth,
       redirectAfterCreate,
-      getDocPermissions,
+      setLivePreviewURL,
       globalSlug,
       refreshCookieAsync,
       incrementVersionCount,
@@ -376,10 +390,13 @@ export function DefaultEditView({
       startRouteTransition,
       router,
       resetUploadEdits,
+      getDocPermissions,
       getDocPreferences,
       getFormState,
       docPermissions,
       operation,
+      isLivePreviewEnabled,
+      typeofLivePreviewURL,
       schemaPathSegments,
       isLockingEnabled,
       setDocumentIsLocked,
@@ -432,17 +449,17 @@ export function DefaultEditView({
       return state
     },
     [
-      id,
-      collectionSlug,
+      editSessionStartTime,
+      isLockingEnabled,
       getDocPreferences,
       getFormState,
+      id,
+      collectionSlug,
+      docPermissions,
       globalSlug,
-      handleDocumentLocking,
-      isLockingEnabled,
       operation,
       schemaPathSegments,
-      docPermissions,
-      editSessionStartTime,
+      handleDocumentLocking,
     ],
   )
 
@@ -497,6 +514,7 @@ export function DefaultEditView({
           initialState={!isInitializing && initialState}
           isDocumentForm={true}
           isInitializing={isInitializing}
+          key={`${isLocked}`}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSuccess={onSave}
@@ -513,17 +531,18 @@ export function DefaultEditView({
                 setShowTakeOverModal(false)
               }}
               onTakeOver={() =>
-                handleTakeOver(
+                handleTakeOver({
                   id,
+                  clearRouteCache,
                   collectionSlug,
+                  documentLockStateRef: documentLockState,
                   globalSlug,
-                  user,
-                  false,
-                  updateDocumentEditor,
-                  setCurrentEditor,
-                  documentLockState,
                   isLockingEnabled,
-                )
+                  isWithinDoc: false,
+                  setCurrentEditor,
+                  updateDocumentEditor,
+                  user,
+                })
               }
               updatedAt={lastUpdateTime}
               user={currentEditor}
@@ -583,18 +602,19 @@ export function DefaultEditView({
             onRestore={onRestore}
             onSave={onSave}
             onTakeOver={() =>
-              handleTakeOver(
+              handleTakeOver({
                 id,
+                clearRouteCache,
                 collectionSlug,
+                documentLockStateRef: documentLockState,
                 globalSlug,
-                user,
-                true,
-                updateDocumentEditor,
-                setCurrentEditor,
-                documentLockState,
                 isLockingEnabled,
+                isWithinDoc: true,
+                setCurrentEditor,
                 setIsReadOnlyForIncomingUser,
-              )
+                updateDocumentEditor,
+                user,
+              })
             }
             permissions={docPermissions}
             readOnlyForIncomingUser={isReadOnlyForIncomingUser}

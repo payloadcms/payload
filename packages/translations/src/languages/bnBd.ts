@@ -517,6 +517,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     enterNumber: 'একটি বৈধ সংখ্যা লিখুন।',
     fieldHasNo: 'এই ক্ষেত্রে কোনো {{label}} নেই',
     greaterThanMax: '{{value}} সর্বাধিক অনুমোদিত {{label}} {{max}} এর চেয়ে বড়।',
+    invalidBlock: 'ব্লক "{{block}}" অনুমোদিত নয়।',
+    invalidBlocks: 'এই ক্ষেত্রটি আর অনুমোদিত না থাকা ব্লকগুলি ধারণ করে: {{blocks}}।',
     invalidInput: 'এই ক্ষেত্রে একটি অবৈধ ইনপুট রয়েছে।',
     invalidSelection: 'এই ক্ষেত্রে একটি অবৈধ নির্বাচন রয়েছে।',
     invalidSelections: 'এই ক্ষেত্রে নিম্নলিখিত অবৈধ নির্বাচনগুলি রয়েছে:',
@@ -571,6 +573,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'শুধুমাত্র পরিবর্তিত',
     moreVersions: 'আরও সংস্করণ...',
     noFurtherVersionsFound: 'আর কোনো সংস্করণ পাওয়া যায়নি',
+    noLabelGroup:
+      'মূল বাক্যের অর্থ প্রেিত্ষ্যে সম্মান রাখুন। নিম্নে পেলোডের কিছু সাধারণ শর্তাবলীর তালিকা প্রদান করেছে যা খুব নির্দিষ্ট অর্থ বহন করে:',
     noRowsFound: 'কোনো {{label}} পাওয়া যায়নি',
     noRowsSelected: 'কোনো {{label}} নির্বাচিত হয়নি',
     preview: 'প্রাকদর্শন',

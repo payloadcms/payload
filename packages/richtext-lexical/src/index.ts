@@ -814,6 +814,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                     properties: {
                       type: {
                         type: 'string',
+                        tsType: 'any',
                       },
                       version: {
                         type: 'integer',
@@ -1057,10 +1058,12 @@ export { populate } from './populateGraphQL/populate.js'
 
 export type { LexicalEditorProps, LexicalFieldAdminProps, LexicalRichTextAdapter } from './types.js'
 
+export { buildEditorState } from './utilities/buildEditorState.js'
 export { createServerFeature } from './utilities/createServerFeature.js'
-export { editorConfigFactory } from './utilities/editorConfigFactory.js'
 
+export { editorConfigFactory } from './utilities/editorConfigFactory.js'
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
+
 export { extractPropsFromJSXPropsString } from './utilities/jsx/extractPropsFromJSXPropsString.js'
 
 export {
@@ -1069,5 +1072,4 @@ export {
   objectToFrontmatter,
   propsToJSXString,
 } from './utilities/jsx/jsx.js'
-
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'

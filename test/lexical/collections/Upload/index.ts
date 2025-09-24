@@ -3,11 +3,11 @@ import type { CollectionConfig } from 'payload'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { uploadsSlug } from '../../slugs.js'
+import { uploads2Slug, uploadsSlug } from '../../slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const Uploads: CollectionConfig = {
+export const Uploads: CollectionConfig = {
   slug: uploadsSlug,
   fields: [
     {
@@ -34,4 +34,14 @@ const Uploads: CollectionConfig = {
   },
 }
 
-export default Uploads
+export const Uploads2: CollectionConfig = {
+  ...Uploads,
+  slug: uploads2Slug,
+  fields: [
+    ...Uploads.fields,
+    {
+      name: 'altText',
+      type: 'text',
+    },
+  ],
+}

@@ -2903,7 +2903,7 @@ describe('Localization', () => {
         })
 
         const req = await createLocalReq({ user }, payload)
-        global.d = true
+
         const res = (await copyDataFromLocaleHandler({
           fromLocale: 'en',
           req,
@@ -2933,7 +2933,6 @@ describe('Localization', () => {
         })
 
         const req = await createLocalReq({ user }, payload)
-        global.d = true
         const res = (await copyDataFromLocaleHandler({
           fromLocale: 'en',
           req,

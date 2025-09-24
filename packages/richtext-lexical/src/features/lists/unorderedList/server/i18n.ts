@@ -88,6 +88,9 @@ export const i18n: Partial<GenericLanguages> = {
   sv: {
     label: 'Oordnad lista',
   },
+  ta: {
+    label: 'வரிசைப்படுத்தப்படாத பட்டியல்',
+  },
   th: {
     label: 'รายการที่ไม่ได้เรียงลำดับ',
   },

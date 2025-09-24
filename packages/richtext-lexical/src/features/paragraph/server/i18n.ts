@@ -117,6 +117,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Stycke',
     label2: 'Normal Text',
   },
+  ta: {
+    label: 'பத்தி',
+    label2: 'சாதாரண உரை',
+  },
   th: {
     label: 'ย่อหน้า',
     label2: 'ข้อความธรรมดา',

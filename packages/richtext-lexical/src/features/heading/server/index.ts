@@ -35,6 +35,8 @@ export const HeadingFeature = createServerFeature<
 
     const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
 
+    enabledHeadingSizes.sort()
+
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#HeadingFeatureClient',
       clientFeatureProps: props,
