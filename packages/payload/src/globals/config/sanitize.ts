@@ -81,6 +81,7 @@ export const sanitizeGlobal = async (
   global.fields = await sanitizeFields({
     config,
     fields: global.fields,
+    globalConfig: global,
     parentIsLocalized: false,
     richTextSanitizationPromises,
     validRelationships,

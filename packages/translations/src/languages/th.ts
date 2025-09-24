@@ -501,6 +501,8 @@ export const thTranslations: DefaultTranslationsObject = {
     enterNumber: 'กรุณาระบุตัวเลขที่ถูกต้อง',
     fieldHasNo: 'ช่องนี้ไม่มี {{label}}',
     greaterThanMax: '{{value}} มากกว่าค่าสูงสุดที่อนุญาตของ {{label}} ซึ่งคือ {{max}}.',
+    invalidBlock: 'บล็อก "{{block}}" ไม่ได้รับอนุญาต.',
+    invalidBlocks: 'ฟิลด์นี้มีบล็อคที่ไม่ได้รับอนุญาตแล้ว: {{blocks}}.',
     invalidInput: 'ข้อมูลไม่ถูกต้อง',
     invalidSelection: 'ค่าที่เลือกไม่ถูกต้อง',
     invalidSelections: 'ค่าที่เลือกไม่ถูกต้องดังนี้:',
@@ -553,6 +555,8 @@ export const thTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'แก้ไขเท่านั้น',
     moreVersions: 'เพิ่มเวอร์ชั่น...',
     noFurtherVersionsFound: 'ไม่พบเวอร์ชันอื่น ๆ',
+    noLabelGroup:
+      'ร่วมให้ความหมายของข้อความต้นฉบับภายในบริบทของ Payload นี่คือรายการของคำศัพท์ Payload ทั่วไปที่มีความหมายที่แน่นอนมาก :\n    - Collection: Collection คือกลุ่มของเอกสารที่มีโครงสร้างและจุดประสงค์ที่เหม',
     noRowsFound: 'ไม่พบ {{label}}',
     noRowsSelected: 'ไม่มี {{label}} ที่ถูกเลือก',
     preview: 'ตัวอย่าง',

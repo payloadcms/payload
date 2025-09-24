@@ -19,6 +19,11 @@ export default buildConfigWithDefaults({
           name: 'text',
         },
         {
+          type: 'richText',
+          name: 'richText',
+          required: true,
+        },
+        {
           type: 'text',
           name: 'title',
         },
