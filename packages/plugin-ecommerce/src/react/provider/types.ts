@@ -1,10 +1,16 @@
-import type { DefaultDocumentIDType, PopulateType, SelectType, TypedCollection } from 'payload'
+import type {
+  Collection,
+  DefaultDocumentIDType,
+  GeneratedTypes,
+  JsonObject,
+  PopulateType,
+  SelectType,
+  TypedCollection,
+  TypeWithID,
+} from 'payload'
 import type React from 'react'
 
 import type { CurrenciesConfig, Currency, PaymentAdapterClient } from '../../types.js'
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-type GeneratedTypes = import('payload').GeneratedTypes
 
 export type SyncLocalStorageConfig = {
   /**
@@ -110,8 +116,7 @@ export type EcommerceContext = {
   /**
    * The current data of the cart.
    */
-  // @ts-ignore
-  cart?: GeneratedTypes['collections']['carts']
+  cart?: TypedEcommerce['cartsCollection']
   /**
    * The ID of the current cart corresponding to the cart in the database or local storage.
    */
@@ -181,4 +186,19 @@ export type EcommerceContext = {
     addressID: DefaultDocumentIDType,
     data: Partial<TypedCollection['addresses']>,
   ) => Promise<void>
+}
+
+type ResolveEcommerceType<T> = 'ecommerce' extends keyof T
+  ? T['ecommerce']
+  : // @ts-expect-error - typescript doesnt play nice here
+    T['ecommerceUntyped']
+
+export type TypedEcommerce = ResolveEcommerceType<GeneratedTypes>
+
+declare module 'payload' {
+  export interface GeneratedTypes {
+    ecommerceUntyped: {
+      cartsCollection: JsonObject & TypeWithID
+    }
+  }
 }

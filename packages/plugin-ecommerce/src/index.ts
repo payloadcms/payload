@@ -16,6 +16,7 @@ import { confirmOrderHandler } from './endpoints/confirmOrder.js'
 import { initiatePaymentHandler } from './endpoints/initiatePayment.js'
 import { translations } from './translations/index.js'
 import { getCollectionSlugMap } from './utilities/getCollectionSlugMap.js'
+import { pushTypeScriptProperties } from './utilities/pushTypeScriptProperties.js'
 import { sanitizePluginConfig } from './utilities/sanitizePluginConfig.js'
 
 export const ecommercePlugin =
@@ -334,9 +335,19 @@ export const ecommercePlugin =
       incomingConfig.i18n?.translations,
     )
 
-    return {
-      ...incomingConfig,
+    if (!incomingConfig.typescript) {
+      incomingConfig.typescript = {}
     }
+
+    if (!incomingConfig.typescript.schema) {
+      incomingConfig.typescript.schema = []
+    }
+
+    incomingConfig.typescript.schema.push((args) =>
+      pushTypeScriptProperties({ ...args, sanitizedPluginConfig }),
+    )
+
+    return incomingConfig
   }
 
 export {
