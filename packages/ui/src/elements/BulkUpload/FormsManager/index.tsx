@@ -306,57 +306,84 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             method: 'POST',
           })
 
-          const json = await req.json()
+          if (req.status === 413) {
+            const { name } = (currentForms[i].formState.file as any).value as File
 
-          if (req.status === 201 && json?.doc) {
-            newDocs.push(json.doc)
-          }
+            const message = t('error:fileTooLarge', {
+              fileName: name,
+            })
 
-          // should expose some sort of helper for this
-          const [fieldErrors, nonFieldErrors] = (json?.errors || []).reduce(
-            ([fieldErrs, nonFieldErrs], err) => {
-              const newFieldErrs: any[] = []
-              const newNonFieldErrs: any[] = []
-
-              if (err?.message) {
-                newNonFieldErrs.push(err)
-              }
-
-              if (Array.isArray(err?.data?.errors)) {
-                err.data?.errors.forEach((dataError) => {
-                  if (dataError?.path) {
-                    newFieldErrs.push(dataError)
-                  } else {
-                    newNonFieldErrs.push(dataError)
-                  }
-                })
-              }
-
-              return [
-                [...fieldErrs, ...newFieldErrs],
-                [...nonFieldErrs, ...newNonFieldErrs],
-              ]
-            },
-            [[], []],
-          )
-
-          currentForms[i] = {
-            errorCount: fieldErrors.length,
-            formID: currentForms[i].formID,
-            formState: fieldReducer(currentForms[i].formState, {
-              type: 'ADD_SERVER_ERRORS',
-              errors: fieldErrors,
-            }),
-          }
-
-          if (req.status === 413 || req.status === 400) {
-            // file too large
             currentForms[i] = {
               ...currentForms[i],
-              errorCount: currentForms[i].errorCount + 1,
+              errorCount: (currentForms[i].errorCount || 0) + 1,
+              formState: fieldReducer(currentForms[i].formState, {
+                type: 'ADD_SERVER_ERRORS',
+                errors: [
+                  {
+                    message,
+                    path: 'file',
+                  },
+                ],
+              }),
             }
 
-            toast.error(nonFieldErrors[0]?.message)
+            toast.error(message)
+          } else {
+            const json = await req.json()
+
+            if (req.status < 400) {
+              if (json?.doc) {
+                newDocs.push(json.doc)
+              }
+            } else {
+              // should expose some sort of helper for this
+              const [fieldErrors, nonFieldErrors] = (json?.errors || []).reduce(
+                ([fieldErrs, nonFieldErrs], err) => {
+                  const newFieldErrs: any[] = []
+                  const newNonFieldErrs: any[] = []
+
+                  if (err?.message) {
+                    newNonFieldErrs.push(err)
+                  }
+
+                  if (Array.isArray(err?.data?.errors)) {
+                    err.data?.errors.forEach((dataError) => {
+                      if (dataError?.path) {
+                        newFieldErrs.push(dataError)
+                      } else {
+                        newNonFieldErrs.push(dataError)
+                      }
+                    })
+                  }
+
+                  return [
+                    [...fieldErrs, ...newFieldErrs],
+                    [...nonFieldErrs, ...newNonFieldErrs],
+                  ]
+                },
+                [[], []],
+              )
+
+              currentForms[i] = {
+                errorCount: fieldErrors.length,
+                formID: currentForms[i].formID,
+                formState: fieldReducer(currentForms[i].formState, {
+                  type: 'ADD_SERVER_ERRORS',
+                  errors: fieldErrors,
+                }),
+              }
+
+              if (nonFieldErrors.length > 0) {
+                currentForms[i] = {
+                  ...currentForms[i],
+                  errorCount: currentForms[i].errorCount + nonFieldErrors.length,
+                }
+
+                nonFieldErrors.forEach((error) => {
+                  toast.error(error.message)
+                })
+              }
+            }
           }
         } catch (_) {
           // swallow
