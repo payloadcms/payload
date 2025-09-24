@@ -53,6 +53,8 @@ export const DocumentLocked: React.FC<{
   return (
     <Modal
       className={baseClass}
+      // Fixes https://github.com/payloadcms/payload/issues/13778
+      closeOnBlur={false}
       onClose={() => {
         startRouteTransition(() => handleGoBack())
       }}
