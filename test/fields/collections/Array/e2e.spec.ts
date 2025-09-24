@@ -641,10 +641,10 @@ describe('Array', () => {
     await page.goto(url.create)
 
     // Wait for the test component to render
-    await page.waitForSelector('[data-testid="getDataByPath-test"]')
+    await page.waitForSelector('#getDataByPath-test')
 
     // Check that getDataByPath returned an empty array, not 0
-    await expect(page.getByTestId('empty-array-result')).toHaveText('ARRAY')
-    await expect(page.getByTestId('empty-array-length')).toHaveText('0')
+    await expect(page.locator('#empty-array-result')).toHaveText('ARRAY')
+    await expect(page.locator('#empty-array-length')).toHaveText('0')
   })
 })

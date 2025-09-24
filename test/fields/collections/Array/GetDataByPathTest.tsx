@@ -11,11 +11,11 @@ const GetDataByPathTest: React.FC = () => {
 
   // Render the result directly so e2e test can easily read it
   return (
-    <div data-testid="getDataByPath-test">
-      <span data-testid="empty-array-result">
+    <div id="getDataByPath-test">
+      <span id="empty-array-result">
         {Array.isArray(emptyArrayResult) ? 'ARRAY' : String(emptyArrayResult)}
       </span>
-      <span data-testid="empty-array-length">
+      <span id="empty-array-length">
         {Array.isArray(emptyArrayResult) ? emptyArrayResult.length : 'NOT_ARRAY'}
       </span>
     </div>
