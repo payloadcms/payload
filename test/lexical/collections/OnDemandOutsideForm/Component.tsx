@@ -6,8 +6,6 @@ import type { JSONFieldClientComponent } from 'payload'
 import { buildEditorState, RenderLexical } from '@payloadcms/richtext-lexical/client'
 import React, { useState } from 'react'
 
-import { lexicalFullyFeaturedSlug } from '../../slugs.js'
-
 export const Component: JSONFieldClientComponent = () => {
   const [value, setValue] = useState<DefaultTypedEditorState | undefined>(() =>
     buildEditorState({ text: 'state default' }),
@@ -21,9 +19,9 @@ export const Component: JSONFieldClientComponent = () => {
     <div>
       Default Component:
       <RenderLexical
-        field={{ name: 'myField' }}
+        field={{ name: 'myField', label: 'My Label' }}
         initialValue={buildEditorState({ text: 'defaultValue' })}
-        schemaPath={`collection.${lexicalFullyFeaturedSlug}.richText`}
+        schemaPath={`collection.OnDemandOutsideForm.hiddenAnchor`}
         setValue={setValue as any}
         value={value}
       />

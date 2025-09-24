@@ -45,7 +45,11 @@ export default withBundleAnalyzer(
         ]
       },
       images: {
-        domains: ['localhost'],
+        remotePatterns: [
+          {
+            hostname: 'localhost',
+          },
+        ],
       },
       webpack: (webpackConfig) => {
         webpackConfig.resolve.extensionAlias = {

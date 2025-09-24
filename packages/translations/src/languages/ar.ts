@@ -499,6 +499,8 @@ export const arTranslations: DefaultTranslationsObject = {
     enterNumber: 'يرجى إدخال رقم صحيح.',
     fieldHasNo: 'هذا الحقل ليس لديه {{label}}',
     greaterThanMax: '{{value}} أكبر من الحد الأقصى المسموح به {{label}} الذي يبلغ {{max}}.',
+    invalidBlock: 'الكتلة "{{block}}" غير مسموح بها.',
+    invalidBlocks: 'هذا الحقل يحتوي على كتل لم تعد مسموحًا بها: {{blocks}}.',
     invalidInput: 'هذا الحقل لديه إدخال غير صالح.',
     invalidSelection: 'هذا الحقل لديه اختيار غير صالح.',
     invalidSelections: 'هذا الحقل لديه الاختيارات الغير صالحة التالية:',

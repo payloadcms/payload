@@ -557,6 +557,54 @@ export interface BlockField {
         blockType: 'readOnlyBlock';
       }[]
     | null;
+  /**
+   * Change the value of this field to change the enabled blocks of the blocksWithDynamicFilterOptions field. If it's empty, all blocks are enabled.
+   */
+  enabledBlocks?: string | null;
+  blocksWithDynamicFilterOptions?:
+    | (
+        | {
+            block1Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockOne';
+          }
+        | {
+            block2Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockTwo';
+          }
+        | {
+            block3Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockThree';
+          }
+      )[]
+    | null;
+  blocksWithFilterOptions?:
+    | (
+        | {
+            block1Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockFour';
+          }
+        | {
+            block2Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockFive';
+          }
+        | {
+            block3Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockSix';
+          }
+      )[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -822,7 +870,7 @@ export interface ConditionalLogic {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -2259,6 +2307,57 @@ export interface BlockFieldsSelect<T extends boolean = true> {
           | T
           | {
               title?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  enabledBlocks?: T;
+  blocksWithDynamicFilterOptions?:
+    | T
+    | {
+        blockOne?:
+          | T
+          | {
+              block1Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockTwo?:
+          | T
+          | {
+              block2Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockThree?:
+          | T
+          | {
+              block3Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  blocksWithFilterOptions?:
+    | T
+    | {
+        blockFour?:
+          | T
+          | {
+              block1Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockFive?:
+          | T
+          | {
+              block2Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockSix?:
+          | T
+          | {
+              block3Text?: T;
               id?: T;
               blockName?: T;
             };

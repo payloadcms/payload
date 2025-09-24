@@ -82,17 +82,26 @@ if (!suiteName) {
 
   // Run specific suite
   clearWebpackCache()
-  const suitePath: string | undefined = path
-    .resolve(dirname, inputSuitePath, 'e2e.spec.ts')
+  const suiteFolderPath: string | undefined = path
+    .resolve(dirname, inputSuitePath)
     .replaceAll('__', '/')
+
+  const allSuitesInFolder = await globby(`${suiteFolderPath.replace(/\\/g, '/')}/*e2e.spec.ts`)
 
   const baseTestFolder = inputSuitePath.split('__')[0]
 
-  if (!suitePath || !baseTestFolder) {
+  if (!baseTestFolder || !allSuitesInFolder?.length) {
     throw new Error(`No test suite found for ${suiteName}`)
   }
 
-  executePlaywright(suitePath, baseTestFolder, false, suiteConfigPath)
+  console.log(`\n\nExecuting all ${allSuitesInFolder.length} E2E tests...\n\n`)
+
+  console.log(`${allSuitesInFolder.join('\n')}\n`)
+
+  for (const file of allSuitesInFolder) {
+    clearWebpackCache()
+    executePlaywright(file, baseTestFolder, false, suiteConfigPath)
+  }
 }
 
 console.log('\nRESULTS:')

@@ -48,6 +48,39 @@ const createConstraint = ({
   value,
 }: CreateConstraintArgs): string => {
   const newAlias = `${pathSegments[0]}_alias_${pathSegments.length - 1}`
+
+  if (operator === 'exists' && value === false) {
+    operator = 'not_exists'
+    value = true
+  } else if (operator === 'not_exists' && value === false) {
+    operator = 'exists'
+    value = true
+  }
+
+  if (operator === 'exists') {
+    if (pathSegments.length === 1) {
+      return `EXISTS (SELECT 1 FROM json_each("${pathSegments[0]}") AS ${newAlias})`
+    }
+
+    return `EXISTS (
+      SELECT 1
+      FROM json_each(${alias}.value -> '${pathSegments[0]}') AS ${newAlias}
+      WHERE ${newAlias}.key = '${pathSegments[1]}'
+    )`
+  }
+
+  if (operator === 'not_exists') {
+    if (pathSegments.length === 1) {
+      return `NOT EXISTS (SELECT 1 FROM json_each("${pathSegments[0]}") AS ${newAlias})`
+    }
+
+    return `NOT EXISTS (
+      SELECT 1
+      FROM json_each(${alias}.value -> '${pathSegments[0]}') AS ${newAlias}
+      WHERE ${newAlias}.key = '${pathSegments[1]}'
+    )`
+  }
+
   let formattedValue = value
   let formattedOperator = operator
   if (['contains', 'like'].includes(operator)) {

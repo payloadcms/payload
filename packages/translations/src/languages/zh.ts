@@ -490,6 +490,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     enterNumber: '请输入一个有效的数字。',
     fieldHasNo: '这个字段没有 {{label}}',
     greaterThanMax: '{{value}} 超过了允许的最大 {{label}}，该最大值为 {{max}}。',
+    invalidBlock: '"{{block}}"块不被允许。',
+    invalidBlocks: '此字段包含不再允许的块：{{blocks}}。',
     invalidInput: '该字段有一个无效的输入。',
     invalidSelection: '该字段有一个无效的选择。',
     invalidSelections: '该字段有以下无效的选择：',

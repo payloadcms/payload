@@ -513,6 +513,8 @@ export const caTranslations: DefaultTranslationsObject = {
     enterNumber: 'Si us plau, introdueix un número vàlid.',
     fieldHasNo: 'Aquest camp no té {{label}}',
     greaterThanMax: '{{value}} és més gran que el màxim permès {{label}} de {{max}}.',
+    invalidBlock: 'El bloc "{{block}}" no està permès.',
+    invalidBlocks: 'Aquest camp conté blocs que ja no estan permesos: {{blocks}}.',
     invalidInput: 'Aquest camp té una entrada invàlida.',
     invalidSelection: 'Aquest camp té una selecció invàlida.',
     invalidSelections: 'Aquest camp té les següents seleccions invàlides:',

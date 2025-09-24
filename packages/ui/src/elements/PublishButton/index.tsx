@@ -174,7 +174,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       })
 
       const action = `${serverURL}${api}${
-        globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}/${id ? `${'/' + id}` : ''}`
+        globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}${id ? `/${id}` : ''}`
       }${params ? '?' + params : ''}`
 
       const result = await submit({
