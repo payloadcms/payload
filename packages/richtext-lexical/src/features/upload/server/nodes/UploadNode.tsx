@@ -20,7 +20,6 @@ import type { JSX } from 'react'
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
-import * as React from 'react'
 
 export type UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
   [TCollectionSlug in CollectionSlug]: {
@@ -166,7 +165,7 @@ export class UploadServerNode extends DecoratorBlockNode {
 
   override decorate(): JSX.Element {
     // @ts-expect-error
-    return <RawUploadComponent data={this.__data} format={this.__format} nodeKey={this.getKey()} />
+    return null
   }
 
   override exportDOM(): DOMExportOutput {

@@ -89,7 +89,7 @@ export class UploadNode extends UploadServerNode {
   }
 
   override decorate(): JSX.Element {
-    return <RawUploadComponent data={this.__data} nodeKey={this.getKey()} />
+    return <RawUploadComponent data={this.__data} format={this.__format} nodeKey={this.getKey()} />
   }
 
   override exportJSON(): SerializedUploadNode {

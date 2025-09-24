@@ -12,7 +12,7 @@ import {
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
-import { $getNodeByKey } from 'lexical'
+import { $getNodeByKey, type ElementFormatType } from 'lexical'
 import { isImage } from 'payload/shared'
 import React, { useCallback, useId, useReducer, useRef, useState } from 'react'
 
@@ -37,6 +37,7 @@ const initialParams = {
 
 export type ElementProps = {
   data: UploadData
+  format?: ElementFormatType
   nodeKey: string
 }
 
