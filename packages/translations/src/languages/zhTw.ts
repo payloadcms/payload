@@ -434,7 +434,9 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     copyTo: '複製到',
     copyToLocale: '複製至語言地區',
     localeToPublish: '要發佈的語言地區',
+    selectedLocales: '選擇的地區設定',
     selectLocaleToCopy: '選取要複製的語言地區',
+    selectLocaleToDuplicate: '選擇要複製的地區設定',
   },
   operators: {
     contains: '包含',

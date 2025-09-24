@@ -430,6 +430,7 @@ export default buildConfigWithDefaults({
   ],
   experimental: {
     localizeStatus: true,
+    duplicateSelectedLocales: true,
   },
   localization: {
     filterAvailableLocales: ({ locales }) => {

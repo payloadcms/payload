@@ -122,6 +122,7 @@ export const DocumentControls: React.FC<{
 
   const {
     admin: { dateFormat },
+    experimental: { duplicateSelectedLocales } = {},
     localization,
     routes: { admin: adminRoute },
   } = config
@@ -365,13 +366,25 @@ export const DocumentControls: React.FC<{
                       </Fragment>
                     )}
                     {collectionConfig.disableDuplicate !== true && isEditing && (
-                      <DuplicateDocument
-                        id={id.toString()}
-                        onDuplicate={onDuplicate}
-                        redirectAfterDuplicate={redirectAfterDuplicate}
-                        singularLabel={collectionConfig?.labels?.singular}
-                        slug={collectionConfig?.slug}
-                      />
+                      <>
+                        <DuplicateDocument
+                          id={id.toString()}
+                          onDuplicate={onDuplicate}
+                          redirectAfterDuplicate={redirectAfterDuplicate}
+                          singularLabel={collectionConfig?.labels?.singular}
+                          slug={collectionConfig?.slug}
+                        />
+                        {duplicateSelectedLocales && localization &&
+                          <DuplicateDocument
+                            id={id.toString()}
+                            onDuplicate={onDuplicate}
+                            redirectAfterDuplicate={redirectAfterDuplicate}
+                            selectLocales={true}
+                            singularLabel={collectionConfig?.labels?.singular}
+                            slug={collectionConfig?.slug}
+                          />
+                        }
+                      </>
                     )}
                   </React.Fragment>
                 )}
