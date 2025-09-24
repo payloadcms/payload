@@ -1,5 +1,5 @@
 'use client'
-import type { DefaultDocumentIDType, TypedCollection, TypedUser } from 'payload'
+import type { DefaultDocumentIDType, TypedUser } from 'payload'
 
 import { deepMergeSimple } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -155,7 +155,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         throw new Error(`Cart creation error: ${data.error}`)
       }
 
-      return data.doc as TypedCollection['carts']
+      return data.doc as TypedEcommerce['cartsCollection']
     },
     [baseAPIURL, cartQuery, cartsSlug, selectedCurrency.code, user?.id],
   )
@@ -180,13 +180,13 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         throw new Error(`Cart fetch error: ${data.error}`)
       }
 
-      return data as TypedCollection['carts']
+      return data as TypedEcommerce['cartsCollection']
     },
     [baseAPIURL, cartQuery, cartsSlug],
   )
 
   const updateCart = useCallback(
-    async (cartID: DefaultDocumentIDType, data: Partial<TypedCollection['carts']>) => {
+    async (cartID: DefaultDocumentIDType, data: Partial<TypedEcommerce['cartsCollection']>) => {
       const query = qs.stringify(cartQuery)
 
       const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}?${query}`, {
@@ -204,7 +204,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       }
 
       const updatedCart = await response.json()
-      setCart(updatedCart.doc as TypedCollection['carts'])
+      setCart(updatedCart.doc as TypedEcommerce['cartsCollection'])
     },
     [baseAPIURL, cartQuery, cartsSlug],
   )

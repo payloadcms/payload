@@ -181,7 +181,7 @@ export type EcommerceContext = {
    */
   updateAddress: (
     addressID: DefaultDocumentIDType,
-    data: Partial<TypedCollection['addresses']>,
+    data: Partial<TypedEcommerce['addressesCollection']>,
   ) => Promise<void>
 }
 
