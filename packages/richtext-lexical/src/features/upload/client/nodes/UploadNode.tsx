@@ -65,7 +65,7 @@ export class UploadNode extends UploadServerNode {
     if ((this.__data as Internal_UploadData).pending) {
       return <PendingUploadComponent />
     }
-    return <RawUploadComponent data={this.__data} nodeKey={this.getKey()} />
+    return <RawUploadComponent data={this.__data} format={this.__format} nodeKey={this.getKey()} />
   }
 
   override exportJSON(): SerializedUploadNode {
