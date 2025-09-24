@@ -1,16 +1,17 @@
-/* eslint-disable jest/no-conditional-in-test */
-import type {
-  SerializedBlockNode,
-  SerializedLinkNode,
-  SerializedRelationshipNode,
-  SerializedUploadNode,
-} from '@payloadcms/richtext-lexical'
 import type {
   SerializedEditorState,
   SerializedParagraphNode,
 } from '@payloadcms/richtext-lexical/lexical'
 import type { PaginatedDocs, Payload } from 'payload'
 
+/* eslint-disable jest/no-conditional-in-test */
+import {
+  buildEditorState,
+  type SerializedBlockNode,
+  type SerializedLinkNode,
+  type SerializedRelationshipNode,
+  type SerializedUploadNode,
+} from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -21,7 +22,6 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
-import { textToLexicalJSON } from './collections/LexicalLocalized/textToLexicalJSON.js'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { richTextDocData } from './collections/RichText/data.js'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText.js'
@@ -655,7 +655,7 @@ describe('Lexical', () => {
         locale: 'en',
         data: {
           title: 'Localized Lexical hooks',
-          lexicalBlocksLocalized: textToLexicalJSON({ text: 'some text' }),
+          lexicalBlocksLocalized: buildEditorState({ text: 'some text' }),
           lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
             'Shared text',
             'English text in block',

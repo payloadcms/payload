@@ -42,6 +42,7 @@ export const acceptedLanguages = [
   'sk',
   'sl',
   'sv',
+  'ta',
   'th',
   'tr',
   'uk',
