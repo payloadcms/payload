@@ -6,13 +6,15 @@ import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
+import { getGlobal } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 
 export const countGlobalVersions: CountGlobalVersions = async function countGlobalVersions(
   this: MongooseAdapter,
-  { global, locale, req, where },
+  { global: globalSlug, locale, req, where = {} },
 ) {
-  const Model = this.versions[global]
+  const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug, versions: true })
+
   const options: CountOptions = {
     session: await getSession(this, req),
   }
@@ -26,11 +28,7 @@ export const countGlobalVersions: CountGlobalVersions = async function countGlob
 
   const query = await buildQuery({
     adapter: this,
-    fields: buildVersionGlobalFields(
-      this.payload.config,
-      this.payload.globals.config.find((each) => each.slug === global),
-      true,
-    ),
+    fields: buildVersionGlobalFields(this.payload.config, globalConfig, true),
     locale,
     where,
   })

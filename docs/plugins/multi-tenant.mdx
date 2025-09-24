@@ -1,7 +1,7 @@
 ---
 title: Multi-Tenant Plugin
 label: Multi-Tenant
-order: 40
+order: 50
 desc: Scaffolds multi-tenancy for your Payload application
 keywords: plugins, multi-tenant, multi-tenancy, plugin, payload, cms, seo, indexing, search, search engine
 ---
@@ -10,14 +10,14 @@ keywords: plugins, multi-tenant, multi-tenancy, plugin, payload, cms, seo, index
 
 This plugin sets up multi-tenancy for your application from within your [Admin Panel](../admin/overview). It does so by adding a `tenant` field to all specified collections. Your front-end application can then query data by tenant. You must add the Tenants collection so you control what fields are available for each tenant.
 
-
 <Banner type="info">
   This plugin is completely open-source and the [source code can be found
-  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-multi-tenant). If you need
-  help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've
-  found a bug, please [open a new
-  issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%multi-tenant&template=bug_report.md&title=plugin-multi-tenant%3A)
-  with as much detail as possible.
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-multi-tenant).
+  If you need help, check out our [Community
+  Help](https://payloadcms.com/community-help). If you think you've found a bug,
+  please [open a new
+  issue](https://github.com/payloadcms/payload/issues/new/choose) with as much
+  detail as possible.
 </Banner>
 
 ## Core features
@@ -32,10 +32,11 @@ This plugin sets up multi-tenancy for your application from within your [Admin P
 <Banner type="error">
   **Warning**
 
-  By default this plugin cleans up documents when a tenant is deleted. You should ensure you have
-  strong access control on your tenants collection to prevent deletions by unauthorized users.
+By default this plugin cleans up documents when a tenant is deleted. You should ensure you have
+strong access control on your tenants collection to prevent deletions by unauthorized users.
 
-  You can disabled this behavior by setting `cleanupAfterTenantDelete` to `false` in the plugin options.
+You can disable this behavior by setting `cleanupAfterTenantDelete` to `false` in the plugin options.
+
 </Banner>
 
 ## Installation
@@ -52,7 +53,15 @@ The plugin accepts an object with the following properties:
 
 ```ts
 type MultiTenantPluginConfig<ConfigTypes = unknown> = {
-/**
+  /**
+   * Base path for your application
+   *
+   * https://nextjs.org/docs/app/api-reference/config/next-config-js/basePath
+   *
+   * @default undefined
+   */
+  basePath?: string
+  /**
    * After a tenant is deleted, the plugin will attempt to clean up related documents
    * - removing documents with the tenant ID
    * - removing the tenant from users
@@ -72,7 +81,29 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
        */
       isGlobal?: boolean
       /**
+       * Opt out of adding the tenant field and place
+       * it manually using the `tenantField` export from the plugin
+       */
+      customTenantField?: boolean
+      /**
+       * Overrides for the tenant field, will override the entire tenantField configuration
+       */
+      tenantFieldOverrides?: CollectionTenantFieldConfigOverrides
+      /**
        * Set to `false` if you want to manually apply the baseListFilter
+       * Set to `false` if you want to manually apply the baseFilter
+       *
+       * @default true
+       */
+      useBaseFilter?: boolean
+      /**
+       * @deprecated Use `useBaseFilter` instead. If both are defined,
+       * `useBaseFilter` will take precedence. This property remains only
+       * for backward compatibility and may be removed in a future version.
+       *
+       * Originally, `baseListFilter` was intended to filter only the List View
+       * in the admin panel. However, base filtering is often required in other areas
+       * such as internal link relationships in the Lexical editor.
        *
        * @default true
        */
@@ -99,17 +130,36 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    */
   enabled?: boolean
   /**
+   * Localization for the plugin
+   */
+  i18n?: {
+    translations: {
+      [key in AcceptedLanguages]?: {
+        /**
+         * @default 'You are about to change ownership from <0>{{fromTenant}}</0> to <0>{{toTenant}}</0>'
+         */
+        'confirm-modal-tenant-switch--body'?: string
+        /**
+         * `tenantLabel` defaults to the value of the `nav-tenantSelector-label` translation
+         *
+         * @default 'Confirm {{tenantLabel}} change'
+         */
+        'confirm-modal-tenant-switch--heading'?: string
+        /**
+         * @default 'Assigned Tenant'
+         */
+        'field-assignedTenant-label'?: string
+        /**
+         * @default 'Tenant'
+         */
+        'nav-tenantSelector-label'?: string
+      }
+    }
+  }
+  /**
    * Field configuration for the field added to all tenant enabled collections
    */
-  tenantField?: {
-    access?: RelationshipField['access']
-    /**
-     * The name of the field added to all tenant enabled collections
-     *
-     * @default 'tenant'
-     */
-    name?: string
-  }
+  tenantField?: RootTenantFieldConfigOverrides
   /**
    * Field configuration for the field added to the users collection
    *
@@ -159,6 +209,18 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
         tenantFieldAccess?: never
       }
   /**
+   * Customize tenant selector label
+   *
+   * Either a string or an object where the keys are i18n codes and the values are the string labels
+   *
+   * @deprecated Use `i18n.translations` instead.
+   */
+  tenantSelectorLabel?:
+    | Partial<{
+        [key in AcceptedLanguages]?: string
+      }>
+    | string
+  /**
    * The slug for the tenant collection
    *
    * @default 'tenants'
@@ -170,12 +232,22 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Useful for super-admin type users
    */
   userHasAccessToAllTenants?: (
-    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : User,
+    user: ConfigTypes extends { user: unknown }
+      ? ConfigTypes['user']
+      : TypedUser,
   ) => boolean
   /**
    * Opt out of adding access constraints to the tenants collection
    */
   useTenantsCollectionAccess?: boolean
+  /**
+   * Opt out including the baseListFilter to filter tenants by selected tenant
+   */
+  useTenantsListFilter?: boolean
+  /**
+   * Opt out including the baseListFilter to filter users by selected tenant
+   */
+  useUsersTenantFilter?: boolean
 }
 ```
 
@@ -193,15 +265,15 @@ const config = buildConfig({
     {
       slug: 'tenants',
       admin: {
-        useAsTitle: 'name'
-      }
+        useAsTitle: 'name',
+      },
       fields: [
         // remember, you own these fields
         // these are merely suggestions/examples
         {
-        name: 'name',
-        type: 'text',
-        required: true,
+          name: 'name',
+          type: 'text',
+          required: true,
         },
         {
           name: 'slug',
@@ -212,7 +284,7 @@ const config = buildConfig({
           name: 'domain',
           type: 'text',
           required: true,
-        }
+        },
       ],
     },
   ],
@@ -222,7 +294,7 @@ const config = buildConfig({
         pages: {},
         navigation: {
           isGlobal: true,
-        }
+        },
       },
     }),
   ],
@@ -234,7 +306,6 @@ export default config
 ## Front end usage
 
 The plugin scaffolds out everything you will need to separate data by tenant. You can use the `tenant` field to filter data from enabled collections in your front-end application.
-
 
 In your frontend you can query and constrain data by tenant with the following:
 
@@ -278,6 +349,54 @@ async rewrites() {
 }
 ```
 
+### React Hooks
+
+Below are the hooks exported from the plugin that you can import into your own custom components to consume.
+
+#### useTenantSelection
+
+You can import this like so:
+
+```tsx
+import { useTenantSelection } from '@payloadcms/plugin-multi-tenant/client'
+
+...
+
+const tenantContext = useTenantSelection()
+```
+
+The hook returns the following context:
+
+```ts
+type ContextType = {
+  /**
+   * Array of options to select from
+   */
+  options: OptionObject[]
+  /**
+   * The currently selected tenant ID
+   */
+  selectedTenantID: number | string | undefined
+  /**
+   * Prevents a refresh when the tenant is changed
+   *
+   * If not switching tenants while viewing a "global",
+   * set to true
+   */
+  setPreventRefreshOnChange: React.Dispatch<React.SetStateAction<boolean>>
+  /**
+   * Sets the selected tenant ID
+   *
+   * @param args.id - The ID of the tenant to select
+   * @param args.refresh - Whether to refresh the page
+   * after changing the tenant
+   */
+  setTenant: (args: {
+    id: number | string | undefined
+    refresh?: boolean
+  }) => void
+}
+```
 
 ## Examples
 

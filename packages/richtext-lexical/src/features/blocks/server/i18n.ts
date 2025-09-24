@@ -262,6 +262,15 @@ export const i18n: Partial<GenericLanguages> = {
     },
     label: 'Block',
   },
+  ta: {
+    inlineBlocks: {
+      create: '{{label}} உருவாக்கவும்',
+      edit: '{{label}} திருத்தவும்',
+      label: 'இன்லைன் தொகுதிகள்',
+      remove: '{{label}} நீக்கவும்',
+    },
+    label: 'தொகுதிகள்',
+  },
   th: {
     inlineBlocks: {
       create: 'สร้าง {{label}}',
@@ -305,7 +314,7 @@ export const i18n: Partial<GenericLanguages> = {
       label: '内联块',
       remove: '删除{{label}}',
     },
-    label: '块',
+    label: '区块',
   },
   'zh-TW': {
     inlineBlocks: {

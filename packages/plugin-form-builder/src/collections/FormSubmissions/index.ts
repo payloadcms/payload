@@ -23,6 +23,7 @@ export const generateSubmissionCollection = (
       },
       relationTo: formSlug,
       required: true,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       validate: async (value, { req: { payload }, req }) => {
         /* Don't run in the client side */
         if (!payload) {
@@ -40,7 +41,7 @@ export const generateSubmissionCollection = (
             })
 
             return true
-          } catch (error) {
+          } catch (_error) {
             return 'Cannot create this submission because this form does not exist.'
           }
         }

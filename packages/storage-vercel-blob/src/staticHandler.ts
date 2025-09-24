@@ -15,35 +15,45 @@ export const getStaticHandler = (
   { baseUrl, cacheControlMaxAge = 0, token }: StaticHandlerArgs,
   collection: CollectionConfig,
 ): StaticHandler => {
-  return async (req, { params: { filename } }) => {
+  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
     try {
-      const prefix = await getFilePrefix({ collection, filename, req })
+      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
       const fileKey = path.posix.join(prefix, encodeURIComponent(filename))
-
       const fileUrl = `${baseUrl}/${fileKey}`
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
-
       const blobMetadata = await head(fileUrl, { token })
-      const uploadedAtString = blobMetadata.uploadedAt.toISOString()
+      const { contentDisposition, contentType, size, uploadedAt } = blobMetadata
+      const uploadedAtString = uploadedAt.toISOString()
       const ETag = `"${fileKey}-${uploadedAtString}"`
 
-      const { contentDisposition, contentType, size } = blobMetadata
+      let headers = new Headers(incomingHeaders)
+
+      headers.append('Cache-Control', `public, max-age=${cacheControlMaxAge}`)
+      headers.append('Content-Disposition', contentDisposition)
+      headers.append('Content-Length', String(size))
+      headers.append('Content-Type', contentType)
+      headers.append('ETag', ETag)
+
+      if (
+        collection.upload &&
+        typeof collection.upload === 'object' &&
+        typeof collection.upload.modifyResponseHeaders === 'function'
+      ) {
+        headers = collection.upload.modifyResponseHeaders({ headers }) || headers
+      }
 
       if (etagFromHeaders && etagFromHeaders === ETag) {
         return new Response(null, {
-          headers: new Headers({
-            'Cache-Control': `public, max-age=${cacheControlMaxAge}`,
-            'Content-Disposition': contentDisposition,
-            'Content-Length': String(size),
-            'Content-Type': contentType,
-            ETag,
-          }),
+          headers,
           status: 304,
         })
       }
 
       const response = await fetch(`${fileUrl}?${uploadedAtString}`, {
-        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          Pragma: 'no-cache',
+        },
       })
 
       const blob = await response.blob()
@@ -54,15 +64,10 @@ export const getStaticHandler = (
 
       const bodyBuffer = await blob.arrayBuffer()
 
+      headers.append('Last-Modified', uploadedAtString)
+
       return new Response(bodyBuffer, {
-        headers: new Headers({
-          'Cache-Control': `public, max-age=${cacheControlMaxAge}`,
-          'Content-Disposition': contentDisposition,
-          'Content-Length': String(size),
-          'Content-Type': contentType,
-          ETag,
-          'Last-Modified': blobMetadata.uploadedAt.toUTCString(),
-        }),
+        headers,
         status: 200,
       })
     } catch (err: unknown) {

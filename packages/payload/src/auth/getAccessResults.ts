@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { AllOperations, PayloadRequest } from '../types/index.js'
 import type { Permissions, SanitizedPermissions } from './types.js'
 
@@ -53,7 +52,7 @@ export async function getAccessResults({
         operations: collectionOperations,
         req,
       })
-      results.collections[collection.slug] = collectionPolicy
+      results.collections![collection.slug] = collectionPolicy
     }),
   )
 
@@ -72,7 +71,7 @@ export async function getAccessResults({
         operations: globalOperations,
         req,
       })
-      results.globals[global.slug] = globalPolicy
+      results.globals![global.slug] = globalPolicy
     }),
   )
 

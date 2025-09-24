@@ -1,19 +1,21 @@
 'use client'
-import type { JSONFieldClientComponent } from 'payload'
+import type { JSONFieldClientComponent, JsonObject } from 'payload'
 
 import { type OnMount } from '@monaco-editor/react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 
+import { defaultOptions } from '../../elements/CodeEditor/constants.js'
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
-import './index.scss'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
+import './index.scss'
 
 const baseClass = 'json-field'
 
@@ -27,14 +29,30 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
       localized,
       required,
     },
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
 
-  const [stringValue, setStringValue] = useState<string>()
+  const { insertSpaces = defaultOptions.insertSpaces, tabSize = defaultOptions.tabSize } =
+    editorOptions || {}
+
+  const formatJSON = useCallback(
+    (value: JsonObject | undefined): string | undefined => {
+      if (value === undefined) {
+        return undefined
+      }
+      if (value === null) {
+        return ''
+      }
+      return insertSpaces ? JSON.stringify(value, null, tabSize) : JSON.stringify(value, null, '\t')
+    },
+    [tabSize, insertSpaces],
+  )
+
   const [jsonError, setJsonError] = useState<string>()
-  const [hasLoadedValue, setHasLoadedValue] = useState(false)
+  const inputChangeFromRef = React.useRef<'formState' | 'internalEditor'>('formState')
+  const [recalculatedHeightAt, setRecalculatedHeightAt] = useState<number | undefined>(Date.now())
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -47,14 +65,18 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     initialValue,
+    path,
     setValue,
     showError,
     value,
-  } = useField<string>({
-    path,
+  } = useField<JsonObject>({
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
+
+  const stringValueRef = React.useRef<string>(formatJSON(value ?? initialValue))
 
   const handleMount = useCallback<OnMount>(
     (editor, monaco) => {
@@ -73,45 +95,47 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
       const uri = jsonSchema.uri
       const newUri = uri.includes('?')
-        ? `${uri}&${crypto.randomUUID()}`
-        : `${uri}?${crypto.randomUUID()}`
+        ? `${uri}&${crypto.randomUUID ? crypto.randomUUID() : uuidv4()}`
+        : `${uri}?${crypto.randomUUID ? crypto.randomUUID() : uuidv4()}`
 
       editor.setModel(
-        monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', monaco.Uri.parse(newUri)),
+        monaco.editor.createModel(formatJSON(value) || '', 'json', monaco.Uri.parse(newUri)),
       )
     },
-    [jsonSchema, value],
+    [jsonSchema, formatJSON, value],
   )
 
   const handleChange = useCallback(
-    (val) => {
-      if (readOnly) {
+    (val: string) => {
+      if (readOnly || disabled) {
         return
       }
-      setStringValue(val)
+      inputChangeFromRef.current = 'internalEditor'
 
       try {
         setValue(val ? JSON.parse(val) : null)
+        stringValueRef.current = val
         setJsonError(undefined)
       } catch (e) {
         setValue(val ? val : null)
+        stringValueRef.current = val
         setJsonError(e)
       }
     },
-    [readOnly, setValue, setStringValue],
+    [readOnly, disabled, setValue],
   )
 
   useEffect(() => {
-    if (hasLoadedValue || value === undefined) {
-      return
+    if (inputChangeFromRef.current === 'formState') {
+      const newStringValue = formatJSON(value ?? initialValue)
+      if (newStringValue !== stringValueRef.current) {
+        stringValueRef.current = newStringValue
+        setRecalculatedHeightAt(Date.now())
+      }
     }
 
-    setStringValue(
-      value || initialValue ? JSON.stringify(value ? value : initialValue, null, 2) : '',
-    )
-
-    setHasLoadedValue(true)
-  }, [initialValue, value, hasLoadedValue])
+    inputChangeFromRef.current = 'formState'
+  }, [initialValue, path, formatJSON, value])
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
@@ -122,7 +146,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         baseClass,
         className,
         showError && 'error',
-        readOnly && 'read-only',
+        (readOnly || disabled) && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -146,8 +170,12 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
           onChange={handleChange}
           onMount={handleMount}
           options={editorOptions}
-          readOnly={readOnly}
-          value={stringValue}
+          readOnly={readOnly || disabled}
+          recalculatedHeightAt={recalculatedHeightAt}
+          value={stringValueRef.current}
+          wrapperProps={{
+            id: `field-${path?.replace(/\./g, '__')}`,
+          }}
         />
         {AfterInput}
       </div>

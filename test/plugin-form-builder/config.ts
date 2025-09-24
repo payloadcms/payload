@@ -74,6 +74,26 @@ export default buildConfigWithDefaults({
             singular: 'Custom Text Field',
           },
         },
+        date: {
+          ...formFields.date,
+          fields: [
+            ...(formFields.date && 'fields' in formFields.date
+              ? formFields.date.fields.map((field) => {
+                  if ('name' in field && field.name === 'defaultValue') {
+                    return {
+                      ...field,
+                      timezone: true,
+                      admin: {
+                        ...field.admin,
+                        description: 'This is a date field',
+                      },
+                    } as Field
+                  }
+                  return field
+                })
+              : []),
+          ],
+        },
         // payment: {
         //     paymentProcessor: {
         //       options: [

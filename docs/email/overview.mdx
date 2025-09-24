@@ -16,7 +16,7 @@ The email adapter should be passed into the `email` property of the Payload Conf
 
 ### Default Configuration
 
-When email is not needed or desired, Payload will log a warning on startup notifying that email is not configured. A  warning message will also be logged on any attempt to send an email.
+When email is not needed or desired, Payload will log a warning on startup notifying that email is not configured. A warning message will also be logged on any attempt to send an email.
 
 ### Email Adapter
 
@@ -24,9 +24,8 @@ An email adapter will require at least the following fields:
 
 | Option                      | Description                                                                      |
 | --------------------------- | -------------------------------------------------------------------------------- |
-| **`defaultFromName`** *    | The name part of the From field that will be seen on the delivered email         |
-| **`defaultFromAddress`** * | The email address part of the From field that will be used when delivering email |
-
+| **`defaultFromName`** \*    | The name part of the From field that will be seen on the delivered email         |
+| **`defaultFromAddress`** \* | The email address part of the From field that will be used when delivering email |
 
 ### Official Email Adapters
 
@@ -97,12 +96,10 @@ export default buildConfig({
 
 You also have the ability to bring your own nodemailer transport. This is an example of using the SendGrid nodemailer transport.
 
-
 ```ts
 import { buildConfig } from 'payload'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailerSendgrid from 'nodemailer-sendgrid'
-
 
 export default buildConfig({
   email: nodemailerAdapter({

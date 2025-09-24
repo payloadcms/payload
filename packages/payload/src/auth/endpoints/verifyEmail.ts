@@ -4,7 +4,7 @@ import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import verifyEmailOperation from '../operations/verifyEmail.js'
+import { verifyEmailOperation } from '../operations/verifyEmail.js'
 
 export const verifyEmailHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req, { disableSanitize: true })

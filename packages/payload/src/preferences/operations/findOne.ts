@@ -1,7 +1,8 @@
-// @ts-strict-ignore
 import type { TypedCollection } from '../../index.js'
 import type { Where } from '../../types/index.js'
 import type { PreferenceRequest } from '../types.js'
+
+import { preferencesCollectionSlug } from '../config.js'
 
 export async function findOne(args: PreferenceRequest): Promise<TypedCollection['_preference']> {
   const {
@@ -12,7 +13,7 @@ export async function findOne(args: PreferenceRequest): Promise<TypedCollection[
   } = args
 
   if (!user) {
-    return null
+    return null!
   }
 
   const where: Where = {
@@ -24,7 +25,7 @@ export async function findOne(args: PreferenceRequest): Promise<TypedCollection[
   }
 
   const { docs } = await payload.db.find({
-    collection: 'payload-preferences',
+    collection: preferencesCollectionSlug,
     limit: 1,
     pagination: false,
     req,
@@ -32,5 +33,5 @@ export async function findOne(args: PreferenceRequest): Promise<TypedCollection[
     where,
   })
 
-  return docs?.[0] || null
+  return docs?.[0] || null!
 }

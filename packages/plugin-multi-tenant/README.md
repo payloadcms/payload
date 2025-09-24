@@ -36,11 +36,11 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
        */
       isGlobal?: boolean
       /**
-       * Set to `false` if you want to manually apply the baseListFilter
+       * Set to `false` if you want to manually apply the baseFilter
        *
        * @default true
        */
-      useBaseListFilter?: boolean
+      useBaseFilter?: boolean
       /**
        * Set to `false` if you want to handle collection access manually without the multi-tenant constraints applied
        *
@@ -87,6 +87,18 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
          */
         arrayFieldAccess?: ArrayField['access']
         /**
+         * Name of the array field
+         *
+         * @default 'tenants'
+         */
+        arrayFieldName?: string
+        /**
+         * Name of the tenant field
+         *
+         * @default 'tenant'
+         */
+        arrayTenantFieldName?: string
+        /**
          * When `includeDefaultField` is `true`, the field will be added to the users collection automatically
          */
         includeDefaultField?: true
@@ -101,6 +113,8 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
       }
     | {
         arrayFieldAccess?: never
+        arrayFieldName?: string
+        arrayTenantFieldName?: string
         /**
          * When `includeDefaultField` is `false`, you must include the field on your users collection manually
          */
@@ -108,6 +122,16 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
         rowFields?: never
         tenantFieldAccess?: never
       }
+  /**
+   * Customize tenant selector label
+   *
+   * Either a string or an object where the keys are i18n codes and the values are the string labels
+   */
+  tenantSelectorLabel?:
+    | Partial<{
+        [key in AcceptedLanguages]?: string
+      }>
+    | string
   /**
    * The slug for the tenant collection
    *
@@ -120,8 +144,20 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Useful for super-admin type users
    */
   userHasAccessToAllTenants?: (
-    user: ConfigTypes extends { user } ? ConfigTypes['user'] : User,
+    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : User,
   ) => boolean
+  /**
+   * Opt out of adding access constraints to the tenants collection
+   */
+  useTenantsCollectionAccess?: boolean
+  /**
+   * Opt out including the baseListFilter to filter tenants by selected tenant
+   */
+  useTenantsListFilter?: boolean
+  /**
+   * Opt out including the baseListFilter to filter users by selected tenant
+   */
+  useUsersTenantFilter?: boolean
 }
 ```
 
@@ -159,7 +195,7 @@ import { Config as ConfigTypes } from './payload-types'
 // Add the plugin to your payload config
 export default buildConfig({
   plugins: [
-    multiTenantPlugin({
+    multiTenantPlugin<ConfigTypes>({
       collections: {
         media: {
           useTenantAccess: false,

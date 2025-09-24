@@ -88,6 +88,9 @@ export const i18n: Partial<GenericLanguages> = {
   sv: {
     label: 'Blockcitat',
   },
+  ta: {
+    label: 'கட்டமைப்பு மேற்கோள்',
+  },
   th: {
     label: 'ข้อความอ้างอิง',
   },
@@ -101,7 +104,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Trích dẫn',
   },
   zh: {
-    label: '块引用',
+    label: '引用区块',
   },
   'zh-TW': {
     label: '引用塊',

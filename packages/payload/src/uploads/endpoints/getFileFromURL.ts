@@ -1,7 +1,6 @@
-// @ts-strict-ignore
 import type { PayloadHandler } from '../../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { APIError } from '../../errors/APIError.js'
 import { Forbidden } from '../../errors/Forbidden.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
@@ -76,7 +75,10 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
         'Content-Type': response.headers.get('content-type') || 'application/octet-stream',
       },
     })
-  } catch (error) {
-    throw new APIError(`Error fetching file: ${error.message}`, 500)
+  } catch (err) {
+    throw new APIError(
+      `Error fetching file: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      500,
+    )
   }
 }

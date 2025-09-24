@@ -46,12 +46,12 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
   **Domain-based Tenant Setting**:
 
-  This example also supports domain-based tenant selection, where tenants can be associated with a specific domain. If a tenant is associated with a domain (e.g., `gold.test:3000`), when a user logs in from that domain, they will be automatically scoped to the matching tenant. This is accomplished through an optional `afterLogin` hook that sets a `payload-tenant` cookie based on the domain.
+  This example also supports domain-based tenant selection, where tenants can be associated with a specific domain. If a tenant is associated with a domain (e.g., `gold.localhost:3000`), when a user logs in from that domain, they will be automatically scoped to the matching tenant. This is accomplished through an optional `afterLogin` hook that sets a `payload-tenant` cookie based on the domain.
 
 For the domain portion of the example to function properly, you will need to add the following entries to your system's `/etc/hosts` file:
 
 ```
-127.0.0.1 gold.test silver.test bronze.test
+127.0.0.1 gold.localhost silver.localhost bronze.localhost
 ```
 
 - #### Pages

@@ -1,3 +1,7 @@
 export function canResizeImage(mimeType: string): boolean {
-  return ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/tiff'].indexOf(mimeType) > -1
+  return (
+    ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/tiff', 'image/avif'].indexOf(
+      mimeType,
+    ) > -1
+  )
 }

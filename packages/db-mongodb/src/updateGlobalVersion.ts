@@ -1,4 +1,4 @@
-import type { QueryOptions } from 'mongoose'
+import type { MongooseUpdateQueryOptions } from 'mongoose'
 
 import { buildVersionGlobalFields, type TypeWithID, type UpdateGlobalVersionArgs } from 'payload'
 
@@ -6,8 +6,9 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getGlobal } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
+import { transform } from './utilities/transform.js'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
   this: MongooseAdapter,
@@ -17,18 +18,18 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     locale,
     options: optionsArgs = {},
     req,
+    returning,
     select,
     versionData,
     where,
   }: UpdateGlobalVersionArgs<T>,
 ) {
-  const VersionModel = this.versions[globalSlug]
+  const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug, versions: true })
   const whereToUse = where || { id: { equals: id } }
 
-  const currentGlobal = this.payload.config.globals.find((global) => global.slug === globalSlug)
-  const fields = buildVersionGlobalFields(this.payload.config, currentGlobal)
-  const flattenedFields = buildVersionGlobalFields(this.payload.config, currentGlobal, true)
-  const options: QueryOptions = {
+  const fields = buildVersionGlobalFields(this.payload.config, globalConfig)
+  const flattenedFields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
+  const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
     lean: true,
     new: true,
@@ -38,6 +39,8 @@ export async function updateGlobalVersion<T extends TypeWithID>(
       select,
     }),
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   const query = await buildQuery({
@@ -47,26 +50,20 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     where: whereToUse,
   })
 
-  const sanitizedData = sanitizeRelationshipIDs({
-    config: this.payload.config,
-    data: versionData,
-    fields,
-  })
+  transform({ adapter: this, data: versionData, fields, operation: 'write' })
 
-  const doc = await VersionModel.findOneAndUpdate(query, sanitizedData, options)
+  if (returning === false) {
+    await Model.updateOne(query, versionData, options)
+    return null
+  }
+
+  const doc = await Model.findOneAndUpdate(query, versionData, options)
 
   if (!doc) {
     return null
   }
 
-  const result = JSON.parse(JSON.stringify(doc))
+  transform({ adapter: this, data: doc, fields, operation: 'read' })
 
-  const verificationToken = doc._verificationToken
-
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
-  }
-  return result
+  return doc
 }

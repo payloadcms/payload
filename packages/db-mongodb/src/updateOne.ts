@@ -1,63 +1,94 @@
-import type { QueryOptions } from 'mongoose'
+import type { MongooseUpdateQueryOptions, UpdateQuery } from 'mongoose'
 import type { UpdateOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { handleError } from './utilities/handleError.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
+import { transform } from './utilities/transform.js'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,
-  { id, collection, data, locale, options: optionsArgs = {}, req, select, where: whereArg },
+  {
+    id,
+    collection: collectionSlug,
+    data,
+    locale,
+    options: optionsArgs = {},
+    req,
+    returning,
+    select,
+    where: whereArg = {},
+  },
 ) {
+  const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
   const where = id ? { id: { equals: id } } : whereArg
-  const Model = this.collections[collection]
-  const fields = this.payload.collections[collection].config.fields
-  const options: QueryOptions = {
+  const fields = collectionConfig.fields
+
+  const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
     lean: true,
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
-      fields: this.payload.collections[collection].config.flattenedFields,
+      fields: collectionConfig.flattenedFields,
       select,
     }),
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   const query = await buildQuery({
     adapter: this,
-    collectionSlug: collection,
-    fields: this.payload.collections[collection].config.flattenedFields,
+    collectionSlug,
+    fields: collectionConfig.flattenedFields,
     locale,
     where,
   })
 
   let result
 
-  const sanitizedData = sanitizeRelationshipIDs({
-    config: this.payload.config,
-    data,
-    fields,
-  })
+  let updateData: UpdateQuery<any> = data
+
+  const $inc: Record<string, number> = {}
+  const $push: Record<string, { $each: any[] } | any> = {}
+
+  transform({ $inc, $push, adapter: this, data, fields, operation: 'write' })
+
+  const updateOps: UpdateQuery<any> = {}
+
+  if (Object.keys($inc).length) {
+    updateOps.$inc = $inc
+  }
+  if (Object.keys($push).length) {
+    updateOps.$push = $push
+  }
+  if (Object.keys(updateOps).length) {
+    updateOps.$set = updateData
+    updateData = updateOps
+  }
 
   try {
-    result = await Model.findOneAndUpdate(query, sanitizedData, options)
+    if (returning === false) {
+      await Model.updateOne(query, updateData, options)
+      transform({ adapter: this, data, fields, operation: 'read' })
+      return null
+    } else {
+      result = await Model.findOneAndUpdate(query, updateData, options)
+    }
   } catch (error) {
-    handleError({ collection, error, req })
+    handleError({ collection: collectionSlug, error, req })
   }
 
   if (!result) {
     return null
   }
 
-  result = JSON.parse(JSON.stringify(result))
-  result.id = result._id
-  result = sanitizeInternalFields(result)
+  transform({ adapter: this, data: result, fields, operation: 'read' })
 
   return result
 }

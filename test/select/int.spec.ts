@@ -1,5 +1,8 @@
+import type { Payload } from 'payload'
+
+import { randomUUID } from 'crypto'
 import path from 'path'
-import { deepCopyObject, type Payload } from 'payload'
+import { deepCopyObject } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 
@@ -12,9 +15,11 @@ import type {
   Page,
   Point,
   Post,
+  User,
   VersionedPost,
 } from './payload-types.js'
 
+import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
 let payload: Payload
@@ -35,9 +40,7 @@ describe('Select', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('Local API - Base', () => {
@@ -75,6 +78,21 @@ describe('Select', () => {
         })
       })
 
+      it('customID - should select only id as default', async () => {
+        const { id } = await createCustomID()
+
+        const res = await payload.findByID({
+          collection: 'custom-ids',
+          id,
+          select: {},
+          depth: 0,
+        })
+
+        expect(res).toStrictEqual({
+          id,
+        })
+      })
+
       it('should select only number', async () => {
         const res = await payload.findByID({
           collection: 'posts',
@@ -88,6 +106,24 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           number: post.number,
+        })
+      })
+
+      it('customID - should select only text', async () => {
+        const { id, text } = await createCustomID()
+
+        const res = await payload.findByID({
+          collection: 'custom-ids',
+          id,
+          select: {
+            text: true,
+          },
+          depth: 0,
+        })
+
+        expect(res).toStrictEqual({
+          id,
+          text,
         })
       })
 
@@ -444,6 +480,25 @@ describe('Select', () => {
         delete expected['text']
 
         expect(res).toStrictEqual(expected)
+      })
+
+      it('customID - should exclude text', async () => {
+        const { id, createdAt, updatedAt } = await createCustomID()
+
+        const res = await payload.findByID({
+          collection: 'custom-ids',
+          id,
+          select: {
+            text: false,
+          },
+          depth: 0,
+        })
+
+        expect(res).toStrictEqual({
+          id,
+          createdAt,
+          updatedAt,
+        })
       })
 
       it('should exclude number', async () => {
@@ -1591,6 +1646,41 @@ describe('Select', () => {
       expect(doc.version.createdAt).toBeUndefined()
       expect(doc.version.text).toBe(post.text)
     })
+
+    it('should create versions with complete data when updating with select', async () => {
+      // First, update the post with select to only return the id field
+      const updatedPost = await payload.update({
+        collection: 'versioned-posts',
+        id: postId,
+        data: {
+          text: 'updated text',
+          number: 999,
+        },
+        select: {},
+      })
+
+      // The update operation should only return the selected field
+      expect(updatedPost).toStrictEqual({
+        id: postId,
+      })
+
+      // However, the created version should contain the complete document
+      const versions = await payload.findVersions({
+        collection: 'versioned-posts',
+        where: { parent: { equals: postId } },
+        sort: '-updatedAt',
+        limit: 1,
+      })
+
+      const latestVersion = versions.docs[0]
+      assert(latestVersion)
+
+      // The version should have complete data, not just the selected fields
+      expect(latestVersion.version.text).toBe('updated text')
+      expect(latestVersion.version.number).toBe(999)
+      expect(latestVersion.version.array).toEqual(post.array)
+      expect(latestVersion.version.blocks).toEqual(post.blocks)
+    })
   })
 
   describe('Local API - Globals', () => {
@@ -1648,7 +1738,10 @@ describe('Select', () => {
         },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
 
     it('should apply select with updateByID', async () => {
@@ -1661,7 +1754,10 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
 
     it('should apply select with updateBulk', async () => {
@@ -1680,7 +1776,10 @@ describe('Select', () => {
 
       assert(res.docs[0])
 
-      expect(Object.keys(res.docs[0])).toStrictEqual(['id', 'text'])
+      expect(res.docs[0]).toStrictEqual({
+        id: res.docs[0].id,
+        text: res.docs[0].text,
+      })
     })
 
     it('should apply select with deleteByID', async () => {
@@ -1692,7 +1791,10 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
 
     it('should apply select with deleteBulk', async () => {
@@ -1710,7 +1812,10 @@ describe('Select', () => {
 
       assert(res.docs[0])
 
-      expect(Object.keys(res.docs[0])).toStrictEqual(['id', 'text'])
+      expect(res.docs[0]).toStrictEqual({
+        id: res.docs[0].id,
+        text: res.docs[0].text,
+      })
     })
 
     it('should apply select with duplicate', async () => {
@@ -1722,7 +1827,10 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
   })
 
@@ -1898,6 +2006,64 @@ describe('Select', () => {
 
         expect(res).toMatchObject(expected)
       })
+    })
+  })
+
+  describe('REST API - Logged in', () => {
+    let token: string | undefined
+    let loggedInUser: undefined | User
+
+    beforeAll(async () => {
+      const response = await restClient.POST(`/users/login`, {
+        body: JSON.stringify({
+          email: devUser.email,
+          password: devUser.password,
+        }),
+      })
+
+      const data = await response.json()
+
+      token = data.token
+      loggedInUser = data.user
+    })
+
+    it('should return only select fields in user from /me', async () => {
+      const response = await restClient.GET(`/users/me`, {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+        query: {
+          depth: 0,
+          select: {
+            name: true,
+          } satisfies Config['collectionsSelect']['users'],
+        },
+      })
+
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.user.name).toBeDefined()
+      expect(data.user.email).not.toBeDefined()
+      expect(data.user.number).not.toBeDefined()
+    })
+
+    it('should return all fields by default in user from /me', async () => {
+      const response = await restClient.GET(`/users/me`, {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+        query: {
+          depth: 0,
+        },
+      })
+
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.user.email).toBeDefined()
+      expect(data.user.name).toBeDefined()
+      expect(data.user.number).toBeDefined()
     })
   })
 
@@ -2082,7 +2248,7 @@ describe('Select', () => {
     it('graphQL - should retrieve fields against defaultPopulate', async () => {
       const query = `query {
         Pages {
-          docs { 
+          docs {
             id,
             content {
               ... on Introduction {
@@ -2090,7 +2256,7 @@ describe('Select', () => {
                   doc {
                     id,
                     additional,
-                    slug, 
+                    slug,
                   }
                 },
                 richTextLexical(depth: 1)
@@ -2265,6 +2431,53 @@ describe('Select', () => {
       })
     })
   })
+
+  it('should force collection select fields with forceSelect', async () => {
+    const { id, text, array, forceSelected } = await payload.create({
+      collection: 'force-select',
+      data: {
+        array: [{ forceSelected: 'text' }],
+        text: 'some-text',
+        forceSelected: 'force-selected',
+      },
+    })
+
+    const response = await payload.findByID({
+      collection: 'force-select',
+      id,
+      select: { text: true },
+    })
+
+    expect(response).toStrictEqual({
+      id,
+      forceSelected,
+      text,
+      array,
+    })
+  })
+
+  it('should force global select fields with forceSelect', async () => {
+    const { forceSelected, id, array, text } = await payload.updateGlobal({
+      slug: 'force-select-global',
+      data: {
+        array: [{ forceSelected: 'text' }],
+        text: 'some-text',
+        forceSelected: 'force-selected',
+      },
+    })
+
+    const response = await payload.findGlobal({
+      slug: 'force-select-global',
+      select: { text: true },
+    })
+
+    expect(response).toStrictEqual({
+      id,
+      forceSelected,
+      text,
+      array,
+    })
+  })
 })
 
 async function createPost() {
@@ -2409,4 +2622,10 @@ function createVersionedPost() {
 
 function createPoint() {
   return payload.create({ collection: 'points', data: { text: 'some', point: [10, 20] } })
+}
+
+let id = 1
+
+function createCustomID() {
+  return payload.create({ collection: 'custom-ids', data: { id: id++, text: randomUUID() } })
 }

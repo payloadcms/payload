@@ -1,5 +1,6 @@
+import type { Payload } from 'payload'
+
 import path from 'path'
-import { NotFound, type Payload } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
@@ -65,9 +66,7 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should add a search collection', async () => {
@@ -300,8 +299,8 @@ describe('@payloadcms/plugin-search', () => {
       collection: 'search',
       depth: 0,
       where: {
-        'doc.value': {
-          equals: page.id,
+        id: {
+          equals: results[0].id,
         },
       },
     })
@@ -495,20 +494,22 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   it('should reindex whole collections', async () => {
-    await payload.create({
-      collection: pagesSlug,
-      data: {
-        title: 'Test page title',
-        _status: 'published',
-      },
-    })
-    await payload.create({
-      collection: postsSlug,
-      data: {
-        title: 'Test page title',
-        _status: 'published',
-      },
-    })
+    await Promise.all([
+      payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Test page title',
+          _status: 'published',
+        },
+      }),
+      payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'Test page title',
+          _status: 'published',
+        },
+      }),
+    ])
 
     await wait(200)
 

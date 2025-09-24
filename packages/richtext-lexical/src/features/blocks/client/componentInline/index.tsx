@@ -61,7 +61,7 @@ const InlineBlockComponentContext = createContext<InlineBlockComponentContextTyp
   initialState: false,
 })
 
-export const useInlineBlockComponentContext = () => React.useContext(InlineBlockComponentContext)
+export const useInlineBlockComponentContext = () => React.use(InlineBlockComponentContext)
 
 export const InlineBlockComponent: React.FC<Props> = (props) => {
   const { cacheBuster, formData, nodeKey } = props
@@ -284,10 +284,22 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   )
   // cleanup effect
   useEffect(() => {
+    const isStateOutOfSync = (formData: InlineBlockFields, initialState: FormState) => {
+      return Object.keys(initialState).some(
+        (key) => initialState[key] && formData[key] !== initialState[key].value,
+      )
+    }
+
     return () => {
+      // If the component is unmounted (either via removeInlineBlock or via lexical itself) and the form state got changed before,
+      // we need to reset the initial state to force a re-fetch of the initial state when it gets mounted again (e.g. via lexical history undo).
+      // Otherwise it would use an outdated initial state.
+      if (initialState && isStateOutOfSync(formData, initialState)) {
+        setInitialState(false)
+      }
       abortAndIgnore(onChangeAbortControllerRef.current)
     }
-  }, [])
+  }, [formData, initialState])
 
   /**
    * HANDLE FORM SUBMIT
@@ -391,6 +403,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         },
       ]}
       disableValidationOnSubmit
+      el="div"
       fields={clientBlock?.fields}
       initialState={initialState || {}}
       onChange={[onChange]}
@@ -416,7 +429,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
                 parentIndexPath=""
                 parentPath="" // See Blocks feature path for details as for why this is empty
                 parentSchemaPath={schemaFieldsPath}
-                permissions={permissions}
+                permissions={true}
                 readOnly={false}
               />
               <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
@@ -425,7 +438,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         </Drawer>
       </EditDepthProvider>
       {CustomBlock ? (
-        <InlineBlockComponentContext.Provider
+        <InlineBlockComponentContext
           value={{
             EditButton,
             initialState,
@@ -436,7 +449,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           }}
         >
           {CustomBlock}
-        </InlineBlockComponentContext.Provider>
+        </InlineBlockComponentContext>
       ) : (
         <InlineBlockContainer>
           {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}

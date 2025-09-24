@@ -2,10 +2,11 @@ import type { Page } from '@playwright/test'
 import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
-import { openListColumns } from 'helpers/e2e/openListColumns.js'
-import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
-import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
+import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
+import { addListFilter } from 'helpers/e2e/filters/index.js'
+import { upsertPreferences } from 'helpers/e2e/preferences.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -79,10 +80,10 @@ describe('Text', () => {
       await expect(page.locator('.cell-hiddenTextField')).toBeHidden()
       await expect(page.locator('#heading-hiddenTextField')).toBeHidden()
 
-      const columnContainer = await openListColumns(page, {})
+      const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.column-selector__column', {
+        columnContainer.locator('.pill-selector__pill', {
           hasText: exactText('Hidden Text Field'),
         }),
       ).toBeHidden()
@@ -105,10 +106,10 @@ describe('Text', () => {
       await expect(page.locator('.cell-disabledTextField')).toBeHidden()
       await expect(page.locator('#heading-disabledTextField')).toBeHidden()
 
-      const columnContainer = await openListColumns(page, {})
+      const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.column-selector__column', {
+        columnContainer.locator('.pill-selector__pill', {
           hasText: exactText('Disabled Text Field'),
         }),
       ).toBeHidden()
@@ -133,10 +134,10 @@ describe('Text', () => {
       await expect(page.locator('.cell-adminHiddenTextField').first()).toBeVisible()
       await expect(page.locator('#heading-adminHiddenTextField')).toBeVisible()
 
-      const columnContainer = await openListColumns(page, {})
+      const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.column-selector__column', {
+        columnContainer.locator('.pill-selector__pill', {
           hasText: exactText('Admin Hidden Text Field'),
         }),
       ).toBeVisible()
@@ -165,7 +166,7 @@ describe('Text', () => {
   })
 
   test('should respect admin.disableListColumn despite preferences', async () => {
-    await upsertPrefs<Config, GeneratedTypes<any>>({
+    await upsertPreferences<Config, GeneratedTypes<any>>({
       payload,
       user: client.user,
       key: 'text-fields-list',
@@ -182,7 +183,7 @@ describe('Text', () => {
     await page.goto(url.list)
     await openListColumns(page, {})
     await expect(
-      page.locator(`.column-selector .column-selector__column`, {
+      page.locator(`.pill-selector .pill-selector__pill`, {
         hasText: exactText('Disable List Column Text'),
       }),
     ).toBeHidden()
@@ -198,6 +199,7 @@ describe('Text', () => {
     await toggleColumn(page, {
       targetState: 'on',
       columnLabel: 'Text en',
+      columnName: 'i18nText',
     })
 
     const textCell = page.locator('.row-1 .cell-i18nText')
@@ -279,5 +281,65 @@ describe('Text', () => {
 
     // Verify it does not become editable
     await expect(field.locator('.multi-value-label__text')).not.toHaveClass(/.*--editable/)
+  })
+
+  test('should filter Text field hasMany: false in the collection list view - in', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Text',
+      operatorLabel: 'is in',
+      value: 'Another text document',
+    })
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
+  })
+
+  test('should filter Text field hasMany: false in the collection list view - is not in', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Text',
+      operatorLabel: 'is not in',
+      value: 'Another text document',
+    })
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
+  })
+
+  test('should filter Text field hasMany: true in the collection list view - in', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Has Many',
+      operatorLabel: 'is in',
+      value: 'one',
+    })
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
+  })
+
+  test('should filter Text field hasMany: true in the collection list view - is not in', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Has Many',
+      operatorLabel: 'is not in',
+      value: 'four',
+    })
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
   })
 })

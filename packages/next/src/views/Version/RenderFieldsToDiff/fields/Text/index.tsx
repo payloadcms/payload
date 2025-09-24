@@ -1,52 +1,92 @@
 'use client'
 import type { TextFieldDiffClientComponent } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { useTranslation } from '@payloadcms/ui'
-import React from 'react'
+import { FieldDiffContainer, getHTMLDiffComponents, useTranslation } from '@payloadcms/ui'
 
-import Label from '../../Label/index.js'
 import './index.scss'
-import { diffStyles } from '../styles.js'
-import { DiffViewer } from './DiffViewer/index.js'
+
+import React from 'react'
 
 const baseClass = 'text-diff'
 
+function formatValue(value: unknown): {
+  tokenizeByCharacter: boolean
+  value: string
+} {
+  if (typeof value === 'string') {
+    return { tokenizeByCharacter: true, value }
+  }
+  if (typeof value === 'number') {
+    return {
+      tokenizeByCharacter: true,
+      value: String(value),
+    }
+  }
+  if (typeof value === 'boolean') {
+    return {
+      tokenizeByCharacter: false,
+      value: String(value),
+    }
+  }
+
+  if (value && typeof value === 'object') {
+    return {
+      tokenizeByCharacter: false,
+      value: `<pre>${JSON.stringify(value, null, 2)}</pre>`,
+    }
+  }
+
+  return {
+    tokenizeByCharacter: true,
+    value: undefined,
+  }
+}
+
 export const Text: TextFieldDiffClientComponent = ({
-  comparisonValue,
-  diffMethod,
+  comparisonValue: valueFrom,
   field,
   locale,
-  versionValue,
+  nestingLevel,
+  versionValue: valueTo,
 }) => {
   const { i18n } = useTranslation()
 
   let placeholder = ''
 
-  if (versionValue == comparisonValue) {
-    placeholder = `[${i18n.t('general:noValue')}]`
+  if (valueTo == valueFrom) {
+    placeholder = `<span class="html-diff-no-value"><span>`
   }
 
-  const versionToRender: string =
-    typeof versionValue === 'string' ? versionValue : JSON.stringify(versionValue, null, 2)
-  const comparisonToRender =
-    typeof comparisonValue === 'string' ? comparisonValue : JSON.stringify(comparisonValue, null, 2)
+  const formattedValueFrom = formatValue(valueFrom)
+  const formattedValueTo = formatValue(valueTo)
+
+  let tokenizeByCharacter = true
+  if (formattedValueFrom.value?.length) {
+    tokenizeByCharacter = formattedValueFrom.tokenizeByCharacter
+  } else if (formattedValueTo.value?.length) {
+    tokenizeByCharacter = formattedValueTo.tokenizeByCharacter
+  }
+
+  const renderedValueFrom = formattedValueFrom.value ?? placeholder
+  const renderedValueTo: string = formattedValueTo.value ?? placeholder
+
+  const { From, To } = getHTMLDiffComponents({
+    fromHTML: '<p>' + renderedValueFrom + '</p>',
+    toHTML: '<p>' + renderedValueTo + '</p>',
+    tokenizeByCharacter,
+  })
 
   return (
-    <div className={baseClass}>
-      <Label>
-        {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        {'label' in field &&
-          typeof field.label !== 'function' &&
-          getTranslation(field.label || '', i18n)}
-      </Label>
-      <DiffViewer
-        comparisonToRender={comparisonToRender}
-        diffMethod={diffMethod}
-        diffStyles={diffStyles}
-        placeholder={placeholder}
-        versionToRender={versionToRender}
-      />
-    </div>
+    <FieldDiffContainer
+      className={baseClass}
+      From={From}
+      i18n={i18n}
+      label={{
+        label: field.label,
+        locale,
+      }}
+      nestingLevel={nestingLevel}
+      To={To}
+    />
   )
 }

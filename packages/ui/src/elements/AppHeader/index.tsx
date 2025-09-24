@@ -1,11 +1,11 @@
 'use client'
+import { formatAdminURL } from 'payload/shared'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { Account } from '../../graphics/Account/index.js'
 import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { Hamburger } from '../Hamburger/index.js'
 import { Link } from '../Link/index.js'
 import { Localizer } from '../Localizer/index.js'
@@ -59,8 +59,6 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
     }
   }, [Actions])
 
-  const LinkElement = Link || 'a'
-
   const ActionComponents = Actions ? Object.values(Actions) : []
 
   return (
@@ -95,15 +93,15 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
             {localization && (
               <LocalizerLabel ariaLabel="invisible" className={`${baseClass}__localizer-spacing`} />
             )}
-            <LinkElement
+            <Link
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
               href={formatAdminURL({ adminRoute, path: accountRoute })}
-              prefetch={Link ? false : undefined}
+              prefetch={false}
               tabIndex={0}
             >
               <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
-            </LinkElement>
+            </Link>
           </div>
         </div>
       </div>

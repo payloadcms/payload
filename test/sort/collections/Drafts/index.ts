@@ -7,6 +7,7 @@ export const DraftsCollection: CollectionConfig = {
   admin: {
     useAsTitle: 'text',
   },
+  orderable: true,
   versions: {
     drafts: true,
   },

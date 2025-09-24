@@ -89,7 +89,7 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
       if (typeof label === 'string') {
         return label
       } else {
-        return Object.hasOwn(label, locale.code) ? label[locale.code] : slug
+        return label && Object.hasOwn(label, locale.code) ? label[locale.code] : slug
       }
     },
     [collectionLabels, locale.code],
@@ -97,7 +97,10 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
 
   const pluralizedLabels = useMemo(() => {
     return searchCollections.reduce<Record<string, string>>((acc, slug) => {
-      acc[slug] = getPluralizedLabel(slug)
+      const label = getPluralizedLabel(slug)
+      if (label) {
+        acc[slug] = label
+      }
       return acc
     }, {})
   }, [searchCollections, getPluralizedLabel])
@@ -111,9 +114,6 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
   const modalDescription = selectedAll
     ? t('general:confirmReindexDescriptionAll')
     : t('general:confirmReindexDescription', { collections: selectedLabels })
-  const loadingText = selectedAll
-    ? t('general:reindexingAll', { collections: t('general:collections') })
-    : t('general:reindexingAll', { collections: selectedLabels })
 
   return (
     <div>

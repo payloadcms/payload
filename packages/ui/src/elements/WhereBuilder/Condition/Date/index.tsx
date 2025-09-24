@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import type { Props } from './types.js'
+import type { DateFilterProps as Props } from './types.js'
 
 import { DatePickerField } from '../../../DatePicker/index.js'
 

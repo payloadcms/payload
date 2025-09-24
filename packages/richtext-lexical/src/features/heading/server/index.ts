@@ -7,7 +7,7 @@ import type { Spread } from 'lexical'
 import { HeadingNode } from '@lexical/rich-text'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
-import { convertLexicalNodesToHTML } from '../../converters/html/converter/index.js'
+import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
 import { MarkdownTransformer } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
@@ -34,6 +34,8 @@ export const HeadingFeature = createServerFeature<
     }
 
     const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
+
+    enabledHeadingSizes.sort()
 
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#HeadingFeatureClient',
@@ -71,6 +73,10 @@ export const HeadingFeature = createServerFeature<
                 })
                 const style = [
                   node.format ? `text-align: ${node.format};` : '',
+                  // the unit should be px. Do not change it to rem, em, or something else.
+                  // The quantity should be 40px. Do not change it either.
+                  // See rationale in
+                  // https://github.com/payloadcms/payload/issues/13130#issuecomment-3058348085
                   node.indent > 0 ? `padding-inline-start: ${node.indent * 40}px;` : '',
                 ]
                   .filter(Boolean)

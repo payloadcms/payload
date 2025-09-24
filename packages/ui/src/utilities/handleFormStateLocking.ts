@@ -85,6 +85,7 @@ export const handleFormStateLocking = async ({
             id: lockedDocument.docs[0].id,
             collection: 'payload-locked-documents',
             data: {},
+            returning: false,
           })
         }
       } else {
@@ -136,6 +137,7 @@ export const handleFormStateLocking = async ({
               value: req.user.id,
             },
           },
+          returning: false,
         })
 
         result = {

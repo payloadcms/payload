@@ -22,14 +22,20 @@ import type {
 
 import { createTableName } from '../createTableName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
+import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
 import { hasLocalesTable } from '../utilities/hasLocalesTable.js'
-import { validateExistingBlockIsIdentical } from '../utilities/validateExistingBlockIsIdentical.js'
+import {
+  InternalBlockTableNameIndex,
+  setInternalBlockIndex,
+  validateExistingBlockIsIdentical,
+} from '../utilities/validateExistingBlockIsIdentical.js'
 import { buildTable } from './build.js'
 import { idToUUID } from './idToUUID.js'
 import { withDefault } from './withDefault.js'
 
 type Args = {
   adapter: DrizzleAdapter
+  blocksTableNameMap: Record<string, number>
   columnPrefix?: string
   columns: Record<string, RawColumn>
   disableNotNull: boolean
@@ -70,6 +76,7 @@ type Result = {
 
 export const traverseFields = ({
   adapter,
+  blocksTableNameMap,
   columnPrefix,
   columns,
   disableNotNull,
@@ -134,7 +141,7 @@ export const traverseFields = ({
       adapter.payload.config.localization &&
       (isFieldLocalized || forceLocalized) &&
       field.type !== 'array' &&
-      field.type !== 'blocks' &&
+      (field.type !== 'blocks' || adapter.blocksAsJSON) &&
       (('hasMany' in field && field.hasMany !== true) || !('hasMany' in field))
     ) {
       hasLocalizedField = true
@@ -248,6 +255,7 @@ export const traverseFields = ({
           baseColumns,
           baseForeignKeys,
           baseIndexes,
+          blocksTableNameMap,
           disableNotNull: disableNotNullFromHere,
           disableRelsTableUnique: true,
           disableUnique,
@@ -287,7 +295,13 @@ export const traverseFields = ({
           }
         }
 
-        relationsToBuild.set(fieldName, {
+        const relationName = getArrayRelationName({
+          field,
+          path: fieldName,
+          tableName: arrayTableName,
+        })
+
+        relationsToBuild.set(relationName, {
           type: 'many',
           // arrays have their own localized table, independent of the base table.
           localized: false,
@@ -304,7 +318,7 @@ export const traverseFields = ({
               },
             ],
             references: ['id'],
-            relationName: fieldName,
+            relationName,
             to: parentTableName,
           },
         }
@@ -356,12 +370,23 @@ export const traverseFields = ({
         break
       }
       case 'blocks': {
+        if (adapter.blocksAsJSON) {
+          targetTable[fieldName] = withDefault(
+            {
+              name: columnName,
+              type: 'jsonb',
+            },
+            field,
+          )
+          break
+        }
+
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
         ;(field.blockReferences ?? field.blocks).forEach((_block) => {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
 
-          const blockTableName = createTableName({
+          let blockTableName = createTableName({
             adapter,
             config: block,
             parentTableName: rootTableName,
@@ -369,6 +394,28 @@ export const traverseFields = ({
             throwValidationError,
             versionsCustomName: versions,
           })
+
+          if (typeof blocksTableNameMap[blockTableName] === 'undefined') {
+            blocksTableNameMap[blockTableName] = 1
+          } else if (
+            !adapter.rawTables[blockTableName] ||
+            !validateExistingBlockIsIdentical({
+              block,
+              localized: field.localized,
+              rootTableName,
+              table: adapter.rawTables[blockTableName],
+              tableLocales: adapter.rawTables[`${blockTableName}${adapter.localesSuffix}`],
+            })
+          ) {
+            blocksTableNameMap[blockTableName]++
+            setInternalBlockIndex(block, blocksTableNameMap[blockTableName])
+            blockTableName = `${blockTableName}_${blocksTableNameMap[blockTableName]}`
+          }
+          let relationName = `_blocks_${block.slug}`
+          if (typeof block[InternalBlockTableNameIndex] !== 'undefined') {
+            relationName = `_blocks_${block.slug}_${block[InternalBlockTableNameIndex]}`
+          }
+
           if (!adapter.rawTables[blockTableName]) {
             const baseColumns: Record<string, RawColumn> = {
               _order: {
@@ -448,6 +495,7 @@ export const traverseFields = ({
               baseColumns,
               baseForeignKeys,
               baseIndexes,
+              blocksTableNameMap,
               disableNotNull: disableNotNullFromHere,
               disableRelsTableUnique: true,
               disableUnique,
@@ -498,7 +546,7 @@ export const traverseFields = ({
                   },
                 ],
                 references: ['id'],
-                relationName: `_blocks_${block.slug}`,
+                relationName,
                 to: rootTableName,
               },
             }
@@ -546,18 +594,10 @@ export const traverseFields = ({
             })
 
             adapter.rawRelations[blockTableName] = blockRelations
-          } else if (process.env.NODE_ENV !== 'production' && !versions) {
-            validateExistingBlockIsIdentical({
-              block,
-              localized: field.localized,
-              parentIsLocalized: parentIsLocalized || field.localized,
-              rootTableName,
-              table: adapter.rawTables[blockTableName],
-              tableLocales: adapter.rawTables[`${blockTableName}${adapter.localesSuffix}`],
-            })
           }
+
           // blocks relationships are defined from the collection or globals table down to the block, bypassing any subBlocks
-          rootRelationsToBuild.set(`_blocks_${block.slug}`, {
+          rootRelationsToBuild.set(relationName, {
             type: 'many',
             // blocks are not localized on the parent table
             localized: false,
@@ -621,6 +661,7 @@ export const traverseFields = ({
           hasManyTextField: groupHasManyTextField,
         } = traverseFields({
           adapter,
+          blocksTableNameMap,
           columnPrefix: `${columnName}_`,
           columns,
           disableNotNull: disableNotNullFromHere,
@@ -837,6 +878,7 @@ export const traverseFields = ({
             baseColumns,
             baseForeignKeys,
             baseIndexes,
+            blocksTableNameMap,
             disableNotNull,
             disableUnique,
             fields: [],
