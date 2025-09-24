@@ -1,5 +1,6 @@
 'use client'
-import { type DefaultDocumentIDType, type TypedCollection, type TypedUser } from 'payload'
+import type { DefaultDocumentIDType, GeneratedTypes, TypedCollection, TypedUser } from 'payload'
+
 import { deepMergeSimple } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -88,7 +89,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
    * It can be null if no cart has been created yet.
    */
   const [cartID, setCartID] = useState<DefaultDocumentIDType>()
-  const [cart, setCart] = useState<TypedCollection['carts']>()
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - Typescript is being weird about the state type here
+  const [cart, setCart] = useState<GeneratedTypes['collections']['carts']>()
 
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(
     () =>
