@@ -63,7 +63,7 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
         }),
       })
 
-      if (config.experimental?.localizeStatus || config.experimental?.allLocaleStatus) {
+      if (config.experimental.localizeStatus || config.experimental.allLocaleStatus) {
         const localeStatusFields = buildLocaleStatusField(config)
 
         fields.push({
