@@ -289,6 +289,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     deleted: 'মুছে ফেলা হয়েছে',
     deletedAt: 'মুছে ফেলার সময়',
     deletedCountSuccessfully: '{{count}} {{label}} সফলভাবে মুছে ফেলা হয়েছে।',
+    deletedInLocale:
+      'সফলভাবে সমস্ত {{locale}} ডাটা মুছে ফেলা হয়েছে। ডকুমেন্টটি স্বয়ং মোছা হয়নি।',
     deletedSuccessfully: 'সফলভাবে মুছে ফেলা হয়েছে।',
     deleteLabel: '{{label}} মুছে ফেলুন',
     deletePermanently: 'ট্র্যাশ এড়িয়ে স্থায়ীভাবে মুছুন',
@@ -329,6 +331,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     goBack: 'পিছনে যান',
     groupByLabel: '{{label}} অনুযায়ী গ্রুপ করুন',
     import: 'ইম্পোর্ট করুন',
+    in: 'মধ্যে',
     isEditing: 'সম্পাদনা করছেন',
     item: 'আইটেম',
     items: 'আইটেমগুলি',

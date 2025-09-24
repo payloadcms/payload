@@ -286,6 +286,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     deleted: 'Ջնջված',
     deletedAt: 'Ջնջված է',
     deletedCountSuccessfully: '{{count}} {{label}} հաջողությամբ ջնջված է։',
+    deletedInLocale:
+      'Բարեհաջող ջնջվեցին բոլոր {{locale}} տվյալները։ Դիմումը ինքն իրենից չեղարկվել:',
     deletedSuccessfully: 'Հաջողությամբ ջնջված է։',
     deleteLabel: 'Ջնջել {{label}}',
     deletePermanently: 'Բաց թողեք աղբատուփը և հեռացրեք հավերժ:',
@@ -326,6 +328,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     goBack: 'Հետ գնալ',
     groupByLabel: 'Խմբավորել {{label}}-ով',
     import: 'Ներմուծում',
+    in: 'ի',
     isEditing: 'խմբագրում է',
     item: 'տարր',
     items: 'տեսականի',

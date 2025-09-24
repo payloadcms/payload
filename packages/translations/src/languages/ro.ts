@@ -290,6 +290,8 @@ export const roTranslations: DefaultTranslationsObject = {
     deleted: 'Șters',
     deletedAt: 'Șters la',
     deletedCountSuccessfully: 'Șterse cu succes {{count}} {{label}}.',
+    deletedInLocale:
+      'Datele pentru toate {{locale}} au fost eliminate cu succes. Documentul în sine nu a fost șters.',
     deletedSuccessfully: 'Șters cu succes.',
     deleteLabel: 'Șterge {{label}}',
     deletePermanently: 'Omite coșul și șterge definitiv',
@@ -330,6 +332,7 @@ export const roTranslations: DefaultTranslationsObject = {
     goBack: 'Înapoi',
     groupByLabel: 'Grupare după {{label}}',
     import: 'Import',
+    in: 'în',
     isEditing: 'editează',
     item: 'Articol',
     items: 'articole',
