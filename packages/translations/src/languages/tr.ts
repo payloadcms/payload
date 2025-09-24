@@ -145,6 +145,7 @@ export const trTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Yeni {{label}}',
     addRelationship: 'İlişki Ekle',
     addUpload: 'Yükleme Ekle',
+    allLocaleStatus: 'Durum - Tüm Yerel Ayarlar',
     block: 'Blok',
     blocks: 'blok',
     blockType: 'Blok tipi',

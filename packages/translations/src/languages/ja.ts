@@ -144,6 +144,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     addNewLabel: '{{label}} を新規追加',
     addRelationship: 'リレーションシップを追加',
     addUpload: 'アップロードを追加',
+    allLocaleStatus: 'ステータス - すべてのロケール',
     block: 'ブロック',
     blocks: 'ブロック',
     blockType: 'ブロックタイプ',

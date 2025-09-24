@@ -144,6 +144,7 @@ export const caTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Afegeix nou {{label}}',
     addRelationship: 'Afegeix relació',
     addUpload: 'Afegeix pujada',
+    allLocaleStatus: 'Estat - Totes les configuracions regionals',
     block: 'Bloc',
     blocks: 'blocs',
     blockType: 'Tipus de bloc',

@@ -18,6 +18,6 @@ export const baseAllLocaleStatusField: Field[] = [
       disableListFilter: true,
       hidden: true,
     },
-    label: 'Status - All Locales',
+    label: ({ t }) => t('fields:allLocaleStatus'),
   },
 ]

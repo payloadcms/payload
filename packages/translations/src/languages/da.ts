@@ -142,6 +142,7 @@ export const daTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Tilføj ny {{label}}',
     addRelationship: 'Tilføj forhold',
     addUpload: 'Tilføj upload',
+    allLocaleStatus: 'Status - Alle lokaliteter',
     block: 'Blok',
     blocks: 'blokke',
     blockType: 'Blok type',

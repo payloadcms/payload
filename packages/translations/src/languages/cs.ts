@@ -143,6 +143,7 @@ export const csTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Přidat nový {{label}}',
     addRelationship: 'Přidat vztah',
     addUpload: 'Přidat nahrávání',
+    allLocaleStatus: 'Status - Všechny lokality',
     block: 'Blok',
     blocks: 'bloky',
     blockType: 'Typ bloku',

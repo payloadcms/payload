@@ -138,6 +138,7 @@ export const heTranslations: DefaultTranslationsObject = {
     addNewLabel: 'הוסף {{label}} חדש',
     addRelationship: 'הוסף יחס',
     addUpload: 'הוסף העלאה',
+    allLocaleStatus: 'סטטוס - כל המקומות',
     block: 'בלוק',
     blocks: 'בלוקים',
     blockType: 'סוג בלוק',

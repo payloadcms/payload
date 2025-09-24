@@ -143,6 +143,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Ավելացնել նոր {{label}}',
     addRelationship: 'Ավելացնել հարաբերություն',
     addUpload: 'Վերբեռնել',
+    allLocaleStatus: 'Ստատուս - Բոլոր լոկալները',
     block: 'բլոկ',
     blocks: 'բլոկներ',
     blockType: 'Բլոկի տեսակ',

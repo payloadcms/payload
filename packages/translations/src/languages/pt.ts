@@ -143,6 +143,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Adicionar novo {{label}}',
     addRelationship: 'Adicionar Relação',
     addUpload: 'Adicionar Upload',
+    allLocaleStatus: 'Status - Todos os Locales',
     block: 'Bloco',
     blocks: 'blocos',
     blockType: 'Tipo de bloco',

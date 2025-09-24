@@ -148,6 +148,7 @@ export const deTranslations: DefaultTranslationsObject = {
     addNewLabel: '{{label}} erstellen',
     addRelationship: 'Verknüpfung hinzufügen',
     addUpload: 'Neue Datei hochladen',
+    allLocaleStatus: 'Status - Alle Gebietsschemata',
     block: 'Block',
     blocks: 'Blöcke',
     blockType: 'Block-Typ',

@@ -146,6 +146,7 @@ export const skTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Pridať nový {{label}}',
     addRelationship: 'Pridať vzťah',
     addUpload: 'Pridať nahrávanie',
+    allLocaleStatus: 'Stav - Všetky jazykové verzie',
     block: 'Blok',
     blocks: 'bloky',
     blockType: 'Typ bloku',

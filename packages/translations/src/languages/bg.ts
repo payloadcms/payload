@@ -143,6 +143,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Добави нов {{label}}',
     addRelationship: 'Добави отношение',
     addUpload: 'Качи',
+    allLocaleStatus: 'Статус - всички езици',
     block: 'Блок',
     blocks: 'блокове',
     blockType: 'Тип блок',

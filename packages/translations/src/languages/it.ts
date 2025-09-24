@@ -147,6 +147,7 @@ export const itTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Aggiungi nuovo {{label}}',
     addRelationship: 'Aggiungi Relazione',
     addUpload: 'aggiungi Carica',
+    allLocaleStatus: 'Stato - Tutti i luoghi',
     block: 'Blocco',
     blocks: 'blocchi',
     blockType: 'Tipo di Blocco',

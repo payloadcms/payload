@@ -141,6 +141,7 @@ export const thTranslations: DefaultTranslationsObject = {
     addNewLabel: 'เพิ่ม {{label}} ใหม่',
     addRelationship: 'เพิ่มความสัมพันธ์',
     addUpload: 'เพิ่มการอัปโหลด',
+    allLocaleStatus: 'สถานะ - ทุกภาษา',
     block: 'Block',
     blocks: 'Blocks',
     blockType: 'ประเภท Block',

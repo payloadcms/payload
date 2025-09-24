@@ -144,6 +144,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     addNewLabel: 'নতুন {{label}} যোগ করুন',
     addRelationship: 'সম্পর্ক যোগ করুন',
     addUpload: 'আপলোড যোগ করুন',
+    allLocaleStatus: 'স্ট্যাটাস - সমস্ত লোকাল',
     block: 'ব্লক',
     blocks: 'ব্লকগুলি',
     blockType: 'ব্লক প্রকার',

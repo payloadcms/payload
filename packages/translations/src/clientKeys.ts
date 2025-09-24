@@ -99,6 +99,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'fields:addNewLabel',
   'fields:addRelationship',
   'fields:addUpload',
+  'fields:allLocaleStatus',
   'fields:block',
   'fields:blocks',
   'fields:blockType',

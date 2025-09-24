@@ -144,6 +144,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Dodaj novi {{label}}',
     addRelationship: 'Dodaj odnos',
     addUpload: 'Dodaj učitavanje',
+    allLocaleStatus: 'Status - Svi lokaliteti',
     block: 'Blokiranje',
     blocks: 'blokiranja',
     blockType: 'Vrsta blokiranja',

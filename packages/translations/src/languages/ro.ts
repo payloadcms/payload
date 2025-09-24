@@ -147,6 +147,7 @@ export const roTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Adăugați un nou {{label}}',
     addRelationship: 'Adăugați o relație',
     addUpload: 'Adăugați un fișier',
+    allLocaleStatus: 'Stare - Toate localitățile',
     block: 'Bloc',
     blocks: 'Blocuri',
     blockType: 'Tip de bloc',

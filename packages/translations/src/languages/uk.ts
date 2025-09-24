@@ -144,6 +144,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Створити {{label}}',
     addRelationship: "Додати взаємозв'язок",
     addUpload: 'Додати завантаження',
+    allLocaleStatus: 'Статус - Всі локалі',
     block: 'Блок',
     blocks: 'блоки',
     blockType: 'Тип блока',

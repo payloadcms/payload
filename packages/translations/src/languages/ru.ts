@@ -145,6 +145,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Добавить {{label}}',
     addRelationship: 'Добавить Отношения',
     addUpload: 'Добавить загрузку',
+    allLocaleStatus: 'Статус - все локали',
     block: 'Блок',
     blocks: 'Блоки',
     blockType: 'Тип Блока',

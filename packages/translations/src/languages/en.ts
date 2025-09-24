@@ -1,5 +1,3 @@
-import { title } from 'process'
-
 import type { Language } from '../types.js'
 
 export const enTranslations = {
@@ -145,6 +143,7 @@ export const enTranslations = {
     addNewLabel: 'Add new {{label}}',
     addRelationship: 'Add Relationship',
     addUpload: 'Add Upload',
+    allLocaleStatus: 'Status - All Locales',
     block: 'Block',
     blocks: 'blocks',
     blockType: 'Block Type',
