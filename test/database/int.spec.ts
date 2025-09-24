@@ -923,6 +923,183 @@ describe('database', () => {
       expect(fromRes.categories.title).toBe(title)
       expect(fromRes.categories.id).toBe(id)
     }
+
+    // Non-consistent sorting by ID
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (process.env.PAYLOAD_DATABASE?.includes('uuid')) {
+      return
+    }
+
+    const resultDepth1NoSort = await payload.findDistinct({
+      depth: 1,
+      collection: 'posts',
+      field: 'categories',
+    })
+
+    for (let i = 0; i < resultDepth1NoSort.values.length; i++) {
+      const fromRes = resultDepth1NoSort.values[i] as any
+      const id = categoriesIDS[i].categories as any
+      const title = categories[i]?.title
+      expect(fromRes.categories.title).toBe(title)
+      expect(fromRes.categories.id).toBe(id)
+    }
+  })
+
+  it('should populate distinct relationships of polymorphic when depth>0', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+
+    const category_1 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_1' },
+    })
+    const category_2 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_2' },
+    })
+    const category_3 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_3' },
+    })
+
+    const post_1 = await payload.create({
+      collection: 'posts',
+      data: { title: 'post_1', categoryPoly: { relationTo: 'categories', value: category_1.id } },
+    })
+    const post_2 = await payload.create({
+      collection: 'posts',
+      data: { title: 'post_2', categoryPoly: { relationTo: 'categories', value: category_1.id } },
+    })
+    const post_3 = await payload.create({
+      collection: 'posts',
+      data: { title: 'post_3', categoryPoly: { relationTo: 'categories', value: category_2.id } },
+    })
+    const post_4 = await payload.create({
+      collection: 'posts',
+      data: { title: 'post_4', categoryPoly: { relationTo: 'categories', value: category_3.id } },
+    })
+    const post_5 = await payload.create({
+      collection: 'posts',
+      data: { title: 'post_5', categoryPoly: { relationTo: 'categories', value: category_3.id } },
+    })
+
+    const result = await payload.findDistinct({
+      depth: 0,
+      collection: 'posts',
+      field: 'categoryPoly',
+    })
+
+    expect(result.values).toHaveLength(3)
+    expect(
+      result.values.some(
+        (v) =>
+          v.categoryPoly?.relationTo === 'categories' && v.categoryPoly.value === category_1.id,
+      ),
+    ).toBe(true)
+    expect(
+      result.values.some(
+        (v) =>
+          v.categoryPoly?.relationTo === 'categories' && v.categoryPoly.value === category_2.id,
+      ),
+    ).toBe(true)
+    expect(
+      result.values.some(
+        (v) =>
+          v.categoryPoly?.relationTo === 'categories' && v.categoryPoly.value === category_3.id,
+      ),
+    ).toBe(true)
+  })
+
+  it('should populate distinct relationships of hasMany polymorphic when depth>0', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+
+    const category_1 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_1' },
+    })
+    const category_2 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_2' },
+    })
+    const category_3 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_3' },
+    })
+
+    const post_1 = await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'post_1',
+        categoryPolyMany: [{ relationTo: 'categories', value: category_1.id }],
+      },
+    })
+    const post_2 = await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'post_2',
+        categoryPolyMany: [{ relationTo: 'categories', value: category_1.id }],
+      },
+    })
+    const post_3 = await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'post_3',
+        categoryPolyMany: [{ relationTo: 'categories', value: category_2.id }],
+      },
+    })
+    const post_4 = await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'post_4',
+        categoryPolyMany: [{ relationTo: 'categories', value: category_3.id }],
+      },
+    })
+    const post_5 = await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'post_5',
+        categoryPolyMany: [{ relationTo: 'categories', value: category_3.id }],
+      },
+    })
+
+    const post_6 = await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'post_6',
+        categoryPolyMany: null,
+      },
+    })
+
+    const result = await payload.findDistinct({
+      depth: 0,
+      collection: 'posts',
+      field: 'categoryPolyMany',
+    })
+
+    expect(result.values).toHaveLength(4)
+    expect(
+      result.values.some(
+        (v) =>
+          v.categoryPolyMany?.relationTo === 'categories' &&
+          v.categoryPolyMany.value === category_1.id,
+      ),
+    ).toBe(true)
+    expect(
+      result.values.some(
+        (v) =>
+          v.categoryPolyMany?.relationTo === 'categories' &&
+          v.categoryPolyMany.value === category_2.id,
+      ),
+    ).toBe(true)
+    expect(
+      result.values.some(
+        (v) =>
+          v.categoryPolyMany?.relationTo === 'categories' &&
+          v.categoryPolyMany.value === category_3.id,
+      ),
+    ).toBe(true)
+    expect(result.values.some((v) => v.categoryPolyMany === null)).toBe(true)
   })
 
   describe('Compound Indexes', () => {
@@ -2987,6 +3164,58 @@ describe('database', () => {
         sort: '-textHooked',
       })
       expect(docs).toHaveLength(1)
+    })
+
+    it('should automatically add hasMany: true to a virtual field that references a hasMany relationship', () => {
+      const field = payload.collections['virtual-relations'].config.fields.find(
+        // eslint-disable-next-line jest/no-conditional-in-test
+        (each) => 'name' in each && each.name === 'postsTitles',
+      )!
+
+      // eslint-disable-next-line jest/no-conditional-in-test
+      expect('hasMany' in field && field.hasMany).toBe(true)
+    })
+
+    it('should the value populate with hasMany: true relationship field', async () => {
+      await payload.delete({ collection: 'categories', where: {} })
+      await payload.delete({ collection: 'posts', where: {} })
+      await payload.delete({ collection: 'virtual-relations', where: {} })
+
+      const post1 = await payload.create({ collection: 'posts', data: { title: 'post 1' } })
+      const post2 = await payload.create({ collection: 'posts', data: { title: 'post 2' } })
+
+      const res = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { posts: [post1.id, post2.id] },
+      })
+      expect(res.postsTitles).toEqual(['post 1', 'post 2'])
+    })
+
+    it('should the value populate with nested hasMany: true relationship field', async () => {
+      await payload.delete({ collection: 'categories', where: {} })
+      await payload.delete({ collection: 'posts', where: {} })
+      await payload.delete({ collection: 'virtual-relations', where: {} })
+
+      const category_1 = await payload.create({
+        collection: 'categories',
+        data: { title: 'category 1' },
+      })
+      const category_2 = await payload.create({
+        collection: 'categories',
+        data: { title: 'category 2' },
+      })
+      const post1 = await payload.create({
+        collection: 'posts',
+        data: { title: 'post 1', categories: [category_1.id, category_2.id] },
+      })
+
+      const res = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post1.id },
+      })
+      expect(res.postCategoriesTitles).toEqual(['category 1', 'category 2'])
     })
   })
 

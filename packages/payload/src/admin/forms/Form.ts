@@ -34,6 +34,12 @@ export type FieldState = {
    * See `mergeServerFormState` for more details.
    */
   addedByServer?: boolean
+  /**
+   * If the field is a `blocks` field, this will contain the slugs of blocks that are allowed, based on the result of `field.filterOptions`.
+   * If this is undefined, all blocks are allowed.
+   * If this is an empty array, no blocks are allowed.
+   */
+  blocksFilterOptions?: string[]
   customComponents?: {
     /**
      * This is used by UI fields, as they can have arbitrary components defined if used
@@ -129,6 +135,12 @@ export type BuildFormStateArgs = {
    */
   renderAllFields?: boolean
   req: PayloadRequest
+  /**
+   * If true, will return a fresh URL for live preview based on the current form state.
+   * Note: this will run on every form state event, so if your `livePreview.url` function is long running or expensive,
+   * ensure it caches itself as needed.
+   */
+  returnLivePreviewURL?: boolean
   returnLockStatus?: boolean
   schemaPath: string
   select?: SelectType
