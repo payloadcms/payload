@@ -682,7 +682,7 @@ async function openAssignTenantModal({
   await expect(docControlsButton).toBeVisible()
   await docControlsButton.click()
 
-  const assignTenantButtonLocator = docControlsPopup.locator('button', { hasText: 'Assign Tenant' })
+  const assignTenantButtonLocator = docControlsPopup.locator('button', { hasText: 'Assign Site' })
   await expect(assignTenantButtonLocator).toBeVisible()
   await assignTenantButtonLocator.click()
 
