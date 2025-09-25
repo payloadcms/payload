@@ -31,7 +31,7 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
       const response = blob._response
 
       let initHeaders: Headers = {
-        ...(response.headers.rawHeaders() as unknown as Headers),
+        ...(response.headers.toJson() as unknown as Headers),
       }
 
       // Typescript is difficult here with merging these types from Azure
