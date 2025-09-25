@@ -93,10 +93,12 @@ export function ModularDashboardClient({ widgets }: { widgets: RenderedWidget[] 
         breakpoints={{ lg: BREAKPOINT, xxs: 0 }}
         className={`grid-layout ${isEditing ? 'editing' : ''}`}
         cols={{ lg: 12, xxs: 6 }}
-        compactType={null}
         isDraggable={isEditing}
         isResizable={isEditing}
         layouts={{ lg: layout }}
+        onLayoutChange={(currentLayout, allLayouts) => {
+          console.log('layout changed', currentLayout, allLayouts)
+        }}
         // preventCollision // not sure if this gives a better UX
         rowHeight={(BREAKPOINT / 12) * 3}
       >
