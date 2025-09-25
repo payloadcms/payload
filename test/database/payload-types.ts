@@ -199,6 +199,24 @@ export interface Post {
   category?: (string | null) | Category;
   categories?: (string | Category)[] | null;
   categoryCustomID?: (number | null) | CategoriesCustomId;
+  polymorphicRelations?:
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | {
+        relationTo: 'simple';
+        value: string | Simple;
+      })[]
+    | null;
+  localizedPolymorphicRelations?:
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | {
+        relationTo: 'simple';
+        value: string | Simple;
+      })[]
+    | null;
   localized?: string | null;
   text?: string | null;
   number?: number | null;
@@ -828,6 +846,8 @@ export interface PostsSelect<T extends boolean = true> {
   category?: T;
   categories?: T;
   categoryCustomID?: T;
+  polymorphicRelations?: T;
+  localizedPolymorphicRelations?: T;
   localized?: T;
   text?: T;
   number?: T;
@@ -1409,6 +1429,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

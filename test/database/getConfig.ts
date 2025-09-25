@@ -138,6 +138,19 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'categoryCustomID',
         },
         {
+          type: 'relationship',
+          relationTo: ['categories', 'simple'],
+          hasMany: true,
+          name: 'polymorphicRelations',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['categories', 'simple'],
+          hasMany: true,
+          localized: true,
+          name: 'localizedPolymorphicRelations',
+        },
+        {
           name: 'localized',
           type: 'text',
           localized: true,
