@@ -14,16 +14,16 @@
 
     &.editing {
       .widget {
-        cursor: grabbing;
+        cursor: grab;
       }
 
       .react-draggable-dragging {
         z-index: 10;
-        cursor: grabbing !important;
+        cursor: grabbing;
       }
 
       &:has(.react-grid-placeholder) {
-        cursor: grabbing !important;
+        cursor: grabbing;
       }
 
       .widget-content {
