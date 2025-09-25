@@ -229,6 +229,10 @@ export const createClientConfig = ({
           if (config.experimental?.localizeStatus) {
             clientConfig.experimental.localizeStatus = config.experimental.localizeStatus
           }
+          if (config.experimental?.multipleFallbackLocales) {
+            clientConfig.experimental.multipleFallbackLocales =
+              config.experimental.multipleFallbackLocales
+          }
         }
 
         break

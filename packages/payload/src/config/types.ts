@@ -466,7 +466,7 @@ export type Locale = {
   /**
    * Code of another locale to use when reading documents with fallback, if not specified defaultLocale is used
    */
-  fallbackLocale?: string
+  fallbackLocale?: string | string[]
   /**
    * label of supported locale
    * @example "English"
@@ -732,6 +732,10 @@ export type ImportMapGenerators = Array<
  */
 export type ExperimentalConfig = {
   localizeStatus?: boolean
+  /**
+   * When true, fallbackLocale accepts an array of locales in find queries and locale configuration.
+   */
+  multipleFallbackLocales?: boolean
 }
 
 export type AfterErrorHook = (

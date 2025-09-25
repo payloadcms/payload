@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext } from '../../../index.js'
+import type { ExperimentalConfig, RequestContext } from '../../../index.js'
 import type {
   JsonObject,
   PayloadRequest,
@@ -23,6 +23,7 @@ type Args = {
   depth: number
   doc: JsonObject
   draft: boolean
+  experimental?: ExperimentalConfig
   fallbackLocale: null | string
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
@@ -60,6 +61,7 @@ export const traverseFields = ({
   depth,
   doc,
   draft,
+  experimental,
   fallbackLocale,
   fieldPromises,
   fields,
@@ -92,6 +94,7 @@ export const traverseFields = ({
         depth,
         doc,
         draft,
+        experimental,
         fallbackLocale,
         field,
         fieldIndex,

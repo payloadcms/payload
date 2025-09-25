@@ -81,6 +81,7 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     depth,
     doc: incomingDoc,
     draft,
+    experimental: req.payload.config.experimental,
     fallbackLocale,
     fieldPromises,
     fields: (collection?.fields || global?.fields)!,

@@ -430,6 +430,7 @@ export default buildConfigWithDefaults({
   ],
   experimental: {
     localizeStatus: true,
+    multipleFallbackLocales: true,
   },
   localization: {
     filterAvailableLocales: ({ locales }) => {
