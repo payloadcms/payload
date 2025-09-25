@@ -733,19 +733,26 @@ export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
 
-export type DashboardWidget = {
-  Component: PayloadComponent
+export type Widget = {
+  ComponentPath: string
   slug: string
+  // TODO: Add fields
+  // fields?: Field[]
 }
 
-export type DefaultDashboardWidget = {
-  height: 1 | 2 | 3
-  width: 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
-} & DashboardWidget
+export type WidgetInstance = {
+  // TODO: should be inferred from Widget Fields
+  // data: Record<string, any>
+  height?: 1 | 2 | 3
+  widgetSlug: string
+  width?: 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
+}
 
 export type DashboardConfig = {
-  components?: Array<DashboardWidget>
-  defaults?: Array<DefaultDashboardWidget>
+  // TODO:
+  // defaultWidgets?: (args: { req: PayloadRequest }) => Array<WidgetInstance>
+  defaultWidgets?: Array<WidgetInstance>
+  widgets: Array<Widget>
 }
 
 /**

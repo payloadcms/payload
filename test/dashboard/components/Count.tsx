@@ -14,17 +14,18 @@ interface CountProps {
   widgetSlug: string
 }
 
-export default async function Count({
-  changePercent,
-  changeText,
-  collection,
-  color = 'blue',
-  icon = '📊',
-  payload,
-  title,
-}: CountProps) {
+export default async function Count(args: CountProps) {
   let count = 0
   let error: null | string = null
+
+  // TODO: Dynamic collection counting using fields
+  const collection = 'tickets'
+  const payload = args.payload
+  const title = 'Tickets'
+  const color = 'blue'
+  const icon = '📊'
+  const changePercent = 10
+  const changeText = '10% increase'
 
   try {
     const result = await payload.count({

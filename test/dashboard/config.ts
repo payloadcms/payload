@@ -27,76 +27,25 @@ export default buildConfigWithDefaults({
       },
     },
     dashboard: {
-      defaults: [
-        {
-          Component: {
-            path: './components/Count.tsx#default',
-            serverProps: {
-              collection: 'tickets',
-              title: 'Total Tickets',
-              icon: '🎫',
-              color: 'blue',
-              changePercent: 29.93,
-              changeText: 'Than last month',
-            },
+      defaultWidgets:
+        // TODO
+        // ({ req: { user } }) =>
+        [
+          {
+            widgetSlug: 'text-block',
+            width: 3,
+            height: 1,
+            // data: {
+            //   interval: 'week',
+            // },
           },
-          slug: 'total-tickets',
-          width: 3,
-          height: 1,
-        },
+        ],
+      widgets: [
         {
-          Component: {
-            path: './components/Count.tsx#default',
-            serverProps: {
-              collection: 'revenue',
-              title: 'Total Revenue',
-              icon: '💰',
-              color: 'green',
-              changePercent: 30.33,
-              changeText: 'Than last month',
-            },
-          },
-          slug: 'total-revenue',
-          width: 3,
-          height: 1,
-        },
-        {
-          Component: {
-            path: './components/Count.tsx#default',
-            serverProps: {
-              collection: 'events',
-              title: 'Upcoming',
-              icon: '📅',
-              color: 'orange',
-              changePercent: 6.19,
-              changeText: 'Than last month',
-            },
-          },
-          slug: 'upcoming-events',
-          width: 3,
-          height: 1,
-        },
-        {
-          Component: {
-            path: './components/Count.tsx#default',
-            serverProps: {
-              collection: 'events',
-              title: 'Total Events',
-              icon: '🎉',
-              color: 'purple',
-              changePercent: -10.29,
-              changeText: 'Than last month',
-            },
-          },
-          slug: 'total-events',
-          width: 3,
-          height: 1,
-        },
-        {
-          Component: './components/Revenue.tsx#default',
-          slug: 'revenue-chart',
-          width: 12,
-          height: 2,
+          slug: 'text-block',
+          ComponentPath: './components/Count.tsx#default',
+          // fields: [
+          // ]
         },
       ],
     },

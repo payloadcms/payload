@@ -59,7 +59,7 @@ export function ModularDashboardClient({ widgets }: { widgets: RenderedWidget[] 
 
     return {
       h: widget.height,
-      i: widget.id,
+      i: widget.widgetSlug,
       maxH: 3,
       maxW: 12,
       minH: 1,
@@ -101,7 +101,7 @@ export function ModularDashboardClient({ widgets }: { widgets: RenderedWidget[] 
         rowHeight={(BREAKPOINT / 12) * 3}
       >
         {widgets.map((widget) => (
-          <div className="widget" key={widget.id}>
+          <div className="widget" key={widget.widgetSlug}>
             <div className="widget-content">{widget.component}</div>
           </div>
         ))}

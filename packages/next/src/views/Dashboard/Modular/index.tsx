@@ -1,4 +1,4 @@
-import type { DefaultDashboardWidget } from 'payload'
+import type { WidgetInstance } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
@@ -10,8 +10,7 @@ import './index.scss'
 
 export type RenderedWidget = {
   component: React.ReactNode
-  id: string
-} & Pick<DefaultDashboardWidget, 'height' | 'width'>
+} & WidgetInstance
 
 export function ModularDashboard(props: DashboardViewServerProps) {
   const {
@@ -25,26 +24,32 @@ export function ModularDashboard(props: DashboardViewServerProps) {
 
   // Pre-render widgets on server side
   const renderedWidgets: RenderedWidget[] = React.useMemo(() => {
-    if (!dashboardConfig?.defaults) {
+    if (!dashboardConfig?.defaultWidgets) {
       return []
     }
 
-    return dashboardConfig.defaults.map((widget) => {
+    return dashboardConfig.defaultWidgets.map((widget) => {
+      const ComponentPath = dashboardConfig.widgets.find(
+        (w) => w.slug === widget.widgetSlug,
+      )?.ComponentPath
+
+      if (!ComponentPath) {
+        throw new Error(`Widget ${widget.widgetSlug} not found`)
+      }
+
       const WidgetComponent = RenderServerComponent({
-        Component: widget.Component,
+        Component: ComponentPath,
         importMap,
         serverProps: {
           ...props,
           dashboardConfig,
-          widgetSlug: widget.slug,
+          widgetSlug: widget.widgetSlug,
         },
       })
 
       return {
-        id: widget.slug,
+        ...widget,
         component: WidgetComponent,
-        height: widget.height,
-        width: widget.width,
       }
     })
   }, [dashboardConfig, importMap, props])
