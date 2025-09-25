@@ -1,5 +1,3 @@
-import { version } from 'os'
-
 // @ts-strict-ignore
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
@@ -18,7 +16,6 @@ type Args = {
   draft?: boolean
   global?: SanitizedGlobalConfig
   id?: number | string
-  locale?: null | string
   operation?: 'create' | 'restoreVersion' | 'update'
   payload: Payload
   publishSpecificLocale?: string
@@ -34,7 +31,6 @@ export const saveVersion = async ({
   docWithLocales: doc,
   draft,
   global,
-  locale,
   operation,
   payload,
   publishSpecificLocale,
@@ -46,7 +42,6 @@ export const saveVersion = async ({
   let createNewVersion = true
   const now = new Date().toISOString()
   const versionData = deepCopyObjectSimple(doc)
-
   if (draft) {
     versionData._status = 'draft'
   }
@@ -60,39 +55,39 @@ export const saveVersion = async ({
   }
 
   try {
-    let docs
-    const findVersionArgs = {
-      limit: 1,
-      pagination: false,
-      req,
-      sort: '-updatedAt',
-    }
-
-    if (collection) {
-      ;({ docs } = await payload.db.findVersions({
-        ...findVersionArgs,
-        collection: collection.slug,
-        limit: 1,
-        pagination: false,
-        req,
-        where: {
-          parent: {
-            equals: id,
-          },
-        },
-      }))
-    } else {
-      ;({ docs } = await payload.db.findGlobalVersions({
-        ...findVersionArgs,
-        global: global!.slug,
-        limit: 1,
-        pagination: false,
-        req,
-      }))
-    }
-    const [latestVersion] = docs
-
     if (autosave) {
+      let docs
+      const findVersionArgs = {
+        limit: 1,
+        pagination: false,
+        req,
+        sort: '-updatedAt',
+      }
+
+      if (collection) {
+        ;({ docs } = await payload.db.findVersions({
+          ...findVersionArgs,
+          collection: collection.slug,
+          limit: 1,
+          pagination: false,
+          req,
+          where: {
+            parent: {
+              equals: id,
+            },
+          },
+        }))
+      } else {
+        ;({ docs } = await payload.db.findGlobalVersions({
+          ...findVersionArgs,
+          global: global!.slug,
+          limit: 1,
+          pagination: false,
+          req,
+        }))
+      }
+      const [latestVersion] = docs
+
       // overwrite the latest version if it's set to autosave
       if (latestVersion && 'autosave' in latestVersion && latestVersion.autosave === true) {
         createNewVersion = false
@@ -130,53 +125,11 @@ export const saveVersion = async ({
     }
 
     if (createNewVersion) {
-      let localeStatus = {}
-      const localizationEnabled =
-        payload.config.localization && payload.config.localization.locales.length > 0
-
-      if (
-        localizationEnabled &&
-        payload.config.localization !== false &&
-        payload.config.experimental?.localizeStatus
-      ) {
-        const allLocales = (
-          (payload.config.localization && payload.config.localization?.locales) ||
-          []
-        ).map((locale) => (typeof locale === 'string' ? locale : locale.code))
-
-        // If `publish all`, set all locales to published
-        if (versionData._status === 'published' && !publishSpecificLocale) {
-          localeStatus = Object.fromEntries(allLocales.map((code) => [code, 'published']))
-        } else if (publishSpecificLocale || (locale && versionData._status === 'draft')) {
-          const status: 'draft' | 'published' = publishSpecificLocale ? 'published' : 'draft'
-          const incomingLocale = String(publishSpecificLocale || locale)
-          const existing = latestVersion?.localeStatus
-
-          // If no locale statuses are set, set it and set all others to draft
-          if (!existing) {
-            localeStatus = {
-              ...Object.fromEntries(
-                allLocales.filter((code) => code !== incomingLocale).map((code) => [code, 'draft']),
-              ),
-              [incomingLocale]: status,
-            }
-          } else {
-            // If locales already exist, update the status for the incoming locale
-            const { [incomingLocale]: _, ...rest } = existing
-            localeStatus = {
-              ...rest,
-              [incomingLocale]: status,
-            }
-          }
-        }
-      }
-
       const createVersionArgs = {
         autosave: Boolean(autosave),
         collectionSlug: undefined as string | undefined,
         createdAt: operation === 'restoreVersion' ? versionData.createdAt : now,
         globalSlug: undefined as string | undefined,
-        localeStatus,
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,
         req,

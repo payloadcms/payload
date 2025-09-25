@@ -36,17 +36,15 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     where: combinedWhere,
   })
 
-  for (let i = 0; i < result.docs.length; i++) {
-    const id = result.docs[i].parent
-    const localeStatus = result.docs[i].localeStatus || {}
-    if (locale && localeStatus[locale]) {
-      result.docs[i].status = localeStatus[locale]
-      result.docs[i].version._status = localeStatus[locale]
-    }
+  return {
+    ...result,
+    docs: result.docs.map((doc) => {
+      doc = {
+        id: doc.parent,
+        ...doc.version,
+      }
 
-    result.docs[i] = result.docs[i].version ?? {}
-    result.docs[i].id = id
+      return doc
+    }),
   }
-
-  return result
 }
