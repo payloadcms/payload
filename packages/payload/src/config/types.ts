@@ -805,6 +805,10 @@ export type Config = {
        * Add custom components before the navigation links
        */
       beforeNavLinks?: CustomComponent[]
+      /**
+       * Add custom footer to bottom of page globally
+       */
+      footer?: CustomComponent[]
       /** Replace graphical components */
       graphics?: {
         /** Replace the icon in the navigation */
