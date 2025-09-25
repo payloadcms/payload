@@ -144,6 +144,7 @@ export const idTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Tambah {{label}} baru',
     addRelationship: 'Tambah Hubungan',
     addUpload: 'Tambah Unggahan',
+    allLocaleStatus: 'Status - Semua Lokal',
     block: 'Blok',
     blocks: 'blok',
     blockType: 'Tipe Blok',

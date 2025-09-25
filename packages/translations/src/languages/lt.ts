@@ -145,6 +145,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Pridėti naują {{label}}',
     addRelationship: 'Pridėti santykį',
     addUpload: 'Pridėti Įkelti',
+    allLocaleStatus: 'Statusas - Visos lokalės',
     block: 'Blokas',
     blocks: 'blokai',
     blockType: 'Blokas Tipas',

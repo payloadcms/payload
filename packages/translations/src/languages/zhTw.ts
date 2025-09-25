@@ -135,6 +135,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     addNewLabel: '新增 {{label}}',
     addRelationship: '新增關聯',
     addUpload: '新增上傳',
+    allLocaleStatus: '狀態 - 所有地區設定',
     block: '區塊',
     blocks: '區塊',
     blockType: '區塊類型',

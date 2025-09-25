@@ -130,41 +130,35 @@ export const saveVersion = async ({
     }
 
     if (createNewVersion) {
-      let localeStatus = {}
+      let localeStatus: Record<string, 'draft' | 'published'> = {}
       const localizationEnabled =
         payload.config.localization && payload.config.localization.locales.length > 0
 
       if (
         localizationEnabled &&
         payload.config.localization !== false &&
-        payload.config.experimental?.localizeStatus
+        (payload.config.experimental?.localizeStatus ||
+          payload.config.experimental?.allLocaleStatus)
       ) {
-        const allLocales = (
-          (payload.config.localization && payload.config.localization?.locales) ||
-          []
-        ).map((locale) => (typeof locale === 'string' ? locale : locale.code))
-
         // If `publish all`, set all locales to published
         if (versionData._status === 'published' && !publishSpecificLocale) {
-          localeStatus = Object.fromEntries(allLocales.map((code) => [code, 'published']))
+          for (const code of payload.config.localization.localeCodes) {
+            localeStatus[code] = 'published'
+          }
         } else if (publishSpecificLocale || (locale && versionData._status === 'draft')) {
           const status: 'draft' | 'published' = publishSpecificLocale ? 'published' : 'draft'
-          const incomingLocale = String(publishSpecificLocale || locale)
+          const incomingLocale = (publishSpecificLocale || locale) as string
           const existing = latestVersion?.localeStatus
 
           // If no locale statuses are set, set it and set all others to draft
           if (!existing) {
-            localeStatus = {
-              ...Object.fromEntries(
-                allLocales.filter((code) => code !== incomingLocale).map((code) => [code, 'draft']),
-              ),
-              [incomingLocale]: status,
+            for (const code of payload.config.localization.localeCodes) {
+              localeStatus[code] = code === incomingLocale ? status : 'draft'
             }
           } else {
             // If locales already exist, update the status for the incoming locale
-            const { [incomingLocale]: _, ...rest } = existing
             localeStatus = {
-              ...rest,
+              ...existing,
               [incomingLocale]: status,
             }
           }

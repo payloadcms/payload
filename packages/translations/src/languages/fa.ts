@@ -141,6 +141,7 @@ export const faTranslations: DefaultTranslationsObject = {
     addNewLabel: 'افزودن {{label}} تازه',
     addRelationship: 'افزودن پیوستگی',
     addUpload: 'افزودن بارگذار',
+    allLocaleStatus: 'وضعیت - همه مکان‌ها',
     block: 'بلوک',
     blocks: 'بلوک‌ها',
     blockType: 'نوع بلوک',

@@ -143,6 +143,7 @@ export const slTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Dodaj nov {{label}}',
     addRelationship: 'Dodaj povezavo',
     addUpload: 'Dodaj nalaganje',
+    allLocaleStatus: 'Stanje - Vse jezikovne različice',
     block: 'Blok',
     blocks: 'bloki',
     blockType: 'Tip bloka',

@@ -143,6 +143,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Pievienot jaunu {{label}}',
     addRelationship: 'Pievienot saistību',
     addUpload: 'Pievienot augšupielādi',
+    allLocaleStatus: 'Statuss - Visas lokālās versijas',
     block: 'Bloks',
     blocks: 'bloki',
     blockType: 'Bloka tips',

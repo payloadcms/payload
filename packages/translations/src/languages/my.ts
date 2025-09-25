@@ -144,6 +144,7 @@ export const myTranslations: DefaultTranslationsObject = {
     addNewLabel: '{{label}} အားအသစ် ထည့်သွင်းမည်။',
     addRelationship: 'Relationship အသစ်ထည့်သွင်းမည်။',
     addUpload: 'Upload ထည့်ပါ။',
+    allLocaleStatus: 'Status - Semua Locale',
     block: 'ဘလောက်',
     blocks: 'ဘလောက်များ',
     blockType: 'ဘလောက် အမျိုးအစား',

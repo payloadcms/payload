@@ -143,6 +143,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Legg til ny {{label}}',
     addRelationship: 'Legg til relasjon',
     addUpload: 'Legg til opplasting',
+    allLocaleStatus: 'Status - Alle lokaliteter',
     block: 'Blokk',
     blocks: 'blokker',
     blockType: 'Blokktype',

@@ -142,6 +142,7 @@ export const etTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Lisa uus {{label}}',
     addRelationship: 'Lisa seos',
     addUpload: 'Lisa üleslaadimine',
+    allLocaleStatus: 'Olekõik Lokalid - Staatus',
     block: 'Plokk',
     blocks: 'plokid',
     blockType: 'Ploki tüüp',

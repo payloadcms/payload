@@ -143,6 +143,7 @@ export const viTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Thêm mới: {{label}}',
     addRelationship: 'Thêm mối quan hệ (relationship)',
     addUpload: 'Thêm tải lên (upload)',
+    allLocaleStatus: 'Trạng thái - Tất cả các địa phương',
     block: 'Block',
     blocks: 'blocks',
     blockType: 'Block Type',

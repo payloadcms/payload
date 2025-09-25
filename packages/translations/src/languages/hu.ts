@@ -145,6 +145,7 @@ export const huTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Új {{label}} hozzáadása',
     addRelationship: 'Kapcsolat hozzáadása',
     addUpload: 'Feltöltés hozzáadása',
+    allLocaleStatus: 'Állapot - Minden helyszín',
     block: 'Blokk',
     blocks: 'blokkok',
     blockType: 'Blokk típusa',

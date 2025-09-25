@@ -143,6 +143,7 @@ export const azTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Yeni {{label}} əlavə et',
     addRelationship: 'Relationship əlavə et',
     addUpload: 'Yükləmə əlavə et',
+    allLocaleStatus: 'Bütün Dil Variantları - Status',
     block: 'Blok',
     blocks: 'bloklar',
     blockType: 'Blok Növü',

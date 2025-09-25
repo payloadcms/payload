@@ -145,6 +145,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Nieuw(e) {{label}} toevoegen',
     addRelationship: 'Nieuwe Relatie',
     addUpload: 'Upload Toevoegen',
+    allLocaleStatus: 'Status - Alle Locales',
     block: 'Blok',
     blocks: 'blokken',
     blockType: 'Bloktype',

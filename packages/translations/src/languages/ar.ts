@@ -140,6 +140,7 @@ export const arTranslations: DefaultTranslationsObject = {
     addNewLabel: 'أضف {{label}} جديد',
     addRelationship: 'أضف علاقة',
     addUpload: 'أضف تحميل',
+    allLocaleStatus: 'الحالة - جميع الأماكن',
     block: 'وحدة محتوى',
     blocks: 'وحدات المحتوى',
     blockType: 'نوع وحدة المحتوى',

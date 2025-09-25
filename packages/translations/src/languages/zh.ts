@@ -137,6 +137,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     addNewLabel: '新增 {{label}}',
     addRelationship: '添加关系',
     addUpload: '添加上传',
+    allLocaleStatus: '状态 - 所有地区设置',
     block: '区块',
     blocks: '区块',
     blockType: '区块类型',

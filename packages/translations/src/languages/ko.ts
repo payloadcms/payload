@@ -143,6 +143,7 @@ export const koTranslations: DefaultTranslationsObject = {
     addNewLabel: '새로운 {{label}} 추가',
     addRelationship: '관계 추가',
     addUpload: '업로드 추가',
+    allLocaleStatus: '상태 - 모든 로케일',
     block: '블록',
     blocks: '블록',
     blockType: '블록 유형',

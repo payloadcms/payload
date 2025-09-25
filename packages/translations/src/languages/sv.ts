@@ -143,6 +143,7 @@ export const svTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Lägg till ny {{label}}',
     addRelationship: 'Lägg till relation',
     addUpload: 'Lägg till uppladdning',
+    allLocaleStatus: 'Status - Alla språkinställningar',
     block: 'Block',
     blocks: 'block',
     blockType: 'Blocktyp',

@@ -149,6 +149,7 @@ export const frTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Ajouter nouveau ou nouvelle {{label}}',
     addRelationship: 'Ajouter une relation',
     addUpload: 'Ajouter le téléchargement',
+    allLocaleStatus: 'Statut - Toutes les locales',
     block: 'Bloc',
     blocks: 'blocs',
     blockType: 'Type de bloc',

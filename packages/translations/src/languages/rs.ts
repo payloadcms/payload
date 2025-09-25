@@ -144,6 +144,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Додај нови {{label}}',
     addRelationship: 'Додај релацију',
     addUpload: 'Додај учитавање',
+    allLocaleStatus: 'Status - Sve Lokacije',
     block: 'Блокирање',
     blocks: 'блокирања',
     blockType: 'Врста блокирања',

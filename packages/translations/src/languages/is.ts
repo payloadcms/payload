@@ -143,6 +143,7 @@ export const isTranslations: DefaultTranslationsObject = {
     addNewLabel: 'Bæta við nýju {{label}}',
     addRelationship: 'Bæta við tengingu',
     addUpload: 'Bæta við skráarupphleðslu',
+    allLocaleStatus: 'Staða - Allar staðfærslur',
     block: 'blokk',
     blocks: 'blokkir',
     blockType: 'Blokkartegund',
