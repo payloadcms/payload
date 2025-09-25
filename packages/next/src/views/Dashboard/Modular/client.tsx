@@ -91,7 +91,7 @@ export function ModularDashboardClient({ widgets }: { widgets: RenderedWidget[] 
 
       <ResponsiveGridLayout
         breakpoints={{ lg: BREAKPOINT, xxs: 0 }}
-        className="grid-layout"
+        className={`grid-layout ${isEditing ? 'editing' : ''}`}
         cols={{ lg: 12, xxs: 6 }}
         compactType={null}
         isDraggable={isEditing}

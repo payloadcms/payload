@@ -10,58 +10,62 @@
       border-radius: 4px;
       padding: 16px;
       overflow: hidden;
-      // ONLY WHEN DND IS ACTIVE (START)
-      cursor: grab;
     }
 
-    .react-draggable-dragging {
-      z-index: 10;
-      cursor: grabbing !important;
-    }
+    &.editing {
+      .widget {
+        cursor: grabbing;
+      }
 
-    &:has(.react-grid-placeholder) {
-      cursor: grabbing !important;
-    }
+      .react-draggable-dragging {
+        z-index: 10;
+        cursor: grabbing !important;
+      }
 
-    .widget-content {
-      user-select: none;
-      -webkit-user-select: none;
-      pointer-events: none;
-    }
-    // ONLY WHEN DND IS ACTIVE (END)
+      &:has(.react-grid-placeholder) {
+        cursor: grabbing !important;
+      }
 
-    .react-grid-item > .react-resizable-handle {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      bottom: 0;
-      right: 0;
-      background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNiIgaGVpZ2h0PSI2IiB2aWV3Qm94PSIwIDAgNiA2IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnIGZpbGw9IiM5OTkiIGZpbGwtcnVsZT0iZXZlbm9kZCI+PHBhdGggZD0ibTUgNWgtNHYtNGg0eiIvPjwvZz48L3N2Zz4=');
-      background-position: bottom right;
-      padding: 0 3px 3px 0;
-      background-repeat: no-repeat;
-      background-origin: content-box;
-      box-sizing: border-box;
-      cursor: se-resize;
-    }
+      .widget-content {
+        user-select: none;
+        -webkit-user-select: none;
+        pointer-events: none;
+      }
+      // ONLY WHEN DND IS ACTIVE (END)
 
-    .react-grid-item > .react-resizable-handle::after {
-      content: '';
-      position: absolute;
-      right: 3px;
-      bottom: 3px;
-      width: 5px;
-      height: 5px;
-      border-right: 2px solid rgba(0, 0, 0, 0.4);
-      border-bottom: 2px solid rgba(0, 0, 0, 0.4);
-    }
+      .react-grid-item > .react-resizable-handle {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        bottom: 0;
+        right: 0;
+        background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNiIgaGVpZ2h0PSI2IiB2aWV3Qm94PSIwIDAgNiA2IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnIGZpbGw9IiM5OTkiIGZpbGwtcnVsZT0iZXZlbm9kZCI+PHBhdGggZD0ibTUgNWgtNHYtNGg0eiIvPjwvZz48L3N2Zz4=');
+        background-position: bottom right;
+        padding: 0 3px 3px 0;
+        background-repeat: no-repeat;
+        background-origin: content-box;
+        box-sizing: border-box;
+        cursor: se-resize;
+      }
 
-    .react-grid-item.react-grid-placeholder {
-      background: var(--theme-elevation-200);
-      opacity: 0.2;
-      transition-duration: 100ms;
-      z-index: 2;
-      user-select: none;
+      .react-grid-item > .react-resizable-handle::after {
+        content: '';
+        position: absolute;
+        right: 3px;
+        bottom: 3px;
+        width: 5px;
+        height: 5px;
+        border-right: 2px solid rgba(0, 0, 0, 0.4);
+        border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+      }
+
+      .react-grid-item.react-grid-placeholder {
+        background: var(--theme-elevation-200);
+        opacity: 0.2;
+        transition-duration: 100ms;
+        z-index: 2;
+        user-select: none;
+      }
     }
   }
 }
