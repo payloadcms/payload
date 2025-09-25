@@ -1,9 +1,10 @@
+import type { DefaultDocumentIDType, PaginatedDocs, Payload } from 'payload'
+
 import path from 'path'
-import { NotFound, type Payload } from 'payload'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { Relationship } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -47,6 +48,92 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       })
 
       expect(tenant1).toHaveProperty('id')
+    })
+
+    describe('relationships', () => {
+      let anchorBarRelationships: PaginatedDocs<Relationship>
+      let blueDogRelationships: PaginatedDocs<Relationship>
+      let anchorBarTenantID: DefaultDocumentIDType
+      let blueDogTenantID: DefaultDocumentIDType
+
+      beforeEach(async () => {
+        anchorBarRelationships = await payload.find({
+          collection: 'relationships',
+          where: {
+            'tenant.name': {
+              equals: 'Anchor Bar',
+            },
+          },
+        })
+
+        blueDogRelationships = await payload.find({
+          collection: 'relationships',
+          where: {
+            'tenant.name': {
+              equals: 'Blue Dog',
+            },
+          },
+        })
+
+        // @ts-expect-error unsafe access okay in test
+
+        anchorBarTenantID = anchorBarRelationships.docs[0].tenant.id
+        // @ts-expect-error unsafe access okay in test
+        blueDogTenantID = blueDogRelationships.docs[0].tenant.id
+      })
+
+      it('ensure relationship document with relationship within same tenant can be created', async () => {
+        const newRelationship = await payload.create({
+          collection: 'relationships',
+          data: {
+            title: 'Relationship to Anchor Bar',
+            // @ts-expect-error unsafe access okay in test
+            relationship: anchorBarRelationships.docs[0].id,
+            tenant: anchorBarTenantID,
+          },
+          req: {
+            // Relationship won't be filtered by tenant based on the tenant of document, but the tenant of the cookie
+            headers: new Headers([['cookie', `payload-tenant=${anchorBarTenantID}`]]),
+          },
+        })
+
+        // @ts-expect-error unsafe access okay in test
+        expect(newRelationship.relationship?.title).toBe('Owned by bar with no ac')
+      })
+
+      it('ensure relationship document with relationship to different tenant cannot be created if tenant header passed', async () => {
+        await expect(
+          payload.create({
+            collection: 'relationships',
+            data: {
+              title: 'Relationship to Blue Dog',
+              // @ts-expect-error unsafe access okay in test
+              relationship: blueDogRelationships.docs[0].id,
+              tenant: anchorBarTenantID,
+            },
+            req: {
+              // Relationship won't be filtered by tenant based on the tenant of document, but the tenant of the cookie
+              headers: new Headers([['cookie', `payload-tenant=${anchorBarTenantID}`]]),
+            },
+          }),
+        ).rejects.toThrow('The following field is invalid: Relationship')
+      })
+
+      it('ensure relationship document with relationship to different tenant cannot be created even if no tenant header passed', async () => {
+        // Should filter based on data.tenant instead of tenant cookie
+        await expect(
+          payload.create({
+            collection: 'relationships',
+            data: {
+              title: 'Relationship to Blue Dog',
+              // @ts-expect-error unsafe access okay in test
+              relationship: blueDogRelationships.docs[0].id,
+              tenant: anchorBarTenantID,
+            },
+            req: {},
+          }),
+        ).rejects.toThrow('The following field is invalid: Relationship')
+      })
     })
   })
 })

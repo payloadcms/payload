@@ -10,13 +10,14 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { AutosaveGlobal } from './collections/AutosaveGlobal.js'
 import { Menu } from './collections/Menu.js'
 import { MenuItems } from './collections/MenuItems.js'
+import { Relationships } from './collections/Relationships.js'
 import { Tenants } from './collections/Tenants.js'
 import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
 import { autosaveGlobalSlug, menuItemsSlug, menuSlug } from './shared.js'
 
 export default buildConfigWithDefaults({
-  collections: [Tenants, Users, MenuItems, Menu, AutosaveGlobal],
+  collections: [Tenants, Users, MenuItems, Menu, AutosaveGlobal, Relationships],
   admin: {
     autoLogin: false,
     importMap: {
@@ -48,6 +49,8 @@ export default buildConfigWithDefaults({
         [autosaveGlobalSlug]: {
           isGlobal: true,
         },
+
+        ['relationships']: {},
       },
       i18n: {
         translations: {
