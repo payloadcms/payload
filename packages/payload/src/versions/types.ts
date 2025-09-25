@@ -123,6 +123,7 @@ export type TypeWithVersion<T> = {
   createdAt: string
   id: string
   localeStatus: Record<string, 'draft' | 'published'>
+  localeUpdatedAt?: Record<string, string>
   parent: number | string
   publishedLocale?: string
   snapshot?: boolean

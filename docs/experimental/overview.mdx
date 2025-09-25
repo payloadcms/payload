@@ -19,6 +19,7 @@ const config = buildConfig({
   // ...
   experimental: {
     localizeStatus: true, // highlight-line
+    localizeUpdatedAt: true, // highlight-line
   },
 })
 ```
@@ -27,9 +28,10 @@ const config = buildConfig({
 
 The following options are available:
 
-| Option               | Description                                                                                                                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`localizeStatus`** | **Boolean.** When `true`, shows document status per locale in the admin panel instead of always showing the latest overall status. Opt-in for backwards compatibility. Defaults to `false`. |
+| Option                  | Description                                                                                                                                                                                   |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`localizeStatus`**    | **Boolean.** When `true`, shows document status per locale in the admin panel instead of always showing the latest overall status. Opt-in for backwards compatibility. Defaults to `false`.   |
+| **`localizeUpdatedAt`** | **Boolean.** When `true`, shows `updatedAt` timestamp per locale in the admin panel instead of showing the latest overall timestamp. Opt-in for backwards compatibility. Defaults to `false`. |
 
 This list may change without notice.
 
