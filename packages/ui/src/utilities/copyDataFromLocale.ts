@@ -1,5 +1,6 @@
 import ObjectIdImport from 'bson-objectid'
 import {
+  canAccessAdmin,
   type CollectionSlug,
   type Data,
   type Field,
@@ -11,8 +12,7 @@ import {
 } from 'payload'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type CopyDataFromLocaleArgs = {
   collectionSlug?: CollectionSlug
@@ -246,26 +246,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     toLocale,
   } = args
 
-  const incomingUserSlug = user?.collection
-
-  const adminUserSlug = payload.config.admin.user
-
-  // If we have a user slug, test it against the functions
-  if (incomingUserSlug) {
-    const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
-
-    // Run the admin access function from the config if it exists
-    if (adminAccessFunction) {
-      const canAccessAdmin = await adminAccessFunction({ req: args.req })
-
-      if (!canAccessAdmin) {
-        throw new Error('Unauthorized')
-      }
-      // Match the user collection to the global admin config
-    } else if (adminUserSlug !== incomingUserSlug) {
-      throw new Error('Unauthorized')
-    }
-  }
+  await canAccessAdmin({ req })
 
   const [fromLocaleData, toLocaleData] = await Promise.allSettled([
     globalSlug

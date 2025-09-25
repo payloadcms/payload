@@ -3,18 +3,17 @@ import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import { sortColumn, toggleColumn } from 'helpers/e2e/columns/index.js'
+import { addListFilter } from 'helpers/e2e/filters/index.js'
 import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
-import { addGroupBy, clearGroupBy, closeGroupBy, openGroupBy } from 'helpers/e2e/groupBy.js'
+import { addGroupBy, clearGroupBy, closeGroupBy, openGroupBy } from 'helpers/e2e/groupBy/index.js'
 import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { sortColumn } from 'helpers/e2e/sortColumn.js'
-import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Config } from './payload-types.js'
+import type { Config, Post } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -222,6 +221,95 @@ test.describe('Group By', () => {
     await expect(groupByContainer.locator('#field-direction input')).toBeDisabled()
     await expect(page.locator('.table-wrap')).toHaveCount(1)
     await expect(page.locator('.group-by-header')).toHaveCount(0)
+  })
+
+  test('should group by relationships even when their values are null', async () => {
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'My Post',
+        category: null,
+      },
+    })
+
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by date fields even when their values are null', async () => {
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'My Post',
+        date: null,
+      },
+    })
+
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Date', fieldPath: 'date' })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(1)
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by boolean values', async () => {
+    await Promise.all([
+      await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'Null Post',
+          checkbox: null,
+        },
+      }),
+      await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'True Post',
+          checkbox: true,
+        },
+      }),
+      await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'False Post',
+          checkbox: false,
+        },
+      }),
+    ])
+
+    await page.goto(url.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Checkbox',
+      fieldPath: 'checkbox',
+    })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+
+    await expect(page.locator('.group-by-header')).toHaveCount(3)
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('True') }),
+    ).toBeVisible()
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('False') }),
+    ).toBeVisible()
   })
 
   test('should sort the group-by field globally', async () => {
@@ -604,4 +692,192 @@ test.describe('Group By', () => {
       }),
     ).toHaveCount(0)
   })
+
+  test('should group by monomorphic has one relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Mono Has One Relationship',
+      fieldPath: 'MonoHasOneRelationship',
+    })
+
+    // Should show populated values first, then "No value"
+    await expect(page.locator('.table-wrap')).toHaveCount(2)
+    await expect(page.locator('.group-by-header')).toHaveCount(2)
+
+    // Check that Category 1 appears as a group
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    // Check that "No value" appears last
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by monomorphic has many relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Mono Has Many Relationship',
+      fieldPath: 'MonoHasManyRelationship',
+    })
+
+    // Should flatten hasMany arrays - each category gets its own group
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+    await expect(page.locator('.group-by-header')).toHaveCount(3)
+
+    // Both categories should appear as separate groups
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
+    ).toBeVisible()
+
+    // "No value" should appear last
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by polymorphic has one relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Poly Has One Relationship',
+      fieldPath: 'PolyHasOneRelationship',
+    })
+
+    // Should show groups for both collection types plus "No value"
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+    await expect(page.locator('.group-by-header')).toHaveCount(3)
+
+    // Check for Category 1 group
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    // Check for Post group (should display the post's title as useAsTitle)
+    await expect(page.locator('.group-by-header__heading', { hasText: 'Find me' })).toBeVisible()
+
+    // "No value" should appear last
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by polymorphic has many relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Poly Has Many Relationship',
+      fieldPath: 'PolyHasManyRelationship',
+    })
+
+    // Should flatten polymorphic hasMany arrays - each relationship gets its own group
+    // Expecting: Category 1, Category 2, Post, and "No value" = 4 groups
+    await expect(page.locator('.table-wrap')).toHaveCount(4)
+    await expect(page.locator('.group-by-header')).toHaveCount(4)
+
+    // Check for both category groups
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
+    ).toBeVisible()
+
+    // Check for post group
+    await expect(page.locator('.group-by-header__heading', { hasText: 'Find me' })).toBeVisible()
+
+    // "No value" should appear last (documents without any relationships)
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test.describe('Trash', () => {
+    test('should show trashed docs in trash view when group-by is active', async () => {
+      await page.goto(url.list)
+
+      // Enable group-by on Category
+      await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+      await expect(page.locator('.table-wrap')).toHaveCount(2) // We expect 2 groups initially
+
+      // Trash the first document in the first group
+      const firstTable = page.locator('.table-wrap').first()
+      await firstTable.locator('.row-1 .cell-_select input').check()
+      await firstTable.locator('.list-selection__button[aria-label="Delete"]').click()
+
+      const firstGroupID = await firstTable
+        .locator('.group-by-header__heading')
+        .getAttribute('data-group-id')
+
+      const modalId = `[id^="${firstGroupID}-confirm-delete-many-docs"]`
+      await expect(page.locator(modalId)).toBeVisible()
+
+      // Confirm trash (skip permanent delete)
+      await page.locator(`${modalId} #confirm-action`).click()
+      await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+        '1 Post moved to trash.',
+      )
+
+      // Go to the trash view
+      await page.locator('#trash-view-pill').click()
+      await expect(page).toHaveURL(/\/posts\/trash(\?|$)/)
+
+      // Re-enable group-by on Category in trash view
+      await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+      await expect(page.locator('.table-wrap')).toHaveCount(1) // Should only have Category 1 (or the trashed doc's category)
+
+      // Ensure the trashed doc is visible
+      await expect(
+        page.locator('.table-wrap tbody tr td.cell-title', { hasText: 'Find me' }),
+      ).toBeVisible()
+    })
+
+    test('should properly clear group-by in trash view', async () => {
+      await createTrashedPostDoc({ title: 'Trashed Post 1' })
+      await page.goto(url.trash)
+
+      // Enable group-by on Title
+      await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
+      await expect(page.locator('.table-wrap')).toHaveCount(1)
+      await expect(page.locator('.group-by-header')).toHaveText('Trashed Post 1')
+
+      await page.locator('#group-by--reset').click()
+      await expect(page.locator('.group-by-header')).toBeHidden()
+    })
+
+    test('should properly navigate to trashed doc edit view from group-by in trash view', async () => {
+      await createTrashedPostDoc({ title: 'Trashed Post 1' })
+      await page.goto(url.trash)
+
+      // Enable group-by on Title
+      await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
+      await expect(page.locator('.table-wrap')).toHaveCount(1)
+      await expect(page.locator('.group-by-header')).toHaveText('Trashed Post 1')
+
+      await page.locator('.table-wrap tbody tr td.cell-title a').click()
+      await expect(page).toHaveURL(/\/posts\/trash\/\d+/)
+    })
+  })
+
+  async function createTrashedPostDoc(data: Partial<Post>): Promise<Post> {
+    return payload.create({
+      collection: postsSlug,
+      data: {
+        ...data,
+        deletedAt: new Date().toISOString(), // Set the post as trashed
+      },
+    }) as unknown as Promise<Post>
+  }
 })

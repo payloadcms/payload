@@ -47,6 +47,7 @@
       display: flex;
       gap: var(--base);
       margin-left: auto;
+      white-space: nowrap;
     }
 
     @include mid-break {

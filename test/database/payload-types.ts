@@ -67,6 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    noTimeStamps: NoTimeStamp;
     categories: Category;
     simple: Simple;
     'categories-custom-id': CategoriesCustomId;
@@ -94,6 +95,7 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    noTimeStamps: NoTimeStampsSelect<false> | NoTimeStampsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     simple: SimpleSelect<false> | SimpleSelect<true>;
     'categories-custom-id': CategoriesCustomIdSelect<false> | CategoriesCustomIdSelect<true>;
@@ -165,32 +167,24 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "noTimeStamps".
+ */
+export interface NoTimeStamp {
+  id: string;
+  title?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
   id: string;
   title?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "simple".
- */
-export interface Simple {
-  id: string;
-  text?: string | null;
-  number?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories-custom-id".
- */
-export interface CategoriesCustomId {
-  id: number;
+  hideout?: {
+    camera1?: {
+      time1Image?: (string | null) | Post;
+    };
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -203,6 +197,17 @@ export interface Post {
   id: string;
   title: string;
   category?: (string | null) | Category;
+  categories?: (string | Category)[] | null;
+  categoryPoly?: {
+    relationTo: 'categories';
+    value: string | Category;
+  } | null;
+  categoryPolyMany?:
+    | {
+        relationTo: 'categories';
+        value: string | Category;
+      }[]
+    | null;
   categoryCustomID?: (number | null) | CategoriesCustomId;
   localized?: string | null;
   text?: string | null;
@@ -234,6 +239,13 @@ export interface Post {
   arrayWithIDs?:
     | {
         text?: string | null;
+        textLocalized?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithIDsLocalized?:
+    | {
+        text?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -251,6 +263,27 @@ export interface Post {
   tab?: {
     text?: string | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-custom-id".
+ */
+export interface CategoriesCustomId {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple".
+ */
+export interface Simple {
+  id: string;
+  text?: string | null;
+  number?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -304,7 +337,7 @@ export interface RelationA {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -330,7 +363,7 @@ export interface RelationB {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -427,6 +460,8 @@ export interface Place {
 export interface VirtualRelation {
   id: string;
   postTitle?: string | null;
+  postsTitles?: string[] | null;
+  postCategoriesTitles?: string[] | null;
   postTitleHidden?: string | null;
   postCategoryTitle?: string | null;
   postCategoryID?:
@@ -450,6 +485,7 @@ export interface VirtualRelation {
     | null;
   postLocalized?: string | null;
   post?: (string | null) | Post;
+  posts?: (string | Post)[] | null;
   customID?: (string | null) | CustomId;
   customIDValue?: string | null;
   updatedAt: string;
@@ -618,6 +654,10 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'noTimeStamps';
+        value: string | NoTimeStamp;
+      } | null)
+    | ({
         relationTo: 'categories';
         value: string | Category;
       } | null)
@@ -745,10 +785,26 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "noTimeStamps_select".
+ */
+export interface NoTimeStampsSelect<T extends boolean = true> {
+  title?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
+  hideout?:
+    | T
+    | {
+        camera1?:
+          | T
+          | {
+              time1Image?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -780,6 +836,9 @@ export interface CategoriesCustomIdSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  categories?: T;
+  categoryPoly?: T;
+  categoryPolyMany?: T;
   categoryCustomID?: T;
   localized?: T;
   text?: T;
@@ -821,6 +880,13 @@ export interface PostsSelect<T extends boolean = true> {
   hasTransaction?: T;
   throwAfterChange?: T;
   arrayWithIDs?:
+    | T
+    | {
+        text?: T;
+        textLocalized?: T;
+        id?: T;
+      };
+  arrayWithIDsLocalized?:
     | T
     | {
         text?: T;
@@ -995,6 +1061,8 @@ export interface PlacesSelect<T extends boolean = true> {
  */
 export interface VirtualRelationsSelect<T extends boolean = true> {
   postTitle?: T;
+  postsTitles?: T;
+  postCategoriesTitles?: T;
   postTitleHidden?: T;
   postCategoryTitle?: T;
   postCategoryID?: T;
@@ -1002,6 +1070,7 @@ export interface VirtualRelationsSelect<T extends boolean = true> {
   postID?: T;
   postLocalized?: T;
   post?: T;
+  posts?: T;
   customID?: T;
   customIDValue?: T;
   updatedAt?: T;

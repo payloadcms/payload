@@ -6,7 +6,6 @@ import type {
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewComponent,
-  LivePreviewConfig,
   PayloadComponent,
   RenderDocumentVersionsProperties,
 } from 'payload'
@@ -18,6 +17,7 @@ import {
   LivePreviewProvider,
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { handleLivePreview } from '@payloadcms/ui/rsc'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
@@ -110,17 +110,18 @@ export const renderDocument = async ({
 
   // Fetch the doc required for the view
   let doc =
-    initialData ||
-    (await getDocumentData({
-      id: idFromArgs,
-      collectionSlug,
-      globalSlug,
-      locale,
-      payload,
-      req,
-      segments,
-      user,
-    }))
+    !idFromArgs && !globalSlug
+      ? initialData || null
+      : await getDocumentData({
+          id: idFromArgs,
+          collectionSlug,
+          globalSlug,
+          locale,
+          payload,
+          req,
+          segments,
+          user,
+        })
 
   if (isEditing && !doc) {
     // If it's a collection document that doesn't exist, redirect to collection list
@@ -207,7 +208,7 @@ export const renderDocument = async ({
       globalSlug,
       locale: locale?.code,
       operation,
-      readOnly: isTrashedDoc,
+      readOnly: isTrashedDoc || isLocked,
       renderAllFields: true,
       req,
       schemaPath: collectionSlug || globalSlug,
@@ -332,6 +333,7 @@ export const renderDocument = async ({
   }
 
   const documentSlots = renderDocumentSlots({
+    id,
     collectionConfig,
     globalConfig,
     hasSavePermission,
@@ -346,36 +348,14 @@ export const renderDocument = async ({
     viewType,
   }
 
-  const isLivePreviewEnabled = Boolean(
-    config.admin?.livePreview?.collections?.includes(collectionSlug) ||
-      config.admin?.livePreview?.globals?.includes(globalSlug) ||
-      collectionConfig?.admin?.livePreview ||
-      globalConfig?.admin?.livePreview,
-  )
-
-  const livePreviewConfig: LivePreviewConfig = {
-    ...(isLivePreviewEnabled ? config.admin.livePreview : {}),
-    ...(collectionConfig?.admin?.livePreview || {}),
-    ...(globalConfig?.admin?.livePreview || {}),
-  }
-
-  const livePreviewURL =
-    operation !== 'create'
-      ? typeof livePreviewConfig?.url === 'function'
-        ? await livePreviewConfig.url({
-            collectionConfig,
-            data: doc,
-            globalConfig,
-            locale,
-            req,
-            /**
-             * @deprecated
-             * Use `req.payload` instead. This will be removed in the next major version.
-             */
-            payload: initPageResult.req.payload,
-          })
-        : livePreviewConfig?.url
-      : ''
+  const { isLivePreviewEnabled, livePreviewConfig, livePreviewURL } = await handleLivePreview({
+    collectionSlug,
+    config,
+    data: doc,
+    globalSlug,
+    operation,
+    req,
+  })
 
   return {
     data: doc,
@@ -410,15 +390,15 @@ export const renderDocument = async ({
           breakpoints={livePreviewConfig?.breakpoints}
           isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
           isLivePreviewing={entityPreferences?.value?.editViewType === 'live-preview'}
+          typeofLivePreviewURL={typeof livePreviewConfig?.url as 'function' | 'string' | undefined}
           url={livePreviewURL}
         >
           {showHeader && !drawerSlug && (
             <DocumentHeader
               collectionConfig={collectionConfig}
               globalConfig={globalConfig}
-              i18n={i18n}
-              payload={payload}
               permissions={permissions}
+              req={req}
             />
           )}
           <HydrateAuthProvider permissions={permissions} />

@@ -4,9 +4,7 @@ import {
   _internal_resetJobSystemGlobals,
   type JobTaskStatus,
   type Payload,
-  type SanitizedConfig,
 } from 'payload'
-import { migrateCLI } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
@@ -17,15 +15,15 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { clearAndSeedEverything } from './seed.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
-let payload: Payload
-let restClient: NextRESTClient
-let token: string
-
 const { email, password } = devUser
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('Queues', () => {
+describe('Queues - Payload', () => {
+  let payload: Payload
+  let restClient: NextRESTClient
+  let token: string
+
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(dirname))
@@ -1056,7 +1054,7 @@ describe('Queues', () => {
   it('ensure payload.jobs.runByID works and only runs the specified job', async () => {
     payload.config.jobs.deleteJobOnComplete = false
 
-    let lastJobID: null | string = null
+    let lastJobID: null | number | string = null
     for (let i = 0; i < 3; i++) {
       const job = await payload.jobs.queue({
         task: 'CreateSimple',
@@ -1100,7 +1098,7 @@ describe('Queues', () => {
   it('ensure where query for id in payload.jobs.run works and only runs the specified job', async () => {
     payload.config.jobs.deleteJobOnComplete = false
 
-    let lastJobID: null | string = null
+    let lastJobID: null | number | string = null
     for (let i = 0; i < 3; i++) {
       const job = await payload.jobs.queue({
         task: 'CreateSimple',
@@ -1424,6 +1422,8 @@ describe('Queues', () => {
       id: job.id,
     })
 
+    // error can be defined while hasError is true, as hasError: true is only set if the job cannot retry anymore.
+    expect(Boolean(jobAfterRun.error)).toBe(false)
     expect(jobAfterRun.hasError).toBe(false)
     expect(jobAfterRun.log?.length).toBe(amount)
 
@@ -1442,6 +1442,30 @@ describe('Queues', () => {
       expect(logEntry).toBeDefined()
       expect((logEntry?.output as any)?.simpleID).toBe(simpleDoc?.id)
     }
+  })
+
+  it('can reliably run workflows with parallel tasks that complete immediately', async () => {
+    const amount = 20
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'fastParallelTask',
+      input: {
+        amount,
+      },
+    })
+
+    await payload.jobs.run({ silent: false })
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // error can be defined while hasError is true, as hasError: true is only set if the job cannot retry anymore.
+    expect(Boolean(jobAfterRun.error)).toBe(false)
+    expect(jobAfterRun.hasError).toBe(false)
+    expect(jobAfterRun.log?.length).toBe(amount)
   })
 
   it('can create and autorun jobs', async () => {
@@ -1465,26 +1489,5 @@ describe('Queues', () => {
 
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples?.docs?.[0]?.title).toBe('hello!')
-  })
-})
-
-describe('Queues - CLI', () => {
-  let config: SanitizedConfig
-  beforeAll(async () => {
-    ;({ config } = await initPayloadInt(dirname, undefined, false))
-  })
-  it('can run migrate CLI without jobs attempting to run', async () => {
-    await migrateCLI({
-      config,
-      parsedArgs: {
-        _: ['migrate'],
-      },
-    })
-
-    // Wait 3 seconds to let potential autorun crons trigger
-    await new Promise((resolve) => setTimeout(resolve, 3000))
-
-    // Expect no errors. Previously, this would throw an "error: relation "payload_jobs" does not exist" error
-    expect(true).toBe(true)
   })
 })

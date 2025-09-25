@@ -7,6 +7,7 @@ import type {
 } from 'payload'
 
 import { sanitizeID } from '@payloadcms/ui/shared'
+import { extractID } from 'payload/shared'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
@@ -42,10 +43,28 @@ export const getIsLocked = async ({
 
   const where: Where = {}
 
+  const lockDurationDefault = 300 // Default 5 minutes in seconds
+  const lockDuration =
+    typeof entityConfig.lockDocuments === 'object'
+      ? entityConfig.lockDocuments.duration
+      : lockDurationDefault
+  const lockDurationInMilliseconds = lockDuration * 1000
+
+  const now = new Date().getTime()
+
   if (globalConfig) {
-    where.globalSlug = {
-      equals: globalConfig.slug,
-    }
+    where.and = [
+      {
+        globalSlug: {
+          equals: globalConfig.slug,
+        },
+      },
+      {
+        updatedAt: {
+          greater_than: new Date(now - lockDurationInMilliseconds),
+        },
+      },
+    ]
   } else {
     where.and = [
       {
@@ -56,6 +75,11 @@ export const getIsLocked = async ({
       {
         'document.relationTo': {
           equals: collectionConfig.slug,
+        },
+      },
+      {
+        updatedAt: {
+          greater_than: new Date(now - lockDurationInMilliseconds),
         },
       },
     ]
@@ -70,12 +94,12 @@ export const getIsLocked = async ({
   })
 
   if (docs.length > 0) {
-    const newEditor = docs[0].user?.value
+    const currentEditor = docs[0].user?.value
     const lastUpdateTime = new Date(docs[0].updatedAt).getTime()
 
-    if (newEditor?.id !== req.user.id) {
+    if (extractID(currentEditor) !== req.user.id) {
       return {
-        currentEditor: newEditor,
+        currentEditor,
         isLocked: true,
         lastUpdateTime,
       }

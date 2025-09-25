@@ -2,26 +2,24 @@ import type { BrowserContext, Page } from '@playwright/test'
 import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
-import { devUser } from 'credentials.js'
-import { openDocControls } from 'helpers/e2e/openDocControls.js'
-import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
-import { email, wait } from 'payload/shared'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
+import { devUser } from '../credentials.js'
 import {
-  closeNav,
   ensureCompilationIsDone,
   exactText,
-  getRoutes,
   initPageConsoleErrorCatch,
-  login,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { login } from '../helpers/e2e/auth/login.js'
+import { openDocControls } from '../helpers/e2e/openDocControls.js'
+import { closeNav, openNav } from '../helpers/e2e/toggleNav.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -71,7 +69,6 @@ describe('Access Control', () => {
   let disabledFields: AdminUrlUtil
   let serverURL: string
   let context: BrowserContext
-  let logoutURL: string
   let authFields: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -98,17 +95,6 @@ describe('Access Control', () => {
     await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
 
     await login({ page, serverURL })
-
-    await ensureCompilationIsDone({ page, serverURL })
-
-    const {
-      admin: {
-        routes: { logout: logoutRoute },
-      },
-      routes: { admin: adminRoute },
-    } = getRoutes({})
-
-    logoutURL = `${serverURL}${adminRoute}${logoutRoute}`
   })
 
   describe('fields', () => {
@@ -515,6 +501,13 @@ describe('Access Control', () => {
 
     describe('global', () => {
       test('should restrict update access based on document field', async () => {
+        await payload.updateGlobal({
+          slug: userRestrictedGlobalSlug,
+          data: {
+            name: 'dev@payloadcms.com',
+          },
+        })
+
         await page.goto(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
         await expect(page.locator('#field-name')).toBeVisible()
         await expect(page.locator('#field-name')).toHaveValue(devUser.email)

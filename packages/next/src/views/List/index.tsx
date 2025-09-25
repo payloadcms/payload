@@ -13,9 +13,10 @@ import type {
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
+import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
 import {
+  appendUploadSelectFields,
   combineWhereConstraints,
   formatAdminURL,
   isNumber,
@@ -29,6 +30,7 @@ import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
+import { transformColumnsToSelect } from './transformColumnsToSelect.js'
 
 type RenderListViewArgs = {
   customCellProps?: Record<string, any>
@@ -41,6 +43,10 @@ type RenderListViewArgs = {
   query: ListQuery
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
+  /**
+   * @experimental This prop is subject to change in future releases.
+   */
+  trash?: boolean
 } & AdminViewServerProps
 
 /**
@@ -67,6 +73,7 @@ export const renderListView = async (
     params,
     query: queryFromArgs,
     searchParams,
+    trash,
     viewType,
   } = args
 
@@ -134,16 +141,14 @@ export const renderListView = async (
       throw new Error('not-found')
     }
 
-    let baseListFilter = undefined
-
-    if (typeof collectionConfig.admin?.baseListFilter === 'function') {
-      baseListFilter = await collectionConfig.admin.baseListFilter({
-        limit: query.limit,
-        page: query.page,
-        req,
-        sort: query.sort,
-      })
-    }
+    const baseFilterConstraint = await (
+      collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
+    )?.({
+      limit: query.limit,
+      page: query.page,
+      req,
+      sort: query.sort,
+    })
 
     let queryPreset: QueryPreset | undefined
     let queryPresetPermissions: SanitizedCollectionPermission | undefined
@@ -151,10 +156,10 @@ export const renderListView = async (
     let whereWithMergedSearch = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
-      where: combineWhereConstraints([query?.where, baseListFilter]),
+      where: combineWhereConstraints([query?.where, baseFilterConstraint]),
     })
 
-    if (query?.trash === true) {
+    if (trash === true) {
       whereWithMergedSearch = {
         and: [
           whereWithMergedSearch,
@@ -190,56 +195,105 @@ export const renderListView = async (
       }
     }
 
-    let data: PaginatedDocs | undefined
     let Table: React.ReactNode | React.ReactNode[] = null
     let columnState: Column[] = []
+    let data: PaginatedDocs = {
+      // no results default
+      docs: [],
+      hasNextPage: false,
+      hasPrevPage: false,
+      limit: query.limit,
+      nextPage: null,
+      page: 1,
+      pagingCounter: 0,
+      prevPage: null,
+      totalDocs: 0,
+      totalPages: 0,
+    }
 
-    if (collectionConfig.admin.groupBy && query.groupBy) {
-      ;({ columnState, data, Table } = await handleGroupBy({
-        clientConfig,
-        collectionConfig,
-        collectionSlug,
-        columns: collectionPreferences?.columns,
-        customCellProps,
-        drawerSlug,
-        enableRowSelections,
-        query,
-        req,
-        user,
-        where: whereWithMergedSearch,
-      }))
-    } else {
-      data = await req.payload.find({
-        collection: collectionSlug,
-        depth: 0,
-        draft: true,
-        fallbackLocale: false,
-        includeLockStatus: true,
-        limit: query?.limit ? Number(query.limit) : undefined,
-        locale: req.locale,
-        overrideAccess: false,
-        page: query?.page ? Number(query.page) : undefined,
-        req,
-        sort: query?.sort,
-        trash: query?.trash === true,
-        user,
-        where: whereWithMergedSearch,
-      })
-      ;({ columnState, Table } = renderTable({
-        clientCollectionConfig: clientConfig.collections.find((c) => c.slug === collectionSlug),
-        collectionConfig,
-        columns: collectionPreferences?.columns,
-        customCellProps,
-        data,
-        drawerSlug,
-        enableRowSelections,
-        i18n: req.i18n,
-        orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
-        payload: req.payload,
-        query,
-        useAsTitle: collectionConfig.admin.useAsTitle,
-        viewType,
-      }))
+    const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
+
+    const columns = getColumns({
+      clientConfig,
+      collectionConfig: clientCollectionConfig,
+      collectionSlug,
+      columns: collectionPreferences?.columns,
+      i18n,
+    })
+
+    const select = collectionConfig.admin.enableListViewSelectAPI
+      ? transformColumnsToSelect(columns)
+      : undefined
+
+    /** Force select image fields for list view thumbnails */
+    appendUploadSelectFields({
+      collectionConfig,
+      select,
+    })
+
+    try {
+      if (collectionConfig.admin.groupBy && query.groupBy) {
+        ;({ columnState, data, Table } = await handleGroupBy({
+          clientCollectionConfig,
+          clientConfig,
+          collectionConfig,
+          collectionSlug,
+          columns,
+          customCellProps,
+          drawerSlug,
+          enableRowSelections,
+          query,
+          req,
+          select,
+          trash,
+          user,
+          viewType,
+          where: whereWithMergedSearch,
+        }))
+      } else {
+        data = await req.payload.find({
+          collection: collectionSlug,
+          depth: 0,
+          draft: true,
+          fallbackLocale: false,
+          includeLockStatus: true,
+          limit: query?.limit ? Number(query.limit) : undefined,
+          locale: req.locale,
+          overrideAccess: false,
+          page: query?.page ? Number(query.page) : undefined,
+          req,
+          select,
+          sort: query?.sort,
+          trash,
+          user,
+          where: whereWithMergedSearch,
+        })
+        ;({ columnState, Table } = renderTable({
+          clientCollectionConfig,
+          collectionConfig,
+          columns,
+          customCellProps,
+          data,
+          drawerSlug,
+          enableRowSelections,
+          i18n: req.i18n,
+          orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
+          payload: req.payload,
+          query,
+          req,
+          useAsTitle: collectionConfig.admin.useAsTitle,
+          viewType,
+        }))
+      }
+    } catch (err) {
+      if (err.name !== 'QueryError') {
+        // QueryErrors are expected when a user filters by a field they do not have access to
+        req.payload.logger.error({
+          err,
+          msg: `There was an error fetching the list view data for collection ${collectionSlug}`,
+        })
+        throw err
+      }
     }
 
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)

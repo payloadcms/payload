@@ -91,6 +91,22 @@ export const Diff: CollectionConfig = {
                       name: 'textInUnnamedTab2InBlock',
                       type: 'text',
                     },
+                    {
+                      name: 'textInUnnamedTab2InBlockAccessFalse',
+                      type: 'text',
+                      access: {
+                        read: () => false,
+                      },
+                    },
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          name: 'textInRowInUnnamedTab2InBlock',
+                          type: 'text',
+                        },
+                      ],
+                    },
                   ],
                 },
               ],
@@ -131,6 +147,25 @@ export const Diff: CollectionConfig = {
       fields: [
         {
           name: 'textInGroup',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      type: 'group',
+      fields: [
+        {
+          name: 'textInUnnamedGroup',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: 'Unnamed Labeled Group',
+      fields: [
+        {
+          name: 'textInUnnamedLabeledGroup',
           type: 'text',
         },
       ],
@@ -212,6 +247,13 @@ export const Diff: CollectionConfig = {
       type: 'row',
     },
     {
+      name: 'textCannotRead',
+      type: 'text',
+      access: {
+        read: () => false,
+      },
+    },
+    {
       name: 'select',
       type: 'select',
       options: [
@@ -235,6 +277,20 @@ export const Diff: CollectionConfig = {
               name: 'textInNamedTab1',
               type: 'text',
             },
+            {
+              name: 'textInNamedTab1ReadFalse',
+              type: 'text',
+              access: {
+                read: () => false,
+              },
+            },
+            {
+              name: 'textInNamedTab1UpdateFalse',
+              type: 'text',
+              access: {
+                update: () => false,
+              },
+            },
           ],
         },
         {
@@ -243,6 +299,22 @@ export const Diff: CollectionConfig = {
             {
               name: 'textInUnnamedTab2',
               type: 'text',
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'textInRowInUnnamedTab',
+                  type: 'text',
+                },
+                {
+                  name: 'textInRowInUnnamedTabUpdateFalse',
+                  type: 'text',
+                  access: {
+                    update: () => false,
+                  },
+                },
+              ],
             },
           ],
         },

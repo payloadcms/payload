@@ -184,7 +184,6 @@ const RichTextComponent: React.FC<
           />
           {AfterInput}
         </ErrorBoundary>
-        {Description}
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}

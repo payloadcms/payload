@@ -58,6 +58,8 @@ export const updateMany: UpdateMany = async function updateMany(
       select,
     }),
     session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   let query = await buildQuery({

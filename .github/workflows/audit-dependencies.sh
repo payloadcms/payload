@@ -13,7 +13,8 @@ echo "${audit_json}" | jq --arg severity "${severity}" '
     {
       package: .value.module_name,
       vulnerable: .value.vulnerable_versions,
-      fixed_in: .value.patched_versions
+      fixed_in: .value.patched_versions,
+      findings: .value.findings
     }
   )
 ' >$output_file
@@ -23,7 +24,11 @@ audit_length=$(jq 'length' $output_file)
 if [[ "${audit_length}" -gt "0" ]]; then
   echo "Actionable vulnerabilities found in the following packages:"
   jq -r '.[] | "\u001b[1m\(.package)\u001b[0m vulnerable in \u001b[31m\(.vulnerable)\u001b[0m fixed in \u001b[32m\(.fixed_in)\u001b[0m"' $output_file | while read -r line; do echo -e "$line"; done
+  echo ""
   echo "Output written to ${output_file}"
+  cat $output_file
+  echo ""
+  echo "This script can be rerun with: './.github/workflows/audit-dependencies.sh $severity'"
   exit 1
 else
   echo "No actionable vulnerabilities"

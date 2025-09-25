@@ -45,11 +45,18 @@ export const handleSchedulesJobsEndpoint: Endpoint = {
       )
     }
 
-    const { queue } = req.query as {
+    const { allQueues, queue } = req.query as {
+      allQueues?: 'false' | 'true'
       queue?: string
     }
 
-    const { errored, queued, skipped } = await handleSchedules({ queue, req })
+    const runAllQueues = allQueues && !(typeof allQueues === 'string' && allQueues === 'false')
+
+    const { errored, queued, skipped } = await handleSchedules({
+      allQueues: runAllQueues,
+      queue,
+      req,
+    })
 
     return Response.json(
       {

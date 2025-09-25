@@ -1,13 +1,14 @@
 /* eslint-disable react-compiler/react-compiler -- TODO: fix */
 'use client'
 
-import type { ClientUser, DocumentViewClientProps, FormState } from 'payload'
+import type { ClientUser, DocumentViewClientProps } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
+import type { FormOnSuccess } from '../../forms/Form/types.js'
 import type { LockedState } from '../../utilities/buildFormState.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
@@ -27,6 +28,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
+import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
@@ -41,6 +43,11 @@ import { SetDocumentTitle } from './SetDocumentTitle/index.js'
 import './index.scss'
 
 const baseClass = 'collection-edit'
+
+export type OnSaveContext = {
+  getDocPermissions?: boolean
+  incrementVersionCount?: boolean
+}
 
 // This component receives props only on _pages_
 // When rendered within a drawer, props are empty
@@ -65,6 +72,7 @@ export function DefaultEditView({
     BeforeFields,
     collectionSlug,
     currentEditor,
+    data,
     disableActions,
     disableCreate,
     disableLeaveWithoutSaving,
@@ -80,18 +88,19 @@ export function DefaultEditView({
     initialState,
     isEditing,
     isInitializing,
+    isLocked,
     isTrashed,
     lastUpdateTime,
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
     redirectAfterRestore,
-    savedDocumentData,
     setCurrentEditor,
+    setData,
     setDocumentIsLocked,
+    setLastUpdateTime,
     unlockDocument,
     updateDocumentEditor,
-    updateSavedDocumentData,
   } = useDocumentInfo()
 
   const {
@@ -127,7 +136,14 @@ export function DefaultEditView({
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
-  const { isLivePreviewEnabled, isLivePreviewing, previewWindowType } = useLivePreviewContext()
+  const { clearRouteCache } = useRouteCache()
+  const {
+    isLivePreviewEnabled,
+    isLivePreviewing,
+    previewWindowType,
+    setURL: setLivePreviewURL,
+    typeofLivePreviewURL,
+  } = useLivePreviewContext()
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)
@@ -237,7 +253,7 @@ export function DefaultEditView({
             setDocumentIsLocked(false)
             setCurrentEditor(null)
           } catch (err) {
-            console.error('Failed to unlock before leave', err)
+            console.error('Failed to unlock before leave', err) // eslint-disable-line no-console
           }
         }
       }
@@ -255,17 +271,15 @@ export function DefaultEditView({
     user?.id,
   ])
 
-  const onSave = useCallback(
-    async (json): Promise<FormState> => {
+  const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
+    async (json, ctx) => {
+      const { context, formState } = ctx || {}
+
       const controller = handleAbortRef(abortOnSaveRef)
 
       const document = json?.doc || json?.result
 
-      reportUpdate({
-        id,
-        entitySlug,
-        updatedAt: document?.updatedAt || new Date().toISOString(),
-      })
+      const updatedAt = document?.updatedAt || new Date().toISOString()
 
       // If we're editing the doc of the logged-in user,
       // Refresh the cookie to get new permissions
@@ -273,18 +287,24 @@ export function DefaultEditView({
         void refreshCookieAsync()
       }
 
-      incrementVersionCount()
+      setLastUpdateTime(updatedAt)
 
-      if (typeof updateSavedDocumentData === 'function') {
-        void updateSavedDocumentData(document || {})
+      if (context?.incrementVersionCount !== false) {
+        incrementVersionCount()
+      }
+
+      if (typeof setData === 'function') {
+        void setData(document || {})
       }
 
       if (typeof onSaveFromContext === 'function') {
         const operation = id ? 'update' : 'create'
 
         void onSaveFromContext({
-          ...json,
+          ...(json as Record<string, unknown>),
+          context,
           operation,
+          // @ts-expect-error todo: this is not right, should be under `doc`?
           updatedAt:
             operation === 'update'
               ? new Date().toISOString()
@@ -304,20 +324,24 @@ export function DefaultEditView({
         resetUploadEdits()
       }
 
-      await getDocPermissions(json)
+      if (context?.getDocPermissions !== false) {
+        await getDocPermissions(json)
+      }
 
-      if ((id || globalSlug) && !autosaveEnabled) {
+      if (id || globalSlug) {
         const docPreferences = await getDocPreferences()
 
-        const { state } = await getFormState({
+        const { livePreviewURL, state } = await getFormState({
           id,
           collectionSlug,
           data: document,
           docPermissions,
           docPreferences,
+          formState,
           globalSlug,
           operation,
-          renderAllFields: true,
+          renderAllFields: false,
+          returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
           returnLockStatus: false,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
@@ -328,6 +352,16 @@ export function DefaultEditView({
         if (isLockingEnabled) {
           setDocumentIsLocked(false)
         }
+
+        if (isLivePreviewEnabled) {
+          setLivePreviewURL(livePreviewURL)
+        }
+
+        reportUpdate({
+          id,
+          entitySlug,
+          updatedAt,
+        })
 
         abortOnSaveRef.current = null
 
@@ -341,28 +375,31 @@ export function DefaultEditView({
       user,
       collectionSlug,
       userSlug,
-      incrementVersionCount,
-      updateSavedDocumentData,
+      setLastUpdateTime,
+      setData,
       onSaveFromContext,
-      redirectAfterCreate,
       isEditing,
       depth,
-      getDocPermissions,
+      redirectAfterCreate,
+      setLivePreviewURL,
       globalSlug,
-      autosaveEnabled,
       refreshCookieAsync,
+      incrementVersionCount,
       adminRoute,
       locale,
+      startRouteTransition,
       router,
       resetUploadEdits,
+      getDocPermissions,
       getDocPreferences,
       getFormState,
       docPermissions,
       operation,
+      isLivePreviewEnabled,
+      typeofLivePreviewURL,
       schemaPathSegments,
       isLockingEnabled,
       setDocumentIsLocked,
-      startRouteTransition,
     ],
   )
 
@@ -389,13 +426,11 @@ export function DefaultEditView({
         formState: prevFormState,
         globalSlug,
         operation,
-        skipValidation: !submitted,
-        // Performance optimization: Setting it to false ensure that only fields that have explicit requireRender set in the form state will be rendered (e.g. new array rows).
-        // We only want to render ALL fields on initial render, not in onChange.
         renderAllFields: false,
         returnLockStatus: isLockingEnabled,
         schemaPath: schemaPathSegments.join('.'),
         signal: controller.signal,
+        skipValidation: !submitted,
         updateLastEdited,
       })
 
@@ -414,17 +449,17 @@ export function DefaultEditView({
       return state
     },
     [
-      id,
-      collectionSlug,
+      editSessionStartTime,
+      isLockingEnabled,
       getDocPreferences,
       getFormState,
+      id,
+      collectionSlug,
+      docPermissions,
       globalSlug,
-      handleDocumentLocking,
-      isLockingEnabled,
       operation,
       schemaPathSegments,
-      docPermissions,
-      editSessionStartTime,
+      handleDocumentLocking,
     ],
   )
 
@@ -479,6 +514,7 @@ export function DefaultEditView({
           initialState={!isInitializing && initialState}
           isDocumentForm={true}
           isInitializing={isInitializing}
+          key={`${isLocked}`}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSuccess={onSave}
@@ -495,17 +531,18 @@ export function DefaultEditView({
                 setShowTakeOverModal(false)
               }}
               onTakeOver={() =>
-                handleTakeOver(
+                handleTakeOver({
                   id,
+                  clearRouteCache,
                   collectionSlug,
+                  documentLockStateRef: documentLockState,
                   globalSlug,
-                  user,
-                  false,
-                  updateDocumentEditor,
-                  setCurrentEditor,
-                  documentLockState,
                   isLockingEnabled,
-                )
+                  isWithinDoc: false,
+                  setCurrentEditor,
+                  updateDocumentEditor,
+                  user,
+                })
               }
               updatedAt={lastUpdateTime}
               user={currentEditor}
@@ -549,7 +586,7 @@ export function DefaultEditView({
               SaveButton,
               SaveDraftButton,
             }}
-            data={savedDocumentData}
+            data={data}
             disableActions={disableActions || isFolderCollection || isTrashed}
             disableCreate={disableCreate}
             EditMenuItems={EditMenuItems}
@@ -565,18 +602,19 @@ export function DefaultEditView({
             onRestore={onRestore}
             onSave={onSave}
             onTakeOver={() =>
-              handleTakeOver(
+              handleTakeOver({
                 id,
+                clearRouteCache,
                 collectionSlug,
+                documentLockStateRef: documentLockState,
                 globalSlug,
-                user,
-                true,
-                updateDocumentEditor,
-                setCurrentEditor,
-                documentLockState,
                 isLockingEnabled,
+                isWithinDoc: true,
+                setCurrentEditor,
                 setIsReadOnlyForIncomingUser,
-              )
+                updateDocumentEditor,
+                user,
+              })
             }
             permissions={docPermissions}
             readOnlyForIncomingUser={isReadOnlyForIncomingUser}
@@ -612,14 +650,14 @@ export function DefaultEditView({
                           className={`${baseClass}__auth`}
                           collectionSlug={collectionConfig.slug}
                           disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
-                          email={savedDocumentData?.email}
+                          email={data?.email}
                           loginWithUsername={auth?.loginWithUsername}
                           operation={operation}
                           readOnly={!hasSavePermission}
                           requirePassword={!id}
                           setValidateBeforeSubmit={setValidateBeforeSubmit}
                           useAPIKey={auth.useAPIKey}
-                          username={savedDocumentData?.username}
+                          username={data?.username}
                           verify={auth.verify}
                         />
                       )}

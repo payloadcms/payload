@@ -10,6 +10,7 @@ export const Pages: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'title',
+    groupBy: true,
   },
   versions: {
     drafts: true,
@@ -219,6 +220,12 @@ export const Pages: CollectionConfig = {
       name: 'hasManyPolymorphic',
       type: 'relationship',
       relationTo: ['users', 'posts'],
+      hasMany: true,
+    },
+    {
+      name: 'hasManyMonomorphic',
+      type: 'relationship',
+      relationTo: 'posts',
       hasMany: true,
     },
     {

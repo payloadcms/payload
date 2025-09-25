@@ -2,10 +2,10 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const thTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-tenant-switch--body':
-      'คุณกำลังจะเปลี่ยนความเป็นเจ้าของจาก <0>{{fromTenant}}</0> เป็น <0>{{toTenant}}</0>',
-    'confirm-tenant-switch--heading': 'ยืนยันการเปลี่ยนแปลง {{tenantLabel}}',
-    'field-assignedTentant-label': 'ผู้เช่าที่ได้รับการกำหนด',
+    'assign-tenant-button-label': 'กำหนดผู้เช่า',
+    'assign-tenant-modal-title': 'มอบหมาย "{{title}}"',
+    'field-assignedTenant-label': 'ผู้เช่าที่ได้รับการกำหนด',
+    'nav-tenantSelector-label': 'ผู้เช่า',
   },
 }
 

@@ -73,6 +73,9 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
       userWithSessions.sessions = sessionsAfterLogout
     }
 
+    // Ensure updatedAt date is always updated
+    ;(userWithSessions as any).updatedAt = new Date().toISOString()
+
     await req.payload.db.updateOne({
       id: user.id,
       collection: collectionConfig.slug,

@@ -28,6 +28,7 @@ export const Preview = () => {
   const { collection } = useImportExport()
   const { config } = useConfig()
   const { value: where } = useField({ path: 'where' })
+  const { value: page } = useField({ path: 'page' })
   const { value: limit } = useField<number>({ path: 'limit' })
   const { value: fields } = useField<string[]>({ path: 'fields' })
   const { value: sort } = useField({ path: 'sort' })
@@ -71,6 +72,7 @@ export const Preview = () => {
             format,
             limit,
             locale,
+            page,
             sort,
             where,
           }),
@@ -168,6 +170,7 @@ export const Preview = () => {
     i18n,
     limit,
     locale,
+    page,
     sort,
     where,
   ])

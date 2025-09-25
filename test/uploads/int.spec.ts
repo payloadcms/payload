@@ -1,19 +1,24 @@
+import type { AddressInfo } from 'net'
 import type { CollectionSlug, Payload } from 'payload'
 
 import { randomUUID } from 'crypto'
 import fs from 'fs'
+import { createServer } from 'http'
 import path from 'path'
-import { _internal_safeFetchGlobal, getFileByPath } from 'payload'
+import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   allowListMediaSlug,
+  anyImagesSlug,
   enlargeSlug,
   focalNoSizesSlug,
   focalOnlySlug,
@@ -24,6 +29,7 @@ import {
   relationSlug,
   restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
+  skipSafeFetchHeaderFilterSlug,
   skipSafeFetchMediaSlug,
   svgOnlySlug,
   unstoredMediaSlug,
@@ -384,6 +390,38 @@ describe('Collections - Uploads', () => {
 
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
       })
+
+      it('should create documents when passing file', async () => {
+        const expectedPath = path.join(dirname, './with-any-image-type')
+
+        const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
+        const fileBuffer = fs.readFileSync(svgFilePath)
+        const doc = await payload.create({
+          collection: anyImagesSlug as CollectionSlug,
+          data: {},
+          file: {
+            data: fileBuffer,
+            mimetype: 'image/svg+xml',
+            name: 'svgWithXml.svg',
+            size: fileBuffer.length,
+          },
+        })
+
+        expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+      })
+
+      it('should upload svg files', async () => {
+        const expectedPath = path.join(dirname, './with-any-image-type')
+
+        const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
+        const doc = await payload.create({
+          collection: anyImagesSlug as CollectionSlug,
+          data: {},
+          filePath: svgFilePath,
+        })
+        expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+        expect(doc.mimeType).toEqual('image/svg+xml')
+      })
     })
 
     describe('update', () => {
@@ -564,6 +602,165 @@ describe('Collections - Uploads', () => {
         })
 
         expect(doc.docs[0].image).toBeFalsy()
+      })
+
+      it('should allow a localized upload relationship in a block', async () => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+
+        const { id } = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })
+
+        const { id: id_2 } = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })
+
+        const res = await payload.create({
+          collection: 'relation',
+          depth: 0,
+          data: {
+            blocks: [
+              {
+                blockType: 'localizedMediaBlock',
+                media: id,
+                relatedMedia: [id],
+              },
+            ],
+          },
+        })
+
+        expect(res.blocks[0]?.media).toBe(id)
+        expect(res.blocks[0]?.relatedMedia).toEqual([id])
+
+        const res_2 = await payload.update({
+          collection: 'relation',
+          id: res.id,
+          depth: 0,
+          data: {
+            blocks: [
+              {
+                id: res.blocks[0]?.id,
+                blockType: 'localizedMediaBlock',
+                media: id_2,
+                relatedMedia: [id_2],
+              },
+            ],
+          },
+        })
+
+        expect(res_2.blocks[0]?.media).toBe(id_2)
+        expect(res_2.blocks[0]?.relatedMedia).toEqual([id_2])
+      })
+    })
+
+    describe('cookie filtering', () => {
+      it('should filter out payload cookies when externalFileHeaderFilter is not defined', async () => {
+        const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
+          '; ',
+        )
+
+        const fetchSpy = jest.spyOn(global, 'fetch')
+
+        await payload.create({
+          collection: skipSafeFetchMediaSlug,
+          data: {
+            filename: 'fat-head-nate.png',
+            url: 'https://www.payload.marketing/fat-head-nate.png',
+          },
+          req: {
+            headers: new Headers({
+              cookie: testCookies,
+            }),
+          },
+        })
+
+        const [[, options]] = fetchSpy.mock.calls
+        const cookieHeader = options.headers.cookie
+
+        expect(cookieHeader).not.toContain('payload-token=123')
+        expect(cookieHeader).not.toContain('payload-something=789')
+        expect(cookieHeader).toContain('other-cookie=456')
+
+        fetchSpy.mockRestore()
+      })
+
+      it('getExternalFile should not filter out payload cookies when externalFileHeaderFilter is not defined and the URL is not external', async () => {
+        const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
+          '; ',
+        )
+
+        const fetchSpy = jest.spyOn(global, 'fetch')
+
+        // spin up a temporary server so fetch to the local doesn't fail
+        const server = createServer((req, res) => {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ ok: true }))
+        })
+        await new Promise((res) => server.listen(0, undefined, undefined, res))
+
+        const port = (server.address() as AddressInfo).port
+        const baseUrl = `http://localhost:${port}`
+
+        const req = await createPayloadRequest({
+          config: payload.config,
+          request: new Request(baseUrl, {
+            headers: new Headers({
+              cookie: testCookies,
+              origin: baseUrl,
+            }),
+          }),
+        })
+
+        await getExternalFile({
+          data: { url: '/api/media/image.png' },
+          req,
+          uploadConfig: { skipSafeFetch: true },
+        })
+
+        const [[, options]] = fetchSpy.mock.calls
+        const cookieHeader = options.headers.cookie
+
+        expect(cookieHeader).toContain('payload-token=123')
+        expect(cookieHeader).toContain('payload-something=789')
+        expect(cookieHeader).toContain('other-cookie=456')
+
+        fetchSpy.mockRestore()
+        await new Promise((res) => server.close(res))
+      })
+
+      it('should keep all cookies when externalFileHeaderFilter is defined', async () => {
+        const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
+          '; ',
+        )
+
+        const fetchSpy = jest.spyOn(global, 'fetch')
+
+        await payload.create({
+          collection: skipSafeFetchHeaderFilterSlug,
+          data: {
+            filename: 'fat-head-nate.png',
+            url: 'https://www.payload.marketing/fat-head-nate.png',
+          },
+          req: {
+            headers: new Headers({
+              cookie: testCookies,
+            }),
+          },
+        })
+
+        const [[, options]] = fetchSpy.mock.calls
+        const cookieHeader = options.headers.cookie
+
+        expect(cookieHeader).toContain('other-cookie=456')
+        expect(cookieHeader).toContain('payload-token=123')
+        expect(cookieHeader).toContain('payload-something=789')
+
+        fetchSpy.mockRestore()
       })
     })
 

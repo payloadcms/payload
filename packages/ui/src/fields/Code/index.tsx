@@ -1,7 +1,7 @@
 'use client'
 import type { CodeFieldClientComponent } from 'payload'
 
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -11,8 +11,8 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
 import { fieldBaseClass } from '../shared/index.js'
+import './index.scss'
 
 const prismToMonacoLanguageMap = {
   js: 'javascript',
@@ -25,7 +25,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
   const {
     field,
     field: {
-      admin: { className, description, editorOptions = {}, language = 'javascript' } = {},
+      admin: { className, description, editorOptions, language = 'javascript' } = {},
       label,
       localized,
       required,
@@ -35,6 +35,9 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
+
+  const inputChangeFromRef = React.useRef<'formState' | 'internalEditor'>('formState')
+  const [recalculatedHeightAt, setRecalculatedHeightAt] = useState<number | undefined>(Date.now())
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -48,14 +51,47 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
+    initialValue,
     path,
     setValue,
     showError,
     value,
-  } = useField({
+  } = useField<string>({
     potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
+
+  const stringValueRef = React.useRef<string>(
+    (value || initialValue) !== undefined ? (value ?? initialValue) : undefined,
+  )
+
+  const handleChange = useCallback(
+    (val: string) => {
+      if (readOnly || disabled) {
+        return
+      }
+      inputChangeFromRef.current = 'internalEditor'
+
+      try {
+        setValue(val ? val : null)
+        stringValueRef.current = val
+      } catch (e) {
+        setValue(val ? val : null)
+        stringValueRef.current = val
+      }
+    },
+    [readOnly, disabled, setValue],
+  )
+
+  useEffect(() => {
+    if (inputChangeFromRef.current === 'formState') {
+      stringValueRef.current =
+        (value || initialValue) !== undefined ? (value ?? initialValue) : undefined
+      setRecalculatedHeightAt(Date.now())
+    }
+
+    inputChangeFromRef.current = 'formState'
+  }, [initialValue, path, value])
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
@@ -86,11 +122,15 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         {BeforeInput}
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}
-          onChange={readOnly || disabled ? () => null : (val) => setValue(val)}
+          onChange={handleChange}
           onMount={onMount}
           options={editorOptions}
           readOnly={readOnly || disabled}
-          value={(value as string) || ''}
+          recalculatedHeightAt={recalculatedHeightAt}
+          value={stringValueRef.current}
+          wrapperProps={{
+            id: `field-${path?.replace(/\./g, '__')}`,
+          }}
         />
         {AfterInput}
       </div>

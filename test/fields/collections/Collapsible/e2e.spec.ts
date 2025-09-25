@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -87,19 +88,19 @@ describe('Collapsibles', () => {
     const arrayWithCollapsibles = page.locator('#field-arrayWithCollapsibles')
     await expect(arrayWithCollapsibles).toBeVisible()
 
-    await page.locator('#field-arrayWithCollapsibles >> .array-field__add-row').click()
+    await addArrayRow(page, { fieldName: 'arrayWithCollapsibles' })
 
-    await page
-      .locator(
-        '#arrayWithCollapsibles-row-0 #field-collapsible-arrayWithCollapsibles__0___index-0 #field-arrayWithCollapsibles__0__innerCollapsible',
-      )
-      .fill(label)
-
-    await wait(100)
+    const innerTextField = page.locator(
+      '#arrayWithCollapsibles-row-0 #field-collapsible-arrayWithCollapsibles__0___index-0 #field-arrayWithCollapsibles__0__innerCollapsible',
+    )
+    await expect(innerTextField).toBeVisible()
+    await innerTextField.fill(label)
 
     const customCollapsibleLabel = page.locator(
       `#field-arrayWithCollapsibles >> #arrayWithCollapsibles-row-0 >> .collapsible-field__row-label-wrap :text("${label}")`,
     )
+
+    await expect(customCollapsibleLabel).toBeVisible()
     await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase')
   })
 })

@@ -73,7 +73,17 @@ export const ExportSaveButton: React.FC = () => {
       }
 
       if (!response.ok) {
-        throw new Error('Failed to download file')
+        // Try to parse the error message from the JSON response
+        let errorMsg = 'Failed to download file'
+        try {
+          const errorJson = await response.json()
+          if (errorJson?.errors?.[0]?.message) {
+            errorMsg = errorJson.errors[0].message
+          }
+        } catch {
+          // Ignore JSON parse errors, fallback to generic message
+        }
+        throw new Error(errorMsg)
       }
 
       const fileStream = response.body
@@ -98,9 +108,8 @@ export const ExportSaveButton: React.FC = () => {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error('Error downloading file:', error)
-      toast.error('Error downloading file')
+    } catch (error: any) {
+      toast.error(error.message || 'Error downloading file')
     }
   }
 

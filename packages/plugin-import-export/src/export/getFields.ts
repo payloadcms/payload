@@ -1,7 +1,9 @@
+import type { TFunction } from '@payloadcms/translations'
 import type { Config, Field, SelectField } from 'payload'
 
 import type { ImportExportPluginConfig } from '../types.js'
 
+import { validateLimitValue } from '../utilities/validateLimitValue.js'
 import { getFilename } from './getFilename.js'
 
 export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfig): Field[] => {
@@ -11,7 +13,7 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
       name: 'locale',
       type: 'select',
       admin: {
-        width: '33%',
+        width: '25%',
       },
       defaultValue: 'all',
       // @ts-expect-error - this is not correctly typed in plugins right now
@@ -49,7 +51,7 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
               admin: {
                 // Hide if a forced format is set via plugin config
                 condition: () => !pluginConfig?.format,
-                width: '33%',
+                width: '33.3333%',
               },
               defaultValue: (() => {
                 // Default to plugin-defined format, otherwise 'csv'
@@ -74,11 +76,37 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
               type: 'number',
               admin: {
                 placeholder: 'No limit',
-                width: '33%',
+                step: 100,
+                width: '33.3333%',
+              },
+              validate: (value: null | number | undefined, { req }: { req: { t: TFunction } }) => {
+                return validateLimitValue(value, req.t) ?? true
               },
               // @ts-expect-error - this is not correctly typed in plugins right now
               label: ({ t }) => t('plugin-import-export:field-limit-label'),
             },
+            {
+              name: 'page',
+              type: 'number',
+              admin: {
+                components: {
+                  Field: '@payloadcms/plugin-import-export/rsc#Page',
+                },
+                condition: ({ limit }) => {
+                  // Show the page field only if limit is set
+                  return typeof limit === 'number' && limit !== 0
+                },
+                width: '33.3333%',
+              },
+              defaultValue: 1,
+              // @ts-expect-error - this is not correctly typed in plugins right now
+              label: ({ t }) => t('plugin-import-export:field-page-label'),
+            },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
             {
               name: 'sort',
               type: 'text',
@@ -90,11 +118,23 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
               // @ts-expect-error - this is not correctly typed in plugins right now
               label: ({ t }) => t('plugin-import-export:field-sort-label'),
             },
-          ],
-        },
-        {
-          type: 'row',
-          fields: [
+            {
+              name: 'sortOrder',
+              type: 'select',
+              admin: {
+                components: {
+                  Field: '@payloadcms/plugin-import-export/rsc#SortOrder',
+                },
+                // Only show when `sort` has a value
+                condition: ({ sort }) => typeof sort === 'string' && sort.trim().length > 0,
+              },
+              // @ts-expect-error - this is not correctly typed in plugins right now
+              label: ({ t }) => t('plugin-import-export:field-sort-order-label'),
+              options: [
+                { label: 'Ascending', value: 'asc' },
+                { label: 'Descending', value: 'desc' },
+              ],
+            },
             ...(localeField ? [localeField] : []),
             {
               name: 'drafts',
@@ -109,7 +149,7 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
                       collectionConfig?.versions?.drafts,
                   )
                 },
-                width: '33%',
+                width: '25%',
               },
               defaultValue: 'yes',
               // @ts-expect-error - this is not correctly typed in plugins right now
@@ -163,6 +203,7 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
               value: 'all',
             },
           ],
+          virtual: true,
         },
         {
           name: 'fields',
@@ -183,7 +224,6 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
             components: {
               Field: '@payloadcms/plugin-import-export/rsc#CollectionField',
             },
-            hidden: true,
           },
           required: true,
         },

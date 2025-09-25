@@ -11,6 +11,7 @@ import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/ind
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWithSearchQueries/index.js'
 import { AdminUploadControl } from './collections/AdminUploadControl/index.js'
+import { AnyImageTypeCollection } from './collections/AnyImageType/index.js'
 import { BulkUploadsCollection } from './collections/BulkUploads/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
 import { FileMimeType } from './collections/FileMimeType/index.js'
@@ -29,7 +30,9 @@ import {
   imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
+  mediaWithImageSizeAdminPropsSlug,
   mediaWithoutCacheTagsSlug,
+  mediaWithoutDeleteAccessSlug,
   mediaWithoutRelationPreviewSlug,
   mediaWithRelationPreviewSlug,
   noRestrictFileMimeTypesSlug,
@@ -39,6 +42,7 @@ import {
   relationSlug,
   restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
+  skipSafeFetchHeaderFilterSlug,
   skipSafeFetchMediaSlug,
   svgOnlySlug,
   threeDimensionalSlug,
@@ -46,6 +50,7 @@ import {
   versionSlug,
   withoutEnlargeSlug,
 } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -55,9 +60,14 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  localization: {
+    locales: ['en', 'es', 'fr'],
+    defaultLocale: 'en',
+  },
   collections: [
     {
       slug: relationSlug,
+      versions: { drafts: { autosave: true } },
       fields: [
         {
           name: 'image',
@@ -73,6 +83,42 @@ export default buildConfigWithDefaults({
           name: 'hideFileInputOnCreate',
           type: 'upload',
           relationTo: hideFileInputOnCreateSlug,
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'a',
+              fields: [
+                {
+                  name: 'blocks',
+                  type: 'blocks',
+                  blocks: [
+                    {
+                      slug: 'localizedMediaBlock',
+                      fields: [
+                        {
+                          name: 'media',
+                          type: 'upload',
+                          relationTo: 'media',
+                          localized: true,
+                          required: true,
+                        },
+                        {
+                          name: 'relatedMedia',
+                          type: 'relationship',
+                          relationTo: 'media',
+                          localized: true,
+                          hasMany: true,
+                          maxRows: 5,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     },
@@ -336,7 +382,17 @@ export default buildConfigWithDefaults({
     },
     {
       slug: mediaSlug,
-      fields: [],
+      fields: [
+        {
+          type: 'text',
+          name: 'alt',
+        },
+        {
+          type: 'text',
+          name: 'localized',
+          localized: true,
+        },
+      ],
       upload: {
         staticDir: path.resolve(dirname, './media'),
         // crop: false,
@@ -463,6 +519,15 @@ export default buildConfigWithDefaults({
       upload: {
         skipSafeFetch: true,
         staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
+      slug: skipSafeFetchHeaderFilterSlug,
+      fields: [],
+      upload: {
+        skipSafeFetch: true,
+        staticDir: path.resolve(dirname, './media'),
+        externalFileHeaderFilter: (headers) => headers, // Keep all headers including cookies
       },
     },
     {
@@ -703,6 +768,7 @@ export default buildConfigWithDefaults({
     },
     Uploads1,
     Uploads2,
+    AnyImageTypeCollection,
     AdminThumbnailFunction,
     AdminThumbnailWithSearchQueries,
     AdminThumbnailSize,
@@ -919,6 +985,51 @@ export default buildConfigWithDefaults({
         staticDir: path.resolve(dirname, './svg-only'),
       },
     },
+    {
+      slug: mediaWithoutDeleteAccessSlug,
+      fields: [],
+      upload: true,
+      access: { delete: () => false },
+    },
+    {
+      slug: mediaWithImageSizeAdminPropsSlug,
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'one',
+            height: 200,
+            width: 200,
+            admin: {
+              disableListFilter: true,
+              disableListColumn: true,
+            },
+          },
+          {
+            name: 'two',
+            height: 300,
+            width: 300,
+            admin: {
+              disableListColumn: true,
+            },
+          },
+          {
+            name: 'three',
+            height: 400,
+            width: 400,
+            admin: {
+              disableListColumn: false,
+              disableListFilter: true,
+            },
+          },
+          {
+            name: 'four',
+            height: 400,
+            width: 300,
+          },
+        ],
+      },
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
@@ -941,6 +1052,8 @@ export default buildConfigWithDefaults({
       data: {},
       file: imageFile,
     })
+
+    await payload.create({ collection: mediaWithoutDeleteAccessSlug, data: {}, file: imageFile })
 
     const { id: versionedImage } = await payload.create({
       collection: versionSlug,

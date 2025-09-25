@@ -56,7 +56,7 @@ export const runJobsEndpoint: Endpoint = {
 
     if (shouldHandleSchedules && jobsConfig.scheduling) {
       // If should handle schedules and schedules are defined
-      await req.payload.jobs.handleSchedules({ queue: runAllQueues ? undefined : queue, req })
+      await req.payload.jobs.handleSchedules({ allQueues: runAllQueues, queue, req })
     }
 
     const runJobsArgs: RunJobsArgs = {

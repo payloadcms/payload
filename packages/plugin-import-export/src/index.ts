@@ -63,7 +63,7 @@ export const importExportPlugin =
         path: '@payloadcms/plugin-import-export/rsc#ExportListMenuItem',
       })
 
-      // // Find fields explicitly marked as disabled for import/export
+      // Find fields explicitly marked as disabled for import/export
       const disabledFieldAccessors = collectDisabledFieldPaths(collection.fields)
 
       // Store disabled field accessors in the admin config for use in the UI
@@ -90,13 +90,14 @@ export const importExportPlugin =
       handler: async (req) => {
         await addDataAndFileToRequest(req)
 
-        const { collectionSlug, draft, fields, limit, locale, sort, where } = req.data as {
+        const { collectionSlug, draft, fields, limit, locale, page, sort, where } = req.data as {
           collectionSlug: string
           draft?: 'no' | 'yes'
           fields?: string[]
           format?: 'csv' | 'json'
           limit?: number
           locale?: string
+          page?: number
           sort?: any
           where?: any
         }
@@ -118,6 +119,7 @@ export const importExportPlugin =
           limit: limit && limit > 10 ? 10 : limit,
           locale,
           overrideAccess: false,
+          page,
           req,
           select,
           sort,

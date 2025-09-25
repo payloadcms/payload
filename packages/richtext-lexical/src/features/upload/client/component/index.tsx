@@ -5,14 +5,15 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
-  File,
   formatDrawerSlug,
+  Thumbnail,
   useConfig,
   useEditDepth,
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
-import { $getNodeByKey } from 'lexical'
+import { $getNodeByKey, type ElementFormatType } from 'lexical'
+import { isImage } from 'payload/shared'
 import React, { useCallback, useId, useReducer, useRef, useState } from 'react'
 
 import type { BaseClientFeatureProps } from '../../../typesClient.js'
@@ -36,6 +37,7 @@ const initialParams = {
 
 export type ElementProps = {
   data: UploadData
+  format?: ElementFormatType
   nodeKey: string
 }
 
@@ -138,29 +140,32 @@ const Component: React.FC<ElementProps> = (props) => {
     [editor, nodeKey],
   )
 
+  const aspectRatio =
+    thumbnailSRC && data?.width && data?.height
+      ? data.width > data.height
+        ? 'landscape'
+        : 'portrait'
+      : 'landscape'
+
   return (
-    <div className={baseClass} contentEditable={false} ref={uploadRef}>
+    <div
+      className={`${baseClass} ${baseClass}--${aspectRatio}`}
+      data-filename={data?.filename}
+      ref={uploadRef}
+    >
       <div className={`${baseClass}__card`}>
-        <div className={`${baseClass}__topRow`}>
-          {/* TODO: migrate to use @payloadcms/ui/elements/Thumbnail component */}
-          <div className={`${baseClass}__thumbnail`}>
-            {thumbnailSRC ? (
-              <img
-                alt={data?.filename}
-                data-lexical-upload-id={value}
-                data-lexical-upload-relation-to={relationTo}
-                src={thumbnailSRC}
-              />
-            ) : (
-              <File />
-            )}
-          </div>
-          <div className={`${baseClass}__topRowRightPanel`}>
-            <div className={`${baseClass}__collectionLabel`}>
-              {getTranslation(relatedCollection.labels.singular, i18n)}
-            </div>
-            {editor.isEditable() && (
-              <div className={`${baseClass}__actions`}>
+        <div className={`${baseClass}__media`}>
+          <Thumbnail
+            collectionSlug={relationTo}
+            fileSrc={isImage(data?.mimeType) ? thumbnailSRC : null}
+            height={data?.height}
+            size="none"
+            width={data?.width}
+          />
+
+          {editor.isEditable() && (
+            <div className={`${baseClass}__overlay ${baseClass}__floater`}>
+              <div className={`${baseClass}__actions`} role="toolbar">
                 {hasExtraFields ? (
                   <Button
                     buttonStyle="icon-label"
@@ -168,10 +173,9 @@ const Component: React.FC<ElementProps> = (props) => {
                     disabled={readOnly}
                     el="button"
                     icon="edit"
-                    onClick={() => {
-                      toggleDrawer()
-                    }}
+                    onClick={toggleDrawer}
                     round
+                    size="medium"
                     tooltip={t('fields:editRelationship')}
                   />
                 ) : null}
@@ -188,8 +192,10 @@ const Component: React.FC<ElementProps> = (props) => {
                     })
                   }}
                   round
+                  size="medium"
                   tooltip={t('fields:swapUpload')}
                 />
+
                 <Button
                   buttonStyle="icon-label"
                   className={`${baseClass}__removeButton`}
@@ -200,18 +206,26 @@ const Component: React.FC<ElementProps> = (props) => {
                     removeUpload()
                   }}
                   round
+                  size="medium"
                   tooltip={t('fields:removeUpload')}
                 />
               </div>
-            )}
+            </div>
+          )}
+        </div>
+
+        <div className={`${baseClass}__metaOverlay ${baseClass}__floater`}>
+          <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
+            <strong className={`${baseClass}__filename`}>
+              {data?.filename || t('general:untitled')}
+            </strong>
+          </DocumentDrawerToggler>
+          <div className={`${baseClass}__collectionLabel`}>
+            {getTranslation(relatedCollection.labels.singular, i18n)}
           </div>
         </div>
-        <div className={`${baseClass}__bottomRow`}>
-          <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
-            <strong>{data?.filename}</strong>
-          </DocumentDrawerToggler>
-        </div>
       </div>
+
       {value ? <DocumentDrawer onSave={updateUpload} /> : null}
       {hasExtraFields ? (
         <FieldsDrawer

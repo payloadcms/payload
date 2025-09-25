@@ -147,19 +147,25 @@ export const generateReindexHandler =
       }
     }
 
-    await initTransaction(req)
+    const shouldCommit = await initTransaction(req)
 
-    for (const collection of collections) {
-      try {
-        await deleteIndexes(collection)
-        await reindexCollection(collection)
-      } catch (err) {
-        const message = t('error:unableToReindexCollection', { collection })
-        payload.logger.error({ err, msg: message })
+    try {
+      const promises = collections.map(async (collection) => {
+        try {
+          await deleteIndexes(collection)
+          await reindexCollection(collection)
+        } catch (err) {
+          const message = t('error:unableToReindexCollection', { collection })
+          payload.logger.error({ err, msg: message })
+        }
+      })
 
+      await Promise.all(promises)
+    } catch (err: any) {
+      if (shouldCommit) {
         await killTransaction(req)
-        return Response.json({ message }, { headers, status: 500 })
       }
+      return Response.json({ message: err.message }, { headers, status: 500 })
     }
 
     const message = t('general:successfullyReindexed', {
@@ -168,7 +174,9 @@ export const generateReindexHandler =
       total: aggregateDocs,
     })
 
-    await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return Response.json({ message }, { headers, status: 200 })
   }

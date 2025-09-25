@@ -54,8 +54,15 @@ The plugin accepts an object with the following properties:
 ```ts
 type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
-   * After a tenant is deleted, the plugin will attempt
-   * to clean up related documents
+   * Base path for your application
+   *
+   * https://nextjs.org/docs/app/api-reference/config/next-config-js/basePath
+   *
+   * @default undefined
+   */
+  basePath?: string
+  /**
+   * After a tenant is deleted, the plugin will attempt to clean up related documents
    * - removing documents with the tenant ID
    * - removing the tenant from users
    *
@@ -68,22 +75,41 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   collections: {
     [key in CollectionSlug]?: {
       /**
-       * Set to `true` if you want the collection to
-       * behave as a global
+       * Set to `true` if you want the collection to behave as a global
        *
        * @default false
        */
       isGlobal?: boolean
       /**
-       * Set to `false` if you want to manually apply
-       * the baseListFilter
+       * Opt out of adding the tenant field and place
+       * it manually using the `tenantField` export from the plugin
+       */
+      customTenantField?: boolean
+      /**
+       * Overrides for the tenant field, will override the entire tenantField configuration
+       */
+      tenantFieldOverrides?: CollectionTenantFieldConfigOverrides
+      /**
+       * Set to `false` if you want to manually apply the baseListFilter
+       * Set to `false` if you want to manually apply the baseFilter
+       *
+       * @default true
+       */
+      useBaseFilter?: boolean
+      /**
+       * @deprecated Use `useBaseFilter` instead. If both are defined,
+       * `useBaseFilter` will take precedence. This property remains only
+       * for backward compatibility and may be removed in a future version.
+       *
+       * Originally, `baseListFilter` was intended to filter only the List View
+       * in the admin panel. However, base filtering is often required in other areas
+       * such as internal link relationships in the Lexical editor.
        *
        * @default true
        */
       useBaseListFilter?: boolean
       /**
-       * Set to `false` if you want to handle collection access
-       * manually without the multi-tenant constraints applied
+       * Set to `false` if you want to handle collection access manually without the multi-tenant constraints applied
        *
        * @default true
        */
@@ -92,8 +118,7 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   }
   /**
    * Enables debug mode
-   * - Makes the tenant field visible in the
-   * admin UI within applicable collections
+   * - Makes the tenant field visible in the admin UI within applicable collections
    *
    * @default false
    */
@@ -105,27 +130,47 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    */
   enabled?: boolean
   /**
-   * Field configuration for the field added
-   * to all tenant enabled collections
+   * Localization for the plugin
    */
-  tenantField?: {
-    access?: RelationshipField['access']
-    /**
-     * The name of the field added to all tenant
-     * enabled collections
-     *
-     * @default 'tenant'
-     */
-    name?: string
+  i18n?: {
+    translations: {
+      [key in AcceptedLanguages]?: {
+        /**
+         * Shown inside 3 dot menu on edit document view
+         *
+         * @default 'Assign Tenant'
+         */
+        'assign-tenant-button-label'?: string
+        /**
+         * Shown as the title of the assign tenant modal
+         *
+         * @default 'Assign "{{title}}"'
+         */
+        'assign-tenant-modal-title'?: string
+        /**
+         * Shown as the label for the assigned tenant field in the assign tenant modal
+         *
+         * @default 'Assigned Tenant'
+         */
+        'field-assignedTenant-label'?: string
+        /**
+         * Shown as the label for the global tenant selector in the admin UI
+         *
+         * @default 'Filter by Tenant'
+         */
+        'nav-tenantSelector-label'?: string
+      }
+    }
   }
   /**
-   * Field configuration for the field added
-   * to the users collection
+   * Field configuration for the field added to all tenant enabled collections
+   */
+  tenantField?: RootTenantFieldConfigOverrides
+  /**
+   * Field configuration for the field added to the users collection
    *
-   * If `includeDefaultField` is `false`, you must
-   * include the field on your users collection manually
-   * This is useful if you want to customize the field
-   * or place the field in a specific location
+   * If `includeDefaultField` is `false`, you must include the field on your users collection manually
+   * This is useful if you want to customize the field or place the field in a specific location
    */
   tenantsArrayField?:
     | {
@@ -146,8 +191,7 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
          */
         arrayTenantFieldName?: string
         /**
-         * When `includeDefaultField` is `true`, the field will
-         * be added to the users collection automatically
+         * When `includeDefaultField` is `true`, the field will be added to the users collection automatically
          */
         includeDefaultField?: true
         /**
@@ -164,8 +208,7 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
         arrayFieldName?: string
         arrayTenantFieldName?: string
         /**
-         * When `includeDefaultField` is `false`, you must
-         * include the field on your users collection manually
+         * When `includeDefaultField` is `false`, you must include the field on your users collection manually
          */
         includeDefaultField?: false
         rowFields?: never
@@ -174,8 +217,9 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
    * Customize tenant selector label
    *
-   * Either a string or an object where the keys are i18n
-   * codes and the values are the string labels
+   * Either a string or an object where the keys are i18n codes and the values are the string labels
+   *
+   * @deprecated Use `i18n.translations` instead.
    */
   tenantSelectorLabel?:
     | Partial<{
@@ -189,27 +233,25 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    */
   tenantsSlug?: string
   /**
-   * Function that determines if a user has access
-   * to _all_ tenants
+   * Function that determines if a user has access to _all_ tenants
    *
    * Useful for super-admin type users
    */
   userHasAccessToAllTenants?: (
-    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : User,
+    user: ConfigTypes extends { user: unknown }
+      ? ConfigTypes['user']
+      : TypedUser,
   ) => boolean
   /**
-   * Opt out of adding access constraints to
-   * the tenants collection
+   * Opt out of adding access constraints to the tenants collection
    */
   useTenantsCollectionAccess?: boolean
   /**
-   * Opt out including the baseListFilter to filter
-   * tenants by selected tenant
+   * Opt out including the baseListFilter to filter tenants by selected tenant
    */
   useTenantsListFilter?: boolean
   /**
-   * Opt out including the baseListFilter to filter
-   * users by selected tenant
+   * Opt out including the baseListFilter to filter users by selected tenant
    */
   useUsersTenantFilter?: boolean
 }

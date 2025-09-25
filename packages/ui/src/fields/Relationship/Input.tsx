@@ -359,6 +359,9 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       updateResultsEffectEvent({
         filterOptions,
         lastLoadedPage: {},
+        onSuccess: () => {
+          setIsLoading(false)
+        },
         search: searchArg,
         sort: true,
         ...(hasManyArg === true
@@ -379,6 +382,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const handleInputChange = useCallback(
     (options: { search: string } & HasManyValueUnion) => {
       if (search !== options.search) {
+        setIsLoading(true)
         setLastLoadedPage({})
         updateSearch(options)
       }
@@ -413,11 +417,17 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       })
 
       if (idsToLoad.length > 0) {
+        const collection = getEntityConfig({ collectionSlug: relation })
+        const fieldToSelect = collection?.admin?.useAsTitle || 'id'
+
         const query = {
           depth: 0,
           draft: true,
           limit: idsToLoad.length,
           locale,
+          select: {
+            [fieldToSelect]: true,
+          },
           where: {
             id: {
               in: idsToLoad,
@@ -436,8 +446,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             },
             method: 'POST',
           })
-
-          const collection = getEntityConfig({ collectionSlug: relation })
           let docs = []
 
           if (response.ok) {
@@ -636,6 +644,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const prevValue = useRef(value)
   const isFirstRenderRef = useRef(true)
+
   // ///////////////////////////////////
   // Ensure we have an option for each value
   // ///////////////////////////////////
@@ -779,11 +788,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               }}
               onMenuOpen={() => {
                 if (appearance === 'drawer') {
-                  // TODO: This timeout is only necessary for inline blocks in the lexical editor
-                  // and when the devtools are closed. Temporary solution, we can probably do better.
-                  setTimeout(() => {
-                    openListDrawer()
-                  }, 100)
+                  openListDrawer()
                 } else if (appearance === 'select') {
                   setMenuIsOpen(true)
                   if (!hasLoadedFirstPageRef.current) {
@@ -809,10 +814,14 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 }
               }}
               onMenuScrollToBottom={() => {
+                setIsLoading(true)
                 updateResultsEffectEvent({
                   filterOptions,
                   lastFullyLoadedRelation,
                   lastLoadedPage,
+                  onSuccess: () => {
+                    setIsLoading(false)
+                  },
                   search,
                   sort: false,
                   ...(hasMany === true

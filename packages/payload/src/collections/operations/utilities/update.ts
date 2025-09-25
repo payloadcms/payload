@@ -237,9 +237,11 @@ export const updateDocument = async <
     overrideAccess,
     req,
     skipValidation:
-      shouldSaveDraft &&
-      collectionConfig.versions.drafts &&
-      !collectionConfig.versions.drafts.validate,
+      (shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate) ||
+      // Skip validation for trash operations since they're just metadata updates
+      Boolean(data?.deletedAt),
   }
 
   if (publishSpecificLocale) {
@@ -293,13 +295,14 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   if (!shouldSaveDraft) {
+    // Ensure updatedAt date is always updated
+    dataToUpdate.updatedAt = new Date().toISOString()
     result = await req.payload.db.updateOne({
       id,
       collection: collectionConfig.slug,
       data: dataToUpdate,
       locale,
       req,
-      select,
     })
   }
 
@@ -314,10 +317,10 @@ export const updateDocument = async <
       collection: collectionConfig,
       docWithLocales: result,
       draft: shouldSaveDraft,
+      operation: 'update',
       payload,
       publishSpecificLocale,
       req,
-      select,
       snapshot: versionSnapshotResult,
     })
   }

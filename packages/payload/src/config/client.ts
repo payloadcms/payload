@@ -2,8 +2,8 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
-import type { ClientBlock } from '../fields/config/types.js'
-import type { BlockSlug } from '../index.js'
+import type { ClientBlock, ClientField, Field } from '../fields/config/types.js'
+import type { BlockSlug, TypedUser } from '../index.js'
 import type {
   RootLivePreviewConfig,
   SanitizedConfig,
@@ -42,16 +42,6 @@ export type ServerOnlyRootProperties = keyof Pick<
 
 export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
 
-export type UnsanitizedClientConfig = {
-  admin: {
-    livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
-  } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
-  blocks: ClientBlock[]
-  collections: ClientCollectionConfig[]
-  custom?: Record<string, any>
-  globals: ClientGlobalConfig[]
-} & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
-
 export type ClientConfig = {
   admin: {
     livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
@@ -61,7 +51,25 @@ export type ClientConfig = {
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
+  unauthenticated?: boolean
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
+
+export type UnauthenticatedClientConfig = {
+  admin: {
+    routes: ClientConfig['admin']['routes']
+    user: ClientConfig['admin']['user']
+  }
+  collections: [
+    {
+      auth: ClientCollectionConfig['auth']
+      slug: string
+    },
+  ]
+  globals: []
+  routes: ClientConfig['routes']
+  serverURL: ClientConfig['serverURL']
+  unauthenticated: true
+}
 
 export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
 
@@ -88,15 +96,60 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
+export type CreateClientConfigArgs = {
+  config: SanitizedConfig
+  i18n: I18nClient
+  importMap: ImportMap
+  /**
+   * If unauthenticated, the client config will omit some sensitive properties
+   * such as field schemas, etc. This is useful for login and error pages where
+   * the page source should not contain this information.
+   *
+   * For example, allow `true` to generate a client config for the "create first user" page
+   * where there is no user yet, but the config should still be complete.
+   */
+  user: true | TypedUser
+}
+
+export const createUnauthenticatedClientConfig = ({
+  clientConfig,
+}: {
+  /**
+   * Send the previously generated client config to share memory when applicable.
+   * E.g. the admin-enabled collection config can reference the existing collection rather than creating a new object.
+   */
+  clientConfig: ClientConfig
+}): UnauthenticatedClientConfig => {
+  /**
+   * To share memory, find the admin user collection from the existing client config.
+   */
+  const adminUserCollection = clientConfig.collections.find(
+    ({ slug }) => slug === clientConfig.admin.user,
+  )!
+
+  return {
+    admin: {
+      routes: clientConfig.admin.routes,
+      user: clientConfig.admin.user,
+    },
+    collections: [
+      {
+        slug: adminUserCollection.slug,
+        auth: adminUserCollection.auth,
+      },
+    ],
+    globals: [],
+    routes: clientConfig.routes,
+    serverURL: clientConfig.serverURL,
+    unauthenticated: true,
+  }
+}
+
 export const createClientConfig = ({
   config,
   i18n,
   importMap,
-}: {
-  config: SanitizedConfig
-  i18n: I18nClient
-  importMap: ImportMap
-}): ClientConfig => {
+}: CreateClientConfigArgs): ClientConfig => {
   const clientConfig = {} as DeepPartial<ClientConfig>
 
   for (const key in config) {
@@ -116,6 +169,7 @@ export const createClientConfig = ({
           routes: config.admin.routes,
           theme: config.admin.theme,
           timezones: config.admin.timezones,
+          toast: config.admin.toast,
           user: config.admin.user,
         }
 
@@ -144,6 +198,17 @@ export const createClientConfig = ({
           i18n,
           importMap,
         }).filter((block) => typeof block !== 'string') as ClientBlock[]
+
+        clientConfig.blocksMap = {}
+        if (clientConfig.blocks?.length) {
+          for (const block of clientConfig.blocks) {
+            if (!block?.slug) {
+              continue
+            }
+
+            clientConfig.blocksMap[block.slug] = block as ClientBlock
+          }
+        }
 
         break
       }

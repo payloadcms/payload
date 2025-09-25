@@ -123,7 +123,7 @@ import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
 
-import type { ClientConfig } from './config/client.js'
+import type { ClientConfig, CreateClientConfigArgs } from './config/client.js'
 import type { BaseJob } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
 
@@ -625,6 +625,64 @@ export class BasePayload {
     [slug: string]: any // TODO: Type this
   } = {}
 
+  async _initializeCrons() {
+    if (this.config.jobs.enabled && this.config.jobs.autoRun && !isNextBuild()) {
+      const DEFAULT_CRON = '* * * * *'
+      const DEFAULT_LIMIT = 10
+
+      const cronJobs =
+        typeof this.config.jobs.autoRun === 'function'
+          ? await this.config.jobs.autoRun(this)
+          : this.config.jobs.autoRun
+
+      await Promise.all(
+        cronJobs.map((cronConfig) => {
+          const jobAutorunCron = new Cron(
+            cronConfig.cron ?? DEFAULT_CRON,
+            async () => {
+              if (
+                _internal_jobSystemGlobals.shouldAutoSchedule &&
+                !cronConfig.disableScheduling &&
+                this.config.jobs.scheduling
+              ) {
+                await this.jobs.handleSchedules({
+                  allQueues: cronConfig.allQueues,
+                  queue: cronConfig.queue,
+                })
+              }
+
+              if (!_internal_jobSystemGlobals.shouldAutoRun) {
+                return
+              }
+
+              if (typeof this.config.jobs.shouldAutoRun === 'function') {
+                const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+
+                if (!shouldAutoRun) {
+                  jobAutorunCron.stop()
+                  return
+                }
+              }
+
+              await this.jobs.run({
+                allQueues: cronConfig.allQueues,
+                limit: cronConfig.limit ?? DEFAULT_LIMIT,
+                queue: cronConfig.queue,
+                silent: cronConfig.silent,
+              })
+            },
+            {
+              // Do not run consecutive crons if previous crons still ongoing
+              protect: true,
+            },
+          )
+
+          this.crons.push(jobAutorunCron)
+        }),
+      )
+    }
+  }
+
   async bin({
     args,
     cwd,
@@ -855,51 +913,8 @@ export class BasePayload {
       throw error
     }
 
-    if (this.config.jobs.enabled && this.config.jobs.autoRun && !isNextBuild() && options.cron) {
-      const DEFAULT_CRON = '* * * * *'
-      const DEFAULT_LIMIT = 10
-
-      const cronJobs =
-        typeof this.config.jobs.autoRun === 'function'
-          ? await this.config.jobs.autoRun(this)
-          : this.config.jobs.autoRun
-
-      await Promise.all(
-        cronJobs.map((cronConfig) => {
-          const jobAutorunCron = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
-            if (
-              _internal_jobSystemGlobals.shouldAutoSchedule &&
-              !cronConfig.disableScheduling &&
-              this.config.jobs.scheduling
-            ) {
-              await this.jobs.handleSchedules({
-                queue: cronConfig.queue,
-              })
-            }
-
-            if (!_internal_jobSystemGlobals.shouldAutoRun) {
-              return
-            }
-
-            if (typeof this.config.jobs.shouldAutoRun === 'function') {
-              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
-
-              if (!shouldAutoRun) {
-                jobAutorunCron.stop()
-                return
-              }
-            }
-
-            await this.jobs.run({
-              limit: cronConfig.limit ?? DEFAULT_LIMIT,
-              queue: cronConfig.queue,
-              silent: cronConfig.silent,
-            })
-          })
-
-          this.crons.push(jobAutorunCron)
-        }),
-      )
+    if (options.cron) {
+      await this._initializeCrons()
     }
 
     return this
@@ -930,21 +945,11 @@ const initialized = new BasePayload()
 // eslint-disable-next-line no-restricted-exports
 export default initialized
 
-let cached: {
-  payload: null | Payload
-  promise: null | Promise<Payload>
-  reload: boolean | Promise<void>
-  ws: null | WebSocket
-} = (global as any)._payload
-
-if (!cached) {
-  cached = (global as any)._payload = { payload: null, promise: null, reload: false, ws: null }
-}
-
 export const reload = async (
   config: SanitizedConfig,
   payload: Payload,
   skipImportMapGeneration?: boolean,
+  options?: InitOptions,
 ): Promise<void> => {
   if (typeof payload.db.destroy === 'function') {
     // Only destroy db, as we then later only call payload.db.init and not payload.init
@@ -994,9 +999,11 @@ export const reload = async (
     })
   }
 
-  await payload.db.init?.()
+  if (payload.db?.init) {
+    await payload.db.init()
+  }
 
-  if (payload.db.connect) {
+  if (!options?.disableDBConnect && payload.db.connect) {
     await payload.db.connect({ hotReload: true })
   }
 
@@ -1008,14 +1015,73 @@ export const reload = async (
   ;(global as any)._payload_doNotCacheClientSchemaMap = true
 }
 
+let _cached: Map<
+  string,
+  {
+    initializedCrons: boolean
+    payload: null | Payload
+    promise: null | Promise<Payload>
+    reload: boolean | Promise<void>
+    ws: null | WebSocket
+  }
+> = (global as any)._payload
+
+if (!_cached) {
+  _cached = (global as any)._payload = new Map()
+}
+
+/**
+ * Get a payload instance.
+ * This function is a wrapper around new BasePayload().init() that adds the following functionality on top of that:
+ *
+ * - smartly caches Payload instance on the module scope. That way, we prevent unnecessarily initializing Payload over and over again
+ * when calling getPayload multiple times or from multiple locations.
+ * - adds HMR support and reloads the payload instance when the config changes.
+ */
 export const getPayload = async (
-  options: Pick<InitOptions, 'config' | 'cron' | 'importMap'>,
+  options: {
+    /**
+     * A unique key to identify the payload instance. You can pass your own key if you want to cache this payload instance separately.
+     * This is useful if you pass a different payload config for each instance.
+     *
+     * @default 'default'
+     */
+    key?: string
+  } & InitOptions,
 ): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayload to work.')
   }
 
+  let alreadyCachedSameConfig = false
+
+  let cached = _cached.get(options.key ?? 'default')
+  if (!cached) {
+    cached = {
+      initializedCrons: Boolean(options.cron),
+      payload: null,
+      promise: null,
+      reload: false,
+      ws: null,
+    }
+    _cached.set(options.key ?? 'default', cached)
+  } else {
+    alreadyCachedSameConfig = true
+  }
+
+  if (alreadyCachedSameConfig) {
+    // alreadyCachedSameConfig => already called onInit once, but same config => no need to call onInit again.
+    // calling onInit again would only make sense if a different config was passed.
+    options.disableOnInit = true
+  }
+
   if (cached.payload) {
+    if (options.cron && !cached.initializedCrons) {
+      // getPayload called with crons enabled, but existing cached version does not have crons initialized. => Initialize crons in existing cached version
+      cached.initializedCrons = true
+      await cached.payload._initializeCrons()
+    }
+
     if (cached.reload === true) {
       let resolve!: () => void
 
@@ -1024,7 +1090,7 @@ export const getPayload = async (
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
       const config = await options.config
-      await reload(config, cached.payload, !options.importMap)
+      await reload(config, cached.payload, !options.importMap, options)
 
       resolve()
     }
@@ -1168,6 +1234,7 @@ export type {
   AfterRefreshHook as CollectionAfterRefreshHook,
   AuthCollection,
   AuthOperationsFromCollectionSlug,
+  BaseFilter,
   BaseListFilter,
   BeforeChangeHook as CollectionBeforeChangeHook,
   BeforeDeleteHook as CollectionBeforeDeleteHook,
@@ -1212,9 +1279,11 @@ export { buildConfig } from './config/build.js'
 export {
   type ClientConfig,
   createClientConfig,
+  type CreateClientConfigArgs,
+  createUnauthenticatedClientConfig,
   serverOnlyAdminConfigProperties,
   serverOnlyConfigProperties,
-  type UnsanitizedClientConfig,
+  type UnauthenticatedClientConfig,
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
 
@@ -1469,7 +1538,7 @@ export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/bef
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
-export { validations } from './fields/validations.js'
+export { validateBlocksFilterOptions, validations } from './fields/validations.js'
 
 export type {
   ArrayFieldValidation,
@@ -1515,6 +1584,7 @@ export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
   BeforeChangeHook as GlobalBeforeChangeHook,
+  BeforeOperationHook as GlobalBeforeOperationHook,
   BeforeReadHook as GlobalBeforeReadHook,
   BeforeValidateHook as GlobalBeforeValidateHook,
   DataFromGlobalSlug,
@@ -1588,6 +1658,7 @@ export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
+export { canAccessAdmin } from './utilities/canAccessAdmin.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,
@@ -1614,7 +1685,6 @@ export {
   type CustomVersionParser,
 } from './utilities/dependencies/dependencyChecker.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
-export type { FieldSchemaJSON } from './utilities/fieldSchemaToJSON.js'
 export {
   findUp,
   findUpSync,

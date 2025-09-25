@@ -11,16 +11,28 @@ import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
 import { findByIDOperation } from '../operations/findByID.js'
 
 export const findByIDHandler: PayloadHandler = async (req) => {
-  const { searchParams } = req
+  const { data, searchParams } = req
   const { id, collection } = getRequestCollectionWithID(req)
-  const depth = searchParams.get('depth')
-  const trash = searchParams.get('trash') === 'true'
+  const depth = data ? data.depth : searchParams.get('depth')
+  const trash = data ? data.trash : searchParams.get('trash') === 'true'
+  const flattenLocales = data
+    ? data.flattenLocales
+    : searchParams.has('flattenLocales')
+      ? searchParams.get('flattenLocales') === 'true'
+      : // flattenLocales should be undefined if not provided, so that the default (true) is applied in the operation
+        undefined
 
   const result = await findByIDOperation({
     id,
     collection,
+    data: data
+      ? data?.data
+      : searchParams.get('data')
+        ? JSON.parse(searchParams.get('data') as string)
+        : undefined,
     depth: isNumber(depth) ? Number(depth) : undefined,
-    draft: searchParams.get('draft') === 'true',
+    draft: data ? data.draft : searchParams.get('draft') === 'true',
+    flattenLocales,
     joins: sanitizeJoinParams(req.query.joins as JoinParams),
     populate: sanitizePopulateParam(req.query.populate),
     req,

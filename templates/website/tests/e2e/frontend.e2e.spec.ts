@@ -13,8 +13,8 @@ test.describe('Frontend', () => {
 
     await expect(page).toHaveTitle(/Payload Website Template/)
 
-    const headging = page.locator('h1').first()
+    const heading = page.locator('h1').first()
 
-    await expect(headging).toHaveText('Payload Website Template')
+    await expect(heading).toHaveText('Payload Website Template')
   })
 })

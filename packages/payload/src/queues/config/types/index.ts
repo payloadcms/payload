@@ -8,6 +8,13 @@ import type { WorkflowConfig } from './workflowTypes.js'
 
 export type AutorunCronConfig = {
   /**
+   * If you want to autoRUn jobs from all queues, set this to true.
+   * If you set this to true, the `queue` property will be ignored.
+   *
+   * @default false
+   */
+  allQueues?: boolean
+  /**
    * The cron schedule for the job.
    * @default '* * * * *' (every minute).
    *
@@ -43,6 +50,8 @@ export type AutorunCronConfig = {
   limit?: number
   /**
    * The queue name for the job.
+   *
+   * @default 'default'
    */
   queue?: string
   /**
@@ -148,6 +157,7 @@ export type JobsConfig = {
    * drastically affect performance.
    *
    * @default false
+   * @deprecated - this will be removed in 4.0
    */
   runHooks?: boolean
   /**
