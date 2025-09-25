@@ -4405,12 +4405,7 @@ describe('database', () => {
       })
     })
 
-    it.skip('should handle localized polymorphic relationships with $remove', async () => {
-      // TODO: This test is currently failing due to an implementation issue in the MongoDB adapter
-      // The localized $remove operation for polymorphic relationships doesn't properly process
-      // the relationship values through the same conversion pipeline as non-localized operations.
-      // See packages/db-mongodb/src/utilities/transform.ts lines 661-663
-
+    it('should handle localized polymorphic relationships with $remove', async () => {
       // Create documents for testing
       const category1 = await payload.create({
         collection: 'categories',

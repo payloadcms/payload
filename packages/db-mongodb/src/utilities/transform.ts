@@ -26,6 +26,52 @@ function isValidRelationObject(value: unknown): value is RelationObject {
   return typeof value === 'object' && value !== null && 'relationTo' in value && 'value' in value
 }
 
+/**
+ * Process relationship values for polymorphic and simple relationships
+ * Used by both $push and $remove operations
+ */
+const processRelationshipValues = (
+  items: unknown[],
+  field: RelationshipField | UploadField,
+  config: SanitizedConfig,
+  operation: 'read' | 'write',
+  validateRelationships: boolean,
+) => {
+  return items.map((item) => {
+    // Handle polymorphic relationships
+    if (Array.isArray(field.relationTo) && isValidRelationObject(item)) {
+      const relatedCollection = config.collections?.find(({ slug }) => slug === item.relationTo)
+      if (relatedCollection) {
+        return {
+          relationTo: item.relationTo,
+          value: convertRelationshipValue({
+            operation,
+            relatedCollection,
+            validateRelationships,
+            value: item.value,
+          }),
+        }
+      }
+      return item
+    }
+
+    // Handle simple relationships
+    if (typeof field.relationTo === 'string') {
+      const relatedCollection = config.collections?.find(({ slug }) => slug === field.relationTo)
+      if (relatedCollection) {
+        return convertRelationshipValue({
+          operation,
+          relatedCollection,
+          validateRelationships,
+          value: item,
+        })
+      }
+    }
+
+    return item
+  })
+}
+
 const convertRelationshipValue = ({
   operation,
   relatedCollection,
@@ -540,44 +586,13 @@ export const transform = ({
         // Transform $push to MongoDB $addToSet with $each
         const itemsToAppend = Array.isArray(value.$push) ? value.$push : [value.$push]
 
-        // Process relationship values through normal sanitization
-        const processedItems = itemsToAppend.map((item) => {
-          // Handle polymorphic relationships
-          if (Array.isArray(field.relationTo) && isValidRelationObject(item)) {
-            const relatedCollection = config.collections?.find(
-              ({ slug }) => slug === item.relationTo,
-            )
-            if (relatedCollection) {
-              return {
-                relationTo: item.relationTo,
-                value: convertRelationshipValue({
-                  operation,
-                  relatedCollection,
-                  validateRelationships,
-                  value: item.value,
-                }),
-              }
-            }
-            return item
-          }
-
-          // Handle simple relationships
-          if (typeof field.relationTo === 'string') {
-            const relatedCollection = config.collections?.find(
-              ({ slug }) => slug === field.relationTo,
-            )
-            if (relatedCollection) {
-              return convertRelationshipValue({
-                operation,
-                relatedCollection,
-                validateRelationships,
-                value: item,
-              })
-            }
-          }
-
-          return item
-        })
+        const processedItems = processRelationshipValues(
+          itemsToAppend,
+          field,
+          config,
+          operation,
+          validateRelationships,
+        )
 
         if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
           if (
@@ -613,44 +628,13 @@ export const transform = ({
         // Transform $remove to MongoDB $pull with $in
         const itemsToRemove = Array.isArray(value.$remove) ? value.$remove : [value.$remove]
 
-        // Process relationship values through normal sanitization
-        const processedItems = itemsToRemove.map((item) => {
-          // Handle polymorphic relationships
-          if (Array.isArray(field.relationTo) && isValidRelationObject(item)) {
-            const relatedCollection = config.collections?.find(
-              ({ slug }) => slug === item.relationTo,
-            )
-            if (relatedCollection) {
-              return {
-                relationTo: item.relationTo,
-                value: convertRelationshipValue({
-                  operation,
-                  relatedCollection,
-                  validateRelationships,
-                  value: item.value,
-                }),
-              }
-            }
-            return item
-          }
-
-          // Handle simple relationships
-          if (typeof field.relationTo === 'string') {
-            const relatedCollection = config.collections?.find(
-              ({ slug }) => slug === field.relationTo,
-            )
-            if (relatedCollection) {
-              return convertRelationshipValue({
-                operation,
-                relatedCollection,
-                validateRelationships,
-                value: item,
-              })
-            }
-          }
-
-          return item
-        })
+        const processedItems = processRelationshipValues(
+          itemsToRemove,
+          field,
+          config,
+          operation,
+          validateRelationships,
+        )
 
         if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
           if (
@@ -660,7 +644,16 @@ export const transform = ({
           ) {
             Object.entries(value.$remove).forEach(([localeKey, localeData]) => {
               const localeItems = Array.isArray(localeData) ? localeData : [localeData]
-              $pull[`${parentPath}${field.name}.${localeKey}`] = { $in: localeItems }
+
+              const processedLocaleItems = processRelationshipValues(
+                localeItems,
+                field,
+                config,
+                operation,
+                validateRelationships,
+              )
+
+              $pull[`${parentPath}${field.name}.${localeKey}`] = { $in: processedLocaleItems }
             })
           }
         } else {

@@ -387,32 +387,73 @@ export const traverseFields = ({
         'hasMany' in field &&
         field.hasMany
       ) {
-        const itemsToAppend = Array.isArray(fieldData.$push) ? fieldData.$push : [fieldData.$push]
+        let itemsToAppend: unknown[]
 
-        itemsToAppend.forEach((item) => {
-          const relationshipToAppend: RelationshipToAppend = {
-            locale: isLocalized ? withinArrayOrBlockLocale : undefined,
-            path: relationshipPath,
-            value: item,
-          }
+        // Handle localized structure: { $push: { locale: [...] } }
+        if (
+          typeof fieldData.$push === 'object' &&
+          fieldData.$push !== null &&
+          !Array.isArray(fieldData.$push) &&
+          field.localized
+        ) {
+          // For localized fields, process each locale
+          Object.entries(fieldData.$push).forEach(([localeKey, localeData]) => {
+            const localeItems = Array.isArray(localeData) ? localeData : [localeData]
 
-          // Handle polymorphic relationships
-          if (
-            Array.isArray(field.relationTo) &&
-            item &&
-            typeof item === 'object' &&
-            'relationTo' in item
-          ) {
-            relationshipToAppend.relationTo = item.relationTo
-            relationshipToAppend.value = item.value
-          } else if (typeof field.relationTo === 'string') {
-            // Simple relationship
-            relationshipToAppend.relationTo = field.relationTo
-            relationshipToAppend.value = item
-          }
+            localeItems.forEach((item) => {
+              const relationshipToAppend: RelationshipToAppend = {
+                locale: localeKey,
+                path: relationshipPath,
+                value: item,
+              }
 
-          relationshipsToAppend.push(relationshipToAppend)
-        })
+              // Handle polymorphic relationships
+              if (
+                Array.isArray(field.relationTo) &&
+                item &&
+                typeof item === 'object' &&
+                'relationTo' in item
+              ) {
+                relationshipToAppend.relationTo = item.relationTo
+                relationshipToAppend.value = item.value
+              } else if (typeof field.relationTo === 'string') {
+                // Simple relationship
+                relationshipToAppend.relationTo = field.relationTo
+                relationshipToAppend.value = item
+              }
+
+              relationshipsToAppend.push(relationshipToAppend)
+            })
+          })
+        } else {
+          // Handle non-localized structure: { $push: [...] }
+          itemsToAppend = Array.isArray(fieldData.$push) ? fieldData.$push : [fieldData.$push]
+
+          itemsToAppend.forEach((item) => {
+            const relationshipToAppend: RelationshipToAppend = {
+              locale: isLocalized ? withinArrayOrBlockLocale : undefined,
+              path: relationshipPath,
+              value: item,
+            }
+
+            // Handle polymorphic relationships
+            if (
+              Array.isArray(field.relationTo) &&
+              item &&
+              typeof item === 'object' &&
+              'relationTo' in item
+            ) {
+              relationshipToAppend.relationTo = item.relationTo
+              relationshipToAppend.value = item.value
+            } else if (typeof field.relationTo === 'string') {
+              // Simple relationship
+              relationshipToAppend.relationTo = field.relationTo
+              relationshipToAppend.value = item
+            }
+
+            relationshipsToAppend.push(relationshipToAppend)
+          })
+        }
         return
       }
 
@@ -424,24 +465,53 @@ export const traverseFields = ({
         'hasMany' in field &&
         field.hasMany
       ) {
-        const itemsToRemove = Array.isArray(fieldData.$remove)
-          ? fieldData.$remove
-          : [fieldData.$remove]
+        // Handle localized structure: { $remove: { locale: [...] } }
+        if (
+          typeof fieldData.$remove === 'object' &&
+          fieldData.$remove !== null &&
+          !Array.isArray(fieldData.$remove) &&
+          field.localized
+        ) {
+          // For localized fields, process each locale
+          Object.entries(fieldData.$remove).forEach(([localeKey, localeData]) => {
+            const localeItems = Array.isArray(localeData) ? localeData : [localeData]
 
-        itemsToRemove.forEach((item) => {
-          const relationshipToDelete: RelationshipToDelete = {
-            itemToRemove: item,
-            locale: isLocalized ? withinArrayOrBlockLocale : undefined,
-            path: relationshipPath,
-          }
+            localeItems.forEach((item) => {
+              const relationshipToDelete: RelationshipToDelete = {
+                itemToRemove: item,
+                locale: localeKey,
+                path: relationshipPath,
+              }
 
-          // Store relationTo for simple relationships
-          if (typeof field.relationTo === 'string') {
-            relationshipToDelete.relationTo = field.relationTo
-          }
+              // Store relationTo for simple relationships
+              if (typeof field.relationTo === 'string') {
+                relationshipToDelete.relationTo = field.relationTo
+              }
 
-          relationshipsToDelete.push(relationshipToDelete)
-        })
+              relationshipsToDelete.push(relationshipToDelete)
+            })
+          })
+        } else {
+          // Handle non-localized structure: { $remove: [...] }
+          const itemsToRemove = Array.isArray(fieldData.$remove)
+            ? fieldData.$remove
+            : [fieldData.$remove]
+
+          itemsToRemove.forEach((item) => {
+            const relationshipToDelete: RelationshipToDelete = {
+              itemToRemove: item,
+              locale: isLocalized ? withinArrayOrBlockLocale : undefined,
+              path: relationshipPath,
+            }
+
+            // Store relationTo for simple relationships
+            if (typeof field.relationTo === 'string') {
+              relationshipToDelete.relationTo = field.relationTo
+            }
+
+            relationshipsToDelete.push(relationshipToDelete)
+          })
+        }
         return
       }
 
