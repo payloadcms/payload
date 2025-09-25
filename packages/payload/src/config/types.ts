@@ -1292,7 +1292,6 @@ export type Config = {
      * @default true
      */
     autoGenerate?: boolean
-
     /** Disable declare block in generated types file */
     declare?:
       | {
@@ -1306,6 +1305,13 @@ export type Config = {
           ignoreTSError?: boolean
         }
       | false
+
+    /**
+     * Override the default ID field type set by the database adapter for generated types.
+     * This is useful when switching between database adapters in order to ensure the generated types remain consistent,
+     * for example in the Payload monorepo.
+     */
+    defaultIDType?: 'number' | 'text'
 
     /** Filename to write the generated types to */
     outputFile?: string

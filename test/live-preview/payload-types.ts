@@ -336,7 +336,7 @@ export interface Page {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -351,7 +351,7 @@ export interface Page {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -382,7 +382,7 @@ export interface Page {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];

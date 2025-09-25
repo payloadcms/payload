@@ -29,7 +29,11 @@ export async function generateTypes(
 
   const i18n = await initI18n({ config: config.i18n, context: 'api', language })
 
-  const jsonSchema = configToJSONSchema(config, config.db.defaultIDType, i18n)
+  const jsonSchema = configToJSONSchema(
+    config,
+    config.typescript?.defaultIDType ?? config.db.defaultIDType,
+    i18n,
+  )
 
   const declare = `declare module 'payload' {\n  export interface GeneratedTypes extends Config {}\n}`
   const declareWithTSIgnoreError = `declare module 'payload' {\n  // @ts-ignore \n  export interface GeneratedTypes extends Config {}\n}`
