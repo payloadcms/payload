@@ -2,10 +2,8 @@
 
 import type { ViewDescriptionClientProps } from 'payload'
 
-import { ViewDescription as DefaultViewDescription } from '@payloadcms/ui'
+import { Banner, ViewDescription as DefaultViewDescription } from '@payloadcms/ui'
 import React from 'react'
-
-import { Banner } from '../Banner/index.js'
 
 export function ViewDescription({
   description = 'This is a custom view description component.',

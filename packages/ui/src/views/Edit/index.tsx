@@ -54,7 +54,6 @@ export type OnSaveContext = {
 // This is solely to support custom edit views which get server-rendered
 export function DefaultEditView({
   BeforeDocumentControls,
-  Description,
   EditMenuItems,
   PreviewButton,
   PublishButton,
@@ -678,7 +677,6 @@ export function DefaultEditView({
                     </Fragment>
                   )
                 }
-                Description={Description}
                 docPermissions={docPermissions}
                 fields={docConfig.fields}
                 forceSidebarWrap={isLivePreviewing}

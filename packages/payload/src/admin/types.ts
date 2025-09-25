@@ -559,6 +559,9 @@ export type FieldRow = {
 
 export type DocumentSlots = {
   BeforeDocumentControls?: React.ReactNode
+  /**
+   * @deprecated
+   */
   Description?: React.ReactNode
   EditMenuItems?: React.ReactNode
   PreviewButton?: React.ReactNode

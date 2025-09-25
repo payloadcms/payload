@@ -12,12 +12,8 @@ import type {
   SaveDraftButtonServerPropsOnly,
   ServerFunction,
   ServerProps,
-  StaticDescription,
-  ViewDescriptionClientProps,
-  ViewDescriptionServerPropsOnly,
 } from 'payload'
 
-import { ViewDescription } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 
 import { getDocumentPermissions } from './getDocumentPermissions.js'
@@ -77,33 +73,6 @@ export const renderDocumentSlots: (args: {
       Component: CustomPreviewButton,
       importMap: req.payload.importMap,
       serverProps: serverProps satisfies PreviewButtonServerPropsOnly,
-    })
-  }
-
-  const descriptionFromConfig =
-    collectionConfig?.admin?.description || globalConfig?.admin?.description
-
-  const staticDescription: StaticDescription =
-    typeof descriptionFromConfig === 'function'
-      ? descriptionFromConfig({ t: req.i18n.t })
-      : descriptionFromConfig
-
-  const CustomDescription =
-    collectionConfig?.admin?.components?.Description ||
-    globalConfig?.admin?.components?.elements?.Description
-
-  const hasDescription = CustomDescription || staticDescription
-
-  if (hasDescription) {
-    components.Description = RenderServerComponent({
-      clientProps: {
-        collectionSlug: collectionConfig?.slug,
-        description: staticDescription,
-      } satisfies ViewDescriptionClientProps,
-      Component: CustomDescription,
-      Fallback: ViewDescription,
-      importMap: req.payload.importMap,
-      serverProps: serverProps satisfies ViewDescriptionServerPropsOnly,
     })
   }
 

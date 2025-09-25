@@ -14,7 +14,6 @@ const baseClass = 'document-fields'
 type Args = {
   readonly AfterFields?: React.ReactNode
   readonly BeforeFields?: React.ReactNode
-  readonly Description?: React.ReactNode
   readonly docPermissions: SanitizedDocumentPermissions
   readonly fields: ClientField[]
   readonly forceSidebarWrap?: boolean
@@ -26,7 +25,6 @@ type Args = {
 export const DocumentFields: React.FC<Args> = ({
   AfterFields,
   BeforeFields,
-  Description,
   docPermissions,
   fields,
   forceSidebarWrap,
@@ -68,11 +66,6 @@ export const DocumentFields: React.FC<Args> = ({
       <div className={`${baseClass}__main`}>
         <Gutter className={`${baseClass}__edit`}>
           {isTrashed && <TrashBanner />}
-          {Description ? (
-            <header className={`${baseClass}__header`}>
-              <div className={`${baseClass}__sub-header`}>{Description}</div>
-            </header>
-          ) : null}
           {BeforeFields}
           <RenderFields
             className={`${baseClass}__fields`}
