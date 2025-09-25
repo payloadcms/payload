@@ -1,23 +1,22 @@
 'use client'
 
 import { AddressItem } from '@/components/addresses/AddressItem'
-import { Address } from '@/payload-types'
-import { useAddresses } from '@payloadcms/plugin-ecommerce/client/react'
+import { CreateAddressModal } from '@/components/addresses/CreateAddressModal'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { Address } from '@/payload-types'
+import { useAddresses } from '@payloadcms/plugin-ecommerce/client/react'
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { CreateAddressModal } from '@/components/addresses/CreateAddressModal'
 
 type Props = {
   selectedAddress?: Address
-  setAddress: React.Dispatch<React.SetStateAction<Address | undefined>>
+  setAddress: React.Dispatch<React.SetStateAction<Partial<Address> | undefined>>
   heading?: string
   description?: string
   setSubmit?: React.Dispatch<React.SetStateAction<() => void | Promise<void>>>
