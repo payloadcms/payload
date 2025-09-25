@@ -10,6 +10,8 @@ export const en: GenericTranslationsObject = {
     addressCompany: 'Company',
     addressCountry: 'Country',
     addresses: 'Addresses',
+    addressesCollectionDescription:
+      'Addresses are associated with customers are used to prefill shipping and billing when placing orders.',
     addressFirstName: 'First name',
     addressLastName: 'Last name',
     addressLine1: 'Address 1',
