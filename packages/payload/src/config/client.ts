@@ -223,16 +223,6 @@ export const createClientConfig = ({
 
         break
 
-      case 'experimental':
-        if (config.experimental) {
-          clientConfig.experimental = {}
-          if (config.experimental?.localizeStatus) {
-            clientConfig.experimental.localizeStatus = config.experimental.localizeStatus
-          }
-        }
-
-        break
-
       case 'folders':
         if (config.folders) {
           clientConfig.folders = {
