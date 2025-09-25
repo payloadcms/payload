@@ -197,6 +197,17 @@ export interface Post {
   id: string;
   title: string;
   category?: (string | null) | Category;
+  categories?: (string | Category)[] | null;
+  categoryPoly?: {
+    relationTo: 'categories';
+    value: string | Category;
+  } | null;
+  categoryPolyMany?:
+    | {
+        relationTo: 'categories';
+        value: string | Category;
+      }[]
+    | null;
   categoryCustomID?: (number | null) | CategoriesCustomId;
   localized?: string | null;
   text?: string | null;
@@ -326,7 +337,7 @@ export interface RelationA {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -352,7 +363,7 @@ export interface RelationB {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -449,6 +460,8 @@ export interface Place {
 export interface VirtualRelation {
   id: string;
   postTitle?: string | null;
+  postsTitles?: string[] | null;
+  postCategoriesTitles?: string[] | null;
   postTitleHidden?: string | null;
   postCategoryTitle?: string | null;
   postCategoryID?:
@@ -472,6 +485,7 @@ export interface VirtualRelation {
     | null;
   postLocalized?: string | null;
   post?: (string | null) | Post;
+  posts?: (string | Post)[] | null;
   customID?: (string | null) | CustomId;
   customIDValue?: string | null;
   updatedAt: string;
@@ -822,6 +836,9 @@ export interface CategoriesCustomIdSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  categories?: T;
+  categoryPoly?: T;
+  categoryPolyMany?: T;
   categoryCustomID?: T;
   localized?: T;
   text?: T;
@@ -1044,6 +1061,8 @@ export interface PlacesSelect<T extends boolean = true> {
  */
 export interface VirtualRelationsSelect<T extends boolean = true> {
   postTitle?: T;
+  postsTitles?: T;
+  postCategoriesTitles?: T;
   postTitleHidden?: T;
   postCategoryTitle?: T;
   postCategoryID?: T;
@@ -1051,6 +1070,7 @@ export interface VirtualRelationsSelect<T extends boolean = true> {
   postID?: T;
   postLocalized?: T;
   post?: T;
+  posts?: T;
   customID?: T;
   customIDValue?: T;
   updatedAt?: T;

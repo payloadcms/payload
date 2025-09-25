@@ -37,24 +37,21 @@ const relationshipSort = ({
   fields,
   locale,
   path,
-  sort,
+  previousField = '',
   sortAggregation,
-  sortDirection,
-  versions,
 }: {
   adapter: MongooseAdapter
   fields: FlattenedField[]
   locale?: string
   path: string
-  sort: Record<string, string>
+  previousField?: string
   sortAggregation: PipelineStage[]
-  sortDirection: SortDirection
   versions?: boolean
-}) => {
+}): null | string => {
   let currentFields = fields
   const segments = path.split('.')
   if (segments.length < 2) {
-    return false
+    return null
   }
 
   for (let i = 0; i < segments.length; i++) {
@@ -62,98 +59,87 @@ const relationshipSort = ({
     const field = currentFields.find((each) => each.name === segment)
 
     if (!field) {
-      return false
+      return null
     }
 
     if ('fields' in field) {
       currentFields = field.flattenedFields
-      if (field.name === 'version' && versions && i === 0) {
-        segments.shift()
-        i--
-      }
     } else if (
       (field.type === 'relationship' || field.type === 'upload') &&
       i !== segments.length - 1
     ) {
       const relationshipPath = segments.slice(0, i + 1).join('.')
-      let sortFieldPath = segments.slice(i + 1, segments.length).join('.')
-      if (sortFieldPath.endsWith('.id')) {
-        sortFieldPath = sortFieldPath.split('.').slice(0, -1).join('.')
-      }
-      if (Array.isArray(field.relationTo)) {
-        throw new APIError('Not supported')
+      const nextPath = segments.slice(i + 1, segments.length)
+      const relationshipFieldResult = getFieldByPath({ fields, path: relationshipPath })
+
+      if (
+        !relationshipFieldResult ||
+        !('relationTo' in relationshipFieldResult.field) ||
+        typeof relationshipFieldResult.field.relationTo !== 'string'
+      ) {
+        return null
       }
 
-      const foreignCollection = getCollection({ adapter, collectionSlug: field.relationTo })
-
-      const foreignFieldPath = getFieldByPath({
-        fields: foreignCollection.collectionConfig.flattenedFields,
-        path: sortFieldPath,
+      const { collectionConfig, Model } = getCollection({
+        adapter,
+        collectionSlug: relationshipFieldResult.field.relationTo,
       })
 
-      if (!foreignFieldPath) {
-        return false
+      let localizedRelationshipPath: string = relationshipFieldResult.localizedPath
+
+      if (locale && relationshipFieldResult.pathHasLocalized) {
+        localizedRelationshipPath = relationshipFieldResult.localizedPath.replace(
+          '<locale>',
+          locale,
+        )
       }
 
-      if (foreignFieldPath.pathHasLocalized && locale) {
-        sortFieldPath = foreignFieldPath.localizedPath.replace('<locale>', locale)
+      if (nextPath.join('.') === 'id') {
+        return `${previousField}${localizedRelationshipPath}`
       }
 
-      const as = `__${relationshipPath.replace(/\./g, '__')}`
+      const as = `__${previousField}${localizedRelationshipPath}`
 
-      // If we have not already sorted on this relationship yet, we need to add a lookup stage
-      if (!sortAggregation.some((each) => '$lookup' in each && each.$lookup.as === as)) {
-        let localField = versions ? `version.${relationshipPath}` : relationshipPath
+      sortAggregation.push({
+        $lookup: {
+          as: `__${previousField}${localizedRelationshipPath}`,
+          foreignField: '_id',
+          from: Model.collection.name,
+          localField: `${previousField}${localizedRelationshipPath}`,
+        },
+      })
 
-        if (adapter.usePipelineInSortLookup) {
-          const flattenedField = `__${localField.replace(/\./g, '__')}_lookup`
-          sortAggregation.push({
-            $addFields: {
-              [flattenedField]: `$${localField}`,
-            },
-          })
-          localField = flattenedField
-        }
-
-        sortAggregation.push({
-          $lookup: {
-            as,
-            foreignField: '_id',
-            from: foreignCollection.Model.collection.name,
-            localField,
-            ...(!adapter.usePipelineInSortLookup && {
-              pipeline: [
-                {
-                  $project: {
-                    [sortFieldPath]: true,
-                  },
-                },
-              ],
-            }),
-          },
+      if (nextPath.length > 1) {
+        const nextRes = relationshipSort({
+          adapter,
+          fields: collectionConfig.flattenedFields,
+          locale,
+          path: nextPath.join('.'),
+          previousField: `${as}.`,
+          sortAggregation,
         })
 
-        if (adapter.usePipelineInSortLookup) {
-          sortAggregation.push({
-            $unset: localField,
-          })
+        if (nextRes) {
+          return nextRes
         }
+
+        return `${as}.${nextPath.join('.')}`
       }
 
-      if (!adapter.usePipelineInSortLookup) {
-        const lookup = sortAggregation.find(
-          (each) => '$lookup' in each && each.$lookup.as === as,
-        ) as PipelineStage.Lookup
-        const pipeline = lookup.$lookup.pipeline![0] as PipelineStage.Project
-        pipeline.$project[sortFieldPath] = true
+      const nextField = getFieldByPath({
+        fields: collectionConfig.flattenedFields,
+        path: nextPath[0]!,
+      })
+
+      if (nextField && nextField.pathHasLocalized && locale) {
+        return `${as}.${nextField.localizedPath.replace('<locale>', locale)}`
       }
 
-      sort[`${as}.${sortFieldPath}`] = sortDirection
-      return true
+      return `${as}.${nextPath[0]}`
     }
   }
 
-  return false
+  return null
 }
 
 export const buildSortParam = ({
@@ -217,20 +203,20 @@ export const buildSortParam = ({
       return acc
     }
 
-    if (
-      sortAggregation &&
-      relationshipSort({
+    if (sortAggregation) {
+      const sortRelProperty = relationshipSort({
         adapter,
         fields,
         locale,
         path: sortProperty,
-        sort: acc,
         sortAggregation,
-        sortDirection,
         versions,
       })
-    ) {
-      return acc
+
+      if (sortRelProperty) {
+        acc[sortRelProperty] = sortDirection
+        return acc
+      }
     }
 
     const localizedProperty = getLocalizedSortProperty({

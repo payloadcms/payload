@@ -267,14 +267,12 @@ export const createOperation = async <
         password: data.password as string,
         payload: req.payload,
         req,
-        select,
       })
     } else {
       doc = await payload.db.create({
         collection: collectionConfig.slug,
         data: resultWithLocales,
         req,
-        select,
       })
     }
 
@@ -291,7 +289,6 @@ export const createOperation = async <
         autosave,
         collection: collectionConfig,
         docWithLocales: result,
-        locale,
         operation: 'create',
         payload,
         publishSpecificLocale,

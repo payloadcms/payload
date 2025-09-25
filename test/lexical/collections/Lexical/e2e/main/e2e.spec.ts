@@ -7,7 +7,6 @@ import type {
 import type { BrowserContext, Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { except } from 'drizzle-orm/mysql-core'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -537,13 +536,11 @@ describe('lexicalMain', () => {
     const secondUploadNode = richTextField.locator('.lexical-upload').nth(1)
     await secondUploadNode.scrollIntoViewIfNeeded()
     await expect(secondUploadNode).toBeVisible()
+    // Focus the upload node
+    await secondUploadNode.click()
 
-    await expect(secondUploadNode.locator('.lexical-upload__bottomRow')).toContainText(
-      'payload-1.jpg',
-    )
-    await expect(secondUploadNode.locator('.lexical-upload__collectionLabel')).toContainText(
-      'Upload',
-    )
+    await expect(secondUploadNode.locator('.lexical-upload__filename')).toHaveText('payload-1.jpg')
+    await expect(secondUploadNode.locator('.lexical-upload__collectionLabel')).toHaveText('Upload')
   })
 
   // This reproduces https://github.com/payloadcms/payload/issues/7128
@@ -590,8 +587,10 @@ describe('lexicalMain', () => {
     const newUploadNode = richTextField.locator('.lexical-upload').nth(1)
     await newUploadNode.scrollIntoViewIfNeeded()
     await expect(newUploadNode).toBeVisible()
+    await newUploadNode.click() // Focus the upload node
+    await newUploadNode.hover()
 
-    await expect(newUploadNode.locator('.lexical-upload__bottomRow')).toContainText('payload.jpg')
+    await expect(newUploadNode.locator('.lexical-upload__filename')).toContainText('payload.jpg')
 
     // Click on button with class lexical-upload__upload-drawer-toggler
     await newUploadNode.locator('.lexical-upload__upload-drawer-toggler').first().click()
@@ -630,6 +629,9 @@ describe('lexicalMain', () => {
       .nth(1)
     await reloadedUploadNode.scrollIntoViewIfNeeded()
     await expect(reloadedUploadNode).toBeVisible()
+    await reloadedUploadNode.click() // Focus the upload node
+    await reloadedUploadNode.hover()
+
     await reloadedUploadNode.locator('.lexical-upload__upload-drawer-toggler').first().click()
     const reloadedUploadExtraFieldsDrawer = page
       .locator('dialog[id^=drawer_1_lexical-upload-drawer-]')
@@ -1209,7 +1211,9 @@ describe('lexicalMain', () => {
 
     await expect(slashMenuPopover).toBeHidden()
 
-    await expect(newUploadNode.locator('.lexical-upload__bottomRow')).toContainText('payload.png')
+    await newUploadNode.hover()
+
+    await expect(newUploadNode.locator('.lexical-upload__filename')).toHaveText('payload.png')
 
     await page.keyboard.press('Enter') // floating toolbar needs to appear with enough distance to the upload node, otherwise clicking may fail
     await page.keyboard.press('Enter')
@@ -1446,6 +1450,29 @@ describe('lexicalMain', () => {
     page.getByText('Creating new User')
   })
 
+  test('ensure custom Description component is rendered only once', async () => {
+    await navigateToLexicalFields()
+    const lexicalWithBlocks = page.locator('.rich-text-lexical').nth(2)
+    await lexicalWithBlocks.scrollIntoViewIfNeeded()
+    await expect(lexicalWithBlocks).toBeVisible()
+
+    await expect(lexicalWithBlocks.locator('.lexical-blocks-custom-description')).toHaveCount(1)
+    await expect(lexicalWithBlocks.locator('.lexical-blocks-custom-description')).toBeVisible()
+
+    await expect(lexicalWithBlocks.locator('.field-description')).toHaveCount(0)
+  })
+
+  test('ensure admin.description property is rendered', async () => {
+    await navigateToLexicalFields()
+    const lexicalSimple = page.locator('.rich-text-lexical').nth(1)
+    await lexicalSimple.scrollIntoViewIfNeeded()
+    await expect(lexicalSimple).toBeVisible()
+
+    await expect(lexicalSimple.locator('.field-description')).toHaveCount(1)
+    await expect(lexicalSimple.locator('.field-description')).toBeVisible()
+    await expect(lexicalSimple.locator('.field-description')).toHaveText('A simple lexical field')
+  })
+
   test('ensure links can created from clipboard and deleted', async () => {
     await navigateToLexicalFields()
     const richTextField = page.locator('.rich-text-lexical').first()
@@ -1534,12 +1561,9 @@ describe('lexicalMain', () => {
 
     // test
     await navigateToLexicalFields()
-    const bottomOfUploadNode = page
-      .locator('.lexical-upload div')
-      .filter({ hasText: /^payload\.jpg$/ })
-      .first()
-    await bottomOfUploadNode.click()
-    await expectInsideSelectedDecorator(bottomOfUploadNode)
+    const uploadNode = page.locator('.lexical-upload[data-filename="payload.jpg"]').first()
+    await uploadNode.click()
+    await expectInsideSelectedDecorator(uploadNode)
 
     const textNode = page.getByText('Upload Node:', { exact: true })
     await textNode.click()

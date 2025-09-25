@@ -1,4 +1,9 @@
 import type {
+  DefaultNodeTypes,
+  DefaultTypedEditorState,
+  TypedEditorState,
+} from '@payloadcms/richtext-lexical'
+import type {
   BulkOperationResult,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
@@ -171,6 +176,109 @@ describe('Types testing', () => {
         Component: string
         path: `/${string}`
       }>()
+    })
+  })
+
+  describe('lexical', () => {
+    type _Hardcoded_DefaultNodeTypes =
+      | 'autolink'
+      | 'heading'
+      | 'horizontalrule'
+      | 'linebreak'
+      | 'link'
+      | 'list'
+      | 'listitem'
+      | 'paragraph'
+      | 'quote'
+      | 'relationship'
+      | 'tab'
+      | 'text'
+      | 'upload'
+
+    test('ensure TypedEditorState node type without generic is string', () => {
+      expect<TypedEditorState['root']['children'][number]['type']>().type.toBe<string>()
+    })
+
+    test('ensure TypedEditorState<1 generic> node type is correct', () => {
+      expect<
+        TypedEditorState<{
+          type: 'custom-node'
+          version: 1
+        }>['root']['children'][number]['type']
+      >().type.toBe<'custom-node'>()
+    })
+
+    test('ensure TypedEditorState<2 generics> node type is correct', () => {
+      expect<
+        TypedEditorState<
+          | {
+              type: 'custom-node'
+              version: 1
+            }
+          | {
+              type: 'custom-node-2'
+              version: 1
+            }
+        >['root']['children'][number]['type']
+      >().type.toBe<'custom-node' | 'custom-node-2'>()
+    })
+
+    test('ensure DefaultTypedEditorState node type is a union of all possible node types', () => {
+      expect<
+        DefaultTypedEditorState['root']['children'][number]['type']
+      >().type.toBe<_Hardcoded_DefaultNodeTypes>()
+    })
+
+    test('ensure TypedEditorState<DefaultNodeTypes> node type is identical to DefaultTypedEditorState', () => {
+      expect<
+        TypedEditorState<DefaultNodeTypes>['root']['children'][number]['type']
+      >().type.toBe<_Hardcoded_DefaultNodeTypes>()
+    })
+
+    test('ensure DefaultTypedEditorState<custom node> adds custom node type to union of default nodes', () => {
+      expect<
+        DefaultTypedEditorState<{
+          type: 'custom-node'
+          version: 1
+        }>['root']['children'][number]['type']
+      >().type.toBe<'custom-node' | _Hardcoded_DefaultNodeTypes>()
+    })
+
+    test('ensure DefaultTypedEditorState<multiple custom nodes> adds custom node types to union of default nodes', () => {
+      expect<
+        DefaultTypedEditorState<
+          | {
+              type: 'custom-node'
+              version: 1
+            }
+          | {
+              type: 'custom-node-2'
+              version: 1
+            }
+        >['root']['children'][number]['type']
+      >().type.toBe<'custom-node' | 'custom-node-2' | _Hardcoded_DefaultNodeTypes>()
+    })
+
+    test("ensure link node automatically narrows type so that node accepts fields property if type === 'link' is checked", () => {
+      type NodeType = DefaultTypedEditorState['root']['children'][number]
+
+      const node = {
+        type: 'link',
+      } as NodeType
+
+      if (node.type === 'link') {
+        expect(node).type.toHaveProperty('fields')
+      } else {
+        expect(node).type.not.toHaveProperty('fields')
+      }
+    })
+
+    test('ensure generated richText types can be assigned to DefaultTypedEditorState type', () => {
+      // If there is a function that expects DefaultTypedEditorState, you should be able to assign the generated type to it
+      // This ensures that data can be passed directly form the payload local API to a function that expects DefaultTypedEditorState
+      type GeneratedRichTextType = Post['richText']
+
+      expect<DefaultTypedEditorState>().type.toBeAssignableWith<GeneratedRichTextType>()
     })
   })
 })

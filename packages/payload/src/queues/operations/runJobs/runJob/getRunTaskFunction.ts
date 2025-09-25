@@ -95,7 +95,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           shouldRestore = false
         } else if (typeof finalRetriesConfig?.shouldRestore === 'function') {
           shouldRestore = await finalRetriesConfig.shouldRestore({
-            input: input!,
+            input,
             job,
             req,
             taskStatus,
@@ -182,7 +182,12 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       }
 
       if (taskConfig?.onSuccess) {
-        await taskConfig.onSuccess()
+        await taskConfig.onSuccess({
+          input,
+          job,
+          req,
+          taskStatus,
+        })
       }
 
       const newLogItem: JobLog = {
