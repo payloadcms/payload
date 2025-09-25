@@ -9,7 +9,6 @@ export const PostsCollection: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     enableListViewSelectAPI: true,
-    description: 'A collection to test the Lexical rich text editor',
   },
   fields: [
     {
