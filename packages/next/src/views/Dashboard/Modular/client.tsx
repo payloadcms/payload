@@ -59,7 +59,7 @@ export function ModularDashboardClient({ widgets }: { widgets: RenderedWidget[] 
 
     return {
       h: widget.height,
-      i: widget.widgetSlug,
+      i: `${widget.widgetSlug}-${index}`,
       maxH: 3,
       maxW: 12,
       minH: 1,
@@ -97,11 +97,11 @@ export function ModularDashboardClient({ widgets }: { widgets: RenderedWidget[] 
         isDraggable={isEditing}
         isResizable={isEditing}
         layouts={{ lg: layout }}
-        preventCollision // not sure if this gives a better UX
+        // preventCollision // not sure if this gives a better UX
         rowHeight={(BREAKPOINT / 12) * 3}
       >
-        {widgets.map((widget) => (
-          <div className="widget" key={widget.widgetSlug}>
+        {widgets.map((widget, index) => (
+          <div className="widget" key={`${widget.widgetSlug}-${index}`}>
             <div className="widget-content">{widget.component}</div>
           </div>
         ))}

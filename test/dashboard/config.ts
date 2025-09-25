@@ -32,20 +32,43 @@ export default buildConfigWithDefaults({
         // ({ req: { user } }) =>
         [
           {
-            widgetSlug: 'text-block',
+            widgetSlug: 'count',
             width: 3,
             height: 1,
             // data: {
             //   interval: 'week',
             // },
           },
+          {
+            widgetSlug: 'count',
+            width: 3,
+            height: 1,
+          },
+          {
+            widgetSlug: 'count',
+            width: 3,
+            height: 1,
+          },
+          {
+            widgetSlug: 'count',
+            width: 3,
+            height: 1,
+          },
+          {
+            widgetSlug: 'revenue',
+            width: 12,
+            height: 2,
+          },
         ],
       widgets: [
         {
-          slug: 'text-block',
+          slug: 'count',
           ComponentPath: './components/Count.tsx#default',
-          // fields: [
-          // ]
+          // fields: []
+        },
+        {
+          slug: 'revenue',
+          ComponentPath: './components/Revenue.tsx#default',
         },
       ],
     },
