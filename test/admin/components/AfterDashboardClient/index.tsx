@@ -1,8 +1,9 @@
 import type { CustomComponent, PayloadServerReactComponent } from 'payload'
 
-import { Banner } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
+
+import { Banner } from '../Banner/index.js'
 
 export const AfterDashboardClient: PayloadServerReactComponent<CustomComponent> = ({ payload }) => {
   return (

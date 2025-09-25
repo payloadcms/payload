@@ -1,14 +1,16 @@
 'use client'
 
-import { Banner, PopupList } from '@payloadcms/ui'
+import { PopupList } from '@payloadcms/ui'
+
+import { Banner } from '../Banner/index.js'
 
 export const ListMenuItemsExample = () => {
   return (
     <>
       <PopupList.ButtonGroup>
-        <Banner>listMenuItems</Banner>
-        <Banner>Many of them</Banner>
-        <Banner>Ok last one</Banner>
+        <Banner message="listMenuItems" />
+        <Banner message="Many of them" />
+        <Banner message="Ok last one" />
       </PopupList.ButtonGroup>
     </>
   )

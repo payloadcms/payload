@@ -1,13 +1,15 @@
 'use client'
 
-import { Banner, PopupList } from '@payloadcms/ui'
+import { PopupList } from '@payloadcms/ui'
+
+import { Banner } from '../Banner/index.js'
 
 export const EditMenuItems = () => {
   return (
     <>
       <PopupList.ButtonGroup>
         <PopupList.Button>Custom Edit Menu Item</PopupList.Button>
-        <Banner>Another using a banner</Banner>
+        <Banner message="Another using a banner" />
         <div>Another in a plain div</div>
       </PopupList.ButtonGroup>
     </>
