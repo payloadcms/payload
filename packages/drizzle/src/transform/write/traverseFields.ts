@@ -379,17 +379,15 @@ export const traverseFields = ({
     if (field.type === 'relationship' || field.type === 'upload') {
       const relationshipPath = `${path || ''}${field.name}`
 
-      // Handle $append operation for relationship fields
+      // Handle $push operation for relationship fields
       if (
         fieldData &&
         typeof fieldData === 'object' &&
-        '$append' in fieldData &&
+        '$push' in fieldData &&
         'hasMany' in field &&
         field.hasMany
       ) {
-        const itemsToAppend = Array.isArray(fieldData.$append)
-          ? fieldData.$append
-          : [fieldData.$append]
+        const itemsToAppend = Array.isArray(fieldData.$push) ? fieldData.$push : [fieldData.$push]
 
         itemsToAppend.forEach((item) => {
           const relationshipToAppend: RelationshipToAppend = {

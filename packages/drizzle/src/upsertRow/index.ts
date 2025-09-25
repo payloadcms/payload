@@ -360,7 +360,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     }
 
     // //////////////////////////////////
-    // HANDLE RELATIONSHIP $append OPERATIONS
+    // HANDLE RELATIONSHIP $push OPERATIONS
     // //////////////////////////////////
 
     if (rowToInsert.relationshipsToAppend.length > 0) {

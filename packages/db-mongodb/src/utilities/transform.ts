@@ -525,7 +525,7 @@ export const transform = ({
       }
     }
 
-    // Handle $append operation for relationship fields (converts to $addToSet)
+    // Handle $push operation for relationship fields (converts to $addToSet)
     if (
       $addToSet &&
       (field.type === 'relationship' || field.type === 'upload') &&
@@ -536,9 +536,9 @@ export const transform = ({
       ref[field.name]
     ) {
       const value = ref[field.name]
-      if (value && typeof value === 'object' && '$append' in value) {
-        // Transform $append to MongoDB $addToSet with $each
-        const itemsToAppend = Array.isArray(value.$append) ? value.$append : [value.$append]
+      if (value && typeof value === 'object' && '$push' in value) {
+        // Transform $push to MongoDB $addToSet with $each
+        const itemsToAppend = Array.isArray(value.$push) ? value.$push : [value.$push]
 
         // Process relationship values through normal sanitization
         const processedItems = itemsToAppend.map((item) => {
@@ -581,11 +581,11 @@ export const transform = ({
 
         if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
           if (
-            typeof value.$append === 'object' &&
-            value.$append !== null &&
-            !Array.isArray(value.$append)
+            typeof value.$push === 'object' &&
+            value.$push !== null &&
+            !Array.isArray(value.$push)
           ) {
-            Object.entries(value.$append).forEach(([localeKey, localeData]) => {
+            Object.entries(value.$push).forEach(([localeKey, localeData]) => {
               const localeItems = Array.isArray(localeData) ? localeData : [localeData]
               $addToSet[`${parentPath}${field.name}.${localeKey}`] = { $each: localeItems }
             })

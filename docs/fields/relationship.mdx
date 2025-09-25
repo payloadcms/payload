@@ -388,7 +388,7 @@ await payload.db.updateMany({
   collection: 'posts',
   where: { status: { equals: 'published' } },
   data: {
-    categories: { $append: ['featured', 'trending'] },
+    categories: { $push: ['featured', 'trending'] },
   },
 })
 ```
@@ -415,7 +415,7 @@ await payload.db.updateOne({
   id: 'post123',
   data: {
     relatedItems: {
-      $append: [
+      $push: [
         { relationTo: 'categories', value: 'category-id' },
         { relationTo: 'tags', value: 'tag-id' },
       ],

@@ -3827,8 +3827,8 @@ describe('database', () => {
     })
   })
 
-  describe('relationship $append', () => {
-    it('should allow appending relationships using $append with single value', async () => {
+  describe('relationship $push', () => {
+    it('should allow appending relationships using $push with single value', async () => {
       // First create some category documents
       const cat1 = await payload.create({
         collection: 'categories',
@@ -3851,13 +3851,13 @@ describe('database', () => {
       expect(post.categories).toHaveLength(1)
       expect(post.categories[0].id || post.categories[0]).toBe(cat1.id)
 
-      // Append another relationship using $append
+      // Append another relationship using $push
       const result = await payload.db.updateOne({
         collection: 'posts',
         id: post.id,
         data: {
           categories: {
-            $append: cat2.id,
+            $push: cat2.id,
           },
         },
       })
@@ -3869,7 +3869,7 @@ describe('database', () => {
       expect(resultIds).toContain(cat2.id)
     })
 
-    it('should allow appending relationships using $append with array', async () => {
+    it('should allow appending relationships using $push with array', async () => {
       // Create category documents
       const cat1 = await payload.create({
         collection: 'categories',
@@ -3893,13 +3893,13 @@ describe('database', () => {
         },
       })
 
-      // Append multiple relationships using $append
+      // Append multiple relationships using $push
       const result = await payload.db.updateOne({
         collection: 'posts',
         id: post.id,
         data: {
           categories: {
-            $append: [cat2.id, cat3.id],
+            $push: [cat2.id, cat3.id],
           },
         },
       })
@@ -3912,7 +3912,7 @@ describe('database', () => {
       expect(resultIds).toContain(cat3.id)
     })
 
-    it('should prevent duplicates when using $append', async () => {
+    it('should prevent duplicates when using $push', async () => {
       // Create category documents
       const cat1 = await payload.create({
         collection: 'categories',
@@ -3938,7 +3938,7 @@ describe('database', () => {
         id: post.id,
         data: {
           categories: {
-            $append: [cat1.id, cat2.id], // Appending existing items
+            $push: [cat1.id, cat2.id], // Appending existing items
           },
         },
       })
@@ -3985,7 +3985,7 @@ describe('database', () => {
         },
         data: {
           categories: {
-            $append: cat2.id,
+            $push: cat2.id,
           },
         },
       })

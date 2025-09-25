@@ -1998,8 +1998,8 @@ describe('Relationships', () => {
   })
 
   describe('Polymorphic Array Operations', () => {
-    describe('polymorphic $append operations', () => {
-      it('should append polymorphic relationships using $append', async () => {
+    describe('polymorphic $push operations', () => {
+      it('should append polymorphic relationships using $push', async () => {
         // Create a movie for the polymorphic relationship
         const movie = await payload.create({
           collection: 'movies',
@@ -2032,13 +2032,13 @@ describe('Relationships', () => {
           data: { title: 'Test Movie 2' },
         })
 
-        // Append another polymorphic relationship using $append
+        // Append another polymorphic relationship using $push
         const result = await payload.db.updateOne({
           collection: 'object-writes',
           id: doc.id,
           data: {
             manyPoly: {
-              $append: [
+              $push: [
                 {
                   relationTo: 'movies',
                   value: movie2.id,
@@ -2060,7 +2060,7 @@ describe('Relationships', () => {
         })
       })
 
-      it('should prevent duplicates in polymorphic relationships with $append', async () => {
+      it('should prevent duplicates in polymorphic relationships with $push', async () => {
         // Create a movie
         const movie = await payload.create({
           collection: 'movies',
@@ -2087,7 +2087,7 @@ describe('Relationships', () => {
           id: doc.id,
           data: {
             manyPoly: {
-              $append: [
+              $push: [
                 {
                   relationTo: 'movies',
                   value: movie.id, // Same relationship
@@ -2215,7 +2215,7 @@ describe('Relationships', () => {
       })
     })
 
-    it('should handle localized relationships with $append', async () => {
+    it('should handle localized relationships with $push', async () => {
       // Create movies for testing
       const movie1 = await payload.create({
         collection: 'movies',
@@ -2247,7 +2247,7 @@ describe('Relationships', () => {
         id: doc.id,
         data: {
           manyPoly: {
-            $append: [
+            $push: [
               {
                 relationTo: 'movies',
                 value: movie2.id,
