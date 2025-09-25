@@ -79,6 +79,38 @@ export const seed: Config['onInit'] = async (payload) => {
     },
   })
 
+  await payload.create({
+    collection: 'relationships',
+    data: {
+      title: 'Owned by blue dog',
+      tenant: blueDogTenant.id,
+    },
+  })
+
+  await payload.create({
+    collection: 'relationships',
+    data: {
+      title: 'Owned by steelcat',
+      tenant: steelCatTenant.id,
+    },
+  })
+
+  await payload.create({
+    collection: 'relationships',
+    data: {
+      title: 'Owned by bar with no ac',
+      tenant: anchorBarTenant.id,
+    },
+  })
+
+  await payload.create({
+    collection: 'relationships',
+    data: {
+      title: 'Owned by public tenant',
+      tenant: publicTenant.id,
+    },
+  })
+
   // Create steel cat menu items
   await payload.create({
     collection: menuItemsSlug,

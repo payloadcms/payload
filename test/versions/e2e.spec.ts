@@ -1097,7 +1097,7 @@ describe('Versions', () => {
 
       await textField.fill('spanish draft')
       await saveDocAndAssert(page, '#action-save-draft')
-      await expect(status).toContainText('Draft')
+      await expect(status).toContainText('Changed')
 
       await changeLocale(page, 'en')
       await textField.fill('english published')
@@ -1130,7 +1130,7 @@ describe('Versions', () => {
 
       const publishedDoc = data.docs[0]
 
-      expect(publishedDoc?.text).toStrictEqual({
+      expect(publishedDoc.text).toStrictEqual({
         en: 'english published',
         es: 'spanish published',
       })

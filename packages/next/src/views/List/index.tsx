@@ -280,6 +280,7 @@ export const renderListView = async (
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,
           query,
+          req,
           useAsTitle: collectionConfig.admin.useAsTitle,
           viewType,
         }))

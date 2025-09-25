@@ -69,6 +69,8 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
   return (
     <Modal
       className={[baseClass, className].filter(Boolean).join(' ')}
+      // Fixes https://github.com/payloadcms/payload/issues/13778
+      closeOnBlur={false}
       slug={modalSlug}
       style={{
         zIndex: drawerZBase + editDepth,
