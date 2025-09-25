@@ -13,7 +13,6 @@ import type {
   Currency,
   EcommerceContextType,
 } from '../../types/index.js'
-import type { TypedEcommerce } from '../../types/utilities.js'
 
 const defaultContext: EcommerceContextType = {
   addItem: async () => {},
