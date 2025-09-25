@@ -92,7 +92,6 @@ describe('@payloadcms/plugin-multi-tenant', () => {
             tenant: anchorBarTenantID,
           },
           req: {
-            // Relationship won't be filtered by tenant based on the tenant of document, but the tenant of the cookie
             headers: new Headers([['cookie', `payload-tenant=${anchorBarTenantID}`]]),
           },
         })
@@ -112,7 +111,6 @@ describe('@payloadcms/plugin-multi-tenant', () => {
               tenant: anchorBarTenantID,
             },
             req: {
-              // Relationship won't be filtered by tenant based on the tenant of document, but the tenant of the cookie
               headers: new Headers([['cookie', `payload-tenant=${anchorBarTenantID}`]]),
             },
           }),
