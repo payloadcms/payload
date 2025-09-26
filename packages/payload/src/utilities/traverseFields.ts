@@ -473,7 +473,7 @@ export const traverseFields = ({
           isTopLevel: false,
           leavesFirst,
           parentIsLocalized,
-          parentPath: field.name ? `${parentPath}${field.name}.` : parentPath,
+          parentPath: 'name' in field && field.name ? `${parentPath}${field.name}.` : parentPath,
           parentRef: currentParentRef,
           ref: currentRef,
         })
@@ -504,8 +504,8 @@ export const traverseFields = ({
         const nestedRef = ref[fieldName as keyof typeof ref] as Record<string, unknown>
 
         // Move the value to the nested structure
-        nestedRef[remainingPath] = ref[key]
-        delete ref[key]
+        nestedRef[remainingPath] = (ref as Record<string, unknown>)[key]
+        delete (ref as Record<string, unknown>)[key]
 
         // Recursively process the newly created nested structure
         // The field traversal will naturally handle it if the field exists in the schema
