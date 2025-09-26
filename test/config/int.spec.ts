@@ -126,6 +126,11 @@ describe('Config', () => {
         description: 'The blockOne of this page',
       })
     })
+
+    it('properly merges collection.labels with defaults', () => {
+      const [collection] = payload.config.collections
+      expect(collection?.labels).toEqual({ plural: 'Pages', singular: 'Pages' })
+    })
   })
 
   describe('global config', () => {
