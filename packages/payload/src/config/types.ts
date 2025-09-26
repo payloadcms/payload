@@ -731,6 +731,14 @@ export type AfterErrorHook = (
 ) => AfterErrorResult | Promise<AfterErrorResult>
 
 /**
+ * Experimental features.
+ * These may be unstable and may change or be removed in future releases.
+ */
+export type ExperimentalConfig = {
+  localizeMeta?: boolean
+}
+
+/**
  * This is the central configuration
  *
  * @see https://payloadcms.com/docs/configuration/overview
@@ -1066,6 +1074,12 @@ export type Config = {
    *
    * @experimental This feature may change in minor versions until it is fully stable
    */
+  /**
+   * Configure experimental features for Payload.
+   *
+   * These features may be unstable and may change or be removed in future releases.
+   */
+  experimental?: ExperimentalConfig
   folders?: false | RootFoldersConfiguration
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs

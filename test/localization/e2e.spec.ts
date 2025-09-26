@@ -681,6 +681,33 @@ describe('Localization', () => {
     await page.goto(noLocalizedFieldsURL.create)
     await expect(page.locator('#publish-locale')).toHaveCount(0)
   })
+
+  test('should show localized status in collection list', async () => {
+    await page.goto(urlPostsWithDrafts.create)
+    const engTitle = 'Eng published'
+    const spanTitle = 'Spanish draft'
+
+    await changeLocale(page, defaultLocale)
+    await fillValues({ title: engTitle })
+    await saveDocAndAssert(page)
+
+    await changeLocale(page, spanishLocale)
+    await fillValues({ title: spanTitle })
+    await saveDocAndAssert(page, '#action-save-draft')
+
+    await page.goto(urlPostsWithDrafts.list)
+
+    const columns = page.getByRole('button', { name: 'Columns' })
+    await columns.click()
+    await page.locator('#_status').click()
+
+    await expect(page.locator('.row-1 .cell-title')).toContainText(spanTitle)
+    await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
+
+    await changeLocale(page, defaultLocale)
+    await expect(page.locator('.row-1 .cell-title')).toContainText(engTitle)
+    await expect(page.locator('.row-1 .cell-_status')).toContainText('Published')
+  })
 })
 
 async function createLocalizedArrayItem(page: Page, url: AdminUrlUtil) {

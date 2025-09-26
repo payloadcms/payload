@@ -2,6 +2,7 @@ import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
+import { baseLocalizedMetaFields } from '../../fields/baseFields/baseLocalizedMeta.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
@@ -123,6 +124,10 @@ export const sanitizeGlobal = async (
       }
 
       global.fields = mergeBaseFields(global.fields, baseVersionFields)
+    }
+
+    if (config.localization && config.experimental?.localizeMeta) {
+      global.fields = mergeBaseFields(global.fields, baseLocalizedMetaFields(config, false))
     }
   }
 

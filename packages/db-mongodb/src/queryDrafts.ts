@@ -179,6 +179,17 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   for (let i = 0; i < result.docs.length; i++) {
     const id = result.docs[i].parent
+
+    const localizedMeta = result.docs[i].version.localizedMeta || {}
+
+    if (locale) {
+      if (localizedMeta[locale]) {
+        result.docs[i].status = localizedMeta[locale].status
+        result.docs[i].version._status = localizedMeta[locale].status
+        result.docs[i].version.updatedAt = localizedMeta[locale].updatedAt
+      }
+    }
+
     result.docs[i] = result.docs[i].version ?? {}
     result.docs[i].id = id
   }
