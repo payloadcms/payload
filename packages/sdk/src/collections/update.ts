@@ -11,6 +11,7 @@ import type {
   SelectFromCollectionSlug,
   TransformCollectionWithSelect,
   TypedLocale,
+  UploadCollectionSlug,
 } from '../types.js'
 
 import { resolveFileFromOptions } from '../utilities/resolveFileFromOptions.js'
@@ -20,17 +21,48 @@ export type UpdateBaseOptions<
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectType,
 > = {
+  /**
+   * Whether the current update should be marked as from autosave.
+   * `versions.drafts.autosave` should be specified.
+   */
   autosave?: boolean
+  /**
+   * the Collection slug to operate against.
+   */
   collection: TSlug
+  /**
+   * The document / documents data to update.
+   */
   data: DeepPartial<RequiredDataFromCollectionSlug<T, TSlug>>
+  /**
+   * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
+   */
   depth?: number
+  /**
+   * Update documents to a draft.
+   */
   draft?: boolean
+  /**
+   * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
+   */
   fallbackLocale?: false | TypedLocale<T>
-  file?: File | string
-  filePath?: string
+  /** File Blob object or URL to the file. Only for upload collections */
+  file?: TSlug extends UploadCollectionSlug<T> ? Blob | string : never
+  /**
+   * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
+   */
   locale?: TypedLocale<T>
+  /**
+   * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
+   */
   populate?: PopulateType<T>
+  /**
+   * Publish the document / documents with a specific locale.
+   */
   publishSpecificLocale?: string
+  /**
+   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
+   */
   select?: TSelect
 }
 

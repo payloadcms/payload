@@ -119,6 +119,9 @@ type Args = {
   fetch?: typeof fetch
 }
 
+/**
+ * @experimental
+ */
 export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes> {
   baseInit: RequestInit
 
