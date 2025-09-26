@@ -36,7 +36,7 @@
       padding-bottom: 0;
     }
 
-    &__description {
+    &__after-header {
       padding-top: var(--base);
     }
 
@@ -51,6 +51,10 @@
 
       &__title {
         width: 100%;
+      }
+
+      &__after-header {
+        padding-top: calc(var(--base) / 4);
       }
     }
 

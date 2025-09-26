@@ -14,14 +14,14 @@ import './index.scss'
 const baseClass = `doc-header`
 
 export const DocumentHeader: React.FC<{
+  AfterHeader?: React.ReactNode
   collectionConfig?: SanitizedCollectionConfig
-  Description?: React.ReactNode
   globalConfig?: SanitizedGlobalConfig
   hideTabs?: boolean
   permissions: SanitizedPermissions
   req: PayloadRequest
 }> = (props) => {
-  const { collectionConfig, Description, globalConfig, hideTabs, permissions, req } = props
+  const { AfterHeader, collectionConfig, globalConfig, hideTabs, permissions, req } = props
 
   return (
     <Gutter className={baseClass}>
@@ -36,7 +36,7 @@ export const DocumentHeader: React.FC<{
           />
         )}
       </div>
-      {Description ? <div className={`${baseClass}__description`}>{Description}</div> : null}
+      {AfterHeader ? <div className={`${baseClass}__after-header`}>{AfterHeader}</div> : null}
     </Gutter>
   )
 }

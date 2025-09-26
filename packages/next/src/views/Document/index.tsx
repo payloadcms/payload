@@ -398,8 +398,8 @@ export const renderDocument = async ({
         >
           {showHeader && !drawerSlug && (
             <DocumentHeader
+              AfterHeader={Description}
               collectionConfig={collectionConfig}
-              Description={Description}
               globalConfig={globalConfig}
               permissions={permissions}
               req={req}
