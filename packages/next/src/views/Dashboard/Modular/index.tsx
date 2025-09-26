@@ -12,24 +12,11 @@ import { ModularDashboardClient } from './client.js'
 import './index.scss'
 
 export async function ModularDashboard(props: DashboardViewServerProps) {
-  const {
-    payload,
-    payload: {
-      config: {
-        admin: { dashboard: dashboardConfig },
-      },
-      importMap,
-    },
-    user,
-  } = props
-  const { widgets } = dashboardConfig
+  const { defaultLayout, widgets } = props.payload.config.admin.dashboard
+  const { importMap } = props.payload
+  const { user } = props
 
-  if (!dashboardConfig?.defaultLayout || !dashboardConfig?.widgets) {
-    return <div>No dashboard configuration found</div>
-  }
-
-  // Generate layout for widgets
-  const generateLayout = (layout: WidgetInstance[]): WidgetInstanceClient[] => {
+  const createClientLayout = (layout: WidgetInstance[]): WidgetInstanceClient[] => {
     return layout.map((widgetInstance, index) => {
       const colsPerRow = 12
       let x = 0
@@ -47,16 +34,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
       x = currentX
 
       return {
-        component: RenderServerComponent({
-          Component: widgets.find((w) => w.slug === widgetInstance.widgetSlug)?.ComponentPath,
-          importMap,
-          serverProps: {
-            ...props,
-            dashboardConfig,
-            widgetSlug: widgetInstance.widgetSlug,
-          },
-        }),
-        layout: {
+        clientLayout: {
           h: widgetInstance.height || 1,
           i: `${widgetInstance.widgetSlug}-${index}`,
           maxH: 3,
@@ -67,6 +45,14 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
           x,
           y: 0,
         },
+        component: RenderServerComponent({
+          Component: widgets.find((w) => w.slug === widgetInstance.widgetSlug)?.ComponentPath,
+          importMap,
+          serverProps: {
+            ...props,
+            widgetSlug: widgetInstance.widgetSlug,
+          },
+        }),
       }
     })
   }
@@ -78,7 +64,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
     try {
       const savedPreferences = await getPreferences(
         'dashboard-layout',
-        payload,
+        props.payload,
         user.id,
         user.collection,
       )
@@ -99,7 +85,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
           const widgetSlug = parts.slice(0, -1).join('-')
 
           // Find the original widget instance
-          const originalWidget = dashboardConfig.defaultLayout[index]
+          const originalWidget = defaultLayout[index]
 
           return {
             height: Math.min(Math.max(layoutItem.h, 1), 3),
@@ -108,23 +94,23 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
           } as WidgetInstance
         })
 
-        finalLayout = generateLayout(savedWidgetInstances)
+        finalLayout = createClientLayout(savedWidgetInstances)
       } else {
         // No saved preferences, use default
-        finalLayout = generateLayout(dashboardConfig.defaultLayout)
+        finalLayout = createClientLayout(defaultLayout)
       }
     } catch {
       // Error loading preferences, fallback to default
-      finalLayout = generateLayout(dashboardConfig.defaultLayout)
+      finalLayout = createClientLayout(defaultLayout)
     }
   } else {
     // No user, use default
-    finalLayout = generateLayout(dashboardConfig.defaultLayout)
+    finalLayout = createClientLayout(defaultLayout)
   }
 
   return (
     <div>
-      <ModularDashboardClient layout={finalLayout} widgets={dashboardConfig.widgets} />
+      <ModularDashboardClient layout={finalLayout} widgets={widgets} />
     </div>
   )
 }

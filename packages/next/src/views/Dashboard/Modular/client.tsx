@@ -15,19 +15,17 @@ const ResponsiveGridLayout = WidthProvider(Responsive)
 const BREAKPOINT = 768
 
 export type WidgetInstanceClient = {
+  clientLayout: Layout
   component: React.ReactNode
-  layout: Layout
-}
-
-interface ModularDashboardClientProps {
-  layout: WidgetInstanceClient[]
-  widgets: Widget[]
 }
 
 export function ModularDashboardClient({
   layout: initialLayout,
   widgets, // For future "Add Widget" functionality
-}: ModularDashboardClientProps) {
+}: {
+  layout: WidgetInstanceClient[]
+  widgets: Widget[]
+}) {
   // TODO: add addWidget or something like that to add widget to layout
   const {
     cancel,
@@ -46,7 +44,7 @@ export function ModularDashboardClient({
         // Merge new layout positions with existing components
         const updatedLayout = currentLayout.map((item, index) => ({
           ...item,
-          layout: newLayout[index] || item.layout, // Use new layout if available, fallback to current
+          clientLayout: newLayout[index] || item.clientLayout, // Use new layout if available, fallback to current
         }))
         setCurrentLayout(updatedLayout)
       }
@@ -81,7 +79,7 @@ export function ModularDashboardClient({
         isDraggable={isEditing}
         isResizable={isEditing}
         layouts={{
-          lg: currentLayout.map((item) => item.layout),
+          lg: currentLayout.map((item) => item.clientLayout),
         }}
         onLayoutChange={handleLayoutChange}
         rowHeight={(BREAKPOINT / 12) * 3}
@@ -89,7 +87,7 @@ export function ModularDashboardClient({
       >
         {currentLayout &&
           currentLayout.map((widget) => (
-            <div className="widget" key={widget.layout.i}>
+            <div className="widget" key={widget.clientLayout.i}>
               <div className="widget-content">{widget.component}</div>
             </div>
           ))}

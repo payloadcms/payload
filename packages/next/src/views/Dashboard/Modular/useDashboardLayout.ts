@@ -16,7 +16,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[], widget
   const saveLayout = useCallback(async () => {
     try {
       // Convert LayoutItem to react-grid-layout Layout format
-      const layoutData: Layout[] = currentLayout.map((item) => item.layout)
+      const layoutData: Layout[] = currentLayout.map((item) => item.clientLayout)
 
       await setPreference(DASHBOARD_PREFERENCES_KEY, { layouts: layoutData }, false)
       setIsEditing(false)
