@@ -31,6 +31,7 @@ import {
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
+import { populateLocalizedMeta } from '../../../utilities/populateLocalizedMeta.js'
 import { getLatestCollectionVersion } from '../../../versions/getLatestCollectionVersion.js'
 import { saveVersion } from '../../../versions/saveVersion.js'
 
@@ -291,6 +292,23 @@ export const updateDocument = async <
   }
 
   // /////////////////////////////////////
+  // Handle localized meta
+  // /////////////////////////////////////
+
+  if (
+    config.localization &&
+    config.localization.locales.length > 0 &&
+    config.experimental?.localizeMeta
+  ) {
+    dataToUpdate.localizedMeta = populateLocalizedMeta({
+      config,
+      data: result,
+      locale,
+      publishSpecificLocale,
+    })
+  }
+
+  // /////////////////////////////////////
   // Update
   // /////////////////////////////////////
 
@@ -317,7 +335,6 @@ export const updateDocument = async <
       collection: collectionConfig,
       docWithLocales: result,
       draft: shouldSaveDraft,
-      locale,
       operation: 'update',
       payload,
       publishSpecificLocale,

@@ -14,11 +14,9 @@ export const baseLocalizedMetaFields = (
     return {
       name: code,
       type: 'group',
-      admin: {
-        disableBulkEdit: true,
-        disableListColumn: true,
-        disableListFilter: true,
-        hidden: true,
+      defaultValue: {
+        status: 'draft',
+        updatedAt: new Date().toISOString(),
       },
       fields: [
         {
@@ -34,6 +32,7 @@ export const baseLocalizedMetaFields = (
           type: 'date',
         },
       ],
+      label: code,
     }
   })
 
@@ -42,6 +41,9 @@ export const baseLocalizedMetaFields = (
       name: 'localizedMeta',
       type: 'group',
       admin: {
+        disableBulkEdit: true,
+        disableListColumn: true,
+        disableListFilter: true,
         hidden: true,
       },
       fields: localizedMetaFields as Field[],

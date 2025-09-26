@@ -3016,6 +3016,33 @@ describe('Localization', () => {
         expect(refreshedDoc.topLevelArrayLocalized?.[0]?.text).toBe('some-text')
       })
     })
+
+    describe('Localized Meta', () => {
+      it('should return localized meta fields', async () => {
+        const doc = await payload.create({
+          collection: 'localized-drafts',
+          locale: 'en',
+          data: {
+            title: 'itle',
+            _status: 'draft',
+          },
+        })
+
+        const updated = await payload.update({
+          collection: 'localized-drafts',
+          id: doc.id,
+          locale: 'es',
+          publishSpecificLocale: 'es',
+          data: {
+            title: 'titulo',
+            _status: 'published',
+          },
+        })
+
+        expect(updated?.localizedMeta?.es?.status).toBe('published')
+        expect(updated?.localizedMeta?.en?.status).toBe('draft')
+      })
+    })
   })
 
   describe('Localization with fallback false', () => {
