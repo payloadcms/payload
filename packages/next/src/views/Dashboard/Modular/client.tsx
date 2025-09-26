@@ -1,12 +1,11 @@
 'use client'
 
+import type { Widget } from 'payload'
 import type { Layout } from 'react-grid-layout'
 
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
-import { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 import { Responsive, WidthProvider } from 'react-grid-layout'
-
-import type { RenderedWidget, RenderedWidgetLibrary } from './index.js'
 
 import { DashboardBreadcrumbDropdown } from './DashboardBreadcrumbDropdown.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
@@ -15,63 +14,44 @@ const ResponsiveGridLayout = WidthProvider(Responsive)
 
 const BREAKPOINT = 768
 
+export type WidgetInstanceClient = {
+  component: React.ReactNode
+  layout: Layout
+}
+
 interface ModularDashboardClientProps {
-  defaultWidgets: RenderedWidget[]
-  savedWidgets: RenderedWidget[]
-  widgets: RenderedWidgetLibrary[] // widget library for "Add Widget" functionality
+  layout: WidgetInstanceClient[]
+  widgets: Widget[]
 }
 
 export function ModularDashboardClient({
-  defaultWidgets,
-  savedWidgets,
-  widgets: _widgets, // For future "Add Widget" functionality
+  layout: initialLayout,
+  widgets, // For future "Add Widget" functionality
 }: ModularDashboardClientProps) {
-  const { isEditing, resetLayout, saveLayout, setIsEditing } = useDashboardLayout()
+  // TODO: add addWidget or something like that to add widget to layout
+  const {
+    cancel,
+    currentLayout,
+    isEditing,
+    resetLayout,
+    saveLayout,
+    setCurrentLayout,
+    setIsEditing,
+  } = useDashboardLayout(initialLayout, widgets)
 
-  // Determine which widgets to use (saved if available, otherwise default)
-  const currentWidgets = savedWidgets.length > 0 ? savedWidgets : defaultWidgets
-
-  // Extract layout from current widgets
-  const [currentLayout, setCurrentLayout] = useState<Layout[]>(() =>
-    currentWidgets.map((widget) => widget.layout),
-  )
-
-  const handleEditClick = () => {
-    setIsEditing(true)
-  }
-
-  const handleResetLayout = useCallback(async () => {
-    await resetLayout()
-    // Reload the page to get fresh default widgets from server
-    window.location.reload()
-  }, [resetLayout])
-
-  const handleSaveChanges = useCallback(async () => {
-    await saveLayout(currentLayout)
-    setIsEditing(false)
-    // Reload the page to get fresh saved widgets from server
-    window.location.reload()
-  }, [saveLayout, currentLayout, setIsEditing])
-
-  const handleCancel = useCallback(() => {
-    // Restore the layout from current widgets (either saved or default)
-    const originalLayout = currentWidgets.map((widget) => widget.layout)
-    setCurrentLayout(originalLayout)
-    setIsEditing(false)
-  }, [currentWidgets, setIsEditing])
-
-  const handleAddWidget = () => {
-    // TODO: Open add widget modal
-  }
-
-  // Handle layout changes during editing
+  // Handle layout changes from react-grid-layout while preserving components
   const handleLayoutChange = useCallback(
     (newLayout: Layout[]) => {
       if (isEditing) {
-        setCurrentLayout(newLayout)
+        // Merge new layout positions with existing components
+        const updatedLayout = currentLayout.map((item, index) => ({
+          ...item,
+          layout: newLayout[index] || item.layout, // Use new layout if available, fallback to current
+        }))
+        setCurrentLayout(updatedLayout)
       }
     },
-    [isEditing],
+    [isEditing, currentLayout, setCurrentLayout],
   )
 
   return (
@@ -82,30 +62,34 @@ export function ModularDashboardClient({
             label: (
               <DashboardBreadcrumbDropdown
                 isEditing={isEditing}
-                onAddWidget={handleAddWidget}
-                onCancel={handleCancel}
-                onEditClick={handleEditClick}
-                onResetLayout={handleResetLayout}
-                onSaveChanges={handleSaveChanges}
+                onAddWidget={() => {
+                  /** TODO: in the future, not yet */
+                }}
+                onCancel={cancel}
+                onEditClick={() => setIsEditing(true)}
+                onResetLayout={resetLayout}
+                onSaveChanges={saveLayout}
               />
             ),
           },
         ]}
       />
-
       <ResponsiveGridLayout
         breakpoints={{ lg: BREAKPOINT, xxs: 0 }}
         className={`grid-layout ${isEditing ? 'editing' : ''}`}
         cols={{ lg: 12, xxs: 6 }}
         isDraggable={isEditing}
         isResizable={isEditing}
-        layouts={{ lg: currentLayout }}
+        layouts={{
+          lg: currentLayout.map((item) => item.layout),
+        }}
         onLayoutChange={handleLayoutChange}
         rowHeight={(BREAKPOINT / 12) * 3}
+        useCSSTransforms={false}
       >
-        {currentWidgets &&
-          currentWidgets.map((widget, index) => (
-            <div className="widget" key={`${widget.widgetSlug}-${index}`}>
+        {currentLayout &&
+          currentLayout.map((widget) => (
+            <div className="widget" key={widget.layout.i}>
               <div className="widget-content">{widget.component}</div>
             </div>
           ))}

@@ -1,51 +1,56 @@
+import type { Widget } from 'payload'
 import type { Layout } from 'react-grid-layout'
 
 import { usePreferences } from '@payloadcms/ui'
 import { useCallback, useState } from 'react'
 
-type DashboardLayoutPreferences = {
-  layouts?: Layout[]
-}
+import type { WidgetInstanceClient } from './client.js'
 
-export function useDashboardLayout() {
-  const { getPreference, setPreference } = usePreferences()
+export function useDashboardLayout(initialLayout: WidgetInstanceClient[], widgets: Widget[]) {
+  const { setPreference } = usePreferences()
   const [isEditing, setIsEditing] = useState(false)
+  const [currentLayout, setCurrentLayout] = useState<WidgetInstanceClient[]>(initialLayout)
 
   const DASHBOARD_PREFERENCES_KEY = 'dashboard-layout'
 
-  const saveLayout = useCallback(
-    async (layout: Layout[]) => {
-      try {
-        await setPreference(DASHBOARD_PREFERENCES_KEY, { layouts: layout }, false)
-      } catch {
-        // Handle error silently or show user feedback
-      }
-    },
-    [setPreference, DASHBOARD_PREFERENCES_KEY],
-  )
+  const saveLayout = useCallback(async () => {
+    try {
+      // Convert LayoutItem to react-grid-layout Layout format
+      const layoutData: Layout[] = currentLayout.map((item) => item.layout)
+
+      await setPreference(DASHBOARD_PREFERENCES_KEY, { layouts: layoutData }, false)
+      setIsEditing(false)
+      // Reload to get fresh layout from server
+      window.location.reload()
+    } catch {
+      // Handle error silently or show user feedback
+    }
+  }, [setPreference, currentLayout])
 
   const resetLayout = useCallback(async () => {
     try {
       await setPreference(DASHBOARD_PREFERENCES_KEY, null, false)
+      setIsEditing(false)
+      // Reload to get default layout from server
+      window.location.reload()
     } catch {
       // Handle error silently or show user feedback
     }
-  }, [setPreference, DASHBOARD_PREFERENCES_KEY])
+  }, [setPreference])
 
-  const getSavedLayout = useCallback(async (): Promise<Layout[]> => {
-    try {
-      const preferences: DashboardLayoutPreferences = await getPreference(DASHBOARD_PREFERENCES_KEY)
-      return preferences?.layouts || []
-    } catch {
-      return []
-    }
-  }, [getPreference, DASHBOARD_PREFERENCES_KEY])
+  const cancel = useCallback(() => {
+    // Restore initial layout
+    setCurrentLayout(initialLayout)
+    setIsEditing(false)
+  }, [initialLayout])
 
   return {
-    getSavedLayout,
+    cancel,
+    currentLayout,
     isEditing,
     resetLayout,
     saveLayout,
+    setCurrentLayout,
     setIsEditing,
   }
 }

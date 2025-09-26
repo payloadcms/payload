@@ -27,7 +27,7 @@ export default buildConfigWithDefaults({
       },
     },
     dashboard: {
-      defaultWidgets:
+      defaultLayout:
         // TODO
         // ({ req: { user } }) =>
         [

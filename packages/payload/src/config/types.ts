@@ -738,6 +738,8 @@ export type Widget = {
   slug: string
   // TODO: Add fields
   // fields?: Field[]
+  // Maybe:
+  // ImageURL?: string // similar to Block
 }
 
 export type WidgetInstance = {
@@ -750,8 +752,8 @@ export type WidgetInstance = {
 
 export type DashboardConfig = {
   // TODO:
-  // defaultWidgets?: (args: { req: PayloadRequest }) => Array<WidgetInstance>
-  defaultWidgets?: Array<WidgetInstance>
+  // defaultLayout?: (args: { req: PayloadRequest }) => Array<WidgetInstance>
+  defaultLayout?: Array<WidgetInstance>
   widgets: Array<Widget>
 }
 
