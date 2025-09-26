@@ -2,6 +2,7 @@
 
 import type { ClientCollectionConfig } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
   Modal,
@@ -21,8 +22,8 @@ import type {
   PluginMultiTenantTranslations,
 } from '../../translations/index.js'
 
-import './index.scss'
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
+import './index.scss'
 
 export const assignTenantModalSlug = 'assign-tenant-field-modal'
 const baseClass = 'assign-tenant-field-modal'
@@ -53,7 +54,10 @@ export const AssignTenantFieldModal: React.FC<{
   onConfirm?: () => void
 }> = ({ afterModalClose, afterModalOpen, children, onCancel, onConfirm }) => {
   const editDepth = useDrawerDepth()
-  const { t } = useTranslation<PluginMultiTenantTranslations, PluginMultiTenantTranslationKeys>()
+  const { i18n, t } = useTranslation<
+    PluginMultiTenantTranslations,
+    PluginMultiTenantTranslationKeys
+  >()
   const { collectionSlug } = useDocumentInfo()
   const { title } = useDocumentTitle()
   const { getEntityConfig } = useConfig()
@@ -114,7 +118,7 @@ export const AssignTenantFieldModal: React.FC<{
             })}
           </h3>
           <Pill className={`${baseClass}__collection-pill`} size="small">
-            <>{collectionConfig.labels.singular}</>
+            {getTranslation(collectionConfig.labels.singular, i18n)}
           </Pill>
         </div>
         <div className={`${baseClass}__content`}>{children}</div>
