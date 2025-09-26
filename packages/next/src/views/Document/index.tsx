@@ -341,9 +341,12 @@ export const renderDocument = async ({
     req,
   })
 
+  // Extract Description from documentSlots to pass to DocumentHeader
+  const { Description, ...documentSlotsWithoutDescription } = documentSlots
+
   const clientProps: DocumentViewClientProps = {
     formState,
-    ...documentSlots,
+    ...documentSlotsWithoutDescription,
     documentSubViewType,
     viewType,
   }
@@ -396,6 +399,7 @@ export const renderDocument = async ({
           {showHeader && !drawerSlug && (
             <DocumentHeader
               collectionConfig={collectionConfig}
+              Description={Description}
               globalConfig={globalConfig}
               permissions={permissions}
               req={req}

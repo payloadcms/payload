@@ -82,10 +82,6 @@
       flex-grow: 1;
     }
 
-    &__sub-header {
-      padding-bottom: calc(var(--base) * 1.5);
-    }
-
     &__sidebar-wrap {
       &:has(.document-fields__sidebar-fields > .render-fields:empty) {
         --sidebar-wrap-width: 0;
@@ -230,10 +226,6 @@
 
       &__edit {
         padding-top: calc(var(--base) / 2);
-      }
-
-      &__sub-header {
-        padding-bottom: calc(var(--base) / 2);
       }
     }
   }
