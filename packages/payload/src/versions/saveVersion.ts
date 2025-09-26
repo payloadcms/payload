@@ -1,6 +1,9 @@
 // @ts-strict-ignore
-import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
-import type { LocalizedMeta } from '../database/types.js'
+import type {
+  LocalizedMeta,
+  SanitizedCollectionConfig,
+  TypeWithID,
+} from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { CreateGlobalVersionArgs, CreateVersionArgs, Payload } from '../index.js'
 import type { PayloadRequest, SelectType } from '../types/index.js'
