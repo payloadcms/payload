@@ -44,7 +44,7 @@ export function DefaultDashboard(props: DashboardViewServerProps) {
     payload: {
       config: {
         admin: {
-          components: { afterDashboard, beforeDashboard },
+          components: { afterDashboard, beforeDashboard, emptyDashboard },
         },
         routes: { admin: adminRoute },
       },
@@ -75,7 +75,23 @@ export function DefaultDashboard(props: DashboardViewServerProps) {
 
         <Fragment>
           {!navGroups || navGroups?.length === 0 ? (
-            <p>no nav groups....</p>
+            emptyDashboard ? (
+              RenderServerComponent({
+                Component: emptyDashboard,
+                importMap: payload.importMap,
+                serverProps: {
+                  i18n,
+                  locale,
+                  params,
+                  payload,
+                  permissions,
+                  searchParams,
+                  user,
+                } satisfies ServerProps,
+              })
+            ) : (
+              <p>no nav groups....</p>
+            )
           ) : (
             navGroups.map(({ entities, label }, groupIndex) => {
               return (
