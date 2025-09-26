@@ -40,6 +40,7 @@ export const packagePublishList = [
   'payload-cloud',
   'plugin-cloud',
   'plugin-cloud-storage',
+  'plugin-ecommerce',
   'plugin-form-builder',
   'plugin-import-export',
   'plugin-multi-tenant',
