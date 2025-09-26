@@ -80,6 +80,7 @@ export const createAddressesCollection: (props: Props) => CollectionConfig = (pr
         // @ts-expect-error - translations are not typed in plugins yet
         t('plugin-ecommerce:addressesCollectionDescription'),
       group: 'Ecommerce',
+      hidden: true,
       useAsTitle: 'createdAt',
     },
     fields,
