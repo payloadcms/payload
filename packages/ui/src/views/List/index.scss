@@ -20,7 +20,7 @@
 
     &__sub-header {
       flex-basis: 100%;
-      padding-top: var(--base);
+      padding-top: calc(var(--base) * 0.75);
     }
 
     &__tables {
