@@ -151,6 +151,7 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    */
   operation: CreateOrUpdateOperation
   previousDoc: T
+  previousDocWithLocales: any
   req: PayloadRequest
 }) => any
 
@@ -633,6 +634,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * @default false
    */
   trash?: boolean
+  /**
+   * Enables tree view support for this collection
+   */
+  treeView?: boolean
   /**
    * Options used in typescript generation
    */
