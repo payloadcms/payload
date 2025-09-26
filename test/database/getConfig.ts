@@ -191,6 +191,32 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
         {
+          type: 'group',
+          name: 'testNestedGroup',
+          fields: [
+            {
+              name: 'nestedLocalizedPolymorphicRelation',
+              type: 'relationship',
+              relationTo: ['categories', 'simple'],
+              hasMany: true,
+              localized: true,
+            },
+            {
+              name: 'nestedLocalizedText',
+              type: 'text',
+              localized: true,
+            },
+            {
+              name: 'nestedText1',
+              type: 'text',
+            },
+            {
+              name: 'nestedText2',
+              type: 'text',
+            },
+          ],
+        },
+        {
           type: 'tabs',
           tabs: [
             {

@@ -516,6 +516,7 @@ export const transform = ({
     field,
     parentIsLocalized,
     parentPath,
+    parentRef: incomingParentRef,
     ref: incomingRef,
   }) => {
     if (!incomingRef || typeof incomingRef !== 'object') {
@@ -523,6 +524,26 @@ export const transform = ({
     }
 
     const ref = incomingRef as Record<string, unknown>
+    const parentRef = (incomingParentRef || {}) as Record<string, unknown>
+
+    // Defer pruning of empty containers; we will prune after traversal to avoid
+    // influencing path computation or traversal order.
+    const markContainerForPrune = () => {
+      if (!parentRef || typeof parentRef !== 'object') {
+        return
+      }
+      if (!ref || typeof ref !== 'object') {
+        return
+      }
+      if (Object.keys(ref).length > 0) {
+        return
+      }
+      const containerKey = Object.keys(parentRef).find((k) => (parentRef as any)[k] === ref)
+      if (containerKey) {
+        // mark by setting to undefined; a final prune pass will remove these
+        ;(parentRef as any)[containerKey] = undefined
+      }
+    }
 
     if (
       $inc &&
@@ -535,6 +556,7 @@ export const transform = ({
       if (value && typeof value === 'object' && '$inc' in value && typeof value.$inc === 'number') {
         $inc[`${parentPath}${field.name}`] = value.$inc
         delete ref[field.name]
+        markContainerForPrune()
       }
     }
 
@@ -568,10 +590,12 @@ export const transform = ({
         }
 
         delete ref[field.name]
+        markContainerForPrune()
       }
     }
 
     // Handle $push operation for relationship fields (converts to $addToSet)
+
     if (
       $addToSet &&
       (field.type === 'relationship' || field.type === 'upload') &&
@@ -605,11 +629,13 @@ export const transform = ({
               $addToSet[`${parentPath}${field.name}.${localeKey}`] = { $each: localeItems }
             })
           }
+          // Note: For localized fields, locale must always be specified inside $push object
         } else {
           $addToSet[`${parentPath}${field.name}`] = { $each: processedItems }
         }
 
         delete ref[field.name]
+        markContainerForPrune()
       }
     }
 
@@ -661,6 +687,7 @@ export const transform = ({
         }
 
         delete ref[field.name]
+        markContainerForPrune()
       }
     }
 
@@ -742,6 +769,28 @@ export const transform = ({
     parentIsLocalized,
     ref: data,
   })
+
+  // Final prune pass: remove any keys explicitly marked undefined and drop empty objects
+  const pruneDeep = (obj: any): void => {
+    if (!obj || typeof obj !== 'object') {
+      return
+    }
+    for (const key of Object.keys(obj)) {
+      const val = obj[key]
+      if (val === undefined) {
+        delete obj[key]
+        continue
+      }
+      if (val && typeof val === 'object') {
+        pruneDeep(val)
+        if (Object.keys(val).length === 0) {
+          delete obj[key]
+        }
+      }
+    }
+  }
+
+  pruneDeep(data)
 
   if (operation === 'write') {
     if (typeof data.updatedAt === 'undefined') {

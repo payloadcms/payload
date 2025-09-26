@@ -4161,6 +4161,72 @@ describe('database', () => {
         value: category2.id,
       })
     })
+
+    it('should handle nested localized polymorphic relationships with $push', async () => {
+      // Create documents for the polymorphic relationship
+      const category1 = await payload.create({
+        collection: 'categories',
+        data: { name: 'Category 1' },
+      })
+
+      const category2 = await payload.create({
+        collection: 'categories',
+        data: { name: 'Category 2' },
+      })
+
+      // Create a post with nested localized polymorphic relationship
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Nested $push',
+          testNestedGroup: {
+            nestedLocalizedPolymorphicRelation: [
+              {
+                relationTo: 'categories',
+                value: category1.id,
+              },
+            ],
+          },
+        },
+        locale: 'en',
+      })
+
+      // Use low-level API to push new items
+      await payload.db.updateOne({
+        collection: 'posts',
+        where: { id: { equals: post.id } },
+        data: {
+          'testNestedGroup.nestedLocalizedPolymorphicRelation': {
+            $push: {
+              en: [
+                {
+                  relationTo: 'categories',
+                  value: category2.id,
+                },
+              ],
+            },
+          },
+        },
+      })
+
+      // Verify the operation worked
+      const result = await payload.findByID({
+        collection: 'posts',
+        id: post.id,
+        locale: 'en',
+        depth: 0,
+      })
+
+      expect(result.testNestedGroup.nestedLocalizedPolymorphicRelation).toHaveLength(2)
+      expect(result.testNestedGroup.nestedLocalizedPolymorphicRelation).toContainEqual({
+        relationTo: 'categories',
+        value: category1.id,
+      })
+      expect(result.testNestedGroup.nestedLocalizedPolymorphicRelation).toContainEqual({
+        relationTo: 'categories',
+        value: category2.id,
+      })
+    })
   })
 
   describe('relationship $remove', () => {
@@ -4464,6 +4530,79 @@ describe('database', () => {
       expect(result.localizedPolymorphicRelations.en).not.toContainEqual({
         relationTo: 'categories',
         value: category3.id,
+      })
+    })
+
+    it('should handle nested localized polymorphic relationships with $remove', async () => {
+      // Create documents for the polymorphic relationship
+      const category1 = await payload.create({
+        collection: 'categories',
+        data: { name: 'Category 1' },
+      })
+
+      const category2 = await payload.create({
+        collection: 'categories',
+        data: { name: 'Category 2' },
+      })
+
+      const simple1 = await payload.create({
+        collection: 'simple',
+        data: { text: 'Simple 1' },
+      })
+
+      // Create a post with multiple items in nested localized polymorphic relationship
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Nested $remove',
+          testNestedGroup: {
+            nestedLocalizedPolymorphicRelation: [
+              {
+                relationTo: 'categories',
+                value: category1.id,
+              },
+              {
+                relationTo: 'categories',
+                value: category2.id,
+              },
+              {
+                relationTo: 'simple',
+                value: simple1.id,
+              },
+            ],
+          },
+        },
+        locale: 'en',
+      })
+
+      // Use low-level API to remove items
+      await payload.db.updateOne({
+        collection: 'posts',
+        where: { id: { equals: post.id } },
+        data: {
+          'testNestedGroup.nestedLocalizedPolymorphicRelation': {
+            $remove: {
+              en: [
+                { relationTo: 'categories', value: category1.id },
+                { relationTo: 'simple', value: simple1.id },
+              ],
+            },
+          },
+        },
+      })
+
+      // Verify the operation worked
+      const result = await payload.findByID({
+        collection: 'posts',
+        id: post.id,
+        locale: 'en',
+        depth: 0,
+      })
+
+      expect(result.testNestedGroup.nestedLocalizedPolymorphicRelation).toHaveLength(1)
+      expect(result.testNestedGroup.nestedLocalizedPolymorphicRelation[0]).toEqual({
+        relationTo: 'categories',
+        value: category2.id,
       })
     })
   })

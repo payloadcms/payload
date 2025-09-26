@@ -242,6 +242,20 @@ export interface Post {
       };
     };
   };
+  testNestedGroup?: {
+    nestedLocalizedPolymorphicRelation?:
+      | ({
+          relationTo: 'categories';
+          value: string | Category;
+        } | {
+          relationTo: 'simple';
+          value: string | Simple;
+        })[]
+      | null;
+    nestedLocalizedText?: string | null;
+    nestedText1?: string | null;
+    nestedText2?: string | null;
+  };
   hasTransaction?: boolean | null;
   throwAfterChange?: boolean | null;
   arrayWithIDs?:
