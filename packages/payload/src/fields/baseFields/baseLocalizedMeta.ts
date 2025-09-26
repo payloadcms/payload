@@ -14,10 +14,6 @@ export const baseLocalizedMetaFields = (
     return {
       name: code,
       type: 'group',
-      defaultValue: {
-        status: 'draft',
-        updatedAt: new Date().toISOString(),
-      },
       fields: [
         {
           name: 'status',

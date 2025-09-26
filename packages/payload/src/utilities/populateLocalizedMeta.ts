@@ -7,10 +7,9 @@ import type { SanitizedConfig } from '../config/types.js'
 export function populateLocalizedMeta(args: {
   config: SanitizedConfig
   data: Record<string, unknown>
-  locale?: string
   publishSpecificLocale?: string
 }): LocalizedMeta {
-  const { config, data, locale, publishSpecificLocale } = args
+  const { config, data, publishSpecificLocale } = args
 
   if (!config.localization) {
     return {}
@@ -19,27 +18,17 @@ export function populateLocalizedMeta(args: {
   let localizedMeta: LocalizedMeta = {}
   const now = new Date().toISOString()
 
-  if (data._status === 'published' && !publishSpecificLocale) {
+  if (!publishSpecificLocale) {
     for (const code of config.localization.localeCodes) {
-      localizedMeta[code] = { status: 'published', updatedAt: String(data?.updatedAt) }
+      const status = data._status === 'published' ? 'published' : 'draft'
+      localizedMeta[code] = { status, updatedAt: now }
     }
-  } else if (publishSpecificLocale || (locale && data._status === 'draft')) {
-    const status = publishSpecificLocale ? 'published' : 'draft'
-    const incomingLocale = String(publishSpecificLocale || locale)
-    const existing = data.localizedMeta
-
-    if (!existing) {
-      for (const code of config.localization.localeCodes) {
-        localizedMeta[code] = {
-          status: code === incomingLocale ? status : 'draft',
-          updatedAt: now,
-        }
-      }
-    } else {
-      localizedMeta = {
-        ...existing,
-        [incomingLocale]: { status, updatedAt: now },
-      }
+  } else {
+    const incomingLocale = String(publishSpecificLocale)
+    const existing = (data.localizedMeta ?? {}) as LocalizedMeta
+    localizedMeta = {
+      ...existing,
+      [incomingLocale]: { status: 'published', updatedAt: now },
     }
   }
 

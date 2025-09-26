@@ -300,12 +300,16 @@ export const updateDocument = async <
     config.localization.locales.length > 0 &&
     config.experimental?.localizeMeta
   ) {
-    dataToUpdate.localizedMeta = populateLocalizedMeta({
+    const localizedMeta = populateLocalizedMeta({
       config,
       data: result,
-      locale,
       publishSpecificLocale,
     })
+    dataToUpdate.localizedMeta = localizedMeta
+    result.localizedMeta = localizedMeta
+    if (versionSnapshotResult) {
+      versionSnapshotResult.localizedMeta = localizedMeta
+    }
   }
 
   // /////////////////////////////////////
