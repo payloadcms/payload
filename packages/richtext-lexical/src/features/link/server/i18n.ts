@@ -41,6 +41,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'پیوند',
     loadingWithEllipsis: 'در حال بارگذاری...',
   },
+  fi: {
+    label: 'Linkki',
+    loadingWithEllipsis: 'Ladataan...',
+  },
   fr: {
     label: 'Lien',
     loadingWithEllipsis: 'Chargement...',
