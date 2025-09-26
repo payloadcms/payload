@@ -342,11 +342,11 @@ export const renderDocument = async ({
   })
 
   // Extract Description from documentSlots to pass to DocumentHeader
-  const { Description, ...documentSlotsWithoutDescription } = documentSlots
+  const { Description } = documentSlots
 
   const clientProps: DocumentViewClientProps = {
     formState,
-    ...documentSlotsWithoutDescription,
+    ...documentSlots,
     documentSubViewType,
     viewType,
   }
