@@ -353,7 +353,7 @@ export function DefaultEditView({
           setDocumentIsLocked(false)
         }
 
-        if (isLivePreviewEnabled) {
+        if (livePreviewURL) {
           setLivePreviewURL(livePreviewURL)
         }
 
