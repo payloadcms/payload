@@ -114,6 +114,8 @@ export const traverseFields = ({
   textsToDelete,
   withinArrayOrBlockLocale,
 }: Args) => {
+  let fieldsMatched = false
+
   if (row._uuid) {
     data._uuid = row._uuid
   }
@@ -125,6 +127,11 @@ export const traverseFields = ({
 
     if (fieldIsVirtual(field)) {
       return
+    }
+
+    // Mark that we found a matching field
+    if (data[field.name] !== undefined) {
+      fieldsMatched = true
     }
 
     columnName = `${columnPrefix || ''}${toSnakeCase(field.name)}`
@@ -328,7 +335,7 @@ export const traverseFields = ({
               parentTableName,
               path: `${path || ''}${field.name}.`,
               relationships,
-              relationshipsToAppend: [],
+              relationshipsToAppend,
               relationshipsToDelete,
               row,
               selects,
@@ -362,7 +369,7 @@ export const traverseFields = ({
             parentTableName,
             path: `${path || ''}${field.name}.`,
             relationships,
-            relationshipsToAppend: [],
+            relationshipsToAppend,
             relationshipsToDelete,
             row,
             selects,
@@ -780,4 +787,60 @@ export const traverseFields = ({
       }
     })
   })
+
+  // Handle dot-notation paths when no fields matched
+  if (!fieldsMatched) {
+    Object.keys(data).forEach((key) => {
+      if (key.includes('.')) {
+        // Split on first dot only
+        const firstDotIndex = key.indexOf('.')
+        const fieldName = key.substring(0, firstDotIndex)
+        const remainingPath = key.substring(firstDotIndex + 1)
+
+        // Create nested structure for this field
+        if (!data[fieldName]) {
+          data[fieldName] = {}
+        }
+
+        const nestedData = data[fieldName] as Record<string, unknown>
+
+        // Move the value to the nested structure
+        nestedData[remainingPath] = data[key]
+        delete data[key]
+
+        // Recursively process the newly created nested structure
+        // The field traversal will naturally handle it if the field exists in the schema
+        traverseFields({
+          adapter,
+          arrays,
+          arraysToPush,
+          baseTableName,
+          blocks,
+          blocksToDelete,
+          columnPrefix,
+          data,
+          enableAtomicWrites,
+          existingLocales,
+          fieldPrefix,
+          fields,
+          forcedLocale,
+          insideArrayOrBlock,
+          locales,
+          numbers,
+          numbersToDelete,
+          parentIsLocalized,
+          parentTableName,
+          path,
+          relationships,
+          relationshipsToAppend,
+          relationshipsToDelete,
+          row,
+          selects,
+          texts,
+          textsToDelete,
+          withinArrayOrBlockLocale,
+        })
+      }
+    })
+  }
 }
