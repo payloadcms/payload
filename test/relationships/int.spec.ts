@@ -10,6 +10,7 @@ import type {
   CustomIdNumberRelation,
   CustomIdRelation,
   Director,
+  Page,
   Post,
   PostsLocalized,
   Relation,

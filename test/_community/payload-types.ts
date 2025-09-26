@@ -130,7 +130,7 @@ export interface Post {
     root: {
       type: string;
       children: {
-        type: any;
+        type: string;
         version: number;
         [k: string]: unknown;
       }[];
@@ -418,6 +418,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
