@@ -26,7 +26,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     versionData,
     where: whereArg,
   }: UpdateGlobalVersionArgs<T>,
-) {
+): Promise<TypeWithVersion<T>> {
   const db = await getTransaction(this, req)
   const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(
     ({ slug }) => slug === global,

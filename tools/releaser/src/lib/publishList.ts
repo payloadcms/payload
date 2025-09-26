@@ -23,6 +23,7 @@ export const packagePublishList = [
   'db-mongodb',
   'db-postgres',
   'db-sqlite',
+  'db-d1-sqlite',
   'db-vercel-postgres',
 
   // Adapters
@@ -31,6 +32,7 @@ export const packagePublishList = [
 
   // Storage
   'storage-s3',
+  'storage-r2',
   'storage-azure',
   'storage-gcs',
   'storage-vercel-blob',

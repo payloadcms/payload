@@ -113,6 +113,11 @@ export const allDatabaseAdapters = {
         process.env.POSTGRES_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
     },
   })`,
+  d1: `
+import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
+
+export const databaseAdapter = sqliteD1Adapter({ binding: global.d1 })
+  `,
 }
 
 /**

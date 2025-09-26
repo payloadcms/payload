@@ -1,3 +1,5 @@
+import { D1DatabaseAPI } from '@miniflare/d1'
+import { createSQLiteDB } from '@miniflare/shared'
 import dotenv from 'dotenv'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 dotenv.config()
@@ -22,6 +24,11 @@ export default async () => {
   process.env.NODE_OPTIONS = '--no-deprecation'
   process.env.DISABLE_PAYLOAD_HMR = 'true'
 
+  if (process.env.PAYLOAD_DATABASE === 'd1' && !global.d1) {
+    process.env.PAYLOAD_DROP_DATABASE = 'false'
+    console.log('Starting memory D1 db...')
+    global.d1 = new D1DatabaseAPI(await createSQLiteDB(':memory'))
+  }
   if (
     (!process.env.PAYLOAD_DATABASE ||
       ['firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE)) &&

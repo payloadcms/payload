@@ -1,15 +1,15 @@
 import type { Row } from '@libsql/client'
 
-import type { DropDatabase, SQLiteAdapter } from './types.js'
+import type { BaseSQLiteAdapter, DropDatabase } from './types.js'
 
-const getTables = (adapter: SQLiteAdapter) => {
+const getTables = (adapter: BaseSQLiteAdapter) => {
   return adapter.client.execute(`SELECT name
                                  FROM sqlite_master
                                  WHERE type = 'table'
                                    AND name NOT LIKE 'sqlite_%';`)
 }
 
-const dropTables = (adapter: SQLiteAdapter, rows: Row[]) => {
+const dropTables = (adapter: BaseSQLiteAdapter, rows: Row[]) => {
   const multi = `
   PRAGMA foreign_keys = OFF;\n
   ${rows.map(({ name }) => `DROP TABLE IF EXISTS ${name as string}`).join(';\n ')};\n
