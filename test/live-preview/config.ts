@@ -2,8 +2,6 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import { StaticURLCollection } from 'collections/StaticURL.js'
-
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { MediaBlock } from './blocks/MediaBlock/index.js'
 import { Categories } from './collections/Categories.js'
@@ -13,6 +11,7 @@ import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
 import { SSR } from './collections/SSR.js'
 import { SSRAutosave } from './collections/SSRAutosave.js'
+import { StaticURLCollection } from './collections/StaticURL.js'
 import { Tenants } from './collections/Tenants.js'
 import { Users } from './collections/Users.js'
 import { Footer } from './globals/Footer.js'
