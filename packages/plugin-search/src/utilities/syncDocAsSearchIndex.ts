@@ -43,11 +43,16 @@ export const syncDocAsSearchIndex = async ({
   if (typeof beforeSync === 'function') {
     let docToSyncWith = doc
     if (payload.config?.localization) {
+      // Check if document is trashed (has deletedAt field)
+      const isTrashDocument = doc && 'deletedAt' in doc && doc.deletedAt
+
       docToSyncWith = await payload.findByID({
         id,
         collection,
         locale: syncLocale,
         req,
+        // Include trashed documents when the document being synced is trashed
+        trash: isTrashDocument,
       })
     }
     dataToSave = await beforeSync({
