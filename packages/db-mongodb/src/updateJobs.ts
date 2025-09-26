@@ -55,9 +55,13 @@ export const updateJobs: UpdateJobs = async function updateMany(
 
   const $inc: Record<string, number> = {}
   const $push: Record<string, { $each: any[] } | any> = {}
+  const $addToSet: Record<string, { $each: any[] } | any> = {}
+  const $pull: Record<string, { $in: any[] } | any> = {}
 
   transform({
+    $addToSet,
     $inc,
+    $pull,
     $push,
     adapter: this,
     data,
@@ -72,6 +76,12 @@ export const updateJobs: UpdateJobs = async function updateMany(
   }
   if (Object.keys($push).length) {
     updateOps.$push = $push
+  }
+  if (Object.keys($addToSet).length) {
+    updateOps.$addToSet = $addToSet
+  }
+  if (Object.keys($pull).length) {
+    updateOps.$pull = $pull
   }
   if (Object.keys(updateOps).length) {
     updateOps.$set = updateData

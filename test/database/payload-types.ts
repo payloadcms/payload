@@ -209,6 +209,24 @@ export interface Post {
       }[]
     | null;
   categoryCustomID?: (number | null) | CategoriesCustomId;
+  polymorphicRelations?:
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | {
+        relationTo: 'simple';
+        value: string | Simple;
+      })[]
+    | null;
+  localizedPolymorphicRelations?:
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | {
+        relationTo: 'simple';
+        value: string | Simple;
+      })[]
+    | null;
   localized?: string | null;
   text?: string | null;
   number?: number | null;
@@ -233,6 +251,20 @@ export interface Post {
         D4?: string | null;
       };
     };
+  };
+  testNestedGroup?: {
+    nestedLocalizedPolymorphicRelation?:
+      | ({
+          relationTo: 'categories';
+          value: string | Category;
+        } | {
+          relationTo: 'simple';
+          value: string | Simple;
+        })[]
+      | null;
+    nestedLocalizedText?: string | null;
+    nestedText1?: string | null;
+    nestedText2?: string | null;
   };
   hasTransaction?: boolean | null;
   throwAfterChange?: boolean | null;
@@ -840,6 +872,8 @@ export interface PostsSelect<T extends boolean = true> {
   categoryPoly?: T;
   categoryPolyMany?: T;
   categoryCustomID?: T;
+  polymorphicRelations?: T;
+  localizedPolymorphicRelations?: T;
   localized?: T;
   text?: T;
   number?: T;
@@ -1421,6 +1455,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

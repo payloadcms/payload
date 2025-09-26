@@ -4,7 +4,13 @@ import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
-import type { NumberToDelete, RelationshipToDelete, RowToInsert, TextToDelete } from './types.js'
+import type {
+  NumberToDelete,
+  RelationshipToAppend,
+  RelationshipToDelete,
+  RowToInsert,
+  TextToDelete,
+} from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
 import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
@@ -63,6 +69,7 @@ type Args = {
   parentTableName: string
   path: string
   relationships: Record<string, unknown>[]
+  relationshipsToAppend: RelationshipToAppend[]
   relationshipsToDelete: RelationshipToDelete[]
   row: Record<string, unknown>
   selects: {
@@ -99,6 +106,7 @@ export const traverseFields = ({
   parentTableName,
   path,
   relationships,
+  relationshipsToAppend,
   relationshipsToDelete,
   row,
   selects,
@@ -106,6 +114,8 @@ export const traverseFields = ({
   textsToDelete,
   withinArrayOrBlockLocale,
 }: Args) => {
+  let fieldsMatched = false
+
   if (row._uuid) {
     data._uuid = row._uuid
   }
@@ -117,6 +127,11 @@ export const traverseFields = ({
 
     if (fieldIsVirtual(field)) {
       return
+    }
+
+    // Mark that we found a matching field
+    if (data[field.name] !== undefined) {
+      fieldsMatched = true
     }
 
     columnName = `${columnPrefix || ''}${toSnakeCase(field.name)}`
@@ -320,6 +335,7 @@ export const traverseFields = ({
               parentTableName,
               path: `${path || ''}${field.name}.`,
               relationships,
+              relationshipsToAppend,
               relationshipsToDelete,
               row,
               selects,
@@ -353,6 +369,7 @@ export const traverseFields = ({
             parentTableName,
             path: `${path || ''}${field.name}.`,
             relationships,
+            relationshipsToAppend,
             relationshipsToDelete,
             row,
             selects,
@@ -368,6 +385,143 @@ export const traverseFields = ({
 
     if (field.type === 'relationship' || field.type === 'upload') {
       const relationshipPath = `${path || ''}${field.name}`
+
+      // Handle $push operation for relationship fields
+      if (
+        fieldData &&
+        typeof fieldData === 'object' &&
+        '$push' in fieldData &&
+        'hasMany' in field &&
+        field.hasMany
+      ) {
+        let itemsToAppend: unknown[]
+
+        // Handle localized structure: { $push: { locale: [...] } }
+        if (
+          typeof fieldData.$push === 'object' &&
+          fieldData.$push !== null &&
+          !Array.isArray(fieldData.$push) &&
+          field.localized
+        ) {
+          // For localized fields, process each locale
+          Object.entries(fieldData.$push).forEach(([localeKey, localeData]) => {
+            const localeItems = Array.isArray(localeData) ? localeData : [localeData]
+
+            localeItems.forEach((item) => {
+              const relationshipToAppend: RelationshipToAppend = {
+                locale: localeKey,
+                path: relationshipPath,
+                value: item,
+              }
+
+              // Handle polymorphic relationships
+              if (
+                Array.isArray(field.relationTo) &&
+                item &&
+                typeof item === 'object' &&
+                'relationTo' in item
+              ) {
+                relationshipToAppend.relationTo = item.relationTo
+                relationshipToAppend.value = item.value
+              } else if (typeof field.relationTo === 'string') {
+                // Simple relationship
+                relationshipToAppend.relationTo = field.relationTo
+                relationshipToAppend.value = item
+              }
+
+              relationshipsToAppend.push(relationshipToAppend)
+            })
+          })
+        } else {
+          // Handle non-localized structure: { $push: [...] }
+          itemsToAppend = Array.isArray(fieldData.$push) ? fieldData.$push : [fieldData.$push]
+
+          itemsToAppend.forEach((item) => {
+            const relationshipToAppend: RelationshipToAppend = {
+              locale: isLocalized ? withinArrayOrBlockLocale : undefined,
+              path: relationshipPath,
+              value: item,
+            }
+
+            // Handle polymorphic relationships
+            if (
+              Array.isArray(field.relationTo) &&
+              item &&
+              typeof item === 'object' &&
+              'relationTo' in item &&
+              'value' in item
+            ) {
+              relationshipToAppend.relationTo = item.relationTo as string
+              relationshipToAppend.value = item.value as number | string
+            } else if (typeof field.relationTo === 'string') {
+              // Simple relationship
+              relationshipToAppend.relationTo = field.relationTo
+              relationshipToAppend.value = item
+            }
+
+            relationshipsToAppend.push(relationshipToAppend)
+          })
+        }
+        return
+      }
+
+      // Handle $remove operation for relationship fields
+      if (
+        fieldData &&
+        typeof fieldData === 'object' &&
+        '$remove' in fieldData &&
+        'hasMany' in field &&
+        field.hasMany
+      ) {
+        // Handle localized structure: { $remove: { locale: [...] } }
+        if (
+          typeof fieldData.$remove === 'object' &&
+          fieldData.$remove !== null &&
+          !Array.isArray(fieldData.$remove) &&
+          field.localized
+        ) {
+          // For localized fields, process each locale
+          Object.entries(fieldData.$remove).forEach(([localeKey, localeData]) => {
+            const localeItems = Array.isArray(localeData) ? localeData : [localeData]
+
+            localeItems.forEach((item) => {
+              const relationshipToDelete: RelationshipToDelete = {
+                itemToRemove: item,
+                locale: localeKey,
+                path: relationshipPath,
+              }
+
+              // Store relationTo for simple relationships
+              if (typeof field.relationTo === 'string') {
+                relationshipToDelete.relationTo = field.relationTo
+              }
+
+              relationshipsToDelete.push(relationshipToDelete)
+            })
+          })
+        } else {
+          // Handle non-localized structure: { $remove: [...] }
+          const itemsToRemove = Array.isArray(fieldData.$remove)
+            ? fieldData.$remove
+            : [fieldData.$remove]
+
+          itemsToRemove.forEach((item) => {
+            const relationshipToDelete: RelationshipToDelete = {
+              itemToRemove: item,
+              locale: isLocalized ? withinArrayOrBlockLocale : undefined,
+              path: relationshipPath,
+            }
+
+            // Store relationTo for simple relationships
+            if (typeof field.relationTo === 'string') {
+              relationshipToDelete.relationTo = field.relationTo
+            }
+
+            relationshipsToDelete.push(relationshipToDelete)
+          })
+        }
+        return
+      }
 
       if (
         isLocalized &&
@@ -633,4 +787,60 @@ export const traverseFields = ({
       }
     })
   })
+
+  // Handle dot-notation paths when no fields matched
+  if (!fieldsMatched) {
+    Object.keys(data).forEach((key) => {
+      if (key.includes('.')) {
+        // Split on first dot only
+        const firstDotIndex = key.indexOf('.')
+        const fieldName = key.substring(0, firstDotIndex)
+        const remainingPath = key.substring(firstDotIndex + 1)
+
+        // Create nested structure for this field
+        if (!data[fieldName]) {
+          data[fieldName] = {}
+        }
+
+        const nestedData = data[fieldName] as Record<string, unknown>
+
+        // Move the value to the nested structure
+        nestedData[remainingPath] = data[key]
+        delete data[key]
+
+        // Recursively process the newly created nested structure
+        // The field traversal will naturally handle it if the field exists in the schema
+        traverseFields({
+          adapter,
+          arrays,
+          arraysToPush,
+          baseTableName,
+          blocks,
+          blocksToDelete,
+          columnPrefix,
+          data,
+          enableAtomicWrites,
+          existingLocales,
+          fieldPrefix,
+          fields,
+          forcedLocale,
+          insideArrayOrBlock,
+          locales,
+          numbers,
+          numbersToDelete,
+          parentIsLocalized,
+          parentTableName,
+          path,
+          relationships,
+          relationshipsToAppend,
+          relationshipsToDelete,
+          row,
+          selects,
+          texts,
+          textsToDelete,
+          withinArrayOrBlockLocale,
+        })
+      }
+    })
+  }
 }

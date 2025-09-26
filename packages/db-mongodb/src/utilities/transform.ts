@@ -26,6 +26,52 @@ function isValidRelationObject(value: unknown): value is RelationObject {
   return typeof value === 'object' && value !== null && 'relationTo' in value && 'value' in value
 }
 
+/**
+ * Process relationship values for polymorphic and simple relationships
+ * Used by both $push and $remove operations
+ */
+const processRelationshipValues = (
+  items: unknown[],
+  field: RelationshipField | UploadField,
+  config: SanitizedConfig,
+  operation: 'read' | 'write',
+  validateRelationships: boolean,
+) => {
+  return items.map((item) => {
+    // Handle polymorphic relationships
+    if (Array.isArray(field.relationTo) && isValidRelationObject(item)) {
+      const relatedCollection = config.collections?.find(({ slug }) => slug === item.relationTo)
+      if (relatedCollection) {
+        return {
+          relationTo: item.relationTo,
+          value: convertRelationshipValue({
+            operation,
+            relatedCollection,
+            validateRelationships,
+            value: item.value,
+          }),
+        }
+      }
+      return item
+    }
+
+    // Handle simple relationships
+    if (typeof field.relationTo === 'string') {
+      const relatedCollection = config.collections?.find(({ slug }) => slug === field.relationTo)
+      if (relatedCollection) {
+        return convertRelationshipValue({
+          operation,
+          relatedCollection,
+          validateRelationships,
+          value: item,
+        })
+      }
+    }
+
+    return item
+  })
+}
+
 const convertRelationshipValue = ({
   operation,
   relatedCollection,
@@ -208,7 +254,9 @@ const sanitizeDate = ({
 }
 
 type Args = {
+  $addToSet?: Record<string, { $each: any[] } | any>
   $inc?: Record<string, number>
+  $pull?: Record<string, { $in: any[] } | any>
   $push?: Record<string, { $each: any[] } | any>
   /** instance of the adapter */
   adapter: MongooseAdapter
@@ -398,7 +446,9 @@ const stripFields = ({
 }
 
 export const transform = ({
+  $addToSet,
   $inc,
+  $pull,
   $push,
   adapter,
   data,
@@ -415,7 +465,9 @@ export const transform = ({
   if (Array.isArray(data)) {
     for (const item of data) {
       transform({
+        $addToSet,
         $inc,
+        $pull,
         $push,
         adapter,
         data: item,
@@ -464,6 +516,7 @@ export const transform = ({
     field,
     parentIsLocalized,
     parentPath,
+    parentRef: incomingParentRef,
     ref: incomingRef,
   }) => {
     if (!incomingRef || typeof incomingRef !== 'object') {
@@ -471,6 +524,26 @@ export const transform = ({
     }
 
     const ref = incomingRef as Record<string, unknown>
+    const parentRef = (incomingParentRef || {}) as Record<string, unknown>
+
+    // Defer pruning of empty containers; we will prune after traversal to avoid
+    // influencing path computation or traversal order.
+    const markContainerForPrune = () => {
+      if (!parentRef || typeof parentRef !== 'object') {
+        return
+      }
+      if (!ref || typeof ref !== 'object') {
+        return
+      }
+      if (Object.keys(ref).length > 0) {
+        return
+      }
+      const containerKey = Object.keys(parentRef).find((k) => (parentRef as any)[k] === ref)
+      if (containerKey) {
+        // mark by setting to undefined; a final prune pass will remove these
+        ;(parentRef as any)[containerKey] = undefined
+      }
+    }
 
     if (
       $inc &&
@@ -483,6 +556,7 @@ export const transform = ({
       if (value && typeof value === 'object' && '$inc' in value && typeof value.$inc === 'number') {
         $inc[`${parentPath}${field.name}`] = value.$inc
         delete ref[field.name]
+        markContainerForPrune()
       }
     }
 
@@ -516,6 +590,104 @@ export const transform = ({
         }
 
         delete ref[field.name]
+        markContainerForPrune()
+      }
+    }
+
+    // Handle $push operation for relationship fields (converts to $addToSet)
+
+    if (
+      $addToSet &&
+      (field.type === 'relationship' || field.type === 'upload') &&
+      'hasMany' in field &&
+      field.hasMany &&
+      operation === 'write' &&
+      field.name in ref &&
+      ref[field.name]
+    ) {
+      const value = ref[field.name]
+      if (value && typeof value === 'object' && '$push' in value) {
+        // Transform $push to MongoDB $addToSet with $each
+        const itemsToAppend = Array.isArray(value.$push) ? value.$push : [value.$push]
+
+        const processedItems = processRelationshipValues(
+          itemsToAppend,
+          field,
+          config,
+          operation,
+          validateRelationships,
+        )
+
+        if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
+          if (
+            typeof value.$push === 'object' &&
+            value.$push !== null &&
+            !Array.isArray(value.$push)
+          ) {
+            Object.entries(value.$push).forEach(([localeKey, localeData]) => {
+              const localeItems = Array.isArray(localeData) ? localeData : [localeData]
+              $addToSet[`${parentPath}${field.name}.${localeKey}`] = { $each: localeItems }
+            })
+          }
+          // Note: For localized fields, locale must always be specified inside $push object
+        } else {
+          $addToSet[`${parentPath}${field.name}`] = { $each: processedItems }
+        }
+
+        delete ref[field.name]
+        markContainerForPrune()
+      }
+    }
+
+    // Handle $remove operation for relationship fields (converts to $pull)
+    if (
+      $pull &&
+      (field.type === 'relationship' || field.type === 'upload') &&
+      'hasMany' in field &&
+      field.hasMany &&
+      operation === 'write' &&
+      field.name in ref &&
+      ref[field.name]
+    ) {
+      const value = ref[field.name]
+      if (value && typeof value === 'object' && '$remove' in value) {
+        // Transform $remove to MongoDB $pull with $in
+        const itemsToRemove = Array.isArray(value.$remove) ? value.$remove : [value.$remove]
+
+        const processedItems = processRelationshipValues(
+          itemsToRemove,
+          field,
+          config,
+          operation,
+          validateRelationships,
+        )
+
+        if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
+          if (
+            typeof value.$remove === 'object' &&
+            value.$remove !== null &&
+            !Array.isArray(value.$remove)
+          ) {
+            Object.entries(value.$remove).forEach(([localeKey, localeData]) => {
+              const localeItems = Array.isArray(localeData) ? localeData : [localeData]
+
+              const processedLocaleItems = processRelationshipValues(
+                localeItems,
+                field,
+                config,
+                operation,
+                validateRelationships,
+              )
+
+              $pull[`${parentPath}${field.name}.${localeKey}`] = { $in: processedLocaleItems }
+            })
+          }
+        } else {
+          $pull[`${parentPath}${field.name}`] = { $in: processedItems }
+        }
+
+        delete ref[field.name]
+        markContainerForPrune()
       }
     }
 
@@ -597,6 +769,28 @@ export const transform = ({
     parentIsLocalized,
     ref: data,
   })
+
+  // Final prune pass: remove any keys explicitly marked undefined and drop empty objects
+  const pruneDeep = (obj: any): void => {
+    if (!obj || typeof obj !== 'object') {
+      return
+    }
+    for (const key of Object.keys(obj)) {
+      const val = obj[key]
+      if (val === undefined) {
+        delete obj[key]
+        continue
+      }
+      if (val && typeof val === 'object') {
+        pruneDeep(val)
+        if (Object.keys(val).length === 0) {
+          delete obj[key]
+        }
+      }
+    }
+  }
+
+  pruneDeep(data)
 
   if (operation === 'write') {
     if (typeof data.updatedAt === 'undefined') {
