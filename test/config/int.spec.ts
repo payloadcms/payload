@@ -129,7 +129,7 @@ describe('Config', () => {
 
     it('properly merges collection.labels with defaults', () => {
       const [collection] = payload.config.collections
-      expect(collection?.labels).toEqual({ plural: 'Pages', singular: 'Pages' })
+      expect(collection?.labels).toEqual({ plural: 'Pages', singular: 'Page' })
     })
   })
 
