@@ -377,53 +377,6 @@ non-polymorphic relationship.
 
 </Banner>
 
-### Atomic Array Operations for hasMany Relationships
-
-For relationship fields with `hasMany: true`, you can perform atomic array operations that append or remove items without replacing the entire array:
-
-#### Append Items
-
-```ts
-await payload.db.updateMany({
-  collection: 'posts',
-  where: { status: { equals: 'published' } },
-  data: {
-    categories: { $push: ['featured', 'trending'] },
-  },
-})
-```
-
-#### Remove Items
-
-```ts
-await payload.db.updateMany({
-  collection: 'posts',
-  where: { author: { equals: 'user123' } },
-  data: {
-    tags: { $remove: ['draft', 'private'] },
-  },
-})
-```
-
-#### Polymorphic Relationships
-
-These operations also work with polymorphic relationships:
-
-```ts
-await payload.db.updateOne({
-  collection: 'posts',
-  id: 'post123',
-  data: {
-    relatedItems: {
-      $push: [
-        { relationTo: 'categories', value: 'category-id' },
-        { relationTo: 'tags', value: 'tag-id' },
-      ],
-    },
-  },
-})
-```
-
 ### Linking virtual fields with relationships
 
 You can link virtual fields to fields in other collections through a relationship (or upload) field, for example:
