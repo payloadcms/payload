@@ -441,10 +441,11 @@ export const traverseFields = ({
               Array.isArray(field.relationTo) &&
               item &&
               typeof item === 'object' &&
-              'relationTo' in item
+              'relationTo' in item &&
+              'value' in item
             ) {
-              relationshipToAppend.relationTo = item.relationTo
-              relationshipToAppend.value = item.value
+              relationshipToAppend.relationTo = item.relationTo as string
+              relationshipToAppend.value = item.value as number | string
             } else if (typeof field.relationTo === 'string') {
               // Simple relationship
               relationshipToAppend.relationTo = field.relationTo
