@@ -3,6 +3,7 @@ import type {
   ArrayField,
   CollectionSlug,
   Field,
+  FilterOptionsFunction,
   RelationshipField,
   SingleRelationshipField,
   TypedUser,
@@ -246,3 +247,29 @@ export type UserWithTenantsField = {
       }[]
     | null
 } & TypedUser
+
+declare module 'payload' {
+  export interface FieldCustom {
+    'plugin-multi-tenant'?: {
+      /**
+       * Function to override the filterOptions result for the relationship field.
+       * The original filterOptions / filterOptions injected by the multi-tenant plugin will still run,
+       * and the result will be passed as the first argument to this function.
+       *
+       * This allows you to combine your own filtering logic with the multi-tenant filtering logic.
+       *
+       * While passing your own `filterOptions` function to the field config will allow you to add stricter filter options
+       * in addition to the multi-tenant filtering, this property allows you to override the result of the multi-tenant filtering entirely
+       * for cases where you need to make it less strict.
+       *
+       * @param args.filterOptionsResult - The result of the original filterOptions function
+       * @param args.filterOptionsArgs - The arguments that were passed to the original filterOptions function
+       * ```ts
+       */
+      filterOptionsOverride?: (args: {
+        filterOptionsArgs: Parameters<FilterOptionsFunction>[0]
+        filterOptionsResult: Awaited<ReturnType<FilterOptionsFunction>>
+      }) => ReturnType<FilterOptionsFunction>
+    }
+  }
+}

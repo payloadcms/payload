@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Where } from 'payload'
 
 export const Relationships: CollectionConfig = {
   slug: 'relationships',
@@ -16,6 +16,27 @@ export const Relationships: CollectionConfig = {
       name: 'relationship',
       type: 'relationship',
       relationTo: 'relationships',
+      custom: {
+        'plugin-multi-tenant': {
+          filterOptionsOverride({ filterOptionsResult }) {
+            if (typeof filterOptionsResult === 'object' && filterOptionsResult !== null) {
+              // Wrap
+              const newResult: Where = {
+                or: [
+                  filterOptionsResult,
+                  {
+                    'tenant.isPublic': {
+                      equals: true,
+                    },
+                  },
+                ],
+              }
+              return newResult
+            }
+            return filterOptionsResult
+          },
+        },
+      },
     },
   ],
 }

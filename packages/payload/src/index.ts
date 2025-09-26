@@ -1464,6 +1464,7 @@ export type {
   FieldWithSubFields,
   FieldWithSubFieldsClient,
   FilterOptions,
+  FilterOptionsFunction,
   FilterOptionsProps,
   FlattenedArrayField,
   FlattenedBlock,

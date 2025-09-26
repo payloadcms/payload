@@ -55,6 +55,7 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       let blueDogRelationships: PaginatedDocs<Relationship>
       let anchorBarTenantID: DefaultDocumentIDType
       let blueDogTenantID: DefaultDocumentIDType
+      let publicRelationships: PaginatedDocs<Relationship>
 
       beforeEach(async () => {
         anchorBarRelationships = await payload.find({
@@ -71,6 +72,14 @@ describe('@payloadcms/plugin-multi-tenant', () => {
           where: {
             'tenant.name': {
               equals: 'Blue Dog',
+            },
+          },
+        })
+        publicRelationships = await payload.find({
+          collection: 'relationships',
+          where: {
+            'tenant.name': {
+              equals: 'Public Tenant',
             },
           },
         })
@@ -131,6 +140,24 @@ describe('@payloadcms/plugin-multi-tenant', () => {
             req: {},
           }),
         ).rejects.toThrow('The following field is invalid: Relationship')
+      })
+
+      it('ensure relationship document with relationship within different tenant can be created if the document is allowed via custom filterOptions override', async () => {
+        const newRelationship = await payload.create({
+          collection: 'relationships',
+          data: {
+            title: 'Relationship to Anchor Bar',
+            // @ts-expect-error unsafe access okay in test
+            relationship: publicRelationships.docs[0].id,
+            tenant: anchorBarTenantID,
+          },
+          req: {
+            headers: new Headers([['cookie', `payload-tenant=${anchorBarTenantID}`]]),
+          },
+        })
+
+        // @ts-expect-error unsafe access okay in test
+        expect(newRelationship.relationship?.title).toBe('Owned by public tenant')
       })
     })
   })

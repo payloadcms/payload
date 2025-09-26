@@ -319,11 +319,11 @@ export type FilterOptionsProps<TData = any> = {
   user: Partial<PayloadRequest['user']>
 }
 
-export type FilterOptionsFunc<TData = any> = (
+export type FilterOptionsFunction<TData = any> = (
   options: FilterOptionsProps<TData>,
 ) => boolean | Promise<boolean | Where> | Where
 
-export type FilterOptions<TData = any> = FilterOptionsFunc<TData> | null | Where
+export type FilterOptions<TData = any> = FilterOptionsFunction<TData> | null | Where
 
 type BlockSlugOrString = (({} & string) | BlockSlug)[]
 

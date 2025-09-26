@@ -1,4 +1,4 @@
-import type { Block, Config, Field, RelationshipField, SanitizedConfig, TypedUser } from 'payload'
+import type { Block, Config, Field, RelationshipField, SanitizedConfig } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 
@@ -170,42 +170,54 @@ function addFilter<ConfigType = unknown>({
   // User specified filter
   const originalFilter = field.filterOptions
   field.filterOptions = async (args) => {
-    const originalFilterResult =
-      typeof originalFilter === 'function' ? await originalFilter(args) : (originalFilter ?? true)
+    const getResult = async () => {
+      const originalFilterResult =
+        typeof originalFilter === 'function' ? await originalFilter(args) : (originalFilter ?? true)
 
-    // If the relationTo is not a tenant enabled collection, return early
-    if (args.relationTo && !tenantEnabledCollectionSlugs.includes(args.relationTo)) {
-      return originalFilterResult
+      // If the relationTo is not a tenant enabled collection, return early
+      if (args.relationTo && !tenantEnabledCollectionSlugs.includes(args.relationTo)) {
+        return originalFilterResult
+      }
+
+      // If the original filter returns false, return early
+      if (originalFilterResult === false) {
+        return false
+      }
+
+      // Custom tenant filter
+      const tenantFilterResults = filterDocumentsByTenants({
+        docTenantID: args.data?.[tenantFieldName],
+        filterFieldName: tenantFieldName,
+        req: args.req,
+        tenantsArrayFieldName,
+        tenantsArrayTenantFieldName,
+        tenantsCollectionSlug,
+        userHasAccessToAllTenants,
+      })
+
+      // If the tenant filter returns null, meaning no tenant filter, just use the original filter
+      if (tenantFilterResults === null) {
+        return originalFilterResult
+      }
+
+      // If the original filter returns true, just use the tenant filter
+      if (originalFilterResult === true) {
+        return tenantFilterResults
+      }
+
+      return {
+        and: [originalFilterResult, tenantFilterResults],
+      }
+    }
+    let result = await getResult()
+
+    if (field?.custom?.['plugin-multi-tenant']?.filterOptionsOverride) {
+      result = await field.custom['plugin-multi-tenant'].filterOptionsOverride({
+        filterOptionsArgs: args,
+        filterOptionsResult: result,
+      })
     }
 
-    // If the original filtr returns false, return early
-    if (originalFilterResult === false) {
-      return false
-    }
-
-    // Custom tenant filter
-    const tenantFilterResults = filterDocumentsByTenants({
-      docTenantID: args.data?.[tenantFieldName],
-      filterFieldName: tenantFieldName,
-      req: args.req,
-      tenantsArrayFieldName,
-      tenantsArrayTenantFieldName,
-      tenantsCollectionSlug,
-      userHasAccessToAllTenants,
-    })
-
-    // If the tenant filter returns null, meaning no tenant filter, just use the original filter
-    if (tenantFilterResults === null) {
-      return originalFilterResult
-    }
-
-    // If the original filter returns true, just use the tenant filter
-    if (originalFilterResult === true) {
-      return tenantFilterResults
-    }
-
-    return {
-      and: [originalFilterResult, tenantFilterResults],
-    }
+    return result
   }
 }
