@@ -228,7 +228,7 @@ addresses: {
 }
 ```
 
-### `supportedCountries`
+### supportedCountries
 
 The `supportedCountries` option is an array of country codes in [ISO 3166-1 alpha-2 format](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). This is used to limit the countries that can be selected when creating or updating an address. If not provided, all countries will be supported. Currently used for storing addresses only.
 
@@ -271,9 +271,9 @@ If the user is not authenticated, the cart ID is stored in local storage and use
 
 The `customers` option is required and is used to provide the customers collection slug. This collection is used to link orders, carts, and addresses to a customer.
 
-| Option | Type   | Description                           |
-| ------ | ------ | ------------------------------------- |
-| `slug` | string | The slug of the customers collection. |
+| Option | Type     | Description                           |
+| ------ | -------- | ------------------------------------- |
+| `slug` | `string` | The slug of the customers collection. |
 
 While it's recommended to use just one collection for customers and your editors, you can use any collection you want for your customers. Just make sure that your access control is checking for the correct collections as well.
 
