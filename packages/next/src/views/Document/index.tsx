@@ -341,6 +341,9 @@ export const renderDocument = async ({
     req,
   })
 
+  // Extract Description from documentSlots to pass to DocumentHeader
+  const { Description } = documentSlots
+
   const clientProps: DocumentViewClientProps = {
     formState,
     ...documentSlots,
@@ -395,6 +398,7 @@ export const renderDocument = async ({
         >
           {showHeader && !drawerSlug && (
             <DocumentHeader
+              AfterHeader={Description}
               collectionConfig={collectionConfig}
               globalConfig={globalConfig}
               permissions={permissions}
