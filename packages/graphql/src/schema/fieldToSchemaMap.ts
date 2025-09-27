@@ -49,6 +49,7 @@ import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import { combineParentName } from '../utilities/combineParentName.js'
 import { formatName } from '../utilities/formatName.js'
 import { formatOptions } from '../utilities/formatOptions.js'
+import { resolveSelect} from '../utilities/select.js'
 import { buildObjectType, type ObjectTypeConfig } from './buildObjectType.js'
 import { isFieldNullable } from './isFieldNullable.js'
 import { withNullableType } from './withNullableType.js'
@@ -56,11 +57,12 @@ import { withNullableType } from './withNullableType.js'
 function formattedNameResolver({
   field,
   ...rest
-}: { field: Field } & GraphQLFieldConfig<any, any, any>): GraphQLFieldConfig<any, any, any> {
+}: { field: Field } & GraphQLFieldConfig<any, Context, any>): GraphQLFieldConfig<any, Context, any> {
   if ('name' in field) {
     if (formatName(field.name) !== field.name) {
       return {
         ...rest,
+        extensions: { ...rest.extensions, field },
         resolve: (parent) => parent[field.name],
       }
     }
@@ -338,13 +340,14 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         ...objectTypeConfig,
         [formatName(field.name)]: {
           type: graphqlResult.types.groupTypes[interfaceName],
-          resolve: (parent, args, context: Context) => {
+          extensions: { field },
+          resolve: (parent, args, context) => {
             return {
               ...parent[field.name],
               _id: parent._id ?? parent.id,
             }
           },
-        },
+        } satisfies GraphQLFieldConfig<any, Context, any>,
       }
     } else {
       return field.fields.reduce((objectTypeConfigWithCollapsibleFields, subField) => {
@@ -369,7 +372,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
   join: ({ collectionSlug, field, graphqlResult, objectTypeConfig, parentName }) => {
     const joinName = combineParentName(parentName, toWords(field.name, true))
 
-    const joinType = {
+    const joinType: GraphQLFieldConfig<any, Context, any> = {
       type: new GraphQLObjectType({
         name: joinName,
         fields: {
@@ -405,13 +408,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       },
       extensions: {
         complexity: typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        field,
       },
-      async resolve(parent, args, context: Context) {
+      async resolve(parent, args, context, info) {
         const { collection } = field
         const { count = false, limit, page, sort, where } = args
         const { req } = context
 
         const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const select = resolveSelect(info, context.select)
 
         const targetField = (field as FlattenedJoinField).targetField
 
@@ -447,6 +452,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           page,
           pagination: count ? true : false,
           req,
+          select,
           sort,
           where: fullWhere,
         })
@@ -626,7 +632,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       }
     }
 
-    const relationship: GraphQLFieldConfig<any, any, any> = {
+    const relationship: GraphQLFieldConfig<any, Context, any> = {
       type: withNullableType({
         type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
         field,
@@ -636,13 +642,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       args: relationshipArgs,
       extensions: {
         complexity: typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        field,
       },
-      async resolve(parent, args, context: Context) {
+      async resolve(parent, args, context, info) {
         const value = parent[field.name]
         const locale = args.locale || context.req.locale
         const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
         let relatedCollectionSlug = field.relationTo
         const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const select = resolveSelect(info, context.select)
 
         if (hasManyValues) {
           const results = []
@@ -671,6 +679,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                   fallbackLocale,
                   locale,
                   overrideAccess: false,
+                  select,
                   showHiddenFields: false,
                   transactionID: context.req.transactionID,
                 }),
@@ -720,6 +729,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                 fallbackLocale,
                 locale,
                 overrideAccess: false,
+                select,
                 showHiddenFields: false,
                 transactionID: context.req.transactionID,
               }),
@@ -765,6 +775,9 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         depth: {
           type: GraphQLInt,
         },
+      },
+      extensions: {
+        field,
       },
       async resolve(parent, args, context: Context) {
         let depth = config.defaultDepth
@@ -1033,7 +1046,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       }
     }
 
-    const relationship = {
+    const relationship: GraphQLFieldConfig<any, Context, any> = {
       type: withNullableType({
         type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
         field,
@@ -1043,13 +1056,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       args: relationshipArgs,
       extensions: {
         complexity: typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        field,
       },
-      async resolve(parent, args, context: Context) {
+      async resolve(parent, args, context, info) {
         const value = parent[field.name]
         const locale = args.locale || context.req.locale
         const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
         let relatedCollectionSlug = field.relationTo
         const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const select = resolveSelect(info, context.select)
 
         if (hasManyValues) {
           const results = []
@@ -1074,6 +1089,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                 fallbackLocale,
                 locale,
                 overrideAccess: false,
+                select,
                 showHiddenFields: false,
                 transactionID: context.req.transactionID,
               }),
@@ -1121,6 +1137,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
               fallbackLocale,
               locale,
               overrideAccess: false,
+              select,
               showHiddenFields: false,
               transactionID: context.req.transactionID,
             }),
