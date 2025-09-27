@@ -30,7 +30,7 @@ export type BlockCollapsibleWithErrorProps = {
   fieldHasErrors?: boolean
 } & BlockCollapsibleProps
 
-type Props = {
+export type BlockContentProps = {
   baseClass: string
   BlockDrawer: React.FC
   Collapsible: React.FC<BlockCollapsibleWithErrorProps>
@@ -45,16 +45,20 @@ type Props = {
 }
 
 type BlockComponentContextType = {
-  BlockCollapsible?: React.FC<BlockCollapsibleProps>
-  EditButton?: React.FC
-  initialState: false | FormState | undefined
-
-  nodeKey?: string
-  RemoveButton?: React.FC
-}
+  BlockCollapsible: React.FC<BlockCollapsibleProps>
+} & Omit<BlockContentProps, 'Collapsible'>
 
 const BlockComponentContext = createContext<BlockComponentContextType>({
+  baseClass: 'lexical-block',
+  BlockCollapsible: () => null,
+  BlockDrawer: () => null,
+  CustomBlock: null,
+  EditButton: () => null,
+  errorCount: 0,
+  formSchema: [],
   initialState: false,
+  nodeKey: '',
+  RemoveButton: () => null,
 })
 
 export const useBlockComponentContext = () => React.use(BlockComponentContext)
@@ -64,18 +68,10 @@ export const useBlockComponentContext = () => React.use(BlockComponentContext)
  * scoped to the block. All format operations in here are thus scoped to the block's form, and
  * not the whole document.
  */
-export const BlockContent: React.FC<Props> = (props) => {
-  const {
-    BlockDrawer,
-    Collapsible,
-    CustomBlock,
-    EditButton,
-    errorCount,
-    formSchema,
-    initialState,
-    nodeKey,
-    RemoveButton,
-  } = props
+export const BlockContent: React.FC<BlockContentProps> = (props) => {
+  const { Collapsible, ...contextProps } = props
+
+  const { BlockDrawer, CustomBlock, errorCount, formSchema } = contextProps
 
   const hasSubmitted = useFormSubmitted()
 
@@ -96,11 +92,8 @@ export const BlockContent: React.FC<Props> = (props) => {
   return CustomBlock ? (
     <BlockComponentContext
       value={{
+        ...contextProps,
         BlockCollapsible: CollapsibleWithErrorProps,
-        EditButton,
-        initialState,
-        nodeKey,
-        RemoveButton,
       }}
     >
       {CustomBlock}
