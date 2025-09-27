@@ -353,7 +353,7 @@ export function DefaultEditView({
           setDocumentIsLocked(false)
         }
 
-        if (isLivePreviewEnabled) {
+        if (livePreviewURL) {
           setLivePreviewURL(livePreviewURL)
         }
 
@@ -520,7 +520,11 @@ export function DefaultEditView({
           onSuccess={onSave}
         >
           {isInDrawer && (
-            <DocumentDrawerHeader drawerSlug={drawerSlug} showDocumentID={!isFolderCollection} />
+            <DocumentDrawerHeader
+              AfterHeader={Description}
+              drawerSlug={drawerSlug}
+              showDocumentID={!isFolderCollection}
+            />
           )}
           {isLockingEnabled && shouldShowDocumentLockedModal && (
             <DocumentLocked

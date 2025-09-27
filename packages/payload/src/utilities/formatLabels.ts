@@ -22,6 +22,7 @@ const toWords = (inputString: string, joinWords = false): string => {
 
 const formatLabels = (slug: string): { plural: string; singular: string } => {
   const words = toWords(slug)
+
   return isPlural(slug)
     ? {
         plural: words,

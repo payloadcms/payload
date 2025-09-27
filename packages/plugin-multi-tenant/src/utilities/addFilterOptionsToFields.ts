@@ -185,6 +185,7 @@ function addFilter<ConfigType = unknown>({
 
     // Custom tenant filter
     const tenantFilterResults = filterDocumentsByTenants({
+      docTenantID: args.data?.[tenantFieldName],
       filterFieldName: tenantFieldName,
       req: args.req,
       tenantsArrayFieldName,

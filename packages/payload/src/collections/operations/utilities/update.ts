@@ -317,7 +317,6 @@ export const updateDocument = async <
       collection: collectionConfig,
       docWithLocales: result,
       draft: shouldSaveDraft,
-      locale,
       operation: 'update',
       payload,
       publishSpecificLocale,
