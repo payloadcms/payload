@@ -426,7 +426,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
                 {(Label ?? CustomLabel) ? (
                   (Label ?? CustomLabel)
                 ) : (
-                  <div>
+                  <div className={`${baseClass}__block-label`}>
                     <Pill
                       className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
                       pillStyle="white"
