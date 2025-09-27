@@ -52,6 +52,7 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
 
   const forceAcceptWarning = forceAcceptFromProps || formattedArgs.includes('forceAcceptWarning')
   const skipEmpty = formattedArgs.includes('skipEmpty')
+  const check = formattedArgs.includes('check')
 
   if (help) {
     // eslint-disable-next-line no-console
@@ -89,6 +90,7 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
     case 'migrate:create':
       try {
         await adapter.createMigration({
+          check,
           file,
           forceAcceptWarning,
           migrationName: args[1],
