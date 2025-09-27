@@ -98,6 +98,8 @@
 
     &__editButton.btn {
       margin: 0;
+      width: 24px;
+
       &:hover {
         background-color: var(--theme-elevation-200);
       }
