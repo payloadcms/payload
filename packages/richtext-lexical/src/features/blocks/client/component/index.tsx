@@ -409,6 +409,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         errorCount,
         fieldHasErrors,
         Label,
+        Pill: CustomPill,
         removeButton,
       }: BlockCollapsibleWithErrorProps) => (
         <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>
@@ -427,13 +428,17 @@ export const BlockComponent: React.FC<Props> = (props) => {
                   (Label ?? CustomLabel)
                 ) : (
                   <div className={`${baseClass}__block-label`}>
-                    <Pill
-                      className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
-                      pillStyle="white"
-                      size="small"
-                    >
-                      {blockDisplayName ?? formData?.blockType}
-                    </Pill>
+                    {CustomPill ? (
+                      CustomPill
+                    ) : (
+                      <Pill
+                        className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
+                        pillStyle="white"
+                        size="small"
+                      >
+                        {blockDisplayName ?? formData?.blockType}
+                      </Pill>
+                    )}
                     {!disableBlockName && !clientBlock?.admin?.disableBlockName && (
                       <SectionTitle
                         path="blockName"

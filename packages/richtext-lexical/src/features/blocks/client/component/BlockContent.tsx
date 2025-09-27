@@ -14,9 +14,14 @@ export type BlockCollapsibleProps = {
   disableBlockName?: boolean
   editButton?: boolean
   /**
-   * Override the default label with a custom label
+   * Replace the default Label component with a custom Label
    */
   Label?: React.ReactNode
+  /**
+   * Replace the default Pill component component that's rendered within the default Label component with a custom Pill.
+   * This property has no effect if you provide a custom Label component via the `Label` property.
+   */
+  Pill?: React.ReactNode
   removeButton?: boolean
 }
 
