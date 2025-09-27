@@ -151,4 +151,59 @@ describe('Lexical Fully Featured', () => {
     await lexical.drawer.getByText('Save changes').click()
     await expect(lexical.drawer).toBeHidden()
   })
+
+  test('ensure code block can be created using slash commands', async ({ page }) => {
+    await lexical.slashCommand('code')
+    const codeBlock = lexical.editor.locator('.lexical-block-Code')
+    await expect(codeBlock).toHaveCount(1)
+    await expect(codeBlock).toBeVisible()
+
+    await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
+    await expect(codeBlock.locator('#field-language .react-select--single-value')).toHaveText(
+      'JavaScript', // JavaScript is the default language
+    )
+
+    // Does not contain payload types. However, since this is JavaScript and not TypeScript, there should be no errors.
+    await codeBlock.locator('.monaco-editor .view-line').first().click()
+    await page.keyboard.type("import { APIError } from 'payload'")
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
+  })
+
+  test('ensure code block can be created using client-side markdown shortcuts', async ({
+    page,
+  }) => {
+    await page.keyboard.type('```ts ')
+    const codeBlock = lexical.editor.locator('.lexical-block-Code')
+    await expect(codeBlock).toHaveCount(1)
+    await expect(codeBlock).toBeVisible()
+
+    await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
+    await expect(codeBlock.locator('#field-language .react-select--single-value')).toHaveText(
+      'TypeScript',
+    )
+
+    // Ensure it does not contain payload types
+    await codeBlock.locator('.monaco-editor .view-line').first().click()
+    await page.keyboard.type("import { APIError } from 'payload'")
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(1)
+  })
+
+  test('ensure payload code block can be created using slash commands and it contains payload types', async ({
+    page,
+  }) => {
+    await lexical.slashCommand('payloadcode')
+    const codeBlock = lexical.editor.locator('.lexical-block-PayloadCode')
+    await expect(codeBlock).toHaveCount(1)
+    await expect(codeBlock).toBeVisible()
+
+    await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
+    await expect(codeBlock.locator('#field-language .react-select--single-value')).toHaveText(
+      'TypeScript', // TypeScript is the default language for the payload code block
+    )
+
+    // Ensure it contains payload types
+    await codeBlock.locator('.monaco-editor .view-line').first().click()
+    await page.keyboard.type("import { APIError } from 'payload'")
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
+  })
 })

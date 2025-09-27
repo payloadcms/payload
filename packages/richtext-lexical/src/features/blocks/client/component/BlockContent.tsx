@@ -4,20 +4,36 @@ import type { ClientField, FormState } from 'payload'
 import { RenderFields, useFormSubmitted } from '@payloadcms/ui'
 import React, { createContext, useMemo } from 'react'
 
-type Props = {
+export type BlockCollapsibleProps = {
+  children?: React.ReactNode
+  /**
+   * Additional className to the collapsible wrapper
+   */
+  className?: string
+
+  disableBlockName?: boolean
+  editButton?: boolean
+  /**
+   * Replace the default Label component with a custom Label
+   */
+  Label?: React.ReactNode
+  /**
+   * Replace the default Pill component component that's rendered within the default Label component with a custom Pill.
+   * This property has no effect if you provide a custom Label component via the `Label` property.
+   */
+  Pill?: React.ReactNode
+  removeButton?: boolean
+}
+
+export type BlockCollapsibleWithErrorProps = {
+  errorCount?: number
+  fieldHasErrors?: boolean
+} & BlockCollapsibleProps
+
+export type BlockContentProps = {
   baseClass: string
   BlockDrawer: React.FC
-  Collapsible: React.FC<{
-    children?: React.ReactNode
-    editButton?: boolean
-    errorCount?: number
-    fieldHasErrors?: boolean
-    /**
-     * Override the default label with a custom label
-     */
-    Label?: React.ReactNode
-    removeButton?: boolean
-  }>
+  Collapsible: React.FC<BlockCollapsibleWithErrorProps>
   CustomBlock: React.ReactNode
   EditButton: React.FC
   errorCount: number
@@ -29,24 +45,20 @@ type Props = {
 }
 
 type BlockComponentContextType = {
-  BlockCollapsible?: React.FC<{
-    children?: React.ReactNode
-    editButton?: boolean
-    /**
-     * Override the default label with a custom label
-     */
-    Label?: React.ReactNode
-    removeButton?: boolean
-  }>
-  EditButton?: React.FC
-  initialState: false | FormState | undefined
-
-  nodeKey?: string
-  RemoveButton?: React.FC
-}
+  BlockCollapsible: React.FC<BlockCollapsibleProps>
+} & Omit<BlockContentProps, 'Collapsible'>
 
 const BlockComponentContext = createContext<BlockComponentContextType>({
+  baseClass: 'lexical-block',
+  BlockCollapsible: () => null,
+  BlockDrawer: () => null,
+  CustomBlock: null,
+  EditButton: () => null,
+  errorCount: 0,
+  formSchema: [],
   initialState: false,
+  nodeKey: '',
+  RemoveButton: () => null,
 })
 
 export const useBlockComponentContext = () => React.use(BlockComponentContext)
@@ -56,56 +68,32 @@ export const useBlockComponentContext = () => React.use(BlockComponentContext)
  * scoped to the block. All format operations in here are thus scoped to the block's form, and
  * not the whole document.
  */
-export const BlockContent: React.FC<Props> = (props) => {
-  const {
-    BlockDrawer,
-    Collapsible,
-    CustomBlock,
-    EditButton,
-    errorCount,
-    formSchema,
-    initialState,
-    nodeKey,
-    RemoveButton,
-  } = props
+export const BlockContent: React.FC<BlockContentProps> = (props) => {
+  const { Collapsible, ...contextProps } = props
+
+  const { BlockDrawer, CustomBlock, errorCount, formSchema } = contextProps
 
   const hasSubmitted = useFormSubmitted()
 
   const fieldHasErrors = hasSubmitted && errorCount > 0
 
   const CollapsibleWithErrorProps = useMemo(
-    () =>
-      (props: {
-        children?: React.ReactNode
-        editButton?: boolean
-
-        /**
-         * Override the default label with a custom label
-         */
-        Label?: React.ReactNode
-        removeButton?: boolean
-      }) => (
-        <Collapsible
-          editButton={props.editButton}
-          errorCount={errorCount}
-          fieldHasErrors={fieldHasErrors}
-          Label={props.Label}
-          removeButton={props.removeButton}
-        >
-          {props.children}
+    () => (props: BlockCollapsibleProps) => {
+      const { children, ...rest } = props
+      return (
+        <Collapsible errorCount={errorCount} fieldHasErrors={fieldHasErrors} {...rest}>
+          {children}
         </Collapsible>
-      ),
+      )
+    },
     [Collapsible, fieldHasErrors, errorCount],
   )
 
   return CustomBlock ? (
     <BlockComponentContext
       value={{
+        ...contextProps,
         BlockCollapsible: CollapsibleWithErrorProps,
-        EditButton,
-        initialState,
-        nodeKey,
-        RemoveButton,
       }}
     >
       {CustomBlock}

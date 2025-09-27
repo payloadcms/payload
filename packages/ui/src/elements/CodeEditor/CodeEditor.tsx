@@ -47,7 +47,9 @@ const CodeEditor: React.FC<Props> = (props) => {
 
   React.useEffect(() => {
     if (recalculatedHeightAt && recalculatedHeightAt > prevCalculatedHeightAt.current) {
-      setDynamicHeight(Math.max(MIN_HEIGHT, value.split('\n').length * 18 + 2 + paddingFromProps))
+      setDynamicHeight(
+        Math.max(MIN_HEIGHT, value ? value.split('\n').length * 18 + 2 + paddingFromProps : 0),
+      )
       prevCalculatedHeightAt.current = recalculatedHeightAt
     }
   }, [value, MIN_HEIGHT, paddingFromProps, recalculatedHeightAt])
@@ -81,7 +83,9 @@ const CodeEditor: React.FC<Props> = (props) => {
       height={maxHeight ? Math.min(dynamicHeight, maxHeight) : dynamicHeight}
       onChange={(value, ev) => {
         rest.onChange?.(value, ev)
-        setDynamicHeight(Math.max(MIN_HEIGHT, value.split('\n').length * 18 + 2 + paddingFromProps))
+        setDynamicHeight(
+          Math.max(MIN_HEIGHT, value ? value.split('\n').length * 18 + 2 + paddingFromProps : 0),
+        )
       }}
       onMount={(editor, monaco) => {
         rest.onMount?.(editor, monaco)
