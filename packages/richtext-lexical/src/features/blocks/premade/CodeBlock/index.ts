@@ -1,6 +1,6 @@
 import type { Block } from 'payload'
 
-import type { AdditionalCodeComponentProps } from './Component.js'
+import type { AdditionalCodeComponentProps } from './Component/Code.js'
 
 import { codeConverter } from './converter.js'
 
