@@ -4,20 +4,31 @@ import type { ClientField, FormState } from 'payload'
 import { RenderFields, useFormSubmitted } from '@payloadcms/ui'
 import React, { createContext, useMemo } from 'react'
 
+export type BlockCollapsibleProps = {
+  children?: React.ReactNode
+  /**
+   * Additional className to the collapsible wrapper
+   */
+  className?: string
+
+  disableBlockName?: boolean
+  editButton?: boolean
+  /**
+   * Override the default label with a custom label
+   */
+  Label?: React.ReactNode
+  removeButton?: boolean
+}
+
+export type BlockCollapsibleWithErrorProps = {
+  errorCount?: number
+  fieldHasErrors?: boolean
+} & BlockCollapsibleProps
+
 type Props = {
   baseClass: string
   BlockDrawer: React.FC
-  Collapsible: React.FC<{
-    children?: React.ReactNode
-    editButton?: boolean
-    errorCount?: number
-    fieldHasErrors?: boolean
-    /**
-     * Override the default label with a custom label
-     */
-    Label?: React.ReactNode
-    removeButton?: boolean
-  }>
+  Collapsible: React.FC<BlockCollapsibleWithErrorProps>
   CustomBlock: React.ReactNode
   EditButton: React.FC
   errorCount: number
@@ -29,15 +40,7 @@ type Props = {
 }
 
 type BlockComponentContextType = {
-  BlockCollapsible?: React.FC<{
-    children?: React.ReactNode
-    editButton?: boolean
-    /**
-     * Override the default label with a custom label
-     */
-    Label?: React.ReactNode
-    removeButton?: boolean
-  }>
+  BlockCollapsible?: React.FC<BlockCollapsibleProps>
   EditButton?: React.FC
   initialState: false | FormState | undefined
 
@@ -74,27 +77,14 @@ export const BlockContent: React.FC<Props> = (props) => {
   const fieldHasErrors = hasSubmitted && errorCount > 0
 
   const CollapsibleWithErrorProps = useMemo(
-    () =>
-      (props: {
-        children?: React.ReactNode
-        editButton?: boolean
-
-        /**
-         * Override the default label with a custom label
-         */
-        Label?: React.ReactNode
-        removeButton?: boolean
-      }) => (
-        <Collapsible
-          editButton={props.editButton}
-          errorCount={errorCount}
-          fieldHasErrors={fieldHasErrors}
-          Label={props.Label}
-          removeButton={props.removeButton}
-        >
-          {props.children}
+    () => (props: BlockCollapsibleProps) => {
+      const { children, ...rest } = props
+      return (
+        <Collapsible errorCount={errorCount} fieldHasErrors={fieldHasErrors} {...rest}>
+          {children}
         </Collapsible>
-      ),
+      )
+    },
     [Collapsible, fieldHasErrors, errorCount],
   )
 

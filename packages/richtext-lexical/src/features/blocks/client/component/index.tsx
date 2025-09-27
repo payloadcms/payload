@@ -43,7 +43,7 @@ import { useEditorConfigContext } from '../../../../lexical/config/client/Editor
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import './index.scss'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
-import { BlockContent } from './BlockContent.js'
+import { type BlockCollapsibleWithErrorProps, BlockContent } from './BlockContent.js'
 import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
 
 type Props = {
@@ -403,30 +403,23 @@ export const BlockComponent: React.FC<Props> = (props) => {
     () =>
       ({
         children,
+        className,
         disableBlockName,
         editButton,
         errorCount,
         fieldHasErrors,
         Label,
         removeButton,
-      }: {
-        children?: React.ReactNode
-        disableBlockName?: boolean
-        editButton?: boolean
-        errorCount?: number
-        fieldHasErrors?: boolean
-        /**
-         * Override the default label with a custom label
-         */
-        Label?: React.ReactNode
-        removeButton?: boolean
-      }) => (
+      }: BlockCollapsibleWithErrorProps) => (
         <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>
           <Collapsible
             className={[
               `${baseClass}__row`,
               fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
-            ].join(' ')}
+              className,
+            ]
+              .filter(Boolean)
+              .join(' ')}
             collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
             header={
               <div className={`${baseClass}__block-header`}>
