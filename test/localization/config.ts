@@ -61,6 +61,9 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  experimental: {
+    localizeMeta: true,
+  },
   collections: [
     RichTextCollection,
     BlocksCollection,
@@ -426,6 +429,9 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'global-text',
+      versions: {
+        drafts: true,
+      },
     },
   ],
   localization: {

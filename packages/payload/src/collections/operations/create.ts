@@ -30,6 +30,7 @@ import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { populateLocalizedMeta } from '../../utilities/populateLocalizedMeta.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -241,6 +242,22 @@ export const createOperation = async <
 
     if (!collectionConfig.upload.disableLocalStorage) {
       await uploadFiles(payload, filesToUpload, req)
+    }
+
+    // /////////////////////////////////////
+    // Handle localized meta
+    // /////////////////////////////////////
+
+    if (
+      config.localization &&
+      config.localization.locales.length > 0 &&
+      config.experimental?.localizeMeta
+    ) {
+      resultWithLocales.localizedMeta = populateLocalizedMeta({
+        config,
+        data: resultWithLocales,
+        publishSpecificLocale,
+      })
     }
 
     // /////////////////////////////////////
