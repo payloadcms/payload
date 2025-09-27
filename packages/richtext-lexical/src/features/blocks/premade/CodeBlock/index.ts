@@ -17,12 +17,21 @@ export const CodeBlock: (args?: AdditionalCodeComponentProps) => Block = (args) 
   return {
     slug: args?.slug || 'Code',
     admin: {
+      components: {
+        Block: {
+          path: '@payloadcms/richtext-lexical/client#CodeBlockBlockComponent',
+        },
+      },
       jsx: '@payloadcms/richtext-lexical/client#codeConverterClient',
     },
     fields: [
       {
         name: 'language',
         type: 'select',
+        admin: {
+          // We'll manually render this field into the block component header
+          hidden: true,
+        },
         defaultValue: args?.defaultLanguage || Object.keys(languages)[0],
         options: Object.entries(languages).map(([key, value]) => ({
           label: value,
@@ -40,6 +49,7 @@ export const CodeBlock: (args?: AdditionalCodeComponentProps) => Block = (args) 
             },
           },
         },
+        label: '',
       },
     ],
     jsx: codeConverter,

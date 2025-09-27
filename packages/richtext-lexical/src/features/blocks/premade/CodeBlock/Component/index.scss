@@ -1,0 +1,22 @@
+@import '~@payloadcms/ui/scss';
+
+.payload-richtext-code-block {
+  &__pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: base(0.4);
+    margin-left: base(0.4);
+  }
+
+  .collapsible__content {
+    padding: 0;
+  }
+
+  .code-editor,
+  .monaco-editor,
+  .overflow-guard {
+    border-width: 0;
+    border-radius: 0 0 $style-radius-s $style-radius-s;
+  }
+}
