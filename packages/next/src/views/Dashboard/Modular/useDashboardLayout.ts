@@ -7,36 +7,33 @@ import { useCallback, useState } from 'react'
 import type { WidgetInstanceClient } from './client.js'
 
 export function useDashboardLayout(initialLayout: WidgetInstanceClient[], _widgets: Widget[]) {
-  const { setPreference } = usePreferences()
+  const setLayoutPreference = useSetLayoutPreference()
   const [isEditing, setIsEditing] = useState(false)
   const [currentLayout, setCurrentLayout] = useState<WidgetInstanceClient[]>(initialLayout)
-
-  const DASHBOARD_PREFERENCES_KEY = 'dashboard-layout'
 
   const saveLayout = useCallback(async () => {
     try {
       // Convert LayoutItem to react-grid-layout Layout format
       const layoutData: Layout[] = currentLayout.map((item) => item.clientLayout)
-
-      await setPreference(DASHBOARD_PREFERENCES_KEY, { layouts: layoutData }, false)
+      await setLayoutPreference(layoutData)
       setIsEditing(false)
       // Reload to get fresh layout from server
       window.location.reload()
     } catch {
       // Handle error silently or show user feedback
     }
-  }, [setPreference, currentLayout])
+  }, [setLayoutPreference, currentLayout])
 
   const resetLayout = useCallback(async () => {
     try {
-      await setPreference(DASHBOARD_PREFERENCES_KEY, null, false)
+      await setLayoutPreference(null)
       setIsEditing(false)
       // Reload to get default layout from server
       window.location.reload()
     } catch {
       // Handle error silently or show user feedback
     }
-  }, [setPreference])
+  }, [setLayoutPreference])
 
   const cancel = useCallback(() => {
     // Restore initial layout
@@ -68,4 +65,14 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[], _widge
     saveLayout,
     setIsEditing,
   }
+}
+
+function useSetLayoutPreference() {
+  const { setPreference } = usePreferences()
+  return useCallback(
+    async (layout: Layout[]) => {
+      await setPreference('dashboard-layout', { layouts: layout }, false)
+    },
+    [setPreference],
+  )
 }
