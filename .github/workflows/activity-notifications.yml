@@ -2,11 +2,11 @@ name: activity-notifications
 
 on:
   workflow_dispatch:
-  inputs:
-    debug:
-      description: Enable debug logging
-      required: false
-      default: false
+    inputs:
+      debug:
+        description: Enable debug logging
+        required: false
+        default: false
 
 jobs:
   run:
