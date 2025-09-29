@@ -183,8 +183,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
         })
 
         setInitialState(state)
-        setCustomLabel(state._components?.customComponents?.BlockLabel)
-        setCustomBlock(state._components?.customComponents?.Block)
+        setCustomLabel(state._components?.customComponents?.BlockLabel ?? undefined)
+        setCustomBlock(state._components?.customComponents?.Block ?? undefined)
       }
     }
 
@@ -281,8 +281,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
       }, 0)
 
       if (submit) {
-        setCustomLabel(newFormState._components?.customComponents?.BlockLabel)
-        setCustomBlock(newFormState._components?.customComponents?.Block)
+        setCustomLabel(newFormState._components?.customComponents?.BlockLabel ?? undefined)
+        setCustomBlock(newFormState._components?.customComponents?.Block ?? undefined)
 
         let rowErrorCount = 0
         for (const formField of Object.values(newFormState)) {
@@ -414,74 +414,76 @@ export const BlockComponent: React.FC<Props> = (props) => {
         Label,
         Pill: CustomPill,
         removeButton,
-      }: BlockCollapsibleWithErrorProps) => (
-        <div className={baseClass + ' ' + baseClass + '-' + blockType}>
-          <Collapsible
-            className={[
-              `${baseClass}__row`,
-              fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
-              className,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
-            header={
-              <div className={`${baseClass}__block-header`}>
-                {typeof Label !== 'undefined' ? (
-                  Label
-                ) : typeof CustomLabel !== 'undefined' ? (
-                  CustomLabel
-                ) : (
-                  <div className={`${baseClass}__block-label`}>
-                    {typeof CustomPill !== 'undefined' ? (
-                      CustomPill
-                    ) : (
-                      <Pill
-                        className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
-                        pillStyle="white"
-                        size="small"
-                      >
-                        {blockDisplayName ?? blockType}
-                      </Pill>
-                    )}
-                    {!disableBlockName && !clientBlock?.admin?.disableBlockName && (
-                      <SectionTitle
-                        path="blockName"
-                        readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
-                      />
-                    )}
+      }: BlockCollapsibleWithErrorProps) => {
+        return (
+          <div className={baseClass + ' ' + baseClass + '-' + blockType}>
+            <Collapsible
+              className={[
+                `${baseClass}__row`,
+                fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
+                className,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
+              header={
+                <div className={`${baseClass}__block-header`}>
+                  {typeof Label !== 'undefined' ? (
+                    Label
+                  ) : typeof CustomLabel !== 'undefined' ? (
+                    CustomLabel
+                  ) : (
+                    <div className={`${baseClass}__block-label`}>
+                      {typeof CustomPill !== 'undefined' ? (
+                        CustomPill
+                      ) : (
+                        <Pill
+                          className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
+                          pillStyle="white"
+                          size="small"
+                        >
+                          {blockDisplayName ?? blockType}
+                        </Pill>
+                      )}
+                      {!disableBlockName && !clientBlock?.admin?.disableBlockName && (
+                        <SectionTitle
+                          path="blockName"
+                          readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
+                        />
+                      )}
 
-                    {fieldHasErrors && (
-                      <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
+                      {fieldHasErrors && (
+                        <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
+                      )}
+                    </div>
+                  )}
+
+                  <div className={`${baseClass}__block-actions`}>
+                    {typeof Actions !== 'undefined' ? (
+                      Actions
+                    ) : (
+                      <>
+                        {(CustomBlock && editButton !== false) || (!CustomBlock && editButton) ? (
+                          <EditButton />
+                        ) : null}
+                        {removeButton !== false && editor.isEditable() ? <RemoveButton /> : null}
+                      </>
                     )}
                   </div>
-                )}
-
-                <div className={`${baseClass}__block-actions`}>
-                  {typeof Actions !== 'undefined' ? (
-                    Actions
-                  ) : (
-                    <>
-                      {(CustomBlock && editButton !== false) || (!CustomBlock && editButton) ? (
-                        <EditButton />
-                      ) : null}
-                      {removeButton !== false && editor.isEditable() ? <RemoveButton /> : null}
-                    </>
-                  )}
                 </div>
-              </div>
-            }
-            isCollapsed={isCollapsed}
-            key={0}
-            onToggle={(incomingCollapsedState) => {
-              onCollapsedChange(incomingCollapsedState)
-              setIsCollapsed(incomingCollapsedState)
-            }}
-          >
-            {children}
-          </Collapsible>
-        </div>
-      ),
+              }
+              isCollapsed={isCollapsed}
+              key={0}
+              onToggle={(incomingCollapsedState) => {
+                onCollapsedChange(incomingCollapsedState)
+                setIsCollapsed(incomingCollapsedState)
+              }}
+            >
+              {children}
+            </Collapsible>
+          </div>
+        )
+      },
     [
       CustomBlock,
       CustomLabel,

@@ -1,5 +1,33 @@
 @import '~@payloadcms/ui/scss';
 
+.payload-richtext-code-block.collapsible--collapsed {
+  .rah-static {
+    height: unset !important;
+    max-height: 150px !important;
+    position: relative;
+
+    &::after {
+      content: '';
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        rgb(0 0 0 / 0%) 0%,
+        var(--theme-elevation-50) 90%,
+        var(--theme-elevation-50) 100%
+      );
+      position: absolute;
+      height: 100px;
+      top: 50px;
+      left: 0;
+      right: 0;
+    }
+
+    > div {
+      display: unset !important;
+    }
+  }
+}
+
 .payload-richtext-code-block {
   &__pill {
     display: flex;
@@ -9,13 +37,11 @@
     margin-left: base(0.4);
   }
 
-  .collapsible {
-    &__header-wrap {
-      overflow: visible;
-    }
-    &__content {
-      padding: 0;
-    }
+  .collapsible__header-wrap {
+    overflow: visible;
+  }
+  .collapsible__content {
+    padding: 0;
   }
 
   .lexical-block {
