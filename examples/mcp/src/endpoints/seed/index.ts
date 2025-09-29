@@ -6,6 +6,7 @@ import { home } from './home'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
 import { imageHero1 } from './image-hero-1'
+import { universalTruth } from './universal-truth'
 import { post1 } from './post-1'
 import { post2 } from './post-2'
 import { post3 } from './post-3'
@@ -81,20 +82,24 @@ export const seed = async ({
 
   payload.logger.info(`— Seeding media...`)
 
-  const [image1Buffer, image2Buffer, image3Buffer, hero1Buffer] = await Promise.all([
-    fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post1.webp',
-    ),
-    fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post2.webp',
-    ),
-    fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post3.webp',
-    ),
-    fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-hero1.webp',
-    ),
-  ])
+  const [image1Buffer, image2Buffer, image3Buffer, hero1Buffer, universalTruthBuffer] =
+    await Promise.all([
+      fetchFileByURL(
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post1.webp',
+      ),
+      fetchFileByURL(
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post2.webp',
+      ),
+      fetchFileByURL(
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post3.webp',
+      ),
+      fetchFileByURL(
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-hero1.webp',
+      ),
+      fetchFileByURL(
+        'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
+      ),
+    ])
 
   const [demoAuthor, image1Doc, image2Doc, image3Doc, imageHomeDoc] = await Promise.all([
     payload.create({
@@ -124,6 +129,11 @@ export const seed = async ({
       collection: 'media',
       data: imageHero1,
       file: hero1Buffer,
+    }),
+    payload.create({
+      collection: 'media',
+      data: universalTruth,
+      file: universalTruthBuffer,
     }),
 
     payload.create({
