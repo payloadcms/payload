@@ -1,40 +1,28 @@
-import { context, getOctokit } from '@actions/github'
 import { info, setFailed } from '@actions/core'
+import { getOctokit } from '@actions/github'
 import { WebClient } from '@slack/web-api'
-import { formattedDate, daysAgo } from './lib/utils'
+import { daysAgo } from './lib/utils'
 import { SlimIssue } from './types'
 
-function generateBlocks(issues: SlimIssue[]) {
-  const blocks = [
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: '*A list of the top 15 issues sorted by the most reactions over the last 30 days.',
-      },
-    },
-    {
-      type: 'divider',
-    },
-  ]
+const DAYS_WINDOW = 60
 
-  let text = ''
+function generateText(issues: SlimIssue[]) {
+  let text = `*A list of the top 10 issues sorted by the most reactions over the last ${DAYS_WINDOW} days:*\n\n`
 
-  issues.forEach((issue, i) => {
-    text += `${i + 1}. [<${issue.html_url}|#${issue.number}>, ${
-      issue?.reactions?.total_count || 0
-    } reactions, ${formattedDate(issue.created_at)}]: ${issue.title}\n`
+  // Format date as "X days ago"
+  const formattedDaysAgo = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = Math.abs(now.getTime() - date.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
+  }
+
+  issues.forEach((issue) => {
+    text += `• ${issue?.reactions?.total_count || 0} 👍  ${issue.title} - <${issue.html_url}|#${issue.number}>, ${formattedDaysAgo(issue.created_at)}\n`
   })
 
-  blocks.push({
-    type: 'section',
-    text: {
-      type: 'mrkdwn',
-      text: text,
-    },
-  })
-
-  return blocks
+  return text.trim()
 }
 
 export async function run() {
@@ -45,11 +33,10 @@ export async function run() {
     const octoClient = getOctokit(process.env.GITHUB_TOKEN)
     const slackClient = new WebClient(process.env.SLACK_TOKEN)
 
-    const { owner, repo } = context.repo
     const { data } = await octoClient.rest.search.issuesAndPullRequests({
       order: 'desc',
-      per_page: 15,
-      q: `repo:${owner}/${repo} is:issue is:open created:>=${daysAgo(30)}`,
+      per_page: 10,
+      q: `repo:payloadcms/payload is:issue is:open created:>=${daysAgo(DAYS_WINDOW)}`,
       sort: 'reactions',
     })
 
@@ -58,18 +45,12 @@ export async function run() {
       return
     }
 
-    console.log(
-      data.items
-        .map(
-          (i) =>
-            `#${i.number}: ${i.title}, reactions: ${i.reactions?.total_count} - link: ${i.html_url}`,
-        )
-        .join('\n'),
-    )
+    const messageText = generateText(data.items)
+    console.log(messageText)
 
     await slackClient.chat.postMessage({
-      blocks: generateBlocks(data.items),
-      channel: '#test-notifications',
+      text: messageText,
+      channel: '#dev-feed',
       icon_emoji: ':github:',
       username: 'GitHub Notifier',
     })

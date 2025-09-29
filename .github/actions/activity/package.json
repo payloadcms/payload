@@ -2,7 +2,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build:all": "pnpm build:typecheck && pnpm build:popular-issues:ncc && pnpm build:new-issues:ncc",
+    "build": "pnpm build:typecheck && pnpm build:popular-issues:ncc && pnpm build:new-issues:ncc",
     "build:new-issues:ncc": "ncc build src/new-issues.ts -m -o dist/new-issues",
     "build:popular-issues:ncc": "ncc build src/popular-issues.ts -m -o dist/popular-issues",
     "build:typecheck": "tsc",
