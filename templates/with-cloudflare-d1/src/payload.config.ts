@@ -32,7 +32,7 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  db: sqliteD1Adapter({ binding: cloudflare.env.D1 as any }),
+  db: sqliteD1Adapter({ binding: cloudflare.env.D1 }),
   plugins: [
     payloadCloudPlugin(),
     r2Storage({
