@@ -1,6 +1,5 @@
 'use client'
 import type { EditorState, SerializedEditorState } from 'lexical'
-import type { Validate } from 'payload'
 
 import {
   FieldDescription,
@@ -13,6 +12,7 @@ import {
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import { dequal } from 'dequal/lite'
+import { type Validate } from 'payload'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
@@ -145,7 +145,10 @@ const RichTextComponent: React.FC<
       // In postgres, the order of keys in JSON objects is not guaranteed to be preserved,
       // so we need to do a deep equality check here that does not care about key order => we use dequal.
       // If we used JSON.stringify, the editor would re-mount every time you save the document, as the order of keys changes => change detected => re-mount.
-      if (prevValueRef.current !== value && !dequal(prevValueRef.current, value)) {
+      if (
+        prevValueRef.current !== value &&
+        !dequal(JSON.parse(JSON.stringify(prevValueRef.current)), value)
+      ) {
         prevInitialValueRef.current = initialValue
         prevValueRef.current = value
         setRerenderProviderKey(new Date())
