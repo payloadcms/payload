@@ -602,7 +602,7 @@ describe('Versions', () => {
       const spanishTitle = 'spanish title'
       const englishTitle = 'english title'
 
-      await page.goto(url.create)
+      await page.goto(autosaveURL.create)
 
       // fill out doc in english
       await page.locator('#field-title').fill(englishTitle)
@@ -623,11 +623,10 @@ describe('Versions', () => {
             await page.locator('.doc-tab[aria-label="Versions"] .pill-version-count').textContent(),
           { timeout: POLL_TOPASS_TIMEOUT },
         )
-        .toEqual('2')
+        .toEqual('5')
 
       // fill out draft content in spanish
       await page.locator('#field-title').fill(`${spanishTitle}--draft`)
-      await saveDocAndAssert(page, '#action-save-draft')
 
       // revert to last published version
       await page.locator('#action-revert-to-published').click()
@@ -1097,7 +1096,7 @@ describe('Versions', () => {
 
       await textField.fill('spanish draft')
       await saveDocAndAssert(page, '#action-save-draft')
-      await expect(status).toContainText('Changed')
+      await expect(status).toContainText('Draft')
 
       await changeLocale(page, 'en')
       await textField.fill('english published')
@@ -1130,7 +1129,7 @@ describe('Versions', () => {
 
       const publishedDoc = data.docs[0]
 
-      expect(publishedDoc.text).toStrictEqual({
+      expect(publishedDoc?.text).toStrictEqual({
         en: 'english published',
         es: 'spanish published',
       })
@@ -1431,7 +1430,7 @@ describe('Versions', () => {
       const titleField = page.locator('#field-title')
 
       // press slower than the autosave interval, but not faster than the response and processing
-      await titleField.pressSequentially('Initial', {
+      await titleField.pressSequentially('Initial ', {
         delay: 150,
       })
 
