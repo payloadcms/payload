@@ -24,7 +24,6 @@ export function DashboardBreadcrumbDropdown({
   onSaveChanges,
 }: DashboardBreadcrumbDropdownProps) {
   if (isEditing) {
-    // In editing mode, show Dashboard as text with inline actions
     return (
       <div style={{ alignItems: 'center', display: 'flex', gap: '12px' }}>
         <span>Dashboard</span>
@@ -43,18 +42,6 @@ export function DashboardBreadcrumbDropdown({
     )
   }
 
-  // buttonStyle?:
-  // | 'error'
-  // | 'icon-label'
-  // | 'none'
-  // | 'pill'
-  // | 'primary'
-  // | 'secondary'
-  // | 'subtle'
-  // | 'tab'
-  // | 'transparent'
-
-  // In view mode, show Dashboard as dropdown using ReactSelect
   const options = [
     { label: 'Edit Dashboard', value: 'edit' },
     { label: 'Reset Layout', value: 'reset' },
