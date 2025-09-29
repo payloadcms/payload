@@ -18,7 +18,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
 
   const createClientLayout = (layout: WidgetInstance[]): WidgetInstanceClient[] => {
     return layout.map((widgetInstance, index) => {
-      const colsPerRow = 12
+      const colsPerRow = 11
       let x = 0
 
       // Simple layout algorithm: place widgets left to right, then wrap to next row
@@ -28,7 +28,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
         currentX += prevWidgetInstance.width || 3
         // If we exceed the row width, wrap to next row
         if (currentX > colsPerRow) {
-          currentX = prevWidgetInstance.width || 3
+          currentX = 0
         }
       }
       x = currentX
