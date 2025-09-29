@@ -20,10 +20,10 @@ export type WidgetInstanceClient = {
 }
 
 export function ModularDashboardClient({
-  layout: initialLayout,
+  clientLayout: initialLayout,
   widgets, // For future "Add Widget" functionality
 }: {
-  layout: WidgetInstanceClient[]
+  clientLayout: WidgetInstanceClient[]
   widgets: Widget[]
 }) {
   // TODO: add addWidget or something like that to add widget to layout
