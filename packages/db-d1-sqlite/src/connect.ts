@@ -1,7 +1,6 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { Connect, Migration } from 'payload'
 
-import { D1Database } from '@miniflare/d1'
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/d1'
 
@@ -23,7 +22,7 @@ export const connect: Connect = async function connect(
   try {
     const logger = this.logger || false
 
-    this.drizzle = drizzle(new D1Database(this.binding), { logger, schema: this.schema })
+    this.drizzle = drizzle(this.binding, { logger, schema: this.schema })
     this.client = this.drizzle.$client as any
 
     if (!hotReload) {
