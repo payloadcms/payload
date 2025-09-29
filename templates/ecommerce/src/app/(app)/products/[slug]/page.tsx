@@ -166,7 +166,7 @@ function RelatedProducts({ products }: { products: Product[] }) {
             className="aspect-square w-full flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"
             key={product.id}
           >
-            <Link className="relative h-full w-full" href={`/product/${product.slug}`}>
+            <Link className="relative h-full w-full" href={`/products/${product.slug}`}>
               <GridTileImage
                 label={{
                   amount: product.priceInUSD!,
