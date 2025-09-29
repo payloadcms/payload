@@ -159,9 +159,10 @@ describe('Lexical Fully Featured', () => {
     await expect(codeBlock).toBeVisible()
 
     await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
-    await expect(codeBlock.locator('#field-language .react-select--single-value')).toHaveText(
-      'JavaScript', // JavaScript is the default language
-    )
+
+    await expect(
+      codeBlock.locator('.payload-richtext-code-block__language-selector-button'),
+    ).toHaveAttribute('data-selected-language', 'js')
 
     // Does not contain payload types. However, since this is JavaScript and not TypeScript, there should be no errors.
     await codeBlock.locator('.monaco-editor .view-line').first().click()
@@ -178,9 +179,9 @@ describe('Lexical Fully Featured', () => {
     await expect(codeBlock).toBeVisible()
 
     await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
-    await expect(codeBlock.locator('#field-language .react-select--single-value')).toHaveText(
-      'TypeScript',
-    )
+    await expect(
+      codeBlock.locator('.payload-richtext-code-block__language-selector-button'),
+    ).toHaveAttribute('data-selected-language', 'ts')
 
     // Ensure it does not contain payload types
     await codeBlock.locator('.monaco-editor .view-line').first().click()
@@ -197,9 +198,9 @@ describe('Lexical Fully Featured', () => {
     await expect(codeBlock).toBeVisible()
 
     await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
-    await expect(codeBlock.locator('#field-language .react-select--single-value')).toHaveText(
-      'TypeScript', // TypeScript is the default language for the payload code block
-    )
+    await expect(
+      codeBlock.locator('.payload-richtext-code-block__language-selector-button'),
+    ).toHaveAttribute('data-selected-language', 'ts')
 
     // Ensure it contains payload types
     await codeBlock.locator('.monaco-editor .view-line').first().click()

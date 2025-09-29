@@ -51,7 +51,10 @@ export const CodeBlockBlockComponent: React.FC<
         <div className={`${baseClass}__actions`}>
           <Popup
             button={
-              <div className={`${baseClass}__language-selector-button`}>
+              <div
+                className={`${baseClass}__language-selector-button`}
+                data-selected-language={selectedLanguageField?.value}
+              >
                 <span>{selectedLanguageLabel}</span>
                 <ChevronIcon className={`${baseClass}__chevron`} />
               </div>
