@@ -278,3 +278,30 @@ sqliteAdapter({
   ],
 })
 ```
+
+## D1 Database
+
+We also provide a separate adapter to connect to [Cloudflare D1](https://developers.cloudflare.com/d1/), which is a serverless SQLite database.
+
+To use it, install the package `@payloadcms/db-d1-sqlite` and configure it as follows:
+
+```ts
+import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
+
+export default buildConfig({
+  // Your config goes here
+  collections: [
+    // Collections go here
+  ],
+  // Configure the D1 adapter here
+  db: sqliteD1Adapter({
+    // D1-specific arguments go here.
+    // `binding` is required and should match the D1 database binding name in your Cloudflare Worker environment.
+    binding: cloudflare.env.D1,
+  }),
+})
+```
+
+It inherits the options from the SQLite adapter above with the exception of the connection options in favour of the `binding`.
+
+You can see our [Cloudflare D1 template](https://github.com/payloadcms/payload/tree/main/templates/with-cloudflare-d1) for a full example of how to set this up.
