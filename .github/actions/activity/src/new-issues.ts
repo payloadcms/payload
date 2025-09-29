@@ -5,9 +5,10 @@ import { daysAgo } from './lib/utils'
 import { SlimIssue } from './types'
 
 const DAYS_WINDOW = 7
+const TRIAGE_LABEL = 'status: needs-triage'
 
 function generateText(issues: SlimIssue[]) {
-  let text = `*A list of issues opened in the last ${DAYS_WINDOW} days:*\n\n`
+  let text = `*A list of issues opened in the last ${DAYS_WINDOW} with \`status: needs-triage\`:*\n\n`
 
   issues.forEach((issue) => {
     text += `• ${issue.title} - (<${issue.html_url}|#${issue.number}>)\n`
@@ -27,7 +28,7 @@ export async function run() {
     const { data } = await octoClient.rest.search.issuesAndPullRequests({
       order: 'desc',
       per_page: 15,
-      q: `repo:payloadcms/payload is:issue is:open created:>=${daysAgo(DAYS_WINDOW)}`,
+      q: `repo:payloadcms/payload is:issue is:open label:"${TRIAGE_LABEL}" created:>=${daysAgo(DAYS_WINDOW)}`,
       sort: 'created',
     })
 
