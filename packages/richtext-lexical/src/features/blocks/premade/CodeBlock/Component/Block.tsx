@@ -1,7 +1,14 @@
 'use client'
 import type {} from 'payload'
 
-import { ChevronIcon, Popup, PopupList, RenderFields, useFormFields } from '@payloadcms/ui'
+import {
+  ChevronIcon,
+  CopyToClipboard,
+  Popup,
+  PopupList,
+  RenderFields,
+  useFormFields,
+} from '@payloadcms/ui'
 import React from 'react'
 
 import './index.scss'
@@ -18,8 +25,12 @@ export const CodeBlockBlockComponent: React.FC<
   const { languages } = args
   const { BlockCollapsible, formSchema } = useBlockComponentContext()
 
-  const { selectedLanguage, setSelectedLanguage } = useFormFields(([fields, dispatch]) => ({
-    selectedLanguage: fields?.language,
+  const { codeField } = useFormFields(([fields]) => ({
+    codeField: fields?.code,
+  }))
+
+  const { selectedLanguageField, setSelectedLanguage } = useFormFields(([fields, dispatch]) => ({
+    selectedLanguageField: fields?.language,
     setSelectedLanguage: (language: string) =>
       dispatch({
         type: 'UPDATE',
@@ -27,44 +38,48 @@ export const CodeBlockBlockComponent: React.FC<
         value: language,
       }),
   }))
-  const selectedLanguageLabel = languages[selectedLanguage?.value as keyof typeof languages]
+
+  const selectedLanguageLabel = languages[selectedLanguageField?.value as keyof typeof languages]
 
   return (
     <BlockCollapsible
       Actions={
-        <Popup
-          button={
-            <div className={`${baseClass}__language-selector-button`}>
-              <span>{selectedLanguageLabel}</span>
-              <ChevronIcon className={`${baseClass}__chevron`} />
-            </div>
-          }
-          className={`${baseClass}__language-selector`}
-          horizontalAlign="right"
-          render={({ close }) => (
-            <PopupList.ButtonGroup>
-              {Object.entries(languages).map(([languageCode, languageLabel]) => {
-                return (
-                  <PopupList.Button
-                    active={false}
-                    disabled={false}
-                    key={languageCode}
-                    onClick={() => {
-                      setSelectedLanguage(languageCode)
-                      close()
-                    }}
-                  >
-                    <span className={`${baseClass}__language-code`} data-language={languageCode}>
-                      {languageLabel}
-                    </span>
-                  </PopupList.Button>
-                )
-              })}
-            </PopupList.ButtonGroup>
-          )}
-          showScrollbar
-          size="large"
-        />
+        <div className={`${baseClass}__actions`}>
+          <Popup
+            button={
+              <div className={`${baseClass}__language-selector-button`}>
+                <span>{selectedLanguageLabel}</span>
+                <ChevronIcon className={`${baseClass}__chevron`} />
+              </div>
+            }
+            className={`${baseClass}__language-selector`}
+            horizontalAlign="right"
+            render={({ close }) => (
+              <PopupList.ButtonGroup>
+                {Object.entries(languages).map(([languageCode, languageLabel]) => {
+                  return (
+                    <PopupList.Button
+                      active={false}
+                      disabled={false}
+                      key={languageCode}
+                      onClick={() => {
+                        setSelectedLanguage(languageCode)
+                        close()
+                      }}
+                    >
+                      <span className={`${baseClass}__language-code`} data-language={languageCode}>
+                        {languageLabel}
+                      </span>
+                    </PopupList.Button>
+                  )
+                })}
+              </PopupList.ButtonGroup>
+            )}
+            showScrollbar
+            size="large"
+          />
+          <CopyToClipboard value={(codeField?.value as string) ?? ''} />
+        </div>
       }
       className={baseClass}
       Pill={

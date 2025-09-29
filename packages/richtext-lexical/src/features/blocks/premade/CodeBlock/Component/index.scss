@@ -31,19 +31,29 @@
     border-radius: 0 0 $style-radius-s $style-radius-s;
   }
 
+  &__actions {
+    display: flex;
+    flex-direction: row;
+    gap: calc(var(--base) * 0.4);
+  }
+
+  .popup-button {
+    padding: 0 0 0 calc(var(--base) * 0.2);
+  }
+
+  .copy-to-clipboard,
+  .popup-button {
+    border-radius: $style-radius-s;
+    color: var(--theme-elevation-500);
+
+    &:hover {
+      color: var(--theme-elevation-800);
+      background-color: var(--theme-elevation-200);
+    }
+  }
+
   &__language-selector {
     pointer-events: all;
-
-    .popup-button {
-      border-radius: $style-radius-s;
-      color: var(--theme-elevation-500);
-      padding: 0 0 0 calc(var(--base) * 0.2);
-
-      &:hover {
-        color: var(--theme-elevation-800);
-        background-color: var(--theme-elevation-200);
-      }
-    }
 
     &-button {
       display: flex;
