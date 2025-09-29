@@ -7,6 +7,7 @@ import {
   Popup,
   PopupList,
   RenderFields,
+  useForm,
   useFormFields,
 } from '@payloadcms/ui'
 import React from 'react'
@@ -24,6 +25,7 @@ export const CodeBlockBlockComponent: React.FC<
 > = (args) => {
   const { languages } = args
   const { BlockCollapsible, formSchema } = useBlockComponentContext()
+  const { setModified } = useForm()
 
   const { codeField } = useFormFields(([fields]) => ({
     codeField: fields?.code,
@@ -31,12 +33,14 @@ export const CodeBlockBlockComponent: React.FC<
 
   const { selectedLanguageField, setSelectedLanguage } = useFormFields(([fields, dispatch]) => ({
     selectedLanguageField: fields?.language,
-    setSelectedLanguage: (language: string) =>
+    setSelectedLanguage: (language: string) => {
       dispatch({
         type: 'UPDATE',
         path: 'language',
         value: language,
-      }),
+      })
+      setModified(true)
+    },
   }))
 
   const selectedLanguageLabel = languages[selectedLanguageField?.value as keyof typeof languages]
