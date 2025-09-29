@@ -1,6 +1,8 @@
 name: activity-notifications
 
 on:
+  schedule:
+    - cron: '0 11 * * 1'
   workflow_dispatch:
     inputs:
       debug:
