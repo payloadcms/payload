@@ -144,21 +144,19 @@ export const traverseFields = ({
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
 
       if (isLocalized) {
-        let value: {
-          [locale: string]: unknown[]
-        } = data[field.name] as any
-
-        let push = false
-        if (typeof value === 'object' && '$push' in value) {
-          value = value.$push as any
-          push = true
-        }
+        const value = data[field.name]
 
         if (typeof value === 'object' && value !== null) {
-          Object.entries(value).forEach(([localeKey, _localeData]) => {
-            let localeData = _localeData
-            if (push && !Array.isArray(localeData)) {
-              localeData = [localeData]
+          Object.entries(value).forEach(([localeKey, localeValue]) => {
+            let localeData = localeValue
+            let push = false
+
+            if (localeValue && typeof localeValue === 'object' && '$push' in localeValue) {
+              localeData = localeValue.$push
+              push = true
+              if (!Array.isArray(localeData)) {
+                localeData = [localeData]
+              }
             }
 
             if (Array.isArray(localeData)) {
@@ -390,51 +388,62 @@ export const traverseFields = ({
       if (
         fieldData &&
         typeof fieldData === 'object' &&
-        '$push' in fieldData &&
         'hasMany' in field &&
-        field.hasMany
+        field.hasMany &&
+        ('$push' in fieldData ||
+          (field.localized &&
+            Object.values(fieldData).some(
+              (localeValue) =>
+                localeValue &&
+                typeof localeValue === 'object' &&
+                '$push' in (localeValue as Record<string, unknown>),
+            )))
       ) {
         let itemsToAppend: unknown[]
 
-        // Handle localized structure: { $push: { locale: [...] } }
-        if (
-          typeof fieldData.$push === 'object' &&
-          fieldData.$push !== null &&
-          !Array.isArray(fieldData.$push) &&
-          field.localized
-        ) {
-          // For localized fields, process each locale
-          Object.entries(fieldData.$push).forEach(([localeKey, localeData]) => {
-            const localeItems = Array.isArray(localeData) ? localeData : [localeData]
+        if (field.localized) {
+          let hasLocaleOperations = false
+          Object.entries(fieldData).forEach(([localeKey, localeValue]) => {
+            if (localeValue && typeof localeValue === 'object' && '$push' in localeValue) {
+              hasLocaleOperations = true
+              const push = localeValue.$push
+              const localeItems = Array.isArray(push) ? push : [push]
 
-            localeItems.forEach((item) => {
-              const relationshipToAppend: RelationshipToAppend = {
-                locale: localeKey,
-                path: relationshipPath,
-                value: item,
-              }
+              localeItems.forEach((item) => {
+                const relationshipToAppend: RelationshipToAppend = {
+                  locale: localeKey,
+                  path: relationshipPath,
+                  value: item,
+                }
 
-              // Handle polymorphic relationships
-              if (
-                Array.isArray(field.relationTo) &&
-                item &&
-                typeof item === 'object' &&
-                'relationTo' in item
-              ) {
-                relationshipToAppend.relationTo = item.relationTo
-                relationshipToAppend.value = item.value
-              } else if (typeof field.relationTo === 'string') {
-                // Simple relationship
-                relationshipToAppend.relationTo = field.relationTo
-                relationshipToAppend.value = item
-              }
+                // Handle polymorphic relationships
+                if (
+                  Array.isArray(field.relationTo) &&
+                  item &&
+                  typeof item === 'object' &&
+                  'relationTo' in item
+                ) {
+                  relationshipToAppend.relationTo = item.relationTo
+                  relationshipToAppend.value = item.value
+                } else if (typeof field.relationTo === 'string') {
+                  // Simple relationship
+                  relationshipToAppend.relationTo = field.relationTo
+                  relationshipToAppend.value = item
+                }
 
-              relationshipsToAppend.push(relationshipToAppend)
-            })
+                relationshipsToAppend.push(relationshipToAppend)
+              })
+            }
           })
+
+          if (hasLocaleOperations) {
+            return
+          }
         } else {
-          // Handle non-localized structure: { $push: [...] }
-          itemsToAppend = Array.isArray(fieldData.$push) ? fieldData.$push : [fieldData.$push]
+          // Handle non-localized fields: { field: { $push: data } }
+          itemsToAppend = Array.isArray((fieldData as any).$push)
+            ? (fieldData as any).$push
+            : [(fieldData as any).$push]
 
           itemsToAppend.forEach((item) => {
             const relationshipToAppend: RelationshipToAppend = {
@@ -469,41 +478,51 @@ export const traverseFields = ({
       if (
         fieldData &&
         typeof fieldData === 'object' &&
-        '$remove' in fieldData &&
         'hasMany' in field &&
-        field.hasMany
+        field.hasMany &&
+        ('$remove' in fieldData ||
+          (field.localized &&
+            Object.values(fieldData).some(
+              (localeValue) =>
+                localeValue &&
+                typeof localeValue === 'object' &&
+                '$remove' in (localeValue as Record<string, unknown>),
+            )))
       ) {
-        // Handle localized structure: { $remove: { locale: [...] } }
-        if (
-          typeof fieldData.$remove === 'object' &&
-          fieldData.$remove !== null &&
-          !Array.isArray(fieldData.$remove) &&
-          field.localized
-        ) {
-          // For localized fields, process each locale
-          Object.entries(fieldData.$remove).forEach(([localeKey, localeData]) => {
-            const localeItems = Array.isArray(localeData) ? localeData : [localeData]
+        // Check for new locale-first syntax: { field: { locale: { $remove: data } } }
+        if (field.localized) {
+          let hasLocaleOperations = false
+          Object.entries(fieldData).forEach(([localeKey, localeValue]) => {
+            if (localeValue && typeof localeValue === 'object' && '$remove' in localeValue) {
+              hasLocaleOperations = true
+              const remove = localeValue.$remove
+              const localeItems = Array.isArray(remove) ? remove : [remove]
 
-            localeItems.forEach((item) => {
-              const relationshipToDelete: RelationshipToDelete = {
-                itemToRemove: item,
-                locale: localeKey,
-                path: relationshipPath,
-              }
+              localeItems.forEach((item) => {
+                const relationshipToDelete: RelationshipToDelete = {
+                  itemToRemove: item,
+                  locale: localeKey,
+                  path: relationshipPath,
+                }
 
-              // Store relationTo for simple relationships
-              if (typeof field.relationTo === 'string') {
-                relationshipToDelete.relationTo = field.relationTo
-              }
+                // Store relationTo for simple relationships
+                if (typeof field.relationTo === 'string') {
+                  relationshipToDelete.relationTo = field.relationTo
+                }
 
-              relationshipsToDelete.push(relationshipToDelete)
-            })
+                relationshipsToDelete.push(relationshipToDelete)
+              })
+            }
           })
+
+          if (hasLocaleOperations) {
+            return
+          }
         } else {
-          // Handle non-localized structure: { $remove: [...] }
-          const itemsToRemove = Array.isArray(fieldData.$remove)
-            ? fieldData.$remove
-            : [fieldData.$remove]
+          // Handle non-localized fields: { field: { $remove: data } }
+          const itemsToRemove = Array.isArray((fieldData as any).$remove)
+            ? (fieldData as any).$remove
+            : [(fieldData as any).$remove]
 
           itemsToRemove.forEach((item) => {
             const relationshipToDelete: RelationshipToDelete = {

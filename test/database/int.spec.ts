@@ -3654,12 +3654,14 @@ describe('database', () => {
           // Locales used => no optimized row update => need to pass full data, incuding title
           title: 'post',
           arrayWithIDsLocalized: {
-            $push: {
-              en: {
+            en: {
+              $push: {
                 text: 'some text 2',
                 id: new mongoose.Types.ObjectId().toHexString(),
               },
-              es: {
+            },
+            es: {
+              $push: {
                 text: 'some text 2 es',
                 id: new mongoose.Types.ObjectId().toHexString(),
               },
@@ -3795,12 +3797,14 @@ describe('database', () => {
           // Locales used => no optimized row update => need to pass full data, incuding title
           title: 'post',
           arrayWithIDsLocalized: {
-            $push: {
-              en: {
+            en: {
+              $push: {
                 text: 'some text 2',
                 id: new mongoose.Types.ObjectId().toHexString(),
               },
-              es: [
+            },
+            es: {
+              $push: [
                 {
                   text: 'some text 2 es',
                   id: new mongoose.Types.ObjectId().toHexString(),
@@ -4138,8 +4142,8 @@ describe('database', () => {
         id: post.id,
         data: {
           localizedPolymorphicRelations: {
-            $push: {
-              en: [
+            en: {
+              $push: [
                 {
                   relationTo: 'categories',
                   value: category2.id,
@@ -4197,8 +4201,8 @@ describe('database', () => {
         where: { id: { equals: post.id } },
         data: {
           'testNestedGroup.nestedLocalizedPolymorphicRelation': {
-            $push: {
-              en: [
+            en: {
+              $push: [
                 {
                   relationTo: 'categories',
                   value: category2.id,
@@ -4507,8 +4511,8 @@ describe('database', () => {
         id: post.id,
         data: {
           localizedPolymorphicRelations: {
-            $remove: {
-              en: [
+            en: {
+              $remove: [
                 { relationTo: 'categories', value: category1.id },
                 { relationTo: 'categories', value: category3.id },
               ],
@@ -4581,8 +4585,8 @@ describe('database', () => {
         where: { id: { equals: post.id } },
         data: {
           'testNestedGroup.nestedLocalizedPolymorphicRelation': {
-            $remove: {
-              en: [
+            en: {
+              $remove: [
                 { relationTo: 'categories', value: category1.id },
                 { relationTo: 'simple', value: simple1.id },
               ],

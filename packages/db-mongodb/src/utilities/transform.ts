@@ -568,34 +568,54 @@ export const transform = ({
       ref[field.name]
     ) {
       const value = ref[field.name]
-      if (value && typeof value === 'object' && '$push' in value) {
-        const push = value.$push
 
+      if (
+        value &&
+        typeof value === 'object' &&
+        ('$push' in value ||
+          (config.localization &&
+            fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+            Object.values(value).some(
+              (localeValue) =>
+                localeValue && typeof localeValue === 'object' && '$push' in localeValue,
+            )))
+      ) {
         if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
-          if (typeof push === 'object' && push !== null) {
-            Object.entries(push).forEach(([localeKey, localeData]) => {
-              if (Array.isArray(localeData)) {
-                $push[`${parentPath}${field.name}.${localeKey}`] = { $each: localeData }
-              } else if (typeof localeData === 'object') {
-                $push[`${parentPath}${field.name}.${localeKey}`] = localeData
+          // Handle localized fields: { field: { locale: { $push: data } } }
+          let hasLocaleOperations = false
+          Object.entries(value).forEach(([localeKey, localeValue]) => {
+            if (localeValue && typeof localeValue === 'object' && '$push' in localeValue) {
+              hasLocaleOperations = true
+              const push = localeValue.$push
+              if (Array.isArray(push)) {
+                $push[`${parentPath}${field.name}.${localeKey}`] = { $each: push }
+              } else if (typeof push === 'object') {
+                $push[`${parentPath}${field.name}.${localeKey}`] = push
               }
-            })
+            }
+          })
+
+          if (hasLocaleOperations) {
+            delete ref[field.name]
+            markContainerForPrune()
           }
-        } else {
+        } else if (value && typeof value === 'object' && '$push' in value) {
+          // Handle non-localized fields: { field: { $push: data } }
+          const push = value.$push
           if (Array.isArray(push)) {
             $push[`${parentPath}${field.name}`] = { $each: push }
           } else if (typeof push === 'object') {
             $push[`${parentPath}${field.name}`] = push
           }
+          delete ref[field.name]
+          markContainerForPrune()
         }
-
-        delete ref[field.name]
-        markContainerForPrune()
       }
     }
 
     // Handle $push operation for relationship fields (converts to $addToSet)
 
+    // Handle $push operation for relationship fields (converts to $addToSet) - unified approach
     if (
       $addToSet &&
       (field.type === 'relationship' || field.type === 'upload') &&
@@ -606,36 +626,57 @@ export const transform = ({
       ref[field.name]
     ) {
       const value = ref[field.name]
-      if (value && typeof value === 'object' && '$push' in value) {
-        // Transform $push to MongoDB $addToSet with $each
-        const itemsToAppend = Array.isArray(value.$push) ? value.$push : [value.$push]
 
-        const processedItems = processRelationshipValues(
-          itemsToAppend,
-          field,
-          config,
-          operation,
-          validateRelationships,
-        )
-
+      if (
+        value &&
+        typeof value === 'object' &&
+        ('$push' in value ||
+          (config.localization &&
+            fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+            Object.values(value).some(
+              (localeValue) =>
+                localeValue &&
+                typeof localeValue === 'object' &&
+                '$push' in (localeValue as Record<string, unknown>),
+            )))
+      ) {
         if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
-          if (
-            typeof value.$push === 'object' &&
-            value.$push !== null &&
-            !Array.isArray(value.$push)
-          ) {
-            Object.entries(value.$push).forEach(([localeKey, localeData]) => {
-              const localeItems = Array.isArray(localeData) ? localeData : [localeData]
-              $addToSet[`${parentPath}${field.name}.${localeKey}`] = { $each: localeItems }
-            })
-          }
-          // Note: For localized fields, locale must always be specified inside $push object
-        } else {
-          $addToSet[`${parentPath}${field.name}`] = { $each: processedItems }
-        }
+          // Handle localized fields: { field: { locale: { $push: data } } }
+          let hasLocaleOperations = false
+          Object.entries(value).forEach(([localeKey, localeValue]) => {
+            if (localeValue && typeof localeValue === 'object' && '$push' in localeValue) {
+              hasLocaleOperations = true
+              const push = localeValue.$push
+              const localeItems = Array.isArray(push) ? push : [push]
+              const processedLocaleItems = processRelationshipValues(
+                localeItems,
+                field,
+                config,
+                operation,
+                validateRelationships,
+              )
+              $addToSet[`${parentPath}${field.name}.${localeKey}`] = { $each: processedLocaleItems }
+            }
+          })
 
-        delete ref[field.name]
-        markContainerForPrune()
+          if (hasLocaleOperations) {
+            delete ref[field.name]
+            markContainerForPrune()
+          }
+        } else if (value && typeof value === 'object' && '$push' in value) {
+          // Handle non-localized fields: { field: { $push: data } }
+          const itemsToAppend = Array.isArray(value.$push) ? value.$push : [value.$push]
+          const processedItems = processRelationshipValues(
+            itemsToAppend,
+            field,
+            config,
+            operation,
+            validateRelationships,
+          )
+          $addToSet[`${parentPath}${field.name}`] = { $each: processedItems }
+          delete ref[field.name]
+          markContainerForPrune()
+        }
       }
     }
 
@@ -650,27 +691,27 @@ export const transform = ({
       ref[field.name]
     ) {
       const value = ref[field.name]
-      if (value && typeof value === 'object' && '$remove' in value) {
-        // Transform $remove to MongoDB $pull with $in
-        const itemsToRemove = Array.isArray(value.$remove) ? value.$remove : [value.$remove]
-
-        const processedItems = processRelationshipValues(
-          itemsToRemove,
-          field,
-          config,
-          operation,
-          validateRelationships,
-        )
-
+      if (
+        value &&
+        typeof value === 'object' &&
+        ('$remove' in value ||
+          (config.localization &&
+            fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+            Object.values(value).some(
+              (localeValue) =>
+                localeValue &&
+                typeof localeValue === 'object' &&
+                '$remove' in (localeValue as Record<string, unknown>),
+            )))
+      ) {
         if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
-          if (
-            typeof value.$remove === 'object' &&
-            value.$remove !== null &&
-            !Array.isArray(value.$remove)
-          ) {
-            Object.entries(value.$remove).forEach(([localeKey, localeData]) => {
-              const localeItems = Array.isArray(localeData) ? localeData : [localeData]
-
+          // Handle localized fields: { field: { locale: { $remove: data } } }
+          let hasLocaleOperations = false
+          Object.entries(value).forEach(([localeKey, localeValue]) => {
+            if (localeValue && typeof localeValue === 'object' && '$remove' in localeValue) {
+              hasLocaleOperations = true
+              const remove = localeValue.$remove
+              const localeItems = Array.isArray(remove) ? remove : [remove]
               const processedLocaleItems = processRelationshipValues(
                 localeItems,
                 field,
@@ -678,16 +719,28 @@ export const transform = ({
                 operation,
                 validateRelationships,
               )
-
               $pull[`${parentPath}${field.name}.${localeKey}`] = { $in: processedLocaleItems }
-            })
-          }
-        } else {
-          $pull[`${parentPath}${field.name}`] = { $in: processedItems }
-        }
+            }
+          })
 
-        delete ref[field.name]
-        markContainerForPrune()
+          if (hasLocaleOperations) {
+            delete ref[field.name]
+            markContainerForPrune()
+          }
+        } else if (value && typeof value === 'object' && '$remove' in value) {
+          // Handle non-localized fields: { field: { $remove: data } }
+          const itemsToRemove = Array.isArray(value.$remove) ? value.$remove : [value.$remove]
+          const processedItems = processRelationshipValues(
+            itemsToRemove,
+            field,
+            config,
+            operation,
+            validateRelationships,
+          )
+          $pull[`${parentPath}${field.name}`] = { $in: processedItems }
+          delete ref[field.name]
+          markContainerForPrune()
+        }
       }
     }
 
