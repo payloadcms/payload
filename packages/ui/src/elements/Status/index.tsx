@@ -19,6 +19,7 @@ export const Status: React.FC = () => {
   const {
     id,
     collectionSlug,
+    data,
     docPermissions,
     globalSlug,
     hasPublishedDoc,
@@ -37,6 +38,7 @@ export const Status: React.FC = () => {
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
   const { reset: resetForm } = useForm()
@@ -46,14 +48,23 @@ export const Status: React.FC = () => {
   const unPublishModalSlug = `confirm-un-publish-${id}`
   const revertModalSlug = `confirm-revert-${id}`
 
-  let statusToRender: 'changed' | 'draft' | 'published'
+  let statusToRender: 'changed' | 'draft' | 'published' = 'draft'
 
-  if (unpublishedVersionCount > 0 && hasPublishedDoc) {
-    statusToRender = 'changed'
-  } else if (!hasPublishedDoc) {
-    statusToRender = 'draft'
-  } else if (hasPublishedDoc && unpublishedVersionCount <= 0) {
-    statusToRender = 'published'
+  const entityConfig = collectionSlug
+    ? getEntityConfig({ collectionSlug })
+    : getEntityConfig({ globalSlug })
+  const autosaveEnabled = entityConfig?.versions?.drafts && entityConfig.versions.drafts.autosave
+
+  if (autosaveEnabled) {
+    if (unpublishedVersionCount > 0 && hasPublishedDoc) {
+      statusToRender = 'changed'
+    } else if (!hasPublishedDoc) {
+      statusToRender = 'draft'
+    } else if (hasPublishedDoc && unpublishedVersionCount <= 0) {
+      statusToRender = 'published'
+    }
+  } else {
+    statusToRender = data._status
   }
 
   const displayStatusKey = isTrashed
@@ -190,29 +201,26 @@ export const Status: React.FC = () => {
               />
             </React.Fragment>
           )}
-          {!isTrashed &&
-            canUpdate &&
-            hasPublishedDoc &&
-            statusToRender === 'changed' && (
-              <React.Fragment>
-                &nbsp;&mdash;&nbsp;
-                <Button
-                  buttonStyle="none"
-                  className={`${baseClass}__action`}
-                  id="action-revert-to-published"
-                  onClick={() => toggleModal(revertModalSlug)}
-                >
-                  {t('version:revertToPublished')}
-                </Button>
-                <ConfirmationModal
-                  body={t('version:aboutToRevertToPublished')}
-                  confirmingLabel={t('version:reverting')}
-                  heading={t('version:confirmRevertToSaved')}
-                  modalSlug={revertModalSlug}
-                  onConfirm={() => performAction('revert')}
-                />
-              </React.Fragment>
-            )}
+          {!isTrashed && canUpdate && hasPublishedDoc && statusToRender === 'changed' && (
+            <React.Fragment>
+              &nbsp;&mdash;&nbsp;
+              <Button
+                buttonStyle="none"
+                className={`${baseClass}__action`}
+                id="action-revert-to-published"
+                onClick={() => toggleModal(revertModalSlug)}
+              >
+                {t('version:revertToPublished')}
+              </Button>
+              <ConfirmationModal
+                body={t('version:aboutToRevertToPublished')}
+                confirmingLabel={t('version:reverting')}
+                heading={t('version:confirmRevertToSaved')}
+                modalSlug={revertModalSlug}
+                onConfirm={() => performAction('revert')}
+              />
+            </React.Fragment>
+          )}
         </div>
       </div>
     )
