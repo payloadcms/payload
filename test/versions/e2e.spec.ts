@@ -1430,7 +1430,7 @@ describe('Versions', () => {
       const titleField = page.locator('#field-title')
 
       // press slower than the autosave interval, but not faster than the response and processing
-      await titleField.pressSequentially('Initial ', {
+      await titleField.pressSequentially('Initial', {
         delay: 150,
       })
 
