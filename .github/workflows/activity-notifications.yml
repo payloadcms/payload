@@ -1,0 +1,23 @@
+name: Notify about repo activity
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run:
+    if: github.repository_owner == 'payloadcms'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Popular Issues to Slack
+        run: node ./.github/actions/activity/dist/index.js
+        continue-on-error: true
+      - name: New Issues to Slack
+        run: node ./.github/actions/activity/dist/new-issues.js
+        continue-on-error: true
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
