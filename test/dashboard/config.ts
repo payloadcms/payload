@@ -21,7 +21,7 @@ export default buildConfigWithDefaults({
       views: {
         dashboard: {
           Component: {
-            path: './components/Revenue.js#Revenue',
+            path: './components/Revenue.tsx#default',
           },
         },
       },

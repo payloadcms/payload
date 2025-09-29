@@ -56,7 +56,8 @@ if (!testSuiteArg || !fs.existsSync(path.resolve(dirname, testSuiteArg))) {
 }
 
 // Enable turbopack by default, unless --no-turbo is passed
-const enableTurbo = args.turbo !== false
+// Disabling turbopack temporarily for the dashboard test suite because HMR is not working
+const enableTurbo = testSuiteArg !== 'dashboard' && args.turbo !== false
 
 console.log(`Selected test suite: ${testSuiteArg}${enableTurbo ? ' [Turbopack]' : ' [Webpack]'}`)
 
