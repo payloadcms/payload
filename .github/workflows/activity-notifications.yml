@@ -2,6 +2,11 @@ name: Notify about repo activity
 
 on:
   workflow_dispatch:
+  inputs:
+    debug:
+      description: Enable debug logging
+      required: false
+      default: false
 
 jobs:
   run:
@@ -21,3 +26,4 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+      DEBUG: ${{ github.event.inputs.debug || 'false' }}

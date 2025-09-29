@@ -50,7 +50,7 @@ export async function run() {
 
     await slackClient.chat.postMessage({
       text: messageText,
-      channel: '#dev-feed',
+      channel: process.env.DEBUG === 'true' ? '#test-slack-notifications' : '#dev-feed',
       icon_emoji: ':github:',
       username: 'GitHub Notifier',
     })
