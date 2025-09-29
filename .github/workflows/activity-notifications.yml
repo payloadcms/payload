@@ -13,7 +13,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
       - name: Popular Issues to Slack
-        run: node ./.github/actions/activity/dist/index.js
+        run: node ./.github/actions/activity/dist/popular-issues.js
         continue-on-error: true
       - name: New Issues to Slack
         run: node ./.github/actions/activity/dist/new-issues.js
