@@ -124,6 +124,7 @@ export interface UserAuthOperations {
 export interface Page {
   id: string;
   text?: string | null;
+  postsRelationship?: (string | Post)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -268,7 +269,7 @@ export interface PayloadQueryPreset {
     | null;
   relatedCollection: 'pages' | 'posts';
   /**
-   * This is a tempoary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
+   * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
    */
   isTemp?: boolean | null;
   updatedAt: string;
@@ -280,6 +281,7 @@ export interface PayloadQueryPreset {
  */
 export interface PagesSelect<T extends boolean = true> {
   text?: T;
+  postsRelationship?: T;
   updatedAt?: T;
   createdAt?: T;
 }
