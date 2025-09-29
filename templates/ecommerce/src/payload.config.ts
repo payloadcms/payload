@@ -1,4 +1,5 @@
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
+// storage-adapter-import-placeholder
+import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
 
 import {
   BoldFeature,
