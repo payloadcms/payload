@@ -45,6 +45,10 @@ export const allDatabaseAdapters = {
   export const databaseAdapter = mongooseAdapter({
     ...compatibilityOptions.firestore,
     ${mongooseAdapterArgs}
+    // The following options prevent some tests from failing.
+    // More work needed to get tests succeeding without these options.
+    ensureIndexes: true,
+    disableIndexHints: false,
     useAlternativeDropDatabase: false,
   })`,
   postgres: `
