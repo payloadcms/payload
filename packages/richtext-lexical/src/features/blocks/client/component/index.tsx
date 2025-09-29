@@ -125,12 +125,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.BlockLabel,
+    initialState?.['_components']?.customComponents?.BlockLabel ?? undefined,
   )
 
   const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.Block,
+    initialState?.['_components']?.customComponents?.Block ?? undefined,
   )
 
   // Initial state for newly created blocks
@@ -404,6 +404,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const BlockCollapsible = useMemo(
     () =>
       ({
+        Actions,
         children,
         className,
         disableBlockName,
@@ -426,11 +427,13 @@ export const BlockComponent: React.FC<Props> = (props) => {
             collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
             header={
               <div className={`${baseClass}__block-header`}>
-                {(Label ?? CustomLabel) ? (
-                  (Label ?? CustomLabel)
+                {typeof Label !== 'undefined' ? (
+                  Label
+                ) : typeof CustomLabel !== 'undefined' ? (
+                  CustomLabel
                 ) : (
                   <div className={`${baseClass}__block-label`}>
-                    {CustomPill ? (
+                    {typeof CustomPill !== 'undefined' ? (
                       CustomPill
                     ) : (
                       <Pill
@@ -454,11 +457,17 @@ export const BlockComponent: React.FC<Props> = (props) => {
                   </div>
                 )}
 
-                <div>
-                  {(CustomBlock && editButton !== false) || (!CustomBlock && editButton) ? (
-                    <EditButton />
-                  ) : null}
-                  {removeButton !== false && editor.isEditable() ? <RemoveButton /> : null}
+                <div className={`${baseClass}__block-actions`}>
+                  {typeof Actions !== 'undefined' ? (
+                    Actions
+                  ) : (
+                    <>
+                      {(CustomBlock && editButton !== false) || (!CustomBlock && editButton) ? (
+                        <EditButton />
+                      ) : null}
+                      {removeButton !== false && editor.isEditable() ? <RemoveButton /> : null}
+                    </>
+                  )}
                 </div>
               </div>
             }

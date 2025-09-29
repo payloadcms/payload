@@ -5,13 +5,26 @@ import { RenderFields, useFormSubmitted } from '@payloadcms/ui'
 import React, { createContext, useMemo } from 'react'
 
 export type BlockCollapsibleProps = {
+  /**
+   * Replace the top-right portion of the header that renders the Edit and Remove buttons with custom content.
+   * If this property is provided, the `removeButton` and `editButton` properties are ignored.
+   */
+  Actions?: React.ReactNode
   children?: React.ReactNode
   /**
    * Additional className to the collapsible wrapper
    */
   className?: string
-
+  /**
+   * Whether to disable rendering the block name field in the header Label
+   * @default false
+   */
   disableBlockName?: boolean
+  /**
+   * Whether to show the Edit button
+   * If `Actions` is provided, this property is ignored.
+   * @default true
+   */
   editButton?: boolean
   /**
    * Replace the default Label component with a custom Label
@@ -22,6 +35,11 @@ export type BlockCollapsibleProps = {
    * This property has no effect if you provide a custom Label component via the `Label` property.
    */
   Pill?: React.ReactNode
+  /**
+   * Whether to show the Remove button
+   * If `Actions` is provided, this property is ignored.
+   * @default true
+   */
   removeButton?: boolean
 }
 
