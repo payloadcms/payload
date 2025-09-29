@@ -29,6 +29,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[], _widge
       await setLayoutPreference(null)
       setIsEditing(false)
       // Reload to get default layout from server
+      // TO-DECIDE: should we send the default layout from server to prevent a reload?
       window.location.reload()
     } catch {
       // Handle error silently or show user feedback
