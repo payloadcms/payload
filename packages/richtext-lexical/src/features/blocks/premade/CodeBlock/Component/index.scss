@@ -9,8 +9,19 @@
     margin-left: base(0.4);
   }
 
-  .collapsible__content {
-    padding: 0;
+  .collapsible {
+    &__header-wrap {
+      overflow: visible;
+    }
+    &__content {
+      padding: 0;
+    }
+  }
+
+  .lexical-block {
+    &__block-header {
+      overflow: visible;
+    }
   }
 
   .code-editor,
@@ -18,5 +29,27 @@
   .overflow-guard {
     border-width: 0;
     border-radius: 0 0 $style-radius-s $style-radius-s;
+  }
+
+  &__language-selector {
+    pointer-events: all;
+
+    .popup-button {
+      border-radius: $style-radius-s;
+      color: var(--theme-elevation-500);
+      padding: 0 0 0 calc(var(--base) * 0.2);
+
+      &:hover {
+        color: var(--theme-elevation-800);
+        background-color: var(--theme-elevation-200);
+      }
+    }
+
+    &-button {
+      display: flex;
+      flex-direction: row;
+      width: max-content;
+      align-items: center;
+    }
   }
 }

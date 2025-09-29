@@ -19,6 +19,9 @@ export const CodeBlock: (args?: AdditionalCodeComponentProps) => Block = (args) 
     admin: {
       components: {
         Block: {
+          clientProps: {
+            languages,
+          },
           path: '@payloadcms/richtext-lexical/client#CodeBlockBlockComponent',
         },
       },
