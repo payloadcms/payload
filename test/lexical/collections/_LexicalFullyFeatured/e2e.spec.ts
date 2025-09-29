@@ -43,7 +43,7 @@ describe('Lexical Fully Featured', () => {
     await lexical.editor.first().focus()
   })
   test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async () => {
-    await lexical.slashCommand('block')
+    await lexical.slashCommand('myblock')
     await expect(lexical.editor.locator('.lexical-block')).toBeVisible()
     await lexical.slashCommand('relationship', true, 'Relationship')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
@@ -70,7 +70,7 @@ describe('Lexical Fully Featured', () => {
     await lexical.editor.first().focus()
     await page.keyboard.type('Hello')
     await page.keyboard.press('Enter')
-    await lexical.slashCommand('block')
+    await lexical.slashCommand('myblock')
     await page.locator('#field-someText').first().focus()
     await page.keyboard.type('World')
     await page.keyboard.press('ControlOrMeta+A')
