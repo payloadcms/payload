@@ -86,7 +86,7 @@ By default logs are not enabled for your API, we've made this decision because i
 
 ### GraphQL
 
-We are currently waiting on some issues with GraphQL to be fixed upstream in Opennext so full support for GraphQL is not currently guaranteed when deployed.
+We are currently waiting on some issues with GraphQL to be [fixed upstream in Workers](https://github.com/cloudflare/workerd/issues/5175) so full support for GraphQL is not currently guaranteed when deployed.
 
 ### Worker size limits
 
