@@ -39,6 +39,7 @@ async function main() {
         'payload',
         'db-mongodb',
         'db-postgres',
+        'db-d1-sqlite',
         'db-sqlite',
         'db-vercel-postgres',
         'drizzle',

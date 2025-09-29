@@ -87,6 +87,7 @@ export interface Config {
     'disable-duplicate': DisableDuplicate;
     'disable-copy-to-locale': DisableCopyToLocale;
     'edit-menu-items': EditMenuItem;
+    'format-doc-url': FormatDocUrl;
     'base-list-filters': BaseListFilter;
     with300documents: With300Document;
     'with-list-drawer': WithListDrawer;
@@ -96,6 +97,7 @@ export interface Config {
     'custom-list-drawer': CustomListDrawer;
     'list-view-select-api': ListViewSelectApi;
     virtuals: Virtual;
+    'no-timestamps': NoTimestamp;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -122,6 +124,7 @@ export interface Config {
     'disable-duplicate': DisableDuplicateSelect<false> | DisableDuplicateSelect<true>;
     'disable-copy-to-locale': DisableCopyToLocaleSelect<false> | DisableCopyToLocaleSelect<true>;
     'edit-menu-items': EditMenuItemsSelect<false> | EditMenuItemsSelect<true>;
+    'format-doc-url': FormatDocUrlSelect<false> | FormatDocUrlSelect<true>;
     'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
     with300documents: With300DocumentsSelect<false> | With300DocumentsSelect<true>;
     'with-list-drawer': WithListDrawerSelect<false> | WithListDrawerSelect<true>;
@@ -131,6 +134,7 @@ export interface Config {
     'custom-list-drawer': CustomListDrawerSelect<false> | CustomListDrawerSelect<true>;
     'list-view-select-api': ListViewSelectApiSelect<false> | ListViewSelectApiSelect<true>;
     virtuals: VirtualsSelect<false> | VirtualsSelect<true>;
+    'no-timestamps': NoTimestampsSelect<false> | NoTimestampsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -514,6 +518,19 @@ export interface EditMenuItem {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "format-doc-url".
+ */
+export interface FormatDocUrl {
+  id: string;
+  title: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "base-list-filters".
  */
 export interface BaseListFilter {
@@ -614,6 +631,14 @@ export interface Virtual {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-timestamps".
+ */
+export interface NoTimestamp {
+  id: string;
+  title?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -700,6 +725,10 @@ export interface PayloadLockedDocument {
         value: string | EditMenuItem;
       } | null)
     | ({
+        relationTo: 'format-doc-url';
+        value: string | FormatDocUrl;
+      } | null)
+    | ({
         relationTo: 'base-list-filters';
         value: string | BaseListFilter;
       } | null)
@@ -734,6 +763,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'virtuals';
         value: string | Virtual;
+      } | null)
+    | ({
+        relationTo: 'no-timestamps';
+        value: string | NoTimestamp;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1084,6 +1117,18 @@ export interface EditMenuItemsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "format-doc-url_select".
+ */
+export interface FormatDocUrlSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "base-list-filters_select".
  */
 export interface BaseListFiltersSelect<T extends boolean = true> {
@@ -1174,6 +1219,13 @@ export interface VirtualsSelect<T extends boolean = true> {
   post?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-timestamps_select".
+ */
+export interface NoTimestampsSelect<T extends boolean = true> {
+  title?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

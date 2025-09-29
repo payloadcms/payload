@@ -32,6 +32,7 @@ export const renderField: RenderFieldMethod = ({
   fieldConfig,
   fieldSchemaMap,
   fieldState,
+  forceCreateClientField,
   formState,
   indexPath,
   lastRenderedPath,
@@ -54,14 +55,15 @@ export const renderField: RenderFieldMethod = ({
     return
   }
 
-  const clientField = clientFieldSchemaMap
-    ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
-    : createClientField({
-        defaultIDType: req.payload.config.db.defaultIDType,
-        field: fieldConfig,
-        i18n: req.i18n,
-        importMap: req.payload.importMap,
-      })
+  const clientField =
+    clientFieldSchemaMap && !forceCreateClientField
+      ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
+      : createClientField({
+          defaultIDType: req.payload.config.db.defaultIDType,
+          field: fieldConfig,
+          i18n: req.i18n,
+          importMap: req.payload.importMap,
+        })
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     field: clientField,
