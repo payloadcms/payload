@@ -4,7 +4,7 @@ import { WebClient } from '@slack/web-api'
 import { daysAgo } from './lib/utils'
 import { SlimIssue } from './types'
 
-const DAYS_WINDOW = 60
+const DAYS_WINDOW = 90
 
 function generateText(issues: SlimIssue[]) {
   let text = `*A list of the top 10 issues sorted by the most reactions over the last ${DAYS_WINDOW} days:*\n\n`
