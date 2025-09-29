@@ -460,6 +460,7 @@ export const roTranslations: DefaultTranslationsObject = {
     copyTo: 'Copiați în',
     copyToLocale: 'Copiați în localizare',
     localeToPublish: 'Localizare pentru publicare',
+    localizedMeta: 'Meta Localizată',
     selectLocaleToCopy: 'Selectați localizarea pentru copiere',
   },
   operators: {

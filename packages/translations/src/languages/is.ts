@@ -453,6 +453,7 @@ export const isTranslations: DefaultTranslationsObject = {
     copyTo: 'Afrita til',
     copyToLocale: 'Afrita í staðfærslu',
     localeToPublish: 'Staðfærsla til að gefa út',
+    localizedMeta: 'Staðbundin lýsigögn',
     selectLocaleToCopy: 'Veldu staðfærslu til að afrita',
   },
   operators: {

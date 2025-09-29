@@ -379,6 +379,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'localization:cannotCopySameLocale',
   'localization:copyFrom',
   'localization:copyTo',
+  'localization:localizedMeta',
 
   'operators:equals',
   'operators:exists',

@@ -454,6 +454,7 @@ export const viTranslations: DefaultTranslationsObject = {
     copyTo: 'Sao chép đến',
     copyToLocale: 'Sao chép vào địa phương',
     localeToPublish: 'Ngôn ngữ để xuất bản',
+    localizedMeta: 'Meta Địa phương hóa',
     selectLocaleToCopy: 'Chọn địa phương để sao chép',
   },
   operators: {

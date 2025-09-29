@@ -458,6 +458,7 @@ export const idTranslations: DefaultTranslationsObject = {
     copyTo: 'Salin ke',
     copyToLocale: 'Salin ke lokal',
     localeToPublish: 'Lokal untuk dipublikasikan',
+    localizedMeta: 'Meta Terlokalisasi',
     selectLocaleToCopy: 'Pilih lokal untuk disalin',
   },
   operators: {

@@ -455,6 +455,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiraj na',
     copyToLocale: 'Kopiraj na lokaciju',
     localeToPublish: 'Lokalitet za objavljivanje',
+    localizedMeta: 'Локализовани метаподаци',
     selectLocaleToCopy: 'Izaberite lokalitet za kopiranje',
   },
   operators: {

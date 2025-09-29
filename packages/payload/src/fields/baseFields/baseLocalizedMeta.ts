@@ -43,7 +43,7 @@ export const baseLocalizedMetaFields = (
         hidden: true,
       },
       fields: localizedMetaFields as Field[],
-      label: 'Localized Meta', // add translation
+      label: ({ t }: any) => t('localization:localizedMeta'),
       ...(flatten
         ? {
             flattenedFields: localizedMetaFields as FlattenedField[],

@@ -462,6 +462,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     copyTo: 'কপি করুন',
     copyToLocale: 'লোকেলে কপি করুন',
     localeToPublish: 'প্রকাশ করার লোকেল',
+    localizedMeta: 'স্থানীয়কৃত মেটা',
     selectLocaleToCopy: 'কপি করার জন্য লোকেল নির্বাচন করুন',
   },
   operators: {

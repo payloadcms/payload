@@ -445,6 +445,7 @@ export const arTranslations: DefaultTranslationsObject = {
     copyTo: 'انسخ إلى',
     copyToLocale: 'نسخ إلى الموقع المحلي',
     localeToPublish: 'الموقع للنشر',
+    localizedMeta: 'ميتا محلي',
     selectLocaleToCopy: 'حدد الموقع المحلي للنسخ',
   },
   operators: {

@@ -461,6 +461,7 @@ export const myTranslations: DefaultTranslationsObject = {
     copyTo: 'Salin ke',
     copyToLocale: 'Salin ke tempat setempat',
     localeToPublish: 'Untuk menerbitkan di lokasi',
+    localizedMeta: 'ဒေတာများကိုတည်ဆောက်နှင့်စီမံခန့်ခွဲပေးသည့်အခြေထောက် စုဆောင်းမှု@endif',
     selectLocaleToCopy: 'Pilih tempatan untuk menyalin',
   },
   operators: {

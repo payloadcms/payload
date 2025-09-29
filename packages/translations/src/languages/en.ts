@@ -458,6 +458,7 @@ export const enTranslations = {
     copyTo: 'Copy to',
     copyToLocale: 'Copy to locale',
     localeToPublish: 'Locale to publish',
+    localizedMeta: 'Localized Meta',
     selectLocaleToCopy: 'Select locale to copy',
   },
   operators: {

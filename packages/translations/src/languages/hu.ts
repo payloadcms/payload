@@ -459,6 +459,7 @@ export const huTranslations: DefaultTranslationsObject = {
     copyTo: 'Másolja ide',
     copyToLocale: 'Másolás a helyi verzióba',
     localeToPublish: 'Közzététel helye',
+    localizedMeta: 'Helyi Meta',
     selectLocaleToCopy: 'Válassza ki a másolni kívánt területet.',
   },
   operators: {

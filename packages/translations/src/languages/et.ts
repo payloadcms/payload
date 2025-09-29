@@ -450,6 +450,7 @@ export const etTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopeeri keelde',
     copyToLocale: 'Kopeeri keelde',
     localeToPublish: 'Lokaal avaldamiseks',
+    localizedMeta: 'Kohalik Meta',
     selectLocaleToCopy: 'Vali keel kopeerimiseks',
   },
   operators: {

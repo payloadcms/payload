@@ -459,6 +459,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     copyTo: 'Պատճենել դեպի',
     copyToLocale: 'Պատճենել լոկալին',
     localeToPublish: 'Հրապարակման լոկալ',
+    localizedMeta: 'Տեղայնացված Meta',
     selectLocaleToCopy: 'Ընտրեք լոկալ՝ պատճենելու համար',
   },
   operators: {

@@ -457,6 +457,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopijuoti į',
     copyToLocale: 'Kopijuoti į vietovę',
     localeToPublish: 'Publikuoti lokacijoje',
+    localizedMeta: 'Lokalizuota Meta',
     selectLocaleToCopy: 'Pasirinkite lokalės kopijavimui',
   },
   operators: {
