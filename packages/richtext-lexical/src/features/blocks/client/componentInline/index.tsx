@@ -70,13 +70,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation<object, string>()
   const {
     createdInlineBlock,
-    fieldProps: {
-      featureClientSchemaMap,
-      initialLexicalFormState,
-      permissions,
-      readOnly,
-      schemaPath,
-    },
+    fieldProps: { featureClientSchemaMap, initialLexicalFormState, readOnly, schemaPath },
     setCreatedInlineBlock,
     uuid: uuidFromContext,
   } = useEditorConfigContext()

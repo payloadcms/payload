@@ -15,6 +15,7 @@ export const CodeBlockBlockComponent: UIFieldClientComponent = () => {
   return (
     <BlockCollapsible
       className={baseClass}
+      editButton={false}
       Pill={
         <div className={`${baseClass}__pill`}>
           <CodeBlockIcon />

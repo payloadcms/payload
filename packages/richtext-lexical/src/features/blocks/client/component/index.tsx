@@ -66,7 +66,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
       featureClientSchemaMap,
       field: parentLexicalRichTextField,
       initialLexicalFormState,
-      permissions,
       readOnly,
       schemaPath,
     },
@@ -92,8 +91,10 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
   const [editor] = useLexicalComposerContext()
 
+  const blockType = formData.blockType
+
   const { getFormState } = useServerFunctions()
-  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}.fields`
+  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}.fields`
 
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(() => {
     return initialLexicalFormState?.[formData.id]?.formState
@@ -175,7 +176,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           const node = $getNodeByKey(nodeKey)
           if (node && $isBlockNode(node)) {
             const newData = newFormStateData
-            newData.blockType = formData.blockType
+            newData.blockType = blockType
 
             node.setFields(newData, true)
           }
@@ -206,13 +207,14 @@ export const BlockComponent: React.FC<Props> = (props) => {
     globalSlug,
     getDocPreferences,
     parentDocumentFields,
+    blockType,
   ])
 
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>(
     initialLexicalFormState?.[formData.id]?.collapsed ?? false,
   )
 
-  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}`
+  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}`
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
 
@@ -272,7 +274,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           const node = $getNodeByKey(nodeKey)
           if (node && $isBlockNode(node)) {
             const newData = newFormStateData
-            newData.blockType = formData.blockType
+            newData.blockType = blockType
             node.setFields(newData, true)
           }
         })
@@ -301,7 +303,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       getDocPreferences,
       globalSlug,
       schemaFieldsPath,
-      formData.blockType,
+      blockType,
       parentDocumentFields,
       editor,
       nodeKey,
@@ -412,7 +414,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         Pill: CustomPill,
         removeButton,
       }: BlockCollapsibleWithErrorProps) => (
-        <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>
+        <div className={baseClass + ' ' + baseClass + '-' + blockType}>
           <Collapsible
             className={[
               `${baseClass}__row`,
@@ -432,11 +434,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
                       CustomPill
                     ) : (
                       <Pill
-                        className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
+                        className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
                         pillStyle="white"
                         size="small"
                       >
-                        {blockDisplayName ?? formData?.blockType}
+                        {blockDisplayName ?? blockType}
                       </Pill>
                     )}
                     {!disableBlockName && !clientBlock?.admin?.disableBlockName && (
@@ -479,7 +481,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       blockDisplayName,
       clientBlock?.admin?.disableBlockName,
       editor,
-      formData.blockType,
+      blockType,
       i18n,
       isCollapsed,
       onCollapsedChange,
@@ -487,13 +489,15 @@ export const BlockComponent: React.FC<Props> = (props) => {
     ],
   )
 
+  const blockID = formData?.id
+
   const BlockDrawer = useMemo(
     () => () => (
       <EditDepthProvider>
         <Drawer
           className={''}
           slug={drawerSlug}
-          title={t(`lexical:blocks:inlineBlocks:${formData?.id ? 'edit' : 'create'}`, {
+          title={t(`lexical:blocks:inlineBlocks:${blockID ? 'edit' : 'create'}`, {
             label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
           })}
         >
@@ -517,11 +521,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
     [
       initialState,
       drawerSlug,
+      blockID,
       blockDisplayName,
       t,
       clientBlock?.fields,
       schemaFieldsPath,
-      permissions,
       // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
     ],
   )
@@ -545,7 +549,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         onChange={[onChange]}
         onSubmit={(formState, newData) => {
           // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-          newData.blockType = formData.blockType
+          newData.blockType = blockType
           editor.update(() => {
             const node = $getNodeByKey(nodeKey)
             if (node && $isBlockNode(node)) {
@@ -575,7 +579,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     BlockCollapsible,
     BlockDrawer,
     CustomBlock,
-    clientBlock?.fields,
+    blockType,
     RemoveButton,
     EditButton,
     editor,
@@ -593,7 +597,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     return (
       <BlockCollapsible disableBlockName={true} fieldHasErrors={true}>
         <div className="lexical-block-not-found">
-          Error: Block '{formData.blockType}' not found in the config but exists in the lexical data
+          Error: Block '{blockType}' not found in the config but exists in the lexical data
         </div>
       </BlockCollapsible>
     )
