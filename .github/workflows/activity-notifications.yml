@@ -1,4 +1,4 @@
-name: Notify about repo activity
+name: activity-notifications
 
 on:
   workflow_dispatch:
