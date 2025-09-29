@@ -25,6 +25,7 @@
     "@aws-sdk/client-s3": "^3.614.0",
     "@azure/storage-blob": "^12.11.0",
     "@date-fns/tz": "1.2.0",
+    "@modelcontextprotocol/sdk": "^1.17.2",
     "@next/env": "15.4.4",
     "@payloadcms/admin-bar": "workspace:*",
     "@payloadcms/db-mongodb": "workspace:*",
@@ -44,6 +45,7 @@
     "@payloadcms/plugin-cloud-storage": "workspace:*",
     "@payloadcms/plugin-form-builder": "workspace:*",
     "@payloadcms/plugin-import-export": "workspace:*",
+    "@payloadcms/plugin-mcp": "workspace:*",
     "@payloadcms/plugin-multi-tenant": "workspace:*",
     "@payloadcms/plugin-nested-docs": "workspace:*",
     "@payloadcms/plugin-redirects": "workspace:*",
@@ -96,7 +98,8 @@
     "tempy": "^1.0.1",
     "ts-essentials": "10.0.3",
     "typescript": "5.7.3",
-    "uuid": "10.0.0"
+    "uuid": "10.0.0",
+    "zod": "^3.25.5"
   },
   "pnpm": {
     "neverBuiltDependencies": []
