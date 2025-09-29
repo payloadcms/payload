@@ -25,6 +25,7 @@ export const Status: React.FC = () => {
     hasPublishedDoc,
     incrementVersionCount,
     isTrashed,
+    mostRecentVersionIsAutosaved,
     setHasPublishedDoc,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
@@ -54,14 +55,13 @@ export const Status: React.FC = () => {
     ? getEntityConfig({ collectionSlug })
     : getEntityConfig({ globalSlug })
   const autosaveEnabled = entityConfig?.versions?.drafts && entityConfig.versions.drafts.autosave
-
   if (autosaveEnabled) {
-    if (unpublishedVersionCount > 0 && hasPublishedDoc) {
+    if (unpublishedVersionCount > 0 && hasPublishedDoc && mostRecentVersionIsAutosaved) {
       statusToRender = 'changed'
     } else if (!hasPublishedDoc) {
       statusToRender = 'draft'
     } else if (hasPublishedDoc && unpublishedVersionCount <= 0) {
-      statusToRender = 'published'
+      statusToRender = data._status
     }
   } else {
     statusToRender = data._status
