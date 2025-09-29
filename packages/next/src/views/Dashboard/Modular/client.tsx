@@ -4,7 +4,7 @@ import type { Widget } from 'payload'
 import type { Layout } from 'react-grid-layout'
 
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
-import React, { useCallback } from 'react'
+import React from 'react'
 import { Responsive, WidthProvider } from 'react-grid-layout'
 
 import { DashboardBreadcrumbDropdown } from './DashboardBreadcrumbDropdown.js'
@@ -30,27 +30,12 @@ export function ModularDashboardClient({
   const {
     cancel,
     currentLayout,
+    handleLayoutChange,
     isEditing,
     resetLayout,
     saveLayout,
-    setCurrentLayout,
     setIsEditing,
   } = useDashboardLayout(initialLayout, widgets)
-
-  // Handle layout changes from react-grid-layout while preserving components
-  const handleLayoutChange = useCallback(
-    (newLayout: Layout[]) => {
-      if (isEditing) {
-        // Merge new layout positions with existing components
-        const updatedLayout = currentLayout.map((item, index) => ({
-          ...item,
-          clientLayout: newLayout[index] || item.clientLayout, // Use new layout if available, fallback to current
-        }))
-        setCurrentLayout(updatedLayout)
-      }
-    },
-    [isEditing, currentLayout, setCurrentLayout],
-  )
 
   return (
     <div>
