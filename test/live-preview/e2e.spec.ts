@@ -164,6 +164,21 @@ describe('Live Preview', () => {
     await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
   })
 
+  test('collection — retains static URL across edits', async () => {
+    const util = new AdminUrlUtil(serverURL, 'static-url')
+    await page.goto(util.create)
+    await saveDocAndAssert(page)
+    await toggleLivePreview(page, { targetState: 'on' })
+
+    const iframe = page.locator('iframe.live-preview-iframe')
+    await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview\/hello/)
+
+    const titleField = page.locator('#field-title')
+    await titleField.fill('New Title')
+    await saveDocAndAssert(page)
+    await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview\/hello/)
+  })
+
   test('collection csr — iframe reflects form state on change', async () => {
     await goToCollectionLivePreview(page, pagesURLUtil)
 

@@ -11,6 +11,7 @@ import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
 import { SSR } from './collections/SSR.js'
 import { SSRAutosave } from './collections/SSRAutosave.js'
+import { StaticURLCollection } from './collections/StaticURL.js'
 import { Tenants } from './collections/Tenants.js'
 import { Users } from './collections/Users.js'
 import { Footer } from './globals/Footer.js'
@@ -56,6 +57,7 @@ export default buildConfigWithDefaults({
     Categories,
     Media,
     CollectionLevelConfig,
+    StaticURLCollection,
   ],
   globals: [Header, Footer],
   onInit: seed,
