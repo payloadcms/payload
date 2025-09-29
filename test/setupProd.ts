@@ -12,6 +12,7 @@ export const tgzToPkgNameMap = {
   '@payloadcms/db-postgres': 'payloadcms-db-postgres-*',
   '@payloadcms/db-vercel-postgres': 'payloadcms-db-vercel-postgres-*',
   '@payloadcms/db-sqlite': 'payloadcms-db-sqlite-*',
+  '@payloadcms/db-d1-sqlite': 'payloadcms-db-d1-sqlite-*',
   '@payloadcms/drizzle': 'payloadcms-drizzle-*',
   '@payloadcms/email-nodemailer': 'payloadcms-email-nodemailer-*',
   '@payloadcms/email-resend': 'payloadcms-email-resend-*',
