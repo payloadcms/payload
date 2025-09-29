@@ -3,8 +3,9 @@
 import type { Widget } from 'payload'
 import type { Layout } from 'react-grid-layout'
 
+import { ItemsDrawer } from '@payloadcms/ui'
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
-import React from 'react'
+import React, { useId } from 'react'
 import { Responsive, WidthProvider } from 'react-grid-layout'
 
 import { DashboardBreadcrumbDropdown } from './DashboardBreadcrumbDropdown.js'
@@ -26,8 +27,8 @@ export function ModularDashboardClient({
   clientLayout: WidgetInstanceClient[]
   widgets: Widget[]
 }) {
-  // TODO: add addWidget or something like that to add widget to layout
   const {
+    addWidget,
     cancel,
     currentLayout,
     handleLayoutChange,
@@ -37,6 +38,9 @@ export function ModularDashboardClient({
     setIsEditing,
   } = useDashboardLayout(initialLayout, widgets)
 
+  const uuid = useId()
+  const drawerSlug = `widgets-drawer-${uuid}`
+
   return (
     <div>
       <SetStepNav
@@ -45,13 +49,11 @@ export function ModularDashboardClient({
             label: (
               <DashboardBreadcrumbDropdown
                 isEditing={isEditing}
-                onAddWidget={() => {
-                  /** TODO: in the future, not yet */
-                }}
                 onCancel={cancel}
                 onEditClick={() => setIsEditing(true)}
                 onResetLayout={resetLayout}
                 onSaveChanges={saveLayout}
+                widgetsDrawerSlug={drawerSlug}
               />
             ),
           },
@@ -77,6 +79,15 @@ export function ModularDashboardClient({
             </div>
           ))}
       </ResponsiveGridLayout>
+      {isEditing && (
+        <ItemsDrawer
+          drawerSlug={drawerSlug}
+          items={widgets}
+          onItemClick={(widget) => addWidget(widget.slug)}
+          searchPlaceholder="Search widgets..."
+          title="Add Widget"
+        />
+      )}
     </div>
   )
 }

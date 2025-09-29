@@ -57,7 +57,36 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[], _widge
     [isEditing, currentLayout],
   )
 
+  const addWidget = useCallback(
+    (widgetSlug: string) => {
+      if (!isEditing) {
+        return
+      }
+
+      // Create a new widget instance with default dimensions
+      const newWidgetInstance = {
+        clientLayout: {
+          h: 1, // Default height
+          i: `${widgetSlug}-${Date.now()}`, // Unique ID using timestamp
+          maxH: 3,
+          maxW: 12,
+          minH: 1,
+          minW: 3,
+          w: 3, // Default width
+          x: 0, // Will be positioned automatically by react-grid-layout
+          y: 0, // Will be positioned automatically by react-grid-layout
+        },
+        component: null, // Will be rendered on server side
+      }
+
+      // Add the new widget to the current layout
+      setCurrentLayout([...currentLayout, newWidgetInstance])
+    },
+    [isEditing, currentLayout, setCurrentLayout],
+  )
+
   return {
+    addWidget,
     cancel,
     currentLayout,
     handleLayoutChange,

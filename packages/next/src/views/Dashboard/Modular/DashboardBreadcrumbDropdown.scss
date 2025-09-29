@@ -3,32 +3,45 @@
   z-index: 10;
 
   .rs__control {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    cursor: pointer !important;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    cursor: pointer;
 
     &:hover {
-      background: transparent !important;
+      background: transparent;
     }
   }
 
   .rs__indicator-separator {
-    display: none !important;
+    display: none;
   }
 
   .rs__dropdown-indicator {
-    padding: 0 4px !important;
+    padding: 0 4px;
   }
 
   .rs__menu {
-    position: absolute !important;
-    top: 100% !important;
-    left: 0 !important;
-    min-width: 150px !important;
-    z-index: 9999 !important;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 150px;
+    z-index: 9999;
     box-shadow:
       0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.drawer-toggler--unstyled {
+  background: transparent;
+  border: none;
+  margin: 0;
+  padding: 0;
+  outline: none;
+
+  &:hover,
+  &:focus {
+    background: transparent;
   }
 }

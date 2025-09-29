@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@payloadcms/ui/elements/Button'
+import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
 import { type Option, ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
 import React from 'react'
 
@@ -8,29 +9,31 @@ import './DashboardBreadcrumbDropdown.scss'
 
 interface DashboardBreadcrumbDropdownProps {
   isEditing: boolean
-  onAddWidget: () => void
   onCancel: () => void
   onEditClick: () => void
   onResetLayout: () => void
   onSaveChanges: () => void
+  widgetsDrawerSlug: string
 }
 
 export function DashboardBreadcrumbDropdown({
   isEditing,
-  onAddWidget,
   onCancel,
   onEditClick,
   onResetLayout,
   onSaveChanges,
+  widgetsDrawerSlug,
 }: DashboardBreadcrumbDropdownProps) {
   if (isEditing) {
     return (
       <div style={{ alignItems: 'center', display: 'flex', gap: '12px' }}>
         <span>Dashboard</span>
         <div style={{ display: 'flex', gap: '8px', marginLeft: '16px' }}>
-          <Button buttonStyle="pill" onClick={onAddWidget} size="small">
-            Add +
-          </Button>
+          <DrawerToggler className="drawer-toggler--unstyled" slug={widgetsDrawerSlug}>
+            <Button buttonStyle="pill" el="span" size="small">
+              Add +
+            </Button>
+          </DrawerToggler>
           <Button buttonStyle="pill" onClick={onSaveChanges} size="small">
             Save Changes
           </Button>
