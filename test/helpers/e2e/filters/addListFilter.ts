@@ -15,7 +15,7 @@ export const addListFilter = async ({
   operatorLabel: string
   page: Page
   replaceExisting?: boolean
-  value?: string | string[]
+  value?: string
 }): Promise<{
   /**
    * A Locator pointing to the condition that was just added.
@@ -67,39 +67,23 @@ export const addListFilter = async ({
         response.url().includes(encodeURIComponent('where[or')) && response.status() === 200,
     )
     const valueLocator = condition.locator('.condition__value')
+    const valueInput = valueLocator.locator('input')
+    await valueInput.fill(value)
+    await expect(valueInput).toHaveValue(value)
 
-    // Check if this is a react-select component (for relationships, etc.)
     if ((await valueLocator.locator('input.rs__input').count()) > 0) {
-      // Handle react-select (relationship fields, etc.)
-      if (Array.isArray(value)) {
-        // Multi-select case
+      const valueOptions = condition.locator('.condition__value .rs__option')
+      const createValue = valueOptions.locator(`text=Create "${value}"`)
+      if ((await createValue.count()) > 0) {
+        await createValue.click()
+      } else {
         await selectInput({
           selectLocator: valueLocator,
-          multiSelect: true,
-          options: value,
+          multiSelect: false,
+          option: value,
         })
-      } else {
-        // Single select case
-        const valueOptions = condition.locator('.condition__value .rs__option')
-        const createValue = valueOptions.locator(`text=Create "${value}"`)
-        if ((await createValue.count()) > 0) {
-          await createValue.click()
-        } else {
-          await selectInput({
-            selectLocator: valueLocator,
-            multiSelect: false,
-            option: value,
-          })
-        }
       }
-    } else {
-      // Handle regular input fields
-      const valueInput = valueLocator.locator('input')
-      const inputValue = Array.isArray(value) ? value.join(', ') : value
-      await valueInput.fill(inputValue)
-      await expect(valueInput).toHaveValue(inputValue)
     }
-
     await networkPromise
   }
 
