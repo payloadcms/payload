@@ -1,12 +1,11 @@
 import type { BannerBlock as BannerBlockProps } from '@/payload-types'
-import type { DefaultDocumentIDType } from 'payload'
 import { cn } from '@/utilities/cn'
 import React from 'react'
 import { RichText } from '@/components/RichText'
 
 export const BannerBlock: React.FC<
   BannerBlockProps & {
-    id?: DefaultDocumentIDType
+    id?: string | number
     className?: string
   }
 > = ({ className, content, style }) => {

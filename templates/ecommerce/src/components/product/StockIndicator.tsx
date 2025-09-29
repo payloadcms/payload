@@ -17,9 +17,9 @@ export const StockIndicator: React.FC<Props> = ({ product }) => {
       const variantId = searchParams.get('variant')
       const validVariant = variants.find((variant) => {
         if (typeof variant === 'object') {
-          return variant.id === variantId
+          return String(variant.id) === variantId
         }
-        return variant === variantId
+        return String(variant) === variantId
       })
 
       if (validVariant && typeof validVariant === 'object') {

@@ -38,7 +38,7 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
           variantID = item.variantOption.id
         } else variantID = item.variantOption
 
-        return Boolean(values.find((value) => value === variantID))
+        return Boolean(values.find((value) => value === String(variantID)))
       })
       if (index !== -1) {
         setCurrent(index)

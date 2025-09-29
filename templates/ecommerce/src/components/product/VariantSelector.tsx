@@ -53,7 +53,7 @@ export function VariantSelector({ product }: { product: Product }) {
 
               // Update the option params using the current option to reflect how the url *would* change,
               // if the option was clicked.
-              optionSearchParams.set(optionKeyLowerCase, optionID)
+              optionSearchParams.set(optionKeyLowerCase, String(optionID))
 
               const currentOptions = Array.from(optionSearchParams.values())
 
@@ -69,15 +69,15 @@ export function VariantSelector({ product }: { product: Product }) {
                     // Check if all variant options match the current options in the URL
                     return variant.options.every((variantOption) => {
                       if (typeof variantOption !== 'object')
-                        return currentOptions.includes(variantOption)
+                        return currentOptions.includes(String(variantOption))
 
-                      return currentOptions.includes(variantOption.id)
+                      return currentOptions.includes(String(variantOption.id))
                     })
                   })
 
                 if (matchingVariant) {
                   // If we found a matching variant, set the variant ID in the search params.
-                  optionSearchParams.set('variant', matchingVariant.id)
+                  optionSearchParams.set('variant', String(matchingVariant.id))
 
                   if (matchingVariant.inventory && matchingVariant.inventory > 0) {
                     isAvailableForSale = true
@@ -91,7 +91,8 @@ export function VariantSelector({ product }: { product: Product }) {
 
               // The option is active if it's in the url params.
               const isActive =
-                Boolean(isAvailableForSale) && searchParams.get(optionKeyLowerCase) === optionID
+                Boolean(isAvailableForSale) &&
+                searchParams.get(optionKeyLowerCase) === String(optionID)
 
               return (
                 <Button

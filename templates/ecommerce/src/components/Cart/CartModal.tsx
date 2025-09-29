@@ -64,16 +64,16 @@ export function CartModal() {
                   const product = item.product
                   const variant = item.variant
 
-                  if (typeof product === 'string' || !item || !product || !product.slug)
+                  if (typeof product !== 'object' || !item || !product || !product.slug)
                     return <React.Fragment key={i} />
 
                   const metaImage =
-                    product.meta?.image && typeof product.meta?.image !== 'string'
+                    product.meta?.image && typeof product.meta?.image === 'object'
                       ? product.meta.image
                       : undefined
 
                   const firstGalleryImage =
-                    typeof product.gallery?.[0]?.image !== 'string'
+                    typeof product.gallery?.[0]?.image === 'object'
                       ? product.gallery?.[0]?.image
                       : undefined
 
@@ -100,7 +100,7 @@ export function CartModal() {
                       return hasMatch
                     })
 
-                    if (imageVariant && typeof imageVariant.image !== 'string') {
+                    if (imageVariant && typeof imageVariant.image === 'object') {
                       image = imageVariant.image
                     }
                   }

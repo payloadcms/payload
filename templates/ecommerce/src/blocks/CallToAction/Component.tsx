@@ -1,13 +1,12 @@
 import React from 'react'
 
 import type { CallToActionBlock as CTABlockProps } from '@/payload-types'
-import type { DefaultDocumentIDType } from 'payload'
 import { RichText } from '@/components/RichText'
 import { CMSLink } from '@/components/Link'
 
 export const CallToActionBlock: React.FC<
   CTABlockProps & {
-    id?: DefaultDocumentIDType
+    id?: string | number
     className?: string
   }
 > = ({ links, richText }) => {

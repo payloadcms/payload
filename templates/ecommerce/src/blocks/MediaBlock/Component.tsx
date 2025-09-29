@@ -3,14 +3,13 @@ import type { StaticImageData } from 'next/image'
 import { cn } from '@/utilities/cn'
 import React from 'react'
 import { RichText } from '@/components/RichText'
-import type { DefaultDocumentIDType } from 'payload'
 import type { MediaBlock as MediaBlockProps } from '@/payload-types'
 
 import { Media } from '../../components/Media'
 
 export const MediaBlock: React.FC<
   MediaBlockProps & {
-    id?: DefaultDocumentIDType
+    id?: string | number
     breakout?: boolean
     captionClassName?: string
     className?: string

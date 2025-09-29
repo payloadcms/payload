@@ -1,7 +1,6 @@
 import React from 'react'
 
 import { Code } from './Component.client'
-import type { DefaultDocumentIDType } from 'payload'
 
 export type CodeBlockProps = {
   code: string
@@ -11,7 +10,7 @@ export type CodeBlockProps = {
 
 export const CodeBlock: React.FC<
   CodeBlockProps & {
-    id?: DefaultDocumentIDType
+    id?: string | number
     className?: string
   }
 > = ({ className, code, language }) => {

@@ -21,11 +21,12 @@ export function AddToCart({ product }: Props) {
   const selectedVariant = useMemo<Variant | undefined>(() => {
     if (product.enableVariants && variants.length) {
       const variantId = searchParams.get('variant')
+
       const validVariant = variants.find((variant) => {
         if (typeof variant === 'object') {
-          return variant.id === variantId
+          return String(variant.id) === variantId
         }
-        return variant === variantId
+        return String(variant) === variantId
       })
 
       if (validVariant && typeof validVariant === 'object') {

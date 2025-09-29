@@ -3,7 +3,6 @@ import React, { useCallback, useMemo } from 'react'
 
 import { Category } from '@/payload-types'
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
 import clsx from 'clsx'
 
 type Props = {
@@ -16,8 +15,8 @@ export const CategoryItem: React.FC<Props> = ({ category }) => {
   const searchParams = useSearchParams()
 
   const isActive = useMemo(() => {
-    return searchParams.get('category') === category.id
-  }, [searchParams])
+    return searchParams.get('category') === String(category.id)
+  }, [category.id, searchParams])
 
   const setQuery = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString())
@@ -25,13 +24,13 @@ export const CategoryItem: React.FC<Props> = ({ category }) => {
     if (isActive) {
       params.delete('category')
     } else {
-      params.set('category', category.id)
+      params.set('category', String(category.id))
     }
 
     const newParams = params.toString()
 
     router.push(pathname + '?' + newParams)
-  }, [isActive])
+  }, [category.id, isActive, pathname, router, searchParams])
 
   return (
     <button
