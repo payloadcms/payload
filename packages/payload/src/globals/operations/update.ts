@@ -267,11 +267,15 @@ export const updateOperation = async <
       req.payload.config.localization.locales.length > 0 &&
       req.payload.config.experimental?.localizeMeta
     ) {
-      result.localizedMeta = populateLocalizedMeta({
+      const localizedMeta = populateLocalizedMeta({
         config: req.payload.config,
         data: result,
         publishSpecificLocale,
       })
+      result.localizedMeta = localizedMeta
+      if (versionSnapshotResult) {
+        versionSnapshotResult.localizedMeta = localizedMeta
+      }
     }
 
     // /////////////////////////////////////
