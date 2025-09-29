@@ -9,7 +9,7 @@ import React, { Fragment } from 'react'
 import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './Default/index.js'
 
 import { DefaultDashboard } from './Default/index.js'
-import { ModularDashboard } from './Modular/index.js'
+import { ModularDashboard } from './Modular/server.js'
 
 export async function Dashboard({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {

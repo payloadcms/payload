@@ -57,10 +57,12 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
     })
   }
 
-  // Determine final layout (saved or default)
-  let finalLayout: WidgetInstanceClient[]
+  // Helper function to get saved layout
+  const getSavedLayout = async (): Promise<null | WidgetInstance[]> => {
+    if (!user) {
+      return null
+    }
 
-  if (user) {
     try {
       const savedPreferences = await getPreferences(
         'dashboard-layout',
@@ -70,43 +72,36 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
       )
 
       if (
-        savedPreferences?.value &&
-        typeof savedPreferences.value === 'object' &&
-        'layouts' in savedPreferences.value
+        !savedPreferences?.value ||
+        typeof savedPreferences.value !== 'object' ||
+        !('layouts' in savedPreferences.value)
       ) {
-        // User has saved preferences, use them
-        const savedLayoutData = (savedPreferences.value as { layouts: Layout[] }).layouts
-
-        // Reconstruct widget instances from saved layout
-        const savedWidgetInstances: WidgetInstance[] = savedLayoutData.map((layoutItem) => {
-          // Extract widget slug and index from layout item id
-          const parts = layoutItem.i.split('-')
-          const index = parseInt(parts[parts.length - 1])
-          const widgetSlug = parts.slice(0, -1).join('-')
-
-          // Find the original widget instance
-          const originalWidget = defaultLayout[index]
-
-          return {
-            height: Math.min(Math.max(layoutItem.h, 1), 3),
-            widgetSlug: originalWidget?.widgetSlug || widgetSlug,
-            width: Math.min(Math.max(layoutItem.w, 3), 12),
-          } as WidgetInstance
-        })
-
-        finalLayout = createClientLayout(savedWidgetInstances)
-      } else {
-        // No saved preferences, use default
-        finalLayout = createClientLayout(defaultLayout)
+        return null
       }
+
+      const layouts = (savedPreferences.value as { layouts: Layout[] }).layouts
+
+      return layouts.map((layoutItem) => {
+        // Extract widget slug and index from layout item id
+        const parts = layoutItem.i.split('-')
+        const index = parseInt(parts[parts.length - 1])
+        const widgetSlug = parts.slice(0, -1).join('-')
+        const originalWidget = defaultLayout[index]
+
+        return {
+          height: Math.min(Math.max(layoutItem.h, 1), 3) as 1 | 2 | 3,
+          widgetSlug: originalWidget?.widgetSlug || widgetSlug,
+          width: Math.min(Math.max(layoutItem.w, 3), 12),
+        } as WidgetInstance
+      })
     } catch {
-      // Error loading preferences, fallback to default
-      finalLayout = createClientLayout(defaultLayout)
+      return null
     }
-  } else {
-    // No user, use default
-    finalLayout = createClientLayout(defaultLayout)
   }
+
+  // Determine final layout (saved or default)
+  const savedLayout = await getSavedLayout()
+  const finalLayout = createClientLayout(savedLayout || defaultLayout)
 
   return (
     <div>
