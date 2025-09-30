@@ -730,17 +730,23 @@ export const traverseFields = ({
           const subQuery = query.as(subQueryAlias)
 
           if (shouldCount) {
+            let countQuery = db
+              .select(selectFields as any)
+              .from(newAliasTable)
+              .where(subQueryWhere)
+              .$dynamic()
+
+            joins.forEach(({ type, condition, table }) => {
+              countQuery = countQuery[type ?? 'leftJoin'](table, condition)
+            })
+
             currentArgs.extras[`${columnName}_count`] = sql`${db
               .select({
                 count: count(),
               })
-              .from(
-                sql`${db
-                  .select(selectFields as any)
-                  .from(newAliasTable)
-                  .where(subQueryWhere)
-                  .as(`${subQueryAlias}_count_subquery`)}`,
-              )}`.as(`${subQueryAlias}_count`)
+              .from(sql`${countQuery.as(`${subQueryAlias}_count_subquery`)}`)}`.as(
+              `${subQueryAlias}_count`,
+            )
           }
 
           currentArgs.extras[columnName] = sql`${db
