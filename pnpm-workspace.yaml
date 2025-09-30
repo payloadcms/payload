@@ -1,9 +1,0 @@
-packages:
-  - 'packages/*'
-  - 'tools/*'
-  - 'test'
-  - 'templates/blank'
-  - 'templates/website'
-  - 'templates/ecommerce'
-
-updateNotifier: false

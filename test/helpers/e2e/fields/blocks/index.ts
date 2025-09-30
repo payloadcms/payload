@@ -1,5 +1,0 @@
-export { addBlock, addBlockBelow } from './addBlock.js'
-export { duplicateBlock } from './duplicateBlock.js'
-export { openBlocksDrawer } from './openBlocksDrawer.js'
-export { removeAllBlocks } from './removeAllBlocks.js'
-export { reorderBlocks } from './reorderBlocks.js'

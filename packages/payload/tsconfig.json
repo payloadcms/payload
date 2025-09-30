@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "references": [{ "path": "../translations" }],
-  "compilerOptions": {
-    // Do not include DOM and DOM.Iterable as payload is a server-only package.
-    // This ensures node types do not conflict with node types (e.g. fetch.dispatcher)
-    "lib": ["ES2022"],
-  }
-}

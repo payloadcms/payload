@@ -377,6 +377,139 @@ non-polymorphic relationship.
 
 </Banner>
 
+### Atomic Operations for hasMany Relationships
+
+For relationship fields with `hasMany: true`, you can perform atomic operations that append or remove items without replacing the entire array. These operations work with both high-level APIs (`payload.update`) and low-level database APIs (`payload.db.updateOne`, `payload.db.updateMany`).
+You cannot use both regular data updates and atomic operations on the same field in a single request.
+
+#### High-Level API Operations
+
+Use the `operations` parameter to perform atomic updates:
+
+```ts
+// Append items to a relationship array
+await payload.update({
+  collection: 'posts',
+  id: 'post123',
+  data: {},
+  operations: {
+    $push: {
+      categories: ['featured-id', 'trending-id'],
+    },
+  },
+})
+
+// Remove items from a relationship array
+await payload.update({
+  collection: 'posts',
+  id: 'post123',
+  data: {},
+  operations: {
+    $remove: {
+      categories: ['draft-id'],
+    },
+  },
+})
+```
+
+#### Low-Level Database API Operations
+
+For direct database operations, use the atomic syntax in the `data` object. Keep in mind that hooks and validations are not performed on low-level API calls:
+
+```ts
+// Append items
+await payload.db.updateMany({
+  collection: 'posts',
+  where: { status: { equals: 'published' } },
+  data: {
+    categories: { $push: ['featured-id', 'trending-id'] },
+  },
+})
+
+// Remove items
+await payload.db.updateMany({
+  collection: 'posts',
+  where: { author: { equals: 'user123' } },
+  data: {
+    tags: { $remove: ['draft-id', 'private-id'] },
+  },
+})
+```
+
+#### Polymorphic Relationships
+
+These operations work seamlessly with polymorphic relationships:
+
+```ts
+// High-level API
+await payload.update({
+  collection: 'posts',
+  id: 'post123',
+  data: {},
+  operations: {
+    $push: {
+      relatedItems: [
+        { relationTo: 'categories', value: 'category-id' },
+        { relationTo: 'tags', value: 'tag-id' },
+      ],
+    },
+  },
+})
+
+// Low-level API
+await payload.db.updateOne({
+  collection: 'posts',
+  id: 'post123',
+  data: {
+    relatedItems: {
+      $push: [
+        { relationTo: 'categories', value: 'category-id' },
+        { relationTo: 'tags', value: 'tag-id' },
+      ],
+    },
+  },
+})
+```
+
+#### Nested Field Operations
+
+Atomic operations also support dot-notation paths for nested fields:
+
+```ts
+// Update nested fields within groups, tabs, or other containers
+await payload.update({
+  collection: 'posts',
+  id: 'post123',
+  data: {},
+  operations: {
+    $push: {
+      'metadata.tags': ['new-tag'],
+    },
+  },
+})
+```
+
+#### Bulk Update with Atomic Operations
+
+Apply atomic operations to multiple documents using a `where` clause:
+
+```ts
+// Add categories to all published posts
+await payload.update({
+  collection: 'posts',
+  where: { status: { equals: 'published' } },
+  data: {},
+  operations: {
+    $push: { categories: ['featured-id'] },
+  },
+})
+```
+
+<Banner type="success">
+  Atomic operations work correctly even when the modified field is not in
+  `select`. The full document is fetched internally, but only selected fields
+  are returned.
+</Banner>
 ### Linking virtual fields with relationships
 
 You can link virtual fields to fields in other collections through a relationship (or upload) field, for example:
