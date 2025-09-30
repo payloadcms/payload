@@ -6,6 +6,7 @@ import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState
 import { getFolderResultsComponentAndDataHandler } from '@payloadcms/ui/utilities/getFolderResultsComponentAndData'
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 
+import { renderWidgetHandler } from '../views/Dashboard/Modular/renderWidgetServerFn.js'
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
@@ -19,6 +20,7 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'render-document-slots': renderDocumentSlotsHandler,
   'render-field': _internal_renderFieldHandler,
   'render-list': renderListHandler,
+  'render-widget': renderWidgetHandler,
   'schedule-publish': schedulePublishHandler,
   'table-state': buildTableStateHandler,
 }

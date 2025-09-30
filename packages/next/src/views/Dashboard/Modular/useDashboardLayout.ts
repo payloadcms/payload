@@ -2,9 +2,11 @@ import type { Widget } from 'payload'
 import type { Layout } from 'react-grid-layout'
 
 import { usePreferences } from '@payloadcms/ui'
-import { useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import type { WidgetInstanceClient } from './client.js'
+
+import { RenderWidget } from './RenderWidget.js'
 
 export function useDashboardLayout(initialLayout: WidgetInstanceClient[], _widgets: Widget[]) {
   const setLayoutPreference = useSetLayoutPreference()
@@ -63,11 +65,13 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[], _widge
         return
       }
 
-      // Create a new widget instance with default dimensions
-      const newWidgetInstance = {
+      const widgetId = `${widgetSlug}-${Date.now()}`
+
+      // Create a new widget instance using RenderWidget (Lexical pattern)
+      const newWidgetInstance: WidgetInstanceClient = {
         clientLayout: {
           h: 1, // Default height
-          i: `${widgetSlug}-${Date.now()}`, // Unique ID using timestamp
+          i: widgetId,
           maxH: 3,
           maxW: 12,
           minH: 1,
@@ -76,13 +80,16 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[], _widge
           x: 0, // Will be positioned automatically by react-grid-layout
           y: 0, // Will be positioned automatically by react-grid-layout
         },
-        component: null, // Will be rendered on server side
+        component: React.createElement(RenderWidget, {
+          widgetId,
+          // TODO: widgetData can be added here for custom props
+        }),
       }
 
       // Add the new widget to the current layout
       setCurrentLayout([...currentLayout, newWidgetInstance])
     },
-    [isEditing, currentLayout, setCurrentLayout],
+    [isEditing, currentLayout],
   )
 
   return {
