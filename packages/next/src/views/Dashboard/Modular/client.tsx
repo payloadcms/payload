@@ -24,22 +24,13 @@ export type WidgetInstanceClient = {
 
 export function ModularDashboardClient({
   clientLayout: initialLayout,
-  widgets, // For future "Add Widget" functionality
+  widgets,
 }: {
   clientLayout: WidgetInstanceClient[]
   widgets: Widget[]
 }) {
-  const {
-    addWidget,
-    cancel,
-    currentLayout,
-    deleteWidget,
-    handleLayoutChange,
-    isEditing,
-    resetLayout,
-    saveLayout,
-    setIsEditing,
-  } = useDashboardLayout(initialLayout, widgets)
+  const { addWidget, currentLayout, deleteWidget, handleLayoutChange, isEditing } =
+    useDashboardLayout(initialLayout)
 
   const uuid = useId()
   const drawerSlug = `widgets-drawer-${uuid}`
@@ -50,14 +41,7 @@ export function ModularDashboardClient({
         nav={[
           {
             label: (
-              <DashboardBreadcrumbDropdown
-                isEditing={isEditing}
-                onCancel={cancel}
-                onEditClick={() => setIsEditing(true)}
-                onResetLayout={resetLayout}
-                onSaveChanges={saveLayout}
-                widgetsDrawerSlug={drawerSlug}
-              />
+              <DashboardBreadcrumbDropdown clientLayout={initialLayout} drawerSlug={drawerSlug} />
             ),
           },
         ]}
@@ -92,13 +76,6 @@ export function ModularDashboardClient({
                   </button>
                 )}
               </div>
-              {/* <WidgetWrapper
-                isEditing={isEditing}
-                onDelete={() => deleteWidget(widget.clientLayout.i)}
-                widgetId={widget.clientLayout.i}
-              >
-                <div className="widget-content">{widget.component}</div>
-              </WidgetWrapper> */}
             </div>
           ))}
       </ResponsiveGridLayout>
@@ -116,29 +93,27 @@ export function ModularDashboardClient({
 }
 
 export function DashboardBreadcrumbDropdown(props: {
-  isEditing: boolean
-  onCancel: () => void
-  onEditClick: () => void
-  onResetLayout: () => void
-  onSaveChanges: () => void
-  widgetsDrawerSlug: string
+  clientLayout: WidgetInstanceClient[]
+  drawerSlug: string
 }) {
-  const { isEditing, onCancel, onEditClick, onResetLayout, onSaveChanges, widgetsDrawerSlug } =
-    props
+  const { cancel, isEditing, resetLayout, saveLayout, setIsEditing } = useDashboardLayout(
+    props.clientLayout,
+  )
+
   if (isEditing) {
     return (
       <div className="dashboard-breadcrumb-dropdown__editing">
         <span>Editing Dashboard</span>
         <div className="dashboard-breadcrumb-dropdown__actions">
-          <DrawerToggler className="drawer-toggler--unstyled" slug={widgetsDrawerSlug}>
+          <DrawerToggler className="drawer-toggler--unstyled" slug={props.drawerSlug}>
             <Button buttonStyle="pill" el="span" size="small">
               Add +
             </Button>
           </DrawerToggler>
-          <Button buttonStyle="pill" onClick={onSaveChanges} size="small">
+          <Button buttonStyle="pill" onClick={saveLayout} size="small">
             Save Changes
           </Button>
-          <Button buttonStyle="pill" onClick={onCancel} size="small">
+          <Button buttonStyle="pill" onClick={cancel} size="small">
             Cancel
           </Button>
         </div>
@@ -156,9 +131,9 @@ export function DashboardBreadcrumbDropdown(props: {
     const option = Array.isArray(selectedOption) ? selectedOption[0] : selectedOption
 
     if (option?.value === 'edit') {
-      onEditClick()
+      setIsEditing(true)
     } else if (option?.value === 'reset') {
-      onResetLayout()
+      void resetLayout()
     }
   }
 

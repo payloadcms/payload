@@ -1,4 +1,3 @@
-import type { Widget } from 'payload'
 import type { Layout } from 'react-grid-layout'
 
 import { usePreferences } from '@payloadcms/ui'
@@ -8,7 +7,7 @@ import type { WidgetInstanceClient } from './client.js'
 
 import { RenderWidget } from './renderWidget/RenderWidget.js'
 
-export function useDashboardLayout(initialLayout: WidgetInstanceClient[], _widgets: Widget[]) {
+export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   const setLayoutPreference = useSetLayoutPreference()
   const [isEditing, setIsEditing] = useState(false)
   const [currentLayout, setCurrentLayout] = useState<WidgetInstanceClient[]>(initialLayout)
