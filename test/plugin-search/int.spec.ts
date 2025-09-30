@@ -561,7 +561,7 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     expect(initialSearchResults).toHaveLength(1)
-    expect(initialSearchResults[0].title).toBe('Post to be trashed')
+    expect(initialSearchResults[0]?.title).toBe('Post to be trashed')
 
     // Soft delete the post (move to trash)
     await payload.update({
@@ -588,7 +588,7 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     // The search document should still exist
-    expect(trashedSearchResults).toHaveLength(1)
+    expect(trashedSearchResults).toHaveLength(0)
 
     // Clean up by permanently deleting the trashed post
     await payload.delete({

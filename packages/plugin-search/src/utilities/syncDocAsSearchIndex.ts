@@ -162,6 +162,26 @@ export const syncDocAsSearchIndex = async ({
               payload.logger.error({ err, msg: `Error updating ${searchSlug} document.` })
             }
           }
+
+          // Check if document is trashed and delete from search
+          const isTrashDocument = doc && 'deletedAt' in doc && doc.deletedAt
+
+          if (isTrashDocument) {
+            try {
+              await payload.delete({
+                id: searchDocID,
+                collection: searchSlug,
+                depth: 0,
+                req,
+              })
+            } catch (err: unknown) {
+              payload.logger.error({
+                err,
+                msg: `Error deleting ${searchSlug} document for trashed doc.`,
+              })
+            }
+          }
+
           if (deleteDrafts && status === 'draft') {
             // Check to see if there's a published version of the doc
             // We don't want to remove the search doc if there is a published version but a new draft has been created
