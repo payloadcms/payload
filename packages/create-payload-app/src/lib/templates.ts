@@ -31,7 +31,7 @@ export function getValidTemplates(): ProjectTemplate[] {
       name: 'ecommerce',
       type: 'starter',
       description: 'Ecommerce template',
-      url: 'https://github.com/payloadcms/payload/templates/ecommerce#feat/ecommerce-template',
+      url: 'https://github.com/payloadcms/payload/templates/ecommerce#main',
     },
     {
       name: 'plugin',
