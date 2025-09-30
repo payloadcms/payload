@@ -124,6 +124,7 @@ export const usePreventLeave = ({
       const className = button.className || ''
       const id = button.id || ''
 
+      // Only intercept document drawer close buttons, not all modal close buttons
       return (
         className.includes('drawer__close') ||
         className.includes('drawer__header__close') ||
