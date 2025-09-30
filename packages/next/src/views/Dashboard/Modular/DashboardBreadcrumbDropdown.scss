@@ -1,3 +1,16 @@
+.dashboard-breadcrumb-dropdown {
+  &__editing {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+  }
+}
+
 .dashboard-breadcrumb-select {
   position: relative;
   z-index: 10;
@@ -6,6 +19,7 @@
     background: transparent;
     border: none;
     box-shadow: none;
+    padding: 0;
     cursor: pointer;
 
     &:hover {

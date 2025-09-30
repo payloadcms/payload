@@ -26,9 +26,9 @@ export function DashboardBreadcrumbDropdown({
 }: DashboardBreadcrumbDropdownProps) {
   if (isEditing) {
     return (
-      <div style={{ alignItems: 'center', display: 'flex', gap: '12px' }}>
-        <span>Dashboard</span>
-        <div style={{ display: 'flex', gap: '8px', marginLeft: '16px' }}>
+      <div className="dashboard-breadcrumb-dropdown__editing">
+        <span>Editing Dashboard</span>
+        <div className="dashboard-breadcrumb-dropdown__actions">
           <DrawerToggler className="drawer-toggler--unstyled" slug={widgetsDrawerSlug}>
             <Button buttonStyle="pill" el="span" size="small">
               Add +
