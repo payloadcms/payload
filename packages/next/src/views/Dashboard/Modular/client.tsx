@@ -3,14 +3,14 @@
 import type { Widget } from 'payload'
 import type { Layout } from 'react-grid-layout'
 
-import { ItemsDrawer } from '@payloadcms/ui'
+import { ItemsDrawer, XIcon } from '@payloadcms/ui'
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
 import React, { useId } from 'react'
 import { Responsive, WidthProvider } from 'react-grid-layout'
 
 import { DashboardBreadcrumbDropdown } from './DashboardBreadcrumbDropdown.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
-import { WidgetWrapper } from './WidgetWrapper.js'
+import './WidgetWrapper.scss'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -77,13 +77,27 @@ export function ModularDashboardClient({
         {currentLayout &&
           currentLayout.map((widget) => (
             <div className="widget" key={widget.clientLayout.i}>
-              <WidgetWrapper
+              <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
+                <div className="widget-content">{widget.component}</div>
+                {isEditing && (
+                  <button
+                    className="widget-wrapper__delete-btn"
+                    onClick={() => deleteWidget(widget.clientLayout.i)}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    title={`Delete widget ${widget.clientLayout.i}`}
+                    type="button"
+                  >
+                    <XIcon />
+                  </button>
+                )}
+              </div>
+              {/* <WidgetWrapper
                 isEditing={isEditing}
                 onDelete={() => deleteWidget(widget.clientLayout.i)}
                 widgetId={widget.clientLayout.i}
               >
                 <div className="widget-content">{widget.component}</div>
-              </WidgetWrapper>
+              </WidgetWrapper> */}
             </div>
           ))}
       </ResponsiveGridLayout>
