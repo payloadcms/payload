@@ -637,4 +637,14 @@ describe('Array', () => {
       await expect(subArrayContainer2).toHaveCount(1)
     })
   })
+  test('should return empty array from getDataByPath for array fields without rows', async () => {
+    await page.goto(url.create)
+
+    // Wait for the test component to render
+    await page.waitForSelector('#getDataByPath-test')
+
+    // Check that getDataByPath returned an empty array, not 0
+    await expect(page.locator('#empty-array-result')).toHaveText('ARRAY')
+    await expect(page.locator('#empty-array-length')).toHaveText('0')
+  })
 })

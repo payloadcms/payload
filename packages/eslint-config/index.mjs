@@ -151,6 +151,7 @@ export const rootEslintConfig = [
             '../db-postgres/relationships-v2-v3.mjs',
             '../db-postgres/scripts/renamePredefinedMigrations.ts',
             '../db-sqlite/bundle.js',
+            '../db-d1-sqlite/bundle.js',
             '../db-vercel-postgres/relationships-v2-v3.mjs',
             '../db-vercel-postgres/scripts/renamePredefinedMigrations.ts',
             '../plugin-cloud-storage/azure.d.ts',

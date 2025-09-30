@@ -1,19 +1,15 @@
+import { Banner as PayloadBanner } from '@payloadcms/ui'
+
 export function Banner(props: {
   children?: React.ReactNode
+  className?: string
   description?: string
   message?: string
 }) {
-  const { children, description, message } = props
+  const { children, className, description, message } = props
   return (
-    <div
-      style={{
-        backgroundColor: 'var(--theme-warning-100)',
-        border: '1px dashed',
-        color: 'var(--theme-warning-750)',
-        padding: '1rem',
-      }}
-    >
+    <PayloadBanner className={className} type="success">
       {children || message || description || 'A custom banner component'}
-    </div>
+    </PayloadBanner>
   )
 }

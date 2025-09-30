@@ -122,7 +122,6 @@ export type SanitizedGlobalVersions = {
 export type TypeWithVersion<T> = {
   createdAt: string
   id: string
-  localeStatus: Record<string, 'draft' | 'published'>
   parent: number | string
   publishedLocale?: string
   snapshot?: boolean
