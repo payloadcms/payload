@@ -3670,7 +3670,7 @@ describe('database', () => {
         },
         collection: 'posts',
         id: post.id,
-      })) as unknown as any
+      })) as unknown as Post
 
       expect(res.arrayWithIDsLocalized?.en).toHaveLength(2)
       expect(res.arrayWithIDsLocalized?.en?.[0]?.text).toBe('some text')
@@ -3853,10 +3853,10 @@ describe('database', () => {
       })
 
       expect(post.categories).toHaveLength(1)
-      expect(post.categories[0].id || post.categories[0]).toBe(cat1.id)
+      expect(post.categories?.[0]).toBe(cat1.id)
 
       // Append another relationship using $push
-      const result = await payload.db.updateOne({
+      const result = (await payload.db.updateOne({
         collection: 'posts',
         id: post.id,
         data: {
@@ -3864,11 +3864,11 @@ describe('database', () => {
             $push: cat2.id,
           },
         },
-      })
+      })) as unknown as Post
 
       expect(result.categories).toHaveLength(2)
       // Handle both populated and non-populated relationships
-      const resultIds = result.categories.map((cat) => cat.id || cat)
+      const resultIds = result.categories?.map((cat) => cat as string)
       expect(resultIds).toContain(cat1.id)
       expect(resultIds).toContain(cat2.id)
     })
@@ -3898,7 +3898,7 @@ describe('database', () => {
       })
 
       // Append multiple relationships using $push
-      const result = await payload.db.updateOne({
+      const result = (await payload.db.updateOne({
         collection: 'posts',
         id: post.id,
         data: {
@@ -3906,11 +3906,11 @@ describe('database', () => {
             $push: [cat2.id, cat3.id],
           },
         },
-      })
+      })) as unknown as Post
 
       expect(result.categories).toHaveLength(3)
       // Handle both populated and non-populated relationships
-      const resultIds = result.categories.map((cat) => cat.id || cat)
+      const resultIds = result.categories?.map((cat) => cat as string)
       expect(resultIds).toContain(cat1.id)
       expect(resultIds).toContain(cat2.id)
       expect(resultIds).toContain(cat3.id)
@@ -3937,7 +3937,7 @@ describe('database', () => {
       })
 
       // Try to append existing relationship - should not create duplicates
-      const result = await payload.db.updateOne({
+      const result = (await payload.db.updateOne({
         collection: 'posts',
         id: post.id,
         data: {
@@ -3945,11 +3945,11 @@ describe('database', () => {
             $push: [cat1.id, cat2.id], // Appending existing items
           },
         },
-      })
+      })) as unknown as Post
 
       expect(result.categories).toHaveLength(2) // Should still be 2, no duplicates
       // Handle both populated and non-populated relationships
-      const resultIds = result.categories.map((cat) => cat.id || cat)
+      const resultIds = result.categories?.map((cat) => cat as string)
       expect(resultIds).toContain(cat1.id)
       expect(resultIds).toContain(cat2.id)
     })
@@ -3982,7 +3982,7 @@ describe('database', () => {
       })
 
       // Append cat2 to all posts using updateMany
-      const result = await payload.db.updateMany({
+      const result = (await payload.db.updateMany({
         collection: 'posts',
         where: {
           id: { in: [post1.id, post2.id] },
@@ -3992,12 +3992,12 @@ describe('database', () => {
             $push: cat2.id,
           },
         },
-      })
+      })) as unknown as Post[]
 
       expect(result).toHaveLength(2)
       result.forEach((post) => {
         expect(post.categories).toHaveLength(2)
-        const categoryIds = post.categories.map((cat) => cat.id || cat)
+        const categoryIds = post.categories?.map((cat) => cat as string)
         expect(categoryIds).toContain(cat1.id)
         expect(categoryIds).toContain(cat2.id)
       })
@@ -4030,13 +4030,13 @@ describe('database', () => {
       })
 
       expect(post.polymorphicRelations).toHaveLength(1)
-      expect(post.polymorphicRelations[0]).toEqual({
+      expect(post.polymorphicRelations?.[0]).toEqual({
         relationTo: 'categories',
         value: category.id,
       })
 
       // Append another polymorphic relationship using $push
-      const result = await payload.db.updateOne({
+      const result = (await payload.db.updateOne({
         collection: 'posts',
         id: post.id,
         data: {
@@ -4049,8 +4049,7 @@ describe('database', () => {
             ],
           },
         },
-        depth: 0, // Don't populate relationships
-      })
+      })) as unknown as Post
 
       expect(result.polymorphicRelations).toHaveLength(2)
       expect(result.polymorphicRelations).toContainEqual({
@@ -4086,7 +4085,7 @@ describe('database', () => {
       })
 
       // Try to append the same relationship - should not create duplicates
-      const result = await payload.db.updateOne({
+      const result = (await payload.db.updateOne({
         collection: 'posts',
         id: post.id,
         data: {
@@ -4099,11 +4098,10 @@ describe('database', () => {
             ],
           },
         },
-        depth: 0,
-      })
+      })) as unknown as Post
 
       expect(result.polymorphicRelations).toHaveLength(1) // Should still be 1, no duplicates
-      expect(result.polymorphicRelations[0]).toEqual({
+      expect(result.polymorphicRelations?.[0]).toEqual({
         relationTo: 'categories',
         value: category.id,
       })
@@ -4137,7 +4135,7 @@ describe('database', () => {
       })
 
       // Append relationship using $push with correct localized structure
-      const result = await payload.db.updateOne({
+      const result = (await payload.db.updateOne({
         collection: 'posts',
         id: post.id,
         data: {
@@ -4152,15 +4150,14 @@ describe('database', () => {
             },
           },
         },
-        depth: 0,
-      })
+      })) as unknown as Post
 
-      expect(result.localizedPolymorphicRelations.en).toHaveLength(2)
-      expect(result.localizedPolymorphicRelations.en).toContainEqual({
+      expect(result.localizedPolymorphicRelations?.en).toHaveLength(2)
+      expect(result.localizedPolymorphicRelations?.en).toContainEqual({
         relationTo: 'categories',
         value: category1.id,
       })
-      expect(result.localizedPolymorphicRelations.en).toContainEqual({
+      expect(result.localizedPolymorphicRelations?.en).toContainEqual({
         relationTo: 'categories',
         value: category2.id,
       })
@@ -4170,12 +4167,12 @@ describe('database', () => {
       // Create documents for the polymorphic relationship
       const category1 = await payload.create({
         collection: 'categories',
-        data: { name: 'Category 1' },
+        data: { title: 'Category 1' },
       })
 
       const category2 = await payload.create({
         collection: 'categories',
-        data: { name: 'Category 2' },
+        data: { title: 'Category 2' },
       })
 
       // Create a post with nested localized polymorphic relationship
@@ -4221,12 +4218,12 @@ describe('database', () => {
         depth: 0,
       })
 
-      expect(result.testNestedGroup.nestedLocalizedPolymorphicRelation).toHaveLength(2)
-      expect(result.testNestedGroup.nestedLocalizedPolymorphicRelation).toContainEqual({
+      expect(result.testNestedGroup?.nestedLocalizedPolymorphicRelation).toHaveLength(2)
+      expect(result.testNestedGroup?.nestedLocalizedPolymorphicRelation).toContainEqual({
         relationTo: 'categories',
         value: category1.id,
       })
-      expect(result.testNestedGroup.nestedLocalizedPolymorphicRelation).toContainEqual({
+      expect(result.testNestedGroup?.nestedLocalizedPolymorphicRelation).toContainEqual({
         relationTo: 'categories',
         value: category2.id,
       })
@@ -4257,7 +4254,7 @@ describe('database', () => {
       expect(post.categories).toHaveLength(2)
 
       // Remove one relationship using $remove
-      const result = await payload.db.updateOne({
+      const result = (await payload.db.updateOne({
         collection: 'posts',
         id: post.id,
         data: {
@@ -4265,10 +4262,10 @@ describe('database', () => {
             $remove: cat1.id,
           },
         },
-      })
+      })) as unknown as Post
 
       expect(result.categories).toHaveLength(1)
-      expect(result.categories[0].id || result.categories[0]).toBe(cat2.id)
+      expect(result.categories?.[0]).toBe(cat2.id)
     })
 
     it('should allow removing relationships using $remove with array', async () => {
@@ -4298,7 +4295,7 @@ describe('database', () => {
       expect(post.categories).toHaveLength(3)
 
       // Remove multiple relationships using $remove
-      const result = await payload.db.updateOne({
+      const result = (await payload.db.updateOne({
         collection: 'posts',
         id: post.id,
         data: {
@@ -4306,10 +4303,10 @@ describe('database', () => {
             $remove: [cat1.id, cat3.id],
           },
         },
-      })
+      })) as unknown as Post
 
       expect(result.categories).toHaveLength(1)
-      expect(result.categories[0].id || result.categories[0]).toBe(cat2.id)
+      expect(result.categories?.[0]).toBe(cat2.id)
     })
 
     it('should work with updateMany for bulk remove operations', async () => {
@@ -4344,7 +4341,7 @@ describe('database', () => {
       })
 
       // Remove cat1 and cat3 from all posts using updateMany
-      const result = await payload.db.updateMany({
+      const result = (await payload.db.updateMany({
         collection: 'posts',
         where: {
           id: { in: [post1.id, post2.id] },
@@ -4354,12 +4351,12 @@ describe('database', () => {
             $remove: [cat1.id, cat3.id],
           },
         },
-      })
+      })) as unknown as Post[]
 
       expect(result).toHaveLength(2)
       result.forEach((post) => {
         expect(post.categories).toHaveLength(1)
-        const categoryIds = post.categories.map((cat) => cat.id || cat)
+        const categoryIds = post.categories?.map((cat) => cat as string)
         expect(categoryIds).toContain(cat2.id)
         expect(categoryIds).not.toContain(cat1.id)
         expect(categoryIds).not.toContain(cat3.id)
@@ -4399,7 +4396,7 @@ describe('database', () => {
       expect(post.polymorphicRelations).toHaveLength(2)
 
       // Remove one polymorphic relationship using $remove
-      const result = await payload.db.updateOne({
+      const result = (await payload.db.updateOne({
         collection: 'posts',
         id: post.id,
         data: {
@@ -4412,11 +4409,10 @@ describe('database', () => {
             ],
           },
         },
-        depth: 0,
-      })
+      })) as unknown as Post
 
       expect(result.polymorphicRelations).toHaveLength(1)
-      expect(result.polymorphicRelations[0]).toEqual({
+      expect(result.polymorphicRelations?.[0]).toEqual({
         relationTo: 'categories',
         value: category2.id,
       })
@@ -4454,7 +4450,7 @@ describe('database', () => {
       expect(post.polymorphicRelations).toHaveLength(3)
 
       // Remove multiple polymorphic relationships using $remove
-      const result = await payload.db.updateOne({
+      const result = (await payload.db.updateOne({
         collection: 'posts',
         id: post.id,
         data: {
@@ -4465,11 +4461,10 @@ describe('database', () => {
             ],
           },
         },
-        depth: 0,
-      })
+      })) as unknown as Post
 
       expect(result.polymorphicRelations).toHaveLength(1)
-      expect(result.polymorphicRelations[0]).toEqual({
+      expect(result.polymorphicRelations?.[0]).toEqual({
         relationTo: 'categories',
         value: category2.id,
       })
@@ -4506,7 +4501,7 @@ describe('database', () => {
       })
 
       // Remove relationships using $remove with correct localized structure
-      const result = await payload.db.updateOne({
+      const result = (await payload.db.updateOne({
         collection: 'posts',
         id: post.id,
         data: {
@@ -4519,19 +4514,18 @@ describe('database', () => {
             },
           },
         },
-        depth: 0,
-      })
+      })) as unknown as Post
 
-      expect(result.localizedPolymorphicRelations.en).toHaveLength(1)
-      expect(result.localizedPolymorphicRelations.en).toContainEqual({
+      expect(result.localizedPolymorphicRelations?.en).toHaveLength(1)
+      expect(result.localizedPolymorphicRelations?.en).toContainEqual({
         relationTo: 'categories',
         value: category2.id,
       })
-      expect(result.localizedPolymorphicRelations.en).not.toContainEqual({
+      expect(result.localizedPolymorphicRelations?.en).not.toContainEqual({
         relationTo: 'categories',
         value: category1.id,
       })
-      expect(result.localizedPolymorphicRelations.en).not.toContainEqual({
+      expect(result.localizedPolymorphicRelations?.en).not.toContainEqual({
         relationTo: 'categories',
         value: category3.id,
       })
@@ -4541,12 +4535,12 @@ describe('database', () => {
       // Create documents for the polymorphic relationship
       const category1 = await payload.create({
         collection: 'categories',
-        data: { name: 'Category 1' },
+        data: { title: 'Category 1' },
       })
 
       const category2 = await payload.create({
         collection: 'categories',
-        data: { name: 'Category 2' },
+        data: { title: 'Category 2' },
       })
 
       const simple1 = await payload.create({
@@ -4603,8 +4597,8 @@ describe('database', () => {
         depth: 0,
       })
 
-      expect(result.testNestedGroup.nestedLocalizedPolymorphicRelation).toHaveLength(1)
-      expect(result.testNestedGroup.nestedLocalizedPolymorphicRelation[0]).toEqual({
+      expect(result.testNestedGroup?.nestedLocalizedPolymorphicRelation).toHaveLength(1)
+      expect(result.testNestedGroup?.nestedLocalizedPolymorphicRelation?.[0]).toEqual({
         relationTo: 'categories',
         value: category2.id,
       })
