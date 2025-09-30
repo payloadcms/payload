@@ -14,6 +14,7 @@ export interface R2Bucket {
     key: string,
     value: ArrayBuffer | ArrayBufferView | Blob | null | ReadableStream | string,
     options?: {
+      httpMetadata?: any | Headers
       onlyIf: any
     } & any,
   ): Promise<any | null>
