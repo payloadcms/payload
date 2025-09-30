@@ -7,15 +7,12 @@ import type {
 } from '@playwright/test'
 import type { Config } from 'payload'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 import { defaults } from 'payload'
 import { wait } from 'payload/shared'
 import shelljs from 'shelljs'
 import { setTimeout } from 'timers/promises'
 
-import { devUser } from './credentials.js'
-import { openNav } from './helpers/e2e/toggleNav.js'
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
 export type AdminRoutes = NonNullable<Config['admin']>['routes']
@@ -218,14 +215,6 @@ export async function openCreateDocDrawer(page: Page, fieldSelector: string): Pr
   await expect(addNewButton).toBeVisible()
   await addNewButton.click()
   await wait(500) // wait for drawer form state to initialize
-}
-
-export async function closeNav(page: Page): Promise<void> {
-  if (!(await page.locator('.template-default.template-default--nav-open').isVisible())) {
-    return
-  }
-  await page.locator('.nav-toggler >> visible=true').click()
-  await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
 }
 
 export async function openLocaleSelector(page: Page): Promise<void> {

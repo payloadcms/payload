@@ -511,6 +511,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     enterNumber: 'Molimo unesite valjani broj.',
     fieldHasNo: 'Ovo polje nema {{label}}',
     greaterThanMax: '{{value}} exceeds the maximum allowable {{label}} limit of {{max}}.',
+    invalidBlock: 'Blok "{{block}}" nije dopušten.',
+    invalidBlocks: 'Ovo polje sadrži blokove koji više nisu dozvoljeni: {{blocks}}.',
     invalidInput: 'Ovo polje ima neispravan unos.',
     invalidSelection: 'Ovo polje ima neispravan odabir.',
     invalidSelections: 'Ovo polje ima sljedeće neispravne odabire:',

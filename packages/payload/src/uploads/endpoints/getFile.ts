@@ -49,6 +49,9 @@ export const getFileHandler: PayloadHandler = async (req) => {
           filename,
         },
       })
+      if (customResponse && customResponse instanceof Response) {
+        break
+      }
     }
 
     if (customResponse instanceof Response) {

@@ -512,6 +512,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     enterNumber: '有効な数値を入力してください。',
     fieldHasNo: '{{label}} が必要です。',
     greaterThanMax: '{{value}}は許容最大{{label}}の{{max}}を超えています。',
+    invalidBlock: 'ブロック "{{block}}" は許可されていません。',
+    invalidBlocks: 'このフィールドには、もう許可されていないブロックが含まれています: {{blocks}}。',
     invalidInput: '無効な入力値です。',
     invalidSelection: '無効な選択です。',
     invalidSelections: '次の無効な選択があります: ',

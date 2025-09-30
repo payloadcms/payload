@@ -10,6 +10,7 @@ import type {
   Field,
   PaginatedDocs,
   Payload,
+  PayloadRequest,
   SanitizedCollectionConfig,
   ServerComponentProps,
   StaticLabel,
@@ -46,6 +47,7 @@ export type BuildColumnStateArgs = {
   enableRowTypes?: boolean
   i18n: I18nClient
   payload: Payload
+  req?: PayloadRequest
   serverFields: Field[]
   sortColumnProps?: Partial<SortColumnProps>
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
@@ -79,6 +81,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     enableRowSelections,
     i18n,
     payload,
+    req,
     serverFields,
     sortColumnProps,
     useAsTitle,
@@ -249,6 +252,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
               i18n,
               isLinkedColumn: enableLinkedCell && colIndex === activeColumnsIndices[0],
               payload,
+              req,
               rowIndex,
               serverField,
               viewType,

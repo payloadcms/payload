@@ -11,6 +11,8 @@ export function FullscreenModal(props: Parameters<typeof ModalType>[0]) {
 
   return (
     <Modal
+      // Fixes https://github.com/payloadcms/payload/issues/13778
+      closeOnBlur={false}
       {...props}
       style={{
         ...(props.style || {}),
