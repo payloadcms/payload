@@ -6,7 +6,7 @@ import React, { useCallback, useState } from 'react'
 
 import type { WidgetInstanceClient } from './client.js'
 
-import { RenderWidget } from './RenderWidget.js'
+import { RenderWidget } from './renderWidget/RenderWidget.js'
 
 export function useDashboardLayout(initialLayout: WidgetInstanceClient[], _widgets: Widget[]) {
   const setLayoutPreference = useSetLayoutPreference()
