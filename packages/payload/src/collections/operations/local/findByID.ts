@@ -18,7 +18,7 @@ import type { SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
-import { findByIDOperation } from '../findByID.js'
+import { type FindByIDArgs, findByIDOperation } from '../findByID.js'
 
 export type Options<
   TSlug extends CollectionSlug,
@@ -41,6 +41,11 @@ export type Options<
    * @internal
    */
   currentDepth?: number
+  /**
+   * You may pass the document data directly which will skip the `db.findOne` database query.
+   * This is useful if you want to use this endpoint solely for running hooks and populating data.
+   */
+  data?: Record<string, unknown>
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
@@ -112,7 +117,7 @@ export type Options<
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindByIDArgs, 'flattenLocales'>
 
 export async function findByIDLocal<
   TSlug extends CollectionSlug,
@@ -126,9 +131,11 @@ export async function findByIDLocal<
     id,
     collection: collectionSlug,
     currentDepth,
+    data,
     depth,
     disableErrors = false,
     draft = false,
+    flattenLocales,
     includeLockStatus,
     joins,
     overrideAccess = true,
@@ -150,9 +157,11 @@ export async function findByIDLocal<
     id,
     collection,
     currentDepth,
+    data,
     depth,
     disableErrors,
     draft,
+    flattenLocales,
     includeLockStatus,
     joins,
     overrideAccess,

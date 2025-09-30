@@ -151,10 +151,14 @@ export type LivePreviewConfig = {
     width: number | string
   }[]
   /**
-   The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
-   Payload will send a `window.postMessage()` to this URL with the document data in real-time.
-   The frontend application is responsible for receiving the message and updating the UI accordingly.
-   Use the `useLivePreview` hook to get started in React applications.
+   * The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
+   * Payload will send a `window.postMessage()` to this URL with the document data in real-time.
+   * The frontend application is responsible for receiving the message and updating the UI accordingly.
+   * Use the `useLivePreview` hook to get started in React applications.
+   *
+   * Note: this function may run often if autosave is enabled with a small interval.
+   * For performance, avoid long-running tasks or expensive operations within this function,
+   * or if you need to do something more complex, cache your function as needed.
    */
   url?:
     | ((args: {
@@ -275,6 +279,7 @@ export type InitOptions = {
   disableOnInit?: boolean
 
   importMap?: ImportMap
+
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
@@ -721,14 +726,6 @@ export type ImportMapGenerators = Array<
   }) => void
 >
 
-/**
- * Experimental features.
- * These may be unstable and may change or be removed in future releases.
- */
-export type ExperimentalConfig = {
-  localizeStatus?: boolean
-}
-
 export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
@@ -784,6 +781,12 @@ export type Config = {
           username?: string
         }
       | false
+    /**
+     * Automatically refresh user tokens for users logged into the dashboard
+     *
+     * @default false
+     */
+    autoRefresh?: boolean
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?:
       | 'default'
@@ -975,9 +978,10 @@ export type Config = {
      */
     timezones?: TimezonesConfig
     /**
-     * @experimental
      * Configure toast message behavior and appearance in the admin panel.
      * Currently using [Sonner](https://sonner.emilkowal.ski) for toast notifications.
+     *
+     * @experimental This property is experimental and may change in future releases. Use at your own discretion.
      */
     toast?: {
       /**
@@ -1000,6 +1004,7 @@ export type Config = {
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
+
   /**
    * Configure authentication-related Payload-wide settings.
    */
@@ -1013,6 +1018,15 @@ export type Config = {
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
   blocks?: Block[]
+  /**
+   * Pass additional options to the parser used to process `multipart/form-data` requests.
+   * For example, a PATCH request containing HTML form data.
+   * For example, you may want to increase the `limits` imposed by the parser.
+   * Currently using @link {https://www.npmjs.com/package/busboy|busboy} under the hood.
+   *
+   * @experimental This property is experimental and may change in future releases. Use at your own discretion.
+   */
+  bodyParser?: Partial<BusboyConfig>
   /**
    * Manage the datamodel of your application
    *
@@ -1044,10 +1058,8 @@ export type Config = {
   cors?: '*' | CORSConfig | string[]
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
-
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
-
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult
   /** Enable to expose more detailed error information. */
@@ -1077,14 +1089,9 @@ export type Config = {
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
-   * Configure experimental features for Payload.
-   *
-   * These features may be unstable and may change or be removed in future releases.
-   */
-  experimental?: ExperimentalConfig
-  /**
    * Options for folder view within the admin panel
-   * @experimental this feature may change in minor versions until it is fully stable
+   *
+   * @experimental This feature may change in minor versions until it is fully stable
    */
   folders?: false | RootFoldersConfiguration
   /**
@@ -1350,7 +1357,6 @@ export type SanitizedConfig = {
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
-  experimental?: ExperimentalConfig
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
   jobs: SanitizedJobsConfig

@@ -12,6 +12,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
+import { addSessionToUser } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
 
@@ -143,11 +144,24 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
 
     await authenticateLocalStrategy({ doc, password: data.password })
 
-    const fieldsToSign = getFieldsToSign({
+    const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
       collectionConfig,
       email: user.email,
       user,
+    }
+
+    const { sid } = await addSessionToUser({
+      collectionConfig,
+      payload,
+      req,
+      user,
     })
+
+    if (sid) {
+      fieldsToSignArgs.sid = sid
+    }
+
+    const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
 
     const { token } = await jwtSign({
       fieldsToSign,

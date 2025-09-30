@@ -64,6 +64,7 @@
 
     &__account {
       position: relative;
+      flex-shrink: 0;
 
       &:focus:not(:focus-visible) {
         opacity: 1;

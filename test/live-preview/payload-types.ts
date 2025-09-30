@@ -65,7 +65,9 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    mediaBlock: MediaBlock;
+  };
   collections: {
     users: User;
     pages: Page;
@@ -76,6 +78,7 @@ export interface Config {
     categories: Category;
     media: Media;
     'collection-level-config': CollectionLevelConfig;
+    'static-url': StaticUrl;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -91,6 +94,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'collection-level-config': CollectionLevelConfigSelect<false> | CollectionLevelConfigSelect<true>;
+    'static-url': StaticUrlSelect<false> | StaticUrlSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -132,6 +136,37 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "mediaBlock".
+ */
+export interface MediaBlock {
+  invertBackground?: boolean | null;
+  position?: ('default' | 'fullscreen') | null;
+  media: string | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mediaBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -303,7 +338,22 @@ export interface Page {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  richTextLexicalLocalized?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -334,7 +384,7 @@ export interface Page {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -381,25 +431,6 @@ export interface Tenant {
   clientURL: string;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -858,6 +889,16 @@ export interface CollectionLevelConfig {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "static-url".
+ */
+export interface StaticUrl {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -898,6 +939,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'collection-level-config';
         value: string | CollectionLevelConfig;
+      } | null)
+    | ({
+        relationTo: 'static-url';
+        value: string | StaticUrl;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1057,6 +1102,7 @@ export interface PagesSelect<T extends boolean = true> {
   relationToLocalized?: T;
   richTextSlate?: T;
   richTextLexical?: T;
+  richTextLexicalLocalized?: T;
   relationshipAsUpload?: T;
   relationshipMonoHasOne?: T;
   relationshipMonoHasMany?: T;
@@ -1434,6 +1480,15 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "collection-level-config_select".
  */
 export interface CollectionLevelConfigSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "static-url_select".
+ */
+export interface StaticUrlSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -2,8 +2,8 @@ import type { BrowserContext, Locator, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
+import { addListFilter } from 'helpers/e2e/filters/index.js'
 import { selectInput } from 'helpers/e2e/selectInput.js'
 import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import * as path from 'path'
@@ -642,7 +642,6 @@ test.describe('Bulk Edit', () => {
       fieldLabel: 'ID',
       operatorLabel: 'equals',
       value: originalDoc.id,
-      skipValueInput: false,
     })
 
     // select first item

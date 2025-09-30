@@ -1,20 +1,22 @@
+import type {
+  AdminViewServerProps,
+  CollectionPreferences,
+  Column,
+  ColumnPreference,
+  ListQuery,
+  ListViewClientProps,
+  ListViewServerPropsOnly,
+  PaginatedDocs,
+  QueryPreset,
+  SanitizedCollectionPermission,
+} from 'payload'
+
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
+import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
 import {
-  type AdminViewServerProps,
-  type CollectionPreferences,
-  type Column,
-  type ColumnPreference,
-  type ListQuery,
-  type ListViewClientProps,
-  type ListViewServerPropsOnly,
-  type PaginatedDocs,
-  type QueryPreset,
-  type SanitizedCollectionPermission,
-} from 'payload'
-import {
+  appendUploadSelectFields,
   combineWhereConstraints,
   formatAdminURL,
   isNumber,
@@ -28,6 +30,7 @@ import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
+import { transformColumnsToSelect } from './transformColumnsToSelect.js'
 
 type RenderListViewArgs = {
   customCellProps?: Record<string, any>
@@ -208,18 +211,40 @@ export const renderListView = async (
       totalPages: 0,
     }
 
+    const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
+
+    const columns = getColumns({
+      clientConfig,
+      collectionConfig: clientCollectionConfig,
+      collectionSlug,
+      columns: collectionPreferences?.columns,
+      i18n,
+    })
+
+    const select = collectionConfig.admin.enableListViewSelectAPI
+      ? transformColumnsToSelect(columns)
+      : undefined
+
+    /** Force select image fields for list view thumbnails */
+    appendUploadSelectFields({
+      collectionConfig,
+      select,
+    })
+
     try {
       if (collectionConfig.admin.groupBy && query.groupBy) {
         ;({ columnState, data, Table } = await handleGroupBy({
+          clientCollectionConfig,
           clientConfig,
           collectionConfig,
           collectionSlug,
-          columns: collectionPreferences?.columns,
+          columns,
           customCellProps,
           drawerSlug,
           enableRowSelections,
           query,
           req,
+          select,
           trash,
           user,
           viewType,
@@ -237,15 +262,16 @@ export const renderListView = async (
           overrideAccess: false,
           page: query?.page ? Number(query.page) : undefined,
           req,
+          select,
           sort: query?.sort,
           trash,
           user,
           where: whereWithMergedSearch,
         })
         ;({ columnState, Table } = renderTable({
-          clientCollectionConfig: clientConfig.collections.find((c) => c.slug === collectionSlug),
+          clientCollectionConfig,
           collectionConfig,
-          columns: collectionPreferences?.columns,
+          columns,
           customCellProps,
           data,
           drawerSlug,
@@ -254,6 +280,7 @@ export const renderListView = async (
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,
           query,
+          req,
           useAsTitle: collectionConfig.admin.useAsTitle,
           viewType,
         }))

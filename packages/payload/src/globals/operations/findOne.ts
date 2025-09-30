@@ -9,14 +9,19 @@ import type {
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
-type Args = {
+export type GlobalFindOneArgs = {
+  /**
+   * You may pass the document data directly which will skip the `db.findOne` database query.
+   * This is useful if you want to use this endpoint solely for running hooks and populating data.
+   */
+  data?: Record<string, unknown>
   depth?: number
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
@@ -27,15 +32,16 @@ type Args = {
   select?: SelectType
   showHiddenFields?: boolean
   slug: string
-}
+} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>
 
 export const findOneOperation = async <T extends Record<string, unknown>>(
-  args: Args,
+  args: GlobalFindOneArgs,
 ): Promise<T> => {
   const {
     slug,
     depth,
     draft: draftEnabled = false,
+    flattenLocales,
     globalConfig,
     includeLockStatus,
     overrideAccess = false,
@@ -47,6 +53,23 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
   } = args
 
   try {
+    // /////////////////////////////////////
+    // beforeOperation - Global
+    // /////////////////////////////////////
+
+    if (globalConfig.hooks?.beforeOperation?.length) {
+      for (const hook of globalConfig.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            context: args.req.context,
+            global: globalConfig,
+            operation: 'read',
+            req: args.req,
+          })) || args
+      }
+    }
+
     // /////////////////////////////////////
     // Retrieve and execute access
     // /////////////////////////////////////
@@ -67,13 +90,15 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Perform database operation
     // /////////////////////////////////////
 
-    let doc = await req.payload.db.findGlobal({
-      slug,
-      locale: locale!,
-      req,
-      select,
-      where: overrideAccess ? undefined : (accessResult as Where),
-    })
+    let doc =
+      (args.data as any) ??
+      (await req.payload.db.findGlobal({
+        slug,
+        locale: locale!,
+        req,
+        select,
+        where: overrideAccess ? undefined : (accessResult as Where),
+      }))
     if (!doc) {
       doc = {}
     }
@@ -182,6 +207,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       doc,
       draft: draftEnabled,
       fallbackLocale: fallbackLocale!,
+      flattenLocales,
       global: globalConfig,
       locale: locale!,
       overrideAccess,

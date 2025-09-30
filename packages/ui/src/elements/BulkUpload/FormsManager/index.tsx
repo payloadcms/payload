@@ -1,9 +1,11 @@
 'use client'
 
 import type {
+  CollectionSlug,
   Data,
   DocumentSlots,
   FormState,
+  JsonObject,
   SanitizedDocumentPermissions,
   UploadEdits,
 } from 'payload'
@@ -16,6 +18,7 @@ import { toast } from 'sonner'
 import type { State } from './reducer.js'
 
 import { fieldReducer } from '../../../forms/Form/fieldReducer.js'
+import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
@@ -86,6 +89,12 @@ const initialState: State = {
   totalErrorCount: 0,
 }
 
+export type InitialForms = Array<{
+  file: File
+  formID?: string
+  initialState?: FormState | null
+}>
+
 type FormsManagerProps = {
   readonly children: React.ReactNode
 }
@@ -118,7 +127,16 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const { toggleLoadingOverlay } = useLoadingOverlay()
   const { closeModal } = useModal()
-  const { collectionSlug, drawerSlug, initialFiles, onSuccess, setInitialFiles } = useBulkUpload()
+  const {
+    collectionSlug,
+    drawerSlug,
+    initialFiles,
+    initialForms,
+    onSuccess,
+    setInitialFiles,
+    setInitialForms,
+    setSuccessfullyUploaded,
+  } = useBulkUpload()
 
   const [isUploading, setIsUploading] = React.useState(false)
   const [loadingText, setLoadingText] = React.useState('')
@@ -244,11 +262,37 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       if (!hasInitializedState) {
         await initializeSharedFormState()
       }
-      dispatch({ type: 'ADD_FORMS', files, initialState: initialStateRef.current })
+      dispatch({
+        type: 'ADD_FORMS',
+        forms: Array.from(files).map((file) => ({
+          file,
+          initialState: initialStateRef.current,
+        })),
+      })
       toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
     },
     [initializeSharedFormState, hasInitializedState, toggleLoadingOverlay, activeIndex, forms],
   )
+
+  const addFilesEffectEvent = useEffectEvent(addFiles)
+
+  const addInitialForms = useEffectEvent(async (initialForms: InitialForms) => {
+    toggleLoadingOverlay({ isLoading: true, key: 'addingDocs' })
+
+    if (!hasInitializedState) {
+      await initializeSharedFormState()
+    }
+
+    dispatch({
+      type: 'ADD_FORMS',
+      forms: initialForms.map((form) => ({
+        ...form,
+        initialState: form?.initialState || initialStateRef.current,
+      })),
+    })
+
+    toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
+  })
 
   const removeFile: FormsManagerContext['removeFile'] = React.useCallback((index) => {
     dispatch({ type: 'REMOVE_FORM', index })
@@ -275,7 +319,14 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         formState: currentFormsData,
         uploadEdits: currentForms[activeIndex].uploadEdits,
       }
-      const newDocs = []
+      const newDocs: Array<{
+        collectionSlug: CollectionSlug
+        doc: JsonObject
+        /**
+         * ID of the form that created this document
+         */
+        formID: string
+      }> = []
 
       setIsUploading(true)
 
@@ -287,6 +338,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           const actionURLWithParams = `${actionURL}${qs.stringify(
             {
+              locale: code,
               uploadEdits: form?.uploadEdits || undefined,
             },
             {
@@ -308,7 +360,11 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           const json = await req.json()
 
           if (req.status === 201 && json?.doc) {
-            newDocs.push(json.doc)
+            newDocs.push({
+              collectionSlug,
+              doc: json.doc,
+              formID: form.formID,
+            })
           }
 
           // should expose some sort of helper for this
@@ -379,6 +435,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
       if (successCount) {
         toast.success(`Successfully saved ${successCount} files`)
+        setSuccessfullyUploaded(true)
 
         if (typeof onSuccess === 'function') {
           onSuccess(newDocs, errorCount)
@@ -402,19 +459,23 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
       if (remainingForms.length === 0) {
         setInitialFiles(undefined)
+        setInitialForms(undefined)
       }
     },
     [
-      setInitialFiles,
-      actionURL,
-      collectionSlug,
-      getUploadHandler,
-      t,
       forms,
       activeIndex,
-      closeModal,
-      drawerSlug,
+      t,
+      actionURL,
+      code,
+      collectionSlug,
+      getUploadHandler,
       onSuccess,
+      closeModal,
+      setSuccessfullyUploaded,
+      drawerSlug,
+      setInitialFiles,
+      setInitialForms,
     ],
   )
 
@@ -502,7 +563,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       void initializeSharedDocPermissions()
     }
 
-    if (initialFiles) {
+    if (initialFiles || initialForms) {
       if (!hasInitializedState || !hasInitializedDocPermissions) {
         setIsInitializing(true)
       } else {
@@ -510,19 +571,28 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
     }
 
-    if (hasInitializedState && initialFiles && !hasInitializedWithFiles.current) {
-      void addFiles(initialFiles)
+    if (
+      hasInitializedState &&
+      (initialForms?.length || initialFiles?.length) &&
+      !hasInitializedWithFiles.current
+    ) {
+      if (initialForms?.length) {
+        void addInitialForms(initialForms)
+      }
+      if (initialFiles?.length) {
+        void addFilesEffectEvent(initialFiles)
+      }
       hasInitializedWithFiles.current = true
     }
     return
   }, [
-    addFiles,
     initialFiles,
     initializeSharedFormState,
     initializeSharedDocPermissions,
     collectionSlug,
     hasInitializedState,
     hasInitializedDocPermissions,
+    initialForms,
   ])
 
   return (

@@ -316,6 +316,8 @@ export const multiTenantPlugin =
                 path: '@payloadcms/plugin-multi-tenant/client#WatchTenantCollection',
               },
             },
+            disableBulkEdit: true,
+            disableListColumn: true,
           },
         })
 
@@ -335,6 +337,16 @@ export const multiTenantPlugin =
 
         if (isGlobal) {
           collection.disableDuplicate = true
+        }
+
+        if (!pluginConfig.debug && !isGlobal) {
+          collection.admin ??= {}
+          collection.admin.components ??= {}
+          collection.admin.components.edit ??= {}
+          collection.admin.components.edit.editMenuItems ??= []
+          collection.admin.components.edit.editMenuItems.push({
+            path: '@payloadcms/plugin-multi-tenant/client#AssignTenantFieldTrigger',
+          })
         }
 
         /**

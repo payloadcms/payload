@@ -53,6 +53,7 @@ import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -376,6 +377,39 @@ describe('General', () => {
       await page.goto(globalsURL)
       // Should redirect to dashboard
       await expect.poll(() => page.url()).toBe(`${serverURL}/admin`)
+    })
+
+    /**
+     * This test is skipped because `page.goBack()` and `page.goForward()` do not trigger navigation in the Next.js app.
+     * I also tried rendering buttons that call `router.back()` and click those instead, but that also does not work.
+     */
+    test.skip("should clear the router's bfcache when navigating via the forward/back browser controls", async () => {
+      const { id } = await createPost({
+        title: 'Post to test bfcache',
+      })
+
+      // check for it in the list view first
+      await page.goto(postsUrl.list)
+      const cell = page.locator('.table td').filter({ hasText: 'Post to test bfcache' })
+      await page.locator('.table a').filter({ hasText: id }).click()
+
+      await page.waitForURL(`${postsUrl.edit(id)}`)
+      const titleField = page.locator('#field-title')
+      await expect(titleField).toHaveValue('Post to test bfcache')
+
+      // change the title to something else
+      await titleField.fill('Post to test bfcache - updated')
+      await saveDocAndAssert(page)
+
+      // now use the browser controls to go back to the list
+      await page.goBack()
+      await page.waitForURL(postsUrl.list)
+      await expect(cell).toBeVisible()
+
+      // and then forward to the edit page again
+      await page.goForward()
+      await page.waitForURL(`${postsUrl.edit(id)}`)
+      await expect(titleField).toHaveValue('Post to test bfcache - updated')
     })
   })
 

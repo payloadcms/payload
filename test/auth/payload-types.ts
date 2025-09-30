@@ -243,6 +243,21 @@ export interface User {
   adminOnlyField?: string | null;
   roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
   namedSaveToJWT?: string | null;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   group?: {
     liftedSaveToJWT?: string | null;
   };
@@ -333,6 +348,7 @@ export interface ApiKey {
  */
 export interface PublicUser {
   id: string;
+  shouldNotShowInClientConfigUnlessAuthenticated?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -503,6 +519,7 @@ export interface UsersSelect<T extends boolean = true> {
   adminOnlyField?: T;
   roles?: T;
   namedSaveToJWT?: T;
+  richText?: T;
   group?:
     | T
     | {
@@ -595,6 +612,7 @@ export interface ApiKeysSelect<T extends boolean = true> {
  * via the `definition` "public-users_select".
  */
 export interface PublicUsersSelect<T extends boolean = true> {
+  shouldNotShowInClientConfigUnlessAuthenticated?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
