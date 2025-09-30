@@ -287,6 +287,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     deleted: '削除されました',
     deletedAt: '削除された時間',
     deletedCountSuccessfully: '{{count}}つの{{label}}を正常に削除しました。',
+    deletedInLocale:
+      'すべての{{locale}}データが正常に削除されました。ドキュメント自体は削除されませんでした。',
     deletedSuccessfully: '正常に削除されました。',
     deleteLabel: '{{label}}を削除します。',
     deletePermanently: 'ゴミ箱をスキップして完全に削除します',
@@ -327,6 +329,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     goBack: '戻る',
     groupByLabel: '{{label}}でグループ化する',
     import: '輸入',
+    in: 'で',
     isEditing: '編集中',
     item: 'アイテム',
     items: 'アイテム',

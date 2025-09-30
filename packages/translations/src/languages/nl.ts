@@ -292,6 +292,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     deleted: 'Verwijderd',
     deletedAt: 'Verwijderd Op',
     deletedCountSuccessfully: '{{count}} {{label}} succesvol verwijderd.',
+    deletedInLocale:
+      'Succesvol alle {{locale}} data verwijderd. Het document zelf is niet verwijderd.',
     deletedSuccessfully: 'Succesvol verwijderd.',
     deleteLabel: 'Verwijder {{label}}',
     deletePermanently: 'Overslaan prullenbak en permanent verwijderen',
@@ -332,6 +334,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     goBack: 'Ga terug',
     groupByLabel: 'Groepeer op {{label}}',
     import: 'Importeren',
+    in: 'in',
     isEditing: 'is aan het bewerken',
     item: 'Artikel',
     items: 'artikelen',

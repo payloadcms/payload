@@ -13,7 +13,9 @@ import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
@@ -27,6 +29,7 @@ const baseClass = 'delete-document'
 export type Props = {
   readonly buttonId?: string
   readonly collectionSlug: SanitizedCollectionConfig['slug']
+  readonly deleteCurrentLocale?: boolean
   readonly id?: string
   readonly onDelete?: DocumentDrawerContextType['onDelete']
   readonly redirectAfterDelete?: boolean
@@ -40,6 +43,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     id,
     buttonId,
     collectionSlug,
+    deleteCurrentLocale = false,
     onDelete,
     redirectAfterDelete = true,
     singularLabel,
@@ -48,6 +52,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
 
   const {
     config: {
+      localization,
       routes: { admin: adminRoute, api },
       serverURL,
     },
@@ -56,14 +61,29 @@ export const DeleteDocument: React.FC<Props> = (props) => {
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
-  const { setModified } = useForm()
+  const { getData, reset, setModified } = useForm()
   const router = useRouter()
   const { i18n, t } = useTranslation()
   const { title } = useDocumentTitle()
   const { startRouteTransition } = useRouteTransition()
   const { openModal } = useModal()
+  const { code: localeCode } = useLocale()
+  const { incrementVersionCount } = useDocumentInfo()
+  const initialData = getData()
 
-  const modalSlug = `delete-${id}`
+  const modalSlug = `delete-${deleteCurrentLocale ? 'current-locale-' : ''}${id}`
+
+  const activeLocale =
+    localization &&
+    localization?.locales.find((locale) =>
+      typeof locale === 'string' ? locale === localeCode : locale.code === localeCode,
+    )
+  const activeLocaleLabel =
+    activeLocale &&
+    (typeof activeLocale.label === 'string'
+      ? activeLocale.label
+      : (activeLocale.label?.[localeCode] ?? undefined))
+
 
   const [deletePermanently, setDeletePermanently] = useState(false)
 
@@ -75,55 +95,84 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     setModified(false)
 
     try {
-      const res =
-        deletePermanently || !collectionConfig.trash
-          ? await requests.delete(`${serverURL}${api}/${collectionSlug}/${id}`, {
-              headers: {
-                'Accept-Language': i18n.language,
-                'Content-Type': 'application/json',
-              },
+      let json
+      const headers = {
+        'Accept-Language': i18n.language,
+        'Content-Type': 'application/json',
+      }
+      if (deleteCurrentLocale) {
+        const deletedData = Object.keys(initialData).reduce((acc, key) => {
+          if (key === 'createdAt') {
+            acc[key] = initialData[key]
+          } else if (key === '_status') {
+            acc[key] = 'draft'
+          } else {
+            acc[key] = null
+          }
+          return acc
+        }, {})
+
+        const res = await requests.patch(`${serverURL}${api}/${collectionSlug}/${id}?locale=${localeCode}`, {
+          body: JSON.stringify(deletedData),
+          headers,
+        })
+
+        json = await res.json()
+
+        if (res.status < 400) {
+          toast.success(t('general:deletedInLocale', { locale: activeLocaleLabel }))
+          await reset({
+            "_status": "draft"
+          })
+          incrementVersionCount()
+          return
+        }
+        return
+      } else {
+        const res =
+          deletePermanently || !collectionConfig.trash
+            ? await requests.delete(`${serverURL}${api}/${collectionSlug}/${id}`, {
+              headers,
             })
-          : await requests.patch(`${serverURL}${api}/${collectionSlug}/${id}`, {
+            : await requests.patch(`${serverURL}${api}/${collectionSlug}/${id}`, {
               body: JSON.stringify({
                 deletedAt: new Date().toISOString(),
               }),
-              headers: {
-                'Accept-Language': i18n.language,
-                'Content-Type': 'application/json',
-              },
+              headers,
             })
 
-      const json = await res.json()
+        json = await res.json()
 
-      if (res.status < 400) {
-        toast.success(
-          t(
-            deletePermanently || !collectionConfig.trash
-              ? 'general:titleDeleted'
-              : 'general:titleTrashed',
-            {
-              label: getTranslation(singularLabel, i18n),
-              title,
-            },
-          ) || json.message,
-        )
-
-        if (redirectAfterDelete) {
-          return startRouteTransition(() =>
-            router.push(
-              formatAdminURL({
-                adminRoute,
-                path: `/collections/${collectionSlug}`,
-              }),
-            ),
+        if (res.status < 400) {
+          toast.success(
+            t(
+              deletePermanently || !collectionConfig.trash
+                ? 'general:titleDeleted'
+                : 'general:titleTrashed',
+              {
+                label: getTranslation(singularLabel, i18n),
+                title,
+              },
+            ) || json.message,
           )
-        }
 
-        if (typeof onDelete === 'function') {
-          await onDelete({ id, collectionConfig })
-        }
+          if (redirectAfterDelete) {
+            return startRouteTransition(() =>
+              router.push(
+                formatAdminURL({
+                  adminRoute,
+                  path: `/collections/${collectionSlug}`,
+                }),
+              ),
+            )
+          }
 
-        return
+          if (typeof onDelete === 'function') {
+            await onDelete({ id, collectionConfig })
+          }
+
+          return
+        }
       }
 
       if (json.errors) {
@@ -154,7 +203,15 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     onDelete,
     collectionConfig,
     startRouteTransition,
+    deleteCurrentLocale,
+    incrementVersionCount,
+    initialData,
+    reset,
+    localeCode,
+    activeLocaleLabel,
   ])
+
+  const idToRender = (children) => deleteCurrentLocale ? <><strong>{children}</strong> {t('general:in')} <strong>{activeLocaleLabel}</strong></> : <strong>{children}</strong>
 
   if (id) {
     return (
@@ -165,14 +222,14 @@ export const DeleteDocument: React.FC<Props> = (props) => {
             openModal(modalSlug)
           }}
         >
-          {t('general:delete')}
+          {deleteCurrentLocale ? <>{t('general:delete')} {t('general:in')} <strong>{activeLocaleLabel}</strong></> : t('general:delete')}
         </PopupList.Button>
         <ConfirmationModal
           body={
             <Fragment>
               <Translation
                 elements={{
-                  '1': ({ children }) => <strong>{children}</strong>,
+                  '1': ({ children }) => idToRender(children)
                 }}
                 i18nKey={collectionConfig.trash ? 'general:aboutToTrash' : 'general:aboutToDelete'}
                 t={t}
@@ -181,7 +238,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
                   title: titleFromProps || title || id,
                 }}
               />
-              {collectionConfig.trash && (
+              {collectionConfig.trash && !deleteCurrentLocale && (
                 <div className={`${baseClass}__checkbox`}>
                   <CheckboxInput
                     checked={deletePermanently}

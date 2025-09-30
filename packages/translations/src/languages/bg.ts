@@ -284,6 +284,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     deleted: 'Изтрито',
     deletedAt: 'Изтрито на',
     deletedCountSuccessfully: 'Изтрити {{count}} {{label}} успешно.',
+    deletedInLocale:
+      'Успешно премахнати всички данни за {{locale}}. Документът сам по себе си не е изтрит.',
     deletedSuccessfully: 'Изтрито успешно.',
     deleteLabel: 'Изтрий {{label}}',
     deletePermanently: 'Пропуснете кошчето и изтрийте перманентно',
@@ -324,6 +326,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     goBack: 'Върни се',
     groupByLabel: 'Групирай по {{label}}',
     import: 'Внос',
+    in: 'в',
     isEditing: 'редактира',
     item: 'Aртикул',
     items: 'артикули',

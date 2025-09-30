@@ -282,6 +282,8 @@ export const koTranslations: DefaultTranslationsObject = {
     deleted: '삭제됨',
     deletedAt: '삭제된 시간',
     deletedCountSuccessfully: '{{count}}개의 {{label}}를 삭제했습니다.',
+    deletedInLocale:
+      '모든 {{locale}} 데이터가 성공적으로 제거되었습니다. 문서 자체는 삭제되지 않았습니다.',
     deletedSuccessfully: '삭제되었습니다.',
     deleteLabel: '{{label}} 삭제',
     deletePermanently: '휴지통 건너뛰고 영구적으로 삭제하세요',
@@ -322,6 +324,7 @@ export const koTranslations: DefaultTranslationsObject = {
     goBack: '돌아가기',
     groupByLabel: '{{label}}로 그룹화',
     import: '수입',
+    in: '~에',
     isEditing: '편집 중',
     item: '항목',
     items: '항목들',

@@ -284,6 +284,8 @@ export const viTranslations: DefaultTranslationsObject = {
     deleted: 'Đã xóa',
     deletedAt: 'Đã Xóa Lúc',
     deletedCountSuccessfully: 'Đã xóa thành công {{count}} {{label}}.',
+    deletedInLocale:
+      'Đã thành công trong việc xóa tất cả dữ liệu {{locale}}. Tài liệu gốc không được xóa.',
     deletedSuccessfully: 'Đã xoá thành công.',
     deleteLabel: 'Xóa {{label}}',
     deletePermanently: 'Bỏ qua thùng rác và xóa vĩnh viễn',
@@ -324,6 +326,7 @@ export const viTranslations: DefaultTranslationsObject = {
     goBack: 'Quay lại',
     groupByLabel: 'Nhóm theo {{label}}',
     import: 'Nhập khẩu',
+    in: 'trong',
     isEditing: 'đang chỉnh sửa',
     item: 'Mặt hàng',
     items: 'mặt hàng',

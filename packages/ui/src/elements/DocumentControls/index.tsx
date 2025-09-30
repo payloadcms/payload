@@ -34,8 +34,8 @@ import { PreviewButton } from '../PreviewButton/index.js'
 import { PublishButton } from '../PublishButton/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { RestoreButton } from '../RestoreButton/index.js'
-import { SaveButton } from '../SaveButton/index.js'
 import './index.scss'
+import { SaveButton } from '../SaveButton/index.js'
 import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
 
@@ -276,11 +276,11 @@ export const DocumentControls: React.FC<{
                     {(unsavedDraftWithValidations ||
                       !autosaveEnabled ||
                       (autosaveEnabled && showSaveDraftButton)) && (
-                      <RenderCustomComponent
-                        CustomComponent={CustomSaveDraftButton}
-                        Fallback={<SaveDraftButton />}
-                      />
-                    )}
+                        <RenderCustomComponent
+                          CustomComponent={CustomSaveDraftButton}
+                          Fallback={<SaveDraftButton />}
+                        />
+                      )}
                     <RenderCustomComponent
                       CustomComponent={CustomPublishButton}
                       Fallback={<PublishButton />}
@@ -376,15 +376,25 @@ export const DocumentControls: React.FC<{
                   </React.Fragment>
                 )}
                 {hasDeletePermission && (
-                  <DeleteDocument
-                    buttonId="action-delete"
-                    collectionSlug={collectionConfig?.slug}
-                    id={id.toString()}
-                    onDelete={onDelete}
-                    redirectAfterDelete={redirectAfterDelete}
-                    singularLabel={collectionConfig?.labels?.singular}
-                    useAsTitle={collectionConfig?.admin?.useAsTitle}
-                  />
+                  <>
+                    <DeleteDocument
+                      buttonId="action-delete"
+                      collectionSlug={collectionConfig?.slug}
+                      id={id.toString()}
+                      onDelete={onDelete}
+                      redirectAfterDelete={redirectAfterDelete}
+                      singularLabel={collectionConfig?.labels?.singular}
+                      useAsTitle={collectionConfig?.admin?.useAsTitle}
+                    />
+                    {localization && <DeleteDocument
+                      buttonId="action-delete-current-locale"
+                      collectionSlug={collectionConfig?.slug}
+                      deleteCurrentLocale={true}
+                      id={id.toString()}
+                      singularLabel={collectionConfig?.labels?.singular}
+                      useAsTitle={collectionConfig?.admin?.useAsTitle}
+                    />}
+                  </>
                 )}
                 {EditMenuItems}
               </PopupList.ButtonGroup>

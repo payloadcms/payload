@@ -285,6 +285,8 @@ export const svTranslations: DefaultTranslationsObject = {
     deleted: 'Raderad',
     deletedAt: 'Raderad Vid',
     deletedCountSuccessfully: 'Raderade {{count}} {{label}}',
+    deletedInLocale:
+      'Alla {{locale}} data har framgångsrikt tagits bort. Dokumentet i sig raderades inte.',
     deletedSuccessfully: 'Borttaget',
     deleteLabel: 'Radera {{label}}',
     deletePermanently: 'Hoppa över papperskorgen och radera permanent',
@@ -325,6 +327,7 @@ export const svTranslations: DefaultTranslationsObject = {
     goBack: 'Gå tillbaka',
     groupByLabel: 'Gruppera efter {{label}}',
     import: 'Importera',
+    in: 'I',
     isEditing: 'redigerar',
     item: 'Artikel',
     items: 'artiklar',
