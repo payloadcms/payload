@@ -365,7 +365,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     if (rowToInsert.relationshipsToAppend.length > 0) {
       // Prepare all relationships for batch insert (order will be set after max query)
-      const relationshipsToInsert = rowToInsert.relationshipsToAppend.map((rel, index) => {
+      const relationshipsToInsert = rowToInsert.relationshipsToAppend.map((rel) => {
         const parentId = id || insertedRow.id
         const row: Record<string, unknown> = {
           parent: parentId as number | string, // Use 'parent' key for Drizzle table
@@ -702,7 +702,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       }
 
       if (Object.keys(arraysBlocksUUIDMap).length > 0) {
-        tableRows.forEach((row: Record<string, number | string>) => {
+        tableRows.forEach((row: RelationshipRow) => {
           if (row.parent in arraysBlocksUUIDMap) {
             row.parent = arraysBlocksUUIDMap[row.parent]
           }
