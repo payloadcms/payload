@@ -460,7 +460,12 @@ export const transform = ({
     data.globalType = globalSlug
   }
 
-  const sanitize: TraverseFieldsCallback = ({ field, parentPath, ref: incomingRef }) => {
+  const sanitize: TraverseFieldsCallback = ({
+    field,
+    parentIsLocalized,
+    parentPath,
+    ref: incomingRef,
+  }) => {
     if (!incomingRef || typeof incomingRef !== 'object') {
       return
     }

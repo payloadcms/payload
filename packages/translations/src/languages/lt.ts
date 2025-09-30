@@ -516,6 +516,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     fieldHasNo: 'Šiame lauke nėra {{label}}',
     greaterThanMax:
       '{{value}} yra didesnė nei leidžiama maksimali {{label}} reikšmė, kuri yra {{max}}.',
+    invalidBlock: 'Blokas "{{block}}" yra neleidžiamas.',
+    invalidBlocks: 'Šiame lauke yra blokų, kurie daugiau neleidžiami: {{blocks}}.',
     invalidInput: 'Šis laukas turi netinkamą įvestį.',
     invalidSelection: 'Šiame lauke yra netinkamas pasirinkimas.',
     invalidSelections: 'Šiame lauke yra šios netinkamos parinktys:',
@@ -572,6 +574,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Tik modifikuotas',
     moreVersions: 'Daugiau versijų...',
     noFurtherVersionsFound: 'Nerasta daugiau versijų',
+    noLabelGroup: 'Nepavadintas grupė',
     noRowsFound: 'Nerasta {{label}}',
     noRowsSelected: 'Pasirinkta ne viena {{label}}',
     preview: 'Peržiūra',

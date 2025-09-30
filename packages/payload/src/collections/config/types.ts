@@ -2,7 +2,7 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type { CustomUpload } from '../../admin/types.js'
+import type { CustomUpload, ViewTypes } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -396,6 +396,27 @@ export type CollectionAdminOptions = {
   enableListViewSelectAPI?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
+  /**
+   * Function to format the URL for document links in the list view.
+   * Return null to disable linking for that document.
+   * Return a string to customize the link destination.
+   * If not provided, uses the default admin edit URL.
+   */
+  formatDocURL?: (args: {
+    collectionSlug: string
+    /**
+     * The default URL that would normally be used for this document link.
+     * You can return this as-is, modify it, or completely replace it.
+     */
+    defaultURL: string
+    doc: Record<string, unknown>
+    req: PayloadRequest
+    /**
+     * The current view context where the link is being generated.
+     * Most relevant values for document linking are 'list' and 'trash'.
+     */
+    viewType?: ViewTypes
+  }) => null | string
   /**
    * Specify a navigational group for collections in the admin sidebar.
    * - Provide a string to place the entity in a custom group.

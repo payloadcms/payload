@@ -151,10 +151,14 @@ export type LivePreviewConfig = {
     width: number | string
   }[]
   /**
-   The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
-   Payload will send a `window.postMessage()` to this URL with the document data in real-time.
-   The frontend application is responsible for receiving the message and updating the UI accordingly.
-   Use the `useLivePreview` hook to get started in React applications.
+   * The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
+   * Payload will send a `window.postMessage()` to this URL with the document data in real-time.
+   * The frontend application is responsible for receiving the message and updating the UI accordingly.
+   * Use the `useLivePreview` hook to get started in React applications.
+   *
+   * Note: this function may run often if autosave is enabled with a small interval.
+   * For performance, avoid long-running tasks or expensive operations within this function,
+   * or if you need to do something more complex, cache your function as needed.
    */
   url?:
     | ((args: {
@@ -722,14 +726,6 @@ export type ImportMapGenerators = Array<
   }) => void
 >
 
-/**
- * Experimental features.
- * These may be unstable and may change or be removed in future releases.
- */
-export type ExperimentalConfig = {
-  localizeStatus?: boolean
-}
-
 export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
@@ -1066,12 +1062,6 @@ export type Config = {
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
-   * Configure experimental features for Payload.
-   *
-   * These features may be unstable and may change or be removed in future releases.
-   */
-  experimental?: ExperimentalConfig
-  /**
    * Options for folder view within the admin panel
    *
    * @experimental This feature may change in minor versions until it is fully stable
@@ -1340,7 +1330,6 @@ export type SanitizedConfig = {
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
-  experimental?: ExperimentalConfig
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
   jobs: SanitizedJobsConfig

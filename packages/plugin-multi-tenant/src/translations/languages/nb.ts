@@ -2,11 +2,10 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const nbTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-modal-tenant-switch--body':
-      'Du er i ferd med å endre eierskap fra <0>{{fromTenant}}</0> til <0>{{toTenant}}</0>',
-    'confirm-modal-tenant-switch--heading': 'Bekreft endring av {{tenantLabel}}',
-    'field-assignedTenant-label': 'Tildelt leietaker',
-    'nav-tenantSelector-label': 'Leietaker',
+    'assign-tenant-button-label': 'Tildel organisasjon',
+    'assign-tenant-modal-title': 'Tildel "{{title}}"',
+    'field-assignedTenant-label': 'Tildelt organisasjon',
+    'nav-tenantSelector-label': 'Filtrer etter organisasjon',
   },
 }
 

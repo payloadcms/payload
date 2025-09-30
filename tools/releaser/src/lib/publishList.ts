@@ -23,14 +23,19 @@ export const packagePublishList = [
   'db-mongodb',
   'db-postgres',
   'db-sqlite',
+  'db-d1-sqlite',
   'db-vercel-postgres',
 
   // Adapters
   'email-nodemailer',
   'email-resend',
 
+  // SDK
+  'sdk',
+
   // Storage
   'storage-s3',
+  'storage-r2',
   'storage-azure',
   'storage-gcs',
   'storage-vercel-blob',
@@ -40,6 +45,7 @@ export const packagePublishList = [
   'payload-cloud',
   'plugin-cloud',
   'plugin-cloud-storage',
+  'plugin-ecommerce',
   'plugin-form-builder',
   'plugin-import-export',
   'plugin-multi-tenant',

@@ -1646,6 +1646,41 @@ describe('Select', () => {
       expect(doc.version.createdAt).toBeUndefined()
       expect(doc.version.text).toBe(post.text)
     })
+
+    it('should create versions with complete data when updating with select', async () => {
+      // First, update the post with select to only return the id field
+      const updatedPost = await payload.update({
+        collection: 'versioned-posts',
+        id: postId,
+        data: {
+          text: 'updated text',
+          number: 999,
+        },
+        select: {},
+      })
+
+      // The update operation should only return the selected field
+      expect(updatedPost).toStrictEqual({
+        id: postId,
+      })
+
+      // However, the created version should contain the complete document
+      const versions = await payload.findVersions({
+        collection: 'versioned-posts',
+        where: { parent: { equals: postId } },
+        sort: '-updatedAt',
+        limit: 1,
+      })
+
+      const latestVersion = versions.docs[0]
+      assert(latestVersion)
+
+      // The version should have complete data, not just the selected fields
+      expect(latestVersion.version.text).toBe('updated text')
+      expect(latestVersion.version.number).toBe(999)
+      expect(latestVersion.version.array).toEqual(post.array)
+      expect(latestVersion.version.blocks).toEqual(post.blocks)
+    })
   })
 
   describe('Local API - Globals', () => {

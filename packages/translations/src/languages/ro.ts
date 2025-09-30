@@ -519,6 +519,8 @@ export const roTranslations: DefaultTranslationsObject = {
     fieldHasNo: 'Acest câmp nu are un {{label}}',
     greaterThanMax:
       '{{value}} este mai mare decât valoarea maximă permisă pentru {{label}} de {{max}}.',
+    invalidBlock: 'Blocul "{{block}}" nu este permis.',
+    invalidBlocks: 'Acest câmp conține blocuri care nu mai sunt permise: {{blocks}}.',
     invalidInput: 'Acest câmp are o intrare invalidă.',
     invalidSelection: 'Acest câmp are o selecție invalidă.',
     invalidSelections: 'Acest câmp are următoarele selecții invalide:',
@@ -577,6 +579,7 @@ export const roTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Modificat doar',
     moreVersions: 'Mai multe versiuni...',
     noFurtherVersionsFound: 'Nu s-au găsit alte versiuni',
+    noLabelGroup: 'Grup Fără Nume',
     noRowsFound: 'Nu s-a găsit niciun {{label}}',
     noRowsSelected: 'Niciun {{etichetă}} selectat',
     preview: 'Previzualizare',
