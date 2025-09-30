@@ -3850,6 +3850,7 @@ describe('database', () => {
           title: 'Test Post',
           categories: [cat1.id],
         },
+        depth: 0,
       })
 
       expect(post.categories).toHaveLength(1)
