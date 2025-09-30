@@ -92,10 +92,23 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[], _widge
     [isEditing, currentLayout],
   )
 
+  const deleteWidget = useCallback(
+    (widgetId: string) => {
+      if (!isEditing) {
+        return
+      }
+
+      // Remove widget from current layout
+      setCurrentLayout((prev) => prev.filter((item) => item.clientLayout.i !== widgetId))
+    },
+    [isEditing],
+  )
+
   return {
     addWidget,
     cancel,
     currentLayout,
+    deleteWidget,
     handleLayoutChange,
     isEditing,
     resetLayout,

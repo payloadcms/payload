@@ -58,6 +58,7 @@ export default async function Count(args: CountProps) {
         flexDirection: 'column',
         gap: '12px',
         height: '100%',
+        padding: '16px',
       }}
     >
       {error ? (

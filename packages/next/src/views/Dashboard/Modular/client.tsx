@@ -10,6 +10,7 @@ import { Responsive, WidthProvider } from 'react-grid-layout'
 
 import { DashboardBreadcrumbDropdown } from './DashboardBreadcrumbDropdown.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
+import { WidgetWrapper } from './WidgetWrapper.js'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -31,6 +32,7 @@ export function ModularDashboardClient({
     addWidget,
     cancel,
     currentLayout,
+    deleteWidget,
     handleLayoutChange,
     isEditing,
     resetLayout,
@@ -75,7 +77,13 @@ export function ModularDashboardClient({
         {currentLayout &&
           currentLayout.map((widget) => (
             <div className="widget" key={widget.clientLayout.i}>
-              <div className="widget-content">{widget.component}</div>
+              <WidgetWrapper
+                isEditing={isEditing}
+                onDelete={() => deleteWidget(widget.clientLayout.i)}
+                widgetId={widget.clientLayout.i}
+              >
+                <div className="widget-content">{widget.component}</div>
+              </WidgetWrapper>
             </div>
           ))}
       </ResponsiveGridLayout>

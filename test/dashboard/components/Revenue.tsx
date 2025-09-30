@@ -76,6 +76,7 @@ export default function Revenue({
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
+        padding: '16px',
       }}
     >
       <div
