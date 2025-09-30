@@ -190,9 +190,7 @@ export const rootEslintConfig = [
     // has 3 entries: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/typescript-eslint/src/configs/recommended-type-checked.ts
     ...deepMerge(
       baseExtends,
-      tseslint.configs.recommendedTypeChecked[0],
-      tseslint.configs.recommendedTypeChecked[1],
-      tseslint.configs.recommendedTypeChecked[2],
+      tseslint.configs.recommendedTypeChecked,
       eslintConfigPrettier,
       {
         plugins: {
@@ -210,9 +208,7 @@ export const rootEslintConfig = [
     name: 'TypeScript-React',
     ...deepMerge(
       baseExtends,
-      tseslint.configs.recommendedTypeChecked[0],
-      tseslint.configs.recommendedTypeChecked[1],
-      tseslint.configs.recommendedTypeChecked[2],
+      tseslint.configs.recommendedTypeChecked,
       reactExtends,
       eslintConfigPrettier,
       {
