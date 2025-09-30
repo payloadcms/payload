@@ -15,6 +15,7 @@ Payload offers additional storage adapters to handle file uploads. These adapter
 | Azure                | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/main/packages/storage-azure)             |
 | Google Cloud Storage | [`@payloadcms/storage-gcs`](https://github.com/payloadcms/payload/tree/main/packages/storage-gcs)                 |
 | Uploadthing          | [`@payloadcms/storage-uploadthing`](https://github.com/payloadcms/payload/tree/main/packages/storage-uploadthing) |
+| R2                   | [`@payloadcms/storage-r2`](https://github.com/payloadcms/payload/tree/main/packages/storage-r2)                   |
 
 ## Vercel Blob Storage
 
@@ -276,6 +277,43 @@ export default buildConfig({
 | `fetch`          | Custom fetch function                                         | `fetch`       |
 | `defaultKeyType` | Default key type for file operations                          | `fileKey`     |
 | `clientUploads`  | Do uploads directly on the client to bypass limits on Vercel. |               |
+
+## R2 Storage
+
+<Banner type="warning">
+  **Note**: The R2 Storage Adapter is in **beta** as some aspects of it may
+  change on any minor releases.
+</Banner>
+
+[`@payloadcms/storage-r2`](https://www.npmjs.com/package/@payloadcms/storage-r2)
+
+Use this adapter to store uploads in a Cloudflare R2 bucket via the Cloudflare Workers environment. If you're trying to connect to R2 using the S3 API then you should use the [S3](#s3-storage) adapter instead.
+
+### Installation#r2-installation
+
+```sh
+pnpm add @payloadcms/storage-r2
+```
+
+### Usage#r2-usage
+
+- Configure the `collections` object to specify which collections should use r2. The slug _must_ match one of your existing collection slugs and be an `upload` type.
+- Pass in the R2 bucket binding to the `bucket` option, this should be done in the environment where Payload is running (e.g. Cloudflare Worker).
+- You can conditionally datamine whether or not to enable the plugin with the `enabled` option.
+
+```ts
+export default buildConfig({
+  collections: [Media],
+  plugins: [
+    r2Storage({
+      collections: {
+        media: true,
+      },
+      bucket: cloudflare.env.R2,
+    }),
+  ],
+})
+```
 
 ## Custom Storage Adapters
 
