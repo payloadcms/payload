@@ -18,7 +18,7 @@ export const stripeProxy: StripeProxy = async ({ stripeArgs, stripeMethod, strip
     const contextToBind = stripe[topLevelMethod]
 
     // NOTE: Stripe API methods using reference "this" within their functions, so we need to bind context
-    const foundMethod = getPath(stripe, stripeMethod)?.bind(contextToBind)
+    const foundMethod = getPath(stripe, stripeMethod).bind(contextToBind)
 
     if (typeof foundMethod === 'function') {
       if (Array.isArray(stripeArgs)) {
