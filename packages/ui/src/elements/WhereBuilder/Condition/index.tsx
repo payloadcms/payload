@@ -12,7 +12,7 @@ import type {
 export type Props = {
   readonly addCondition: AddCondition
   readonly andIndex: number
-  readonly fieldName: string
+  readonly fieldPath: string
   readonly filterOptions: ResolvedFilterOptions
   readonly operator: Operator
   readonly orIndex: number
@@ -42,7 +42,7 @@ export const Condition: React.FC<Props> = (props) => {
   const {
     addCondition,
     andIndex,
-    fieldName,
+    fieldPath,
     filterOptions,
     operator,
     orIndex,
@@ -55,7 +55,7 @@ export const Condition: React.FC<Props> = (props) => {
 
   const { t } = useTranslation()
 
-  const reducedField = reducedFields.find((field) => field.value === fieldName)
+  const reducedField = reducedFields.find((field) => field.value === fieldPath)
 
   const [internalValue, setInternalValue] = useState<Value>(value)
 

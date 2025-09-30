@@ -27,6 +27,7 @@ export const Pages: CollectionConfig = {
     {
       name: 'slug',
       type: 'text',
+      unique: true,
       required: true,
       admin: {
         position: 'sidebar',
@@ -85,6 +86,18 @@ export const Pages: CollectionConfig = {
               label: 'Rich Text — Lexical',
               type: 'richText',
               name: 'richTextLexical',
+              editor: lexicalEditor({
+                features: ({ defaultFeatures }) => [
+                  ...defaultFeatures,
+                  BlocksFeature({ blocks: ['mediaBlock'] }),
+                ],
+              }),
+            },
+            {
+              label: 'Rich Text — Lexical — Localized',
+              type: 'richText',
+              name: 'richTextLexicalLocalized',
+              localized: true,
               editor: lexicalEditor({
                 features: ({ defaultFeatures }) => [
                   ...defaultFeatures,

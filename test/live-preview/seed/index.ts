@@ -168,7 +168,13 @@ export const seed: Config['onInit'] = async (payload) => {
 
   await payload.updateGlobal({
     slug: 'header',
-    data: JSON.parse(JSON.stringify(header).replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID)),
+    data: JSON.parse(
+      JSON.stringify(header)
+        .replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID)
+        .replace(/"\{\{POST_1_ID\}\}"/g, post1DocID)
+        .replace(/"\{\{POST_2_ID\}\}"/g, post2DocID)
+        .replace(/"\{\{POST_3_ID\}\}"/g, post3DocID),
+    ),
   })
 
   await payload.updateGlobal({

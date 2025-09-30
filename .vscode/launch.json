@@ -161,6 +161,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm tsx --no-deprecation test/dev.ts plugin-search",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev plugin-search",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm run test:int live-preview",
       "cwd": "${workspaceFolder}",
       "name": "Live Preview Int Tests",
@@ -262,6 +269,27 @@
       "outputCapture": "std",
       "request": "launch",
       "type": "node-terminal"
+    },
+    {
+      "name": "Debug GraphQL Schema Generation",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/test/generateGraphQLSchema.ts",
+      "args": ["graphql"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "NODE_OPTIONS": "--no-deprecation --no-experimental-strip-types"
+      },
+      "runtimeArgs": [
+        "--no-deprecation",
+        "--no-experimental-strip-types",
+        "--import",
+        "@swc-node/register/esm-register"
+      ],
+      "console": "integratedTerminal",
+      "outputCapture": "std",
+      "sourceMaps": true,
+      "skipFiles": ["<node_internals>/**"]
     }
   ],
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387

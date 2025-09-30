@@ -603,6 +603,59 @@ describe('Collections - Uploads', () => {
 
         expect(doc.docs[0].image).toBeFalsy()
       })
+
+      it('should allow a localized upload relationship in a block', async () => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+
+        const { id } = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })
+
+        const { id: id_2 } = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })
+
+        const res = await payload.create({
+          collection: 'relation',
+          depth: 0,
+          data: {
+            blocks: [
+              {
+                blockType: 'localizedMediaBlock',
+                media: id,
+                relatedMedia: [id],
+              },
+            ],
+          },
+        })
+
+        expect(res.blocks[0]?.media).toBe(id)
+        expect(res.blocks[0]?.relatedMedia).toEqual([id])
+
+        const res_2 = await payload.update({
+          collection: 'relation',
+          id: res.id,
+          depth: 0,
+          data: {
+            blocks: [
+              {
+                id: res.blocks[0]?.id,
+                blockType: 'localizedMediaBlock',
+                media: id_2,
+                relatedMedia: [id_2],
+              },
+            ],
+          },
+        })
+
+        expect(res_2.blocks[0]?.media).toBe(id_2)
+        expect(res_2.blocks[0]?.relatedMedia).toEqual([id_2])
+      })
     })
 
     describe('cookie filtering', () => {
