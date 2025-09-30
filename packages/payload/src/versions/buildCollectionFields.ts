@@ -2,7 +2,6 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FlattenedField } from '../fields/config/types.js'
 
-import { baseLocalizedMetaFields } from '../fields/baseFields/baseLocalizedMeta.js'
 import { versionSnapshotField } from './baseFields.js'
 
 export const buildVersionCollectionFields = <T extends boolean = false>(
