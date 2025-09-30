@@ -377,45 +377,6 @@ non-polymorphic relationship.
 
 </Banner>
 
-### Linking virtual fields with relationships
-
-You can link virtual fields to fields in other collections through a relationship (or upload) field, for example:
-
-```ts
-{
-  collections: [
-    {
-      slug: 'categories',
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: 'posts',
-      fields: [
-        {
-          type: 'relationship',
-          name: 'category',
-          relationTo: 'categories',
-        },
-        {
-          type: 'text',
-          name: 'categoryTitle',
-          virtual: 'category.title',
-        },
-      ],
-    },
-  ],
-}
-```
-
-Here, `categoryTitle` will _always_ be populated with the corresponding value, even if the current `depth` is `0`, You can also query and sort by this field.
-The relationship must not be `hasMany: true` or polymorphic.
-The path can be deeply nested into 2 or more relationship fields, for example `post.category.title` as long as all the relationship fields meet the above requirement.
-
 ## Custom Components
 
 ### Field
