@@ -75,6 +75,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
           maxW: 12,
           minH: 1,
           minW: 3,
+          resizeHandles: ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'],
           w: 3, // Default width
           x: 0, // Will be positioned automatically by react-grid-layout
           y: 0, // Will be positioned automatically by react-grid-layout

@@ -81,6 +81,7 @@ function getLayoutFromConfig(defaultLayout: WidgetInstance[]): Layout[] {
       maxW: 12,
       minH: 1,
       minW: 3,
+      resizeHandles: ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'],
       w: widgetInstance.width || 3,
       x,
       y: 0,
