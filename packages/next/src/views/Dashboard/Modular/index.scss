@@ -35,181 +35,182 @@
         -webkit-user-select: none;
         pointer-events: none;
       }
-      // ONLY WHEN DND IS ACTIVE (END)
 
-      // Base styles for all resize handles
-      .react-grid-item > .react-resizable-handle {
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        background-repeat: no-repeat;
-        background-origin: content-box;
-        box-sizing: border-box;
-        z-index: 1;
-      }
+      .react-grid-item {
+        // Base styles for all resize handles
+        > .react-resizable-handle {
+          position: absolute;
+          width: 20px;
+          height: 20px;
+          background-repeat: no-repeat;
+          background-origin: content-box;
+          box-sizing: border-box;
+          z-index: 1;
+        }
 
-      // Southeast handle (bottom-right) - L shape
-      .react-grid-item > .react-resizable-handle-se {
-        bottom: 0;
-        right: 0;
-        cursor: se-resize;
-      }
+        // Southeast handle (bottom-right) - L shape
+        > .react-resizable-handle-se {
+          bottom: 0;
+          right: 0;
+          cursor: se-resize;
 
-      .react-grid-item > .react-resizable-handle-se::after {
-        content: '';
-        position: absolute;
-        right: 3px;
-        bottom: 3px;
-        width: 8px;
-        height: 8px;
-        border-right: 2px solid rgba(0, 0, 0, 0.4);
-        border-bottom: 2px solid rgba(0, 0, 0, 0.4);
-        border-bottom-right-radius: 1px;
-      }
+          &::after {
+            content: '';
+            position: absolute;
+            right: 3px;
+            bottom: 3px;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid rgba(0, 0, 0, 0.4);
+            border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+            border-bottom-right-radius: 1px;
+          }
+        }
 
-      // Southwest handle (bottom-left) - L shape
-      .react-grid-item > .react-resizable-handle-sw {
-        bottom: 0;
-        left: 0;
-        cursor: sw-resize;
-      }
+        // Southwest handle (bottom-left) - L shape
+        > .react-resizable-handle-sw {
+          bottom: 0;
+          left: 0;
+          cursor: sw-resize;
 
-      .react-grid-item > .react-resizable-handle-sw::after {
-        content: '';
-        position: absolute;
-        left: 3px;
-        bottom: 3px;
-        width: 8px;
-        height: 8px;
-        border-left: 2px solid rgba(0, 0, 0, 0.4);
-        border-bottom: 2px solid rgba(0, 0, 0, 0.4);
-        border-bottom-left-radius: 1px;
-      }
+          &::after {
+            content: '';
+            position: absolute;
+            left: 3px;
+            bottom: 3px;
+            width: 8px;
+            height: 8px;
+            border-left: 2px solid rgba(0, 0, 0, 0.4);
+            border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+            border-bottom-left-radius: 1px;
+          }
+        }
 
-      // Northeast handle (top-right) - L shape
-      .react-grid-item > .react-resizable-handle-ne {
-        top: 0;
-        right: 0;
-        cursor: ne-resize;
-      }
+        // Northeast handle (top-right) - L shape
+        > .react-resizable-handle-ne {
+          top: 0;
+          right: 0;
+          cursor: ne-resize;
 
-      .react-grid-item > .react-resizable-handle-ne::after {
-        content: '';
-        position: absolute;
-        right: 3px;
-        top: 3px;
-        width: 8px;
-        height: 8px;
-        border-right: 2px solid rgba(0, 0, 0, 0.4);
-        border-top: 2px solid rgba(0, 0, 0, 0.4);
-        border-top-right-radius: 1px;
-      }
+          &::after {
+            content: '';
+            position: absolute;
+            right: 3px;
+            top: 3px;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid rgba(0, 0, 0, 0.4);
+            border-top: 2px solid rgba(0, 0, 0, 0.4);
+            border-top-right-radius: 1px;
+          }
+        }
 
-      // Northwest handle (top-left) - L shape
-      .react-grid-item > .react-resizable-handle-nw {
-        top: 0;
-        left: 0;
-        cursor: nw-resize;
-      }
+        // Northwest handle (top-left) - L shape
+        > .react-resizable-handle-nw {
+          top: 0;
+          left: 0;
+          cursor: nw-resize;
 
-      .react-grid-item > .react-resizable-handle-nw::after {
-        content: '';
-        position: absolute;
-        left: 3px;
-        top: 3px;
-        width: 8px;
-        height: 8px;
-        border-left: 2px solid rgba(0, 0, 0, 0.4);
-        border-top: 2px solid rgba(0, 0, 0, 0.4);
-        border-top-left-radius: 1px;
-      }
+          &::after {
+            content: '';
+            position: absolute;
+            left: 3px;
+            top: 3px;
+            width: 8px;
+            height: 8px;
+            border-left: 2px solid rgba(0, 0, 0, 0.4);
+            border-top: 2px solid rgba(0, 0, 0, 0.4);
+            border-top-left-radius: 1px;
+          }
+        }
 
-      // North handle (top) - horizontal bar
-      .react-grid-item > .react-resizable-handle-n {
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 24px;
-        height: 6px;
-        cursor: n-resize;
-      }
+        // North handle (top) - horizontal bar
+        > .react-resizable-handle-n {
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 24px;
+          height: 6px;
+          cursor: n-resize;
 
-      .react-grid-item > .react-resizable-handle-n::after {
-        content: '';
-        position: absolute;
-        top: 2px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 16px;
-        height: 2px;
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 1px;
-      }
+          &::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 2px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 1px;
+          }
+        }
 
-      // South handle (bottom) - horizontal bar
-      .react-grid-item > .react-resizable-handle-s {
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 24px;
-        height: 6px;
-        cursor: s-resize;
-      }
+        // South handle (bottom) - horizontal bar
+        > .react-resizable-handle-s {
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 24px;
+          height: 6px;
+          cursor: s-resize;
 
-      .react-grid-item > .react-resizable-handle-s::after {
-        content: '';
-        position: absolute;
-        bottom: 2px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 16px;
-        height: 2px;
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 1px;
-      }
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 2px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 1px;
+          }
+        }
 
-      // East handle (right) - vertical bar
-      .react-grid-item > .react-resizable-handle-e {
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 6px;
-        height: 24px;
-        cursor: e-resize;
-      }
+        // East handle (right) - vertical bar
+        > .react-resizable-handle-e {
+          right: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 6px;
+          height: 24px;
+          cursor: e-resize;
 
-      .react-grid-item > .react-resizable-handle-e::after {
-        content: '';
-        position: absolute;
-        right: 2px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 2px;
-        height: 16px;
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 1px;
-      }
+          &::after {
+            content: '';
+            position: absolute;
+            right: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 16px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 1px;
+          }
+        }
 
-      // West handle (left) - vertical bar
-      .react-grid-item > .react-resizable-handle-w {
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 6px;
-        height: 24px;
-        cursor: w-resize;
-      }
+        // West handle (left) - vertical bar
+        > .react-resizable-handle-w {
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 6px;
+          height: 24px;
+          cursor: w-resize;
 
-      .react-grid-item > .react-resizable-handle-w::after {
-        content: '';
-        position: absolute;
-        left: 2px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 2px;
-        height: 16px;
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 1px;
+          &::after {
+            content: '';
+            position: absolute;
+            left: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 16px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 1px;
+          }
+        }
       }
 
       .react-grid-item.react-grid-placeholder {
@@ -260,7 +261,6 @@
 
       transition: all 0.2s ease;
 
-      // Dark mode: white background + black X, Light mode: dark background + white X
       .icon {
         width: 16px;
         height: 16px;
@@ -334,12 +334,18 @@
     }
   }
 
+  .rs__control {
+    box-shadow: none !important;
+    cursor: pointer !important;
+  }
+
   .drawer-toggler--unstyled {
     background: transparent;
     border: none;
     margin: 0;
     padding: 0;
     outline: none;
+    box-shadow: none;
 
     &:hover,
     &:focus {
