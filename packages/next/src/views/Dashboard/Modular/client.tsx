@@ -29,8 +29,17 @@ export function ModularDashboardClient({
   clientLayout: WidgetInstanceClient[]
   widgets: Widget[]
 }) {
-  const { addWidget, currentLayout, deleteWidget, handleLayoutChange, isEditing } =
-    useDashboardLayout(initialLayout)
+  const {
+    addWidget,
+    cancel,
+    currentLayout,
+    deleteWidget,
+    handleLayoutChange,
+    isEditing,
+    resetLayout,
+    saveLayout,
+    setIsEditing,
+  } = useDashboardLayout(initialLayout)
 
   const uuid = useId()
   const drawerSlug = `widgets-drawer-${uuid}`
@@ -41,7 +50,14 @@ export function ModularDashboardClient({
         nav={[
           {
             label: (
-              <DashboardBreadcrumbDropdown clientLayout={initialLayout} drawerSlug={drawerSlug} />
+              <DashboardBreadcrumbDropdown
+                isEditing={isEditing}
+                onCancel={cancel}
+                onEditClick={() => setIsEditing(true)}
+                onResetLayout={resetLayout}
+                onSaveChanges={saveLayout}
+                widgetsDrawerSlug={drawerSlug}
+              />
             ),
           },
         ]}
@@ -93,27 +109,29 @@ export function ModularDashboardClient({
 }
 
 export function DashboardBreadcrumbDropdown(props: {
-  clientLayout: WidgetInstanceClient[]
-  drawerSlug: string
+  isEditing: boolean
+  onCancel: () => void
+  onEditClick: () => void
+  onResetLayout: () => void
+  onSaveChanges: () => void
+  widgetsDrawerSlug: string
 }) {
-  const { cancel, isEditing, resetLayout, saveLayout, setIsEditing } = useDashboardLayout(
-    props.clientLayout,
-  )
-
+  const { isEditing, onCancel, onEditClick, onResetLayout, onSaveChanges, widgetsDrawerSlug } =
+    props
   if (isEditing) {
     return (
       <div className="dashboard-breadcrumb-dropdown__editing">
         <span>Editing Dashboard</span>
         <div className="dashboard-breadcrumb-dropdown__actions">
-          <DrawerToggler className="drawer-toggler--unstyled" slug={props.drawerSlug}>
+          <DrawerToggler className="drawer-toggler--unstyled" slug={widgetsDrawerSlug}>
             <Button buttonStyle="pill" el="span" size="small">
               Add +
             </Button>
           </DrawerToggler>
-          <Button buttonStyle="pill" onClick={saveLayout} size="small">
+          <Button buttonStyle="pill" onClick={onSaveChanges} size="small">
             Save Changes
           </Button>
-          <Button buttonStyle="pill" onClick={cancel} size="small">
+          <Button buttonStyle="pill" onClick={onCancel} size="small">
             Cancel
           </Button>
         </div>
@@ -131,9 +149,9 @@ export function DashboardBreadcrumbDropdown(props: {
     const option = Array.isArray(selectedOption) ? selectedOption[0] : selectedOption
 
     if (option?.value === 'edit') {
-      setIsEditing(true)
+      onEditClick()
     } else if (option?.value === 'reset') {
-      void resetLayout()
+      onResetLayout()
     }
   }
 
