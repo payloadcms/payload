@@ -429,9 +429,6 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'global-text',
-      versions: {
-        drafts: true,
-      },
     },
   ],
   localization: {

@@ -735,6 +735,9 @@ export type AfterErrorHook = (
  * These may be unstable and may change or be removed in future releases.
  */
 export type ExperimentalConfig = {
+  /**
+   * When `true`, shows document metadata (e.g., status, updatedAt) per locale in the admin panel instead of showing the latest overall metadata. Defaults to `false`.
+   */
   localizeMeta?: boolean
 }
 
@@ -1070,16 +1073,16 @@ export type Config = {
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
-   * Options for folder view within the admin panel
-   *
-   * @experimental This feature may change in minor versions until it is fully stable
-   */
-  /**
    * Configure experimental features for Payload.
    *
    * These features may be unstable and may change or be removed in future releases.
    */
   experimental?: ExperimentalConfig
+  /**
+   * Options for folder view within the admin panel
+   *
+   * @experimental This feature may change in minor versions until it is fully stable
+   */
   folders?: false | RootFoldersConfiguration
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs

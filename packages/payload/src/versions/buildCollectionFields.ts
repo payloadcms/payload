@@ -81,10 +81,6 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
         index: true,
       })
     }
-
-    if (config.experimental?.localizeMeta) {
-      fields.push(...(baseLocalizedMetaFields(config, flatten) as FlattenedField[]))
-    }
   }
 
   return fields as true extends T ? FlattenedField[] : Field[]

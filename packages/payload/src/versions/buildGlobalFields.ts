@@ -2,7 +2,6 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FlattenedField } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
-import { baseLocalizedMetaFields } from '../fields/baseFields/baseLocalizedMeta.js'
 import { versionSnapshotField } from './baseFields.js'
 
 export const buildVersionGlobalFields = <T extends boolean = false>(
@@ -74,10 +73,6 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
         type: 'checkbox',
         index: true,
       })
-    }
-
-    if (config.experimental?.localizeMeta) {
-      fields.push(...(baseLocalizedMetaFields(config, flatten) as FlattenedField[]))
     }
   }
 
