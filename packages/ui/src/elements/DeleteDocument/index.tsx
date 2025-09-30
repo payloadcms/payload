@@ -84,7 +84,6 @@ export const DeleteDocument: React.FC<Props> = (props) => {
       ? activeLocale.label
       : (activeLocale.label?.[localeCode] ?? undefined))
 
-
   const [deletePermanently, setDeletePermanently] = useState(false)
 
   const addDefaultError = useCallback(() => {
@@ -112,17 +111,20 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           return acc
         }, {})
 
-        const res = await requests.patch(`${serverURL}${api}/${collectionSlug}/${id}?locale=${localeCode}`, {
-          body: JSON.stringify(deletedData),
-          headers,
-        })
+        const res = await requests.patch(
+          `${serverURL}${api}/${collectionSlug}/${id}?locale=${localeCode}`,
+          {
+            body: JSON.stringify(deletedData),
+            headers,
+          },
+        )
 
         json = await res.json()
 
         if (res.status < 400) {
           toast.success(t('general:deletedInLocale', { locale: activeLocaleLabel }))
           await reset({
-            "_status": "draft"
+            _status: 'draft',
           })
           incrementVersionCount()
           return
@@ -132,14 +134,14 @@ export const DeleteDocument: React.FC<Props> = (props) => {
         const res =
           deletePermanently || !collectionConfig.trash
             ? await requests.delete(`${serverURL}${api}/${collectionSlug}/${id}`, {
-              headers,
-            })
+                headers,
+              })
             : await requests.patch(`${serverURL}${api}/${collectionSlug}/${id}`, {
-              body: JSON.stringify({
-                deletedAt: new Date().toISOString(),
-              }),
-              headers,
-            })
+                body: JSON.stringify({
+                  deletedAt: new Date().toISOString(),
+                }),
+                headers,
+              })
 
         json = await res.json()
 
@@ -211,7 +213,14 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     activeLocaleLabel,
   ])
 
-  const idToRender = (children) => deleteCurrentLocale ? <><strong>{children}</strong> {t('general:in')} <strong>{activeLocaleLabel}</strong></> : <strong>{children}</strong>
+  const idToRender = (children) =>
+    deleteCurrentLocale ? (
+      <>
+        <strong>{children}</strong> {t('general:in')} <strong>{activeLocaleLabel}</strong>
+      </>
+    ) : (
+      <strong>{children}</strong>
+    )
 
   if (id) {
     return (
@@ -222,14 +231,20 @@ export const DeleteDocument: React.FC<Props> = (props) => {
             openModal(modalSlug)
           }}
         >
-          {deleteCurrentLocale ? <>{t('general:delete')} {t('general:in')} <strong>{activeLocaleLabel}</strong></> : t('general:delete')}
+          {deleteCurrentLocale ? (
+            <>
+              {t('general:delete')} {t('general:in')} {activeLocaleLabel}
+            </>
+          ) : (
+            t('general:delete')
+          )}
         </PopupList.Button>
         <ConfirmationModal
           body={
             <Fragment>
               <Translation
                 elements={{
-                  '1': ({ children }) => idToRender(children)
+                  '1': ({ children }) => idToRender(children),
                 }}
                 i18nKey={collectionConfig.trash ? 'general:aboutToTrash' : 'general:aboutToDelete'}
                 t={t}
