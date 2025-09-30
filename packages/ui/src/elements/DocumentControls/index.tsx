@@ -276,11 +276,11 @@ export const DocumentControls: React.FC<{
                     {(unsavedDraftWithValidations ||
                       !autosaveEnabled ||
                       (autosaveEnabled && showSaveDraftButton)) && (
-                      <RenderCustomComponent
-                        CustomComponent={CustomSaveDraftButton}
-                        Fallback={<SaveDraftButton />}
-                      />
-                    )}
+                        <RenderCustomComponent
+                          CustomComponent={CustomSaveDraftButton}
+                          Fallback={<SaveDraftButton />}
+                        />
+                      )}
                     <RenderCustomComponent
                       CustomComponent={CustomPublishButton}
                       Fallback={<PublishButton />}
@@ -365,13 +365,25 @@ export const DocumentControls: React.FC<{
                       </Fragment>
                     )}
                     {collectionConfig.disableDuplicate !== true && isEditing && (
-                      <DuplicateDocument
-                        id={id.toString()}
-                        onDuplicate={onDuplicate}
-                        redirectAfterDuplicate={redirectAfterDuplicate}
-                        singularLabel={collectionConfig?.labels?.singular}
-                        slug={collectionConfig?.slug}
-                      />
+                      <>
+                        <DuplicateDocument
+                          id={id.toString()}
+                          onDuplicate={onDuplicate}
+                          redirectAfterDuplicate={redirectAfterDuplicate}
+                          singularLabel={collectionConfig?.labels?.singular}
+                          slug={collectionConfig?.slug}
+                        />
+                        {localization &&
+                          <DuplicateDocument
+                            id={id.toString()}
+                            onDuplicate={onDuplicate}
+                            redirectAfterDuplicate={redirectAfterDuplicate}
+                            selectLocales={true}
+                            singularLabel={collectionConfig?.labels?.singular}
+                            slug={collectionConfig?.slug}
+                          />
+                        }
+                      </>
                     )}
                   </React.Fragment>
                 )}

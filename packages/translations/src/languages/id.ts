@@ -1,8 +1,6 @@
-import { title } from 'process'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import type { Language } from '../types.js'
-
-export const idTranslations = {
+export const idTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Akun',
     accountOfCurrentUser: 'Akun pengguna saat ini',
@@ -29,11 +27,9 @@ export const idTranslations = {
     forgotPassword: 'Lupa Kata Sandi',
     forgotPasswordEmailInstructions:
       'Silakan masukkan email Anda di bawah ini. Anda akan menerima pesan email dengan instruksi tentang cara mengatur ulang kata sandi Anda.',
+    forgotPasswordQuestion: 'Lupa kata sandi?',
     forgotPasswordUsernameInstructions:
       'Silakan masukkan nama pengguna Anda di bawah ini. Instruksi tentang cara mengatur ulang kata sandi Anda akan dikirim ke alamat email yang terkait dengan nama pengguna Anda.',
-    usernameNotValid: 'Nama pengguna yang diberikan tidak valid',
-
-    forgotPasswordQuestion: 'Lupa kata sandi?',
     generate: 'Buat',
     generateNewAPIKey: 'Buat kunci API baru',
     generatingNewAPIKeyWillInvalidate:
@@ -71,6 +67,7 @@ export const idTranslations = {
     tokenRefreshSuccessful: 'Penyegaran token berhasil.',
     unableToVerify: 'Tidak Dapat Memverifikasi',
     username: 'Nama Pengguna',
+    usernameNotValid: 'Nama pengguna yang diberikan tidak valid',
     verified: 'Terverifikasi',
     verifiedSuccessfully: 'Berhasil Diverifikasi',
     verify: 'Verifikasi',
@@ -461,7 +458,9 @@ export const idTranslations = {
     copyTo: 'Salin ke',
     copyToLocale: 'Salin ke lokal',
     localeToPublish: 'Lokal untuk dipublikasikan',
+    selectedLocales: 'Lokasi yang Dipilih',
     selectLocaleToCopy: 'Pilih lokal untuk disalin',
+    selectLocaleToDuplicate: 'Pilih bahasa lokal untuk duplikat',
   },
   operators: {
     contains: 'mengandung',

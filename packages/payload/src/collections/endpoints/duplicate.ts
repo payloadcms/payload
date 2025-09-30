@@ -16,6 +16,10 @@ export const duplicateHandler: PayloadHandler = async (req) => {
   const depth = searchParams.get('depth')
   // draft defaults to true, unless explicitly set requested as false to prevent the newly duplicated document from being published
   const draft = searchParams.get('draft') !== 'false'
+  const selectedLocales = (searchParams.get('selectedLocales') || '')
+    .replace(/^\[|\]$/g, '')
+    .split(',')
+    .map((s) => s.trim())
 
   const doc = await duplicateOperation({
     id,
@@ -26,6 +30,7 @@ export const duplicateHandler: PayloadHandler = async (req) => {
     populate: sanitizePopulateParam(req.query.populate),
     req,
     select: sanitizeSelectParam(req.query.select),
+    selectedLocales,
   })
 
   const message = req.t('general:successfullyDuplicated', {

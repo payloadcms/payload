@@ -457,7 +457,9 @@ export const caTranslations: DefaultTranslationsObject = {
     copyTo: 'Copiar a',
     copyToLocale: 'Copiar a idioma',
     localeToPublish: 'Idioma per publicar',
+    selectedLocales: 'Idiomes seleccionats',
     selectLocaleToCopy: "Selecciona l'idioma per copiar",
+    selectLocaleToDuplicate: 'Selecciona les configuracions regionals per duplicar',
   },
   operators: {
     contains: 'conté',

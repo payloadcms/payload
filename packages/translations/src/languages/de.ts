@@ -467,7 +467,9 @@ export const deTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopieren nach',
     copyToLocale: 'Erstelle Kopie für Sprach-Variante',
     localeToPublish: 'Zu veröffentlichende Sprache',
+    selectedLocales: 'Ausgewählte Gebietsschemata',
     selectLocaleToCopy: 'Wähle den Ort zum Kopieren aus',
+    selectLocaleToDuplicate: 'Wählen Sie die Gebietsschemata zum Duplizieren aus',
   },
   operators: {
     contains: 'enthält',

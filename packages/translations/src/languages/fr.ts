@@ -467,7 +467,9 @@ export const frTranslations: DefaultTranslationsObject = {
     copyTo: 'Copier à',
     copyToLocale: 'Copier vers le lieu',
     localeToPublish: 'Locale à publier',
+    selectedLocales: 'Langues sélectionnées',
     selectLocaleToCopy: 'Sélectionnez la locale à copier',
+    selectLocaleToDuplicate: 'Sélectionnez les paramètres régionaux à dupliquer',
   },
   operators: {
     contains: 'contient',

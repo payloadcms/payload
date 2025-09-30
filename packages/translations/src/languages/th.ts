@@ -447,7 +447,9 @@ export const thTranslations: DefaultTranslationsObject = {
     copyTo: 'คัดลอกไปที่',
     copyToLocale: 'คัดลอกไปยังสถานที่',
     localeToPublish: 'เผยแพร่ในสถานที่',
+    selectedLocales: 'ตำแหน่งที่ตั้งที่เลือก',
     selectLocaleToCopy: 'เลือกสถานที่ท้องถิ่นเพื่อคัดลอก',
+    selectLocaleToDuplicate: 'เลือกที่ตั้งเพื่อทำซ้ำ',
   },
   operators: {
     contains: 'มี',

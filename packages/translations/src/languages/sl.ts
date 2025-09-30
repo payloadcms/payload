@@ -454,7 +454,9 @@ export const slTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiraj v',
     copyToLocale: 'Kopiraj v jezik',
     localeToPublish: 'Lokalno za objavo',
+    selectedLocales: 'Izbrane regionalne nastavitve',
     selectLocaleToCopy: 'Izberite jezik za kopiranje',
+    selectLocaleToDuplicate: 'Izberite jezikovne nastavitve za podvojitev',
   },
   operators: {
     contains: 'vsebuje',

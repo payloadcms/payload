@@ -456,7 +456,9 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiraj u',
     copyToLocale: 'Kopiraj na lokaciju',
     localeToPublish: 'Lokal za objavljivanje',
+    selectedLocales: 'Izabrane regionalne postavke',
     selectLocaleToCopy: 'Izaberite lokalitet za kopiranje',
+    selectLocaleToDuplicate: 'Izaberite lokacije za kopiranje',
   },
   operators: {
     contains: 'sadrži',
