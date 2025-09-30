@@ -211,7 +211,7 @@ export const syncDocAsSearchIndex = async ({
               },
             })
 
-            if (!docWithPublish) {
+            if (!docWithPublish && !isTrashDocument) {
               // do not include draft docs in search results, so delete the record
               try {
                 await payload.delete({
