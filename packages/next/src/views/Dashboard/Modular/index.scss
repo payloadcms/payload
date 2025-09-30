@@ -12,6 +12,11 @@
       overflow: hidden;
     }
 
+    .widget-content {
+      height: 100%;
+      width: 100%;
+    }
+
     &.editing {
       .widget {
         cursor: grab;

@@ -74,7 +74,7 @@ export const RenderWidget: React.FC<{
   }, [renderWidget])
 
   if (!Component) {
-    return <ShimmerEffect />
+    return <ShimmerEffect height="100%" />
   }
 
   return <>{Component}</>
