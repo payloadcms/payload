@@ -804,6 +804,20 @@ test.describe('Group By', () => {
     ).toBeVisible()
   })
 
+  test('should hide field from groupBy options when admin.disableGroupBy is true', async () => {
+    await page.goto(url.list)
+    const { groupByContainer } = await openGroupBy(page)
+
+    const field = groupByContainer.locator('#group-by--field-select')
+    await field.click()
+
+    await expect(
+      field.locator('.rs__option', {
+        hasText: exactText('Virtual Title From Category'),
+      }),
+    ).toBeHidden()
+  })
+
   test.describe('Trash', () => {
     test('should show trashed docs in trash view when group-by is active', async () => {
       await page.goto(url.list)
