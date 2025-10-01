@@ -2,6 +2,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+import { NoURLCollection } from 'collections/NoURL.js'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { MediaBlock } from './blocks/MediaBlock/index.js'
 import { Categories } from './collections/Categories.js'
@@ -58,6 +60,7 @@ export default buildConfigWithDefaults({
     Media,
     CollectionLevelConfig,
     StaticURLCollection,
+    NoURLCollection,
   ],
   globals: [Header, Footer],
   onInit: seed,

@@ -2,6 +2,7 @@ import type {
   CollectionConfig,
   GlobalConfig,
   LivePreviewConfig,
+  LivePreviewURLType,
   Operation,
   PayloadRequest,
   SanitizedConfig,
@@ -80,7 +81,7 @@ export const handleLivePreview = async ({
 }): Promise<{
   isLivePreviewEnabled?: boolean
   livePreviewConfig?: LivePreviewConfig
-  livePreviewURL?: string
+  livePreviewURL?: LivePreviewURLType
 }> => {
   const collectionConfig = collectionSlug
     ? req.payload.collections[collectionSlug]?.config

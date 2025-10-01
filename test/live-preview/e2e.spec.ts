@@ -172,6 +172,14 @@ describe('Live Preview', () => {
     const toggler = page.locator('button#live-preview-toggler')
     await expect(toggler).toBeHidden()
     await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+
+    const enabledCheckbox = page.locator('#field-enabled')
+    await enabledCheckbox.check()
+    await saveDocAndAssert(page)
+
+    await expect(toggler).toBeVisible()
+    await toggleLivePreview(page)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
   })
 
   test('collection — retains static URL across edits', async () => {

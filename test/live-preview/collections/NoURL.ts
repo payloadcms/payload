@@ -4,13 +4,17 @@ export const NoURLCollection: CollectionConfig = {
   slug: 'no-url',
   admin: {
     livePreview: {
-      url: () => undefined,
+      url: ({ data }) => (data?.enabled ? '/live-preview/test' : null),
     },
   },
   fields: [
     {
       name: 'title',
       type: 'text',
+    },
+    {
+      name: 'enabled',
+      type: 'checkbox',
     },
   ],
 }

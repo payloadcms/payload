@@ -138,6 +138,8 @@ type Prettify<T> = {
 
 export type Plugin = (config: Config) => Config | Promise<Config>
 
+export type LivePreviewURLType = null | string | undefined
+
 export type LivePreviewConfig = {
   /**
    Device breakpoints to use for the `iframe` of the Live Preview window.
@@ -172,8 +174,8 @@ export type LivePreviewConfig = {
          */
         payload: Payload
         req: PayloadRequest
-      }) => null | Promise<null | string | undefined> | string | undefined)
-    | string
+      }) => LivePreviewURLType | Promise<LivePreviewURLType>)
+    | LivePreviewURLType
 }
 
 export type RootLivePreviewConfig = {

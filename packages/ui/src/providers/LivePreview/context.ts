@@ -1,5 +1,5 @@
 'use client'
-import type { LivePreviewConfig } from 'payload'
+import type { LivePreviewConfig, LivePreviewURLType } from 'payload'
 import type { Dispatch } from 'react'
 import type React from 'react'
 
@@ -59,7 +59,7 @@ export interface LivePreviewContextType {
    * It is important to know which one it is, so that we can opt in/out of certain behaviors, e.g. calling the server to get the URL.
    */
   typeofLivePreviewURL?: 'function' | 'string'
-  url: string | undefined
+  url: LivePreviewURLType
   zoom: number
 }
 
