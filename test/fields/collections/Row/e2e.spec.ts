@@ -249,7 +249,7 @@ describe('Row', () => {
     await page.goto(url.create)
 
     // Target the Array field wrappers
-    const left = page.locator('#field-arayLeftColumn')
+    const left = page.locator('#field-arrayLeftColumn')
     const right = page.locator('#field-arrayRightColumn')
 
     await expect(left).toBeVisible()

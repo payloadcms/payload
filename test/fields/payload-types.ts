@@ -1194,7 +1194,7 @@ export interface RowField {
         blockType: 'rightTextBlock';
       }[]
     | null;
-  arayLeftColumn?:
+  arrayLeftColumn?:
     | {
         leftArrayChild?: string | null;
         id?: string | null;
@@ -2916,7 +2916,7 @@ export interface RowFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
-  arayLeftColumn?:
+  arrayLeftColumn?:
     | T
     | {
         leftArrayChild?: T;

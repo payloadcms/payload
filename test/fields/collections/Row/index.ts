@@ -182,7 +182,7 @@ const RowFields: CollectionConfig = {
       type: 'row',
       fields: [
         {
-          name: 'arayLeftColumn',
+          name: 'arrayLeftColumn',
           type: 'array',
           admin: {
             width: '50%',
