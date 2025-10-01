@@ -266,7 +266,15 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-    collectionWithName(relationSlug, { versions: { drafts: true } }),
+    collectionWithName(relationSlug, {
+      access: {
+        ...openAccess,
+        read: () => {
+          return { name: { not_equals: 'restricted' } }
+        },
+      },
+      versions: { drafts: true },
+    }),
     collectionWithName('dummy'),
     {
       ...collectionWithName(errorOnHookSlug),

@@ -1060,6 +1060,51 @@ describe('collections-graphql', () => {
 
         expect(queriedDoc.relationHasManyField[0].id).toBe(relation_2.id)
       })
+
+      it('should still query hasMany relationships when user doesnt have access to some document', async () => {
+        const relation_1_draft = await payload.create({
+          collection: 'relation',
+          data: { name: 'restricted' },
+        })
+
+        const relation_2 = await payload.create({
+          collection: 'relation',
+          data: { name: 'relation_2' },
+        })
+
+        await payload.create({
+          collection: 'posts',
+          draft: true,
+          data: {
+            _status: 'draft',
+            title: 'post with relation restricted',
+            relationHasManyField: [relation_1_draft.id, relation_2.id],
+          },
+        })
+
+        const query = `query {
+          Posts(draft:true,where: { title: { equals: "post with relation restricted" }}) {
+            docs {
+              id
+              title
+              relationHasManyField {
+                id,
+                name
+              }
+            }
+            totalDocs
+          }
+        }`
+
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+
+        const queriedDoc = res.data.Posts.docs[0]
+        expect(queriedDoc.title).toBe('post with relation restricted')
+
+        expect(queriedDoc.relationHasManyField[0].id).toBe(relation_2.id)
+      })
     })
   })
 
