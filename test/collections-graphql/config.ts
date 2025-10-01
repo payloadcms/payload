@@ -19,7 +19,10 @@ const openAccess = {
   update: () => true,
 }
 
-const collectionWithName = (collectionSlug: string): CollectionConfig => {
+const collectionWithName = (
+  collectionSlug: string,
+  extra: Partial<CollectionConfig> = {},
+): CollectionConfig => {
   return {
     slug: collectionSlug,
     access: openAccess,
@@ -29,6 +32,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
         type: 'text',
       },
     ],
+    ...extra,
   }
 }
 
@@ -244,6 +248,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: { drafts: true },
     },
     {
       slug: 'custom-ids',
@@ -261,7 +266,7 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-    collectionWithName(relationSlug),
+    collectionWithName(relationSlug, { versions: { drafts: true } }),
     collectionWithName('dummy'),
     {
       ...collectionWithName(errorOnHookSlug),

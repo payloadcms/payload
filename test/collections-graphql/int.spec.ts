@@ -12,6 +12,8 @@ import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
 
+const formatID = (id: number | string) => (typeof id === 'number' ? id : `"${id}"`)
+
 const title = 'title'
 
 let restClient: NextRESTClient
@@ -1010,6 +1012,54 @@ describe('collections-graphql', () => {
         const queriedDoc = res.data.CyclicalRelationships.docs[0]
         expect(queriedDoc.title).toEqual(queriedDoc.relationToSelf.title)
       })
+
+      it('should still query hasMany relationships when some document was deleted', async () => {
+        const relation_1_draft = await payload.create({
+          collection: 'relation',
+          data: { _status: 'draft', name: 'relation_1_draft' },
+          draft: true,
+        })
+
+        const relation_2 = await payload.create({
+          collection: 'relation',
+          data: { name: 'relation_2', _status: 'published' },
+        })
+
+        await payload.create({
+          collection: 'posts',
+          draft: true,
+          data: {
+            _status: 'draft',
+            title: 'post with relations in draft',
+            relationHasManyField: [relation_1_draft.id, relation_2.id],
+          },
+        })
+
+        await payload.delete({ collection: 'relation', id: relation_1_draft.id })
+
+        const query = `query {
+          Posts(draft:true,where: { title: { equals: "post with relations in draft" }}) {
+            docs {
+              id
+              title
+              relationHasManyField {
+                id,
+                name
+              }
+            }
+            totalDocs
+          }
+        }`
+
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+
+        const queriedDoc = res.data.Posts.docs[0]
+        expect(queriedDoc.title).toBe('post with relations in draft')
+
+        expect(queriedDoc.relationHasManyField[0].id).toBe(relation_2.id)
+      })
     })
   })
 
@@ -1106,7 +1156,7 @@ describe('collections-graphql', () => {
     })
 
     const query = `{
-      CyclicalRelationship(id: ${typeof newDoc.id === 'number' ? newDoc.id : `"${newDoc.id}"`}) {
+      CyclicalRelationship(id: ${formatID(newDoc.id)}) {
         media {
           id
           title
