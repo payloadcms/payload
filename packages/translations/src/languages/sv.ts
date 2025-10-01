@@ -570,7 +570,7 @@ export const svTranslations: DefaultTranslationsObject = {
     noFurtherVersionsFound: 'Inga fler versioner hittades',
     noLabelGroup: 'Namnlös grupp',
     noRowsFound: 'Inga {{label}} hittades',
-    noRowsSelected: 'Inget {{etikett}} valt',
+    noRowsSelected: 'Inget {{label}} valt',
     preview: 'Förhandsgranska',
     previouslyDraft: 'Tidigare utkast',
     previouslyPublished: 'Tidigare publicerad',
