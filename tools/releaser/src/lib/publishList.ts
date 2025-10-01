@@ -30,6 +30,9 @@ export const packagePublishList = [
   'email-nodemailer',
   'email-resend',
 
+  // SDK
+  'sdk',
+
   // Storage
   'storage-s3',
   'storage-r2',
@@ -42,6 +45,7 @@ export const packagePublishList = [
   'payload-cloud',
   'plugin-cloud',
   'plugin-cloud-storage',
+  'plugin-ecommerce',
   'plugin-form-builder',
   'plugin-import-export',
   'plugin-multi-tenant',

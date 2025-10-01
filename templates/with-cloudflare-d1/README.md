@@ -1,6 +1,6 @@
 # Payload Cloudflare Template
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/payloadcms/payload/tree/feat/add-d1-adapter/templates/with-cloudflare-d1)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/payloadcms/payload/tree/main/templates/with-cloudflare-d1)
 
 This template comes configured with the bare minimum to get started on anything you need.
 
