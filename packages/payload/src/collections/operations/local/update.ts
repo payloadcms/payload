@@ -121,6 +121,10 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   trash?: boolean
   /**
+   * Unpublish the document / documents for a specific locale.
+   */
+  unpublishSpecificLocale?: string
+  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
@@ -227,6 +231,7 @@ async function updateLocal<
     showHiddenFields,
     sort,
     trash = false,
+    unpublishSpecificLocale,
     where,
   } = options
 
@@ -261,6 +266,7 @@ async function updateLocal<
     showHiddenFields,
     sort,
     trash,
+    unpublishSpecificLocale,
     where,
   }
 

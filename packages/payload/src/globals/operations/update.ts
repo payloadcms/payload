@@ -45,6 +45,7 @@ type Args<TSlug extends GlobalSlug> = {
   select?: SelectType
   showHiddenFields?: boolean
   slug: string
+  unpublishSpecificLocale?: string
 }
 
 export const updateOperation = async <
@@ -55,6 +56,10 @@ export const updateOperation = async <
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
   if (args.publishSpecificLocale) {
     args.req.locale = args.publishSpecificLocale
+  }
+
+  if (args.unpublishSpecificLocale) {
+    args.req.locale = args.unpublishSpecificLocale
   }
 
   const {
@@ -72,6 +77,7 @@ export const updateOperation = async <
     req,
     select: incomingSelect,
     showHiddenFields,
+    unpublishSpecificLocale,
   } = args
 
   try {
@@ -218,6 +224,7 @@ export const updateOperation = async <
     }
 
     if (publishSpecificLocale) {
+      // JESS TODO
       const latestVersion = await getLatestGlobalVersion({
         slug,
         config: globalConfig,

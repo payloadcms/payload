@@ -88,6 +88,10 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   slug: TSlug
   /**
+   * Unpublish the document / documents for a specific locale.
+   */
+  unpublishSpecificLocale?: TypedLocale
+  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
@@ -111,6 +115,7 @@ export async function updateGlobalLocal<
     publishSpecificLocale,
     select,
     showHiddenFields,
+    unpublishSpecificLocale,
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
@@ -132,5 +137,6 @@ export async function updateGlobalLocal<
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
+    unpublishSpecificLocale: unpublishSpecificLocale!,
   })
 }

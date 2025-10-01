@@ -55,6 +55,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   req: PayloadRequest
   select: SelectType
   showHiddenFields: boolean
+  unpublishSpecificLocale?: string
 }
 
 /**
@@ -94,6 +95,7 @@ export const updateDocument = async <
   req,
   select,
   showHiddenFields,
+  unpublishSpecificLocale,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
   const shouldSaveDraft =
@@ -243,6 +245,7 @@ export const updateDocument = async <
   }
 
   if (publishSpecificLocale) {
+    // JESS TODO
     versionSnapshotResult = await beforeChange({
       ...beforeChangeArgs,
       docWithLocales,
@@ -323,6 +326,7 @@ export const updateDocument = async <
       req,
       select,
       snapshot: versionSnapshotResult,
+      unpublishSpecificLocale,
     })
   }
 

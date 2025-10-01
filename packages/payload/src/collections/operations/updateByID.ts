@@ -49,6 +49,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
+  unpublishSpecificLocale?: string
 }
 
 export const updateByIDOperation = async <
@@ -83,6 +84,10 @@ export const updateByIDOperation = async <
       args.req.locale = args.publishSpecificLocale
     }
 
+    if (args.unpublishSpecificLocale) {
+      args.req.locale = args.unpublishSpecificLocale
+    }
+
     const {
       id,
       autosave = false,
@@ -105,6 +110,7 @@ export const updateByIDOperation = async <
       select: incomingSelect,
       showHiddenFields,
       trash = false,
+      unpublishSpecificLocale,
     } = args
 
     if (!id) {
