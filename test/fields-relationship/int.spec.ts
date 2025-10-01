@@ -604,7 +604,7 @@ describe('Relationship Fields', () => {
           data: {},
           operations: {
             $push: {
-              relationshipHasMany: [relationDoc3.id],
+              relationshipHasMany: [relationDoc2.id],
             },
           },
           select: {},
@@ -629,7 +629,7 @@ describe('Relationship Fields', () => {
 
         expect(verifyDoc1.relationshipHasMany).toHaveLength(2)
         expect(verifyDoc1.relationshipHasMany).toContain(relationDoc1.id)
-        expect(verifyDoc1.relationshipHasMany).toContain(relationDoc3.id)
+        expect(verifyDoc1.relationshipHasMany).toContain(relationDoc2.id)
       })
     })
 
