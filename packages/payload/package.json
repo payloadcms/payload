@@ -71,10 +71,11 @@
     "bin.js"
   ],
   "scripts": {
-    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && echo skipping esbuild",
+    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm bundle:types && echo skipping esbuild",
     "build:bundle-for-analysis": "node ./bundle.js esbuild",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "bundle:types": "api-extractor run --local -c api-extractor.payload.json",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "clean:cache": "rimraf node_modules/.cache",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
@@ -118,6 +119,7 @@
   },
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
+    "@microsoft/api-extractor": "7.52.15",
     "@monaco-editor/react": "4.7.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/json-schema": "7.0.15",
