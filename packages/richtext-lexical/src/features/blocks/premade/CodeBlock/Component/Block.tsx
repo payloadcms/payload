@@ -26,7 +26,7 @@ export const CodeBlockBlockComponent: React.FC<
   Required<Pick<AdditionalCodeComponentProps, 'languages'>>
 > = (args) => {
   const { languages } = args
-  const { BlockCollapsible, formSchema } = useBlockComponentContext()
+  const { BlockCollapsible, formSchema, RemoveButton } = useBlockComponentContext()
   const { setModified } = useForm()
 
   const { codeField } = useFormFields(([fields]) => ({
@@ -90,6 +90,8 @@ export const CodeBlockBlockComponent: React.FC<
           <CopyToClipboard value={(codeField?.value as string) ?? ''} />
 
           <Collapse />
+
+          <RemoveButton />
         </div>
       }
       className={baseClass}
