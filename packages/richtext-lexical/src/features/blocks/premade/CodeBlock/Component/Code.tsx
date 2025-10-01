@@ -102,6 +102,23 @@ export const CodeComponent: React.FC<AdditionalCodeComponentProps & CodeFieldCli
         forceRender={forceRender}
         key={key}
         onMount={(_editor, monaco) => {
+          monaco.editor.defineTheme('vs-dark', {
+            base: 'vs-dark',
+            colors: {
+              'editor.background': '#222222',
+            },
+            inherit: true,
+            rules: [],
+          })
+
+          monaco.editor.defineTheme('vs', {
+            base: 'vs',
+            colors: {
+              'editor.background': '#f5f5f5',
+            },
+            inherit: true,
+            rules: [],
+          })
           monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             allowNonTsExtensions: true,
             // Set module resolution to NodeJs to enable autocompletion
