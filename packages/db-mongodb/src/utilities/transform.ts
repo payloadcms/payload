@@ -271,6 +271,9 @@ const stripFields = ({
           const localeData = fieldData[localeKey]
 
           if (!localeData || typeof localeData !== 'object') {
+            if (field.type === 'blocks') {
+              fieldData[localeKey] = []
+            }
             continue
           }
 
