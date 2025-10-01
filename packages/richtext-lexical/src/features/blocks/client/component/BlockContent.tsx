@@ -1,4 +1,5 @@
 'use client'
+import type { CollapsibleProps } from '@payloadcms/ui/elements/Collapsible'
 import type { ClientField, FormState } from 'payload'
 
 import { RenderFields, useFormSubmitted } from '@payloadcms/ui'
@@ -16,6 +17,10 @@ export type BlockCollapsibleProps = {
    */
   className?: string
   /**
+   * Props to pass to the underlying Collapsible component. You could use this to override the `Header` entirely, for example.
+   */
+  collapsibleProps?: Partial<CollapsibleProps>
+  /**
    * Whether to disable rendering the block name field in the header Label
    * @default false
    */
@@ -26,13 +31,6 @@ export type BlockCollapsibleProps = {
    * @default true
    */
   editButton?: boolean
-  /**
-   * Replace the entire collapsible header with custom content.
-   * If this is set, the following properties are ignored: `Actions`, `editButton`, `removeButton`, `Label`, `Pill`, `disableBlockName`
-   *
-   * @todo for 4.0: replace this with Header: { Components: {}, Component: {}} and scope all components part of the header to this single property
-   */
-  Header?: React.ReactNode
   /**
    * Replace the default Label component with a custom Label
    */

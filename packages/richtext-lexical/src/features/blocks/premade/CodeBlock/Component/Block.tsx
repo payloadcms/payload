@@ -89,6 +89,10 @@ export const CodeBlockBlockComponent: React.FC<
         </div>
       }
       className={baseClass}
+      collapsibleProps={{
+        disableHeaderToggle: true,
+        disableToggleIndicator: true,
+      }}
       Pill={
         <div className={`${baseClass}__pill`}>
           <CodeBlockIcon />
