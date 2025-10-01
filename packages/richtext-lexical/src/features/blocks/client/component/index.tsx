@@ -411,6 +411,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         editButton,
         errorCount,
         fieldHasErrors,
+        Header,
         Label,
         Pill: CustomPill,
         removeButton,
@@ -427,50 +428,54 @@ export const BlockComponent: React.FC<Props> = (props) => {
                 .join(' ')}
               collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
               header={
-                <div className={`${baseClass}__block-header`}>
-                  {typeof Label !== 'undefined' ? (
-                    Label
-                  ) : typeof CustomLabel !== 'undefined' ? (
-                    CustomLabel
-                  ) : (
-                    <div className={`${baseClass}__block-label`}>
-                      {typeof CustomPill !== 'undefined' ? (
-                        CustomPill
-                      ) : (
-                        <Pill
-                          className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
-                          pillStyle="white"
-                          size="small"
-                        >
-                          {blockDisplayName ?? blockType}
-                        </Pill>
-                      )}
-                      {!disableBlockName && !clientBlock?.admin?.disableBlockName && (
-                        <SectionTitle
-                          path="blockName"
-                          readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
-                        />
-                      )}
+                typeof Header !== 'undefined' ? (
+                  Header
+                ) : (
+                  <div className={`${baseClass}__block-header`}>
+                    {typeof Label !== 'undefined' ? (
+                      Label
+                    ) : typeof CustomLabel !== 'undefined' ? (
+                      CustomLabel
+                    ) : (
+                      <div className={`${baseClass}__block-label`}>
+                        {typeof CustomPill !== 'undefined' ? (
+                          CustomPill
+                        ) : (
+                          <Pill
+                            className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
+                            pillStyle="white"
+                            size="small"
+                          >
+                            {blockDisplayName ?? blockType}
+                          </Pill>
+                        )}
+                        {!disableBlockName && !clientBlock?.admin?.disableBlockName && (
+                          <SectionTitle
+                            path="blockName"
+                            readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
+                          />
+                        )}
 
-                      {fieldHasErrors && (
-                        <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
+                        {fieldHasErrors && (
+                          <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
+                        )}
+                      </div>
+                    )}
+
+                    <div className={`${baseClass}__block-actions`}>
+                      {typeof Actions !== 'undefined' ? (
+                        Actions
+                      ) : (
+                        <>
+                          {(CustomBlock && editButton !== false) || (!CustomBlock && editButton) ? (
+                            <EditButton />
+                          ) : null}
+                          {removeButton !== false && editor.isEditable() ? <RemoveButton /> : null}
+                        </>
                       )}
                     </div>
-                  )}
-
-                  <div className={`${baseClass}__block-actions`}>
-                    {typeof Actions !== 'undefined' ? (
-                      Actions
-                    ) : (
-                      <>
-                        {(CustomBlock && editButton !== false) || (!CustomBlock && editButton) ? (
-                          <EditButton />
-                        ) : null}
-                        {removeButton !== false && editor.isEditable() ? <RemoveButton /> : null}
-                      </>
-                    )}
                   </div>
-                </div>
+                )
               }
               isCollapsed={isCollapsed}
               key={0}

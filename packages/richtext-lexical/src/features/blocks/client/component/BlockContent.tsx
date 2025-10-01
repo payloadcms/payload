@@ -27,6 +27,13 @@ export type BlockCollapsibleProps = {
    */
   editButton?: boolean
   /**
+   * Replace the entire collapsible header with custom content.
+   * If this is set, the following properties are ignored: `Actions`, `editButton`, `removeButton`, `Label`, `Pill`, `disableBlockName`
+   *
+   * @todo for 4.0: replace this with Header: { Components: {}, Component: {}} and scope all components part of the header to this single property
+   */
+  Header?: React.ReactNode
+  /**
    * Replace the default Label component with a custom Label
    */
   Label?: React.ReactNode
