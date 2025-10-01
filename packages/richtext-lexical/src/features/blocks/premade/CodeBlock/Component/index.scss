@@ -68,9 +68,14 @@
   }
 
   .copy-to-clipboard,
+  .code-block-collapse-button,
   .popup-button {
     border-radius: $style-radius-s;
     color: var(--theme-elevation-500);
+    min-width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover {
       color: var(--theme-elevation-800);
