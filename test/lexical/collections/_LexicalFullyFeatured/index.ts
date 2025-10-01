@@ -45,14 +45,20 @@ export const LexicalFullyFeatured: CollectionConfig = {
                 typescript: {
                   fetchTypes: [
                     {
-                      url: 'https://unpkg.com/payload@latest/dist/index.d.ts',
+                      url: 'https://unpkg.com/payload@3.59.0-internal.8435f3c/dist/index.bundled.d.ts',
                       filePath: 'file:///node_modules/payload/index.d.ts',
+                    },
+                    {
+                      url: 'https://unpkg.com/@types/react@19.1.17/index.d.ts',
+                      filePath: 'file:///node_modules/@types/react/index.d.ts',
                     },
                   ],
                   paths: {
                     payload: ['file:///node_modules/payload/index.d.ts'],
+                    react: ['file:///node_modules/@types/react/index.d.ts'],
                   },
                   typeRoots: ['node_modules/@types', 'node_modules/payload'],
+                  enableSemanticValidation: true,
                 },
               }),
 

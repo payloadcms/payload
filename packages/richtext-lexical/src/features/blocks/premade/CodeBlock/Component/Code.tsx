@@ -94,6 +94,11 @@ export const CodeComponent: React.FC<AdditionalCodeComponentProps & CodeFieldCli
       admin: {
         ...field.admin,
         editorOptions: {},
+        editorProps: {
+          // If typescript is set, @monaco-editor/react needs to set the URI to a .ts or .tsx file when it calls createModel().
+          // This is done through the `defaultPath` prop.
+          defaultPath: language === 'ts' ? 'file.tsx' : undefined,
+        },
         language,
       },
     }),
@@ -130,16 +135,21 @@ export const CodeComponent: React.FC<AdditionalCodeComponentProps & CodeFieldCli
           monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             allowNonTsExtensions: true,
             // Set module resolution to NodeJs to enable autocompletion
-            jsx: 4, // React JSX
+            allowJs: true,
+            allowSyntheticDefaultImports: true,
+            esModuleInterop: true,
+            jsx: monaco.languages.typescript.JsxEmit.React,
             moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+            noEmit: true,
             paths: typescript?.paths,
+            reactNamespace: 'React',
             target: monaco.languages.typescript.ScriptTarget[
               typescript?.target ?? ('ESNext' as any)
             ] as any,
             typeRoots: typescript?.typeRoots ?? ['node_modules/@types'],
           })
 
-          monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+          monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
             noSemanticValidation: typescript?.enableSemanticValidation ? false : true,
             noSyntaxValidation: false,
           })
