@@ -57,7 +57,7 @@ export async function Footer() {
           <p>Designed in Michigan</p>
           <p className="md:ml-auto">
             <a className="text-black dark:text-white" href="https://payloadcms.com">
-              Crafted by Prayload
+              Crafted by Payload
             </a>
           </p>
         </div>
