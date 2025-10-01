@@ -82,19 +82,21 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
           onMouseEnter={() => setHoveringToggle(true)}
           onMouseLeave={() => setHoveringToggle(false)}
         >
-          <button
-            className={[
-              `${baseClass}__toggle`,
-              `${baseClass}__toggle--${isCollapsed ? 'collapsed' : 'open'}`,
-              disableHeaderToggle && `toggle-disabled`,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            onClick={disableHeaderToggle ? undefined : toggleCollapsible}
-            type="button"
-          >
-            <span>{t('fields:toggleBlock')}</span>
-          </button>
+          {!disableHeaderToggle && (
+            <button
+              className={[
+                `${baseClass}__toggle`,
+                `${baseClass}__toggle--${isCollapsed ? 'collapsed' : 'open'}`,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              onClick={toggleCollapsible}
+              type="button"
+            >
+              <span>{t('fields:toggleBlock')}</span>
+            </button>
+          )}
+
           {dragHandleProps && (
             <div
               className={`${baseClass}__drag`}

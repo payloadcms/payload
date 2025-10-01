@@ -2,7 +2,6 @@
 import type {} from 'payload'
 
 import {
-  Button,
   ChevronIcon,
   CopyToClipboard,
   Popup,
@@ -18,7 +17,6 @@ import './index.scss'
 import type { AdditionalCodeComponentProps } from './Code.js'
 
 import { CodeBlockIcon } from '../../../../../lexical/ui/icons/CodeBlock/index.js'
-import { CollapseIcon } from '../../../../../lexical/ui/icons/Collapse/index.js'
 import { useBlockComponentContext } from '../../../client/component/BlockContent.js'
 import { Collapse } from './Collapse/index.js'
 
