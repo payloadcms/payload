@@ -13,6 +13,7 @@ export const defaultESLintIgnores = [
   '**/tsconfig.tsbuildinfo',
   '**/README.md',
   '**/eslint.config.js',
+  '**/rollup.dts.config.mjs',
   '**/payload-types.ts',
   '**/dist/',
   '**/.yarn/',
