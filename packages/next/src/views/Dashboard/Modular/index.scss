@@ -61,8 +61,8 @@
             bottom: 3px;
             width: 8px;
             height: 8px;
-            border-right: 2px solid rgba(0, 0, 0, 0.4);
-            border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+            border-right: 2px solid var(--theme-elevation-300);
+            border-bottom: 2px solid var(--theme-elevation-300);
             border-bottom-right-radius: 1px;
           }
         }
@@ -80,8 +80,8 @@
             bottom: 3px;
             width: 8px;
             height: 8px;
-            border-left: 2px solid rgba(0, 0, 0, 0.4);
-            border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+            border-left: 2px solid var(--theme-elevation-300);
+            border-bottom: 2px solid var(--theme-elevation-300);
             border-bottom-left-radius: 1px;
           }
         }
@@ -99,8 +99,8 @@
             top: 3px;
             width: 8px;
             height: 8px;
-            border-right: 2px solid rgba(0, 0, 0, 0.4);
-            border-top: 2px solid rgba(0, 0, 0, 0.4);
+            border-right: 2px solid var(--theme-elevation-300);
+            border-top: 2px solid var(--theme-elevation-300);
             border-top-right-radius: 1px;
           }
         }
@@ -118,8 +118,8 @@
             top: 3px;
             width: 8px;
             height: 8px;
-            border-left: 2px solid rgba(0, 0, 0, 0.4);
-            border-top: 2px solid rgba(0, 0, 0, 0.4);
+            border-left: 2px solid var(--theme-elevation-300);
+            border-top: 2px solid var(--theme-elevation-300);
             border-top-left-radius: 1px;
           }
         }
@@ -141,7 +141,7 @@
             transform: translateX(-50%);
             width: 16px;
             height: 2px;
-            background: rgba(0, 0, 0, 0.4);
+            background: var(--theme-elevation-300);
             border-radius: 1px;
           }
         }
@@ -163,7 +163,7 @@
             transform: translateX(-50%);
             width: 16px;
             height: 2px;
-            background: rgba(0, 0, 0, 0.4);
+            background: var(--theme-elevation-300);
             border-radius: 1px;
           }
         }
@@ -185,7 +185,7 @@
             transform: translateY(-50%);
             width: 2px;
             height: 16px;
-            background: rgba(0, 0, 0, 0.4);
+            background: var(--theme-elevation-300);
             border-radius: 1px;
           }
         }
@@ -207,7 +207,7 @@
             transform: translateY(-50%);
             width: 2px;
             height: 16px;
-            background: rgba(0, 0, 0, 0.4);
+            background: var(--theme-elevation-300);
             border-radius: 1px;
           }
         }
