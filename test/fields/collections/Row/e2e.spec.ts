@@ -224,8 +224,49 @@ describe('Row', () => {
       getComputedStyle(el).getPropertyValue('--field-width').trim(),
     )
 
-    expect(leftVar).toBe('50%')
-    expect(rightVar).toBe('50%')
+    await expect(() => {
+      expect(leftVar).toBe('50%')
+      expect(rightVar).toBe('50%')
+    }).toPass()
+
+    // Also assert inline style contains the var (robust to other inline styles)
+    await expect(left).toHaveAttribute('style', /--field-width:\s*50%/)
+    await expect(right).toHaveAttribute('style', /--field-width:\s*50%/)
+
+    // 2) Layout reflects the widths (same row, equal widths)
+    const leftBox = await left.boundingBox()
+    const rightBox = await right.boundingBox()
+
+    await expect(() => {
+      // Same row
+      expect(Math.round(leftBox.y)).toEqual(Math.round(rightBox.y))
+      // Equal width (tolerate sub-pixel differences)
+      expect(Math.round(leftBox.width)).toEqual(Math.round(rightBox.width))
+    }).toPass()
+  })
+
+  test('should respect admin.width for array fields inside a row', async () => {
+    await page.goto(url.create)
+
+    // Target the Array field wrappers
+    const left = page.locator('#field-arrayLeftColumn')
+    const right = page.locator('#field-arrayRightColumn')
+
+    await expect(left).toBeVisible()
+    await expect(right).toBeVisible()
+
+    // 1) CSS variable is applied (via mergeFieldStyles)
+    const leftVar = await left.evaluate((el) =>
+      getComputedStyle(el).getPropertyValue('--field-width').trim(),
+    )
+    const rightVar = await right.evaluate((el) =>
+      getComputedStyle(el).getPropertyValue('--field-width').trim(),
+    )
+
+    await expect(() => {
+      expect(leftVar).toBe('50%')
+      expect(rightVar).toBe('50%')
+    }).toPass()
 
     // Also assert inline style contains the var (robust to other inline styles)
     await expect(left).toHaveAttribute('style', /--field-width:\s*50%/)

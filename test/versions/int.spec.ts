@@ -395,6 +395,56 @@ describe('Versions', () => {
         })
         expect(resFromVersions?.version.blocks[0]?.array[0]?.relationship).toEqual(post.id)
       })
+
+      it('should not create new versions with autosave:true', async () => {
+        const post = await payload.create({
+          collection: 'autosave-posts',
+          data: { title: 'post', description: 'description', _status: 'draft' },
+          draft: true,
+        })
+
+        await payload.update({
+          collection: 'autosave-posts',
+          id: post.id,
+          draft: true,
+          autosave: true,
+          data: { title: 'autosave' },
+        })
+
+        const getVersionsCount = async () => {
+          const { totalDocs: versionsCount } = await payload.countVersions({
+            collection: 'autosave-posts',
+            where: {
+              parent: { equals: post.id },
+            },
+          })
+
+          return versionsCount
+        }
+
+        expect(await getVersionsCount()).toBe(2)
+
+        // id
+        await payload.update({
+          collection: 'autosave-posts',
+          id: post.id,
+          draft: true,
+          autosave: true,
+          data: { title: 'post-updated-1' },
+        })
+
+        expect(await getVersionsCount()).toBe(2)
+
+        // where
+        await payload.update({
+          collection: 'autosave-posts',
+          where: { id: { equals: post.id } },
+          draft: true,
+          autosave: true,
+          data: { title: 'post-updated-2' },
+        })
+        expect(await getVersionsCount()).toBe(2)
+      })
     })
 
     describe('Restore', () => {

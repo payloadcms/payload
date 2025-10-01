@@ -678,15 +678,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
               if (result) {
                 if (isRelatedToManyCollections) {
-                  results[i] = {
+                  results.push({
                     relationTo: collectionSlug,
                     value: {
                       ...result,
                       collection: collectionSlug,
                     },
-                  }
+                  })
                 } else {
-                  results[i] = result
+                  results.push(result)
                 }
               }
             }
@@ -1081,15 +1081,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
             if (result) {
               if (isRelatedToManyCollections) {
-                results[i] = {
+                results.push({
                   relationTo: collectionSlug,
                   value: {
                     ...result,
                     collection: collectionSlug,
                   },
-                }
+                })
               } else {
-                results[i] = result
+                results.push(result)
               }
             }
           }
