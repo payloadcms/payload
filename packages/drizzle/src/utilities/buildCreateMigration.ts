@@ -116,19 +116,20 @@ export const buildCreateMigration = ({
       fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
     }
 
+    const data = getMigrationTemplate({
+      downSQL: downSQL || `  // Migration code`,
+      imports,
+      packageName: payload.db.packageName,
+      upSQL: upSQL || `  // Migration code`,
+    })
+
+    const fullPath = `${filePath}.ts`
+
     // write migration
-    fs.writeFileSync(
-      `${filePath}.ts`,
-      getMigrationTemplate({
-        downSQL: downSQL || `  // Migration code`,
-        imports,
-        packageName: payload.db.packageName,
-        upSQL: upSQL || `  // Migration code`,
-      }),
-    )
+    fs.writeFileSync(fullPath, data)
 
     writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
 
-    payload.logger.info({ msg: `Migration created at ${filePath}.ts` })
+    payload.logger.info({ msg: `Migration created at ${fullPath}` })
   }
 }

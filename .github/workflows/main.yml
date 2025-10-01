@@ -286,6 +286,12 @@ jobs:
           - group-by
           - folders
           - hooks
+          - lexical__collections___LexicalFullyFeatured
+          - lexical__collections___LexicalFullyFeatured__db
+          - lexical__collections__LexicalHeadingFeature
+          - lexical__collections__LexicalJSXConverter
+          - lexical__collections__LexicalLinkFeature
+          - lexical__collections__OnDemandForm
           - lexical__collections__Lexical__e2e__main
           - lexical__collections__Lexical__e2e__blocks
           - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts
@@ -424,6 +430,12 @@ jobs:
           - group-by
           - folders
           - hooks
+          - lexical__collections___LexicalFullyFeatured
+          - lexical__collections___LexicalFullyFeatured__db
+          - lexical__collections__LexicalHeadingFeature
+          - lexical__collections__LexicalJSXConverter
+          - lexical__collections__LexicalLinkFeature
+          - lexical__collections__OnDemandForm
           - lexical__collections__Lexical__e2e__main
           - lexical__collections__Lexical__e2e__blocks
           - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts

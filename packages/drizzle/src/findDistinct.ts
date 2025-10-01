@@ -1,5 +1,4 @@
-import type { FindDistinct, SanitizedCollectionConfig } from 'payload'
-
+import { type FindDistinct, getFieldByPath, type SanitizedCollectionConfig } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, GenericColumn } from './types.js'
@@ -57,11 +56,31 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     },
     selectFields: {
       _selected: selectFields['_selected'],
-      ...(orderBy[0].column === selectFields['_selected'] ? {} : { _order: orderBy[0].column }),
+      ...(orderBy.length &&
+        (orderBy[0].column === selectFields['_selected'] ? {} : { _order: orderBy[0]?.column })),
     } as Record<string, GenericColumn>,
     tableName,
     where,
   })
+
+  const field = getFieldByPath({
+    fields: collectionConfig.flattenedFields,
+    path: args.field,
+  })?.field
+
+  if (field && 'relationTo' in field && Array.isArray(field.relationTo)) {
+    for (const row of selectDistinctResult as any) {
+      const json = JSON.parse(row._selected)
+      const relationTo = Object.keys(json).find((each) => Boolean(json[each]))
+      const value = json[relationTo]
+
+      if (!value) {
+        row._selected = null
+      } else {
+        row._selected = { relationTo, value }
+      }
+    }
+  }
 
   const values = selectDistinctResult.map((each) => ({
     [args.field]: (each as Record<string, any>)._selected,

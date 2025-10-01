@@ -24,6 +24,21 @@ export const syncDocAsSearchIndex = async ({
     },
     title,
   }
+  const docKey = `${collection}:${id}`
+  const syncedDocsSet = (req.context?.syncedDocsSet as Set<string>) || new Set<string>()
+
+  if (syncedDocsSet.has(docKey)) {
+    /*
+     * prevents duplicate syncing of documents in the same request
+     * this can happen when hooks call `payload.update` within the create lifecycle
+     * like the nested-docs plugin does
+     */
+    return doc
+  } else {
+    syncedDocsSet.add(docKey)
+  }
+
+  req.context.syncedDocsSet = syncedDocsSet
 
   if (typeof beforeSync === 'function') {
     let docToSyncWith = doc

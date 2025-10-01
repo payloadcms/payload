@@ -128,8 +128,38 @@ export const getConfig: () => Partial<Config> = () => ({
         },
         {
           type: 'relationship',
+          relationTo: 'categories',
+          hasMany: true,
+          name: 'categories',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['categories'],
+          name: 'categoryPoly',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['categories'],
+          hasMany: true,
+          name: 'categoryPolyMany',
+        },
+        {
+          type: 'relationship',
           relationTo: 'categories-custom-id',
           name: 'categoryCustomID',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['categories', 'simple'],
+          hasMany: true,
+          name: 'polymorphicRelations',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['categories', 'simple'],
+          hasMany: true,
+          localized: true,
+          name: 'localizedPolymorphicRelations',
         },
         {
           name: 'localized',
@@ -168,6 +198,32 @@ export const getConfig: () => Partial<Config> = () => ({
                   ],
                 },
               ],
+            },
+          ],
+        },
+        {
+          type: 'group',
+          name: 'testNestedGroup',
+          fields: [
+            {
+              name: 'nestedLocalizedPolymorphicRelation',
+              type: 'relationship',
+              relationTo: ['categories', 'simple'],
+              hasMany: true,
+              localized: true,
+            },
+            {
+              name: 'nestedLocalizedText',
+              type: 'text',
+              localized: true,
+            },
+            {
+              name: 'nestedText1',
+              type: 'text',
+            },
+            {
+              name: 'nestedText2',
+              type: 'text',
             },
           ],
         },
@@ -602,6 +658,16 @@ export const getConfig: () => Partial<Config> = () => ({
           virtual: 'post.title',
         },
         {
+          name: 'postsTitles',
+          type: 'text',
+          virtual: 'posts.title',
+        },
+        {
+          name: 'postCategoriesTitles',
+          type: 'text',
+          virtual: 'post.categories.title',
+        },
+        {
           name: 'postTitleHidden',
           type: 'text',
           virtual: 'post.title',
@@ -636,6 +702,12 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'post',
           type: 'relationship',
           relationTo: 'posts',
+        },
+        {
+          name: 'posts',
+          type: 'relationship',
+          relationTo: 'posts',
+          hasMany: true,
         },
         {
           name: 'customID',

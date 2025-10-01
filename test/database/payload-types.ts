@@ -197,7 +197,36 @@ export interface Post {
   id: string;
   title: string;
   category?: (string | null) | Category;
+  categories?: (string | Category)[] | null;
+  categoryPoly?: {
+    relationTo: 'categories';
+    value: string | Category;
+  } | null;
+  categoryPolyMany?:
+    | {
+        relationTo: 'categories';
+        value: string | Category;
+      }[]
+    | null;
   categoryCustomID?: (number | null) | CategoriesCustomId;
+  polymorphicRelations?:
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | {
+        relationTo: 'simple';
+        value: string | Simple;
+      })[]
+    | null;
+  localizedPolymorphicRelations?:
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | {
+        relationTo: 'simple';
+        value: string | Simple;
+      })[]
+    | null;
   localized?: string | null;
   text?: string | null;
   number?: number | null;
@@ -222,6 +251,20 @@ export interface Post {
         D4?: string | null;
       };
     };
+  };
+  testNestedGroup?: {
+    nestedLocalizedPolymorphicRelation?:
+      | ({
+          relationTo: 'categories';
+          value: string | Category;
+        } | {
+          relationTo: 'simple';
+          value: string | Simple;
+        })[]
+      | null;
+    nestedLocalizedText?: string | null;
+    nestedText1?: string | null;
+    nestedText2?: string | null;
   };
   hasTransaction?: boolean | null;
   throwAfterChange?: boolean | null;
@@ -326,7 +369,7 @@ export interface RelationA {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -352,7 +395,7 @@ export interface RelationB {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -449,6 +492,8 @@ export interface Place {
 export interface VirtualRelation {
   id: string;
   postTitle?: string | null;
+  postsTitles?: string[] | null;
+  postCategoriesTitles?: string[] | null;
   postTitleHidden?: string | null;
   postCategoryTitle?: string | null;
   postCategoryID?:
@@ -472,6 +517,7 @@ export interface VirtualRelation {
     | null;
   postLocalized?: string | null;
   post?: (string | null) | Post;
+  posts?: (string | Post)[] | null;
   customID?: (string | null) | CustomId;
   customIDValue?: string | null;
   updatedAt: string;
@@ -822,7 +868,12 @@ export interface CategoriesCustomIdSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  categories?: T;
+  categoryPoly?: T;
+  categoryPolyMany?: T;
   categoryCustomID?: T;
+  polymorphicRelations?: T;
+  localizedPolymorphicRelations?: T;
   localized?: T;
   text?: T;
   number?: T;
@@ -1044,6 +1095,8 @@ export interface PlacesSelect<T extends boolean = true> {
  */
 export interface VirtualRelationsSelect<T extends boolean = true> {
   postTitle?: T;
+  postsTitles?: T;
+  postCategoriesTitles?: T;
   postTitleHidden?: T;
   postCategoryTitle?: T;
   postCategoryID?: T;
@@ -1051,6 +1104,7 @@ export interface VirtualRelationsSelect<T extends boolean = true> {
   postID?: T;
   postLocalized?: T;
   post?: T;
+  posts?: T;
   customID?: T;
   customIDValue?: T;
   updatedAt?: T;
@@ -1401,6 +1455,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
