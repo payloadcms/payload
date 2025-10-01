@@ -130,7 +130,7 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
   fetch: typeof fetch
   constructor(args: Args) {
     this.baseURL = args.baseURL
-    this.fetch = args.fetch ?? globalThis.fetch
+    this.fetch = args.fetch ?? globalThis.fetch.bind(globalThis)
     this.baseInit = args.baseInit ?? {}
   }
 
