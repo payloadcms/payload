@@ -30,6 +30,14 @@ export type AdditionalCodeComponentProps = {
    */
   typescript?: {
     /**
+     * By default, the editor will not perform semantic validation. This means that
+     * while syntax errors will be highlighted, other issues like missing imports or incorrect
+     * types will not be.
+     *
+     * @default false
+     */
+    enableSemanticValidation?: boolean
+    /**
      * Additional types to fetch and include in the editor for autocompletion.
      *
      * For example, to include types for payload, you would set this to
@@ -122,6 +130,7 @@ export const CodeComponent: React.FC<AdditionalCodeComponentProps & CodeFieldCli
           monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             allowNonTsExtensions: true,
             // Set module resolution to NodeJs to enable autocompletion
+            jsx: 4, // React JSX
             moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
             paths: typescript?.paths,
             target: monaco.languages.typescript.ScriptTarget[
@@ -129,6 +138,12 @@ export const CodeComponent: React.FC<AdditionalCodeComponentProps & CodeFieldCli
             ] as any,
             typeRoots: typescript?.typeRoots ?? ['node_modules/@types'],
           })
+
+          monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+            noSemanticValidation: typescript?.enableSemanticValidation ? false : true,
+            noSyntaxValidation: false,
+          })
+
           const run = async () => {
             if (
               typescript?.fetchTypes &&
