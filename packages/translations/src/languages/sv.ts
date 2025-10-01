@@ -542,6 +542,7 @@ export const svTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Du kommer återställa det här dokumentets ändringar till dess publicerade tillstånd. Är du säker?',
     aboutToUnpublish: 'Du kommer avpublicera detta dokument. Är du säker?',
+    aboutToUnpublishIn: 'Du håller på att avpublicera detta dokument i {{locale}}. Är du säker?',
     aboutToUnpublishSelection:
       'Du är på väg att avpublicera alla {{label}} i urvalet. Är du säker?',
     autosave: 'Spara automatiskt',
@@ -588,6 +589,7 @@ export const svTranslations: DefaultTranslationsObject = {
     restoring: 'Återställer...',
     reverting: 'Återställer...',
     revertToPublished: 'Återgå till publicerad',
+    revertUnsuccessful: 'Återställning misslyckades. Ingen tidigare publicerad version hittades.',
     saveDraft: 'Spara Utkast',
     scheduledSuccessfully: 'Schemalagd',
     schedulePublish: 'Schemalägg publicering',
@@ -598,6 +600,8 @@ export const svTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifik version',
     status: 'Status',
     unpublish: 'Avpublicera',
+    unpublishedSuccessfully: 'Ej publicerad framgångsrikt.',
+    unpublishIn: 'Avpublicera i {{locale}}',
     unpublishing: 'Avpublicerar...',
     version: 'Version',
     versionAgo: '{{distance}} sedan',

@@ -542,6 +542,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'このデータの変更を公開時の状態に戻そうとしています。よろしいですか？',
     aboutToUnpublish: 'このデータを非公開にしようとしています。よろしいですか？',
+    aboutToUnpublishIn:
+      'あなたはこのドキュメントを{{locale}}で非公開にする予定です。よろしいですか？',
     aboutToUnpublishSelection:
       '選択したすべての{{label}}の公開を取り消そうとしています。よろしいですか？',
     autosave: '自動保存',
@@ -588,6 +590,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     restoring: '復元しています...',
     reverting: '内容を戻しています...',
     revertToPublished: '公開時の内容に戻す',
+    revertUnsuccessful:
+      '元に戻す操作に失敗しました。以前に公開されたバージョンが見つかりませんでした。',
     saveDraft: 'ドラフトを保存',
     scheduledSuccessfully: '正常にスケジュールされました。',
     schedulePublish: 'スケジュール公開',
@@ -598,6 +602,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     specificVersion: '特定のバージョン',
     status: 'ステータス',
     unpublish: '非公開',
+    unpublishedSuccessfully: '公開停止が成功しました。',
+    unpublishIn: '{{locale}}で非公開にする',
     unpublishing: '非公開中...',
     version: 'バージョン',
     versionAgo: '{{distance}}前',

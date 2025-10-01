@@ -542,6 +542,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Jūs grasāties atsaukt šī dokumenta izmaiņas uz publicēto versiju. Vai esat pārliecināts?',
     aboutToUnpublish: 'Jūs grasāties atcelt šī dokumenta publicēšanu. Vai esat pārliecināts?',
+    aboutToUnpublishIn:
+      'Jūs tūlīt noņemsiet šo dokumentu no publicēšanas {{locale}}. Vai esat pārliecināts?',
     aboutToUnpublishSelection:
       'Jūs grasāties atcelt publicēšanu visiem {{label}} izvēlētajā sarakstā. Vai esat pārliecināts?',
     autosave: 'Automātiskā saglabāšana',
@@ -588,6 +590,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     restoring: 'Atjauno...',
     reverting: 'Atgriež...',
     revertToPublished: 'Atgriezt uz publicēto',
+    revertUnsuccessful: 'Atcelšana neizdevās. Iepriekš publicēta versija nav atrasta.',
     saveDraft: 'Saglabāt melnrakstu',
     scheduledSuccessfully: 'Veiksmīgi ieplānots.',
     schedulePublish: 'Ieplānot publicēšanu',
@@ -598,6 +601,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     specificVersion: 'Konkrētā versija',
     status: 'Statuss',
     unpublish: 'Atcelt publicēšanu',
+    unpublishedSuccessfully: 'Veiksmīgi nepublicēts.',
+    unpublishIn: 'Nepublicēt {{locale}}',
     unpublishing: 'Atceļ publicēšanu...',
     version: 'Versija',
     versionAgo: '{{distance}} pirms',

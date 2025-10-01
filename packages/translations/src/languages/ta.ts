@@ -543,6 +543,8 @@ export const taTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'இந்த ஆவணத்தின் மாற்றங்களை வெளியிடப்பட்ட நிலைக்கு மாற்றப்போகிறீர்கள். உறுதியா?',
     aboutToUnpublish: 'இந்த ஆவணத்தை வெளியிடாமல் செய்யப் போகிறீர்கள். உறுதியா?',
+    aboutToUnpublishIn:
+      'நீங்கள் இந்த ஆவணத்தை {{locale}}-இல் வெளியீடு செய்யதேவையாக உள்ளீர்கள். நீங்கள் உறுதியாக உள்ளீர்களா?',
     aboutToUnpublishSelection:
       'நீங்கள் தேர்வில் உள்ள அனைத்து {{label}}-ஐ வெளியிடாமல் செய்யப் போகிறீர்கள். உறுதியா?',
     autosave: 'தானியங்க சேமிப்பு',
@@ -589,6 +591,8 @@ export const taTranslations: DefaultTranslationsObject = {
     restoring: 'மீட்டமைக்கப்படுகிறது...',
     reverting: 'மாற்றப்படுகிறது...',
     revertToPublished: 'வெளியிடப்பட்ட நிலைக்கு மாற்று',
+    revertUnsuccessful:
+      'திரும்பப் பெற முடியவில்லை. முன்னர் வெளியிடப்பட்ட பதிப்புகள் எதுவும் காணப்படவில்லை.',
     saveDraft: 'வரைவை சேமிக்கவும்',
     scheduledSuccessfully: 'அட்டவணைப்படுத்தப்பட்டது வெற்றிகரமாக.',
     schedulePublish: 'வெளியீட்டை அட்டவணைப்படுத்தவும்',
@@ -599,6 +603,8 @@ export const taTranslations: DefaultTranslationsObject = {
     specificVersion: 'குறிப்பிட்ட பதிப்பு',
     status: 'நிலை',
     unpublish: 'வெளியீட்டை நீக்கு',
+    unpublishedSuccessfully: 'வெற்றிகரமாக வெளியீடு நிறுத்தப்பட்டது.',
+    unpublishIn: '{{locale}} இல் வெளியீட்டை அவிழ்க்க',
     unpublishing: 'வெளியீடு நீக்கப்படுகிறது...',
     version: 'பதிப்பு',
     versionAgo: '{{distance}} முன்பு',

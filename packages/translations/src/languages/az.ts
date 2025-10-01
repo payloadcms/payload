@@ -545,6 +545,8 @@ export const azTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Bu sənədin dəyişikliklərini dərc edilmiş vəziyyətinə qaytarmağa hazırsınız. Əminsiniz?',
     aboutToUnpublish: 'Bu sənədi dərcdən çıxartmağa hazırsınız. Əminsiniz?',
+    aboutToUnpublishIn:
+      'Siz bu sənədi {{locale}} dildə nəşr etməyi dayandırmaq ətrafında deyilsiniz. Eminsinizmi?',
     aboutToUnpublishSelection:
       'Seçimdə olan bütün {{label}}-i dərcdən çıxartmağa hazırsınız. Əminsiniz?',
     autosave: 'Avtomatik yadda saxlama',
@@ -591,6 +593,7 @@ export const azTranslations: DefaultTranslationsObject = {
     restoring: 'Bərpa olunur...',
     reverting: 'Qayıdılır...',
     revertToPublished: 'Dərc edilmişə qayıt',
+    revertUnsuccessful: 'Əvvəlki dərc olunmuş versiya tapılmadı. Geri dönmə uğursuz oldu.',
     saveDraft: 'Qaralamayı yadda saxla',
     scheduledSuccessfully: 'Uğurla cədvələ qoyuldu.',
     schedulePublish: 'Nəşr Cədvəli',
@@ -601,6 +604,8 @@ export const azTranslations: DefaultTranslationsObject = {
     specificVersion: 'Xüsusi Versiya',
     status: 'Status',
     unpublish: 'Dərcdən çıxart',
+    unpublishedSuccessfully: 'Uğurla dərc olunmadı.',
+    unpublishIn: '{{locale}} dilində yayınlanmaması',
     unpublishing: 'Dərcdən çıxarılır...',
     version: 'Versiya',
     versionAgo: '{{distance}} əvvəl',

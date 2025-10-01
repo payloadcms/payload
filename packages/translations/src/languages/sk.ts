@@ -540,6 +540,8 @@ export const skTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Chystáte sa vrátiť zmeny tohto dokumentu do jeho publikovaného stavu. Ste si istý?',
     aboutToUnpublish: 'Chystáte sa zrušiť publikovanie tohto dokumentu. Ste si istý?',
+    aboutToUnpublishIn:
+      'Chystáte sa zrušiť publikovanie tohto dokumentu v {{locale}}. Ste si istý?',
     aboutToUnpublishSelection:
       'Chystáte sa zrušiť publikovanie všetkých {{label}} vo výbere. Ste si istý?',
     autosave: 'Automatické uloženie',
@@ -586,6 +588,7 @@ export const skTranslations: DefaultTranslationsObject = {
     restoring: 'Obnovovanie...',
     reverting: 'Vracanie...',
     revertToPublished: 'Vrátiť sa k publikovanému',
+    revertUnsuccessful: 'Vrátenie neúspešné. Nebola nájdená žiadna predtým publikovaná verzia.',
     saveDraft: 'Uložiť návrh',
     scheduledSuccessfully: 'Úspešne naplánované.',
     schedulePublish: 'Naplánovať publikovanie',
@@ -596,6 +599,8 @@ export const skTranslations: DefaultTranslationsObject = {
     specificVersion: 'Špecifická verzia',
     status: 'Stav',
     unpublish: 'Zrušiť publikovanie',
+    unpublishedSuccessfully: 'Úspešne nezverejnené.',
+    unpublishIn: 'Zrušiť publikovanie v {{locale}}',
     unpublishing: 'Zrušujem publikovanie...',
     version: 'Verzia',
     versionAgo: 'pred {{distance}}',

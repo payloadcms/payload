@@ -553,6 +553,8 @@ export const deTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Du bist dabei, dieses Dokument auf den Stand des ersten Veröffentlichungsdatums zurückzusetzen. Bist du sicher?',
     aboutToUnpublish: 'Du bist dabei dieses Dokument auf Entwurf zu setzen. Bist du dir sicher?',
+    aboutToUnpublishIn:
+      'Sie sind dabei, dieses Dokument in {{locale}} zu entveröffentlichen. Sind Sie sicher?',
     aboutToUnpublishSelection:
       'Du bist dabei, die Veröffentlichung aller {{label}} in der Auswahl aufzuheben. Bist du dir sicher?',
     autosave: 'Automatische Speicherung',
@@ -599,6 +601,8 @@ export const deTranslations: DefaultTranslationsObject = {
     restoring: 'Wiederherstellen...',
     reverting: 'Zurücksetzen...',
     revertToPublished: 'Auf veröffentlichte Version zurücksetzen',
+    revertUnsuccessful:
+      'Rückgängig machen fehlgeschlagen. Keine zuvor veröffentlichte Version gefunden.',
     saveDraft: 'Entwurf speichern',
     scheduledSuccessfully: 'Erfolgreich geplant.',
     schedulePublish: 'Veröffentlichungsplan',
@@ -609,6 +613,8 @@ export const deTranslations: DefaultTranslationsObject = {
     specificVersion: 'Spezifische Version',
     status: 'Status',
     unpublish: 'Veröffentlichung aufheben',
+    unpublishedSuccessfully: 'Erfolgreich nicht veröffentlicht.',
+    unpublishIn: 'Nicht veröffentlichen in {{locale}}',
     unpublishing: 'Veröffentlichung aufheben...',
     version: 'Version',
     versionAgo: 'vor {{distance}}',

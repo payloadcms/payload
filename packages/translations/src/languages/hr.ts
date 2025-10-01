@@ -539,6 +539,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Vratit ćete promjene u dokumentu u objavljeno stanje. Jeste li sigurni? ',
     aboutToUnpublish: 'Poništit ćete objavu ovog dokumenta. Jeste li sigurni?',
+    aboutToUnpublishIn:
+      'Uskoro ćete povući objavljivanje ovog dokumenta na {{locale}}. Jeste li sigurni?',
     aboutToUnpublishSelection:
       'Upravo ćete poništiti objavu svih {{label}} u odabiru. Jeste li sigurni?',
     autosave: 'Automatsko spremanje',
@@ -586,6 +588,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     restoring: 'Vraćanje...',
     reverting: 'Vraćanje...',
     revertToPublished: 'Vrati na objavljeno',
+    revertUnsuccessful: 'Vraćanje neuspješno. Nije pronađena prethodno objavljena verzija.',
     saveDraft: 'Sačuvaj nacrt',
     scheduledSuccessfully: 'Uspješno zakazano.',
     schedulePublish: 'Raspored objavljivanja',
@@ -596,6 +599,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifična verzija',
     status: 'Status',
     unpublish: 'Poništi objavu',
+    unpublishedSuccessfully: 'Uspješno nepobjavljeno.',
+    unpublishIn: 'Povuci objavljivanje na {{locale}}',
     unpublishing: 'Poništavanje objave...',
     version: 'Verzija',
     versionAgo: 'prije {{distance}}',

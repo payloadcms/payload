@@ -551,6 +551,8 @@ export const nlTranslations: DefaultTranslationsObject = {
       'U staat op het punt om de wijzigingen van dit document terug te draaien naar de gepubliceerde staat. Weet u het zeker?',
     aboutToUnpublish:
       'U staat op het punt om de publicatie van dit document ongedaan te maken. Weet u het zeker?',
+    aboutToUnpublishIn:
+      'U staat op het punt dit document in {{locale}} te depubliceren. Weet u het zeker?',
     aboutToUnpublishSelection:
       'You are about to unpublish all {{label}} in the selection. Are you sure?',
     autosave: 'Automatisch bewaren',
@@ -597,6 +599,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     restoring: 'Herstellen...',
     reverting: 'Terugdraaien...',
     revertToPublished: 'Terugdraaien naar gepubliceerde versie',
+    revertUnsuccessful: 'Herstel mislukt. Geen eerder gepubliceerde versie gevonden.',
     saveDraft: 'Bewaar concept',
     scheduledSuccessfully: 'Succesvol gepland.',
     schedulePublish: 'Publicatie plannen',
@@ -607,6 +610,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifieke versie',
     status: 'Status',
     unpublish: 'Publicatie ongedaan maken',
+    unpublishedSuccessfully: 'Met succes niet gepubliceerd.',
+    unpublishIn: 'Depubliceren in {{locale}}',
     unpublishing: 'Publicatie ongedaan maken...',
     version: 'Versie',
     versionAgo: '{{distance}} geleden',
