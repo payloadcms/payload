@@ -131,6 +131,30 @@ export const Relationship: CollectionConfig = {
           relationTo: slug,
           type: 'relationship',
         },
+        {
+          name: 'nestedHasManyRelation',
+          hasMany: true,
+          relationTo: relationOneSlug,
+          type: 'relationship',
+        },
+      ],
+    },
+    {
+      name: 'nestedGroup',
+      type: 'group',
+      label: 'Nested Group',
+      fields: [
+        {
+          name: 'groupTextField',
+          type: 'text',
+          label: 'Group Text Field',
+        },
+        {
+          name: 'groupHasManyRelation',
+          hasMany: true,
+          relationTo: [relationOneSlug, relationTwoSlug],
+          type: 'relationship',
+        },
       ],
     },
     {
