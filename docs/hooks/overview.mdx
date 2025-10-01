@@ -118,7 +118,7 @@ const beforeChange = async ({ data }) => {
 ```ts
 const afterChange = ({ doc }) => {
   // Trigger side-effect without blocking
-  pingAnalyticsService(doc.id)
+  void pingAnalyticsService(doc.id)
   // No return → Payload does not wait
 }
 ```
