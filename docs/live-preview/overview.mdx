@@ -123,13 +123,11 @@ url: ({ data, req }) => `${req.protocol}//${req.host}/${data.slug}`
 
 You can conditionally render Live Preview by returning `undefined` or `null` from the `url` function. This is similar to access control, where you may want to restrict who can use Live Preview based on certain criteria, such as the current user or document data.
 
-For example, you could check the user's role and only enable Live Preview if they have the appropriate permissions.
+For example, you could check the user's role and only enable Live Preview if they have the appropriate permissions:
 
 ```ts
-url: ({ req }) => (req.user?.role === 'admin' ? 'http://localhost:3000' : null)
+url: ({ req }) => (req.user?.role === 'admin' ? '/hello-world' : null)
 ```
-
-This will hide the
 
 ### Breakpoints
 
