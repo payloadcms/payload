@@ -1,6 +1,6 @@
 import type { Layout } from 'react-grid-layout'
 
-import { usePreferences } from '@payloadcms/ui'
+import { toast, usePreferences } from '@payloadcms/ui'
 import React, { useCallback, useState } from 'react'
 
 import type { WidgetInstanceClient } from './client.js'
@@ -14,14 +14,12 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
 
   const saveLayout = useCallback(async () => {
     try {
-      // Convert LayoutItem to react-grid-layout Layout format
       const layoutData: Layout[] = currentLayout.map((item) => item.clientLayout)
-      await setLayoutPreference(layoutData)
       setIsEditing(false)
-      // Reload to get fresh layout from server
-      window.location.reload()
+      await setLayoutPreference(layoutData)
     } catch {
-      // Handle error silently or show user feedback
+      setIsEditing(true)
+      toast.error('Failed to save layout')
     }
   }, [setLayoutPreference, currentLayout])
 
