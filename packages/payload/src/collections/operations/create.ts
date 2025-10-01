@@ -63,6 +63,7 @@ export const createOperation = async <
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    const shouldSaveDraft = Boolean(args.draft && args.collection.config.versions.drafts)
 
     ensureUsernameOrEmail<TSlug>({
       authOptions: args.collection.config.auth,
@@ -83,6 +84,7 @@ export const createOperation = async <
             args,
             collection: args.collection.config,
             context: args.req.context,
+            draft: shouldSaveDraft,
             operation: 'create',
             req: args.req,
           })) || args
@@ -99,7 +101,6 @@ export const createOperation = async <
       collection,
       depth,
       disableVerificationEmail,
-      draft = false,
       duplicateFromID,
       overrideAccess,
       overwriteExistingFiles = false,
@@ -117,8 +118,6 @@ export const createOperation = async <
     } = args
 
     let { data } = args
-
-    const shouldSaveDraft = Boolean(draft && collectionConfig.versions.drafts)
 
     let duplicatedFromDocWithLocales: JsonObject = {}
     let duplicatedFromDoc: JsonObject = {}
@@ -173,6 +172,7 @@ export const createOperation = async <
       context: req.context,
       data,
       doc: duplicatedFromDoc,
+      draft: shouldSaveDraft,
       global: null,
       operation: 'create',
       overrideAccess: overrideAccess!,
@@ -190,6 +190,7 @@ export const createOperation = async <
             collection: collectionConfig,
             context: req.context,
             data,
+            draft: shouldSaveDraft,
             operation: 'create',
             originalDoc: duplicatedFromDoc,
             req,
@@ -208,6 +209,7 @@ export const createOperation = async <
             collection: collectionConfig,
             context: req.context,
             data,
+            draft: shouldSaveDraft,
             operation: 'create',
             originalDoc: duplicatedFromDoc,
             req,
@@ -225,6 +227,7 @@ export const createOperation = async <
       data,
       doc: duplicatedFromDoc,
       docWithLocales: duplicatedFromDocWithLocales,
+      draft: shouldSaveDraft,
       global: null,
       operation: 'create',
       overrideAccess,
@@ -321,7 +324,7 @@ export const createOperation = async <
       context: req.context,
       depth: depth!,
       doc: result,
-      draft,
+      draft: shouldSaveDraft,
       fallbackLocale: fallbackLocale!,
       global: null,
       locale: locale!,
@@ -357,6 +360,7 @@ export const createOperation = async <
       context: req.context,
       data,
       doc: result,
+      draft: shouldSaveDraft,
       global: null,
       operation: 'create',
       previousDoc: {},
@@ -375,6 +379,7 @@ export const createOperation = async <
             context: req.context,
             data,
             doc: result,
+            draft: shouldSaveDraft,
             operation: 'create',
             previousDoc: {},
             req: args.req,

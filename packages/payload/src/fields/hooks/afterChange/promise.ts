@@ -19,6 +19,7 @@ type Args = {
   context: RequestContext
   data: JsonObject
   doc: JsonObject
+  draft: boolean
   field: Field | TabAsField
   fieldIndex: number
   global: null | SanitizedGlobalConfig
@@ -44,6 +45,7 @@ export const promise = async ({
   context,
   data,
   doc,
+  draft,
   field,
   fieldIndex,
   global,
@@ -80,6 +82,7 @@ export const promise = async ({
           collection,
           context,
           data,
+          draft,
           field,
           global,
           indexPath: indexPathSegments,
@@ -118,6 +121,7 @@ export const promise = async ({
               context,
               data,
               doc,
+              draft,
               fields: field.fields,
               global,
               operation,
@@ -162,6 +166,7 @@ export const promise = async ({
                 context,
                 data,
                 doc,
+                draft,
                 fields: block.fields,
                 global,
                 operation,
@@ -193,6 +198,7 @@ export const promise = async ({
         context,
         data,
         doc,
+        draft,
         fields: field.fields,
         global,
         operation,
@@ -218,6 +224,7 @@ export const promise = async ({
           context,
           data,
           doc,
+          draft,
           fields: field.fields,
           global,
           operation,
@@ -238,6 +245,7 @@ export const promise = async ({
           context,
           data,
           doc,
+          draft,
           fields: field.fields,
           global,
           operation,
@@ -273,6 +281,7 @@ export const promise = async ({
             collection,
             context,
             data,
+            draft,
             field,
             global,
             indexPath: indexPathSegments,
@@ -316,6 +325,7 @@ export const promise = async ({
         context,
         data,
         doc,
+        draft,
         fields: field.fields,
         global,
         operation,
@@ -340,6 +350,7 @@ export const promise = async ({
         context,
         data,
         doc,
+        draft,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         global,
         operation,

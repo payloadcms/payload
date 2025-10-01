@@ -97,6 +97,7 @@ export type BeforeOperationHook = (args: {
    */
   collection: SanitizedCollectionConfig
   context: RequestContext
+  draft?: boolean
   /**
    * Hook operation being performed
    */
@@ -109,6 +110,7 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   data?: Partial<T>
+  draft?: boolean
   /**
    * Hook operation being performed
    */
@@ -127,6 +129,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   data: Partial<T>
+  draft?: boolean
   /**
    * Hook operation being performed
    */
@@ -146,6 +149,7 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   data: Partial<T>
   doc: T
+  draft?: boolean
   /**
    * Hook operation being performed
    */
