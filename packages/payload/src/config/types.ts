@@ -172,7 +172,7 @@ export type LivePreviewConfig = {
          */
         payload: Payload
         req: PayloadRequest
-      }) => Promise<string> | string)
+      }) => null | Promise<null | string | undefined> | string | undefined)
     | string
 }
 

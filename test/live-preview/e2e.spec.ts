@@ -164,6 +164,16 @@ describe('Live Preview', () => {
     await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
   })
 
+  test('collection — does not render iframe when live preview url is falsy', async () => {
+    const noURL = new AdminUrlUtil(serverURL, 'no-url')
+    await page.goto(noURL.create)
+    await page.locator('#field-title').fill('No URL')
+    await saveDocAndAssert(page)
+    const toggler = page.locator('button#live-preview-toggler')
+    await expect(toggler).toBeHidden()
+    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+  })
+
   test('collection — retains static URL across edits', async () => {
     const util = new AdminUrlUtil(serverURL, 'static-url')
     await page.goto(util.create)
