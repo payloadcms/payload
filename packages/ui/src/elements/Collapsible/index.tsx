@@ -16,6 +16,10 @@ export { CollapsibleProvider, useCollapsible }
 
 export type CollapsibleProps = {
   actions?: React.ReactNode
+  /**
+   * Components that will be rendered within the collapsible provider but after the wrapper.
+   */
+  AfterCollapsible?: React.ReactNode
   children: React.ReactNode
   className?: string
   collapsibleStyle?: 'default' | 'error'
@@ -37,6 +41,7 @@ export type CollapsibleProps = {
 
 export const Collapsible: React.FC<CollapsibleProps> = ({
   actions,
+  AfterCollapsible,
   children,
   className,
   collapsibleStyle = 'default',
@@ -130,6 +135,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
         <AnimateHeight height={isCollapsed ? 0 : 'auto'}>
           <div className={`${baseClass}__content`}>{children}</div>
         </AnimateHeight>
+        {AfterCollapsible}
       </CollapsibleProvider>
     </div>
   )

@@ -2,6 +2,7 @@
 
 @layer payload-default {
   .collapsible {
+    position: relative;
     --toggle-pad-h: #{base(0.75)};
     --toggle-pad-v: #{base(0.6)};
 

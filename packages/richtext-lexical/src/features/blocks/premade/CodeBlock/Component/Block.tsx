@@ -19,6 +19,7 @@ import type { AdditionalCodeComponentProps } from './Code.js'
 import { CodeBlockIcon } from '../../../../../lexical/ui/icons/CodeBlock/index.js'
 import { useBlockComponentContext } from '../../../client/component/BlockContent.js'
 import { Collapse } from './Collapse/index.js'
+import { FloatingCollapse } from './FloatingCollapse/index.js'
 
 const baseClass = 'payload-richtext-code-block'
 export const CodeBlockBlockComponent: React.FC<
@@ -93,6 +94,7 @@ export const CodeBlockBlockComponent: React.FC<
       }
       className={baseClass}
       collapsibleProps={{
+        AfterCollapsible: <FloatingCollapse />,
         disableHeaderToggle: true,
         disableToggleIndicator: true,
       }}
@@ -102,14 +104,16 @@ export const CodeBlockBlockComponent: React.FC<
         </div>
       }
     >
-      <RenderFields
-        fields={formSchema}
-        forceRender={true}
-        parentIndexPath=""
-        parentPath={''}
-        parentSchemaPath=""
-        permissions={true}
-      />
+      <>
+        <RenderFields
+          fields={formSchema}
+          forceRender={true}
+          parentIndexPath=""
+          parentPath={''}
+          parentSchemaPath=""
+          permissions={true}
+        />
+      </>
     </BlockCollapsible>
   )
 }
