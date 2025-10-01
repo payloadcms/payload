@@ -96,6 +96,7 @@
     "croner": "9.1.0",
     "dataloader": "2.2.3",
     "deepmerge": "4.3.1",
+    "dequal": "2.0.3",
     "file-type": "19.3.0",
     "get-tsconfig": "4.8.1",
     "http-status": "2.1.0",

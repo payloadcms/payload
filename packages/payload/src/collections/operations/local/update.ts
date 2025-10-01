@@ -1,6 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type { AtomicOperations } from '../../../types/atomic.js'
 import type {
   Document,
   PayloadRequest,
@@ -74,6 +75,10 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
   locale?: TypedLocale
+  /**
+   * Atomic operations to perform on the document.
+   */
+  operations?: AtomicOperations<TSlug>
   /**
    * Skip access control.
    * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
@@ -218,6 +223,7 @@ async function updateLocal<
     file,
     filePath,
     limit,
+    operations,
     overrideAccess = true,
     overrideLock,
     overwriteExistingFiles = false,
@@ -250,6 +256,7 @@ async function updateLocal<
     disableTransaction,
     draft,
     limit,
+    operations,
     overrideAccess,
     overrideLock,
     overwriteExistingFiles,

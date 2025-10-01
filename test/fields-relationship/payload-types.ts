@@ -188,9 +188,25 @@ export interface FieldsRelationship {
          * This will filter the relationship options if the filter field in this document is set to "Include me"
          */
         filteredByFieldInArray?: (string | null) | FieldsRelationship;
+        nestedHasManyRelation?: (string | RelationOne)[] | null;
         id?: string | null;
       }[]
     | null;
+  nestedGroup?: {
+    groupTextField?: string | null;
+    groupHasManyRelation?:
+      | (
+          | {
+              relationTo: 'relation-one';
+              value: string | RelationOne;
+            }
+          | {
+              relationTo: 'relation-two';
+              value: string | RelationTwo;
+            }
+        )[]
+      | null;
+  };
   relationshipFilteredAsync?: (string | null) | RelationOne;
   relationshipManyFiltered?:
     | (
@@ -532,7 +548,14 @@ export interface FieldsRelationshipSelect<T extends boolean = true> {
     | T
     | {
         filteredByFieldInArray?: T;
+        nestedHasManyRelation?: T;
         id?: T;
+      };
+  nestedGroup?:
+    | T
+    | {
+        groupTextField?: T;
+        groupHasManyRelation?: T;
       };
   relationshipFilteredAsync?: T;
   relationshipManyFiltered?: T;
