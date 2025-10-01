@@ -76,6 +76,10 @@ export const sanitizePluginConfig = ({ pluginConfig }: Props): SanitizedEcommerc
     config.payments.paymentMethods = []
   }
 
+  if (typeof config.products === 'undefined') {
+    config.products = true
+  }
+
   if (config.products) {
     if (typeof config.products === 'object' && typeof config.products.variants === 'undefined') {
       config.products.variants = true
