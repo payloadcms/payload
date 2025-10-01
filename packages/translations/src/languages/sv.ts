@@ -188,7 +188,7 @@ export const svTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Ta bort mapp',
     folderName: 'Mappnamn',
     folders: 'Mappar',
-    folderTypeDescription: 'Välj vilken typ av samlingsdokument som ska tillåtas i denna mapp.',
+    folderTypeDescription: 'Välj vilka typer av dokument som ska tillåtas i denna mapp.',
     itemHasBeenMoved: '{{title}} har flyttats till {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} har flyttats till rotmappen',
     itemsMovedToFolder: '{{title}} flyttad till {{folderName}}',
