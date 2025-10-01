@@ -8,6 +8,7 @@ import {
   $getSelection,
   $isRangeSelection,
   $setSelection,
+  COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
   createCommand,
   KEY_ARROW_DOWN_COMMAND,
@@ -350,7 +351,7 @@ export function LexicalMenu({
           }
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_HIGH,
       ),
       editor.registerCommand<KeyboardEvent>(
         KEY_ARROW_UP_COMMAND,
@@ -376,7 +377,7 @@ export function LexicalMenu({
           }
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_HIGH,
       ),
       editor.registerCommand<KeyboardEvent>(
         KEY_ESCAPE_COMMAND,
@@ -408,7 +409,7 @@ export function LexicalMenu({
           selectItemAndCleanUp(selectedItem)
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_HIGH,
       ),
       editor.registerCommand(
         KEY_ENTER_COMMAND,
@@ -429,7 +430,7 @@ export function LexicalMenu({
           selectItemAndCleanUp(selectedItem)
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_HIGH,
       ),
     )
   }, [selectItemAndCleanUp, close, editor, groups, selectedItemKey, updateSelectedItem])
