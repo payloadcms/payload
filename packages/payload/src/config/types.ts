@@ -748,9 +748,9 @@ export type WidgetInstance = {
 }
 
 export type DashboardConfig = {
-  // TODO:
-  // defaultLayout?: (args: { req: PayloadRequest }) => Array<WidgetInstance>
-  defaultLayout?: Array<WidgetInstance>
+  defaultLayout?:
+    | ((args: { req: PayloadRequest }) => Array<WidgetInstance> | Promise<Array<WidgetInstance>>)
+    | Array<WidgetInstance>
   widgets: Array<Widget>
 }
 

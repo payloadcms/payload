@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { type WidgetInstance } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -27,10 +28,8 @@ export default buildConfigWithDefaults({
       },
     },
     dashboard: {
-      defaultLayout:
-        // TODO
-        // ({ req: { user } }) =>
-        [
+      defaultLayout: ({ req: { user } }) => {
+        const baseWidgets: WidgetInstance[] = [
           {
             widgetSlug: 'count',
             width: 3,
@@ -59,12 +58,26 @@ export default buildConfigWithDefaults({
             width: 12,
             height: 2,
           },
-        ],
+        ]
+
+        if (user?.email === 'dev@payloadcms.com') {
+          baseWidgets.push({
+            widgetSlug: 'private',
+            width: 12,
+            height: 1,
+          })
+        }
+        return baseWidgets
+      },
       widgets: [
         {
           slug: 'count',
           ComponentPath: './components/Count.tsx#default',
           // fields: []
+        },
+        {
+          slug: 'private',
+          ComponentPath: './components/Private.tsx#default',
         },
         {
           slug: 'revenue',

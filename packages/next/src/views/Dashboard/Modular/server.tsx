@@ -1,4 +1,10 @@
-import type { BasePayload, TypedUser, WidgetInstance } from 'payload'
+import type {
+  BasePayload,
+  DashboardConfig,
+  PayloadRequest,
+  TypedUser,
+  WidgetInstance,
+} from 'payload'
 import type { Layout } from 'react-grid-layout'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -17,7 +23,8 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
   const { user } = props
 
   const layout =
-    (await getLayoutFromPreferences(props.payload, user)) ?? getLayoutFromConfig(defaultLayout)
+    (await getLayoutFromPreferences(props.payload, user)) ??
+    (await getLayoutFromConfig(defaultLayout, props.req))
 
   const clientLayout: WidgetInstanceClient[] = layout.map((layoutItem) => {
     return {
@@ -57,15 +64,26 @@ async function getLayoutFromPreferences(payload: BasePayload, user: TypedUser) {
   return savedPreferences.value.layouts as Layout[] | null
 }
 
-function getLayoutFromConfig(defaultLayout: WidgetInstance[]): Layout[] {
-  return defaultLayout.map((widgetInstance, index) => {
+async function getLayoutFromConfig(
+  defaultLayout: DashboardConfig['defaultLayout'],
+  req: PayloadRequest,
+): Promise<Layout[]> {
+  // Handle function format
+  let widgetInstances: WidgetInstance[]
+  if (typeof defaultLayout === 'function') {
+    widgetInstances = await defaultLayout({ req })
+  } else {
+    widgetInstances = defaultLayout
+  }
+
+  return widgetInstances.map((widgetInstance, index) => {
     const colsPerRow = 12
     let x = 0
 
     // Simple layout algorithm: place widgets left to right, then wrap to next row
     let currentX = 0
     for (let i = 0; i < index; i++) {
-      const prevWidgetInstance = defaultLayout[i]
+      const prevWidgetInstance = widgetInstances[i]
       currentX += prevWidgetInstance.width || 3
       // If we exceed the row width, wrap to next row
       if (currentX + (widgetInstance.width || 3) > colsPerRow) {

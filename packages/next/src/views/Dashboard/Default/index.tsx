@@ -1,5 +1,5 @@
 import type { groupNavItems } from '@payloadcms/ui/shared'
-import type { ClientUser, Locale, ServerProps } from 'payload'
+import type { ClientUser, Locale, PayloadRequest, ServerProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Button, Card, Gutter, Locked } from '@payloadcms/ui'
@@ -29,6 +29,7 @@ export type DashboardViewServerPropsOnly = {
    */
   Link?: React.ComponentType
   navGroups?: ReturnType<typeof groupNavItems>
+  req: PayloadRequest
 } & ServerProps
 
 export type DashboardViewServerProps = DashboardViewClientProps & DashboardViewServerPropsOnly

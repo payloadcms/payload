@@ -119,6 +119,7 @@ export async function Dashboard({ initPageResult, params, searchParams }: AdminV
           params,
           payload,
           permissions,
+          req,
           searchParams,
           user,
           visibleEntities,
