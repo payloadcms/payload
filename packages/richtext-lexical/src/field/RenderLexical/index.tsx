@@ -52,7 +52,7 @@ export const RenderLexical: React.FC<
           ...((field as RichTextField) || {}),
           type: 'richText',
           admin: {
-            ...((field?.admin as RichTextField) || {}),
+            ...((field as RichTextField)?.admin || {}),
 
             hidden: false,
           },
