@@ -27,13 +27,15 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
     defaultColumns: ['title', 'enableVariants', '_status', 'variants.variants'],
     livePreview: {
       url: ({ data, req }) => {
-        const path = generatePreviewPath({
+        if (data.slug === undefined || data.slug === null) {
+          return null
+        }
+
+        return generatePreviewPath({
           slug: typeof data?.slug === 'string' ? data.slug : '',
           collection: 'products',
           req,
         })
-
-        return path
       },
     },
     preview: (data, { req }) =>
