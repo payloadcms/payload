@@ -574,6 +574,7 @@ export type {
   BuildTableStateArgs,
   DefaultServerFunctionArgs,
   GetFolderResultsComponentAndDataArgs,
+  GetTreeViewResultsComponentAndDataArgs,
   ListQuery,
   ServerFunction,
   ServerFunctionArgs,
@@ -666,6 +667,7 @@ export type {
   AdminViewServerProps,
   AdminViewServerPropsOnly,
   InitPageResult,
+  ListViewTypes,
   ServerPropsFromView,
   ViewDescriptionClientProps,
   ViewDescriptionServerProps,
@@ -693,6 +695,26 @@ export type {
   ListViewSlots,
   ListViewSlotSharedClientProps,
 } from './views/list.js'
+
+export type {
+  AfterTreeViewListClientProps,
+  AfterTreeViewListServerProps,
+  AfterTreeViewListServerPropsOnly,
+  AfterTreeViewListTableClientProps,
+  AfterTreeViewListTableServerProps,
+  AfterTreeViewListTableServerPropsOnly,
+  BeforeTreeViewListClientProps,
+  BeforeTreeViewListServerProps,
+  BeforeTreeViewListServerPropsOnly,
+  BeforeTreeViewListTableClientProps,
+  BeforeTreeViewListTableServerProps,
+  BeforeTreeViewListTableServerPropsOnly,
+  TreeViewClientProps,
+  TreeViewServerProps,
+  TreeViewServerPropsOnly,
+  TreeViewSlots,
+  TreeViewSlotSharedClientProps,
+} from './views/treeViewList.js'
 
 type SchemaPath = {} & string
 export type FieldSchemaMap = Map<

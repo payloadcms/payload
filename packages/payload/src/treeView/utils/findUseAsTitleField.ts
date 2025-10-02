@@ -23,7 +23,7 @@ function iterateFields({
       case 'number':
       case 'textarea':
         if (field.name === titleFieldName) {
-          titleField = field
+          return field
         }
         break
       case 'row':

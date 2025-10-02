@@ -149,3 +149,21 @@ export type GetFolderResultsComponentAndDataArgs = {
    */
   sort: FolderSortKeys
 }
+
+export type BuildCollectionTreeViewResult = {
+  View: React.ReactNode
+}
+
+export type GetTreeViewResultsComponentAndDataArgs = {
+  /**
+   * The slug of the collection to get tree view data for.
+   * i.e. 'posts'
+   */
+  collectionSlug: CollectionSlug
+  // search?: string
+  req: PayloadRequest
+  /**
+   * The sort order for the results.
+   */
+  sort: any
+}

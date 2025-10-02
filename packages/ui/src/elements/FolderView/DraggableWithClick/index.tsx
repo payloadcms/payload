@@ -27,12 +27,20 @@ export const DraggableWithClick = ({
   thresholdPixels = 3,
 }: Props) => {
   const id = useId()
-  const { attributes, listeners, setNodeRef } = useDraggable({ id, disabled })
   const initialPos = useRef({ x: 0, y: 0 })
+  const [dragStartX, setDragStartX] = React.useState(0)
+  const { attributes, listeners, setNodeRef } = useDraggable({
+    id,
+    data: {
+      dragStartX,
+    },
+    disabled,
+  })
   const isDragging = useRef(false)
 
   const handlePointerDown = (e) => {
     initialPos.current = { x: e.clientX, y: e.clientY }
+    setDragStartX(e.clientX)
     isDragging.current = false
 
     const handlePointerMove = (moveEvent) => {

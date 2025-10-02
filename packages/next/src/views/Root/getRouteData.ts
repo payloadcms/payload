@@ -20,6 +20,7 @@ import { Account } from '../Account/index.js'
 import { BrowseByFolder } from '../BrowseByFolder/index.js'
 import { CollectionFolderView } from '../CollectionFolders/index.js'
 import { TrashView } from '../CollectionTrash/index.js'
+import { CollectionTreeView } from '../CollectionTreeView/index.js'
 import { CreateFirstUserView } from '../CreateFirstUser/index.js'
 import { Dashboard } from '../Dashboard/index.js'
 import { Document as DocumentView } from '../Document/index.js'
@@ -225,8 +226,10 @@ export const getRouteData = ({
         routeParams.collection = collectionConfig.slug
 
         if (
+          config.folders &&
+          collectionConfig.folders &&
           collectionPreferences?.listViewType &&
-          collectionPreferences.listViewType === 'folders'
+          collectionPreferences.listViewType === 'collection-folders'
         ) {
           // Render folder view by default if set in preferences
           ViewToRender = {
@@ -236,6 +239,20 @@ export const getRouteData = ({
           templateClassName = `collection-folders`
           templateType = 'default'
           viewType = 'collection-folders'
+        } else if (
+          config.treeView &&
+          collectionConfig.treeView &&
+          collectionPreferences?.listViewType &&
+          collectionPreferences.listViewType === 'collection-tree-view'
+        ) {
+          // Render tree view by default if set in preferences
+          ViewToRender = {
+            Component: CollectionTreeView,
+          }
+
+          templateClassName = `collection-tree-view`
+          templateType = 'default'
+          viewType = 'collection-tree-view'
         } else {
           ViewToRender = {
             Component: ListView,
@@ -337,6 +354,18 @@ export const getRouteData = ({
             templateClassName = `collection-folders`
             templateType = 'default'
             viewType = 'collection-folders'
+
+            viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
+          } else if (config.treeView && segmentThree === 'tree-view' && collectionConfig.treeView) {
+            // Collection Tree View
+            // --> /collections/:collectionSlug/tree-view
+            ViewToRender = {
+              Component: CollectionTreeView,
+            }
+
+            templateClassName = `collection-tree-view`
+            templateType = 'default'
+            viewType = 'collection-tree-view'
 
             viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
           } else {

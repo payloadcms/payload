@@ -1,5 +1,6 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
+import type { Document } from '../types/index.js'
 
 export type AddTreeViewFieldsArgs = {
   collectionConfig: CollectionConfig
@@ -9,3 +10,9 @@ export type AddTreeViewFieldsArgs = {
   slugPathFieldName?: string
   titlePathFieldName?: string
 }
+
+export type GetTreeViewDataResult = {
+  documents: Document[]
+}
+
+export type RootTreeViewConfiguration = {}
