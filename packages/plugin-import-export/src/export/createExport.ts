@@ -285,6 +285,11 @@ export const createExport = async (args: CreateExportArgs) => {
             columns: allColumns,
           })
 
+          // Add UTF-8 BOM for Excel compatibility on Windows
+          if (isFirstBatch) {
+            this.push(new Uint8Array([0xef, 0xbb, 0xbf]))
+          }
+
           this.push(encoder.encode(csvString))
         } else {
           // --- JSON Streaming ---
@@ -319,7 +324,7 @@ export const createExport = async (args: CreateExportArgs) => {
     return new Response(stream as any, {
       headers: {
         'Content-Disposition': `attachment; filename="${name}"`,
-        'Content-Type': isCSV ? 'text/csv' : 'application/json',
+        'Content-Type': isCSV ? 'text/csv; charset=utf-8' : 'application/json',
       },
     })
   }
@@ -403,7 +408,9 @@ export const createExport = async (args: CreateExportArgs) => {
     )
   }
 
-  const buffer = Buffer.from(format === 'json' ? `[${outputData.join(',')}]` : outputData.join(''))
+  const buffer = Buffer.from(
+    format === 'json' ? `[${outputData.join(',')}]` : '\uFEFF' + outputData.join(''),
+  )
   if (debug) {
     req.payload.logger.debug(`${format} file generation complete`)
   }
@@ -415,7 +422,7 @@ export const createExport = async (args: CreateExportArgs) => {
     req.file = {
       name,
       data: buffer,
-      mimetype: isCSV ? 'text/csv' : 'application/json',
+      mimetype: isCSV ? 'text/csv; charset=utf-8' : 'application/json',
       size: buffer.length,
     }
   } else {
@@ -429,7 +436,7 @@ export const createExport = async (args: CreateExportArgs) => {
       file: {
         name,
         data: buffer,
-        mimetype: isCSV ? 'text/csv' : 'application/json',
+        mimetype: isCSV ? 'text/csv; charset=utf-8' : 'application/json',
         size: buffer.length,
       },
       user,
