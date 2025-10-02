@@ -56,6 +56,7 @@ export function DefaultEditView({
   BeforeDocumentControls,
   Description,
   EditMenuItems,
+  LivePreview: CustomLivePreview,
   PreviewButton,
   PublishButton,
   SaveButton,
@@ -693,7 +694,11 @@ export function DefaultEditView({
               {AfterDocument}
             </div>
             {isLivePreviewEnabled && !isInDrawer && (
-              <LivePreviewWindow collectionSlug={collectionSlug} globalSlug={globalSlug} />
+              <>
+                {CustomLivePreview || (
+                  <LivePreviewWindow collectionSlug={collectionSlug} globalSlug={globalSlug} />
+                )}
+              </>
             )}
           </div>
         </Form>
