@@ -24,12 +24,10 @@ export async function logout<
   options: LogoutOptions<T, TSlug>,
   init?: RequestInit,
 ): Promise<LogoutResult> {
-  const url = `/${options.collection}/logout?allSessions=${options.allSessions ?? false}`
-
   const response = await sdk.request({
     init,
     method: 'POST',
-    path: url,
+    path: `/${options.collection}/logout?allSessions=${options.allSessions ?? false}`,
   })
 
   return response.json()

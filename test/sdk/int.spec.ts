@@ -306,4 +306,28 @@ describe('@payloadcms/sdk', () => {
 
     expect(email).toBe(user.email)
   })
+
+  it('should execute logout', async () => {
+    const loginRes = await sdk.login({
+      collection: 'users',
+      data: { email: testUserCredentials.email, password: testUserCredentials.password },
+    })
+
+    expect(loginRes.user.email).toBe(testUserCredentials.email)
+
+    const logoutRes = await sdk.logout({
+      collection: 'users',
+      allSessions: false,
+    })
+
+    expect(logoutRes.message).toBeDefined()
+
+    await expect(
+      sdk.request({
+        method: 'GET',
+        path: '/users/me',
+      }),
+    ).rejects.toThrow()
+  })
+
 })
