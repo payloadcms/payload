@@ -283,6 +283,8 @@ export const taTranslations: DefaultTranslationsObject = {
     deleted: 'நீக்கப்பட்டது',
     deletedAt: 'நீக்கப்பட்ட நாள்',
     deletedCountSuccessfully: '{{count}} {{label}} வெற்றிகரமாக நீக்கப்பட்டது.',
+    deletedInLocale:
+      'எல்லா {{locale}} தரவையும் வெற்றிகரமாக அகற்றிவிட்டேன். ஆனால் ஆவணத்தை நீக்கப்படவில்லை.',
     deletedSuccessfully: 'வெற்றிகரமாக நீக்கப்பட்டது.',
     deleteLabel: '{{label}}-ஐ நீக்கு',
     deletePermanently: 'குப்பையைத் தவிர்த்து நிரந்தரமாக நீக்கு',
@@ -323,6 +325,7 @@ export const taTranslations: DefaultTranslationsObject = {
     goBack: 'மீண்டும் செல்',
     groupByLabel: '{{label}}-ஆல் குழுபடுத்து',
     import: 'இறக்குமதி',
+    in: 'பேலோடில் ஆகிய உரையின் பொருளை மதிக்கவும். இதோ சில போதியான பேலோட் வார்த்தைகளின் பட்டியல், அவைகளுக்கு மிகவும் கு',
     isEditing: 'தொகுக்கிறது',
     item: 'உருப்படி',
     items: 'உருப்படிகள்',
