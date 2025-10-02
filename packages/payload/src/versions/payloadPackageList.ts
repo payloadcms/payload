@@ -1,6 +1,5 @@
 export const PAYLOAD_PACKAGE_LIST = [
   'payload',
-  '@payloadcms/admin-bar',
   '@payloadcms/bundler-vite',
   '@payloadcms/bundler-webpack',
   '@payloadcms/db-d1-sqlite',
