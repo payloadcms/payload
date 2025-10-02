@@ -3,14 +3,8 @@ import { countVersions } from './countVersions'
 import { toKebabCase } from 'payload/shared'
 
 /**
- * This is a `BeforeChange` field hook that generates the `slug` field based on another field.
- * For example, it will take a "title" field and transform its value from "My Title" → "my-title".
- *
- * This should only run on:
- * 1. the `create` operation unless the user has provided on themselves
- * 2. the `update` operation if:
- *   a. autosave is _not_ enabled and there is no slug
- *   b. autosave _is_ enabled, the doc is unpublished, and the user has not modified the slug themselves
+ * This is a `BeforeChange` field hook for the "slug" field.
+ * See `slugField` for more details.
  */
 export const generateSlug =
   (fallback: string): FieldHook =>
