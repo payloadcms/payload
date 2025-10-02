@@ -367,6 +367,11 @@ type Admin = {
   disableBulkEdit?: boolean
   disabled?: boolean
   /**
+   * Shows / hides fields from appearing in the list view groupBy options.
+   * @type boolean
+   */
+  disableGroupBy?: boolean
+  /**
    * Shows / hides fields from appearing in the list view column selector.
    * @type boolean
    */
@@ -390,6 +395,11 @@ export type AdminClient = {
   description?: StaticDescription
   disableBulkEdit?: boolean
   disabled?: boolean
+  /**
+   * Shows / hides fields from appearing in the list view groupBy options.
+   * @type boolean
+   */
+  disableGroupBy?: boolean
   /**
    * Shows / hides fields from appearing in the list view column selector.
    * @type boolean

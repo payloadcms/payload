@@ -51,6 +51,7 @@ export const tenantField = ({
     admin: {
       allowCreate: false,
       allowEdit: false,
+      disableGroupBy: true,
       disableListColumn: true,
       disableListFilter: true,
       position: 'sidebar',
