@@ -4,7 +4,7 @@ export const NoURLCollection: CollectionConfig = {
   slug: 'no-url',
   admin: {
     livePreview: {
-      url: ({ data }) => (data?.enabled ? '/live-preview/test' : null),
+      url: ({ data }) => (data?.enabled ? '/live-preview/static' : null),
     },
   },
   fields: [

@@ -12,7 +12,7 @@ export default async function TestPage(args: Args) {
   return (
     <Fragment>
       <Gutter>
-        <p>This is a dummy page for testing.</p>
+        <p>This is a static page for testing.</p>
       </Gutter>
     </Fragment>
   )

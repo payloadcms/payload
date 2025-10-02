@@ -9,7 +9,12 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 
 import { devUser } from '../credentials.js'
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+  // throttleTest,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import {
   selectLivePreviewBreakpoint,
@@ -55,6 +60,7 @@ describe('Live Preview', () => {
   let ssrAutosavePagesURLUtil: AdminUrlUtil
   let payload: PayloadTestSDK<Config>
   let user: any
+  let context: any
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -65,7 +71,7 @@ describe('Live Preview', () => {
     ssrPagesURLUtil = new AdminUrlUtil(serverURL, ssrPagesSlug)
     ssrAutosavePagesURLUtil = new AdminUrlUtil(serverURL, ssrAutosavePagesSlug)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
@@ -83,6 +89,12 @@ describe('Live Preview', () => {
   })
 
   beforeEach(async () => {
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Fast 4G',
+    // })
+
     await reInitializeDB({
       serverURL,
       snapshotKey: 'livePreviewTest',
