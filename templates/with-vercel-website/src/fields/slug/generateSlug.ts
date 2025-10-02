@@ -3,7 +3,7 @@ import { countVersions } from './countVersions'
 import { toKebabCase } from 'payload/shared'
 
 /**
- * This is a `BeforeChange` field hook for the "slug" field.
+ * This is a `BeforeChange` field hook used to auto-generate the `slug` field.
  * See `slugField` for more details.
  */
 export const generateSlug =
@@ -12,13 +12,16 @@ export const generateSlug =
     const { operation, value: isChecked, collection, global, data, originalDoc } = args
 
     // Ensure user-defined slugs are not overwritten during create
-    // Use a generic falsy check here so that empty strings are still generated
+    // Use a generic falsy check here to include empty strings
     if (operation === 'create') {
+      if (data) {
+        data.slug = toKebabCase(data?.slug || data?.[fallback])
+      }
+
       return Boolean(!data?.slug)
     }
 
     if (operation === 'update') {
-      console.log({ data, originalDoc })
       // Early return to avoid additional processing
       if (!isChecked) {
         return false
@@ -31,7 +34,7 @@ export const generateSlug =
       )
 
       if (!autosaveEnabled) {
-        // Generate the slug here
+        // We can generate the slug at this point
         if (data) {
           data.slug = toKebabCase(data?.[fallback])
         }
@@ -42,15 +45,15 @@ export const generateSlug =
         const isPublishing = data?._status === 'published'
 
         // Ensure the user can take over the generated slug themselves without it ever being overridden back
-        const hasChangedSlugManually = data?.slug !== originalDoc?.slug
+        const userOverride = data?.slug !== originalDoc?.slug
 
-        if (!hasChangedSlugManually) {
+        if (!userOverride) {
           if (data) {
             data.slug = toKebabCase(data?.[fallback])
           }
         }
 
-        if (isPublishing || hasChangedSlugManually) {
+        if (isPublishing || userOverride) {
           return false
         }
 

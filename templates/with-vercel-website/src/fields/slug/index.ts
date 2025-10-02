@@ -19,7 +19,7 @@ type SlugField = (fieldToUse?: string, overrides?: Overrides) => [CheckboxField,
  *   a. autosave is _not_ enabled and there is no slug
  *   b. autosave _is_ enabled, the doc is unpublished, and the user has not modified the slug themselves
  *
- * The slug should _stop_ generating after it's been generated, because the URL is typically derived from the slug.
+ * The slug should stabilize after all above criteria have been met, because the URL is typically derived from the slug.
  * This is to protect modifying potentially live URLs, breaking links, etc. without explicit intent.
  */
 export const slugField: SlugField = (fieldToUse = 'title', overrides = {}) => {
