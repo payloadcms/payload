@@ -170,6 +170,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           name,
           type: 'number',
           admin: {
+            disableGroupBy: true,
             disableListColumn: true,
             disableListFilter: true,
             hidden: true,
@@ -184,7 +185,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
   }
 
   // In Payload v4, image size subfields (`url`, `width`, `height`, etc.) should
-  // default to `disableListColumn: true` and `disableListFilter: true`
+  // default to `disableGroupBy: true`, `disableListColumn: true` and `disableListFilter: true`
   // to avoid cluttering the collection list view and filters by default.
   if (uploadOptions.imageSizes) {
     uploadFields = uploadFields.concat([
@@ -199,6 +200,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           type: 'group',
           admin: {
             hidden: true,
+            ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
             ...(size.admin?.disableListColumn && { disableListColumn: true }),
             ...(size.admin?.disableListFilter && { disableListFilter: true }),
           },
@@ -207,6 +209,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...url,
               admin: {
                 ...url.admin,
+                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
                 ...(size.admin?.disableListColumn && { disableListColumn: true }),
                 ...(size.admin?.disableListFilter && { disableListFilter: true }),
               },
@@ -232,6 +235,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...width,
               admin: {
                 ...width.admin,
+                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
                 ...(size.admin?.disableListColumn && { disableListColumn: true }),
                 ...(size.admin?.disableListFilter && { disableListFilter: true }),
               },
@@ -240,6 +244,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...height,
               admin: {
                 ...height.admin,
+                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
                 ...(size.admin?.disableListColumn && { disableListColumn: true }),
                 ...(size.admin?.disableListFilter && { disableListFilter: true }),
               },
@@ -248,6 +253,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...mimeType,
               admin: {
                 ...mimeType.admin,
+                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
                 ...(size.admin?.disableListColumn && { disableListColumn: true }),
                 ...(size.admin?.disableListFilter && { disableListFilter: true }),
               },
@@ -256,6 +262,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...filesize,
               admin: {
                 ...filesize.admin,
+                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
                 ...(size.admin?.disableListColumn && { disableListColumn: true }),
                 ...(size.admin?.disableListFilter && { disableListFilter: true }),
               },
@@ -264,6 +271,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...filename,
               admin: {
                 ...filename.admin,
+                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
                 ...(size.admin?.disableListColumn && { disableListColumn: true }),
                 ...(size.admin?.disableListFilter && { disableListFilter: true }),
               },

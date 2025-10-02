@@ -2,6 +2,7 @@ import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDistinctDocs } from '../../database/types.js'
+import type { FlattenedField } from '../../fields/config/types.js'
 import type { PayloadRequest, PopulateType, Sort, Where } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
@@ -137,6 +138,56 @@ export const findDistinctOperation = async (
       if (!hasAccess) {
         throw new Forbidden(req.t)
       }
+    }
+
+    if ('virtual' in fieldResult.field && fieldResult.field.virtual) {
+      if (typeof fieldResult.field.virtual !== 'string') {
+        throw new APIError(
+          `Cannot findDistinct by a virtual field that isn't linked to a relationship field.`,
+        )
+      }
+
+      let relationPath: string = ''
+      let currentFields: FlattenedField[] = collectionConfig.flattenedFields
+      const fieldPathSegments = fieldResult.field.virtual.split('.')
+      for (const segment of fieldResult.field.virtual.split('.')) {
+        relationPath = `${relationPath}${segment}`
+        fieldPathSegments.shift()
+        const field = currentFields.find((e) => e.name === segment)!
+        if (
+          (field.type === 'relationship' || field.type === 'upload') &&
+          typeof field.relationTo === 'string'
+        ) {
+          break
+        }
+        if ('flattenedFields' in field) {
+          currentFields = field.flattenedFields
+        }
+      }
+
+      const path = `${relationPath}.${fieldPathSegments.join('.')}`
+
+      const result = await payload.findDistinct({
+        collection: collectionConfig.slug,
+        depth: args.depth,
+        disableErrors,
+        field: path,
+        locale,
+        overrideAccess,
+        populate,
+        req,
+        showHiddenFields,
+        sort: args.sort,
+        trash,
+        where,
+      })
+
+      for (const val of result.values) {
+        val[args.field] = val[path]
+        delete val[path]
+      }
+
+      return result
     }
 
     let result = await payload.db.findDistinct({

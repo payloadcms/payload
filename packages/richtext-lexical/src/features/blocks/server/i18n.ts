@@ -127,6 +127,15 @@ export const i18n: Partial<GenericLanguages> = {
     },
     label: 'Blokkok',
   },
+  is: {
+    inlineBlocks: {
+      create: 'Skrá {{label}}',
+      edit: 'Breyta {{label}}',
+      label: 'Línublokkir',
+      remove: 'Fjarlægja {{label}}',
+    },
+    label: 'Blokkir',
+  },
   it: {
     inlineBlocks: {
       create: 'Crea {{label}}',
