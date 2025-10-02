@@ -10,8 +10,7 @@ import { toKebabCase } from 'payload/shared'
  * 1. the `create` operation unless the user has provided on themselves
  * 2. the `update` operation if:
  *   a. autosave is _not_ enabled and there is no slug
- *   b. autosave _is_ enabled and there are only 2 versions: the initial create and the autosaved draft
- *     i. UNLESS the user has modified the slug directly, in this case we want them to take it over without it being overridden
+ *   b. autosave _is_ enabled, the doc is unpublished, and the user has not modified the slug themselves
  */
 export const generateSlug =
   (fallback: string): FieldHook =>
