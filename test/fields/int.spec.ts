@@ -179,8 +179,8 @@ describe('Fields', () => {
       const miss = await payload.create({
         collection: 'text-fields',
         data: {
-          hasMany: ['two'],
-          hasManySecond: ['5'],
+          hasMany: ['6'],
+          hasManySecond: ['4'],
           text: 'required',
         },
       })
@@ -188,11 +188,9 @@ describe('Fields', () => {
       const { docs } = await payload.find({
         collection: 'text-fields',
         where: {
-          hasMany: {
-            in: ['1'],
-          },
+          hasMany: { equals: '3' },
           hasManySecond: {
-            in: ['4'],
+            equals: '4',
           },
         },
       })
