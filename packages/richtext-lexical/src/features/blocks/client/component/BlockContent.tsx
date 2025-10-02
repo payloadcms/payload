@@ -2,6 +2,7 @@
 import type { CollapsibleProps } from '@payloadcms/ui/elements/Collapsible'
 import type { ClientField, FormState } from 'payload'
 
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { RenderFields, useFormSubmitted } from '@payloadcms/ui'
 import React, { createContext, useMemo } from 'react'
 
@@ -99,6 +100,7 @@ export const BlockContent: React.FC<BlockContentProps> = (props) => {
   const hasSubmitted = useFormSubmitted()
 
   const fieldHasErrors = hasSubmitted && errorCount > 0
+  const isEditable = useLexicalEditable()
 
   const CollapsibleWithErrorProps = useMemo(
     () => (props: BlockCollapsibleProps) => {
@@ -131,6 +133,7 @@ export const BlockContent: React.FC<BlockContentProps> = (props) => {
         parentPath={''}
         parentSchemaPath=""
         permissions={true}
+        readOnly={!isEditable}
       />
     </CollapsibleWithErrorProps>
   )

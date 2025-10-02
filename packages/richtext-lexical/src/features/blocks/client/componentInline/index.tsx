@@ -6,6 +6,7 @@ const baseClass = 'inline-block'
 import type { BlocksFieldClient, ClientBlock, Data, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -24,10 +25,10 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { $getNodeByKey } from 'lexical'
 
 import './index.scss'
 
+import { $getNodeByKey } from 'lexical'
 import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
 import { v4 as uuid } from 'uuid'
 
@@ -67,10 +68,11 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const { cacheBuster, formData, nodeKey } = props
 
   const [editor] = useLexicalComposerContext()
+  const isEditable = useLexicalEditable()
   const { i18n, t } = useTranslation<object, string>()
   const {
     createdInlineBlock,
-    fieldProps: { featureClientSchemaMap, initialLexicalFormState, readOnly, schemaPath },
+    fieldProps: { featureClientSchemaMap, initialLexicalFormState, schemaPath },
     setCreatedInlineBlock,
     uuid: uuidFromContext,
   } = useEditorConfigContext()
@@ -179,6 +181,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         initialBlockData: formData,
         initialBlockFormState: formData,
         operation: 'update',
+        readOnly: !isEditable,
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
         signal: abortController.signal,
@@ -218,6 +221,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     getFormState,
     editor,
     nodeKey,
+    isEditable,
     schemaFieldsPath,
     id,
     formData,
@@ -250,6 +254,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         globalSlug,
         initialBlockFormState: prevFormState,
         operation: 'update',
+        readOnly: !isEditable,
         renderAllFields: submit ? true : false,
         schemaPath: schemaFieldsPath,
         signal: controller.signal,
@@ -273,6 +278,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       getDocPreferences,
       parentDocumentFields,
       globalSlug,
+      isEditable,
       schemaFieldsPath,
     ],
   )
@@ -317,7 +323,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       <Button
         buttonStyle="icon-label"
         className={`${baseClass}__removeButton`}
-        disabled={readOnly}
+        disabled={!isEditable}
         icon="x"
         onClick={(e) => {
           e.preventDefault()
@@ -328,7 +334,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         tooltip={t('lexical:blocks:inlineBlocks:remove', { label: blockDisplayName })}
       />
     ),
-    [blockDisplayName, readOnly, removeInlineBlock, t],
+    [blockDisplayName, isEditable, removeInlineBlock, t],
   )
 
   const EditButton = useMemo(
@@ -336,7 +342,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       <Button
         buttonStyle="icon-label"
         className={`${baseClass}__editButton`}
-        disabled={readOnly}
+        disabled={!isEditable}
         el="button"
         icon="edit"
         onClick={() => {
@@ -347,7 +353,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         tooltip={t('lexical:blocks:inlineBlocks:edit', { label: blockDisplayName })}
       />
     ),
-    [blockDisplayName, readOnly, t, toggleDrawer],
+    [blockDisplayName, isEditable, t, toggleDrawer],
   )
 
   const InlineBlockContainer = useMemo(
@@ -379,7 +385,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     return (
       <InlineBlockContainer className={`${baseClass}-not-found`}>
         <span>Error: Block '{formData.blockType}' not found</span>
-        {editor.isEditable() ? (
+        {isEditable ? (
           <div className={`${baseClass}__actions`}>
             <RemoveButton />
           </div>
@@ -424,7 +430,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
                 parentPath="" // See Blocks feature path for details as for why this is empty
                 parentSchemaPath={schemaFieldsPath}
                 permissions={true}
-                readOnly={false}
+                readOnly={!isEditable}
               />
               <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
             </>
@@ -447,7 +453,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       ) : (
         <InlineBlockContainer>
           {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}
-          {editor.isEditable() ? (
+          {isEditable ? (
             <div className={`${baseClass}__actions`}>
               <EditButton />
               <RemoveButton />

@@ -1,6 +1,10 @@
 'use client'
 import type {} from 'payload'
 
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
+
+import './index.scss'
+
 import {
   ChevronIcon,
   CopyToClipboard,
@@ -11,8 +15,6 @@ import {
   useFormFields,
 } from '@payloadcms/ui'
 import React from 'react'
-
-import './index.scss'
 
 import type { AdditionalCodeComponentProps } from './Code.js'
 
@@ -47,6 +49,8 @@ export const CodeBlockBlockComponent: React.FC<
 
   const selectedLanguageLabel = languages[selectedLanguageField?.value as keyof typeof languages]
 
+  const isEditable = useLexicalEditable()
+
   return (
     <BlockCollapsible
       Actions={
@@ -62,6 +66,7 @@ export const CodeBlockBlockComponent: React.FC<
               </div>
             }
             className={`${baseClass}__language-selector`}
+            disabled={!isEditable}
             horizontalAlign="right"
             render={({ close }) => (
               <PopupList.ButtonGroup>
@@ -91,7 +96,7 @@ export const CodeBlockBlockComponent: React.FC<
 
           <Collapse />
 
-          <RemoveButton />
+          {isEditable && <RemoveButton />}
         </div>
       }
       className={baseClass}
@@ -114,6 +119,7 @@ export const CodeBlockBlockComponent: React.FC<
           parentPath={''}
           parentSchemaPath=""
           permissions={true}
+          readOnly={!isEditable}
         />
       </>
     </BlockCollapsible>

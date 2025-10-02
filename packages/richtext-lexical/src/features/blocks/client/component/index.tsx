@@ -27,6 +27,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 const baseClass = 'lexical-block'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
 import { $getNodeByKey } from 'lexical'
 import {
@@ -40,8 +41,8 @@ import { v4 as uuid } from 'uuid'
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
-import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import './index.scss'
+import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import { type BlockCollapsibleWithErrorProps, BlockContent } from './BlockContent.js'
 import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
@@ -66,7 +67,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
       featureClientSchemaMap,
       field: parentLexicalRichTextField,
       initialLexicalFormState,
-      readOnly,
       schemaPath,
     },
     uuid: uuidFromContext,
@@ -90,6 +90,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   // is important to consider for the data path used in setDocFieldPreferences
   const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
   const [editor] = useLexicalComposerContext()
+  const isEditable = useLexicalEditable()
 
   const blockType = formData.blockType
 
@@ -153,6 +154,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         globalSlug,
         initialBlockData: formData,
         operation: 'update',
+        readOnly: !isEditable,
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
         signal: abortController.signal,
@@ -198,6 +200,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   }, [
     getFormState,
     schemaFieldsPath,
+    isEditable,
     id,
     formData,
     editor,
@@ -249,6 +252,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         globalSlug,
         initialBlockFormState: prevFormState,
         operation: 'update',
+        readOnly: !isEditable,
         renderAllFields: submit ? true : false,
         schemaPath: schemaFieldsPath,
         signal: controller.signal,
@@ -305,6 +309,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       schemaFieldsPath,
       blockType,
       parentDocumentFields,
+      isEditable,
       editor,
       nodeKey,
     ],
@@ -361,7 +366,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       <Button
         buttonStyle="icon-label"
         className={`${baseClass}__editButton`}
-        disabled={readOnly}
+        disabled={!isEditable}
         el="button"
         icon="edit"
         onClick={(e) => {
@@ -380,7 +385,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         tooltip={t('lexical:blocks:inlineBlocks:edit', { label: blockDisplayName })}
       />
     ),
-    [blockDisplayName, readOnly, t, toggleDrawer],
+    [blockDisplayName, t, isEditable, toggleDrawer],
   )
 
   const RemoveButton = useMemo(
@@ -388,7 +393,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       <Button
         buttonStyle="icon-label"
         className={`${baseClass}__removeButton`}
-        disabled={parentLexicalRichTextField?.admin?.readOnly || false}
+        disabled={!isEditable}
         icon="x"
         onClick={(e) => {
           e.preventDefault()
@@ -398,7 +403,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         tooltip="Remove Block"
       />
     ),
-    [parentLexicalRichTextField?.admin?.readOnly, removeBlock],
+    [isEditable, removeBlock],
   )
 
   const BlockCollapsible = useMemo(
@@ -447,10 +452,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
                         </Pill>
                       )}
                       {!disableBlockName && !clientBlock?.admin?.disableBlockName && (
-                        <SectionTitle
-                          path="blockName"
-                          readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
-                        />
+                        <SectionTitle path="blockName" readOnly={!isEditable} />
                       )}
 
                       {fieldHasErrors && (
@@ -467,7 +469,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
                         {(CustomBlock && editButton !== false) || (!CustomBlock && editButton) ? (
                           <EditButton />
                         ) : null}
-                        {removeButton !== false && editor.isEditable() ? <RemoveButton /> : null}
+                        {removeButton !== false && isEditable ? <RemoveButton /> : null}
                       </>
                     )}
                   </div>
@@ -493,12 +495,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
       RemoveButton,
       blockDisplayName,
       clientBlock?.admin?.disableBlockName,
-      editor,
       blockType,
       i18n,
       isCollapsed,
       onCollapsedChange,
-      parentLexicalRichTextField?.admin?.readOnly,
+      isEditable,
     ],
   )
 
@@ -523,7 +524,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
                 parentPath="" // See Blocks feature path for details as for why this is empty
                 parentSchemaPath={schemaFieldsPath}
                 permissions={true}
-                readOnly={false}
+                readOnly={!isEditable}
               />
               <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
             </>
@@ -537,6 +538,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       blockID,
       blockDisplayName,
       t,
+      isEditable,
       clientBlock?.fields,
       schemaFieldsPath,
       // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
