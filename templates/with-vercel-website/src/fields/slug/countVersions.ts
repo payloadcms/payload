@@ -1,4 +1,4 @@
-import { FieldHook } from 'payload'
+import { FieldHook, Where } from 'payload'
 
 /**
  * This is a cross-entity way to count the number of versions for any given document.
@@ -10,7 +10,7 @@ export const countVersions = async (args: Parameters<FieldHook>[0]): Promise<num
 
   let countFn
 
-  let where = {
+  const where: Where = {
     parent: {
       equals: originalDoc?.id,
     },
@@ -35,6 +35,6 @@ export const countVersions = async (args: Parameters<FieldHook>[0]): Promise<num
   }
 
   const res = countFn ? (await countFn()?.then((res) => res.totalDocs || 0)) || 0 : 0
-  console.log('counted', res)
+
   return res
 }

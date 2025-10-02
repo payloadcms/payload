@@ -17,11 +17,10 @@ export const slugField: Slug = (fieldToUse = 'title', overrides = {}) => {
     {
       name: 'generateSlug',
       type: 'checkbox',
-      label: 'Auto-generate slug',
       defaultValue: true,
       admin: {
         description:
-          'When enabled, the slug will auto-generate from the title field on save and autosave.',
+          'When enabled, the slug will auto-generate from the title field on create and other criteria.',
         position: 'sidebar',
         // hidden: true,
       },
