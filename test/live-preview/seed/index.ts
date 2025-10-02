@@ -20,6 +20,20 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const seed: Config['onInit'] = async (payload) => {
+  const existingUser = await payload.find({
+    collection: 'users',
+    where: {
+      email: {
+        equals: devUser.email,
+      },
+    },
+  })
+
+  // Seed already ran => this is likely a consecutive, uncached getPayload call
+  if (existingUser.docs.length) {
+    return
+  }
+
   const uploadsDir = path.resolve(dirname, './media')
   removeFiles(path.normalize(uploadsDir))
 
@@ -154,7 +168,13 @@ export const seed: Config['onInit'] = async (payload) => {
 
   await payload.updateGlobal({
     slug: 'header',
-    data: JSON.parse(JSON.stringify(header).replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID)),
+    data: JSON.parse(
+      JSON.stringify(header)
+        .replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID)
+        .replace(/"\{\{POST_1_ID\}\}"/g, post1DocID)
+        .replace(/"\{\{POST_2_ID\}\}"/g, post2DocID)
+        .replace(/"\{\{POST_3_ID\}\}"/g, post3DocID),
+    ),
   })
 
   await payload.updateGlobal({

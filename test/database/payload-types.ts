@@ -197,7 +197,43 @@ export interface Post {
   id: string;
   title: string;
   category?: (string | null) | Category;
+  categoryTitle?: string | null;
+  categories?: (string | Category)[] | null;
+  categoryPoly?: {
+    relationTo: 'categories';
+    value: string | Category;
+  } | null;
+  categoryPolyMany?:
+    | {
+        relationTo: 'categories';
+        value: string | Category;
+      }[]
+    | null;
   categoryCustomID?: (number | null) | CategoriesCustomId;
+  polymorphicRelations?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: string | Category;
+          }
+        | {
+            relationTo: 'simple';
+            value: string | Simple;
+          }
+      )[]
+    | null;
+  localizedPolymorphicRelations?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: string | Category;
+          }
+        | {
+            relationTo: 'simple';
+            value: string | Simple;
+          }
+      )[]
+    | null;
   localized?: string | null;
   text?: string | null;
   number?: number | null;
@@ -216,6 +252,23 @@ export interface Post {
         blockType: 'block-third';
       }[]
     | null;
+  testNestedGroup?: {
+    nestedLocalizedPolymorphicRelation?:
+      | (
+          | {
+              relationTo: 'categories';
+              value: string | Category;
+            }
+          | {
+              relationTo: 'simple';
+              value: string | Simple;
+            }
+        )[]
+      | null;
+    nestedLocalizedText?: string | null;
+    nestedText1?: string | null;
+    nestedText2?: string | null;
+  };
   D1?: {
     D2?: {
       D3?: {
@@ -326,7 +379,7 @@ export interface RelationA {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -352,7 +405,7 @@ export interface RelationB {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -449,6 +502,8 @@ export interface Place {
 export interface VirtualRelation {
   id: string;
   postTitle?: string | null;
+  postsTitles?: string[] | null;
+  postCategoriesTitles?: string[] | null;
   postTitleHidden?: string | null;
   postCategoryTitle?: string | null;
   postCategoryID?:
@@ -472,6 +527,7 @@ export interface VirtualRelation {
     | null;
   postLocalized?: string | null;
   post?: (string | null) | Post;
+  posts?: (string | Post)[] | null;
   customID?: (string | null) | CustomId;
   customIDValue?: string | null;
   updatedAt: string;
@@ -822,7 +878,13 @@ export interface CategoriesCustomIdSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  categoryTitle?: T;
+  categories?: T;
+  categoryPoly?: T;
+  categoryPolyMany?: T;
   categoryCustomID?: T;
+  polymorphicRelations?: T;
+  localizedPolymorphicRelations?: T;
   localized?: T;
   text?: T;
   number?: T;
@@ -846,6 +908,14 @@ export interface PostsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  testNestedGroup?:
+    | T
+    | {
+        nestedLocalizedPolymorphicRelation?: T;
+        nestedLocalizedText?: T;
+        nestedText1?: T;
+        nestedText2?: T;
       };
   D1?:
     | T
@@ -1044,6 +1114,8 @@ export interface PlacesSelect<T extends boolean = true> {
  */
 export interface VirtualRelationsSelect<T extends boolean = true> {
   postTitle?: T;
+  postsTitles?: T;
+  postCategoriesTitles?: T;
   postTitleHidden?: T;
   postCategoryTitle?: T;
   postCategoryID?: T;
@@ -1051,6 +1123,7 @@ export interface VirtualRelationsSelect<T extends boolean = true> {
   postID?: T;
   postLocalized?: T;
   post?: T;
+  posts?: T;
   customID?: T;
   customIDValue?: T;
   updatedAt?: T;

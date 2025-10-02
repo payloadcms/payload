@@ -70,6 +70,33 @@ export type GenerateImageName = (args: {
 
 export type ImageSize = {
   /**
+   * Admin UI options that control how this image size appears in list views.
+   *
+   * NOTE: In Payload v4, these options (`disableGroupBy`, `disableListColumn` and `disableListFilter`)
+   * should default to `true` so image size subfields are hidden from list columns
+   * and filters by default, reducing noise in the admin UI.
+   */
+  admin?: {
+    /**
+     * If set to true, this image size will not be available
+     * as a selectable groupBy option in the collection list view.
+     * @default false
+     */
+    disableGroupBy?: boolean
+    /**
+     * If set to true, this image size will not be available
+     * as a selectable column in the collection list view.
+     * @default false
+     */
+    disableListColumn?: boolean
+    /**
+     * If set to true, this image size will not be available
+     * as a filter option in the collection list view.
+     * @default false
+     */
+    disableListFilter?: boolean
+  }
+  /**
    * @deprecated prefer position
    */
   crop?: string // comes from sharp package

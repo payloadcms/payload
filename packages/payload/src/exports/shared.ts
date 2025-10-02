@@ -58,6 +58,7 @@ export { validOperators, validOperatorSet } from '../types/constants.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'
 
 export { isImage } from '../uploads/isImage.js'
+export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
 export { combineWhereConstraints } from '../utilities/combineWhereConstraints.js'
 
 export {
@@ -74,8 +75,6 @@ export {
 } from '../utilities/deepMerge.js'
 
 export { extractID } from '../utilities/extractID.js'
-
-export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'

@@ -237,9 +237,11 @@ export const updateDocument = async <
     overrideAccess,
     req,
     skipValidation:
-      shouldSaveDraft &&
-      collectionConfig.versions.drafts &&
-      !collectionConfig.versions.drafts.validate,
+      (shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate) ||
+      // Skip validation for trash operations since they're just metadata updates
+      Boolean(data?.deletedAt),
   }
 
   if (publishSpecificLocale) {
@@ -301,7 +303,6 @@ export const updateDocument = async <
       data: dataToUpdate,
       locale,
       req,
-      select,
     })
   }
 
@@ -320,7 +321,6 @@ export const updateDocument = async <
       payload,
       publishSpecificLocale,
       req,
-      select,
       snapshot: versionSnapshotResult,
     })
   }

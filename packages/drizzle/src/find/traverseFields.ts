@@ -1,4 +1,3 @@
-import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelect, SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
 
@@ -730,17 +729,24 @@ export const traverseFields = ({
           const subQuery = query.as(subQueryAlias)
 
           if (shouldCount) {
+            let countSubquery: SQLiteSelect = db
+              .select(selectFields as any)
+
+              .from(newAliasTable)
+              .where(subQueryWhere)
+              .$dynamic()
+
+            joins.forEach(({ type, condition, table }) => {
+              countSubquery = countSubquery[type ?? 'leftJoin'](table, condition)
+            })
+
             currentArgs.extras[`${columnName}_count`] = sql`${db
               .select({
                 count: count(),
               })
-              .from(
-                sql`${db
-                  .select(selectFields as any)
-                  .from(newAliasTable)
-                  .where(subQueryWhere)
-                  .as(`${subQueryAlias}_count_subquery`)}`,
-              )}`.as(`${subQueryAlias}_count`)
+              .from(sql`${countSubquery.as(`${subQueryAlias}_count_subquery`)}`)}`.as(
+              `${subQueryAlias}_count`,
+            )
           }
 
           currentArgs.extras[columnName] = sql`${db

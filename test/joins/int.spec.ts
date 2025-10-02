@@ -215,6 +215,18 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts?.totalDocs).toBe(15)
   })
 
+  it('should count hasMany relationship joins', async () => {
+    const res = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+      joins: {
+        hasManyPosts: { limit: 1, count: true },
+      },
+    })
+
+    expect(res.hasManyPosts?.totalDocs).toBe(15)
+  })
+
   it('should populate relationships in joins', async () => {
     const { docs } = await payload.find({
       limit: 1,
@@ -396,6 +408,66 @@ describe('Joins Field', () => {
                 folderType: {
                   in: ['folderPoly1'],
                 },
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    expect(findFolder?.docs[0]?.documentsAndFolders?.docs).toHaveLength(1)
+  })
+
+  it('should query where with exists for hasMany select fields', async () => {
+    await payload.delete({ collection: 'payload-folders', where: {} })
+    const folderDoc = await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'scopedFolder',
+        folderType: ['folderPoly1', 'folderPoly2'],
+      },
+    })
+
+    await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'childFolder',
+        folderType: ['folderPoly1'],
+        folder: folderDoc.id,
+      },
+    })
+
+    const findFolder = await payload.find({
+      collection: 'payload-folders',
+      where: {
+        id: {
+          equals: folderDoc.id,
+        },
+      },
+      joins: {
+        documentsAndFolders: {
+          limit: 100_000,
+          sort: 'name',
+          where: {
+            and: [
+              {
+                relationTo: {
+                  equals: 'payload-folders',
+                },
+              },
+              {
+                or: [
+                  {
+                    folderType: {
+                      in: ['folderPoly1'],
+                    },
+                  },
+                  {
+                    folderType: {
+                      exists: false,
+                    },
+                  },
+                ],
               },
             ],
           },

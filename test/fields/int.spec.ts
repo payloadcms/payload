@@ -165,6 +165,43 @@ describe('Fields', () => {
       expect(missResult).toBeFalsy()
     })
 
+    it('should query multiple hasMany fields', async () => {
+      await payload.delete({ collection: 'text-fields', where: {} })
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['1', '2', '3'],
+          hasManySecond: ['4'],
+          text: 'required',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['6'],
+          hasManySecond: ['4'],
+          text: 'required',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: { equals: '3' },
+          hasManySecond: {
+            equals: '4',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
+
     it('should query like on value', async () => {
       const miss = await payload.create({
         collection: 'text-fields',
@@ -590,6 +627,7 @@ describe('Fields', () => {
 
   describe('timestamps', () => {
     const tenMinutesAgo = new Date(Date.now() - 1000 * 60 * 10)
+    const tenMinutesLater = new Date(Date.now() + 1000 * 60 * 10)
     let doc
     beforeEach(async () => {
       doc = await payload.create({
@@ -612,7 +650,7 @@ describe('Fields', () => {
       expect(docs.map(({ id }) => id)).toContain(doc.id)
     })
 
-    it('should query createdAt', async () => {
+    it('should query createdAt (greater_than_equal with results)', async () => {
       const result = await payload.find({
         collection: 'date-fields',
         depth: 0,
@@ -624,6 +662,76 @@ describe('Fields', () => {
       })
 
       expect(result.docs[0].id).toEqual(doc.id)
+    })
+
+    it('should query createdAt (greater_than_equal with no results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            greater_than_equal: tenMinutesLater,
+          },
+        },
+      })
+
+      expect(result.totalDocs).toBe(0)
+    })
+
+    it('should query createdAt (less_than with results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            less_than: tenMinutesLater,
+          },
+        },
+      })
+
+      expect(result.docs[0].id).toEqual(doc.id)
+    })
+
+    it('should query createdAt (less_than with no results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            less_than: tenMinutesAgo,
+          },
+        },
+      })
+
+      expect(result.totalDocs).toBe(0)
+    })
+
+    it('should query createdAt (in with results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            in: [new Date(doc.createdAt)],
+          },
+        },
+      })
+
+      expect(result.docs[0].id).toBe(doc.id)
+    })
+
+    it('should query createdAt (in without results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            in: [tenMinutesAgo],
+          },
+        },
+      })
+
+      expect(result.totalDocs).toBe(0)
     })
 
     // Function to generate random date between start and end dates

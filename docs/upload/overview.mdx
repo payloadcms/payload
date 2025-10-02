@@ -192,6 +192,31 @@ Behind the scenes, Payload relies on [`sharp`](https://sharp.pixelplumbing.com/a
 
 Note that for image resizing to work, `sharp` must be specified in your [Payload Config](../configuration/overview). This is configured by default if you created your Payload project with `create-payload-app`. See `sharp` in [Config Options](../configuration/overview#config-options).
 
+#### Admin List View Options
+
+Each image size also supports `admin` options to control whether it appears in the [Admin Panel](../admin/overview) list view.
+
+```ts
+{
+  name: 'thumbnail',
+  width: 400,
+  height: 300,
+  admin: {
+    disableGroupBy: true, // hide from list view groupBy options
+    disableListColumn: true, // hide from list view columns
+    disableListFilter: true, // hide from list view filters
+  },
+}
+```
+
+| Option                  | Description                                                                                                                              |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **`disableGroupBy`**    | If set to `true`, this image size will not be available as a selectable groupBy option in the collection list view. Defaults to `false`. |
+| **`disableListColumn`** | If set to `true`, this image size will not be available as a selectable column in the collection list view. Defaults to `false`.         |
+| **`disableListFilter`** | If set to `true`, this image size will not be available as a filter option in the collection list view. Defaults to `false`.             |
+
+This is useful for hiding large or rarely used image sizes from the list view UI while still keeping them available in the API.
+
 #### Accessing the resized images in hooks
 
 All auto-resized images are exposed to be re-used in hooks and similar via an object that is bound to `req.payloadUploadSizes`.

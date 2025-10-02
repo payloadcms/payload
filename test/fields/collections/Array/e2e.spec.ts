@@ -102,16 +102,16 @@ describe('Array', () => {
       })
       .catch(() => false) // If it doesn't appear, this resolves to `false`
 
-    expect(defaultRowLabelWasAttached).toBeFalsy()
+    await expect.poll(() => defaultRowLabelWasAttached).toBeFalsy()
 
     await expect(page.locator('#field-rowLabelAsComponent #custom-array-row-label')).toBeVisible()
 
     await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
-    await wait(100)
 
     const customRowLabel = page.locator(
       '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("custom row label")',
     )
+    await expect(customRowLabel).toBeVisible()
 
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
   })
@@ -636,5 +636,15 @@ describe('Array', () => {
       await expect(subArrayContainer).toHaveCount(1)
       await expect(subArrayContainer2).toHaveCount(1)
     })
+  })
+  test('should return empty array from getDataByPath for array fields without rows', async () => {
+    await page.goto(url.create)
+
+    // Wait for the test component to render
+    await page.waitForSelector('#getDataByPath-test')
+
+    // Check that getDataByPath returned an empty array, not 0
+    await expect(page.locator('#empty-array-result')).toHaveText('ARRAY')
+    await expect(page.locator('#empty-array-length')).toHaveText('0')
   })
 })

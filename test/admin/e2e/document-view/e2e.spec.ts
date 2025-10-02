@@ -496,6 +496,19 @@ describe('Document View', () => {
       // Ensure the original page did not change
       expect(page.url()).toBe(currentUrl)
     })
+
+    test('document drawer displays AfterHeader components', async () => {
+      await navigateToDoc(page, postsUrl)
+      await page
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+      await wait(500)
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      await expect(drawer1Content).toBeVisible()
+
+      const afterHeader = page.locator('[id^=doc-drawer_posts_1_] .doc-drawer__after-header')
+      await expect(afterHeader).toBeVisible()
+    })
   })
 
   describe('descriptions', () => {

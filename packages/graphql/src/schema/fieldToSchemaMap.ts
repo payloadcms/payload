@@ -248,6 +248,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     }),
   }),
   collapsible: ({
+    collectionSlug,
     config,
     field,
     forceNullable,
@@ -261,6 +262,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       const addSubField: GenericFieldToSchemaMap = fieldToSchemaMap[subField.type]
       if (addSubField) {
         return addSubField({
+          collectionSlug,
           config,
           field: subField,
           forceNullable,
@@ -298,6 +300,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     }),
   }),
   group: ({
+    collectionSlug,
     config,
     field,
     forceNullable,
@@ -348,6 +351,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const addSubField: GenericFieldToSchemaMap = fieldToSchemaMap[subField.type]
         if (addSubField) {
           return addSubField({
+            collectionSlug,
             config,
             field: subField,
             forceNullable,
@@ -674,15 +678,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
               if (result) {
                 if (isRelatedToManyCollections) {
-                  results[i] = {
+                  results.push({
                     relationTo: collectionSlug,
                     value: {
                       ...result,
                       collection: collectionSlug,
                     },
-                  }
+                  })
                 } else {
-                  results[i] = result
+                  results.push(result)
                 }
               }
             }
@@ -840,6 +844,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     }
   },
   tabs: ({
+    collectionSlug,
     config,
     field,
     forceNullable,
@@ -857,6 +862,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         if (!graphqlResult.types.groupTypes[interfaceName]) {
           const objectType = buildObjectType({
             name: interfaceName,
+            collectionSlug,
             config,
             fields: tab.fields,
             forceNullable,
@@ -894,6 +900,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           const addSubField: GenericFieldToSchemaMap = fieldToSchemaMap[subField.type]
           if (addSubField) {
             return addSubField({
+              collectionSlug,
               config,
               field: subField,
               forceNullable,
@@ -1074,15 +1081,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
             if (result) {
               if (isRelatedToManyCollections) {
-                results[i] = {
+                results.push({
                   relationTo: collectionSlug,
                   value: {
                     ...result,
                     collection: collectionSlug,
                   },
-                }
+                })
               } else {
-                results[i] = result
+                results.push(result)
               }
             }
           }

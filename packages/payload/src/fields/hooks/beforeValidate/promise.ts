@@ -284,7 +284,7 @@ export const promise = async <T>({
     }
 
     // Execute hooks
-    if (field.hooks?.beforeValidate) {
+    if ('hooks' in field && field.hooks?.beforeValidate) {
       for (const hook of field.hooks.beforeValidate) {
         const hookedValue = await hook({
           blockData,
@@ -299,19 +299,19 @@ export const promise = async <T>({
           overrideAccess,
           path: pathSegments,
           previousSiblingDoc: siblingDoc,
-          previousValue: siblingDoc[field.name!],
+          previousValue: siblingDoc[field.name],
           req,
           schemaPath: schemaPathSegments,
           siblingData,
           siblingFields: siblingFields!,
           value:
-            typeof siblingData[field.name!] === 'undefined'
+            typeof siblingData[field.name] === 'undefined'
               ? fallbackResult.value
-              : siblingData[field.name!],
+              : siblingData[field.name],
         })
 
         if (hookedValue !== undefined) {
-          siblingData[field.name!] = hookedValue
+          siblingData[field.name] = hookedValue
         }
       }
     }

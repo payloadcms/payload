@@ -17,6 +17,11 @@ export async function refresh({ config }: { config: any }) {
     throw new Error('Cannot refresh token: user not authenticated')
   }
 
+  const existingCookie = await getExistingAuthToken(payload.config.cookiePrefix)
+  if (!existingCookie) {
+    return { message: 'No valid token found to refresh', success: false }
+  }
+
   const collection: CollectionSlug | undefined = result.user.collection
   const collectionConfig = payload.collections[collection]
 
@@ -35,15 +40,10 @@ export async function refresh({ config }: { config: any }) {
     return { message: 'Token refresh failed', success: false }
   }
 
-  const existingCookie = await getExistingAuthToken(payload.config.cookiePrefix)
-  if (!existingCookie) {
-    return { message: 'No valid token found to refresh', success: false }
-  }
-
   await setPayloadAuthCookie({
     authConfig: collectionConfig.config.auth,
     cookiePrefix: payload.config.cookiePrefix,
-    token: existingCookie.value,
+    token: refreshResult.refreshedToken,
   })
 
   return { message: 'Token refreshed successfully', success: true }

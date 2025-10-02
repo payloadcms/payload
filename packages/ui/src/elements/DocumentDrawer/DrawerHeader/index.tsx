@@ -12,9 +12,10 @@ import { documentDrawerBaseClass } from '../index.js'
 import './index.scss'
 
 export const DocumentDrawerHeader: React.FC<{
+  AfterHeader?: React.ReactNode
   drawerSlug: string
   showDocumentID?: boolean
-}> = ({ drawerSlug, showDocumentID = true }) => {
+}> = ({ AfterHeader, drawerSlug, showDocumentID = true }) => {
   const { closeModal } = useModal()
   const { t } = useTranslation()
 
@@ -34,6 +35,9 @@ export const DocumentDrawerHeader: React.FC<{
         </button>
       </div>
       {showDocumentID && <DocumentID />}
+      {AfterHeader ? (
+        <div className={`${documentDrawerBaseClass}__after-header`}>{AfterHeader}</div>
+      ) : null}
     </Gutter>
   )
 }

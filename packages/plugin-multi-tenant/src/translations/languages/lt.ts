@@ -2,9 +2,8 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const ltTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-modal-tenant-switch--body':
-      'Jūs ketinate pakeisti nuosavybę iš <0>{{fromTenant}}</0> į <0>{{toTenant}}</0>',
-    'confirm-modal-tenant-switch--heading': 'Patvirtinkite {{tenantLabel}} pakeitimą',
+    'assign-tenant-button-label': 'Priskirkite nuomininką',
+    'assign-tenant-modal-title': 'Paskirkite "{{title}}"',
     'field-assignedTenant-label': 'Paskirtas nuomininkas',
     'nav-tenantSelector-label': 'Nuomininkas',
   },

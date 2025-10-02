@@ -14,7 +14,7 @@ const handlerBuilder =
   ): Promise<Response> => {
     const awaitedConfig = await config
 
-    // Add this endpoint only when using Next.js, still can be overriden.
+    // Add this endpoint only when using Next.js, still can be overridden.
     if (
       initedOGEndpoint === false &&
       !awaitedConfig.endpoints.some(

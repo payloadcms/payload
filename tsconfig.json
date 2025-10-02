@@ -84,6 +84,9 @@
     {
       "path": "./packages/ui"
     },
+    {
+      "path": "./packages/sdk"
+    }
   ],
   "include": [
     "${configDir}/src",
