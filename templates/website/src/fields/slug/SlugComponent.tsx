@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import { TextFieldClientProps } from 'payload'
 
 import { useField, Button, TextInput, FieldLabel, useFormFields, useForm } from '@payloadcms/ui'
@@ -9,29 +9,21 @@ import './index.scss'
 
 type SlugComponentProps = {
   fieldToUse: string
-  checkboxFieldPath: string
 } & TextFieldClientProps
 
 export const SlugComponent: React.FC<SlugComponentProps> = ({
   field,
   fieldToUse,
-  checkboxFieldPath: checkboxFieldPathFromProps,
   path,
   readOnly: readOnlyFromProps,
 }) => {
   const { label } = field
 
-  const checkboxFieldPath = path?.includes('.')
-    ? `${path}.${checkboxFieldPathFromProps}`
-    : checkboxFieldPathFromProps
-
   const { value, setValue } = useField<string>({ path: path || field.name })
 
-  const { dispatchFields, getDataByPath } = useForm()
+  const { getDataByPath } = useForm()
 
-  const isLocked = useFormFields(([fields]) => {
-    return fields[checkboxFieldPath]?.value as string
-  })
+  const [isLocked, setIsLocked] = useState(true)
 
   const handleGenerate = useCallback(
     (e: React.MouseEvent<Element>) => {
@@ -50,18 +42,10 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
     [setValue, value, fieldToUse, getDataByPath],
   )
 
-  const handleLock = useCallback(
-    (e: React.MouseEvent<Element>) => {
-      e.preventDefault()
-
-      dispatchFields({
-        type: 'UPDATE',
-        path: checkboxFieldPath,
-        value: !isLocked,
-      })
-    },
-    [isLocked, checkboxFieldPath, dispatchFields],
-  )
+  const toggleLock = useCallback((e: React.MouseEvent<Element>) => {
+    e.preventDefault()
+    setIsLocked((prev) => !prev)
+  }, [])
 
   return (
     <div className="field-type slug-field-component">
@@ -72,7 +56,7 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
             Generate
           </Button>
         )}
-        <Button className="lock-button" buttonStyle="none" onClick={handleLock}>
+        <Button className="lock-button" buttonStyle="none" onClick={toggleLock}>
           {isLocked ? 'Unlock' : 'Lock'}
         </Button>
       </div>

@@ -1,4 +1,5 @@
 import type { FieldHook } from 'payload'
+import { countVersions } from './countVersions'
 
 export const formatSlug = (val: string): string | undefined =>
   val
@@ -9,9 +10,9 @@ export const formatSlug = (val: string): string | undefined =>
 /**
  * This is a `BeforeValidate` field hook.
  * It will auto-generate the slug from a specific fallback field, if necessary.
- * For example, slugifying the title field "My First Post" to "my-first-post".
+ * For example, generating a slug from the title field: "My First Post" to "my-first-post".
  *
- * We need to ensure the slug continues to auto-generate through the autosave's initial create.
+ * For autosave, We need to ensure the slug continues to auto-generate through the initial create.
  * This will ensure the user can continue to edit the fallback field without the slug being prematurely generated.
  * For example, after creating a new autosave post, then editing the title, we want the slug to continue to update.
  *
@@ -24,11 +25,14 @@ export const formatSlug = (val: string): string | undefined =>
  */
 export const formatSlugHook =
   (fallback: string): FieldHook =>
-  (args) => {
+  async (args) => {
     const { data, operation, value, collection, global } = args
 
-    if (typeof value === 'string') {
-      return formatSlug(value)
+    let toReturn = value
+
+    // during create, only generate the slug if the user has not provided one
+    if (data?.generateSlug && (operation === 'update' || (operation === 'create' && !value))) {
+      toReturn = data?.[fallback]
     }
 
     const autosaveEnabled = Boolean(
@@ -36,23 +40,19 @@ export const formatSlugHook =
         (typeof global?.versions?.drafts === 'object' && global?.versions?.drafts.autosave),
     )
 
-    let autoGenerateSlug = false
+    // Important: ensure `countVersions` is not called unnecessarily often
+    // To do this, early return if `generateSlug` is already false
+    const shouldContinueGenerating = Boolean(
+      data?.generateSlug &&
+        operation === 'update' &&
+        (!autosaveEnabled || (await countVersions(args)) < 3),
+    )
 
-    if (!autosaveEnabled && (operation === 'create' || data?.slug === undefined)) {
-      autoGenerateSlug = true
-    } else if (autosaveEnabled && operation === 'update') {
-      if (data?._status === 'published') {
-        autoGenerateSlug = true
+    if (!shouldContinueGenerating) {
+      if (data) {
+        data.generateSlug = false
       }
     }
 
-    if (autoGenerateSlug) {
-      const fallbackData = data?.[fallback]
-
-      if (typeof fallbackData === 'string') {
-        return formatSlug(fallbackData)
-      }
-    }
-
-    return value
+    return formatSlug(toReturn)
   }
