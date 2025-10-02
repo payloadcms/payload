@@ -23,6 +23,14 @@ export const PostsCollection: CollectionConfig = {
       relationTo: categoriesSlug,
     },
     {
+      name: 'virtualTitleFromCategory',
+      type: 'text',
+      virtual: 'category.title',
+      admin: {
+        disableGroupBy: true,
+      },
+    },
+    {
       name: 'checkbox',
       type: 'checkbox',
     },

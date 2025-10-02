@@ -101,7 +101,7 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           }}
           options={reducedFields.filter(
             (field) =>
-              !field.field.admin.disableListFilter &&
+              !field.field.admin.disableGroupBy &&
               field.value !== 'id' &&
               supportedFieldTypes.includes(field.field.type),
           )}

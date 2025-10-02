@@ -197,6 +197,7 @@ export interface Post {
   id: string;
   title: string;
   category?: (string | null) | Category;
+  categoryTitle?: string | null;
   categories?: (string | Category)[] | null;
   categoryPoly?: {
     relationTo: 'categories';
@@ -210,22 +211,28 @@ export interface Post {
     | null;
   categoryCustomID?: (number | null) | CategoriesCustomId;
   polymorphicRelations?:
-    | ({
-        relationTo: 'categories';
-        value: string | Category;
-      } | {
-        relationTo: 'simple';
-        value: string | Simple;
-      })[]
+    | (
+        | {
+            relationTo: 'categories';
+            value: string | Category;
+          }
+        | {
+            relationTo: 'simple';
+            value: string | Simple;
+          }
+      )[]
     | null;
   localizedPolymorphicRelations?:
-    | ({
-        relationTo: 'categories';
-        value: string | Category;
-      } | {
-        relationTo: 'simple';
-        value: string | Simple;
-      })[]
+    | (
+        | {
+            relationTo: 'categories';
+            value: string | Category;
+          }
+        | {
+            relationTo: 'simple';
+            value: string | Simple;
+          }
+      )[]
     | null;
   localized?: string | null;
   text?: string | null;
@@ -245,26 +252,29 @@ export interface Post {
         blockType: 'block-third';
       }[]
     | null;
+  testNestedGroup?: {
+    nestedLocalizedPolymorphicRelation?:
+      | (
+          | {
+              relationTo: 'categories';
+              value: string | Category;
+            }
+          | {
+              relationTo: 'simple';
+              value: string | Simple;
+            }
+        )[]
+      | null;
+    nestedLocalizedText?: string | null;
+    nestedText1?: string | null;
+    nestedText2?: string | null;
+  };
   D1?: {
     D2?: {
       D3?: {
         D4?: string | null;
       };
     };
-  };
-  testNestedGroup?: {
-    nestedLocalizedPolymorphicRelation?:
-      | ({
-          relationTo: 'categories';
-          value: string | Category;
-        } | {
-          relationTo: 'simple';
-          value: string | Simple;
-        })[]
-      | null;
-    nestedLocalizedText?: string | null;
-    nestedText1?: string | null;
-    nestedText2?: string | null;
   };
   hasTransaction?: boolean | null;
   throwAfterChange?: boolean | null;
@@ -868,6 +878,7 @@ export interface CategoriesCustomIdSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  categoryTitle?: T;
   categories?: T;
   categoryPoly?: T;
   categoryPolyMany?: T;
@@ -897,6 +908,14 @@ export interface PostsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  testNestedGroup?:
+    | T
+    | {
+        nestedLocalizedPolymorphicRelation?: T;
+        nestedLocalizedText?: T;
+        nestedText1?: T;
+        nestedText2?: T;
       };
   D1?:
     | T
@@ -1455,6 +1474,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
