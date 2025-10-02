@@ -8,6 +8,7 @@ import { Categories } from './collections/Categories.js'
 import { CollectionLevelConfig } from './collections/CollectionLevelConfig.js'
 import { CustomLivePreview } from './collections/CustomLivePreview.js'
 import { Media } from './collections/Media.js'
+import { NoURLCollection } from './collections/NoURL.js'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
 import { SSR } from './collections/SSR.js'
@@ -67,6 +68,7 @@ export default buildConfigWithDefaults({
     CollectionLevelConfig,
     StaticURLCollection,
     CustomLivePreview,
+    NoURLCollection,
   ],
   globals: [Header, Footer],
   onInit: seed,
