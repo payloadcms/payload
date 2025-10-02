@@ -84,7 +84,7 @@ export const renderDocumentSlots: (args: {
     collectionConfig?.admin?.components?.views?.edit?.livePreview ||
     globalConfig?.admin?.components?.views?.edit?.livePreview
 
-  if (LivePreview.Component) {
+  if (LivePreview?.Component) {
     components.LivePreview = RenderServerComponent({
       Component: LivePreview.Component,
       importMap: req.payload.importMap,
