@@ -1,6 +1,6 @@
 import type { CheckboxField, TextField } from 'payload'
 
-import { formatSlugHook } from './formatSlug'
+import { generateSlug } from './generateSlug'
 
 type Overrides = {
   slugOverrides?: Partial<TextField>
@@ -9,46 +9,45 @@ type Overrides = {
 
 type Slug = (fieldToUse?: string, overrides?: Overrides) => [TextField, CheckboxField]
 
+// @ts-expect-error - ts mismatch Partial<TextField> with TextField
 export const slugField: Slug = (fieldToUse = 'title', overrides = {}) => {
   const { slugOverrides, generateSlugOverrides } = overrides
 
-  const generateSlugField: CheckboxField = {
-    name: 'generateSlug',
-    type: 'checkbox',
-    label: 'Auto-generate slug',
-    defaultValue: true,
-    admin: {
-      description:
-        'When enabled, the slug will auto-generate from the title field on save and autosave.',
-      position: 'sidebar',
+  return [
+    {
+      name: 'generateSlug',
+      type: 'checkbox',
+      label: 'Auto-generate slug',
+      defaultValue: true,
+      admin: {
+        description:
+          'When enabled, the slug will auto-generate from the title field on save and autosave.',
+        position: 'sidebar',
+        // hidden: true,
+      },
+      hooks: {
+        beforeChange: [generateSlug(fieldToUse)],
+      },
+      ...(generateSlugOverrides || {}),
     },
-    ...(generateSlugOverrides || {}),
-  }
-
-  // @ts-expect-error - ts mismatch Partial<TextField> with TextField
-  const slugField: TextField = {
-    name: 'slug',
-    type: 'text',
-    index: true,
-    label: 'Slug',
-    ...(slugOverrides || {}),
-    hooks: {
-      // Kept this in for hook or API based updates
-      beforeValidate: [formatSlugHook(fieldToUse)],
-    },
-    admin: {
-      position: 'sidebar',
-      ...(slugOverrides?.admin || {}),
-      components: {
-        Field: {
-          path: '@/fields/slug/SlugComponent#SlugComponent',
-          clientProps: {
-            fieldToUse,
+    {
+      name: 'slug',
+      type: 'text',
+      index: true,
+      label: 'Slug',
+      ...(slugOverrides || {}),
+      admin: {
+        position: 'sidebar',
+        ...(slugOverrides?.admin || {}),
+        components: {
+          Field: {
+            path: '@/fields/slug/SlugComponent#SlugComponent',
+            clientProps: {
+              fieldToUse,
+            },
           },
         },
       },
     },
-  }
-
-  return [slugField, generateSlugField]
+  ]
 }

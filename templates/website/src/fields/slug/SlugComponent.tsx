@@ -4,7 +4,7 @@ import { TextFieldClientProps } from 'payload'
 
 import { useField, Button, TextInput, FieldLabel, useFormFields, useForm } from '@payloadcms/ui'
 
-import { formatSlug } from './formatSlug'
+import { slugify } from './slugify'
 import './index.scss'
 
 type SlugComponentProps = {
@@ -32,7 +32,7 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
       const targetFieldValue = getDataByPath(fieldToUse) as string
 
       if (targetFieldValue) {
-        const formattedSlug = formatSlug(targetFieldValue)
+        const formattedSlug = slugify(targetFieldValue)
 
         if (value !== formattedSlug) setValue(formattedSlug)
       } else {
