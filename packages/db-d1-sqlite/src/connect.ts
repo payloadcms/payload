@@ -21,8 +21,16 @@ export const connect: Connect = async function connect(
 
   try {
     const logger = this.logger || false
-    // @ts-expect-error
-    this.drizzle = drizzle(this.binding.withSession('first-primary'), {
+    const readReplicas = this.readReplicas
+
+    let binding = this.binding
+
+    if (readReplicas && readReplicas === 'first-primary') {
+      // @ts-expect-error - need to have types that support withSession binding from D1
+      binding = this.binding.withSession('first-primary')
+    }
+
+    this.drizzle = drizzle(binding, {
       logger,
       schema: this.schema,
     })

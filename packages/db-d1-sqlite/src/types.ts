@@ -99,6 +99,14 @@ export type SQLiteD1Adapter = {
   binding: Args['binding']
   client: AnyD1Database
   drizzle: Drizzle
+  /**
+   * Experimental. Enables read replicas support with the `first-primary` strategy.
+   *
+   * @example
+   *
+   * ```readReplicas: 'first-primary'```
+   */
+  readReplicas?: 'first-primary'
 } & BaseSQLiteAdapter &
   SQLiteDrizzleAdapter
 
