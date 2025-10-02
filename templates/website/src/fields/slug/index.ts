@@ -22,7 +22,7 @@ export const slugField: Slug = (fieldToUse = 'title', overrides = {}) => {
         description:
           'When enabled, the slug will auto-generate from the title field on create and other criteria.',
         position: 'sidebar',
-        // hidden: true,
+        hidden: true,
       },
       hooks: {
         beforeChange: [generateSlug(fieldToUse)],
