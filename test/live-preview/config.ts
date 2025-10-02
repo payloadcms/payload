@@ -6,6 +6,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { MediaBlock } from './blocks/MediaBlock/index.js'
 import { Categories } from './collections/Categories.js'
 import { CollectionLevelConfig } from './collections/CollectionLevelConfig.js'
+import { CustomLivePreview } from './collections/CustomLivePreview.js'
 import { Media } from './collections/Media.js'
 import { NoURLCollection } from './collections/NoURL.js'
 import { Pages } from './collections/Pages.js'
@@ -19,6 +20,7 @@ import { Footer } from './globals/Footer.js'
 import { Header } from './globals/Header.js'
 import { seed } from './seed/index.js'
 import {
+  customLivePreviewSlug,
   desktopBreakpoint,
   mobileBreakpoint,
   pagesSlug,
@@ -42,7 +44,13 @@ export default buildConfigWithDefaults({
       // The Live Preview config cascades from the top down, properties are inherited from here
       url: formatLivePreviewURL,
       breakpoints: [mobileBreakpoint, desktopBreakpoint],
-      collections: [pagesSlug, postsSlug, ssrPagesSlug, ssrAutosavePagesSlug],
+      collections: [
+        pagesSlug,
+        postsSlug,
+        ssrPagesSlug,
+        ssrAutosavePagesSlug,
+        customLivePreviewSlug,
+      ],
       globals: ['header', 'footer'],
     },
   },
@@ -59,6 +67,7 @@ export default buildConfigWithDefaults({
     Media,
     CollectionLevelConfig,
     StaticURLCollection,
+    CustomLivePreview,
     NoURLCollection,
   ],
   globals: [Header, Footer],

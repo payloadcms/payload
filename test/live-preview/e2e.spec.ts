@@ -36,6 +36,7 @@ import {
 } from './helpers.js'
 import {
   collectionLevelConfigSlug,
+  customLivePreviewSlug,
   desktopBreakpoint,
   mobileBreakpoint,
   pagesSlug,
@@ -58,6 +59,7 @@ describe('Live Preview', () => {
   let postsURLUtil: AdminUrlUtil
   let ssrPagesURLUtil: AdminUrlUtil
   let ssrAutosavePagesURLUtil: AdminUrlUtil
+  let customLivePreviewURLUtil: AdminUrlUtil
   let payload: PayloadTestSDK<Config>
   let user: any
   let context: any
@@ -69,6 +71,7 @@ describe('Live Preview', () => {
     pagesURLUtil = new AdminUrlUtil(serverURL, pagesSlug)
     postsURLUtil = new AdminUrlUtil(serverURL, postsSlug)
     ssrPagesURLUtil = new AdminUrlUtil(serverURL, ssrPagesSlug)
+    customLivePreviewURLUtil = new AdminUrlUtil(serverURL, customLivePreviewSlug)
     ssrAutosavePagesURLUtil = new AdminUrlUtil(serverURL, ssrAutosavePagesSlug)
 
     context = await browser.newContext()
@@ -719,5 +722,13 @@ describe('Live Preview', () => {
     await selectLivePreviewZoom(page, '200%')
     await ensureDeviceIsLeftAligned(page)
     expect(true).toBeTruthy()
+  })
+
+  test('can open a custom live-preview', async () => {
+    await goToCollectionLivePreview(page, customLivePreviewURLUtil)
+
+    const customLivePreview = page.locator('.custom-live-preview')
+
+    await expect(customLivePreview).toContainText('Custom live preview being rendered')
   })
 })
