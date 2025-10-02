@@ -1102,6 +1102,94 @@ describe('database', () => {
     expect(result.values.some((v) => v.categoryPolyMany === null)).toBe(true)
   })
 
+  it('should find distinct values with field nested to a relationship', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+
+    const category_1 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_1' },
+    })
+    const category_2 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_2' },
+    })
+    const category_3 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_3' },
+    })
+
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_1 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+
+    const res = await payload.findDistinct({
+      collection: 'posts',
+      field: 'category.title',
+    })
+
+    expect(res.values).toEqual([
+      {
+        'category.title': 'category_1',
+      },
+      {
+        'category.title': 'category_2',
+      },
+      {
+        'category.title': 'category_3',
+      },
+    ])
+  })
+
+  it('should find distinct values with virtual field linked to a relationship', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+
+    const category_1 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_1' },
+    })
+    const category_2 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_2' },
+    })
+    const category_3 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_3' },
+    })
+
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_1 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+
+    const res = await payload.findDistinct({
+      collection: 'posts',
+      field: 'categoryTitle',
+    })
+
+    expect(res.values).toEqual([
+      {
+        categoryTitle: 'category_1',
+      },
+      {
+        categoryTitle: 'category_2',
+      },
+      {
+        categoryTitle: 'category_3',
+      },
+    ])
+  })
+
   describe('Compound Indexes', () => {
     beforeEach(async () => {
       await payload.delete({ collection: 'compound-indexes', where: {} })
