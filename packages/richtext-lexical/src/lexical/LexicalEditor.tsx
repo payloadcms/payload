@@ -111,24 +111,26 @@ export const LexicalEditor: React.FC<
           ErrorBoundary={LexicalErrorBoundary}
         />
         <NormalizeSelectionPlugin />
-        <InsertParagraphAtEndPlugin />
+        {isEditable && <InsertParagraphAtEndPlugin />}
         <DecoratorPlugin />
         <TextPlugin features={editorConfig.features} />
         <SelectAllPlugin />
-        <OnChangePlugin
-          // Selection changes can be ignored here, reducing the
-          // frequency that the FieldComponent and Payload receive updates.
-          // Selection changes are only needed if you are saving selection state
-          ignoreSelectionChange
-          onChange={(editorState, editor, tags) => {
-            // Ignore any onChange event triggered by focus only
-            if (!tags.has('focus') || tags.size > 1) {
-              if (onChange != null) {
-                onChange(editorState, editor, tags)
+        {isEditable && (
+          <OnChangePlugin
+            // Selection changes can be ignored here, reducing the
+            // frequency that the FieldComponent and Payload receive updates.
+            // Selection changes are only needed if you are saving selection state
+            ignoreSelectionChange
+            onChange={(editorState, editor, tags) => {
+              // Ignore any onChange event triggered by focus only
+              if (!tags.has('focus') || tags.size > 1) {
+                if (onChange != null) {
+                  onChange(editorState, editor, tags)
+                }
               }
-            }
-          }}
-        />
+            }}
+          />
+        )}
         {floatingAnchorElem && (
           <React.Fragment>
             {!isSmallWidthViewport && isEditable && (
