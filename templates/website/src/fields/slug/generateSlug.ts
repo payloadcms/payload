@@ -1,6 +1,6 @@
 import type { FieldHook } from 'payload'
 import { countVersions } from './countVersions'
-import { slugify } from './slugify'
+import { toKebabCase } from 'payload/shared'
 
 /**
  * This is a `BeforeChange` field hook that generates the `slug` field based on another field.
@@ -40,7 +40,7 @@ export const generateSlug =
       if (!autosaveEnabled) {
         // Generate the slug here
         if (data) {
-          data.slug = slugify(data?.[fallback])
+          data.slug = toKebabCase(data?.[fallback])
         }
 
         return Boolean(!data?.slug)
@@ -53,7 +53,7 @@ export const generateSlug =
 
         if (!hasChangedSlugManually) {
           if (data) {
-            data.slug = slugify(data?.[fallback])
+            data.slug = toKebabCase(data?.[fallback])
           }
         }
 

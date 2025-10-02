@@ -1,10 +1,10 @@
 'use client'
 import React, { useCallback, useState } from 'react'
-import { TextFieldClientProps } from 'payload'
+import type { TextFieldClientProps } from 'payload'
+import { toKebabCase } from 'payload/shared'
 
-import { useField, Button, TextInput, FieldLabel, useFormFields, useForm } from '@payloadcms/ui'
+import { useField, Button, TextInput, FieldLabel, useForm } from '@payloadcms/ui'
 
-import { slugify } from './slugify'
 import './index.scss'
 
 type SlugComponentProps = {
@@ -32,7 +32,7 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
       const targetFieldValue = getDataByPath(fieldToUse) as string
 
       if (targetFieldValue) {
-        const formattedSlug = slugify(targetFieldValue)
+        const formattedSlug = toKebabCase(targetFieldValue)
 
         if (value !== formattedSlug) setValue(formattedSlug)
       } else {
