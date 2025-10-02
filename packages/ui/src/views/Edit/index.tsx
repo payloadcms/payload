@@ -143,6 +143,7 @@ export function DefaultEditView({
     previewWindowType,
     setURL: setLivePreviewURL,
     typeofLivePreviewURL,
+    url: livePreviewURL,
   } = useLivePreviewContext()
 
   const abortOnChangeRef = useRef<AbortController>(null)
@@ -353,7 +354,7 @@ export function DefaultEditView({
           setDocumentIsLocked(false)
         }
 
-        if (livePreviewURL) {
+        if (isLivePreviewEnabled && typeofLivePreviewURL === 'function') {
           setLivePreviewURL(livePreviewURL)
         }
 
@@ -692,7 +693,7 @@ export function DefaultEditView({
               />
               {AfterDocument}
             </div>
-            {isLivePreviewEnabled && !isInDrawer && (
+            {isLivePreviewEnabled && !isInDrawer && livePreviewURL && (
               <LivePreviewWindow collectionSlug={collectionSlug} globalSlug={globalSlug} />
             )}
           </div>

@@ -157,11 +157,8 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
     [api, getPreference, i18n.language, pendingUpdate, serverURL],
   )
 
-  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   contextRef.current.getPreference = getPreference
-  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   contextRef.current.setPreference = setPreference
-  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   return <Context value={contextRef.current}>{children}</Context>
 }
 
