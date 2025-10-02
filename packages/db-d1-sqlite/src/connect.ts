@@ -21,8 +21,12 @@ export const connect: Connect = async function connect(
 
   try {
     const logger = this.logger || false
+    // @ts-expect-error
+    this.drizzle = drizzle(this.binding.withSession('first-primary'), {
+      logger,
+      schema: this.schema,
+    })
 
-    this.drizzle = drizzle(this.binding, { logger, schema: this.schema })
     this.client = this.drizzle.$client as any
 
     if (!hotReload) {
