@@ -1,6 +1,6 @@
 import type { CheckboxField, RowField, TextField } from 'payload'
 
-import { generateSlug } from './slug/generateSlug.js'
+import { generateSlug } from './generateSlug.js'
 
 type Overrides = {
   generateSlugOverrides?: Partial<CheckboxField>
