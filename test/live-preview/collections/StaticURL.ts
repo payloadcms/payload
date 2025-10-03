@@ -4,7 +4,7 @@ export const StaticURLCollection: CollectionConfig = {
   slug: 'static-url',
   admin: {
     livePreview: {
-      url: '/live-preview/hello-world',
+      url: '/live-preview/static',
     },
   },
   fields: [

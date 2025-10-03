@@ -392,7 +392,9 @@ export const renderDocument = async ({
         <LivePreviewProvider
           breakpoints={livePreviewConfig?.breakpoints}
           isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
-          isLivePreviewing={entityPreferences?.value?.editViewType === 'live-preview'}
+          isLivePreviewing={Boolean(
+            entityPreferences?.value?.editViewType === 'live-preview' && livePreviewURL,
+          )}
           typeofLivePreviewURL={typeof livePreviewConfig?.url as 'function' | 'string' | undefined}
           url={livePreviewURL}
         >

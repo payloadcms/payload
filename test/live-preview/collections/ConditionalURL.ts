@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-export const ConditionalURLCollection: CollectionConfig = {
+export const ConditionalURL: CollectionConfig = {
   slug: 'conditional-url',
   admin: {
     livePreview: {
