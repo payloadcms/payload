@@ -285,71 +285,73 @@
     }
   }
 
-  .dashboard-breadcrumb-dropdown {
-    &__editing {
-      align-items: center;
-      display: flex !important;
-      gap: 12px;
-    }
+  .step-nav {
+    .dashboard-breadcrumb-dropdown {
+      &__editing {
+        align-items: center;
+        display: flex !important;
+        gap: 12px;
+      }
 
-    &__actions {
-      display: flex !important;
-      gap: 8px;
-    }
-  }
-
-  .dashboard-breadcrumb-select {
-    position: relative;
-    z-index: 10;
-
-    .rs__control {
-      background: transparent;
-      border: none;
-      box-shadow: none;
-      padding: 0;
-      cursor: pointer;
-
-      &:hover {
-        background: transparent;
+      &__actions {
+        display: flex !important;
+        gap: 8px;
       }
     }
 
-    .rs__indicator-separator {
-      display: none;
+    .dashboard-breadcrumb-select {
+      position: relative;
+      z-index: 10;
+
+      .rs__control {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        cursor: pointer;
+
+        &:hover {
+          background: transparent;
+        }
+      }
+
+      .rs__indicator-separator {
+        display: none;
+      }
+
+      .rs__dropdown-indicator {
+        padding: 0 4px;
+      }
+
+      .rs__menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        min-width: 150px;
+        z-index: 9999;
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
     }
 
-    .rs__dropdown-indicator {
-      padding: 0 4px;
+    .rs__control {
+      box-shadow: none !important;
+      cursor: pointer !important;
     }
 
-    .rs__menu {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      min-width: 150px;
-      z-index: 9999;
-      box-shadow:
-        0 4px 6px -1px rgba(0, 0, 0, 0.1),
-        0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-  }
-
-  .rs__control {
-    box-shadow: none !important;
-    cursor: pointer !important;
-  }
-
-  .drawer-toggler--unstyled {
-    background: transparent;
-    border: none;
-    margin: 0;
-    padding: 0;
-    outline: none;
-    box-shadow: none;
-
-    &:hover,
-    &:focus {
+    .drawer-toggler--unstyled {
       background: transparent;
+      border: none;
+      margin: 0;
+      padding: 0;
+      outline: none;
+      box-shadow: none;
+
+      &:hover,
+      &:focus {
+        background: transparent;
+      }
     }
   }
 }
