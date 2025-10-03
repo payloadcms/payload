@@ -103,6 +103,9 @@ export type {
 export { ListSelection } from '../../views/List/ListSelection/index.js'
 export { CollectionListHeader as ListHeader } from '../../views/List/ListHeader/index.js'
 export { GroupByHeader } from '../../views/List/GroupByHeader/index.js'
+export { PageControls, PageControlsComponent } from '../../elements/PageControls/index.js'
+export { StickyToolbar } from '../../elements/StickyToolbar/index.js'
+
 export { GroupByPageControls } from '../../elements/PageControls/GroupByPageControls.js'
 export { LoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { FormLoadingOverlayToggle } from '../../elements/Loading/index.js'
@@ -341,6 +344,7 @@ export type { UploadHandlersContext } from '../../providers/UploadHandlers/index
 export { defaultTheme, type Theme, ThemeProvider, useTheme } from '../../providers/Theme/index.js'
 export { TranslationProvider, useTranslation } from '../../providers/Translation/index.js'
 export { useWindowInfo, WindowInfoProvider } from '../../providers/WindowInfo/index.js'
+export { useControllableState } from '../../hooks/useControllableState.js'
 
 export { Text as TextCondition } from '../../elements/WhereBuilder/Condition/Text/index.js'
 export { Select as SelectCondition } from '../../elements/WhereBuilder/Condition/Select/index.js'
