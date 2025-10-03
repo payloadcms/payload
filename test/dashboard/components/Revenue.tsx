@@ -107,6 +107,7 @@ export default function Revenue({
               borderRadius: '4px',
               color: 'var(--theme-text)',
               fontSize: '12px',
+              outline: 'none',
               padding: '4px 8px',
             }}
           >
@@ -120,7 +121,11 @@ export default function Revenue({
 
       <div style={{ flex: 1, minHeight: 0 }}>
         <ResponsiveContainer height={300} width="100%">
-          <AreaChart data={mockData} margin={{ bottom: 5, left: 20, right: 30, top: 20 }}>
+          <AreaChart
+            data={mockData}
+            margin={{ bottom: 35, left: 5, right: 5, top: 10 }}
+            style={{ outline: 'none' }}
+          >
             <defs>
               <linearGradient id="revenueGradient" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
