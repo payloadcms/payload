@@ -229,12 +229,12 @@ describe('Live Preview', () => {
     await toggleLivePreview(page, { targetState: 'on' })
 
     const iframe = page.locator('iframe.live-preview-iframe')
-    await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview\/hello/)
+    await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview\/static/)
 
     const titleField = page.locator('#field-title')
     await titleField.fill('New Title')
     await saveDocAndAssert(page)
-    await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview\/hello/)
+    await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview\/static/)
   })
 
   test('collection csr — iframe reflects form state on change', async () => {
