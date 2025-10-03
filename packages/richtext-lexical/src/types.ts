@@ -21,6 +21,14 @@ import type { InitialLexicalFormState } from './utilities/buildInitialState.js'
 
 export type LexicalFieldAdminProps = {
   /**
+   * Controls if the add block button should be hidden. @default false
+   */
+  hideAddBlockButton?: boolean
+  /**
+   * Controls if the draggable block element should be hidden. @default false
+   */
+  hideDraggableBlockElement?: boolean
+  /**
    * Controls if the gutter (padding to the left & gray vertical line) should be hidden. @default false
    */
   hideGutter?: boolean
@@ -38,40 +46,42 @@ export type LexicalFieldAdminClientProps = {
   placeholder?: string
 } & Omit<LexicalFieldAdminProps, 'placeholder'>
 
+export type FeaturesInput =
+  | (({
+      defaultFeatures,
+      rootFeatures,
+    }: {
+      /**
+       * This opinionated array contains all "recommended" default features.
+       *
+       * @Example
+       *
+       * ```ts
+       *  editor: lexicalEditor({
+       *    features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+       *  })
+       *  ```
+       */
+      defaultFeatures: FeatureProviderServer<any, any, any>[]
+      /**
+       * This array contains all features that are enabled in the root richText editor (the one defined in the payload.config.ts).
+       * If this field is the root richText editor, or if the root richText editor is not a lexical editor, this array will be empty.
+       *
+       * @Example
+       *
+       * ```ts
+       *  editor: lexicalEditor({
+       *    features: ({ rootFeatures }) => [...rootFeatures, FixedToolbarFeature()],
+       *  })
+       *  ```
+       */
+      rootFeatures: FeatureProviderServer<any, any, any>[]
+    }) => FeatureProviderServer<any, any, any>[])
+  | FeatureProviderServer<any, any, any>[]
+
 export type LexicalEditorProps = {
   admin?: LexicalFieldAdminProps
-  features?:
-    | (({
-        defaultFeatures,
-        rootFeatures,
-      }: {
-        /**
-         * This opinionated array contains all "recommended" default features.
-         *
-         * @Example
-         *
-         * ```ts
-         *  editor: lexicalEditor({
-         *    features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
-         *  })
-         *  ```
-         */
-        defaultFeatures: FeatureProviderServer<any, any, any>[]
-        /**
-         * This array contains all features that are enabled in the root richText editor (the one defined in the payload.config.ts).
-         * If this field is the root richText editor, or if the root richText editor is not a lexical editor, this array will be empty.
-         *
-         * @Example
-         *
-         * ```ts
-         *  editor: lexicalEditor({
-         *    features: ({ rootFeatures }) => [...rootFeatures, FixedToolbarFeature()],
-         *  })
-         *  ```
-         */
-        rootFeatures: FeatureProviderServer<any, any, any>[]
-      }) => FeatureProviderServer<any, any, any>[])
-    | FeatureProviderServer<any, any, any>[]
+  features?: FeaturesInput
   lexical?: LexicalEditorConfig
 }
 
@@ -110,6 +120,7 @@ export type LexicalRichTextFieldProps = {
       clientFeatureProvider?: FeatureProviderProviderClient<any, any>
     }
   }
+  featureClientImportMap: Record<string, any>
   featureClientSchemaMap: FeatureClientSchemaMap
   initialLexicalFormState: InitialLexicalFormState
   lexicalEditorConfig: LexicalEditorConfig | undefined // Undefined if default lexical editor config should be used

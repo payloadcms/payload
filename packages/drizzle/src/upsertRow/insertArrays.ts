@@ -32,6 +32,9 @@ export const insertArrays = async ({
   const rowsByTable: RowsByTable = {}
 
   arrays.forEach((arraysByTable, parentRowIndex) => {
+    if (!arraysByTable || Object.keys(arraysByTable).length === 0) {
+      return
+    }
     Object.entries(arraysByTable).forEach(([tableName, arrayRows]) => {
       // If the table doesn't exist in map, initialize it
       if (!rowsByTable[tableName]) {
@@ -46,7 +49,7 @@ export const insertArrays = async ({
 
       // Add any sub arrays that need to be created
       // We will call this recursively below
-      arrayRows.forEach((arrayRow, i) => {
+      arrayRows.forEach((arrayRow) => {
         if (Object.keys(arrayRow.arrays).length > 0) {
           rowsByTable[tableName].arrays.push(arrayRow.arrays)
         }

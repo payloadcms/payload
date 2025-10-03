@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -90,6 +91,9 @@ export interface Config {
     folders: Folder;
     'example-pages': ExamplePage;
     'example-posts': ExamplePost;
+    folderPoly1: FolderPoly1;
+    folderPoly2: FolderPoly2;
+    'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -105,6 +109,7 @@ export interface Config {
       'group.relatedPosts': 'posts';
       'group.camelCasePosts': 'posts';
       arrayPosts: 'posts';
+      arrayHasManyPosts: 'posts';
       localizedArrayPosts: 'posts';
       blocksPosts: 'posts';
       polymorphic: 'posts';
@@ -112,6 +117,7 @@ export interface Config {
       localizedPolymorphic: 'posts';
       localizedPolymorphics: 'posts';
       filtered: 'posts';
+      inTab: 'posts';
       joinWithError: 'posts';
       hiddenPosts: 'hidden-posts';
       singulars: 'singular';
@@ -147,6 +153,9 @@ export interface Config {
     folders: {
       children: 'folders' | 'example-pages' | 'example-posts';
     };
+    'payload-folders': {
+      documentsAndFolders: 'payload-folders' | 'folderPoly1' | 'folderPoly2';
+    };
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
@@ -173,6 +182,9 @@ export interface Config {
     folders: FoldersSelect<false> | FoldersSelect<true>;
     'example-pages': ExamplePagesSelect<false> | ExamplePagesSelect<true>;
     'example-posts': ExamplePostsSelect<false> | ExamplePostsSelect<true>;
+    folderPoly1: FolderPoly1Select<false> | FolderPoly1Select<true>;
+    folderPoly2: FolderPoly2Select<false> | FolderPoly2Select<true>;
+    'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -216,9 +228,10 @@ export interface UserAuthOperations {
 export interface User {
   id: string;
   posts?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -228,6 +241,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -300,6 +320,12 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
+  arrayHasMany?:
+    | {
+        category?: (string | Category)[] | null;
+        id?: string | null;
+      }[]
+    | null;
   localizedArray?:
     | {
         category?: (string | null) | Category;
@@ -314,6 +340,12 @@ export interface Post {
         blockType: 'block';
       }[]
     | null;
+  first?: {
+    tabText?: string | null;
+  };
+  tab?: {
+    category?: (string | null) | Category;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -324,9 +356,10 @@ export interface Post {
 export interface Upload {
   id: string;
   relatedPosts?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -347,74 +380,100 @@ export interface Category {
   id: string;
   name?: string | null;
   relatedPosts?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   /**
    * Static Description
    */
   hasManyPosts?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   hasManyPostsLocalized?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   hiddenPosts?: {
-    docs?: (string | HiddenPost)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | HiddenPost)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   group?: {
     relatedPosts?: {
-      docs?: (string | Post)[] | null;
-      hasNextPage?: boolean | null;
-    } | null;
+      docs?: (string | Post)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
     camelCasePosts?: {
-      docs?: (string | Post)[] | null;
-      hasNextPage?: boolean | null;
-    } | null;
+      docs?: (string | Post)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
   };
   arrayPosts?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  arrayHasManyPosts?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   localizedArrayPosts?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   blocksPosts?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   polymorphic?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   polymorphics?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   localizedPolymorphic?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   localizedPolymorphics?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   singulars?: {
-    docs?: (string | Singular)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Singular)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   filtered?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  inTab?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   joinWithError?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   enableErrorOnJoin?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -446,6 +505,7 @@ export interface Singular {
  */
 export interface Version {
   id: string;
+  title: string;
   category?: (string | null) | Category;
   categoryVersion?: (string | null) | CategoriesVersion;
   categoryVersions?: (string | CategoriesVersion)[] | null;
@@ -459,14 +519,17 @@ export interface Version {
  */
 export interface CategoriesVersion {
   id: string;
+  title?: string | null;
   relatedVersions?: {
-    docs?: (string | Version)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Version)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   relatedVersionsMany?: {
-    docs?: (string | Version)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Version)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -479,9 +542,10 @@ export interface SelfJoin {
   id: string;
   rel?: (string | null) | SelfJoin;
   joins?: {
-    docs?: (string | SelfJoin)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | SelfJoin)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -504,9 +568,10 @@ export interface LocalizedCategory {
   id: string;
   name?: string | null;
   relatedPosts?: {
-    docs?: (string | LocalizedPost)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | LocalizedPost)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -518,9 +583,10 @@ export interface RestrictedCategory {
   id: string;
   name?: string | null;
   restrictedPosts?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -532,9 +598,10 @@ export interface CategoriesJoinRestricted {
   id: string;
   name?: string | null;
   collectionRestrictedJoin?: {
-    docs?: (string | CollectionRestricted)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | CollectionRestricted)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -570,9 +637,10 @@ export interface DepthJoins1 {
   id: string;
   rel?: (string | null) | DepthJoins2;
   joins?: {
-    docs?: (string | DepthJoins3)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | DepthJoins3)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -583,9 +651,10 @@ export interface DepthJoins1 {
 export interface DepthJoins2 {
   id: string;
   joins?: {
-    docs?: (string | DepthJoins1)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | DepthJoins1)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -606,20 +675,19 @@ export interface DepthJoins3 {
 export interface MultipleCollectionsParent {
   id: string;
   children?: {
-    docs?:
-      | (
-          | {
-              relationTo?: 'multiple-collections-1';
-              value: string | MultipleCollections1;
-            }
-          | {
-              relationTo?: 'multiple-collections-2';
-              value: string | MultipleCollections2;
-            }
-        )[]
-      | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (
+      | {
+          relationTo?: 'multiple-collections-1';
+          value: string | MultipleCollections1;
+        }
+      | {
+          relationTo?: 'multiple-collections-2';
+          value: string | MultipleCollections2;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -656,24 +724,23 @@ export interface Folder {
   folder?: (string | null) | Folder;
   title?: string | null;
   children?: {
-    docs?:
-      | (
-          | {
-              relationTo?: 'folders';
-              value: string | Folder;
-            }
-          | {
-              relationTo?: 'example-pages';
-              value: string | ExamplePage;
-            }
-          | {
-              relationTo?: 'example-posts';
-              value: string | ExamplePost;
-            }
-        )[]
-      | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (
+      | {
+          relationTo?: 'folders';
+          value: string | Folder;
+        }
+      | {
+          relationTo?: 'example-pages';
+          value: string | ExamplePage;
+        }
+      | {
+          relationTo?: 'example-posts';
+          value: string | ExamplePost;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -698,6 +765,58 @@ export interface ExamplePost {
   folder?: (string | null) | Folder;
   title?: string | null;
   description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly1".
+ */
+export interface FolderPoly1 {
+  id: string;
+  folderPoly1Title?: string | null;
+  folder?: (string | null) | FolderInterface;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders".
+ */
+export interface FolderInterface {
+  id: string;
+  name: string;
+  folder?: (string | null) | FolderInterface;
+  documentsAndFolders?: {
+    docs?: (
+      | {
+          relationTo?: 'payload-folders';
+          value: string | FolderInterface;
+        }
+      | {
+          relationTo?: 'folderPoly1';
+          value: string | FolderPoly1;
+        }
+      | {
+          relationTo?: 'folderPoly2';
+          value: string | FolderPoly2;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  folderType?: ('folderPoly1' | 'folderPoly2')[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly2".
+ */
+export interface FolderPoly2 {
+  id: string;
+  folderPoly2Title?: string | null;
+  folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
 }
@@ -803,6 +922,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'example-posts';
         value: string | ExamplePost;
+      } | null)
+    | ({
+        relationTo: 'folderPoly1';
+        value: string | FolderPoly1;
+      } | null)
+    | ({
+        relationTo: 'folderPoly2';
+        value: string | FolderPoly2;
+      } | null)
+    | ({
+        relationTo: 'payload-folders';
+        value: string | FolderInterface;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -861,6 +992,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -892,6 +1030,12 @@ export interface PostsSelect<T extends boolean = true> {
         category?: T;
         id?: T;
       };
+  arrayHasMany?:
+    | T
+    | {
+        category?: T;
+        id?: T;
+      };
   localizedArray?:
     | T
     | {
@@ -908,6 +1052,16 @@ export interface PostsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  first?:
+    | T
+    | {
+        tabText?: T;
+      };
+  tab?:
+    | T
+    | {
+        category?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -929,6 +1083,7 @@ export interface CategoriesSelect<T extends boolean = true> {
         camelCasePosts?: T;
       };
   arrayPosts?: T;
+  arrayHasManyPosts?: T;
   localizedArrayPosts?: T;
   blocksPosts?: T;
   polymorphic?: T;
@@ -937,6 +1092,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   localizedPolymorphics?: T;
   singulars?: T;
   filtered?: T;
+  inTab?: T;
   joinWithError?: T;
   enableErrorOnJoin?: T;
   updatedAt?: T;
@@ -975,6 +1131,7 @@ export interface UploadsSelect<T extends boolean = true> {
  * via the `definition` "versions_select".
  */
 export interface VersionsSelect<T extends boolean = true> {
+  title?: T;
   category?: T;
   categoryVersion?: T;
   categoryVersions?: T;
@@ -987,6 +1144,7 @@ export interface VersionsSelect<T extends boolean = true> {
  * via the `definition` "categories-versions_select".
  */
 export interface CategoriesVersionsSelect<T extends boolean = true> {
+  title?: T;
   relatedVersions?: T;
   relatedVersionsMany?: T;
   updatedAt?: T;
@@ -1163,6 +1321,38 @@ export interface ExamplePostsSelect<T extends boolean = true> {
   folder?: T;
   title?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly1_select".
+ */
+export interface FolderPoly1Select<T extends boolean = true> {
+  folderPoly1Title?: T;
+  folder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly2_select".
+ */
+export interface FolderPoly2Select<T extends boolean = true> {
+  folderPoly2Title?: T;
+  folder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders_select".
+ */
+export interface PayloadFoldersSelect<T extends boolean = true> {
+  name?: T;
+  folder?: T;
+  documentsAndFolders?: T;
+  folderType?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -260,6 +260,32 @@ const ArrayFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'arrayWithCustomID',
+      type: 'array',
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+          admin: {
+            disableListFilter: true,
+          },
+        },
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'getDataByPathTest',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/collections/Array/GetDataByPathTest.js',
+        },
+      },
+    },
   ],
   slug: arrayFieldsSlug,
   versions: true,

@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 /* eslint-disable perfectionist/sort-switch-case */
 // Keep perfectionist/sort-switch-case disabled - it incorrectly messes up the ordering of the switch cases, causing it to break
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient, TFunction } from '@payloadcms/translations'
 
 import type {
   AdminClient,
@@ -22,7 +22,7 @@ import type {
 } from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
 
-import { getFromImportMap } from '../../bin/generateImportMap/getFromImportMap.js'
+import { getFromImportMap } from '../../bin/generateImportMap/utilities/getFromImportMap.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { flattenTopLevelFields, type ImportMap } from '../../index.js'
@@ -36,7 +36,7 @@ export type ServerOnlyFieldProperties =
   | 'dbName' // can be a function
   | 'editor' // This is a `richText` only property
   | 'enumName' // can be a function
-  | 'filterOptions' // This is a `relationship` and `upload` only property
+  | 'filterOptions' // This is a `relationship`, `upload`, and `select` only property
   | 'graphQL'
   | 'label'
   | 'typescriptSchema'
@@ -45,6 +45,7 @@ export type ServerOnlyFieldProperties =
 
 export type ServerOnlyFieldAdminProperties = keyof Pick<
   FieldBase['admin'],
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   'components' | 'condition'
 >
 
@@ -53,7 +54,7 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   'access',
   'validate',
   'defaultValue',
-  'filterOptions', // This is a `relationship` and `upload` only property
+  'filterOptions', // This is a `relationship`, `upload`, and `select` only property
   'editor', // This is a `richText` only property
   'custom',
   'typescriptSchema',
@@ -67,10 +68,12 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   // `tabs`
   // `admin`
 ]
+
 const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = [
   'condition',
   'components',
 ]
+
 type FieldWithDescription = {
   admin: AdminClient
 } & ClientField
@@ -88,7 +91,7 @@ export const createClientBlocks = ({
 }): (ClientBlock | string)[] | ClientBlock[] => {
   const clientBlocks: (ClientBlock | string)[] = []
   for (let i = 0; i < blocks.length; i++) {
-    const block = blocks[i]
+    const block = blocks[i]!
 
     if (typeof block === 'string') {
       // Do not process blocks that are just strings - they are processed once in the client config
@@ -107,9 +110,14 @@ export const createClientBlocks = ({
       clientBlock.imageURL = block.imageURL
     }
 
-    if (block.admin?.custom) {
-      clientBlock.admin = {
-        custom: block.admin.custom,
+    if (block.admin?.custom || block.admin?.group) {
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      clientBlock.admin = {}
+      if (block.admin.custom) {
+        clientBlock.admin!.custom = block.admin.custom
+      }
+      if (block.admin.group) {
+        clientBlock.admin!.group = block.admin.group
       }
     }
 
@@ -122,17 +130,27 @@ export const createClientBlocks = ({
       clientBlock.jsx = jsxResolved
     }
 
+    if (block?.admin?.disableBlockName) {
+      // Check for existing admin object, this way we don't have to spread it in
+      if (clientBlock.admin) {
+        clientBlock.admin.disableBlockName = block.admin.disableBlockName
+      } else {
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+        clientBlock.admin = { disableBlockName: block.admin.disableBlockName }
+      }
+    }
+
     if (block.labels) {
       clientBlock.labels = {} as unknown as LabelsClient
 
       if (block.labels.singular) {
         if (typeof block.labels.singular === 'function') {
-          clientBlock.labels.singular = block.labels.singular({ t: i18n.t })
+          clientBlock.labels.singular = block.labels.singular({ i18n, t: i18n.t as TFunction })
         } else {
           clientBlock.labels.singular = block.labels.singular
         }
         if (typeof block.labels.plural === 'function') {
-          clientBlock.labels.plural = block.labels.plural({ t: i18n.t })
+          clientBlock.labels.plural = block.labels.plural({ i18n, t: i18n.t as TFunction })
         } else {
           clientBlock.labels.plural = block.labels.plural
         }
@@ -195,7 +213,8 @@ export const createClientField = ({
               break
 
             default:
-              clientField.admin[adminKey] = incomingField.admin[adminKey]
+              ;(clientField.admin as any)[adminKey] =
+                incomingField.admin[adminKey as keyof typeof incomingField.admin]
           }
         }
 
@@ -211,7 +230,7 @@ export const createClientField = ({
         //@ts-expect-error - would need to type narrow
         if (typeof incomingField.label === 'function') {
           //@ts-expect-error - would need to type narrow
-          clientField.label = incomingField.label({ t: i18n.t })
+          clientField.label = incomingField.label({ i18n, t: i18n.t })
         } else {
           //@ts-expect-error - would need to type narrow
           clientField.label = incomingField.label
@@ -220,7 +239,7 @@ export const createClientField = ({
         break
 
       default:
-        clientField[key] = incomingField[key]
+        ;(clientField as any)[key] = incomingField[key as keyof Field]
     }
   }
 
@@ -233,12 +252,12 @@ export const createClientField = ({
 
         if (incomingField.labels.singular) {
           if (typeof incomingField.labels.singular === 'function') {
-            field.labels.singular = incomingField.labels.singular({ t: i18n.t })
+            field.labels.singular = incomingField.labels.singular({ i18n, t: i18n.t as TFunction })
           } else {
             field.labels.singular = incomingField.labels.singular
           }
           if (typeof incomingField.labels.plural === 'function') {
-            field.labels.plural = incomingField.labels.plural({ t: i18n.t })
+            field.labels.plural = incomingField.labels.plural({ i18n, t: i18n.t as TFunction })
           } else {
             field.labels.plural = incomingField.labels.plural
           }
@@ -274,12 +293,12 @@ export const createClientField = ({
 
         if (incomingField.labels.singular) {
           if (typeof incomingField.labels.singular === 'function') {
-            field.labels.singular = incomingField.labels.singular({ t: i18n.t })
+            field.labels.singular = incomingField.labels.singular({ i18n, t: i18n.t as TFunction })
           } else {
             field.labels.singular = incomingField.labels.singular
           }
           if (typeof incomingField.labels.plural === 'function') {
-            field.labels.plural = incomingField.labels.plural({ t: i18n.t })
+            field.labels.plural = incomingField.labels.plural({ i18n, t: i18n.t as TFunction })
           } else {
             field.labels.plural = incomingField.labels.plural
           }
@@ -332,7 +351,7 @@ export const createClientField = ({
             }
 
             field.options[i] = {
-              label: option.label({ t: i18n.t }),
+              label: option.label({ i18n, t: i18n.t as TFunction }),
               value: option.value,
             }
           }
@@ -369,7 +388,7 @@ export const createClientField = ({
               continue
             }
 
-            const tabProp = tab[key]
+            const tabProp = tab[key as keyof typeof tab]
 
             if (key === 'fields') {
               clientTab.fields = createClientFields({
@@ -383,6 +402,7 @@ export const createClientField = ({
               (key === 'label' || key === 'description') &&
               typeof tabProp === 'function'
             ) {
+              // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
               clientTab[key] = tabProp({ t: i18n.t })
             } else if (key === 'admin') {
               clientTab.admin = {} as AdminClient
@@ -396,7 +416,10 @@ export const createClientField = ({
                   case 'description':
                     if ('description' in tab.admin) {
                       if (typeof tab.admin?.description === 'function') {
-                        clientTab.admin.description = tab.admin.description({ t: i18n.t })
+                        clientTab.admin.description = tab.admin.description({
+                          i18n,
+                          t: i18n.t as TFunction,
+                        })
                       } else {
                         clientTab.admin.description = tab.admin.description
                       }
@@ -405,11 +428,12 @@ export const createClientField = ({
                     break
 
                   default:
-                    clientField.admin[adminKey] = tab.admin[adminKey]
+                    ;(clientTab.admin as any)[adminKey] =
+                      tab.admin[adminKey as keyof typeof tab.admin]
                 }
               }
             } else {
-              clientTab[key] = tabProp
+              ;(clientTab as any)[key] = tabProp
             }
           }
           field.tabs[i] = clientTab
@@ -442,7 +466,7 @@ export const createClientFields = ({
   const clientFields: ClientField[] = []
 
   for (let i = 0; i < fields.length; i++) {
-    const field = fields[i]
+    const field = fields[i]!
 
     const clientField = createClientField({
       defaultIDType,
@@ -468,7 +492,7 @@ export const createClientFields = ({
       },
       hidden: true,
       label: 'ID',
-    })
+    } as ClientField)
   }
 
   return clientFields

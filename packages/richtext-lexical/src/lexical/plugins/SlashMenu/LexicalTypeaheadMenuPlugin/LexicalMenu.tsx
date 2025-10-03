@@ -9,6 +9,7 @@ import {
   $isRangeSelection,
   $setSelection,
   COMMAND_PRIORITY_LOW,
+  COMMAND_PRIORITY_NORMAL,
   createCommand,
   KEY_ARROW_DOWN_COMMAND,
   KEY_ARROW_UP_COMMAND,
@@ -350,7 +351,7 @@ export function LexicalMenu({
           }
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_NORMAL,
       ),
       editor.registerCommand<KeyboardEvent>(
         KEY_ARROW_UP_COMMAND,
@@ -376,7 +377,7 @@ export function LexicalMenu({
           }
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_NORMAL,
       ),
       editor.registerCommand<KeyboardEvent>(
         KEY_ESCAPE_COMMAND,
@@ -408,7 +409,7 @@ export function LexicalMenu({
           selectItemAndCleanUp(selectedItem)
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_NORMAL,
       ),
       editor.registerCommand(
         KEY_ENTER_COMMAND,
@@ -429,7 +430,7 @@ export function LexicalMenu({
           selectItemAndCleanUp(selectedItem)
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_NORMAL,
       ),
     )
   }, [selectItemAndCleanUp, close, editor, groups, selectedItemKey, updateSelectedItem])
@@ -449,6 +450,16 @@ export function LexicalMenu({
     listItemProps,
     resolution.match ? resolution.match.matchingString : '',
   )
+}
+
+function setContainerDivAttributes(containerDiv: HTMLElement, className?: string) {
+  if (className != null) {
+    containerDiv.className = className
+  }
+  containerDiv.setAttribute('aria-label', 'Slash menu')
+  containerDiv.setAttribute('role', 'listbox')
+  containerDiv.style.display = 'block'
+  containerDiv.style.position = 'absolute'
 }
 
 export function useMenuAnchorRef(
@@ -508,16 +519,10 @@ export function useMenuAnchorRef(
       }
 
       if (!containerDiv.isConnected) {
-        if (className != null) {
-          containerDiv.className = className
-        }
-        containerDiv.setAttribute('aria-label', 'Slash menu')
-        containerDiv.setAttribute('id', 'slash-menu')
-        containerDiv.setAttribute('role', 'listbox')
-        containerDiv.style.display = 'block'
-        containerDiv.style.position = 'absolute'
+        setContainerDivAttributes(containerDiv, className)
         anchorElem.append(containerDiv)
       }
+      containerDiv.setAttribute('id', 'slash-menu')
       anchorElementRef.current = containerDiv
       rootElement.setAttribute('aria-controls', 'slash-menu')
     }
@@ -535,6 +540,7 @@ export function useMenuAnchorRef(
         const containerDiv = anchorElementRef.current
         if (containerDiv !== null && containerDiv.isConnected) {
           containerDiv.remove()
+          containerDiv.removeAttribute('id')
         }
       }
     }

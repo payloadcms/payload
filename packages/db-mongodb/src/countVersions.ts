@@ -6,13 +6,19 @@ import { buildVersionCollectionFields, flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 
 export const countVersions: CountVersions = async function countVersions(
   this: MongooseAdapter,
-  { collection, locale, req, where },
+  { collection: collectionSlug, locale, req, where = {} },
 ) {
-  const Model = this.versions[collection]
+  const { collectionConfig, Model } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
+
   const options: CountOptions = {
     session: await getSession(this, req),
   }
@@ -26,11 +32,7 @@ export const countVersions: CountVersions = async function countVersions(
 
   const query = await buildQuery({
     adapter: this,
-    fields: buildVersionCollectionFields(
-      this.payload.config,
-      this.payload.collections[collection].config,
-      true,
-    ),
+    fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
     locale,
     where,
   })

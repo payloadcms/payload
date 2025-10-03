@@ -111,6 +111,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
     collection.graphQL.type = buildObjectType({
       name: singularName,
       baseFields,
+      collectionSlug: collectionConfig.slug,
       config,
       fields,
       forceNullable: forceNullableObjectType,
@@ -145,10 +146,25 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       })
     }
 
+    let mutationCreateInputFields = mutationInputFields
+
+    if (
+      config.db.allowIDOnCreate &&
+      !collectionConfig.flattenedFields.some((field) => field.name === 'id')
+    ) {
+      mutationCreateInputFields = [
+        ...mutationCreateInputFields,
+        {
+          name: 'id',
+          type: config.db.defaultIDType,
+        } as Field,
+      ]
+    }
+
     const createMutationInputType = buildMutationInputType({
       name: singularName,
       config,
-      fields: mutationInputFields,
+      fields: mutationCreateInputFields,
       graphqlResult,
       parentIsLocalized: false,
       parentName: singularName,
@@ -189,6 +205,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
                 locale: { type: graphqlResult.types.localeInputType },
               }
             : {}),
+          trash: { type: GraphQLBoolean },
         },
         resolve: findByIDResolver(collection),
       }
@@ -208,6 +225,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           page: { type: GraphQLInt },
           pagination: { type: GraphQLBoolean },
           sort: { type: GraphQLString },
+          trash: { type: GraphQLBoolean },
         },
         resolve: findResolver(collection),
       }
@@ -221,6 +239,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         }),
         args: {
           draft: { type: GraphQLBoolean },
+          trash: { type: GraphQLBoolean },
           where: { type: collection.graphQL.whereInputType },
           ...(config.localization
             ? {
@@ -276,6 +295,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
                 locale: { type: graphqlResult.types.localeInputType },
               }
             : {}),
+          trash: { type: GraphQLBoolean },
         },
         resolve: updateResolver(collection),
       }
@@ -284,6 +304,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         type: collection.graphQL.type,
         args: {
           id: { type: new GraphQLNonNull(idType) },
+          trash: { type: GraphQLBoolean },
         },
         resolve: getDeleteResolver(collection),
       }
@@ -313,17 +334,18 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         {
           name: 'createdAt',
           type: 'date',
-          label: 'Created At',
+          label: ({ t }) => t('general:createdAt'),
         },
         {
           name: 'updatedAt',
           type: 'date',
-          label: 'Updated At',
+          label: ({ t }) => t('general:updatedAt'),
         },
       ]
 
       collection.graphQL.versionType = buildObjectType({
         name: `${singularName}Version`,
+        collectionSlug: collectionConfig.slug,
         config,
         fields: versionCollectionFields,
         forceNullable: forceNullableObjectType,
@@ -342,6 +364,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
                   locale: { type: graphqlResult.types.localeInputType },
                 }
               : {}),
+            trash: { type: GraphQLBoolean },
           },
           resolve: findVersionByIDResolver(collection),
         }
@@ -368,6 +391,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
             page: { type: GraphQLInt },
             pagination: { type: GraphQLBoolean },
             sort: { type: GraphQLString },
+            trash: { type: GraphQLBoolean },
           },
           resolve: findVersionsResolver(collection),
         }
@@ -470,6 +494,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
 
         graphqlResult.Mutation.fields[`logout${singularName}`] = {
           type: GraphQLString,
+          args: {
+            allSessions: { type: GraphQLBoolean },
+          },
           resolve: logout(collection),
         }
 

@@ -7,8 +7,6 @@ import './index.scss'
 
 const baseClass = 'logout'
 
-export { generateLogoutMetadata } from './meta.js'
-
 export const LogoutView: React.FC<
   {
     inactivity?: boolean

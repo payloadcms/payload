@@ -1,8 +1,8 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
-import type { JoinQuery, Where } from '../../types/index.js'
+import type { Where } from '../../types/index.js'
+import type { JoinParams } from '../../utilities/sanitizeJoinParams.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
@@ -14,17 +14,18 @@ import { findOperation } from '../operations/find.js'
 
 export const findHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { depth, draft, joins, limit, page, pagination, populate, select, sort, where } =
+  const { depth, draft, joins, limit, page, pagination, populate, select, sort, trash, where } =
     req.query as {
       depth?: string
       draft?: string
-      joins?: JoinQuery
+      joins?: JoinParams
       limit?: string
       page?: string
       pagination?: string
       populate?: Record<string, unknown>
       select?: Record<string, unknown>
       sort?: string
+      trash?: string
       where?: Where
     }
 
@@ -40,6 +41,7 @@ export const findHandler: PayloadHandler = async (req) => {
     req,
     select: sanitizeSelectParam(select),
     sort: typeof sort === 'string' ? sort.split(',') : undefined,
+    trash: trash === 'true',
     where,
   })
 

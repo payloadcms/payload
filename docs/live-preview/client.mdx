@@ -7,7 +7,9 @@ keywords: live preview, frontend, react, next.js, vue, nuxt.js, svelte, hook, us
 ---
 
 <Banner type="info">
-  If your front-end application supports Server Components like the [Next.js App Router](https://nextjs.org/docs/app), etc., we suggest setting up [server-side Live Preview](./server) instead.
+  If your front-end application supports Server Components like the [Next.js App
+  Router](https://nextjs.org/docs/app), etc., we suggest setting up [server-side
+  Live Preview](./server) instead.
 </Banner>
 
 While using Live Preview, the [Admin Panel](../admin/overview) emits a new `window.postMessage` event every time your document has changed. Your front-end application can listen for these events and re-render accordingly.
@@ -18,12 +20,12 @@ By default, all hooks accept the following args:
 
 | Path               | Description                                                                            |
 | ------------------ | -------------------------------------------------------------------------------------- |
-| **`serverURL`** * | The URL of your Payload server.                                                        |
+| **`serverURL`** \* | The URL of your Payload server.                                                        |
 | **`initialData`**  | The initial data of the document. The live data will be merged in as changes are made. |
 | **`depth`**        | The depth of the relationships to fetch. Defaults to `0`.                              |
 | **`apiRoute`**     | The path of your API route as defined in `routes.api`. Defaults to `/api`.             |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 And return the following values:
 
@@ -33,15 +35,19 @@ And return the following values:
 | **`isLoading`** | A boolean that indicates whether or not the document is loading. |
 
 <Banner type="info">
-  If your front-end is tightly coupled to required fields, you should ensure that your UI does not
-  break when these fields are removed. For example, if you are rendering something like
-  `data.relatedPosts[0].title`, your page will break once you remove the first related post. To get
-  around this, use conditional logic, optional chaining, or default values in your UI where needed.
-  For example, `data?.relatedPosts?.[0]?.title`.
+  If your front-end is tightly coupled to required fields, you should ensure
+  that your UI does not break when these fields are removed. For example, if you
+  are rendering something like `data.relatedPosts[0].title`, your page will
+  break once you remove the first related post. To get around this, use
+  conditional logic, optional chaining, or default values in your UI where
+  needed. For example, `data?.relatedPosts?.[0]?.title`.
 </Banner>
 
 <Banner type="info">
-  It is important that the `depth` argument matches exactly with the depth of your initial page request. The depth property is used to populated relationships and uploads beyond their IDs. See [Depth](../queries/depth) for more information.
+  It is important that the `depth` argument matches exactly with the depth of
+  your initial page request. The depth property is used to populated
+  relationships and uploads beyond their IDs. See [Depth](../queries/depth) for
+  more information.
 </Banner>
 
 ## Frameworks
@@ -89,8 +95,9 @@ export const PageClient: React.FC<{
 ```
 
 <Banner type="warning">
-  **Reminder:**
-  If you are using [React Server Components](https://react.dev/reference/rsc/server-components), we strongly suggest setting up [server-side Live Preview](./server) instead.
+  **Reminder:** If you are using [React Server
+  Components](https://react.dev/reference/rsc/server-components), we strongly
+  suggest setting up [server-side Live Preview](./server) instead.
 </Banner>
 
 ### Vue
@@ -140,19 +147,19 @@ npm install @payloadcms/live-preview
 
 This package provides the following functions:
 
-| Path                     | Description                                                                                                                |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| **`subscribe`**          | Subscribes to the Admin Panel's `window.postMessage` events and calls the provided callback function.                      |
-| **`unsubscribe`**        | Unsubscribes from the Admin Panel's `window.postMessage` events.                                                           |
-| **`ready`**              | Sends a `window.postMessage` event to the Admin Panel to indicate that the front-end is ready to receive messages.         |
-| **`isLivePreviewEvent`** | Checks if a `MessageEvent` originates from the Admin Panel and is a Live Preview event, i.e. debounced form state.         |
+| Path                     | Description                                                                                                        |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| **`subscribe`**          | Subscribes to the Admin Panel's `window.postMessage` events and calls the provided callback function.              |
+| **`unsubscribe`**        | Unsubscribes from the Admin Panel's `window.postMessage` events.                                                   |
+| **`ready`**              | Sends a `window.postMessage` event to the Admin Panel to indicate that the front-end is ready to receive messages. |
+| **`isLivePreviewEvent`** | Checks if a `MessageEvent` originates from the Admin Panel and is a Live Preview event, i.e. debounced form state. |
 
 The `subscribe` function takes the following args:
 
 | Path               | Description                                                                                 |
 | ------------------ | ------------------------------------------------------------------------------------------- |
-| **`callback`** *  | A callback function that is called with `data` every time a change is made to the document. |
-| **`serverURL`** * | The URL of your Payload server.                                                             |
+| **`callback`** \*  | A callback function that is called with `data` every time a change is made to the document. |
+| **`serverURL`** \* | The URL of your Payload server.                                                             |
 | **`initialData`**  | The initial data of the document. The live data will be merged in as changes are made.      |
 | **`depth`**        | The depth of the relationships to fetch. Defaults to `0`.                                   |
 
@@ -233,29 +240,27 @@ export const useLivePreview = <T extends any>(props: {
 ```
 
 <Banner type="info">
-  When building your own hook, ensure that the args and return values are consistent with the ones
-  listed at the top of this document. This will ensure that all hooks follow the same API.
+  When building your own hook, ensure that the args and return values are
+  consistent with the ones listed at the top of this document. This will ensure
+  that all hooks follow the same API.
 </Banner>
 
 ## Example
 
-For a working demonstration of this, check out the official [Live Preview Example](https://github.com/payloadcms/payload/tree/main/examples/live-preview). There you will find examples of various front-end frameworks and how to integrate each one of them, including:
-
-- [Next.js App Router](https://github.com/payloadcms/payload/tree/main/examples/live-preview/next-app)
-- [Next.js Pages Router](https://github.com/payloadcms/payload/tree/main/examples/live-preview/next-pages)
+For a working demonstration of this, check out the official [Live Preview Example](https://github.com/payloadcms/payload/tree/main/examples/live-preview). There you will find an example of a fully integrated Next.js App Router front-end that runs on the same server as Payload.
 
 ## Troubleshooting
 
 #### Relationships and/or uploads are not populating
 
-If you are using relationships or uploads in your front-end application, and your front-end application runs on a different domain than your Payload server, you may need to configure [CORS](../configuration/overview) to allow requests to be made between the two domains. This includes sites that are running on a different port or subdomain. Similarly, if you are protecting resources behind user authentication, you may also need to configure [CSRF](../authentication/overview#csrf-protection) to allow cookies to be sent between the two domains. For example:
+If you are using relationships or uploads in your front-end application, and your front-end application runs on a different domain than your Payload server, you may need to configure [CORS](../configuration/overview#cors) to allow requests to be made between the two domains. This includes sites that are running on a different port or subdomain. Similarly, if you are protecting resources behind user authentication, you may also need to configure [CSRF](../authentication/cookies#csrf-prevention) to allow cookies to be sent between the two domains. For example:
 
 ```ts
 // payload.config.ts
 {
   // ...
   // If your site is running on a different domain than your Payload server,
-  // This will allows requests to be made between the two domains
+  // This will allow requests to be made between the two domains
   cors: [
     'http://localhost:3001' // Your front-end application
   ],

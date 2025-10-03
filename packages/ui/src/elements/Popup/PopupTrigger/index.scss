@@ -16,16 +16,20 @@
       background: transparent;
     }
 
+    &--size-xsmall {
+      padding: base(0.1);
+    }
+
     &--size-small {
-      padding: base(0.4);
+      padding: base(0.2);
     }
 
     &--size-medium {
-      padding: base(0.6);
+      padding: base(0.3);
     }
 
     &--size-large {
-      padding: base(0.8);
+      padding: base(0.4);
     }
 
     &--disabled {

@@ -16,6 +16,14 @@ export const importDateFNSLocale = async (locale: string): Promise<Locale> => {
       result = (await import('date-fns/locale/bg')).bg
 
       break
+    case 'bn-BD':
+      result = (await import('date-fns/locale/bn')).bn
+
+      break
+    case 'bn-IN':
+      result = (await import('date-fns/locale/bn')).bn
+
+      break
     case 'ca':
       result = (await import('date-fns/locale/ca')).ca
 
@@ -64,6 +72,16 @@ export const importDateFNSLocale = async (locale: string): Promise<Locale> => {
       result = (await import('date-fns/locale/hu')).hu
 
       break
+    case 'id':
+      result = (await import('date-fns/locale/id')).id
+
+      break
+
+    case 'is':
+      result = (await import('date-fns/locale/is')).is
+
+      break
+
     case 'it':
       result = (await import('date-fns/locale/it')).it
 
@@ -80,6 +98,11 @@ export const importDateFNSLocale = async (locale: string): Promise<Locale> => {
       result = (await import('date-fns/locale/lt')).lt
 
       break
+    case 'lv':
+      result = (await import('date-fns/locale/lv')).lv
+
+      break
+
     case 'nb':
       result = (await import('date-fns/locale/nb')).nb
 
@@ -124,6 +147,10 @@ export const importDateFNSLocale = async (locale: string): Promise<Locale> => {
       result = (await import('date-fns/locale/sv')).sv
 
       break
+    case 'ta':
+      result = (await import('date-fns/locale/ta')).ta
+
+      break
     case 'th':
       result = (await import('date-fns/locale/th')).th
 
@@ -150,7 +177,9 @@ export const importDateFNSLocale = async (locale: string): Promise<Locale> => {
       break
   }
 
-  if (result.default) {
+  // @ts-expect-error - I'm not sure if this is still necessary.
+  if (result?.default) {
+    // @ts-expect-error - I'm not sure if this is still necessary.
     return result.default
   }
 

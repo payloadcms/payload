@@ -1,37 +1,34 @@
-# Order matters. The last matching pattern takes precedence.
+# Order matters. The last matching pattern takes precedence
 
-### Package Exports
+## Package Exports
 
-**/exports/ @denolfe @jmikrut @DanRibbens
+**/exports/ @denolfe @DanRibbens
 
-### Packages
+## Packages
 
-/packages/plugin-cloud*/src/ @denolfe @jmikrut @DanRibbens
-/packages/email-*/src/ @denolfe @jmikrut @DanRibbens
-/packages/live-preview*/src/ @jacobsfletch
-/packages/plugin-stripe/src/ @jacobsfletch
+/packages/create-payload-app/src/ @denolfe
+/packages/email-*/src/ @denolfe
+/packages/eslint-*/ @denolfe @AlessioGr
+/packages/plugin-cloud-storage/src/ @denolfe
 /packages/plugin-multi-tenant/src/ @JarrodMFlesch
 /packages/richtext-*/src/ @AlessioGr
-/packages/next/src/ @jmikrut @jacobsfletch @AlessioGr @JarrodMFlesch
-/packages/ui/src/ @jmikrut @jacobsfletch @AlessioGr @JarrodMFlesch
-/packages/storage-*/src/ @denolfe @jmikrut @DanRibbens
-/packages/create-payload-app/src/ @denolfe @jmikrut @DanRibbens
-/packages/eslint-*/ @denolfe @jmikrut @DanRibbens @AlessioGr
+/packages/storage-*/src/ @denolfe
+/packages/ui/src/  @jacobsfletch @AlessioGr @JarrodMFlesch
 
-### Templates
+## Templates
 
-/templates/_data/ @denolfe @jmikrut @DanRibbens
-/templates/_template/ @denolfe @jmikrut @DanRibbens
+/templates/_data/ @denolfe
+/templates/_template/ @denolfe
 
-### Build Files
+## Build Files
 
-**/tsconfig*.json @denolfe @jmikrut @DanRibbens @AlessioGr
-**/jest.config.js @denolfe @jmikrut @DanRibbens @AlessioGr
+**/jest.config.js @denolfe @AlessioGr
+**/tsconfig*.json @denolfe @AlessioGr
 
-### Root
+## Root
 
-/package.json @denolfe @jmikrut @DanRibbens
-/tools/ @denolfe @jmikrut @DanRibbens
-/.husky/ @denolfe @jmikrut @DanRibbens
-/.vscode/ @denolfe @jmikrut @DanRibbens @AlessioGr
-/.github/ @denolfe @jmikrut @DanRibbens
+/.github/ @denolfe
+/.husky/ @denolfe
+/.vscode/ @denolfe @AlessioGr
+/package.json @denolfe
+/tools/ @denolfe

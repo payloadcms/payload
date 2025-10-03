@@ -1,11 +1,11 @@
-// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { buildVersionCollectionFields, type CollectionSlug } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildAfterOperation } from './utils.js'
@@ -18,6 +18,7 @@ export type Arguments = {
   where?: Where
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const countVersionsOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
 ): Promise<{ totalDocs: number }> => {
@@ -28,27 +29,28 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'countVersions',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    if (args.collection.config.hooks.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req!.context,
+            operation: 'countVersions',
+            req: args.req!,
+          })) || args
+      }
+    }
 
     const {
       collection: { config: collectionConfig },
       disableErrors,
       overrideAccess,
-      req: { payload },
       req,
       where,
     } = args
+
+    const { payload } = req!
 
     // /////////////////////////////////////
     // Access
@@ -58,7 +60,7 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
 
     if (!overrideAccess) {
       accessResult = await executeAccess(
-        { disableErrors, req },
+        { disableErrors, req: req! },
         collectionConfig.access.readVersions,
       )
 
@@ -72,16 +74,18 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
 
     let result: { totalDocs: number }
 
-    const fullWhere = combineQueries(where, accessResult)
+    const fullWhere = combineQueries(where!, accessResult!)
 
     const versionFields = buildVersionCollectionFields(payload.config, collectionConfig, true)
 
+    sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
+
     await validateQueryPaths({
       collectionConfig,
-      overrideAccess,
-      req,
+      overrideAccess: overrideAccess!,
+      req: req!,
       versionFields,
-      where,
+      where: where!,
     })
 
     result = await payload.db.countVersions({
@@ -107,7 +111,7 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
 
     return result
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    await killTransaction(args.req!)
     throw error
   }
 }

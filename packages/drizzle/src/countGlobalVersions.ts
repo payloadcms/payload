@@ -5,7 +5,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
-import buildQuery from './queries/buildQuery.js'
+import { buildQuery } from './queries/buildQuery.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const countGlobalVersions: CountGlobalVersions = async function countGlobalVersions(

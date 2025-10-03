@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import type { Args } from '../../../fields/hooks/beforeChange/index.js'
@@ -99,7 +98,14 @@ export const updateDocument = async <
   const password = data?.password
   const shouldSaveDraft =
     Boolean(draftArg && collectionConfig.versions.drafts) && data._status !== 'published'
-  const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft)
+  const shouldSavePassword = Boolean(
+    password &&
+      collectionConfig.auth &&
+      (!collectionConfig.auth.disableLocalStrategy ||
+        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
+          collectionConfig.auth.disableLocalStrategy.enableFields)) &&
+      !shouldSaveDraft,
+  )
 
   // /////////////////////////////////////
   // Handle potentially locked documents
@@ -171,19 +177,19 @@ export const updateDocument = async <
   // beforeValidate - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    data =
-      (await hook({
-        collection: collectionConfig,
-        context: req.context,
-        data,
-        operation: 'update',
-        originalDoc,
-        req,
-      })) || data
-  }, Promise.resolve())
+  if (collectionConfig.hooks?.beforeValidate?.length) {
+    for (const hook of collectionConfig.hooks.beforeValidate) {
+      data =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          data,
+          operation: 'update',
+          originalDoc,
+          req,
+        })) || data
+    }
+  }
 
   // /////////////////////////////////////
   // Write files to local storage
@@ -197,19 +203,19 @@ export const updateDocument = async <
   // beforeChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    data =
-      (await hook({
-        collection: collectionConfig,
-        context: req.context,
-        data,
-        operation: 'update',
-        originalDoc,
-        req,
-      })) || data
-  }, Promise.resolve())
+  if (collectionConfig.hooks?.beforeChange?.length) {
+    for (const hook of collectionConfig.hooks.beforeChange) {
+      data =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          data,
+          operation: 'update',
+          originalDoc,
+          req,
+        })) || data
+    }
+  }
 
   // /////////////////////////////////////
   // beforeChange - Fields
@@ -224,14 +230,18 @@ export const updateDocument = async <
     context: req.context,
     data: { ...data, id },
     doc: originalDoc,
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     docWithLocales: undefined,
     global: null,
     operation: 'update',
+    overrideAccess,
     req,
     skipValidation:
-      shouldSaveDraft &&
-      collectionConfig.versions.drafts &&
-      !collectionConfig.versions.drafts.validate,
+      (shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate) ||
+      // Skip validation for trash operations since they're just metadata updates
+      Boolean(data?.deletedAt),
   }
 
   if (publishSpecificLocale) {
@@ -285,13 +295,14 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   if (!shouldSaveDraft) {
+    // Ensure updatedAt date is always updated
+    dataToUpdate.updatedAt = new Date().toISOString()
     result = await req.payload.db.updateOne({
       id,
       collection: collectionConfig.slug,
       data: dataToUpdate,
       locale,
       req,
-      select,
     })
   }
 
@@ -306,10 +317,10 @@ export const updateDocument = async <
       collection: collectionConfig,
       docWithLocales: result,
       draft: shouldSaveDraft,
+      operation: 'update',
       payload,
       publishSpecificLocale,
       req,
-      select,
       snapshot: versionSnapshotResult,
     })
   }
@@ -338,17 +349,17 @@ export const updateDocument = async <
   // afterRead - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    result =
-      (await hook({
-        collection: collectionConfig,
-        context: req.context,
-        doc: result,
-        req,
-      })) || result
-  }, Promise.resolve())
+  if (collectionConfig.hooks?.afterRead?.length) {
+    for (const hook of collectionConfig.hooks.afterRead) {
+      result =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          doc: result,
+          req,
+        })) || result
+    }
+  }
 
   // /////////////////////////////////////
   // afterChange - Fields
@@ -369,19 +380,20 @@ export const updateDocument = async <
   // afterChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    result =
-      (await hook({
-        collection: collectionConfig,
-        context: req.context,
-        doc: result,
-        operation: 'update',
-        previousDoc: originalDoc,
-        req,
-      })) || result
-  }, Promise.resolve())
+  if (collectionConfig.hooks?.afterChange?.length) {
+    for (const hook of collectionConfig.hooks.afterChange) {
+      result =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          data,
+          doc: result,
+          operation: 'update',
+          previousDoc: originalDoc,
+          req,
+        })) || result
+    }
+  }
 
   return result as TransformCollectionWithSelect<TSlug, TSelect>
 }

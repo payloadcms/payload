@@ -18,6 +18,7 @@ type Args = {
 
 export function initLexicalFeatures(args: Args): {
   clientFeatures: LexicalRichTextFieldProps['clientFeatures']
+  featureClientImportMap: Record<string, any>
   featureClientSchemaMap: FeatureClientSchemaMap
 } {
   const clientFeatures: LexicalRichTextFieldProps['clientFeatures'] = {}
@@ -28,6 +29,11 @@ export function initLexicalFeatures(args: Args): {
   ).sort((a, b) => a[1].order - b[1].order)
 
   const featureClientSchemaMap: FeatureClientSchemaMap = {}
+
+  /**
+   * All modules added to the import map, keyed by the provided key, if feature.componentImports with type object is used
+   */
+  const featureClientImportMap: Record<string, any> = {}
 
   for (const [featureKey, resolvedFeature] of resolvedFeatureMapArray) {
     clientFeatures[featureKey] = {}
@@ -64,7 +70,7 @@ export function initLexicalFeatures(args: Args): {
     }
 
     /**
-     * Handle sub-fields (formstate of those)ttt
+     * Handle sub-fields (formstate of those)
      */
     // The args.fieldSchemaMap generated before in buildFormState should contain all of lexical features' sub-field schemas
     // as well, as it already called feature.generateSchemaMap for each feature.
@@ -84,10 +90,28 @@ export function initLexicalFeatures(args: Args): {
           featureClientSchemaMap[featureKey][key] = 'fields' in entry ? entry.fields : [entry]
         }
       }
+      if (
+        resolvedFeature.componentImports &&
+        typeof resolvedFeature.componentImports === 'object'
+      ) {
+        for (const key in resolvedFeature.componentImports) {
+          const payloadComponent = resolvedFeature.componentImports[key]
+
+          const resolvedComponent = getFromImportMap({
+            importMap: args.payload.importMap,
+            PayloadComponent: payloadComponent,
+            schemaPath: 'lexical-clientComponent',
+            silent: true,
+          })
+
+          featureClientImportMap[`${resolvedFeature.key}.${key}`] = resolvedComponent
+        }
+      }
     }
   }
   return {
     clientFeatures,
+    featureClientImportMap,
     featureClientSchemaMap,
   }
 }

@@ -1,10 +1,12 @@
 import type { Client, Config, ResultSet } from '@libsql/client'
 import type { extendDrizzleTable, Operators } from '@payloadcms/drizzle'
+import type { BaseSQLiteAdapter, BaseSQLiteArgs } from '@payloadcms/drizzle/sqlite'
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
   AnySQLiteColumn,
+  SQLiteColumn,
   SQLiteInsertOnConflictDoUpdateConfig,
   SQLiteTableWithColumns,
   SQLiteTransactionConfig,
@@ -32,6 +34,14 @@ export type Args = {
    */
   afterSchemaInit?: SQLiteSchemaHook[]
   /**
+   * Enable this flag if you want to thread your own ID to create operation data, for example:
+   * ```ts
+   * // doc created with id 1
+   * const doc = await payload.create({ collection: 'posts', data: {id: 1, title: "my title"}})
+   * ```
+   */
+  allowIDOnCreate?: boolean
+  /**
    * Enable [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for Primary Keys.
    * This ensures that the same ID cannot be reused from previously deleted rows.
    */
@@ -42,24 +52,12 @@ export type Args = {
    * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
    */
   beforeSchemaInit?: SQLiteSchemaHook[]
+  /**
+   * Store blocks as JSON column instead of storing them in relational structure.
+   */
+  blocksAsJSON?: boolean
   client: Config
-  /** Generated schema from payload generate:db-schema file path */
-  generateSchemaOutputFile?: string
-  idType?: 'number' | 'uuid'
-  localesSuffix?: string
-  logger?: DrizzleConfig['logger']
-  migrationDir?: string
-  prodMigrations?: {
-    down: (args: MigrateDownArgs) => Promise<void>
-    name: string
-    up: (args: MigrateUpArgs) => Promise<void>
-  }[]
-  push?: boolean
-  relationshipsSuffix?: string
-  schemaName?: string
-  transactionOptions?: false | SQLiteTransactionConfig
-  versionsSuffix?: string
-}
+} & BaseSQLiteArgs
 
 export type GenericColumns = {
   [x: string]: AnySQLiteColumn
@@ -75,6 +73,7 @@ export type GenericTable = SQLiteTableWithColumns<{
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
 export type CountDistinct = (args: {
+  column?: SQLiteColumn<any>
   db: LibSQLDatabase
   joins: BuildQueryJoinAliases
   tableName: string
@@ -128,45 +127,11 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
 type Drizzle = { $client: Client } & LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
 
 export type SQLiteAdapter = {
-  afterSchemaInit: SQLiteSchemaHook[]
-  autoIncrement: boolean
-  beforeSchemaInit: SQLiteSchemaHook[]
   client: Client
   clientConfig: Args['client']
-  countDistinct: CountDistinct
-  defaultDrizzleSnapshot: any
-  deleteWhere: DeleteWhere
   drizzle: Drizzle
-  dropDatabase: DropDatabase
-  execute: Execute<unknown>
-  /**
-   * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
-   * Used for returning properly formed errors from unique fields
-   */
-  fieldConstraints: Record<string, Record<string, string>>
-  idType: Args['idType']
-  initializing: Promise<void>
-  insert: Insert
-  localesSuffix?: string
-  logger: DrizzleConfig['logger']
-  operators: Operators
-  prodMigrations?: {
-    down: (args: MigrateDownArgs) => Promise<void>
-    name: string
-    up: (args: MigrateUpArgs) => Promise<void>
-  }[]
-  push: boolean
-  rejectInitializing: () => void
-  relations: Record<string, GenericRelation>
-  relationshipsSuffix?: string
-  resolveInitializing: () => void
-  schema: Record<string, GenericRelation | GenericTable>
-  schemaName?: Args['schemaName']
-  tableNameMap: Map<string, string>
-  tables: Record<string, GenericTable>
-  transactionOptions: SQLiteTransactionConfig
-  versionsSuffix?: string
-} & SQLiteDrizzleAdapter
+} & BaseSQLiteAdapter &
+  SQLiteDrizzleAdapter
 
 export type IDType = 'integer' | 'numeric' | 'text'
 

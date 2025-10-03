@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { autosaveCollectionSlug } from '../slugs.js'
+import { autosaveCollectionSlug, postCollectionSlug } from '../slugs.js'
 
 const AutosavePosts: CollectionConfig = {
   slug: autosaveCollectionSlug,
@@ -16,8 +16,9 @@ const AutosavePosts: CollectionConfig = {
     maxPerDoc: 35,
     drafts: {
       autosave: {
-        interval: 2000,
+        interval: 100,
       },
+      schedulePublish: true,
     },
   },
   access: {
@@ -53,10 +54,46 @@ const AutosavePosts: CollectionConfig = {
       localized: true,
     },
     {
+      name: 'relationship',
+      type: 'relationship',
+      relationTo: postCollectionSlug,
+      admin: {
+        components: {
+          Label: './elements/CustomFieldLabel/index.tsx#CustomFieldLabel',
+        },
+      },
+    },
+    {
+      name: 'computedTitle',
+      label: 'Computed Title',
+      type: 'text',
+      hooks: {
+        beforeChange: [({ data }) => data?.title],
+      },
+    },
+    {
+      name: 'richText',
+      type: 'richText',
+    },
+    {
+      name: 'json',
+      type: 'json',
+    },
+    {
       name: 'description',
       label: 'Description',
       type: 'textarea',
       required: true,
+    },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
     },
   ],
 }

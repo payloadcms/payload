@@ -1,5 +1,6 @@
+import type { Payload } from 'payload'
+
 import path from 'path'
-import { NotFound, type Payload } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
@@ -65,9 +66,7 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should add a search collection', async () => {
@@ -300,8 +299,8 @@ describe('@payloadcms/plugin-search', () => {
       collection: 'search',
       depth: 0,
       where: {
-        'doc.value': {
-          equals: page.id,
+        id: {
+          equals: results[0].id,
         },
       },
     })
@@ -495,20 +494,22 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   it('should reindex whole collections', async () => {
-    await payload.create({
-      collection: pagesSlug,
-      data: {
-        title: 'Test page title',
-        _status: 'published',
-      },
-    })
-    await payload.create({
-      collection: postsSlug,
-      data: {
-        title: 'Test page title',
-        _status: 'published',
-      },
-    })
+    await Promise.all([
+      payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Test page title',
+          _status: 'published',
+        },
+      }),
+      payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'Test page title',
+          _status: 'published',
+        },
+      }),
+    ])
 
     await wait(200)
 
@@ -532,5 +533,68 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     expect(totalAfterReindex).toBe(totalBeforeReindex)
+  })
+
+  it('should sync trashed documents correctly with search plugin', async () => {
+    // Create a published post
+    const publishedPost = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Post to be trashed',
+        excerpt: 'This post will be soft deleted',
+        _status: 'published',
+      },
+    })
+
+    // Wait for the search document to be created
+    await wait(200)
+
+    // Verify the search document was created
+    const { docs: initialSearchResults } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      where: {
+        'doc.value': {
+          equals: publishedPost.id,
+        },
+      },
+    })
+
+    expect(initialSearchResults).toHaveLength(1)
+    expect(initialSearchResults[0]?.title).toBe('Post to be trashed')
+
+    // Soft delete the post (move to trash)
+    await payload.update({
+      collection: postsSlug,
+      id: publishedPost.id,
+      data: {
+        deletedAt: new Date().toISOString(),
+      },
+    })
+
+    // Wait for the search plugin to sync the trashed document
+    await wait(200)
+
+    // Verify the search document still exists but is properly synced
+    // The search document should remain and be updated correctly
+    const { docs: trashedSearchResults } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      where: {
+        'doc.value': {
+          equals: publishedPost.id,
+        },
+      },
+    })
+
+    // The search document should still exist
+    expect(trashedSearchResults).toHaveLength(0)
+
+    // Clean up by permanently deleting the trashed post
+    await payload.delete({
+      collection: postsSlug,
+      id: publishedPost.id,
+      trash: true, // permanently delete
+    })
   })
 })

@@ -34,6 +34,7 @@ export type FeatureProviderClient<
   feature:
     | ((props: {
         config: ClientConfig
+        featureClientImportMap: Record<string, any>
         featureClientSchemaMap: FeatureClientSchemaMap
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ClientFeatureProviderMap

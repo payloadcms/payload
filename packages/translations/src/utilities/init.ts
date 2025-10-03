@@ -145,9 +145,13 @@ export function t<
 
 const initTFunction: InitTFunction = (args) => {
   const { config, language, translations } = args
-  const mergedTranslations = config?.translations?.[language]
-    ? deepMergeSimple<DefaultTranslationsObject>(translations, config?.translations?.[language])
-    : translations
+  const mergedTranslations =
+    language && config?.translations?.[language as keyof typeof config.translations]
+      ? deepMergeSimple<DefaultTranslationsObject>(
+          translations,
+          config.translations[language as keyof typeof config.translations]!,
+        )
+      : translations
 
   return {
     t: (key, vars) => {
@@ -161,18 +165,14 @@ const initTFunction: InitTFunction = (args) => {
   }
 }
 
-function memoize(
-  fn: (args: Parameters<InitI18n>[0]) => Promise<I18n>,
-  keys: string[],
-): (
-  args: {
-    context: 'api' | 'client'
-  } & Parameters<InitI18n>[0],
-) => Promise<I18n> {
-  const cacheMap = new Map()
+function memoize<T extends Parameters<InitI18n>[0], K extends keyof T>(
+  fn: (args: T) => Promise<I18n>,
+  keys: K[],
+): (args: T) => Promise<I18n> {
+  const cacheMap = new Map<string, I18n>()
 
-  const memoized = async (args) => {
-    const cacheKey = keys.reduce((acc, key) => acc + args[key], '')
+  const memoized = async (args: T) => {
+    const cacheKey = keys.reduce((acc, key) => acc + String(args[key]), '')
 
     if (!cacheMap.has(cacheKey)) {
       const result = await fn(args)
@@ -187,7 +187,11 @@ function memoize(
 
 export const initI18n = memoize(
   async ({ config, context, language = config.fallbackLanguage }) => {
-    const translations = getTranslationsByContext(config.supportedLanguages[language], context)
+    if (!language || !config.supportedLanguages?.[language]) {
+      throw new Error(`Language ${language} not supported`)
+    }
+
+    const translations = getTranslationsByContext(config.supportedLanguages?.[language], context)
 
     const { t, translations: mergedTranslations } = initTFunction({
       config: config as any,
@@ -202,7 +206,7 @@ export const initI18n = memoize(
     const i18n: I18n = {
       dateFNS,
       dateFNSKey,
-      fallbackLanguage: config.fallbackLanguage,
+      fallbackLanguage: config.fallbackLanguage!,
       language: language || config.fallbackLanguage,
       t,
       translations: mergedTranslations,

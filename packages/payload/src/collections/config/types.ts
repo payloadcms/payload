@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type { CustomUpload } from '../../admin/types.js'
+import type { CustomUpload, ViewTypes } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -32,6 +33,7 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
+import type { CollectionFoldersConfiguration } from '../../folders/types.js'
 import type {
   CollectionSlug,
   JsonObject,
@@ -43,6 +45,7 @@ import type {
 } from '../../index.js'
 import type {
   PayloadRequest,
+  SelectIncludeType,
   SelectType,
   Sort,
   TransformCollectionWithSelect,
@@ -64,7 +67,7 @@ export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
 
 export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
   TData,
-  'createdAt' | 'id' | 'sizes' | 'updatedAt'
+  'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'
 >
 
 export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
@@ -79,14 +82,19 @@ export type HookOperationType =
   | 'forgotPassword'
   | 'login'
   | 'read'
+  | 'readDistinct'
   | 'refresh'
+  | 'resetPassword'
+  | 'restoreVersion'
   | 'update'
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
 
 export type BeforeOperationHook = (args: {
   args?: any
-  /** The collection which this hook is being run on */
+  /**
+   *  The collection which this hook is being run on
+   */
   collection: SanitizedCollectionConfig
   context: RequestContext
   /**
@@ -136,6 +144,7 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
+  data: Partial<T>
   doc: T
   /**
    * Hook operation being performed
@@ -210,6 +219,7 @@ export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   user: T
 }) => any
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -217,6 +227,7 @@ export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest
 }) => any
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -235,6 +246,7 @@ export type MeHook<T extends TypeWithID = any> = (args: {
   user: T
 }) => ({ exp: number; user: T } | void) | Promise<{ exp: number; user: T } | void>
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -255,7 +267,12 @@ export type AfterForgotPasswordHook = (args: {
   context: RequestContext
 }) => any
 
-export type BaseListFilter = (args: {
+export type EnableFoldersOptions = {
+  // Displays the folder collection and parentFolder field in the document view
+  debug?: boolean
+}
+
+export type BaseFilter = (args: {
   limit: number
   locale?: TypedLocale
   page: number
@@ -263,7 +280,31 @@ export type BaseListFilter = (args: {
   sort: string
 }) => null | Promise<null | Where> | Where
 
+/**
+ * @deprecated Use `BaseFilter` instead.
+ */
+export type BaseListFilter = BaseFilter
+
 export type CollectionAdminOptions = {
+  /**
+   * Defines a default base filter which will be applied in the following parts of the admin panel:
+   * - List View
+   * - Relationship fields for internal links within the Lexical editor
+   *
+   * This is especially useful for plugins like multi-tenant. For example,
+   * a user may have access to multiple tenants, but should only see content
+   * related to the currently active or selected tenant in those places.
+   */
+  baseFilter?: BaseFilter
+  /**
+   * @deprecated Use `baseFilter` instead. If both are defined,
+   * `baseFilter` will take precedence. This property remains only
+   * for backward compatibility and may be removed in a future version.
+   *
+   * Originally, `baseListFilter` was intended to filter only the List View
+   * in the admin panel. However, base filtering is often required in other areas
+   * such as internal link relationships in the Lexical editor.
+   */
   baseListFilter?: BaseListFilter
   /**
    * Custom admin components
@@ -278,6 +319,14 @@ export type CollectionAdminOptions = {
      * Components within the edit view
      */
     edit?: {
+      /**
+       * Inject custom components before the document controls
+       */
+      beforeDocumentControls?: CustomComponent[]
+      /**
+       * Inject custom components within the 3-dot menu dropdown
+       */
+      editMenuItems?: CustomComponent[]
       /**
        * Replaces the "Preview" button
        */
@@ -307,10 +356,14 @@ export type CollectionAdminOptions = {
     listMenuItems?: CustomComponent[]
     views?: {
       /**
-       * Set to a React component to replace the entire Edit View, including all nested routes.
-       * Set to an object to replace or modify individual nested routes, or to add new ones.
+       * Replace, modify, or add new "document" views.
+       * @link https://payloadcms.com/docs/custom-components/document-views
        */
       edit?: EditConfig
+      /**
+       * Replace or modify the "list" view.
+       * @link https://payloadcms.com/docs/custom-components/list-view
+       */
       list?: {
         actions?: CustomComponent[]
         Component?: PayloadComponent
@@ -327,8 +380,43 @@ export type CollectionAdminOptions = {
    * Custom description for collection. This will also be used as JSDoc for the generated types
    */
   description?: EntityDescription
+  /**
+   * Disable the Copy To Locale button in the edit document view
+   * @default false
+   */
+  disableCopyToLocale?: boolean
+  /**
+   * Performance opt-in. If true, will use the [Select API](https://payloadcms.com/docs/queries/select) when
+   * loading the list view to query only the active columns, as opposed to the entire documents.
+   * If your cells require specific fields that may be unselected, such as within hooks, etc.,
+   * use `forceSelect` in conjunction with this property.
+   *
+   * @experimental This is an experimental feature and may change in the future. Use at your own discretion.
+   */
+  enableListViewSelectAPI?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
+  /**
+   * Function to format the URL for document links in the list view.
+   * Return null to disable linking for that document.
+   * Return a string to customize the link destination.
+   * If not provided, uses the default admin edit URL.
+   */
+  formatDocURL?: (args: {
+    collectionSlug: string
+    /**
+     * The default URL that would normally be used for this document link.
+     * You can return this as-is, modify it, or completely replace it.
+     */
+    defaultURL: string
+    doc: Record<string, unknown>
+    req: PayloadRequest
+    /**
+     * The current view context where the link is being generated.
+     * Most relevant values for document linking are 'list' and 'trash'.
+     */
+    viewType?: ViewTypes
+  }) => null | string
   /**
    * Specify a navigational group for collections in the admin sidebar.
    * - Provide a string to place the entity in a custom group.
@@ -336,6 +424,13 @@ export type CollectionAdminOptions = {
    * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
    */
   group?: false | Record<string, string> | string
+  /**
+   * @description Enable grouping by a field in the list view.
+   * Uses `payload.findDistinct` under the hood to populate the group-by options.
+   *
+   * @experimental This option is currently in beta and may change in future releases. Use at your own discretion.
+   */
+  groupBy?: boolean
   /**
    * Exclude the collection from the admin nav and routes
    */
@@ -349,7 +444,9 @@ export type CollectionAdminOptions = {
    */
   listSearchableFields?: string[]
   /**
-   * Live preview options
+   * Live Preview options.
+   *
+   * @see https://payloadcms.com/docs/live-preview/overview
    */
   livePreview?: LivePreviewConfig
   meta?: MetaConfig
@@ -369,6 +466,11 @@ export type CollectionAdminOptions = {
 
 /** Manage all aspects of a data collection */
 export type CollectionConfig<TSlug extends CollectionSlug = any> = {
+  /**
+   * Do not set this property manually. This is set to true during sanitization, to avoid
+   * sanitizing the same collection multiple times.
+   */
+  _sanitized?: boolean
   /**
    * Access control
    */
@@ -406,14 +508,33 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   defaultSort?: Sort
   /**
+   * Disable the bulk edit operation for the collection in the admin panel and the API
+   */
+  disableBulkEdit?: boolean
+  /**
    * When true, do not show the "Duplicate" button while editing documents within this collection and prevent `duplicate` from all APIs
    */
   disableDuplicate?: boolean
+  /**
+   * Opt-in to enable query presets for this collection.
+   * @see https://payloadcms.com/docs/query-presets/overview
+   */
+  enableQueryPresets?: boolean
   /**
    * Custom rest api endpoints, set false to disable all rest endpoints for this collection.
    */
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
+  /**
+   * Enables folders for this collection
+   */
+  folders?: boolean | CollectionFoldersConfiguration
+  /**
+   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
+   */
+  forceSelect?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
+    ? SelectIncludeType
+    : SelectFromCollectionSlug<TSlug>
   /**
    * GraphQL configuration
    */
@@ -460,6 +581,16 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     refresh?: RefreshHook[]
   }
   /**
+   * Define compound indexes for this collection.
+   * This can be used to either speed up querying/sorting by 2 or more fields at the same time or
+   * to ensure uniqueness between several fields.
+   * Specify field paths
+   * @example
+   * [{ unique: true, fields: ['title', 'group.name'] }]
+   * @default []
+   */
+  indexes?: CompoundIndex[]
+  /**
    * Label configuration
    */
   labels?: {
@@ -475,13 +606,35 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
         duration: number
       }
     | false
+  /**
+   * If true, enables custom ordering for the collection, and documents in the listView can be reordered via drag and drop.
+   * New documents are inserted at the end of the list according to this parameter.
+   *
+   * Under the hood, a field with {@link https://observablehq.com/@dgreensp/implementing-fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
+   *
+   * @default false
+   *
+   * @experimental There may be frequent breaking changes to this API
+   */
+  orderable?: boolean
   slug: string
   /**
-   * Add `createdAt` and `updatedAt` fields
+   * Add `createdAt`, `deletedAt` and `updatedAt` fields
    *
    * @default true
    */
   timestamps?: boolean
+  /**
+   * Enables trash support for this collection.
+   *
+   * When enabled, documents will include a `deletedAt` timestamp field.
+   * This allows documents to be marked as deleted without being permanently removed.
+   * The `deletedAt` field will be set to the current date and time when a document is trashed.
+   *
+   * @experimental This is a beta feature and its behavior may be refined in future releases.
+   * @default false
+   */
+  trash?: boolean
   /**
    * Options used in typescript generation
    */
@@ -529,30 +682,36 @@ export type SanitizedJoins = {
   [collectionSlug: string]: SanitizedJoin[]
 }
 
+/**
+ * @todo remove the `DeepRequired` in v4.
+ * We don't actually guarantee that all properties are set when sanitizing configs.
+ */
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
+    'admin' | 'auth' | 'endpoints' | 'fields' | 'folders' | 'slug' | 'upload' | 'versions'
   > {
+  admin: CollectionAdminOptions
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
-
   /**
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
   flattenedFields: FlattenedField[]
-
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
+  folders: CollectionFoldersConfiguration | false
   joins: SanitizedJoins
 
   /**
    * List of all polymorphic join fields
    */
   polymorphicJoins: SanitizedJoin[]
+
+  sanitizedIndexes: SanitizedCompoundIndex[]
 
   slug: CollectionSlug
   upload: SanitizedUploadConfig
@@ -587,6 +746,7 @@ export type AuthCollection = {
 }
 
 export type TypeWithID = {
+  deletedAt?: null | string
   docId?: any
   id: number | string
 }
@@ -594,6 +754,22 @@ export type TypeWithID = {
 export type TypeWithTimestamps = {
   [key: string]: unknown
   createdAt: string
+  deletedAt?: null | string
   id: number | string
   updatedAt: string
+}
+
+export type CompoundIndex = {
+  fields: string[]
+  unique?: boolean
+}
+
+export type SanitizedCompoundIndex = {
+  fields: {
+    field: FlattenedField
+    localizedPath: string
+    path: string
+    pathHasLocalized: boolean
+  }[]
+  unique: boolean
 }

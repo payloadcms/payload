@@ -13,6 +13,9 @@
   ],
   "references": [
     {
+      "path": "../packages/admin-bar"
+    },
+    {
       "path": "../packages/create-payload-app"
     },
     {
@@ -74,6 +77,9 @@
     },
     {
       "path": "../packages/ui"
+    },
+    {
+      "path": "../packages/plugin-ecommerce"
     }
   ]
 }

@@ -4,8 +4,14 @@ import { fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
-import type { BlockRowToInsert, RelationshipToDelete } from './types.js'
+import type {
+  BlockRowToInsert,
+  NumberToDelete,
+  RelationshipToDelete,
+  TextToDelete,
+} from './types.js'
 
+import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -19,6 +25,7 @@ type Args = {
   field: FlattenedBlocksField
   locale?: string
   numbers: Record<string, unknown>[]
+  numbersToDelete: NumberToDelete[]
   parentIsLocalized: boolean
   path: string
   relationships: Record<string, unknown>[]
@@ -27,6 +34,7 @@ type Args = {
     [tableName: string]: Record<string, unknown>[]
   }
   texts: Record<string, unknown>[]
+  textsToDelete: TextToDelete[]
   /**
    * Set to a locale code if this set of fields is traversed within a
    * localized array or block field
@@ -42,12 +50,14 @@ export const transformBlocks = ({
   field,
   locale,
   numbers,
+  numbersToDelete,
   parentIsLocalized,
   path,
   relationships,
   relationshipsToDelete,
   selects,
   texts,
+  textsToDelete,
   withinArrayOrBlockLocale,
 }: Args) => {
   data.forEach((blockRow, i) => {
@@ -66,12 +76,9 @@ export const transformBlocks = ({
     }
     const blockType = toSnakeCase(blockRow.blockType)
 
-    if (!blocks[blockType]) {
-      blocks[blockType] = []
-    }
-
     const newRow: BlockRowToInsert = {
       arrays: {},
+      arraysToPush: {},
       locales: {},
       row: {
         _order: i + 1,
@@ -86,7 +93,14 @@ export const transformBlocks = ({
       newRow.row._locale = withinArrayOrBlockLocale
     }
 
-    const blockTableName = adapter.tableNameMap.get(`${baseTableName}_blocks_${blockType}`)
+    const blockTableName = resolveBlockTableName(
+      matchedBlock,
+      adapter.tableNameMap.get(`${baseTableName}_blocks_${blockType}`),
+    )
+
+    if (!blocks[blockTableName]) {
+      blocks[blockTableName] = []
+    }
 
     const hasUUID = adapter.tables[blockTableName]._uuid
 
@@ -103,6 +117,7 @@ export const transformBlocks = ({
     traverseFields({
       adapter,
       arrays: newRow.arrays,
+      arraysToPush: newRow.arraysToPush,
       baseTableName,
       blocks,
       blocksToDelete,
@@ -113,17 +128,20 @@ export const transformBlocks = ({
       insideArrayOrBlock: true,
       locales: newRow.locales,
       numbers,
+      numbersToDelete,
       parentIsLocalized: parentIsLocalized || field.localized,
       parentTableName: blockTableName,
       path: `${path || ''}${field.name}.${i}.`,
       relationships,
+      relationshipsToAppend: [],
       relationshipsToDelete,
       row: newRow.row,
       selects,
       texts,
+      textsToDelete,
       withinArrayOrBlockLocale,
     })
 
-    blocks[blockType].push(newRow)
+    blocks[blockTableName].push(newRow)
   })
 }

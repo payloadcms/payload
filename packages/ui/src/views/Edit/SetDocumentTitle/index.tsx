@@ -4,9 +4,9 @@ import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'p
 import { useEffect, useRef } from 'react'
 
 import { useFormFields } from '../../../forms/Form/context.js'
-import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
+import { useDocumentTitle } from '../../../providers/DocumentTitle/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { formatDocTitle } from '../../../utilities/formatDocTitle.js'
+import { formatDocTitle } from '../../../utilities/formatDocTitle/index.js'
 
 export const SetDocumentTitle: React.FC<{
   collectionConfig?: ClientCollectionConfig
@@ -24,20 +24,15 @@ export const SetDocumentTitle: React.FC<{
 
   const { i18n } = useTranslation()
 
-  const { setDocumentTitle } = useDocumentInfo()
+  const { setDocumentTitle } = useDocumentTitle()
 
   const dateFormatFromConfig = config?.admin?.dateFormat
 
   const title = formatDocTitle({
     collectionConfig,
-    data: { id: '' },
+    data: { id: '', [useAsTitle]: field?.value || '' },
     dateFormat: dateFormatFromConfig,
-    fallback:
-      typeof field === 'string'
-        ? field
-        : typeof field === 'number'
-          ? String(field)
-          : (field?.value as string) || fallback,
+    fallback,
     globalConfig,
     i18n,
   })

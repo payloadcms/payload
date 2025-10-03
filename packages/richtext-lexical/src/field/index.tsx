@@ -21,6 +21,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
   const {
     admin = {},
     clientFeatures,
+    featureClientImportMap,
     featureClientSchemaMap,
     field,
     lexicalEditorConfig = defaultEditorLexicalConfig,
@@ -53,6 +54,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
 
     const resolvedClientFeatures = loadClientFeatures({
       config,
+      featureClientImportMap,
       featureClientSchemaMap,
       field: field as RichTextFieldClient,
       schemaPath: schemaPath ?? field.name,
@@ -70,6 +72,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     admin,
     finalSanitizedEditorConfig,
     clientFeatures,
+    featureClientImportMap,
     featureClientSchemaMap,
     field,
     config,

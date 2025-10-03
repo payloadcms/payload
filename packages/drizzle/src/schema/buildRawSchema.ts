@@ -1,4 +1,8 @@
-import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
+import {
+  buildVersionCollectionFields,
+  buildVersionCompoundIndexes,
+  buildVersionGlobalFields,
+} from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, RawIndex, SetColumnID } from '../types.js'
@@ -52,6 +56,8 @@ export const buildRawSchema = ({
 
     buildTable({
       adapter,
+      blocksTableNameMap: {},
+      compoundIndexes: collection.sanitizedIndexes,
       disableNotNull: !!collection?.versions?.drafts,
       disableUnique: false,
       fields: collection.flattenedFields,
@@ -70,6 +76,8 @@ export const buildRawSchema = ({
 
       buildTable({
         adapter,
+        blocksTableNameMap: {},
+        compoundIndexes: buildVersionCompoundIndexes({ indexes: collection.sanitizedIndexes }),
         disableNotNull: !!collection.versions?.drafts,
         disableUnique: true,
         fields: versionFields,
@@ -90,6 +98,7 @@ export const buildRawSchema = ({
 
     buildTable({
       adapter,
+      blocksTableNameMap: {},
       disableNotNull: !!global?.versions?.drafts,
       disableUnique: false,
       fields: global.flattenedFields,
@@ -112,6 +121,7 @@ export const buildRawSchema = ({
 
       buildTable({
         adapter,
+        blocksTableNameMap: {},
         disableNotNull: !!global.versions?.drafts,
         disableUnique: true,
         fields: versionFields,

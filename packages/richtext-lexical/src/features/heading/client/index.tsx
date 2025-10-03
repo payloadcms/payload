@@ -2,11 +2,14 @@
 
 import type { HeadingTagType } from '@lexical/rich-text'
 
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $createHeadingNode, $isHeadingNode, HeadingNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
 import { $getSelection, $isRangeSelection } from 'lexical'
+import { useEffect } from 'react'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
+import type { PluginComponent } from '../../typesClient.js'
 import type { HeadingFeatureProps } from '../server/index.js'
 
 import { H1Icon } from '../../../lexical/ui/icons/H1/index.js'
@@ -78,6 +81,12 @@ export const HeadingFeatureClient = createClientFeature<HeadingFeatureProps>(({ 
   return {
     markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],
     nodes: [HeadingNode],
+    plugins: [
+      {
+        Component: HeadingPlugin,
+        position: 'normal',
+      },
+    ],
     sanitizedClientFeatureProps: props,
     slashMenu: {
       groups: enabledHeadingSizes?.length
@@ -112,3 +121,22 @@ export const HeadingFeatureClient = createClientFeature<HeadingFeatureProps>(({ 
     },
   }
 })
+
+const HeadingPlugin: PluginComponent<HeadingFeatureProps> = ({ clientProps }) => {
+  const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = clientProps
+  const lowestAllowed = enabledHeadingSizes.at(-1)
+  const [editor] = useLexicalComposerContext()
+
+  useEffect(() => {
+    if (!lowestAllowed || enabledHeadingSizes.length === 6) {
+      return
+    }
+    return editor.registerNodeTransform(HeadingNode, (node) => {
+      if (!enabledHeadingSizes.includes(node.getTag())) {
+        node.setTag(lowestAllowed)
+      }
+    })
+  }, [editor, enabledHeadingSizes, lowestAllowed])
+
+  return null
+}

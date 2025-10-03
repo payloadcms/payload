@@ -22,7 +22,7 @@ import { UnorderedListFeature } from '../../../features/lists/unorderedList/serv
 import { ParagraphFeature } from '../../../features/paragraph/server/index.js'
 import { RelationshipFeature } from '../../../features/relationship/server/index.js'
 import { InlineToolbarFeature } from '../../../features/toolbars/inline/server/index.js'
-import { UploadFeature } from '../../../features/upload/server/feature.server.js'
+import { UploadFeature } from '../../../features/upload/server/index.js'
 import { LexicalEditorTheme } from '../../theme/EditorTheme.js'
 
 export const defaultEditorLexicalConfig: LexicalEditorConfig = {

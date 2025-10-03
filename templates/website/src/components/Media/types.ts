@@ -8,6 +8,7 @@ export interface Props {
   className?: string
   fill?: boolean // for NextImage only
   htmlElement?: ElementType | null
+  pictureClassName?: string
   imgClassName?: string
   onClick?: () => void
   onLoad?: () => void

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FlattenedField } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
@@ -17,7 +16,7 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
       fields: global.fields,
       ...(flatten && {
         flattenedFields: global.flattenedFields,
-      }),
+      })!,
     },
     {
       name: 'createdAt',

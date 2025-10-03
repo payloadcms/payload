@@ -13,7 +13,7 @@ import { useIntersect } from '../../../../../hooks/useIntersect.js'
 import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
-import { formatDocTitle } from '../../../../../utilities/formatDocTitle.js'
+import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
 import { FileCell } from '../File/index.js'
 import './index.scss'
@@ -110,9 +110,9 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
         let fileField = null
 
         if (field.type === 'upload') {
-          const relatedCollectionPreview = !!relatedCollection.upload.displayPreview
+          const fieldPreviewAllowed = 'displayPreview' in field ? field.displayPreview : undefined
           const previewAllowed =
-            field.displayPreview || (relatedCollectionPreview && field.displayPreview !== false)
+            fieldPreviewAllowed ?? relatedCollection.upload?.displayPreview ?? true
 
           if (previewAllowed && document) {
             fileField = (

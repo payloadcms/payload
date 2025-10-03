@@ -80,7 +80,7 @@ export class UnknownConvertedNode extends DecoratorNode<JSX.Element> {
     return true
   }
 
-  override updateDOM(prevNode: UnknownConvertedNode, dom: HTMLElement): boolean {
+  override updateDOM(prevNode: this, dom: HTMLElement): boolean {
     return false
   }
 }

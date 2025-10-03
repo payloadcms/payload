@@ -38,9 +38,7 @@ describe('_Community Tests', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   // --__--__--__--__--__--__--__--__--__

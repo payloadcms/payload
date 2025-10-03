@@ -6,13 +6,15 @@ import { flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 
 export const count: Count = async function count(
   this: MongooseAdapter,
-  { collection, locale, req, where },
+  { collection: collectionSlug, locale, req, where = {} },
 ) {
-  const Model = this.collections[collection]
+  const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+
   const options: CountOptions = {
     session: await getSession(this, req),
   }
@@ -26,8 +28,8 @@ export const count: Count = async function count(
 
   const query = await buildQuery({
     adapter: this,
-    collectionSlug: collection,
-    fields: this.payload.collections[collection].config.flattenedFields,
+    collectionSlug,
+    fields: collectionConfig.flattenedFields,
     locale,
     where,
   })

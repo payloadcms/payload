@@ -12,11 +12,12 @@ import {
 import * as qs from 'qs-esm'
 
 import { devUser } from '../credentials.js'
+import { getFormDataSize } from './getFormDataSize.js'
 
 type ValidPath = `/${string}`
 type RequestOptions = {
   auth?: boolean
-  query?: {
+  query?: { [key: string]: unknown } & {
     depth?: number
     fallbackLocale?: string
     joins?: JoinQuery
@@ -94,17 +95,26 @@ export class NextRESTClient {
   }
 
   private buildHeaders(options: FileArg & RequestInit & RequestOptions): Headers {
-    const defaultHeaders = {
-      'Content-Type': 'application/json',
+    // Only set `Content-Type` to `application/json` if body is not `FormData`
+    const isFormData =
+      options &&
+      typeof options.body !== 'undefined' &&
+      typeof FormData !== 'undefined' &&
+      options.body instanceof FormData
+
+    const headers = new Headers(options.headers || {})
+
+    if (options?.file) {
+      headers.set('Content-Length', options.file.size.toString())
     }
-    const headers = new Headers({
-      ...(options?.file
-        ? {
-            'Content-Length': options.file.size.toString(),
-          }
-        : defaultHeaders),
-      ...(options?.headers || {}),
-    })
+
+    if (isFormData) {
+      headers.set('Content-Length', getFormDataSize(options.body as FormData).toString())
+    }
+
+    if (!isFormData && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json')
+    }
 
     if (options.auth !== false && this.token) {
       headers.set('Authorization', `JWT ${this.token}`)
@@ -213,6 +223,7 @@ export class NextRESTClient {
       headers: this.buildHeaders(options),
       method: 'PATCH',
     })
+
     return this._PATCH(request, { params: Promise.resolve({ slug }) })
   }
 

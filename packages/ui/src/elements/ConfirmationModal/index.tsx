@@ -2,10 +2,9 @@
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback } from 'react'
 
-import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import { drawerZBase } from '../Drawer/index.js'
+import { drawerZBase, useDrawerDepth } from '../Drawer/index.js'
 import './index.scss'
 
 const baseClass = 'confirmation-modal'
@@ -37,7 +36,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
     onConfirm: onConfirmFromProps,
   } = props
 
-  const editDepth = useEditDepth()
+  const editDepth = useDrawerDepth()
 
   const [confirming, setConfirming] = React.useState(false)
 
@@ -70,6 +69,8 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
   return (
     <Modal
       className={[baseClass, className].filter(Boolean).join(' ')}
+      // Fixes https://github.com/payloadcms/payload/issues/13778
+      closeOnBlur={false}
       slug={modalSlug}
       style={{
         zIndex: drawerZBase + editDepth,
@@ -77,8 +78,8 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
     >
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
-          <h1>{heading}</h1>
-          <p>{body}</p>
+          {typeof heading === 'string' ? <h1>{heading}</h1> : heading}
+          {typeof body === 'string' ? <p>{body}</p> : body}
         </div>
         <div className={`${baseClass}__controls`}>
           <Button

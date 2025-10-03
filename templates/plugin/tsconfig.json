@@ -29,6 +29,6 @@
   "include": [
     "./src/**/*.ts",
     "./src/**/*.tsx",
-    "./dev/next-env.d.ts"
+    "./dev/next-env.d.ts",
   ],
 }

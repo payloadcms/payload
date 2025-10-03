@@ -1,10 +1,13 @@
 import type { FlattenedBlock, FlattenedField, JoinQuery, SanitizedConfig } from 'payload'
 
 import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
+import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'
 
+import { getArrayRelationName } from '../../utilities/getArrayRelationName.js'
+import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
 import { transformHasManyNumber } from './hasManyNumber.js'
 import { transformHasManyText } from './hasManyText.js'
 import { transformRelationship } from './relationship.js'
@@ -22,6 +25,7 @@ type TraverseFieldsArgs = {
    * The full Payload config
    */
   config: SanitizedConfig
+  currentTableName: string
   /**
    * The data reference to be mutated within this recursive function
    */
@@ -59,10 +63,12 @@ type TraverseFieldsArgs = {
    * Data structure representing the nearest table from db
    */
   table: Record<string, unknown>
+  tablePath: string
   /**
    * All hasMany text fields, as returned by Drizzle, keyed on an object by field path
    */
   texts: Record<string, Record<string, unknown>[]>
+  topLevelTableName: string
   /**
    * Set to a locale if this group of fields is within a localized array or block.
    */
@@ -75,6 +81,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
   adapter,
   blocks,
   config,
+  currentTableName,
   dataRef,
   deletions,
   fieldPrefix,
@@ -85,10 +92,14 @@ export const traverseFields = <T extends Record<string, unknown>>({
   path,
   relationships,
   table,
+  tablePath,
   texts,
+  topLevelTableName,
   withinArrayOrBlockLocale,
 }: TraverseFieldsArgs): T => {
   const sanitizedPath = path ? `${path}.` : path
+  const localeCodes =
+    adapter.payload.config.localization && adapter.payload.config.localization.localeCodes
 
   const formatted = fields.reduce((result, field) => {
     if (fieldIsVirtual(field)) {
@@ -110,6 +121,12 @@ export const traverseFields = <T extends Record<string, unknown>>({
     const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
 
     if (field.type === 'array') {
+      const arrayTableName = adapter.tableNameMap.get(
+        `${currentTableName}_${tablePath}${toSnakeCase(field.name)}`,
+      )
+
+      fieldData = table[getArrayRelationName({ field, path: fieldName, tableName: arrayTableName })]
+
       if (Array.isArray(fieldData)) {
         if (isLocalized) {
           result[field.name] = fieldData.reduce((arrayResult, row) => {
@@ -129,6 +146,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 adapter,
                 blocks,
                 config,
+                currentTableName: arrayTableName,
                 dataRef: data,
                 deletions,
                 fieldPrefix: '',
@@ -138,7 +156,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 path: `${sanitizedPath}${field.name}.${row._order - 1}`,
                 relationships,
                 table: row,
+                tablePath: '',
                 texts,
+                topLevelTableName,
                 withinArrayOrBlockLocale: locale,
               })
 
@@ -175,6 +195,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   adapter,
                   blocks,
                   config,
+                  currentTableName: arrayTableName,
                   dataRef: row,
                   deletions,
                   fieldPrefix: '',
@@ -184,7 +205,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   path: `${sanitizedPath}${field.name}.${i}`,
                   relationships,
                   table: row,
+                  tablePath: '',
                   texts,
+                  topLevelTableName,
                   withinArrayOrBlockLocale,
                 }),
               )
@@ -198,7 +221,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
       return result
     }
 
-    if (field.type === 'blocks') {
+    if (field.type === 'blocks' && !adapter.blocksAsJSON) {
       const blockFieldPath = `${sanitizedPath}${field.name}`
       const blocksByPath = blocks[blockFieldPath]
 
@@ -228,11 +251,17 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   (block) => typeof block !== 'string' && block.slug === row.blockType,
                 ) as FlattenedBlock | undefined)
 
+              const tableName = resolveBlockTableName(
+                block,
+                adapter.tableNameMap.get(`${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`),
+              )
+
               if (block) {
                 const blockResult = traverseFields<T>({
                   adapter,
                   blocks,
                   config,
+                  currentTableName: tableName,
                   dataRef: row,
                   deletions,
                   fieldPrefix: '',
@@ -242,7 +271,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   path: `${blockFieldPath}.${row._order - 1}`,
                   relationships,
                   table: row,
+                  tablePath: '',
                   texts,
+                  topLevelTableName,
                   withinArrayOrBlockLocale: locale,
                 })
 
@@ -300,11 +331,19 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   delete row._index
                 }
 
+                const tableName = resolveBlockTableName(
+                  block,
+                  adapter.tableNameMap.get(
+                    `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+                  ),
+                )
+
                 acc.push(
                   traverseFields<T>({
                     adapter,
                     blocks,
                     config,
+                    currentTableName: tableName,
                     dataRef: row,
                     deletions,
                     fieldPrefix: '',
@@ -314,7 +353,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
                     path: `${blockFieldPath}.${i}`,
                     relationships,
                     table: row,
+                    tablePath: '',
                     texts,
+                    topLevelTableName,
                     withinArrayOrBlockLocale,
                   }),
                 )
@@ -333,72 +374,60 @@ export const traverseFields = <T extends Record<string, unknown>>({
       return result
     }
 
-    if (field.type === 'relationship' || field.type === 'upload') {
-      if (typeof field.relationTo === 'string' && !('hasMany' in field && field.hasMany)) {
-        if (
-          isLocalized &&
-          config.localization &&
-          config.localization.locales &&
-          Array.isArray(table?._locales)
-        ) {
-          table._locales.forEach((localeRow) => {
-            result[field.name] = { [localeRow._locale]: localeRow[fieldName] }
-          })
-        } else {
-          valuesToTransform.push({ ref: result, table })
-        }
-      } else {
-        const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
+    if (
+      (field.type === 'relationship' || field.type === 'upload') &&
+      (Array.isArray(field.relationTo) || field.hasMany)
+    ) {
+      const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
 
-        if (!relationPathMatch) {
-          if ('hasMany' in field && field.hasMany) {
-            if (isLocalized && config.localization && config.localization.locales) {
-              result[field.name] = {
-                [config.localization.defaultLocale]: [],
-              }
-            } else {
-              result[field.name] = []
+      if (!relationPathMatch) {
+        if ('hasMany' in field && field.hasMany) {
+          if (isLocalized && config.localization && config.localization.locales) {
+            result[field.name] = {
+              [config.localization.defaultLocale]: [],
             }
+          } else {
+            result[field.name] = []
           }
-
-          return result
         }
 
-        if (isLocalized) {
-          result[field.name] = {}
-          const relationsByLocale: Record<string, Record<string, unknown>[]> = {}
-
-          relationPathMatch.forEach((row) => {
-            if (typeof row.locale === 'string') {
-              if (!relationsByLocale[row.locale]) {
-                relationsByLocale[row.locale] = []
-              }
-              relationsByLocale[row.locale].push(row)
-            }
-          })
-
-          Object.entries(relationsByLocale).forEach(([locale, relations]) => {
-            transformRelationship({
-              field,
-              locale,
-              ref: result,
-              relations,
-            })
-          })
-        } else {
-          transformRelationship({
-            field,
-            ref: result,
-            relations: relationPathMatch,
-            withinArrayOrBlockLocale,
-          })
-        }
         return result
       }
+
+      if (isLocalized) {
+        result[field.name] = {}
+        const relationsByLocale: Record<string, Record<string, unknown>[]> = {}
+
+        relationPathMatch.forEach((row) => {
+          if (typeof row.locale === 'string') {
+            if (!relationsByLocale[row.locale]) {
+              relationsByLocale[row.locale] = []
+            }
+            relationsByLocale[row.locale].push(row)
+          }
+        })
+
+        Object.entries(relationsByLocale).forEach(([locale, relations]) => {
+          transformRelationship({
+            field,
+            locale,
+            ref: result,
+            relations,
+          })
+        })
+      } else {
+        transformRelationship({
+          field,
+          ref: result,
+          relations: relationPathMatch,
+          withinArrayOrBlockLocale,
+        })
+      }
+      return result
     }
 
     if (field.type === 'join') {
-      const { limit = field.defaultLimit ?? 10 } =
+      const { count, limit = field.defaultLimit ?? 10 } =
         joinQuery?.[`${fieldPrefix.replaceAll('_', '.')}${field.name}`] || {}
 
       // raw hasMany results from SQLite
@@ -407,8 +436,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
       }
 
       let fieldResult:
-        | { docs: unknown[]; hasNextPage: boolean }
-        | Record<string, { docs: unknown[]; hasNextPage: boolean }>
+        | { docs: unknown[]; hasNextPage: boolean; totalDocs?: number }
+        | Record<string, { docs: unknown[]; hasNextPage: boolean; totalDocs?: number }>
       if (Array.isArray(fieldData)) {
         if (isLocalized && adapter.payload.config.localization) {
           fieldResult = fieldData.reduce(
@@ -449,6 +478,17 @@ export const traverseFields = <T extends Record<string, unknown>>({
         }
       }
 
+      if (count) {
+        const countPath = `${fieldName}_count`
+        if (typeof table[countPath] !== 'undefined') {
+          let value = Number(table[countPath])
+          if (Number.isNaN(value)) {
+            value = 0
+          }
+          fieldResult.totalDocs = value
+        }
+      }
+
       result[field.name] = fieldResult
       return result
     }
@@ -456,6 +496,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (field.type === 'text' && field?.hasMany) {
       const textPathMatch = texts[`${sanitizedPath}${field.name}`]
       if (!textPathMatch) {
+        result[field.name] =
+          isLocalized && localeCodes
+            ? Object.fromEntries(localeCodes.map((locale) => [locale, []]))
+            : []
         return result
       }
 
@@ -495,6 +539,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (field.type === 'number' && field.hasMany) {
       const numberPathMatch = numbers[`${sanitizedPath}${field.name}`]
       if (!numberPathMatch) {
+        result[field.name] =
+          isLocalized && localeCodes
+            ? Object.fromEntries(localeCodes.map((locale) => [locale, []]))
+            : []
         return result
       }
 
@@ -556,10 +604,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
     }
 
     if (isLocalized && Array.isArray(table._locales)) {
-      if (!table._locales.length && adapter.payload.config.localization) {
-        adapter.payload.config.localization.localeCodes.forEach((_locale) =>
-          (table._locales as unknown[]).push({ _locale }),
-        )
+      if (!table._locales.length && localeCodes) {
+        localeCodes.forEach((_locale) => (table._locales as unknown[]).push({ _locale }))
       }
 
       table._locales.forEach((localeRow) => {
@@ -603,22 +649,22 @@ export const traverseFields = <T extends Record<string, unknown>>({
             adapter,
             blocks,
             config,
+            currentTableName,
             dataRef: groupData as Record<string, unknown>,
             deletions,
             fieldPrefix: groupFieldPrefix,
             fields: field.flattenedFields,
+            joinQuery,
             numbers,
             parentIsLocalized: parentIsLocalized || field.localized,
             path: `${sanitizedPath}${field.name}`,
             relationships,
             table,
+            tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
             texts,
+            topLevelTableName,
             withinArrayOrBlockLocale: locale || withinArrayOrBlockLocale,
           })
-
-          if ('_order' in ref) {
-            delete ref._order
-          }
 
           return
         }
@@ -673,8 +719,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (Object.keys(localizedFieldData).length > 0) {
       result[field.name] = localizedFieldData
     }
-
-    return result
 
     return result
   }, dataRef)

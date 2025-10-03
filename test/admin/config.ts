@@ -1,24 +1,37 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { Array } from './collections/Array.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
+import { CustomListDrawer } from './collections/CustomListDrawer/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
+import { DisableBulkEdit } from './collections/DisableBulkEdit.js'
+import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
+import { EditMenuItems } from './collections/editMenuItems.js'
+import { FormatDocURL } from './collections/FormatDocURL/index.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
 import { CollectionGroup1B } from './collections/Group1B.js'
 import { CollectionGroup2A } from './collections/Group2A.js'
 import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
+import { ListDrawer } from './collections/ListDrawer.js'
+import { ListViewSelectAPI } from './collections/ListViewSelectAPI/index.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
+import { NoTimestampsCollection } from './collections/NoTimestamps.js'
 import { CollectionNotInView } from './collections/NotInView.js'
+import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
+import { ReorderTabs } from './collections/ReorderTabs.js'
 import { UploadCollection } from './collections/Upload.js'
+import { UploadTwoCollection } from './collections/UploadTwo.js'
+import { UseAsTitleGroupField } from './collections/UseAsTitleGroupField.js'
 import { Users } from './collections/Users.js'
+import { Virtuals } from './collections/Virtuals.js'
 import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
@@ -39,9 +52,16 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
+import { editMenuItemsSlug, reorderTabsSlug } from './slugs.js'
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   admin: {
+    livePreview: {
+      collections: [reorderTabsSlug, editMenuItemsSlug],
+      url: 'http://localhost:3000',
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -68,6 +88,10 @@ export default buildConfigWithDefaults({
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
+        collections: {
+          Component: '/components/views/CustomView/index.js#CustomView',
+          path: '/collections',
+        },
         CustomDefaultView: {
           Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
           path: '/custom-default-view',
@@ -141,6 +165,7 @@ export default buildConfigWithDefaults({
   },
   collections: [
     UploadCollection,
+    UploadTwoCollection,
     Posts,
     Users,
     CollectionHidden,
@@ -148,15 +173,28 @@ export default buildConfigWithDefaults({
     CollectionNoApiView,
     CustomViews1,
     CustomViews2,
+    ReorderTabs,
     CustomFields,
     CollectionGroup1A,
     CollectionGroup1B,
     CollectionGroup2A,
     CollectionGroup2B,
     Geo,
+    Array,
     DisableDuplicate,
+    DisableCopyToLocale,
+    EditMenuItems,
+    FormatDocURL,
     BaseListFilter,
     with300Documents,
+    ListDrawer,
+    Placeholder,
+    UseAsTitleGroupField,
+    DisableBulkEdit,
+    CustomListDrawer,
+    ListViewSelectAPI,
+    Virtuals,
+    NoTimestampsCollection,
   ],
   globals: [
     GlobalHidden,

@@ -37,7 +37,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
   const {
-    fieldProps: { featureClientSchemaMap, permissions },
+    fieldProps: { featureClientSchemaMap },
   } = useEditorConfigContext()
 
   const { getFormState } = useServerFunctions()
@@ -155,7 +155,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         parentIndexPath=""
         parentPath="" // See Blocks feature path for details as for why this is empty
         parentSchemaPath={schemaFieldsPath}
-        permissions={permissions}
+        permissions={true}
         readOnly={false}
       />
       <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
