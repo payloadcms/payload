@@ -1,6 +1,8 @@
 import type { FieldHook } from 'payload'
-import { countVersions } from './countVersions'
+
 import { toKebabCase } from 'payload/shared'
+
+import { countVersions } from '../../utilities/countVersions.js'
 
 /**
  * This is a `BeforeChange` field hook used to auto-generate the `slug` field.
@@ -9,7 +11,7 @@ import { toKebabCase } from 'payload/shared'
 export const generateSlug =
   (fallback: string): FieldHook =>
   async (args) => {
-    const { operation, value: isChecked, collection, global, data, originalDoc } = args
+    const { collection, data, global, operation, originalDoc, value: isChecked } = args
 
     // Ensure user-defined slugs are not overwritten during create
     // Use a generic falsy check here to include empty strings
@@ -59,7 +61,12 @@ export const generateSlug =
 
         // Important: ensure `countVersions` is not called unnecessarily often
         // That is why this is buried beneath all these conditions
-        const versionCount = await countVersions(args)
+        const versionCount = await countVersions({
+          collectionSlug: collection?.slug,
+          globalSlug: global?.slug,
+          parentID: originalDoc?.id,
+          req: args.req,
+        })
 
         if (versionCount <= 2) {
           return true
