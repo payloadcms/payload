@@ -500,8 +500,6 @@ export function DefaultEditView({
 
   const isFolderCollection = config.folders && collectionSlug === config.folders?.slug
 
-  console.log('Last update time:', lastUpdateTime)
-
   return (
     <main
       className={[
