@@ -600,6 +600,7 @@ export const svTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifik version',
     status: 'Status',
     unpublish: 'Avpublicera',
+    unpublished: 'Opublicerad',
     unpublishedSuccessfully: 'Ej publicerad framgångsrikt.',
     unpublishIn: 'Avpublicera i {{locale}}',
     unpublishing: 'Avpublicerar...',

@@ -607,6 +607,7 @@ export const esTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versión Específica',
     status: 'Estado',
     unpublish: 'Despublicar',
+    unpublished: 'No publicado',
     unpublishedSuccessfully: 'No publicado con éxito.',
     unpublishIn: 'Despublicar en {{locale}}',
     unpublishing: 'Despublicando...',

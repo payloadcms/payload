@@ -603,6 +603,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versão Específica',
     status: 'Status',
     unpublish: 'Despublicar',
+    unpublished: 'Não publicado',
     unpublishedSuccessfully: 'Não publicado com sucesso.',
     unpublishIn: 'Despublicar em {{locale}}',
     unpublishing: 'Despublicando...',

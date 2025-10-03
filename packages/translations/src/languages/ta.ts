@@ -603,6 +603,7 @@ export const taTranslations: DefaultTranslationsObject = {
     specificVersion: 'குறிப்பிட்ட பதிப்பு',
     status: 'நிலை',
     unpublish: 'வெளியீட்டை நீக்கு',
+    unpublished: 'வெளியிடப்படாதது',
     unpublishedSuccessfully: 'வெற்றிகரமாக வெளியீடு நிறுத்தப்பட்டது.',
     unpublishIn: '{{locale}} இல் வெளியீட்டை அவிழ்க்க',
     unpublishing: 'வெளியீடு நீக்கப்படுகிறது...',

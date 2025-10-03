@@ -599,6 +599,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifična verzija',
     status: 'Status',
     unpublish: 'Poništi objavu',
+    unpublished: 'Neobjavljeno',
     unpublishedSuccessfully: 'Uspješno nepobjavljeno.',
     unpublishIn: 'Povuci objavljivanje na {{locale}}',
     unpublishing: 'Poništavanje objave...',

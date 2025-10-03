@@ -260,8 +260,15 @@ export const updateOperation = async <
 
     let result = await beforeChange({
       ...beforeChangeArgs,
+      data: unpublishSpecificLocale ? {} : data,
       docWithLocales: publishedDocWithLocales,
     })
+
+    if (unpublishSpecificLocale && versionSnapshotResult) {
+      if (Object.keys(result).length === 0) {
+        result = versionSnapshotResult
+      }
+    }
 
     // /////////////////////////////////////
     // Update

@@ -603,6 +603,7 @@ export const idTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versi Spesifik',
     status: 'Status',
     unpublish: 'Batalkan Publikasi',
+    unpublished: 'Tidak diterbitkan',
     unpublishedSuccessfully: 'Berhasil tidak diterbitkan.',
     unpublishIn: 'Batal publikasi dalam {{locale}}',
     unpublishing: 'Membatalkan publikasi...',

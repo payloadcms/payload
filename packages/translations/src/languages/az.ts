@@ -604,6 +604,7 @@ export const azTranslations: DefaultTranslationsObject = {
     specificVersion: 'Xüsusi Versiya',
     status: 'Status',
     unpublish: 'Dərcdən çıxart',
+    unpublished: 'Nəşr olunmamış',
     unpublishedSuccessfully: 'Uğurla dərc olunmadı.',
     unpublishIn: '{{locale}} dilində yayınlanmaması',
     unpublishing: 'Dərcdən çıxarılır...',

@@ -598,6 +598,7 @@ export const slTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifična različica',
     status: 'Status',
     unpublish: 'Razveljavi objavo',
+    unpublished: 'Neobjavljeno',
     unpublishedSuccessfully: 'Uspešno neobjavljeno.',
     unpublishIn: 'Prekliči objavo v {{locale}}',
     unpublishing: 'Razveljavljanje objave...',

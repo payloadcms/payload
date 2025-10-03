@@ -603,6 +603,7 @@ export const enTranslations = {
     specificVersion: 'Specific Version',
     status: 'Status',
     unpublish: 'Unpublish',
+    unpublished: 'Unpublished',
     unpublishedSuccessfully: 'Unpublished successfully.',
     unpublishIn: 'Unpublish in {{locale}}',
     unpublishing: 'Unpublishing...',

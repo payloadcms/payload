@@ -581,6 +581,7 @@ export const heTranslations: DefaultTranslationsObject = {
     specificVersion: 'גרסה מסוימת',
     status: 'סטטוס',
     unpublish: 'בטל פרסום',
+    unpublished: 'לא פורסם',
     unpublishedSuccessfully: 'לא פורסם בהצלחה.',
     unpublishIn: 'בטל פרסום ב{{locale}}',
     unpublishing: 'מבטל פרסום...',

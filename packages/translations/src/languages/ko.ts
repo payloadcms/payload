@@ -593,6 +593,7 @@ export const koTranslations: DefaultTranslationsObject = {
     specificVersion: '특정 버전',
     status: '상태',
     unpublish: '게시 해제',
+    unpublished: '미발행',
     unpublishedSuccessfully: '성공적으로 비공개되었습니다.',
     unpublishIn: '{{locale}}에서 비공개',
     unpublishing: '게시 해제 중...',

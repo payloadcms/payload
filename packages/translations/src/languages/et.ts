@@ -592,6 +592,7 @@ export const etTranslations: DefaultTranslationsObject = {
     specificVersion: 'Spetsiifiline versioon',
     status: 'Olek',
     unpublish: 'Tühista avaldamine',
+    unpublished: 'Avaldamata',
     unpublishedSuccessfully: 'Edukalt avaldamata.',
     unpublishIn: 'Tühista avaldamine {{locale}}',
     unpublishing: 'Avaldamise tühistamine...',

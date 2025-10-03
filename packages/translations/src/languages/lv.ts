@@ -601,6 +601,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     specificVersion: 'Konkrētā versija',
     status: 'Statuss',
     unpublish: 'Atcelt publicēšanu',
+    unpublished: 'Nepublicēts',
     unpublishedSuccessfully: 'Veiksmīgi nepublicēts.',
     unpublishIn: 'Nepublicēt {{locale}}',
     unpublishing: 'Atceļ publicēšanu...',

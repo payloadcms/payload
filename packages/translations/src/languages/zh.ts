@@ -573,6 +573,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     specificVersion: '特定版本',
     status: '状态',
     unpublish: '取消发布',
+    unpublished: '未发布',
     unpublishedSuccessfully: '成功取消发布。',
     unpublishIn: '在{{locale}}中取消发布',
     unpublishing: '取消发布中...',

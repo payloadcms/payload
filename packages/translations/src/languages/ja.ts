@@ -602,6 +602,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     specificVersion: '特定のバージョン',
     status: 'ステータス',
     unpublish: '非公開',
+    unpublished: '未公開',
     unpublishedSuccessfully: '公開停止が成功しました。',
     unpublishIn: '{{locale}}で非公開にする',
     unpublishing: '非公開中...',

@@ -597,6 +597,7 @@ export const isTranslations: DefaultTranslationsObject = {
     specificVersion: 'Tiltekin útgáfa',
     status: 'Staða',
     unpublish: 'Taka úr birtingu',
+    unpublished: 'Óútgefið',
     unpublishedSuccessfully: 'Ekkert birting.',
     unpublishIn: 'Afbóka í {{locale}}',
     unpublishing: 'Tek úr birtingu...',

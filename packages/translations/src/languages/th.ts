@@ -588,6 +588,7 @@ export const thTranslations: DefaultTranslationsObject = {
     specificVersion: 'เวอร์ชันเฉพาะ',
     status: 'สถานะ',
     unpublish: 'หยุดเผยแพร่',
+    unpublished: 'ไม่เผยแพร่',
     unpublishedSuccessfully: 'ยกเลิกการเผยแพร่เรียบร้อยแล้ว',
     unpublishIn: 'ยกเลิกการเผยแพร่ใน {{locale}}',
     unpublishing: 'กำลังหยุดการเผยแพร่...',

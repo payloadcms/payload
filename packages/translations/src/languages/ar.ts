@@ -585,6 +585,7 @@ export const arTranslations: DefaultTranslationsObject = {
     specificVersion: 'الإصدار المحدد',
     status: 'الحالة',
     unpublish: 'الغاء النّشر',
+    unpublished: 'غير منشور',
     unpublishedSuccessfully: 'تم إلغاء النشر بنجاح.',
     unpublishIn: 'إلغاء النشر في {{locale}}',
     unpublishing: 'يتمّ الغاء النّشر...',

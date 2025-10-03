@@ -610,6 +610,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifieke versie',
     status: 'Status',
     unpublish: 'Publicatie ongedaan maken',
+    unpublished: 'Ongepubliceerd',
     unpublishedSuccessfully: 'Met succes niet gepubliceerd.',
     unpublishIn: 'Depubliceren in {{locale}}',
     unpublishing: 'Publicatie ongedaan maken...',

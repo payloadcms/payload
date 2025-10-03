@@ -604,6 +604,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifinė versija',
     status: 'Būsena',
     unpublish: 'Nebepublikuoti',
+    unpublished: 'Nepublikuotas',
     unpublishedSuccessfully: 'Sėkmingai nepaskelbta.',
     unpublishIn: 'Nepublikuoti {{locale}}',
     unpublishing: 'Nebepublikuojama...',

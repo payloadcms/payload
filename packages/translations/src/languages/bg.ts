@@ -600,6 +600,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     specificVersion: 'Специфична версия',
     status: 'Статус',
     unpublish: 'Скрий',
+    unpublished: 'Непубликуван',
     unpublishedSuccessfully: 'Успешно нее публикувано.',
     unpublishIn: 'Спиране на публикуване в {{locale}}',
     unpublishing: 'Скриване...',

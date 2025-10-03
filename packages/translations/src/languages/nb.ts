@@ -602,6 +602,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     specificVersion: 'Spesifikk versjon',
     status: 'Status',
     unpublish: 'Avpubliser',
+    unpublished: 'Upublisert',
     unpublishedSuccessfully: 'Utgivelse avbrutt vellykket.',
     unpublishIn: 'Avpubliser på {{locale}}',
     unpublishing: 'Avpubliserer...',

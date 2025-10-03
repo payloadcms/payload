@@ -608,6 +608,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     specificVersion: 'Մասնավոր Տարբերակ',
     status: 'Կարգավիճակ',
     unpublish: 'Բերել չհրապարակված վիճակի։',
+    unpublished: 'Չհրատարակված',
     unpublishedSuccessfully: 'Չհրատարակված է հաջողությամբ:',
     unpublishIn: 'Չհրատարակել {{locale}}',
     unpublishing: 'Բերվում է չհրապարակված վիճակի...',

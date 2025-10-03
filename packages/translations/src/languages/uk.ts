@@ -598,6 +598,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     specificVersion: 'Специфічна версія',
     status: 'Статус',
     unpublish: 'Скасувати публікацію',
+    unpublished: 'Неопубліковано',
     unpublishedSuccessfully: 'Успішно скасовано публікацію.',
     unpublishIn: 'Скасувати публікацію в {{locale}}',
     unpublishing: 'Скасування публікації...',

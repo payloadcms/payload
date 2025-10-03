@@ -611,6 +611,7 @@ export const myTranslations: DefaultTranslationsObject = {
     specificVersion: 'အထူးဗားရှင်း',
     status: 'အခြေအနေ',
     unpublish: 'ပြန်ဖြုတ်မည်။',
+    unpublished: 'Belum diterbitkan',
     unpublishedSuccessfully: 'Tidak diterbitkan dengan jayanya.',
     unpublishIn: 'Batalkan penerbitan dalam {{locale}}',
     unpublishing: 'ပြန်ဖြုတ်နေဆဲ ...',

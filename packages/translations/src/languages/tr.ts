@@ -602,6 +602,7 @@ export const trTranslations: DefaultTranslationsObject = {
     specificVersion: 'Belirli Sürüm',
     status: 'Durum',
     unpublish: 'Yayından Kaldır',
+    unpublished: 'Yayınlanmamış',
     unpublishedSuccessfully: 'Başarıyla yayınlanmadı.',
     unpublishIn: "{{locale}}'da Yayından Kaldır",
     unpublishing: 'Yayından kaldırılıyor...',

@@ -605,6 +605,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     specificVersion: 'নির্দিষ্ট সংস্করণ',
     status: 'স্থিতি',
     unpublish: 'প্রকাশ বাতিল করুন',
+    unpublished: 'অপ্রকাশিত',
     unpublishedSuccessfully: 'সফলভাবে অপ্রকাশিত হয়েছে।',
     unpublishIn: '{{locale}} এ অপ্রকাশিত করুন',
     unpublishing: 'প্রকাশ বাতিল করা হচ্ছে...',

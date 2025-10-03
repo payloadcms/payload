@@ -599,6 +599,7 @@ export const daTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifik Version',
     status: 'Status',
     unpublish: 'Afpublicer',
+    unpublished: 'Upubliceret',
     unpublishedSuccessfully: 'Offentliggjort succesfuldt.',
     unpublishIn: 'Afbryd offentliggørelse i {{locale}}',
     unpublishing: 'Afpublicerer...',

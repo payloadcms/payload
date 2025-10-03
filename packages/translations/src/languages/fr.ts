@@ -617,6 +617,7 @@ export const frTranslations: DefaultTranslationsObject = {
     specificVersion: 'Version spécifique',
     status: 'Statut',
     unpublish: 'Annuler la publication',
+    unpublished: 'Non publié',
     unpublishedSuccessfully: 'Non publié avec succès.',
     unpublishIn: 'Dépublier en {{locale}}',
     unpublishing: 'Annulation en cours...',

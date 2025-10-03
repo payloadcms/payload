@@ -604,6 +604,7 @@ export const caTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versió Específica',
     status: 'Estat',
     unpublish: 'Despublicar',
+    unpublished: 'Inèdit',
     unpublishedSuccessfully: 'No publicat amb èxit.',
     unpublishIn: 'Despublicar a {{locale}}',
     unpublishing: 'Despublicant...',
