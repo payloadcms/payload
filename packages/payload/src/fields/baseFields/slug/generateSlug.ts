@@ -1,8 +1,7 @@
-import type { FieldHook } from 'payload'
+import type { FieldHook } from '../../config/types.js'
 
-import { toKebabCase } from 'payload/shared'
-
-import { countVersions } from '../../utilities/countVersions.js'
+import { toKebabCase } from '../../../utilities/toKebabCase.js'
+import { countVersions } from './countVersions.js'
 
 /**
  * This is a `BeforeChange` field hook used to auto-generate the `slug` field.

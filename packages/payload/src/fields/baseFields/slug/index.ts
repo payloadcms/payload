@@ -1,4 +1,4 @@
-import type { RowField } from 'payload'
+import type { FieldAdmin, RowField } from '../../../fields/config/types.js'
 
 import { generateSlug } from './generateSlug.js'
 
@@ -23,7 +23,7 @@ type SlugField = (args?: {
    * Passes the row field to you to manipulate beyond the exposed options.
    */
   overrides?: (field: RowField) => RowField
-  position?: RowField['admin']['position']
+  position?: FieldAdmin['position']
   /**
    * Whether or not the `slug` field is required.
    */
@@ -35,24 +35,24 @@ type SlugField = (args?: {
  * For example, it will take a "title" field and transform its value from "My Title" → "my-title".
  *
  * The slug should generated through:
- * 1. the `create` operation, unless the user has modified the slug manually
- * 2. the `update` operation, if:
- *   a. autosave is _not_ enabled and there is no slug
- *   b. autosave _is_ enabled, the doc is unpublished, and the user has not modified the slug themselves
+ * 1. The `create` operation, unless the user has modified the slug manually
+ * 2. The `update` operation, if:
+ *   a. Autosave is _not_ enabled and there is no slug
+ *   b. Autosave _is_ enabled, the doc is unpublished, and the user has not modified the slug themselves
  *
  * The slug should stabilize after all above criteria have been met, because the URL is typically derived from the slug.
  * This is to protect modifying potentially live URLs, breaking links, etc. without explicit intent.
  *
- * @experimental This property is experimental and may change in the future. Use at your own discretion.
+ * @experimental This field is experimental and may change or be removed in the future. Use at your own discretion.
  */
 export const slugField: SlugField = ({
   name: fieldName = 'slug',
   checkboxName = 'generateSlug',
   fallback = 'title',
   overrides,
-  position = 'sidebar',
+  position,
   required,
-}) => {
+} = {}) => {
   const baseField: RowField = {
     type: 'row',
     admin: {

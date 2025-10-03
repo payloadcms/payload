@@ -1410,6 +1410,8 @@ export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 
+export { slugField } from './fields/baseFields/slug/index.js'
+
 export {
   createClientField,
   createClientFields,

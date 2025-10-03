@@ -1,4 +1,4 @@
-import { slugField } from '@payloadcms/ui/rsc'
+import { slugField } from 'payload'
 import type { CollectionConfig } from 'payload'
 
 export const Categories: CollectionConfig = {
