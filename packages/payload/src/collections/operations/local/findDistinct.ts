@@ -42,7 +42,7 @@ export type Options<
   /**
    * The field to get distinct values for
    */
-  field: TField
+  field: ({} & string) | TField
   /**
    * The maximum distinct field values to be returned.
    * By default the operation returns all the values.

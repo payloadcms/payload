@@ -769,6 +769,7 @@ export interface TextField {
   fieldWithDefaultValue?: string | null;
   dependentOnFieldWithDefaultValue?: string | null;
   hasMany?: string[] | null;
+  hasManySecond?: string[] | null;
   readOnlyHasMany?: string[] | null;
   validatesHasMany?: string[] | null;
   localizedHasMany?: string[] | null;
@@ -1192,6 +1193,18 @@ export interface RowField {
         id?: string | null;
         blockName?: string | null;
         blockType: 'rightTextBlock';
+      }[]
+    | null;
+  arrayLeftColumn?:
+    | {
+        leftArrayChild?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayRightColumn?:
+    | {
+        rightArrayChild?: string | null;
+        id?: string | null;
       }[]
     | null;
   updatedAt: string;
@@ -2904,6 +2917,18 @@ export interface RowFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  arrayLeftColumn?:
+    | T
+    | {
+        leftArrayChild?: T;
+        id?: T;
+      };
+  arrayRightColumn?:
+    | T
+    | {
+        rightArrayChild?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3232,6 +3257,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
   fieldWithDefaultValue?: T;
   dependentOnFieldWithDefaultValue?: T;
   hasMany?: T;
+  hasManySecond?: T;
   readOnlyHasMany?: T;
   validatesHasMany?: T;
   localizedHasMany?: T;

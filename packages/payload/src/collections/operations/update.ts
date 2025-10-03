@@ -33,6 +33,7 @@ import { updateDocument } from './utilities/update.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
+  autosave?: boolean
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
@@ -92,6 +93,7 @@ export const updateOperation = async <
     }
 
     const {
+      autosave = false,
       collection: { config: collectionConfig },
       collection,
       depth,
@@ -243,7 +245,7 @@ export const updateOperation = async <
         const updatedDoc = await updateDocument({
           id,
           accessResults: accessResult,
-          autosave: false,
+          autosave,
           collectionConfig,
           config,
           data: deepCopyObjectSimple(data),
