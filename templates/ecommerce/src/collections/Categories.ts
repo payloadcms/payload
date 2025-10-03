@@ -16,13 +16,9 @@ export const Categories: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    slugField('title', {
-      slugOverrides: {
-        required: true,
-        admin: {
-          position: undefined,
-        },
-      },
+    slugField({
+      required: true,
+      position: undefined,
     }),
   ],
 }

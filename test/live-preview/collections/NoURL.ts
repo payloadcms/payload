@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 export const NoURLCollection: CollectionConfig = {
-  slug: 'no-url',
+  slug: 'conditional-url',
   admin: {
     livePreview: {
       url: ({ data }) => (data?.enabled ? '/live-preview/static' : null),

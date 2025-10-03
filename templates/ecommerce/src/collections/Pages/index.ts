@@ -136,10 +136,8 @@ export const Pages: CollectionConfig = {
         },
       ],
     },
-    slugField('title', {
-      slugOverrides: {
-        required: true,
-      },
+    slugField({
+      required: true,
     }),
   ],
   hooks: {

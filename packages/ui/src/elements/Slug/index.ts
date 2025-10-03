@@ -1,13 +1,34 @@
-import type { CheckboxField, RowField, TextField } from 'payload'
+import type { RowField } from 'payload'
 
 import { generateSlug } from './generateSlug.js'
 
-type Overrides = {
-  generateSlugOverrides?: Partial<CheckboxField>
-  slugOverrides?: Partial<TextField>
-}
-
-type SlugField = (fieldToUse?: string, overrides?: Overrides) => RowField
+type SlugField = (args?: {
+  /**
+   * Override for the `generateSlug` checkbox field name.
+   * @default 'generateSlug'
+   */
+  checkboxName?: string
+  /**
+   * The name of the field to generate the slug from, when applicable.
+   * @default 'title'
+   */
+  fallback?: string
+  /**
+   * Override for the `slug` field name.
+   * @default 'slug'
+   */
+  name?: string
+  /**
+   * A function used to override te fields at a granular level.
+   * Passes the row field to you to manipulate beyond the exposed options.
+   */
+  overrides?: (field: RowField) => RowField
+  position?: RowField['admin']['position']
+  /**
+   * Whether or not the `slug` field is required.
+   */
+  required?: boolean
+}) => RowField
 
 /**
  * The `slug` field is auto-generated based on another field.
@@ -21,48 +42,58 @@ type SlugField = (fieldToUse?: string, overrides?: Overrides) => RowField
  *
  * The slug should stabilize after all above criteria have been met, because the URL is typically derived from the slug.
  * This is to protect modifying potentially live URLs, breaking links, etc. without explicit intent.
+ *
+ * @experimental This property is experimental and may change in the future. Use at your own discretion.
  */
-export const slugField: SlugField = (fieldToUse = 'title', overrides = {}) => {
-  const { generateSlugOverrides, slugOverrides } = overrides
-
-  return {
+export const slugField: SlugField = ({
+  name: fieldName = 'slug',
+  checkboxName = 'generateSlug',
+  fallback = 'title',
+  overrides,
+  position = 'sidebar',
+  required,
+}) => {
+  const baseField: RowField = {
     type: 'row',
+    admin: {
+      position,
+    },
     fields: [
       {
-        name: 'generateSlug',
+        name: checkboxName,
         type: 'checkbox',
         admin: {
           description:
             'When enabled, the slug will auto-generate from the title field on save and autosave.',
           hidden: true,
-          position: 'sidebar',
         },
         defaultValue: true,
         hooks: {
-          beforeChange: [generateSlug(fieldToUse)],
+          beforeChange: [generateSlug(fallback)],
         },
-        label: 'Auto-generate slug',
-        ...(generateSlugOverrides || {}),
       },
       {
-        name: 'slug',
+        name: fieldName,
         type: 'text',
-        index: true,
-        label: 'Slug',
-        ...((slugOverrides || {}) as any),
         admin: {
-          position: 'sidebar',
-          ...(slugOverrides?.admin || {}),
           components: {
             Field: {
               clientProps: {
-                fieldToUse,
+                fallback,
               },
               path: '@/fields/slug/SlugComponent#SlugComponent',
             },
           },
         },
+        index: true,
+        required,
       },
     ],
   }
+
+  if (typeof overrides === 'function') {
+    return overrides(baseField)
+  }
+
+  return baseField
 }

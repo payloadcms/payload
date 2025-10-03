@@ -122,7 +122,9 @@ export const Pages: CollectionConfig<'pages'> = {
         position: 'sidebar',
       },
     },
-    slugField(),
+    slugField({
+      required: true,
+    }),
   ],
   hooks: {
     afterChange: [revalidatePage],
