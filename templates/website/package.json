@@ -59,6 +59,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@playwright/test": "1.54.1",
+    "@tailwindcss/postcss": "^4.1.13",
     "@tailwindcss/typography": "^0.5.13",
     "@testing-library/react": "16.3.0",
     "@types/escape-html": "^1.0.2",
@@ -66,7 +67,6 @@
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
     "@vitejs/plugin-react": "4.5.2",
-    "autoprefixer": "^10.4.19",
     "copyfiles": "^2.4.1",
     "eslint": "^9.16.0",
     "eslint-config-next": "15.4.4",
@@ -75,7 +75,7 @@
     "playwright-core": "1.54.1",
     "postcss": "^8.4.38",
     "prettier": "^3.4.2",
-    "tailwindcss": "^3.4.3",
+    "tailwindcss": "^4.1.13",
     "typescript": "5.7.3",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.3"
