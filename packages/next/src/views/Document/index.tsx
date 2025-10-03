@@ -420,7 +420,7 @@ export const renderDocument = async ({
   }
 }
 
-export async function Document(props: AdminViewServerProps) {
+export async function DocumentView(props: AdminViewServerProps) {
   try {
     const { Document: RenderedDocument } = await renderDocument(props)
     return RenderedDocument

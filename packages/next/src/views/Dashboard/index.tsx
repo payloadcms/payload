@@ -10,7 +10,11 @@ import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './D
 
 import { DefaultDashboard } from './Default/index.js'
 
-export async function Dashboard({ initPageResult, params, searchParams }: AdminViewServerProps) {
+export async function DashboardView({
+  initPageResult,
+  params,
+  searchParams,
+}: AdminViewServerProps) {
   const {
     locale,
     permissions,
