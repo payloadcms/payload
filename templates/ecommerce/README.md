@@ -89,23 +89,23 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 - ### Carts
 
-  Used to track user and guest carts within Payload. Added by the [ecommerce plugin](https://payloadcms.com/docs/plugins/ecommerce#carts).
+  Used to track user and guest carts within Payload. Added by the [ecommerce plugin](https://payloadcms.com/docs/ecommerce/plugin#carts).
 
 - ### Addresses
 
-  Saves user's addresses for easier checkout. Added by the [ecommerce plugin](https://payloadcms.com/docs/plugins/ecommerce#addresses).
+  Saves user's addresses for easier checkout. Added by the [ecommerce plugin](https://payloadcms.com/docs/ecommerce/plugin#addresses).
 
 - ### Orders
 
-  Tracks orders once a transaction successfully completes. Added by the [ecommerce plugin](https://payloadcms.com/docs/plugins/ecommerce#orders).
+  Tracks orders once a transaction successfully completes. Added by the [ecommerce plugin](https://payloadcms.com/docs/ecommerce/plugin#orders).
 
 - ### Transactions
 
-  Tracks transactions from initiation to completion, once completed they will have a related Order item. Added by the [ecommerce plugin](https://payloadcms.com/docs/plugins/ecommerce#transactions).
+  Tracks transactions from initiation to completion, once completed they will have a related Order item. Added by the [ecommerce plugin](https://payloadcms.com/docs/ecommerce/plugin#transactions).
 
 - ### Products and Variants
 
-  Primary collections for product details such as pricing per currency and optionally supports variants per product. Added by the [ecommerce plugin](https://payloadcms.com/docs/plugins/ecommerce#products).
+  Primary collections for product details such as pricing per currency and optionally supports variants per product. Added by the [ecommerce plugin](https://payloadcms.com/docs/ecommerce/plugin#products).
 
 ### Globals
 
@@ -187,7 +187,7 @@ An order is created only once a transaction is successfully completed. This is a
 
 ## Currencies
 
-By default the template ships with support only for USD however you can change the supported currencies via the [plugin configuration](https://payloadcms.com/docs/plugins/ecommerce#currencies). You will need to ensure that the supported currencies in Payload are also configured in your Payment platforms.
+By default the template ships with support only for USD however you can change the supported currencies via the [plugin configuration](https://payloadcms.com/docs/ecommerce/plugin#currencies). You will need to ensure that the supported currencies in Payload are also configured in your Payment platforms.
 
 ## Stripe
 
@@ -359,8 +359,6 @@ export default buildConfig({
   ],
   // ...
 ```
-
-There is also a simplified [one click deploy](https://github.com/payloadcms/payload/tree/templates/with-vercel-postgres) to Vercel should you need it.
 
 ### Self-hosting
 
