@@ -360,6 +360,8 @@ export const renderDocument = async ({
     req,
   })
 
+  console.log(entityPreferences?.value?.editViewType)
+
   return {
     data: doc,
     Document: (
