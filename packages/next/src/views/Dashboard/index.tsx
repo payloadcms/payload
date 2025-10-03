@@ -20,11 +20,11 @@ export async function DashboardView(props: AdminViewServerProps) {
       i18n,
       payload: { config },
       payload,
+      user,
     },
     req,
     visibleEntities,
   } = props.initPageResult
-
   const collections = config.collections.filter(
     (collection) =>
       permissions?.collections?.[collection.slug]?.read &&
@@ -116,7 +116,13 @@ export async function DashboardView(props: AdminViewServerProps) {
         serverProps: {
           ...props,
           globalData,
+          i18n,
+          locale,
           navGroups,
+          payload,
+          permissions,
+          user,
+          visibleEntities,
         } satisfies DashboardViewServerPropsOnly,
       })}
     </Fragment>
