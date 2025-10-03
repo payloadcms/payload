@@ -88,6 +88,11 @@ export default buildConfigWithDefaults({
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
+        // 'create-first-user': {
+        //   Component: '/components/views/CreateFirstUser/index.js#CreateFirstUser',
+        //   path: '/create-first-user',
+        //   exact: true,
+        // },
         collections: {
           Component: '/components/views/CustomView/index.js#CustomView',
           path: '/collections',
