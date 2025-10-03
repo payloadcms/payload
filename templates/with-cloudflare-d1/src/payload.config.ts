@@ -15,9 +15,11 @@ import { Media } from './collections/Media'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const cloudflare = process.argv.find((value) => value.match(/^(generate|migrate):?/))
-  ? await getCloudflareContextFromWrangler()
-  : await getCloudflareContext({ async: true })
+const cloudflareRemoteBindings = process.env.NODE_ENV === 'production'
+const cloudflare =
+  process.argv.find((value) => value.match(/^(generate|migrate):?/)) || !cloudflareRemoteBindings
+    ? await getCloudflareContextFromWrangler()
+    : await getCloudflareContext({ async: true })
 
 export default buildConfig({
   admin: {
@@ -47,7 +49,7 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
   return import(`${'__wrangler'.replaceAll('_', '')}`).then(({ getPlatformProxy }) =>
     getPlatformProxy({
       environment: process.env.CLOUDFLARE_ENV,
-      experimental: { remoteBindings: process.env.NODE_ENV === 'production' },
+      experimental: { remoteBindings: cloudflareRemoteBindings },
     } satisfies GetPlatformProxyOptions),
   )
 }
