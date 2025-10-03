@@ -4,7 +4,7 @@ import { EntityType } from '@payloadcms/ui/shared'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import { baseClass, type DashboardViewServerPropsOnly } from './index.js'
+import { baseClass, type DashboardViewServerPropsOnly } from '../../Default/index.js'
 
 export function CollectionCards(props: DashboardViewServerPropsOnly) {
   const { globalData, i18n, navGroups, payload, permissions, user } = props

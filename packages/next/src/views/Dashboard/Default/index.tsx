@@ -5,7 +5,7 @@ import { Gutter } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
-import { CollectionCards } from './CollectionCards.js'
+import { CollectionCards } from '../Widgets/CollectionCards/index.js'
 import './index.scss'
 
 export const baseClass = 'dashboard'
@@ -33,26 +33,8 @@ export type DashboardViewServerPropsOnly = {
 export type DashboardViewServerProps = DashboardViewClientProps & DashboardViewServerPropsOnly
 
 export function DefaultDashboard(props: DashboardViewServerProps) {
-  const {
-    globalData,
-    i18n,
-    i18n: { t },
-    locale,
-    navGroups,
-    params,
-    payload: {
-      config: {
-        admin: {
-          components: { afterDashboard, beforeDashboard },
-        },
-        routes: { admin: adminRoute },
-      },
-    },
-    payload,
-    permissions,
-    searchParams,
-    user,
-  } = props
+  const { i18n, locale, params, payload, permissions, searchParams, user } = props
+  const { afterDashboard, beforeDashboard } = payload.config.admin.components
 
   return (
     <div className={baseClass}>
