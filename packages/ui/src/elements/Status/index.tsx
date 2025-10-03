@@ -60,88 +60,85 @@ export const Status: React.FC = () => {
       : 'previouslyDraft'
     : statusToRender
 
-  const performAction = useCallback(
-    async () => {
-      let url
-      let method
+  const performAction = useCallback(async () => {
+    let url
+    let method
 
-      if (collectionSlug) {
-        url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null&depth=0`
-        method = 'patch'
-      }
+    if (collectionSlug) {
+      url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null&depth=0`
+      method = 'patch'
+    }
 
-      if (globalSlug) {
-        url = `${serverURL}${api}/globals/${globalSlug}?locale=${locale}&fallback-locale=null&depth=0`
-        method = 'post'
-      }
+    if (globalSlug) {
+      url = `${serverURL}${api}/globals/${globalSlug}?locale=${locale}&fallback-locale=null&depth=0`
+      method = 'post'
+    }
 
-      const publishedDoc = await requests
-        .get(url, {
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/json',
-          },
-        })
-        .then((res) => res.json())
-
-      const body = publishedDoc
-
-      const res = await requests[method](url, {
-        body: JSON.stringify(body),
+    const publishedDoc = await requests
+      .get(url, {
         headers: {
           'Accept-Language': i18n.language,
           'Content-Type': 'application/json',
         },
       })
+      .then((res) => res.json())
 
-      if (res.status === 200) {
-        let data
-        const json = await res.json()
+    const body = publishedDoc
 
-        if (globalSlug) {
-          data = json.result
-        } else if (collectionSlug) {
-          data = json.doc
-        }
+    const res = await requests[method](url, {
+      body: JSON.stringify(body),
+      headers: {
+        'Accept-Language': i18n.language,
+        'Content-Type': 'application/json',
+      },
+    })
 
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        resetForm(data)
-        toast.success(json.message)
-        incrementVersionCount()
-        setMostRecentVersionIsAutosaved(false)
+    if (res.status === 200) {
+      let data
+      const json = await res.json()
 
-        setUnpublishedVersionCount(0)
-      } else {
-        try {
-          const json = await res.json()
-          if (json.errors?.[0]?.message) {
-            toast.error(json.errors[0].message)
-          } else if (json.error) {
-            toast.error(json.error)
-          } else {
-            toast.error(t('error:unPublishingDocument'))
-          }
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (err) {
-          toast.error(t('error:unPublishingDocument'))
-        }
+      if (globalSlug) {
+        data = json.result
+      } else if (collectionSlug) {
+        data = json.doc
       }
-    },
-    [
-      api,
-      collectionSlug,
-      globalSlug,
-      id,
-      i18n.language,
-      incrementVersionCount,
-      locale,
-      resetForm,
-      serverURL,
-      setUnpublishedVersionCount,
-      setMostRecentVersionIsAutosaved,
-      t,
-    ],
-  )
+
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      resetForm(data)
+      toast.success(json.message)
+      incrementVersionCount()
+      setMostRecentVersionIsAutosaved(false)
+
+      setUnpublishedVersionCount(0)
+    } else {
+      try {
+        const json = await res.json()
+        if (json.errors?.[0]?.message) {
+          toast.error(json.errors[0].message)
+        } else if (json.error) {
+          toast.error(json.error)
+        } else {
+          toast.error(t('version:revertUnsuccessful'))
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (err) {
+        toast.error(t('version:revertUnsuccessful'))
+      }
+    }
+  }, [
+    api,
+    collectionSlug,
+    globalSlug,
+    id,
+    i18n.language,
+    incrementVersionCount,
+    locale,
+    resetForm,
+    serverURL,
+    setUnpublishedVersionCount,
+    setMostRecentVersionIsAutosaved,
+    t,
+  ])
 
   const canUpdate = docPermissions?.update
 
@@ -154,29 +151,26 @@ export const Status: React.FC = () => {
         <div className={`${baseClass}__value-wrap`}>
           <span className={`${baseClass}__label`}>{t('version:status')}:&nbsp;</span>
           <span className={`${baseClass}__value`}>{t(`version:${displayStatusKey}`)}</span>
-          {!isTrashed &&
-            canUpdate &&
-            hasPublishedDoc &&
-            statusToRender === 'changed' && (
-              <React.Fragment>
-                &nbsp;&mdash;&nbsp;
-                <Button
-                  buttonStyle="none"
-                  className={`${baseClass}__action`}
-                  id="action-revert-to-published"
-                  onClick={() => toggleModal(revertModalSlug)}
-                >
-                  {t('version:revertToPublished')}
-                </Button>
-                <ConfirmationModal
-                  body={t('version:aboutToRevertToPublished')}
-                  confirmingLabel={t('version:reverting')}
-                  heading={t('version:confirmRevertToSaved')}
-                  modalSlug={revertModalSlug}
-                  onConfirm={() => performAction()}
-                />
-              </React.Fragment>
-            )}
+          {!isTrashed && canUpdate && hasPublishedDoc && statusToRender === 'changed' && (
+            <React.Fragment>
+              &nbsp;&mdash;&nbsp;
+              <Button
+                buttonStyle="none"
+                className={`${baseClass}__action`}
+                id="action-revert-to-published"
+                onClick={() => toggleModal(revertModalSlug)}
+              >
+                {t('version:revertToPublished')}
+              </Button>
+              <ConfirmationModal
+                body={t('version:aboutToRevertToPublished')}
+                confirmingLabel={t('version:reverting')}
+                heading={t('version:confirmRevertToSaved')}
+                modalSlug={revertModalSlug}
+                onConfirm={() => performAction()}
+              />
+            </React.Fragment>
+          )}
         </div>
       </div>
     )

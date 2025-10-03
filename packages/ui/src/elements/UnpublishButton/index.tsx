@@ -30,8 +30,6 @@ export function UnpublishButton() {
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
   } = useDocumentInfo()
-
-
   const { toggleModal } = useModal()
 
   const { config, getEntityConfig } = useConfig()
@@ -69,7 +67,7 @@ export function UnpublishButton() {
 
   const unpublish = useCallback(
     (unpublishSpecificLocale?: boolean) => {
-      ; (async () => {
+      ;(async () => {
         let url
         let method
 
@@ -97,20 +95,12 @@ export function UnpublishButton() {
           })
 
           if (res.status === 200) {
-            let data
-            const json = await res.json()
-
-            if (globalSlug) {
-              data = json.result
-            } else if (collectionSlug) {
-              data = json.doc
-            }
-
             void resetForm({
               ...(dataFromProps || {}),
               _status: 'draft',
             })
-            toast.success(json.message)
+
+            toast.success(t('version:unpublishedSuccessfully'))
             incrementVersionCount()
             setUnpublishedVersionCount(1)
             setMostRecentVersionIsAutosaved(false)
@@ -165,7 +155,7 @@ export function UnpublishButton() {
 
   const canUnpublish = hasPublishedDoc
 
-  const canUnpublishCurrentLocale = hasLocalizedFields && hasPublishedDoc
+  const canUnpublishCurrentLocale = hasLocalizedFields && canUnpublish
 
   const activeLocale =
     localization &&
@@ -189,7 +179,6 @@ export function UnpublishButton() {
             enableSubMenu={canUnpublishCurrentLocale}
             onClick={() => {
               setUnpublishSpecificLocale(false)
-
               toggleModal(unPublishModalSlug)
             }}
             size="medium"
@@ -204,23 +193,25 @@ export function UnpublishButton() {
                       close()
                     }}
                   >
-                    {/* TODO: add translation */}
-                    Unpublish in {activeLocaleLabel}
+                    {t('version:unpublishIn', { locale: activeLocaleLabel })}
                   </PopupList.Button>
                 </PopupList.ButtonGroup>
               )
             }}
             type="button"
           >
-            Unpublish
+            {t('version:unpublish')}
           </FormSubmit>
           <ConfirmationModal
-            body={t('version:aboutToUnpublish')}
+            body={
+              unpublishSpecificLocale
+                ? t('version:aboutToUnpublishIn', { locale: activeLocaleLabel })
+                : t('version:aboutToUnpublish')
+            }
             confirmingLabel={t('version:unpublishing')}
             heading={t('version:confirmUnpublish')}
             modalSlug={unPublishModalSlug}
-            onConfirm={() =>
-              unpublish(unpublishSpecificLocale)}
+            onConfirm={() => unpublish(unpublishSpecificLocale)}
           />
         </>
       )}
