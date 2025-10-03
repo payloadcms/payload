@@ -30,10 +30,15 @@
   &__section {
     position: relative;
     display: table-row-group;
-    &:nth-child(odd) {
+    &:nth-child(odd):not(.nested-items-table__section--hovered) {
       background: var(--theme-elevation-50);
       border-radius: var(--style-radius-l);
     }
+  }
+
+  &__section--hovered {
+    outline: 1px solid var(--theme-success-400);
+    background-color: var(--theme-success-100);
   }
 }
 
@@ -47,11 +52,6 @@
   &--on-row {
     top: 50%;
     transform: translateY(-50%);
-
-    &.is-dragging.is-over {
-      background-color: var(--theme-elevation-150);
-      opacity: 0.5;
-    }
   }
 
   &--on-split {
