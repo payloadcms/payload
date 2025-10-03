@@ -126,3 +126,9 @@ To further investigate the issue:
 - Go to the login screen. Open your inspector. Go to the Network tab.
 - Log in and then find the login request that should appear in your network panel. Click the login request.
 - The login request should have a Set-Cookie header on the response, and the cookie should be getting set successfully. If it is not, most browsers generally have a little yellow ⚠️ symbol that you can hover over to see why the cookie was rejected.
+
+## CPU Spike
+
+If you are experiencing a CPU spike when performing certain operations, it may be due to infinite loops in your hooks. This can happen if a hook triggers an operation that calls the same hook again, leading to a recursive loop that can potentially crash your server.
+
+To learn more, see the [Hooks Context documentation](https://payloadcms.com/docs/hooks/context#preventing-infinite-loops).

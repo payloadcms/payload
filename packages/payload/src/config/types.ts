@@ -1133,6 +1133,15 @@ export type Config = {
   hooks?: {
     afterError?: AfterErrorHook[]
   }
+  /**
+   * When defined, limits the number of times an operation can be invoked during a single request.
+   * This is useful for self-invoking hooks which can fall into an infinite loop and crash the server if not properly guarded.
+   * For example, a `beforeChange` hook that updates the same document being saved, @see https://payloadcms.com/docs/hooks/context#preventing-infinite-loops.
+   * Note: Ensure you pass `context` between Payload operations to track recursion, @see https://payloadcms.com/docs/hooks/context#hooksMaxRecursion.
+   *
+   * @experimental This property is experimental and may change in future releases. Use at your own discretion.
+   */
+  hooksMaxRecursion?: number
   /** i18n config settings */
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   i18n?: I18nOptions<{} | DefaultTranslationsObject> // loosen the type here to allow for custom translations
@@ -1195,7 +1204,6 @@ export type Config = {
    * }
    */
   loggingLevels?: Partial<Record<ErrorName, false | Level>>
-
   /**
    * The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries.
    *
@@ -1204,7 +1212,6 @@ export type Config = {
    * @default 10
    */
   maxDepth?: number
-
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void
   /**

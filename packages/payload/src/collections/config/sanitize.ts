@@ -14,6 +14,7 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
+import { detectRecursiveHooks } from '../../utilities/detectRecursiveHooks.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
@@ -48,6 +49,15 @@ export const sanitizeCollection = async (
   // /////////////////////////////////
 
   const sanitized: CollectionConfig = addDefaultsToCollectionConfig(collection)
+
+  // Attach recursive hook detection, if enabled
+  if (typeof config.hooksMaxRecursion === 'number' && sanitized.hooks) {
+    if (!sanitized.hooks.beforeOperation) {
+      sanitized.hooks.beforeOperation = []
+    }
+
+    sanitized.hooks.beforeOperation.unshift((args) => detectRecursiveHooks(config, args))
+  }
 
   // /////////////////////////////////
   // Sanitize fields
