@@ -1,7 +1,7 @@
-import { useDroppable } from '@dnd-kit/core'
 import React from 'react'
 
 import { DraggableWithClick } from '../../folderView/DraggableWithClick/index.js'
+import { RowDropArea } from './RowDropArea/index.js'
 import './index.scss'
 
 const exampleData = [
@@ -42,12 +42,12 @@ const baseClass = 'nested-items-table'
 const SEGMENT_WIDTH = 30
 const INITIAL_OFFSET = 56
 
-export const NestedItemsTable = ({
+export const NestedSectionsTable = ({
   className = '',
   columns = [{ test: 'Test' }, { name: 'name' }],
-  data = exampleData,
   dragStartX = 0,
   isDragging = false,
+  sections = exampleData,
 }) => {
   const [hoveredRowID, setHoveredRowID] = React.useState(null)
   const onDropZoneHover = ({ placement, targetItem }) => {
@@ -71,7 +71,7 @@ export const NestedItemsTable = ({
           isDragging={isDragging}
           onDropZoneHover={onDropZoneHover}
           parentItems={[]}
-          rows={data}
+          sectionRows={sections}
         />
       </div>
     </div>
@@ -95,62 +95,35 @@ export const DivTableSection = ({
   dragStartX,
   hoveredRowID,
   isDragging,
-  isRootLeaf: _isRootLeaf = false,
+  isLastRowOfRoot: _isLastRowOfRoot = false,
   level = 0,
   onDropZoneHover,
   parentItems = [],
-  rows: sectionRows,
-  startZIndex = 1000,
+  sectionRows,
 }) => {
-  /**
-   * startZIndex: The z-index value for the first row at this level
-   * Each subsequent row (including nested children) gets a lower z-index
-   * parentItems: Array of ancestor items from root to current level
-   */
-
-  // Calculate how many rows this item and its children will render
-  const countRows = (items) => {
-    return items.reduce((total, item) => {
-      return total + 1 + (item.children ? countRows(item.children) : 0)
-    }, 0)
-  }
-
-  let currentZIndex = startZIndex
-
   return (
     <>
       {sectionRows.map((sectionRowItem, sectionRowIndex: number) => {
         const isLastRow = sectionRows.length - 1 === sectionRowIndex
-        const hasChildren = Boolean(sectionRowItem?.children?.length)
-        const isRootLeaf = level === 0 || (isLastRow && _isRootLeaf)
-
-        // Assign z-index for this row
-        const thisZIndex = currentZIndex
-        currentZIndex--
-        const childStartZIndex = currentZIndex
-
-        if (hasChildren) {
-          currentZIndex -= countRows(sectionRowItem.children)
-        }
-
-        const nestedParentItems = [...parentItems, sectionRowItem]
+        const hasNestedSection = Boolean(sectionRowItem?.children?.length)
+        const isLastRowOfRoot = level === 0 || (isLastRow && _isLastRowOfRoot)
 
         let targetItems = []
         if (level === 0) {
-          if (hasChildren) {
+          if (hasNestedSection) {
             targetItems = [sectionRowItem]
           }
         } else if (!isLastRow) {
           targetItems = [parentItems[parentItems.length - 1]]
         } else if (isLastRow) {
-          if (hasChildren) {
+          if (hasNestedSection) {
             targetItems = [sectionRowItem]
           } else {
             targetItems = [...parentItems]
           }
         }
 
-        if (isRootLeaf && !hasChildren) {
+        if (isLastRowOfRoot && !hasNestedSection) {
           targetItems = [null, ...targetItems]
         }
 
@@ -182,30 +155,28 @@ export const DivTableSection = ({
                 ))}
 
                 <div>
-                  {/* row drop area */}
-                  <ParentDropArea
+                  <RowDropArea
                     dragStartX={dragStartX}
                     isDragging={isDragging}
                     onHover={onDropZoneHover}
                     parentID={sectionRowItem.rowID}
-                    placement="row"
+                    placement="middle"
                     style={{ left: 0, width: '100%' }}
                     targetItems={[sectionRowItem]}
                   />
 
-                  <ParentDropArea
+                  <RowDropArea
                     dragStartX={dragStartX}
                     isDragging={isDragging}
                     markerLeftOffset={
-                      isLastRow && !hasChildren
+                      isLastRow && !hasNestedSection
                         ? INITIAL_OFFSET + SEGMENT_WIDTH * (level - targetItems.length + 1)
-                        : INITIAL_OFFSET + SEGMENT_WIDTH * (hasChildren ? level + 1 : level)
+                        : INITIAL_OFFSET + SEGMENT_WIDTH * (hasNestedSection ? level + 1 : level)
                     }
                     onHover={onDropZoneHover}
                     style={{
                       left: 0,
                       width: '100%',
-                      zIndex: thisZIndex,
                     }}
                     targetItems={targetItems}
                   />
@@ -219,108 +190,16 @@ export const DivTableSection = ({
                 dragStartX={dragStartX}
                 hoveredRowID={hoveredRowID}
                 isDragging={isDragging}
-                isRootLeaf={isRootLeaf}
+                isLastRowOfRoot={isLastRowOfRoot}
                 level={level + 1}
                 onDropZoneHover={onDropZoneHover}
-                parentItems={nestedParentItems}
-                rows={sectionRowItem.children}
-                startZIndex={childStartZIndex}
+                parentItems={[...parentItems, sectionRowItem]}
+                sectionRows={sectionRowItem.children}
               />
             )}
           </React.Fragment>
         )
       })}
     </>
-  )
-}
-
-const ParentDropArea = ({
-  dragStartX = 0,
-  isDragging = false,
-  markerLeftOffset = 0,
-  onHover,
-  placement = 'split',
-  style,
-  targetItems = [],
-}: {
-  dragStartX?: number
-  isDragging?: boolean
-  markerLeftOffset?: number
-  onHover?: (data: { placement: 'row' | 'split'; targetItem: any }) => void
-  parentID?: null | number
-  placement?: 'row' | 'split'
-  style: React.CSSProperties
-  targetItems?: any[]
-}) => {
-  const id = React.useId()
-  const [currentMouseX, setCurrentMouseX] = React.useState(0)
-
-  React.useEffect(() => {
-    if (!isDragging) {
-      return
-    }
-
-    const handleMouseMove = (e: MouseEvent) => {
-      setCurrentMouseX(e.clientX)
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [isDragging])
-
-  // Calculate horizontal offset from drag start
-  const offsetFromDragStart = currentMouseX - dragStartX
-
-  // Determine target level based on offset and initial level
-  const hoverIndex = Math.max(
-    Math.min(Math.round(offsetFromDragStart / 100), targetItems.length - 1),
-    0,
-  )
-
-  const { isOver, setNodeRef } = useDroppable({
-    id,
-    data: { parentID: hoverIndex },
-  })
-
-  const targetItem = targetItems[hoverIndex]
-
-  React.useEffect(() => {
-    if (isOver && onHover) {
-      onHover({ placement, targetItem })
-    }
-  }, [isOver, targetItem, onHover, placement])
-
-  const markerLeftPosition = hoverIndex * SEGMENT_WIDTH + markerLeftOffset
-
-  return (
-    <div
-      className={[
-        'dnd-drop-target',
-        `dnd-drop-target--on-${placement}`,
-        isDragging && 'is-dragging',
-        isOver && 'is-over',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      style={style}
-      title={`Parent: ${hoverIndex} ${id}`}
-    >
-      <div
-        ref={setNodeRef}
-        style={{
-          height: '100%',
-          width: '100%',
-        }}
-      >
-        {placement === 'split' && (
-          <div
-            className="dnd-drop-target-split-marker"
-            style={{
-              left: markerLeftPosition,
-            }}
-          />
-        )}
-      </div>
-    </div>
   )
 }

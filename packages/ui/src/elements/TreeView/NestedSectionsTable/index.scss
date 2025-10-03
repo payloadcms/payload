@@ -30,6 +30,7 @@
   &__section {
     position: relative;
     display: table-row-group;
+    outline: 1px solid transparent;
     &:nth-child(odd):not(.nested-items-table__section--hovered) {
       background: var(--theme-elevation-50);
       border-radius: var(--style-radius-l);
@@ -37,49 +38,11 @@
   }
 
   &__section--hovered {
+    z-index: 1;
     outline: 1px solid var(--theme-success-400);
     background-color: var(--theme-success-100);
+    transition:
+      background-color 0.2s ease-in-out,
+      outline 0.2s ease-in-out;
   }
-}
-
-.dnd-drop-target {
-  min-width: 100%;
-  position: absolute;
-  right: 0;
-  left: 0;
-  height: 50%;
-
-  &--on-row {
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
-  &--on-split {
-    bottom: 0;
-    transform: translateY(50%);
-    min-width: unset;
-
-    &.is-dragging.is-over {
-      .dnd-drop-target-split-marker {
-        opacity: 1;
-      }
-    }
-  }
-}
-
-.dnd-drop-target-split-marker {
-  height: 4px;
-  opacity: 0;
-  background-color: var(--theme-success-400);
-  border-radius: var(--style-radius-l);
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  transform: translateY(-50%);
-  max-width: 100%;
-  // margin-right: calc(var(--base) * 0.5);
-  transition:
-    opacity 0.1s ease-in-out,
-    left 0.1s ease-in-out;
 }
