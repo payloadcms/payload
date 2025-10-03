@@ -52,6 +52,8 @@ export const RenderLexical: React.FC<
           ...((field as RichTextField) || {}),
           type: 'richText',
           admin: {
+            ...((field as RichTextField)?.admin || {}),
+            // When using "fake" anchor fields, hidden is often set to true. We need to override that here to ensure the field is rendered.
             hidden: false,
           },
         },
