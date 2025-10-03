@@ -30,6 +30,7 @@ export type Args = {
   /**
    * Experimental. Enables read replicas support with the `first-primary` strategy.
    *
+   * @experimental
    * @example
    *
    * ```readReplicas: 'first-primary'```
