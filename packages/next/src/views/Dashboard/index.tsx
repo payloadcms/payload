@@ -10,11 +10,7 @@ import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './D
 
 import { DefaultDashboard } from './Default/index.js'
 
-export async function DashboardView({
-  initPageResult,
-  params,
-  searchParams,
-}: AdminViewServerProps) {
+export async function DashboardView(props: AdminViewServerProps) {
   const {
     locale,
     permissions,
@@ -22,11 +18,10 @@ export async function DashboardView({
       i18n,
       payload: { config },
       payload,
-      user,
     },
     req,
     visibleEntities,
-  } = initPageResult
+  } = props.initPageResult
 
   const collections = config.collections.filter(
     (collection) =>
@@ -113,16 +108,9 @@ export async function DashboardView({
         Fallback: DefaultDashboard,
         importMap: payload.importMap,
         serverProps: {
+          ...props,
           globalData,
-          i18n,
-          locale,
           navGroups,
-          params,
-          payload,
-          permissions,
-          searchParams,
-          user,
-          visibleEntities,
         } satisfies DashboardViewServerPropsOnly,
       })}
     </Fragment>
