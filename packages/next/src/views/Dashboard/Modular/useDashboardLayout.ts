@@ -1,6 +1,6 @@
 import type { Layout } from 'react-grid-layout'
 
-import { toast, usePreferences } from '@payloadcms/ui'
+import { toast, useConfig, usePreferences } from '@payloadcms/ui'
 import React, { useCallback, useState } from 'react'
 
 import type { WidgetInstanceClient } from './client.js'
@@ -11,6 +11,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   const setLayoutPreference = useSetLayoutPreference()
   const [isEditing, setIsEditing] = useState(false)
   const [currentLayout, setCurrentLayout] = useState<WidgetInstanceClient[]>(initialLayout)
+  const { widgets = [] } = useConfig().config.admin.dashboard ?? {}
 
   const saveLayout = useCallback(async () => {
     try {
@@ -63,18 +64,19 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       }
 
       const widgetId = `${widgetSlug}-${Date.now()}`
+      const widget = widgets.find((w) => w.slug === widgetSlug)
 
       // Create a new widget instance using RenderWidget (Lexical pattern)
       const newWidgetInstance: WidgetInstanceClient = {
         clientLayout: {
-          h: 1, // Default height
+          h: widget?.minHeight ?? 1,
           i: widgetId,
-          maxH: 3,
-          maxW: 12,
-          minH: 1,
-          minW: 3,
+          maxH: widget?.maxHeight ?? 3,
+          maxW: widget?.maxWidth ?? 12,
+          minH: widget?.minHeight ?? 1,
+          minW: widget?.minWidth ?? 3,
           resizeHandles: ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'],
-          w: 3, // Default width
+          w: widget?.minWidth ?? 3,
           x: 0, // Will be positioned automatically by react-grid-layout
           y: 0, // Will be positioned automatically by react-grid-layout
         },
@@ -118,7 +120,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
 function useSetLayoutPreference() {
   const { setPreference } = usePreferences()
   return useCallback(
-    async (layout: Layout[]) => {
+    async (layout: Layout[] | null) => {
       await setPreference('dashboard-layout', { layouts: layout }, false)
     },
     [setPreference],

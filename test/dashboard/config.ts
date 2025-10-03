@@ -83,6 +83,7 @@ export default buildConfigWithDefaults({
         {
           slug: 'revenue',
           ComponentPath: './components/Revenue.tsx#default',
+          minWidth: 6,
           maxHeight: 2,
           minHeight: 2,
         },

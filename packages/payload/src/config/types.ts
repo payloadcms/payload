@@ -762,6 +762,10 @@ export type DashboardConfig = {
   widgets: Array<Widget>
 }
 
+export type SanitizedDashboardConfig = {
+  widgets: Array<Omit<Widget, 'ComponentPath'>>
+}
+
 /**
  * This is the central configuration
  *
@@ -1359,7 +1363,7 @@ export type Config = {
 export type SanitizedConfig = {
   admin: {
     timezones: SanitizedTimezoneConfig
-  } & DeepRequired<Config['admin']>
+  } & DeepRequired<Config['admin']> // TODO: I am using only dashboard.widgets. Should I exclude dashboard.defaultLayout?
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
