@@ -4,6 +4,46 @@ import { DraggableWithClick } from '../../folderView/DraggableWithClick/index.js
 import { RowDropArea } from './RowDropArea/index.js'
 import './index.scss'
 
+interface SectionRow {
+  [key: string]: any
+  children?: SectionRow[]
+  name?: string
+  rowID: string
+}
+
+interface Column {
+  label?: string
+  name: string
+}
+
+interface NestedSectionsTableProps {
+  className?: string
+  columns?: Column[]
+  dragStartX?: number
+  initialOffset?: number
+  isDragging?: boolean
+  sections?: SectionRow[]
+  segmentWidth?: number
+}
+
+interface DivTableHeaderProps {
+  columns: Column[]
+}
+
+interface DivTableSectionProps {
+  columns: Column[]
+  dragStartX: number
+  hoveredRowID: null | string
+  initialOffset: number
+  isDragging: boolean
+  isLastRowOfRoot?: boolean
+  level?: number
+  onDropZoneHover: (params: { placement?: string; targetItem: null | SectionRow }) => void
+  parentItems?: SectionRow[]
+  sectionRows: SectionRow[]
+  segmentWidth: number
+}
+
 const exampleData = [
   {
     name: 'About',
@@ -39,20 +79,27 @@ const exampleData = [
 ]
 
 const baseClass = 'nested-items-table'
-const SEGMENT_WIDTH = 30
-const INITIAL_OFFSET = 56
+const DEFAULT_SEGMENT_WIDTH = 30
+const DEFAULT_INITIAL_OFFSET = 56
 
-export const NestedSectionsTable = ({
+export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   className = '',
-  columns = [{ test: 'Test' }, { name: 'name' }],
+  columns = [{ name: 'name' }],
   dragStartX = 0,
+  initialOffset = DEFAULT_INITIAL_OFFSET,
   isDragging = false,
   sections = exampleData,
+  segmentWidth = DEFAULT_SEGMENT_WIDTH,
 }) => {
-  const [hoveredRowID, setHoveredRowID] = React.useState(null)
-  const onDropZoneHover = ({ placement, targetItem }) => {
+  const [hoveredRowID, setHoveredRowID] = React.useState<null | string>(null)
+  const onDropZoneHover = ({
+    placement,
+    targetItem,
+  }: {
+    placement?: string
+    targetItem: null | SectionRow
+  }) => {
     setHoveredRowID(targetItem?.rowID || null)
-    console.log('Drop zone hover:', { placement, targetItem })
     // targetItem is the calculated target parent based on hover position
     // You can use targetItem.rowID directly as the parent ID
   }
@@ -68,21 +115,23 @@ export const NestedSectionsTable = ({
           columns={columns}
           dragStartX={dragStartX}
           hoveredRowID={hoveredRowID}
+          initialOffset={initialOffset}
           isDragging={isDragging}
           onDropZoneHover={onDropZoneHover}
           parentItems={[]}
           sectionRows={sections}
+          segmentWidth={segmentWidth}
         />
       </div>
     </div>
   )
 }
 
-export const DivTableHeader = ({ columns }) => {
+export const DivTableHeader: React.FC<DivTableHeaderProps> = ({ columns }) => {
   return (
     <div className={`${baseClass}__header`}>
-      {columns.map((col, index) => (
-        <div className={`${baseClass}__header-cell`} key={index}>
+      {columns.map((col) => (
+        <div className={`${baseClass}__header-cell`} key={col.name}>
           {col.label || col.name}
         </div>
       ))}
@@ -90,61 +139,56 @@ export const DivTableHeader = ({ columns }) => {
   )
 }
 
-export const DivTableSection = ({
+export const DivTableSection: React.FC<DivTableSectionProps> = ({
   columns,
   dragStartX,
   hoveredRowID,
+  initialOffset,
   isDragging,
-  isLastRowOfRoot: _isLastRowOfRoot = false,
+  isLastRowOfRoot = false,
   level = 0,
   onDropZoneHover,
   parentItems = [],
   sectionRows,
+  segmentWidth,
 }) => {
   return (
     <>
       {sectionRows.map((sectionRowItem, sectionRowIndex: number) => {
         const isLastRow = sectionRows.length - 1 === sectionRowIndex
         const hasNestedSection = Boolean(sectionRowItem?.children?.length)
-        const isLastRowOfRoot = level === 0 || (isLastRow && _isLastRowOfRoot)
+        const isRowAtRootLevel = level === 0 || (isLastRow && isLastRowOfRoot)
 
-        let targetItems = []
+        // Calculate drop target items based on position in hierarchy
+        let targetItems: (null | SectionRow)[] = []
+
         if (level === 0) {
-          if (hasNestedSection) {
-            targetItems = [sectionRowItem]
-          }
-        } else if (!isLastRow) {
-          targetItems = [parentItems[parentItems.length - 1]]
+          targetItems = hasNestedSection ? [sectionRowItem] : []
         } else if (isLastRow) {
-          if (hasNestedSection) {
-            targetItems = [sectionRowItem]
-          } else {
-            targetItems = [...parentItems]
-          }
+          targetItems = hasNestedSection ? [sectionRowItem] : [...parentItems]
+        } else {
+          targetItems = [parentItems[parentItems.length - 1]]
         }
 
-        if (isLastRowOfRoot && !hasNestedSection) {
+        // Allow dropping at root level for last row without nested sections
+        if (isRowAtRootLevel && !hasNestedSection) {
           targetItems = [null, ...targetItems]
         }
 
         return (
-          <React.Fragment key={sectionRowIndex}>
+          <React.Fragment key={sectionRowItem.rowID}>
             <div
               className={`${baseClass}__section ${hoveredRowID === sectionRowItem.rowID ? `${baseClass}__section--hovered` : ''}`}
             >
-              <DraggableWithClick
-                className={`${baseClass}__row`}
-                key={sectionRowIndex}
-                onClick={() => {}}
-              >
-                {columns.map((col, colIndex: number) => (
+              <DraggableWithClick className={`${baseClass}__row`} onClick={() => {}}>
+                {columns.map((col) => (
                   <div
                     className={`${baseClass}__cell`}
-                    key={colIndex}
+                    key={col.name}
                     style={
                       col.name === 'name'
                         ? {
-                            paddingLeft: level * SEGMENT_WIDTH,
+                            paddingLeft: level * segmentWidth,
                             width: '100%',
                           }
                         : undefined
@@ -159,7 +203,6 @@ export const DivTableSection = ({
                     dragStartX={dragStartX}
                     isDragging={isDragging}
                     onHover={onDropZoneHover}
-                    parentID={sectionRowItem.rowID}
                     placement="middle"
                     style={{ left: 0, width: '100%' }}
                     targetItems={[sectionRowItem]}
@@ -170,8 +213,8 @@ export const DivTableSection = ({
                     isDragging={isDragging}
                     markerLeftOffset={
                       isLastRow && !hasNestedSection
-                        ? INITIAL_OFFSET + SEGMENT_WIDTH * (level - targetItems.length + 1)
-                        : INITIAL_OFFSET + SEGMENT_WIDTH * (hasNestedSection ? level + 1 : level)
+                        ? initialOffset + segmentWidth * (level - targetItems.length + 1)
+                        : initialOffset + segmentWidth * (hasNestedSection ? level + 1 : level)
                     }
                     onHover={onDropZoneHover}
                     style={{
@@ -189,12 +232,14 @@ export const DivTableSection = ({
                 columns={columns}
                 dragStartX={dragStartX}
                 hoveredRowID={hoveredRowID}
+                initialOffset={initialOffset}
                 isDragging={isDragging}
-                isLastRowOfRoot={isLastRowOfRoot}
+                isLastRowOfRoot={isRowAtRootLevel}
                 level={level + 1}
                 onDropZoneHover={onDropZoneHover}
                 parentItems={[...parentItems, sectionRowItem]}
                 sectionRows={sectionRowItem.children}
+                segmentWidth={segmentWidth}
               />
             )}
           </React.Fragment>

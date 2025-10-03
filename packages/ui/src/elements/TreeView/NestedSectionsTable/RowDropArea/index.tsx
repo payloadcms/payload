@@ -21,7 +21,6 @@ export const RowDropArea = ({
   isDragging?: boolean
   markerLeftOffset?: number
   onHover?: (data: { placement: 'middle' | 'split'; targetItem: any }) => void
-  parentID?: null | number
   placement?: 'middle' | 'split'
   style: React.CSSProperties
   targetItems?: any[]
