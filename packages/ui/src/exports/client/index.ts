@@ -35,6 +35,7 @@ export { QueryPresetsColumnField } from '../../elements/QueryPresets/fields/Colu
 export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
 
 // elements
+export { SlugComponent } from '../../elements/Slug/SlugComponent.js'
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'
 export type { OnCancel } from '../../elements/ConfirmationModal/index.js'
 export { Link } from '../../elements/Link/index.js'

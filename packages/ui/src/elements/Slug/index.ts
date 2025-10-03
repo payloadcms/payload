@@ -81,9 +81,10 @@ export const slugField: SlugField = ({
               clientProps: {
                 fallback,
               },
-              path: '@/fields/slug/SlugComponent#SlugComponent',
+              path: '@payloadcms/ui#SlugComponent',
             },
           },
+          width: '100%',
         },
         index: true,
         required,

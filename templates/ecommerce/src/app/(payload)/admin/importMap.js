@@ -17,6 +17,7 @@ import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c08
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
+import { SlugComponent as SlugComponent_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
 import { VariantOptionsSelector as VariantOptionsSelector_b91672ccd6e8b071c11142ab941fedfb } from '@payloadcms/plugin-ecommerce/rsc'
 import { PriceCell as PriceCell_e27bf7b8cc50640dcdd584767b8eac3c } from '@payloadcms/plugin-ecommerce/client'
 import { PriceInput as PriceInput_b91672ccd6e8b071c11142ab941fedfb } from '@payloadcms/plugin-ecommerce/rsc'
@@ -63,6 +64,7 @@ export const importMap = {
     MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860,
   '@payloadcms/plugin-seo/client#PreviewComponent':
     PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
+  '@payloadcms/ui#SlugComponent': SlugComponent_3817bf644402e67bfe6577f60ef982de,
   '@payloadcms/plugin-ecommerce/rsc#VariantOptionsSelector':
     VariantOptionsSelector_b91672ccd6e8b071c11142ab941fedfb,
   '@payloadcms/plugin-ecommerce/client#PriceCell': PriceCell_e27bf7b8cc50640dcdd584767b8eac3c,
