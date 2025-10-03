@@ -1,7 +1,4 @@
 import { withPayload } from '@payloadcms/next/withPayload'
-import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
-
-initOpenNextCloudflareForDev({ environment: process.env.CLOUDFLARE_ENV })
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

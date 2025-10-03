@@ -2,7 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
   "name": "my-app",
-  "compatibility_date": "2025-05-05",
+  "compatibility_date": "2025-08-15",
   "compatibility_flags": [
     // Enable Node.js API
     // see https://developers.cloudflare.com/workers/configuration/compatibility-flags/#nodejs-compatibility-flag
@@ -10,8 +10,6 @@
     // Allow to fetch URLs in your app
     // see https://developers.cloudflare.com/workers/configuration/compatibility-flags/#global-fetch-strictly-public
     "global_fetch_strictly_public",
-    // Enable MessagePort, used by undici
-    "expose_global_message_channel",
   ],
   "assets": {
     "directory": ".open-next/assets",
@@ -45,7 +43,7 @@
   ],
 
   // Here's how to configure an additional environment
-  // It can be deployed with `CLOUDFLARE_ENV=staging npm run deploy`
+  // It can be deployed with `CLOUDFLARE_ENV=staging pnpm run deploy`
   // "env": {
   //   "staging": {
   //     "name": "my-app-staging",
@@ -54,7 +52,7 @@
   //         "binding": "D1",
   //         "database_id": "DATABASE_ID",
   //         "database_name": "my-app-staging",
-  //         "experimental_remote": true
+  //         "remote": true
   //       }
   //     ],
   //     "services": [
