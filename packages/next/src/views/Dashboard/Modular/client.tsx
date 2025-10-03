@@ -15,7 +15,7 @@ import { useDashboardLayout } from './useDashboardLayout.js'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
-const BREAKPOINT = 768
+const BREAKPOINT = 640 //768
 
 export type WidgetInstanceClient = {
   clientLayout: Layout
@@ -65,7 +65,7 @@ export function ModularDashboardClient({
       <ResponsiveGridLayout
         breakpoints={{ lg: BREAKPOINT, xxs: 0 }}
         className={`grid-layout ${isEditing ? 'editing' : ''}`}
-        cols={{ lg: 12, xxs: 6 }}
+        cols={{ lg: 12, xxs: 3 }} // xxs: 6?
         isDraggable={isEditing}
         isResizable={isEditing}
         layouts={{
