@@ -43,7 +43,9 @@ import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
+  Field,
   FlattenedBlock,
+  FlattenedField,
   JobsConfig,
   Payload,
   RequestContext,
@@ -730,8 +732,17 @@ export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
 
+// Widget data follows the same pattern as BlockFields
+type WidgetFields = {
+  [key: string]: any
+  widgetName?: string
+  widgetType?: string
+}
+
 export type Widget = {
   ComponentPath: string
+  /** Fields that define the widget's configurable data structure */
+  fields?: Field[]
   /** If undefined, will be set to 3 */
   maxHeight?: 1 | 2
   /** If undefined, will be set to 12 */
@@ -741,15 +752,17 @@ export type Widget = {
   /** If undefined, will be set to 3 */
   minWidth?: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
   slug: string
-  // TODO: Add fields
-  // fields?: Field[]
   // Maybe:
   // ImageURL?: string // similar to Block
 }
 
+export type FlattenedWidget = {
+  flattenedFields: FlattenedField[]
+} & Widget
+
 export type WidgetInstance = {
-  // TODO: should be inferred from Widget Fields
-  // data: Record<string, any>
+  /** Widget data - follows same pattern as BlockFields */
+  data?: WidgetFields
   height?: 1 | 2 | 3
   widgetSlug: string
   width?: 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
@@ -763,7 +776,7 @@ export type DashboardConfig = {
 }
 
 export type SanitizedDashboardConfig = {
-  widgets: Array<Omit<Widget, 'ComponentPath'>>
+  widgets: Array<Omit<FlattenedWidget, 'ComponentPath'>>
 }
 
 /**

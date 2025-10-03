@@ -34,9 +34,9 @@ export default buildConfigWithDefaults({
             widgetSlug: 'count',
             width: 3,
             height: 1,
-            // data: {
-            //   interval: 'week',
-            // },
+            data: {
+              interval: 'week',
+            },
           },
           {
             widgetSlug: 'count',
@@ -74,7 +74,13 @@ export default buildConfigWithDefaults({
           slug: 'count',
           ComponentPath: './components/Count.tsx#default',
           maxWidth: 6,
-          // fields: []
+          fields: [
+            {
+              name: 'interval',
+              type: 'select',
+              options: ['week', 'month', 'year'],
+            },
+          ],
         },
         {
           slug: 'private',

@@ -1,3 +1,4 @@
+import type { FlattenedWidget, Widget } from '../config/types.js'
 import type {
   Block,
   Field,
@@ -13,6 +14,13 @@ export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
   return {
     ...block,
     flattenedFields: flattenAllFields({ fields: block.fields }),
+  }
+}
+
+export const flattenWidget = ({ widget }: { widget: Widget }): FlattenedWidget => {
+  return {
+    ...widget,
+    flattenedFields: widget.fields ? flattenAllFields({ fields: widget.fields }) : [],
   }
 }
 

@@ -14,6 +14,7 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
+import { flattenWidget } from './flattenAllFields.js'
 import { toWords } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 
@@ -1228,6 +1229,53 @@ export function configToJSONSchema(
     }
   }
 
+  // Generate widget type definitions - similar to blocks
+  const widgetsDefinition: JSONSchema4 | undefined = {
+    type: 'object',
+    additionalProperties: false,
+    properties: {},
+    required: [],
+  }
+  if (config?.admin?.dashboard?.widgets?.length) {
+    for (const widget of config.admin.dashboard.widgets) {
+      if (widget.fields?.length) {
+        // Flatten widget to get flattenedFields for type generation
+        const flattenedWidget = flattenWidget({ widget })
+
+        const widgetFieldSchemas = fieldsToJSONSchema(
+          collectionIDFieldTypes,
+          flattenedWidget.flattenedFields,
+          interfaceNameDefinitions,
+          config,
+          i18n,
+        )
+
+        const widgetSchema: JSONSchema4 = {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            ...widgetFieldSchemas.properties,
+            widgetName: {
+              type: 'string',
+            },
+            widgetType: {
+              const: widget.slug,
+            },
+          },
+          required: ['widgetType', ...widgetFieldSchemas.required],
+        }
+
+        const interfaceName = widget.slug
+        interfaceNameDefinitions.set(interfaceName, widgetSchema)
+
+        widgetsDefinition.properties![widget.slug] = {
+          $ref: `#/definitions/${interfaceName}`,
+        }
+        ;(widgetsDefinition.required as string[]).push(widget.slug)
+      }
+    }
+  }
+
   let jsonSchema: JSONSchema4 = {
     additionalProperties: false,
     definitions: {
@@ -1249,6 +1297,7 @@ export function configToJSONSchema(
       globalsSelect: generateEntitySelectSchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
       user: generateAuthEntitySchemas(config.collections),
+      widgets: widgetsDefinition,
     },
     required: [
       'user',
@@ -1262,6 +1311,7 @@ export function configToJSONSchema(
       'db',
       'jobs',
       'blocks',
+      'widgets',
     ],
     title: 'Config',
   }

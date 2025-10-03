@@ -221,6 +221,9 @@ export interface GeneratedTypes {
   }
   localeUntyped: null | string
   userUntyped: UntypedUser
+  widgetsUntyped: {
+    [slug: string]: JsonObject
+  }
 }
 
 // Helper type to resolve the correct type using conditional types
@@ -233,6 +236,11 @@ type ResolveBlockType<T> = 'blocks' extends keyof T
   ? T['blocks']
   : // @ts-expect-error
     T['blocksUntyped']
+
+type ResolveWidgetType<T> = 'widgets' extends keyof T
+  ? T['widgets']
+  : // @ts-expect-error
+    T['widgetsUntyped']
 
 type ResolveCollectionSelectType<T> = 'collectionsSelect' extends keyof T
   ? T['collectionsSelect']
@@ -258,6 +266,8 @@ type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
 export type TypedCollection = ResolveCollectionType<GeneratedTypes>
 
 export type TypedBlock = ResolveBlockType<GeneratedTypes>
+
+export type TypedWidget = ResolveWidgetType<GeneratedTypes>
 
 export type TypedUploadCollection = NonNever<{
   [K in keyof TypedCollection]:
@@ -1692,6 +1702,7 @@ export {
   pathExistsAndIsAccessibleSync,
 } from './utilities/findUp.js'
 export { flattenAllFields } from './utilities/flattenAllFields.js'
+export { flattenBlock, flattenWidget } from './utilities/flattenAllFields.js'
 export { flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'

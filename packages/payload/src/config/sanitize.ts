@@ -235,6 +235,24 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
+  // Sanitize dashboard widgets - similar to blocks
+  if (config?.admin?.dashboard?.widgets?.length) {
+    for (let i = 0; i < config.admin.dashboard.widgets.length; i++) {
+      const widget = config.admin.dashboard.widgets[i]!
+      if (widget.fields?.length) {
+        // Sanitize widget fields
+        widget.fields = (await sanitizeFields({
+          config: config as unknown as Config,
+          existingFieldNames: new Set(),
+          fields: widget.fields,
+          parentIsLocalized: false,
+          richTextSanitizationPromises,
+          validRelationships,
+        })) as any // TODO: Fix type mismatch with sanitized fields
+      }
+    }
+  }
+
   const folderEnabledCollections: SanitizedCollectionConfig[] = []
 
   for (let i = 0; i < config.collections!.length; i++) {
