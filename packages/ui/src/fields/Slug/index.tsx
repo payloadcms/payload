@@ -1,17 +1,17 @@
 'use client'
+import type { SlugFieldProps } from 'payload'
+
+import { slugify } from 'payload/shared'
 import React, { useCallback, useState } from 'react'
-import type { TextFieldClientProps } from 'payload'
-import { toKebabCase } from 'payload/shared'
 
-import { useField, Button, TextInput, FieldLabel, useForm } from '@payloadcms/ui'
-
+import { Button } from '../../elements/Button/index.js'
+import { useForm } from '../../forms/Form/index.js'
+import { useField } from '../../forms/useField/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
+import { TextInput } from '../Text/index.js'
 import './index.scss'
 
-type SlugComponentProps = {
-  fieldToUse: string
-} & TextFieldClientProps
-
-export const SlugComponent: React.FC<SlugComponentProps> = ({
+export const SlugField: React.FC<SlugFieldProps> = ({
   field,
   fieldToUse,
   path,
@@ -19,7 +19,7 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
 }) => {
   const { label } = field
 
-  const { value, setValue } = useField<string>({ path: path || field.name })
+  const { setValue, value } = useField<string>({ path: path || field.name })
 
   const { getDataByPath } = useForm()
 
@@ -29,14 +29,18 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
     (e: React.MouseEvent<Element>) => {
       e.preventDefault()
 
-      const targetFieldValue = getDataByPath(fieldToUse) as string
+      const targetFieldValue = getDataByPath(fieldToUse)
 
       if (targetFieldValue) {
-        const formattedSlug = toKebabCase(targetFieldValue)
+        const formattedSlug = slugify(targetFieldValue as string)
 
-        if (value !== formattedSlug) setValue(formattedSlug)
+        if (value !== formattedSlug) {
+          setValue(formattedSlug)
+        }
       } else {
-        if (value !== '') setValue('')
+        if (value !== '') {
+          setValue('')
+        }
       }
     },
     [setValue, value, fieldToUse, getDataByPath],
@@ -52,19 +56,19 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
       <div className="label-wrapper">
         <FieldLabel htmlFor={`field-${path}`} label={label} />
         {!isLocked && (
-          <Button className="lock-button" buttonStyle="none" onClick={handleGenerate}>
+          <Button buttonStyle="none" className="lock-button" onClick={handleGenerate}>
             Generate
           </Button>
         )}
-        <Button className="lock-button" buttonStyle="none" onClick={toggleLock}>
+        <Button buttonStyle="none" className="lock-button" onClick={toggleLock}>
           {isLocked ? 'Unlock' : 'Lock'}
         </Button>
       </div>
       <TextInput
-        value={value}
         onChange={setValue}
         path={path || field.name}
         readOnly={Boolean(readOnlyFromProps || isLocked)}
+        value={value}
       />
     </div>
   )

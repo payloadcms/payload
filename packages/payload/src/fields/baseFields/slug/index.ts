@@ -1,8 +1,9 @@
+import type { TextFieldClientProps } from '../../../admin/types.js'
 import type { FieldAdmin, RowField } from '../../../fields/config/types.js'
 
 import { generateSlug } from './generateSlug.js'
 
-type SlugField = (args?: {
+type SlugFieldArgs = {
   /**
    * Override for the `generateSlug` checkbox field name.
    * @default 'generateSlug'
@@ -12,7 +13,7 @@ type SlugField = (args?: {
    * The name of the field to generate the slug from, when applicable.
    * @default 'title'
    */
-  fallback?: string
+  fieldToUse?: string
   /**
    * Override for the `slug` field name.
    * @default 'slug'
@@ -28,7 +29,13 @@ type SlugField = (args?: {
    * Whether or not the `slug` field is required.
    */
   required?: boolean
-}) => RowField
+}
+
+type SlugField = (args?: SlugFieldArgs) => RowField
+
+export type SlugFieldClientProps = {} & Pick<SlugFieldArgs, 'fieldToUse'>
+
+export type SlugFieldProps = SlugFieldClientProps & TextFieldClientProps
 
 /**
  * The `slug` field is auto-generated based on another field.
@@ -48,7 +55,7 @@ type SlugField = (args?: {
 export const slugField: SlugField = ({
   name: fieldName = 'slug',
   checkboxName = 'generateSlug',
-  fallback = 'title',
+  fieldToUse = 'title',
   overrides,
   position,
   required,
@@ -69,7 +76,7 @@ export const slugField: SlugField = ({
         },
         defaultValue: true,
         hooks: {
-          beforeChange: [generateSlug(fallback)],
+          beforeChange: [generateSlug(fieldToUse)],
         },
       },
       {
@@ -79,9 +86,9 @@ export const slugField: SlugField = ({
           components: {
             Field: {
               clientProps: {
-                fallback,
-              },
-              path: '@payloadcms/ui#SlugComponent',
+                fieldToUse,
+              } satisfies SlugFieldClientProps,
+              path: '@payloadcms/ui#SlugField',
             },
           },
           width: '100%',

@@ -35,7 +35,6 @@ export { QueryPresetsColumnField } from '../../elements/QueryPresets/fields/Colu
 export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
 
 // elements
-export { SlugComponent } from '../../elements/Slug/SlugComponent.js'
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'
 export type { OnCancel } from '../../elements/ConfirmationModal/index.js'
 export { Link } from '../../elements/Link/index.js'
@@ -203,6 +202,7 @@ export { RowField } from '../../fields/Row/index.js'
 export { SelectField, SelectInput } from '../../fields/Select/index.js'
 export { TabsField, TabsProvider } from '../../fields/Tabs/index.js'
 export { TabComponent } from '../../fields/Tabs/Tab/index.js'
+export { SlugField } from '../../fields/Slug/index.js'
 
 export { TextField, TextInput } from '../../fields/Text/index.js'
 export { JoinField } from '../../fields/Join/index.js'

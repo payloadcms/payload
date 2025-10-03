@@ -1,6 +1,6 @@
 import type { FieldHook } from '../../config/types.js'
 
-import { toKebabCase } from '../../../utilities/toKebabCase.js'
+import { slugify } from '../../../utilities/slugify.js'
 import { countVersions } from './countVersions.js'
 
 /**
@@ -16,7 +16,7 @@ export const generateSlug =
     // Use a generic falsy check here to include empty strings
     if (operation === 'create') {
       if (data) {
-        data.slug = toKebabCase(data?.slug || data?.[fallback])
+        data.slug = slugify(data?.slug || data?.[fallback])
       }
 
       return Boolean(!data?.slug)
@@ -37,7 +37,7 @@ export const generateSlug =
       if (!autosaveEnabled) {
         // We can generate the slug at this point
         if (data) {
-          data.slug = toKebabCase(data?.[fallback])
+          data.slug = slugify(data?.[fallback])
         }
 
         return Boolean(!data?.slug)
@@ -50,7 +50,9 @@ export const generateSlug =
 
         if (!userOverride) {
           if (data) {
-            data.slug = toKebabCase(data?.[fallback])
+            // If the fallback is an empty string, we want the slug to return to `null`
+            // This will ensure that live preview conditions continue to run as expected
+            data.slug = data?.[fallback] ? slugify(data[fallback]) : null
           }
         }
 
