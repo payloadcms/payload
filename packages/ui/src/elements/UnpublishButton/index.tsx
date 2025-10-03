@@ -20,6 +20,7 @@ export function UnpublishButton() {
   const {
     id,
     collectionSlug,
+    data: dataFromProps,
     docConfig,
     globalSlug,
     hasPublishedDoc,
@@ -27,7 +28,6 @@ export function UnpublishButton() {
     setHasPublishedDoc,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
-    unpublishedVersionCount,
   } = useDocumentInfo()
 
   const { config, getEntityConfig } = useConfig()
@@ -53,7 +53,6 @@ export function UnpublishButton() {
     }
   }, [collectionSlug, globalSlug, getEntityConfig])
 
-
   const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
 
   useEffect(() => {
@@ -61,124 +60,103 @@ export function UnpublishButton() {
     setHasLocalizedFields(hasLocalizedField)
   }, [entityConfig?.fields])
 
+  const unpublish = useCallback(
+    (unpublishSpecificLocale?: boolean) => {
+      ;(async () => {
+        let url
+        let method
 
-  const unpublish = useCallback(async () => {
-    let url
-    let method
-    const body = {
-      _status: 'draft',
-    }
-    if (collectionSlug) {
-      url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${localeCode}&fallback-locale=null&depth=0`
-      method = 'patch'
-    }
+        const body = unpublishSpecificLocale ? {} : { _status: 'draft' }
+        const params =
+          unpublishSpecificLocale && localeCode ? `&unpublishSpecificLocale=${localeCode}` : ''
 
-    if (globalSlug) {
-      url = `${serverURL}${api}/globals/${globalSlug}?locale=${localeCode}&fallback-locale=null&depth=0`
-      method = 'post'
-    }
+        if (collectionSlug) {
+          url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${localeCode}&fallback-locale=null&depth=0${params}`
+          method = 'patch'
+        }
 
-    const res = await requests[method](url, {
-      body: JSON.stringify(body),
-      headers: {
-        'Accept-Language': i18n.language,
-        'Content-Type': 'application/json',
-      },
-    })
+        if (globalSlug) {
+          url = `${serverURL}${api}/globals/${globalSlug}?locale=${localeCode}&fallback-locale=null&depth=0${params}`
+          method = 'post'
+        }
 
-    if (res.status === 200) {
-      let data
-      const json = await res.json()
+        try {
+          const res = await requests[method](url, {
+            body: JSON.stringify(body),
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
+            },
+          })
 
-      if (globalSlug) {
-        data = json.result
-      } else if (collectionSlug) {
-        data = json.doc
-      }
+          if (res.status === 200) {
+            let data
+            const json = await res.json()
 
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      resetForm(data)
-      toast.success(json.message)
-      incrementVersionCount()
-      setUnpublishedVersionCount(1)
-      setMostRecentVersionIsAutosaved(false)
-      setHasPublishedDoc(false)
-    } else {
-      try {
-        const json = await res.json()
-        if (json.errors?.[0]?.message) {
-          toast.error(json.errors[0].message)
-        } else if (json.error) {
-          toast.error(json.error)
-        } else {
+            if (globalSlug) {
+              data = json.result
+            } else if (collectionSlug) {
+              data = json.doc
+            }
+
+            void resetForm({
+              ...(dataFromProps || {}),
+              _status: 'draft',
+            })
+            toast.success(json.message)
+            incrementVersionCount()
+            setUnpublishedVersionCount(1)
+            setMostRecentVersionIsAutosaved(false)
+            setHasPublishedDoc(false)
+          } else {
+            try {
+              const json = await res.json()
+              if (json.errors?.[0]?.message) {
+                toast.error(json.errors[0].message)
+              } else if (json.error) {
+                toast.error(json.error)
+              } else {
+                toast.error(t('error:unPublishingDocument'))
+              }
+            } catch {
+              toast.error(t('error:unPublishingDocument'))
+            }
+          }
+        } catch {
           toast.error(t('error:unPublishingDocument'))
         }
-      } catch (err) {
+      })().catch(() => {
         toast.error(t('error:unPublishingDocument'))
-      }
-    }
-  }, [
-    resetForm,
-    collectionSlug,
-    globalSlug,
-    serverURL,
-    api,
-    localeCode,
-    id,
-    i18n.language,
-    incrementVersionCount,
-    setHasPublishedDoc,
-    setMostRecentVersionIsAutosaved,
-    setUnpublishedVersionCount,
-    t,
-  ])
+      })
+    },
+    [
+      dataFromProps,
+      resetForm,
+      collectionSlug,
+      globalSlug,
+      serverURL,
+      api,
+      localeCode,
+      id,
+      i18n.language,
+      incrementVersionCount,
+      setHasPublishedDoc,
+      setMostRecentVersionIsAutosaved,
+      setUnpublishedVersionCount,
+      t,
+    ],
+  )
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
     e.stopPropagation()
 
     if (unpublish && docConfig.versions?.drafts && docConfig.versions?.drafts?.autosave) {
-      void unpublish()
+      unpublish(false)
     }
   })
 
-  const unpublishSpecificLocale = useCallback(
-    async (locale) => {
-      let url
-      let method
-      const params = qs.stringify({
-        unpublishSpecificLocale: locale,
-      })
-      const body = {
-        _status: 'published',
-      }
-
-      if (collectionSlug) {
-        url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${localeCode}&fallback-locale=null&depth=0${params ? '?' + params : ''}`
-        method = 'patch'
-      }
-
-      if (globalSlug) {
-        url = `${serverURL}${api}/globals/${globalSlug}?locale=${localeCode}&fallback-locale=null&depth=0${params ? '?' + params : ''}`
-        method = 'post'
-      }
-
-      const result = await requests[method](url, {
-        body: JSON.stringify(body),
-        headers: {
-          'Accept-Language': i18n.language,
-          'Content-Type': 'application/json',
-        },
-      })
-
-      if (result) {
-        setHasPublishedDoc(true)
-      }
-    },
-    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, i18n.language, localeCode],
-  )
-
-  const canUnpublish = hasPublishedDoc && unpublishedVersionCount === 0
+  const canUnpublish = hasPublishedDoc
 
   const canUnpublishCurrentLocale = hasLocalizedFields && hasPublishedDoc
 
@@ -196,31 +174,36 @@ export function UnpublishButton() {
 
   return (
     <React.Fragment>
-      {canUnpublish &&
+      {canUnpublish && (
         <FormSubmit
           buttonId="action-unpublish"
           disabled={!canUnpublish}
           enableSubMenu={canUnpublishCurrentLocale}
-          onClick={unpublish}
+          onClick={() => {
+            unpublish(false)
+          }}
           size="medium"
-          SubMenuPopupContent={
-            canUnpublishCurrentLocale
-              ? ({ close }) => {
-                return (
-                  <PopupList.ButtonGroup>
-                    <PopupList.Button id="action-unpublish-locale" onClick={unpublishSpecificLocale}>
-                      Unpublish in {activeLocaleLabel}
-                    </PopupList.Button>
-                  </PopupList.ButtonGroup>
-                )
-              }
-              : undefined
-          }
+          SubMenuPopupContent={({ close }) => {
+            return (
+              <PopupList.ButtonGroup>
+                <PopupList.Button
+                  id="action-unpublish-locale"
+                  onClick={() => {
+                    unpublish(true)
+                    close()
+                  }}
+                >
+                  {/* TODO: add translation */}
+                  Unpublish in {activeLocaleLabel}
+                </PopupList.Button>
+              </PopupList.ButtonGroup>
+            )
+          }}
           type="button"
         >
           Unpublish
         </FormSubmit>
-      }
+      )}
     </React.Fragment>
   )
 }

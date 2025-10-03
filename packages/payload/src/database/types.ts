@@ -402,6 +402,7 @@ export type CreateVersionArgs<T = TypeWithID> = {
   returning?: boolean
   select?: SelectType
   snapshot?: true
+  unpublishedLocale?: string
   updatedAt: string
   versionData: T
 }
@@ -426,6 +427,7 @@ export type CreateGlobalVersionArgs<T = TypeWithID> = {
   returning?: boolean
   select?: SelectType
   snapshot?: true
+  unpublishedLocale?: string
   updatedAt: string
   versionData: T
 }

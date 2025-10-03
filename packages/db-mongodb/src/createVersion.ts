@@ -17,6 +17,7 @@ export const createVersion: CreateVersion = async function createVersion(
     req,
     returning,
     snapshot,
+    unpublishedLocale,
     updatedAt,
     versionData,
   },
@@ -40,6 +41,7 @@ export const createVersion: CreateVersion = async function createVersion(
     parent,
     publishedLocale,
     snapshot,
+    unpublishedLocale,
     updatedAt,
     version: versionData,
   }

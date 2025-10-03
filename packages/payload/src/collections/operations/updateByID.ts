@@ -222,6 +222,7 @@ export const updateByIDOperation = async <
       req,
       select: select!,
       showHiddenFields: showHiddenFields!,
+      unpublishSpecificLocale,
     })
 
     await unlinkTempFiles({

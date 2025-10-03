@@ -240,8 +240,7 @@ export const updateOperation = async <
         shouldSaveDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
     }
 
-    if (publishSpecificLocale) {
-      // JESS TODO
+    if (publishSpecificLocale || unpublishSpecificLocale) {
       const latestVersion = await getLatestGlobalVersion({
         slug,
         config: globalConfig,
@@ -315,6 +314,7 @@ export const updateOperation = async <
         req,
         select,
         snapshot: versionSnapshotResult,
+        unpublishSpecificLocale,
       })
 
       result = {
