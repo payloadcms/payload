@@ -225,9 +225,14 @@ export function DefaultEditView({
           }
           setCurrentEditor(lockedState.user as ClientUser)
         }
+
+        // Update lastUpdateTime when lock state changes
+        if (lockedState.lastEditedAt) {
+          setLastUpdateTime(new Date(lockedState.lastEditedAt).getTime())
+        }
       }
     },
-    [documentLockState, setCurrentEditor, setDocumentIsLocked, user?.id],
+    [documentLockState, setCurrentEditor, setDocumentIsLocked, setLastUpdateTime, user?.id],
   )
 
   const handlePrevent = useCallback((nextHref: null | string) => {
@@ -494,6 +499,8 @@ export function DefaultEditView({
     !isLockExpired
 
   const isFolderCollection = config.folders && collectionSlug === config.folders?.slug
+
+  console.log('Last update time:', lastUpdateTime)
 
   return (
     <main
