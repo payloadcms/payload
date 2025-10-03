@@ -78,13 +78,13 @@ const exampleData = [
   { name: 'Docs', rowID: '3' },
 ]
 
-const baseClass = 'nested-items-table'
+const baseClass = 'nested-sections-table'
 const DEFAULT_SEGMENT_WIDTH = 30
 const DEFAULT_INITIAL_OFFSET = 56
 
 export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   className = '',
-  columns = [{ name: 'name' }],
+  columns = [{ name: 'rowID' }, { name: 'name' }],
   dragStartX = 0,
   initialOffset = DEFAULT_INITIAL_OFFSET,
   isDragging = false,
@@ -92,17 +92,10 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   segmentWidth = DEFAULT_SEGMENT_WIDTH,
 }) => {
   const [hoveredRowID, setHoveredRowID] = React.useState<null | string>(null)
-  const onDropZoneHover = ({
-    placement,
-    targetItem,
-  }: {
-    placement?: string
-    targetItem: null | SectionRow
-  }) => {
+  const onDropZoneHover = React.useCallback(({ targetItem }: { targetItem: null | SectionRow }) => {
     setHoveredRowID(targetItem?.rowID || null)
-    // targetItem is the calculated target parent based on hover position
-    // You can use targetItem.rowID directly as the parent ID
-  }
+  }, [])
+
   return (
     <div
       className={[`${baseClass}__wrapper`, isDragging && `${baseClass}--dragging`, className]
@@ -167,7 +160,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
         } else if (isLastRow) {
           targetItems = hasNestedSection ? [sectionRowItem] : [...parentItems]
         } else {
-          targetItems = [parentItems[parentItems.length - 1]]
+          targetItems = hasNestedSection ? [sectionRowItem] : [parentItems[parentItems.length - 1]]
         }
 
         // Allow dropping at root level for last row without nested sections
@@ -204,6 +197,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                     isDragging={isDragging}
                     onHover={onDropZoneHover}
                     placement="middle"
+                    segmentWidth={segmentWidth}
                     style={{ left: 0, width: '100%' }}
                     targetItems={[sectionRowItem]}
                   />
@@ -217,6 +211,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                         : initialOffset + segmentWidth * (hasNestedSection ? level + 1 : level)
                     }
                     onHover={onDropZoneHover}
+                    segmentWidth={segmentWidth}
                     style={{
                       left: 0,
                       width: '100%',

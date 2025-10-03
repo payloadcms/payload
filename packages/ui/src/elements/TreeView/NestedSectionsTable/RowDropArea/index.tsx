@@ -1,59 +1,59 @@
 import { useDroppable } from '@dnd-kit/core'
 import React from 'react'
 
+import { useMousePosition } from '../../../../hooks/useMousePosition.js'
 import './index.scss'
 
 const baseClass = 'row-drop-area'
-const SEGMENT_WIDTH = 30
+const DEFAULT_SEGMENT_WIDTH = 30
+const THROTTLE_MS = 16
 
-export const RowDropArea = ({
-  dragStartX = 0,
-  dragVariance = 100,
-  isDragging = false,
-  markerLeftOffset = 0,
-  onHover,
-  placement = 'split',
-  style,
-  targetItems = [],
-}: {
+type Placement = 'middle' | 'split'
+
+export type RowDropAreaProps = {
   dragStartX?: number
   dragVariance?: number
   isDragging?: boolean
   markerLeftOffset?: number
-  onHover?: (data: { placement: 'middle' | 'split'; targetItem: any }) => void
-  placement?: 'middle' | 'split'
+  onHover?: (data: { placement: Placement; targetItem: any }) => void
+  placement?: Placement
+  segmentWidth?: number
   style: React.CSSProperties
-  targetItems?: any[]
-}) => {
-  const [currentMouseX, setCurrentMouseX] = React.useState(0)
+  targetItems?: unknown[]
+}
 
-  const hoverIndex = Math.max(
-    Math.min(Math.round((currentMouseX - dragStartX) / dragVariance), targetItems.length - 1),
-    0,
-  )
+export const RowDropArea = ({
+  dragStartX = 0,
+  dragVariance = 30,
+  isDragging = false,
+  markerLeftOffset = 0,
+  onHover,
+  placement = 'split',
+  segmentWidth = DEFAULT_SEGMENT_WIDTH,
+  style,
+  targetItems = [],
+}: RowDropAreaProps) => {
+  const id = React.useId()
+  const mousePosition = useMousePosition({ enabled: isDragging, throttle: THROTTLE_MS })
+  const hoverIndex = React.useMemo(() => {
+    if (targetItems.length === 0) {
+      return 0
+    }
+    return Math.max(
+      Math.min(Math.round((mousePosition.x - dragStartX) / dragVariance), targetItems.length - 1),
+      0,
+    )
+  }, [mousePosition.x, dragStartX, dragVariance, targetItems.length])
+
   const targetItem = targetItems[hoverIndex]
 
-  const id = React.useId()
   const { isOver, setNodeRef } = useDroppable({
     id,
     data: { type: 'row-drop-area', targetItem },
   })
 
   React.useEffect(() => {
-    if (!isDragging) {
-      return
-    }
-
-    const handleMouseMove = (e: MouseEvent) => {
-      setCurrentMouseX(e.clientX)
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [isDragging])
-
-  React.useEffect(() => {
-    if (isOver && onHover) {
+    if (isOver && onHover && targetItem !== undefined) {
       onHover({ placement, targetItem })
     }
   }, [isOver, targetItem, onHover, placement])
@@ -69,7 +69,6 @@ export const RowDropArea = ({
         .filter(Boolean)
         .join(' ')}
       style={style}
-      title={`Parent: ${hoverIndex} ${id}`}
     >
       <div
         ref={setNodeRef}
@@ -82,7 +81,7 @@ export const RowDropArea = ({
           <div
             className={`${baseClass}__split-marker`}
             style={{
-              left: hoverIndex * SEGMENT_WIDTH + markerLeftOffset,
+              left: hoverIndex * segmentWidth + markerLeftOffset,
             }}
           />
         )}
