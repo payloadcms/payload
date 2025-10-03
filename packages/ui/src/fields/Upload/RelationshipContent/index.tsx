@@ -89,7 +89,7 @@ export function RelationshipContent(props: Props) {
   }
 
   const metaText = withMeta ? generateMetaText(mimeType, byteSize) : ''
-  const previewAllowed = displayPreview ?? collectionConfig.upload?.displayPreview ?? true
+  const previewAllowed = displayPreview ?? collectionConfig?.upload?.displayPreview ?? true
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>

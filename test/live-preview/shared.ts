@@ -1,6 +1,7 @@
 export const pagesSlug = 'pages'
 export const tenantsSlug = 'tenants'
 export const ssrPagesSlug = 'ssr'
+export const customLivePreviewSlug = 'custom-live-preview'
 export const ssrAutosavePagesSlug = 'ssr-autosave'
 export const postsSlug = 'posts'
 export const mediaSlug = 'media'
