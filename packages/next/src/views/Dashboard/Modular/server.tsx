@@ -3,6 +3,7 @@ import type {
   DashboardConfig,
   PayloadRequest,
   TypedUser,
+  Widget,
   WidgetInstance,
 } from 'payload'
 import type { Layout } from 'react-grid-layout'
@@ -24,7 +25,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
 
   const layout =
     (await getLayoutFromPreferences(props.payload, user)) ??
-    (await getLayoutFromConfig(defaultLayout, props.req))
+    (await getLayoutFromConfig(defaultLayout, props.req, widgets))
 
   const clientLayout: WidgetInstanceClient[] = layout.map((layoutItem) => {
     return {
@@ -67,6 +68,7 @@ async function getLayoutFromPreferences(payload: BasePayload, user: TypedUser) {
 async function getLayoutFromConfig(
   defaultLayout: DashboardConfig['defaultLayout'],
   req: PayloadRequest,
+  widgets: Widget[],
 ): Promise<Layout[]> {
   // Handle function format
   let widgetInstances: WidgetInstance[]
@@ -92,13 +94,15 @@ async function getLayoutFromConfig(
     }
     x = currentX
 
+    const widget = widgets.find((w) => w.slug === widgetInstance.widgetSlug)
+
     return {
       h: widgetInstance.height || 1,
       i: `${widgetInstance.widgetSlug}-${index}`,
-      maxH: 3,
-      maxW: 12,
-      minH: 1,
-      minW: 3,
+      maxH: widget?.maxHeight ?? 3,
+      maxW: widget?.maxWidth ?? 12,
+      minH: widget?.minHeight ?? 1,
+      minW: widget?.minWidth ?? 3,
       resizeHandles: ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'],
       w: widgetInstance.width || 3,
       x,

@@ -73,6 +73,7 @@ export default buildConfigWithDefaults({
         {
           slug: 'count',
           ComponentPath: './components/Count.tsx#default',
+          maxWidth: 6,
           // fields: []
         },
         {
@@ -82,6 +83,8 @@ export default buildConfigWithDefaults({
         {
           slug: 'revenue',
           ComponentPath: './components/Revenue.tsx#default',
+          maxHeight: 2,
+          minHeight: 2,
         },
       ],
     },
