@@ -52,13 +52,12 @@ export default async function Count(args: CountProps) {
 
   return (
     <div
-      className="count-widget"
+      className="count-widget card"
       style={{
         display: 'flex',
         flexDirection: 'column',
         gap: '12px',
         height: '100%',
-        padding: '16px',
       }}
     >
       {error ? (

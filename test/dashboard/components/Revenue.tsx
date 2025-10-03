@@ -81,12 +81,12 @@ export default function Revenue({
 
   return (
     <div
-      className="revenue-widget"
+      className="revenue-widget card"
       style={{
         display: 'flex',
         flexDirection: 'column',
+        gap: '0px',
         height: '100%',
-        padding: '16px',
       }}
     >
       <div

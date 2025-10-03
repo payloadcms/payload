@@ -12,12 +12,11 @@ interface PrivateProps {
 export default function Private({ widgetSlug }: PrivateProps) {
   return (
     <div
-      className="private-widget"
+      className="private-widget card"
       style={{
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        padding: '16px',
       }}
     >
       <div
