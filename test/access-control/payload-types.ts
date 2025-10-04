@@ -420,6 +420,7 @@ export interface HiddenField {
       }[]
     | null;
   hidden?: boolean | null;
+  hiddenWithDefault?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -490,7 +491,7 @@ export interface RichText {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -520,7 +521,7 @@ export interface Regression1 {
       root: {
         type: string;
         children: {
-          type: string;
+          type: any;
           version: number;
           [k: string]: unknown;
         }[];
@@ -538,7 +539,7 @@ export interface Regression1 {
       root: {
         type: string;
         children: {
-          type: string;
+          type: any;
           version: number;
           [k: string]: unknown;
         }[];
@@ -555,7 +556,7 @@ export interface Regression1 {
             root: {
               type: string;
               children: {
-                type: string;
+                type: any;
                 version: number;
                 [k: string]: unknown;
               }[];
@@ -576,7 +577,7 @@ export interface Regression1 {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -593,7 +594,7 @@ export interface Regression1 {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -615,7 +616,7 @@ export interface Regression1 {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -635,7 +636,7 @@ export interface Regression1 {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -655,7 +656,7 @@ export interface Regression1 {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -685,7 +686,7 @@ export interface Regression2 {
       root: {
         type: string;
         children: {
-          type: string;
+          type: any;
           version: number;
           [k: string]: unknown;
         }[];
@@ -704,7 +705,7 @@ export interface Regression2 {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -1116,6 +1117,7 @@ export interface HiddenFieldsSelect<T extends boolean = true> {
         id?: T;
       };
   hidden?: T;
+  hiddenWithDefault?: T;
   updatedAt?: T;
   createdAt?: T;
 }
