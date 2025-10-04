@@ -459,7 +459,9 @@ export const itTranslations: DefaultTranslationsObject = {
     copyTo: 'Copia per',
     copyToLocale: 'Copia in locale',
     localeToPublish: 'Località da pubblicare',
+    selectedLocales: 'Località Selezionate',
     selectLocaleToCopy: 'Seleziona la località da copiare',
+    selectLocaleToDuplicate: 'Seleziona le località da duplicare',
   },
   operators: {
     contains: 'contiene',

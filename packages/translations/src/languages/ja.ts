@@ -457,7 +457,9 @@ export const jaTranslations: DefaultTranslationsObject = {
     copyTo: 'コピー先',
     copyToLocale: 'ロケールにコピー',
     localeToPublish: '公開する場所',
+    selectedLocales: '選択されたロケール',
     selectLocaleToCopy: 'コピーするロケールを選択してください',
+    selectLocaleToDuplicate: '重複するロケールを選択してください',
   },
   operators: {
     contains: '含む',

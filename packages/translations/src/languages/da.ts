@@ -454,7 +454,9 @@ export const daTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopier til',
     copyToLocale: 'Kopier til lokal',
     localeToPublish: 'Offentliggør på lokalitet',
+    selectedLocales: 'Valgte sprogområder',
     selectLocaleToCopy: 'Vælg lokalitet til kopiering',
+    selectLocaleToDuplicate: 'Vælg lokaliteter til at duplikere',
   },
   operators: {
     contains: 'Indeholder',

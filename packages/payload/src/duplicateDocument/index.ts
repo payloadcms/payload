@@ -10,6 +10,7 @@ import { NotFound } from '../errors/NotFound.js'
 import { afterRead } from '../fields/hooks/afterRead/index.js'
 import { beforeDuplicate } from '../fields/hooks/beforeDuplicate/index.js'
 import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
+import { filterLocales } from '../utilities/filterLocalizedData.js'
 import { getLatestCollectionVersion } from '../versions/getLatestCollectionVersion.js'
 
 type GetDuplicateDocumentArgs = {
@@ -18,6 +19,7 @@ type GetDuplicateDocumentArgs = {
   id: number | string
   overrideAccess?: boolean
   req: PayloadRequest
+  selectedLocales?: string[]
   shouldSaveDraft?: boolean
 }
 export const getDuplicateDocumentData = async ({
@@ -26,6 +28,7 @@ export const getDuplicateDocumentData = async ({
   draftArg,
   overrideAccess,
   req,
+  selectedLocales,
   shouldSaveDraft,
 }: GetDuplicateDocumentArgs): Promise<{
   duplicatedFromDoc: JsonObject
@@ -58,6 +61,11 @@ export const getDuplicateDocumentData = async ({
     query: findOneArgs,
     req,
   })
+
+  if (selectedLocales && selectedLocales.length > 0 && duplicatedFromDocWithLocales) {
+    const filteredDoc = filterLocales(duplicatedFromDocWithLocales, selectedLocales)
+    duplicatedFromDocWithLocales = filteredDoc as typeof duplicatedFromDocWithLocales
+  }
 
   if (!duplicatedFromDocWithLocales && !hasWherePolicy) {
     throw new NotFound(req.t)
