@@ -2,9 +2,8 @@ import type { CollectionConfig } from 'payload'
 
 import { ValidationError } from 'payload'
 
-import { categoriesSlug, hiddenPostsSlug, postsSlug } from '../shared.js'
+import { categoriesSlug, hiddenPostsSlug, postsSlug, versionsSlug } from '../shared.js'
 import { singularSlug } from './Singular.js'
-import { versionsSlug } from './Versions.js'
 
 export const Categories: CollectionConfig = {
   slug: categoriesSlug,
