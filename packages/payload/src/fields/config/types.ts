@@ -1628,6 +1628,7 @@ export type JoinField = {
     } & Admin['components']
     defaultColumns?: string[]
     disableBulkEdit?: never
+    disableRowTypes?: boolean
     readOnly?: never
   } & Admin
   /**
@@ -1679,8 +1680,11 @@ export type JoinField = {
 
 export type JoinFieldClient = {
   admin?: AdminClient &
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    Pick<JoinField['admin'], 'allowCreate' | 'defaultColumns' | 'disableBulkEdit' | 'readOnly'>
+    Pick<
+      JoinField['admin'],
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      'allowCreate' | 'defaultColumns' | 'disableBulkEdit' | 'disableRowTypes' | 'readOnly'
+    >
 } & { targetField: Pick<RelationshipFieldClient, 'relationTo'> } & FieldBaseClient &
   Pick<
     JoinField,
