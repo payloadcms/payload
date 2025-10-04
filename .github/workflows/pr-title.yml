@@ -36,6 +36,7 @@ jobs:
           scopes: |
             cpa
             db-\*
+            db-d1-sqlite
             db-mongodb
             db-postgres
             db-vercel-postgres
@@ -53,6 +54,7 @@ jobs:
             payload-cloud
             plugin-cloud
             plugin-cloud-storage
+            plugin-ecommerce
             plugin-form-builder
             plugin-import-export
             plugin-multi-tenant
@@ -69,6 +71,7 @@ jobs:
             storage-\*
             storage-azure
             storage-gcs
+            storage-r2
             storage-uploadthing
             storage-vercel-blob
             storage-s3
