@@ -2,6 +2,7 @@ import type { PaginatedDocs } from '../../../database/types.js'
 import type {
   CollectionSlug,
   JoinQuery,
+  LocaleValue,
   Payload,
   RequestContext,
   TypedLocale,
@@ -12,7 +13,7 @@ import type {
   PopulateType,
   SelectType,
   Sort,
-  TransformCollectionWithSelect,
+  TransformCollection,
   Where,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
@@ -22,7 +23,11 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOperation } from '../find.js'
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+export type Options<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue,
+> = {
   /**
    * the Collection slug to operate against.
    */
@@ -73,7 +78,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
-  locale?: 'all' | TypedLocale
+  locale?: TLocale
   /**
    * Skip access control.
    * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
@@ -136,10 +141,11 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
 export async function findLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> {
+  options: Options<TSlug, TSelect, TLocale>,
+): Promise<PaginatedDocs<TransformCollection<TSlug, TSelect, TLocale>>> {
   const {
     collection: collectionSlug,
     currentDepth,
