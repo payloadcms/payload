@@ -12,7 +12,7 @@ import { TextInput } from '../Text/index.js'
 import './index.scss'
 
 /**
- * @experimental This component is experimental and may change or be removed in the future. Use at your own discretion.
+ * @experimental This component is experimental and may change or be removed in the future. Use at your own risk.
  */
 export const SlugField: React.FC<SlugFieldProps> = ({
   field,

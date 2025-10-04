@@ -22,11 +22,21 @@ type SlugFieldArgs = {
   /**
    * A function used to override te fields at a granular level.
    * Passes the row field to you to manipulate beyond the exposed options.
+   * @example
+   * ```ts
+   * slugField({
+   *   overrides: (field) => {
+   *     field.fields[1].label = 'Custom Slug Label'
+   *     return field
+   *   }
+   * })
+   * ```
    */
   overrides?: (field: RowField) => RowField
   position?: FieldAdmin['position']
   /**
    * Whether or not the `slug` field is required.
+   * @default true
    */
   required?: boolean
 }
@@ -38,19 +48,19 @@ export type SlugFieldClientProps = {} & Pick<SlugFieldArgs, 'fieldToUse'>
 export type SlugFieldProps = SlugFieldClientProps & TextFieldClientProps
 
 /**
- * The `slug` field is auto-generated based on another field.
- * For example, it will take a "title" field and transform its value from "My Title" → "my-title".
+ * A slug is a unique, URL-friendly string that identifies a particular document, often used to construct the URL of a webpage.
+ * The `slug` field auto-generates its value based on another field, e.g. "My Title" → "my-title".
  *
- * The slug should generated through:
+ * The slug should continue to be generated through:
  * 1. The `create` operation, unless the user has modified the slug manually
  * 2. The `update` operation, if:
  *   a. Autosave is _not_ enabled and there is no slug
- *   b. Autosave _is_ enabled, the doc is unpublished, and the user has not modified the slug themselves
+ *   b. Autosave _is_ enabled, the doc is unpublished, and the user has not modified the slug manually
  *
  * The slug should stabilize after all above criteria have been met, because the URL is typically derived from the slug.
  * This is to protect modifying potentially live URLs, breaking links, etc. without explicit intent.
  *
- * @experimental This field is experimental and may change or be removed in the future. Use at your own discretion.
+ * @experimental This field is experimental and may change or be removed in the future. Use at your own risk.
  */
 export const slugField: SlugField = ({
   name: fieldName = 'slug',
@@ -58,7 +68,7 @@ export const slugField: SlugField = ({
   fieldToUse = 'title',
   overrides,
   position,
-  required,
+  required = true,
 } = {}) => {
   const baseField: RowField = {
     type: 'row',
@@ -99,6 +109,7 @@ export const slugField: SlugField = ({
         },
         index: true,
         required,
+        unique: true,
       },
     ],
   }

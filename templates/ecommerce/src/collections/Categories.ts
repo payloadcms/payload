@@ -17,7 +17,6 @@ export const Categories: CollectionConfig = {
       required: true,
     },
     slugField({
-      required: true,
       position: undefined,
     }),
   ],
