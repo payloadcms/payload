@@ -168,7 +168,28 @@ export const getRouteData = ({
         }
       }
 
-      if (oneSegmentViews[viewKey]) {
+      // Check if a custom view is configured for this viewKey
+      const customView = getCustomViewByRoute({ config, currentRoute })
+      const hasCustomViewOverride = customView?.viewKey && oneSegmentViews[viewKey]
+
+      if (hasCustomViewOverride) {
+        // User has configured a custom view to override a built-in view
+        ViewToRender = customView.view
+
+        viewType = viewKey as ViewTypes
+
+        templateClassName = baseClasses[viewKey]
+        templateType = 'minimal'
+
+        if (viewKey === 'account') {
+          templateType = 'default'
+        }
+
+        if (isBrowseByFolderEnabled && viewKey === 'browseByFolder') {
+          templateType = 'default'
+          viewType = 'folders'
+        }
+      } else if (oneSegmentViews[viewKey]) {
         // --> /account
         // --> /create-first-user
         // --> /browse-by-folder
