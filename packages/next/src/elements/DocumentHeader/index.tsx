@@ -13,6 +13,9 @@ import './index.scss'
 
 const baseClass = `doc-header`
 
+/**
+ * @internal
+ */
 export const DocumentHeader: React.FC<{
   AfterHeader?: React.ReactNode
   collectionConfig?: SanitizedCollectionConfig

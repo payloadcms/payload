@@ -2,6 +2,9 @@
 import { Hamburger, useNav } from '@payloadcms/ui'
 import React from 'react'
 
+/**
+ * @internal
+ */
 export const NavHamburger: React.FC<{
   baseClass?: string
 }> = ({ baseClass }) => {

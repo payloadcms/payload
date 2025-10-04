@@ -1,3 +1,4 @@
+'use client'
 import type { ClientCollectionConfig, PaginatedDocs } from 'payload'
 
 import { isNumber } from 'payload/shared'
@@ -13,6 +14,9 @@ import './index.scss'
 
 const baseClass = 'page-controls'
 
+/**
+ * @internal
+ */
 export const PageControlsComponent: React.FC<{
   AfterPageControls?: React.ReactNode
   collectionConfig: ClientCollectionConfig
@@ -65,9 +69,11 @@ export const PageControlsComponent: React.FC<{
   )
 }
 
-/*
+/**
  * These page controls are controlled by the global ListQuery state.
  * To override thi behavior, build your own wrapper around PageControlsComponent.
+ *
+ * @internal
  */
 export const PageControls: React.FC<{
   AfterPageControls?: React.ReactNode

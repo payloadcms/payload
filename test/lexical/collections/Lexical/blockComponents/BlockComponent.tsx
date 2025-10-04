@@ -1,4 +1,6 @@
 'use client'
+import type { UIFieldClientComponent } from 'payload'
+
 import {
   BlockCollapsible,
   BlockEditButton,
@@ -7,7 +9,7 @@ import {
 import { useFormFields } from '@payloadcms/ui'
 import React from 'react'
 
-export const BlockComponent: React.FC = () => {
+export const BlockComponent: UIFieldClientComponent = () => {
   const key = useFormFields(([fields]) => fields.key)
 
   return (
