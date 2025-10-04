@@ -57,6 +57,7 @@ import { findGlobalVersions } from './globals/findVersions.js'
 import { restoreGlobalVersion } from './globals/restoreVersion.js'
 import { updateGlobal } from './globals/update.js'
 import { buildSearchParams } from './utilities/buildSearchParams.js'
+import { logout, LogoutOptions, LogoutResult } from './auth/logout.js'
 
 type Args = {
   /** Base passed `RequestInit` to `fetch`. For base headers / credentials include etc. */
@@ -371,4 +372,12 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
   ): Promise<{ message: string }> {
     return verifyEmail(this, options, init)
   }
+
+  logout<TSlug extends AuthCollectionSlug<T>>(
+    options: LogoutOptions<T, TSlug>,
+    init?: RequestInit,
+  ): Promise<LogoutResult> {
+    return logout(this, options, init)
+  }
+
 }
