@@ -51,7 +51,10 @@ export type RenderListViewArgs = {
   drawerSlug?: string
   enableRowSelections: boolean
   overrideEntityVisibility?: boolean
-  query: ListQuery
+  /**
+   * If not ListQuery is provided, `req.query` will be used.
+   */
+  query?: ListQuery
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
   /**
