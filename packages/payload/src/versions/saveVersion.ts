@@ -22,6 +22,7 @@ type Args = {
   req?: PayloadRequest
   select?: SelectType
   snapshot?: any
+  unpublishSpecificLocale?: string
 }
 
 export const saveVersion = async ({
@@ -37,6 +38,7 @@ export const saveVersion = async ({
   req,
   select,
   snapshot,
+  unpublishSpecificLocale,
 }: Args): Promise<TypeWithID> => {
   let result: TypeWithID | undefined
   let createNewVersion = true
@@ -134,6 +136,7 @@ export const saveVersion = async ({
         publishedLocale: publishSpecificLocale || undefined,
         req,
         select: getQueryDraftsSelect({ select }),
+        unpublishedLocale: unpublishSpecificLocale || undefined,
         updatedAt: now,
         versionData,
       }
@@ -148,7 +151,7 @@ export const saveVersion = async ({
         result = await payload.db.createGlobalVersion(createVersionArgs as CreateGlobalVersionArgs)
       }
 
-      if (publishSpecificLocale && snapshot) {
+      if ((publishSpecificLocale || unpublishSpecificLocale) && snapshot) {
         const snapshotData = deepCopyObjectSimple(snapshot)
         if (snapshotData._id) {
           delete snapshotData._id

@@ -45,6 +45,7 @@ type Args<TSlug extends GlobalSlug> = {
   select?: SelectType
   showHiddenFields?: boolean
   slug: string
+  unpublishSpecificLocale?: string
 }
 
 export const updateOperation = async <
@@ -55,6 +56,10 @@ export const updateOperation = async <
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
   if (args.publishSpecificLocale) {
     args.req.locale = args.publishSpecificLocale
+  }
+
+  if (args.unpublishSpecificLocale) {
+    args.req.locale = args.unpublishSpecificLocale
   }
 
   const {
@@ -72,6 +77,7 @@ export const updateOperation = async <
     req,
     select: incomingSelect,
     showHiddenFields,
+    unpublishSpecificLocale,
   } = args
 
   try {
@@ -234,7 +240,7 @@ export const updateOperation = async <
         shouldSaveDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
     }
 
-    if (publishSpecificLocale) {
+    if (publishSpecificLocale || unpublishSpecificLocale) {
       const latestVersion = await getLatestGlobalVersion({
         slug,
         config: globalConfig,
@@ -254,8 +260,15 @@ export const updateOperation = async <
 
     let result = await beforeChange({
       ...beforeChangeArgs,
+      data: unpublishSpecificLocale ? {} : data,
       docWithLocales: publishedDocWithLocales,
     })
+
+    if (unpublishSpecificLocale && versionSnapshotResult) {
+      if (Object.keys(result).length === 0) {
+        result = versionSnapshotResult
+      }
+    }
 
     // /////////////////////////////////////
     // Update
@@ -308,6 +321,7 @@ export const updateOperation = async <
         req,
         select,
         snapshot: versionSnapshotResult,
+        unpublishSpecificLocale,
       })
 
       result = {

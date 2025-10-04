@@ -55,6 +55,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   req: PayloadRequest
   select: SelectType
   showHiddenFields: boolean
+  unpublishSpecificLocale?: string
 }
 
 /**
@@ -94,6 +95,7 @@ export const updateDocument = async <
   req,
   select,
   showHiddenFields,
+  unpublishSpecificLocale,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
   const shouldSaveDraft =
@@ -244,7 +246,7 @@ export const updateDocument = async <
       Boolean(data?.deletedAt),
   }
 
-  if (publishSpecificLocale) {
+  if (publishSpecificLocale || unpublishSpecificLocale) {
     versionSnapshotResult = await beforeChange({
       ...beforeChangeArgs,
       docWithLocales,
@@ -269,8 +271,15 @@ export const updateDocument = async <
 
   let result = await beforeChange({
     ...beforeChangeArgs,
+    data: unpublishSpecificLocale ? { id } : { ...data, id },
     docWithLocales: publishedDocWithLocales,
   })
+
+  if (unpublishSpecificLocale && versionSnapshotResult) {
+    if (Object.keys(result).length <= 1 && result.id) {
+      result = versionSnapshotResult
+    }
+  }
 
   // /////////////////////////////////////
   // Handle potential password update
@@ -322,6 +331,7 @@ export const updateDocument = async <
       publishSpecificLocale,
       req,
       snapshot: versionSnapshotResult,
+      unpublishSpecificLocale,
     })
   }
 
