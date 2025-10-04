@@ -204,6 +204,11 @@ export function getLocalizedPaths({
           case 'json':
           case 'richText': {
             const upcomingSegments = pathSegments.slice(i + 1).join('.')
+            pathSegments.forEach((path) => {
+              if (!/^\w+(?:\.\w+)*$/.test(path)) {
+                lastIncompletePath.invalid = true
+              }
+            })
             lastIncompletePath.complete = true
             lastIncompletePath.path = upcomingSegments
               ? `${currentPath}.${upcomingSegments}`
