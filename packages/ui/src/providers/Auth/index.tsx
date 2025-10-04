@@ -59,6 +59,7 @@ export function AuthProvider({
 
   const {
     admin: {
+      autoLogin,
       autoRefresh,
       routes: { inactivity: logoutInactivityRoute },
       user: userSlug,
@@ -302,6 +303,12 @@ export function AuthProvider({
 
     void fetchUserOnMount()
   }, [])
+
+  useEffect(() => {
+    if (!user && autoLogin && !autoLogin.prefillOnly) {
+      void fetchFullUserEvent()
+    }
+  }, [user, autoLogin])
 
   useEffect(
     () => () => {
