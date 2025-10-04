@@ -21,7 +21,8 @@ export const connect: Connect = async function connect(
     }
 
     const logger = this.logger || false
-    this.drizzle = drizzle(this.client, { logger, schema: this.schema })
+    const casing = this.casing || 'snake_case'
+    this.drizzle = drizzle(this.client, { casing, logger, schema: this.schema })
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
