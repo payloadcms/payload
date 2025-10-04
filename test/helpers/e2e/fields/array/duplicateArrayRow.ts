@@ -14,7 +14,8 @@ export const duplicateArrayRow = async (
   popupContentLocator: Locator
   rowActionsButtonLocator: Locator
 }> => {
-  const rowLocator = page.locator(`#field-${fieldName} .array-field__row`)
+  const rowLocator = page.locator(`#field-${fieldName} > .array-field__draggable-rows > *`)
+
   const numberOfPrevRows = await rowLocator.count()
 
   const { popupContentLocator, rowActionsButtonLocator } = await openArrayRowActions(page, {
