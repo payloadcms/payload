@@ -72,6 +72,10 @@ export const slugField: SlugField = ({
         admin: {
           description:
             'When enabled, the slug will auto-generate from the title field on save and autosave.',
+          disableBulkEdit: true,
+          disableGroupBy: true,
+          disableListColumn: true,
+          disableListFilter: true,
           hidden: true,
         },
         defaultValue: true,
