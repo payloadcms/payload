@@ -179,22 +179,47 @@ describe('Live Preview', () => {
     await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
   })
 
-  test('collection — does not render iframe when live preview url is falsy', async () => {
-    const noURL = new AdminUrlUtil(serverURL, 'no-url')
+  test('collection — does not render live preview when url is null', async () => {
+    const noURL = new AdminUrlUtil(serverURL, 'conditional-url')
     await page.goto(noURL.create)
     await page.locator('#field-title').fill('No URL')
     await saveDocAndAssert(page)
+
+    // No toggler should render
     const toggler = page.locator('button#live-preview-toggler')
     await expect(toggler).toBeHidden()
     await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
 
+    // Check the `enabled` field
     const enabledCheckbox = page.locator('#field-enabled')
     await enabledCheckbox.check()
     await saveDocAndAssert(page)
 
+    // Toggler is present but not iframe
     await expect(toggler).toBeVisible()
-    await toggleLivePreview(page)
-    await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
+    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+
+    // Toggle the iframe back on, which will save to prefs
+    // We need to explicitly test for this, as we don't want live preview to suddenly appear
+    await toggleLivePreview(page, {
+      targetState: 'on',
+    })
+
+    // Uncheck the `enabled` field
+    await enabledCheckbox.uncheck()
+    await saveDocAndAssert(page)
+
+    // Toggler and iframe are gone
+    await expect(toggler).toBeHidden()
+    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+
+    // Check the `enabled` field
+    await enabledCheckbox.check()
+    await saveDocAndAssert(page)
+
+    // Toggler is present but still not iframe
+    await expect(toggler).toBeVisible()
+    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
   })
 
   test('collection — retains static URL across edits', async () => {
@@ -204,12 +229,12 @@ describe('Live Preview', () => {
     await toggleLivePreview(page, { targetState: 'on' })
 
     const iframe = page.locator('iframe.live-preview-iframe')
-    await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview\/hello/)
+    await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview\/static/)
 
     const titleField = page.locator('#field-title')
     await titleField.fill('New Title')
     await saveDocAndAssert(page)
-    await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview\/hello/)
+    await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview\/static/)
   })
 
   test('collection csr — iframe reflects form state on change', async () => {

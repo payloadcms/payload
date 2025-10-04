@@ -26,7 +26,7 @@ const formatDate = (date) => {
     minute: 'numeric',
     month: 'short',
     year: 'numeric',
-  }).format(date)
+  }).format(new Date(date))
 }
 
 export const DocumentLocked: React.FC<{

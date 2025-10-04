@@ -429,7 +429,7 @@ describe('Join Field', () => {
     await expect(joinField).toBeVisible()
 
     const editButton = joinField.locator(
-      'tbody tr:first-child td:nth-child(2) button.drawer-link__doc-drawer-toggler',
+      'tbody tr:first-child td:nth-child(1) button.drawer-link__doc-drawer-toggler',
     )
 
     await expect(editButton).toBeVisible()

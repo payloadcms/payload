@@ -40,6 +40,7 @@ jobs:
             db-postgres
             db-vercel-postgres
             db-sqlite
+            db-d1-sqlite
             drizzle
             email-\*
             email-nodemailer
