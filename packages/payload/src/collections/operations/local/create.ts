@@ -1,8 +1,17 @@
 import type {
+  type CollectionSlug,
+  deepCopyObjectSimple,
+  LocaleValue,
+  type Payload,
+  type RequestContext,
+  type TypedLocale,
+} from '../../../index.js'
+import type {
   Document,
   PayloadRequest,
   PopulateType,
   SelectType,
+  TransformCollection,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
@@ -15,18 +24,15 @@ import type {
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import {
-  type CollectionSlug,
-  deepCopyObjectSimple,
-  type Payload,
-  type RequestContext,
-  type TypedLocale,
-} from '../../../index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
 
-type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+export type Options<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue,
+> = {
   /**
    * the Collection slug to operate against.
    */
@@ -38,6 +44,10 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    * to determine if it should run or not.
    */
   context?: RequestContext
+  /**
+   * The data for the document to create.
+   */
+  data: RequiredDataFromCollectionSlug<TSlug, TLocale>
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
@@ -71,7 +81,7 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
-  locale?: TypedLocale
+  locale?: TLocale
   /**
    * Skip access control.
    * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
@@ -134,10 +144,11 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> =
 export async function createLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<TransformCollectionWithSelect<TSlug, TSelect>> {
+  options: Options<TSlug, TSelect, TLocale>,
+): Promise<TransformCollection<TSlug, TSelect, TLocale>> {
   const {
     collection: collectionSlug,
     data,
@@ -165,7 +176,7 @@ export async function createLocal<
 
   const req = await createLocalReq(options as CreateLocalReqOptions, payload)
 
-  req.file = file ?? (await getFileByPath(filePath!))
+  req.file = file ?? (await getFileByPath(filePath))
 
   return createOperation<TSlug, TSelect>({
     collection,

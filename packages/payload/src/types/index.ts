@@ -5,14 +5,17 @@ import type { URL } from 'url'
 
 import type {
   DataFromCollectionSlug,
+  LocalizedDataFromCollectionSlug,
   TypeWithID,
   TypeWithTimestamps,
 } from '../collections/config/types.js'
+import type { LocalizedDataFromGlobalSlug } from '../globals/config/types.js'
 import type payload from '../index.js'
 import type {
   CollectionSlug,
   DataFromGlobalSlug,
   GlobalSlug,
+  LocaleValue,
   Payload,
   RequestContext,
   TypedCollectionJoins,
@@ -253,12 +256,30 @@ export type TransformCollectionWithSelect<
   ? TransformDataWithSelect<DataFromCollectionSlug<TSlug>, TSelect>
   : DataFromCollectionSlug<TSlug>
 
+export type TransformCollection<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue = string,
+  Data = TLocale extends 'all'
+    ? LocalizedDataFromCollectionSlug<TSlug>
+    : DataFromCollectionSlug<TSlug>,
+  // @ts-expect-error
+> = TSelect extends SelectType ? TransformDataWithSelect<Data, TSelect> : Data
+
 export type TransformGlobalWithSelect<
   TSlug extends GlobalSlug,
   TSelect extends SelectType,
 > = TSelect extends SelectType
   ? TransformDataWithSelect<DataFromGlobalSlug<TSlug>, TSelect>
   : DataFromGlobalSlug<TSlug>
+
+export type TransformGlobal<
+  TSlug extends GlobalSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue,
+  Data = TLocale extends 'all' ? LocalizedDataFromGlobalSlug<TSlug> : DataFromGlobalSlug<TSlug>,
+  // @ts-expect-error
+> = TSelect extends SelectType ? TransformDataWithSelect<Data, TSelect> : Data
 
 export type PopulateType = Partial<TypedCollectionSelect>
 

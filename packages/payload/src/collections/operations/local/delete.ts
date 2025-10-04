@@ -1,10 +1,16 @@
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  CollectionSlug,
+  LocaleValue,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
   PopulateType,
   SelectType,
-  TransformCollectionWithSelect,
+  TransformCollection,
   Where,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
@@ -15,7 +21,11 @@ import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { deleteOperation } from '../delete.js'
 import { deleteByIDOperation } from '../deleteByID.js'
 
-export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+export type BaseOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TLocale extends LocaleValue,
+> = {
   /**
    * the Collection slug to operate against.
    */
@@ -43,7 +53,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
-  locale?: TypedLocale
+  locale?: TLocale
   /**
    * Skip access control.
    * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
@@ -90,6 +100,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
 export type ByIDOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue,
 > = {
   /**
    * The ID of the document to delete.
@@ -99,11 +110,12 @@ export type ByIDOptions<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: never
-} & BaseOptions<TSlug, TSelect>
+} & BaseOptions<TSlug, TSelect, TLocale>
 
 export type ManyOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue,
 > = {
   /**
    * The ID of the document to delete.
@@ -113,41 +125,50 @@ export type ManyOptions<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where: Where
-} & BaseOptions<TSlug, TSelect>
+} & BaseOptions<TSlug, TSelect, TLocale>
 
 export type Options<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-> = ByIDOptions<TSlug, TSelect> | ManyOptions<TSlug, TSelect>
+  TLocale extends LocaleValue,
+> = ByIDOptions<TSlug, TSelect, TLocale> | ManyOptions<TSlug, TSelect, TLocale>
 
 async function deleteLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue,
 >(
   payload: Payload,
-  options: ByIDOptions<TSlug, TSelect>,
-): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
+  options: ByIDOptions<TSlug, TSelect, TLocale>,
+): Promise<TransformCollection<TSlug, TSelect, TLocale>>
 async function deleteLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue,
 >(
   payload: Payload,
-  options: ManyOptions<TSlug, TSelect>,
-): Promise<BulkOperationResult<TSlug, TSelect>>
+  options: ManyOptions<TSlug, TSelect, TLocale>,
+): Promise<BulkOperationResult<TSlug, TSelect, TLocale>>
 async function deleteLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>>
+  options: Options<TSlug, TSelect, TLocale>,
+): Promise<
+  BulkOperationResult<TSlug, TSelect, TLocale> | TransformCollection<TSlug, TSelect, TLocale>
+>
 async function deleteLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TLocale extends LocaleValue,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
+  options: Options<TSlug, TSelect, TLocale>,
+): Promise<
+  BulkOperationResult<TSlug, TSelect, TLocale> | TransformCollection<TSlug, TSelect, TLocale>
+> {
   const {
     id,
     collection: collectionSlug,
