@@ -36,6 +36,7 @@ jobs:
           scopes: |
             cpa
             db-\*
+            db-d1-sqlite
             db-mongodb
             db-postgres
             db-vercel-postgres
