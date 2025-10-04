@@ -6,6 +6,7 @@ import type {
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
+  ListViewTypes,
   PaginatedDocs,
   QueryPreset,
   SanitizedCollectionPermission,
@@ -47,7 +48,8 @@ type RenderListViewArgs = {
    * @experimental This prop is subject to change in future releases.
    */
   trash?: boolean
-} & AdminViewServerProps
+  viewType: ListViewTypes
+} & Omit<AdminViewServerProps, 'viewType'>
 
 /**
  * This function is responsible for rendering
