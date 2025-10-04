@@ -456,6 +456,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopier til',
     copyToLocale: 'Kopiere til språk',
     localeToPublish: 'Språk å publisere',
+    localizedMeta: 'Lokalisert Meta',
     selectLocaleToCopy: 'Velg språk for å kopiere',
   },
   operators: {

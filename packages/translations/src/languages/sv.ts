@@ -456,6 +456,7 @@ export const svTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiera till',
     copyToLocale: 'Kopiera till språk',
     localeToPublish: 'Publicera språk',
+    localizedMeta: 'Lokaliserad Meta',
     selectLocaleToCopy: 'Välj språk att kopiera',
   },
   operators: {

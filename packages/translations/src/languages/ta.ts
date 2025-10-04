@@ -454,6 +454,7 @@ export const taTranslations: DefaultTranslationsObject = {
     copyTo: 'இதற்கு நகலெடு',
     copyToLocale: 'மொழி அமைவுக்கு நகலெடு',
     localeToPublish: 'வெளியிட வேண்டிய மொழி அமைவு',
+    localizedMeta: 'உள்ளூராக்கப்பட்ட மெட்டா',
     selectLocaleToCopy: 'நகலெடுக்க வேண்டிய மொழி அமைவைத் தேர்ந்தெடுக்கவும்',
   },
   operators: {

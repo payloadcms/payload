@@ -455,6 +455,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopēt uz',
     copyToLocale: 'Kopēt uz lokalizāciju',
     localeToPublish: 'Lokalizācija publicēšanai',
+    localizedMeta: 'Lokalizēts Meta',
     selectLocaleToCopy: 'Izvēlieties lokalizāciju, no kuras kopēt',
   },
   operators: {

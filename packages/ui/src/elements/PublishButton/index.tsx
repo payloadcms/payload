@@ -186,9 +186,22 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
 
       if (result) {
         setHasPublishedDoc(true)
+        setUnpublishedVersionCount(0)
+        setMostRecentVersionIsAutosaved(false)
       }
     },
-    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit, uploadStatus],
+    [
+      api,
+      collectionSlug,
+      globalSlug,
+      id,
+      serverURL,
+      setHasPublishedDoc,
+      submit,
+      uploadStatus,
+      setUnpublishedVersionCount,
+      setMostRecentVersionIsAutosaved,
+    ],
   )
 
   const publishAll =

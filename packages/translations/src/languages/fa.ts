@@ -451,6 +451,7 @@ export const faTranslations: DefaultTranslationsObject = {
     copyTo: 'کپی کنید به',
     copyToLocale: 'کپی به محلی',
     localeToPublish: 'محل انتشار',
+    localizedMeta: 'متا محلی',
     selectLocaleToCopy: 'انتخاب مکان برای کپی کردن',
   },
   operators: {

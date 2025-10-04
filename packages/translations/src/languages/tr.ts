@@ -460,6 +460,7 @@ export const trTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopyala',
     copyToLocale: 'Yerel hafızaya kopyala',
     localeToPublish: 'Yayınlanacak yerel',
+    localizedMeta: 'Yerelleştirilmiş Meta',
     selectLocaleToCopy: 'Kopyalamak için yerel seçimi yapın',
   },
   operators: {

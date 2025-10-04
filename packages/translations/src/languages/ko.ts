@@ -453,6 +453,7 @@ export const koTranslations: DefaultTranslationsObject = {
     copyTo: '복사하기',
     copyToLocale: '로케일로 복사',
     localeToPublish: '발행할 장소',
+    localizedMeta: '지역화된 메타',
     selectLocaleToCopy: '복사할 지역을 선택하십시오.',
   },
   operators: {

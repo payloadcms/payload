@@ -436,6 +436,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     copyTo: '复制到',
     copyToLocale: '复制到指定语言环境',
     localeToPublish: '需发布的语言环境',
+    localizedMeta: '本地化元数据',
     selectLocaleToCopy: '选择要复制的语言环境',
   },
   operators: {

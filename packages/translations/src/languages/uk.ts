@@ -453,6 +453,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     copyTo: 'Копіювати в',
     copyToLocale: 'Копіювати до локалізації',
     localeToPublish: 'Місце публікації',
+    localizedMeta: 'Локалізована Мета',
     selectLocaleToCopy: 'Виберіть локалізацію для копіювання',
   },
   operators: {

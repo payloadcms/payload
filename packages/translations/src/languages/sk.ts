@@ -454,6 +454,7 @@ export const skTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopírovať do',
     copyToLocale: 'Kopírovať do lokalizácie',
     localeToPublish: 'Miesto na publikovanie',
+    localizedMeta: 'Lokalizované Meta',
     selectLocaleToCopy: 'Vyberte miestny systém na kopírovanie',
   },
   operators: {

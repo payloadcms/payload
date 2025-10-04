@@ -453,6 +453,7 @@ export const plTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiuj do',
     copyToLocale: 'Kopiuj do lokalizacji',
     localeToPublish: 'Publikować lokalnie',
+    localizedMeta: 'Zlokalizowane Meta',
     selectLocaleToCopy: 'Wybierz lokalizację do skopiowania',
   },
   operators: {
