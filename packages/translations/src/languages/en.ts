@@ -1,5 +1,3 @@
-import { title } from 'process'
-
 import type { Language } from '../types.js'
 
 export const enTranslations = {
