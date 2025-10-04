@@ -734,6 +734,42 @@ export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
 
+export type Widget = {
+  ComponentPath: string
+  /** If undefined, will be set to 3 */
+  maxHeight?: 1 | 2
+  /** If undefined, will be set to 12 */
+  maxWidth?: 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11
+  /** If undefined, will be set to 1 */
+  minHeight?: 2 | 3
+  /** If undefined, will be set to 3 */
+  minWidth?: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
+  slug: string
+  // TODO: Add fields
+  // fields?: Field[]
+  // Maybe:
+  // ImageURL?: string // similar to Block
+}
+
+export type WidgetInstance = {
+  // TODO: should be inferred from Widget Fields
+  // data: Record<string, any>
+  height?: 1 | 2 | 3
+  widgetSlug: string
+  width?: 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
+}
+
+export type DashboardConfig = {
+  defaultLayout?:
+    | ((args: { req: PayloadRequest }) => Array<WidgetInstance> | Promise<Array<WidgetInstance>>)
+    | Array<WidgetInstance>
+  widgets: Array<Widget>
+}
+
+export type SanitizedDashboardConfig = {
+  widgets: Array<Omit<Widget, 'ComponentPath'>>
+}
+
 /**
  * This is the central configuration
  *
@@ -774,7 +810,6 @@ export type Config = {
       | {
           Component: PayloadComponent
         }
-
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -852,6 +887,10 @@ export type Config = {
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    /**
+     * Customize the dashboard widgets
+     */
+    dashboard?: DashboardConfig
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /**
@@ -1333,7 +1372,7 @@ export type Config = {
 export type SanitizedConfig = {
   admin: {
     timezones: SanitizedTimezoneConfig
-  } & DeepRequired<Config['admin']>
+  } & DeepRequired<Config['admin']> // TODO: I am using only dashboard.widgets. Should I exclude dashboard.defaultLayout?
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
