@@ -188,10 +188,10 @@
         "types": "./dist/exports/views.d.ts",
         "default": "./dist/exports/views.js"
       },
-      "./elements": {
-        "import": "./dist/exports/elements.js",
-        "types": "./dist/exports/elements.d.ts",
-        "default": "./dist/exports/elements.js"
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
       },
       "./rsc": {
         "import": "./dist/exports/rsc.js",
