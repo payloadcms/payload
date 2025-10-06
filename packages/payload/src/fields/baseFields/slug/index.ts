@@ -48,7 +48,7 @@ export type SlugFieldClientProps = {} & Pick<SlugFieldArgs, 'fieldToUse'>
 export type SlugFieldProps = SlugFieldClientProps & TextFieldClientProps
 
 /**
- * A slug is a unique, URL-friendly string that identifies a particular document, often used to construct the URL of a webpage.
+ * A slug is a unique, indexed, URL-friendly string that identifies a particular document, often used to construct the URL of a webpage.
  * The `slug` field auto-generates its value based on another field, e.g. "My Title" → "my-title".
  *
  * The slug should continue to be generated through:
