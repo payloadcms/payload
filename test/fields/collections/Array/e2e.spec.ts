@@ -210,9 +210,7 @@ describe('Array', () => {
       await page.locator('#field-potentiallyEmptyArray__1__text').fill(row2Text)
       await page.locator('#field-potentiallyEmptyArray__2__text').fill(row3Text)
 
-      await page
-        .locator('#field-potentiallyEmptyArray__0__groupInArray__textInGroupInArray')
-        .fill(row1GroupText)
+      await page.locator('#field-potentiallyEmptyArray__0__group__text').fill(row1GroupText)
 
       await saveDocAndAssert(page)
       await scrollEntirePage(page)
@@ -221,9 +219,7 @@ describe('Array', () => {
       await expect(page.locator('#field-potentiallyEmptyArray__1__text')).toHaveValue(row2Text)
       await expect(page.locator('#field-potentiallyEmptyArray__2__text')).toHaveValue(row3Text)
 
-      const input = page.locator(
-        '#field-potentiallyEmptyArray__0__groupInArray__textInGroupInArray',
-      )
+      const input = page.locator('#field-potentiallyEmptyArray__0__group__text')
 
       await expect(input).toHaveValue(row1GroupText)
     })
@@ -248,7 +244,7 @@ describe('Array', () => {
 
       // Mark the first row with some unique values to assert against later
       await page
-        .locator('#field-potentiallyEmptyArray__0__groupInArray__textInGroupInArray')
+        .locator('#field-potentiallyEmptyArray__0__group__text')
         .fill(`${row1Text} duplicate`)
 
       await duplicateArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
@@ -261,9 +257,9 @@ describe('Array', () => {
       await page.locator('#field-potentiallyEmptyArray__2__text').fill(row2Text)
       await page.locator('#field-potentiallyEmptyArray__3__text').fill(row3Text)
 
-      await expect(
-        page.locator('#field-potentiallyEmptyArray__1__groupInArray__textInGroupInArray'),
-      ).toHaveValue(`${row1Text} duplicate`)
+      await expect(page.locator('#field-potentiallyEmptyArray__1__group__text')).toHaveValue(
+        `${row1Text} duplicate`,
+      )
     })
 
     test('should duplicate rows with nested arrays', async () => {
@@ -271,15 +267,13 @@ describe('Array', () => {
       await scrollEntirePage(page)
 
       await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
-      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray__0__arrayInArray' })
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray__0__array' })
 
-      await page
-        .locator('#field-potentiallyEmptyArray__0__arrayInArray__0__textInArrayInArray')
-        .fill('Row 1')
+      await page.locator('#field-potentiallyEmptyArray__0__array__0__text').fill('Row 1')
 
       // There should be 2 fields in the nested array row: the text field and the row id
       const fieldsInRow = page
-        .locator('#field-potentiallyEmptyArray__0__arrayInArray')
+        .locator('#field-potentiallyEmptyArray__0__array')
         .locator('.render-fields')
         .first()
 
@@ -289,7 +283,7 @@ describe('Array', () => {
 
       // There should still only be 2 fields in the duplicated row
       const fieldsInDuplicatedRow = page
-        .locator('#field-potentiallyEmptyArray__1__arrayInArray')
+        .locator('#field-potentiallyEmptyArray__1__array')
         .locator('.render-fields')
         .first()
 
@@ -315,9 +309,7 @@ describe('Array', () => {
       await page.locator('#field-potentiallyEmptyArray__2__text').fill(row3Text)
 
       // Mark the third row with some unique values to assert against later
-      await page
-        .locator('#field-potentiallyEmptyArray__2__groupInArray__textInGroupInArray')
-        .fill(assertGroupText3)
+      await page.locator('#field-potentiallyEmptyArray__2__group__text').fill(assertGroupText3)
 
       // Remove all rows one by one, except the last one
       await removeArrayRow(page, { fieldName: 'potentiallyEmptyArray', rowIndex: 1 })
@@ -327,9 +319,9 @@ describe('Array', () => {
       await scrollEntirePage(page)
 
       // Expect the remaining row to be the third row, now first
-      await expect(
-        page.locator('#field-potentiallyEmptyArray__0__groupInArray__textInGroupInArray'),
-      ).toHaveValue(assertGroupText3)
+      await expect(page.locator('#field-potentiallyEmptyArray__0__group__text')).toHaveValue(
+        assertGroupText3,
+      )
     })
   })
 

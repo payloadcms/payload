@@ -136,20 +136,20 @@ const ArrayFields: CollectionConfig = {
           type: 'text',
         },
         {
-          name: 'groupInArray',
+          name: 'group',
           fields: [
             {
-              name: 'textInGroupInArray',
+              name: 'text',
               type: 'text',
             },
           ],
           type: 'group',
         },
         {
-          name: 'arrayInArray',
+          name: 'array',
           fields: [
             {
-              name: 'textInArrayInArray',
+              name: 'text',
               type: 'text',
             },
           ],
