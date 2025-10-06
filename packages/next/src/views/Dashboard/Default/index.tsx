@@ -8,7 +8,7 @@ import React from 'react'
 import { CollectionCards } from '../Widgets/CollectionCards/index.js'
 import './index.scss'
 
-export const baseClass = 'dashboard'
+const baseClass = 'dashboard'
 
 export type DashboardViewClientProps = {
   locale: Locale
