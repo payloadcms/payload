@@ -31,7 +31,7 @@ export default async () => {
   }
   if (
     (!process.env.PAYLOAD_DATABASE ||
-      ['firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE)) &&
+      ['cosmosdb', 'documentdb', 'firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE)) &&
     !global._mongoMemoryServer
   ) {
     console.log('Starting memory db...')
