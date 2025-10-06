@@ -1,10 +1,12 @@
 import { getTranslation } from '@payloadcms/translations'
-import { Button, Card, Locked } from '@payloadcms/ui'
-import { EntityType } from '@payloadcms/ui/shared'
+import { type DashboardViewServerPropsOnly } from 'payload'
+import { EntityType } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import { type DashboardViewServerPropsOnly } from '../../Default/index.js'
+import { Button } from '../../elements/Button/index.js'
+import { Card } from '../../elements/Card/index.js'
+import { Locked } from '../../elements/Locked/index.js'
 import './index.scss'
 
 const baseClass = 'collection-cards'

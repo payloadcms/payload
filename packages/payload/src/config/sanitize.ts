@@ -52,6 +52,10 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ValidationError: 'info',
     ...(sanitizedConfig.loggingLevels || {}),
   }
+  ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
+    slug: 'collection-cards',
+    ComponentPath: '@payloadcms/ui/rsc#CollectionCards',
+  })
 
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {

@@ -1,6 +1,7 @@
 import type {
   BasePayload,
   DashboardConfig,
+  DashboardViewServerProps,
   PayloadRequest,
   TypedUser,
   Widget,
@@ -11,7 +12,6 @@ import type { Layout } from 'react-grid-layout'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
-import type { DashboardViewServerProps } from '../index.js'
 import type { WidgetInstanceClient } from './client.js'
 
 import { getPreferences } from '../../../../utilities/getPreferences.js'
@@ -31,7 +31,9 @@ export async function GridLayoutDashboard(props: DashboardViewServerProps) {
     return {
       clientLayout: layoutItem,
       component: RenderServerComponent({
-        Component: widgets.find((w) => w.slug === layoutItem.i.split('-')[0])?.ComponentPath,
+        Component: widgets.find(
+          (w) => w.slug === layoutItem.i.slice(0, layoutItem.i.lastIndexOf('-')),
+        )?.ComponentPath,
         importMap,
         serverProps: {
           ...props,

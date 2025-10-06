@@ -27,7 +27,7 @@ export const RenderWidget: React.FC<{
   const renderWidget = useCallback(() => {
     async function render() {
       try {
-        const widgetSlug = widgetId.split('-')[0]
+        const widgetSlug = widgetId.slice(0, widgetId.lastIndexOf('-'))
 
         const result = (await serverFunction({
           name: 'render-widget',

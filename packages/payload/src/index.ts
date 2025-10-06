@@ -119,6 +119,7 @@ import {
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
 export type * from './admin/types.js'
+export { EntityType } from './admin/views/dashboard.js'
 import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
