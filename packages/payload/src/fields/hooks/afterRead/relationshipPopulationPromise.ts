@@ -10,7 +10,7 @@ type PopulateArgs = {
   dataReference: Record<string, any>
   depth: number
   draft: boolean
-  fallbackLocale: null | string
+  fallbackLocale: null | string | string[]
   field: JoinField | RelationshipField | UploadField
   index?: number
   key?: string
@@ -135,7 +135,7 @@ type PromiseArgs = {
   currentDepth: number
   depth: number
   draft: boolean
-  fallbackLocale: null | string
+  fallbackLocale: null | string | string[]
   field: JoinField | RelationshipField | UploadField
   locale: null | string
   overrideAccess: boolean

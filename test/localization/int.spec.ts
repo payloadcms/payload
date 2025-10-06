@@ -3113,7 +3113,7 @@ describe('Localization', () => {
         describe('Collections', () => {
           it('should allow fallback locale to be an array', async () => {
             const response = await restClient.GET(
-              `/${collection}/${postWithLocalizedData.id}?locale=pt&fallbackLocale=[es,en]`,
+              `/${collection}/${postWithLocalizedData.id}?locale=pt&fallbackLocale[]=es&fallbackLocale[]=en`,
             )
 
             expect(response.status).toBe(200)
@@ -3124,7 +3124,7 @@ describe('Localization', () => {
 
           it('should pass over fallback locales until it finds one that exists', async () => {
             const response = await restClient.GET(
-              `/${collection}/${postWithLocalizedData.id}?locale=pt&fallbackLocale=[hu,ar,es]`,
+              `/${collection}/${postWithLocalizedData.id}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar&fallbackLocale[]=es`,
             )
 
             expect(response.status).toBe(200)
@@ -3135,7 +3135,7 @@ describe('Localization', () => {
 
           it('should return undefined if no fallback locales exist', async () => {
             const response = await restClient.GET(
-              `/${collection}/${postWithLocalizedData.id}?locale=pt&fallbackLocale=[hu,ar]`,
+              `/${collection}/${postWithLocalizedData.id}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar`,
             )
 
             expect(response.status).toBe(200)
@@ -3148,7 +3148,7 @@ describe('Localization', () => {
         describe('Globals', () => {
           it('should allow fallback locale to be an array', async () => {
             const response = await restClient.GET(
-              `/globals/${global}?locale=pt&fallbackLocale=[es,en]`,
+              `/globals/${global}?locale=pt&fallbackLocale[]=es&fallbackLocale[]=en`,
             )
 
             expect(response.status).toBe(200)
@@ -3158,7 +3158,7 @@ describe('Localization', () => {
 
           it('should pass over fallback locales until it finds one that exists', async () => {
             const response = await restClient.GET(
-              `/globals/${global}?locale=pt&fallbackLocale=[hu,ar,es]`,
+              `/globals/${global}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar&fallbackLocale[]=es`,
             )
 
             expect(response.status).toBe(200)
@@ -3169,7 +3169,7 @@ describe('Localization', () => {
 
           it('should return undefined if no fallback locales exist', async () => {
             const response = await restClient.GET(
-              `/globals/${global}?locale=pt&fallbackLocale=[hu,ar]`,
+              `/globals/${global}?locale=pt&fallbackLocale[]=hu&fallbackLocale[]=ar`,
             )
 
             expect(response.status).toBe(200)
@@ -3194,7 +3194,7 @@ describe('Localization', () => {
             const { data } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: '[es, en]' },
+                query: { locale: 'pt', fallbackLocale: ['es', 'en'] },
               })
               .then((res) => res.json())
             console.log(data)
@@ -3214,7 +3214,7 @@ describe('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: '[hu,ar,es]' },
+                query: { locale: 'pt', fallbackLocale: ['hu', 'ar', 'es'] },
               })
               .then((res) => res.json())
 
@@ -3233,7 +3233,7 @@ describe('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: '[hu,ar]' },
+                query: { locale: 'pt', fallbackLocale: ['hu', 'ar'] },
               })
               .then((res) => res.json())
 
@@ -3252,7 +3252,7 @@ describe('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: '[es, en]' },
+                query: { locale: 'pt', fallbackLocale: ['es', 'en'] },
               })
               .then((res) => res.json())
 
@@ -3269,7 +3269,7 @@ describe('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: '[hu,ar,es]' },
+                query: { locale: 'pt', fallbackLocale: ['hu', 'ar', 'es'] },
               })
               .then((res) => res.json())
 
@@ -3286,7 +3286,7 @@ describe('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: '[hu,ar]' },
+                query: { locale: 'pt', fallbackLocale: ['hu', 'ar'] },
               })
               .then((res) => res.json())
 

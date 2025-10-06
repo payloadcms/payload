@@ -33,7 +33,7 @@ type Args = {
   depth: number
   doc: JsonObject
   draft: boolean
-  fallbackLocale: null | string
+  fallbackLocale: null | string | string[]
   field: Field | TabAsField
   fieldIndex: number
   /**
@@ -156,24 +156,13 @@ export const promise = async ({
     const value = siblingDoc[field.name!][locale!]
 
     let hoistedValue = value
-    let formattedFallbackLocale = fallbackLocale as string | string[]
 
     if (fallbackLocale && fallbackLocale !== locale) {
       let fallbackValue
       const isNullOrUndefined = typeof value === 'undefined' || value === null
-      if (
-        typeof fallbackLocale === 'string' &&
-        fallbackLocale.startsWith('[') &&
-        fallbackLocale.endsWith(']')
-      ) {
-        formattedFallbackLocale = fallbackLocale
-          .slice(1, -1)
-          .split(',')
-          .map((l) => l.trim())
-      }
 
-      if (Array.isArray(formattedFallbackLocale)) {
-        for (const locale of formattedFallbackLocale) {
+      if (Array.isArray(fallbackLocale)) {
+        for (const locale of fallbackLocale) {
           const val = siblingDoc[field.name!]?.[locale]
           if (val !== undefined && val !== null && val !== '') {
             fallbackValue = val
@@ -181,7 +170,7 @@ export const promise = async ({
           }
         }
       } else {
-        fallbackValue = siblingDoc[field.name!][formattedFallbackLocale]
+        fallbackValue = siblingDoc[field.name!][fallbackLocale]
       }
 
       if (fallbackValue) {
