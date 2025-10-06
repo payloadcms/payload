@@ -41,7 +41,9 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
   })
 
   const fieldPathResult = getFieldByPath({
+    config: this.payload.config,
     fields: collectionConfig.flattenedFields,
+    includeRelationships: true,
     path: args.field,
   })
   let fieldPath = args.field

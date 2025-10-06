@@ -55,6 +55,11 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'title',
         },
         {
+          name: 'simple',
+          type: 'relationship',
+          relationTo: 'simple',
+        },
+        {
           type: 'tabs',
           tabs: [
             {
