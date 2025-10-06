@@ -1,6 +1,6 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
-import React, { createContext, use, useCallback, useEffect, useState } from 'react'
+import React, { createContext, use, useCallback, useLayoutEffect, useState } from 'react'
 
 import type { Props, TogglerProps } from './types.js'
 
@@ -58,14 +58,11 @@ export const Drawer: React.FC<Props> = ({
   const { closeModal, modalState } = useModal()
   const drawerDepth = useDrawerDepth()
 
-  const [isOpen, setIsOpen] = useState(false)
-  const [animateIn, setAnimateIn] = useState(false)
+  const isOpen = !!modalState[slug]?.isOpen
 
-  useEffect(() => {
-    setIsOpen(modalState[slug]?.isOpen)
-  }, [slug, modalState])
+  const [animateIn, setAnimateIn] = useState(isOpen)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setAnimateIn(isOpen)
   }, [isOpen])
 
@@ -82,6 +79,8 @@ export const Drawer: React.FC<Props> = ({
           ]
             .filter(Boolean)
             .join(' ')}
+          // Fixes https://github.com/payloadcms/payload/issues/13778
+          closeOnBlur={false}
           slug={slug}
           style={{
             zIndex: drawerZBase + drawerDepth,

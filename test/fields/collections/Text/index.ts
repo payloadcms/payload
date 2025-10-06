@@ -128,6 +128,11 @@ const TextFields: CollectionConfig = {
       hasMany: true,
     },
     {
+      name: 'hasManySecond',
+      type: 'text',
+      hasMany: true,
+    },
+    {
       name: 'readOnlyHasMany',
       type: 'text',
       hasMany: true,

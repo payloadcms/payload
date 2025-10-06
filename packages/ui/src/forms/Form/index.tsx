@@ -18,6 +18,7 @@ import type {
   Context as FormContextType,
   FormProps,
   GetDataByPath,
+  Submit,
   SubmitOptions,
 } from './types.js'
 
@@ -58,6 +59,11 @@ const baseClass = 'form'
 export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
     useDocumentInfo()
+
+  const validateDrafts =
+    docConfig?.versions?.drafts && typeof docConfig?.versions?.drafts === 'object'
+      ? (docConfig.versions.drafts.validate ?? false)
+      : false
 
   const {
     action,
@@ -110,6 +116,7 @@ export const Form: React.FC<FormProps> = (props) => {
    */
   const [isValid, setIsValid] = useState(true)
   const [initializing, setInitializing] = useState(initializingFromProps)
+
   const [processing, setProcessing] = useState(false)
   const [backgroundProcessing, setBackgroundProcessing] = useState(false)
 
@@ -198,14 +205,20 @@ export const Form: React.FC<FormProps> = (props) => {
     return isValid
   }, [collectionSlug, config, dispatchFields, id, operation, t, user, documentForm])
 
-  const submit = useCallback(
-    async (options: SubmitOptions = {}, e): Promise<void> => {
+  const submit = useCallback<Submit>(
+    async (options, e) => {
       const {
+        acceptValues = true,
         action: actionArg = action,
+        context,
+        disableFormWhileProcessing = true,
+        disableSuccessStatus: disableSuccessStatusFromArgs,
         method: methodToUse = method,
         overrides: overridesFromArgs = {},
         skipValidation,
-      } = options
+      } = options || ({} as SubmitOptions)
+
+      const disableToast = disableSuccessStatusFromArgs ?? disableSuccessStatus
 
       if (disabled) {
         if (e) {
@@ -216,6 +229,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // create new toast promise which will resolve manually later
       let errorToast, successToast
+
       const promise = new Promise((resolve, reject) => {
         successToast = resolve
         errorToast = reject
@@ -224,7 +238,7 @@ export const Form: React.FC<FormProps> = (props) => {
       const hasFormSubmitAction =
         actionArg || typeof action === 'string' || typeof action === 'function'
 
-      if (redirect || disableSuccessStatus || !hasFormSubmitAction) {
+      if (redirect || disableToast || !hasFormSubmitAction) {
         // Do not show submitting toast, as the promise toast may never disappear under these conditions.
         // Instead, make successToast() or errorToast() throw toast.success / toast.error
         successToast = (data) => toast.success(data)
@@ -246,26 +260,30 @@ export const Form: React.FC<FormProps> = (props) => {
         e.preventDefault()
       }
 
-      setProcessing(true)
-      setDisabled(true)
+      if (disableFormWhileProcessing) {
+        setProcessing(true)
+        setDisabled(true)
+      }
 
       if (waitForAutocomplete) {
         await wait(100)
       }
 
+      const data = reduceFieldsToValues(contextRef.current.fields, true)
+
+      const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
+        contextRef.current.fields,
+      )
+
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
         let revalidatedFormState: FormState
-
-        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
-          contextRef.current.fields,
-        )
 
         await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
           await priorOnChange
 
           const result = await beforeSubmitFn({
-            formState: serializableFields,
+            formState: serializableFormState,
           })
 
           revalidatedFormState = result
@@ -289,6 +307,7 @@ export const Form: React.FC<FormProps> = (props) => {
         skipValidation || disableValidationOnSubmit ? true : await contextRef.current.validateForm()
 
       setIsValid(isValid)
+
       // If not valid, prevent submission
       if (!isValid) {
         errorToast(t('error:correctInvalidFields'))
@@ -308,17 +327,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // If submit handler comes through via props, run that
       if (onSubmit) {
-        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
-          contextRef.current.fields,
-        )
-
-        const data = reduceFieldsToValues(serializableFields, true)
-
         for (const [key, value] of Object.entries(overrides)) {
           data[key] = value
         }
 
-        onSubmit(serializableFields, data)
+        onSubmit(contextRef.current.fields, data)
       }
 
       if (!hasFormSubmitAction) {
@@ -331,6 +344,7 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       const formData = await contextRef.current.createFormData(overrides, {
+        data,
         mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
       })
 
@@ -365,32 +379,44 @@ export const Form: React.FC<FormProps> = (props) => {
         if (isJSON) {
           json = await res.json()
         }
+
         if (res.status < 400) {
           if (typeof onSuccess === 'function') {
-            const newFormState = await onSuccess(json)
+            const newFormState = await onSuccess(json, {
+              context,
+              formState: serializableFormState,
+            })
 
             if (newFormState) {
               dispatchFields({
                 type: 'MERGE_SERVER_STATE',
-                acceptValues: true,
+                acceptValues,
                 prevStateRef: prevFormState,
                 serverState: newFormState,
               })
             }
           }
+
           setSubmitted(false)
           setProcessing(false)
 
           if (redirect) {
             startRouteTransition(() => router.push(redirect))
-          } else if (!disableSuccessStatus) {
+          } else if (!disableToast) {
             successToast(json.message || t('general:submissionSuccessful'))
           }
         } else {
           setProcessing(false)
           setSubmitted(true)
 
+          // When there was an error submitting a draft,
+          // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
+          if (!validateDrafts && overridesFromArgs['_status'] === 'draft') {
+            setSubmitted(false)
+          }
+
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
+
           if (json.message) {
             errorToast(json.message)
             return
@@ -442,6 +468,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
           errorToast(message)
         }
+
+        return { formState: contextRef.current.fields, res }
       } catch (err) {
         console.error('Error submitting form', err) // eslint-disable-line no-console
         setProcessing(false)
@@ -487,8 +515,8 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const createFormData = useCallback<CreateFormData>(
-    async (overrides, { mergeOverrideData = true }) => {
-      let data = reduceFieldsToValues(contextRef.current.fields, true)
+    async (overrides, { data: dataFromArgs, mergeOverrideData = true }) => {
+      let data = dataFromArgs || reduceFieldsToValues(contextRef.current.fields, true)
 
       let file = data?.file
 

@@ -7,7 +7,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 import ArrayFields from './collections/Array/index.js'
-import BlockFields from './collections/Blocks/index.js'
+import { BlockFields } from './collections/Blocks/index.js'
 import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'
@@ -38,7 +38,7 @@ import UploadsMultiPoly from './collections/UploadMultiPoly/index.js'
 import UploadsPoly from './collections/UploadPoly/index.js'
 import UploadRestricted from './collections/UploadRestricted/index.js'
 import Uploads3 from './collections/Uploads3/index.js'
-import { clearAndSeedEverything } from './seed.js'
+import { seed } from './seed.js'
 
 export const collectionSlugs: CollectionConfig[] = [
   {
@@ -157,7 +157,7 @@ export const baseConfig: Partial<Config> = {
   },
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await clearAndSeedEverything(payload)
+      await seed(payload)
     }
   },
   typescript: {

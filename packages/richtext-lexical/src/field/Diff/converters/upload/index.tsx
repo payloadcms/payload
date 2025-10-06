@@ -72,7 +72,7 @@ export const UploadDiffHTMLConverterAsync: (args: {
                 <File />
               )}
             </div>
-            <div className={`${baseClass}__info`}>
+            <div className={`${baseClass}__info`} data-enable-match="false">
               <strong>{uploadDoc?.filename}</strong>
               <div className={`${baseClass}__meta`}>
                 {formatFilesize(uploadDoc?.filesize)}
@@ -95,7 +95,7 @@ export const UploadDiffHTMLConverterAsync: (args: {
       )
 
       // Render to HTML
-      const html = ReactDOMServer.renderToString(JSX)
+      const html = ReactDOMServer.renderToStaticMarkup(JSX)
 
       return html
     },

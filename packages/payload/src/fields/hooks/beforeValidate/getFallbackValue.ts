@@ -13,7 +13,7 @@ export async function getFallbackValue({
   req: PayloadRequest
   siblingDoc: JsonObject
 }): Promise<JsonValue> {
-  let fallbackValue = undefined
+  let fallbackValue: JsonValue = undefined
   if ('name' in field && field.name) {
     if (typeof siblingDoc[field.name] !== 'undefined') {
       fallbackValue = cloneDataFromOriginalDoc(siblingDoc[field.name])

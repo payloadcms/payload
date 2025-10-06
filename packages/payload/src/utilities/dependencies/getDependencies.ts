@@ -61,7 +61,7 @@ export async function getDependencies(
         const pkgPath = await fs.realpath(resolveFrom(baseDir, pkg))
         const pkgDir = path.dirname(pkgPath)
 
-        let packageJsonFilePath = null
+        let packageJsonFilePath: null | string = null
 
         const foundPackageJsonDir = await findUp({
           dir: pkgDir,

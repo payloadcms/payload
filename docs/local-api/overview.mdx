@@ -162,6 +162,11 @@ const result = await payload.find({
 })
 ```
 
+<Banner type="info">
+  `pagination`, `page`, and `limit` are three related properties [documented
+  here](/docs/queries/pagination).
+</Banner>
+
 ### Find by ID#collection-find-by-id
 
 ```js
@@ -191,6 +196,27 @@ const result = await payload.count({
   where: {}, // pass a `where` query here
   user: dummyUser,
   overrideAccess: false,
+})
+```
+
+### FindDistinct#collection-find-distinct
+
+```js
+// Result will be an object with:
+// {
+//   values: ['value-1', 'value-2'], // array of distinct values,
+//   field: 'title', // the field
+//   totalDocs: 10, // count of the distinct values satisfies query,
+//   perPage: 10, // count of distinct values per page (based on provided limit)
+// }
+const result = await payload.findDistinct({
+  collection: 'posts', // required
+  locale: 'en',
+  where: {}, // pass a `where` query here
+  user: dummyUser,
+  overrideAccess: false,
+  field: 'title',
+  sort: 'title',
 })
 ```
 
@@ -329,7 +355,7 @@ available:
 //    responseHeaders: { ... } // returned headers from the response
 // }
 
-const result = await payload.auth({ headers })
+const result = await payload.auth({ headers, canSetHeaders: false })
 ```
 
 ### Login

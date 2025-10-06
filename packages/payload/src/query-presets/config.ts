@@ -113,10 +113,20 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
         : [],
       required: true,
     },
+    {
+      name: 'isTemp',
+      type: 'checkbox',
+      admin: {
+        description:
+          "This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.",
+        disabled: true,
+        hidden: true,
+      },
+    },
   ],
   hooks: {
     beforeValidate: [
-      ({ data, operation, req }) => {
+      ({ data, operation }) => {
         // TODO: type this
         const typedData = data as any
 

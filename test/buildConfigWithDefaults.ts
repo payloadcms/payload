@@ -32,7 +32,7 @@ import { es } from 'payload/i18n/es'
 import sharp from 'sharp'
 
 import { databaseAdapter } from './databaseAdapter.js'
-import { reInitEndpoint } from './helpers/reInit.js'
+import { reInitEndpoint } from './helpers/reInitEndpoint.js'
 import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
 import { testEmailAdapter } from './testEmailAdapter.js'
 

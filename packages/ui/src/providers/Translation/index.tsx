@@ -67,12 +67,15 @@ export const TranslationProvider: React.FC<Props> = ({
   const router = useRouter()
   const [dateFNS, setDateFNS] = useState<Locale>()
 
-  const nextT: ContextType['t'] = (key, vars): string =>
-    t({
-      key,
-      translations,
-      vars,
-    })
+  const nextT: ContextType['t'] = React.useCallback(
+    (key, vars): string =>
+      t({
+        key,
+        translations,
+        vars,
+      }),
+    [translations],
+  )
 
   const switchLanguage = React.useCallback(
     async (lang: string) => {

@@ -20,7 +20,6 @@ type SearchParam = {
 
 const subQueryOptions = {
   lean: true,
-  limit: 50,
 }
 
 /**
@@ -184,7 +183,7 @@ export async function buildSearchParam({
             select[joinPath] = true
           }
 
-          const result = await SubModel.find(subQuery).lean().limit(50).select(select)
+          const result = await SubModel.find(subQuery).lean().select(select)
 
           const $in: unknown[] = []
 
@@ -246,10 +245,13 @@ export async function buildSearchParam({
             value: { $in },
           }
         } else {
-          relationshipQuery = {
-            value: {
-              _id: { $in },
-            },
+          const nextSubPath = pathsToQuery[i + 1]?.path
+          if (nextSubPath) {
+            relationshipQuery = {
+              value: {
+                [nextSubPath]: { $in },
+              },
+            }
           }
         }
       }

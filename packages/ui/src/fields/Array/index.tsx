@@ -6,10 +6,19 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { Fragment, useCallback, useMemo } from 'react'
+import { toast } from 'sonner'
+
+import type { ClipboardPasteData } from '../../elements/ClipboardAction/types.js'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
+import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
+import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
+import {
+  mergeFormStateFromClipboard,
+  reduceFormStateByPath,
+} from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
@@ -27,6 +36,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { ArrayRow } from './ArrayRow.js'
 import './index.scss'
@@ -35,8 +45,10 @@ const baseClass = 'array-field'
 
 export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const {
+    field,
     field: {
       name,
+      type,
       admin: { className, description, isSortable = true } = {},
       fields,
       label,
@@ -46,7 +58,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       required,
     },
     forceRender = false,
-    path,
+    path: pathFromProps,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
@@ -58,7 +70,15 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, moveFieldRow, removeFieldRow, setModified } = useForm()
+  const {
+    addFieldRow,
+    dispatchFields,
+    getFields,
+    moveFieldRow,
+    removeFieldRow,
+    replaceState,
+    setModified,
+  } = useForm()
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -113,13 +133,14 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
     errorPaths,
+    path,
     rows = [],
     showError,
     valid,
     value,
   } = useField<number>({
     hasRows: true,
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -195,6 +216,83 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
+  const copyRow = useCallback(
+    (rowIndex: number) => {
+      const formState = { ...getFields() }
+      const clipboardResult = clipboardCopy({
+        type,
+        fields,
+        getDataToCopy: () =>
+          reduceFormStateByPath({
+            formState,
+            path,
+            rowIndex,
+          }),
+        path,
+        rowIndex,
+        t,
+      })
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      } else {
+        toast.success(t('general:copied'))
+      }
+    },
+    [fields, getFields, path, t, type],
+  )
+
+  const pasteRow = useCallback(
+    (rowIndex: number) => {
+      const formState = { ...getFields() }
+      const pasteArgs = {
+        onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const newState = mergeFormStateFromClipboard({
+            dataFromClipboard,
+            formState,
+            path,
+            rowIndex,
+          })
+          replaceState(newState)
+          setModified(true)
+        },
+        path,
+        schemaFields: fields,
+        t,
+      }
+
+      const clipboardResult = clipboardPaste(pasteArgs)
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      }
+    },
+    [fields, getFields, path, replaceState, setModified, t],
+  )
+
+  const pasteField = useCallback(
+    (dataFromClipboard: ClipboardPasteData) => {
+      const formState = { ...getFields() }
+      const newState = mergeFormStateFromClipboard({
+        dataFromClipboard,
+        formState,
+        path,
+      })
+      replaceState(newState)
+      setModified(true)
+    },
+    [getFields, path, replaceState, setModified],
+  )
+
+  const getDataToCopy = useCallback(
+    () =>
+      reduceFormStateByPath({
+        formState: { ...getFields() },
+        path,
+      }),
+    [getFields, path],
+  )
+
   const hasMaxRows = maxRows && rows.length >= maxRows
 
   const fieldErrorCount = errorPaths.length
@@ -202,6 +300,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const showRequired = (readOnly || disabled) && rows.length === 0
   const showMinRows = (rows.length && rows.length < minRows) || (required && rows.length === 0)
+
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <div
@@ -214,6 +314,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
+      style={styles}
     >
       {showError && (
         <RenderCustomComponent
@@ -242,35 +343,55 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
           </div>
-          {rows?.length > 0 && (
-            <ul className={`${baseClass}__header-actions`}>
-              <li>
-                <button
-                  className={`${baseClass}__header-action`}
-                  onClick={() => toggleCollapseAll(true)}
-                  type="button"
-                >
-                  {t('fields:collapseAll')}
-                </button>
-              </li>
-              <li>
-                <button
-                  className={`${baseClass}__header-action`}
-                  onClick={() => toggleCollapseAll(false)}
-                  type="button"
-                >
-                  {t('fields:showAll')}
-                </button>
-              </li>
-            </ul>
-          )}
+          <ul className={`${baseClass}__header-actions`}>
+            {rows?.length > 0 && (
+              <Fragment>
+                <li>
+                  <button
+                    className={`${baseClass}__header-action`}
+                    onClick={() => toggleCollapseAll(true)}
+                    type="button"
+                  >
+                    {t('fields:collapseAll')}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className={`${baseClass}__header-action`}
+                    onClick={() => toggleCollapseAll(false)}
+                    type="button"
+                  >
+                    {t('fields:showAll')}
+                  </button>
+                </li>
+              </Fragment>
+            )}
+            <li>
+              <ClipboardAction
+                allowCopy={rows?.length > 0}
+                allowPaste={!readOnly}
+                className={`${baseClass}__header-action`}
+                disabled={disabled}
+                fields={fields}
+                getDataToCopy={getDataToCopy}
+                onPaste={pasteField}
+                path={path}
+                type={type}
+              />
+            </li>
+          </ul>
         </div>
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}
         />
       </header>
-      <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
+      <NullifyLocaleField
+        fieldValue={value}
+        localized={localized}
+        path={path}
+        readOnly={readOnly}
+      />
       {BeforeInput}
       {(rows?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
@@ -297,6 +418,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                   <ArrayRow
                     {...draggableSortableItemProps}
                     addRow={addRow}
+                    copyRow={copyRow}
                     CustomRowLabel={rows?.[i]?.customComponents?.RowLabel}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
@@ -308,6 +430,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     labels={labels}
                     moveRow={moveRow}
                     parentPath={path}
+                    pasteRow={pasteRow}
                     path={rowPath}
                     permissions={permissions}
                     readOnly={readOnly || disabled}
@@ -347,6 +470,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__add-row`}
+          disabled={disabled}
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"

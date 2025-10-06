@@ -16,7 +16,7 @@ import { conditionalLogicDoc } from './collections/ConditionalLogic/shared.js'
 import { customRowID, customTabID, nonStandardID } from './collections/CustomID/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
 import { anotherEmailDoc, emailDoc } from './collections/Email/shared.js'
-import { groupDoc } from './collections/Group/shared.js'
+import { namedGroupDoc } from './collections/Group/shared.js'
 import { jsonDoc } from './collections/JSON/shared.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { pointDoc } from './collections/Point/shared.js'
@@ -223,7 +223,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: groupFieldsSlug,
-    data: groupDoc,
+    data: namedGroupDoc,
     depth: 0,
     overrideAccess: true,
   })

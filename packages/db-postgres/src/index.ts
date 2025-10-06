@@ -17,6 +17,7 @@ import {
   deleteVersions,
   destroy,
   find,
+  findDistinct,
   findGlobal,
   findGlobalVersions,
   findMigrationDir,
@@ -37,6 +38,7 @@ import {
   updateMany,
   updateOne,
   updateVersion,
+  upsert,
 } from '@payloadcms/drizzle'
 import {
   columnToCodeConverter,
@@ -54,6 +56,7 @@ import {
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import pgDependency from 'pg'
 import { fileURLToPath } from 'url'
 
 import type { Args, PostgresAdapter } from './types.js'
@@ -98,6 +101,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       afterSchemaInit: args.afterSchemaInit ?? [],
       allowIDOnCreate,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
+      blocksAsJSON: args.blocksAsJSON ?? false,
       createDatabase,
       createExtensions,
       createMigration: buildCreateMigration({
@@ -117,6 +121,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
         json: true,
       },
       fieldConstraints: {},
+      findDistinct,
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'pg-core',
@@ -130,6 +135,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
       operators: operatorMap,
+      pg: args.pg || pgDependency,
       pgSchema: adapterSchema,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       pool: undefined,
@@ -137,6 +143,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       prodMigrations: args.prodMigrations,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       push: args.push,
+      readReplicaOptions: args.readReplicas,
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',
       schema: {},
@@ -173,8 +180,6 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       find,
       findGlobal,
       findGlobalVersions,
-      updateJobs,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
       indexes: new Set<string>(),
@@ -192,6 +197,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       queryDrafts,
       rawRelations: {},
       rawTables: {},
+      updateJobs,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,
@@ -203,7 +209,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       updateMany,
       updateOne,
       updateVersion,
-      upsert: updateOne,
+      upsert,
     })
   }
 

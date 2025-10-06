@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { categoriesSlug } from '../shared.js'
 
-const Categories: CollectionConfig = {
+export const Categories: CollectionConfig = {
   slug: categoriesSlug,
   admin: {
     useAsTitle: 'title',
@@ -17,5 +17,3 @@ const Categories: CollectionConfig = {
     },
   ],
 }
-
-export default Categories

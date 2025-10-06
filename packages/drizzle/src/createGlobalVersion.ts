@@ -17,13 +17,13 @@ export async function createGlobalVersion<T extends TypeWithID>(
     globalSlug,
     publishedLocale,
     req,
+    returning,
     select,
     snapshot,
     updatedAt,
     versionData,
-    returning,
   }: CreateGlobalVersionArgs,
-) {
+): Promise<TypeWithVersion<T>> {
   const db = await getTransaction(this, req)
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
 
@@ -42,11 +42,11 @@ export async function createGlobalVersion<T extends TypeWithID>(
     },
     db,
     fields: buildVersionGlobalFields(this.payload.config, global, true),
+    ignoreResult: returning === false ? 'idOnly' : false,
     operation: 'create',
     req,
     select,
     tableName,
-    ignoreResult: returning === false ? 'idOnly' : false,
   })
 
   const table = this.tables[tableName]

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PaginatedDocs } from '../../../database/types.js'
 import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
@@ -9,6 +8,7 @@ import type {
   Sort,
   Where,
 } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromCollectionSlug } from '../../config/types.js'
 
@@ -52,7 +52,7 @@ export type Options<TSlug extends CollectionSlug> = {
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -61,6 +61,11 @@ export type Options<TSlug extends CollectionSlug> = {
    * @default 1
    */
   page?: number
+  /**
+   * Set to `false` to return all documents and avoid querying for document counts which introduces some overhead.
+   * You can also combine that property with a specified `limit` to limit documents but avoid the count query.
+   */
+  pagination?: boolean
   /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
@@ -86,6 +91,15 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   sort?: Sort
   /**
+   * When set to `true`, the query will include both normal and trashed (soft-deleted) documents.
+   * To query only trashed documents, pass `trash: true` and combine with a `where` clause filtering by `deletedAt`.
+   * By default (`false`), the query will only include normal documents and exclude those with a `deletedAt` field.
+   *
+   * This argument has no effect unless `trash` is enabled on the collection.
+   * @default false
+   */
+  trash?: boolean
+  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
@@ -95,7 +109,7 @@ export type Options<TSlug extends CollectionSlug> = {
   where?: Where
 }
 
-export default async function findVersionsLocal<TSlug extends CollectionSlug>(
+export async function findVersionsLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<PaginatedDocs<TypeWithVersion<DataFromCollectionSlug<TSlug>>>> {
@@ -105,10 +119,12 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     limit,
     overrideAccess = true,
     page,
+    pagination = true,
     populate,
     select,
     showHiddenFields,
     sort,
+    trash = false,
     where,
   } = options
 
@@ -126,11 +142,13 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     limit,
     overrideAccess,
     page,
+    pagination,
     populate,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
     sort,
+    trash,
     where,
   })
 }

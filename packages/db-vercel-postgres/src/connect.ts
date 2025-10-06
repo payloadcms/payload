@@ -4,6 +4,7 @@ import type { Connect, Migration } from 'payload'
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { sql, VercelPool } from '@vercel/postgres'
 import { drizzle } from 'drizzle-orm/node-postgres'
+import { withReplicas } from 'drizzle-orm/pg-core'
 import pg from 'pg'
 
 import type { VercelPostgresAdapter } from './types.js'
@@ -15,13 +16,6 @@ export const connect: Connect = async function connect(
   },
 ) {
   const { hotReload } = options
-
-  this.schema = {
-    pgSchema: this.pgSchema,
-    ...this.tables,
-    ...this.relations,
-    ...this.enums,
-  }
 
   try {
     const logger = this.logger || false
@@ -52,6 +46,19 @@ export const connect: Connect = async function connect(
       logger,
       schema: this.schema,
     })
+
+    if (this.readReplicaOptions) {
+      const readReplicas = this.readReplicaOptions.map((connectionString) => {
+        const options = {
+          ...this.poolOptions,
+          connectionString,
+        }
+        const pool = new VercelPool(options)
+        return drizzle({ client: pool, logger, schema: this.schema })
+      })
+      const myReplicas = withReplicas(this.drizzle, readReplicas as any)
+      this.drizzle = myReplicas
+    }
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {

@@ -6,17 +6,18 @@ import type { BasePostgresAdapter, CountDistinct } from './types.js'
 
 export const countDistinct: CountDistinct = async function countDistinct(
   this: BasePostgresAdapter,
-  { db, joins, tableName, where },
+  { column, db, joins, tableName, where },
 ) {
   // When we don't have any joins - use a simple COUNT(*) query.
   if (joins.length === 0) {
     const countResult = await db
       .select({
-        count: count(),
+        count: column ? count(sql`DISTINCT ${column}`) : count(),
       })
       .from(this.tables[tableName])
       .where(where)
-    return Number(countResult[0].count)
+
+    return Number(countResult?.[0]?.count ?? 0)
   }
 
   let query = db
@@ -25,12 +26,12 @@ export const countDistinct: CountDistinct = async function countDistinct(
     })
     .from(this.tables[tableName])
     .where(where)
-    .groupBy(this.tables[tableName].id)
+    .groupBy(column || this.tables[tableName].id)
     .limit(1)
     .$dynamic()
 
-  joins.forEach(({ condition, table }) => {
-    query = query.leftJoin(table as PgTableWithColumns<any>, condition)
+  joins.forEach(({ type, condition, table }) => {
+    query = query[type ?? 'leftJoin'](table as PgTableWithColumns<any>, condition)
   })
 
   // When we have any joins, we need to count each individual ID only once.
@@ -39,5 +40,5 @@ export const countDistinct: CountDistinct = async function countDistinct(
   // Instead, COUNT (GROUP BY id) can be used which is still slower than COUNT(*) but acceptable.
   const countResult = await query
 
-  return Number(countResult[0].count)
+  return Number(countResult?.[0]?.count ?? 0)
 }

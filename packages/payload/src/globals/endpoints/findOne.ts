@@ -11,13 +11,25 @@ import { findOneOperation } from '../operations/findOne.js'
 
 export const findOneHandler: PayloadHandler = async (req) => {
   const globalConfig = getRequestGlobal(req)
-  const { searchParams } = req
-  const depth = searchParams.get('depth')
+  const { data, searchParams } = req
+  const depth = data ? data.depth : searchParams.get('depth')
+  const flattenLocales = data
+    ? data.flattenLocales
+    : searchParams.has('flattenLocales')
+      ? searchParams.get('flattenLocales') === 'true'
+      : // flattenLocales should be undfined if not provided, so that the default (true) is applied in the operation
+        undefined
 
   const result = await findOneOperation({
     slug: globalConfig.slug,
+    data: data
+      ? data?.data
+      : searchParams.get('data')
+        ? JSON.parse(searchParams.get('data') as string)
+        : undefined,
     depth: isNumber(depth) ? Number(depth) : undefined,
-    draft: searchParams.get('draft') === 'true',
+    draft: data ? data.draft : searchParams.get('draft') === 'true',
+    flattenLocales,
     globalConfig,
     populate: sanitizePopulateParam(req.query.populate),
     req,

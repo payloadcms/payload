@@ -11,9 +11,8 @@ import './index.scss'
 
 export const QueryPresetsColumnField: JSONFieldClientComponent = ({
   field: { label, required },
-  path,
 }) => {
-  const { value } = useField({ path })
+  const { path, value } = useField()
 
   return (
     <div className="field-type query-preset-columns-field">
@@ -24,7 +23,11 @@ export const QueryPresetsColumnField: JSONFieldClientComponent = ({
               const isColumnActive = !column.startsWith('-')
 
               return (
-                <Pill key={i} pillStyle={isColumnActive ? 'always-white' : 'light-gray'}>
+                <Pill
+                  key={i}
+                  pillStyle={isColumnActive ? 'always-white' : 'light-gray'}
+                  size="small"
+                >
                   {toWords(column)}
                 </Pill>
               )

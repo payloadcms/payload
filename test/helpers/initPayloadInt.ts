@@ -1,33 +1,46 @@
-import type { Payload, SanitizedConfig } from 'payload'
+import type { PayloadSDK } from '@payloadcms/sdk'
+import type { GeneratedTypes, Payload, SanitizedConfig } from 'payload'
 
 import path from 'path'
 import { getPayload } from 'payload'
 
 import { runInit } from '../runInit.js'
+import { getSDK } from './getSDK.js'
 import { NextRESTClient } from './NextRESTClient.js'
 
 /**
  * Initialize Payload configured for integration tests
  */
-export async function initPayloadInt(
+export async function initPayloadInt<TInitializePayload extends boolean | undefined = true>(
   dirname: string,
   testSuiteNameOverride?: string,
-  initializePayload = true,
-): Promise<{ config: SanitizedConfig; payload?: Payload; restClient?: NextRESTClient }> {
+  initializePayload?: TInitializePayload,
+  configFile?: string,
+): Promise<
+  TInitializePayload extends false
+    ? { config: SanitizedConfig }
+    : {
+        config: SanitizedConfig
+        payload: Payload
+        restClient: NextRESTClient
+        sdk: PayloadSDK<GeneratedTypes>
+      }
+> {
   const testSuiteName = testSuiteNameOverride ?? path.basename(dirname)
-  await runInit(testSuiteName, false, true)
-  console.log('importing config', path.resolve(dirname, 'config.ts'))
-  const { default: config } = await import(path.resolve(dirname, 'config.ts'))
+  await runInit(testSuiteName, false, true, configFile)
+  console.log('importing config', path.resolve(dirname, configFile ?? 'config.ts'))
+  const { default: config } = await import(path.resolve(dirname, configFile ?? 'config.ts'))
 
-  if (!initializePayload) {
-    return { config: await config }
+  if (initializePayload === false) {
+    return { config: await config } as any
   }
 
   console.log('starting payload')
 
-  const payload = await getPayload({ config })
+  const payload = await getPayload({ config, cron: true })
   console.log('initializing rest client')
   const restClient = new NextRESTClient(payload.config)
   console.log('initPayloadInt done')
-  return { config: payload.config, payload, restClient }
+  const sdk = getSDK(payload.config)
+  return { config: payload.config, sdk, payload, restClient } as any
 }

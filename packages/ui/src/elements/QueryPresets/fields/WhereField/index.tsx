@@ -30,21 +30,26 @@ const transformWhereToNaturalLanguage = (
     }
 
     const operator = Object.keys(condition[key])[0]
-    let value = condition[key][operator]
+    const operatorValue = condition[key][operator]
 
-    // TODO: this is not right, but works for now at least.
-    // Ideally we look up iterate _fields_ so we know the type of the field
-    // Currently, we're only iterating over the `where` field's value, so we don't know the type
-    if (typeof value === 'object') {
-      try {
-        value = new Date(value).toLocaleDateString()
-      } catch (_err) {
-        value = 'Unknown error has occurred'
+    // Format value - ideally would use field schema for proper typing
+    const formatValue = (val: any): string => {
+      if (typeof val === 'object' && val != null) {
+        try {
+          return new Date(val).toLocaleDateString()
+        } catch {
+          return 'Unknown error has occurred'
+        }
       }
+      return val?.toString() ?? ''
     }
 
+    const value = Array.isArray(operatorValue)
+      ? operatorValue.map(formatValue).join(', ')
+      : formatValue(operatorValue)
+
     return (
-      <Pill pillStyle="always-white">
+      <Pill pillStyle="always-white" size="small">
         <b>{toWords(key)}</b> {operator} <b>{toWords(value)}</b>
       </Pill>
     )
@@ -88,9 +93,8 @@ const transformWhereToNaturalLanguage = (
 
 export const QueryPresetsWhereField: JSONFieldClientComponent = ({
   field: { label, required },
-  path,
 }) => {
-  const { value } = useField({ path })
+  const { path, value } = useField()
   const { collectionSlug } = useListQuery()
   const { getEntityConfig } = useConfig()
 
@@ -105,7 +109,7 @@ export const QueryPresetsWhereField: JSONFieldClientComponent = ({
         {value
           ? transformWhereToNaturalLanguage(
               value as Where,
-              getTranslation(collectionConfig.labels.plural, i18n),
+              getTranslation(collectionConfig?.labels?.plural, i18n),
             )
           : 'No where query'}
       </div>

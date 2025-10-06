@@ -1,6 +1,6 @@
-// @ts-strict-ignore
 import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequest, Where } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -32,7 +32,7 @@ export type Options<TSlug extends CollectionSlug> = {
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -51,8 +51,7 @@ export type Options<TSlug extends CollectionSlug> = {
   where?: Where
 }
 
-// eslint-disable-next-line no-restricted-exports
-export default async function countVersionsLocal<TSlug extends CollectionSlug>(
+export async function countVersionsLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<{ totalDocs: number }> {
@@ -70,7 +69,7 @@ export default async function countVersionsLocal<TSlug extends CollectionSlug>(
     collection,
     disableErrors,
     overrideAccess,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     where,
   })
 }

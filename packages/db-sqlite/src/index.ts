@@ -18,6 +18,7 @@ import {
   deleteVersions,
   destroy,
   find,
+  findDistinct,
   findGlobal,
   findGlobalVersions,
   findMigrationDir,
@@ -38,25 +39,28 @@ import {
   updateMany,
   updateOne,
   updateVersion,
+  upsert,
 } from '@payloadcms/drizzle'
+import {
+  columnToCodeConverter,
+  convertPathToJSONTraversal,
+  countDistinct,
+  createJSONQuery,
+  defaultDrizzleSnapshot,
+  deleteWhere,
+  dropDatabase,
+  execute,
+  init,
+  insert,
+  requireDrizzleKit,
+} from '@payloadcms/drizzle/sqlite'
 import { like, notLike } from 'drizzle-orm'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { Args, SQLiteAdapter } from './types.js'
 
-import { columnToCodeConverter } from './columnToCodeConverter.js'
 import { connect } from './connect.js'
-import { countDistinct } from './countDistinct.js'
-import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal.js'
-import { createJSONQuery } from './createJSONQuery/index.js'
-import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
-import { deleteWhere } from './deleteWhere.js'
-import { dropDatabase } from './dropDatabase.js'
-import { execute } from './execute.js'
-import { init } from './init.js'
-import { insert } from './insert.js'
-import { requireDrizzleKit } from './requireDrizzleKit.js'
 
 const filename = fileURLToPath(import.meta.url)
 
@@ -67,8 +71,8 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
 
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
-    let resolveInitializing
-    let rejectInitializing
+    let resolveInitializing: () => void = () => {}
+    let rejectInitializing: () => void = () => {}
 
     const initializing = new Promise<void>((res, rej) => {
       resolveInitializing = res
@@ -89,6 +93,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       allowIDOnCreate,
       autoIncrement: args.autoIncrement ?? false,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
+      blocksAsJSON: args.blocksAsJSON ?? false,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       client: undefined,
       clientConfig: args.client,
@@ -99,6 +104,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
         json: true,
       },
       fieldConstraints: {},
+      findDistinct,
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'sqlite-core',
@@ -127,7 +133,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       updateJobs,
       updateMany,
       versionsSuffix: args.versionsSuffix || '_v',
-
       // DatabaseAdapter
       beginTransaction: args.transactionOptions ? beginTransaction : defaultBeginTransaction(),
       commitTransaction,
@@ -162,7 +167,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       find,
       findGlobal,
       findGlobalVersions,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
       indexes: new Set<string>(),
@@ -178,17 +182,15 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       packageName: '@payloadcms/db-sqlite',
       payload,
       queryDrafts,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       resolveInitializing,
       rollbackTransaction,
       updateGlobal,
       updateGlobalVersion,
       updateOne,
       updateVersion,
-      upsert: updateOne,
+      upsert,
     })
   }
 

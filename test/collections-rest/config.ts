@@ -6,6 +6,7 @@ import { APIError, type CollectionConfig, type Endpoint } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { LargeDocuments } from './collections/LargeDocuments.js'
 
 export interface Relation {
   id: string
@@ -270,7 +271,23 @@ export default buildConfigWithDefaults({
         path: `/${method}-test`,
       })),
     },
+    {
+      slug: 'disabled-bulk-edit-docs',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+      disableBulkEdit: true,
+    },
+    LargeDocuments,
   ],
+  bodyParser: {
+    limits: {
+      fieldSize: 2 * 1024 * 1024, // 2MB
+    },
+  },
   endpoints: [
     {
       handler: async ({ payload }) => {

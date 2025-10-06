@@ -89,6 +89,7 @@ export type TransactionPg = PgTransaction<
 export type DrizzleTransaction = TransactionPg | TransactionSQLite
 
 export type CountDistinct = (args: {
+  column?: PgColumn<any> | SQLiteColumn<any>
   db: DrizzleTransaction | LibSQLDatabase | PostgresDB
   joins: BuildQueryJoinAliases
   tableName: string
@@ -160,10 +161,11 @@ export type CreateJSONQueryArgs = {
   column?: Column | string
   operator: string
   pathSegments: string[]
+  rawColumn?: SQL<unknown>
   table?: string
   treatAsArray?: string[]
   treatRootAsArray?: boolean
-  value: boolean | number | string
+  value: boolean | number | number[] | string | string[]
 }
 
 /**
@@ -281,12 +283,30 @@ export type VectorRawColumn = {
   type: 'vector'
 } & BaseRawColumn
 
+export type HalfVecRawColumn = {
+  dimensions?: number
+  type: 'halfvec'
+} & BaseRawColumn
+
+export type SparseVecRawColumn = {
+  dimensions?: number
+  type: 'sparsevec'
+} & BaseRawColumn
+
+export type BinaryVecRawColumn = {
+  dimensions?: number
+  type: 'bit'
+} & BaseRawColumn
+
 export type RawColumn =
   | ({
       type: 'boolean' | 'geometry' | 'jsonb' | 'numeric' | 'serial' | 'text' | 'varchar'
     } & BaseRawColumn)
+  | BinaryVecRawColumn
   | EnumRawColumn
+  | HalfVecRawColumn
   | IntegerRawColumn
+  | SparseVecRawColumn
   | TimestampRawColumn
   | UUIDRawColumn
   | VectorRawColumn
@@ -315,6 +335,7 @@ export type BuildDrizzleTable<T extends DrizzleAdapter = DrizzleAdapter> = (args
 }) => void
 
 export interface DrizzleAdapter extends BaseDatabaseAdapter {
+  blocksAsJSON?: boolean
   convertPathToJSONTraversal?: (incomingSegments: string[]) => string
   countDistinct: CountDistinct
   createJSONQuery: (args: CreateJSONQueryArgs) => string
@@ -323,8 +344,8 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   drizzle: LibSQLDatabase | PostgresDB
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
-  execute: Execute<unknown>
 
+  execute: Execute<unknown>
   features: {
     json?: boolean
   }

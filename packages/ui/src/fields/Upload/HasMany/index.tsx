@@ -11,13 +11,11 @@ import { UploadCard } from '../UploadCard/index.js'
 
 const baseClass = 'upload upload--has-many'
 
-import { isImage } from 'payload/shared'
+import { getBestFitFromSizes, isImage } from 'payload/shared'
 
 import './index.scss'
 
 import type { ReloadDoc } from '../types.js'
-
-import { getBestFitFromSizes } from '../../../utilities/getBestFitFromSizes.js'
 
 type Props = {
   readonly className?: string

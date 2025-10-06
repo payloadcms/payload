@@ -84,7 +84,7 @@ The following options are available:
 | `slug` \*       | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                    |
 | `typescript`    | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                            |
 | `versions`      | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#global-config).                                                                |
-| `forceSelect`   | Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks                                          |
+| `forceSelect`   | Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks. [More details](../queries/select).      |
 
 _\* An asterisk denotes that a property is required._
 
@@ -179,12 +179,12 @@ export const MyGlobal: SanitizedGlobalConfig = {
 
 The following options are available:
 
-| Option            | Description                                                                                                                                                                                                  |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `SaveButton`      | Replace the default Save Button with a Custom Component. [Drafts](../versions/drafts) must be disabled. [More details](../custom-components/edit-view#save-button).                                          |
-| `SaveDraftButton` | Replace the default Save Draft Button with a Custom Component. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. [More details](../custom-components/edit-view#save-draft-button). |
-| `PublishButton`   | Replace the default Publish Button with a Custom Component. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#publish-button).                                     |
-| `PreviewButton`   | Replace the default Preview Button with a Custom Component. [Preview](../admin/preview) must be enabled. [More details](../custom-components/edit-view#preview-button).                                      |
+| Option            | Description                                                                                                                                                                                                |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SaveButton`      | Replace the default Save Button with a Custom Component. [Drafts](../versions/drafts) must be disabled. [More details](../custom-components/edit-view#savebutton).                                         |
+| `SaveDraftButton` | Replace the default Save Draft Button with a Custom Component. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. [More details](../custom-components/edit-view#savedraftbutton). |
+| `PublishButton`   | Replace the default Publish Button with a Custom Component. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#publishbutton).                                    |
+| `PreviewButton`   | Replace the default Preview Button with a Custom Component. [Preview](../admin/preview) must be enabled. [More details](../custom-components/edit-view#previewbutton).                                     |
 
 <Banner type="success">
   **Note:** For details on how to build Custom Components, see [Building Custom
@@ -205,7 +205,7 @@ You can also pass an object to the global's `graphQL` property, which allows you
 
 ## TypeScript
 
-You can import types from Payload to help make writing your Global configs easier and type-safe. There are two main types that represent the Global Config, `GlobalConfig` and `SanitizeGlobalConfig`.
+You can import types from Payload to help make writing your Global configs easier and type-safe. There are two main types that represent the Global Config, `GlobalConfig` and `SanitizedGlobalConfig`.
 
 The `GlobalConfig` type represents a raw Global Config in its full form, where only the bare minimum properties are marked as required. The `SanitizedGlobalConfig` type represents a Global Config after it has been fully sanitized. Generally, this is only used internally by Payload.
 

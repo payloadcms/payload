@@ -3,6 +3,7 @@ package-lock.json
 dist
 /.idea/*
 !/.idea/runConfigurations
+/.idea/runConfigurations/_template*
 !/.idea/payload.iml
 
 # Custom actions
@@ -20,6 +21,13 @@ meta_client.json
 meta_server.json
 meta_index.json
 meta_shared.json
+
+packages/payload/esbuild
+packages/ui/esbuild
+packages/next/esbuild
+packages/richtext-lexical/esbuild
+
+audit_output.json
 
 .turbo
 
@@ -314,6 +322,8 @@ test/admin-root/app/(payload)/admin/importMap.js
 /test/admin-root/app/(payload)/admin/importMap.js
 test/app/(payload)/admin/importMap.js
 /test/app/(payload)/admin/importMap.js
+test/plugin-ecommerce/app/(payload)/admin/importMap.js
+/test/plugin-ecommerce/app/(payload)/admin/importMap.js
 test/pnpm-lock.yaml
 test/databaseAdapter.js
 /filename-compound-index
@@ -323,5 +333,7 @@ test/databaseAdapter.js
 test/.localstack
 test/google-cloud-storage
 test/azurestoragedata/
+/media-without-delete-access
+
 
 licenses.csv

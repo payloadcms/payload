@@ -1,41 +1,36 @@
-import type { DefaultDocumentIDType, NavPreferences, Payload, User } from 'payload'
+import type { NavPreferences, PayloadRequest } from 'payload'
 
 import { cache } from 'react'
 
-export const getNavPrefs = cache(
-  async (
-    payload: Payload,
-    userID: DefaultDocumentIDType,
-    userSlug: string,
-  ): Promise<NavPreferences> => {
-    return userSlug
-      ? await payload
-          .find({
-            collection: 'payload-preferences',
-            depth: 0,
-            limit: 1,
-            pagination: false,
-            where: {
-              and: [
-                {
-                  key: {
-                    equals: 'nav',
-                  },
+export const getNavPrefs = cache(async (req: PayloadRequest): Promise<NavPreferences> => {
+  return req?.user?.collection
+    ? await req.payload
+        .find({
+          collection: 'payload-preferences',
+          depth: 0,
+          limit: 1,
+          pagination: false,
+          req,
+          where: {
+            and: [
+              {
+                key: {
+                  equals: 'nav',
                 },
-                {
-                  'user.relationTo': {
-                    equals: userSlug,
-                  },
+              },
+              {
+                'user.relationTo': {
+                  equals: req.user.collection,
                 },
-                {
-                  'user.value': {
-                    equals: userID,
-                  },
+              },
+              {
+                'user.value': {
+                  equals: req?.user?.id,
                 },
-              ],
-            },
-          })
-          ?.then((res) => res?.docs?.[0]?.value)
-      : null
-  },
-)
+              },
+            ],
+          },
+        })
+        ?.then((res) => res?.docs?.[0]?.value)
+    : null
+})

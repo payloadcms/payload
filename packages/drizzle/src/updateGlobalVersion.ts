@@ -10,7 +10,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
-import buildQuery from './queries/buildQuery.js'
+import { buildQuery } from './queries/buildQuery.js'
 import { upsertRow } from './upsertRow/index.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
@@ -21,12 +21,12 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     global,
     locale,
     req,
+    returning,
     select,
     versionData,
     where: whereArg,
-    returning,
   }: UpdateGlobalVersionArgs<T>,
-) {
+): Promise<TypeWithVersion<T>> {
   const db = await getTransaction(this, req)
   const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(
     ({ slug }) => slug === global,
@@ -53,12 +53,12 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     data: versionData,
     db,
     fields,
+    ignoreResult: returning === false,
     operation: 'update',
     req,
     select,
     tableName,
     where,
-    ignoreResult: returning === false,
   })
 
   if (returning === false) {

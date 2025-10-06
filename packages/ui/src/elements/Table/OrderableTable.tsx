@@ -19,13 +19,16 @@ const baseClass = 'table'
 
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
+  readonly BeforeTable?: React.ReactNode
   readonly collection: ClientCollectionConfig
   readonly columns?: Column[]
   readonly data: Record<string, unknown>[]
+  readonly heading?: React.ReactNode
 }
 
 export const OrderableTable: React.FC<Props> = ({
   appearance = 'default',
+  BeforeTable,
   collection,
   columns,
   data: initialData,
@@ -116,8 +119,9 @@ export const OrderableTable: React.FC<Props> = ({
         target,
       }
 
-      const response = await fetch(`${config.routes.api}/reorder`, {
+      const response = await fetch(`${config.serverURL}${config.routes.api}/reorder`, {
         body: JSON.stringify(jsonBody),
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -131,6 +135,14 @@ export const OrderableTable: React.FC<Props> = ({
       if (!response.ok) {
         throw new Error(
           'Failed to reorder. This can happen if you reorder several rows too quickly. Please try again.',
+        )
+      }
+
+      if (response.status === 200 && (await response.json())['message'] === 'initial migration') {
+        throw new Error(
+          'You have enabled "orderable" on a collection with existing documents' +
+            'and this is the first time you have sorted documents. We have run an automatic migration ' +
+            'to add an initial order to the documents. Please refresh the page and try again.',
         )
       }
     } catch (err) {
@@ -155,6 +167,7 @@ export const OrderableTable: React.FC<Props> = ({
         .filter(Boolean)
         .join(' ')}
     >
+      {BeforeTable}
       <DraggableSortable ids={rowIds} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
         <table cellPadding="0" cellSpacing="0">
           <thead>

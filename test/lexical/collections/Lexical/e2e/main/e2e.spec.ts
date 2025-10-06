@@ -7,7 +7,6 @@ import type {
 import type { BrowserContext, Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { except } from 'drizzle-orm/mysql-core'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -92,11 +91,8 @@ describe('lexicalMain', () => {
     })*/
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: [
-        path.resolve(dirname, './collections/Upload/uploads'),
-        path.resolve(dirname, './collections/Upload2/uploads2'),
-      ],
+      snapshotKey: 'lexicalTest',
+      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
 
     if (client) {
@@ -540,13 +536,11 @@ describe('lexicalMain', () => {
     const secondUploadNode = richTextField.locator('.lexical-upload').nth(1)
     await secondUploadNode.scrollIntoViewIfNeeded()
     await expect(secondUploadNode).toBeVisible()
+    // Focus the upload node
+    await secondUploadNode.click()
 
-    await expect(secondUploadNode.locator('.lexical-upload__bottomRow')).toContainText(
-      'payload-1.jpg',
-    )
-    await expect(secondUploadNode.locator('.lexical-upload__collectionLabel')).toContainText(
-      'Upload',
-    )
+    await expect(secondUploadNode.locator('.lexical-upload__filename')).toHaveText('payload-1.jpg')
+    await expect(secondUploadNode.locator('.lexical-upload__collectionLabel')).toHaveText('Upload')
   })
 
   // This reproduces https://github.com/payloadcms/payload/issues/7128
@@ -593,8 +587,10 @@ describe('lexicalMain', () => {
     const newUploadNode = richTextField.locator('.lexical-upload').nth(1)
     await newUploadNode.scrollIntoViewIfNeeded()
     await expect(newUploadNode).toBeVisible()
+    await newUploadNode.click() // Focus the upload node
+    await newUploadNode.hover()
 
-    await expect(newUploadNode.locator('.lexical-upload__bottomRow')).toContainText('payload.jpg')
+    await expect(newUploadNode.locator('.lexical-upload__filename')).toContainText('payload.jpg')
 
     // Click on button with class lexical-upload__upload-drawer-toggler
     await newUploadNode.locator('.lexical-upload__upload-drawer-toggler').first().click()
@@ -633,6 +629,9 @@ describe('lexicalMain', () => {
       .nth(1)
     await reloadedUploadNode.scrollIntoViewIfNeeded()
     await expect(reloadedUploadNode).toBeVisible()
+    await reloadedUploadNode.click() // Focus the upload node
+    await reloadedUploadNode.hover()
+
     await reloadedUploadNode.locator('.lexical-upload__upload-drawer-toggler').first().click()
     const reloadedUploadExtraFieldsDrawer = page
       .locator('dialog[id^=drawer_1_lexical-upload-drawer-]')
@@ -674,7 +673,7 @@ describe('lexicalMain', () => {
     await relationshipSelectButton.click()
     await expect(slashMenuPopover).toBeHidden()
 
-    const relationshipListDrawer = page.locator('.list-drawer__header-text')
+    const relationshipListDrawer = page.locator('.list-header__title')
     await expect(relationshipListDrawer).toHaveText('Array Fields')
   })
 
@@ -728,7 +727,8 @@ describe('lexicalMain', () => {
     await expect(relationshipListDrawer).toBeVisible()
     await wait(500)
 
-    await expect(relationshipListDrawer.locator('.rs__single-value')).toHaveText('Lexical Field')
+    await relationshipListDrawer.locator('.rs__input').first().click()
+    await relationshipListDrawer.locator('.rs__menu').getByText('Lexical Field').click()
 
     await relationshipListDrawer.locator('button').getByText('Rich Text').first().click()
     await expect(relationshipListDrawer).toBeHidden()
@@ -769,6 +769,7 @@ describe('lexicalMain', () => {
 
     // make text bold
     await boldButton.click()
+    await wait(300)
 
     // Save drawer
     await docDrawer.locator('button').getByText('Save').first().click()
@@ -960,6 +961,7 @@ describe('lexicalMain', () => {
 
   test('ensure internal links can be created', async () => {
     await navigateToLexicalFields()
+    await wait(200)
     const richTextField = page.locator('.rich-text-lexical').first()
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
@@ -972,11 +974,15 @@ describe('lexicalMain', () => {
     const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
     await paragraph.scrollIntoViewIfNeeded()
     await expect(paragraph).toBeVisible()
+    await wait(200)
+
     /**
      * Type some text
      */
     await paragraph.click()
+    await wait(200)
     await page.keyboard.type('Link')
+    await wait(200)
 
     // Select "Link" by pressing shift + arrow left
     for (let i = 0; i < 4; i++) {
@@ -988,6 +994,7 @@ describe('lexicalMain', () => {
 
     const linkButton = inlineToolbar.locator('.toolbar-popup__button-link')
     await expect(linkButton).toBeVisible()
+    await wait(200)
     await linkButton.click()
 
     /**
@@ -1007,16 +1014,20 @@ describe('lexicalMain', () => {
       .locator('.radio-input__styled-radio')
 
     await radioInternalLink.click()
+    await wait(200)
 
     const internalLinkSelect = linkDrawer
       .locator('#field-doc .rs__control .value-container')
       .first()
     await internalLinkSelect.click()
+    await wait(200)
 
     await expect(linkDrawer.locator('.rs__option').nth(0)).toBeVisible()
     await expect(linkDrawer.locator('.rs__option').nth(0)).toContainText('Rich Text') // Link to itself - that way we can also test if depth 0 works
     await linkDrawer.locator('.rs__option').nth(0).click()
+
     await expect(internalLinkSelect).toContainText('Rich Text')
+    await wait(200)
 
     await linkDrawer.locator('button').getByText('Save').first().click()
     await expect(linkDrawer).toBeHidden()
@@ -1200,13 +1211,16 @@ describe('lexicalMain', () => {
 
     await expect(slashMenuPopover).toBeHidden()
 
-    await expect(newUploadNode.locator('.lexical-upload__bottomRow')).toContainText('payload.png')
+    await newUploadNode.hover()
+
+    await expect(newUploadNode.locator('.lexical-upload__filename')).toHaveText('payload.png')
 
     await page.keyboard.press('Enter') // floating toolbar needs to appear with enough distance to the upload node, otherwise clicking may fail
+    await page.keyboard.press('Enter')
     await page.keyboard.press('ArrowLeft')
     await page.keyboard.press('ArrowLeft')
     // Select "there" by pressing shift + arrow left
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       await page.keyboard.press('Shift+ArrowLeft')
     }
 
@@ -1258,10 +1272,10 @@ describe('lexicalMain', () => {
       const firstParagraph: SerializedParagraphNode = lexicalField.root
         .children[0] as SerializedParagraphNode
       const secondParagraph: SerializedParagraphNode = lexicalField.root
-        .children[1] as SerializedParagraphNode
-      const thirdParagraph: SerializedParagraphNode = lexicalField.root
         .children[2] as SerializedParagraphNode
-      const uploadNode: SerializedUploadNode = lexicalField.root.children[3] as SerializedUploadNode
+      const thirdParagraph: SerializedParagraphNode = lexicalField.root
+        .children[3] as SerializedParagraphNode
+      const uploadNode: SerializedUploadNode = lexicalField.root.children[1] as SerializedUploadNode
 
       expect(firstParagraph.children).toHaveLength(2)
       expect((firstParagraph.children[0] as SerializedTextNode).text).toBe('Some ')
@@ -1391,7 +1405,7 @@ describe('lexicalMain', () => {
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
 
       // @ts-expect-error no need to type this
-      expect(lexicalField?.root?.children[1].fields.someTextRequired).toEqual('test')
+      expect(lexicalField?.root?.children[0].fields.someTextRequired).toEqual('test')
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
@@ -1434,6 +1448,29 @@ describe('lexicalMain', () => {
     const button = page.getByLabel('Add new User')
     await button.click()
     page.getByText('Creating new User')
+  })
+
+  test('ensure custom Description component is rendered only once', async () => {
+    await navigateToLexicalFields()
+    const lexicalWithBlocks = page.locator('.rich-text-lexical').nth(2)
+    await lexicalWithBlocks.scrollIntoViewIfNeeded()
+    await expect(lexicalWithBlocks).toBeVisible()
+
+    await expect(lexicalWithBlocks.locator('.lexical-blocks-custom-description')).toHaveCount(1)
+    await expect(lexicalWithBlocks.locator('.lexical-blocks-custom-description')).toBeVisible()
+
+    await expect(lexicalWithBlocks.locator('.field-description')).toHaveCount(0)
+  })
+
+  test('ensure admin.description property is rendered', async () => {
+    await navigateToLexicalFields()
+    const lexicalSimple = page.locator('.rich-text-lexical').nth(1)
+    await lexicalSimple.scrollIntoViewIfNeeded()
+    await expect(lexicalSimple).toBeVisible()
+
+    await expect(lexicalSimple.locator('.field-description')).toHaveCount(1)
+    await expect(lexicalSimple.locator('.field-description')).toBeVisible()
+    await expect(lexicalSimple.locator('.field-description')).toHaveText('A simple lexical field')
   })
 
   test('ensure links can created from clipboard and deleted', async () => {
@@ -1524,12 +1561,9 @@ describe('lexicalMain', () => {
 
     // test
     await navigateToLexicalFields()
-    const bottomOfUploadNode = page
-      .locator('.lexical-upload div')
-      .filter({ hasText: /^payload\.jpg$/ })
-      .first()
-    await bottomOfUploadNode.click()
-    await expectInsideSelectedDecorator(bottomOfUploadNode)
+    const uploadNode = page.locator('.lexical-upload[data-filename="payload.jpg"]').first()
+    await uploadNode.click()
+    await expectInsideSelectedDecorator(uploadNode)
 
     const textNode = page.getByText('Upload Node:', { exact: true })
     await textNode.click()
@@ -1541,7 +1575,7 @@ describe('lexicalMain', () => {
     await closeTagInMultiSelect.click()
     await expect(decoratorLocator).toBeHidden()
 
-    const labelInsideCollapsableBody = page.locator('label').getByText('Sub Blocks')
+    const labelInsideCollapsableBody = page.locator('h3>span').getByText('Sub Blocks')
     await labelInsideCollapsableBody.click()
     await expectInsideSelectedDecorator(labelInsideCollapsableBody)
 

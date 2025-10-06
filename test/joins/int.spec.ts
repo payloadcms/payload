@@ -115,6 +115,7 @@ describe('Joins Field', () => {
           camelCaseCategory: category.id,
         },
         array: [{ category: category.id }],
+        arrayHasMany: [{ category: [category.id] }],
         localizedArray: [{ category: category.id }],
         blocks: [{ blockType: 'block', category: category.id }],
       })
@@ -122,9 +123,7 @@ describe('Joins Field', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should populate joins using findByID', async () => {
@@ -216,6 +215,18 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts?.totalDocs).toBe(15)
   })
 
+  it('should count hasMany relationship joins', async () => {
+    const res = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+      joins: {
+        hasManyPosts: { limit: 1, count: true },
+      },
+    })
+
+    expect(res.hasManyPosts?.totalDocs).toBe(15)
+  })
+
   it('should populate relationships in joins', async () => {
     const { docs } = await payload.find({
       limit: 1,
@@ -247,6 +258,16 @@ describe('Joins Field', () => {
 
     expect(categoryWithPosts.arrayPosts.docs).toBeDefined()
     expect(categoryWithPosts.arrayPosts.docs).toHaveLength(10)
+  })
+
+  it('should populate joins with array hasMany relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.arrayHasManyPosts.docs).toBeDefined()
+    expect(categoryWithPosts.arrayHasManyPosts.docs).toHaveLength(10)
   })
 
   it('should populate joins with localized array relationships', async () => {
@@ -287,6 +308,174 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.polymorphics.docs[0]).toHaveProperty('id')
     expect(categoryWithPosts.localizedPolymorphic.docs[0]).toHaveProperty('id')
     expect(categoryWithPosts.localizedPolymorphics.docs[0]).toHaveProperty('id')
+  })
+
+  it('should not throw a path validation error when querying joins with polymorphic relationships', async () => {
+    const folderDoc = await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'sharedFolder',
+      },
+    })
+
+    await payload.create({
+      collection: 'folderPoly1',
+      data: {
+        folderPoly1Title: 'Poly 1 title',
+        folder: folderDoc.id,
+      },
+      depth: 0,
+    })
+
+    await payload.create({
+      collection: 'folderPoly2',
+      data: {
+        folderPoly2Title: 'Poly 2 Title',
+        folder: folderDoc.id,
+      },
+      depth: 0,
+    })
+
+    const result = await payload.find({
+      collection: 'payload-folders',
+      joins: {
+        documentsAndFolders: {
+          limit: 100_000,
+          sort: 'name',
+          where: {
+            and: [
+              {
+                relationTo: {
+                  in: ['folderPoly1', 'folderPoly2'],
+                },
+              },
+              {
+                folderPoly2Title: {
+                  equals: 'Poly 2 Title',
+                },
+              },
+            ],
+          },
+        },
+      },
+      where: {
+        id: {
+          equals: folderDoc.id,
+        },
+      },
+    })
+
+    expect(result.docs[0]?.documentsAndFolders.docs).toHaveLength(1)
+  })
+
+  it('should allow join where query on hasMany select fields', async () => {
+    const folderDoc = await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'scopedFolder',
+        folderType: ['folderPoly1', 'folderPoly2'],
+      },
+    })
+
+    await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'childFolder',
+        folderType: ['folderPoly1'],
+        folder: folderDoc.id,
+      },
+    })
+
+    const findFolder = await payload.find({
+      collection: 'payload-folders',
+      where: {
+        id: {
+          equals: folderDoc.id,
+        },
+      },
+      joins: {
+        documentsAndFolders: {
+          limit: 100_000,
+          sort: 'name',
+          where: {
+            and: [
+              {
+                relationTo: {
+                  equals: 'payload-folders',
+                },
+              },
+              {
+                folderType: {
+                  in: ['folderPoly1'],
+                },
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    expect(findFolder?.docs[0]?.documentsAndFolders?.docs).toHaveLength(1)
+  })
+
+  it('should query where with exists for hasMany select fields', async () => {
+    await payload.delete({ collection: 'payload-folders', where: {} })
+    const folderDoc = await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'scopedFolder',
+        folderType: ['folderPoly1', 'folderPoly2'],
+      },
+    })
+
+    await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'childFolder',
+        folderType: ['folderPoly1'],
+        folder: folderDoc.id,
+      },
+    })
+
+    const findFolder = await payload.find({
+      collection: 'payload-folders',
+      where: {
+        id: {
+          equals: folderDoc.id,
+        },
+      },
+      joins: {
+        documentsAndFolders: {
+          limit: 100_000,
+          sort: 'name',
+          where: {
+            and: [
+              {
+                relationTo: {
+                  equals: 'payload-folders',
+                },
+              },
+              {
+                or: [
+                  {
+                    folderType: {
+                      in: ['folderPoly1'],
+                    },
+                  },
+                  {
+                    folderType: {
+                      exists: false,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    expect(findFolder?.docs[0]?.documentsAndFolders?.docs).toHaveLength(1)
   })
 
   it('should filter joins using where query', async () => {
@@ -852,6 +1041,37 @@ describe('Joins Field', () => {
       expect(unlimited.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
     })
 
+    it('should return totalDocs with count: true', async () => {
+      const queryWithLimit = `query {
+    Categories(where: {
+            name: { equals: "paginate example" }
+          }) {
+          docs {
+            relatedPosts(
+              sort: "createdAt",
+              limit: 4,
+              count: true
+            ) {
+              docs {
+                title
+              }
+              hasNextPage
+              totalDocs
+            }
+          }
+        }
+      }`
+      const pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs).toHaveLength(4)
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[0].title).toStrictEqual(
+        'test 0',
+      )
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(true)
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.totalDocs).toStrictEqual(15)
+    })
+
     it('should have simple paginate with page for joins', async () => {
       let queryWithLimit = `query {
     Categories(where: {
@@ -937,6 +1157,94 @@ describe('Joins Field', () => {
       )
       expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[1].id).toStrictEqual(
         unlimited.data.Categories.docs[0].relatedPosts.docs[3].id,
+      )
+    })
+
+    it('should have simple paginate with page for joins polymorphic', async () => {
+      let queryWithLimit = `query {
+    Categories(where: {
+            name: { equals: "paginate example" }
+          }) {
+          docs {
+            polymorphic(
+              sort: "createdAt",
+              limit: 2
+            ) {
+              docs {
+                title
+              }
+              hasNextPage
+            }
+          }
+        }
+      }`
+      let pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+
+      const queryUnlimited = `query {
+        Categories(
+          where: {
+            name: { equals: "paginate example" }
+          }
+        ) {
+          docs {
+            polymorphic(
+              sort: "createdAt",
+              limit: 0
+            ) {
+              docs {
+                title
+                createdAt
+              }
+              hasNextPage
+            }
+          }
+        }
+      }`
+
+      const unlimited = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryUnlimited }) })
+        .then((res) => res.json())
+
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs).toHaveLength(2)
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[0].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].polymorphic.docs[0].id,
+      )
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[1].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].polymorphic.docs[1].id,
+      )
+
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.hasNextPage).toStrictEqual(true)
+
+      queryWithLimit = `query {
+        Categories(where: {
+                name: { equals: "paginate example" }
+              }) {
+              docs {
+                polymorphic(
+                  sort: "createdAt",
+                  limit: 2,
+                  page: 2,
+                ) {
+                  docs {
+                    title
+                  }
+                  hasNextPage
+                }
+              }
+            }
+          }`
+
+      pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[0].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].polymorphic.docs[2].id,
+      )
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[1].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].polymorphic.docs[3].id,
       )
     })
 
@@ -1473,6 +1781,31 @@ describe('Joins Field', () => {
 
     expect(found.docs).toHaveLength(1)
     expect(found.docs[0].id).toBe(category.id)
+  })
+
+  it('should support where querying by a join field as ID', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    const post = await payload.create({
+      collection: 'posts',
+      data: { category: category.id, title: 'my-title' },
+    })
+    const found_1 = await payload.find({
+      collection: 'categories',
+      where: { 'relatedPosts.id': { equals: post.id } },
+      overrideAccess: true,
+    })
+
+    expect(found_1.docs).toHaveLength(1)
+    expect(found_1.docs[0].id).toBe(category.id)
+
+    const found_2 = await payload.find({
+      collection: 'categories',
+      where: { relatedPosts: { equals: post.id } },
+      overrideAccess: true,
+    })
+
+    expect(found_2.docs).toHaveLength(1)
+    expect(found_2.docs[0].id).toBe(category.id)
   })
 
   it('should support where querying by a join field with hasMany relationship', async () => {

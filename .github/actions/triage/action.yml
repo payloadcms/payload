@@ -26,7 +26,7 @@ runs:
   steps:
     - name: Checkout code
       if: ${{ github.event_name != 'pull_request' }}
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Run action
       run: node ${{ github.action_path }}/dist/index.js
       shell: sh

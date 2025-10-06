@@ -1,6 +1,3 @@
-// @ts-strict-ignore
-
-import type { AdminViewConfig } from '../../admin/views/index.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 

@@ -1,7 +1,8 @@
 import type { JobsConfig } from '../queues/config/types/index.js'
 import type { Config } from './types.js'
 
-import defaultAccess from '../auth/defaultAccess.js'
+import { defaultAccess } from '../auth/defaultAccess.js'
+import { foldersSlug, parentFolderFieldName } from '../folders/constants.js'
 
 /**
  * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
@@ -23,6 +24,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     },
     routes: {
       account: '/account',
+      browseByFolder: '/browse-by-folder',
       createFirstUser: '/create-first-user',
       forgot: '/forgot',
       inactivity: '/logout-inactivity',
@@ -98,6 +100,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
     },
     routes: {
       account: '/account',
+      browseByFolder: '/browse-by-folder',
       createFirstUser: '/create-first-user',
       forgot: '/forgot',
       inactivity: '/logout-inactivity',
@@ -120,6 +123,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.endpoints = config.endpoints ?? []
   config.globals = config.globals ?? []
   config.graphQL = {
+    disableIntrospectionInProduction: true,
     disablePlaygroundInProduction: true,
     maxComplexity: 1000,
     schemaOutputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/schema.graphql`,
@@ -157,6 +161,22 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.auth = {
     jwtOrder: ['JWT', 'Bearer', 'cookie'],
     ...(config.auth || {}),
+  }
+
+  if (
+    config.folders !== false &&
+    config.collections.some((collection) => Boolean(collection.folders))
+  ) {
+    config.folders = {
+      slug: config.folders?.slug ?? foldersSlug,
+      browseByFolder: config.folders?.browseByFolder ?? true,
+      collectionOverrides: config.folders?.collectionOverrides || undefined,
+      collectionSpecific: config.folders?.collectionSpecific ?? true,
+      debug: config.folders?.debug ?? false,
+      fieldName: config.folders?.fieldName ?? parentFolderFieldName,
+    }
+  } else {
+    config.folders = false
   }
 
   return config

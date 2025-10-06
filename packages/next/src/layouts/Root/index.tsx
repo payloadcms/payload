@@ -79,12 +79,13 @@ export const RootLayout = async ({
     })
   }
 
-  const navPrefs = await getNavPrefs(req.payload, req.user?.id, req.user?.collection)
+  const navPrefs = await getNavPrefs(req)
 
   const clientConfig = getClientConfig({
     config,
     i18n: req.i18n,
     importMap,
+    user: req.user,
   })
 
   if (
@@ -121,7 +122,7 @@ export const RootLayout = async ({
           languageCode={languageCode}
           languageOptions={languageOptions}
           locale={req.locale}
-          permissions={permissions}
+          permissions={req.user ? permissions : null}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}

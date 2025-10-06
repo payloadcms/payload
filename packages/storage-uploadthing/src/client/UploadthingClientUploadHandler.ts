@@ -13,6 +13,6 @@ export const UploadthingClientUploadHandler = createClientUploadHandler({
       files: [file],
     })
 
-    return { key: res[0].key }
+    return { key: res[0]?.key }
   },
 })

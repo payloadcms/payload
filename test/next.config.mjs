@@ -14,6 +14,9 @@ const withBundleAnalyzer = bundleAnalyzer({
 export default withBundleAnalyzer(
   withPayload(
     {
+      devIndicators: {
+        position: 'bottom-right',
+      },
       eslint: {
         ignoreDuringBuilds: true,
       },
@@ -42,7 +45,11 @@ export default withBundleAnalyzer(
         ]
       },
       images: {
-        domains: ['localhost'],
+        remotePatterns: [
+          {
+            hostname: 'localhost',
+          },
+        ],
       },
       webpack: (webpackConfig) => {
         webpackConfig.resolve.extensionAlias = {

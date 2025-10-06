@@ -1,0 +1,56 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .droppable-button {
+    @include btn-reset;
+    font-weight: 600;
+    font-family: inherit;
+    &:hover {
+      cursor: pointer;
+    }
+  }
+  .folderBreadcrumbs {
+    display: flex;
+
+    &__crumb,
+    &__crumb-item.droppable-button {
+      @extend %h4;
+      font-weight: 600;
+      letter-spacing: unset;
+      display: flex;
+      align-items: center;
+      margin: 0;
+
+      &:has(.icon--folder) {
+        height: calc(var(--base) * 1.6);
+        .btn__label {
+          display: flex;
+          align-items: center;
+          height: 100%;
+        }
+      }
+    }
+
+    &__crumb-item.droppable-button--hover {
+      opacity: 0.5;
+    }
+
+    &__crumb-chevron {
+      position: relative;
+      top: 1px;
+
+      .stroke {
+        stroke: var(--theme-elevation-250);
+      }
+    }
+  }
+
+  @include mid-break {
+    .folderBreadcrumbs {
+      &__crumb,
+      &__crumb-item {
+        font-size: var(--base);
+      }
+    }
+  }
+}

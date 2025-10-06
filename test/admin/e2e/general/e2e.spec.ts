@@ -53,6 +53,7 @@ import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -346,17 +347,69 @@ describe('General', () => {
       await expect(page.locator('.not-found')).toContainText('Nothing found')
     })
 
-    test('should 404 not found documents', async () => {
-      const unknownDocumentURL = `${postsUrl.collection(postsCollectionSlug)}/1234`
-      const response = await page.goto(unknownDocumentURL)
-      expect(response.status() === 404).toBeTruthy()
-      await expect(page.locator('.not-found')).toContainText('Nothing found')
-    })
-
     test('should use custom logout route', async () => {
       const customLogoutRouteURL = `${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`
       const response = await page.goto(customLogoutRouteURL)
       expect(response.status() !== 404).toBeTruthy()
+    })
+
+    test('should redirect from non-existent document ID to collection list', async () => {
+      const nonExistentDocURL = `${serverURL}/admin/collections/${postsCollectionSlug}/999999`
+      await page.goto(nonExistentDocURL)
+      // Should redirect to collection list with notFound query parameter
+      await expect
+        .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+        .toMatch(`${serverURL}/admin/collections/${postsCollectionSlug}?notFound=999999`)
+
+      // Should show warning banner about document not found
+      await expect(page.locator('.banner--type-error')).toBeVisible()
+      await expect(page.locator('.banner--type-error')).toContainText('999999')
+    })
+
+    test('should not redirect `${adminRoute}/collections` to `${adminRoute} if there is a custom view', async () => {
+      const collectionsURL = `${serverURL}/admin/collections`
+      await page.goto(collectionsURL)
+      await expect(page.getByText('Custom View').first()).toBeVisible()
+    })
+
+    test('should redirect `${adminRoute}/globals` to `${adminRoute}', async () => {
+      const globalsURL = `${serverURL}/admin/globals`
+      await page.goto(globalsURL)
+      // Should redirect to dashboard
+      await expect.poll(() => page.url()).toBe(`${serverURL}/admin`)
+    })
+
+    /**
+     * This test is skipped because `page.goBack()` and `page.goForward()` do not trigger navigation in the Next.js app.
+     * I also tried rendering buttons that call `router.back()` and click those instead, but that also does not work.
+     */
+    test.skip("should clear the router's bfcache when navigating via the forward/back browser controls", async () => {
+      const { id } = await createPost({
+        title: 'Post to test bfcache',
+      })
+
+      // check for it in the list view first
+      await page.goto(postsUrl.list)
+      const cell = page.locator('.table td').filter({ hasText: 'Post to test bfcache' })
+      await page.locator('.table a').filter({ hasText: id }).click()
+
+      await page.waitForURL(`${postsUrl.edit(id)}`)
+      const titleField = page.locator('#field-title')
+      await expect(titleField).toHaveValue('Post to test bfcache')
+
+      // change the title to something else
+      await titleField.fill('Post to test bfcache - updated')
+      await saveDocAndAssert(page)
+
+      // now use the browser controls to go back to the list
+      await page.goBack()
+      await page.waitForURL(postsUrl.list)
+      await expect(cell).toBeVisible()
+
+      // and then forward to the edit page again
+      await page.goForward()
+      await page.waitForURL(`${postsUrl.edit(id)}`)
+      await expect(titleField).toHaveValue('Post to test bfcache - updated')
     })
   })
 
@@ -677,7 +730,7 @@ describe('General', () => {
 
       await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
         'title',
-        'Tablero',
+        'Panel de Control',
       )
 
       await field.click()
@@ -708,7 +761,6 @@ describe('General', () => {
       await checkLocaleLabels('Spanish (es)', 'English (en)')
 
       // Change locale to Spanish
-      await localizerButton.click()
       await expect(localeListItem1).toContainText('Spanish (es)')
       await localeListItem1.click()
 
