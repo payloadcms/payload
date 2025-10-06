@@ -53,7 +53,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
 
   const page = args.page || 1
 
-  const sortProperty = Object.keys(sort)[0]! // assert because buildSortParam always returns at least 1 key.
+  let sortProperty = Object.keys(sort)[0]! // assert because buildSortParam always returns at least 1 key.
   const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
 
   let currentFields = collectionConfig.flattenedFields
@@ -110,6 +110,13 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
   }
 
   if (rels.length) {
+    if (sortProperty.startsWith('_')) {
+      const sortWithoutRelationPrefix = sortProperty.replace(/^_+/, '')
+      const lastFieldPath = rels.at(-1)?.fieldPath as string
+      if (sortWithoutRelationPrefix.startsWith(lastFieldPath)) {
+        sortProperty = sortWithoutRelationPrefix
+      }
+    }
     relationLookup = rels.reduce<PipelineStage[]>((acc, { fieldPath, relationTo }) => {
       sortAggregation = sortAggregation.filter((each) => {
         if ('$lookup' in each && each.$lookup.as.replace(/^_+/, '') === fieldPath) {
