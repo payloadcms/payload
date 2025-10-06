@@ -22,7 +22,7 @@ export type WidgetInstanceClient = {
   component: React.ReactNode
 }
 
-export function ModularDashboardClient({
+export function GridLayoutDashboardClient({
   clientLayout: initialLayout,
   widgets,
 }: {

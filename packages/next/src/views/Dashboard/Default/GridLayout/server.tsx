@@ -11,15 +11,15 @@ import type { Layout } from 'react-grid-layout'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
-import type { DashboardViewServerProps } from '../Default/index.js'
+import type { DashboardViewServerProps } from '../index.js'
 import type { WidgetInstanceClient } from './client.js'
 
-import { getPreferences } from '../../../utilities/getPreferences.js'
-import { ModularDashboardClient } from './client.js'
+import { getPreferences } from '../../../../utilities/getPreferences.js'
+import { GridLayoutDashboardClient } from './client.js'
 import './index.scss'
 
-export async function ModularDashboard(props: DashboardViewServerProps) {
-  const { defaultLayout, widgets } = props.payload.config.admin.dashboard
+export async function GridLayoutDashboard(props: DashboardViewServerProps) {
+  const { defaultLayout = [], widgets } = props.payload.config.admin.dashboard || {}
   const { importMap } = props.payload
   const { user } = props
 
@@ -43,7 +43,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
 
   return (
     <div>
-      <ModularDashboardClient clientLayout={clientLayout} widgets={widgets} />
+      <GridLayoutDashboardClient clientLayout={clientLayout} widgets={widgets} />
     </div>
   )
 }
@@ -66,7 +66,7 @@ async function getLayoutFromPreferences(payload: BasePayload, user: TypedUser) {
 }
 
 async function getLayoutFromConfig(
-  defaultLayout: DashboardConfig['defaultLayout'],
+  defaultLayout: NonNullable<DashboardConfig['defaultLayout']>,
   req: PayloadRequest,
   widgets: Widget[],
 ): Promise<Layout[]> {

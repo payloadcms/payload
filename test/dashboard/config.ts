@@ -19,76 +19,76 @@ export default buildConfigWithDefaults({
     components: {
       afterDashboard: ['./components/BeforeOrAfterDashboard.js'],
       beforeDashboard: ['./components/BeforeOrAfterDashboard.js'],
-      views: {
-        dashboard: {
-          Component: {
-            path: './components/Revenue.tsx#default',
-          },
-        },
-      },
+      // views: {
+      //   dashboard: {
+      //     Component: {
+      //       path: './components/Revenue.tsx#default',
+      //     },
+      //   },
+      // },
     },
-    dashboard: {
-      defaultLayout: ({ req: { user } }) => {
-        const baseWidgets: WidgetInstance[] = [
-          {
-            widgetSlug: 'count',
-            width: 3,
-            height: 1,
-            // data: {
-            //   interval: 'week',
-            // },
-          },
-          {
-            widgetSlug: 'count',
-            width: 3,
-            height: 1,
-          },
-          {
-            widgetSlug: 'count',
-            width: 3,
-            height: 1,
-          },
-          {
-            widgetSlug: 'count',
-            width: 3,
-            height: 1,
-          },
-          {
-            widgetSlug: 'revenue',
-            width: 12,
-            height: 2,
-          },
-        ]
+    // dashboard: {
+    //   defaultLayout: ({ req: { user } }) => {
+    //     const baseWidgets: WidgetInstance[] = [
+    //       {
+    //         widgetSlug: 'count',
+    //         width: 3,
+    //         height: 1,
+    //         // data: {
+    //         //   interval: 'week',
+    //         // },
+    //       },
+    //       {
+    //         widgetSlug: 'count',
+    //         width: 3,
+    //         height: 1,
+    //       },
+    //       {
+    //         widgetSlug: 'count',
+    //         width: 3,
+    //         height: 1,
+    //       },
+    //       {
+    //         widgetSlug: 'count',
+    //         width: 3,
+    //         height: 1,
+    //       },
+    //       {
+    //         widgetSlug: 'revenue',
+    //         width: 12,
+    //         height: 2,
+    //       },
+    //     ]
 
-        if (user?.email === 'dev@payloadcms.com') {
-          baseWidgets.push({
-            widgetSlug: 'private',
-            width: 12,
-            height: 1,
-          })
-        }
-        return baseWidgets
-      },
-      widgets: [
-        {
-          slug: 'count',
-          ComponentPath: './components/Count.tsx#default',
-          maxWidth: 6,
-          // fields: []
-        },
-        {
-          slug: 'private',
-          ComponentPath: './components/Private.tsx#default',
-        },
-        {
-          slug: 'revenue',
-          ComponentPath: './components/Revenue.tsx#default',
-          minWidth: 6,
-          maxHeight: 2,
-          minHeight: 2,
-        },
-      ],
-    },
+    //     if (user?.email === 'dev@payloadcms.com') {
+    //       baseWidgets.push({
+    //         widgetSlug: 'private',
+    //         width: 12,
+    //         height: 1,
+    //       })
+    //     }
+    //     return baseWidgets
+    //   },
+    //   widgets: [
+    //     {
+    //       slug: 'count',
+    //       ComponentPath: './components/Count.tsx#default',
+    //       maxWidth: 6,
+    //       // fields: []
+    //     },
+    //     {
+    //       slug: 'private',
+    //       ComponentPath: './components/Private.tsx#default',
+    //     },
+    //     {
+    //       slug: 'revenue',
+    //       ComponentPath: './components/Revenue.tsx#default',
+    //       minWidth: 6,
+    //       maxHeight: 2,
+    //       minHeight: 2,
+    //     },
+    //   ],
+    // },
   },
   collections: [Tickets, Revenue, Events],
   onInit: async (payload) => {

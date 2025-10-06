@@ -7,6 +7,7 @@ import React from 'react'
 
 import { CollectionCards } from '../Widgets/CollectionCards/index.js'
 import './index.scss'
+import { GridLayoutDashboard } from './GridLayout/server.js'
 
 const baseClass = 'dashboard'
 
@@ -53,7 +54,7 @@ export function DefaultDashboard(props: DashboardViewServerProps) {
               user,
             } satisfies ServerProps,
           })}
-
+        <GridLayoutDashboard {...props} />
         <CollectionCards {...props} />
         {afterDashboard &&
           RenderServerComponent({

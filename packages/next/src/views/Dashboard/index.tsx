@@ -9,7 +9,6 @@ import React, { Fragment } from 'react'
 import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './Default/index.js'
 
 import { DefaultDashboard } from './Default/index.js'
-import { ModularDashboard } from './Modular/server.js'
 
 export async function Dashboard({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {
@@ -106,9 +105,7 @@ export async function Dashboard({ initPageResult, params, searchParams }: AdminV
         clientProps: {
           locale,
         } satisfies DashboardViewClientProps,
-        Component: config.admin?.dashboard
-          ? ModularDashboard
-          : config.admin?.components?.views?.dashboard?.Component,
+        Component: config.admin?.components?.views?.dashboard?.Component,
         Fallback: DefaultDashboard,
         importMap: payload.importMap,
         serverProps: {
