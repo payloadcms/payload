@@ -67,7 +67,7 @@ export const slugField: SlugField = ({
   checkboxName = 'generateSlug',
   fieldToUse = 'title',
   overrides,
-  position,
+  position = 'sidebar',
   required = true,
 } = {}) => {
   const baseField: RowField = {
