@@ -418,6 +418,10 @@ export type CollectionAdminOptions = {
     viewType?: ViewTypes
   }) => null | string
   /**
+   * Custom debounce timeout for sending form updates to server
+   */
+  formUpdateDebounceTimeout?: number
+  /**
    * Specify a navigational group for collections in the admin sidebar.
    * - Provide a string to place the entity in a custom group.
    * - Provide a record to define localized group names.

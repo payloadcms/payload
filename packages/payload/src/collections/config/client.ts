@@ -44,6 +44,7 @@ export type ServerOnlyUploadProperties = keyof Pick<
 export type ClientCollectionConfig = {
   admin: {
     description?: StaticDescription
+    formUpdateDebounceTimeout?: number
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
     preview?: boolean
   } & Omit<
@@ -149,6 +150,14 @@ export const createClientCollectionConfig = ({
                   clientCollection.admin.description = description
                 }
               }
+              break
+
+            case 'formUpdateDebounceTimeout':
+              if (collection.admin.formUpdateDebounceTimeout) {
+                clientCollection.admin.formUpdateDebounceTimeout =
+                  collection.admin.formUpdateDebounceTimeout
+              }
+
               break
 
             case 'livePreview':
