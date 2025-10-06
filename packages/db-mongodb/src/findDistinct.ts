@@ -59,15 +59,19 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
   let currentFields = collectionConfig.flattenedFields
   let foundField: FlattenedField | null = null
 
-  const rels: {
+  let rels: {
     fieldPath: string
     relationTo: string
   }[] = []
 
   let tempPath = ''
+  let insideRelation = false
 
   for (const segment of args.field.split('.')) {
     const field = currentFields.find((e) => e.name === segment)
+    if (rels.length) {
+      insideRelation = true
+    }
 
     if (!field) {
       break
@@ -89,13 +93,6 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
       typeof field.relationTo === 'string'
     ) {
       rels.push({ fieldPath: tempPath, relationTo: field.relationTo })
-      sortAggregation = sortAggregation.filter((each) => {
-        if ('$lookup' in each && each.$lookup.as.replace(/^_+/, '') === tempPath) {
-          return false
-        }
-
-        return true
-      })
       currentFields = this.payload.collections[field.relationTo]?.config
         .flattenedFields as FlattenedField[]
       continue
@@ -108,8 +105,19 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
 
   let relationLookup: null | PipelineStage[] = null
 
+  if (!insideRelation) {
+    rels = []
+  }
+
   if (rels.length) {
     relationLookup = rels.reduce<PipelineStage[]>((acc, { fieldPath, relationTo }) => {
+      sortAggregation = sortAggregation.filter((each) => {
+        if ('$lookup' in each && each.$lookup.as.replace(/^_+/, '') === fieldPath) {
+          return false
+        }
+
+        return true
+      })
       const { Model: foreignModel } = getCollection({ adapter: this, collectionSlug: relationTo })
       acc.push({
         $lookup: {
