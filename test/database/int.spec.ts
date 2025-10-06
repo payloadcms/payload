@@ -1190,7 +1190,7 @@ describe('database', () => {
     ])
   })
 
-  it('should find distinct values with virtual field linked to a 2x relationship', async () => {
+  it('should find distinct values with field nested to a 2x relationship', async () => {
     await payload.delete({ collection: 'posts', where: {} })
     await payload.delete({ collection: 'categories', where: {} })
     await payload.delete({ collection: 'simple', where: {} })
@@ -1240,6 +1240,60 @@ describe('database', () => {
       },
       {
         'category.simple.text': 'simple_3',
+      },
+    ])
+  })
+
+  it('should find distinct values with virtual field linked to a 2x relationship', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ collection: 'simple', where: {} })
+
+    const simple_1 = await payload.create({ collection: 'simple', data: { text: 'simple_1' } })
+    const simple_2 = await payload.create({ collection: 'simple', data: { text: 'simple_2' } })
+    const simple_3 = await payload.create({ collection: 'simple', data: { text: 'simple_3' } })
+
+    const category_1 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_1', simple: simple_1 },
+    })
+    const category_2 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_2', simple: simple_2 },
+    })
+    const category_3 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_3', simple: simple_3 },
+    })
+    const category_4 = await payload.create({
+      collection: 'categories',
+      data: { title: 'category_4', simple: simple_3 },
+    })
+
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_1 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_2 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_3 } })
+    await payload.create({ collection: 'posts', data: { title: 'post', category: category_4 } })
+
+    const res = await payload.findDistinct({
+      collection: 'posts',
+      field: 'categorySimpleText',
+    })
+
+    expect(res.values).toEqual([
+      {
+        categorySimpleText: 'simple_1',
+      },
+      {
+        categorySimpleText: 'simple_2',
+      },
+      {
+        categorySimpleText: 'simple_3',
       },
     ])
   })

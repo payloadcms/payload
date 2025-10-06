@@ -137,6 +137,11 @@ export const getConfig: () => Partial<Config> = () => ({
           virtual: 'category.title',
         },
         {
+          type: 'text',
+          name: 'categorySimpleText',
+          virtual: 'category.simple.text',
+        },
+        {
           type: 'relationship',
           relationTo: 'categories',
           hasMany: true,
