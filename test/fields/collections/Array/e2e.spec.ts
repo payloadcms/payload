@@ -214,9 +214,8 @@ describe('Array', () => {
         .locator('#field-potentiallyEmptyArray__0__groupInArray__textInGroupInArray')
         .fill(row1GroupText)
 
-      await wait(3000)
-
       await saveDocAndAssert(page)
+      await scrollEntirePage(page)
 
       await expect(page.locator('#field-potentiallyEmptyArray__0__text')).toHaveValue(row1Text)
       await expect(page.locator('#field-potentiallyEmptyArray__1__text')).toHaveValue(row2Text)
@@ -255,6 +254,7 @@ describe('Array', () => {
       await duplicateArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
 
       await saveDocAndAssert(page)
+      await scrollEntirePage(page)
 
       await page.locator('#field-potentiallyEmptyArray__0__text').fill(row1Text)
       await page.locator('#field-potentiallyEmptyArray__1__text').fill(row1Text)
@@ -323,9 +323,8 @@ describe('Array', () => {
       await removeArrayRow(page, { fieldName: 'potentiallyEmptyArray', rowIndex: 1 })
       await removeArrayRow(page, { fieldName: 'potentiallyEmptyArray', rowIndex: 0 })
 
-      await wait(3000)
-
       await saveDocAndAssert(page)
+      await scrollEntirePage(page)
 
       // Expect the remaining row to be the third row, now first
       await expect(
