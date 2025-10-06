@@ -34,6 +34,12 @@ export function getValidTemplates(): ProjectTemplate[] {
       url: 'https://github.com/payloadcms/payload/templates/ecommerce#main',
     },
     {
+      name: 'cloudflare-d1',
+      type: 'starter',
+      description: 'Blank template with Cloudflare D1 integration',
+      url: 'https://github.com/payloadcms/payload/templates/with-cloudflare-d1#main',
+    },
+    {
       name: 'plugin',
       type: 'plugin',
       description: 'Template for creating a Payload plugin',
