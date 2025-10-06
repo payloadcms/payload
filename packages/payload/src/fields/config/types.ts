@@ -323,10 +323,22 @@ export type FilterOptionsFunc<TData = any> = (
   options: FilterOptionsProps<TData>,
 ) => boolean | Promise<boolean | Where> | Where
 
-export type FilterOptions<TData = any> =
-  | ((options: FilterOptionsProps<TData>) => boolean | Promise<boolean | Where> | Where)
-  | null
-  | Where
+export type FilterOptions<TData = any> = FilterOptionsFunc<TData> | null | Where
+
+type BlockSlugOrString = (({} & string) | BlockSlug)[]
+
+export type BlocksFilterOptionsProps<TData = any> = {
+  /**
+   * The `id` of the current document being edited. Will be undefined during the `create` operation.
+   */
+  id: number | string
+} & Pick<FilterOptionsProps<TData>, 'data' | 'req' | 'siblingData' | 'user'>
+
+export type BlocksFilterOptions<TData = any> =
+  | ((
+      options: BlocksFilterOptionsProps<TData>,
+    ) => BlockSlugOrString | Promise<BlockSlugOrString | true> | true)
+  | BlockSlugOrString
 
 type Admin = {
   className?: string
@@ -355,6 +367,11 @@ type Admin = {
   disableBulkEdit?: boolean
   disabled?: boolean
   /**
+   * Shows / hides fields from appearing in the list view groupBy options.
+   * @type boolean
+   */
+  disableGroupBy?: boolean
+  /**
    * Shows / hides fields from appearing in the list view column selector.
    * @type boolean
    */
@@ -378,6 +395,11 @@ export type AdminClient = {
   description?: StaticDescription
   disableBulkEdit?: boolean
   disabled?: boolean
+  /**
+   * Shows / hides fields from appearing in the list view groupBy options.
+   * @type boolean
+   */
+  disableGroupBy?: boolean
   /**
    * Shows / hides fields from appearing in the list view column selector.
    * @type boolean
@@ -1515,6 +1537,36 @@ export type BlocksField = {
   blockReferences?: (Block | BlockSlug)[]
   blocks: Block[]
   defaultValue?: DefaultValue
+  /**
+   * Blocks can be conditionally enabled using the `filterOptions` property on the blocks field.
+   * It allows you to provide a function that returns which block slugs should be available based on the given context.
+   *
+   * @behavior
+   *
+   * - `filterOptions` is re-evaluated as part of the form state request, whenever the document data changes.
+   * - If a block is present in the field but no longer allowed by `filterOptions`, a validation error will occur when saving.
+   *
+   * @example
+   *
+   * ```ts
+   * {
+   *   name: 'blocksWithDynamicFilterOptions',
+   *   type: 'blocks',
+   *   filterOptions: ({ siblingData }) => {
+   *     return siblingData?.enabledBlocks?.length
+   *       ? [siblingData.enabledBlocks] // allow only the matching block
+   *       : true // allow all blocks if no value is set
+   *   },
+   *   blocks: [
+   *     { slug: 'block1', fields: [{ type: 'text', name: 'block1Text' }] },
+   *     { slug: 'block2', fields: [{ type: 'text', name: 'block2Text' }] },
+   *     { slug: 'block3', fields: [{ type: 'text', name: 'block3Text' }] },
+   *   ],
+   * }
+   * ```
+   * In this example, the list of available blocks is determined by the enabledBlocks sibling field. If no value is set, all blocks remain available.
+   */
+  filterOptions?: BlocksFilterOptions
   labels?: Labels
   maxRows?: number
   minRows?: number
@@ -1576,6 +1628,7 @@ export type JoinField = {
     } & Admin['components']
     defaultColumns?: string[]
     disableBulkEdit?: never
+    disableRowTypes?: boolean
     readOnly?: never
   } & Admin
   /**
@@ -1627,8 +1680,11 @@ export type JoinField = {
 
 export type JoinFieldClient = {
   admin?: AdminClient &
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    Pick<JoinField['admin'], 'allowCreate' | 'defaultColumns' | 'disableBulkEdit' | 'readOnly'>
+    Pick<
+      JoinField['admin'],
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      'allowCreate' | 'defaultColumns' | 'disableBulkEdit' | 'disableRowTypes' | 'readOnly'
+    >
 } & { targetField: Pick<RelationshipFieldClient, 'relationTo'> } & FieldBaseClient &
   Pick<
     JoinField,

@@ -2,7 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
-import type { ClientBlock, ClientField, Field } from '../fields/config/types.js'
+import type { ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, TypedUser } from '../index.js'
 import type {
   RootLivePreviewConfig,
@@ -220,16 +220,6 @@ export const createClientConfig = ({
           i18n,
           importMap,
         })
-
-        break
-
-      case 'experimental':
-        if (config.experimental) {
-          clientConfig.experimental = {}
-          if (config.experimental?.localizeStatus) {
-            clientConfig.experimental.localizeStatus = config.experimental.localizeStatus
-          }
-        }
 
         break
 

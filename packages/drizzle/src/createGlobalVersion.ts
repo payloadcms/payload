@@ -15,7 +15,6 @@ export async function createGlobalVersion<T extends TypeWithID>(
     autosave,
     createdAt,
     globalSlug,
-    localeStatus,
     publishedLocale,
     req,
     returning,
@@ -24,7 +23,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
     updatedAt,
     versionData,
   }: CreateGlobalVersionArgs,
-) {
+): Promise<TypeWithVersion<T>> {
   const db = await getTransaction(this, req)
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
 
@@ -36,7 +35,6 @@ export async function createGlobalVersion<T extends TypeWithID>(
       autosave,
       createdAt,
       latest: true,
-      localeStatus,
       publishedLocale,
       snapshot,
       updatedAt,

@@ -1,8 +1,11 @@
-import type { Collection, PaginatedDocs, PayloadRequest, Where } from 'payload'
+import type { GraphQLResolveInfo } from 'graphql'
+import type { Collection, PaginatedDocs, Where } from 'payload'
 
 import { findOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { buildSelectForCollectionMany } from '../../utilities/select.js'
 
 export type Resolver = (
   _: unknown,
@@ -14,28 +17,24 @@ export type Resolver = (
     locale?: string
     page?: number
     pagination?: boolean
+    select?: boolean
     sort?: string
     trash?: boolean
     where?: Where
   },
-  context: {
-    req: PayloadRequest
-  },
+  context: Context,
+  info: GraphQLResolveInfo,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => Promise<PaginatedDocs<any>>
 
 export function findResolver(collection: Collection): Resolver {
-  return async function resolver(_, args, context: Context) {
-    let { req } = context
-    const locale = req.locale
-    const fallbackLocale = req.fallbackLocale
+  return async function resolver(_, args, context, info) {
+    const req = context.req = isolateObjectProperty(context.req, ['locale', 'fallbackLocale', 'transactionID'])
+    const select = context.select = args.select ? buildSelectForCollectionMany(info) : undefined
 
-    req = isolateObjectProperty(req, ['locale', 'fallbackLocale', 'transactionID'])
-    req.locale = args.locale || locale
-    req.fallbackLocale = args.fallbackLocale || fallbackLocale
-    if (!req.query) {
-      req.query = {}
-    }
+    req.locale = args.locale || req.locale
+    req.fallbackLocale = args.fallbackLocale || req.fallbackLocale
+    req.query = req.query || {}
 
     const draft: boolean =
       (args.draft ?? req.query?.draft === 'false')
@@ -47,8 +46,6 @@ export function findResolver(collection: Collection): Resolver {
       req.query.draft = String(draft)
     }
 
-    context.req = req
-
     const options = {
       collection,
       depth: 0,
@@ -57,12 +54,13 @@ export function findResolver(collection: Collection): Resolver {
       page: args.page,
       pagination: args.pagination,
       req,
+      select,
       sort: args.sort,
       trash: args.trash,
       where: args.where,
     }
 
-    const results = await findOperation(options)
-    return results
+    const result = await findOperation(options)
+    return result
   }
 }

@@ -788,11 +788,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               }}
               onMenuOpen={() => {
                 if (appearance === 'drawer') {
-                  // TODO: This timeout is only necessary for inline blocks in the lexical editor
-                  // and when the devtools are closed. Temporary solution, we can probably do better.
-                  setTimeout(() => {
-                    openListDrawer()
-                  }, 100)
+                  openListDrawer()
                 } else if (appearance === 'select') {
                   setMenuIsOpen(true)
                   if (!hasLoadedFirstPageRef.current) {
