@@ -1,6 +1,7 @@
 import type { Payload, PayloadRequest } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
+import { mongooseList } from 'helpers/isMongoose.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -38,7 +39,7 @@ const dirname = path.dirname(filename)
 
 type EasierChained = { id: string; relation: EasierChained }
 
-const mongoIt = ['firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE || '') ? it : it.skip
+const mongoIt = mongooseList.includes(process.env.PAYLOAD_DATABASE || '') ? it : it.skip
 
 describe('Relationships', () => {
   beforeAll(async () => {

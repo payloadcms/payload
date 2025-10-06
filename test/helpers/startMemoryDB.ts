@@ -2,6 +2,8 @@ import { D1DatabaseAPI } from '@miniflare/d1'
 import { createSQLiteDB } from '@miniflare/shared'
 import dotenv from 'dotenv'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
+
+import { mongooseList } from './isMongoose.js'
 dotenv.config()
 
 declare global {
@@ -30,8 +32,7 @@ export default async () => {
     global.d1 = new D1DatabaseAPI(await createSQLiteDB(':memory'))
   }
   if (
-    (!process.env.PAYLOAD_DATABASE ||
-      ['cosmosdb', 'documentdb', 'firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE)) &&
+    (!process.env.PAYLOAD_DATABASE || mongooseList.includes(process.env.PAYLOAD_DATABASE)) &&
     !global._mongoMemoryServer
   ) {
     console.log('Starting memory db...')

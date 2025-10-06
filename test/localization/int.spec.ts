@@ -1,5 +1,6 @@
 import type { Payload, User, Where } from 'payload'
 
+import { isMongoose, mongooseList } from 'helpers/isMongoose.js'
 import path from 'path'
 import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
@@ -398,7 +399,7 @@ describe('Localization', () => {
           expect(docs[2].id).toBe(doc_3.id)
         })
 
-        if (['mongodb'].includes(process.env.PAYLOAD_DATABASE)) {
+        if (mongooseList.includes(process.env.PAYLOAD_DATABASE)) {
           describe('Localized sorting', () => {
             let localizedAccentPostOne: LocalizedPost
             let localizedAccentPostTwo: LocalizedPost
@@ -1249,7 +1250,7 @@ describe('Localization', () => {
         })
 
         // eslint-disable-next-line jest/no-conditional-in-test
-        if (['firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE!)) {
+        if (isMongoose(payload)) {
           expect(docWithoutFallback.items).toStrictEqual(null)
         } else {
           // TODO: build out compatability with SQL databases
