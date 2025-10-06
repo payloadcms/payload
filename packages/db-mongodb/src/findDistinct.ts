@@ -93,9 +93,8 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
         if ('$lookup' in each && each.$lookup.as.replace(/^_+/, '') === tempPath) {
           return false
         }
-        {
-          return true
-        }
+
+        return true
       })
       currentFields = this.payload.collections[field.relationTo]?.config
         .flattenedFields as FlattenedField[]
