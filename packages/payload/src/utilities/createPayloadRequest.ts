@@ -75,7 +75,7 @@ export const createPayloadRequest = async ({
       locale: locale!,
       localization,
     })
-    console.log(locales)
+
     fallbackLocale = locales.fallbackLocale!
     locale = locales.locale!
   }
