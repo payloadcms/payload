@@ -76,6 +76,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
                 locale: { type: graphqlResult.types.localeInputType },
               }
             : {}),
+          select: { type: GraphQLBoolean },
         },
         resolve: findOne(global),
       }
@@ -151,6 +152,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
                   locale: { type: graphqlResult.types.localeInputType },
                 }
               : {}),
+            select: { type: GraphQLBoolean },
           },
           resolve: findVersionByID(global),
         }
@@ -176,6 +178,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
             limit: { type: GraphQLInt },
             page: { type: GraphQLInt },
             pagination: { type: GraphQLBoolean },
+            select: { type: GraphQLBoolean },
             sort: { type: GraphQLString },
           },
           resolve: findVersions(global),
