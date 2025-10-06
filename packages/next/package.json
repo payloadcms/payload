@@ -64,16 +64,6 @@
       "import": "./src/exports/views.ts",
       "types": "./src/exports/views.ts",
       "default": "./src/exports/views.ts"
-    },
-    "./elements": {
-      "import": "./src/exports/elements.ts",
-      "types": "./src/exports/elements.ts",
-      "default": "./src/exports/elements.ts"
-    },
-    "./rsc": {
-      "import": "./src/exports/rsc.ts",
-      "types": "./src/exports/rsc.ts",
-      "default": "./src/exports/rsc.ts"
     }
   },
   "main": "./src/index.js",
@@ -187,16 +177,6 @@
         "import": "./dist/exports/views.js",
         "types": "./dist/exports/views.d.ts",
         "default": "./dist/exports/views.js"
-      },
-      "./elements": {
-        "import": "./dist/exports/elements.js",
-        "types": "./dist/exports/elements.d.ts",
-        "default": "./dist/exports/elements.js"
-      },
-      "./rsc": {
-        "import": "./dist/exports/rsc.js",
-        "types": "./dist/exports/rsc.d.ts",
-        "default": "./dist/exports/rsc.js"
       }
     },
     "main": "./dist/index.js",

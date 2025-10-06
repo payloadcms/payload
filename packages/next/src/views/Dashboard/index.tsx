@@ -1,5 +1,5 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
-import type { AdminViewServerProps, TypedUser } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -10,9 +10,7 @@ import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './D
 
 import { DefaultDashboard } from './Default/index.js'
 
-const globalLockDurationDefault = 300
-
-export async function DashboardView(props: AdminViewServerProps) {
+export async function Dashboard({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {
     locale,
     permissions,
@@ -24,7 +22,8 @@ export async function DashboardView(props: AdminViewServerProps) {
     },
     req,
     visibleEntities,
-  } = props.initPageResult
+  } = initPageResult
+
   const collections = config.collections.filter(
     (collection) =>
       permissions?.collections?.[collection.slug]?.read &&
@@ -37,7 +36,7 @@ export async function DashboardView(props: AdminViewServerProps) {
   )
 
   // Query locked global documents only if there are globals in the config
-  let globalData: DashboardViewServerPropsOnly['globalData'] = []
+  let globalData = []
 
   if (config.globals.length > 0) {
     const lockedDocuments = await payload.find({
@@ -46,11 +45,6 @@ export async function DashboardView(props: AdminViewServerProps) {
       overrideAccess: false,
       pagination: false,
       req,
-      select: {
-        globalSlug: true,
-        updatedAt: true,
-        user: true,
-      },
       where: {
         globalSlug: {
           exists: true,
@@ -60,10 +54,11 @@ export async function DashboardView(props: AdminViewServerProps) {
 
     // Map over globals to include `lockDuration` and lock data for each global slug
     globalData = config.globals.map((global) => {
+      const lockDurationDefault = 300
       const lockDuration =
         typeof global.lockDocuments === 'object'
           ? global.lockDocuments.duration
-          : globalLockDurationDefault
+          : lockDurationDefault
 
       const lockedDoc = lockedDocuments.docs.find((doc) => doc.globalSlug === global.slug)
 
@@ -71,8 +66,8 @@ export async function DashboardView(props: AdminViewServerProps) {
         slug: global.slug,
         data: {
           _isLocked: !!lockedDoc,
-          _lastEditedAt: (lockedDoc?.updatedAt as string) ?? null,
-          _userEditing: (lockedDoc?.user as { value?: TypedUser })?.value ?? null,
+          _lastEditedAt: lockedDoc?.updatedAt ?? null,
+          _userEditing: lockedDoc?.user?.value ?? null,
         },
         lockDuration,
       }
@@ -114,13 +109,14 @@ export async function DashboardView(props: AdminViewServerProps) {
         Fallback: DefaultDashboard,
         importMap: payload.importMap,
         serverProps: {
-          ...props,
           globalData,
           i18n,
           locale,
           navGroups,
+          params,
           payload,
           permissions,
+          searchParams,
           user,
           visibleEntities,
         } satisfies DashboardViewServerPropsOnly,

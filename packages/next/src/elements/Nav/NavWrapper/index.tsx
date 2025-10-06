@@ -4,9 +4,6 @@ import React from 'react'
 
 import './index.scss'
 
-/**
- * @internal
- */
 export const NavWrapper: React.FC<{
   baseClass?: string
   children: React.ReactNode
