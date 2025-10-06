@@ -1120,11 +1120,9 @@ export const getPayload = async (
     ) {
       try {
         const hasHTTPS =
-          process.argv.includes('--experimental-https') ??
-          process.env.__NEXT_ASSET_PREFIX?.includes('https:')
+          process.env.USE_HTTPS === 'true' || process.argv.includes('--experimental-https')
         const protocol = hasHTTPS ? 'wss' : 'ws'
         const port = process.env.PORT || '3000'
-        const protocol = process.env.USE_HTTPS === 'true' ? 'wss' : 'ws'
 
         const path = '/_next/webpack-hmr'
         // The __NEXT_ASSET_PREFIX env variable is set for both assetPrefix and basePath (tested in Next.js 15.1.6)
