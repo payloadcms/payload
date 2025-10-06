@@ -16,6 +16,7 @@ import { translations } from './translations/index.js'
 import { addCollectionAccess } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
 import { combineFilters } from './utilities/combineFilters.js'
+import { miniChalk } from './utilities/miniChalk.js'
 
 export const multiTenantPlugin =
   <ConfigType>(pluginConfig: MultiTenantPluginConfig<ConfigType>) =>
@@ -434,7 +435,7 @@ export const multiTenantPlugin =
       )
       // eslint-disable-next-line no-console
       console.error(
-        chalk.yellow.bold('WARNING (plugin-multi-tenant)'),
+        miniChalk.yellowBold('WARNING (plugin-multi-tenant)'),
         'missing collections',
         missingSlugs,
         'try placing the multi-tenant plugin after other plugins.',

@@ -310,3 +310,29 @@ export default buildConfig({
 It inherits the options from the SQLite adapter above with the exception of the connection options in favour of the `binding`.
 
 You can see our [Cloudflare D1 template](https://github.com/payloadcms/payload/tree/main/templates/with-cloudflare-d1) for a full example of how to set this up.
+
+### D1 Read Replicas
+
+You can enable read replicas support with the `first-primary` strategy. This is experimental.
+
+You must also enable it on your D1 database in the Cloudflare dashboard. Read more about it in the [Cloudflare documentation](https://developers.cloudflare.com/d1/best-practices/read-replication/).
+
+<Banner type="info">
+  All write queries are still forwarded to the primary database instance. Read
+  replication only improves the response time for read query requests.
+</Banner>
+
+```ts
+import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
+
+export default buildConfig({
+  collections: [],
+  db: sqliteD1Adapter({
+    binding: cloudflare.env.D1,
+    // You can also enable read replicas support with the `first-primary` strategy.
+    readReplicas: 'first-primary',
+  }),
+})
+```
+
+You can then verify that they're being used by checking the logs in your Cloudflare dashboard. You should see logs indicating whether a read or write operation was performed, and on which database instance.
