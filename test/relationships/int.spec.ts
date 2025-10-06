@@ -1,7 +1,6 @@
 import type { Payload, PayloadRequest } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
-import { mongooseList } from 'helpers/isMongoose.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -18,6 +17,7 @@ import type {
 } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { mongooseList } from '../helpers/isMongoose.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,

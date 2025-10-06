@@ -1,6 +1,5 @@
 import type { Payload, User, Where } from 'payload'
 
-import { isMongoose, mongooseList } from 'helpers/isMongoose.js'
 import path from 'path'
 import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
@@ -15,6 +14,7 @@ import type {
 } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
+import { isMongoose, mongooseList } from '../helpers/isMongoose.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { copyDataFromLocaleHandler } from '../../packages/ui/src/utilities/copyDataFromLocale.js'
