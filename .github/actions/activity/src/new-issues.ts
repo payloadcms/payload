@@ -7,16 +7,35 @@ import { SlimIssue } from './types'
 const DAYS_WINDOW = 7
 const TRIAGE_LABEL = 'status: needs-triage'
 
-function generateText(issues: SlimIssue[]) {
-  let text = `*A list of issues opened in the last ${DAYS_WINDOW} with \`status: needs-triage\`:*\n\n`
+function generateText(issues: { issue: SlimIssue; linkedPRUrl?: string }[]) {
+  let text = `*A list of issues opened in the last ${DAYS_WINDOW} days with \`status: needs-triage\`:*\n\n`
 
-  issues.forEach((issue) => {
-    text += `• ${issue.title} - (<${issue.html_url}|#${issue.number}>)\n`
+  issues.forEach(({ issue, linkedPRUrl }) => {
+    text += `• ${issue.title} - (<${issue.html_url}|#${issue.number}>)`
+    if (linkedPRUrl) {
+      text += ` - <${linkedPRUrl}|:link: Linked PR>`
+    }
+    text += `\n`
   })
 
   return text.trim()
 }
 
+async function getLinkedPRUrl(
+  octoClient: ReturnType<typeof getOctokit>,
+  issue: SlimIssue,
+): Promise<string | undefined> {
+  const { data: events } = await octoClient.rest.issues.listEventsForTimeline({
+    owner: 'payloadcms',
+    repo: 'payload',
+    issue_number: issue.number,
+  })
+
+  const crossReferencedEvent = events.find(
+    (event) => event.event === 'cross-referenced' && event.source?.issue?.pull_request,
+  )
+  return crossReferencedEvent?.source?.issue?.html_url
+}
 export async function run() {
   try {
     if (!process.env.GITHUB_TOKEN) throw new TypeError('GITHUB_TOKEN not set')
@@ -37,11 +56,18 @@ export async function run() {
       return
     }
 
-    const messageText = generateText(data.items)
+    const issuesWithLinkedPRs = await Promise.all(
+      data.items.map(async (issue) => {
+        const linkedPRUrl = await getLinkedPRUrl(octoClient, issue)
+        return { issue, linkedPRUrl }
+      }),
+    )
+
+    const messageText = generateText(issuesWithLinkedPRs)
     console.log(messageText)
 
     await slackClient.chat.postMessage({
-      text: generateText(data.items),
+      text: messageText,
       channel: process.env.DEBUG === 'true' ? '#test-slack-notifications' : '#dev-feed',
       icon_emoji: ':github:',
       username: 'GitHub Notifier',

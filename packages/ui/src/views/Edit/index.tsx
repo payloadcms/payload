@@ -56,6 +56,7 @@ export function DefaultEditView({
   BeforeDocumentControls,
   Description,
   EditMenuItems,
+  LivePreview: CustomLivePreview,
   PreviewButton,
   PublishButton,
   SaveButton,
@@ -143,6 +144,7 @@ export function DefaultEditView({
     previewWindowType,
     setURL: setLivePreviewURL,
     typeofLivePreviewURL,
+    url: livePreviewURL,
   } = useLivePreviewContext()
 
   const abortOnChangeRef = useRef<AbortController>(null)
@@ -223,9 +225,14 @@ export function DefaultEditView({
           }
           setCurrentEditor(lockedState.user as ClientUser)
         }
+
+        // Update lastUpdateTime when lock state changes
+        if (lockedState.lastEditedAt) {
+          setLastUpdateTime(new Date(lockedState.lastEditedAt).getTime())
+        }
       }
     },
-    [documentLockState, setCurrentEditor, setDocumentIsLocked, user?.id],
+    [documentLockState, setCurrentEditor, setDocumentIsLocked, setLastUpdateTime, user?.id],
   )
 
   const handlePrevent = useCallback((nextHref: null | string) => {
@@ -353,7 +360,7 @@ export function DefaultEditView({
           setDocumentIsLocked(false)
         }
 
-        if (livePreviewURL) {
+        if (isLivePreviewEnabled && typeofLivePreviewURL === 'function') {
           setLivePreviewURL(livePreviewURL)
         }
 
@@ -692,8 +699,12 @@ export function DefaultEditView({
               />
               {AfterDocument}
             </div>
-            {isLivePreviewEnabled && !isInDrawer && (
-              <LivePreviewWindow collectionSlug={collectionSlug} globalSlug={globalSlug} />
+            {isLivePreviewEnabled && !isInDrawer && livePreviewURL && (
+              <>
+                {CustomLivePreview || (
+                  <LivePreviewWindow collectionSlug={collectionSlug} globalSlug={globalSlug} />
+                )}
+              </>
             )}
           </div>
         </Form>

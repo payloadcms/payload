@@ -15,6 +15,7 @@ import { fr } from './fr.js'
 import { he } from './he.js'
 import { hr } from './hr.js'
 import { hu } from './hu.js'
+import { is } from './is.js'
 import { it } from './it.js'
 import { ja } from './ja.js'
 import { ko } from './ko.js'
@@ -55,6 +56,7 @@ export const translations = {
   he,
   hr,
   hu,
+  is,
   it,
   ja,
   ko,

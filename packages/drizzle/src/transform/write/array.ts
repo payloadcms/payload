@@ -121,6 +121,7 @@ export const transformArray = ({
         parentTableName: arrayTableName,
         path: `${path || ''}${field.name}.${i}.`,
         relationships,
+        relationshipsToAppend: [],
         relationshipsToDelete,
         row: newRow.row,
         selects,

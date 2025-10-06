@@ -27,11 +27,11 @@ export const formatBreadcrumb = ({
   const lastDoc = docs[docs.length - 1]!
 
   if (typeof generateURL === 'function') {
-    url = generateURL(docs, lastDoc)
+    url = generateURL(docs, lastDoc, collection)
   }
 
   if (typeof generateLabel === 'function') {
-    label = generateLabel(docs, lastDoc)
+    label = generateLabel(docs, lastDoc, collection)
   } else {
     const title = collection.admin?.useAsTitle ? lastDoc[collection.admin.useAsTitle] : ''
 

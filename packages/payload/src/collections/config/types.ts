@@ -444,7 +444,9 @@ export type CollectionAdminOptions = {
    */
   listSearchableFields?: string[]
   /**
-   * Live preview options
+   * Live Preview options.
+   *
+   * @see https://payloadcms.com/docs/live-preview/overview
    */
   livePreview?: LivePreviewConfig
   meta?: MetaConfig

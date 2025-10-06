@@ -79,6 +79,7 @@ export interface Config {
     media: Media;
     'collection-level-config': CollectionLevelConfig;
     'static-url': StaticUrl;
+    'custom-live-preview': CustomLivePreview;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -95,6 +96,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'collection-level-config': CollectionLevelConfigSelect<false> | CollectionLevelConfigSelect<true>;
     'static-url': StaticUrlSelect<false> | StaticUrlSelect<true>;
+    'custom-live-preview': CustomLivePreviewSelect<false> | CustomLivePreviewSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -899,6 +901,149 @@ export interface StaticUrl {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-live-preview".
+ */
+export interface CustomLivePreview {
+  id: string;
+  slug: string;
+  tenant?: (string | null) | Tenant;
+  title: string;
+  hero: {
+    type: 'none' | 'highImpact' | 'lowImpact';
+    richText?:
+      | {
+          [k: string]: unknown;
+        }[]
+      | null;
+    media?: (string | null) | Media;
+  };
+  layout?:
+    | (
+        | {
+            invertBackground?: boolean | null;
+            richText?:
+              | {
+                  [k: string]: unknown;
+                }[]
+              | null;
+            links?:
+              | {
+                  link: {
+                    type?: ('reference' | 'custom') | null;
+                    newTab?: boolean | null;
+                    reference?:
+                      | ({
+                          relationTo: 'posts';
+                          value: string | Post;
+                        } | null)
+                      | ({
+                          relationTo: 'pages';
+                          value: string | Page;
+                        } | null);
+                    url?: string | null;
+                    label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
+                    appearance?: ('primary' | 'secondary') | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cta';
+          }
+        | {
+            invertBackground?: boolean | null;
+            columns?:
+              | {
+                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
+                  richText?:
+                    | {
+                        [k: string]: unknown;
+                      }[]
+                    | null;
+                  enableLink?: boolean | null;
+                  link?: {
+                    type?: ('reference' | 'custom') | null;
+                    newTab?: boolean | null;
+                    reference?:
+                      | ({
+                          relationTo: 'posts';
+                          value: string | Post;
+                        } | null)
+                      | ({
+                          relationTo: 'pages';
+                          value: string | Page;
+                        } | null);
+                    url?: string | null;
+                    label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
+                    appearance?: ('default' | 'primary' | 'secondary') | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'content';
+          }
+        | {
+            invertBackground?: boolean | null;
+            position?: ('default' | 'fullscreen') | null;
+            media: string | Media;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'mediaBlock';
+          }
+        | {
+            introContent?:
+              | {
+                  [k: string]: unknown;
+                }[]
+              | null;
+            populateBy?: ('collection' | 'selection') | null;
+            relationTo?: 'posts' | null;
+            categories?: (string | Category)[] | null;
+            limit?: number | null;
+            selectedDocs?:
+              | {
+                  relationTo: 'posts';
+                  value: string | Post;
+                }[]
+              | null;
+            /**
+             * This field is auto-populated after-read
+             */
+            populatedDocs?:
+              | {
+                  relationTo: 'posts';
+                  value: string | Post;
+                }[]
+              | null;
+            /**
+             * This field is auto-populated after-read
+             */
+            populatedDocsTotal?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'archive';
+          }
+      )[]
+    | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (string | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -943,6 +1088,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'static-url';
         value: string | StaticUrl;
+      } | null)
+    | ({
+        relationTo: 'custom-live-preview';
+        value: string | CustomLivePreview;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1490,6 +1639,106 @@ export interface CollectionLevelConfigSelect<T extends boolean = true> {
  */
 export interface StaticUrlSelect<T extends boolean = true> {
   title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-live-preview_select".
+ */
+export interface CustomLivePreviewSelect<T extends boolean = true> {
+  slug?: T;
+  tenant?: T;
+  title?: T;
+  hero?:
+    | T
+    | {
+        type?: T;
+        richText?: T;
+        media?: T;
+      };
+  layout?:
+    | T
+    | {
+        cta?:
+          | T
+          | {
+              invertBackground?: T;
+              richText?: T;
+              links?:
+                | T
+                | {
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          newTab?: T;
+                          reference?: T;
+                          url?: T;
+                          label?: T;
+                          appearance?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        content?:
+          | T
+          | {
+              invertBackground?: T;
+              columns?:
+                | T
+                | {
+                    size?: T;
+                    richText?: T;
+                    enableLink?: T;
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          newTab?: T;
+                          reference?: T;
+                          url?: T;
+                          label?: T;
+                          appearance?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        mediaBlock?:
+          | T
+          | {
+              invertBackground?: T;
+              position?: T;
+              media?: T;
+              id?: T;
+              blockName?: T;
+            };
+        archive?:
+          | T
+          | {
+              introContent?: T;
+              populateBy?: T;
+              relationTo?: T;
+              categories?: T;
+              limit?: T;
+              selectedDocs?: T;
+              populatedDocs?: T;
+              populatedDocsTotal?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
