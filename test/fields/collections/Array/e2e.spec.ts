@@ -214,7 +214,7 @@ describe('Array', () => {
         .locator('#field-potentiallyEmptyArray__0__groupInArray__textInGroupInArray')
         .fill(row1GroupText)
 
-      await wait(300)
+      await wait(3000)
 
       await saveDocAndAssert(page)
 
@@ -322,6 +322,8 @@ describe('Array', () => {
       // Remove all rows one by one, except the last one
       await removeArrayRow(page, { fieldName: 'potentiallyEmptyArray', rowIndex: 1 })
       await removeArrayRow(page, { fieldName: 'potentiallyEmptyArray', rowIndex: 0 })
+
+      await wait(3000)
 
       await saveDocAndAssert(page)
 
