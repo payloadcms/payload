@@ -55,16 +55,5 @@ export const sanitizeFallbackLocale = ({
     fallbackLocale = null
   }
 
-  if (
-    typeof fallbackLocale === 'string' &&
-    fallbackLocale.startsWith('[') &&
-    fallbackLocale.endsWith(']')
-  ) {
-    fallbackLocale = fallbackLocale
-      .slice(1, -1)
-      .split(',')
-      .map((l) => l.trim())
-  }
-
   return fallbackLocale as null | string
 }

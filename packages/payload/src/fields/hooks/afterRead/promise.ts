@@ -156,22 +156,32 @@ export const promise = async ({
     const value = siblingDoc[field.name!][locale!]
 
     let hoistedValue = value
+    let formattedFallbackLocale = fallbackLocale as string | string[]
 
     if (fallbackLocale && fallbackLocale !== locale) {
       let fallbackValue
       const isNullOrUndefined = typeof value === 'undefined' || value === null
+      if (
+        typeof fallbackLocale === 'string' &&
+        fallbackLocale.startsWith('[') &&
+        fallbackLocale.endsWith(']')
+      ) {
+        formattedFallbackLocale = fallbackLocale
+          .slice(1, -1)
+          .split(',')
+          .map((l) => l.trim())
+      }
 
-      if (Array.isArray(fallbackLocale)) {
-        for (const locale of fallbackLocale) {
+      if (Array.isArray(formattedFallbackLocale)) {
+        for (const locale of formattedFallbackLocale) {
           const val = siblingDoc[field.name!]?.[locale]
-
           if (val !== undefined && val !== null && val !== '') {
             fallbackValue = val
             break
           }
         }
       } else {
-        fallbackValue = siblingDoc[field.name!][fallbackLocale]
+        fallbackValue = siblingDoc[field.name!][formattedFallbackLocale]
       }
 
       if (fallbackValue) {
