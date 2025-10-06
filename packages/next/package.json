@@ -65,10 +65,10 @@
       "types": "./src/exports/views.ts",
       "default": "./src/exports/views.ts"
     },
-    "./elements": {
-      "import": "./src/exports/elements.ts",
-      "types": "./src/exports/elements.ts",
-      "default": "./src/exports/elements.ts"
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
     },
     "./rsc": {
       "import": "./src/exports/rsc.ts",
