@@ -88,7 +88,7 @@ export const VersionPillLabel: React.FC<{
 
   const getLocaleLabel = (input) => {
     const code = Array.isArray(input) ? input[0] : input
-    const loc = localization?.locales?.find((l) => l.code === code)
+    const loc = localization && localization?.locales?.find((l) => l.code === code)
     return loc?.label?.[i18n?.language] || loc?.label || null
   }
 
