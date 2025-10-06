@@ -118,7 +118,9 @@ export const findDistinctOperation = async (
     })
 
     const fieldResult = getFieldByPath({
+      config: payload.config,
       fields: collectionConfig.flattenedFields,
+      includeRelationships: true,
       path: args.field,
     })
 
