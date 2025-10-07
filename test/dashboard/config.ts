@@ -80,7 +80,15 @@ export default buildConfigWithDefaults({
       ],
     },
   },
-  collections: [Tickets, Revenue, Events],
+  collections: [
+    Tickets,
+    Revenue,
+    Events,
+    // ...Array.from({ length: 35 }, () => ({
+    //   slug: `collection-${Math.random().toString(36).substring(2, 15)}`,
+    //   fields: [],
+    // })),
+  ],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
