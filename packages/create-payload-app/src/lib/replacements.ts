@@ -53,7 +53,16 @@ const sqliteReplacement: DbAdapterReplacement = {
   packageName: '@payloadcms/db-sqlite',
 }
 
+const d1SqliteReplacement: DbAdapterReplacement = {
+  configReplacement: (envName = 'DATABASE_URI') => [
+    'db: sqliteD1Adapter({ binding: cloudflare.env.D1 }),',
+  ],
+  importReplacement: "import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'",
+  packageName: '@payloadcms/db-d1-sqlite',
+}
+
 export const dbReplacements: Record<DbType, DbAdapterReplacement> = {
+  'd1-sqlite': d1SqliteReplacement,
   mongodb: mongodbReplacement,
   postgres: postgresReplacement,
   sqlite: sqliteReplacement,
@@ -80,12 +89,6 @@ const vercelBlobStorageReplacement: StorageAdapterReplacement = {
   packageName: '@payloadcms/storage-vercel-blob',
 }
 
-const payloadCloudReplacement: StorageAdapterReplacement = {
-  configReplacement: ['    payloadCloudPlugin(),'],
-  importReplacement: "import { payloadCloudPlugin } from '@payloadcms/payload-cloud'",
-  packageName: '@payloadcms/payload-cloud',
-}
-
 // Removes placeholders
 const diskReplacement: StorageAdapterReplacement = {
   configReplacement: [],
@@ -94,7 +97,6 @@ const diskReplacement: StorageAdapterReplacement = {
 
 export const storageReplacements: Record<StorageAdapterType, StorageAdapterReplacement> = {
   localDisk: diskReplacement,
-  payloadCloud: payloadCloudReplacement,
   vercelBlobStorage: vercelBlobStorageReplacement,
 }
 
