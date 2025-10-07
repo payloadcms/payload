@@ -1,16 +1,8 @@
 /* eslint-disable no-restricted-exports */
 'use client'
 
-import { type DashboardConfig, type Payload } from 'payload'
+import { type WidgetServerProps } from 'payload'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-
-interface RevenueProps {
-  dashboardConfig: DashboardConfig
-  payload: Payload
-  timeframe?: 'daily' | 'monthly' | 'weekly'
-  title?: string
-  widgetSlug: string
-}
 
 interface RevenueData {
   amount: number
@@ -18,10 +10,9 @@ interface RevenueData {
   period: string
 }
 
-export default function Revenue({
-  timeframe = 'monthly',
-  title = 'Revenue Statistics',
-}: RevenueProps) {
+export default function Revenue(_props: WidgetServerProps) {
+  const timeframe = 'monthly'
+  const title = 'Revenue Statistics'
   // Mock data for now - in real implementation, this would come from props or server-side fetch
   const mockData: RevenueData[] = [
     { amount: 20000, date: '2024-01', period: 'Jan' },
@@ -46,8 +37,12 @@ export default function Revenue({
     }).format(value)
   }
 
-  // @ts-expect-error - Recharts tooltip types
-  const CustomTooltip = ({ active, label, payload }) => {
+  function CustomTooltip(props: {
+    active?: boolean
+    label?: number | string
+    payload?: { value: number }[]
+  }) {
+    const { active, label, payload } = props
     if (active && payload && payload.length) {
       return (
         <div
@@ -71,7 +66,7 @@ export default function Revenue({
             {label}
           </p>
           <p style={{ color: 'var(--theme-text)', fontSize: '14px', fontWeight: 600, margin: 0 }}>
-            {formatCurrency(payload[0].value)}
+            {formatCurrency(payload[0]?.value ?? 0)}
           </p>
         </div>
       )
@@ -144,7 +139,7 @@ export default function Revenue({
               tickFormatter={(value) => `$${value / 1000}k`}
               tickLine={false}
             />
-            <Tooltip content={CustomTooltip} />
+            <Tooltip content={<CustomTooltip />} />
             <Area
               dataKey="amount"
               fill="url(#revenueGradient)"

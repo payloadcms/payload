@@ -1,26 +1,13 @@
 /* eslint-disable no-restricted-exports */
+import { type WidgetServerProps } from 'payload'
 
-import { type DashboardConfig, type Payload } from 'payload'
-
-interface CountProps {
-  changePercent?: number
-  changeText?: string
-  collection: string
-  color?: 'blue' | 'green' | 'orange' | 'purple' | 'red'
-  dashboardConfig: DashboardConfig
-  icon?: string
-  payload: Payload
-  title: string
-  widgetSlug: string
-}
-
-export default async function Count(args: CountProps) {
+export default async function Count({ req }: WidgetServerProps) {
   let count = 0
   let error: null | string = null
 
   // TODO: Dynamic collection counting using fields
   const collection = 'tickets'
-  const payload = args.payload
+  const payload = req.payload
   const title = 'Tickets'
   const color = 'blue'
   const icon = '📊'

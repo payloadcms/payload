@@ -1,15 +1,9 @@
 /* eslint-disable no-restricted-exports */
 'use client'
 
-import { type DashboardConfig, type Payload } from 'payload'
+import type { WidgetServerProps } from 'payload'
 
-interface PrivateProps {
-  dashboardConfig: DashboardConfig
-  payload: Payload
-  widgetSlug: string
-}
-
-export default function Private({ widgetSlug }: PrivateProps) {
+export default function Private({ widgetSlug }: WidgetServerProps) {
   return (
     <div
       className="private-widget card"
