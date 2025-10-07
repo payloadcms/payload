@@ -114,17 +114,15 @@ export const CodeBlockBlockComponent: React.FC<Pick<AdditionalCodeComponentProps
         </div>
       }
     >
-      <>
-        <RenderFields
-          fields={formSchema}
-          forceRender={true}
-          parentIndexPath=""
-          parentPath={''}
-          parentSchemaPath=""
-          permissions={true}
-          readOnly={!isEditable}
-        />
-      </>
+      <RenderFields
+        fields={formSchema}
+        forceRender={true}
+        parentIndexPath=""
+        parentPath={''}
+        parentSchemaPath=""
+        permissions={true}
+        readOnly={!isEditable}
+      />
     </BlockCollapsible>
   )
 }
