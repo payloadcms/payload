@@ -1,3 +1,6 @@
+/**
+ * Source: https://github.com/microsoft/monaco-editor/tree/main/src/basic-languages
+ */
 export const defaultLanguages: Record<string, string> = {
   abap: 'ABAP',
   apex: 'Apex',
