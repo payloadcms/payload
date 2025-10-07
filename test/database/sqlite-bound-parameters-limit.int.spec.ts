@@ -1,8 +1,6 @@
 import type { Payload } from 'payload'
 
 /* eslint-disable jest/require-top-level-describe */
-import assert from 'assert'
-import mongoose from 'mongoose'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
