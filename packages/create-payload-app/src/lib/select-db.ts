@@ -74,7 +74,7 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
     dbUri = initialDbUri
   } else if (args['--db-connection-string']) {
     dbUri = args['--db-connection-string']
-  } else {
+  } else if (dbType !== 'd1-sqlite') {
     dbUri = await p.text({
       initialValue: initialDbUri,
       message: `Enter ${dbChoice.title.split(' ')[0]} connection string`, // strip beta from title
