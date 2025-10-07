@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type {
   BlocksField,
+  LocalizedDraft,
   LocalizedPost,
   LocalizedSort,
   Nested,
@@ -3018,19 +3019,20 @@ describe('Localization', () => {
     })
 
     describe('Localized Meta', () => {
-      it('should return localized meta fields', async () => {
-        const doc = await payload.create({
+      let doc: LocalizedDraft
+      beforeAll(async () => {
+        const created = await payload.create({
           collection: 'localized-drafts',
           locale: 'en',
           data: {
-            title: 'itle',
+            title: 'title',
             _status: 'draft',
           },
         })
 
-        const updated = await payload.update({
+        doc = await payload.update({
           collection: 'localized-drafts',
-          id: doc.id,
+          id: created.id,
           locale: 'es',
           publishSpecificLocale: 'es',
           data: {
@@ -3038,9 +3040,40 @@ describe('Localization', () => {
             _status: 'published',
           },
         })
+      })
+      it('should return localized meta fields', () => {
+        expect(doc?.localizedMeta?.es?.status).toBe('published')
+        expect(doc?.localizedMeta?.en?.status).toBe('draft')
+      })
 
-        expect(updated?.localizedMeta?.es?.status).toBe('published')
-        expect(updated?.localizedMeta?.en?.status).toBe('draft')
+      it('should allow documents to be queried by localized meta data', async () => {
+        await payload.create({
+          collection: 'localized-drafts',
+          locale: 'en',
+          data: {
+            title: 'another',
+            _status: 'draft',
+          },
+        })
+
+        const docsWithNoQuery = await payload.find({
+          collection: 'localized-drafts',
+          locale: 'all',
+        })
+
+        expect(docsWithNoQuery.docs).toHaveLength(2)
+
+        const docsWithWhereQuery = await payload.find({
+          collection: 'localized-drafts',
+          locale: 'all',
+          where: {
+            'localizedMeta.es.status': {
+              equals: 'published',
+            },
+          },
+        })
+
+        expect(docsWithWhereQuery.docs).toHaveLength(1)
       })
     })
   })
