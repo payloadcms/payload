@@ -145,6 +145,8 @@ export async function buildConfigWithDefaults(
       ...(testConfig?.i18n || {}),
     },
     typescript: {
+      // Set defaultIDType to 'text' to ensure consistent generated types when switching db adapters
+      defaultIDType: 'text',
       declare: {
         ignoreTSError: true,
       },
