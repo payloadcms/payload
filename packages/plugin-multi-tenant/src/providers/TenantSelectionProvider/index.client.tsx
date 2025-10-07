@@ -65,9 +65,17 @@ const Context = createContext<ContextType>({
   updateTenants: () => null,
 })
 
-const setCookie = (value?: string) => {
+const DEFAULT_COOKIE_NAME = 'payload-tenant'
+
+const setTenantCookie = ({
+  cookieName = DEFAULT_COOKIE_NAME,
+  value,
+}: {
+  cookieName?: string
+  value: string
+}) => {
   document.cookie = generateCookie<string>({
-    name: 'payload-tenant',
+    name: cookieName,
     maxAge: 60 * 60 * 24 * 365, // 1 year in seconds
     path: '/',
     returnCookieAsObject: false,
@@ -75,14 +83,23 @@ const setCookie = (value?: string) => {
   })
 }
 
-const deleteCookie = () => {
+const deleteTenantCookie = ({ cookieName = DEFAULT_COOKIE_NAME }: { cookieName?: string } = {}) => {
   document.cookie = generateCookie<string>({
-    name: 'payload-tenant',
+    name: cookieName,
     maxAge: -1,
     path: '/',
     returnCookieAsObject: false,
     value: '',
   })
+}
+
+const getTenantCookie = ({ cookieName = DEFAULT_COOKIE_NAME }: {}): string | undefined => {
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${cookieName}=`)
+  if (parts.length === 2) {
+    return parts.pop()?.split(';').shift()
+  }
+  return undefined
 }
 
 export const TenantSelectionProviderClient = ({
@@ -119,9 +136,9 @@ export const TenantSelectionProviderClient = ({
     ({ id, refresh }: { id: number | string | undefined; refresh?: boolean }) => {
       setSelectedTenantID(id)
       if (id !== undefined) {
-        setCookie(String(id))
+        setTenantCookie({ value: String(id) })
       } else {
-        deleteCookie()
+        deleteTenantCookie()
       }
       if (refresh) {
         router.refresh()
@@ -171,7 +188,7 @@ export const TenantSelectionProviderClient = ({
 
         if (result.tenantOptions.length === 1) {
           setSelectedTenantID(result.tenantOptions[0].value)
-          setCookie(String(result.tenantOptions[0].value))
+          setTenantCookie({ value: String(result.tenantOptions[0].value) })
         }
       }
     } catch (e) {
@@ -199,21 +216,21 @@ export const TenantSelectionProviderClient = ({
   )
 
   React.useEffect(() => {
-    if (userChanged) {
+    if (userChanged || (initialValue && String(initialValue) !== getTenantCookie())) {
       if (userID) {
         // user logging in
         void syncTenants()
       } else {
         // user logging out
         setSelectedTenantID(undefined)
-        deleteCookie()
+        deleteTenantCookie()
         if (tenantOptions.length > 0) {
           setTenantOptions([])
         }
       }
       prevUserID.current = userID
     }
-  }, [userID, userChanged, syncTenants, tenantOptions])
+  }, [userID, userChanged, syncTenants, tenantOptions, initialValue])
 
   /**
    * If there is no initial value, clear the tenant and refresh the router.
