@@ -126,3 +126,21 @@ To further investigate the issue:
 - Go to the login screen. Open your inspector. Go to the Network tab.
 - Log in and then find the login request that should appear in your network panel. Click the login request.
 - The login request should have a Set-Cookie header on the response, and the cookie should be getting set successfully. If it is not, most browsers generally have a little yellow ⚠️ symbol that you can hover over to see why the cookie was rejected.
+
+## Using --experimental-https
+
+If you are using the `--experimental-https` flag when starting your Payload server, you may run into issues with your WebSocket connection for HMR (Hot Module Reloading) in development mode.
+
+To resolve this, you can set the `USE_HTTPS` environment variable to `true` in your `.env` file:
+
+```
+USE_HTTPS=true
+```
+
+This will ensure that the WebSocket connection uses the correct protocol (`wss://` instead of `ws://`) when HTTPS is enabled.
+
+Alternatively if more of your URL is dynamic, you can set the full URL for the WebSocket connection using the `PAYLOAD_HMR_URL_OVERRIDE` environment variable:
+
+```
+PAYLOAD_HMR_URL_OVERRIDE=wss://localhost:3000/_next/webpack-hmr
+```

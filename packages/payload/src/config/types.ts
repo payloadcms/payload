@@ -138,6 +138,8 @@ type Prettify<T> = {
 
 export type Plugin = (config: Config) => Config | Promise<Config>
 
+export type LivePreviewURLType = null | string | undefined
+
 export type LivePreviewConfig = {
   /**
    Device breakpoints to use for the `iframe` of the Live Preview window.
@@ -154,7 +156,9 @@ export type LivePreviewConfig = {
    * The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
    * Payload will send a `window.postMessage()` to this URL with the document data in real-time.
    * The frontend application is responsible for receiving the message and updating the UI accordingly.
-   * Use the `useLivePreview` hook to get started in React applications.
+   * @see https://payloadcms.com/docs/live-preview/frontend
+   *
+   * To conditionally render Live Preview, use a function that returns `undefined` or `null`.
    *
    * Note: this function may run often if autosave is enabled with a small interval.
    * For performance, avoid long-running tasks or expensive operations within this function,
@@ -172,8 +176,8 @@ export type LivePreviewConfig = {
          */
         payload: Payload
         req: PayloadRequest
-      }) => Promise<string> | string)
-    | string
+      }) => LivePreviewURLType | Promise<LivePreviewURLType>)
+    | LivePreviewURLType
 }
 
 export type RootLivePreviewConfig = {
@@ -884,6 +888,11 @@ export type Config = {
        */
       importMapFile?: string
     }
+    /**
+     * Live Preview options.
+     *
+     * @see https://payloadcms.com/docs/live-preview/overview
+     */
     livePreview?: RootLivePreviewConfig
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: MetaConfig
@@ -954,7 +963,7 @@ export type Config = {
      * Configure toast message behavior and appearance in the admin panel.
      * Currently using [Sonner](https://sonner.emilkowal.ski) for toast notifications.
      *
-     * @experimental This property is experimental and may change in future releases. Use at your own discretion.
+     * @experimental This property is experimental and may change in future releases. Use at your own risk.
      */
     toast?: {
       /**
@@ -997,7 +1006,7 @@ export type Config = {
    * For example, you may want to increase the `limits` imposed by the parser.
    * Currently using @link {https://www.npmjs.com/package/busboy|busboy} under the hood.
    *
-   * @experimental This property is experimental and may change in future releases. Use at your own discretion.
+   * @experimental This property is experimental and may change in future releases. Use at your own risk.
    */
   bodyParser?: Partial<BusboyConfig>
   /**

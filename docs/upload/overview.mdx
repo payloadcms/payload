@@ -202,16 +202,18 @@ Each image size also supports `admin` options to control whether it appears in t
   width: 400,
   height: 300,
   admin: {
+    disableGroupBy: true, // hide from list view groupBy options
     disableListColumn: true, // hide from list view columns
     disableListFilter: true, // hide from list view filters
   },
 }
 ```
 
-| Option                  | Description                                                                                                                      |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **`disableListColumn`** | If set to `true`, this image size will not be available as a selectable column in the collection list view. Defaults to `false`. |
-| **`disableListFilter`** | If set to `true`, this image size will not be available as a filter option in the collection list view. Defaults to `false`.     |
+| Option                  | Description                                                                                                                              |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **`disableGroupBy`**    | If set to `true`, this image size will not be available as a selectable groupBy option in the collection list view. Defaults to `false`. |
+| **`disableListColumn`** | If set to `true`, this image size will not be available as a selectable column in the collection list view. Defaults to `false`.         |
+| **`disableListFilter`** | If set to `true`, this image size will not be available as a filter option in the collection list view. Defaults to `false`.             |
 
 This is useful for hiding large or rarely used image sizes from the list view UI while still keeping them available in the API.
 

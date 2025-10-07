@@ -1,4 +1,3 @@
-import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelect, SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
 
@@ -293,7 +292,7 @@ export const traverseFields = ({
             ) {
               blockSelect = {}
               blockSelectMode = 'include'
-            } else if (selectMode === 'include' && blocksSelect[block.slug] === true) {
+            } else if (selectMode === 'include' && Boolean(blocksSelect[block.slug])) {
               blockSelect = true
             }
           }
@@ -730,17 +729,24 @@ export const traverseFields = ({
           const subQuery = query.as(subQueryAlias)
 
           if (shouldCount) {
+            let countSubquery: SQLiteSelect = db
+              .select(selectFields as any)
+
+              .from(newAliasTable)
+              .where(subQueryWhere)
+              .$dynamic()
+
+            joins.forEach(({ type, condition, table }) => {
+              countSubquery = countSubquery[type ?? 'leftJoin'](table, condition)
+            })
+
             currentArgs.extras[`${columnName}_count`] = sql`${db
               .select({
                 count: count(),
               })
-              .from(
-                sql`${db
-                  .select(selectFields as any)
-                  .from(newAliasTable)
-                  .where(subQueryWhere)
-                  .as(`${subQueryAlias}_count_subquery`)}`,
-              )}`.as(`${subQueryAlias}_count`)
+              .from(sql`${countSubquery.as(`${subQueryAlias}_count_subquery`)}`)}`.as(
+              `${subQueryAlias}_count`,
+            )
           }
 
           currentArgs.extras[columnName] = sql`${db
@@ -783,7 +789,7 @@ export const traverseFields = ({
         if (select || selectAllOnCurrentLevel) {
           if (
             selectAllOnCurrentLevel ||
-            (selectMode === 'include' && select[field.name] === true) ||
+            (selectMode === 'include' && Boolean(select[field.name])) ||
             (selectMode === 'exclude' && typeof select[field.name] === 'undefined')
           ) {
             shouldSelect = true
@@ -847,7 +853,7 @@ export const traverseFields = ({
 
         if (
           selectAllOnCurrentLevel ||
-          (selectMode === 'include' && select[field.name] === true) ||
+          (selectMode === 'include' && Boolean(select[field.name])) ||
           (selectMode === 'exclude' && typeof select[field.name] === 'undefined')
         ) {
           const fieldPath = `${path}${field.name}`

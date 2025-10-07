@@ -80,8 +80,6 @@ The Text Field inherits all of the default admin options from the base [Field Ad
 
 ## Example
 
-`collections/ExampleCollection.ts`
-
 ```ts
 import type { CollectionConfig } from 'payload'
 
@@ -181,5 +179,68 @@ export const CustomTextFieldLabelClient: TextFieldLabelClientComponent = ({
       required={field?.required}
     />
   )
+}
+```
+
+## Slug Field
+
+<Banner type="warning">
+  The slug field is experimental and may change, or even be removed, in future
+  releases. Use at your own risk.
+</Banner>
+
+One common use case for the Text Field is to create a "slug" for a document. A slug is a unique, indexed, URL-friendly string that identifies a particular document, often used to construct the URL of a webpage.
+
+Payload provides a built-in Slug Field so you don't have to built one from scratch. This field automatically generates a slug based on the value of another field, such as a title or name field. It provides UI to lock and unlock the field to protect its value, as well as to re-generate the slug on-demand.
+
+To add a Slug Field, import the `slugField` into your field schema:
+
+```ts
+import { slugField } from 'payload'
+import type { CollectionConfig } from 'payload'
+
+export const ExampleCollection: CollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    // highlight-line
+    slugField(),
+    // highlight-line
+  ],
+}
+```
+
+The slug field exposes a few top-level config options for easy customization:
+
+| Option         | Description                                                                                                                               |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | To be used as the slug field's name. Defaults to `slug`.                                                                                  |
+| `overrides`    | A function that receives the default fields so you can override on a granular level. See example below. [More details](./slug-overrides). |
+| `checkboxName` | To be used as the name for the `generateSlug` checkbox field. Defaults to `generateSlug`.                                                 |
+| `fieldToUse`   | The name of the field to use when generating the slug. This field must exist in the same collection. Defaults to `title`.                 |
+| `position`     | The position of the slug field. [More details](./overview#admin-options).                                                                 |
+| `required`     | Require the slug field. Defaults to `true`.                                                                                               |
+
+### Slug Overrides
+
+If the above options aren't sufficient for your use case, you can use the `overrides` function to customize the slug field at a granular level. The `overrides` function receives the default fields that make up the slug field, and you can modify them to any extent you need.
+
+```ts
+import { slugField } from 'payload'
+import type { CollectionConfig } from 'payload'
+
+export const ExampleCollection: CollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    // highlight-line
+    slugField({
+      overrides: (defaultField) => {
+        defaultField.fields[1].label = 'Custom Slug Label'
+        return defaultField
+      },
+    }),
+    // highlight-line
+  ],
 }
 ```

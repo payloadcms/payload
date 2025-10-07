@@ -14,6 +14,7 @@ import type {
 } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
+import { isMongoose, mongooseList } from '../helpers/isMongoose.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { copyDataFromLocaleHandler } from '../../packages/ui/src/utilities/copyDataFromLocale.js'
@@ -398,7 +399,7 @@ describe('Localization', () => {
           expect(docs[2].id).toBe(doc_3.id)
         })
 
-        if (['mongodb'].includes(process.env.PAYLOAD_DATABASE)) {
+        if (mongooseList.includes(process.env.PAYLOAD_DATABASE)) {
           describe('Localized sorting', () => {
             let localizedAccentPostOne: LocalizedPost
             let localizedAccentPostTwo: LocalizedPost
@@ -1249,7 +1250,7 @@ describe('Localization', () => {
         })
 
         // eslint-disable-next-line jest/no-conditional-in-test
-        if (['firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE!)) {
+        if (isMongoose(payload)) {
           expect(docWithoutFallback.items).toStrictEqual(null)
         } else {
           // TODO: build out compatability with SQL databases

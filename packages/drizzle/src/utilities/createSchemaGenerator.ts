@@ -118,7 +118,7 @@ export const createSchemaGenerator = ({
       if (table.indexes) {
         for (const key in table.indexes) {
           const index = table.indexes[key]
-          let indexDeclaration = `${sanitizeObjectKey(key)}: ${index.unique ? 'uniqueIndex' : 'index'}('${index.name}')`
+          let indexDeclaration = `${index.unique ? 'uniqueIndex' : 'index'}('${index.name}')`
           indexDeclaration += `.on(${typeof index.on === 'string' ? `${accessProperty('columns', index.on)}` : `${index.on.map((on) => `${accessProperty('columns', on)}`).join(', ')}`}),`
           extrasDeclarations.push(indexDeclaration)
         }
@@ -128,7 +128,7 @@ export const createSchemaGenerator = ({
         for (const key in table.foreignKeys) {
           const foreignKey = table.foreignKeys[key]
 
-          let foreignKeyDeclaration = `${sanitizeObjectKey(key)}: foreignKey({
+          let foreignKeyDeclaration = `foreignKey({
       columns: [${foreignKey.columns.map((col) => `columns['${col}']`).join(', ')}],
       foreignColumns: [${foreignKey.foreignColumns.map((col) => `${accessProperty(col.table, col.name)}`).join(', ')}],
       name: '${foreignKey.name}'
@@ -166,9 +166,9 @@ ${Object.entries(table.columns)
   .join('\n')}
 }${
         extrasDeclarations.length
-          ? `, (columns) => ({
-    ${extrasDeclarations.join('\n    ')}
-  })`
+          ? `, (columns) => [
+    ${extrasDeclarations.join(' ')}
+]`
           : ''
       }
 )

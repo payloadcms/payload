@@ -1120,13 +1120,16 @@ export const getPayload = async (
     ) {
       try {
         const port = process.env.PORT || '3000'
+        const hasHTTPS =
+          process.env.USE_HTTPS === 'true' || process.argv.includes('--experimental-https')
+        const protocol = hasHTTPS ? 'wss' : 'ws'
 
         const path = '/_next/webpack-hmr'
         // The __NEXT_ASSET_PREFIX env variable is set for both assetPrefix and basePath (tested in Next.js 15.1.6)
         const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
 
         cached.ws = new WebSocket(
-          process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `ws://localhost:${port}${prefix}${path}`,
+          process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `${protocol}://localhost:${port}${prefix}${path}`,
         )
 
         cached.ws.onmessage = (event) => {
@@ -1409,6 +1412,8 @@ export type { ValidationFieldError } from './errors/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 
 export { baseIDField } from './fields/baseFields/baseIDField.js'
+
+export { slugField, type SlugFieldProps } from './fields/baseFields/slug/index.js'
 
 export {
   createClientField,

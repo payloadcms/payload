@@ -1,7 +1,7 @@
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Content } from '@/blocks/Content/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
-import { slugField } from '@/fields/slug'
+import { slugField } from 'payload'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
 import { CollectionOverride } from '@payloadcms/plugin-ecommerce/types'
 import {
@@ -26,19 +26,16 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
     ...defaultCollection?.admin,
     defaultColumns: ['title', 'enableVariants', '_status', 'variants.variants'],
     livePreview: {
-      url: ({ data, req }) => {
-        const path = generatePreviewPath({
-          slug: typeof data?.slug === 'string' ? data.slug : '',
+      url: ({ data, req }) =>
+        generatePreviewPath({
+          slug: data?.slug,
           collection: 'products',
           req,
-        })
-
-        return path
-      },
+        }),
     },
     preview: (data, { req }) =>
       generatePreviewPath({
-        slug: typeof data?.slug === 'string' ? data.slug : '',
+        slug: data?.slug as string,
         collection: 'products',
         req,
       }),
@@ -210,10 +207,6 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
       hasMany: true,
       relationTo: 'categories',
     },
-    ...slugField('title', {
-      slugOverrides: {
-        required: true,
-      },
-    }),
+    slugField(),
   ],
 })

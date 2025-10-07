@@ -27,6 +27,15 @@ export type SQLiteSchemaHook = (args: SQLiteSchemaHookArgs) => Promise<SQLiteSch
 
 export type Args = {
   binding: AnyD1Database
+  /**
+   * Experimental. Enables read replicas support with the `first-primary` strategy.
+   *
+   * @experimental
+   * @example
+   *
+   * ```readReplicas: 'first-primary'```
+   */
+  readReplicas?: 'first-primary'
 } & BaseSQLiteArgs
 
 export type GenericColumns = {
@@ -99,6 +108,14 @@ export type SQLiteD1Adapter = {
   binding: Args['binding']
   client: AnyD1Database
   drizzle: Drizzle
+  /**
+   * Experimental. Enables read replicas support with the `first-primary` strategy.
+   *
+   * @example
+   *
+   * ```readReplicas: 'first-primary'```
+   */
+  readReplicas?: 'first-primary'
 } & BaseSQLiteAdapter &
   SQLiteDrizzleAdapter
 

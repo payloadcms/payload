@@ -181,6 +181,9 @@ export const rootEslintConfig = [
       },
       parser: typescriptParser,
     },
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
+    },
     plugins: {
       'import-x': importX,
     },
