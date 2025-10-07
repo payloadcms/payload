@@ -12,6 +12,11 @@ type Props = {
 }
 
 export const generatePreviewPath = ({ collection, slug }: Props) => {
+  // Allow empty strings, e.g. for the homepage
+  if (slug === undefined || slug === null) {
+    return null
+  }
+
   const encodedParams = new URLSearchParams({
     slug,
     collection,
