@@ -162,7 +162,7 @@ describe('Lexical Fully Featured', () => {
 
     await expect(
       codeBlock.locator('.payload-richtext-code-block__language-selector-button'),
-    ).toHaveAttribute('data-selected-language', 'js')
+    ).toHaveAttribute('data-selected-language', 'abap')
 
     // Does not contain payload types. However, since this is JavaScript and not TypeScript, there should be no errors.
     await codeBlock.locator('.monaco-editor .view-line').first().click()
