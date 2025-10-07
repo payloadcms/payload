@@ -1,5 +1,5 @@
 import type { StaticLabel } from '../../config/types.js'
-import type { ClientUser, Locale, PayloadRequest, ServerProps } from '../../index.js'
+import type { AdminViewServerPropsOnly, ClientUser, Locale } from '../../index.js'
 
 export enum EntityType {
   collection = 'collections',
@@ -26,7 +26,6 @@ export type DashboardViewServerPropsOnly = {
     slug: string
   }>
   navGroups?: NavGroupType[]
-  req: PayloadRequest
-} & ServerProps
+} & AdminViewServerPropsOnly
 
 export type DashboardViewServerProps = DashboardViewClientProps & DashboardViewServerPropsOnly
