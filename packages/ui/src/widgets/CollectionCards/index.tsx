@@ -1,20 +1,29 @@
+import type { WidgetServerProps } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
-import { type DashboardViewServerPropsOnly } from 'payload'
-import { EntityType } from 'payload'
+import { EntityType, getAccessResults } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { Button } from '../../elements/Button/index.js'
 import { Card } from '../../elements/Card/index.js'
 import { Locked } from '../../elements/Locked/index.js'
+import { getGlobalData } from '../../utilities/getGlobalData.js'
+import { getNavGroups } from '../../utilities/getNavGroups.js'
+import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 import './index.scss'
 
 const baseClass = 'collection-cards'
 
-export function CollectionCards(props: DashboardViewServerPropsOnly) {
-  const { globalData, i18n, navGroups, payload, permissions, user } = props
+export async function CollectionCards(props: WidgetServerProps) {
+  const { i18n, payload, user } = props.req
   const { admin: adminRoute } = payload.config.routes
   const { t } = i18n
+  const permissions = await getAccessResults({ req: props.req })
+  const visibleEntities = getVisibleEntities({ req: props.req })
+  const globalData = await getGlobalData(props.req)
+
+  const navGroups = getNavGroups(permissions, visibleEntities, payload.config, i18n)
 
   return (
     <Fragment>
@@ -35,6 +44,7 @@ export function CollectionCards(props: DashboardViewServerPropsOnly) {
                   let isLocked = null
                   let userEditing = null
 
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                   if (type === EntityType.collection) {
                     title = getTranslation(label, i18n)
 
@@ -50,6 +60,7 @@ export function CollectionCards(props: DashboardViewServerPropsOnly) {
                     hasCreatePermission = permissions?.collections?.[slug]?.create
                   }
 
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                   if (type === EntityType.global) {
                     title = getTranslation(label, i18n)
 
@@ -88,7 +99,8 @@ export function CollectionCards(props: DashboardViewServerPropsOnly) {
                         actions={
                           isLocked && user?.id !== userEditing?.id ? (
                             <Locked className={`${baseClass}__locked`} user={userEditing} />
-                          ) : hasCreatePermission && type === EntityType.collection ? (
+                          ) : // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+                          hasCreatePermission && type === EntityType.collection ? (
                             <Button
                               aria-label={t('general:createNewLabel', {
                                 label,

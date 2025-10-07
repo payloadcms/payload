@@ -1,4 +1,4 @@
-import type { ServerFunction, Widget } from 'payload'
+import type { ServerFunction, Widget, WidgetServerProps } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
@@ -57,11 +57,10 @@ export const renderWidgetHandler: ServerFunction<
 
   try {
     // Create server props for the widget
-    const serverProps = {
-      payload: req.payload,
+    const serverProps: WidgetServerProps = {
       req,
-      user: req.user,
       widgetData: widgetData || {},
+      widgetSlug,
     }
 
     // Render the widget server component

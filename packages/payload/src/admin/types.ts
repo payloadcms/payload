@@ -593,6 +593,7 @@ export {
   type DashboardViewServerProps,
   type DashboardViewServerPropsOnly,
   type NavGroupType,
+  type WidgetServerProps,
 } from './views/dashboard.js'
 
 export type {

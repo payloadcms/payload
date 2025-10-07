@@ -6,6 +6,7 @@ import type {
   TypedUser,
   Widget,
   WidgetInstance,
+  WidgetServerProps,
 } from 'payload'
 import type { Layout } from 'react-grid-layout'
 
@@ -29,17 +30,17 @@ export async function GridLayoutDashboard(props: DashboardViewServerProps) {
     (await getLayoutFromConfig(defaultLayout, req, widgets))
 
   const clientLayout: WidgetInstanceClient[] = layout.map((layoutItem) => {
+    const widgetSlug = layoutItem.i.slice(0, layoutItem.i.lastIndexOf('-'))
     return {
       clientLayout: layoutItem,
       component: RenderServerComponent({
-        Component: widgets.find(
-          (w) => w.slug === layoutItem.i.slice(0, layoutItem.i.lastIndexOf('-')),
-        )?.ComponentPath,
+        Component: widgets.find((w) => w.slug === widgetSlug)?.ComponentPath,
         importMap,
         serverProps: {
-          ...props,
-          widgetSlug: layoutItem.i,
-        },
+          req,
+          widgetSlug,
+          // widgetData: layoutItem.data,
+        } satisfies WidgetServerProps,
       }),
     }
   })
