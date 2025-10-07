@@ -1,11 +1,19 @@
 'use client'
 import type { UseDraggableArguments } from '@dnd-kit/core'
 
-import React, { Fragment } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 
 import type { ChildFunction } from './types.js'
 
 import { useDraggableSortable } from '../useDraggableSortable/index.js'
+
+function useClient() {
+  const [isClient, setClient] = useState<boolean>(false)
+  useEffect(() => {
+    setClient(true)
+  }, [])
+  return isClient
+}
 
 export const DraggableSortableItem: React.FC<
   {
@@ -19,6 +27,13 @@ export const DraggableSortableItem: React.FC<
       id,
       disabled,
     })
+
+  const isClient = useClient()
+
+  if (!isClient) {
+    // Skip server-side rendering to avoid hydration error of aria attributes
+    return null
+  }
 
   return (
     <Fragment>
