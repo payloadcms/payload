@@ -20,13 +20,15 @@ export type InlineBlockFields<TInlineBlockFields extends JsonObject = JsonObject
   id: string
 } & TInlineBlockFields
 
-export type SerializedInlineBlockNode<TBlockFields extends JsonObject = JsonObject> = Spread<
-  {
-    children?: never // required so that our typed editor state doesn't automatically add children
-    fields: InlineBlockFields<TBlockFields>
-    type: 'inlineBlock'
-  },
-  SerializedLexicalNode
+export type SerializedInlineBlockNode<TBlockFields extends JsonObject = JsonObject> = Omit<
+  Spread<
+    {
+      fields: InlineBlockFields<TBlockFields>
+      type: 'inlineBlock'
+    },
+    Omit<SerializedLexicalNode, 'type'>
+  >,
+  'children'
 >
 
 export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactElement> {

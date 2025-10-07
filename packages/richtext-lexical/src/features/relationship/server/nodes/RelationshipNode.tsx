@@ -22,10 +22,12 @@ export type RelationshipData = {
   }
 }[CollectionSlug]
 
-export type SerializedRelationshipNode = {
-  children?: never // required so that our typed editor state doesn't automatically add children
-  type: 'relationship'
-} & Spread<RelationshipData, SerializedDecoratorBlockNode>
+export type SerializedRelationshipNode = Omit<
+  {
+    type: 'relationship'
+  } & Spread<RelationshipData, Omit<SerializedDecoratorBlockNode, 'type'>>,
+  'children'
+>
 
 function $relationshipElementToServerNode(domNode: HTMLDivElement): DOMConversionOutput | null {
   const id = domNode.getAttribute('data-lexical-relationship-id')

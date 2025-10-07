@@ -76,10 +76,12 @@ export type UploadDataImproved<TUploadExtraFieldsData extends JsonObject = JsonO
   }
 }[UploadCollectionSlug]
 
-export type SerializedUploadNode = {
-  children?: never // required so that our typed editor state doesn't automatically add children
-  type: 'upload'
-} & Spread<UploadData, SerializedDecoratorBlockNode>
+export type SerializedUploadNode = Omit<
+  {
+    type: 'upload'
+  } & Spread<UploadData, Omit<SerializedDecoratorBlockNode, 'type'>>,
+  'children'
+>
 
 export class UploadServerNode extends DecoratorBlockNode {
   __data: UploadData

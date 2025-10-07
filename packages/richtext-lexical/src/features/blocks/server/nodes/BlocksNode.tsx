@@ -29,13 +29,15 @@ export type BlockFieldsOptionalID<TBlockFields extends JsonObject = JsonObject> 
   id?: string
 } & BaseBlockFields<TBlockFields>
 
-export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = Spread<
-  {
-    children?: never // required so that our typed editor state doesn't automatically add children
-    fields: BlockFields<TBlockFields>
-    type: 'block'
-  },
-  SerializedDecoratorBlockNode
+export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = Omit<
+  Spread<
+    {
+      fields: BlockFields<TBlockFields>
+      type: 'block'
+    },
+    Omit<SerializedDecoratorBlockNode, 'type'>
+  >,
+  'children'
 >
 
 export class ServerBlockNode extends DecoratorBlockNode {

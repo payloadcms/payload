@@ -46,36 +46,60 @@ export type SerializedParagraphNode<T extends SerializedLexicalNode = Serialized
       textFormat: number
       type: 'paragraph'
     },
-    SerializedElementNode<T>
+    Omit<SerializedElementNode<T>, 'type'>
   >
-export type SerializedTextNode = Spread<
-  {
-    children?: never // required so that our typed editor state doesn't automatically add children
-    type: 'text'
-  },
-  _SerializedTextNode
+export type SerializedTextNode = Omit<
+  Spread<
+    {
+      type: 'text'
+    },
+    Omit<_SerializedTextNode, 'type'>
+  >,
+  'children'
 >
 
-export type SerializedTabNode = Spread<
-  {
-    children?: never // required so that our typed editor state doesn't automatically add children
-    type: 'tab'
-  },
-  _SerializedTabNode
+export type SerializedTabNode = Omit<
+  Spread<
+    {
+      type: 'tab'
+    },
+    Omit<_SerializedTabNode, 'type'>
+  >,
+  'children'
 >
 
-export type SerializedLineBreakNode = Spread<
-  {
-    children?: never // required so that our typed editor state doesn't automatically add children
-    type: 'linebreak'
-  },
-  _SerializedLineBreakNode
+export type SerializedLineBreakNode = Omit<
+  Spread<
+    {
+      type: 'linebreak'
+    },
+    Omit<_SerializedLineBreakNode, 'type'>
+  >,
+  'children'
 >
 
-type RecursiveNodes<T extends SerializedLexicalNode, Depth extends number = 4> = Depth extends 0
-  ? T
-  : { children?: RecursiveNodes<T, DecrementDepth<Depth>>[] } & T
+/**
+ * Recursively adds typed children to nodes up to a specified depth.
+ *
+ * Key behaviors:
+ * - `T extends any`: Distributive - processes each union member individually
+ * - `OriginalUnion`: Preserves full union so nested children accept all node types, not just parent's type. If we just used `T`, the type would be narrowed to the parent's type and the children would only consist of the parent's type.
+ * - `'children' extends keyof T`: Only adds children to container nodes; respects leaf nodes that use `Omit<_, 'children'>`
+ * - `Depth`: Limits recursion to prevent infinite types (default: 4 levels)
+ */
+type RecursiveNodes<
+  T extends SerializedLexicalNode,
+  Depth extends number = 4,
+  OriginalUnion extends SerializedLexicalNode = T,
+> = T extends any // Make distributive over unions
+  ? Depth extends 0
+    ? T
+    : 'children' extends keyof T
+      ? { children?: RecursiveNodes<OriginalUnion, DecrementDepth<Depth>, OriginalUnion>[] } & T
+      : T // Skip leaf nodes
+  : never
 
+/** Decrements depth: 4→3, 3→2, 2→1, 1→0, 0→0 */
 type DecrementDepth<N extends number> = [0, 0, 1, 2, 3, 4][N]
 
 /**

@@ -303,5 +303,119 @@ describe('Types testing', () => {
 
       expect<PushParameterType['type']>().type.toBe<_Hardcoded_DefaultNodeTypes>()
     })
+
+    test('ensure leaf nodes (linebreak, text, tab) do not have children property', () => {
+      type NodeType = DefaultTypedEditorState['root']['children'][number]
+
+      // When narrowed to linebreak, children should not exist
+      const linebreakNode = {
+        type: 'linebreak',
+      } as NodeType
+
+      if (linebreakNode.type === 'linebreak') {
+        expect(linebreakNode).type.not.toHaveProperty('children')
+      }
+
+      // When narrowed to text, children should not exist
+      const textNode = {
+        type: 'text',
+      } as NodeType
+
+      if (textNode.type === 'text') {
+        expect(textNode).type.not.toHaveProperty('children')
+      }
+
+      // When narrowed to tab, children should not exist
+      const tabNode = {
+        type: 'tab',
+      } as NodeType
+
+      if (tabNode.type === 'tab') {
+        expect(tabNode).type.not.toHaveProperty('children')
+      }
+    })
+
+    test('ensure container nodes (heading, paragraph, list) have children property', () => {
+      type NodeType = DefaultTypedEditorState['root']['children'][number]
+
+      // When narrowed to heading, children should exist
+      const headingNode = {
+        type: 'heading',
+      } as NodeType
+
+      if (headingNode.type === 'heading') {
+        expect(headingNode).type.toHaveProperty('children')
+      }
+
+      // When narrowed to paragraph, children should exist
+      const paragraphNode = {
+        type: 'paragraph',
+      } as NodeType
+
+      if (paragraphNode.type === 'paragraph') {
+        expect(paragraphNode).type.toHaveProperty('children')
+      }
+
+      // When narrowed to list, children should exist
+      const listNode = {
+        type: 'list',
+      } as NodeType
+
+      if (listNode.type === 'list') {
+        expect(listNode).type.toHaveProperty('children')
+      }
+    })
+
+    test('ensure children accept all node types from the union, not just parent type', () => {
+      type NodeType = DefaultTypedEditorState['root']['children'][number]
+
+      const headingNode = {
+        type: 'heading',
+      } as NodeType
+
+      if (headingNode.type === 'heading') {
+        // Children should accept all node types from the union
+        type ChildrenType = NonNullable<(typeof headingNode)['children']>[number]['type']
+        expect<ChildrenType>().type.toBe<_Hardcoded_DefaultNodeTypes>()
+      }
+    })
+
+    test('ensure nested children preserve full union type at all depths', () => {
+      type RootChildren = DefaultTypedEditorState['root']['children'][number]
+      type Level1Children = Extract<RootChildren, { children?: any }>['children']
+      type Level2Children = NonNullable<Level1Children>[number]
+
+      // Level 2 children should still have access to all node types
+      expect<Level2Children['type']>().type.toBe<_Hardcoded_DefaultNodeTypes>()
+
+      // Level 3 children (if they exist) should also have all node types
+      type Level3Children = Extract<Level2Children, { children?: any }>['children']
+      type Level3Node = NonNullable<Level3Children>[number]
+      expect<Level3Node['type']>().type.toBe<_Hardcoded_DefaultNodeTypes>()
+    })
+
+    test('ensure linebreak nodes cannot have children even when nested', () => {
+      // This test verifies that RecursiveNodes doesn't add children to leaf nodes
+      type RootChildren = DefaultTypedEditorState['root']['children'][number]
+
+      // At top level
+      type TopLevelLinebreak = Extract<RootChildren, { type: 'linebreak' }>
+      expect<TopLevelLinebreak>().type.not.toHaveProperty('children')
+
+      // At nested level (inside a heading's children)
+      type HeadingNode = Extract<RootChildren, { type: 'heading' }>
+      type HeadingChildren = NonNullable<HeadingNode['children']>[number]
+      type NestedLinebreak = Extract<HeadingChildren, { type: 'linebreak' }>
+      expect<NestedLinebreak>().type.not.toHaveProperty('children')
+    })
+
+    test('ensure type property uses literal types, not string', () => {
+      // This verifies the Omit<_, 'type'> fix prevents base Lexical type: string from overriding literals
+      type NodeType = DefaultTypedEditorState['root']['children'][number]
+
+      // Type should be a union of literals, not string
+      expect<NodeType['type']>().type.toBe<_Hardcoded_DefaultNodeTypes>()
+      expect<NodeType['type']>().type.not.toBe<string>()
+    })
   })
 })

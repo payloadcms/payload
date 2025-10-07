@@ -16,7 +16,7 @@ export type SerializedHeadingNode = Spread<
   {
     type: 'heading'
   },
-  _SerializedHeadingNode
+  Omit<_SerializedHeadingNode, 'type'>
 >
 
 export type HeadingFeatureProps = {
