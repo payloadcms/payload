@@ -174,6 +174,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     removeUpload: 'Ukloni prenos',
     saveChanges: 'Sačuvaj promene',
     searchForBlock: 'Pretraži blok',
+    searchForLanguage: 'Pretraži jezik',
     selectExistingLabel: 'Odaberi postojeću {{label}}',
     selectFieldsToEdit: 'Odaberite polja za promenu',
     showAll: 'Pokaži sve',

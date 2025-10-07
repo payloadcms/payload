@@ -174,6 +174,7 @@ export const caTranslations: DefaultTranslationsObject = {
     removeUpload: 'Elimina la pujada',
     saveChanges: 'Desa els canvis',
     searchForBlock: 'Cerca un bloc',
+    searchForLanguage: 'Cerca un llenguatge',
     selectExistingLabel: 'Selecciona un {{label}} existent',
     selectFieldsToEdit: 'Selecciona camps per editar',
     showAll: 'Mostra-ho tot',

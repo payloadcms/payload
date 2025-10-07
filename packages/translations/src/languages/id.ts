@@ -174,6 +174,7 @@ export const idTranslations: DefaultTranslationsObject = {
     removeUpload: 'Hapus Unggahan',
     saveChanges: 'Simpan perubahan',
     searchForBlock: 'Cari blok',
+    searchForLanguage: 'Cari bahasa',
     selectExistingLabel: 'Pilih {{label}} yang ada',
     selectFieldsToEdit: 'Pilih isian untuk diedit',
     showAll: 'Tampilkan Semua',

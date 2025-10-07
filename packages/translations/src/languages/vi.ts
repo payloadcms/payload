@@ -173,6 +173,7 @@ export const viTranslations: DefaultTranslationsObject = {
     removeUpload: 'Xóa bản tải lên',
     saveChanges: 'Luu thay đổi',
     searchForBlock: 'Tìm block',
+    searchForLanguage: 'Tìm kiếm một ngôn ngữ',
     selectExistingLabel: 'Chọn một {{label}} có sẵn',
     selectFieldsToEdit: 'Chọn các trường để chỉnh sửa',
     showAll: 'Hiển thị toàn bộ',

@@ -174,6 +174,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     removeUpload: '削除',
     saveChanges: '変更を保存',
     searchForBlock: 'ブロックを検索',
+    searchForLanguage: '言語を検索します',
     selectExistingLabel: '既存 {{label}} を選択',
     selectFieldsToEdit: '編集するフィールドを選択',
     showAll: 'すべて開く',
