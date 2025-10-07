@@ -17,6 +17,7 @@ import './index.scss'
 const prismToMonacoLanguageMap = {
   js: 'javascript',
   ts: 'typescript',
+  tsx: 'typescript',
 }
 
 const baseClass = 'code-field'

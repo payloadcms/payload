@@ -21,13 +21,16 @@ import type { AdditionalCodeComponentProps } from './Code.js'
 import { CodeBlockIcon } from '../../../../../lexical/ui/icons/CodeBlock/index.js'
 import { useBlockComponentContext } from '../../../client/component/BlockContent.js'
 import { Collapse } from './Collapse/index.js'
+import { defaultLanguages } from './defaultLanguages.js'
 import { FloatingCollapse } from './FloatingCollapse/index.js'
 
 const baseClass = 'payload-richtext-code-block'
-export const CodeBlockBlockComponent: React.FC<
-  Required<Pick<AdditionalCodeComponentProps, 'languages'>>
-> = (args) => {
-  const { languages } = args
+export const CodeBlockBlockComponent: React.FC<Pick<AdditionalCodeComponentProps, 'languages'>> = (
+  args,
+) => {
+  const { languages: languagesFromProps } = args
+  const languages = languagesFromProps || defaultLanguages
+
   const { BlockCollapsible, formSchema, RemoveButton } = useBlockComponentContext()
   const { setModified } = useForm()
 

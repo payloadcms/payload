@@ -5,18 +5,15 @@ import type { CodeFieldClient, CodeFieldClientProps } from 'payload'
 import { CodeField, useFormFields } from '@payloadcms/ui'
 import React, { useMemo } from 'react'
 
+import { defaultLanguages } from './defaultLanguages.js'
+
 export type AdditionalCodeComponentProps = {
   /**
    * @default first key of the `languages` prop
    */
   defaultLanguage?: string
   /**
-   * @default
-   * {
-   *  js: 'JavaScript',
-   *  plaintext: 'Plain Text',
-   *  ts: 'TypeScript',
-   * }
+   * @default all languages supported by Monaco Editor
    */
   languages?: Record<string, string>
   /**
@@ -67,11 +64,7 @@ export const CodeComponent: React.FC<AdditionalCodeComponentProps & CodeFieldCli
   autoComplete,
   field,
   forceRender,
-  languages = {
-    js: 'JavaScript',
-    plaintext: 'Plain Text',
-    ts: 'TypeScript',
-  },
+  languages = defaultLanguages,
   path,
   permissions,
   readOnly,

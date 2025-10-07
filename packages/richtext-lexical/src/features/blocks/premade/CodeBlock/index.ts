@@ -2,17 +2,14 @@ import type { Block } from 'payload'
 
 import type { AdditionalCodeComponentProps } from './Component/Code.js'
 
+import { defaultLanguages } from './Component/defaultLanguages.js'
 import { codeConverter } from './converter.js'
 
 /**
  * @experimental - this API may change in future, minor releases
  */
 export const CodeBlock: (args?: AdditionalCodeComponentProps) => Block = (args) => {
-  const languages = args?.languages || {
-    js: 'JavaScript',
-    plaintext: 'Plain Text',
-    ts: 'TypeScript',
-  }
+  const languages = args?.languages || defaultLanguages
 
   return {
     slug: args?.slug || 'Code',
@@ -20,7 +17,8 @@ export const CodeBlock: (args?: AdditionalCodeComponentProps) => Block = (args) 
       components: {
         Block: {
           clientProps: {
-            languages,
+            // If default languages are used, return undefined (=> do not pass `languages` variable) in order to reduce data sent to the client
+            languages: args?.languages,
           },
           path: '@payloadcms/richtext-lexical/client#CodeBlockBlockComponent',
         },

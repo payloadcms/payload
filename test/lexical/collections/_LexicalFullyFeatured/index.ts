@@ -42,6 +42,12 @@ export const LexicalFullyFeatured: CollectionConfig = {
               CodeBlock({
                 slug: 'PayloadCode',
                 defaultLanguage: 'ts',
+                languages: {
+                  js: 'JavaScript',
+                  ts: 'TypeScript',
+                  json: 'JSON',
+                  plaintext: 'Plain Text',
+                },
                 typescript: {
                   fetchTypes: [
                     {
