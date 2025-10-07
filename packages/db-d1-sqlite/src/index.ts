@@ -109,6 +109,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       }),
       idType: sqliteIDType,
       initializing,
+      limitedBoundParameters: true,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
       operators,

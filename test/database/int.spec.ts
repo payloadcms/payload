@@ -5099,4 +5099,62 @@ describe('database', () => {
     await payload.db.init()
     await payload.db.connect()
   })
+
+  const itSqlite = process.env.PAYLOAD_DATABASE === 'sqlite' ? it : it.skip
+
+  itSqlite(
+    'should not use bound parameters for where querying on ID with IN if limitedBoundParameters: true',
+    async () => {
+      const defaultExecute = payload.db.drizzle.$client.execute.bind(payload.db.drizzle.$client)
+      payload.db.drizzle.$client.execute = async function execute(...args) {
+        const res = await defaultExecute(...args)
+        const [{ args: boundParameters }] = args as [{ args: any[] }]
+
+        if (boundParameters.length > 100) {
+          throw new Error('Exceeded limit of bound parameters!')
+        }
+        return res
+      }
+
+      payload.db.limitedBoundParameters = false
+
+      const IN = Array.from({ length: 300 }, (_, i) => i)
+
+      await expect(
+        payload.find({
+          collection: 'simple',
+          pagination: false,
+          where: { id: { in: IN } },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'simple',
+          pagination: false,
+          where: { id: { not_in: IN } },
+        }),
+      ).rejects.toBeTruthy()
+
+      payload.db.limitedBoundParameters = true
+
+      await expect(
+        payload.find({
+          collection: 'simple',
+          pagination: false,
+          where: { id: { in: IN } },
+        }),
+      ).resolves.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'simple',
+          pagination: false,
+          where: { id: { not_in: IN } },
+        }),
+      ).resolves.toBeTruthy()
+
+      payload.db.drizzle.$client.execute = defaultExecute
+    },
+  )
 })
