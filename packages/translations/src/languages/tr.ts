@@ -175,6 +175,7 @@ export const trTranslations: DefaultTranslationsObject = {
     removeUpload: 'Dosyayı Sil',
     saveChanges: 'Değişiklikleri kaydet',
     searchForBlock: 'Blok ara',
+    searchForLanguage: 'Bir dil arayın.',
     selectExistingLabel: 'Varolan {{label}} seç',
     selectFieldsToEdit: 'Düzenlenecek alanları seçin',
     showAll: 'Tümünü göster',

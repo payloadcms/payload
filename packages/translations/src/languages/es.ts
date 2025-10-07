@@ -177,6 +177,7 @@ export const esTranslations: DefaultTranslationsObject = {
     removeUpload: 'Eliminar documento',
     saveChanges: 'Guardar cambios',
     searchForBlock: 'Buscar bloque',
+    searchForLanguage: 'Busca un idioma',
     selectExistingLabel: 'Seleccionar {{label}} existente',
     selectFieldsToEdit: 'Seleccionar campos para editar',
     showAll: 'Mostrar Todo',

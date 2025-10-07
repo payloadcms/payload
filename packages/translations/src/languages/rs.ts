@@ -174,6 +174,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     removeUpload: 'Уклони пренос',
     saveChanges: 'Сачувај промене',
     searchForBlock: 'Претражи блок',
+    searchForLanguage: 'Pretraga za jezik',
     selectExistingLabel: 'Одабери постојећу {{label}}',
     selectFieldsToEdit: 'Одаберите поља за промену',
     showAll: 'Покажи све',

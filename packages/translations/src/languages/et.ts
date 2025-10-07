@@ -172,6 +172,7 @@ export const etTranslations: DefaultTranslationsObject = {
     removeUpload: 'Eemalda üleslaadimine',
     saveChanges: 'Salvesta muudatused',
     searchForBlock: 'Otsi plokki',
+    searchForLanguage: 'Otsi keelt',
     selectExistingLabel: 'Vali olemasolev {{label}}',
     selectFieldsToEdit: 'Vali väljad muutmiseks',
     showAll: 'Näita kõiki',
