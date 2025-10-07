@@ -35,7 +35,7 @@
       line-height: var(--base);
       text-decoration: none;
       border-radius: 3px;
-
+      width: 100%;
       button {
         @extend %btn-reset;
 

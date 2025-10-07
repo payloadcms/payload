@@ -1,18 +1,19 @@
 'use client'
+import type { ComboboxEntry } from '@payloadcms/ui'
 import type {} from 'payload'
-
-import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 
 import './index.scss'
 
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {
   ChevronIcon,
+  Combobox,
   CopyToClipboard,
-  Popup,
   PopupList,
   RenderFields,
   useForm,
   useFormFields,
+  useTranslation,
 } from '@payloadcms/ui'
 import React from 'react'
 
@@ -33,6 +34,7 @@ export const CodeBlockBlockComponent: React.FC<Pick<AdditionalCodeComponentProps
 
   const { BlockCollapsible, formSchema, RemoveButton } = useBlockComponentContext()
   const { setModified } = useForm()
+  const { t } = useTranslation()
 
   const { codeField } = useFormFields(([fields]) => ({
     codeField: fields?.code,
@@ -54,11 +56,30 @@ export const CodeBlockBlockComponent: React.FC<Pick<AdditionalCodeComponentProps
 
   const isEditable = useLexicalEditable()
 
+  const languageEntries = React.useMemo<ComboboxEntry[]>(() => {
+    return Object.entries(languages).map(([languageCode, languageLabel]) => ({
+      name: `${languageCode} ${languageLabel}`,
+      Component: (
+        <PopupList.Button
+          active={false}
+          disabled={false}
+          onClick={() => {
+            setSelectedLanguage(languageCode)
+          }}
+        >
+          <span className={`${baseClass}__language-code`} data-language={languageCode}>
+            {languageLabel}
+          </span>
+        </PopupList.Button>
+      ),
+    }))
+  }, [languages, setSelectedLanguage])
+
   return (
     <BlockCollapsible
       Actions={
         <div className={`${baseClass}__actions`}>
-          <Popup
+          <Combobox
             button={
               <div
                 className={`${baseClass}__language-selector-button`}
@@ -68,30 +89,13 @@ export const CodeBlockBlockComponent: React.FC<Pick<AdditionalCodeComponentProps
                 <ChevronIcon className={`${baseClass}__chevron`} />
               </div>
             }
+            buttonType="custom"
             className={`${baseClass}__language-selector`}
             disabled={!isEditable}
+            entries={languageEntries}
             horizontalAlign="right"
-            render={({ close }) => (
-              <PopupList.ButtonGroup>
-                {Object.entries(languages).map(([languageCode, languageLabel]) => {
-                  return (
-                    <PopupList.Button
-                      active={false}
-                      disabled={false}
-                      key={languageCode}
-                      onClick={() => {
-                        setSelectedLanguage(languageCode)
-                        close()
-                      }}
-                    >
-                      <span className={`${baseClass}__language-code`} data-language={languageCode}>
-                        {languageLabel}
-                      </span>
-                    </PopupList.Button>
-                  )
-                })}
-              </PopupList.ButtonGroup>
-            )}
+            minEntriesForSearch={8}
+            searchPlaceholder={t('fields:searchForLanguage')}
             showScrollbar
             size="large"
           />
