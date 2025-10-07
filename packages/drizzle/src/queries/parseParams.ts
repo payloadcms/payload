@@ -10,6 +10,7 @@ import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
+import { isValidStringID } from '../utilities/isValidStringID.js'
 import { DistinctSymbol } from '../utilities/rawConstraint.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
@@ -405,7 +406,7 @@ export function parseParams({
                       continue
                     }
                     if (typeof val === 'string') {
-                      if (!/^[\w-]+(?:\.[\w-]+)*$/.test(val)) {
+                      if (!isValidStringID(val)) {
                         isInvalid = true
                         break
                       } else {
