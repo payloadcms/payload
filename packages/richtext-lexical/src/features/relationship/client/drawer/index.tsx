@@ -91,7 +91,7 @@ const RelationshipDrawerComponentFallback: React.FC = () => {
     }>(
       INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND,
       () => {
-        toast.error('No upload collections enabled')
+        toast.error('No relationship collections enabled')
         return true
       },
       COMMAND_PRIORITY_EDITOR,
