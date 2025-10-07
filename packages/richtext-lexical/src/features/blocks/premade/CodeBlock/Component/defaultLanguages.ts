@@ -46,6 +46,7 @@ export const defaultLanguages: Record<string, string> = {
   pgsql: 'PostgreSQL',
   php: 'PHP',
   pla: 'PLA',
+  plaintext: 'Plain Text',
   postiats: 'Postiats',
   powerquery: 'Power Query',
   powershell: 'PowerShell',
