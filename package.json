@@ -190,7 +190,7 @@
     "tstyche": "3.5.0",
     "tsx": "4.19.2",
     "turbo": "^2.5.4",
-    "typescript": "5.7.3"
+    "typescript": "5.9.3"
   },
   "packageManager": "pnpm@9.7.1",
   "engines": {

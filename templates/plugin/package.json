@@ -76,7 +76,7 @@
     "rimraf": "3.0.2",
     "sharp": "0.34.2",
     "sort-package-json": "^2.10.0",
-    "typescript": "5.7.3",
+    "typescript": "5.9.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.1.2"
   },

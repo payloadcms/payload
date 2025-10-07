@@ -52,7 +52,7 @@
     "playwright": "1.54.1",
     "playwright-core": "1.54.1",
     "prettier": "^3.4.2",
-    "typescript": "5.7.3",
+    "typescript": "5.9.3",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.3",
     "wrangler": "~4.42.0"
