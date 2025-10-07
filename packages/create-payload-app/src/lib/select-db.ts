@@ -74,6 +74,7 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
     dbUri = initialDbUri
   } else if (args['--db-connection-string']) {
     dbUri = args['--db-connection-string']
+    // D1 Sqlite does not use a connection string so skip this prompt for this database
   } else if (dbType !== 'd1-sqlite') {
     dbUri = await p.text({
       initialValue: initialDbUri,
