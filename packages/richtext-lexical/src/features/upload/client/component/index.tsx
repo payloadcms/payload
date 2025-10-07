@@ -26,9 +26,8 @@ import { useEditorConfigContext } from '../../../../lexical/config/client/Editor
 import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
 import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
-import { EnabledRelationshipsCondition } from '../../../relationship/client/utils/EnabledRelationshipsCondition.js'
-import './index.scss'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
+import './index.scss'
 
 const baseClass = 'lexical-upload'
 
@@ -42,7 +41,7 @@ export type ElementProps = {
   nodeKey: string
 }
 
-const Component: React.FC<ElementProps> = (props) => {
+export const UploadComponent: React.FC<ElementProps> = (props) => {
   const {
     data: { fields, relationTo, value },
     nodeKey,
@@ -242,13 +241,5 @@ const Component: React.FC<ElementProps> = (props) => {
         />
       ) : null}
     </div>
-  )
-}
-
-export const UploadComponent = (props: ElementProps): React.ReactNode => {
-  return (
-    <EnabledRelationshipsCondition {...props} uploads>
-      <Component {...props} />
-    </EnabledRelationshipsCondition>
   )
 }

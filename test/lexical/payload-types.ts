@@ -612,6 +612,21 @@ export interface LexicalRelationshipField {
     };
     [k: string]: unknown;
   } | null;
+  richText3?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1220,6 +1235,7 @@ export interface LexicalAccessControlSelect<T extends boolean = true> {
 export interface LexicalRelationshipFieldsSelect<T extends boolean = true> {
   richText?: T;
   richText2?: T;
+  richText3?: T;
   updatedAt?: T;
   createdAt?: T;
 }

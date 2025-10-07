@@ -27,7 +27,7 @@ type Props = {
   nodeKey?: string
 }
 
-const Component: React.FC<Props> = (props) => {
+export const RelationshipComponent: React.FC<Props> = (props) => {
   const {
     data: { relationTo, value },
     nodeKey,
@@ -133,8 +133,4 @@ const Component: React.FC<Props> = (props) => {
       {!!value && <DocumentDrawer onSave={updateRelationship} />}
     </div>
   )
-}
-
-export const RelationshipComponent = (props: Props): React.ReactNode => {
-  return <Component {...props} />
 }
