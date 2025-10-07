@@ -152,6 +152,8 @@ jobs:
       matrix:
         database:
           - mongodb
+          - documentdb
+          - cosmosdb
           - firestore
           - postgres
           - postgres-custom-schema

@@ -1,3 +1,4 @@
+import type { SanitizedConfig } from '../config/types.js'
 import type { FlattenedField } from '../fields/config/types.js'
 
 /**
@@ -7,11 +8,15 @@ import type { FlattenedField } from '../fields/config/types.js'
  * group.<locale>.title // group is localized here
  */
 export const getFieldByPath = ({
+  config,
   fields,
+  includeRelationships = false,
   localizedPath = '',
   path,
 }: {
+  config?: SanitizedConfig
   fields: FlattenedField[]
+  includeRelationships?: boolean
   localizedPath?: string
   path: string
 }): {
@@ -45,10 +50,26 @@ export const getFieldByPath = ({
       currentFields = field.flattenedFields
     }
 
+    if (
+      config &&
+      includeRelationships &&
+      (field.type === 'relationship' || field.type === 'upload') &&
+      !Array.isArray(field.relationTo)
+    ) {
+      const flattenedFields = config.collections.find(
+        (e) => e.slug === field.relationTo,
+      )?.flattenedFields
+      if (flattenedFields) {
+        currentFields = flattenedFields
+      }
+    }
+
     if ('blocks' in field) {
       for (const block of field.blocks) {
         const maybeField = getFieldByPath({
+          config,
           fields: block.flattenedFields,
+          includeRelationships,
           localizedPath,
           path: [...segments].join('.'),
         })

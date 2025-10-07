@@ -39,10 +39,10 @@ The `EcommerceProvider` component is used to wrap your application and provide t
 Example usage:
 
 ```tsx
-import { EcommerceProvider } from '@payloadcms/plugin-ecommerce/react'
+import { EcommerceProvider } from '@payloadcms/plugin-ecommerce/client/react'
 // Import any payment adapters you want to use on the client side
 import { stripeAdapterClient } from '@payloadcms/plugin-ecommerce/payments/stripe'
-import { USD, EUR } from '@payloadcms/plugin-ecommerce/currencies'
+import { USD, EUR } from '@payloadcms/plugin-ecommerce'
 
 export const Providers = () => (
   <EcommerceProvider
@@ -117,7 +117,7 @@ The `useCart` hook is used to manage the cart state and actions. It provides met
 Example usage:
 
 ```tsx
-import { useCart } from '@payloadcms/plugin-ecommerce/react'
+import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 
 const CartComponent = () => {
   const { addItem, cart, clearCart, decrementItem, incrementItem, removeItem } =
@@ -140,7 +140,7 @@ The `useAddresses` hook is used to fetch and manage addresses. It provides metho
 Example usage:
 
 ```tsx
-import { useAddresses } from '@payloadcms/plugin-ecommerce/react'
+import { useAddresses } from '@payloadcms/plugin-ecommerce/client/react'
 
 const AddressesComponent = () => {
   const { addresses, createAddress, updateAddress } = useAddresses()
@@ -163,7 +163,7 @@ The `usePayments` hook is used to manage the checkout process. It provides metho
 Example usage:
 
 ```tsx
-import { usePayments } from '@payloadcms/plugin-ecommerce/react'
+import { usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 
 const CheckoutComponent = () => {
   const {
@@ -244,7 +244,7 @@ The `useCurrency` hook is used to format prices based on the selected currency. 
 `formatPrice` in particular is very helpful as all prices are stored as integers to avoid any potential issues with decimal calculations, therefore on the frontend you can use this utility to format your price accounting for the currency and decimals. Example usage:
 
 ```tsx
-import { useCurrency } from '@payloadcms/plugin-ecommerce/react'
+import { useCurrency } from '@payloadcms/plugin-ecommerce/client/react'
 
 const PriceComponent = ({ amount }) => {
   const { currenciesConfig, currency, setCurrency } = useCurrency()
@@ -260,7 +260,7 @@ The `useEcommerce` hook encompasses all of the above hooks in one. It provides a
 Example usage:
 
 ```tsx
-import { useEcommerce } from '@payloadcms/plugin-ecommerce/react'
+import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
 
 const EcommerceComponent = () => {
   const { cart, addresses, selectedPaymentMethod } = useEcommerce()

@@ -561,6 +561,7 @@ export type DocumentSlots = {
   BeforeDocumentControls?: React.ReactNode
   Description?: React.ReactNode
   EditMenuItems?: React.ReactNode
+  LivePreview?: React.ReactNode
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode
   SaveButton?: React.ReactNode

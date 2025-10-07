@@ -56,7 +56,7 @@ export const getColumns = ({
       )
     : getInitialColumns(
         isPolymorphic ? fields : filterFields(fields),
-        collectionConfig.admin?.useAsTitle,
+        collectionConfig?.admin?.useAsTitle,
         isPolymorphic ? [] : collectionConfig?.admin?.defaultColumns,
       )
 }

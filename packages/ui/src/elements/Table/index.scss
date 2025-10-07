@@ -5,6 +5,7 @@
     margin-bottom: $baseline;
     overflow: auto;
     max-width: 100%;
+    isolation: isolate;
 
     table {
       min-width: 100%;

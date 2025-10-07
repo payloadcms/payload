@@ -205,6 +205,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
                 locale: { type: graphqlResult.types.localeInputType },
               }
             : {}),
+          select: { type: GraphQLBoolean },
           trash: { type: GraphQLBoolean },
         },
         resolve: findByIDResolver(collection),
@@ -224,6 +225,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           limit: { type: GraphQLInt },
           page: { type: GraphQLInt },
           pagination: { type: GraphQLBoolean },
+          select: { type: GraphQLBoolean },
           sort: { type: GraphQLString },
           trash: { type: GraphQLBoolean },
         },
@@ -390,6 +392,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
             limit: { type: GraphQLInt },
             page: { type: GraphQLInt },
             pagination: { type: GraphQLBoolean },
+            select: { type: GraphQLBoolean },
             sort: { type: GraphQLString },
             trash: { type: GraphQLBoolean },
           },

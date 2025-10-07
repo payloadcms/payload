@@ -125,16 +125,16 @@ export const seed = async ({
   const [imageHatBuffer, imageTshirtBlackBuffer, imageTshirtWhiteBuffer, heroBuffer] =
     await Promise.all([
       fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/ecommerce/src/endpoints/seed/hat-logo.png',
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/ecommerce/src/endpoints/seed/hat-logo.png',
       ),
       fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/ecommerce/src/endpoints/seed/tshirt-black.png',
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/ecommerce/src/endpoints/seed/tshirt-black.png',
       ),
       fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/ecommerce/src/endpoints/seed/tshirt-white.png',
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/ecommerce/src/endpoints/seed/tshirt-white.png',
       ),
       fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/feat/ecommerce-template/templates/website/src/endpoints/seed/image-hero1.webp',
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-hero1.webp',
       ),
     ])
 

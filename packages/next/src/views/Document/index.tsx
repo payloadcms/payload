@@ -392,7 +392,9 @@ export const renderDocument = async ({
         <LivePreviewProvider
           breakpoints={livePreviewConfig?.breakpoints}
           isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
-          isLivePreviewing={entityPreferences?.value?.editViewType === 'live-preview'}
+          isLivePreviewing={Boolean(
+            entityPreferences?.value?.editViewType === 'live-preview' && livePreviewURL,
+          )}
           typeofLivePreviewURL={typeof livePreviewConfig?.url as 'function' | 'string' | undefined}
           url={livePreviewURL}
         >
@@ -420,7 +422,7 @@ export const renderDocument = async ({
   }
 }
 
-export async function Document(props: AdminViewServerProps) {
+export async function DocumentView(props: AdminViewServerProps) {
   try {
     const { Document: RenderedDocument } = await renderDocument(props)
     return RenderedDocument

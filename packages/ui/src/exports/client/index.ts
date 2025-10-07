@@ -416,3 +416,6 @@ export type {
   RenderFieldServerFnArgs,
   RenderFieldServerFnReturnType,
 } from '../../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
+
+export { useLivePreviewContext } from '../../providers/LivePreview/context.js'
+export { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'

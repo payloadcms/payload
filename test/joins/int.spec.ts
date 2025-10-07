@@ -215,6 +215,18 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts?.totalDocs).toBe(15)
   })
 
+  it('should count hasMany relationship joins', async () => {
+    const res = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+      joins: {
+        hasManyPosts: { limit: 1, count: true },
+      },
+    })
+
+    expect(res.hasManyPosts?.totalDocs).toBe(15)
+  })
+
   it('should populate relationships in joins', async () => {
     const { docs } = await payload.find({
       limit: 1,
