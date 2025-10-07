@@ -4,13 +4,17 @@ import slugify from '@sindresorhus/slugify'
 import type { CliArgs, DbDetails, DbType } from '../types.js'
 
 type DbChoice = {
-  dbConnectionPrefix: `${string}/`
+  dbConnectionPrefix?: `${string}/`
   dbConnectionSuffix?: string
   title: string
   value: DbType
 }
 
 export const dbChoiceRecord: Record<DbType, DbChoice> = {
+  'd1-sqlite': {
+    title: 'Cloudflare D1 SQlite',
+    value: 'd1-sqlite',
+  },
   mongodb: {
     dbConnectionPrefix: 'mongodb://127.0.0.1/',
     title: 'MongoDB',

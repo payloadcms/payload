@@ -67,7 +67,7 @@ interface Template {
 
 export type PackageManager = 'bun' | 'npm' | 'pnpm' | 'yarn'
 
-export type DbType = 'mongodb' | 'postgres' | 'sqlite' | 'vercel-postgres'
+export type DbType = 'd1-sqlite' | 'mongodb' | 'postgres' | 'sqlite' | 'vercel-postgres'
 
 export type DbDetails = {
   dbUri: string
@@ -89,4 +89,4 @@ export type NextAppDetails = {
 
 export type NextConfigType = 'cjs' | 'esm' | 'ts'
 
-export type StorageAdapterType = 'localDisk' | 'payloadCloud' | 'vercelBlobStorage'
+export type StorageAdapterType = 'localDisk' | 'vercelBlobStorage'
