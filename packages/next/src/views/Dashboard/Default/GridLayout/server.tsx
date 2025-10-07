@@ -22,10 +22,11 @@ export async function GridLayoutDashboard(props: DashboardViewServerProps) {
   const { defaultLayout = [], widgets } = props.payload.config.admin.dashboard || {}
   const { importMap } = props.payload
   const { user } = props
+  const { req } = props.initPageResult
 
   const layout =
     (await getLayoutFromPreferences(props.payload, user)) ??
-    (await getLayoutFromConfig(defaultLayout, props.req, widgets))
+    (await getLayoutFromConfig(defaultLayout, req, widgets))
 
   const clientLayout: WidgetInstanceClient[] = layout.map((layoutItem) => {
     return {
