@@ -5,6 +5,7 @@ import {
   FixedToolbarFeature,
   lexicalEditor,
   RelationshipFeature,
+  UploadFeature,
 } from '@payloadcms/richtext-lexical'
 
 import { lexicalRelationshipFieldsSlug } from '../../slugs.js'
@@ -23,6 +24,9 @@ export const LexicalRelationshipsFields: CollectionConfig = {
           ...defaultEditorFeatures,
           RelationshipFeature({
             enabledCollections: ['array-fields'],
+          }),
+          UploadFeature({
+            enabledCollections: ['uploads'],
           }),
         ],
       }),
