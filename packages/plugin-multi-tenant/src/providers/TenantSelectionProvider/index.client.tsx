@@ -67,13 +67,8 @@ const Context = createContext<ContextType>({
 
 const DEFAULT_COOKIE_NAME = 'payload-tenant'
 
-const setTenantCookie = ({
-  cookieName = DEFAULT_COOKIE_NAME,
-  value,
-}: {
-  cookieName?: string
-  value: string
-}) => {
+const setTenantCookie = (args: { cookieName?: string; value: string }) => {
+  const { cookieName = DEFAULT_COOKIE_NAME, value } = args
   document.cookie = generateCookie<string>({
     name: cookieName,
     maxAge: 60 * 60 * 24 * 365, // 1 year in seconds
@@ -83,7 +78,8 @@ const setTenantCookie = ({
   })
 }
 
-const deleteTenantCookie = ({ cookieName = DEFAULT_COOKIE_NAME }: { cookieName?: string } = {}) => {
+const deleteTenantCookie = (args: { cookieName?: string } = {}) => {
+  const { cookieName = DEFAULT_COOKIE_NAME } = args
   document.cookie = generateCookie<string>({
     name: cookieName,
     maxAge: -1,
@@ -93,7 +89,8 @@ const deleteTenantCookie = ({ cookieName = DEFAULT_COOKIE_NAME }: { cookieName?:
   })
 }
 
-const getTenantCookie = ({ cookieName = DEFAULT_COOKIE_NAME }: {}): string | undefined => {
+const getTenantCookie = (args: { cookieName?: string } = {}): string | undefined => {
+  const { cookieName = DEFAULT_COOKIE_NAME } = args
   const value = `; ${document.cookie}`
   const parts = value.split(`; ${cookieName}=`)
   if (parts.length === 2) {
