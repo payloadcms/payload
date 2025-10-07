@@ -38,5 +38,17 @@ export const LexicalRelationshipsFields: CollectionConfig = {
         features: [...defaultEditorFeatures, RelationshipFeature(), FixedToolbarFeature()],
       }),
     },
+    {
+      name: 'richText3',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: [
+          ...defaultEditorFeatures,
+          UploadFeature({
+            disabledCollections: ['uploads'],
+          }),
+        ],
+      }),
+    },
   ],
 }

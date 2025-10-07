@@ -709,7 +709,7 @@ describe('lexicalMain', () => {
     const relationshipListDrawerTitle = page.locator('.list-header__title')
     await expect(relationshipListDrawerTitle).toHaveText('Uploads')
 
-    await expect(relationshipListDrawerTitle.locator('.rs__input')).toBeHidden()
+    await expect(page.locator('.rs__input')).toBeHidden()
 
     // Close drawer
     await page.locator('.close-modal-button').first().click()
@@ -744,6 +744,41 @@ describe('lexicalMain', () => {
     await page.locator('.rs__input').first().click()
     await expect(page.locator('.rs__menu').getByText('Uploads')).toHaveCount(1)
     await expect(page.locator('.rs__menu').getByText('Uploads2')).toHaveCount(1)
+  })
+
+  test('disabledCollections should work with UploadFeature', async () => {
+    const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-relationship-fields')
+    await page.goto(url.list)
+    const linkToDoc = page.locator('tbody tr:first-child a').first()
+
+    await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    const linkDocHref = await linkToDoc.getAttribute('href')
+    await linkToDoc.click()
+    await page.waitForURL(`**${linkDocHref}`)
+    const richTextField = page.locator('.rich-text-lexical').nth(2)
+
+    const contentEditable = richTextField.locator('.ContentEditable__root').last()
+    await contentEditable.scrollIntoViewIfNeeded()
+    await expect(contentEditable).toBeVisible()
+
+    // Create upload node with slash menu
+    await contentEditable.click()
+    await page.keyboard.press('Enter')
+    await page.keyboard.press('/')
+    await page.keyboard.type('Upload')
+    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+    await expect(slashMenuPopover).toBeVisible()
+
+    const uploadSelectButton = slashMenuPopover.locator('button').nth(0)
+    await expect(uploadSelectButton).toBeVisible()
+    await expect(uploadSelectButton).toContainText('Upload')
+    await uploadSelectButton.click()
+    await expect(slashMenuPopover).toBeHidden()
+
+    const uploadListDrawerTitle = page.locator('.list-header__title')
+    await expect(uploadListDrawerTitle).toHaveText('Uploads2s')
+
+    await expect(page.locator('.rs__input')).toBeHidden()
   })
 
   test('ensure navigation to collection that used to cause admin panel freeze due to object references bug is possible', async () => {
