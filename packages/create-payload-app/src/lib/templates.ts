@@ -36,7 +36,7 @@ export function getValidTemplates(): ProjectTemplate[] {
     {
       name: 'with-cloudflare-d1',
       type: 'starter',
-      description: 'Blank template with Cloudflare D1 integration',
+      description: 'Blank template with Cloudflare D1 and Workers integration',
       url: 'https://github.com/payloadcms/payload/templates/with-cloudflare-d1#main',
     },
     {
