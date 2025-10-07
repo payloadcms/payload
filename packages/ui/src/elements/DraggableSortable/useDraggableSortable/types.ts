@@ -1,4 +1,4 @@
-import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
+import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities/index.js'
 import type { HTMLAttributes } from 'react'
 
 export type UseDraggableSortableReturn = {
