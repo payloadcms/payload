@@ -79,7 +79,7 @@
     "@types/pg": "8.10.2",
     "console-table-printer": "2.12.1",
     "drizzle-kit": "0.31.4",
-    "drizzle-orm": "0.44.6",
+    "drizzle-orm": "0.44.2",
     "pg": "8.16.3",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
