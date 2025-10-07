@@ -692,7 +692,7 @@ describe('lexicalMain', () => {
     await lastParagraph.scrollIntoViewIfNeeded()
     await expect(lastParagraph).toBeVisible()
 
-    // Create relationship node with slash menu
+    // Create upload node with slash menu
     await lastParagraph.click()
     await page.keyboard.press('Enter')
     await page.keyboard.press('/')
@@ -709,37 +709,44 @@ describe('lexicalMain', () => {
     const relationshipListDrawerTitle = page.locator('.list-header__title')
     await expect(relationshipListDrawerTitle).toHaveText('Uploads')
 
+    // Should not have collection selector since only one collection is enabled
     await expect(page.locator('.rs__input')).toBeHidden()
+  })
 
-    // Close drawer
-    await page.locator('.close-modal-button').first().click()
-    await expect(relationshipListDrawerTitle).toBeHidden()
+  test('UploadFeature without any configuration should show all upload collections', async () => {
+    const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-relationship-fields')
+    await page.goto(url.list)
+    const linkToDoc = page.locator('tbody tr:first-child a').first()
 
-    // Ensure second richtext field has both upload collections visible
+    await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    const linkDocHref = await linkToDoc.getAttribute('href')
+    await linkToDoc.click()
+    await page.waitForURL(`**${linkDocHref}`)
 
-    const richTextField2 = page.locator('.rich-text-lexical').nth(1)
-    await expect(richTextField2).toBeVisible()
-    const contentEditable2 = richTextField2.locator('.ContentEditable__root').last()
-    await contentEditable2.scrollIntoViewIfNeeded()
-    await expect(contentEditable2).toBeVisible()
+    const richTextField = page.locator('.rich-text-lexical').nth(1)
+    await expect(richTextField).toBeVisible()
+    const contentEditable = richTextField.locator('.ContentEditable__root').last()
+    await contentEditable.scrollIntoViewIfNeeded()
+    await expect(contentEditable).toBeVisible()
 
     // Create upload node with slash menu
-    await contentEditable2.click()
+    await contentEditable.click()
     await page.keyboard.press('Enter')
     await page.keyboard.press('/')
     await page.keyboard.type('Upload')
-    const slashMenuPopover2 = page.locator('#slash-menu .slash-menu-popup')
-    await expect(slashMenuPopover2).toBeVisible()
+    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+    await expect(slashMenuPopover).toBeVisible()
 
-    const uploadSelectButton2 = slashMenuPopover2.locator('button').nth(0)
-    await expect(uploadSelectButton2).toBeVisible()
-    await expect(uploadSelectButton2).toContainText('Upload')
-    await uploadSelectButton2.click()
-    await expect(slashMenuPopover2).toBeHidden()
+    const uploadSelectButton = slashMenuPopover.locator('button').nth(0)
+    await expect(uploadSelectButton).toBeVisible()
+    await expect(uploadSelectButton).toContainText('Upload')
+    await uploadSelectButton.click()
+    await expect(slashMenuPopover).toBeHidden()
 
-    const uploadListDrawerTitle2 = page.locator('.list-header__title')
-    await expect(uploadListDrawerTitle2).toHaveText('Uploads')
+    const uploadListDrawerTitle = page.locator('.list-header__title')
+    await expect(uploadListDrawerTitle).toHaveText('Uploads')
 
+    // Should have collection selector since all collections are available
     await expect(page.locator('.rs__input')).toBeVisible()
     await page.locator('.rs__input').first().click()
     await expect(page.locator('.rs__menu').getByText('Uploads')).toHaveCount(1)
