@@ -72,130 +72,130 @@ async function main() {
   const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/main/templates`
 
   let variations: TemplateVariation[] = [
-    // {
-    //   name: 'with-vercel-postgres',
-    //   db: 'vercel-postgres',
-    //   dirname: 'with-vercel-postgres',
-    //   envNames: {
-    //     // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
-    //     dbUri: 'POSTGRES_URL',
-    //   },
-    //   sharp: false,
-    //   skipDockerCompose: true,
-    //   skipReadme: true,
-    //   storage: 'vercelBlobStorage',
-    //   targetDeployment: 'vercel',
-    //   vercelDeployButtonLink:
-    //     `https://vercel.com/new/clone?repository-url=` +
-    //     encodeURI(
-    //       `${templateRepoUrlBase}/with-vercel-postgres` +
-    //         '&project-name=payload-project' +
-    //         '&env=PAYLOAD_SECRET' +
-    //         '&build-command=pnpm run ci' +
-    //         '&stores=[{"type":"postgres"},{"type":"blob"}]', // Postgres and Vercel Blob Storage
-    //     ),
-    // },
-    // {
-    //   name: 'with-vercel-website',
-    //   base: 'website', // This is the base template to copy from
-    //   db: 'vercel-postgres',
-    //   dirname: 'with-vercel-website',
-    //   envNames: {
-    //     // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
-    //     dbUri: 'POSTGRES_URL',
-    //   },
-    //   sharp: true,
-    //   skipDockerCompose: true,
-    //   skipReadme: true,
-    //   storage: 'vercelBlobStorage',
-    //   targetDeployment: 'vercel',
-    //   vercelDeployButtonLink:
-    //     `https://vercel.com/new/clone?repository-url=` +
-    //     encodeURI(
-    //       `${templateRepoUrlBase}/with-vercel-website` +
-    //         '&project-name=payload-project' +
-    //         '&env=PAYLOAD_SECRET%2CCRON_SECRET' +
-    //         '&build-command=pnpm run ci' +
-    //         '&stores=[{"type":"postgres"},{"type":"blob"}]', // Postgres and Vercel Blob Storage
-    //     ),
-    // },
-    // {
-    //   name: 'with-postgres',
-    //   db: 'postgres',
-    //   dirname: 'with-postgres',
-    //   sharp: true,
-    //   skipDockerCompose: true,
-    //   storage: 'localDisk',
-    // },
-    // {
-    //   name: 'with-vercel-mongodb',
-    //   db: 'mongodb',
-    //   dirname: 'with-vercel-mongodb',
-    //   envNames: {
-    //     dbUri: 'MONGODB_URI',
-    //   },
-    //   sharp: false,
-    //   storage: 'vercelBlobStorage',
-    //   skipReadme: true,
-    //   targetDeployment: 'vercel',
-    //   vercelDeployButtonLink:
-    //     `https://vercel.com/new/clone?repository-url=` +
-    //     encodeURI(
-    //       `${templateRepoUrlBase}/with-vercel-mongodb` +
-    //         '&project-name=payload-project' +
-    //         '&env=PAYLOAD_SECRET' +
-    //         '&build-command=pnpm run ci' +
-    //         '&stores=[{"type":"blob"}]' + // Vercel Blob Storage
-    //         '&integration-ids=oac_jnzmjqM10gllKmSrG0SGrHOH', // MongoDB Atlas
-    //     ),
-    // },
-    // {
-    //   name: 'blank',
-    //   db: 'mongodb',
-    //   dirname: 'blank',
-    //   generateLockfile: true,
-    //   sharp: true,
-    //   skipConfig: true, // Do not copy the payload.config.ts file from the base template
-    //   skipReadme: true, // Do not copy the README.md file from the base template
-    //   storage: 'localDisk',
-    //   // The blank template is used as a base for create-payload-app functionality,
-    //   // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
-    //   configureConfig: false,
-    //   workspace: true,
-    //   base: 'none', // Do not copy from the base _template directory
-    // },
-    // {
-    //   name: 'website',
-    //   db: 'mongodb',
-    //   dirname: 'website',
-    //   generateLockfile: true,
-    //   sharp: true,
-    //   skipConfig: true, // Do not copy the payload.config.ts file from the base template
-    //   storage: 'localDisk',
-    //   // The blank template is used as a base for create-payload-app functionality,
-    //   // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
-    //   configureConfig: false,
-    //   base: 'none',
-    //   skipDockerCompose: true,
-    //   skipReadme: true,
-    //   workspace: true,
-    // },
-    // {
-    //   name: 'ecommerce',
-    //   db: 'mongodb',
-    //   dirname: 'ecommerce',
-    //   generateLockfile: true,
-    //   sharp: true,
-    //   skipConfig: true, // Do not copy the payload.config.ts file from the base template
-    //   storage: 'localDisk',
-    //   // The blank template is used as a base for create-payload-app functionality,
-    //   // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
-    //   configureConfig: false,
-    //   base: 'none',
-    //   skipDockerCompose: true,
-    //   skipReadme: true,
-    //   workspace: true,
-    // },
+    {
+      name: 'with-vercel-postgres',
+      db: 'vercel-postgres',
+      dirname: 'with-vercel-postgres',
+      envNames: {
+        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
+        dbUri: 'POSTGRES_URL',
+      },
+      sharp: false,
+      skipDockerCompose: true,
+      skipReadme: true,
+      storage: 'vercelBlobStorage',
+      targetDeployment: 'vercel',
+      vercelDeployButtonLink:
+        `https://vercel.com/new/clone?repository-url=` +
+        encodeURI(
+          `${templateRepoUrlBase}/with-vercel-postgres` +
+            '&project-name=payload-project' +
+            '&env=PAYLOAD_SECRET' +
+            '&build-command=pnpm run ci' +
+            '&stores=[{"type":"postgres"},{"type":"blob"}]', // Postgres and Vercel Blob Storage
+        ),
+    },
+    {
+      name: 'with-vercel-website',
+      base: 'website', // This is the base template to copy from
+      db: 'vercel-postgres',
+      dirname: 'with-vercel-website',
+      envNames: {
+        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
+        dbUri: 'POSTGRES_URL',
+      },
+      sharp: true,
+      skipDockerCompose: true,
+      skipReadme: true,
+      storage: 'vercelBlobStorage',
+      targetDeployment: 'vercel',
+      vercelDeployButtonLink:
+        `https://vercel.com/new/clone?repository-url=` +
+        encodeURI(
+          `${templateRepoUrlBase}/with-vercel-website` +
+            '&project-name=payload-project' +
+            '&env=PAYLOAD_SECRET%2CCRON_SECRET' +
+            '&build-command=pnpm run ci' +
+            '&stores=[{"type":"postgres"},{"type":"blob"}]', // Postgres and Vercel Blob Storage
+        ),
+    },
+    {
+      name: 'with-postgres',
+      db: 'postgres',
+      dirname: 'with-postgres',
+      sharp: true,
+      skipDockerCompose: true,
+      storage: 'localDisk',
+    },
+    {
+      name: 'with-vercel-mongodb',
+      db: 'mongodb',
+      dirname: 'with-vercel-mongodb',
+      envNames: {
+        dbUri: 'MONGODB_URI',
+      },
+      sharp: false,
+      storage: 'vercelBlobStorage',
+      skipReadme: true,
+      targetDeployment: 'vercel',
+      vercelDeployButtonLink:
+        `https://vercel.com/new/clone?repository-url=` +
+        encodeURI(
+          `${templateRepoUrlBase}/with-vercel-mongodb` +
+            '&project-name=payload-project' +
+            '&env=PAYLOAD_SECRET' +
+            '&build-command=pnpm run ci' +
+            '&stores=[{"type":"blob"}]' + // Vercel Blob Storage
+            '&integration-ids=oac_jnzmjqM10gllKmSrG0SGrHOH', // MongoDB Atlas
+        ),
+    },
+    {
+      name: 'blank',
+      db: 'mongodb',
+      dirname: 'blank',
+      generateLockfile: true,
+      sharp: true,
+      skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      skipReadme: true, // Do not copy the README.md file from the base template
+      storage: 'localDisk',
+      // The blank template is used as a base for create-payload-app functionality,
+      // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
+      configureConfig: false,
+      workspace: true,
+      base: 'none', // Do not copy from the base _template directory
+    },
+    {
+      name: 'website',
+      db: 'mongodb',
+      dirname: 'website',
+      generateLockfile: true,
+      sharp: true,
+      skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      storage: 'localDisk',
+      // The blank template is used as a base for create-payload-app functionality,
+      // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
+      configureConfig: false,
+      base: 'none',
+      skipDockerCompose: true,
+      skipReadme: true,
+      workspace: true,
+    },
+    {
+      name: 'ecommerce',
+      db: 'mongodb',
+      dirname: 'ecommerce',
+      generateLockfile: true,
+      sharp: true,
+      skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      storage: 'localDisk',
+      // The blank template is used as a base for create-payload-app functionality,
+      // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
+      configureConfig: false,
+      base: 'none',
+      skipDockerCompose: true,
+      skipReadme: true,
+      workspace: true,
+    },
     {
       name: 'with-cloudflare-d1',
       db: 'd1-sqlite',
