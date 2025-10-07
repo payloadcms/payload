@@ -2,6 +2,7 @@ import { D1DatabaseAPI } from '@miniflare/d1'
 import { createSQLiteDB } from '@miniflare/shared'
 import dotenv from 'dotenv'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
+
 dotenv.config()
 
 declare global {
@@ -31,7 +32,7 @@ export default async () => {
   }
   if (
     (!process.env.PAYLOAD_DATABASE ||
-      ['firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE)) &&
+      ['cosmosdb', 'documentdb', 'firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE)) &&
     !global._mongoMemoryServer
   ) {
     console.log('Starting memory db...')
