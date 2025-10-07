@@ -10,7 +10,8 @@ type Props = {
   readonly children?: React.ReactNode
   readonly className?: string
   readonly disabled?: boolean
-  readonly onClick: (e: React.MouseEvent) => void
+  readonly onClick: (event: React.MouseEvent<HTMLElement>) => void
+  readonly onDrag: (e: PointerEvent) => void
   readonly onKeyDown?: (e: React.KeyboardEvent) => void
   readonly ref?: React.RefObject<HTMLDivElement>
   readonly thresholdPixels?: number
@@ -22,6 +23,7 @@ export const DraggableWithClick = ({
   className,
   disabled = false,
   onClick,
+  onDrag,
   onKeyDown,
   ref,
   thresholdPixels = 3,
@@ -38,12 +40,12 @@ export const DraggableWithClick = ({
   })
   const isDragging = useRef(false)
 
-  const handlePointerDown = (e) => {
+  const handlePointerDown = (e: PointerEvent) => {
     initialPos.current = { x: e.clientX, y: e.clientY }
     setDragStartX(e.clientX)
     isDragging.current = false
 
-    const handlePointerMove = (moveEvent) => {
+    const handlePointerMove = (moveEvent: PointerEvent) => {
       const deltaX = Math.abs(moveEvent.clientX - initialPos.current.x)
       const deltaY = Math.abs(moveEvent.clientY - initialPos.current.y)
       if (deltaX > thresholdPixels || deltaY > thresholdPixels) {
@@ -53,7 +55,7 @@ export const DraggableWithClick = ({
           // when the user starts dragging
           // - call the click handler
           // - remove the pointermove listener
-          onClick(moveEvent)
+          onDrag(moveEvent)
         }
         window.removeEventListener('pointermove', handlePointerMove)
       }
@@ -64,12 +66,12 @@ export const DraggableWithClick = ({
       window.removeEventListener('pointerup', handlePointerUp)
     }
 
-    const handlePointerUp = (upEvent) => {
+    const handlePointerUp = (upEvent: PointerEvent) => {
       cleanup()
       if (!isDragging.current) {
         // if the user did not drag the element
         // - call the click handler
-        onClick(upEvent)
+        onClick(upEvent as unknown as React.MouseEvent<HTMLElement>)
       }
     }
 
@@ -88,7 +90,7 @@ export const DraggableWithClick = ({
         .filter(Boolean)
         .join(' ')}
       onKeyDown={disabled ? undefined : onKeyDown}
-      onPointerDown={disabled ? undefined : onClick ? handlePointerDown : undefined}
+      onPointerDown={disabled ? undefined : handlePointerDown}
       ref={(node) => {
         if (disabled) {
           return

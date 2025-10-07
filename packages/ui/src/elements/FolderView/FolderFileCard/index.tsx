@@ -28,7 +28,8 @@ type Props = {
   readonly isFocused?: boolean
   readonly isSelected?: boolean
   readonly itemKey: string
-  readonly onClick?: (e: React.MouseEvent) => void
+  readonly onClick?: (e: React.MouseEvent<HTMLElement>) => void
+  readonly onDrag?: (e: PointerEvent) => void
   readonly onKeyDown?: (e: React.KeyboardEvent) => void
   readonly PopupActions?: React.ReactNode
   readonly previewUrl?: string
@@ -47,6 +48,7 @@ export function FolderFileCard({
   isSelected = false,
   itemKey,
   onClick,
+  onDrag,
   onKeyDown,
   PopupActions,
   previewUrl,
@@ -97,6 +99,7 @@ export function FolderFileCard({
       disabled={disabled || (!onClick && !onKeyDown)}
       key={itemKey}
       onClick={onClick}
+      onDrag={onDrag}
       onKeyDown={onKeyDown}
       ref={ref}
     >
@@ -169,8 +172,14 @@ type ContextCardProps = {
   readonly type: 'file' | 'folder'
 }
 export function ContextFolderFileCard({ type, className, index, item }: ContextCardProps) {
-  const { checkIfItemIsDisabled, focusedRowIndex, onItemClick, onItemKeyPress, selectedItemKeys } =
-    useFolder()
+  const {
+    checkIfItemIsDisabled,
+    focusedRowIndex,
+    onItemClick,
+    onItemDrag,
+    onItemKeyPress,
+    selectedItemKeys,
+  } = useFolder()
   const isSelected = selectedItemKeys.has(item.itemKey)
   const isDisabled = checkIfItemIsDisabled(item)
 
@@ -185,6 +194,9 @@ export function ContextFolderFileCard({ type, className, index, item }: ContextC
       itemKey={item.itemKey}
       onClick={(event) => {
         void onItemClick({ event, index, item })
+      }}
+      onDrag={(event) => {
+        onItemDrag({ event, item })
       }}
       onKeyDown={(event) => {
         void onItemKeyPress({ event, index, item })

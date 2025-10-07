@@ -1,7 +1,7 @@
 'use client'
 
 import type { CollectionSlug, FolderSortKeys } from 'payload'
-import type { FolderDocumentItemKey, FolderOrDocument } from 'payload/shared'
+import type { TreeViewDocument, TreeViewItemKey } from 'payload/shared'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { extractID } from 'payload/shared'
@@ -21,35 +21,33 @@ type TreeViewQueryParams = {
   sort?: string
 }
 
-export type FileCardData = {
-  filename: string
-  id: number | string
-  mimeType: string
-  name: string
-  url: string
-}
-
 export type TreeViewContextValue = {
-  checkIfItemIsDisabled: (item: FolderOrDocument) => boolean
+  checkIfItemIsDisabled: (item: TreeViewDocument) => boolean
   clearSelections: () => void
-  documents?: FolderOrDocument[]
-  dragOverlayItem?: FolderOrDocument | undefined
+  documents?: TreeViewDocument[]
+  dragOverlayItem?: TreeViewDocument | undefined
   dragStartX: number
   focusedRowIndex: number
-  getSelectedItems?: () => FolderOrDocument[]
+  getSelectedItems?: () => TreeViewDocument[]
   isDragging: boolean
-  itemKeysToMove?: Set<FolderDocumentItemKey>
+  itemKeysToMove?: Set<TreeViewItemKey>
   moveItems: (args: { docIDs: (number | string)[]; parentID?: number | string }) => Promise<void>
-  onItemClick: (args: { event: React.MouseEvent; index: number; item: FolderOrDocument }) => void
+  onItemClick: (args: {
+    event: React.MouseEvent<HTMLElement>
+    index: number
+    item: TreeViewDocument
+    keepSelected?: boolean
+  }) => void
+  onItemDrag: (args: { event: PointerEvent; item: TreeViewDocument }) => void
   onItemKeyPress: (args: {
     event: React.KeyboardEvent
     index: number
-    item: FolderOrDocument
+    item: TreeViewDocument
   }) => void
   parentFieldName: string
   refineTreeViewData: (args: { query?: TreeViewQueryParams; updateURL: boolean }) => void
   search: string
-  readonly selectedItemKeys: Set<FolderDocumentItemKey>
+  readonly selectedItemKeys: Set<TreeViewItemKey>
   setDragStartX: React.Dispatch<React.SetStateAction<number>>
   setFocusedRowIndex: React.Dispatch<React.SetStateAction<number>>
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>
@@ -69,11 +67,12 @@ const Context = React.createContext<TreeViewContextValue>({
   itemKeysToMove: undefined,
   moveItems: () => Promise.resolve(undefined),
   onItemClick: () => undefined,
+  onItemDrag: () => undefined,
   onItemKeyPress: () => undefined,
   parentFieldName: '_parentDoc',
   refineTreeViewData: () => undefined,
   search: '',
-  selectedItemKeys: new Set<FolderDocumentItemKey>(),
+  selectedItemKeys: new Set<TreeViewItemKey>(),
   setDragStartX: () => 0,
   setFocusedRowIndex: () => -1,
   setIsDragging: () => false,
@@ -91,11 +90,11 @@ export type TreeViewProviderProps = {
   /**
    * All documents in the tree
    */
-  readonly documents: FolderOrDocument[]
+  readonly documents: TreeViewDocument[]
   /**
    * Optional function to call when an item is clicked
    */
-  readonly onItemClick?: (item: FolderOrDocument) => void
+  readonly onItemClick?: (item: TreeViewDocument) => void
   /**
    * The field name that holds the parent reference
    */
@@ -152,12 +151,13 @@ export function TreeViewProvider({
 
   const [isDragging, setIsDragging] = React.useState(false)
   const [dragStartX, setDragStartX] = React.useState(0)
-  const [selectedItemKeys, setSelectedItemKeys] = React.useState<Set<FolderDocumentItemKey>>(
+  const [selectedItemKeys, setSelectedItemKeys] = React.useState<Set<TreeViewItemKey>>(
     () => new Set(),
   )
   const [focusedRowIndex, setFocusedRowIndex] = React.useState(-1)
+  const [isDoubleClickEnabled] = React.useState(false)
   // This is used to determine what data to display on the drag overlay
-  const [dragOverlayItem, setDragOverlayItem] = React.useState<FolderOrDocument | undefined>()
+  const [dragOverlayItem, setDragOverlayItem] = React.useState<TreeViewDocument | undefined>()
   const lastClickTime = React.useRef<null | number>(null)
   const totalCount = documents.length
 
@@ -206,7 +206,7 @@ export function TreeViewProvider({
   )
 
   const getItem = React.useCallback(
-    (itemKey: FolderDocumentItemKey) => {
+    (itemKey: TreeViewItemKey) => {
       return documents.find((doc) => doc.itemKey === itemKey)
     },
     [documents],
@@ -302,7 +302,7 @@ export function TreeViewProvider({
           return acc
         },
         {
-          newSelectedItemKeys: new Set<FolderDocumentItemKey>(),
+          newSelectedItemKeys: new Set<TreeViewItemKey>(),
         },
       )
 
@@ -437,84 +437,115 @@ export function TreeViewProvider({
     ],
   )
 
-  const onItemClick: TreeViewContextValue['onItemClick'] = React.useCallback(
-    ({ event, item: clickedItem }) => {
-      let doubleClicked: boolean = false
+  const onItemDrag: TreeViewContextValue['onItemDrag'] = React.useCallback(
+    ({ event, item: dragItem }) => {
       const isCtrlPressed = event.ctrlKey || event.metaKey
       const isShiftPressed = event.shiftKey
-      const isCurrentlySelected = selectedItemKeys.has(clickedItem.itemKey)
-      const allItems = documents
-      const currentItemIndex = allItems.findIndex((item) => item.itemKey === clickedItem.itemKey)
+      const isCurrentlySelected = selectedItemKeys.has(dragItem.itemKey)
+      const allItems = [...documents]
 
-      if (allowMultiSelection && isCtrlPressed) {
-        event.preventDefault()
-        let overlayItemKey: FolderDocumentItemKey | undefined
-        const indexes = allItems.reduce((acc, item, idx) => {
-          if (item.itemKey === clickedItem.itemKey) {
-            if (isCurrentlySelected && event.type !== 'pointermove') {
-              return acc
-            } else {
+      if (!isCurrentlySelected) {
+        updateSelections({
+          indexes: allItems.reduce((acc, item, idx) => {
+            if (item.itemKey === dragItem.itemKey) {
               acc.push(idx)
-              overlayItemKey = item.itemKey
+            } else if ((isCtrlPressed || isShiftPressed) && selectedItemKeys.has(item.itemKey)) {
+              acc.push(idx)
             }
-          } else if (selectedItemKeys.has(item.itemKey)) {
-            acc.push(idx)
-          }
-          return acc
-        }, [])
+            return acc
+          }, []),
+        })
 
-        updateSelections({ indexes })
+        setDragOverlayItem(getItem(dragItem.itemKey))
+      }
+    },
+    [selectedItemKeys, documents, getItem, updateSelections],
+  )
 
-        if (overlayItemKey) {
-          setDragOverlayItem(getItem(overlayItemKey))
-        }
-      } else if (allowMultiSelection && isShiftPressed) {
-        if (currentItemIndex !== -1) {
+  const onItemClick: TreeViewContextValue['onItemClick'] = React.useCallback(
+    ({ event, item: clickedItem, keepSelected }) => {
+      let doubleClicked: boolean = false
+      const isCtrlPressed = event?.ctrlKey || event?.nativeEvent?.ctrlKey || event?.metaKey
+      const isShiftPressed = event?.shiftKey || event?.nativeEvent?.shiftKey
+      const isCurrentlySelected = selectedItemKeys.has(clickedItem.itemKey)
+
+      if (allowMultiSelection && (isCtrlPressed || isShiftPressed)) {
+        const currentItemIndex = documents.findIndex((item) => item.itemKey === clickedItem.itemKey)
+        if (isCtrlPressed) {
+          const indexes = documents.reduce((acc, item, idx) => {
+            if (item.itemKey === clickedItem.itemKey) {
+              if (!isCurrentlySelected || keepSelected) {
+                acc.push(idx)
+                setDragOverlayItem(getItem(clickedItem.itemKey))
+              }
+            } else if (selectedItemKeys.has(item.itemKey)) {
+              acc.push(idx)
+            }
+            return acc
+          }, [])
+
+          updateSelections({ indexes })
+        } else if (currentItemIndex !== -1) {
           const selectedIndexes = handleShiftSelection(currentItemIndex)
           updateSelections({ indexes: selectedIndexes })
+          setDragOverlayItem(getItem(clickedItem.itemKey))
         }
-      } else if (allowMultiSelection && event.type === 'pointermove') {
-        // on drag start of an unselected item
-        if (!isCurrentlySelected) {
-          updateSelections({
-            indexes: allItems.reduce((acc, item, idx) => {
-              if (item.itemKey === clickedItem.itemKey) {
-                acc.push(idx)
-              }
-              return acc
-            }, []),
-          })
-        }
-        setDragOverlayItem(getItem(clickedItem.itemKey))
       } else {
         // Normal click - select single item
         const now = Date.now()
         doubleClicked =
           now - lastClickTime.current < 400 && dragOverlayItem?.itemKey === clickedItem.itemKey
         lastClickTime.current = now
-        if (!doubleClicked) {
+        if (!doubleClicked || !isDoubleClickEnabled) {
           updateSelections({
-            indexes: isCurrentlySelected && selectedItemKeys.size === 1 ? [] : [currentItemIndex],
+            indexes: (() => {
+              const indexes: number[] = []
+
+              for (let idx = 0; idx < documents.length; idx++) {
+                const item = documents[idx]
+                if (clickedItem.itemKey === item.itemKey) {
+                  if (keepSelected || !selectedItemKeys.has(item.itemKey)) {
+                    indexes.push(idx)
+                  }
+                } else if (selectedItemKeys.has(item.itemKey)) {
+                  indexes.push(idx)
+                }
+              }
+
+              return indexes
+            })(),
           })
         }
-        setDragOverlayItem(getItem(clickedItem.itemKey))
-      }
 
-      if (doubleClicked) {
-        navigateAfterSelection({
-          collectionSlug: clickedItem.relationTo,
-          docID: extractID(clickedItem.value),
-        })
+        if (isCurrentlySelected) {
+          const selectedArray = Array.from(selectedItemKeys)
+          const lastSelectedKey = selectedArray[selectedArray.length - 1]
+          if (lastSelectedKey) {
+            setDragOverlayItem(getItem(lastSelectedKey))
+          } else {
+            setDragOverlayItem(undefined)
+          }
+        } else {
+          setDragOverlayItem(getItem(clickedItem.itemKey))
+        }
+
+        if (isDoubleClickEnabled && doubleClicked) {
+          navigateAfterSelection({
+            collectionSlug: clickedItem.relationTo,
+            docID: extractID(clickedItem.value),
+          })
+        }
       }
     },
     [
+      isDoubleClickEnabled,
+      navigateAfterSelection,
       selectedItemKeys,
       documents,
       allowMultiSelection,
       dragOverlayItem,
       getItem,
       updateSelections,
-      navigateAfterSelection,
       handleShiftSelection,
     ],
   )
@@ -599,6 +630,7 @@ export function TreeViewProvider({
         itemKeysToMove: parentTreeViewContext.selectedItemKeys,
         moveItems,
         onItemClick,
+        onItemDrag,
         onItemKeyPress,
         parentFieldName,
         refineTreeViewData,

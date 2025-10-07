@@ -64,8 +64,16 @@ export const buildCollectionTreeView = async (
 
     const { documents, TreeViewResultsComponent } = await getTreeViewResultsComponentAndData({
       collectionSlug,
+      // TODO: remove and get from prefs
+      expandedItemIDs: [
+        '68e55080d18048a90c795f6b',
+        '68e5508ed18048a90c795f7f',
+        '68e547aed18048a90c795d25',
+        '68e550bfd18048a90c795fd3',
+        '68e023f7bdb81b341429f726',
+      ],
       req: initPageResult.req,
-      sort: '',
+      sort: 'titlePath',
       // sort: sortPreference,
       // search,
     })

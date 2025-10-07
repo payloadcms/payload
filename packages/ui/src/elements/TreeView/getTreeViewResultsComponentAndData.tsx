@@ -53,6 +53,7 @@ export const getTreeViewResultsComponentAndData = async ({
   collectionSlug,
   req,
   // search,
+  expandedItemIDs,
   sort,
 }: GetTreeViewResultsComponentAndDataArgs): Promise<GetTreeViewResultsComponentAndDataResult> => {
   const { payload } = req
@@ -63,6 +64,8 @@ export const getTreeViewResultsComponentAndData = async ({
 
   const treeViewData = await getTreeViewData({
     collectionSlug,
+    expandedItemIDs,
+    fullTitleFieldName: 'name',
     parentFieldName: '_parentDoc',
     req,
     sort,

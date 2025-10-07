@@ -160,6 +160,12 @@ export type GetTreeViewResultsComponentAndDataArgs = {
    * i.e. 'posts'
    */
   collectionSlug: CollectionSlug
+  /**
+   * An array of item IDs that are currently expanded.
+   * This is used to determine which items to fetch from the database.
+   * i.e. ['123', '456']
+   */
+  expandedItemIDs?: (number | string)[]
   // search?: string
   req: PayloadRequest
   /**

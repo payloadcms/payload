@@ -4,10 +4,14 @@
   right: 0;
   left: 0;
   height: 50%;
+  z-index: -1;
 
   &--on-middle {
     top: 50%;
     transform: translateY(-50%);
+  }
+  &.is-dragging.is-over {
+    z-index: 1;
   }
 
   &--on-split {

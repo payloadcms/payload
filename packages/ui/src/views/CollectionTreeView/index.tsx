@@ -107,12 +107,15 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
         return
       }
 
-      if (event.over.data.current.type === 'folder' && 'id' in event.over.data.current) {
+      if (
+        event.over.data.current.type === 'tree-view-table' &&
+        event.over.data.current.targetItem
+      ) {
         try {
-          await moveItems({
-            docIDs: getSelectedItems().map((doc) => doc.value.id),
-            parentID: event.over.data.current.id,
-          })
+          // await moveItems({
+          //   docIDs: getSelectedItems().map((doc) => doc.value.id),
+          //   parentID: event.over.data.current.id,
+          // })
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error('Error moving items:', error)
@@ -208,8 +211,6 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
   //   startRouteTransition,
   // ])
 
-  console.log({ documents })
-
   return (
     <Fragment>
       <DndEventListener
@@ -298,9 +299,9 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
         </Gutter>
         {AfterTreeViewList}
       </div>
-      {/* {selectedItemKeys.size > 0 && dragOverlayItem && (
+      {selectedItemKeys.size > 0 && dragOverlayItem && (
         <DragOverlaySelection item={dragOverlayItem} selectedCount={selectedItemKeys.size} />
-      )} */}
+      )}
     </Fragment>
   )
 }

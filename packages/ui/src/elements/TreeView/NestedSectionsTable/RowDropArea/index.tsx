@@ -11,45 +11,46 @@ const THROTTLE_MS = 16
 type Placement = 'middle' | 'split'
 
 export type RowDropAreaProps = {
-  dragStartX?: number
-  dragVariance?: number
+  dropContextName: string
   isDragging?: boolean
-  markerLeftOffset?: number
   onHover?: (data: { placement: Placement; targetItem: any }) => void
   placement?: Placement
   segmentWidth?: number
   style: React.CSSProperties
   targetItems?: unknown[]
+  xDragOffset?: number
+  xSplitOffset?: string
 }
 
 export const RowDropArea = ({
-  dragStartX = 0,
-  dragVariance = 30,
+  dropContextName,
   isDragging = false,
-  markerLeftOffset = 0,
   onHover,
   placement = 'split',
   segmentWidth = DEFAULT_SEGMENT_WIDTH,
   style,
   targetItems = [],
+  xDragOffset = 0,
+  xSplitOffset = '0px',
 }: RowDropAreaProps) => {
   const id = React.useId()
   const mousePosition = useMousePosition({ enabled: isDragging, throttle: THROTTLE_MS })
+
   const hoverIndex = React.useMemo(() => {
     if (targetItems.length === 0) {
       return 0
     }
-    return Math.max(
-      Math.min(Math.round((mousePosition.x - dragStartX) / dragVariance), targetItems.length - 1),
-      0,
-    )
-  }, [mousePosition.x, dragStartX, dragVariance, targetItems.length])
+    const relativeX = mousePosition.x - xDragOffset
+    const segmentIndex = Math.round(relativeX / segmentWidth)
+    return Math.max(Math.min(segmentIndex, targetItems.length - 1), 0)
+  }, [mousePosition.x, xDragOffset, segmentWidth, targetItems.length])
 
   const targetItem = targetItems[hoverIndex]
 
   const { isOver, setNodeRef } = useDroppable({
     id,
-    data: { type: 'row-drop-area', targetItem },
+    data: { type: dropContextName, targetItem },
+    disabled: !isDragging,
   })
 
   React.useEffect(() => {
@@ -81,7 +82,7 @@ export const RowDropArea = ({
           <div
             className={`${baseClass}__split-marker`}
             style={{
-              left: hoverIndex * segmentWidth + markerLeftOffset,
+              left: `calc(${hoverIndex * segmentWidth}px + ${xSplitOffset})`,
             }}
           />
         )}

@@ -2,10 +2,12 @@
 
 import React from 'react'
 
-import { useConfig } from '../../../providers/Config/index.js'
+import type { SectionRow } from '../NestedSectionsTable/index.js'
+
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { useTreeView } from '../../../providers/TreeView/index.js'
 import { NestedSectionsTable } from '../NestedSectionsTable/index.js'
+import { documentsToSectionRows } from '../utils/documentsToSectionRows.js'
 import './index.scss'
 
 const baseClass = 'tree-view-results-table'
@@ -18,11 +20,59 @@ export function TreeViewTable() {
     focusedRowIndex,
     isDragging,
     onItemClick,
+    onItemDrag,
     onItemKeyPress,
     selectedItemKeys,
   } = useTreeView()
-  const { config } = useConfig()
   const { i18n, t } = useTranslation()
+  const [hoveredRowID, setHoveredRowID] = React.useState<null | number | string>(null)
+  const onDroppableHover = React.useCallback(
+    ({ targetItem }: { targetItem: null | SectionRow }) => {
+      setHoveredRowID(targetItem?.rowID || null)
+    },
+    [],
+  )
+
+  const onRowDrag = React.useCallback(
+    ({ event, item }: { event: PointerEvent; item: null | SectionRow }) => {
+      if (item) {
+        const index = documents.findIndex((doc) => doc.value.id === item.rowID)
+        if (index !== -1) {
+          onItemDrag({ event, item: documents[index] })
+        }
+      }
+    },
+    [documents, onItemDrag],
+  )
+
+  const onRowClick = React.useCallback(
+    ({
+      event,
+      from,
+      row,
+    }: {
+      event: React.MouseEvent<HTMLElement>
+      from: 'checkbox' | 'dragHandle'
+      row: SectionRow
+    }) => {
+      const index = documents.findIndex((doc) => doc.value.id === row.rowID)
+      if (index !== -1) {
+        const item = documents[index]
+        // const isDisabled = checkIfItemIsDisabled(item)
+        // if (isDisabled) {
+        //   return
+        // }
+
+        // if the user clicked the checkbox, we want to prevent the onClick event from the DraggableWithClick
+        // if (from === 'checkbox' && event.type === 'click') {
+        //   event.stopPropagation()
+        // }
+
+        void onItemClick({ event, index, item, keepSelected: from === 'dragHandle' })
+      }
+    },
+    [documents, onItemClick],
+  )
 
   const [columns] = React.useState(() => [
     {
@@ -35,12 +85,25 @@ export function TreeViewTable() {
     },
   ])
 
+  const sections = React.useMemo(() => {
+    return documentsToSectionRows({ documents, i18nLanguage: i18n.language })
+  }, [documents, i18n.language])
+
   return (
     <NestedSectionsTable
       className={baseClass}
       dragStartX={dragStartX}
+      dropContextName="tree-view-table"
+      hoveredRowID={hoveredRowID}
       isDragging={isDragging}
-      // sections={documents}
+      onDroppableHover={onDroppableHover}
+      onRowClick={onRowClick}
+      onRowDrag={onRowDrag}
+      sections={sections}
+      selectedRowIDs={Array.from(selectedItemKeys).map((key) => {
+        const doc = documents.find((d) => d.itemKey === key)
+        return doc?.value.id || ''
+      })}
       // columns={columns}
     />
   )
