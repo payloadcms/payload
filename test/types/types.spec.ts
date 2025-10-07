@@ -1,9 +1,4 @@
 import type {
-  DefaultNodeTypes,
-  DefaultTypedEditorState,
-  TypedEditorState,
-} from '@payloadcms/richtext-lexical'
-import type {
   BulkOperationResult,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
@@ -14,6 +9,11 @@ import type {
   Where,
 } from 'payload'
 
+import {
+  type DefaultNodeTypes,
+  type DefaultTypedEditorState,
+  type TypedEditorState,
+} from '@payloadcms/richtext-lexical'
 import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
 
@@ -279,6 +279,29 @@ describe('Types testing', () => {
       type GeneratedRichTextType = Post['richText']
 
       expect<DefaultTypedEditorState>().type.toBeAssignableWith<GeneratedRichTextType>()
+    })
+
+    test('ensure DefaultTypedEditorState type can be assigned to GeneratedRichTextType type', () => {
+      /**
+       * Example:
+       *
+       * const mySeedData: RequiredDataFromCollectionSlug<'posts'> = {
+       *   title: 'hello',
+       *   richText: buildEditorState({text: 'hello'}) // <= DefaultTypedEditorState
+       * }
+       */
+      type GeneratedRichTextType = Post['richText']
+
+      expect<GeneratedRichTextType>().type.toBeAssignableWith<DefaultTypedEditorState>()
+    })
+
+    test('ensure type property in editorState.root.children.push() is correctly typed as union of all node types', () => {
+      const _editorState: DefaultTypedEditorState = null as unknown as DefaultTypedEditorState
+
+      // Test that the type parameter is correctly typed
+      type PushParameterType = Parameters<typeof _editorState.root.children.push>[0]
+
+      expect<PushParameterType['type']>().type.toBe<_Hardcoded_DefaultNodeTypes>()
     })
   })
 })

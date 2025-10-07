@@ -83,8 +83,9 @@ type DecrementDepth<N extends number> = [0, 0, 1, 2, 3, 4][N]
  * more strictly, narrowing down nodes based on the `type` without having to manually
  * type-cast.
  */
-export type TypedEditorState<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  SerializedEditorState<RecursiveNodes<T>>
+export type TypedEditorState<T extends SerializedLexicalNode = SerializedLexicalNode> = {
+  [k: string]: unknown
+} & SerializedEditorState<RecursiveNodes<T>>
 
 /**
  * All node types included by default in a lexical editor without configuration.
