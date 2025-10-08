@@ -23,6 +23,8 @@ import type { SerializedListItemNode, SerializedListNode } from './features/list
 import type { SerializedRelationshipNode } from './features/relationship/server/nodes/RelationshipNode.js'
 import type { SerializedUploadNode } from './features/upload/server/nodes/UploadNode.js'
 
+import { buildEditorState } from './utilities/buildEditorState.js'
+
 export type {
   SerializedAutoLinkNode,
   SerializedBlockNode,
@@ -139,3 +141,62 @@ export type DefaultTypedEditorState<
 > = [TAdditionalNodeTypes] extends null
   ? TypedEditorState<DefaultNodeTypes>
   : TypedEditorState<DefaultNodeTypes | NonNullable<TAdditionalNodeTypes>>
+
+const a: DefaultNodeTypes = {
+  type: 'text',
+  detail: 0,
+  format: 0,
+  mode: 'normal',
+  style: '',
+  version: 0,
+  // Has text type suggestion
+}
+
+const b: DefaultTypedEditorState['root']['children'][number] = {
+  type: 'text',
+  detail: 0,
+  format: 0,
+  mode: 'normal',
+  style: '',
+  version: 1,
+  // Has text type suggestion
+}
+
+const c = buildEditorState({
+  nodes: [
+    {
+      type: 'text',
+      detail: 0,
+      format: 0,
+      mode: 'normal',
+      style: '',
+      version: 1,
+      // Does not have text type suggestion unless I remove version property
+    },
+  ],
+})
+
+const d = buildEditorState<DefaultNodeTypes | SerializedBlockNode>({
+  nodes: [
+    {
+      type: 'text',
+      detail: 0,
+      format: 0,
+      mode: 'normal',
+      style: '',
+      text: 'hello',
+      version: 1,
+      // Does not have text type suggestion unless I remove version property
+    },
+    {
+      type: 'block',
+      fields: {
+        id: 'id',
+        blockName: 'Cool block',
+        blockType: 'myBlock',
+      },
+      format: 'left',
+      version: 1,
+    },
+  ],
+})
