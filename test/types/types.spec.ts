@@ -447,7 +447,7 @@ describe('Types testing', () => {
     })
 
     describe('buildEditorState', () => {
-      test('buildEditorState without generic returns DefaultTypedEditorState', () => {
+      test('buildEditorState returns DefaultTypedEditorState', () => {
         const result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
         expect(result).type.toBe<DefaultTypedEditorState>()
       })
@@ -551,10 +551,7 @@ describe('Types testing', () => {
         expect(result).type.toBe<DefaultTypedEditorState>()
       })
 
-      test('buildEditorState without generic parameter correctly validates incomplete text node (missing text property)', () => {
-        // This test verifies the NoInfer fix works correctly
-        // Before NoInfer: TypeScript would infer a narrow type from the incomplete object, preventing autocomplete
-        // After NoInfer: TypeScript uses DefaultTypedEditorState['root']['children'], catching the missing property
+      test('buildEditorState correctly validates incomplete text node (missing text property)', () => {
         expect(
           buildEditorState<DefaultNodeTypes>({
             nodes: [
@@ -572,7 +569,7 @@ describe('Types testing', () => {
         ).type.toRaiseError()
       })
 
-      test('buildEditorState without generic parameter validates complete text node correctly', () => {
+      test('buildEditorState validates complete text node correctly', () => {
         const result = buildEditorState<DefaultNodeTypes>({
           nodes: [
             {
@@ -587,9 +584,10 @@ describe('Types testing', () => {
           ],
         })
         expect(result).type.toBe<DefaultTypedEditorState>()
+        expect(result).type.toBe<TypedEditorState<DefaultNodeTypes>>()
       })
 
-      test('buildEditorState without generic parameter correctly validates incomplete heading node (missing tag property)', () => {
+      test('buildEditorState correctly validates incomplete heading node (missing tag property)', () => {
         expect(
           buildEditorState<DefaultNodeTypes>({
             nodes: [
@@ -626,9 +624,6 @@ describe('Types testing', () => {
       })
 
       test('buildEditorState returns DefaultTypedEditorState even with incomplete nodes (though nodes cause errors)', () => {
-        // This verifies that the return type is DefaultTypedEditorState (first overload)
-        // and not a narrowed TypedEditorState<T> (second overload)
-        // The incomplete node will cause an error, but the return type should still be correct
         const _result = buildEditorState<DefaultNodeTypes>({
           nodes: [
             {
@@ -640,6 +635,33 @@ describe('Types testing', () => {
         })
         type ResultType = typeof _result
         expect<ResultType>().type.toBe<DefaultTypedEditorState>()
+      })
+
+      test('accepts complete heading node with DefaultNodeTypes', () => {
+        const result = buildEditorState<DefaultNodeTypes>({
+          nodes: [
+            {
+              type: 'heading',
+              tag: 'h1',
+              children: [
+                {
+                  type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
+                  text: 'Title',
+                  version: 1,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              version: 1,
+            },
+          ],
+        })
+        expect(result).type.toBe<TypedEditorState<DefaultNodeTypes>>()
       })
     })
   })
