@@ -99,6 +99,7 @@ export const multiTenantPlugin =
     }
 
     addCollectionAccess({
+      accessResultCallback: pluginConfig.usersAccessResultOverride,
       adminUsersSlug: adminUsersCollection.slug,
       collection: adminUsersCollection,
       fieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
