@@ -1,6 +1,8 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 import type {
+  AccessResult,
   ArrayField,
+  CollectionConfig,
   CollectionSlug,
   Field,
   RelationshipField,
@@ -197,6 +199,16 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
     user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : TypedUser,
   ) => boolean
   /**
+   * Override the result of the admin `users` collection access control functions
+   */
+  usersAccessResultOverride?: ({
+    accessKey,
+    result,
+  }: {
+    accessKey: AllAccessKeys[number]
+    result: AccessResult
+  }) => AccessResult
+  /**
    * Opt out of adding access constraints to the tenants collection
    */
   useTenantsCollectionAccess?: boolean
@@ -204,6 +216,7 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Opt out including the baseListFilter to filter tenants by selected tenant
    */
   useTenantsListFilter?: boolean
+
   /**
    * Opt out including the baseListFilter to filter users by selected tenant
    */
@@ -214,7 +227,6 @@ export type RootTenantFieldConfigOverrides = Partial<
   Omit<
     SingleRelationshipField,
     | '_sanitized'
-    | 'hasMany'
     | 'hidden'
     | 'index'
     | 'localized'
@@ -246,3 +258,16 @@ export type UserWithTenantsField = {
       }[]
     | null
 } & TypedUser
+
+type AllAccessKeysT<T extends readonly string[]> = T[number] extends keyof Omit<
+  Required<CollectionConfig>['access'],
+  'admin'
+>
+  ? keyof Omit<Required<CollectionConfig>['access'], 'admin'> extends T[number]
+    ? T
+    : never
+  : never
+
+export type AllAccessKeys = AllAccessKeysT<
+  ['create', 'read', 'update', 'delete', 'readVersions', 'unlock']
+>
