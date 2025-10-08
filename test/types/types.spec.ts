@@ -486,6 +486,126 @@ describe('Types testing', () => {
       expect(editorState).type.toBe<TypedEditorState<DefaultNodeTypes>>()
     })
 
+    test('accepts complete heading node as part of nested children within DefaultNodeTypes if heading node is explicitly typed', () => {
+      // Extract the correct children type from DefaultTypedEditorState
+      type DefaultChildren = DefaultTypedEditorState['root']['children'][number]
+
+      const headingNode: SerializedHeadingNode<DefaultChildren> = {
+        type: 'heading',
+        tag: 'h1',
+        children: [
+          {
+            type: 'text',
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Title',
+            version: 1,
+          } as SerializedTextNode,
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        version: 1,
+      }
+
+      const editorState: DefaultTypedEditorState = {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'paragraph',
+              children: [headingNode],
+              direction: 'ltr',
+              format: 'left',
+              indent: 0,
+              version: 0,
+              textFormat: 0,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      }
+
+      expect(editorState).type.toBe<TypedEditorState<DefaultNodeTypes>>()
+    })
+
+    test('accepts complete heading node as part of nested, nested children within DefaultNodeTypes if heading node is explicitly typed', () => {
+      // Extract the correct children type from DefaultTypedEditorState
+      type DefaultChildren = DefaultTypedEditorState['root']['children'][number]
+
+      const headingNode: SerializedHeadingNode<DefaultChildren> = {
+        type: 'heading',
+        tag: 'h1',
+        children: [
+          {
+            type: 'text',
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Title',
+            version: 1,
+          } as SerializedTextNode,
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        version: 1,
+      }
+
+      const editorState: DefaultTypedEditorState = {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'paragraph',
+              children: [],
+              direction: 'ltr',
+              format: 'left',
+              indent: 0,
+              version: 0,
+              textFormat: 0,
+            },
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  type: 'link',
+                  children: [headingNode],
+                  direction: 'ltr',
+                  format: 'left',
+                  indent: 0,
+                  version: 0,
+                  textFormat: 0,
+                  fields: {
+                    linkType: 'custom',
+                    newTab: false,
+                    url: 'https://www.payloadcms.com',
+                  },
+                },
+              ],
+              direction: 'ltr',
+              format: 'left',
+              indent: 0,
+              version: 0,
+              textFormat: 0,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      }
+
+      expect(editorState).type.toBe<TypedEditorState<DefaultNodeTypes>>()
+    })
+
     describe('buildEditorState', () => {
       test('buildEditorState returns DefaultTypedEditorState', () => {
         const result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
