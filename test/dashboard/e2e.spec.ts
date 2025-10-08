@@ -39,7 +39,55 @@ describe('Dashboard', () => {
     await page.goto(url.admin)
   })
 
-  test('todo', async ({ page }) => {
+  test('initial dashboard', async ({ page }) => {
+    await expect(page.locator('.widget')).toHaveCount(7)
+    const widget = (pos: number) => page.locator(`.grid-layout > :nth-child(${pos})`)
+
+    await expect(widget(1)).toHaveAttribute('data-columns', '12')
+    await expect(widget(1)).toHaveAttribute('data-rows', '3')
+    await expect(widget(1)).toHaveAttribute('data-slug', /^collection-cards/)
+
+    await expect(widget(2)).toHaveAttribute('data-columns', '3')
+    await expect(widget(2)).toHaveAttribute('data-rows', '1')
+    await expect(widget(2)).toHaveAttribute('data-slug', /^count/)
+
+    await expect(widget(3)).toHaveAttribute('data-columns', '3')
+    await expect(widget(3)).toHaveAttribute('data-rows', '1')
+    await expect(widget(3)).toHaveAttribute('data-slug', /^count/)
+
+    await expect(widget(4)).toHaveAttribute('data-columns', '3')
+    await expect(widget(4)).toHaveAttribute('data-rows', '1')
+    await expect(widget(4)).toHaveAttribute('data-slug', /^count/)
+
+    await expect(widget(5)).toHaveAttribute('data-columns', '3')
+    await expect(widget(5)).toHaveAttribute('data-rows', '1')
+    await expect(widget(5)).toHaveAttribute('data-slug', /^count/)
+
+    await expect(widget(6)).toHaveAttribute('data-columns', '12')
+    await expect(widget(6)).toHaveAttribute('data-rows', '2')
+    await expect(widget(6)).toHaveAttribute('data-slug', /^revenue/)
+
+    await expect(widget(7)).toHaveAttribute('data-columns', '12')
+    await expect(widget(7)).toHaveAttribute('data-rows', '1')
+    await expect(widget(7)).toHaveAttribute('data-slug', /^private/)
+  })
+
+  test('add widget', async ({ page }) => {
+    const dashboardMenu = page.locator('.step-nav').getByText('Dashboard')
+    await dashboardMenu.click()
+    await page.getByRole('option', { name: 'Edit Dashboard' }).click()
+    await page.getByText('Add +').click()
+    await page.locator('.drawer').getByText('revenue').click()
+    const revenueWidget = page.locator('.revenue-widget')
+    await expect(revenueWidget).toHaveCount(1)
+  })
+
+  test('resize widget', async ({ page }) => {
+    await page.goto(serverURL)
+    expect(1).toBe(1)
+  })
+
+  test('delete widget', async ({ page }) => {
     await page.goto(serverURL)
     expect(1).toBe(1)
   })

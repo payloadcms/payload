@@ -77,7 +77,13 @@ export function GridLayoutDashboardClient({
       >
         {currentLayout &&
           currentLayout.map((widget) => (
-            <div className="widget" key={widget.clientLayout.i}>
+            <div
+              className="widget"
+              data-columns={widget.clientLayout.w}
+              data-rows={widget.clientLayout.h}
+              data-slug={widget.clientLayout.i}
+              key={widget.clientLayout.i}
+            >
               <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
                 <div className="widget-content">{widget.component}</div>
                 {isEditing && (
