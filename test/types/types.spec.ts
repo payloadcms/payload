@@ -10,8 +10,10 @@ import type {
 } from 'payload'
 
 import {
+  buildEditorState,
   type DefaultNodeTypes,
   type DefaultTypedEditorState,
+  type SerializedBlockNode,
   type TypedEditorState,
 } from '@payloadcms/richtext-lexical'
 import payload from 'payload'
@@ -442,6 +444,203 @@ describe('Types testing', () => {
       expect<'children' extends keyof LinebreakNode ? true : false>().type.toBe<false>()
       expect<'children' extends keyof TextNode ? true : false>().type.toBe<false>()
       expect<'children' extends keyof TabNode ? true : false>().type.toBe<false>()
+    })
+
+    describe('buildEditorState', () => {
+      test('buildEditorState without generic returns DefaultTypedEditorState', () => {
+        const result = buildEditorState({ text: 'hello' })
+        expect(result).type.toBe<DefaultTypedEditorState>()
+      })
+
+      test('buildEditorState with text parameter returns DefaultTypedEditorState', () => {
+        const result = buildEditorState({ text: 'Hello world' })
+        expect(result).type.toBe<DefaultTypedEditorState>()
+      })
+
+      test('buildEditorState with nodes parameter returns DefaultTypedEditorState', () => {
+        const result = buildEditorState({
+          nodes: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'hello',
+              version: 1,
+            },
+          ],
+        })
+        expect(result).type.toBe<DefaultTypedEditorState>()
+      })
+
+      test('buildEditorState with explicit generic returns TypedEditorState<T>', () => {
+        const result = buildEditorState<DefaultNodeTypes | SerializedBlockNode>({
+          nodes: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'hello',
+              version: 1,
+            },
+          ],
+        })
+        expect(result).type.toBe<TypedEditorState<DefaultNodeTypes | SerializedBlockNode>>()
+      })
+
+      test('buildEditorState with explicit SerializedBlockNode generic returns TypedEditorState<SerializedBlockNode>', () => {
+        const result = buildEditorState<SerializedBlockNode>({
+          nodes: [
+            {
+              type: 'block',
+              fields: {
+                id: 'id',
+                blockName: 'Cool block',
+                blockType: 'myBlock',
+              },
+              format: 'left',
+              version: 1,
+            },
+          ],
+        })
+        expect(result).type.toBe<TypedEditorState<SerializedBlockNode>>()
+      })
+
+      test('buildEditorState return type includes correct node types in children', () => {
+        const _result = buildEditorState({ text: 'hello' })
+        type NodeType = (typeof _result)['root']['children'][number]['type']
+        expect<NodeType>().type.toBe<_Hardcoded_DefaultNodeTypes>()
+      })
+
+      test('buildEditorState with explicit generic includes custom node types in children', () => {
+        const _result = buildEditorState<DefaultNodeTypes | SerializedBlockNode>({ text: 'hello' })
+        type NodeType = (typeof _result)['root']['children'][number]['type']
+        expect<NodeType>().type.toBe<'block' | _Hardcoded_DefaultNodeTypes>()
+      })
+
+      test('buildEditorState result can be assigned to Post richText field', () => {
+        const _result = buildEditorState({ text: 'hello' })
+        type GeneratedRichTextType = Post['richText']
+        expect<GeneratedRichTextType>().type.toBeAssignableWith<typeof _result>()
+      })
+
+      test('buildEditorState allows pushing typed nodes to children', () => {
+        const result = buildEditorState({ text: 'hello' })
+        result.root.children.push({
+          type: 'heading',
+          tag: 'h1',
+          children: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'Heading text',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          version: 1,
+        })
+        expect(result).type.toBe<DefaultTypedEditorState>()
+      })
+
+      test('buildEditorState without generic parameter correctly validates incomplete text node (missing text property)', () => {
+        // This test verifies the NoInfer fix works correctly
+        // Before NoInfer: TypeScript would infer a narrow type from the incomplete object, preventing autocomplete
+        // After NoInfer: TypeScript uses DefaultTypedEditorState['root']['children'], catching the missing property
+        expect(
+          buildEditorState({
+            nodes: [
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                version: 1,
+                // Missing 'text' property - this should be a type error
+              },
+            ],
+          }),
+        ).type.toRaiseError()
+      })
+
+      test('buildEditorState without generic parameter validates complete text node correctly', () => {
+        const result = buildEditorState({
+          nodes: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'hello',
+              version: 1,
+            },
+          ],
+        })
+        expect(result).type.toBe<DefaultTypedEditorState>()
+      })
+
+      test('buildEditorState without generic parameter correctly validates incomplete heading node (missing tag property)', () => {
+        expect(
+          buildEditorState({
+            nodes: [
+              {
+                type: 'heading',
+                children: [],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+                // Missing 'tag' property - this should be a type error
+              },
+            ],
+          }),
+        ).type.toRaiseError()
+      })
+
+      test('buildEditorState with explicit generic allows custom nodes', () => {
+        const result = buildEditorState<DefaultNodeTypes | SerializedBlockNode>({
+          nodes: [
+            {
+              type: 'block',
+              fields: {
+                id: 'id',
+                blockName: 'Cool block',
+                blockType: 'myBlock',
+              },
+              format: 'left',
+              version: 1,
+            },
+          ],
+        })
+        expect(result).type.toBe<TypedEditorState<DefaultNodeTypes | SerializedBlockNode>>()
+      })
+
+      test('buildEditorState returns DefaultTypedEditorState even with incomplete nodes (though nodes cause errors)', () => {
+        // This verifies that the return type is DefaultTypedEditorState (first overload)
+        // and not a narrowed TypedEditorState<T> (second overload)
+        // The incomplete node will cause an error, but the return type should still be correct
+        const _result = buildEditorState({
+          nodes: [
+            {
+              type: 'text',
+              version: 1,
+              // Missing many properties
+            } as any, // Using 'as any' to bypass the error for testing purposes
+          ],
+        })
+        type ResultType = typeof _result
+        expect<ResultType>().type.toBe<DefaultTypedEditorState>()
+      })
     })
   })
 })
