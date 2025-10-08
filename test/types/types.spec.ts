@@ -448,6 +448,41 @@ describe('Types testing', () => {
       expect<'children' extends keyof TabNode ? true : false>().type.toBe<false>()
     })
 
+    test('aa', () => {
+      const headingNode: SerializedHeadingNode = {
+        type: 'heading',
+        tag: 'h1',
+        children: [
+          {
+            type: 'text',
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Title',
+            version: 1,
+          } as SerializedTextNode,
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        version: 1,
+      }
+
+      const editorState: DefaultTypedEditorState = {
+        root: {
+          type: 'root',
+          children: [headingNode],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      }
+
+      expect(editorState).type.toBe<TypedEditorState<DefaultNodeTypes>>()
+    })
+
     describe('buildEditorState', () => {
       test('buildEditorState returns DefaultTypedEditorState', () => {
         const result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
