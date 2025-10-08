@@ -12,6 +12,7 @@ import type {
   Payload,
   PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedFieldsPermissions,
   ViewTypes,
 } from 'payload'
 
@@ -72,6 +73,7 @@ export const renderTable = ({
   customCellProps,
   data,
   enableRowSelections,
+  fieldPermissions,
   groupByFieldPath,
   groupByValue,
   heading,
@@ -95,6 +97,7 @@ export const renderTable = ({
   data?: PaginatedDocs | undefined
   drawerSlug?: string
   enableRowSelections: boolean
+  fieldPermissions?: SanitizedFieldsPermissions
   groupByFieldPath?: string
   groupByValue?: string
   heading?: string
@@ -160,6 +163,7 @@ export const renderTable = ({
     | 'columns'
     | 'customCellProps'
     | 'enableRowSelections'
+    | 'fieldPermissions'
     | 'i18n'
     | 'payload'
     | 'req'
@@ -170,6 +174,7 @@ export const renderTable = ({
     clientFields,
     columns,
     enableRowSelections,
+    fieldPermissions,
     i18n,
     // sortColumnProps,
     customCellProps,

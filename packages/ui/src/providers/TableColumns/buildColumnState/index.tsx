@@ -12,6 +12,7 @@ import type {
   Payload,
   PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedFieldsPermissions,
   ServerComponentProps,
   StaticLabel,
   ViewTypes,
@@ -33,6 +34,7 @@ import {
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../../../exports/client/index.js'
 import { filterFields } from './filterFields.js'
+import { hasFieldReadPermission } from './hasFieldReadPermission.js'
 import { isColumnActive } from './isColumnActive.js'
 import { renderCell } from './renderCell.js'
 import { sortFieldMap } from './sortFieldMap.js'
@@ -45,6 +47,7 @@ export type BuildColumnStateArgs = {
   enableLinkedCell?: boolean
   enableRowSelections: boolean
   enableRowTypes?: boolean
+  fieldPermissions?: SanitizedFieldsPermissions
   i18n: I18nClient
   payload: Payload
   req?: PayloadRequest
@@ -79,6 +82,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     docs,
     enableLinkedCell = true,
     enableRowSelections,
+    fieldPermissions,
     i18n,
     payload,
     req,
@@ -137,6 +141,16 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
 
     const accessor =
       (clientField as any).accessor ?? ('name' in clientField ? clientField.name : undefined)
+
+    // Check read permissions for the field
+    // Skip permission check for ID field as it should always be visible
+    if (fieldPermissions && accessor && !fieldIsID(clientField)) {
+      const hasReadPermission = hasFieldReadPermission(fieldPermissions, accessor)
+
+      if (!hasReadPermission) {
+        return acc
+      }
+    }
 
     const serverField = _sortedFieldMap.find((f) => {
       const fAccessor = (f as any).accessor ?? ('name' in f ? f.name : undefined)

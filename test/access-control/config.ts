@@ -13,6 +13,8 @@ import { devUser } from '../credentials.js'
 import { Auth } from './collections/Auth/index.js'
 import { Disabled } from './collections/Disabled/index.js'
 import { Hooks } from './collections/hooks/index.js'
+import { ReadRestricted } from './collections/ReadRestricted/index.js'
+import { seedReadRestricted } from './collections/ReadRestricted/seed.js'
 import { Regression1 } from './collections/Regression-1/index.js'
 import { Regression2 } from './collections/Regression-2/index.js'
 import { RichText } from './collections/RichText/index.js'
@@ -578,6 +580,7 @@ export default buildConfigWithDefaults(
       Regression2,
       Hooks,
       Auth,
+      ReadRestricted,
     ],
     globals: [
       {
@@ -767,6 +770,9 @@ export default buildConfigWithDefaults(
           },
         },
       })
+
+      // Seed read-restricted collection
+      await seedReadRestricted(payload)
     },
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),

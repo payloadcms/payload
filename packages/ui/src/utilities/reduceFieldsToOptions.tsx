@@ -1,6 +1,6 @@
 'use client'
 import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations'
-import type { ClientField } from 'payload'
+import type { ClientField, SanitizedFieldsPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
@@ -9,9 +9,11 @@ import type { ReducedField } from '../elements/WhereBuilder/types.js'
 
 import fieldTypes, { arrayOperators } from '../elements/WhereBuilder/field-types.js'
 import { createNestedClientFieldPath } from '../forms/Form/createNestedClientFieldPath.js'
+import { hasFieldReadPermission } from '../providers/TableColumns/buildColumnState/hasFieldReadPermission.js'
 import { combineFieldLabel } from './combineFieldLabel.js'
 
 type ReduceFieldOptionsArgs = {
+  fieldPermissions?: SanitizedFieldsPermissions
   fields: ClientField[]
   i18n: I18nClient
   labelPrefix?: string
@@ -23,6 +25,7 @@ type ReduceFieldOptionsArgs = {
  * Used in the `WhereBuilder` component to render the fields in the dropdown.
  */
 export const reduceFieldsToOptions = ({
+  fieldPermissions,
   fields,
   i18n,
   labelPrefix,
@@ -70,6 +73,7 @@ export const reduceFieldsToOptions = ({
           if (typeof localizedTabLabel === 'string') {
             reduced.push(
               ...reduceFieldsToOptions({
+                fieldPermissions,
                 fields: tab.fields,
                 i18n,
                 labelPrefix: labelWithPrefix,
@@ -86,6 +90,7 @@ export const reduceFieldsToOptions = ({
     if (field.type === 'row' && 'fields' in field) {
       reduced.push(
         ...reduceFieldsToOptions({
+          fieldPermissions,
           fields: field.fields,
           i18n,
           labelPrefix,
@@ -104,6 +109,7 @@ export const reduceFieldsToOptions = ({
 
       reduced.push(
         ...reduceFieldsToOptions({
+          fieldPermissions,
           fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,
@@ -132,6 +138,7 @@ export const reduceFieldsToOptions = ({
 
         reduced.push(
           ...reduceFieldsToOptions({
+            fieldPermissions,
             fields: field.fields,
             i18n,
             labelPrefix: labelWithPrefix,
@@ -141,6 +148,7 @@ export const reduceFieldsToOptions = ({
       } else {
         reduced.push(
           ...reduceFieldsToOptions({
+            fieldPermissions,
             fields: field.fields,
             i18n,
             labelPrefix: labelWithPrefix,
@@ -170,6 +178,7 @@ export const reduceFieldsToOptions = ({
 
       reduced.push(
         ...reduceFieldsToOptions({
+          fieldPermissions,
           fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,
@@ -209,6 +218,14 @@ export const reduceFieldsToOptions = ({
         : localizedLabel
 
       const fieldPath = pathPrefix ? createNestedClientFieldPath(pathPrefix, field) : field.name
+
+      // Check read permissions - skip ID field as it should always be visible
+      if (fieldPermissions && fieldPath && !fieldIsID(field)) {
+        const hasReadPermission = hasFieldReadPermission(fieldPermissions, fieldPath)
+        if (!hasReadPermission) {
+          return reduced
+        }
+      }
 
       const formattedField: ReducedField = {
         label: formattedLabel,

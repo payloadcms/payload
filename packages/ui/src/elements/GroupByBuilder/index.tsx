@@ -6,6 +6,7 @@ import './index.scss'
 import React, { useMemo } from 'react'
 
 import { SelectInput } from '../../fields/Select/Input.js'
+import { useAuth } from '../../providers/Auth/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { reduceFieldsToOptions } from '../../utilities/reduceFieldsToOptions.js'
@@ -41,8 +42,14 @@ const supportedFieldTypes: Field['type'][] = [
 
 export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
   const { i18n, t } = useTranslation()
+  const { permissions } = useAuth()
 
-  const reducedFields = useMemo(() => reduceFieldsToOptions({ fields, i18n }), [fields, i18n])
+  const fieldPermissions = permissions?.collections?.[collectionSlug]?.fields
+
+  const reducedFields = useMemo(
+    () => reduceFieldsToOptions({ fieldPermissions, fields, i18n }),
+    [fields, fieldPermissions, i18n],
+  )
 
   const { query, refineListData } = useListQuery()
 
