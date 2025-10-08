@@ -24,7 +24,6 @@ type TreeViewQueryParams = {
 export type TreeViewContextValue = {
   checkIfItemIsDisabled: (item: TreeViewDocument) => boolean
   clearSelections: () => void
-  ComponentToRender: React.ReactNode
   documents?: TreeViewDocument[]
   dragOverlayItem?: TreeViewDocument | undefined
   dragStartX: number
@@ -53,12 +52,12 @@ export type TreeViewContextValue = {
   setFocusedRowIndex: React.Dispatch<React.SetStateAction<number>>
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>
   sort: FolderSortKeys
+  TableComponent: React.ReactNode
 }
 
 const Context = React.createContext<TreeViewContextValue>({
   checkIfItemIsDisabled: () => false,
   clearSelections: () => {},
-  ComponentToRender: null,
   documents: [],
   dragOverlayItem: undefined,
   dragStartX: 0,
@@ -78,6 +77,7 @@ const Context = React.createContext<TreeViewContextValue>({
   setFocusedRowIndex: () => -1,
   setIsDragging: () => false,
   sort: 'name',
+  TableComponent: null,
 })
 
 export type TreeViewProviderProps = {
@@ -87,10 +87,6 @@ export type TreeViewProviderProps = {
    */
   readonly children: React.ReactNode
   readonly collectionSlug: CollectionSlug
-  /**
-   * The component to render the folder results
-   */
-  readonly ComponentToRender: React.ReactNode
   /**
    * All documents in the tree
    */
@@ -116,6 +112,10 @@ export type TreeViewProviderProps = {
    */
   readonly sort?: FolderSortKeys
   /**
+   * The component to render the folder results
+   */
+  readonly TableComponent: React.ReactNode
+  /**
    *
    */
 }
@@ -123,12 +123,12 @@ export function TreeViewProvider({
   allowMultiSelection = true,
   children,
   collectionSlug,
-  ComponentToRender: InitialComponentToRender,
   documents,
   onItemClick: onItemClickFromProps,
   parentFieldName = '_parentDoc',
   search,
   sort = 'name',
+  TableComponent: InitialTableComponent,
 }: TreeViewProviderProps) {
   const parentTreeViewContext = useTreeView()
   const { config } = useConfig()
@@ -141,8 +141,8 @@ export function TreeViewProvider({
 
   const currentlySelectedIndexes = React.useRef(new Set<number>())
 
-  const [ComponentToRender, setComponentToRender] = React.useState(
-    InitialComponentToRender || (() => null),
+  const [TableComponent, setTableComponentToRender] = React.useState(
+    InitialTableComponent || (() => null),
   )
 
   const rawSearchParams = useSearchParams()
@@ -610,17 +610,16 @@ export function TreeViewProvider({
 
   // If a new component is provided, update the state so children can re-render with the new component
   React.useEffect(() => {
-    if (InitialComponentToRender) {
-      setComponentToRender(InitialComponentToRender)
+    if (InitialTableComponent) {
+      setTableComponentToRender(InitialTableComponent)
     }
-  }, [InitialComponentToRender])
+  }, [InitialTableComponent])
 
   return (
     <Context
       value={{
         checkIfItemIsDisabled,
         clearSelections,
-        ComponentToRender,
         documents,
         dragOverlayItem,
         dragStartX,
@@ -640,6 +639,7 @@ export function TreeViewProvider({
         setFocusedRowIndex,
         setIsDragging,
         sort,
+        TableComponent,
       }}
     >
       {children}

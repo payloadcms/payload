@@ -40,11 +40,11 @@ export function DefaultCollectionTreeView({
   return (
     <TreeViewProvider
       collectionSlug={collectionSlug}
-      ComponentToRender={TreeViewComponent}
       documents={documents}
       parentFieldName={parentFieldName}
       search={search}
       sort={sort}
+      TableComponent={TreeViewComponent}
     >
       <CollectionTreeViewInContext {...restOfProps} collectionSlug={collectionSlug} />
     </TreeViewProvider>
@@ -75,7 +75,6 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
   const { setPreference } = usePreferences()
 
   const {
-    ComponentToRender,
     documents,
     dragOverlayItem,
     getSelectedItems,
@@ -85,6 +84,7 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
     selectedItemKeys,
     setDragStartX,
     setIsDragging,
+    TableComponent: ComponentToRender,
   } = useTreeView()
 
   const router = useRouter()
