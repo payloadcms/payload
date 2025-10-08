@@ -391,7 +391,7 @@ export type CollectionAdminOptions = {
    * If your cells require specific fields that may be unselected, such as within hooks, etc.,
    * use `forceSelect` in conjunction with this property.
    *
-   * @experimental This is an experimental feature and may change in the future. Use at your own discretion.
+   * @experimental This is an experimental feature and may change in the future. Use at your own risk.
    */
   enableListViewSelectAPI?: boolean
   enableRichTextLink?: boolean
@@ -428,7 +428,7 @@ export type CollectionAdminOptions = {
    * @description Enable grouping by a field in the list view.
    * Uses `payload.findDistinct` under the hood to populate the group-by options.
    *
-   * @experimental This option is currently in beta and may change in future releases. Use at your own discretion.
+   * @experimental This option is currently in beta and may change in future releases. Use at your own risk.
    */
   groupBy?: boolean
   /**

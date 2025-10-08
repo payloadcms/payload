@@ -64,7 +64,9 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
   })
 
   const field = getFieldByPath({
+    config: this.payload.config,
     fields: collectionConfig.flattenedFields,
+    includeRelationships: true,
     path: args.field,
   })?.field
 
