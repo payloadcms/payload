@@ -56,51 +56,68 @@ export const DraggableWithClick = ({
 }: Props) => {
   const id = useId()
   const initialPos = useRef({ x: 0, y: 0 })
-  const [dragStartX, setDragStartX] = React.useState(0)
+  const dragStartX = useRef(0)
   const { attributes, listeners, setNodeRef } = useDraggable({
     id,
     data: {
-      dragStartX,
+      get dragStartX() {
+        return dragStartX.current
+      },
     },
     disabled,
   })
   const isDragging = useRef(false)
+  const cleanupRef = useRef<(() => void) | null>(null)
 
-  const handlePointerDown = (e: PointerEvent) => {
-    initialPos.current = { x: e.clientX, y: e.clientY }
-    setDragStartX(e.clientX)
-    isDragging.current = false
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      if (cleanupRef.current) {
+        cleanupRef.current()
+      }
+    }
+  }, [])
 
-    const handlePointerMove = (moveEvent: PointerEvent) => {
-      const deltaX = Math.abs(moveEvent.clientX - initialPos.current.x)
-      const deltaY = Math.abs(moveEvent.clientY - initialPos.current.y)
-      if (deltaX > dragThreshold || deltaY > dragThreshold) {
-        isDragging.current = true
-        if (listeners?.onPointerDown) {
-          listeners.onPointerDown(e)
-          // pointer movement exceeded threshold, initiate drag
-          onDrag(moveEvent)
+  const handlePointerDown = React.useCallback(
+    (e: PointerEvent) => {
+      initialPos.current = { x: e.clientX, y: e.clientY }
+      dragStartX.current = e.clientX
+      isDragging.current = false
+
+      const handlePointerMove = (moveEvent: PointerEvent) => {
+        const deltaX = Math.abs(moveEvent.clientX - initialPos.current.x)
+        const deltaY = Math.abs(moveEvent.clientY - initialPos.current.y)
+        if (deltaX > dragThreshold || deltaY > dragThreshold) {
+          isDragging.current = true
+          if (listeners?.onPointerDown) {
+            listeners.onPointerDown(e)
+            // pointer movement exceeded threshold, initiate drag
+            onDrag(moveEvent)
+          }
+          window.removeEventListener('pointermove', handlePointerMove)
         }
+      }
+
+      const cleanup = () => {
         window.removeEventListener('pointermove', handlePointerMove)
+        window.removeEventListener('pointerup', handlePointerUp)
+        cleanupRef.current = null
       }
-    }
 
-    const cleanup = () => {
-      window.removeEventListener('pointermove', handlePointerMove)
-      window.removeEventListener('pointerup', handlePointerUp)
-    }
-
-    const handlePointerUp = (upEvent: PointerEvent) => {
-      cleanup()
-      if (!isDragging.current && onClick) {
-        // pointer-down then pointer-up within the threshold, call click handler
-        onClick(upEvent as unknown as React.MouseEvent<HTMLElement>)
+      const handlePointerUp = (upEvent: PointerEvent) => {
+        cleanup()
+        if (!isDragging.current && onClick) {
+          // pointer-down then pointer-up within the threshold, call click handler
+          onClick(upEvent as unknown as React.MouseEvent<HTMLElement>)
+        }
       }
-    }
 
-    window.addEventListener('pointermove', handlePointerMove)
-    window.addEventListener('pointerup', handlePointerUp)
-  }
+      window.addEventListener('pointermove', handlePointerMove)
+      window.addEventListener('pointerup', handlePointerUp)
+      cleanupRef.current = cleanup
+    },
+    [dragThreshold, listeners, onClick, onDrag],
+  )
 
   const Component = as || 'div'
 
