@@ -666,6 +666,38 @@ describe('Types testing', () => {
         expect(result).type.toBe<TypedEditorState<DefaultNodeTypes>>()
       })
 
+      test('throws error for invalid children of non-explicit typed heading node', () => {
+        expect(
+          buildEditorState<DefaultNodeTypes>({
+            nodes: [
+              {
+                type: 'heading',
+                tag: 'h1',
+                children: [
+                  {
+                    type: 'text',
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Title',
+                    version: 1,
+                  },
+                  {
+                    type: 'invalid',
+                    test: 'test',
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            ],
+          }),
+        ).type.toRaiseError()
+      })
+
       test('accepts complete heading node with DefaultNodeTypes if heading node is explicitly typed', () => {
         const headingNode: SerializedHeadingNode = {
           type: 'heading',
