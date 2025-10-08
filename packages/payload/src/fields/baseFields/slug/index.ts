@@ -3,7 +3,7 @@ import type { FieldAdmin, RowField } from '../../../fields/config/types.js'
 
 import { generateSlug } from './generateSlug.js'
 
-type SlugFieldArgs = {
+export type SlugFieldArgs = {
   /**
    * Override for the `generateSlug` checkbox field name.
    * @default 'generateSlug'
@@ -39,6 +39,10 @@ type SlugFieldArgs = {
    * @default true
    */
   required?: boolean
+  /**
+   * Provide your own slugify function to override the default.
+   */
+  slugify?: (val?: string) => string
 }
 
 type SlugField = (args?: SlugFieldArgs) => RowField
@@ -69,6 +73,7 @@ export const slugField: SlugField = ({
   overrides,
   position = 'sidebar',
   required = true,
+  slugify,
 } = {}) => {
   const baseField: RowField = {
     type: 'row',
@@ -90,7 +95,7 @@ export const slugField: SlugField = ({
         },
         defaultValue: true,
         hooks: {
-          beforeChange: [generateSlug(fieldToUse)],
+          beforeChange: [generateSlug(fieldToUse, slugify)],
         },
       },
       {
