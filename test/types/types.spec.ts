@@ -448,7 +448,7 @@ describe('Types testing', () => {
       expect<'children' extends keyof TabNode ? true : false>().type.toBe<false>()
     })
 
-    test('aa', () => {
+    test('accepts complete heading node as part of DefaultNodeTypes if heading node is explicitly typed', () => {
       const headingNode: SerializedHeadingNode = {
         type: 'heading',
         tag: 'h1',
