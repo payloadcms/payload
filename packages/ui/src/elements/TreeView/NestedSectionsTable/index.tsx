@@ -29,6 +29,7 @@ interface NestedSectionsTableProps {
   dropContextName: string
   hoveredRowID?: null | number | string
   initialOffset?: number
+  invalidTargetIDs?: Set<number | string>
   isDragging?: boolean
   onDroppableHover: (params: {
     hoveredRowID?: number | string
@@ -63,6 +64,7 @@ interface DivTableSectionProps {
   firstCellWidth: number
   firstCellXOffset: number
   hoveredRowID: null | number | string
+  invalidTargetIDs?: Set<number | string>
   isDragging: boolean
   isLastRowOfRoot?: boolean
   level?: number
@@ -133,6 +135,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   draggedItem,
   dropContextName,
   hoveredRowID,
+  invalidTargetIDs,
   isDragging = false,
   onDroppableHover,
   onRowClick,
@@ -169,6 +172,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           firstCellWidth={firstCellWidth}
           firstCellXOffset={firstCellXOffset}
           hoveredRowID={hoveredRowID}
+          invalidTargetIDs={invalidTargetIDs}
           isDragging={isDragging}
           onDroppableHover={onDroppableHover}
           onRowClick={onRowClick}
@@ -205,6 +209,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
   firstCellWidth,
   firstCellXOffset,
   hoveredRowID,
+  invalidTargetIDs,
   isDragging,
   isLastRowOfRoot = false,
   level = 0,
@@ -349,6 +354,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                 <div>
                   <RowDropArea
                     dropContextName={dropContextName}
+                    invalidTargetIDs={invalidTargetIDs}
                     isDragging={isDragging}
                     onHover={(data) => {
                       onDroppableHover({ ...data, hoveredRowID: rowItem.rowID })
@@ -361,6 +367,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
 
                   <RowDropArea
                     dropContextName={dropContextName}
+                    invalidTargetIDs={invalidTargetIDs}
                     isDragging={isDragging}
                     onHover={(data) => {
                       onDroppableHover({ ...data, hoveredRowID: rowItem.rowID })
@@ -400,6 +407,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                 firstCellWidth={firstCellWidth}
                 firstCellXOffset={firstCellXOffset}
                 hoveredRowID={hoveredRowID}
+                invalidTargetIDs={invalidTargetIDs}
                 isDragging={isDragging}
                 isLastRowOfRoot={isRowAtRootLevel}
                 level={level + 1}

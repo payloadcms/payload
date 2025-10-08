@@ -7,6 +7,7 @@ import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment } from 'react'
+import { toast } from 'sonner'
 
 import { DefaultListViewTabs } from '../../elements/DefaultListViewTabs/index.js'
 import { SortByPill } from '../../elements/FolderView/SortByPill/index.js'
@@ -16,6 +17,7 @@ import { NoListResults } from '../../elements/NoListResults/index.js'
 import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { TreeViewDragOverlay } from '../../elements/TreeView/TreeViewDragOverlay/index.js'
+import { getAllDescendantIDs } from '../../elements/TreeView/utils/getAllDescendantIDs.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -109,22 +111,34 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
 
       if (
         event.over.data.current.type === 'tree-view-table' &&
-        event.over.data.current.targetItem
+        'targetItem' in event.over.data.current
       ) {
+        const selectedItems = getSelectedItems()
+        const docIDs = selectedItems.map((doc) => doc.value.id)
+        const targetItem = event.over.data.current.targetItem
+        const targetID = targetItem?.rowID
+
+        // Validate: prevent moving a parent into its own descendant
+        const invalidTargets = getAllDescendantIDs(docIDs, documents)
+        if (targetID && invalidTargets.has(targetID)) {
+          toast.error(t('general:cannotMoveParentIntoChild'))
+          return
+        }
+
         try {
-          // await moveItems({
-          //   docIDs: getSelectedItems().map((doc) => doc.value.id),
-          //   parentID: event.over.data.current.id,
-          // })
+          await moveItems({
+            docIDs,
+            parentID: targetID,
+          })
+          clearRouteCache()
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error('Error moving items:', error)
+          toast.error(t('general:errorMovingItems'))
         }
-
-        clearRouteCache()
       }
     },
-    [moveItems, getSelectedItems, clearRouteCache],
+    [moveItems, getSelectedItems, clearRouteCache, documents, t],
   )
 
   // React.useEffect(() => {

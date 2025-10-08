@@ -8,6 +8,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { useTreeView } from '../../../providers/TreeView/index.js'
 import { NestedSectionsTable } from '../NestedSectionsTable/index.js'
 import { documentsToSectionRows } from '../utils/documentsToSectionRows.js'
+import { getAllDescendantIDs } from '../utils/getAllDescendantIDs.js'
 import './index.scss'
 
 const baseClass = 'tree-view-results-table'
@@ -28,6 +29,14 @@ export function TreeViewTable() {
   const { i18n, t } = useTranslation()
   const [hoveredRowID, setHoveredRowID] = React.useState<null | number | string>(null)
   const [targetParentID, setTargetParentID] = React.useState<null | number | string>(null)
+
+  // Reset hover state when drag ends
+  React.useEffect(() => {
+    if (!isDragging) {
+      setHoveredRowID(null)
+      setTargetParentID(null)
+    }
+  }, [isDragging])
   const onDroppableHover = React.useCallback(
     ({
       hoveredRowID: newHoveredRowID,
@@ -98,6 +107,21 @@ export function TreeViewTable() {
     return documentsToSectionRows({ documents, i18nLanguage: i18n.language })
   }, [documents, i18n.language])
 
+  const selectedRowIDs = React.useMemo(() => {
+    return Array.from(selectedItemKeys).map((key) => {
+      const doc = documents.find((d) => d.itemKey === key)
+      return doc?.value.id || ''
+    })
+  }, [selectedItemKeys, documents])
+
+  // Compute invalid drop targets (dragged items + all their descendants)
+  const invalidTargetIDs = React.useMemo(() => {
+    if (!isDragging || selectedRowIDs.length === 0) {
+      return undefined
+    }
+    return getAllDescendantIDs(selectedRowIDs, documents)
+  }, [isDragging, selectedRowIDs, documents])
+
   return (
     <NestedSectionsTable
       className={baseClass}
@@ -105,15 +129,13 @@ export function TreeViewTable() {
       dragStartX={dragStartX}
       dropContextName="tree-view-table"
       hoveredRowID={hoveredRowID}
+      invalidTargetIDs={invalidTargetIDs}
       isDragging={isDragging}
       onDroppableHover={onDroppableHover}
       onRowClick={onRowClick}
       onRowDrag={onRowDrag}
       sections={sections}
-      selectedRowIDs={Array.from(selectedItemKeys).map((key) => {
-        const doc = documents.find((d) => d.itemKey === key)
-        return doc?.value.id || ''
-      })}
+      selectedRowIDs={selectedRowIDs}
       targetParentID={targetParentID}
       // columns={columns}
     />

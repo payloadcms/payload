@@ -12,6 +12,7 @@ type Placement = 'middle' | 'split'
 
 export type RowDropAreaProps = {
   dropContextName: string
+  invalidTargetIDs?: Set<number | string>
   isDragging?: boolean
   onHover?: (data: { placement: Placement; targetItem: any }) => void
   placement?: Placement
@@ -24,6 +25,7 @@ export type RowDropAreaProps = {
 
 export const RowDropArea = ({
   dropContextName,
+  invalidTargetIDs,
   isDragging = false,
   onHover,
   placement = 'split',
@@ -47,10 +49,20 @@ export const RowDropArea = ({
 
   const targetItem = targetItems[hoverIndex]
 
+  // Check if this target is invalid (trying to drop a parent into its own descendant)
+  const isInvalidTarget = React.useMemo(() => {
+    if (!invalidTargetIDs || !targetItem) {
+      return false
+    }
+    // targetItem can be null (for root level drops) or have a rowID
+    const targetID = targetItem?.rowID
+    return targetID !== null && targetID !== undefined && invalidTargetIDs.has(targetID)
+  }, [invalidTargetIDs, targetItem])
+
   const { isOver, setNodeRef } = useDroppable({
     id,
     data: { type: dropContextName, targetItem },
-    disabled: !isDragging,
+    disabled: !isDragging || isInvalidTarget,
   })
 
   React.useEffect(() => {
@@ -66,6 +78,7 @@ export const RowDropArea = ({
         `${baseClass}--on-${placement}`,
         isDragging && 'is-dragging',
         isOver && 'is-over',
+        isInvalidTarget && `${baseClass}--invalid`,
       ]
         .filter(Boolean)
         .join(' ')}
