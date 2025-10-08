@@ -173,6 +173,7 @@ export const isTranslations: DefaultTranslationsObject = {
     removeUpload: 'Fjarlægja skrá',
     saveChanges: 'Vista breytingar',
     searchForBlock: 'Leita að blokk',
+    searchForLanguage: 'Leitaðu að tungumáli',
     selectExistingLabel: 'Veldu núverandi {{label}}',
     selectFieldsToEdit: 'Veldu reit til að breyta',
     showAll: 'Sýna allt',

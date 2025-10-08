@@ -173,6 +173,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     removeUpload: 'Fjern opplasting',
     saveChanges: 'Lagre endringer',
     searchForBlock: 'Søk etter en blokk',
+    searchForLanguage: 'Søk etter et språk',
     selectExistingLabel: 'Velg eksisterende {{label}}',
     selectFieldsToEdit: 'Velg felt som skal redigeres',
     showAll: 'Vis alle',

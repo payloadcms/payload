@@ -173,6 +173,7 @@ export const azTranslations: DefaultTranslationsObject = {
     removeUpload: 'Yükləməni sil',
     saveChanges: 'Dəyişiklikləri saxla',
     searchForBlock: 'Blok üçün axtarış',
+    searchForLanguage: 'Dil axtarın',
     selectExistingLabel: 'Mövcud {{label}} seçin',
     selectFieldsToEdit: 'Redaktə ediləcək sahələri seçin',
     showAll: 'Hamısını Göstər',

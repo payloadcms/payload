@@ -172,6 +172,7 @@ export const taTranslations: DefaultTranslationsObject = {
     removeUpload: 'பதிவேற்றத்தை நீக்கவும்',
     saveChanges: 'மாற்றங்களைச் சேமிக்கவும்',
     searchForBlock: 'தொகுதியைத் தேடவும்',
+    searchForLanguage: 'ஒரு மொழியைத் தேடு',
     selectExistingLabel: 'இருப்பில் உள்ள {{label}} தேர்வு செய்யவும்',
     selectFieldsToEdit: 'திருத்த வேண்டிய புலங்களைத் தேர்வு செய்யவும்',
     showAll: 'அனைத்தையும் காட்டு',

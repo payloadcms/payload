@@ -178,6 +178,7 @@ export const deTranslations: DefaultTranslationsObject = {
     removeUpload: 'Hochgeladene Datei löschen',
     saveChanges: 'Änderungen speichern',
     searchForBlock: 'Nach Block suchen',
+    searchForLanguage: 'Suchen Sie nach einer Sprache',
     selectExistingLabel: '{{label}} auswählen (vorhandene)',
     selectFieldsToEdit: 'Wähle die zu bearbeitenden Felder aus',
     showAll: 'Alle anzeigen',

@@ -1,8 +1,11 @@
+'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 /**
  * A hook for managing state that can be controlled by props but also overridden locally.
  * Props always take precedence if they change, but local state can override them temporarily.
+ *
+ * @internal - may change or be removed without a major version bump
  */
 export function useControllableState<T>(
   propValue: T,

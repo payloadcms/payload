@@ -175,6 +175,7 @@ export const enTranslations = {
     removeUpload: 'Remove Upload',
     saveChanges: 'Save changes',
     searchForBlock: 'Search for a block',
+    searchForLanguage: 'Search for a language',
     selectExistingLabel: 'Select existing {{label}}',
     selectFieldsToEdit: 'Select fields to edit',
     showAll: 'Show All',
