@@ -417,5 +417,31 @@ describe('Types testing', () => {
       expect<NodeType['type']>().type.toBe<_Hardcoded_DefaultNodeTypes>()
       expect<NodeType['type']>().type.not.toBe<string>()
     })
+
+    test('ensure leaf nodes have NO children key at all (not even children?: never)', () => {
+      // This test prevents regression where someone adds `children?: never` back to leaf nodes.
+      //
+      // WHY `children?: never` BREAKS VS CODE AUTOCOMPLETE:
+      // When you have a union like `SerializedHeadingNode | SerializedLineBreakNode`:
+      // - If linebreak has `children?: never`, VS Code's IntelliSense gets confused
+      // - When typing `type: ''` and pressing Ctrl+Space, it only suggests 'linebreak'
+      // - It doesn't suggest 'heading' or other types that have `children?: Array<...>`
+      // - This is a VS Code quirk with unions that have conflicting optional properties
+      // - TypeScript's type checker works fine, but autocomplete heuristics fail
+      //
+      // SOLUTION: Use `Omit<_, 'children'>` to completely remove the property
+      // - With no `children` key at all, VS Code correctly suggests all types in the union
+
+      // Extract individual node types from the union
+      type LinebreakNode = Extract<DefaultNodeTypes, { type: 'linebreak' }>
+      type TextNode = Extract<DefaultNodeTypes, { type: 'text' }>
+      type TabNode = Extract<DefaultNodeTypes, { type: 'tab' }>
+
+      // 'children' should NOT be a key in these types at all
+      // If someone adds `children?: never`, this test will fail
+      expect<'children' extends keyof LinebreakNode ? true : false>().type.toBe<false>()
+      expect<'children' extends keyof TextNode ? true : false>().type.toBe<false>()
+      expect<'children' extends keyof TabNode ? true : false>().type.toBe<false>()
+    })
   })
 })
