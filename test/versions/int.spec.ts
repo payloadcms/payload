@@ -3153,4 +3153,166 @@ describe('Versions', () => {
       })
     })
   })
+
+  describe('Unpublish Individual Locale', () => {
+    const collection = localizedCollectionSlug
+    const global = localizedGlobalSlug
+
+    describe('Collections', () => {
+      let postID: string
+
+      beforeEach(async () => {
+        await payload.delete({
+          collection,
+          where: {},
+        })
+      })
+
+      it('should return correct data after unpublishing specific locale', async () => {
+        // publish spanish
+        const doc1 = await payload.create({
+          collection,
+          data: {
+            text: 'Spanish',
+            _status: 'published',
+          },
+          locale: 'es',
+        })
+
+        postID = doc1.id as any
+
+        // publish english
+        const doc2 = await payload.update({
+          id: postID,
+          collection,
+          data: {
+            text: 'English',
+            _status: 'published',
+          },
+          locale: 'en',
+        })
+
+        // publish german
+        const doc3 = await payload.update({
+          id: postID,
+          collection,
+          data: {
+            text: 'German',
+            _status: 'published',
+          },
+          locale: 'de',
+        })
+
+        const publishedDoc = await payload.findByID({
+          collection,
+          id: postID,
+          locale: 'all',
+        })
+
+        expect(publishedDoc?.text?.es).toStrictEqual('Spanish')
+        expect(publishedDoc?.text?.en).toStrictEqual('English')
+        expect(publishedDoc?.text?.de).toStrictEqual('German')
+
+        // unpublish only english
+        const unpublish = await payload.update({
+          id: postID,
+          data: {},
+          collection,
+          unpublishSpecificLocale: 'en',
+        })
+
+        const latestPublishedDoc = await payload.findByID({
+          collection,
+          id: postID,
+          locale: 'all',
+        })
+
+        expect(latestPublishedDoc?.text?.es).toStrictEqual('Spanish')
+        expect(latestPublishedDoc?.text?.en).toBeUndefined()
+        expect(latestPublishedDoc?.text?.de).toStrictEqual('German')
+
+        const latestDraft = await payload.findByID({
+          collection,
+          id: postID,
+          locale: 'all',
+          draft: true,
+        })
+
+        expect(latestDraft._status).toBe('draft')
+        expect(latestDraft?.text?.es).toStrictEqual('Spanish')
+        expect(latestDraft?.text?.en).toStrictEqual('English')
+        expect(latestDraft?.text?.de).toStrictEqual('German')
+      })
+    })
+
+    describe('Globals', () => {
+      it('should save correct data when unpublishing individual locale', async () => {
+        // publish german
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            title: 'German',
+            _status: 'published',
+          },
+          locale: 'de',
+        })
+
+        // publish spanish
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            title: 'Spanish',
+            _status: 'published',
+          },
+          locale: 'es',
+        })
+
+        // publish english
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            title: 'English',
+            _status: 'published',
+          },
+          locale: 'en',
+        })
+
+        const globalData = await payload.findGlobal({
+          slug: global,
+          locale: 'all',
+        })
+
+        expect(globalData?.title?.es).toStrictEqual('Spanish')
+        expect(globalData?.title?.en).toStrictEqual('English')
+        expect(globalData?.title?.de).toStrictEqual('German')
+
+        // unpublish only english
+        await payload.updateGlobal({
+          slug: global,
+          data: {},
+          unpublishSpecificLocale: 'en',
+        })
+
+        const latestGlobal = await payload.findGlobal({
+          slug: global,
+          locale: 'all',
+        })
+
+        expect(latestGlobal?.title?.es).toStrictEqual('Spanish')
+        expect(latestGlobal?.title?.en).toBeUndefined()
+        expect(latestGlobal?.title?.de).toStrictEqual('German')
+
+        const latestDraft = await payload.findGlobal({
+          slug: global,
+          locale: 'all',
+          draft: true,
+        })
+
+        expect(latestDraft._status).toBe('draft')
+        expect(latestDraft?.title?.es).toStrictEqual('Spanish')
+        expect(latestDraft?.title?.en).toStrictEqual('English')
+        expect(latestDraft?.title?.de).toStrictEqual('German')
+      })
+    })
+  })
 })
