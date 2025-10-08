@@ -1058,7 +1058,7 @@ export { populate } from './populateGraphQL/populate.js'
 
 export type { LexicalEditorProps, LexicalFieldAdminProps, LexicalRichTextAdapter } from './types.js'
 
-export { buildEditorState } from './utilities/buildEditorState.js'
+export { buildDefaultEditorState, buildEditorState } from './utilities/buildEditorState.js'
 export { createServerFeature } from './utilities/createServerFeature.js'
 
 export { editorConfigFactory } from './utilities/editorConfigFactory.js'

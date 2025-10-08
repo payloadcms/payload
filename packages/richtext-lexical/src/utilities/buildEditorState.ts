@@ -1,6 +1,6 @@
 import type { SerializedLexicalNode } from 'lexical'
 
-import type { DefaultTypedEditorState, TypedEditorState } from '../nodeTypes.js'
+import type { DefaultNodeTypes, DefaultTypedEditorState, TypedEditorState } from '../nodeTypes.js'
 
 /**
  * Helper to build lexical editor state JSON from text and/or nodes.
@@ -86,3 +86,13 @@ export function buildEditorState<T extends SerializedLexicalNode>({
 
   return editorJSON as TypedEditorState<T>
 }
+
+/**
+ *
+ * Alias for `buildEditorState<DefaultNodeTypes>`
+ *
+ * @experimental this API may change or be removed in a minor release
+ * @internal
+ */
+export const buildDefaultEditorState: typeof buildEditorState<DefaultNodeTypes> =
+  buildEditorState<DefaultNodeTypes>
