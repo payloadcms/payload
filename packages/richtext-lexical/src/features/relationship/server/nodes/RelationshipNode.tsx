@@ -8,12 +8,13 @@ import type {
   LexicalEditor,
   LexicalNode,
   NodeKey,
-  Spread,
 } from 'lexical'
 import type { CollectionSlug, DataFromCollectionSlug } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+
+import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
 
 export type RelationshipData = {
   [TCollectionSlug in CollectionSlug]: {
@@ -22,12 +23,8 @@ export type RelationshipData = {
   }
 }[CollectionSlug]
 
-export type SerializedRelationshipNode = Omit<
-  {
-    type: 'relationship'
-  } & Spread<RelationshipData, Omit<SerializedDecoratorBlockNode, 'type'>>,
-  'children'
->
+export type SerializedRelationshipNode = RelationshipData &
+  StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'relationship'>
 
 function $relationshipElementToServerNode(domNode: HTMLDivElement): DOMConversionOutput | null {
   const id = domNode.getAttribute('data-lexical-relationship-id')

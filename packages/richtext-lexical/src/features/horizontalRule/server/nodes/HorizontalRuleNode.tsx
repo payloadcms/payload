@@ -6,24 +6,20 @@ import type {
   LexicalCommand,
   LexicalNode,
   SerializedLexicalNode,
-  Spread,
 } from 'lexical'
 import type * as React from 'react'
 
 import { addClassNamesToElement } from '@lexical/utils'
 import { $applyNodeReplacement, createCommand, DecoratorNode } from 'lexical'
 
+import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
+
 /**
  * Serialized representation of a horizontal rule node. Serialized = converted to JSON. This is what is stored in the database / in the lexical editor state.
  */
-export type SerializedHorizontalRuleNode = Omit<
-  Spread<
-    {
-      type: 'horizontalrule'
-    },
-    Omit<SerializedLexicalNode, 'type'>
-  >,
-  'children'
+export type SerializedHorizontalRuleNode = StronglyTypedLeafNode<
+  SerializedLexicalNode,
+  'horizontalrule'
 >
 
 export const INSERT_HORIZONTAL_RULE_COMMAND: LexicalCommand<void> = createCommand(

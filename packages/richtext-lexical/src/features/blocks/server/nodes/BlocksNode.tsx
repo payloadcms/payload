@@ -7,13 +7,14 @@ import type {
   LexicalEditor,
   LexicalNode,
   NodeKey,
-  Spread,
 } from 'lexical'
 import type { JsonObject } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import ObjectID from 'bson-objectid'
+
+import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
 
 type BaseBlockFields<TBlockFields extends JsonObject = JsonObject> = {
   /** Block form data */
@@ -29,16 +30,9 @@ export type BlockFieldsOptionalID<TBlockFields extends JsonObject = JsonObject> 
   id?: string
 } & BaseBlockFields<TBlockFields>
 
-export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = Omit<
-  Spread<
-    {
-      fields: BlockFields<TBlockFields>
-      type: 'block'
-    },
-    Omit<SerializedDecoratorBlockNode, 'type'>
-  >,
-  'children'
->
+export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = {
+  fields: BlockFields<TBlockFields>
+} & StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'block'>
 
 export class ServerBlockNode extends DecoratorBlockNode {
   __cacheBuster: number

@@ -5,7 +5,6 @@ import type {
   SerializedEditorState,
   SerializedElementNode,
   SerializedLexicalNode,
-  Spread,
 } from 'lexical'
 
 import type { SerializedQuoteNode } from './features/blockquote/server/index.js'
@@ -22,6 +21,34 @@ import type { SerializedAutoLinkNode, SerializedLinkNode } from './features/link
 import type { SerializedListItemNode, SerializedListNode } from './features/lists/plugin/index.js'
 import type { SerializedRelationshipNode } from './features/relationship/server/nodes/RelationshipNode.js'
 import type { SerializedUploadNode } from './features/upload/server/nodes/UploadNode.js'
+
+/**
+ * Helper type to create strongly typed serialized nodes with flexible children types.
+ * Omits 'children' and 'type' from the base node type and redeclares them with proper typing.
+ *
+ * @param TBase - The base Lexical node type (e.g., _SerializedHeadingNode)
+ * @param TType - The node type string (e.g., 'heading')
+ * @param TChildren - The type for children (defaults to SerializedLexicalNode)
+ */
+export type StronglyTypedNode<
+  TBase,
+  TType extends string,
+  TChildren extends SerializedLexicalNode = SerializedLexicalNode,
+> = {
+  children?: TChildren[]
+  type: TType
+} & Omit<TBase, 'children' | 'type'>
+
+/**
+ * Helper type to create strongly typed leaf nodes (nodes without children).
+ * Omits 'children' and 'type' from the base node type and redeclares 'type' with a literal.
+ *
+ * @param TBase - The base Lexical node type (e.g., _SerializedTextNode)
+ * @param TType - The node type string (e.g., 'text')
+ */
+export type StronglyTypedLeafNode<TBase, TType extends string> = {
+  type: TType
+} & Omit<TBase, 'children' | 'type'>
 
 export type {
   SerializedAutoLinkNode,
@@ -40,43 +67,15 @@ export type {
   SerializedUploadNode,
 }
 
-export type SerializedParagraphNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  Spread<
-    {
-      textFormat: number
-      type: 'paragraph'
-    },
-    Omit<SerializedElementNode<T>, 'type'>
-  >
-export type SerializedTextNode = Omit<
-  Spread<
-    {
-      type: 'text'
-    },
-    Omit<_SerializedTextNode, 'type'>
-  >,
-  'children'
->
+export type SerializedParagraphNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
+  textFormat: number
+} & StronglyTypedNode<SerializedElementNode, 'paragraph', T>
 
-export type SerializedTabNode = Omit<
-  Spread<
-    {
-      type: 'tab'
-    },
-    Omit<_SerializedTabNode, 'type'>
-  >,
-  'children'
->
+export type SerializedTextNode = StronglyTypedLeafNode<_SerializedTextNode, 'text'>
 
-export type SerializedLineBreakNode = Omit<
-  Spread<
-    {
-      type: 'linebreak'
-    },
-    Omit<_SerializedLineBreakNode, 'type'>
-  >,
-  'children'
->
+export type SerializedTabNode = StronglyTypedLeafNode<_SerializedTabNode, 'tab'>
+
+export type SerializedLineBreakNode = StronglyTypedLeafNode<_SerializedLineBreakNode, 'linebreak'>
 
 /**
  * Recursively adds typed children to nodes up to a specified depth.

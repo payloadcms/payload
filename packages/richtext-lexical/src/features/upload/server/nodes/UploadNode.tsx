@@ -5,7 +5,6 @@ import type {
   ElementFormatType,
   LexicalNode,
   NodeKey,
-  Spread,
 } from 'lexical'
 import type {
   CollectionSlug,
@@ -19,6 +18,8 @@ import type { JSX } from 'react'
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
+
+import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
 
 import { $convertUploadElement } from './conversions.js'
 
@@ -76,12 +77,8 @@ export type UploadDataImproved<TUploadExtraFieldsData extends JsonObject = JsonO
   }
 }[UploadCollectionSlug]
 
-export type SerializedUploadNode = Omit<
-  {
-    type: 'upload'
-  } & Spread<UploadData, Omit<SerializedDecoratorBlockNode, 'type'>>,
-  'children'
->
+export type SerializedUploadNode = StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'upload'> &
+  UploadData
 
 export class UploadServerNode extends DecoratorBlockNode {
   __data: UploadData
