@@ -6,15 +6,41 @@ import './index.scss'
 const baseClass = 'draggable-with-click'
 
 type Props = {
+  /** The component or HTML element to render as the root element.
+   * @default 'div'
+   */
   readonly as?: React.ElementType
+  /** The content to be rendered inside the component. */
   readonly children?: React.ReactNode
+  /**
+   * Optional additional class name(s) to apply to the component.
+   */
   readonly className?: string
+  /**
+   * Whether dragging is disabled.
+   * @default false
+   */
   readonly disabled?: boolean
-  readonly onClick: (event: React.MouseEvent<HTMLElement>) => void
+  /**
+   * The distance (in pixels) the pointer must move before a drag is initiated.
+   */
+  readonly dragThreshold?: number
+  /**
+   * Callback fired when the element is clicked (pointer down and up without exceeding the drag threshold).
+   */
+  readonly onClick?: (event: React.MouseEvent<HTMLElement>) => void
+  /**
+   * Callback fired when a drag is initiated (pointer moves beyond the drag threshold).
+   */
   readonly onDrag: (e: PointerEvent) => void
+  /**
+   * Optional keydown handler for accessibility (e.g., handling Enter or Space to trigger click).
+   */
   readonly onKeyDown?: (e: React.KeyboardEvent) => void
+  /**
+   * Optional ref to access the underlying DOM element.
+   */
   readonly ref?: React.RefObject<HTMLDivElement>
-  readonly thresholdPixels?: number
 }
 
 export const DraggableWithClick = ({
@@ -22,11 +48,11 @@ export const DraggableWithClick = ({
   children,
   className,
   disabled = false,
+  dragThreshold = 3,
   onClick,
   onDrag,
   onKeyDown,
   ref,
-  thresholdPixels = 3,
 }: Props) => {
   const id = useId()
   const initialPos = useRef({ x: 0, y: 0 })
@@ -48,13 +74,11 @@ export const DraggableWithClick = ({
     const handlePointerMove = (moveEvent: PointerEvent) => {
       const deltaX = Math.abs(moveEvent.clientX - initialPos.current.x)
       const deltaY = Math.abs(moveEvent.clientY - initialPos.current.y)
-      if (deltaX > thresholdPixels || deltaY > thresholdPixels) {
+      if (deltaX > dragThreshold || deltaY > dragThreshold) {
         isDragging.current = true
         if (listeners?.onPointerDown) {
           listeners.onPointerDown(e)
-          // when the user starts dragging
-          // - call the click handler
-          // - remove the pointermove listener
+          // pointer movement exceeded threshold, initiate drag
           onDrag(moveEvent)
         }
         window.removeEventListener('pointermove', handlePointerMove)
@@ -68,9 +92,8 @@ export const DraggableWithClick = ({
 
     const handlePointerUp = (upEvent: PointerEvent) => {
       cleanup()
-      if (!isDragging.current) {
-        // if the user did not drag the element
-        // - call the click handler
+      if (!isDragging.current && onClick) {
+        // pointer-down then pointer-up within the threshold, call click handler
         onClick(upEvent as unknown as React.MouseEvent<HTMLElement>)
       }
     }

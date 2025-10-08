@@ -2,7 +2,7 @@
 import { useDroppable } from '@dnd-kit/core'
 import React from 'react'
 
-import { DraggableWithClick } from '../DraggableWithClick/index.js'
+import { DraggableWithClick } from '../../DraggableWithClick/index.js'
 import { HiddenCell, TableCell } from '../SimpleTable/index.js'
 import './index.scss'
 
