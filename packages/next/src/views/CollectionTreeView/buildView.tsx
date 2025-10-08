@@ -62,7 +62,7 @@ export const buildCollectionTreeView = async (
       routes: { admin: adminRoute },
     } = config
 
-    const { Component, documents } = await getTreeViewResultsComponentAndData({
+    const { documents, TreeViewComponent } = await getTreeViewResultsComponentAndData({
       collectionSlug,
       // TODO: remove and get from prefs
       expandedItemIDs: [
@@ -118,9 +118,8 @@ export const buildCollectionTreeView = async (
               disableBulkEdit,
               documents,
               enableRowSelections,
-              // folderFieldName: config.folders.fieldName,
-              Component,
               search,
+              TreeViewComponent,
               // sort: sortPreference,
             },
             // Component: collectionConfig?.admin?.components?.views?.TreeView?.Component,

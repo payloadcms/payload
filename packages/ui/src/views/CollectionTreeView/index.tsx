@@ -30,17 +30,17 @@ const baseClass = 'collection-tree-view-list'
 
 export function DefaultCollectionTreeView({
   collectionSlug,
-  ComponentToRender,
   documents,
   parentFieldName,
   search,
   sort,
+  TreeViewComponent,
   ...restOfProps
 }: TreeViewClientProps) {
   return (
     <TreeViewProvider
       collectionSlug={collectionSlug}
-      ComponentToRender={ComponentToRender}
+      ComponentToRender={TreeViewComponent}
       documents={documents}
       parentFieldName={parentFieldName}
       search={search}
@@ -53,7 +53,7 @@ export function DefaultCollectionTreeView({
 
 type CollectionTreeViewInContextProps = Omit<
   TreeViewClientProps,
-  'breadcrumbs' | 'ComponentToRender' | 'documents' | 'parentFieldName' | 'search' | 'sort'
+  'breadcrumbs' | 'documents' | 'parentFieldName' | 'search' | 'sort' | 'TreeViewComponent'
 >
 
 function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
