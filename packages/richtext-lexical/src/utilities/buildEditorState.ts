@@ -2,14 +2,16 @@ import type { SerializedLexicalNode } from 'lexical'
 
 import type { DefaultTypedEditorState, TypedEditorState } from '../nodeTypes.js'
 
+// Non-generic overload: when no type is specified, return DefaultTypedEditorState
 export function buildEditorState(args: {
   nodes?: DefaultTypedEditorState['root']['children']
   text?: string
 }): DefaultTypedEditorState
 
+// Generic overload: when explicit type T is provided, return TypedEditorState<T>
+// Note: NoInfer prevents TypeScript from inferring T from the argument, forcing explicit type parameters
 export function buildEditorState<T extends SerializedLexicalNode>(args: {
-  // If you pass children typed for a specific schema T, the return is TypedEditorState<T>
-  nodes?: TypedEditorState<T>['root']['children']
+  nodes?: TypedEditorState<NoInfer<T>>['root']['children']
   text?: string
 }): TypedEditorState<T>
 
