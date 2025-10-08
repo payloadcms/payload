@@ -2,19 +2,6 @@ import type { SerializedLexicalNode } from 'lexical'
 
 import type { DefaultTypedEditorState, TypedEditorState } from '../nodeTypes.js'
 
-// Non-generic overload: when no type is specified, return DefaultTypedEditorState
-export function buildEditorState(args: {
-  nodes?: DefaultTypedEditorState['root']['children']
-  text?: string
-}): DefaultTypedEditorState
-
-// Generic overload: when explicit type T is provided, return TypedEditorState<T>
-// Note: NoInfer prevents TypeScript from inferring T from the argument, forcing explicit type parameters
-export function buildEditorState<T extends SerializedLexicalNode>(args: {
-  nodes?: TypedEditorState<NoInfer<T>>['root']['children']
-  text?: string
-}): TypedEditorState<T>
-
 /**
  * Helper to build lexical editor state JSON from text and/or nodes.
  *
@@ -27,7 +14,7 @@ export function buildEditorState<T extends SerializedLexicalNode>(args: {
  * just passing text:
  *
  * ```ts
- * const editorState = buildEditorState({ text: 'Hello world' }) // result typed as DefaultTypedEditorState
+ * const editorState = buildEditorState<DefaultNodeTypes>({ text: 'Hello world' }) // result typed as DefaultTypedEditorState
  * ```
  *
  * @example
@@ -56,9 +43,9 @@ export function buildEditorState<T extends SerializedLexicalNode>({
   nodes,
   text,
 }: {
-  nodes?: DefaultTypedEditorState['root']['children'] | TypedEditorState<T>['root']['children']
+  nodes?: TypedEditorState<T>['root']['children']
   text?: string
-}): DefaultTypedEditorState | TypedEditorState<T> {
+}): TypedEditorState<T> {
   const editorJSON: DefaultTypedEditorState = {
     root: {
       type: 'root',
@@ -97,5 +84,5 @@ export function buildEditorState<T extends SerializedLexicalNode>({
     editorJSON.root.children.push(...(nodes as any))
   }
 
-  return editorJSON
+  return editorJSON as TypedEditorState<T>
 }

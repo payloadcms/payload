@@ -289,7 +289,7 @@ describe('Types testing', () => {
        *
        * const mySeedData: RequiredDataFromCollectionSlug<'posts'> = {
        *   title: 'hello',
-       *   richText: buildEditorState({text: 'hello'}) // <= DefaultTypedEditorState
+       *   richText: buildEditorState<DefaultNodeTypes>({text: 'hello'}) // <= DefaultTypedEditorState
        * }
        */
       type GeneratedRichTextType = Post['richText']
@@ -448,17 +448,17 @@ describe('Types testing', () => {
 
     describe('buildEditorState', () => {
       test('buildEditorState without generic returns DefaultTypedEditorState', () => {
-        const result = buildEditorState({ text: 'hello' })
+        const result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
         expect(result).type.toBe<DefaultTypedEditorState>()
       })
 
       test('buildEditorState with text parameter returns DefaultTypedEditorState', () => {
-        const result = buildEditorState({ text: 'Hello world' })
+        const result = buildEditorState<DefaultNodeTypes>({ text: 'Hello world' })
         expect(result).type.toBe<DefaultTypedEditorState>()
       })
 
       test('buildEditorState with nodes parameter returns DefaultTypedEditorState', () => {
-        const result = buildEditorState({
+        const result = buildEditorState<DefaultNodeTypes>({
           nodes: [
             {
               type: 'text',
@@ -510,7 +510,7 @@ describe('Types testing', () => {
       })
 
       test('buildEditorState return type includes correct node types in children', () => {
-        const _result = buildEditorState({ text: 'hello' })
+        const _result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
         type NodeType = (typeof _result)['root']['children'][number]['type']
         expect<NodeType>().type.toBe<_Hardcoded_DefaultNodeTypes>()
       })
@@ -522,13 +522,13 @@ describe('Types testing', () => {
       })
 
       test('buildEditorState result can be assigned to Post richText field', () => {
-        const _result = buildEditorState({ text: 'hello' })
+        const _result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
         type GeneratedRichTextType = Post['richText']
         expect<GeneratedRichTextType>().type.toBeAssignableWith<typeof _result>()
       })
 
       test('buildEditorState allows pushing typed nodes to children', () => {
-        const result = buildEditorState({ text: 'hello' })
+        const result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
         result.root.children.push({
           type: 'heading',
           tag: 'h1',
@@ -556,7 +556,7 @@ describe('Types testing', () => {
         // Before NoInfer: TypeScript would infer a narrow type from the incomplete object, preventing autocomplete
         // After NoInfer: TypeScript uses DefaultTypedEditorState['root']['children'], catching the missing property
         expect(
-          buildEditorState({
+          buildEditorState<DefaultNodeTypes>({
             nodes: [
               {
                 type: 'text',
@@ -573,7 +573,7 @@ describe('Types testing', () => {
       })
 
       test('buildEditorState without generic parameter validates complete text node correctly', () => {
-        const result = buildEditorState({
+        const result = buildEditorState<DefaultNodeTypes>({
           nodes: [
             {
               type: 'text',
@@ -591,7 +591,7 @@ describe('Types testing', () => {
 
       test('buildEditorState without generic parameter correctly validates incomplete heading node (missing tag property)', () => {
         expect(
-          buildEditorState({
+          buildEditorState<DefaultNodeTypes>({
             nodes: [
               {
                 type: 'heading',
@@ -629,7 +629,7 @@ describe('Types testing', () => {
         // This verifies that the return type is DefaultTypedEditorState (first overload)
         // and not a narrowed TypedEditorState<T> (second overload)
         // The incomplete node will cause an error, but the return type should still be correct
-        const _result = buildEditorState({
+        const _result = buildEditorState<DefaultNodeTypes>({
           nodes: [
             {
               type: 'text',
