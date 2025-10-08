@@ -174,6 +174,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     removeUpload: 'আপলোড সরান',
     saveChanges: 'পরিবর্তনগুলি সংরক্ষণ করুন',
     searchForBlock: 'একটি ব্লক অনুসন্ধান করুন',
+    searchForLanguage: 'একটি ভাষা অনুসন্ধান করুন',
     selectExistingLabel: 'বিদ্যমান {{label}} নির্বাচন করুন',
     selectFieldsToEdit: 'সম্পাদনা করার জন্য ক্ষেত্রগুলি নির্বাচন করুন',
     showAll: 'সমস্ত দেখান',

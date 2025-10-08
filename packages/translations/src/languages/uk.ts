@@ -174,6 +174,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     removeUpload: 'Видалити завантаження',
     saveChanges: 'Зберегти зміни',
     searchForBlock: 'Знайти блок',
+    searchForLanguage: 'Пошук мови',
     selectExistingLabel: 'Вибрати існуючий {{label}}',
     selectFieldsToEdit: 'Виберіть поля для редагування',
     showAll: 'Показати все',

@@ -173,6 +173,7 @@ export const svTranslations: DefaultTranslationsObject = {
     removeUpload: 'Ta bort uppladdning',
     saveChanges: 'Spara ändringar',
     searchForBlock: 'Sök efter ett block',
+    searchForLanguage: 'Sök efter ett språk',
     selectExistingLabel: 'Välj befintlig {{label}}',
     selectFieldsToEdit: 'Välj fält att redigera',
     showAll: 'Visa alla',

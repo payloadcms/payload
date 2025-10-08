@@ -164,6 +164,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     removeUpload: '移除上傳項目',
     saveChanges: '儲存變更',
     searchForBlock: '搜尋區塊',
+    searchForLanguage: '搜索語言',
     selectExistingLabel: '選取現有 {{label}}',
     selectFieldsToEdit: '選取要編輯的欄位',
     showAll: '全部展開',

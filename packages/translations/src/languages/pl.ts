@@ -172,6 +172,7 @@ export const plTranslations: DefaultTranslationsObject = {
     removeUpload: 'Usuń Wrzucone',
     saveChanges: 'Zapisz zmiany',
     searchForBlock: 'Szukaj bloku',
+    searchForLanguage: 'Szukaj języka',
     selectExistingLabel: 'Wybierz istniejący {{label}}',
     selectFieldsToEdit: 'Wybierz pola do edycji',
     showAll: 'Pokaż wszystkie',

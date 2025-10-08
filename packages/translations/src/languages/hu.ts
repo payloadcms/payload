@@ -175,6 +175,7 @@ export const huTranslations: DefaultTranslationsObject = {
     removeUpload: 'Feltöltés eltávolítása',
     saveChanges: 'Módosítások mentése',
     searchForBlock: 'Blokk keresése',
+    searchForLanguage: 'Keresse meg a nyelvet',
     selectExistingLabel: 'Meglévő {{label}} kiválasztása',
     selectFieldsToEdit: 'Válassza ki a szerkeszteni kívánt mezőket',
     showAll: 'Az összes megjelenítése',

@@ -21,7 +21,7 @@ import React from 'react'
  * }
  * ```
  *
- * @experimental This is an experimental API and may change at any time. Use at your own discretion.
+ * @experimental This is an experimental API and may change at any time. Use at your own risk.
  */
 export const FieldPathContext = React.createContext<string>(undefined)
 
@@ -29,7 +29,7 @@ export const FieldPathContext = React.createContext<string>(undefined)
  * Gets the current field path from the nearest `FieldPathContext` provider.
  * All fields are wrapped in this context by default.
  *
- * @experimental This is an experimental API and may change at any time. Use at your own discretion.
+ * @experimental This is an experimental API and may change at any time. Use at your own risk.
  */
 export const useFieldPath = () => {
   const context = React.useContext(FieldPathContext)

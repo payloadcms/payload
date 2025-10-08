@@ -17,6 +17,7 @@ import './index.scss'
 const prismToMonacoLanguageMap = {
   js: 'javascript',
   ts: 'typescript',
+  tsx: 'typescript',
 }
 
 const baseClass = 'code-field'
@@ -25,7 +26,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
   const {
     field,
     field: {
-      admin: { className, description, editorOptions, language = 'javascript' } = {},
+      admin: { className, description, editorOptions, editorProps, language = 'javascript' } = {},
       label,
       localized,
       required,
@@ -131,6 +132,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
           wrapperProps={{
             id: `field-${path?.replace(/\./g, '__')}`,
           }}
+          {...(editorProps || {})}
         />
         {AfterInput}
       </div>

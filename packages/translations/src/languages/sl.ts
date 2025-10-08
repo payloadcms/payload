@@ -173,6 +173,7 @@ export const slTranslations: DefaultTranslationsObject = {
     removeUpload: 'Odstrani nalaganje',
     saveChanges: 'Shrani spremembe',
     searchForBlock: 'Išči blok',
+    searchForLanguage: 'Išči jezik',
     selectExistingLabel: 'Izberi obstoječ {{label}}',
     selectFieldsToEdit: 'Izberi polja za urejanje',
     showAll: 'Pokaži vse',

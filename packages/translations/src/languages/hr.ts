@@ -174,6 +174,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     removeUpload: 'Ukloni prijenos',
     saveChanges: 'Spremi promjene',
     searchForBlock: 'Potraži blok',
+    searchForLanguage: 'Pretraži jezik',
     selectExistingLabel: 'Odaberi postojeće {{label}}',
     selectFieldsToEdit: 'Odaberite polja za uređivanje',
     showAll: 'Pokaži sve',

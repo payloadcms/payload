@@ -2,6 +2,7 @@
 import type { ElementFormatType } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
 import { Button, useConfig, usePayloadAPI, useTranslation } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
@@ -9,10 +10,9 @@ import React, { useCallback, useReducer, useRef, useState } from 'react'
 
 import type { RelationshipData } from '../../server/nodes/RelationshipNode.js'
 
-import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
-import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
 import './index.scss'
+import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
 
 const baseClass = 'lexical-relationship'
 
@@ -27,7 +27,7 @@ type Props = {
   nodeKey?: string
 }
 
-const Component: React.FC<Props> = (props) => {
+export const RelationshipComponent: React.FC<Props> = (props) => {
   const {
     data: { relationTo, value },
     nodeKey,
@@ -42,9 +42,7 @@ const Component: React.FC<Props> = (props) => {
   const relationshipElemRef = useRef<HTMLDivElement | null>(null)
 
   const [editor] = useLexicalComposerContext()
-  const {
-    fieldProps: { readOnly },
-  } = useEditorConfigContext()
+  const isEditable = useLexicalEditable()
   const {
     config: {
       routes: { api },
@@ -99,12 +97,12 @@ const Component: React.FC<Props> = (props) => {
           </p>
         </DocumentDrawerToggler>
       </div>
-      {editor.isEditable() && (
+      {isEditable && (
         <div className={`${baseClass}__actions`}>
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__swapButton`}
-            disabled={readOnly}
+            disabled={!isEditable}
             el="button"
             icon="swap"
             onClick={() => {
@@ -120,7 +118,7 @@ const Component: React.FC<Props> = (props) => {
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__removeButton`}
-            disabled={readOnly}
+            disabled={!isEditable}
             icon="x"
             onClick={(e) => {
               e.preventDefault()
@@ -135,8 +133,4 @@ const Component: React.FC<Props> = (props) => {
       {!!value && <DocumentDrawer onSave={updateRelationship} />}
     </div>
   )
-}
-
-export const RelationshipComponent = (props: Props): React.ReactNode => {
-  return <Component {...props} />
 }

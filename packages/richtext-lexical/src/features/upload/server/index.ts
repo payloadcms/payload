@@ -1,5 +1,4 @@
 import type {
-  CollectionSlug,
   Config,
   Field,
   FieldSchemaMap,
@@ -7,6 +6,7 @@ import type {
   FileSizeImproved,
   Payload,
   TypeWithID,
+  UploadCollectionSlug,
 } from 'payload'
 
 import { sanitizeFields } from 'payload'
@@ -21,9 +21,31 @@ import { i18n } from './i18n.js'
 import { UploadServerNode } from './nodes/UploadNode.js'
 import { uploadValidation } from './validate.js'
 
+export type ExclusiveUploadFeatureProps =
+  | {
+      /**
+       * The collections that should be disabled. Overrides the `enableRichTextRelationship` property in the collection config.
+       * When this property is set, `enabledCollections` will not be available.
+       **/
+      disabledCollections?: UploadCollectionSlug[]
+
+      // Ensures that enabledCollections is not available when disabledCollections is set
+      enabledCollections?: never
+    }
+  | {
+      // Ensures that disabledCollections is not available when enabledCollections is set
+      disabledCollections?: never
+
+      /**
+       * The collections that should be enabled. Overrides the `enableRichTextRelationship` property in the collection config
+       * When this property is set, `disabledCollections` will not be available.
+       **/
+      enabledCollections?: UploadCollectionSlug[]
+    }
+
 export type UploadFeatureProps = {
   collections?: {
-    [collection: CollectionSlug]: {
+    [collection: UploadCollectionSlug]: {
       fields: Field[]
     }
   }
@@ -34,7 +56,7 @@ export type UploadFeatureProps = {
    * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
    */
   maxDepth?: number
-}
+} & ExclusiveUploadFeatureProps
 
 /**
  * Get the absolute URL for an upload URL by potentially prepending the serverURL
@@ -56,6 +78,13 @@ export const UploadFeature = createServerFeature<
     const clientProps: UploadFeaturePropsClient = {
       collections: {},
     }
+    if (props.disabledCollections) {
+      clientProps.disabledCollections = props.disabledCollections
+    }
+    if (props.enabledCollections) {
+      clientProps.enabledCollections = props.enabledCollections
+    }
+
     if (props.collections) {
       for (const collection in props.collections) {
         clientProps.collections[collection] = {

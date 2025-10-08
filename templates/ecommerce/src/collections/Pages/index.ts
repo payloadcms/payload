@@ -11,7 +11,7 @@ import { Content } from '@/blocks/Content/config'
 import { FormBlock } from '@/blocks/Form/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { hero } from '@/fields/hero'
-import { slugField } from '@/fields/slug'
+import { slugField } from 'payload'
 import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
 import {
   MetaDescriptionField,
@@ -34,19 +34,16 @@ export const Pages: CollectionConfig = {
     group: 'Content',
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
-      url: ({ data, req }) => {
-        const path = generatePreviewPath({
-          slug: typeof data?.slug === 'string' ? data.slug : '',
+      url: ({ data, req }) =>
+        generatePreviewPath({
+          slug: data?.slug,
           collection: 'pages',
           req,
-        })
-
-        return path
-      },
+        }),
     },
     preview: (data, { req }) =>
       generatePreviewPath({
-        slug: typeof data?.slug === 'string' ? data.slug : '',
+        slug: data?.slug as string,
         collection: 'pages',
         req,
       }),
@@ -134,11 +131,7 @@ export const Pages: CollectionConfig = {
         },
       ],
     },
-    ...slugField('title', {
-      slugOverrides: {
-        required: true,
-      },
-    }),
+    slugField(),
   ],
   hooks: {
     afterChange: [revalidatePage],

@@ -176,6 +176,7 @@ export const skTranslations: DefaultTranslationsObject = {
     removeUpload: 'Odstrániť nahranie',
     saveChanges: 'Uložiť zmeny',
     searchForBlock: 'Hľadať blok',
+    searchForLanguage: 'Vyhľadať jazyk',
     selectExistingLabel: 'Vybrať existujúci {{label}}',
     selectFieldsToEdit: 'Vyberte polia, ktoré chcete upraviť',
     showAll: 'Zobraziť všetko',

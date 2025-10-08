@@ -175,6 +175,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     removeUpload: 'Pašalinti įkėlimą',
     saveChanges: 'Išsaugoti pakeitimus',
     searchForBlock: 'Ieškokite bloko',
+    searchForLanguage: 'Ieškoti kalbos',
     selectExistingLabel: 'Pasirinkite esamą {{label}}',
     selectFieldsToEdit: 'Pasirinkite laukus, kuriuos norite redaguoti',
     showAll: 'Rodyti viską',

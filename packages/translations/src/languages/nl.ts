@@ -175,6 +175,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     removeUpload: 'Verwijder Upload',
     saveChanges: 'Bewaar aanpassingen',
     searchForBlock: 'Zoeken naar een blok',
+    searchForLanguage: 'Zoek naar een taal',
     selectExistingLabel: 'Selecteer bestaand(e) {{label}}',
     selectFieldsToEdit: 'Selecteer velden om te bewerken',
     showAll: 'Alles tonen',

@@ -166,6 +166,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     removeUpload: '移除上传',
     saveChanges: '保存更改',
     searchForBlock: '搜索一个区块',
+    searchForLanguage: '搜索一种语言',
     selectExistingLabel: '选择现有的 {{label}}',
     selectFieldsToEdit: '选择要编辑的字段',
     showAll: '显示全部',

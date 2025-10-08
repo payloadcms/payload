@@ -175,6 +175,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     removeUpload: 'Удалить загруженное',
     saveChanges: 'Сохранить изменения',
     searchForBlock: 'Найти Блок',
+    searchForLanguage: 'Поиск языка',
     selectExistingLabel: 'Выберите существующий {{label}}',
     selectFieldsToEdit: 'Выберите поля для редактирования',
     showAll: 'Показать все',

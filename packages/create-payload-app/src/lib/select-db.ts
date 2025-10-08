@@ -4,13 +4,17 @@ import slugify from '@sindresorhus/slugify'
 import type { CliArgs, DbDetails, DbType } from '../types.js'
 
 type DbChoice = {
-  dbConnectionPrefix: `${string}/`
+  dbConnectionPrefix?: `${string}/`
   dbConnectionSuffix?: string
   title: string
   value: DbType
 }
 
 export const dbChoiceRecord: Record<DbType, DbChoice> = {
+  'd1-sqlite': {
+    title: 'Cloudflare D1 SQlite',
+    value: 'd1-sqlite',
+  },
   mongodb: {
     dbConnectionPrefix: 'mongodb://127.0.0.1/',
     title: 'MongoDB',
@@ -70,7 +74,8 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
     dbUri = initialDbUri
   } else if (args['--db-connection-string']) {
     dbUri = args['--db-connection-string']
-  } else {
+    // D1 Sqlite does not use a connection string so skip this prompt for this database
+  } else if (dbType !== 'd1-sqlite') {
     dbUri = await p.text({
       initialValue: initialDbUri,
       message: `Enter ${dbChoice.title.split(' ')[0]} connection string`, // strip beta from title

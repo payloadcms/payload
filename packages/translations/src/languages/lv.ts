@@ -173,6 +173,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     removeUpload: 'Noņemt augšupielādi',
     saveChanges: 'Saglabāt izmaiņas',
     searchForBlock: 'Meklēt bloku',
+    searchForLanguage: 'Meklēt valodu',
     selectExistingLabel: 'Izvēlēties esošo {{label}}',
     selectFieldsToEdit: 'Izvēlēties laukus rediģēšanai',
     showAll: 'Rādīt visus',

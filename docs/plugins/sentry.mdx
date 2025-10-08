@@ -94,8 +94,9 @@ import pg from 'pg'
 export default buildConfig({
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URL },
-    pg, // Inject the patched pg driver for Sentry instrumentation
-  }),
+  },
+  pg, // Inject the patched pg driver for Sentry instrumentation
+  ),
   plugins: [sentryPlugin({ Sentry })],
 })
 ```

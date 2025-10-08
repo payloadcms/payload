@@ -53,7 +53,7 @@ async function navigateToLexicalFields(
     await page.goto(url.list)
   }
 
-  const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
+  const linkToDoc = page.locator('tbody tr:first-child a').first()
   await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
   const linkDocHref = await linkToDoc.getAttribute('href')
 
@@ -643,38 +643,122 @@ describe('lexicalMain', () => {
     )
   })
 
-  // https://github.com/payloadcms/payload/issues/7379
-  test('enabledCollections and disabledCollections should work with RelationshipFeature', async () => {
-    const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-relationship-fields')
-    await page.goto(url.list)
-    const linkToDoc = page.locator('tbody tr:first-child a').first()
+  describe('Relationships', () => {
+    // https://github.com/payloadcms/payload/issues/7379
+    test('enabledCollections and disabledCollections should work with RelationshipFeature', async () => {
+      await navigateToLexicalFields(true, 'lexical-relationship-fields')
+      const richTextField = page.locator('.rich-text-lexical').nth(0)
 
-    await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-    const linkDocHref = await linkToDoc.getAttribute('href')
-    await linkToDoc.click()
-    await page.waitForURL(`**${linkDocHref}`)
-    const richTextField = page.locator('.rich-text-lexical').nth(0)
+      const lastParagraph = richTextField.locator('p').last()
+      await lastParagraph.scrollIntoViewIfNeeded()
+      await expect(lastParagraph).toBeVisible()
 
-    const lastParagraph = richTextField.locator('p').last()
-    await lastParagraph.scrollIntoViewIfNeeded()
-    await expect(lastParagraph).toBeVisible()
+      // Create relationship node with slash menu
+      await lastParagraph.click()
+      await page.keyboard.press('Enter')
+      await page.keyboard.press('/')
+      await page.keyboard.type('Relationship')
+      const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+      await expect(slashMenuPopover).toBeVisible()
 
-    // Create relationship node with slash menu
-    await lastParagraph.click()
-    await page.keyboard.press('Enter')
-    await page.keyboard.press('/')
-    await page.keyboard.type('Relationship')
-    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
-    await expect(slashMenuPopover).toBeVisible()
+      const relationshipSelectButton = slashMenuPopover.locator('button').nth(0)
+      await expect(relationshipSelectButton).toBeVisible()
+      await expect(relationshipSelectButton).toContainText('Relationship')
+      await relationshipSelectButton.click()
+      await expect(slashMenuPopover).toBeHidden()
 
-    const relationshipSelectButton = slashMenuPopover.locator('button').nth(0)
-    await expect(relationshipSelectButton).toBeVisible()
-    await expect(relationshipSelectButton).toContainText('Relationship')
-    await relationshipSelectButton.click()
-    await expect(slashMenuPopover).toBeHidden()
+      const relationshipListDrawer = page.locator('.list-header__title')
+      await expect(relationshipListDrawer).toHaveText('Array Fields')
+    })
 
-    const relationshipListDrawer = page.locator('.list-header__title')
-    await expect(relationshipListDrawer).toHaveText('Array Fields')
+    test('enabledCollections should work with UploadFeature', async () => {
+      await navigateToLexicalFields(true, 'lexical-relationship-fields')
+      const richTextField = page.locator('.rich-text-lexical').nth(0)
+
+      const lastParagraph = richTextField.locator('p').last()
+      await lastParagraph.scrollIntoViewIfNeeded()
+      await expect(lastParagraph).toBeVisible()
+
+      // Create upload node with slash menu
+      await lastParagraph.click()
+      await page.keyboard.press('Enter')
+      await page.keyboard.press('/')
+      await page.keyboard.type('Upload')
+      const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+      await expect(slashMenuPopover).toBeVisible()
+
+      const uploadSelectButton = slashMenuPopover.locator('button').nth(0)
+      await expect(uploadSelectButton).toBeVisible()
+      await expect(uploadSelectButton).toContainText('Upload')
+      await uploadSelectButton.click()
+      await expect(slashMenuPopover).toBeHidden()
+
+      const relationshipListDrawerTitle = page.locator('.list-header__title')
+      await expect(relationshipListDrawerTitle).toHaveText('Uploads')
+
+      // Should not have collection selector since only one collection is enabled
+      await expect(page.locator('.rs__input')).toBeHidden()
+    })
+
+    test('UploadFeature without any configuration should show all upload collections', async () => {
+      await navigateToLexicalFields(true, 'lexical-relationship-fields')
+      const richTextField = page.locator('.rich-text-lexical').nth(1)
+      await expect(richTextField).toBeVisible()
+      const contentEditable = richTextField.locator('.ContentEditable__root').last()
+      await contentEditable.scrollIntoViewIfNeeded()
+      await expect(contentEditable).toBeVisible()
+
+      // Create upload node with slash menu
+      await contentEditable.click()
+      await page.keyboard.press('Enter')
+      await page.keyboard.press('/')
+      await page.keyboard.type('Upload')
+      const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+      await expect(slashMenuPopover).toBeVisible()
+
+      const uploadSelectButton = slashMenuPopover.locator('button').nth(0)
+      await expect(uploadSelectButton).toBeVisible()
+      await expect(uploadSelectButton).toContainText('Upload')
+      await uploadSelectButton.click()
+      await expect(slashMenuPopover).toBeHidden()
+
+      const uploadListDrawerTitle = page.locator('.list-header__title')
+      await expect(uploadListDrawerTitle).toHaveText('Uploads')
+
+      // Should have collection selector since all collections are available
+      await expect(page.locator('.rs__input')).toBeVisible()
+      await page.locator('.rs__input').first().click()
+      await expect(page.locator('.rs__menu').getByText('Uploads')).toHaveCount(1)
+      await expect(page.locator('.rs__menu').getByText('Uploads2')).toHaveCount(1)
+    })
+
+    test('disabledCollections should work with UploadFeature', async () => {
+      await navigateToLexicalFields(true, 'lexical-relationship-fields')
+      const richTextField = page.locator('.rich-text-lexical').nth(2)
+
+      const contentEditable = richTextField.locator('.ContentEditable__root').last()
+      await contentEditable.scrollIntoViewIfNeeded()
+      await expect(contentEditable).toBeVisible()
+
+      // Create upload node with slash menu
+      await contentEditable.click()
+      await page.keyboard.press('Enter')
+      await page.keyboard.press('/')
+      await page.keyboard.type('Upload')
+      const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+      await expect(slashMenuPopover).toBeVisible()
+
+      const uploadSelectButton = slashMenuPopover.locator('button').nth(0)
+      await expect(uploadSelectButton).toBeVisible()
+      await expect(uploadSelectButton).toContainText('Upload')
+      await uploadSelectButton.click()
+      await expect(slashMenuPopover).toBeHidden()
+
+      const uploadListDrawerTitle = page.locator('.list-header__title')
+      await expect(uploadListDrawerTitle).toHaveText('Uploads2s')
+
+      await expect(page.locator('.rs__input')).toBeHidden()
+    })
   })
 
   test('ensure navigation to collection that used to cause admin panel freeze due to object references bug is possible', async () => {

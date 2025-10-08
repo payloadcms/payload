@@ -177,6 +177,7 @@ export const roTranslations: DefaultTranslationsObject = {
     removeUpload: 'Eliminați încărcarea',
     saveChanges: 'Salvați modificările',
     searchForBlock: 'Căutați un bloc',
+    searchForLanguage: 'Căutați o limbă',
     selectExistingLabel: 'Selectați existent {{label}}',
     selectFieldsToEdit: 'Selectați câmpurile de editat',
     showAll: 'Afișați toate',

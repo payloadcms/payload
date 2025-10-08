@@ -173,6 +173,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     removeUpload: 'Remover Upload',
     saveChanges: 'Salvar alterações',
     searchForBlock: 'Procurar bloco',
+    searchForLanguage: 'Pesquise por um idioma',
     selectExistingLabel: 'Selecionar {{label}} existente',
     selectFieldsToEdit: 'Selecione os campos para editar',
     showAll: 'Mostrar Tudo',

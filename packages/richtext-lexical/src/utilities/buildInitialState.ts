@@ -25,6 +25,7 @@ type Props = {
   context: {
     clientFieldSchemaMap: ClientFieldSchemaMap
     collectionSlug: string
+    disabled?: boolean
     documentData?: any
     field: RichTextField
     fieldSchemaMap: FieldSchemaMap
@@ -81,6 +82,7 @@ export async function buildInitialState({
         operation: context.operation as any, // TODO: Type
         permissions: true,
         preferences: context.preferences,
+        readOnly: context.disabled,
         renderAllFields: true, // If this function runs, the parent lexical field is being re-rendered => thus we can assume all its sub-fields need to be re-rendered
         renderFieldFn: context.renderFieldFn,
         req: context.req,

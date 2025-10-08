@@ -173,6 +173,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     removeUpload: 'Հեռացնել վերբեռնվածը',
     saveChanges: 'Պահպանել փոփոխությունները',
     searchForBlock: 'Որոնել բլոկ',
+    searchForLanguage: 'Որոնեք լեզու',
     selectExistingLabel: 'Ընտրել գոյություն ունեցող {{label}}',
     selectFieldsToEdit: 'Ընտրեք դաշտեր խմբագրման համար',
     showAll: 'Ցուցադրել բոլորը',

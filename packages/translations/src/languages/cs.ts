@@ -173,6 +173,7 @@ export const csTranslations: DefaultTranslationsObject = {
     removeUpload: 'Odstranit nahrání',
     saveChanges: 'Uložit změny',
     searchForBlock: 'Hledat blok',
+    searchForLanguage: 'Hledejte jazyk',
     selectExistingLabel: 'Vybrat existující {{label}}',
     selectFieldsToEdit: 'Vyberte pole, která chcete upravit',
     showAll: 'Zobrazit vše',

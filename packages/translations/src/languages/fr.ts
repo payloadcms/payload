@@ -179,6 +179,7 @@ export const frTranslations: DefaultTranslationsObject = {
     removeUpload: 'Supprimer le téléversement',
     saveChanges: 'Sauvegarder les modifications',
     searchForBlock: 'Rechercher un bloc',
+    searchForLanguage: 'Recherchez une langue',
     selectExistingLabel: 'Sélectionnez {{label}} existant',
     selectFieldsToEdit: 'Sélectionnez les champs à modifier',
     showAll: 'Afficher tout',

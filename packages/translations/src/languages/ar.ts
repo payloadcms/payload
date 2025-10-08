@@ -169,6 +169,7 @@ export const arTranslations: DefaultTranslationsObject = {
     removeUpload: 'حذف المحتوى المرفوع',
     saveChanges: 'حفظ التّغييرات',
     searchForBlock: 'ابحث عن وحدة محتوى',
+    searchForLanguage: 'ابحث عن لغة',
     selectExistingLabel: 'اختيار {{label}} من القائمة',
     selectFieldsToEdit: 'حدّد الحقول اللتي تريد تعديلها',
     showAll: 'إظهار الكلّ',

@@ -170,6 +170,7 @@ export const thTranslations: DefaultTranslationsObject = {
     removeUpload: 'ลบอัปโหลด',
     saveChanges: 'บันทึก',
     searchForBlock: 'ค้นหา Block',
+    searchForLanguage: 'ค้นหาภาษา',
     selectExistingLabel: 'เลือก {{label}} ที่มีอยู่',
     selectFieldsToEdit: 'เลือกช่องที่จะแก้ไข',
     showAll: 'แสดงทั้งหมด',

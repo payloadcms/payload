@@ -174,6 +174,7 @@ export const myTranslations: DefaultTranslationsObject = {
     removeUpload: 'အပ်လုဒ်ကို ဖယ်ရှားပါ။',
     saveChanges: 'သိမ်းဆည်းမည်။',
     searchForBlock: 'ဘလောက်တစ်ခုရှာမည်။',
+    searchForLanguage: 'Cari bahasa',
     selectExistingLabel: 'ရှိပြီးသား {{label}} ကို ရွေးပါ',
     selectFieldsToEdit: 'တည်းဖြတ်ရန် အကွက်များကို ရွေးပါ။',
     showAll: 'အကုန် ကြည့်မည်။',

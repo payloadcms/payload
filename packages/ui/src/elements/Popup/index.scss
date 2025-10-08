@@ -43,6 +43,8 @@
       width: calc(100% + var(--scrollbar-width));
       padding-top: var(--popup-padding);
       padding-bottom: var(--popup-padding);
+      max-height: calc(var(--base) * 10);
+      overflow-y: auto;
     }
 
     &__scroll-content {

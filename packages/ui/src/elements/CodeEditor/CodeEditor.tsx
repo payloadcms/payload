@@ -59,6 +59,7 @@ const CodeEditor: React.FC<Props> = (props) => {
   return (
     <Editor
       className={classes}
+      height={maxHeight ? Math.min(dynamicHeight, maxHeight) : dynamicHeight}
       loading={<ShimmerEffect height={dynamicHeight} />}
       options={{
         ...defaultGlobalEditorOptions,
@@ -82,7 +83,6 @@ const CodeEditor: React.FC<Props> = (props) => {
       // can already have scrolling, we want the height of the
       // editor to fit its content.
       // See: https://github.com/microsoft/monaco-editor/discussions/3677
-      height={maxHeight ? Math.min(dynamicHeight, maxHeight) : dynamicHeight}
       onChange={(value, ev) => {
         rest.onChange?.(value, ev)
         setDynamicHeight(

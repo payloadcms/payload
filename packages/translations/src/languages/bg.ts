@@ -173,6 +173,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     removeUpload: 'Премахни качване',
     saveChanges: 'Запази промените',
     searchForBlock: 'Търси блок',
+    searchForLanguage: 'Търсене на език',
     selectExistingLabel: 'Избери съществуващ {{label}}',
     selectFieldsToEdit: 'Избери полета за редактиране',
     showAll: 'Покажи всички',

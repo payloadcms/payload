@@ -108,7 +108,7 @@ export const useConfig = (): ClientConfigContext => use(RootConfigContext)
  * If the config here has the same reference as the config from the layout, we
  * simply reuse the context from the layout to avoid unnecessary re-renders.
  *
- * @experimental This component is experimental and may change or be removed in future releases. Use at your own discretion.
+ * @experimental This component is experimental and may change or be removed in future releases. Use at your own risk.
  */
 export const PageConfigProvider: React.FC<{
   readonly children: React.ReactNode

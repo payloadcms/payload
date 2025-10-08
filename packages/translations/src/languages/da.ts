@@ -172,6 +172,7 @@ export const daTranslations: DefaultTranslationsObject = {
     removeUpload: 'Fjern upload',
     saveChanges: 'Gem ændringer',
     searchForBlock: 'Søg efter blok',
+    searchForLanguage: 'Søg efter et sprog',
     selectExistingLabel: 'Vælg eksisterende {{label}}',
     selectFieldsToEdit: 'Vælg felter at redigere',
     showAll: 'Vis alle',

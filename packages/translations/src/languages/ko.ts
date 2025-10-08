@@ -173,6 +173,7 @@ export const koTranslations: DefaultTranslationsObject = {
     removeUpload: '제거',
     saveChanges: '변경 사항 저장',
     searchForBlock: '블록 검색',
+    searchForLanguage: '언어 검색',
     selectExistingLabel: '기존 {{label}} 선택',
     selectFieldsToEdit: '수정할 입력란 선택',
     showAll: '모두 표시',

@@ -220,12 +220,12 @@ export interface LexicalLinkFeature {
  * via the `definition` "lexical-heading-feature".
  */
 export interface LexicalHeadingFeature {
-  id: string;
+  id: number;
   richText?: {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -285,6 +285,9 @@ export interface LexicalField {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * A simple lexical field
+   */
   lexicalSimple?: {
     root: {
       type: string;
@@ -300,6 +303,9 @@ export interface LexicalField {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Should not be rendered
+   */
   lexicalWithBlocks: {
     root: {
       type: string;
@@ -606,6 +612,21 @@ export interface LexicalRelationshipField {
     };
     [k: string]: unknown;
   } | null;
+  richText3?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -767,9 +788,9 @@ export interface Upload {
  * via the `definition` "uploads2".
  */
 export interface Uploads2 {
-  id: string;
+  id: number;
   text?: string | null;
-  media?: (string | null) | Upload;
+  media?: (number | null) | Upload;
   altText?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -973,7 +994,7 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'lexical-heading-feature';
-        value: string | LexicalHeadingFeature;
+        value: number | LexicalHeadingFeature;
       } | null)
     | ({
         relationTo: 'lexical-jsx-converter';
@@ -1021,7 +1042,7 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'uploads2';
-        value: string | Uploads2;
+        value: number | Uploads2;
       } | null)
     | ({
         relationTo: 'array-fields';
@@ -1214,6 +1235,7 @@ export interface LexicalAccessControlSelect<T extends boolean = true> {
 export interface LexicalRelationshipFieldsSelect<T extends boolean = true> {
   richText?: T;
   richText2?: T;
+  richText3?: T;
   updatedAt?: T;
   createdAt?: T;
 }

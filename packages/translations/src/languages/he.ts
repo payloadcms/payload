@@ -167,6 +167,7 @@ export const heTranslations: DefaultTranslationsObject = {
     removeUpload: 'הסר העלאה',
     saveChanges: 'שמור שינויים',
     searchForBlock: 'חפש בלוק',
+    searchForLanguage: 'חפש שפה',
     selectExistingLabel: 'בחר {{label}} קיים',
     selectFieldsToEdit: 'בחר שדות לעריכה',
     showAll: 'הצג הכל',
