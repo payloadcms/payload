@@ -13,8 +13,8 @@ import {
 } from '../../exports/client/index.js'
 
 type GetTreeViewResultsComponentAndDataResult = {
+  Component: React.ReactNode
   documents?: Document[]
-  TreeViewResultsComponent: React.ReactNode
 }
 
 type GetTreeViewResultsComponentAndDataErrorResult = {
@@ -71,10 +71,10 @@ export const getTreeViewResultsComponentAndData = async ({
     sort,
   })
 
-  const TreeViewResultsComponent = <TreeViewTable />
+  const Component = <TreeViewTable />
 
   return {
+    Component,
     documents: treeViewData.documents,
-    TreeViewResultsComponent,
   }
 }

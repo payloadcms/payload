@@ -21,6 +21,7 @@ export type TreeViewClientProps = {
   beforeActions?: React.ReactNode[]
   breadcrumbs: FolderBreadcrumb[]
   collectionSlug?: SanitizedCollectionConfig['slug']
+  ComponentToRender: React.ReactNode
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   documents: FolderOrDocument[]
@@ -28,7 +29,6 @@ export type TreeViewClientProps = {
   parentFieldName: string
   search?: string
   sort?: FolderSortKeys
-  TreeViewResultsComponent: React.ReactNode
 } & TreeViewSlots
 
 export type TreeViewSlotSharedClientProps = {

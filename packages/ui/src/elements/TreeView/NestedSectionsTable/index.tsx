@@ -1,7 +1,11 @@
-import { CheckboxInput, DragHandleIcon, Pill } from '@payloadcms/ui'
+import type { TreeViewDocument } from 'payload/shared'
+
 import React from 'react'
 
-import { DraggableWithClick } from '../../folderView/DraggableWithClick/index.js'
+import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
+import { DragHandleIcon } from '../../../icons/DragHandle/index.js'
+import { DraggableWithClick } from '../../DraggableWithClick/index.js'
+import { Pill } from '../../Pill/index.js'
 import { RowDropArea } from './RowDropArea/index.js'
 import './index.scss'
 
@@ -20,12 +24,17 @@ interface NestedSectionsTableProps {
   className?: string
   columns?: Column[]
   disabledRowIDs?: (number | string)[]
+  draggedItem?: TreeViewDocument
   dragStartX?: number
   dropContextName: string
   hoveredRowID?: null | number | string
   initialOffset?: number
   isDragging?: boolean
-  onDroppableHover: (params: { placement?: string; targetItem: null | SectionRow }) => void
+  onDroppableHover: (params: {
+    hoveredRowID?: number | string
+    placement?: string
+    targetItem: null | SectionRow
+  }) => void
   onRowClick?: ({
     event,
     from,
@@ -39,6 +48,7 @@ interface NestedSectionsTableProps {
   sections?: SectionRow[]
   segmentWidth?: number
   selectedRowIDs?: (number | string)[]
+  targetParentID?: null | number | string
 }
 
 interface DivTableHeaderProps {
@@ -47,6 +57,7 @@ interface DivTableHeaderProps {
 
 interface DivTableSectionProps {
   columns: Column[]
+  draggedItem?: TreeViewDocument
   dropContextName: string
   firstCellRef?: React.RefObject<HTMLDivElement>
   firstCellWidth: number
@@ -55,7 +66,11 @@ interface DivTableSectionProps {
   isDragging: boolean
   isLastRowOfRoot?: boolean
   level?: number
-  onDroppableHover: (params: { placement?: string; targetItem: null | SectionRow }) => void
+  onDroppableHover: (params: {
+    hoveredRowID?: number | string
+    placement?: string
+    targetItem: null | SectionRow
+  }) => void
   onRowClick: ({
     event,
     from,
@@ -67,9 +82,11 @@ interface DivTableSectionProps {
   }) => void
   onRowDrag: (params: { event: PointerEvent; item: null | SectionRow }) => void
   parentItems?: SectionRow[]
+  rowIndexOffset?: number
   rows: SectionRow[]
   segmentWidth: number
   selectedRowIDs?: (number | string)[]
+  targetParentID: null | number | string
 }
 
 const exampleData: SectionRow[] = [
@@ -113,6 +130,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   className = '',
   columns = [{ name: 'name' }],
   disabledRowIDs,
+  draggedItem,
   dropContextName,
   hoveredRowID,
   isDragging = false,
@@ -122,6 +140,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   sections = exampleData,
   segmentWidth = DEFAULT_SEGMENT_WIDTH,
   selectedRowIDs,
+  targetParentID,
 }) => {
   const [firstCellXOffset, setFirstCellXOffset] = React.useState(0)
   const [firstCellWidth, setFirstCellWidth] = React.useState(0)
@@ -144,6 +163,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
         <DivTableHeader columns={columns} />
         <DivTableSection
           columns={[{ name: '_tree-actions' }, ...columns]}
+          draggedItem={draggedItem}
           dropContextName={dropContextName}
           firstCellRef={firstCellRef}
           firstCellWidth={firstCellWidth}
@@ -154,9 +174,11 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           onRowClick={onRowClick}
           onRowDrag={onRowDrag}
           parentItems={[]}
+          rowIndexOffset={0}
           rows={sections}
           segmentWidth={segmentWidth}
           selectedRowIDs={selectedRowIDs}
+          targetParentID={targetParentID}
         />
       </div>
     </div>
@@ -177,6 +199,7 @@ export const DivTableHeader: React.FC<DivTableHeaderProps> = ({ columns }) => {
 
 export const DivTableSection: React.FC<DivTableSectionProps> = ({
   columns,
+  draggedItem,
   dropContextName,
   firstCellRef,
   firstCellWidth,
@@ -189,13 +212,35 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
   onRowClick,
   onRowDrag,
   parentItems = [],
+  rowIndexOffset = 0,
   rows,
   segmentWidth,
   selectedRowIDs = [],
+  targetParentID,
 }) => {
+  // Helper to count all rows recursively
+  const countRows = (items: SectionRow[]): number => {
+    return items.reduce((count, item) => {
+      return count + 1 + (item.rows ? countRows(item.rows) : 0)
+    }, 0)
+  }
+
+  // Calculate absolute row index for each row before render
+  const getAbsoluteRowIndex = (index: number): number => {
+    let offset = rowIndexOffset
+    for (let i = 0; i < index; i++) {
+      offset += 1
+      if (rows[i].rows) {
+        offset += countRows(rows[i].rows)
+      }
+    }
+    return offset
+  }
+
   return (
     <>
       {rows.map((rowItem, sectionRowIndex: number) => {
+        const absoluteRowIndex = getAbsoluteRowIndex(sectionRowIndex)
         const isLastRow = rows.length - 1 === sectionRowIndex
         const hasNestedRows = Boolean(rowItem?.rows?.length)
         const isRowAtRootLevel = level === 0 || (isLastRow && isLastRowOfRoot)
@@ -227,10 +272,12 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
             ? firstCellWidth + segmentWidth * (level - targetItems.length + 1)
             : firstCellWidth + segmentWidth * (hasNestedRows ? level + 1 : level)
 
-        return (
+        const isOdd = absoluteRowIndex % 2 === 1
+
+        const renderResult = (
           <React.Fragment key={rowItem.rowID}>
             <div
-              className={`${baseClass}__section ${hoveredRowID === rowItem.rowID ? `${baseClass}__section--hovered` : ''} ${
+              className={`${baseClass}__section ${baseClass}__section-background ${isOdd ? `${baseClass}__section--odd` : ''} ${targetParentID === rowItem.rowID ? `${baseClass}__section--hovered` : ''} ${
                 selectedRowIDs.includes(rowItem.rowID) ? `${baseClass}__section--selected` : ''
               }`}
             >
@@ -303,7 +350,9 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                   <RowDropArea
                     dropContextName={dropContextName}
                     isDragging={isDragging}
-                    onHover={onDroppableHover}
+                    onHover={(data) => {
+                      onDroppableHover({ ...data, hoveredRowID: rowItem.rowID })
+                    }}
                     placement="middle"
                     segmentWidth={segmentWidth}
                     style={{ left: 0, width: '100%' }}
@@ -313,7 +362,10 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                   <RowDropArea
                     dropContextName={dropContextName}
                     isDragging={isDragging}
-                    onHover={onDroppableHover}
+                    onHover={(data) => {
+                      onDroppableHover({ ...data, hoveredRowID: rowItem.rowID })
+                    }}
+                    placement="split"
                     segmentWidth={segmentWidth}
                     style={{
                       left: 0,
@@ -327,9 +379,23 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
               </div>
             </div>
 
+            {/* Render placeholder row below the hovered row */}
+            {isDragging && hoveredRowID === rowItem.rowID && (
+              <div className={`${baseClass}__placeholder-section`}>
+                <div className={`${baseClass}__placeholder-row`}>
+                  {columns.map((col) => (
+                    <div className={`${baseClass}__cell`} key={col.name}>
+                      <div className={`${baseClass}__placeholder-cell-bg`} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {hasNestedRows && (
               <DivTableSection
                 columns={columns}
+                draggedItem={draggedItem}
                 dropContextName={dropContextName}
                 firstCellWidth={firstCellWidth}
                 firstCellXOffset={firstCellXOffset}
@@ -341,13 +407,17 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                 onRowClick={onRowClick}
                 onRowDrag={onRowDrag}
                 parentItems={[...parentItems, rowItem]}
+                rowIndexOffset={absoluteRowIndex + 1}
                 rows={rowItem.rows}
                 segmentWidth={segmentWidth}
                 selectedRowIDs={selectedRowIDs}
+                targetParentID={targetParentID}
               />
             )}
           </React.Fragment>
         )
+
+        return renderResult
       })}
     </>
   )

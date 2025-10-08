@@ -16,6 +16,7 @@ export function TreeViewTable() {
   const {
     checkIfItemIsDisabled,
     documents,
+    dragOverlayItem,
     dragStartX,
     focusedRowIndex,
     isDragging,
@@ -26,9 +27,17 @@ export function TreeViewTable() {
   } = useTreeView()
   const { i18n, t } = useTranslation()
   const [hoveredRowID, setHoveredRowID] = React.useState<null | number | string>(null)
+  const [targetParentID, setTargetParentID] = React.useState<null | number | string>(null)
   const onDroppableHover = React.useCallback(
-    ({ targetItem }: { targetItem: null | SectionRow }) => {
-      setHoveredRowID(targetItem?.rowID || null)
+    ({
+      hoveredRowID: newHoveredRowID,
+      targetItem,
+    }: {
+      hoveredRowID?: number | string
+      targetItem: null | SectionRow
+    }) => {
+      setHoveredRowID(newHoveredRowID || null)
+      setTargetParentID(targetItem?.rowID || null)
     },
     [],
   )
@@ -92,6 +101,7 @@ export function TreeViewTable() {
   return (
     <NestedSectionsTable
       className={baseClass}
+      draggedItem={dragOverlayItem}
       dragStartX={dragStartX}
       dropContextName="tree-view-table"
       hoveredRowID={hoveredRowID}
@@ -104,6 +114,7 @@ export function TreeViewTable() {
         const doc = documents.find((d) => d.itemKey === key)
         return doc?.value.id || ''
       })}
+      targetParentID={targetParentID}
       // columns={columns}
     />
   )

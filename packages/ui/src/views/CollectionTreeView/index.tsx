@@ -9,13 +9,13 @@ import { useRouter } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { DefaultListViewTabs } from '../../elements/DefaultListViewTabs/index.js'
-import { DragOverlaySelection } from '../../elements/FolderView/DragOverlaySelection/index.js'
 import { SortByPill } from '../../elements/FolderView/SortByPill/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListHeader } from '../../elements/ListHeader/index.js'
 import { NoListResults } from '../../elements/NoListResults/index.js'
 import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
+import { TreeViewDragOverlay } from '../../elements/TreeView/TreeViewDragOverlay/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -30,21 +30,21 @@ const baseClass = 'collection-tree-view-list'
 
 export function DefaultCollectionTreeView({
   collectionSlug,
+  ComponentToRender,
   documents,
   parentFieldName,
   search,
   sort,
-  TreeViewResultsComponent,
   ...restOfProps
 }: TreeViewClientProps) {
   return (
     <TreeViewProvider
       collectionSlug={collectionSlug}
+      ComponentToRender={ComponentToRender}
       documents={documents}
       parentFieldName={parentFieldName}
       search={search}
       sort={sort}
-      TreeViewResultsComponent={TreeViewResultsComponent}
     >
       <CollectionTreeViewInContext {...restOfProps} collectionSlug={collectionSlug} />
     </TreeViewProvider>
@@ -53,7 +53,7 @@ export function DefaultCollectionTreeView({
 
 type CollectionTreeViewInContextProps = Omit<
   TreeViewClientProps,
-  'breadcrumbs' | 'documents' | 'parentFieldName' | 'search' | 'sort' | 'TreeViewResultsComponent'
+  'breadcrumbs' | 'ComponentToRender' | 'documents' | 'parentFieldName' | 'search' | 'sort'
 >
 
 function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
@@ -75,6 +75,7 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
   const { setPreference } = usePreferences()
 
   const {
+    ComponentToRender,
     documents,
     dragOverlayItem,
     getSelectedItems,
@@ -84,7 +85,6 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
     selectedItemKeys,
     setDragStartX,
     setIsDragging,
-    TreeViewResultsComponent,
   } = useTreeView()
 
   const router = useRouter()
@@ -254,7 +254,7 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
             searchQueryParam={search}
           />
           {BeforeTreeViewListTable}
-          {documents.length > 0 && TreeViewResultsComponent}
+          {documents.length > 0 && ComponentToRender}
           {documents.length === 0 && (
             <NoListResults
               Actions={[
@@ -300,7 +300,7 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
         {AfterTreeViewList}
       </div>
       {selectedItemKeys.size > 0 && dragOverlayItem && (
-        <DragOverlaySelection item={dragOverlayItem} selectedCount={selectedItemKeys.size} />
+        <TreeViewDragOverlay item={dragOverlayItem} selectedCount={selectedItemKeys.size} />
       )}
     </Fragment>
   )
