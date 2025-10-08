@@ -1594,6 +1594,41 @@ describe('Localization', () => {
         expect(allLocales.myTab.group.es.nestedArray2[0].nestedText).toStrictEqual('hola')
         expect(allLocales.myTab.group.es.nestedArray2[1].nestedText).toStrictEqual('adios')
       })
+
+      it('should retain non-localized fields when duplicating select locales', async () => {
+        const post = await payload.create({
+          collection,
+          data: {
+            title: englishTitle,
+            description: 'keep me',
+          },
+        })
+
+        await payload.update({
+          id: post.id,
+          collection,
+          data: {
+            title: spanishTitle,
+          },
+          locale: spanishLocale,
+        })
+
+        const duplicated = await payload.duplicate({
+          id: post.id,
+          collection,
+          selectedLocales: [spanishLocale],
+        })
+
+        const allLocales = await payload.findByID({
+          id: duplicated.id,
+          collection,
+          locale: 'all',
+        })
+
+        expect(allLocales?.title?.en).toBe(undefined)
+        expect(allLocales?.title?.es).toBe(spanishTitle)
+        expect(allLocales?.description).toBe('keep me')
+      })
     })
 
     describe('Localized group and tabs', () => {
