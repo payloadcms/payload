@@ -91,6 +91,7 @@ type RecursiveNodes<
   T extends SerializedLexicalNode,
   Depth extends number = 4,
   OriginalUnion extends SerializedLexicalNode = T,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 > = T extends any // Make distributive over unions
   ? Depth extends 0
     ? T

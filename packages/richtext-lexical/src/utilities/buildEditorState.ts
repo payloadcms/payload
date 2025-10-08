@@ -81,6 +81,7 @@ export function buildEditorState<T extends SerializedLexicalNode>({
   }
 
   if (nodes?.length) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     editorJSON.root.children.push(...(nodes as any))
   }
 

@@ -2,7 +2,7 @@ import type {
   SerializedHeadingNode as _SerializedHeadingNode,
   HeadingTagType,
 } from '@lexical/rich-text'
-import type { Spread } from 'lexical'
+import type { SerializedLexicalNode, Spread } from 'lexical'
 
 import { HeadingNode } from '@lexical/rich-text'
 
@@ -12,11 +12,16 @@ import { createNode } from '../../typeUtilities.js'
 import { MarkdownTransformer } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
 
-export type SerializedHeadingNode = Spread<
-  {
-    type: 'heading'
-  },
-  Omit<_SerializedHeadingNode, 'type'>
+export type SerializedHeadingNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
+  children?: T[]
+} & Omit<
+  Spread<
+    {
+      type: 'heading'
+    },
+    _SerializedHeadingNode
+  >,
+  'children'
 >
 
 export type HeadingFeatureProps = {

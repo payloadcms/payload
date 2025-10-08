@@ -449,7 +449,10 @@ describe('Types testing', () => {
     })
 
     test('accepts complete heading node as part of DefaultNodeTypes if heading node is explicitly typed', () => {
-      const headingNode: SerializedHeadingNode = {
+      // Extract the correct children type from DefaultTypedEditorState
+      type DefaultChildren = DefaultTypedEditorState['root']['children'][number]
+
+      const headingNode: SerializedHeadingNode<DefaultChildren> = {
         type: 'heading',
         tag: 'h1',
         children: [
@@ -734,7 +737,10 @@ describe('Types testing', () => {
       })
 
       test('accepts complete heading node with DefaultNodeTypes if heading node is explicitly typed', () => {
-        const headingNode: SerializedHeadingNode = {
+        // Extract the correct children type for the heading node
+        type DefaultChildren = TypedEditorState<DefaultNodeTypes>['root']['children'][number]
+
+        const headingNode: SerializedHeadingNode<DefaultChildren> = {
           type: 'heading',
           tag: 'h1',
           children: [
