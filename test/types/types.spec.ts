@@ -13,6 +13,7 @@ import {
   buildEditorState,
   type DefaultNodeTypes,
   type DefaultTypedEditorState,
+  type RecursiveNodes,
   type SerializedBlockNode,
   type SerializedHeadingNode,
   type SerializedTextNode,
@@ -449,10 +450,7 @@ describe('Types testing', () => {
     })
 
     test('accepts complete heading node as part of DefaultNodeTypes if heading node is explicitly typed', () => {
-      // Extract the correct children type from DefaultTypedEditorState
-      type DefaultChildren = DefaultTypedEditorState['root']['children'][number]
-
-      const headingNode: SerializedHeadingNode<DefaultChildren> = {
+      const headingNode: SerializedHeadingNode<RecursiveNodes<DefaultNodeTypes>> = {
         type: 'heading',
         tag: 'h1',
         children: [
@@ -487,10 +485,7 @@ describe('Types testing', () => {
     })
 
     test('accepts complete heading node as part of nested children within DefaultNodeTypes if heading node is explicitly typed', () => {
-      // Extract the correct children type from DefaultTypedEditorState
-      type DefaultChildren = DefaultTypedEditorState['root']['children'][number]
-
-      const headingNode: SerializedHeadingNode<DefaultChildren> = {
+      const headingNode: SerializedHeadingNode<RecursiveNodes<DefaultNodeTypes>> = {
         type: 'heading',
         tag: 'h1',
         children: [

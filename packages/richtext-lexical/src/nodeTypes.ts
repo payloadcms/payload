@@ -85,8 +85,10 @@ export type SerializedLineBreakNode = StronglyTypedLeafNode<_SerializedLineBreak
  * - `OriginalUnion`: Preserves full union so nested children accept all node types, not just parent's type. If we just used `T`, the type would be narrowed to the parent's type and the children would only consist of the parent's type.
  * - `'children' extends keyof T`: Only adds children to container nodes; respects leaf nodes that use `Omit<_, 'children'>`
  * - `Depth`: Limits recursion to prevent infinite types (default: 4 levels)
+ *
+ * @internal - this type may change or be removed in a minor release
  */
-type RecursiveNodes<
+export type RecursiveNodes<
   T extends SerializedLexicalNode,
   Depth extends number = 4,
   OriginalUnion extends SerializedLexicalNode = T,
