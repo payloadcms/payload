@@ -14,6 +14,8 @@ import {
   type DefaultNodeTypes,
   type DefaultTypedEditorState,
   type SerializedBlockNode,
+  type SerializedHeadingNode,
+  type SerializedTextNode,
   type TypedEditorState,
 } from '@payloadcms/richtext-lexical'
 import payload from 'payload'
@@ -660,6 +662,32 @@ describe('Types testing', () => {
               version: 1,
             },
           ],
+        })
+        expect(result).type.toBe<TypedEditorState<DefaultNodeTypes>>()
+      })
+
+      test('accepts complete heading node with DefaultNodeTypes if heading node is explicitly typed', () => {
+        const headingNode: SerializedHeadingNode = {
+          type: 'heading',
+          tag: 'h1',
+          children: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'Title',
+              version: 1,
+            } as SerializedTextNode,
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          version: 1,
+        }
+        const result = buildEditorState<DefaultNodeTypes>({
+          nodes: [headingNode],
         })
         expect(result).type.toBe<TypedEditorState<DefaultNodeTypes>>()
       })
