@@ -35,7 +35,7 @@ export type StronglyTypedNode<
   TType extends string,
   TChildren extends SerializedLexicalNode = SerializedLexicalNode,
 > = {
-  children?: TChildren[]
+  children: TChildren[]
   type: TType
 } & Omit<TBase, 'children' | 'type'>
 
