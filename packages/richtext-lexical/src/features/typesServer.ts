@@ -121,7 +121,7 @@ export type AfterReadNodeHookArgs<T extends SerializedLexicalNode> = {
    */
   depth: number
   draft: boolean
-  fallbackLocale: string
+  fallbackLocale: string | string[]
   /**
    *  Only available in `afterRead` field hooks.
    */

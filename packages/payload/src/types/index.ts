@@ -26,7 +26,7 @@ export type { Payload } from '../index.js'
 export type CustomPayloadRequestProperties = {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
-  fallbackLocale?: string
+  fallbackLocale?: string | string[]
   i18n: I18n
   /**
    * The requested locale if specified
