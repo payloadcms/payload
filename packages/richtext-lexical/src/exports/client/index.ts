@@ -155,4 +155,4 @@ export { CodeComponent } from '../../features/blocks/premade/CodeBlock/Component
 export { CodeBlockBlockComponent } from '../../features/blocks/premade/CodeBlock/Component/Block.js'
 
 export { RenderLexical } from '../../field/RenderLexical/index.js'
-export { buildEditorState } from '../../utilities/buildEditorState.js'
+export { buildDefaultEditorState, buildEditorState } from '../../utilities/buildEditorState.js'
