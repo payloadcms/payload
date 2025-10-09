@@ -72,7 +72,7 @@
     "@types/jest": "29.5.12",
     "@types/react": "19.1.12",
     "@types/react-dom": "19.1.9",
-    "babel-plugin-react-compiler": "19.1.0-rc.3",
+    "babel-plugin-react-compiler": "1.0.0",
     "better-sqlite3": "11.10.0",
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
