@@ -30,7 +30,7 @@ import type { SerializedUploadNode } from './features/upload/server/nodes/Upload
  * @param TType - The node type string (e.g., 'heading')
  * @param TChildren - The type for children (defaults to SerializedLexicalNode)
  */
-export type StronglyTypedNode<
+export type StronglyTypedElementNode<
   TBase,
   TType extends string,
   TChildren extends SerializedLexicalNode = SerializedLexicalNode,
@@ -69,7 +69,7 @@ export type {
 
 export type SerializedParagraphNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
   textFormat: number
-} & StronglyTypedNode<SerializedElementNode, 'paragraph', T>
+} & StronglyTypedElementNode<SerializedElementNode, 'paragraph', T>
 
 export type SerializedTextNode = StronglyTypedLeafNode<_SerializedTextNode, 'text'>
 

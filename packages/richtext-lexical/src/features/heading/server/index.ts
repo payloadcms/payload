@@ -6,7 +6,7 @@ import type { SerializedLexicalNode } from 'lexical'
 
 import { HeadingNode } from '@lexical/rich-text'
 
-import type { StronglyTypedNode } from '../../../nodeTypes.js'
+import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
@@ -15,7 +15,7 @@ import { MarkdownTransformer } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
 
 export type SerializedHeadingNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  StronglyTypedNode<_SerializedHeadingNode, 'heading', T>
+  StronglyTypedElementNode<_SerializedHeadingNode, 'heading', T>
 
 export type HeadingFeatureProps = {
   enabledHeadingSizes?: HeadingTagType[]

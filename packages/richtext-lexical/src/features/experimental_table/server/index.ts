@@ -9,7 +9,7 @@ import type { Config, Field, FieldSchemaMap } from 'payload'
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
 import { sanitizeFields } from 'payload'
 
-import type { StronglyTypedNode } from '../../../nodeTypes.js'
+import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
@@ -32,13 +32,13 @@ const fields: Field[] = [
 ]
 
 export type SerializedTableCellNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  StronglyTypedNode<_SerializedTableCellNode, 'tablecell', T>
+  StronglyTypedElementNode<_SerializedTableCellNode, 'tablecell', T>
 
 export type SerializedTableNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  StronglyTypedNode<_SerializedTableNode, 'table', T>
+  StronglyTypedElementNode<_SerializedTableNode, 'table', T>
 
 export type SerializedTableRowNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  StronglyTypedNode<_SerializedTableRowNode, 'tablerow', T>
+  StronglyTypedElementNode<_SerializedTableRowNode, 'tablerow', T>
 export const EXPERIMENTAL_TableFeature = createServerFeature({
   feature: async ({ config, isRoot, parentIsLocalized }) => {
     const validRelationships = config.collections.map((c) => c.slug) || []

@@ -1,7 +1,7 @@
 import type { SerializedElementNode, SerializedLexicalNode } from 'lexical'
 import type { DefaultDocumentIDType, JsonValue } from 'payload'
 
-import type { StronglyTypedNode } from '../../../nodeTypes.js'
+import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
 
 export type LinkFields = {
   [key: string]: JsonValue
@@ -26,8 +26,8 @@ export type SerializedLinkNode<T extends SerializedLexicalNode = SerializedLexic
    * @todo make required in 4.0 and type AutoLinkNode differently
    */
   id?: string // optional if AutoLinkNode
-} & StronglyTypedNode<SerializedElementNode, 'link', T>
+} & StronglyTypedElementNode<SerializedElementNode, 'link', T>
 
 export type SerializedAutoLinkNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
   fields: LinkFields
-} & StronglyTypedNode<SerializedElementNode, 'autolink', T>
+} & StronglyTypedElementNode<SerializedElementNode, 'autolink', T>
