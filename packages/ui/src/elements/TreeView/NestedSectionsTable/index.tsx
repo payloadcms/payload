@@ -274,7 +274,9 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                 isOdd && `${baseClass}__section--odd`,
                 targetParentID === rowItem.rowID && `${baseClass}__section--target`,
                 selectedRowIDs.includes(rowItem.rowID) && `${baseClass}__section--selected`,
-              ].join(' ')}
+              ]
+                .filter(Boolean)
+                .join(' ')}
               onKeyDown={
                 onRowKeyPress
                   ? (event) => {

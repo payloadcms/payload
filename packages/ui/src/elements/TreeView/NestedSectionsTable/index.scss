@@ -156,6 +156,28 @@
     }
   }
 
+  // When a selected section is followed by another selected section
+  &__section--selected + &__section--selected &__cell {
+    border-top: none;
+
+    &:first-child {
+      border-top-left-radius: 0;
+    }
+    &:last-child {
+      border-top-right-radius: 0;
+    }
+  }
+
+  // Selected section followed by another selected section - remove bottom radius
+  &__section--selected:has(+ &__section--selected) &__cell {
+    &:first-child {
+      border-bottom-left-radius: 0;
+    }
+    &:last-child {
+      border-bottom-right-radius: 0;
+    }
+  }
+
   &__section {
     position: relative;
     display: table-row-group;
