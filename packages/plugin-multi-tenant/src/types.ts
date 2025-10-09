@@ -1,5 +1,6 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 import type {
+  AccessArgs,
   AccessResult,
   ArrayField,
   CollectionConfig,
@@ -32,6 +33,15 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    */
   collections: {
     [key in CollectionSlug]?: {
+      /**
+       * Override the access result from the collection access control functions
+       *
+       * The function receives:
+       *  - accessResult: the original result from the access control function
+       *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', or 'unlock'
+       *  - ...restOfAccessArgs: the original arguments passed to the access control function
+       */
+      accessResultOverride?: CollectionAccessResultOverride
       /**
        * Opt out of adding the tenant field and place
        * it manually using the `tenantField` export from the plugin
@@ -199,15 +209,14 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
     user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : TypedUser,
   ) => boolean
   /**
-   * Override the result of the admin `users` collection access control functions
+   * Override the access result on the users collection access control functions
+   *
+   * The function receives:
+   *  - accessResult: the original result from the access control function
+   *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', or 'unlock'
+   *  - ...restOfAccessArgs: the original arguments passed to the access control function
    */
-  usersAccessResultOverride?: ({
-    accessKey,
-    result,
-  }: {
-    accessKey: AllAccessKeys[number]
-    result: AccessResult
-  }) => AccessResult
+  usersAccessResultOverride?: CollectionAccessResultOverride
   /**
    * Opt out of adding access constraints to the tenants collection
    */
@@ -271,3 +280,11 @@ type AllAccessKeysT<T extends readonly string[]> = T[number] extends keyof Omit<
 export type AllAccessKeys = AllAccessKeysT<
   ['create', 'read', 'update', 'delete', 'readVersions', 'unlock']
 >
+
+export type CollectionAccessResultOverride = ({
+  accessKey,
+  accessResult,
+}: {
+  accessKey: AllAccessKeys[number]
+  accessResult: AccessResult
+} & AccessArgs) => AccessResult | Promise<AccessResult>

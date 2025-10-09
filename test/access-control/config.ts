@@ -4,7 +4,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { FieldAccess } from 'payload'
 
-import { buildEditorState } from '@payloadcms/richtext-lexical'
+import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-lexical'
 
 import type { Config, User } from './payload-types.js'
 
@@ -719,33 +719,35 @@ export default buildConfigWithDefaults(
       await payload.create({
         collection: 'regression1',
         data: {
-          richText4: buildEditorState({ text: 'Text1' }),
-          array: [{ art: buildEditorState({ text: 'Text2' }) }],
-          arrayWithAccessFalse: [{ richText6: buildEditorState({ text: 'Text3' }) }],
+          richText4: buildEditorState<DefaultNodeTypes>({ text: 'Text1' }),
+          array: [{ art: buildEditorState<DefaultNodeTypes>({ text: 'Text2' }) }],
+          arrayWithAccessFalse: [
+            { richText6: buildEditorState<DefaultNodeTypes>({ text: 'Text3' }) },
+          ],
           group1: {
             text: 'Text4',
-            richText1: buildEditorState({ text: 'Text5' }),
+            richText1: buildEditorState<DefaultNodeTypes>({ text: 'Text5' }),
           },
           blocks: [
             {
               blockType: 'myBlock3',
-              richText7: buildEditorState({ text: 'Text6' }),
+              richText7: buildEditorState<DefaultNodeTypes>({ text: 'Text6' }),
               blockName: 'My Block 1',
             },
           ],
           blocks3: [
             {
               blockType: 'myBlock2',
-              richText5: buildEditorState({ text: 'Text7' }),
+              richText5: buildEditorState<DefaultNodeTypes>({ text: 'Text7' }),
               blockName: 'My Block 2',
             },
           ],
           tab1: {
-            richText2: buildEditorState({ text: 'Text8' }),
+            richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text8' }),
             blocks2: [
               {
                 blockType: 'myBlock',
-                richText3: buildEditorState({ text: 'Text9' }),
+                richText3: buildEditorState<DefaultNodeTypes>({ text: 'Text9' }),
                 blockName: 'My Block 3',
               },
             ],
@@ -758,12 +760,12 @@ export default buildConfigWithDefaults(
         data: {
           array: [
             {
-              richText2: buildEditorState({ text: 'Text1' }),
+              richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text1' }),
             },
           ],
           group: {
             text: 'Text2',
-            richText1: buildEditorState({ text: 'Text3' }),
+            richText1: buildEditorState<DefaultNodeTypes>({ text: 'Text3' }),
           },
         },
       })
