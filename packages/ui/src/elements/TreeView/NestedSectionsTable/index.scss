@@ -139,6 +139,7 @@
     vertical-align: middle;
     position: relative;
     background: var(--cell-bg-color);
+    border-radius: 0;
     border-top: 1px solid var(--cell-border-color);
     border-bottom: 1px solid var(--cell-border-color);
 
@@ -148,7 +149,7 @@
       border-top-left-radius: var(--style-radius-s);
       border-bottom-left-radius: var(--style-radius-s);
     }
-    &:last-child {
+    &:nth-last-child(2) {
       padding-inline-end: calc(var(--base) * (0.8));
       border-right: 1px solid var(--cell-border-color);
       border-top-right-radius: var(--style-radius-s);
@@ -163,18 +164,31 @@
     &:first-child {
       border-top-left-radius: 0;
     }
-    &:last-child {
+    &:nth-last-child(2) {
       border-top-right-radius: 0;
     }
   }
 
-  // Selected section followed by another selected section - remove bottom radius
-  &__section--selected:has(+ &__section--selected) &__cell {
-    &:first-child {
-      border-bottom-left-radius: 0;
-    }
-    &:last-child {
-      border-bottom-right-radius: 0;
+  // Selected section followed by another selected section - remove bottom radius and add inner border
+  &__section--selected:has(+ &__section--selected) {
+    .nested-sections-table__cell {
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        height: 1px;
+        right: 0;
+        background-color: var(--cell-inner-border-color);
+        z-index: 1;
+      }
+
+      &:first-child {
+        border-bottom-left-radius: 0;
+      }
+      &:nth-last-child(2) {
+        border-bottom-right-radius: 0;
+      }
     }
   }
 
@@ -205,10 +219,10 @@
       outline 0.2s ease-in-out;
   }
 
-  &__section--selected,
-  &__section:nth-child(odd).nested-sections-table__section--selected {
+  &__section--selected {
     --cell-bg-color: var(--theme-success-50);
     --cell-border-color: var(--theme-success-500);
+    --cell-inner-border-color: var(--theme-success-200);
   }
 
   &__section--selected.nested-sections-table__section--dragging {
