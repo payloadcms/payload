@@ -2,6 +2,10 @@
 
 @layer payload-default {
   .nav-menu-button {
-    // Additional styling can be added here if needed
+    &.popup--h-align-left {
+      .popup__content {
+        left: base(-0.5);
+      }
+    }
   }
 }

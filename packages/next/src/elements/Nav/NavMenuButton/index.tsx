@@ -21,7 +21,7 @@ export const NavMenuButton: React.FC<NavMenuButtonProps> = ({ navMenuItems }) =>
     <Popup
       button={<GearIcon ariaLabel={t('general:menu')} />}
       className={baseClass}
-      horizontalAlign="right"
+      horizontalAlign="left"
       id="nav-menu"
       size="small"
       verticalAlign="bottom"
