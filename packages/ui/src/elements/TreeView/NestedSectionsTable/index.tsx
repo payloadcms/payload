@@ -268,9 +268,12 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
         const renderResult = (
           <React.Fragment key={rowItem.rowID}>
             <div
-              className={`${baseClass}__section ${baseClass}__section-background ${isOdd ? `${baseClass}__section--odd` : ''} ${targetParentID === rowItem.rowID ? `${baseClass}__section--hovered` : ''} ${
-                selectedRowIDs.includes(rowItem.rowID) ? `${baseClass}__section--selected` : ''
-              }`}
+              className={[
+                `${baseClass}__section`,
+                isOdd && `${baseClass}__section--odd`,
+                targetParentID === rowItem.rowID && `${baseClass}__section--target`,
+                selectedRowIDs.includes(rowItem.rowID) && `${baseClass}__section--selected`,
+              ].join(' ')}
               onKeyDown={
                 onRowKeyPress
                   ? (event) => {

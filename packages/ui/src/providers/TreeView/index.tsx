@@ -450,7 +450,6 @@ export function TreeViewProvider({
   const toggleRow: TreeViewContextValue['toggleRow'] = React.useCallback(
     (docID) => {
       const updatedOpenDocIDs = new Set(openItemIDs)
-      const isOpening = !updatedOpenDocIDs.has(docID)
 
       if (updatedOpenDocIDs.has(docID)) {
         // When closing a parent, also close all its descendants
@@ -471,6 +470,9 @@ export function TreeViewProvider({
         descendantIDs.forEach((id) => {
           updatedOpenDocIDs.delete(id)
         })
+
+        // Remove descendant items from the items array
+        setItems((prevItems) => prevItems.filter((item) => !descendantIDs.has(item.value.id)))
 
         // Also deselect all descendant items
         setSelectedItemKeys((prevSelectedKeys) => {
@@ -526,6 +528,13 @@ export function TreeViewProvider({
       setTableComponentToRender(InitialTableComponent)
     }
   }, [InitialTableComponent])
+
+  React.useEffect(
+    () => () => {
+      setLoadingRowIDs(new Set())
+    },
+    [],
+  )
 
   return (
     <Context

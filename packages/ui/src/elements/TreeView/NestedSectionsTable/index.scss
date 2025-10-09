@@ -85,7 +85,7 @@
   }
 
   &__tree-toggle {
-    color: var(--theme-elevation-300);
+    color: var(--theme-elevation-600);
     display: flex;
     height: 20px;
     width: 20px;
@@ -97,7 +97,7 @@
     }
 
     &:hover {
-      color: var(--theme-elevation-600);
+      color: var(--theme-elevation-400);
     }
   }
 
@@ -156,6 +156,12 @@
 
   &__section--odd {
     background: var(--theme-elevation-0);
+  }
+
+  &__section--target {
+    outline: 1px solid var(--theme-success-400);
+    border-radius: var(--style-radius-s);
+    z-index: 1;
   }
 
   &__section--hovered {
