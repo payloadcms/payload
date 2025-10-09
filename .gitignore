@@ -5,7 +5,7 @@ dist
 !/.idea/runConfigurations
 /.idea/runConfigurations/_template*
 !/.idea/payload.iml
-.wrangler
+
 # Custom actions
 !.github/actions/**/dist
 
@@ -30,6 +30,7 @@ packages/richtext-lexical/esbuild
 audit_output.json
 
 .turbo
+.wrangler
 
 # Ignore test directory media folder/files
 /media
