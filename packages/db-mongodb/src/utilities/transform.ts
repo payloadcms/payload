@@ -17,6 +17,8 @@ import { fieldAffectsData, fieldShouldBeLocalized } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 
+import { isObjectID } from './isObjectID.js'
+
 interface RelationObject {
   relationTo: string
   value: number | string
@@ -88,7 +90,7 @@ const convertRelationshipValue = ({
   )
 
   if (operation === 'read') {
-    if (value instanceof Types.ObjectId) {
+    if (isObjectID(value)) {
       return value.toHexString()
     }
 
@@ -141,7 +143,7 @@ const sanitizeRelationship = ({
       for (let i = 0; i < value.docs.length; i++) {
         const item = value.docs[i]
 
-        if (item instanceof Types.ObjectId) {
+        if (isObjectID(item)) {
           value.docs[i] = item.toHexString()
         } else if (Array.isArray(field.collection) && item) {
           // Fields here for polymorphic joins cannot be determinted, JSON.parse needed
@@ -492,7 +494,7 @@ export const transform = ({
     data.id = data._id || data.id
     delete data['_id']
 
-    if (data.id instanceof Types.ObjectId) {
+    if (isObjectID(data.id)) {
       data.id = data.id.toHexString()
     }
 
