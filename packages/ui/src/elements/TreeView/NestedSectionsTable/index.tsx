@@ -29,6 +29,7 @@ interface NestedSectionsTableProps {
   initialOffset?: number
   invalidTargetIDs?: Set<number | string>
   isDragging?: boolean
+  loadingRowIDs?: Set<number | string>
   onDroppableHover: (params: {
     hoveredRowID?: number | string
     placement?: string
@@ -64,6 +65,7 @@ interface DivTableSectionProps {
   isDragging: boolean
   isLastRowOfRoot?: boolean
   level?: number
+  loadingRowIDs?: Set<number | string>
   onDroppableHover: (params: {
     hoveredRowID?: number | string
     placement?: string
@@ -101,6 +103,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   hoveredRowID,
   invalidTargetIDs,
   isDragging = false,
+  loadingRowIDs,
   onDroppableHover,
   onRowClick,
   onRowDrag,
@@ -160,6 +163,7 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           hoveredRowID={hoveredRowID}
           invalidTargetIDs={invalidTargetIDs}
           isDragging={isDragging}
+          loadingRowIDs={loadingRowIDs}
           onDroppableHover={onDroppableHover}
           onRowClick={onRowClick}
           onRowDrag={onRowDrag}
@@ -189,6 +193,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
   isDragging,
   isLastRowOfRoot = false,
   level = 0,
+  loadingRowIDs,
   onDroppableHover,
   onRowClick,
   onRowDrag,
@@ -345,9 +350,17 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                               }}
                               size="small"
                             >
-                              <ChevronIcon
-                                direction={openItemIDs?.has(rowItem.rowID) ? 'down' : 'right'}
-                              />
+                              {loadingRowIDs?.has(rowItem.rowID) ? (
+                                <div className={`${baseClass}__tree-toggle-spinner`}>
+                                  <div className={`${baseClass}__spinner-bar`} />
+                                  <div className={`${baseClass}__spinner-bar`} />
+                                  <div className={`${baseClass}__spinner-bar`} />
+                                </div>
+                              ) : (
+                                <ChevronIcon
+                                  direction={openItemIDs?.has(rowItem.rowID) ? 'down' : 'right'}
+                                />
+                              )}
                             </Button>
                           ) : (
                             <div className={`${baseClass}__tree-toggle-placeholder`} />
@@ -422,6 +435,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                 isDragging={isDragging}
                 isLastRowOfRoot={isRowAtRootLevel}
                 level={level + 1}
+                loadingRowIDs={loadingRowIDs}
                 onDroppableHover={onDroppableHover}
                 onRowClick={onRowClick}
                 onRowDrag={onRowDrag}

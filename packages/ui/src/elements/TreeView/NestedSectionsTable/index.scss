@@ -1,3 +1,39 @@
+@keyframes spinner-bar--1 {
+  0% {
+    transform: translateY(-1px);
+  }
+  50% {
+    transform: translateY(1px);
+  }
+  100% {
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes spinner-bar--2 {
+  0% {
+    transform: translateY(1px);
+  }
+  50% {
+    transform: translateY(-1px);
+  }
+  100% {
+    transform: translateY(1px);
+  }
+}
+
+@keyframes spinner-bar--3 {
+  0% {
+    transform: translateY(-1px);
+  }
+  50% {
+    transform: translateY(1px);
+  }
+  100% {
+    transform: translateY(-1px);
+  }
+}
+
 .nested-sections-table-wrapper {
   width: 100%;
   overflow-x: auto;
@@ -53,6 +89,12 @@
     display: flex;
     height: 20px;
     width: 20px;
+    justify-content: center;
+    align-items: center;
+
+    .btn__label {
+      display: flex;
+    }
 
     &:hover {
       color: var(--theme-elevation-600);
@@ -63,6 +105,33 @@
     width: 20px;
     height: 20px;
     display: inline-block;
+  }
+
+  &__tree-toggle-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 12px;
+  }
+
+  &__spinner-bar {
+    width: 1px;
+    background-color: currentColor;
+    height: 8px;
+    border-radius: 3px;
+
+    &:nth-child(1) {
+      animation: spinner-bar--1 1s infinite ease-in-out;
+    }
+
+    &:nth-child(2) {
+      animation: spinner-bar--2 1s infinite ease-in-out;
+    }
+
+    &:nth-child(3) {
+      animation: spinner-bar--3 1s infinite ease-in-out;
+    }
   }
 
   &__cell {

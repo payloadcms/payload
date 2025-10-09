@@ -25,6 +25,7 @@ export function TreeViewTable() {
     collectionSlug,
     getSelectedItems,
     items,
+    loadingRowIDs,
     moveItems,
     onItemClick,
     openItemIDs,
@@ -362,6 +363,7 @@ export function TreeViewTable() {
         hoveredRowID={hoveredRowID}
         invalidTargetIDs={invalidTargetIDs}
         isDragging={isDragging}
+        loadingRowIDs={loadingRowIDs}
         onDroppableHover={onDroppableHover}
         onRowClick={onRowClick}
         onRowDrag={onRowDrag}

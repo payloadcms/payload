@@ -67,7 +67,7 @@ export const getTreeViewResultsComponentAndData = async ({
     sort,
   })
 
-  const TreeViewComponent = <TreeViewTable />
+  const TreeViewComponent = <TreeViewTable key={collectionSlug} />
 
   return {
     items: treeViewData.items,

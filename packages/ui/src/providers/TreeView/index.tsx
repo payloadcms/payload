@@ -31,6 +31,7 @@ export type TreeViewContextValue = {
   getSelectedItems?: () => TreeViewItem[]
   itemKeysToMove?: Set<TreeViewItemKey>
   items?: TreeViewItem[]
+  loadingRowIDs: Set<number | string>
   moveItems: (args: { docIDs: (number | string)[]; parentID?: number | string }) => Promise<void>
   onItemClick: (args: {
     event: React.MouseEvent<HTMLElement>
@@ -57,6 +58,7 @@ const Context = React.createContext<TreeViewContextValue>({
   getSelectedItems: () => [],
   itemKeysToMove: undefined,
   items: [],
+  loadingRowIDs: new Set<number | string>(),
   moveItems: () => Promise.resolve(undefined),
   onItemClick: () => undefined,
   openItemIDs: new Set<number | string>(),
@@ -134,6 +136,7 @@ export function TreeViewProvider({
 
   const [items, setItems] = React.useState(itemsFromProps)
   const [openItemIDs, setOpenItemIDs] = React.useState<Set<number | string>>(() => new Set())
+  const [loadingRowIDs, setLoadingRowIDs] = React.useState<Set<number | string>>(() => new Set())
   const [TableComponent, setTableComponentToRender] = React.useState(
     InitialTableComponent || (() => null),
   )
@@ -447,6 +450,8 @@ export function TreeViewProvider({
   const toggleRow: TreeViewContextValue['toggleRow'] = React.useCallback(
     (docID) => {
       const updatedOpenDocIDs = new Set(openItemIDs)
+      const isOpening = !updatedOpenDocIDs.has(docID)
+
       if (updatedOpenDocIDs.has(docID)) {
         // When closing a parent, also close all its descendants
         updatedOpenDocIDs.delete(docID)
@@ -466,8 +471,24 @@ export function TreeViewProvider({
         descendantIDs.forEach((id) => {
           updatedOpenDocIDs.delete(id)
         })
+
+        // Also deselect all descendant items
+        setSelectedItemKeys((prevSelectedKeys) => {
+          const newSelectedKeys = new Set(prevSelectedKeys)
+          descendantIDs.forEach((id) => {
+            // Find the item key for this ID
+            const item = items.find((i) => i.value.id === id)
+            if (item) {
+              newSelectedKeys.delete(item.itemKey)
+            }
+          })
+          return newSelectedKeys
+        })
       } else {
         updatedOpenDocIDs.add(docID)
+
+        // Add to loading state when opening
+        setLoadingRowIDs((prev) => new Set(prev).add(docID))
       }
 
       setOpenItemIDs(updatedOpenDocIDs)
@@ -492,9 +513,11 @@ export function TreeViewProvider({
     [parentTreeViewContext?.selectedItemKeys],
   )
 
-  // Sync documents when prop changes
+  // Sync documents when prop changes and clear loading state
   React.useEffect(() => {
     setItems(itemsFromProps)
+    // Clear loading state since new data has arrived
+    setLoadingRowIDs(new Set())
   }, [itemsFromProps])
 
   // If a new component is provided, update the state so children can re-render with the new component
@@ -514,6 +537,7 @@ export function TreeViewProvider({
         getSelectedItems,
         itemKeysToMove: parentTreeViewContext.selectedItemKeys,
         items,
+        loadingRowIDs,
         moveItems,
         onItemClick,
         openItemIDs,
