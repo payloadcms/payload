@@ -1,9 +1,5 @@
-import type {
-  Document,
-  ErrorResult,
-  GetTreeViewResultsComponentAndDataArgs,
-  ServerFunction,
-} from 'payload'
+import type { ErrorResult, GetTreeViewResultsComponentAndDataArgs, ServerFunction } from 'payload'
+import type { TreeViewItem } from 'payload/shared'
 
 import { APIError, formatErrors, getTreeViewData } from 'payload'
 
@@ -13,12 +9,12 @@ import {
 } from '../../exports/client/index.js'
 
 type GetTreeViewResultsComponentAndDataResult = {
-  documents?: Document[]
+  items?: TreeViewItem[]
   TreeViewComponent: React.ReactNode
 }
 
 type GetTreeViewResultsComponentAndDataErrorResult = {
-  documents?: never
+  items?: never
 } & (
   | {
       message: string
@@ -74,7 +70,7 @@ export const getTreeViewResultsComponentAndData = async ({
   const TreeViewComponent = <TreeViewTable />
 
   return {
-    documents: treeViewData.documents,
+    items: treeViewData.items,
     TreeViewComponent,
   }
 }

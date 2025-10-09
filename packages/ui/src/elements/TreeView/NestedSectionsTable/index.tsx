@@ -53,10 +53,6 @@ interface NestedSectionsTableProps {
   toggleRow?: (docID: number | string) => void
 }
 
-interface DivTableHeaderProps {
-  columns: Column[]
-}
-
 interface DivTableSectionProps {
   columns: Column[]
   dropContextName: string
@@ -206,10 +202,11 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
   targetParentID,
   toggleRow,
 }) => {
-  // Helper to count all rows recursively
+  // Helper to count all rows recursively, only counting visible (open) rows
   const countRows = (items: SectionRow[]): number => {
     return items.reduce((count, item) => {
-      return count + 1 + (item.rows ? countRows(item.rows) : 0)
+      const isOpen = openItemIDs?.has(item.rowID)
+      return count + 1 + (item.rows && isOpen ? countRows(item.rows) : 0)
     }, 0)
   }
 
@@ -218,7 +215,8 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
     let offset = rowIndexOffset
     for (let i = 0; i < index; i++) {
       offset += 1
-      if (rows[i].rows) {
+      const isOpen = openItemIDs?.has(rows[i].rowID)
+      if (rows[i].rows && isOpen) {
         offset += countRows(rows[i].rows)
       }
     }
@@ -230,7 +228,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
       {rows.map((rowItem, sectionRowIndex: number) => {
         const absoluteRowIndex = getAbsoluteRowIndex(sectionRowIndex)
         const isLastRow = rows.length - 1 === sectionRowIndex
-        const hasNestedRows = Boolean(rowItem?.rows?.length)
+        const hasNestedRows = Boolean(rowItem?.rows?.length) && openItemIDs?.has(rowItem.rowID)
         const isRowAtRootLevel = level === 0 || (isLastRow && isLastRowOfRoot)
 
         // Calculate drop target items based on position in hierarchy
@@ -336,7 +334,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                             width: '100%',
                           }}
                         >
-                          {rowItem.hasChildren || hasNestedRows ? (
+                          {rowItem.hasChildren || rowItem.rows?.length ? (
                             <Button
                               buttonStyle="none"
                               className={`${baseClass}__tree-toggle`}
@@ -347,7 +345,9 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                               }}
                               size="small"
                             >
-                              <ChevronIcon direction={hasNestedRows ? 'down' : 'right'} />
+                              <ChevronIcon
+                                direction={openItemIDs?.has(rowItem.rowID) ? 'down' : 'right'}
+                              />
                             </Button>
                           ) : (
                             <div className={`${baseClass}__tree-toggle-placeholder`} />

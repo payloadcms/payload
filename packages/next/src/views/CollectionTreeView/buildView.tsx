@@ -63,7 +63,7 @@ export const buildCollectionTreeView = async (
       expandedIDs: (number | string)[]
       // sort: SortPreference
     }>(`collection-${collectionSlug}-treeView`, payload, user.id, payload.config.admin.user)
-    const { documents, TreeViewComponent } = await getTreeViewResultsComponentAndData({
+    const { items, TreeViewComponent } = await getTreeViewResultsComponentAndData({
       collectionSlug,
       expandedItemIDs: preferences?.value.expandedIDs || [],
       req: initPageResult.req,
@@ -110,8 +110,8 @@ export const buildCollectionTreeView = async (
               collectionSlug,
               disableBulkDelete,
               disableBulkEdit,
-              documents,
               enableRowSelections,
+              items,
               search,
               TreeViewComponent,
               // sort: sortPreference,

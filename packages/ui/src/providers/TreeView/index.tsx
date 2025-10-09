@@ -133,7 +133,7 @@ export function TreeViewProvider({
   const currentlySelectedIndexes = React.useRef(new Set<number>())
 
   const [items, setItems] = React.useState(itemsFromProps)
-  const [openItemIDs, setOpenDocumentIDs] = React.useState<Set<number | string>>(() => new Set())
+  const [openItemIDs, setOpenItemIDs] = React.useState<Set<number | string>>(() => new Set())
   const [TableComponent, setTableComponentToRender] = React.useState(
     InitialTableComponent || (() => null),
   )
@@ -448,19 +448,36 @@ export function TreeViewProvider({
     (docID) => {
       const updatedOpenDocIDs = new Set(openItemIDs)
       if (updatedOpenDocIDs.has(docID)) {
+        // When closing a parent, also close all its descendants
         updatedOpenDocIDs.delete(docID)
+
+        // Find all descendant IDs and remove them from the open set
+        const descendantIDs = new Set<number | string>()
+        const collectDescendants = (parentID: number | string) => {
+          items.forEach((item) => {
+            if (item.value.parentID === parentID) {
+              descendantIDs.add(item.value.id)
+              collectDescendants(item.value.id)
+            }
+          })
+        }
+        collectDescendants(docID)
+
+        descendantIDs.forEach((id) => {
+          updatedOpenDocIDs.delete(id)
+        })
       } else {
         updatedOpenDocIDs.add(docID)
       }
 
-      setOpenDocumentIDs(updatedOpenDocIDs)
+      setOpenItemIDs(updatedOpenDocIDs)
 
       void setPreference(`collection-${collectionSlug}-treeView`, {
         expandedIDs: Array.from(updatedOpenDocIDs),
       })
       clearRouteCache()
     },
-    [collectionSlug, openItemIDs, setPreference, clearRouteCache],
+    [collectionSlug, openItemIDs, items, setPreference, clearRouteCache],
   )
 
   const checkIfItemIsDisabled: TreeViewContextValue['checkIfItemIsDisabled'] = React.useCallback(

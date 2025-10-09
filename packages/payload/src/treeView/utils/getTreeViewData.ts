@@ -93,6 +93,6 @@ export const getTreeViewData = async ({
   }
 
   return {
-    documents: result,
+    items: result,
   }
 }

@@ -12,7 +12,7 @@ export type AddTreeViewFieldsArgs = {
 }
 
 export type GetTreeViewDataResult = {
-  documents: TreeViewItem[]
+  items: TreeViewItem[]
 }
 
 export type RootTreeViewConfiguration = {}

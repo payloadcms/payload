@@ -60,7 +60,7 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
   const { config, getEntityConfig } = useConfig()
   const { i18n, t } = useTranslation()
 
-  const { items: items, search, TableComponent: ComponentToRender } = useTreeView()
+  const { items, search, TableComponent: ComponentToRender } = useTreeView()
   const collectionConfig = getEntityConfig({ collectionSlug })
 
   const { labels, upload } = collectionConfig
