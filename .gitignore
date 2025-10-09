@@ -30,6 +30,7 @@ packages/richtext-lexical/esbuild
 audit_output.json
 
 .turbo
+.wrangler
 
 # Ignore test directory media folder/files
 /media
