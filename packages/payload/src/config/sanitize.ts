@@ -11,6 +11,7 @@ import type {
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
   Timezone,
+  WidgetInstance,
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
@@ -52,6 +53,17 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ValidationError: 'info',
     ...(sanitizedConfig.loggingLevels || {}),
   }
+  ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
+    slug: 'collection-cards',
+    ComponentPath: '@payloadcms/ui/rsc#CollectionCards',
+  })
+  sanitizedConfig.admin!.dashboard.defaultLayout ??= [
+    {
+      height: 3,
+      widgetSlug: 'collection-cards',
+      width: 12,
+    } satisfies WidgetInstance,
+  ]
 
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {

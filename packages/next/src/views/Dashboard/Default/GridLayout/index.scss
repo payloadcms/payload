@@ -1,0 +1,354 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .grid-layout {
+    position: relative;
+
+    .widget {
+      overflow: hidden;
+    }
+
+    .widget-content {
+      height: 100%;
+      width: 100%;
+    }
+
+    &.editing {
+      .widget {
+        cursor: grab;
+      }
+
+      .react-draggable-dragging {
+        z-index: 10;
+        cursor: grabbing;
+      }
+
+      &:has(.react-grid-placeholder) {
+        cursor: grabbing;
+      }
+
+      .widget-content {
+        user-select: none;
+        -webkit-user-select: none;
+        pointer-events: none;
+      }
+
+      .react-grid-item {
+        // Base styles for all resize handles
+        > .react-resizable-handle {
+          position: absolute;
+          width: 20px;
+          height: 20px;
+          background-repeat: no-repeat;
+          background-origin: content-box;
+          box-sizing: border-box;
+          z-index: 1;
+        }
+
+        // Southeast handle (bottom-right) - L shape
+        > .react-resizable-handle-se {
+          bottom: 0;
+          right: 0;
+          cursor: se-resize;
+
+          &::after {
+            content: '';
+            position: absolute;
+            right: 3px;
+            bottom: 3px;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid var(--theme-elevation-300);
+            border-bottom: 2px solid var(--theme-elevation-300);
+            border-bottom-right-radius: 1px;
+          }
+        }
+
+        // Southwest handle (bottom-left) - L shape
+        > .react-resizable-handle-sw {
+          bottom: 0;
+          left: 0;
+          cursor: sw-resize;
+
+          &::after {
+            content: '';
+            position: absolute;
+            left: 3px;
+            bottom: 3px;
+            width: 8px;
+            height: 8px;
+            border-left: 2px solid var(--theme-elevation-300);
+            border-bottom: 2px solid var(--theme-elevation-300);
+            border-bottom-left-radius: 1px;
+          }
+        }
+
+        // Northeast handle (top-right) - L shape
+        > .react-resizable-handle-ne {
+          top: 0;
+          right: 0;
+          cursor: ne-resize;
+
+          &::after {
+            content: '';
+            position: absolute;
+            right: 3px;
+            top: 3px;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid var(--theme-elevation-300);
+            border-top: 2px solid var(--theme-elevation-300);
+            border-top-right-radius: 1px;
+          }
+        }
+
+        // Northwest handle (top-left) - L shape
+        > .react-resizable-handle-nw {
+          top: 0;
+          left: 0;
+          cursor: nw-resize;
+
+          &::after {
+            content: '';
+            position: absolute;
+            left: 3px;
+            top: 3px;
+            width: 8px;
+            height: 8px;
+            border-left: 2px solid var(--theme-elevation-300);
+            border-top: 2px solid var(--theme-elevation-300);
+            border-top-left-radius: 1px;
+          }
+        }
+
+        // North handle (top) - horizontal bar
+        > .react-resizable-handle-n {
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 24px;
+          height: 6px;
+          cursor: n-resize;
+
+          &::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 2px;
+            background: var(--theme-elevation-300);
+            border-radius: 1px;
+          }
+        }
+
+        // South handle (bottom) - horizontal bar
+        > .react-resizable-handle-s {
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 24px;
+          height: 6px;
+          cursor: s-resize;
+
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 2px;
+            background: var(--theme-elevation-300);
+            border-radius: 1px;
+          }
+        }
+
+        // East handle (right) - vertical bar
+        > .react-resizable-handle-e {
+          right: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 6px;
+          height: 24px;
+          cursor: e-resize;
+
+          &::after {
+            content: '';
+            position: absolute;
+            right: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 16px;
+            background: var(--theme-elevation-300);
+            border-radius: 1px;
+          }
+        }
+
+        // West handle (left) - vertical bar
+        > .react-resizable-handle-w {
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 6px;
+          height: 24px;
+          cursor: w-resize;
+
+          &::after {
+            content: '';
+            position: absolute;
+            left: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 16px;
+            background: var(--theme-elevation-300);
+            border-radius: 1px;
+          }
+        }
+      }
+
+      .react-grid-item.react-grid-placeholder {
+        background: var(--theme-elevation-200);
+        opacity: 0.2;
+        transition-duration: 100ms;
+        z-index: 2;
+        user-select: none;
+      }
+    }
+  }
+
+  .widget-wrapper {
+    position: relative;
+    height: 100%;
+    width: 100%;
+
+    &--editing {
+      .widget-wrapper__delete-btn {
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      &:hover {
+        .widget-wrapper__delete-btn {
+          opacity: 1;
+        }
+      }
+    }
+
+    &__delete-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      width: 28px;
+      height: 28px;
+
+      background: var(--theme-text);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+
+      transition: all 0.2s ease;
+
+      .icon {
+        width: 16px;
+        height: 16px;
+
+        .stroke {
+          stroke: var(--theme-elevation-0);
+          stroke-width: 2;
+        }
+      }
+
+      &:hover {
+        background: var(--theme-elevation-800);
+      }
+
+      &:active {
+        background: var(--theme-elevation-900);
+      }
+
+      svg {
+        pointer-events: none;
+      }
+    }
+  }
+
+  .step-nav {
+    .dashboard-breadcrumb-dropdown {
+      &__editing {
+        align-items: center;
+        display: flex !important;
+        gap: 12px;
+      }
+
+      &__actions {
+        display: flex !important;
+        gap: 8px;
+      }
+    }
+
+    .dashboard-breadcrumb-select {
+      position: relative;
+      z-index: 10;
+
+      .rs__control {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        cursor: pointer;
+
+        &:hover {
+          background: transparent;
+        }
+      }
+
+      .rs__indicator-separator {
+        display: none;
+      }
+
+      .rs__dropdown-indicator {
+        padding: 0 4px;
+      }
+
+      .rs__menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        min-width: 150px;
+        z-index: 9999;
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+    }
+
+    .rs__control {
+      box-shadow: none !important;
+      cursor: pointer !important;
+    }
+
+    .drawer-toggler--unstyled {
+      background: transparent;
+      border: none;
+      margin: 0;
+      padding: 0;
+      outline: none;
+      box-shadow: none;
+
+      &:hover,
+      &:focus {
+        background: transparent;
+      }
+    }
+  }
+}

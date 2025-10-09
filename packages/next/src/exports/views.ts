@@ -1,10 +1,5 @@
 export { AccountView } from '../views/Account/index.js'
-export {
-  type DashboardViewClientProps,
-  type DashboardViewServerProps,
-  type DashboardViewServerPropsOnly,
-  DefaultDashboard,
-} from '../views/Dashboard/Default/index.js'
+export { DefaultDashboard } from '../views/Dashboard/Default/index.js'
 export { DashboardView } from '../views/Dashboard/index.js'
 
 export { ListView, renderListView, type RenderListViewArgs } from '../views/List/index.js'
