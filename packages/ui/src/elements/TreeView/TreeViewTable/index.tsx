@@ -343,14 +343,6 @@ export function TreeViewTable() {
     })
   }, [selectedItemKeys, items])
 
-  // Compute invalid drop targets (dragged items + all their descendants)
-  const invalidTargetIDs = React.useMemo(() => {
-    if (!isDragging || selectedRowIDs.length === 0) {
-      return undefined
-    }
-    return getAllDescendantIDs(selectedRowIDs, items)
-  }, [isDragging, selectedRowIDs, items])
-
   return (
     <>
       {/* TODO: remove this button */}
@@ -359,7 +351,6 @@ export function TreeViewTable() {
         className={baseClass}
         dropContextName={dropContextName}
         hoveredRowID={hoveredRowID}
-        invalidTargetIDs={invalidTargetIDs}
         isDragging={isDragging}
         loadingRowIDs={loadingRowIDs}
         onDroppableHover={onDroppableHover}

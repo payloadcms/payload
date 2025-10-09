@@ -27,7 +27,6 @@ interface NestedSectionsTableProps {
   dropContextName: string
   hoveredRowID?: null | number | string
   initialOffset?: number
-  invalidTargetIDs?: Set<number | string>
   isDragging?: boolean
   loadingRowIDs?: Set<number | string>
   onDroppableHover: (params: {
@@ -60,8 +59,8 @@ interface DivTableSectionProps {
   firstCellRef?: React.RefObject<HTMLDivElement>
   firstCellWidth: number
   firstCellXOffset: number
+  hasSelectedAncestor?: boolean
   hoveredRowID: null | number | string
-  invalidTargetIDs?: Set<number | string>
   isDragging: boolean
   isLastRowOfRoot?: boolean
   level?: number
@@ -101,7 +100,6 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
   disabledRowIDs,
   dropContextName,
   hoveredRowID,
-  invalidTargetIDs,
   isDragging = false,
   loadingRowIDs,
   onDroppableHover,
@@ -161,7 +159,6 @@ export const NestedSectionsTable: React.FC<NestedSectionsTableProps> = ({
           firstCellWidth={firstCellWidth}
           firstCellXOffset={firstCellXOffset}
           hoveredRowID={hoveredRowID}
-          invalidTargetIDs={invalidTargetIDs}
           isDragging={isDragging}
           loadingRowIDs={loadingRowIDs}
           onDroppableHover={onDroppableHover}
@@ -188,8 +185,8 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
   firstCellRef,
   firstCellWidth,
   firstCellXOffset,
+  hasSelectedAncestor = false,
   hoveredRowID,
-  invalidTargetIDs,
   isDragging,
   isLastRowOfRoot = false,
   level = 0,
@@ -264,8 +261,8 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
             : firstCellWidth + segmentWidth * (hasNestedRows ? level + 1 : level) + 28
 
         const isOdd = absoluteRowIndex % 2 === 1
-
-        const isInvalidTarget = invalidTargetIDs?.has(rowItem.rowID)
+        const isRowSelected = selectedRowIDs.includes(rowItem.rowID)
+        const isInvalidTarget = hasSelectedAncestor || isRowSelected
 
         const renderResult = (
           <React.Fragment key={rowItem.rowID}>
@@ -276,7 +273,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                 isDragging && isInvalidTarget && `${baseClass}__section--invalid-target`,
                 isOdd && `${baseClass}__section--odd`,
                 targetParentID === rowItem.rowID && `${baseClass}__section--target`,
-                selectedRowIDs.includes(rowItem.rowID) && `${baseClass}__section--selected`,
+                isRowSelected && `${baseClass}__section--selected`,
               ]
                 .filter(Boolean)
                 .join(' ')}
@@ -387,8 +384,8 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                 )}
                 <div>
                   <RowDropArea
+                    disabled={isInvalidTarget}
                     dropContextName={dropContextName}
-                    invalidTargetIDs={invalidTargetIDs}
                     isDragging={isDragging}
                     onHover={(data) => {
                       onDroppableHover({ ...data, hoveredRowID: rowItem.rowID })
@@ -400,8 +397,8 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                   />
 
                   <RowDropArea
+                    disabled={isInvalidTarget}
                     dropContextName={dropContextName}
-                    invalidTargetIDs={invalidTargetIDs}
                     isDragging={isDragging}
                     onHover={(data) => {
                       onDroppableHover({ ...data, hoveredRowID: rowItem.rowID })
@@ -439,8 +436,8 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                 dropContextName={dropContextName}
                 firstCellWidth={firstCellWidth}
                 firstCellXOffset={firstCellXOffset}
+                hasSelectedAncestor={hasSelectedAncestor || isRowSelected}
                 hoveredRowID={hoveredRowID}
-                invalidTargetIDs={invalidTargetIDs}
                 isDragging={isDragging}
                 isLastRowOfRoot={isRowAtRootLevel}
                 level={level + 1}
