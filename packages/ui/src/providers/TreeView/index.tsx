@@ -1,7 +1,7 @@
 'use client'
 
 import type { CollectionSlug, FolderSortKeys } from 'payload'
-import type { TreeViewDocument, TreeViewItemKey } from 'payload/shared'
+import type { TreeViewItem, TreeViewItemKey } from 'payload/shared'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { extractID } from 'payload/shared'
@@ -12,6 +12,8 @@ import { toast } from 'sonner'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'
+import { usePreferences } from '../Preferences/index.js'
+import { useRouteCache } from '../RouteCache/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 import { useTranslation } from '../Translation/index.js'
 
@@ -22,62 +24,50 @@ type TreeViewQueryParams = {
 }
 
 export type TreeViewContextValue = {
-  checkIfItemIsDisabled: (item: TreeViewDocument) => boolean
+  checkIfItemIsDisabled: (item: TreeViewItem) => boolean
   clearSelections: () => void
-  documents?: TreeViewDocument[]
-  dragOverlayItem?: TreeViewDocument | undefined
-  dragStartX: number
+  collectionSlug: CollectionSlug
   focusedRowIndex: number
-  getSelectedItems?: () => TreeViewDocument[]
-  isDragging: boolean
+  getSelectedItems?: () => TreeViewItem[]
   itemKeysToMove?: Set<TreeViewItemKey>
+  items?: TreeViewItem[]
   moveItems: (args: { docIDs: (number | string)[]; parentID?: number | string }) => Promise<void>
   onItemClick: (args: {
     event: React.MouseEvent<HTMLElement>
     index: number
-    item: TreeViewDocument
+    item: TreeViewItem
     keepSelected?: boolean
   }) => void
-  onItemDrag: (args: { event: PointerEvent; item: TreeViewDocument }) => void
-  onItemKeyPress: (args: {
-    event: React.KeyboardEvent
-    index: number
-    item: TreeViewDocument
-  }) => void
+  openItemIDs: Set<number | string>
   parentFieldName: string
   refineTreeViewData: (args: { query?: TreeViewQueryParams; updateURL: boolean }) => void
   search: string
   readonly selectedItemKeys: Set<TreeViewItemKey>
-  setDragStartX: React.Dispatch<React.SetStateAction<number>>
   setFocusedRowIndex: React.Dispatch<React.SetStateAction<number>>
-  setIsDragging: React.Dispatch<React.SetStateAction<boolean>>
   sort: FolderSortKeys
   TableComponent: React.ReactNode
+  toggleRow: (docID: number | string) => void
 }
 
 const Context = React.createContext<TreeViewContextValue>({
   checkIfItemIsDisabled: () => false,
   clearSelections: () => {},
-  documents: [],
-  dragOverlayItem: undefined,
-  dragStartX: 0,
+  collectionSlug: '' as CollectionSlug,
   focusedRowIndex: -1,
   getSelectedItems: () => [],
-  isDragging: false,
   itemKeysToMove: undefined,
+  items: [],
   moveItems: () => Promise.resolve(undefined),
   onItemClick: () => undefined,
-  onItemDrag: () => undefined,
-  onItemKeyPress: () => undefined,
+  openItemIDs: new Set<number | string>(),
   parentFieldName: '_parentDoc',
   refineTreeViewData: () => undefined,
   search: '',
   selectedItemKeys: new Set<TreeViewItemKey>(),
-  setDragStartX: () => 0,
   setFocusedRowIndex: () => -1,
-  setIsDragging: () => false,
   sort: 'name',
   TableComponent: null,
+  toggleRow: () => undefined,
 })
 
 export type TreeViewProviderProps = {
@@ -88,13 +78,13 @@ export type TreeViewProviderProps = {
   readonly children: React.ReactNode
   readonly collectionSlug: CollectionSlug
   /**
-   * All documents in the tree
+   * All items in the tree
    */
-  readonly documents: TreeViewDocument[]
+  readonly items: TreeViewItem[]
   /**
    * Optional function to call when an item is clicked
    */
-  readonly onItemClick?: (item: TreeViewDocument) => void
+  readonly onItemClick?: (item: TreeViewItem) => void
   /**
    * The field name that holds the parent reference
    */
@@ -123,7 +113,7 @@ export function TreeViewProvider({
   allowMultiSelection = true,
   children,
   collectionSlug,
-  documents,
+  items: itemsFromProps,
   onItemClick: onItemClickFromProps,
   parentFieldName = '_parentDoc',
   search,
@@ -138,9 +128,12 @@ export function TreeViewProvider({
   const { startRouteTransition } = useRouteTransition()
   const locale = useLocale()
   const localeCode = locale ? locale.code : undefined
+  const { setPreference } = usePreferences()
 
   const currentlySelectedIndexes = React.useRef(new Set<number>())
 
+  const [items, setItems] = React.useState(itemsFromProps)
+  const [openItemIDs, setOpenDocumentIDs] = React.useState<Set<number | string>>(() => new Set())
   const [TableComponent, setTableComponentToRender] = React.useState(
     InitialTableComponent || (() => null),
   )
@@ -149,21 +142,17 @@ export function TreeViewProvider({
   const searchParams = React.useMemo(() => parseSearchParams(rawSearchParams), [rawSearchParams])
   const [currentQuery, setCurrentQuery] = React.useState<TreeViewQueryParams>(searchParams)
 
-  const [isDragging, setIsDragging] = React.useState(false)
-  const [dragStartX, setDragStartX] = React.useState(0)
   const [selectedItemKeys, setSelectedItemKeys] = React.useState<Set<TreeViewItemKey>>(
     () => new Set(),
   )
   const [focusedRowIndex, setFocusedRowIndex] = React.useState(-1)
   const [isDoubleClickEnabled] = React.useState(false)
-  const [dragOverlayItem, setDragOverlayItem] = React.useState<TreeViewDocument | undefined>()
   const lastClickTime = React.useRef<null | number>(null)
-  const totalCount = documents.length
+  const { clearRouteCache } = useRouteCache()
 
   const clearSelections = React.useCallback(() => {
     setFocusedRowIndex(-1)
     setSelectedItemKeys(new Set())
-    setDragOverlayItem(undefined)
     currentlySelectedIndexes.current = new Set()
   }, [])
 
@@ -206,9 +195,9 @@ export function TreeViewProvider({
 
   const getItem = React.useCallback(
     (itemKey: TreeViewItemKey) => {
-      return documents.find((doc) => doc.itemKey === itemKey)
+      return items.find((doc) => doc.itemKey === itemKey)
     },
-    [documents],
+    [items],
   )
 
   const getSelectedItems = React.useCallback(() => {
@@ -233,7 +222,7 @@ export function TreeViewProvider({
 
   const handleShiftSelection = React.useCallback(
     (targetIndex: number) => {
-      const allItems = documents
+      const allItems = items
 
       // Find existing selection boundaries
       const existingIndexes = allItems.reduce((acc, item, idx) => {
@@ -287,12 +276,12 @@ export function TreeViewProvider({
         return [...new Set([...existingIndexes, ...newRangeIndexes])]
       }
     },
-    [documents, selectedItemKeys],
+    [items, selectedItemKeys],
   )
 
   const updateSelections = React.useCallback(
     ({ indexes }: { indexes: number[] }) => {
-      const allItems = documents
+      const allItems = items
       const { newSelectedItemKeys } = allItems.reduce(
         (acc, item, index) => {
           if (indexes.includes(index)) {
@@ -307,158 +296,7 @@ export function TreeViewProvider({
 
       setSelectedItemKeys(newSelectedItemKeys)
     },
-    [documents],
-  )
-
-  const onItemKeyPress: TreeViewContextValue['onItemKeyPress'] = React.useCallback(
-    ({ event, item: currentItem }) => {
-      const { code, ctrlKey, metaKey, shiftKey } = event
-      const isShiftPressed = shiftKey
-      const isCtrlPressed = ctrlKey || metaKey
-      const isCurrentlySelected = selectedItemKeys.has(currentItem.itemKey)
-      const allItems = documents
-      const currentItemIndex = allItems.findIndex((item) => item.itemKey === currentItem.itemKey)
-
-      switch (code) {
-        case 'ArrowDown':
-        case 'ArrowLeft':
-        case 'ArrowRight':
-        case 'ArrowUp': {
-          event.preventDefault()
-
-          if (currentItemIndex === -1) {
-            break
-          }
-
-          const isBackward = code === 'ArrowLeft' || code === 'ArrowUp'
-          const newItemIndex = isBackward ? currentItemIndex - 1 : currentItemIndex + 1
-
-          if (newItemIndex < 0 || newItemIndex > totalCount - 1) {
-            // out of bounds, keep current selection
-            return
-          }
-
-          setFocusedRowIndex(newItemIndex)
-
-          if (isCtrlPressed) {
-            break
-          }
-
-          if (isShiftPressed && allowMultiSelection) {
-            const selectedIndexes = handleShiftSelection(newItemIndex)
-            updateSelections({ indexes: selectedIndexes })
-            return
-          }
-
-          // Single selection without shift
-          if (!isShiftPressed) {
-            const newItem = allItems[newItemIndex]
-            setSelectedItemKeys(new Set([newItem.itemKey]))
-          }
-
-          break
-        }
-        case 'Enter': {
-          if (selectedItemKeys.size === 1) {
-            setFocusedRowIndex(undefined)
-            navigateAfterSelection({
-              collectionSlug: currentItem.relationTo,
-              docID: extractID(currentItem.value),
-            })
-            return
-          }
-          break
-        }
-        case 'Escape': {
-          clearSelections()
-          break
-        }
-        case 'KeyA': {
-          if (allowMultiSelection && isCtrlPressed) {
-            event.preventDefault()
-            setFocusedRowIndex(totalCount - 1)
-            updateSelections({
-              indexes: Array.from({ length: totalCount }, (_, i) => i),
-            })
-          }
-          break
-        }
-        case 'Space': {
-          if (allowMultiSelection && isShiftPressed) {
-            event.preventDefault()
-            updateSelections({
-              indexes: allItems.reduce((acc, item, idx) => {
-                if (item.itemKey === currentItem.itemKey) {
-                  if (isCurrentlySelected) {
-                    return acc
-                  } else {
-                    acc.push(idx)
-                  }
-                } else if (selectedItemKeys.has(item.itemKey)) {
-                  acc.push(idx)
-                }
-                return acc
-              }, []),
-            })
-          } else {
-            event.preventDefault()
-            updateSelections({
-              indexes: isCurrentlySelected ? [] : [currentItemIndex],
-            })
-          }
-          break
-        }
-        case 'Tab': {
-          if (allowMultiSelection && isShiftPressed) {
-            const prevIndex = currentItemIndex - 1
-            if (prevIndex < 0 && selectedItemKeys?.size > 0) {
-              setFocusedRowIndex(prevIndex)
-            }
-          } else {
-            const nextIndex = currentItemIndex + 1
-            if (nextIndex === totalCount && selectedItemKeys.size > 0) {
-              setFocusedRowIndex(totalCount - 1)
-            }
-          }
-          break
-        }
-      }
-    },
-    [
-      selectedItemKeys,
-      documents,
-      allowMultiSelection,
-      handleShiftSelection,
-      updateSelections,
-      navigateAfterSelection,
-      clearSelections,
-      totalCount,
-    ],
-  )
-
-  const onItemDrag: TreeViewContextValue['onItemDrag'] = React.useCallback(
-    ({ event, item: dragItem }) => {
-      const isCtrlPressed = event.ctrlKey || event.metaKey
-      const isShiftPressed = event.shiftKey
-      const isCurrentlySelected = selectedItemKeys.has(dragItem.itemKey)
-      const allItems = [...documents]
-
-      if (!isCurrentlySelected) {
-        updateSelections({
-          indexes: allItems.reduce((acc, item, idx) => {
-            if (item.itemKey === dragItem.itemKey) {
-              acc.push(idx)
-            } else if ((isCtrlPressed || isShiftPressed) && selectedItemKeys.has(item.itemKey)) {
-              acc.push(idx)
-            }
-            return acc
-          }, []),
-        })
-
-        setDragOverlayItem(getItem(dragItem.itemKey))
-      }
-    },
-    [selectedItemKeys, documents, getItem, updateSelections],
+    [items],
   )
 
   const onItemClick: TreeViewContextValue['onItemClick'] = React.useCallback(
@@ -469,13 +307,12 @@ export function TreeViewProvider({
       const isCurrentlySelected = selectedItemKeys.has(clickedItem.itemKey)
 
       if (allowMultiSelection && (isCtrlPressed || isShiftPressed)) {
-        const currentItemIndex = documents.findIndex((item) => item.itemKey === clickedItem.itemKey)
+        const currentItemIndex = items.findIndex((item) => item.itemKey === clickedItem.itemKey)
         if (isCtrlPressed) {
-          const indexes = documents.reduce((acc, item, idx) => {
+          const indexes = items.reduce((acc, item, idx) => {
             if (item.itemKey === clickedItem.itemKey) {
               if (!isCurrentlySelected || keepSelected) {
                 acc.push(idx)
-                setDragOverlayItem(getItem(clickedItem.itemKey))
               }
             } else if (selectedItemKeys.has(item.itemKey)) {
               acc.push(idx)
@@ -487,21 +324,22 @@ export function TreeViewProvider({
         } else if (currentItemIndex !== -1) {
           const selectedIndexes = handleShiftSelection(currentItemIndex)
           updateSelections({ indexes: selectedIndexes })
-          setDragOverlayItem(getItem(clickedItem.itemKey))
         }
       } else {
         // Normal click - select single item
         const now = Date.now()
+        const lastSelectedKey = Array.from(selectedItemKeys)[selectedItemKeys.size - 1]
+        const lastSelectedItem = lastSelectedKey ? getItem(lastSelectedKey) : undefined
         doubleClicked =
-          now - lastClickTime.current < 400 && dragOverlayItem?.itemKey === clickedItem.itemKey
+          now - lastClickTime.current < 400 && lastSelectedItem?.itemKey === clickedItem.itemKey
         lastClickTime.current = now
         if (!doubleClicked || !isDoubleClickEnabled) {
           updateSelections({
             indexes: (() => {
               const indexes: number[] = []
 
-              for (let idx = 0; idx < documents.length; idx++) {
-                const item = documents[idx]
+              for (let idx = 0; idx < items.length; idx++) {
+                const item = items[idx]
                 if (clickedItem.itemKey === item.itemKey) {
                   if (keepSelected || !selectedItemKeys.has(item.itemKey)) {
                     indexes.push(idx)
@@ -516,18 +354,6 @@ export function TreeViewProvider({
           })
         }
 
-        if (isCurrentlySelected) {
-          const selectedArray = Array.from(selectedItemKeys)
-          const lastSelectedKey = selectedArray[selectedArray.length - 1]
-          if (lastSelectedKey) {
-            setDragOverlayItem(getItem(lastSelectedKey))
-          } else {
-            setDragOverlayItem(undefined)
-          }
-        } else {
-          setDragOverlayItem(getItem(clickedItem.itemKey))
-        }
-
         if (isDoubleClickEnabled && doubleClicked) {
           navigateAfterSelection({
             collectionSlug: clickedItem.relationTo,
@@ -540,9 +366,8 @@ export function TreeViewProvider({
       isDoubleClickEnabled,
       navigateAfterSelection,
       selectedItemKeys,
-      documents,
+      items,
       allowMultiSelection,
-      dragOverlayItem,
       getItem,
       updateSelections,
       handleShiftSelection,
@@ -555,6 +380,21 @@ export function TreeViewProvider({
       if (!docIDs.length) {
         return
       }
+
+      // Optimistically update local documents
+      setItems((prevDocs) =>
+        prevDocs.map((doc) =>
+          docIDs.includes(doc.value.id)
+            ? {
+                ...doc,
+                value: {
+                  ...doc.value,
+                  parentID: parentID || null,
+                },
+              }
+            : doc,
+        ),
+      )
 
       const queryParams = qs.stringify(
         {
@@ -580,7 +420,10 @@ export function TreeViewProvider({
           },
           method: 'PATCH',
         })
+        clearRouteCache()
       } catch (error) {
+        // Revert optimistic update on error
+        setItems(itemsFromProps)
         toast.error(t('general:error'))
         // eslint-disable-next-line no-console
         console.error(error)
@@ -588,25 +431,54 @@ export function TreeViewProvider({
 
       clearSelections()
     },
-    [clearSelections, routes.api, serverURL, t, localeCode, collectionSlug, parentFieldName],
+    [
+      clearSelections,
+      routes.api,
+      serverURL,
+      t,
+      localeCode,
+      collectionSlug,
+      parentFieldName,
+      itemsFromProps,
+      clearRouteCache,
+    ],
+  )
+
+  const toggleRow: TreeViewContextValue['toggleRow'] = React.useCallback(
+    (docID) => {
+      const updatedOpenDocIDs = new Set(openItemIDs)
+      if (updatedOpenDocIDs.has(docID)) {
+        updatedOpenDocIDs.delete(docID)
+      } else {
+        updatedOpenDocIDs.add(docID)
+      }
+
+      setOpenDocumentIDs(updatedOpenDocIDs)
+
+      void setPreference(`collection-${collectionSlug}-treeView`, {
+        expandedIDs: Array.from(updatedOpenDocIDs),
+      })
+      clearRouteCache()
+    },
+    [collectionSlug, openItemIDs, setPreference, clearRouteCache],
   )
 
   const checkIfItemIsDisabled: TreeViewContextValue['checkIfItemIsDisabled'] = React.useCallback(
     (item) => {
-      if (isDragging) {
-        const isSelected = selectedItemKeys.has(item.itemKey)
-        if (isSelected) {
-          return true
-        }
-      } else if (parentTreeViewContext?.selectedItemKeys?.size) {
+      if (parentTreeViewContext?.selectedItemKeys?.size) {
         // Disable selected items from being navigated to in move to drawer
         if (parentTreeViewContext.selectedItemKeys.has(item.itemKey)) {
           return true
         }
       }
     },
-    [isDragging, selectedItemKeys, parentTreeViewContext?.selectedItemKeys],
+    [parentTreeViewContext?.selectedItemKeys],
   )
+
+  // Sync documents when prop changes
+  React.useEffect(() => {
+    setItems(itemsFromProps)
+  }, [itemsFromProps])
 
   // If a new component is provided, update the state so children can re-render with the new component
   React.useEffect(() => {
@@ -620,26 +492,22 @@ export function TreeViewProvider({
       value={{
         checkIfItemIsDisabled,
         clearSelections,
-        documents,
-        dragOverlayItem,
-        dragStartX,
+        collectionSlug,
         focusedRowIndex,
         getSelectedItems,
-        isDragging,
         itemKeysToMove: parentTreeViewContext.selectedItemKeys,
+        items,
         moveItems,
         onItemClick,
-        onItemDrag,
-        onItemKeyPress,
+        openItemIDs,
         parentFieldName,
         refineTreeViewData,
         search,
         selectedItemKeys,
-        setDragStartX,
         setFocusedRowIndex,
-        setIsDragging,
         sort,
         TableComponent,
+        toggleRow,
       }}
     >
       {children}

@@ -1,5 +1,5 @@
 import type { CollectionSlug, Document } from '../../index.js'
-import type { TreeViewDocument } from '../types.js'
+import type { TreeViewItem } from '../types.js'
 
 // import { isImage } from '../../uploads/isImage.js'
 // import { getBestFitFromSizes } from '../../utilities/getBestFitFromSizes.js'
@@ -10,12 +10,8 @@ type Args = {
   useAsTitle?: string
   value: Document
 }
-export function formatTreeViewDocumentItem({
-  relationTo,
-  useAsTitle,
-  value,
-}: Args): TreeViewDocument {
-  const itemValue: TreeViewDocument['value'] = {
+export function formatTreeViewDocumentItem({ relationTo, useAsTitle, value }: Args): TreeViewItem {
+  const itemValue: TreeViewItem['value'] = {
     id: value?.id,
     createdAt: value?.createdAt,
     parentDocIDs: value?._parentDocPath || [],
@@ -41,6 +37,7 @@ export function formatTreeViewDocumentItem({
   // }
 
   return {
+    hasChildren: true,
     itemKey: `${relationTo}-${value.id}`,
     relationTo,
     value: itemValue,

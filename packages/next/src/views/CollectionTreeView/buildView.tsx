@@ -4,6 +4,8 @@ import { DefaultCollectionTreeView, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getTreeViewResultsComponentAndData, upsertPreferences } from '@payloadcms/ui/rsc'
 
+import { getPreferences } from '../../utilities/getPreferences.js'
+
 export type BuildCollectionTreeViewStateArgs = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
@@ -21,7 +23,6 @@ export const buildCollectionTreeView = async (
     disableBulkEdit,
     enableRowSelections,
     initPageResult,
-    isInDrawer,
     overrideEntityVisibility,
     params,
     query: queryFromArgs,
@@ -58,20 +59,13 @@ export const buildCollectionTreeView = async (
 
     const query = queryFromArgs || queryFromReq
 
-    const {
-      routes: { admin: adminRoute },
-    } = config
-
+    const preferences = await getPreferences<{
+      expandedIDs: (number | string)[]
+      // sort: SortPreference
+    }>(`collection-${collectionSlug}-treeView`, payload, user.id, payload.config.admin.user)
     const { documents, TreeViewComponent } = await getTreeViewResultsComponentAndData({
       collectionSlug,
-      // TODO: remove and get from prefs
-      expandedItemIDs: [
-        '68e55080d18048a90c795f6b',
-        '68e5508ed18048a90c795f7f',
-        '68e547aed18048a90c795d25',
-        '68e550bfd18048a90c795fd3',
-        '68e023f7bdb81b341429f726',
-      ],
+      expandedItemIDs: preferences?.value.expandedIDs || [],
       req: initPageResult.req,
       sort: 'titlePath',
       // sort: sortPreference,

@@ -53,9 +53,13 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
       newViewType === 'collection-folders' ||
       newViewType === 'collection-tree-view'
     ) {
-      await setPreference(`collection-${collectionConfig.slug}`, {
-        listViewType: newViewType,
-      })
+      await setPreference(
+        `collection-${collectionConfig.slug}`,
+        {
+          listViewType: newViewType,
+        },
+        true,
+      )
     }
 
     let path: `/${string}` = `/collections/${collectionConfig.slug}`

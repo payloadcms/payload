@@ -45,6 +45,23 @@
     display: flex;
     align-items: center;
     gap: calc(var(--base) * 0.4);
+    color: var(--theme-elevation-600);
+  }
+
+  &__tree-toggle {
+    color: var(--theme-elevation-300);
+    height: 20px;
+    width: 20px;
+
+    &:hover {
+      color: var(--theme-elevation-600);
+    }
+  }
+
+  &__tree-toggle-placeholder {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
   }
 
   &__cell {
@@ -64,10 +81,11 @@
     position: relative;
     display: table-row-group;
     outline: 1px solid transparent;
+    background: var(--theme-elevation-50);
   }
 
   &__section--odd {
-    background: var(--theme-elevation-50);
+    background: var(--theme-elevation-0);
   }
 
   &__section--hovered {

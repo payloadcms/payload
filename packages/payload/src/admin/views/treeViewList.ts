@@ -1,6 +1,7 @@
 import type { ServerProps } from '../../config/types.js'
-import type { FolderBreadcrumb, FolderOrDocument, FolderSortKeys } from '../../folders/types.js'
+import type { FolderBreadcrumb, FolderSortKeys } from '../../folders/types.js'
 import type { SanitizedCollectionConfig } from '../../index.js'
+import type { TreeViewItem } from '../../treeView/types.js'
 export type TreeViewSlots = {
   AfterTreeViewList?: React.ReactNode
   AfterTreeViewListTable?: React.ReactNode
@@ -12,7 +13,7 @@ export type TreeViewSlots = {
 
 export type TreeViewServerPropsOnly = {
   collectionConfig: SanitizedCollectionConfig
-  documents: FolderOrDocument[]
+  items: TreeViewItem[]
 } & ServerProps
 
 export type TreeViewServerProps = TreeViewClientProps & TreeViewServerPropsOnly
@@ -23,8 +24,8 @@ export type TreeViewClientProps = {
   collectionSlug?: SanitizedCollectionConfig['slug']
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
-  documents: FolderOrDocument[]
   enableRowSelections?: boolean
+  items: TreeViewItem[]
   parentFieldName: string
   search?: string
   sort?: FolderSortKeys

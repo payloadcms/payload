@@ -1,51 +1,52 @@
-import type { TreeViewDocument } from 'payload/shared'
+import type { TreeViewItem } from 'payload/shared'
 
 import type { SectionRow } from '../NestedSectionsTable/index.js'
 
 type Args = {
-  documents: TreeViewDocument[]
   i18nLanguage: string
+  items: TreeViewItem[]
 }
 
-export function documentsToSectionRows({ documents, i18nLanguage }: Args): SectionRow[] {
+export function itemsToSectionRows({ i18nLanguage, items }: Args): SectionRow[] {
   // Create a map for quick lookups
-  const docMap = new Map<number | string, TreeViewDocument>()
-  documents.forEach((doc) => {
-    docMap.set(doc.value.id, doc)
+  const itemMap = new Map<number | string, TreeViewItem>()
+  items.forEach((item) => {
+    itemMap.set(item.value.id, item)
   })
 
   // Create a map to store section rows
   const sectionRowMap = new Map<number | string, SectionRow>()
 
-  // Convert each document to a SectionRow
-  documents.forEach((doc) => {
+  // Convert each item to a SectionRow
+  items.forEach((item) => {
     const sectionRow: SectionRow = {
-      name: doc.value.title,
-      rowID: doc.value.id,
+      name: item.value.title,
+      hasChildren: item.hasChildren,
+      rowID: item.value.id,
       rows: [],
-      updatedAt: doc.value.updatedAt
-        ? new Date(doc.value.updatedAt).toLocaleDateString(i18nLanguage, {
+      updatedAt: item.value.updatedAt
+        ? new Date(item.value.updatedAt).toLocaleDateString(i18nLanguage, {
             day: 'numeric',
             month: 'short',
             year: 'numeric',
           })
         : '',
     }
-    sectionRowMap.set(doc.value.id, sectionRow)
+    sectionRowMap.set(item.value.id, sectionRow)
   })
 
   // Build the hierarchy
   const rootSections: SectionRow[] = []
 
-  documents.forEach((doc) => {
-    const sectionRow = sectionRowMap.get(doc.value.id)
+  items.forEach((item) => {
+    const sectionRow = sectionRowMap.get(item.value.id)
     if (!sectionRow) {
       return
     }
 
-    if (doc.value.parentID) {
+    if (item.value.parentID) {
       // This is a child - add it to its parent's rows array
-      const parentRow = sectionRowMap.get(doc.value.parentID)
+      const parentRow = sectionRowMap.get(item.value.parentID)
       if (parentRow) {
         if (!parentRow.rows) {
           parentRow.rows = []
@@ -56,7 +57,7 @@ export function documentsToSectionRows({ documents, i18nLanguage }: Args): Secti
         rootSections.push(sectionRow)
       }
     } else {
-      // This is a root-level document
+      // This is a root-level item
       rootSections.push(sectionRow)
     }
   })

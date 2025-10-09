@@ -1,5 +1,5 @@
 import type { Modifier } from '@dnd-kit/core'
-import type { TreeViewDocument } from 'payload/shared'
+import type { TreeViewItem } from 'payload/shared'
 
 import { DragOverlay } from '@dnd-kit/core'
 import { getEventCoordinates } from '@dnd-kit/utilities'
@@ -10,7 +10,7 @@ import './index.scss'
 const baseClass = 'tree-view-drag-overlay'
 
 type TreeViewDragOverlayProps = {
-  readonly item: TreeViewDocument
+  readonly item: TreeViewItem
   readonly selectedCount: number
 }
 
@@ -52,7 +52,7 @@ export const snapTopLeftToCursor: Modifier = ({ activatorEvent, draggingNodeRect
     return {
       ...transform,
       x: transform.x + offsetX + 5,
-      y: transform.y + offsetY + 5,
+      y: transform.y + offsetY + 35,
     }
   }
 

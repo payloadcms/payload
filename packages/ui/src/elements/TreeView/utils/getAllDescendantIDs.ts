@@ -1,11 +1,11 @@
-import type { TreeViewDocument } from 'payload/shared'
+import type { TreeViewItem } from 'payload/shared'
 
 /**
  * Recursively collects all descendant IDs for the given parent IDs.
  * This is used to determine invalid drop targets when dragging tree items.
  *
  * @param draggedItemIDs - Array of IDs for items being dragged
- * @param documents - All documents in the tree
+ * @param items - All documents in the tree
  * @returns Set containing the dragged IDs and all their descendant IDs at any depth
  *
  * @example
@@ -21,13 +21,13 @@ import type { TreeViewDocument } from 'payload/shared'
  */
 export function getAllDescendantIDs(
   draggedItemIDs: (number | string)[],
-  documents: TreeViewDocument[],
+  items: TreeViewItem[],
 ): Set<number | string> {
   const invalidTargets = new Set<number | string>()
 
   // Helper to recursively collect all descendants of a parent
   const collectDescendants = (parentID: number | string) => {
-    documents.forEach((doc) => {
+    items.forEach((doc) => {
       if (doc.value.parentID === parentID) {
         invalidTargets.add(doc.value.id)
         // Recursively collect this child's descendants

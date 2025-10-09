@@ -1,13 +1,9 @@
 'use client'
 
-import type { DragEndEvent } from '@dnd-kit/core'
 import type { TreeViewClientProps } from 'payload'
 
-import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import React, { Fragment } from 'react'
-import { toast } from 'sonner'
 
 import { DefaultListViewTabs } from '../../elements/DefaultListViewTabs/index.js'
 import { SortByPill } from '../../elements/FolderView/SortByPill/index.js'
@@ -15,14 +11,7 @@ import { Gutter } from '../../elements/Gutter/index.js'
 import { ListHeader } from '../../elements/ListHeader/index.js'
 import { NoListResults } from '../../elements/NoListResults/index.js'
 import { SearchBar } from '../../elements/SearchBar/index.js'
-import { useStepNav } from '../../elements/StepNav/index.js'
-import { TreeViewDragOverlay } from '../../elements/TreeView/TreeViewDragOverlay/index.js'
-import { getAllDescendantIDs } from '../../elements/TreeView/utils/getAllDescendantIDs.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
-import { usePreferences } from '../../providers/Preferences/index.js'
-import { useRouteCache } from '../../providers/RouteCache/index.js'
-import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { TreeViewProvider, useTreeView } from '../../providers/TreeView/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
@@ -32,7 +21,7 @@ const baseClass = 'collection-tree-view-list'
 
 export function DefaultCollectionTreeView({
   collectionSlug,
-  documents,
+  items,
   parentFieldName,
   search,
   sort,
@@ -42,7 +31,7 @@ export function DefaultCollectionTreeView({
   return (
     <TreeViewProvider
       collectionSlug={collectionSlug}
-      documents={documents}
+      items={items}
       parentFieldName={parentFieldName}
       search={search}
       sort={sort}
@@ -55,7 +44,7 @@ export function DefaultCollectionTreeView({
 
 type CollectionTreeViewInContextProps = Omit<
   TreeViewClientProps,
-  'breadcrumbs' | 'documents' | 'parentFieldName' | 'search' | 'sort' | 'TreeViewComponent'
+  'breadcrumbs' | 'items' | 'parentFieldName' | 'search' | 'sort' | 'TreeViewComponent'
 >
 
 function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
@@ -66,33 +55,12 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
     BeforeTreeViewListTable,
     collectionSlug,
     Description,
-    disableBulkDelete,
-    disableBulkEdit,
   } = props
 
   const { config, getEntityConfig } = useConfig()
   const { i18n, t } = useTranslation()
-  const drawerDepth = useEditDepth()
-  const { setStepNav } = useStepNav()
-  const { setPreference } = usePreferences()
 
-  const {
-    documents,
-    dragOverlayItem,
-    getSelectedItems,
-    moveItems,
-    refineTreeViewData,
-    search,
-    selectedItemKeys,
-    setDragStartX,
-    setIsDragging,
-    TableComponent: ComponentToRender,
-  } = useTreeView()
-
-  const router = useRouter()
-  const { startRouteTransition } = useRouteTransition()
-  const { clearRouteCache } = useRouteCache()
-
+  const { items: items, search, TableComponent: ComponentToRender } = useTreeView()
   const collectionConfig = getEntityConfig({ collectionSlug })
 
   const { labels, upload } = collectionConfig
@@ -102,44 +70,6 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
-
-  const onDragEnd = React.useCallback(
-    async (event: DragEndEvent) => {
-      if (!event.over) {
-        return
-      }
-
-      if (
-        event.over.data.current.type === 'tree-view-table' &&
-        'targetItem' in event.over.data.current
-      ) {
-        const selectedItems = getSelectedItems()
-        const docIDs = selectedItems.map((doc) => doc.value.id)
-        const targetItem = event.over.data.current.targetItem
-        const targetID = targetItem?.rowID
-
-        // Validate: prevent moving a parent into its own descendant
-        const invalidTargets = getAllDescendantIDs(docIDs, documents)
-        if (targetID && invalidTargets.has(targetID)) {
-          toast.error(t('general:cannotMoveParentIntoChild'))
-          return
-        }
-
-        try {
-          await moveItems({
-            docIDs,
-            parentID: targetID,
-          })
-          clearRouteCache()
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error('Error moving items:', error)
-          toast.error(t('general:errorMovingItems'))
-        }
-      }
-    },
-    [moveItems, getSelectedItems, clearRouteCache, documents, t],
-  )
 
   // React.useEffect(() => {
   //   if (!drawerDepth) {
@@ -227,12 +157,6 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
 
   return (
     <Fragment>
-      <DndEventListener
-        onDragEnd={onDragEnd}
-        setDragStartX={setDragStartX}
-        setIsDragging={setIsDragging}
-      />
-
       <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
         {BeforeTreeViewList}
         <Gutter className={`${baseClass}__wrap`}>
@@ -268,8 +192,8 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
             searchQueryParam={search}
           />
           {BeforeTreeViewListTable}
-          {documents.length > 0 && ComponentToRender}
-          {documents.length === 0 && (
+          {items.length > 0 && ComponentToRender}
+          {items.length === 0 && (
             <NoListResults
               Actions={[
                 // allowCreateCollectionSlugs.includes(folderCollectionSlug) && (
@@ -313,30 +237,6 @@ function CollectionTreeViewInContext(props: CollectionTreeViewInContextProps) {
         </Gutter>
         {AfterTreeViewList}
       </div>
-      {selectedItemKeys.size > 0 && dragOverlayItem && (
-        <TreeViewDragOverlay item={dragOverlayItem} selectedCount={selectedItemKeys.size} />
-      )}
     </Fragment>
   )
-}
-
-function DndEventListener({ onDragEnd, setDragStartX, setIsDragging }) {
-  useDndMonitor({
-    onDragCancel() {
-      setIsDragging(false)
-    },
-    onDragEnd(event) {
-      setIsDragging(false)
-      onDragEnd(event)
-    },
-    onDragStart(event) {
-      setIsDragging(true)
-      // Capture the drag start X position from the active draggable's data
-      if (event.active?.data?.current?.dragStartX !== undefined) {
-        setDragStartX(event.active.data.current.dragStartX)
-      }
-    },
-  })
-
-  return null
 }
