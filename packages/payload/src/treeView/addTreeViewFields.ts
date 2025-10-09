@@ -27,6 +27,7 @@ export function addTreeViewFields({
         admin: {
           disableBulkEdit: true,
         },
+        defaultValue: () => null,
         filterOptions: ({ id }) => {
           return {
             id: {

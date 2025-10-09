@@ -42,7 +42,6 @@
 .nested-sections-table {
   display: table;
   min-width: 100%;
-  border-collapse: collapse;
 
   --cell-inline-padding-start: calc(var(--base) * 0.6);
   --cell-inline-padding-end: calc(var(--base) * 0.6);
@@ -139,11 +138,21 @@
     padding: 8px 12px;
     vertical-align: middle;
     position: relative;
+    background: var(--cell-bg-color);
+    border-top: 1px solid var(--cell-border-color);
+    border-bottom: 1px solid var(--cell-border-color);
+
     &:first-child {
       padding-inline-start: calc(var(--base) * (0.8));
+      border-left: 1px solid var(--cell-border-color);
+      border-top-left-radius: var(--style-radius-s);
+      border-bottom-left-radius: var(--style-radius-s);
     }
     &:last-child {
       padding-inline-end: calc(var(--base) * (0.8));
+      border-right: 1px solid var(--cell-border-color);
+      border-top-right-radius: var(--style-radius-s);
+      border-bottom-right-radius: var(--style-radius-s);
     }
   }
 
@@ -151,11 +160,13 @@
     position: relative;
     display: table-row-group;
     outline: 1px solid transparent;
-    background: var(--theme-elevation-50);
+    --cell-bg-color: var(--theme-elevation-50);
+    --cell-border-color: var(--theme-elevation-50);
   }
 
   &__section--odd {
-    background: var(--theme-elevation-0);
+    --cell-bg-color: var(--theme-elevation-0);
+    --cell-border-color: var(--theme-elevation-0);
   }
 
   &__section--target {
@@ -174,7 +185,12 @@
 
   &__section--selected,
   &__section:nth-child(odd).nested-sections-table__section--selected {
-    background-color: var(--theme-success-50);
+    --cell-bg-color: var(--theme-success-50);
+    --cell-border-color: var(--theme-success-500);
+  }
+
+  &__section--selected.nested-sections-table__section--dragging {
+    opacity: 0.4;
   }
 
   &__placeholder-section {

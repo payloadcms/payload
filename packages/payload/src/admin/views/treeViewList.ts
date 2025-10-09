@@ -25,6 +25,7 @@ export type TreeViewClientProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   enableRowSelections?: boolean
+  expandedItemIDs?: (number | string)[]
   items: TreeViewItem[]
   parentFieldName: string
   search?: string

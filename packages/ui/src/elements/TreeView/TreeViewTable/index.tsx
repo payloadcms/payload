@@ -354,9 +354,7 @@ export function TreeViewTable() {
   return (
     <>
       {/* TODO: remove this button */}
-      <div style={{ borderBottom: '1px solid var(--theme-elevation-400)', padding: '1rem' }}>
-        <SeedDataButton collectionSlug={collectionSlug} />
-      </div>
+      <SeedDataButton collectionSlug={collectionSlug} />
       <NestedSectionsTable
         className={baseClass}
         dropContextName={dropContextName}

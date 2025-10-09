@@ -27,12 +27,20 @@ export const getTreeViewData = async ({
     collection: collectionSlug,
     depth: 0,
     limit: 100,
+    overrideAccess: false,
+    req,
     sort,
+    user: req.user,
     where: {
       or: [
         {
           [parentFieldName]: {
             exists: false,
+          },
+        },
+        {
+          [parentFieldName]: {
+            equals: null,
           },
         },
         {
@@ -52,6 +60,7 @@ export const getTreeViewData = async ({
       value: doc,
     }),
   )
+  console.log('docs', result)
 
   // Identify parent IDs and potential leaf nodes
   const parentIDsInResult = new Set<number | string>()

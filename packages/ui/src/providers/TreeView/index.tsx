@@ -80,6 +80,10 @@ export type TreeViewProviderProps = {
   readonly children: React.ReactNode
   readonly collectionSlug: CollectionSlug
   /**
+   * An array of IDs that should be expanded initially
+   */
+  readonly expandedItemIDs?: (number | string)[]
+  /**
    * All items in the tree
    */
   readonly items: TreeViewItem[]
@@ -107,14 +111,12 @@ export type TreeViewProviderProps = {
    * The component to render the folder results
    */
   readonly TableComponent: React.ReactNode
-  /**
-   *
-   */
 }
 export function TreeViewProvider({
   allowMultiSelection = true,
   children,
   collectionSlug,
+  expandedItemIDs,
   items: itemsFromProps,
   onItemClick: onItemClickFromProps,
   parentFieldName = '_parentDoc',
@@ -135,7 +137,9 @@ export function TreeViewProvider({
   const currentlySelectedIndexes = React.useRef(new Set<number>())
 
   const [items, setItems] = React.useState(itemsFromProps)
-  const [openItemIDs, setOpenItemIDs] = React.useState<Set<number | string>>(() => new Set())
+  const [openItemIDs, setOpenItemIDs] = React.useState<Set<number | string>>(
+    () => new Set(expandedItemIDs || []),
+  )
   const [loadingRowIDs, setLoadingRowIDs] = React.useState<Set<number | string>>(() => new Set())
   const [TableComponent, setTableComponentToRender] = React.useState(
     InitialTableComponent || (() => null),

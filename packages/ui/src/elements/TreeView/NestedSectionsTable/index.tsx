@@ -270,6 +270,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
             <div
               className={[
                 `${baseClass}__section`,
+                isDragging && `${baseClass}__section--dragging`,
                 isOdd && `${baseClass}__section--odd`,
                 targetParentID === rowItem.rowID && `${baseClass}__section--target`,
                 selectedRowIDs.includes(rowItem.rowID) && `${baseClass}__section--selected`,

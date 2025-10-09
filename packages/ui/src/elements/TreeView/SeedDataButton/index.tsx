@@ -18,16 +18,13 @@ export function SeedDataButton({ collectionSlug }: SeedDataButtonProps) {
   const handleSeedData = React.useCallback(async () => {
     setIsLoading(true)
     try {
-      const response = await fetch(
-        `${serverURL}${routes.api}/${collectionSlug}/seed-data`,
-        {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+      const response = await fetch(`${serverURL}${routes.api}/${collectionSlug}/seed-data`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      )
+        method: 'POST',
+      })
 
       if (!response.ok) {
         throw new Error('Failed to seed data')
@@ -48,8 +45,9 @@ export function SeedDataButton({ collectionSlug }: SeedDataButtonProps) {
 
   return (
     <Button
-      buttonStyle="secondary"
+      buttonStyle="subtle"
       disabled={isLoading}
+      margin={false}
       onClick={handleSeedData}
       size="small"
     >

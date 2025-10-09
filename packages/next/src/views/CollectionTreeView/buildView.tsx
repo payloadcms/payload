@@ -1,4 +1,9 @@
-import type { AdminViewServerProps, BuildCollectionFolderViewResult, ListQuery } from 'payload'
+import type {
+  AdminViewServerProps,
+  BuildCollectionFolderViewResult,
+  ListQuery,
+  TreeViewClientProps,
+} from 'payload'
 
 import { DefaultCollectionTreeView, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -107,15 +112,18 @@ export const buildCollectionTreeView = async (
           {RenderServerComponent({
             clientProps: {
               // ...folderViewSlots,
+              breadcrumbs: [],
               collectionSlug,
               disableBulkDelete,
               disableBulkEdit,
               enableRowSelections,
+              expandedItemIDs: preferences?.value.expandedIDs || [],
               items,
+              parentFieldName: '_parentDoc',
               search,
               TreeViewComponent,
               // sort: sortPreference,
-            },
+            } satisfies TreeViewClientProps,
             // Component: collectionConfig?.admin?.components?.views?.TreeView?.Component,
             Fallback: DefaultCollectionTreeView,
             importMap: payload.importMap,
