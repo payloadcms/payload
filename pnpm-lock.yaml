@@ -528,12 +528,12 @@ importers:
   packages/email-nodemailer:
     dependencies:
       nodemailer:
-        specifier: 6.9.16
-        version: 6.9.16
+        specifier: 7.0.9
+        version: 7.0.9
     devDependencies:
       '@types/nodemailer':
-        specifier: 6.4.17
-        version: 6.4.17
+        specifier: 7.0.2
+        version: 7.0.2
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -954,8 +954,8 @@ importers:
         specifier: 1.2.2
         version: 1.2.2
       '@types/nodemailer':
-        specifier: 6.4.17
-        version: 6.4.17
+        specifier: 7.0.2
+        version: 7.0.2
       '@types/pluralize':
         specifier: 0.0.33
         version: 0.0.33
@@ -1014,15 +1014,15 @@ importers:
         specifier: ^6.1.2
         version: 6.3.12
       nodemailer:
-        specifier: 6.9.16
-        version: 6.9.16
+        specifier: 7.0.9
+        version: 7.0.9
     devDependencies:
       '@types/jest':
         specifier: 29.5.12
         version: 29.5.12
       '@types/nodemailer':
-        specifier: 6.4.17
-        version: 6.4.17
+        specifier: 7.0.2
+        version: 7.0.2
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -2478,8 +2478,8 @@ importers:
         specifier: 15.4.4
         version: 15.4.4(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.77.4)
       nodemailer:
-        specifier: 6.9.16
-        version: 6.9.16
+        specifier: 7.0.9
+        version: 7.0.9
       object-to-formdata:
         specifier: 4.5.1
         version: 4.5.1
@@ -2759,6 +2759,10 @@ packages:
     resolution: {integrity: sha512-2IoaVAd7HCIDhfeTTrk8CAosEVqnQig47Tra2uOBEyzpcCFQLmcY57/sbHCpJ3ntnU8see53q0bQ+fdew4MGLA==}
     engines: {node: '>=16.0.0'}
 
+  '@aws-sdk/client-sesv2@3.906.0':
+    resolution: {integrity: sha512-nfqIkDtAvbwQOEPXKPb0a5We3tXhCM41A3C4oY+ttRPyYUecYgo3N0dIIH9ejuVA9ejBmfCIAuR9hx5TZ5ih6A==}
+    engines: {node: '>=18.0.0'}
+
   '@aws-sdk/client-sqs@3.906.0':
     resolution: {integrity: sha512-Urd9S+pg6MnKgfiLSbFLLim6Ts3wBrMFqiLh+baxrDTyIR5PGwlz/jSZCaMH19AytFi/Gwb+kt4f8aF+2QrhdA==}
     engines: {node: '>=18.0.0'}
@@ -2967,6 +2971,10 @@ packages:
     resolution: {integrity: sha512-3H6Z46cmAQCHQ0z8mm7/cftY5ifiLfCjbObrbyyp2fhQs9zk6gCKzIX8Zjhw0RMd93FZi3ebRuKJWmMglf4Itw==}
     engines: {node: '>=18.0.0'}
 
+  '@aws-sdk/middleware-sdk-s3@3.906.0':
+    resolution: {integrity: sha512-8Ztl5natyVXOvpk/en2j9Bjn2t8vawjbvgcU0/ZF5/JtA1rKSTctRXusICJgCovFHzaAH2MVhA51nnp3d8rViA==}
+    engines: {node: '>=18.0.0'}
+
   '@aws-sdk/middleware-sdk-sqs@3.901.0':
     resolution: {integrity: sha512-0mdVLxT8RpxFUC8W5ygkyZkG2HoeqHQKGdvJlxXFVCDtAsGjY1qapS4OnDjrPDWUHWjNZa+chqFczzRmLe9UKw==}
     engines: {node: '>=18.0.0'}
@@ -3019,6 +3027,10 @@ packages:
     resolution: {integrity: sha512-RA9hv1Irro/CrdPcOEXKwJ0DJYJwYCsauGEdRXihrRfy8MNSR9E+mD5/Fr5Rxjaq5AHM05DYnN3mg/DU6VwzSw==}
     engines: {node: '>=18.0.0'}
 
+  '@aws-sdk/signature-v4-multi-region@3.906.0':
+    resolution: {integrity: sha512-zqxRN8/dSrAaAEi5oXIeScsrbDkS63+ZyaBrkC6bc8Jd/bCvJM6D4LjJJxIOPBNXuF0bNhBIlTmqwtbkiqCwZw==}
+    engines: {node: '>=18.0.0'}
+
   '@aws-sdk/token-providers@3.398.0':
     resolution: {integrity: sha512-nrYgjzavGCKJL/48Vt0EL+OlIc5UZLfNGpgyUW9cv3XZwl+kXV0QB+HH0rHZZLfpbBgZ2RBIJR9uD5ieu/6hpQ==}
     engines: {node: '>=14.0.0'}
@@ -3055,6 +3067,10 @@ packages:
 
   '@aws-sdk/util-arn-parser@3.723.0':
     resolution: {integrity: sha512-ZhEfvUwNliOQROcAk34WJWVYTlTa4694kSVhDSjW6lE1bMataPnIN8A0ycukEzBXmd8ZSoBcQLn6lKGl7XIJ5w==}
+    engines: {node: '>=18.0.0'}
+
+  '@aws-sdk/util-arn-parser@3.893.0':
+    resolution: {integrity: sha512-u8H4f2Zsi19DGnwj5FSZzDMhytYF/bCh37vAtBsn3cNDL3YG578X5oc+wSX54pM3tOxS+NY7tvOAo52SW7koUA==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/util-endpoints@3.398.0':
@@ -7983,8 +7999,8 @@ packages:
   '@types/node@22.5.4':
     resolution: {integrity: sha512-FDuKUJQm/ju9fT/SeX/6+gBzoPzlVCzfzmGkwKvRHQVxi4BntVbyIwf6a4Xn62mrvndLiml6z/UBXIdEVjQLXg==}
 
-  '@types/nodemailer@6.4.17':
-    resolution: {integrity: sha512-I9CCaIp6DTldEg7vyUTZi8+9Vo0hi1/T8gv3C89yk1rSAAzoKQ8H8ki/jBYJSFoH/BisgLP8tkZMlQ91CIquww==}
+  '@types/nodemailer@7.0.2':
+    resolution: {integrity: sha512-Zo6uOA9157WRgBk/ZhMpTQ/iCWLMk7OIs/Q9jvHarMvrzUUP/MDdPHL2U1zpf57HrrWGv4nYQn5uIxna0xY3xw==}
 
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
@@ -12118,8 +12134,8 @@ packages:
   node-releases@2.0.19:
     resolution: {integrity: sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw==}
 
-  nodemailer@6.9.16:
-    resolution: {integrity: sha512-psAuZdTIRN08HKVd/E8ObdV6NO7NTBY3KsC30F7M4H1OnmLCUNaS56FpYxyb26zWLSyYF9Ozch9KYHhHegsiOQ==}
+  nodemailer@7.0.9:
+    resolution: {integrity: sha512-9/Qm0qXIByEP8lEV2qOqcAW7bRpL8CR9jcTwk3NBnHJNmP9fIJ86g2fgmIXqHY+nj55ZEMwWqYAT2QTDpRUYiQ==}
     engines: {node: '>=6.0.0'}
 
   noms@0.0.0:
@@ -15221,6 +15237,51 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
+  '@aws-sdk/client-sesv2@3.906.0':
+    dependencies:
+      '@aws-crypto/sha256-browser': 5.2.0
+      '@aws-crypto/sha256-js': 5.2.0
+      '@aws-sdk/core': 3.906.0
+      '@aws-sdk/credential-provider-node': 3.906.0
+      '@aws-sdk/middleware-host-header': 3.901.0
+      '@aws-sdk/middleware-logger': 3.901.0
+      '@aws-sdk/middleware-recursion-detection': 3.901.0
+      '@aws-sdk/middleware-user-agent': 3.906.0
+      '@aws-sdk/region-config-resolver': 3.901.0
+      '@aws-sdk/signature-v4-multi-region': 3.906.0
+      '@aws-sdk/types': 3.901.0
+      '@aws-sdk/util-endpoints': 3.901.0
+      '@aws-sdk/util-user-agent-browser': 3.901.0
+      '@aws-sdk/util-user-agent-node': 3.906.0
+      '@smithy/config-resolver': 4.3.0
+      '@smithy/core': 3.15.0
+      '@smithy/fetch-http-handler': 5.3.1
+      '@smithy/hash-node': 4.2.0
+      '@smithy/invalid-dependency': 4.2.0
+      '@smithy/middleware-content-length': 4.2.0
+      '@smithy/middleware-endpoint': 4.3.1
+      '@smithy/middleware-retry': 4.4.1
+      '@smithy/middleware-serde': 4.2.0
+      '@smithy/middleware-stack': 4.2.0
+      '@smithy/node-config-provider': 4.3.0
+      '@smithy/node-http-handler': 4.3.0
+      '@smithy/protocol-http': 5.3.0
+      '@smithy/smithy-client': 4.7.1
+      '@smithy/types': 4.6.0
+      '@smithy/url-parser': 4.2.0
+      '@smithy/util-base64': 4.3.0
+      '@smithy/util-body-length-browser': 4.2.0
+      '@smithy/util-body-length-node': 4.2.1
+      '@smithy/util-defaults-mode-browser': 4.3.0
+      '@smithy/util-defaults-mode-node': 4.2.1
+      '@smithy/util-endpoints': 3.2.0
+      '@smithy/util-middleware': 4.2.0
+      '@smithy/util-retry': 4.2.0
+      '@smithy/util-utf8': 4.2.0
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - aws-crt
+
   '@aws-sdk/client-sqs@3.906.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
@@ -16004,6 +16065,23 @@ snapshots:
       '@smithy/util-utf8': 4.0.0
       tslib: 2.8.1
 
+  '@aws-sdk/middleware-sdk-s3@3.906.0':
+    dependencies:
+      '@aws-sdk/core': 3.906.0
+      '@aws-sdk/types': 3.901.0
+      '@aws-sdk/util-arn-parser': 3.893.0
+      '@smithy/core': 3.15.0
+      '@smithy/node-config-provider': 4.3.0
+      '@smithy/protocol-http': 5.3.0
+      '@smithy/signature-v4': 5.3.0
+      '@smithy/smithy-client': 4.7.1
+      '@smithy/types': 4.6.0
+      '@smithy/util-config-provider': 4.2.0
+      '@smithy/util-middleware': 4.2.0
+      '@smithy/util-stream': 4.5.0
+      '@smithy/util-utf8': 4.2.0
+      tslib: 2.8.1
+
   '@aws-sdk/middleware-sdk-sqs@3.901.0':
     dependencies:
       '@aws-sdk/types': 3.901.0
@@ -16154,6 +16232,15 @@ snapshots:
       '@smithy/types': 4.1.0
       tslib: 2.8.1
 
+  '@aws-sdk/signature-v4-multi-region@3.906.0':
+    dependencies:
+      '@aws-sdk/middleware-sdk-s3': 3.906.0
+      '@aws-sdk/types': 3.901.0
+      '@smithy/protocol-http': 5.3.0
+      '@smithy/signature-v4': 5.3.0
+      '@smithy/types': 4.6.0
+      tslib: 2.8.1
+
   '@aws-sdk/token-providers@3.398.0':
     dependencies:
       '@aws-crypto/sha256-browser': 3.0.0
@@ -16240,6 +16327,10 @@ snapshots:
       tslib: 2.8.1
 
   '@aws-sdk/util-arn-parser@3.723.0':
+    dependencies:
+      tslib: 2.8.1
+
+  '@aws-sdk/util-arn-parser@3.893.0':
     dependencies:
       tslib: 2.8.1
 
@@ -22028,9 +22119,12 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
-  '@types/nodemailer@6.4.17':
+  '@types/nodemailer@7.0.2':
     dependencies:
+      '@aws-sdk/client-sesv2': 3.906.0
       '@types/node': 22.15.30
+    transitivePeerDependencies:
+      - aws-crt
 
   '@types/parse-json@4.0.2': {}
 
@@ -27130,7 +27224,7 @@ snapshots:
 
   node-releases@2.0.19: {}
 
-  nodemailer@6.9.16: {}
+  nodemailer@7.0.9: {}
 
   noms@0.0.0:
     dependencies:
