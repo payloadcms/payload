@@ -42,10 +42,12 @@ export const withTenantAccess =
       if (accessResultCallback) {
         return accessResultCallback({
           accessKey,
-          result: false,
+          accessResult: false,
+          ...args,
         })
+      } else {
+        return false
       }
-      return false
     } else if (accessResult && typeof accessResult === 'object') {
       constraints.push(accessResult)
     }
@@ -81,17 +83,21 @@ export const withTenantAccess =
       if (accessResultCallback) {
         return accessResultCallback({
           accessKey,
-          result: combineWhereConstraints(constraints),
+          accessResult: combineWhereConstraints(constraints),
+          ...args,
         })
+      } else {
+        return combineWhereConstraints(constraints)
       }
-      return combineWhereConstraints(constraints)
     }
 
     if (accessResultCallback) {
       return accessResultCallback({
         accessKey,
-        result: accessResult,
+        accessResult,
+        ...args,
       })
+    } else {
+      return accessResult
     }
-    return accessResult
   }
