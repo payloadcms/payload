@@ -209,7 +209,12 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
     user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : TypedUser,
   ) => boolean
   /**
-   * Override the result of the admin `users` collection access control functions
+   * Override the access result on the users collection access control functions
+   *
+   * The function receives:
+   *  - accessResult: the original result from the access control function
+   *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', or 'unlock'
+   *  - ...restOfAccessArgs: the original arguments passed to the access control function
    */
   usersAccessResultOverride?: CollectionAccessResultOverride
   /**
@@ -282,4 +287,4 @@ export type CollectionAccessResultOverride = ({
 }: {
   accessKey: AllAccessKeys[number]
   accessResult: AccessResult
-} & AccessArgs) => AccessResult
+} & AccessArgs) => AccessResult | Promise<AccessResult>
