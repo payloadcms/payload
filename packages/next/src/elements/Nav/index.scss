@@ -73,10 +73,13 @@
     }
 
     &__controls {
+      display: flex;
+      flex-direction: column;
+      gap: base(0.75);
       margin-top: auto;
       margin-bottom: 0;
 
-      > * {
+      > :first-child {
         margin-top: base(1);
       }
 

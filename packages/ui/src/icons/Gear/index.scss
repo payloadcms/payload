@@ -1,0 +1,17 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .gear {
+    // Additional styling can be added here if needed
+  }
+
+  .icon--gear {
+    height: $baseline;
+    width: $baseline;
+
+    path {
+      stroke: currentColor;
+      stroke-width: 1.5px;
+    }
+  }
+}
