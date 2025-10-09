@@ -22,7 +22,6 @@ import {
   COMMAND_PRIORITY_EDITOR,
   COMMAND_PRIORITY_LOW,
   COPY_COMMAND,
-  PASTE_COMMAND,
 } from 'lexical'
 import { useEffect, useState } from 'react'
 
