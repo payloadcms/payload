@@ -128,8 +128,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"meta_image_id" integer,
   	"meta_description" varchar,
   	"published_at" timestamp(3) with time zone,
+  	"generate_slug" boolean DEFAULT true,
   	"slug" varchar,
-  	"slug_lock" boolean DEFAULT true,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"_status" "enum_pages_status" DEFAULT 'draft'
@@ -249,8 +249,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"version_meta_image_id" integer,
   	"version_meta_description" varchar,
   	"version_published_at" timestamp(3) with time zone,
+  	"version_generate_slug" boolean DEFAULT true,
   	"version_slug" varchar,
-  	"version_slug_lock" boolean DEFAULT true,
   	"version_updated_at" timestamp(3) with time zone,
   	"version_created_at" timestamp(3) with time zone,
   	"version__status" "enum__pages_v_version_status" DEFAULT 'draft',
@@ -286,8 +286,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"meta_image_id" integer,
   	"meta_description" varchar,
   	"published_at" timestamp(3) with time zone,
+  	"generate_slug" boolean DEFAULT true,
   	"slug" varchar,
-  	"slug_lock" boolean DEFAULT true,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"_status" "enum_posts_status" DEFAULT 'draft'
@@ -321,8 +321,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"version_meta_image_id" integer,
   	"version_meta_description" varchar,
   	"version_published_at" timestamp(3) with time zone,
+  	"version_generate_slug" boolean DEFAULT true,
   	"version_slug" varchar,
-  	"version_slug_lock" boolean DEFAULT true,
   	"version_updated_at" timestamp(3) with time zone,
   	"version_created_at" timestamp(3) with time zone,
   	"version__status" "enum__posts_v_version_status" DEFAULT 'draft',
@@ -413,8 +413,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TABLE "categories" (
   	"id" serial PRIMARY KEY NOT NULL,
   	"title" varchar NOT NULL,
-  	"slug" varchar,
-  	"slug_lock" boolean DEFAULT true,
+  	"generate_slug" boolean DEFAULT true,
+  	"slug" varchar NOT NULL,
   	"parent_id" integer,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
@@ -893,7 +893,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "pages_blocks_form_block_form_idx" ON "pages_blocks_form_block" USING btree ("form_id");
   CREATE INDEX "pages_hero_hero_media_idx" ON "pages" USING btree ("hero_media_id");
   CREATE INDEX "pages_meta_meta_image_idx" ON "pages" USING btree ("meta_image_id");
-  CREATE INDEX "pages_slug_idx" ON "pages" USING btree ("slug");
+  CREATE UNIQUE INDEX "pages_slug_idx" ON "pages" USING btree ("slug");
   CREATE INDEX "pages_updated_at_idx" ON "pages" USING btree ("updated_at");
   CREATE INDEX "pages_created_at_idx" ON "pages" USING btree ("created_at");
   CREATE INDEX "pages__status_idx" ON "pages" USING btree ("_status");
@@ -947,7 +947,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "posts_populated_authors_parent_id_idx" ON "posts_populated_authors" USING btree ("_parent_id");
   CREATE INDEX "posts_hero_image_idx" ON "posts" USING btree ("hero_image_id");
   CREATE INDEX "posts_meta_meta_image_idx" ON "posts" USING btree ("meta_image_id");
-  CREATE INDEX "posts_slug_idx" ON "posts" USING btree ("slug");
+  CREATE UNIQUE INDEX "posts_slug_idx" ON "posts" USING btree ("slug");
   CREATE INDEX "posts_updated_at_idx" ON "posts" USING btree ("updated_at");
   CREATE INDEX "posts_created_at_idx" ON "posts" USING btree ("created_at");
   CREATE INDEX "posts__status_idx" ON "posts" USING btree ("_status");
@@ -989,7 +989,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "categories_breadcrumbs_order_idx" ON "categories_breadcrumbs" USING btree ("_order");
   CREATE INDEX "categories_breadcrumbs_parent_id_idx" ON "categories_breadcrumbs" USING btree ("_parent_id");
   CREATE INDEX "categories_breadcrumbs_doc_idx" ON "categories_breadcrumbs" USING btree ("doc_id");
-  CREATE INDEX "categories_slug_idx" ON "categories" USING btree ("slug");
+  CREATE UNIQUE INDEX "categories_slug_idx" ON "categories" USING btree ("slug");
   CREATE INDEX "categories_parent_idx" ON "categories" USING btree ("parent_id");
   CREATE INDEX "categories_updated_at_idx" ON "categories" USING btree ("updated_at");
   CREATE INDEX "categories_created_at_idx" ON "categories" USING btree ("created_at");
