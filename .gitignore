@@ -5,7 +5,7 @@ dist
 !/.idea/runConfigurations
 /.idea/runConfigurations/_template*
 !/.idea/payload.iml
-
+.wrangler
 # Custom actions
 !.github/actions/**/dist
 
