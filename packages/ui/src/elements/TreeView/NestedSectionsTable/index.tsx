@@ -265,12 +265,15 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
 
         const isOdd = absoluteRowIndex % 2 === 1
 
+        const isInvalidTarget = invalidTargetIDs?.has(rowItem.rowID)
+
         const renderResult = (
           <React.Fragment key={rowItem.rowID}>
             <div
               className={[
                 `${baseClass}__section`,
                 isDragging && `${baseClass}__section--dragging`,
+                isDragging && isInvalidTarget && `${baseClass}__section--invalid-target`,
                 isOdd && `${baseClass}__section--odd`,
                 targetParentID === rowItem.rowID && `${baseClass}__section--target`,
                 selectedRowIDs.includes(rowItem.rowID) && `${baseClass}__section--selected`,

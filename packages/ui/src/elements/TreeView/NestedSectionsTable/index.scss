@@ -229,6 +229,10 @@
     opacity: 0.4;
   }
 
+  &__section--invalid-target {
+    opacity: 0.4;
+  }
+
   &__placeholder-section {
     display: table-row-group;
     pointer-events: none;
