@@ -158,7 +158,10 @@
   }
 
   // When a selected section is followed by another selected section
-  &__section--selected + &__section--selected &__cell {
+  &__section--selected + &__section--selected &__cell,
+  &__section--selected + &__section--selected-descendant &__cell,
+  &__section--selected-descendant + &__section--selected &__cell,
+  &__section--selected-descendant + &__section--selected-descendant &__cell {
     border-top: none;
 
     &:first-child {
@@ -171,6 +174,30 @@
 
   // Selected section followed by another selected section - remove bottom radius and add inner border
   &__section--selected:has(+ &__section--selected) {
+    .nested-sections-table__cell {
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        height: 1px;
+        right: 0;
+        background-color: var(--cell-inner-border-color);
+        z-index: 1;
+      }
+
+      &:first-child {
+        border-bottom-left-radius: 0;
+      }
+      &:nth-last-child(2) {
+        border-bottom-right-radius: 0;
+      }
+    }
+  }
+
+  &__section--selected:has(+ &__section--selected-descendant),
+  &__section--selected-descendant:has(+ &__section--selected),
+  &__section--selected-descendant:has(+ &__section--selected-descendant) {
     .nested-sections-table__cell {
       &::after {
         content: '';
@@ -223,6 +250,16 @@
     --cell-bg-color: var(--theme-success-50);
     --cell-border-color: var(--theme-success-500);
     --cell-inner-border-color: var(--theme-success-200);
+  }
+
+  &__section--selected-descendant {
+    --cell-bg-color: color-mix(in srgb, var(--theme-success-50) 40%, transparent);
+    --cell-border-color: var(--theme-success-500);
+    --cell-inner-border-color: var(--theme-success-200);
+  }
+
+  &__section--selected-descendant.nested-sections-table__section--odd {
+    --cell-bg-color: color-mix(in srgb, var(--theme-success-50) 40%, transparent);
   }
 
   &__section--selected.nested-sections-table__section--dragging {

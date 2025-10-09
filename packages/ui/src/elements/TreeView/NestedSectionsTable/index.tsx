@@ -274,6 +274,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                 isOdd && `${baseClass}__section--odd`,
                 targetParentID === rowItem.rowID && `${baseClass}__section--target`,
                 isRowSelected && `${baseClass}__section--selected`,
+                hasSelectedAncestor && `${baseClass}__section--selected-descendant`,
               ]
                 .filter(Boolean)
                 .join(' ')}
@@ -295,12 +296,15 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                 >
                   <div className={`${baseClass}__row-actions`}>
                     <CheckboxInput
-                      checked={selectedRowIDs.includes(rowItem.rowID)}
+                      checked={selectedRowIDs.includes(rowItem.rowID) || hasSelectedAncestor}
                       onToggle={
                         ((event: React.MouseEvent<HTMLElement>) => {
-                          onRowClick({ event, from: 'checkbox', row: rowItem })
+                          if (!hasSelectedAncestor) {
+                            onRowClick({ event, from: 'checkbox', row: rowItem })
+                          }
                         }) as unknown as (event: React.ChangeEvent) => void
                       }
+                      readOnly={hasSelectedAncestor}
                     />
                     <DraggableWithClick
                       disabled={
