@@ -67,7 +67,11 @@ export const filterFieldsWithPermissions = <T extends ClientField | Field>({
       return acc
     }
 
-    if (fieldAffectsData(field) && fieldPermissions[field.name] === true) {
+    if (fieldAffectsData(field)) {
+      if (fieldPermissions[field.name] === true || fieldPermissions[field.name]?.read) {
+        acc.push(field)
+      }
+      return acc
     }
 
     // leaf
