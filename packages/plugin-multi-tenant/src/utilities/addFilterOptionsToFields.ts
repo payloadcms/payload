@@ -58,7 +58,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
           })
         }
       } else {
-        newField.relationTo.map((relationTo) => {
+        for (const relationTo of newField.relationTo) {
           if (tenantEnabledGlobalSlugs.includes(relationTo)) {
             throw new Error(
               `The collection ${relationTo} is a global collection and cannot be related to a tenant enabled collection.`,
@@ -75,7 +75,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
               userHasAccessToAllTenants,
             })
           }
-        })
+        }
       }
     }
 
