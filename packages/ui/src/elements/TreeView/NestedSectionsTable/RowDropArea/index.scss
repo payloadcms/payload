@@ -14,9 +14,8 @@
     z-index: 1;
   }
 
-  &--on-split {
-    bottom: 0;
-    transform: translateY(50%);
+  &--on-split-bottom,
+  &--on-split-top {
     min-width: unset;
 
     &.is-dragging.is-over {
@@ -25,6 +24,16 @@
         opacity: 1;
       }
     }
+  }
+
+  &--on-split-bottom {
+    bottom: 0;
+    transform: translateY(50%);
+  }
+
+  &--on-split-top {
+    top: 0;
+    transform: translateY(-50%);
   }
 }
 

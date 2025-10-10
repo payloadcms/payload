@@ -387,6 +387,27 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                   ),
                 )}
                 <div>
+                  {/* Add split-top drop area for first root-level row */}
+                  {level === 0 && sectionRowIndex === 0 && (
+                    <RowDropArea
+                      disabled={isInvalidTarget}
+                      dropContextName={dropContextName}
+                      isDragging={isDragging}
+                      onHover={(data) => {
+                        onDroppableHover({ ...data, hoveredRowID: rowItem.rowID })
+                      }}
+                      placement="split-top"
+                      segmentWidth={segmentWidth}
+                      style={{
+                        left: 0,
+                        width: '100%',
+                      }}
+                      targetItems={[null]}
+                      xDragOffset={firstCellXOffset + firstCellWidth + 28}
+                      xSplitOffset={`calc(${firstCellWidth + 28}px + var(--cell-inline-padding-start))`}
+                    />
+                  )}
+                  {/* Add row-drop-area on row */}
                   <RowDropArea
                     disabled={isInvalidTarget}
                     dropContextName={dropContextName}
@@ -399,7 +420,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                     style={{ left: 0, width: '100%' }}
                     targetItems={[rowItem]}
                   />
-
+                  {/* Add split-bottom drop area on row */}
                   <RowDropArea
                     disabled={isInvalidTarget}
                     dropContextName={dropContextName}
@@ -407,7 +428,7 @@ export const DivTableSection: React.FC<DivTableSectionProps> = ({
                     onHover={(data) => {
                       onDroppableHover({ ...data, hoveredRowID: rowItem.rowID })
                     }}
-                    placement="split"
+                    placement="split-bottom"
                     segmentWidth={segmentWidth}
                     style={{
                       left: 0,

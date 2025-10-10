@@ -10,7 +10,7 @@ const baseClass = 'row-drop-area'
 const DEFAULT_SEGMENT_WIDTH = 30
 const THROTTLE_MS = 16
 
-type Placement = 'middle' | 'split'
+type Placement = 'middle' | 'split-bottom' | 'split-top'
 
 export type RowDropAreaProps = {
   disabled?: boolean
@@ -30,7 +30,7 @@ export const RowDropArea = ({
   dropContextName,
   isDragging = false,
   onHover,
-  placement = 'split',
+  placement = 'split-bottom',
   segmentWidth = DEFAULT_SEGMENT_WIDTH,
   style,
   targetItems = [],
@@ -83,7 +83,7 @@ export const RowDropArea = ({
           width: '100%',
         }}
       >
-        {placement === 'split' && (
+        {(placement === 'split-bottom' || placement === 'split-top') && (
           <div
             className={`${baseClass}__split-marker`}
             style={{
