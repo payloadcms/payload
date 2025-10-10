@@ -4,7 +4,7 @@
   .nav-menu-button {
     &.popup--h-align-left {
       .popup__content {
-        left: base(-0.5);
+        left: calc(var(--nav-padding-inline-start) * -0.5);
       }
     }
   }
