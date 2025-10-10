@@ -9,6 +9,7 @@ import { createClientFeature } from '../../../../utilities/createClientFeature.j
 import { toolbarTextDropdownGroupWithItems } from '../../../shared/toolbar/textDropdownGroup.js'
 import { LexicalListPlugin } from '../../plugin/index.js'
 import { slashMenuListGroupWithItems } from '../../shared/slashMenuListGroup.js'
+import { type ListFeatureServerProps } from '../../shared/types.js'
 import { ORDERED_LIST } from '../markdownTransformer.js'
 
 const toolbarGroups: ToolbarGroup[] = [
@@ -52,40 +53,44 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
-export const OrderedListFeatureClient = createClientFeature(({ featureProviderMap }) => {
-  return {
-    markdownTransformers: [ORDERED_LIST],
-    nodes: featureProviderMap.has('orderedList') ? [] : [ListNode, ListItemNode],
-    plugins: featureProviderMap.has('orderedList')
-      ? []
-      : [
-          {
-            Component: LexicalListPlugin,
-            position: 'normal',
-          },
+export const OrderedListFeatureClient = createClientFeature<ListFeatureServerProps>(
+  ({ featureProviderMap, props }) => {
+    console.log('OrderedListFeatureClient', props)
+    return {
+      markdownTransformers: [ORDERED_LIST],
+      nodes: featureProviderMap.has('orderedList') ? [] : [ListNode, ListItemNode],
+      plugins: featureProviderMap.has('orderedList')
+        ? []
+        : [
+            {
+              Component: LexicalListPlugin,
+              position: 'normal',
+            },
+          ],
+      sanitizedClientFeatureProps: props,
+      slashMenu: {
+        groups: [
+          slashMenuListGroupWithItems([
+            {
+              Icon: OrderedListIcon,
+              key: 'orderedList',
+              keywords: ['ordered list', 'ol'],
+              label: ({ i18n }) => {
+                return i18n.t('lexical:orderedList:label')
+              },
+              onSelect: ({ editor }) => {
+                editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
+              },
+            },
+          ]),
         ],
-    slashMenu: {
-      groups: [
-        slashMenuListGroupWithItems([
-          {
-            Icon: OrderedListIcon,
-            key: 'orderedList',
-            keywords: ['ordered list', 'ol'],
-            label: ({ i18n }) => {
-              return i18n.t('lexical:orderedList:label')
-            },
-            onSelect: ({ editor }) => {
-              editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
-            },
-          },
-        ]),
-      ],
-    },
-    toolbarFixed: {
-      groups: toolbarGroups,
-    },
-    toolbarInline: {
-      groups: toolbarGroups,
-    },
-  }
-})
+      },
+      toolbarFixed: {
+        groups: toolbarGroups,
+      },
+      toolbarInline: {
+        groups: toolbarGroups,
+      },
+    }
+  },
+)

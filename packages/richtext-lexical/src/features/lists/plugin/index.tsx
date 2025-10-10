@@ -10,6 +10,7 @@ import React from 'react'
 
 import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
 import type { PluginComponent } from '../../typesClient.js'
+import type { ListFeatureServerProps } from '../shared/types.js'
 
 export type SerializedListItemNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
   checked?: boolean
@@ -19,6 +20,7 @@ export type SerializedListNode<T extends SerializedLexicalNode = SerializedLexic
   checked?: boolean
 } & StronglyTypedElementNode<_SerializedListNode, 'list', T>
 
-export const LexicalListPlugin: PluginComponent<undefined> = () => {
-  return <ListPlugin />
+export const LexicalListPlugin: PluginComponent<ListFeatureServerProps> = (props) => {
+  console.log('LexicalListPlugin', props)
+  return <ListPlugin {...props.clientProps} />
 }
