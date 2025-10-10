@@ -9,7 +9,7 @@ import { ChecklistIcon } from '../../../../lexical/ui/icons/Checklist/index.js'
 import { createClientFeature } from '../../../../utilities/createClientFeature.js'
 import { toolbarTextDropdownGroupWithItems } from '../../../shared/toolbar/textDropdownGroup.js'
 import { LexicalListPlugin } from '../../plugin/index.js'
-import { shouldRegisterList } from '../../shared/shouldRegisterList.js'
+import { shouldRegisterListBaseNodes } from '../../shared/shouldRegisterListBaseNodes.js'
 import { slashMenuListGroupWithItems } from '../../shared/slashMenuListGroup.js'
 import { CHECK_LIST } from '../markdownTransformers.js'
 import { LexicalCheckListPlugin } from './plugin/index.js'
@@ -63,7 +63,7 @@ export const ChecklistFeatureClient = createClientFeature(({ featureProviderMap 
     },
   ]
 
-  const shouldRegister = shouldRegisterList('checklist', featureProviderMap)
+  const shouldRegister = shouldRegisterListBaseNodes('checklist', featureProviderMap)
   if (shouldRegister) {
     plugins.push({
       Component: LexicalListPlugin,

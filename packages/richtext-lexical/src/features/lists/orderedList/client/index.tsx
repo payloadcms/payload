@@ -8,7 +8,7 @@ import { OrderedListIcon } from '../../../../lexical/ui/icons/OrderedList/index.
 import { createClientFeature } from '../../../../utilities/createClientFeature.js'
 import { toolbarTextDropdownGroupWithItems } from '../../../shared/toolbar/textDropdownGroup.js'
 import { LexicalListPlugin } from '../../plugin/index.js'
-import { shouldRegisterList } from '../../shared/shouldRegisterList.js'
+import { shouldRegisterListBaseNodes } from '../../shared/shouldRegisterListBaseNodes.js'
 import { slashMenuListGroupWithItems } from '../../shared/slashMenuListGroup.js'
 import { ORDERED_LIST } from '../markdownTransformer.js'
 
@@ -54,7 +54,7 @@ const toolbarGroups: ToolbarGroup[] = [
 ]
 
 export const OrderedListFeatureClient = createClientFeature(({ featureProviderMap }) => {
-  const shouldRegister = shouldRegisterList('ordered', featureProviderMap)
+  const shouldRegister = shouldRegisterListBaseNodes('ordered', featureProviderMap)
   return {
     markdownTransformers: [ORDERED_LIST],
     nodes: shouldRegister ? [ListNode, ListItemNode] : [],

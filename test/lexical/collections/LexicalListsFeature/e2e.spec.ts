@@ -25,7 +25,7 @@ const { beforeAll, beforeEach, describe } = test
 // PLEASE do not reset the database or perform any operations that modify it in this file.
 test.describe.configure({ mode: 'parallel' })
 
-describe('Lexical Fully Featured', () => {
+describe('Lexical Lists Features', () => {
   let lexical: LexicalHelpers
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)

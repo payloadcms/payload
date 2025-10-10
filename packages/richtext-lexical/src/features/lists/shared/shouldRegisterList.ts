@@ -1,6 +1,6 @@
 // Priority order: unordered > ordered > checklist.
 // That's why we don't include unordered among the parameter options. It registers by default.
-export function shouldRegisterList(
+export function shouldRegisterListBaseNodes(
   type: 'checklist' | 'ordered',
   featureProviderMap: Map<string, unknown>,
 ) {
