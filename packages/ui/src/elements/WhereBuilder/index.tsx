@@ -7,6 +7,7 @@ import React, { useMemo } from 'react'
 
 import type { AddCondition, RemoveCondition, UpdateCondition, WhereBuilderProps } from './types.js'
 
+import { useAuth } from '../../providers/Auth/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { reduceFieldsToOptions } from '../../utilities/reduceFieldsToOptions.js'
@@ -24,10 +25,22 @@ export { WhereBuilderProps }
  * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
  */
 export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
-  const { collectionPluralLabel, fields, renderedFilters, resolvedFilterOptions } = props
+  const { collectionPluralLabel, collectionSlug, fields, renderedFilters, resolvedFilterOptions } =
+    props
   const { i18n, t } = useTranslation()
+  const { permissions } = useAuth()
 
-  const reducedFields = useMemo(() => reduceFieldsToOptions({ fields, i18n }), [fields, i18n])
+  const fieldPermissions = permissions?.collections?.[collectionSlug]?.fields
+
+  const reducedFields = useMemo(
+    () =>
+      reduceFieldsToOptions({
+        fieldPermissions,
+        fields,
+        i18n,
+      }),
+    [fieldPermissions, fields, i18n],
+  )
 
   const { handleWhereChange, query } = useListQuery()
 

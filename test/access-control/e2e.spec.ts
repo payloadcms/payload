@@ -18,10 +18,13 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { login } from '../helpers/e2e/auth/login.js'
+import { openListFilters } from '../helpers/e2e/filters/index.js'
+import { openGroupBy } from '../helpers/e2e/groupBy/index.js'
 import { openDocControls } from '../helpers/e2e/openDocControls.js'
 import { closeNav, openNav } from '../helpers/e2e/toggleNav.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { readRestrictedSlug } from './collections/ReadRestricted/index.js'
 import {
   authSlug,
   createNotUpdateCollectionSlug,
@@ -759,6 +762,554 @@ describe('Access Control', () => {
       await expect(passwordField).toBeHidden()
       const changePasswordButton = page.locator('#change-password')
       await expect(changePasswordButton).toBeHidden()
+    })
+  })
+
+  describe('field read access restrictions in list view', () => {
+    let readRestrictedUrl: AdminUrlUtil
+
+    beforeAll(() => {
+      readRestrictedUrl = new AdminUrlUtil(serverURL, readRestrictedSlug)
+    })
+
+    describe('column selector', () => {
+      test('should hide top-level field with read: false in column selector', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await page.locator('.list-controls__toggle-columns').click()
+
+        await expect(page.locator('.pill-selector')).toBeVisible()
+
+        // Should hide restrictedTopLevel field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Restricted Top Level'),
+          }),
+        ).toBeHidden()
+
+        // Should show visibleTopLevel field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Visible Top Level'),
+          }),
+        ).toBeVisible()
+      })
+
+      test('should hide nested field with read: false inside group in column selector', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await page.locator('.list-controls__toggle-columns').click()
+
+        await expect(page.locator('.pill-selector')).toBeVisible()
+
+        // Should hide secretPhone field inside contactInfo group
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Contact Info > Secret Phone'),
+          }),
+        ).toBeHidden()
+
+        // Should show publicPhone field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Contact Info > Public Phone'),
+          }),
+        ).toBeVisible()
+      })
+
+      test('should hide field with read: false inside row in column selector', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await page.locator('.list-controls__toggle-columns').click()
+
+        await expect(page.locator('.pill-selector')).toBeVisible()
+
+        // Should hide restrictedInRow field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Restricted In Row'),
+          }),
+        ).toBeHidden()
+
+        // Should show visibleInRow field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Visible In Row'),
+          }),
+        ).toBeVisible()
+      })
+
+      test('should hide field with read: false inside collapsible in column selector', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await page.locator('.list-controls__toggle-columns').click()
+
+        await expect(page.locator('.pill-selector')).toBeVisible()
+
+        // Should hide restrictedInCollapsible field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Restricted In Collapsible'),
+          }),
+        ).toBeHidden()
+
+        // Should show visibleInCollapsible field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Visible In Collapsible'),
+          }),
+        ).toBeVisible()
+      })
+
+      test('should hide deeply nested field with read: false in column selector', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await page.locator('.list-controls__toggle-columns').click()
+
+        await expect(page.locator('.pill-selector')).toBeVisible()
+
+        // Should hide metadata.analytics.restrictedMetric field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Metadata > Analytics > Restricted Metric'),
+          }),
+        ).toBeHidden()
+
+        // Should show metadata.analytics.visibleMetric field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Metadata > Analytics > Visible Metric'),
+          }),
+        ).toBeVisible()
+      })
+
+      test('should hide field with read: false inside unnamed tab in column selector', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await page.locator('.list-controls__toggle-columns').click()
+
+        await expect(page.locator('.pill-selector')).toBeVisible()
+
+        // Should hide secretInPublicTab field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Secret In Public Tab'),
+          }),
+        ).toBeHidden()
+
+        // Should show publicData field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Public Data'),
+          }),
+        ).toBeVisible()
+      })
+
+      test('should hide field with read: false inside named tab in column selector', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await page.locator('.list-controls__toggle-columns').click()
+
+        await expect(page.locator('.pill-selector')).toBeVisible()
+
+        // Should hide restrictedSetting field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Settings > Restricted Setting'),
+          }),
+        ).toBeHidden()
+
+        // Should show visibleSetting field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Settings > Visible Setting'),
+          }),
+        ).toBeVisible()
+      })
+
+      test('should hide field with read: false inside row within group in column selector', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await page.locator('.list-controls__toggle-columns').click()
+
+        await expect(page.locator('.pill-selector')).toBeVisible()
+
+        // Should hide secretPostalCode field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Address > Secret Postal Code'),
+          }),
+        ).toBeHidden()
+
+        // Should show city field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Address > City'),
+          }),
+        ).toBeVisible()
+      })
+
+      test('should hide field with read: false inside group within collapsible in column selector', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await page.locator('.list-controls__toggle-columns').click()
+
+        await expect(page.locator('.pill-selector')).toBeVisible()
+
+        // Should hide restrictedAdvanced field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Advanced > Restricted Advanced'),
+          }),
+        ).toBeHidden()
+
+        // Should show visibleAdvanced field
+        await expect(
+          page.locator(`.pill-selector .pill-selector__pill`, {
+            hasText: exactText('Advanced > Visible Advanced'),
+          }),
+        ).toBeVisible()
+      })
+    })
+
+    describe('filter dropdown', () => {
+      test('should hide top-level field with read: false in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide restrictedTopLevel field
+        await expect(
+          initialField.locator('.rs__option', { hasText: 'Restricted Top Level' }),
+        ).toBeHidden()
+      })
+
+      test('should hide nested field with read: false inside group in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Public Phone',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide secretPhone field
+        await expect(initialField.locator('.rs__option', { hasText: 'Secret Phone' })).toBeHidden()
+      })
+
+      test('should hide field with read: false inside row in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Visible In Row',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide restrictedInRow field
+        await expect(
+          initialField.locator('.rs__option', { hasText: 'Restricted In Row' }),
+        ).toBeHidden()
+      })
+
+      test('should hide field with read: false inside collapsible in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Visible In Collapsible',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide restrictedInCollapsible field
+        await expect(
+          initialField.locator('.rs__option', { hasText: 'Restricted In Collapsible' }),
+        ).toBeHidden()
+      })
+
+      test('should hide deeply nested field with read: false in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Visible Metric',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide metadata.analytics.restrictedMetric field
+        await expect(
+          initialField.locator('.rs__option', { hasText: 'Restricted Metric' }),
+        ).toBeHidden()
+      })
+
+      test('should hide field with read: false inside unnamed tab in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Public Tab > Public Data',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide secretInPublicTab field
+        await expect(
+          initialField.locator('.rs__option', { hasText: 'Public Tab > Secret In Public Tab' }),
+        ).toBeHidden()
+      })
+
+      test('should hide field with read: false inside named tab in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Settings > Visible Setting',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide restrictedSetting field
+        await expect(
+          initialField.locator('.rs__option', { hasText: 'Settings > Restricted Setting' }),
+        ).toBeHidden()
+      })
+
+      test('should hide field with read: false inside row within group in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Address > City',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide secretPostalCode field
+        await expect(
+          initialField.locator('.rs__option', { hasText: 'Address > Secret Postal Code' }),
+        ).toBeHidden()
+      })
+
+      test('should hide field with read: false inside group within collapsible in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Advanced Settings > Advanced > Visible Advanced',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide restrictedAdvanced field
+        await expect(
+          initialField.locator('.rs__option', {
+            hasText: 'Advanced Settings > Advanced > Restricted Advanced',
+          }),
+        ).toBeHidden()
+      })
+    })
+
+    describe('groupBy dropdown', () => {
+      test('should hide top-level field with read: false in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide restrictedTopLevel field
+        await expect(field.locator('.rs__option', { hasText: 'Restricted Top Level' })).toBeHidden()
+      })
+
+      test('should hide nested field with read: false inside group in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Public Phone',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide secretPhone field
+        await expect(field.locator('.rs__option', { hasText: 'Secret Phone' })).toBeHidden()
+      })
+
+      test('should hide field with read: false inside row in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Visible In Row',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide restrictedInRow field
+        await expect(field.locator('.rs__option', { hasText: 'Restricted In Row' })).toBeHidden()
+      })
+
+      test('should hide field with read: false inside collapsible in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Visible In Collapsible',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide restrictedInCollapsible field
+        await expect(
+          field.locator('.rs__option', { hasText: 'Restricted In Collapsible' }),
+        ).toBeHidden()
+      })
+
+      test('should hide deeply nested field with read: false in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Visible Metric',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide metadata.analytics.restrictedMetric field
+        await expect(field.locator('.rs__option', { hasText: 'Restricted Metric' })).toBeHidden()
+      })
+
+      test('should hide field with read: false inside unnamed tab in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Public Tab > Public Data',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide secretInPublicTab field
+        await expect(
+          field.locator('.rs__option', { hasText: 'Public Tab > Secret In Public Tab' }),
+        ).toBeHidden()
+      })
+
+      test('should hide field with read: false inside named tab in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Settings > Visible Setting',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide restrictedSetting field
+        await expect(
+          field.locator('.rs__option', { hasText: 'Settings > Restricted Setting' }),
+        ).toBeHidden()
+      })
+
+      test('should hide field with read: false inside row within group in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Address > City',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide secretPostalCode field
+        await expect(
+          field.locator('.rs__option', { hasText: 'Address > Secret Postal Code' }),
+        ).toBeHidden()
+      })
+
+      test('should hide field with read: false inside group within collapsible in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load by waiting for the visible field
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Advanced Settings > Advanced > Visible Advanced',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Should hide restrictedAdvanced field
+        await expect(
+          field.locator('.rs__option', {
+            hasText: 'Advanced Settings > Advanced > Restricted Advanced',
+          }),
+        ).toBeHidden()
+      })
     })
   })
 })

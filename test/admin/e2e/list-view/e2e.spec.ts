@@ -836,27 +836,6 @@ describe('List View', () => {
       ).toBeHidden()
     })
 
-    test('should show no results when queryin on a field a user cannot read', async () => {
-      await payload.create({
-        collection: postsCollectionSlug,
-        data: {
-          noReadAccessField: 'test',
-        },
-      })
-
-      await page.goto(postsUrl.list)
-
-      const { whereBuilder } = await addListFilter({
-        page,
-        fieldLabel: 'No Read Access Field',
-        operatorLabel: 'equals',
-        value: 'test',
-      })
-
-      await expect(whereBuilder.locator('.condition__value input')).toBeVisible()
-      await expect(page.locator('.collection-list__no-results')).toBeVisible()
-    })
-
     test('should properly paginate many documents', async () => {
       await page.goto(with300DocumentsUrl.list)
 

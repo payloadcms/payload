@@ -6,6 +6,7 @@ import type {
   PaginatedDocs,
   PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedFieldsPermissions,
   SelectType,
   ViewTypes,
   Where,
@@ -28,6 +29,7 @@ export const handleGroupBy = async ({
   customCellProps,
   drawerSlug,
   enableRowSelections,
+  fieldPermissions,
   query,
   req,
   select,
@@ -44,6 +46,7 @@ export const handleGroupBy = async ({
   customCellProps?: Record<string, any>
   drawerSlug?: string
   enableRowSelections?: boolean
+  fieldPermissions?: SanitizedFieldsPermissions
   query?: ListQuery
   req: PayloadRequest
   select?: SelectType
@@ -183,6 +186,7 @@ export const handleGroupBy = async ({
           data: groupData,
           drawerSlug,
           enableRowSelections,
+          fieldPermissions,
           groupByFieldPath,
           groupByValue: serializableValue,
           heading: heading || req.i18n.t('general:noValue'),
