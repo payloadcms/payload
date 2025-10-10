@@ -69,7 +69,7 @@ export function ClipboardPlugin() {
       },
       COMMAND_PRIORITY_LOW,
     )
-  }, [editor, features])
+  }, [editor])
 
   return null
 }
