@@ -11,7 +11,7 @@ import type {
   Where,
 } from 'payload'
 
-import { APIError, canAccessAdmin, formatErrors } from 'payload'
+import { APIError, canAccessAdmin, formatErrors, getAccessResults } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import { getClientConfig } from './getClientConfig.js'
@@ -99,6 +99,8 @@ const buildTableState = async (
     importMap: payload.importMap,
     user,
   })
+
+  const permissions = await getAccessResults({ req })
 
   let collectionConfig: SanitizedCollectionConfig
   let clientCollectionConfig: ClientCollectionConfig
@@ -208,6 +210,9 @@ const buildTableState = async (
     }),
     data,
     enableRowSelections,
+    fieldPermissions: Array.isArray(collectionSlug)
+      ? undefined
+      : permissions?.collections?.[collectionSlug]?.fields,
     i18n: req.i18n,
     orderableFieldName,
     payload,
