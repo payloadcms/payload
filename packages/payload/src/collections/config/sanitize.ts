@@ -12,6 +12,7 @@ import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
+import { addTreeViewFields } from '../../treeView/addTreeViewFields.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
@@ -205,6 +206,16 @@ export const sanitizeCollection = async (
     }
   } else if (sanitized.folders) {
     sanitized.folders.browseByFolder = sanitized.folders.browseByFolder ?? true
+  }
+
+  /**
+   * Tree view feature
+   */
+  if (sanitized.treeView) {
+    addTreeViewFields({
+      collectionConfig: sanitized,
+      config,
+    })
   }
 
   if (sanitized.upload) {

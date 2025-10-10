@@ -2,7 +2,7 @@
 import { useDroppable } from '@dnd-kit/core'
 import React from 'react'
 
-import { DraggableWithClick } from '../DraggableWithClick/index.js'
+import { DraggableWithClick } from '../../DraggableWithClick/index.js'
 import { HiddenCell, TableCell } from '../SimpleTable/index.js'
 import './index.scss'
 
@@ -17,7 +17,8 @@ type Props = {
   readonly isSelected?: boolean
   readonly isSelecting?: boolean
   readonly itemKey: string
-  readonly onClick?: (e: React.MouseEvent) => void
+  readonly onClick?: (e: React.MouseEvent<HTMLElement>) => void
+  readonly onDrag?: (e: PointerEvent) => void
   readonly onKeyDown?: (e: React.KeyboardEvent) => void
 }
 export function DraggableTableRow({
@@ -31,6 +32,7 @@ export function DraggableTableRow({
   isSelecting,
   itemKey,
   onClick,
+  onDrag,
   onKeyDown,
 }: Props) {
   const isDroppable = !disabled && _isDroppable && !isSelected
@@ -71,6 +73,7 @@ export function DraggableTableRow({
         .join(' ')}
       key={itemKey}
       onClick={onClick}
+      onDrag={onDrag}
       onKeyDown={onKeyDown}
       ref={ref}
     >

@@ -30,11 +30,11 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { FolderProvider, useFolder } from '../../providers/Folders/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
-import './index.scss'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from './ListSelection/index.js'
+import './index.scss'
 
 const baseClass = 'collection-folder-list'
 

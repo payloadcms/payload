@@ -91,6 +91,7 @@ export type InitPageResult = {
 export type ViewTypes =
   | 'account'
   | 'collection-folders'
+  | 'collection-tree-view'
   | 'createFirstUser'
   | 'dashboard'
   | 'document'
@@ -100,6 +101,11 @@ export type ViewTypes =
   | 'trash'
   | 'verify'
   | 'version'
+
+export type ListViewTypes = Extract<
+  ViewTypes,
+  'collection-folders' | 'collection-tree-view' | 'folders' | 'list' | 'trash'
+>
 
 export type ServerPropsFromView = {
   collectionConfig?: SanitizedConfig['collections'][number]
