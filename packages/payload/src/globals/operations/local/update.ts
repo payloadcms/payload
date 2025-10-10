@@ -1,5 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
+import type { AtomicOperations } from '../../../types/atomic.js'
 import type {
   Document,
   PayloadRequest,
@@ -49,6 +50,11 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
   locale?: 'all' | TypedLocale
+  /**
+   * Atomic operations for relationship fields with hasMany: true.
+   * Allows adding or removing specific items without replacing the entire array.
+   */
+  operations?: AtomicOperations<TSlug>
   /**
    * Skip access control.
    * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
@@ -105,6 +111,7 @@ export async function updateGlobalLocal<
     data,
     depth,
     draft,
+    operations,
     overrideAccess = true,
     overrideLock,
     populate,
@@ -125,6 +132,7 @@ export async function updateGlobalLocal<
     depth,
     draft,
     globalConfig,
+    operations,
     overrideAccess,
     overrideLock,
     populate,
