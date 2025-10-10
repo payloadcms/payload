@@ -110,8 +110,12 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'global-relationship': GlobalRelationship;
+  };
+  globalsSelect: {
+    'global-relationship': GlobalRelationshipSelect<false> | GlobalRelationshipSelect<true>;
+  };
   locale: 'en';
   user: User & {
     collection: 'users';
@@ -745,6 +749,49 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-relationship".
+ */
+export interface GlobalRelationship {
+  id: string;
+  title?: string | null;
+  relations?: (string | RelationOne)[] | null;
+  polymorphicRelations?:
+    | (
+        | {
+            relationTo: 'relation-one';
+            value: string | RelationOne;
+          }
+        | {
+            relationTo: 'relation-two';
+            value: string | RelationTwo;
+          }
+      )[]
+    | null;
+  group?: {
+    groupRelations?: (string | RelationOne)[] | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-relationship_select".
+ */
+export interface GlobalRelationshipSelect<T extends boolean = true> {
+  title?: T;
+  relations?: T;
+  polymorphicRelations?: T;
+  group?:
+    | T
+    | {
+        groupRelations?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

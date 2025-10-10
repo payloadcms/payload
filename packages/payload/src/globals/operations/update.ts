@@ -1,6 +1,9 @@
 import type { DeepPartial } from 'ts-essentials'
 
+import { status as httpStatus } from 'http-status'
+
 import type { GlobalSlug, JsonObject } from '../../index.js'
+import type { AtomicOperations } from '../../types/atomic.js'
 import type {
   Operation,
   PayloadRequest,
@@ -16,11 +19,14 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { APIError } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../index.js'
+import { applyAtomicOperations } from '../../utilities/atomic/apply.js'
+import { validateAtomicOperations } from '../../utilities/atomic/validate.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
@@ -37,6 +43,7 @@ type Args<TSlug extends GlobalSlug> = {
   disableTransaction?: boolean
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
+  operations?: AtomicOperations<TSlug>
   overrideAccess?: boolean
   overrideLock?: boolean
   populate?: PopulateType
@@ -166,6 +173,25 @@ export const updateOperation = async <
       overrideLock,
       req,
     })
+
+    // /////////////////////////////////////
+    // Handle atomic operations
+    // /////////////////////////////////////
+
+    const { operations } = args
+
+    try {
+      validateAtomicOperations(operations, data, globalConfig.flattenedFields)
+    } catch (error) {
+      throw new APIError(
+        error instanceof Error ? error.message : String(error),
+        httpStatus.BAD_REQUEST,
+      )
+    }
+
+    if (operations) {
+      applyAtomicOperations(globalJSON, data, operations)
+    }
 
     // /////////////////////////////////////
     // beforeValidate - Fields
