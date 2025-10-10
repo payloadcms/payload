@@ -448,7 +448,9 @@ export const faTranslations: DefaultTranslationsObject = {
     copyTo: 'کپی به',
     copyToLocale: 'کپی به زبان دیگر',
     localeToPublish: 'زبان مورد نظر برای انتشار',
+    selectedLocales: 'انتخاب مناطق',
     selectLocaleToCopy: 'یک زبان برای کپی کردن اطلاعات انتخاب کنید',
+    selectLocaleToDuplicate: 'انتخاب مکان‌ها برای تکثیر',
   },
   operators: {
     contains: 'شامل می‌شود',

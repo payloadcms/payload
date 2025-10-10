@@ -462,7 +462,9 @@ export const myTranslations: DefaultTranslationsObject = {
     copyTo: 'Salin ke',
     copyToLocale: 'Salin ke tempat setempat',
     localeToPublish: 'Untuk menerbitkan di lokasi',
+    selectedLocales: 'Pilihan Locale',
     selectLocaleToCopy: 'Pilih tempatan untuk menyalin',
+    selectLocaleToDuplicate: 'Pilih bahasa untuk dipadankan',
   },
   operators: {
     contains: 'ပါဝင်သည်',

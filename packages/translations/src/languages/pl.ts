@@ -454,7 +454,9 @@ export const plTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiuj do',
     copyToLocale: 'Kopiuj do lokalizacji',
     localeToPublish: 'Publikować lokalnie',
+    selectedLocales: 'Wybrane ustawienia regionalne',
     selectLocaleToCopy: 'Wybierz lokalizację do skopiowania',
+    selectLocaleToDuplicate: 'Wybierz regiony do skopiowania',
   },
   operators: {
     contains: 'zawiera',

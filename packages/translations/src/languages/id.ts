@@ -459,7 +459,9 @@ export const idTranslations: DefaultTranslationsObject = {
     copyTo: 'Salin ke',
     copyToLocale: 'Salin ke lokal',
     localeToPublish: 'Lokal untuk dipublikasikan',
+    selectedLocales: 'Lokasi yang Dipilih',
     selectLocaleToCopy: 'Pilih lokal untuk disalin',
+    selectLocaleToDuplicate: 'Pilih bahasa lokal untuk duplikat',
   },
   operators: {
     contains: 'mengandung',

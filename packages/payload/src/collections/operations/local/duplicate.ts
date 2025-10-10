@@ -80,6 +80,11 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    */
   select?: TSelect
   /**
+   * Specifies which locales to include when duplicating localized fields. Non-localized data is always duplicated.
+   * By default, all locales are duplicated.
+   */
+  selectedLocales?: string[]
+  /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
    */
@@ -107,6 +112,7 @@ export async function duplicateLocal<
     overrideAccess = true,
     populate,
     select,
+    selectedLocales,
     showHiddenFields,
   } = options
 
@@ -138,6 +144,7 @@ export async function duplicateLocal<
     populate,
     req,
     select,
+    selectedLocales,
     showHiddenFields,
   })
 }
