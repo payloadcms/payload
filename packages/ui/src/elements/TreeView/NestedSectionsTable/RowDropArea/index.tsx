@@ -87,7 +87,8 @@ export const RowDropArea = ({
           <div
             className={`${baseClass}__split-marker`}
             style={{
-              left: `calc(${hoverIndex * segmentWidth}px + ${xSplitOffset})`,
+              left:
+                targetItem === null ? 0 : `calc(${hoverIndex * segmentWidth}px + ${xSplitOffset})`,
             }}
           />
         )}
