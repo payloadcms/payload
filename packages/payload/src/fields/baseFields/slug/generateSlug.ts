@@ -1,6 +1,7 @@
 import type { FieldHook } from '../../config/types.js'
+import type { SlugFieldArgs } from './index.js'
 
-import { slugify } from '../../../utilities/slugify.js'
+import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
 import { countVersions } from './countVersions.js'
 
 /**
@@ -8,9 +9,11 @@ import { countVersions } from './countVersions.js'
  * See `slugField` for more details.
  */
 export const generateSlug =
-  (fallback: string): FieldHook =>
+  (fallback: string, customSlugify?: SlugFieldArgs['slugify']): FieldHook =>
   async (args) => {
     const { collection, data, global, operation, originalDoc, value: isChecked } = args
+
+    const slugify = customSlugify || defaultSlugify
 
     // Ensure user-defined slugs are not overwritten during create
     // Use a generic falsy check here to include empty strings
