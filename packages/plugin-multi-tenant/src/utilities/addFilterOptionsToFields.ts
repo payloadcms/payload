@@ -1,4 +1,4 @@
-import type { Block, Config, Field, RelationshipField, SanitizedConfig, TypedUser } from 'payload'
+import type { Block, Config, Field, RelationshipField, SanitizedConfig } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 
@@ -31,22 +31,24 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
   userHasAccessToAllTenants,
-}: AddFilterOptionsToFieldsArgs<ConfigType>) {
-  fields.forEach((field) => {
-    if (field.type === 'relationship') {
+}: AddFilterOptionsToFieldsArgs<ConfigType>): Field[] {
+  const newFields = []
+  for (const field of fields) {
+    let newField: Field = { ...field }
+    if (newField.type === 'relationship') {
       /**
        * Adjusts relationship fields to filter by tenant
        * and ensures relationTo cannot be a tenant global collection
        */
-      if (typeof field.relationTo === 'string') {
-        if (tenantEnabledGlobalSlugs.includes(field.relationTo)) {
+      if (typeof newField.relationTo === 'string') {
+        if (tenantEnabledGlobalSlugs.includes(newField.relationTo)) {
           throw new Error(
-            `The collection ${field.relationTo} is a global collection and cannot be related to a tenant enabled collection.`,
+            `The collection ${newField.relationTo} is a global collection and cannot be related to a tenant enabled collection.`,
           )
         }
-        if (tenantEnabledCollectionSlugs.includes(field.relationTo)) {
-          addFilter({
-            field,
+        if (tenantEnabledCollectionSlugs.includes(newField.relationTo)) {
+          newField = addFilter({
+            field: newField,
             tenantEnabledCollectionSlugs,
             tenantFieldName,
             tenantsArrayFieldName,
@@ -56,15 +58,15 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
           })
         }
       } else {
-        field.relationTo.map((relationTo) => {
+        newField.relationTo.map((relationTo) => {
           if (tenantEnabledGlobalSlugs.includes(relationTo)) {
             throw new Error(
               `The collection ${relationTo} is a global collection and cannot be related to a tenant enabled collection.`,
             )
           }
           if (tenantEnabledCollectionSlugs.includes(relationTo)) {
-            addFilter({
-              field,
+            newField = addFilter({
+              field: newField as RelationshipField,
               tenantEnabledCollectionSlugs,
               tenantFieldName,
               tenantsArrayFieldName,
@@ -78,15 +80,15 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
     }
 
     if (
-      field.type === 'row' ||
-      field.type === 'array' ||
-      field.type === 'collapsible' ||
-      field.type === 'group'
+      newField.type === 'row' ||
+      newField.type === 'array' ||
+      newField.type === 'collapsible' ||
+      newField.type === 'group'
     ) {
-      addFilterOptionsToFields({
+      newField.fields = addFilterOptionsToFields({
         blockReferencesWithFilters,
         config,
-        fields: field.fields,
+        fields: [...newField.fields],
         tenantEnabledCollectionSlugs,
         tenantEnabledGlobalSlugs,
         tenantFieldName,
@@ -97,8 +99,9 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
       })
     }
 
-    if (field.type === 'blocks') {
-      ;(field.blockReferences ?? field.blocks).forEach((_block) => {
+    if (newField.type === 'blocks') {
+      const newBlocks: Block[] = []
+      ;(newField.blockReferences ?? newField.blocks).forEach((_block) => {
         let block: Block | undefined
 
         if (typeof _block === 'string') {
@@ -108,14 +111,15 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
           block = config?.blocks?.find((b) => b.slug === _block)
           blockReferencesWithFilters.push(_block)
         } else {
-          block = _block
+          // Create a shallow copy to avoid mutating the original block reference
+          block = { ..._block }
         }
 
         if (block?.fields) {
-          addFilterOptionsToFields({
+          block.fields = addFilterOptionsToFields({
             blockReferencesWithFilters,
             config,
-            fields: block.fields,
+            fields: [...block.fields],
             tenantEnabledCollectionSlugs,
             tenantEnabledGlobalSlugs,
             tenantFieldName,
@@ -125,15 +129,21 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
             userHasAccessToAllTenants,
           })
         }
+
+        if (block) {
+          newBlocks.push(block)
+        }
       })
+      newField.blocks = newBlocks
     }
 
-    if (field.type === 'tabs') {
-      field.tabs.forEach((tab) => {
-        addFilterOptionsToFields({
+    if (newField.type === 'tabs') {
+      newField.tabs = newField.tabs.map((tab) => {
+        const newTab = { ...tab }
+        newTab.fields = addFilterOptionsToFields({
           blockReferencesWithFilters,
           config,
-          fields: tab.fields,
+          fields: [...tab.fields],
           tenantEnabledCollectionSlugs,
           tenantEnabledGlobalSlugs,
           tenantFieldName,
@@ -142,9 +152,14 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
           tenantsCollectionSlug,
           userHasAccessToAllTenants,
         })
+        return newTab
       })
     }
-  })
+
+    newFields.push(newField)
+  }
+
+  return newFields
 }
 
 type AddFilterArgs<ConfigType = unknown> = {
@@ -166,7 +181,7 @@ function addFilter<ConfigType = unknown>({
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
   userHasAccessToAllTenants,
-}: AddFilterArgs<ConfigType>) {
+}: AddFilterArgs<ConfigType>): Field {
   // User specified filter
   const originalFilter = field.filterOptions
   field.filterOptions = async (args) => {
@@ -208,4 +223,6 @@ function addFilter<ConfigType = unknown>({
       and: [originalFilterResult, tenantFilterResults],
     }
   }
+
+  return field
 }
