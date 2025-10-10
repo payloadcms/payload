@@ -12,9 +12,7 @@ type SerializedUnknownLexicalNode = {
   type: string
 }
 
-import type { SanitizedClientFeatures } from '../../../features/typesClient.js'
-
-export function ClipboardPlugin({ features }: { features: SanitizedClientFeatures }) {
+export function ClipboardPlugin() {
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
