@@ -550,6 +550,8 @@ export const huTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Arra készül, hogy visszaállítsa a dokumentum módosításait a közzétett állapotába. Biztos benne?',
     aboutToUnpublish: 'A dokumentum közzétételének visszavonására készül. Biztos benne?',
+    aboutToUnpublishIn:
+      'Ön készül visszavonni ennek a dokumentumnak a közzétételét a {{locale}} beállításban. Biztos benne?',
     aboutToUnpublishSelection:
       'Arra készül, hogy visszavonja a kijelölésben szereplő összes {{label}} közzétételét. biztos vagy ebben?',
     autosave: 'Automatikus mentés',
@@ -596,6 +598,7 @@ export const huTranslations: DefaultTranslationsObject = {
     restoring: 'Visszaállítás...',
     reverting: 'Visszaállítás...',
     revertToPublished: 'Visszatérés a közzétetthez',
+    revertUnsuccessful: 'Visszavonás sikertelen. Nem található korábban publikált verzió.',
     saveDraft: 'Piszkozat mentése',
     scheduledSuccessfully: 'Sikeresen ütemezve.',
     schedulePublish: 'Közzététel ütemezése',
@@ -606,6 +609,9 @@ export const huTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifikus verzió',
     status: 'Állapot',
     unpublish: 'Közzététel visszavonása',
+    unpublished: 'Közzétételre váró',
+    unpublishedSuccessfully: 'Sikeresen visszavonták a közzétételt.',
+    unpublishIn: 'Vonatkozás {{locale}} nem közzététele',
     unpublishing: 'Közzététel visszavonása...',
     version: 'Verzió',
     versionAgo: '{{distance}} ezelőtt',

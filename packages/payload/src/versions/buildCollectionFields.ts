@@ -62,6 +62,23 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
           return locale.code
         }),
       })
+
+      fields.push({
+        name: 'unpublishedLocale',
+        type: 'select',
+        admin: {
+          disableBulkEdit: true,
+          disabled: true,
+        },
+        index: true,
+        options: config.localization.locales.map((locale) => {
+          if (typeof locale === 'string') {
+            return locale
+          }
+
+          return locale.code
+        }),
+      })
     }
 
     fields.push({
