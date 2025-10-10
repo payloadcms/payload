@@ -223,7 +223,7 @@ export interface LexicalLinkFeature {
  */
 export interface LexicalListsFeature {
   id: string;
-  richText?: {
+  onlyOrderedList?: {
     root: {
       type: string;
       children: {
@@ -1155,7 +1155,7 @@ export interface LexicalLinkFeatureSelect<T extends boolean = true> {
  * via the `definition` "lexical-lists-features_select".
  */
 export interface LexicalListsFeaturesSelect<T extends boolean = true> {
-  richText?: T;
+  onlyOrderedList?: T;
   updatedAt?: T;
   createdAt?: T;
 }

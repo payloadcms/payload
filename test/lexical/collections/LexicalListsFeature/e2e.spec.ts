@@ -9,7 +9,7 @@ import { ensureCompilationIsDone } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
-import { lexicalFullyFeaturedSlug } from '../../slugs.js'
+import { lexicalListsFeatureSlug } from '../../slugs.js'
 import { LexicalHelpers } from '../utils.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -37,17 +37,16 @@ describe('Lexical Fully Featured', () => {
     await page.close()
   })
   beforeEach(async ({ page }) => {
-    const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
+    const url = new AdminUrlUtil(serverURL, lexicalListsFeatureSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
     await lexical.editor.first().focus()
   })
-  test('TODO: Add tests for Lexical Lists Feature', async () => {
-    await lexical.slashCommand('ordered')
-    await expect(lexical.editor.locator('.lexical-block')).toBeVisible()
-    await lexical.slashCommand('unordered')
-    await expect(lexical.editor.locator('.lexical-block')).toBeVisible()
-    await lexical.slashCommand('check')
-    await expect(lexical.editor.locator('.lexical-block')).toBeVisible()
+  test('Registering only ordered list should work', async ({ page }) => {
+    await page.keyboard.type('- hello')
+    await expect(lexical.editor.locator('li')).toBeHidden()
+    await page.keyboard.press('Enter')
+    await page.keyboard.type('1. hello')
+    await expect(lexical.editor.locator('li')).toBeVisible()
   })
 })

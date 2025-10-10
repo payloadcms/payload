@@ -19,7 +19,7 @@ export const LexicalListsFeature: CollectionConfig = {
   },
   fields: [
     {
-      name: 'richText',
+      name: 'onlyOrderedList',
       type: 'richText',
       editor: lexicalEditor({
         features: [
