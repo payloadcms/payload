@@ -830,6 +830,11 @@ export type Config = {
        */
       Nav?: CustomComponent
       /**
+       * Add custom menu items to the navigation menu accessible via the gear icon.
+       * These components will be rendered in a popup menu above the logout button.
+       */
+      navMenuItems?: CustomComponent[]
+      /**
        * Wrap the admin dashboard in custom context providers
        */
       providers?: PayloadComponent<{ children?: React.ReactNode }, { children?: React.ReactNode }>[]

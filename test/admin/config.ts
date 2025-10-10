@@ -81,6 +81,10 @@ export default buildConfigWithDefaults({
       logout: {
         Button: '/components/Logout/index.js#Logout',
       },
+      navMenuItems: [
+        '/components/NavMenuItems/Item1.tsx#NavMenuItem1',
+        '/components/NavMenuItems/Item2.tsx#NavMenuItem2',
+      ],
       providers: [
         '/components/CustomProviderServer/index.js#CustomProviderServer',
         '/components/CustomProvider/index.js#CustomProvider',
