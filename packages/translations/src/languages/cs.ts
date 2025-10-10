@@ -454,6 +454,7 @@ export const csTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopírovat do',
     copyToLocale: 'Kopírovat do lokalizace',
     localeToPublish: 'Místo k publikování',
+    localizedMeta: 'Lokalizovaná Meta',
     selectLocaleToCopy: 'Vyberte lokalitu ke kopírování',
   },
   operators: {

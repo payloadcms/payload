@@ -111,11 +111,18 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     draft.version = {} as T
   }
 
+  // Lift locale meta from version data if available
+  const localizedMeta = (draft.version as { localizedMeta?: any }).localizedMeta || {}
+
+  if (locale && localizedMeta[locale]) {
+    ;(draft.version as { _status?: string })['_status'] = localizedMeta[locale].status
+    ;(draft.version as { updatedAt?: string }).updatedAt = localizedMeta[locale].updatedAt
+  }
+
   // Disregard all other draft content at this point,
   // Only interested in the version itself.
   // Operations will handle firing hooks, etc.
 
   draft.version.id = doc.id
-
   return draft.version
 }

@@ -455,6 +455,7 @@ export const daTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopier til',
     copyToLocale: 'Kopier til lokal',
     localeToPublish: 'Offentliggør på lokalitet',
+    localizedMeta: 'Lokaliseret Meta',
     selectLocaleToCopy: 'Vælg lokalitet til kopiering',
   },
   operators: {

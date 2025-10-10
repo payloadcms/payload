@@ -460,6 +460,7 @@ export const azTranslations: DefaultTranslationsObject = {
     copyTo: 'Köçür',
     copyToLocale: 'Yerliyə köçürün',
     localeToPublish: 'Yayımlamaq üçün yerləşdirin',
+    localizedMeta: 'Yerliləşdirilmiş Meta',
     selectLocaleToCopy: 'Köçürmək üçün yerli seçin',
   },
   operators: {

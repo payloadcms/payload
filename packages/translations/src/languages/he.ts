@@ -444,6 +444,7 @@ export const heTranslations: DefaultTranslationsObject = {
     copyTo: 'העתק אל',
     copyToLocale: 'העתק למקום',
     localeToPublish: 'מיקום לפרסום',
+    localizedMeta: 'מטא מקומי',
     selectLocaleToCopy: 'בחר מיקום להעתקה',
   },
   operators: {
