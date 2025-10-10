@@ -8,7 +8,12 @@ import { codeConverter } from './converter.js'
 /**
  * @experimental - this API may change in future, minor releases
  */
-export const CodeBlock: (args?: AdditionalCodeComponentProps) => Block = (args) => {
+export const CodeBlock: (
+  args?: {
+    fieldOverrides?: Partial<Block>
+  } & AdditionalCodeComponentProps,
+) => Block = (_args) => {
+  const { fieldOverrides, ...args } = _args || {}
   const languages = args?.languages || defaultLanguages
 
   return {
@@ -54,5 +59,6 @@ export const CodeBlock: (args?: AdditionalCodeComponentProps) => Block = (args) 
       },
     ],
     jsx: codeConverter,
+    ...(fieldOverrides || {}),
   }
 }
