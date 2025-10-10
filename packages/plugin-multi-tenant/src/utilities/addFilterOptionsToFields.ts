@@ -88,7 +88,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
       newField.fields = addFilterOptionsToFields({
         blockReferencesWithFilters,
         config,
-        fields: [...newField.fields],
+        fields: newField.fields,
         tenantEnabledCollectionSlugs,
         tenantEnabledGlobalSlugs,
         tenantFieldName,
@@ -119,7 +119,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
           block.fields = addFilterOptionsToFields({
             blockReferencesWithFilters,
             config,
-            fields: [...block.fields],
+            fields: block.fields,
             tenantEnabledCollectionSlugs,
             tenantEnabledGlobalSlugs,
             tenantFieldName,
@@ -143,7 +143,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
         newTab.fields = addFilterOptionsToFields({
           blockReferencesWithFilters,
           config,
-          fields: [...tab.fields],
+          fields: tab.fields,
           tenantEnabledCollectionSlugs,
           tenantEnabledGlobalSlugs,
           tenantFieldName,
