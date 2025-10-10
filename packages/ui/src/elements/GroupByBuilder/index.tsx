@@ -47,7 +47,12 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
   const fieldPermissions = permissions?.collections?.[collectionSlug]?.fields
 
   const reducedFields = useMemo(
-    () => reduceFieldsToOptions({ fieldPermissions, fields, i18n }),
+    () =>
+      reduceFieldsToOptions({
+        fieldPermissions,
+        fields,
+        i18n,
+      }),
     [fields, fieldPermissions, i18n],
   )
 

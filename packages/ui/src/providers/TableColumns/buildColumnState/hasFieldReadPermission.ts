@@ -14,8 +14,12 @@ export const hasFieldReadPermission = (
   permissions: SanitizedFieldsPermissions,
   path: string,
 ): boolean => {
-  if (permissions === true) {return true}
-  if (typeof permissions !== 'object') {return false}
+  if (permissions === true) {
+    return true
+  }
+  if (typeof permissions !== 'object') {
+    return false
+  }
 
   const pathParts = path.split('.')
 
@@ -24,12 +28,16 @@ export const hasFieldReadPermission = (
     const isLastPart = index === parts.length - 1
 
     // Field doesn't exist in permissions - was filtered out
-    if (!(part in currentPerms)) {return false}
+    if (!(part in currentPerms)) {
+      return false
+    }
 
     const fieldPerm = currentPerms[part]
 
     // Permission is explicitly true
-    if (fieldPerm === true) {return true}
+    if (fieldPerm === true) {
+      return true
+    }
 
     // At the last part - check for explicit read: true
     if (isLastPart) {

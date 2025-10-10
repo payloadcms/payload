@@ -235,6 +235,7 @@ export const renderListView = async (
       collectionConfig: clientCollectionConfig,
       collectionSlug,
       columns: collectionPreferences?.columns,
+      fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
       i18n,
     })
 

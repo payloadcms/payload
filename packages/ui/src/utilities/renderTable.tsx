@@ -36,7 +36,7 @@ import {
   Table,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- these MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../exports/client/index.js'
-import { filterFields } from '../providers/TableColumns/buildColumnState/filterFields.js'
+import { filterFieldsWithPermissions } from '../providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
 import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'
 
 export const renderFilters = (
@@ -133,7 +133,10 @@ export const renderTable = ({
         (each) => each.slug === collection,
       )
 
-      for (const field of filterFields(clientCollectionConfig.fields)) {
+      for (const field of filterFieldsWithPermissions({
+        fieldPermissions,
+        fields: clientCollectionConfig.fields,
+      })) {
         if (fieldAffectsData(field)) {
           if (clientFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
             continue
@@ -145,7 +148,10 @@ export const renderTable = ({
 
       const serverCollectionConfig = payload.collections[collection].config
 
-      for (const field of filterFields(serverCollectionConfig.fields)) {
+      for (const field of filterFieldsWithPermissions({
+        fieldPermissions,
+        fields: serverCollectionConfig.fields,
+      })) {
         if (fieldAffectsData(field)) {
           if (serverFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
             continue

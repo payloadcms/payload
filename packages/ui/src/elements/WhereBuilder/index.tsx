@@ -33,7 +33,12 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const fieldPermissions = permissions?.collections?.[collectionSlug]?.fields
 
   const reducedFields = useMemo(
-    () => reduceFieldsToOptions({ fieldPermissions, fields, i18n }),
+    () =>
+      reduceFieldsToOptions({
+        fieldPermissions,
+        fields,
+        i18n,
+      }),
     [fieldPermissions, fields, i18n],
   )
 

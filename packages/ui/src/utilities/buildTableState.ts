@@ -206,6 +206,9 @@ const buildTableState = async (
       collectionConfig: clientCollectionConfig,
       collectionSlug,
       columns: columnsFromArgs,
+      fieldPermissions: Array.isArray(collectionSlug)
+        ? undefined
+        : permissions?.collections?.[collectionSlug]?.fields,
       i18n: req.i18n,
     }),
     data,
