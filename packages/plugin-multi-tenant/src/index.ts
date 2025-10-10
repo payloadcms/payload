@@ -169,7 +169,7 @@ export const multiTenantPlugin =
         /**
          * Add filter options to all relationship fields
          */
-        addFilterOptionsToFields({
+        collection.fields = addFilterOptionsToFields({
           blockReferencesWithFilters,
           config: incomingConfig,
           fields: collection.fields,
@@ -355,7 +355,7 @@ export const multiTenantPlugin =
         /**
          * Add filter options to all relationship fields
          */
-        addFilterOptionsToFields({
+        collection.fields = addFilterOptionsToFields({
           blockReferencesWithFilters,
           config: incomingConfig,
           fields: collection.fields,
