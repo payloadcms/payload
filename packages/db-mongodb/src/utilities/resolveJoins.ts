@@ -480,11 +480,15 @@ function extractRelationToFilter(where: Record<string, unknown>): null | string[
 
   // Check for relationTo in logical operators
   if (where.and && Array.isArray(where.and)) {
+    const allResults: string[] = []
     for (const condition of where.and) {
       const result = extractRelationToFilter(condition)
       if (result) {
-        return result
+        allResults.push(...result)
       }
+    }
+    if (allResults.length > 0) {
+      return [...new Set(allResults)] // Remove duplicates
     }
   }
 
