@@ -19,7 +19,7 @@
     }
 
     &:has(.popup--active) {
-      z-index: 1;
+      z-index: 2;
     }
 
     .icon--search {
