@@ -1404,6 +1404,8 @@ describe('Auth', () => {
       const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === decoded.sid)
 
       expect(matchedSession).toBeDefined()
+      expect(matchedSession?.ip).toBeDefined()
+      expect(matchedSession?.userAgent).toBeDefined()
       expect(matchedSession?.createdAt).toBeDefined()
       expect(matchedSession?.expiresAt).toBeDefined()
     })
@@ -1505,6 +1507,138 @@ describe('Auth', () => {
       expect(new Date(matchedSession?.expiresAt as unknown as string).getTime()).toBeLessThan(
         new Date(matchedRefreshedSession?.expiresAt as unknown as string).getTime(),
       )
+    })
+
+    it('should retrieve user ip and userAgent from request headers when logging in', async () => {
+      const ip = '192.168.1.1'
+      const userAgent = 'Mozilla/5.0'
+      const headers = new Headers()
+      headers.set('user-agent', userAgent)
+      headers.set('x-client-ip', ip)
+
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+        req: {
+          headers,
+        },
+      })
+
+      const user = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          email: {
+            equals: devUser.email,
+          },
+        },
+      })
+
+      const decoded = jwtDecode<{ sid: string }>(String(authenticated.token))
+
+      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === decoded.sid)
+
+      expect(matchedSession?.ip).toBe(ip)
+      expect(matchedSession?.userAgent).toBe(userAgent)
+    })
+
+    it('should update user ip on token refresh if ip has changed', async () => {
+      const initialIP = '192.168.1.1'
+      const userAgent = 'Mozilla/5.0'
+      const headers = new Headers()
+      headers.set('user-agent', userAgent)
+      headers.set('x-client-ip', initialIP)
+
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+        req: {
+          headers,
+        },
+      })
+
+      const newIP = '192.168.1.2'
+      const refreshHeaders = new Headers()
+      refreshHeaders.set('user-agent', userAgent)
+      refreshHeaders.set('x-client-ip', newIP)
+
+      const refreshed = await restClient
+        .POST(`/${slug}/refresh-token`, {
+          headers: {
+            Authorization: `JWT ${authenticated.token}`,
+            ...Object.fromEntries(refreshHeaders.entries()),
+          },
+        })
+        .then((res) => res.json())
+
+      const user = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          email: {
+            equals: devUser.email,
+          },
+        },
+      })
+
+      const decoded = jwtDecode<{ sid: string }>(String(refreshed.refreshedToken))
+
+      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === decoded.sid)
+
+      expect(matchedSession?.ip).toBe(newIP)
+      expect(matchedSession?.userAgent).toBe(userAgent)
+    })
+
+    it('should not update user ip on token refresh if ip become unknown', async () => {
+      const initialIP = '192.168.1.1'
+      const userAgent = 'Mozilla/5.0'
+      const headers = new Headers()
+      headers.set('user-agent', userAgent)
+      headers.set('x-client-ip', initialIP)
+
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+        req: {
+          headers,
+        },
+      })
+
+      const refreshHeaders = new Headers()
+      refreshHeaders.set('user-agent', userAgent)
+      // No 'x-client-ip' header, simulating unknown IP
+
+      const refreshed = await restClient
+        .POST(`/${slug}/refresh-token`, {
+          headers: {
+            Authorization: `JWT ${authenticated.token}`,
+            ...Object.fromEntries(refreshHeaders.entries()),
+          },
+        })
+        .then((res) => res.json())
+
+      const user = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          email: {
+            equals: devUser.email,
+          },
+        },
+      })
+
+      const decoded = jwtDecode<{ sid: string }>(String(refreshed.refreshedToken))
+
+      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === decoded.sid)
+
+      expect(matchedSession?.ip).toBe(initialIP)
+      expect(matchedSession?.userAgent).toBe(userAgent)
     })
 
     it('should not authenticate a user who has a JWT but its session has been terminated', async () => {

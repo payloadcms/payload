@@ -1,3 +1,4 @@
+import { getClientIp } from 'request-ip'
 import { v4 as uuid } from 'uuid'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
@@ -40,7 +41,12 @@ export const addSessionToUser = async ({
     const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
     const expiresAt = new Date(now.getTime() + tokenExpInMs)
 
-    const session = { id: sid, createdAt: now, expiresAt }
+    const ip = getClientIp({
+      headers: Object.fromEntries(req.headers.entries()),
+    })
+    const userAgent = req.headers.get('user-agent')
+
+    const session = { id: sid, createdAt: now, expiresAt, ip, userAgent }
 
     if (!user.sessions?.length) {
       user.sessions = [session]

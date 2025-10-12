@@ -1,3 +1,4 @@
+import { getClientIp } from 'request-ip'
 import url from 'url'
 
 import type { Collection } from '../../collections/config/types.js'
@@ -91,6 +92,14 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       const now = new Date()
       const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
       existingSession.expiresAt = new Date(now.getTime() + tokenExpInMs)
+
+      // Update IP
+      const newIp = getClientIp({
+        headers: Object.fromEntries(req.headers.entries()),
+      })
+      if (newIp) {
+        existingSession.ip = newIp
+      }
 
       // Ensure updatedAt date is always updated
       user.updatedAt = new Date().toISOString()

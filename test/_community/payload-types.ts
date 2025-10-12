@@ -206,6 +206,8 @@ export interface User {
   sessions?:
     | {
         id: string;
+        ip?: string | null;
+        userAgent?: string | null;
         createdAt?: string | null;
         expiresAt: string;
       }[]
@@ -352,6 +354,8 @@ export interface UsersSelect<T extends boolean = true> {
     | T
     | {
         id?: T;
+        ip?: T;
+        userAgent?: T;
         createdAt?: T;
         expiresAt?: T;
       };
