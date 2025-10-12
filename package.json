@@ -115,7 +115,6 @@
     "test:e2e:prod:ci": "pnpm prepare-run-test-against-prod:ci && pnpm runts ./test/runE2E.ts --prod",
     "test:e2e:prod:ci:noturbo": "pnpm prepare-run-test-against-prod:ci && pnpm runts ./test/runE2E.ts --prod --no-turbo",
     "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
-    "test:int:auth": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest test/auth --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:int:firestore": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
