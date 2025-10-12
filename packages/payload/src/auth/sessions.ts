@@ -1,3 +1,4 @@
+import { decodeJwt } from 'jose'
 import { getClientIp } from 'request-ip'
 import { v4 as uuid } from 'uuid'
 
@@ -19,16 +20,48 @@ export const removeExpiredSessions = (sessions: UserSession[]) => {
 }
 
 /**
+ * Extracts the session ID from a JWT token string
+ *
+ * Note: This function does not verify the token, it only decodes it.
+ *
+ * @param token - The JWT token string
+ * @returns The session ID or undefined if not found
+ */
+export const getSessionIdFromToken = (token: string): string | undefined => {
+  const decodedJwt = decodeJwt(token)
+
+  // Check if the token has "sid"
+  if (!Object.hasOwn(decodedJwt, 'sid')) {
+    return undefined
+  }
+
+  return decodedJwt.sid as string
+}
+
+/**
  * Adds a session to the user and removes expired sessions
+ *
+ * @param params - The parameters for adding a session to the user
+ * @param params.collectionConfig - The collection config
+ * @param params.override - Optional override for IP and user agent
+ * @param params.payload - The Payload instance
+ * @param params.req - The incoming payload request
+ * @param params.user - The user to add the session to
+ *
  * @returns The session ID (sid) if sessions are used
  */
 export const addSessionToUser = async ({
   collectionConfig,
+  override,
   payload,
   req,
   user,
 }: {
   collectionConfig: SanitizedCollectionConfig
+  override?: {
+    ip?: string
+    userAgent?: string
+  }
   payload: Payload
   req: PayloadRequest
   user: TypedUser
@@ -41,10 +74,12 @@ export const addSessionToUser = async ({
     const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
     const expiresAt = new Date(now.getTime() + tokenExpInMs)
 
-    const ip = getClientIp({
-      headers: Object.fromEntries(req.headers.entries()),
-    })
-    const userAgent = req.headers.get('user-agent')
+    const ip =
+      override?.ip ||
+      getClientIp({
+        headers: Object.fromEntries(req.headers.entries()),
+      })
+    const userAgent = override?.userAgent || req.headers.get('user-agent')
 
     const session = { id: sid, createdAt: now, expiresAt, ip, userAgent }
 

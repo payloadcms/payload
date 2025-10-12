@@ -11,7 +11,7 @@ import type {
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
-import { email as emailValidation } from 'payload/shared'
+import { email as emailValidation, getSessionIdFromToken } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -1397,11 +1397,11 @@ describe('Auth', () => {
 
       expect(Array.isArray(user.docs[0]?.sessions)).toBeTruthy()
 
-      const decoded = jwtDecode<{ sid: string }>(String(authenticated.token))
+      const sid = getSessionIdFromToken(authenticated.token!)
 
-      expect(decoded.sid).toBeDefined()
+      expect(sid).toBeDefined()
 
-      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === decoded.sid)
+      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === sid)
 
       expect(matchedSession).toBeDefined()
       expect(matchedSession?.ip).toBeDefined()
@@ -1442,19 +1442,19 @@ describe('Auth', () => {
         },
       })
 
-      const decoded = jwtDecode<{ sid: string }>(String(authenticated.token))
-      expect(decoded.sid).toBeDefined()
+      const sid = getSessionIdFromToken(authenticated.token!)
+      expect(sid).toBeDefined()
 
       const remainingSessions = user.docs[0]?.sessions ?? []
 
-      const loggedOutSession = remainingSessions.find(({ id }) => id === decoded.sid)
+      const loggedOutSession = remainingSessions.find(({ id }) => id === sid)
       expect(loggedOutSession).toBeUndefined()
 
-      const decoded2 = jwtDecode<{ sid: string }>(String(authenticated2.token))
-      expect(decoded2.sid).toBeDefined()
+      const sid2 = getSessionIdFromToken(authenticated2.token!)
+      expect(sid2).toBeDefined()
 
-      const existingSession = remainingSessions.find(({ id }) => id === decoded2.sid)
-      expect(existingSession?.id).toStrictEqual(decoded2.sid)
+      const existingSession = remainingSessions.find(({ id }) => id === sid2)
+      expect(existingSession?.id).toStrictEqual(sid2)
     })
 
     it('should refresh an existing session', async () => {
@@ -1466,7 +1466,7 @@ describe('Auth', () => {
         },
       })
 
-      const decoded = jwtDecode<{ sid: string }>(String(authenticated.token))
+      const sid = getSessionIdFromToken(authenticated.token!)
 
       const user = await payload.db.find<User>({
         collection: slug,
@@ -1477,7 +1477,7 @@ describe('Auth', () => {
         },
       })
 
-      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === decoded.sid)
+      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === sid)
 
       const refreshed = await restClient
         .POST(`/${slug}/refresh-token`, {
@@ -1496,13 +1496,13 @@ describe('Auth', () => {
         },
       })
 
-      const decodedRefreshed = jwtDecode<{ sid: string }>(String(refreshed.refreshedToken))
+      const refreshedSid = getSessionIdFromToken(refreshed.refreshedToken)
 
       const matchedRefreshedSession = refreshedUser.docs[0]?.sessions?.find(
-        ({ id }) => id === decodedRefreshed.sid,
+        ({ id }) => id === refreshedSid,
       )
 
-      expect(decodedRefreshed.sid).toStrictEqual(decoded.sid)
+      expect(refreshedSid).toStrictEqual(sid)
 
       expect(new Date(matchedSession?.expiresAt as unknown as string).getTime()).toBeLessThan(
         new Date(matchedRefreshedSession?.expiresAt as unknown as string).getTime(),
@@ -1536,9 +1536,9 @@ describe('Auth', () => {
         },
       })
 
-      const decoded = jwtDecode<{ sid: string }>(String(authenticated.token))
+      const sid = getSessionIdFromToken(authenticated.token!)
 
-      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === decoded.sid)
+      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === sid)
 
       expect(matchedSession?.ip).toBe(ip)
       expect(matchedSession?.userAgent).toBe(userAgent)
@@ -1585,9 +1585,9 @@ describe('Auth', () => {
         },
       })
 
-      const decoded = jwtDecode<{ sid: string }>(String(refreshed.refreshedToken))
+      const sid = getSessionIdFromToken(refreshed.refreshedToken)
 
-      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === decoded.sid)
+      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === sid)
 
       expect(matchedSession?.ip).toBe(newIP)
       expect(matchedSession?.userAgent).toBe(userAgent)
@@ -1633,9 +1633,9 @@ describe('Auth', () => {
         },
       })
 
-      const decoded = jwtDecode<{ sid: string }>(String(refreshed.refreshedToken))
+      const decoded = getSessionIdFromToken(refreshed.refreshedToken)
 
-      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === decoded.sid)
+      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === decoded)
 
       expect(matchedSession?.ip).toBe(initialIP)
       expect(matchedSession?.userAgent).toBe(userAgent)
