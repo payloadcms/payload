@@ -14,37 +14,37 @@ export interface PayloadGeneratedTypes {
     [slug: string]: {
       forgotPassword:
         | {
-            email: string
+            email: string;
           }
         | {
-          username: string
+          username: string;
           };
       login:
         | {
-            email: string
-            password: string
+            email: string;
+            password: string;
           }
         | {
-            password: string
-            username: string
-          }
+            password: string;
+            username: string;
+          };
       registerFirstUser:
         | {
-            email: string
-            password: string
+            email: string;
+            password: string;
           }
         | {
-            password: string
-            username: string
-            email?: string
-          }
+            password: string;
+            username: string;
+            email?: string;
+          };
       unlock:
         | {
-            email: string
+            email: string;
           }
         | {
-            username: string
-          }
+            username: string;
+          };
     }
   }
 
