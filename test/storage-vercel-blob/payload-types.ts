@@ -84,7 +84,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {};
   globalsSelect: {};
@@ -120,7 +120,7 @@ export interface UserAuthOperations {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   alt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -157,8 +157,7 @@ export interface Media {
  * via the `definition` "media-with-prefix".
  */
 export interface MediaWithPrefix {
-  id: number;
-  prefix?: string | null;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -176,7 +175,7 @@ export interface MediaWithPrefix {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -200,24 +199,24 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'media-with-prefix';
-        value: number | MediaWithPrefix;
+        value: string | MediaWithPrefix;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -227,10 +226,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -250,7 +249,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -303,7 +302,6 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "media-with-prefix_select".
  */
 export interface MediaWithPrefixSelect<T extends boolean = true> {
-  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

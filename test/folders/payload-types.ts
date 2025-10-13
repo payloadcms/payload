@@ -150,6 +150,7 @@ export interface Post {
  */
 export interface Media {
   id: string;
+  testAdminThumbnail?: string | null;
   folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -359,6 +360,7 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  testAdminThumbnail?: T;
   folder?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -100,7 +100,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {
     'global-post': GlobalPost;
@@ -142,7 +142,7 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   text?: string | null;
   number?: number | null;
   select?: ('a' | 'b') | null;
@@ -182,17 +182,17 @@ export interface Post {
   };
   unnamedTabText?: string | null;
   unnamedTabNumber?: number | null;
-  hasOne?: (number | null) | Rel;
-  hasMany?: (number | Rel)[] | null;
-  hasManyUpload?: (number | Upload)[] | null;
+  hasOne?: (string | null) | Rel;
+  hasMany?: (string | Rel)[] | null;
+  hasManyUpload?: (string | Upload)[] | null;
   hasOnePoly?: {
     relationTo: 'rels';
-    value: number | Rel;
+    value: string | Rel;
   } | null;
   hasManyPoly?:
     | {
         relationTo: 'rels';
-        value: number | Rel;
+        value: string | Rel;
       }[]
     | null;
   updatedAt: string;
@@ -203,7 +203,7 @@ export interface Post {
  * via the `definition` "rels".
  */
 export interface Rel {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -212,7 +212,7 @@ export interface Rel {
  * via the `definition` "upload".
  */
 export interface Upload {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -230,7 +230,7 @@ export interface Upload {
  * via the `definition` "localized-posts".
  */
 export interface LocalizedPost {
-  id: number;
+  id: string;
   text?: string | null;
   number?: number | null;
   select?: ('a' | 'b') | null;
@@ -301,7 +301,7 @@ export interface LocalizedPost {
  * via the `definition` "versioned-posts".
  */
 export interface VersionedPost {
-  id: number;
+  id: string;
   text?: string | null;
   number?: number | null;
   array?:
@@ -327,7 +327,7 @@ export interface VersionedPost {
  * via the `definition` "deep-posts".
  */
 export interface DeepPost {
-  id: number;
+  id: string;
   group?: {
     array?:
       | {
@@ -369,22 +369,22 @@ export interface DeepPost {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: number;
-  relatedPage?: (number | null) | Page;
+  id: string;
+  relatedPage?: (string | null) | Page;
   content?:
     | {
         title: string;
         link: {
           docPoly?: {
             relationTo: 'pages';
-            value: number | Page;
+            value: string | Page;
           } | null;
-          doc?: (number | null) | Page;
-          docMany?: (number | Page)[] | null;
+          doc?: (string | null) | Page;
+          docMany?: (string | Page)[] | null;
           docHasManyPoly?:
             | {
                 relationTo: 'pages';
-                value: number | Page;
+                value: string | Page;
               }[]
             | null;
           label: string;
@@ -393,7 +393,7 @@ export interface Page {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -440,7 +440,7 @@ export interface Page {
  * via the `definition` "points".
  */
 export interface Point {
-  id: number;
+  id: string;
   text?: string | null;
   /**
    * @minItems 2
@@ -455,7 +455,7 @@ export interface Point {
  * via the `definition` "force-select".
  */
 export interface ForceSelect {
-  id: number;
+  id: string;
   text?: string | null;
   forceSelected?: string | null;
   array?:
@@ -482,7 +482,7 @@ export interface CustomId {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   name?: string | null;
   number?: number | null;
   updatedAt: string;
@@ -508,43 +508,43 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'localized-posts';
-        value: number | LocalizedPost;
+        value: string | LocalizedPost;
       } | null)
     | ({
         relationTo: 'versioned-posts';
-        value: number | VersionedPost;
+        value: string | VersionedPost;
       } | null)
     | ({
         relationTo: 'deep-posts';
-        value: number | DeepPost;
+        value: string | DeepPost;
       } | null)
     | ({
         relationTo: 'pages';
-        value: number | Page;
+        value: string | Page;
       } | null)
     | ({
         relationTo: 'points';
-        value: number | Point;
+        value: string | Point;
       } | null)
     | ({
         relationTo: 'force-select';
-        value: number | ForceSelect;
+        value: string | ForceSelect;
       } | null)
     | ({
         relationTo: 'upload';
-        value: number | Upload;
+        value: string | Upload;
       } | null)
     | ({
         relationTo: 'rels';
-        value: number | Rel;
+        value: string | Rel;
       } | null)
     | ({
         relationTo: 'custom-ids';
@@ -552,12 +552,12 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -567,10 +567,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -590,7 +590,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -982,7 +982,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "global-post".
  */
 export interface GlobalPost {
-  id: number;
+  id: string;
   text?: string | null;
   number?: number | null;
   updatedAt?: string | null;
@@ -993,7 +993,7 @@ export interface GlobalPost {
  * via the `definition` "force-select-global".
  */
 export interface ForceSelectGlobal {
-  id: number;
+  id: string;
   text?: string | null;
   forceSelected?: string | null;
   array?:
