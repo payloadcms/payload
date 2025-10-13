@@ -53,7 +53,7 @@ The `options` object contains the following properties:
 | ------------ | ----------------------------------------------------- |
 | **`locale`** | The current locale of the Document being edited.      |
 | **`req`**    | The Payload Request object.                           |
-| **`token`**  | The JWT token of the currently authenticated in user. |
+| **`token`**  | The JWT token of the currently authenticated user.    |
 
 If your application requires a fully qualified URL, such as within deploying to Vercel Preview Deployments, you can use the `req` property to build this URL:
 
@@ -225,7 +225,7 @@ export default async function Page({ params: paramsPromise }) {
 ```
 
 <Banner type="success">
-  **Note:** For fully working example of this, check of the official [Draft
+  **Note:** For fully working example of this, check out the official [Draft
   Preview
   Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview)
   in the [Examples
