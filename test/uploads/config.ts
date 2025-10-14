@@ -1,5 +1,7 @@
 import type { CollectionSlug, File } from 'payload'
 
+import { en } from '@payloadcms/translations/languages/en'
+import { fr } from '@payloadcms/translations/languages/fr'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
@@ -63,6 +65,15 @@ export default buildConfigWithDefaults({
   localization: {
     locales: ['en', 'es', 'fr'],
     defaultLocale: 'en',
+  },
+  i18n: {
+    supportedLanguages: {
+      // de,
+      en,
+      // es,
+      fr,
+    },
+    fallbackLanguage: 'fr',
   },
   collections: [
     {
