@@ -7,29 +7,29 @@ import type {
 
 import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
 
-export const filterFieldsWithPermissions = <T extends ClientField | Field>({
+const shouldSkipField = (field: ClientField | Field): boolean =>
+  (field.type !== 'ui' && fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||
+  field?.admin?.disableListColumn === true
+
+export const filterFieldsWithPermissions = <T extends ClientField | Field = ClientField>({
   fieldPermissions,
   fields,
 }: {
   fieldPermissions?: SanitizedFieldPermissions | SanitizedFieldsPermissions
-  fields: T[]
+  fields: (ClientField | Field)[]
 }): T[] => {
-  const shouldSkipField = (field: T): boolean =>
-    (field.type !== 'ui' && fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||
-    field?.admin?.disableListColumn === true
-
-  return (fields ?? []).reduce<T[]>((acc, field) => {
+  return (fields ?? []).reduce((acc, field) => {
     if (shouldSkipField(field)) {
       return acc
     }
 
     // handle tabs
     if (field.type === 'tabs' && 'tabs' in field) {
-      const formattedField: T = {
+      const formattedField = {
         ...field,
         tabs: field.tabs.map((tab) => ({
           ...tab,
-          fields: filterFieldsWithPermissions({
+          fields: filterFieldsWithPermissions<T>({
             fieldPermissions:
               typeof fieldPermissions === 'boolean'
                 ? fieldPermissions
@@ -39,25 +39,25 @@ export const filterFieldsWithPermissions = <T extends ClientField | Field>({
             fields: tab.fields,
           }),
         })),
-      }
+      } as ClientField | Field
       acc.push(formattedField)
       return acc
     }
 
     // handle fields with subfields (row, group, collapsible, etc.)
     if ('fields' in field && Array.isArray(field.fields)) {
-      const formattedField: T = {
+      const formattedField = {
         ...field,
-        fields: filterFieldsWithPermissions({
+        fields: filterFieldsWithPermissions<T>({
           fieldPermissions:
             typeof fieldPermissions === 'boolean'
               ? fieldPermissions
               : 'name' in field && field.name
                 ? fieldPermissions[field.name]?.fields || fieldPermissions[field.name]
                 : fieldPermissions,
-          fields: field.fields as T[],
+          fields: field.fields,
         }),
-      }
+      } as ClientField | Field
       acc.push(formattedField)
       return acc
     }

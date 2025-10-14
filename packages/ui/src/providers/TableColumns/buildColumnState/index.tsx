@@ -102,7 +102,10 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
   ) as ClientField[]
 
   let _sortedFieldMap = flattenTopLevelFields(
-    filterFieldsWithPermissions({ fieldPermissions, fields: serverFields }),
+    filterFieldsWithPermissions({
+      fieldPermissions,
+      fields: serverFields,
+    }),
     {
       i18n,
       keepPresentationalFields: true,

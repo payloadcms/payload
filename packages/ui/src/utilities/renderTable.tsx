@@ -148,7 +148,7 @@ export const renderTable = ({
 
       const serverCollectionConfig = payload.collections[collection].config
 
-      for (const field of filterFieldsWithPermissions({
+      for (const field of filterFieldsWithPermissions<Field>({
         fieldPermissions,
         fields: serverCollectionConfig.fields,
       })) {
