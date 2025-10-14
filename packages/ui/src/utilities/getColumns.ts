@@ -3,7 +3,7 @@ import type {
   ClientCollectionConfig,
   ClientConfig,
   ColumnPreference,
-  SanitizedFieldsPermissions,
+  SanitizedPermissions,
 } from 'payload'
 
 import { flattenTopLevelFields } from 'payload'
@@ -17,15 +17,15 @@ export const getColumns = ({
   collectionConfig,
   collectionSlug,
   columns,
-  fieldPermissions,
   i18n,
+  permissions,
 }: {
   clientConfig: ClientConfig
   collectionConfig?: ClientCollectionConfig
   collectionSlug: string | string[]
   columns: ColumnPreference[]
-  fieldPermissions: SanitizedFieldsPermissions
   i18n: I18nClient
+  permissions?: SanitizedPermissions
 }) => {
   const isPolymorphic = Array.isArray(collectionSlug)
 
@@ -38,7 +38,7 @@ export const getColumns = ({
       )
 
       for (const field of filterFieldsWithPermissions({
-        fieldPermissions,
+        fieldPermissions: permissions?.collections?.[collection]?.fields || true,
         fields: clientCollectionConfig.fields,
       })) {
         if (fieldAffectsData(field)) {
@@ -65,7 +65,16 @@ export const getColumns = ({
         }),
       )
     : getInitialColumns(
-        isPolymorphic ? fields : filterFieldsWithPermissions({ fieldPermissions, fields }),
+        isPolymorphic
+          ? fields
+          : filterFieldsWithPermissions({
+              fieldPermissions:
+                typeof collectionSlug === 'string' &&
+                permissions?.collections?.[collectionSlug]?.fields
+                  ? permissions.collections[collectionSlug].fields
+                  : true,
+              fields,
+            }),
         collectionConfig?.admin?.useAsTitle,
         isPolymorphic ? [] : collectionConfig?.admin?.defaultColumns,
       )

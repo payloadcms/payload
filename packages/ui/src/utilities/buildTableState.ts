@@ -206,10 +206,8 @@ const buildTableState = async (
       collectionConfig: clientCollectionConfig,
       collectionSlug,
       columns: columnsFromArgs,
-      fieldPermissions: Array.isArray(collectionSlug)
-        ? true
-        : permissions.collections[collectionSlug].fields,
       i18n: req.i18n,
+      permissions,
     }),
     data,
     enableRowSelections,
