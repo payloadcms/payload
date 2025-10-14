@@ -245,7 +245,7 @@ export const updateDocument = async <
         (Boolean(data?.deletedAt) ||
           // Skip validation when restoring from trash, but only if not publishing
           // (if publishing, we need full validation)
-          (Boolean(originalDoc?.deletedAt) && data._status !== 'published'))),
+          (Boolean(originalDoc?.deletedAt) && data?._status !== 'published'))),
   }
 
   if (publishSpecificLocale) {
