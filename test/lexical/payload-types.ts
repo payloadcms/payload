@@ -85,6 +85,7 @@ export interface Config {
   collections: {
     'lexical-fully-featured': LexicalFullyFeatured;
     'lexical-link-feature': LexicalLinkFeature;
+    'lexical-lists-features': LexicalListsFeature;
     'lexical-heading-feature': LexicalHeadingFeature;
     'lexical-jsx-converter': LexicalJsxConverter;
     'lexical-fields': LexicalField;
@@ -110,6 +111,7 @@ export interface Config {
   collectionsSelect: {
     'lexical-fully-featured': LexicalFullyFeaturedSelect<false> | LexicalFullyFeaturedSelect<true>;
     'lexical-link-feature': LexicalLinkFeatureSelect<false> | LexicalLinkFeatureSelect<true>;
+    'lexical-lists-features': LexicalListsFeaturesSelect<false> | LexicalListsFeaturesSelect<true>;
     'lexical-heading-feature': LexicalHeadingFeatureSelect<false> | LexicalHeadingFeatureSelect<true>;
     'lexical-jsx-converter': LexicalJsxConverterSelect<false> | LexicalJsxConverterSelect<true>;
     'lexical-fields': LexicalFieldsSelect<false> | LexicalFieldsSelect<true>;
@@ -198,6 +200,30 @@ export interface LexicalFullyFeatured {
 export interface LexicalLinkFeature {
   id: string;
   richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-lists-features".
+ */
+export interface LexicalListsFeature {
+  id: string;
+  onlyOrderedList?: {
     root: {
       type: string;
       children: {
@@ -993,6 +1019,10 @@ export interface PayloadLockedDocument {
         value: string | LexicalLinkFeature;
       } | null)
     | ({
+        relationTo: 'lexical-lists-features';
+        value: string | LexicalListsFeature;
+      } | null)
+    | ({
         relationTo: 'lexical-heading-feature';
         value: string | LexicalHeadingFeature;
       } | null)
@@ -1117,6 +1147,15 @@ export interface LexicalFullyFeaturedSelect<T extends boolean = true> {
  */
 export interface LexicalLinkFeatureSelect<T extends boolean = true> {
   richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-lists-features_select".
+ */
+export interface LexicalListsFeaturesSelect<T extends boolean = true> {
+  onlyOrderedList?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1627,6 +1666,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
