@@ -121,7 +121,23 @@ const vulnerabilities = Object.entries(advisories)
     let directDepVersion = null
     let blockingDep = null // Track which dep blocks the fix
 
-    if (deepestPath && advisory.patched_versions !== '<0.0.0') {
+    // If no paths, the vulnerable package itself might be a direct/peer dependency
+    if (!deepestPath && paths.length === 0 && advisory.patched_versions !== '<0.0.0') {
+      try {
+        const latestVersion = execSync(`pnpm view "${advisory.module_name}" version`, {
+          encoding: 'utf-8',
+          maxBuffer: 10 * 1024 * 1024,
+          stdio: ['pipe', 'pipe', 'ignore'],
+        }).trim()
+
+        // Check if latest version satisfies the patched version range
+        if (satisfies(latestVersion, advisory.patched_versions)) {
+          directDepVersion = latestVersion
+        }
+      } catch (error) {
+        // Ignore errors
+      }
+    } else if (deepestPath && advisory.patched_versions !== '<0.0.0') {
       const parts = deepestPath.split(' > ')
       const vulnerablePkg = advisory.module_name
 
@@ -452,6 +468,7 @@ const vulnerabilities = Object.entries(advisories)
     return {
       package: advisory.module_name,
       title: advisory.title,
+      severity: advisory.severity,
       vulnerable: advisory.vulnerable_versions,
       fixedIn: advisory.patched_versions,
       url: advisory.url,
@@ -465,6 +482,10 @@ const vulnerabilities = Object.entries(advisories)
       fixChain: fixChain,
     }
   })
+  .sort((a, b) => {
+    const severityOrder = { critical: 0, high: 1, moderate: 2, low: 3 }
+    return severityOrder[a.severity] - severityOrder[b.severity]
+  })
 
 fs.writeFileSync(outputFile, JSON.stringify(vulnerabilities, null, 2))
 
@@ -475,6 +496,16 @@ if (vulnerabilities.length > 0) {
     console.log(chalk.bold.cyan(`${vuln.package}`))
     if (vuln.title) {
       console.log(`  ${chalk.dim('Title:')}: ${vuln.title}`)
+    }
+    if (vuln.severity) {
+      const severityColors = {
+        low: chalk.gray,
+        moderate: chalk.yellow,
+        high: chalk.red,
+        critical: chalk.bgRed.white,
+      }
+      const colorFn = severityColors[vuln.severity] || chalk.white
+      console.log(`  ${chalk.gray('Severity:')} ${colorFn(vuln.severity.toUpperCase())}`)
     }
     console.log(`  ${chalk.gray('Vulnerable:')} ${chalk.red(vuln.vulnerable)}`)
     console.log(`  ${chalk.gray('Fixed in:')} ${chalk.green(vuln.fixedIn)}`)
