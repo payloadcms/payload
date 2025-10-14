@@ -247,7 +247,7 @@ export interface User {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -275,6 +275,7 @@ export interface User {
   unnamedTabSaveToJWTString?: string | null;
   unnamedTabSaveToJWTFalse?: string | null;
   custom?: string | null;
+  shouldNotShowInClientConfigUnlessAuthenticated?: string | null;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -348,7 +349,6 @@ export interface ApiKey {
  */
 export interface PublicUser {
   id: string;
-  shouldNotShowInClientConfigUnlessAuthenticated?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -545,6 +545,7 @@ export interface UsersSelect<T extends boolean = true> {
   unnamedTabSaveToJWTString?: T;
   unnamedTabSaveToJWTFalse?: T;
   custom?: T;
+  shouldNotShowInClientConfigUnlessAuthenticated?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
@@ -612,7 +613,6 @@ export interface ApiKeysSelect<T extends boolean = true> {
  * via the `definition` "public-users_select".
  */
 export interface PublicUsersSelect<T extends boolean = true> {
-  shouldNotShowInClientConfigUnlessAuthenticated?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
