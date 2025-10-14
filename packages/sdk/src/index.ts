@@ -366,18 +366,18 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
     return updateGlobal(this, options, init)
   }
 
-  verifyEmail<TSlug extends AuthCollectionSlug<T>>(
-    options: VerifyEmailOptions<T, TSlug>,
-    init?: RequestInit,
-  ): Promise<{ message: string }> {
-    return verifyEmail(this, options, init)
-  }
-
   logout<TSlug extends AuthCollectionSlug<T>>(
     options: LogoutOptions<T, TSlug>,
     init?: RequestInit,
   ): Promise<LogoutResult> {
     return logout(this, options, init)
+  }
+
+  verifyEmail<TSlug extends AuthCollectionSlug<T>>(
+    options: VerifyEmailOptions<T, TSlug>,
+    init?: RequestInit,
+  ): Promise<{ message: string }> {
+    return verifyEmail(this, options, init)
   }
 
 }

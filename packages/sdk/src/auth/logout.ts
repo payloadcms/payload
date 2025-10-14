@@ -8,8 +8,8 @@ export type LogoutOptions<
   T extends PayloadGeneratedTypes,
   TSlug extends AuthCollectionSlug<T>
 > = {
-  collection: TSlug
   allSessions?: boolean
+  collection: TSlug
 }
 
 export type LogoutResult = {
