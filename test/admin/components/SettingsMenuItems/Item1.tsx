@@ -3,7 +3,7 @@
 import { PopupList } from '@payloadcms/ui'
 import React from 'react'
 
-export const NavMenuItem1 = () => {
+export const SettingsMenuItem1 = () => {
   return (
     <PopupList.ButtonGroup>
       <PopupList.Button onClick={() => alert('System Settings')}>System Settings</PopupList.Button>

@@ -7,8 +7,8 @@ import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import { NavHamburger } from './NavHamburger/index.js'
-import { NavMenuButton } from './NavMenuButton/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
+import { SettingsMenuButton } from './SettingsMenuButton/index.js'
 import './index.scss'
 
 const baseClass = 'nav'
@@ -41,7 +41,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
 
   const {
     admin: {
-      components: { afterNavLinks, beforeNavLinks, logout, navMenuItems },
+      components: { afterNavLinks, beforeNavLinks, logout, settingsMenu },
     },
     collections,
     globals,
@@ -93,9 +93,9 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     },
   })
 
-  const renderedNavMenuItems =
-    navMenuItems && Array.isArray(navMenuItems)
-      ? navMenuItems.map((item, index) =>
+  const renderedSettingsMenu =
+    settingsMenu && Array.isArray(settingsMenu)
+      ? settingsMenu.map((item, index) =>
           RenderServerComponent({
             clientProps: {
               documentSubViewType,
@@ -103,7 +103,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
             },
             Component: item,
             importMap: payload.importMap,
-            key: `nav-menu-item-${index}`,
+            key: `settings-menu-item-${index}`,
             serverProps: {
               i18n,
               locale,
@@ -156,7 +156,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
           },
         })}
         <div className={`${baseClass}__controls`}>
-          <NavMenuButton navMenuItems={renderedNavMenuItems} />
+          <SettingsMenuButton settingsMenu={renderedSettingsMenu} />
           {LogoutComponent}
         </div>
       </nav>

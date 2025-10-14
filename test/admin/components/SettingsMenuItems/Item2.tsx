@@ -3,7 +3,7 @@
 import { PopupList } from '@payloadcms/ui'
 import React from 'react'
 
-export const NavMenuItem2 = () => {
+export const SettingsMenuItem2 = () => {
   return (
     <PopupList.ButtonGroup>
       <PopupList.Button onClick={() => alert('Manage Users')}>Manage Users</PopupList.Button>

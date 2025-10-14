@@ -4,16 +4,16 @@ import React, { Fragment } from 'react'
 
 import './index.scss'
 
-const baseClass = 'nav-menu-button'
+const baseClass = 'settings-menu-button'
 
-export type NavMenuButtonProps = {
-  navMenuItems?: React.ReactNode[]
+export type SettingsMenuButtonProps = {
+  settingsMenu?: React.ReactNode[]
 }
 
-export const NavMenuButton: React.FC<NavMenuButtonProps> = ({ navMenuItems }) => {
+export const SettingsMenuButton: React.FC<SettingsMenuButtonProps> = ({ settingsMenu }) => {
   const { t } = useTranslation()
 
-  if (!navMenuItems || navMenuItems.length === 0) {
+  if (!settingsMenu || settingsMenu.length === 0) {
     return null
   }
 
@@ -22,12 +22,12 @@ export const NavMenuButton: React.FC<NavMenuButtonProps> = ({ navMenuItems }) =>
       button={<GearIcon ariaLabel={t('general:menu')} />}
       className={baseClass}
       horizontalAlign="left"
-      id="nav-menu"
+      id="settings-menu"
       size="small"
       verticalAlign="bottom"
     >
-      {navMenuItems.map((item, i) => (
-        <Fragment key={`nav-menu-item-${i}`}>{item}</Fragment>
+      {settingsMenu.map((item, i) => (
+        <Fragment key={`settings-menu-item-${i}`}>{item}</Fragment>
       ))}
     </Popup>
   )

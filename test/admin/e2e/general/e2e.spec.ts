@@ -513,43 +513,43 @@ describe('General', () => {
       await expect(activeNavItems).toHaveCount(1)
     })
 
-    test('nav menu items — should show gear icon when navMenuItems are configured', async () => {
+    test('settings menu — should show gear icon when settingsMenu is configured', async () => {
       await page.goto(postsUrl.admin)
       await openNav(page)
-      const gearIcon = page.locator('.nav__controls .popup#nav-menu .gear')
+      const gearIcon = page.locator('.nav__controls .popup#settings-menu .gear')
       await expect(gearIcon).toBeVisible()
     })
 
-    test('nav menu items — should open popup when gear icon is clicked', async () => {
+    test('settings menu — should open popup when gear icon is clicked', async () => {
       await page.goto(postsUrl.admin)
       await openNav(page)
-      const gearButton = page.locator('.nav__controls .popup#nav-menu .popup-button')
+      const gearButton = page.locator('.nav__controls .popup#settings-menu .popup-button')
       await gearButton.click()
-      const popupContent = page.locator('.popup#nav-menu .popup__content')
+      const popupContent = page.locator('.popup#settings-menu .popup__content')
       await expect(popupContent).toBeVisible()
     })
 
-    test('nav menu items — should render custom navMenuItems components', async () => {
+    test('settings menu — should render custom settingsMenu components', async () => {
       await page.goto(postsUrl.admin)
       await openNav(page)
-      const gearButton = page.locator('.nav__controls .popup#nav-menu .popup-button')
+      const gearButton = page.locator('.nav__controls .popup#settings-menu .popup-button')
       await gearButton.click()
 
       // Check for the first group of buttons
       await expect(
-        page.locator('.popup#nav-menu .popup-button-list__button').first(),
+        page.locator('.popup#settings-menu .popup-button-list__button').first(),
       ).toContainText('System Settings')
-      await expect(page.locator('.popup#nav-menu .popup-button-list__button').nth(1)).toContainText(
-        'View Logs',
-      )
+      await expect(
+        page.locator('.popup#settings-menu .popup-button-list__button').nth(1),
+      ).toContainText('View Logs')
 
       // Check for the second group of buttons
-      await expect(page.locator('.popup#nav-menu .popup-button-list__button').nth(2)).toContainText(
-        'Manage Users',
-      )
-      await expect(page.locator('.popup#nav-menu .popup-button-list__button').nth(3)).toContainText(
-        'View Activity',
-      )
+      await expect(
+        page.locator('.popup#settings-menu .popup-button-list__button').nth(2),
+      ).toContainText('Manage Users')
+      await expect(
+        page.locator('.popup#settings-menu .popup-button-list__button').nth(3),
+      ).toContainText('View Activity')
     })
 
     test('breadcrumbs — should navigate from list to dashboard', async () => {
