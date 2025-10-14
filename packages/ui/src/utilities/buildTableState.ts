@@ -207,15 +207,15 @@ const buildTableState = async (
       collectionSlug,
       columns: columnsFromArgs,
       fieldPermissions: Array.isArray(collectionSlug)
-        ? undefined
-        : permissions?.collections?.[collectionSlug]?.fields,
+        ? true
+        : permissions.collections[collectionSlug].fields,
       i18n: req.i18n,
     }),
     data,
     enableRowSelections,
     fieldPermissions: Array.isArray(collectionSlug)
-      ? undefined
-      : permissions?.collections?.[collectionSlug]?.fields,
+      ? true
+      : permissions.collections[collectionSlug].fields,
     i18n: req.i18n,
     orderableFieldName,
     payload,
