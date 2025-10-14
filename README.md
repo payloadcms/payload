@@ -54,32 +54,32 @@ pnpx create-payload-app@latest
 You can deploy Payload serverlessly in one-click via Vercel and Cloudflare—giving everything you need without the hassle of the plumbing.
 
 ### Deploy on Cloudflare
+
 Fully self-contained — one click to deploy Payload with **Workers**, **R2** for uploads, and **D1** for a globally replicated database.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://dub.sh/payload-cloudflare)
 
-
 ### Deploy on Vercel
+
 All-in-one on Vercel — one click to deploy Payload with a **Next.js** front end, **Neon** database, and **Vercel Blob** for media storage.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://dub.sh/payload-vercel)
-
 
 ## One-click templates
 
 Jumpstart your next project with a ready-to-go template. These are **production-ready, end-to-end solutions** designed to get you to market fast. Build any kind of **website**, **ecommerce store**, **blog**, or **portfolio** — complete with a modern front end built using **React Server Components** and **Tailwind**.
 
-
 #### 🌐 [Website](https://github.com/payloadcms/payload/tree/main/templates/website)
+
 #### 🛍️ [Ecommerce](https://github.com/payloadcms/payload/tree/main/templates/ecommerce) 🎉 _**NEW**_ 🎉
 
 We're constantly adding more templates to our [**Templates Directory**](https://github.com/payloadcms/payload/tree/main/templates).  
 If you maintain your own, add the `payload-template` topic to your GitHub repo so others can discover it.
 
 **🔗 Explore more:**
+
 - [Official Templates](https://github.com/payloadcms/payload/tree/main/templates)
 - [Community Templates](https://github.com/topics/payload-template)
-
 
 ## ✨ Payload Features
 

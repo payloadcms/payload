@@ -93,6 +93,11 @@ describe('Auth', () => {
 
       await expect(page.locator('.create-first-user')).toBeVisible()
 
+      // Check that custom view override is visible
+      await expect(page.locator('#custom-view-override')).toHaveText(
+        'Custom CreateFirstUser View Override',
+      )
+
       await waitForVisibleAuthFields()
 
       // forget to fill out confirm password

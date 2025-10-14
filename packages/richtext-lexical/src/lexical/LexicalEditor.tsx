@@ -14,6 +14,7 @@ import type { LexicalProviderProps } from './LexicalProvider.js'
 import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
 import './LexicalEditor.scss'
 import { EditorPlugin } from './EditorPlugin.js'
+import { ClipboardPlugin } from './plugins/ClipboardPlugin/index.js'
 import { DecoratorPlugin } from './plugins/DecoratorPlugin/index.js'
 import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/index.js'
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
@@ -113,6 +114,7 @@ export const LexicalEditor: React.FC<
         <NormalizeSelectionPlugin />
         {isEditable && <InsertParagraphAtEndPlugin />}
         <DecoratorPlugin />
+        <ClipboardPlugin />
         <TextPlugin features={editorConfig.features} />
         <SelectAllPlugin />
         {isEditable && (
