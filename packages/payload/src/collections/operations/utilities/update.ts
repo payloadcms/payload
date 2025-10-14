@@ -241,7 +241,11 @@ export const updateDocument = async <
         collectionConfig.versions.drafts &&
         !collectionConfig.versions.drafts.validate) ||
       // Skip validation for trash operations since they're just metadata updates
-      Boolean(data?.deletedAt),
+      (collectionConfig.trash &&
+        (Boolean(data?.deletedAt) ||
+          // Skip validation when restoring from trash, but only if not publishing
+          // (if publishing, we need full validation)
+          (Boolean(originalDoc?.deletedAt) && data._status !== 'published'))),
   }
 
   if (publishSpecificLocale) {
