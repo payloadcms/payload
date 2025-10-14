@@ -3,11 +3,7 @@
 import { execSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'url'
 import chalk from 'chalk'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 // Simple semver check functions - avoid external dependency
 function satisfies(version, range) {
@@ -534,7 +530,9 @@ if (vulnerabilities.length > 0) {
       }
     } else if (!vuln.hasDirectUpdate) {
       if (vuln.blockingDep) {
-        console.log(`  ${chalk.gray('Fix:')} ${chalk.red('No fix available')} (blocked by ${chalk.red(vuln.blockingDep)})`)
+        console.log(
+          `  ${chalk.gray('Fix:')} ${chalk.red('No fix available')} (blocked by ${chalk.red(vuln.blockingDep)})`,
+        )
       } else {
         console.log(`  ${chalk.gray('Fix:')} ${chalk.red('No fix available')}`)
       }
