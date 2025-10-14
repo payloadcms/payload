@@ -132,6 +132,7 @@ npm run payload migrate:create optional-name-here
 Flags:
 
 - `--skip-empty`: with Postgres, it skips the "no schema changes detected. Would you like to create a blank migration file?" prompt which can be useful for generating migration in CI.
+- `--check`: with Postgres, it only checks if new migrations are needed (exits with code 1 if needed and 0 if up-to-date) without writing any files. Useful for CI checks.
 - `--force-accept-warning`: accepts any command prompts, creates a blank migration even if there weren't any changes to the schema.
 
 ### Status
