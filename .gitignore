@@ -6,6 +6,10 @@ dist
 /.idea/runConfigurations/_template*
 !/.idea/payload.iml
 
+# Local AI Agent files
+AGENTS.local.md
+CLAUDE.local.md
+
 # Custom actions
 !.github/actions/**/dist
 
