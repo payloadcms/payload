@@ -44,6 +44,11 @@ export const buildDrizzleTable: BuildDrizzleTable = ({ adapter, locales, rawTabl
         break
       }
 
+      case 'numeric': {
+        columns[key] = numeric(column.name, { mode: 'number' })
+        break
+      }
+
       case 'serial': {
         columns[key] = integer(column.name)
         break
