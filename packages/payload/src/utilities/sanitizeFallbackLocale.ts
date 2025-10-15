@@ -28,7 +28,7 @@ export const sanitizeFallbackLocale = ({
 
   if (
     fallbackLocale &&
-    !['false', 'none', 'null'].includes(!Array.isArray(fallbackLocale) ? fallbackLocale : '')
+    (Array.isArray(fallbackLocale) || !['false', 'none', 'null'].includes(fallbackLocale))
   ) {
     hasFallbackLocale = true
   }
