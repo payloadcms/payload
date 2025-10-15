@@ -12,14 +12,11 @@ import { duplicateOperation } from '../operations/duplicate.js'
 
 export const duplicateHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
-  const { searchParams } = req
+  const { query, searchParams } = req
   const depth = searchParams.get('depth')
   // draft defaults to true, unless explicitly set requested as false to prevent the newly duplicated document from being published
   const draft = searchParams.get('draft') !== 'false'
-  const selectedLocales = (searchParams.get('selectedLocales') || '')
-    .replace(/^\[|\]$/g, '')
-    .split(',')
-    .map((s) => s.trim())
+  const selectedLocales = query.selectedLocales as string[] | undefined
 
   const doc = await duplicateOperation({
     id,

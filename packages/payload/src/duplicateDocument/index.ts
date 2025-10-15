@@ -10,7 +10,7 @@ import { NotFound } from '../errors/NotFound.js'
 import { afterRead } from '../fields/hooks/afterRead/index.js'
 import { beforeDuplicate } from '../fields/hooks/beforeDuplicate/index.js'
 import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
-import { filterLocales } from '../utilities/filterLocalizedData.js'
+import { filterDataToSelectedLocales } from '../utilities/filterLocalizedData.js'
 import { getLatestCollectionVersion } from '../versions/getLatestCollectionVersion.js'
 
 type GetDuplicateDocumentArgs = {
@@ -63,8 +63,11 @@ export const getDuplicateDocumentData = async ({
   })
 
   if (selectedLocales && selectedLocales.length > 0 && duplicatedFromDocWithLocales) {
-    const filteredDoc = filterLocales(duplicatedFromDocWithLocales, selectedLocales)
-    duplicatedFromDocWithLocales = filteredDoc as typeof duplicatedFromDocWithLocales
+    duplicatedFromDocWithLocales = filterDataToSelectedLocales({
+      data: duplicatedFromDocWithLocales,
+      fields: collectionConfig.fields,
+      selectedLocales,
+    })
   }
 
   if (!duplicatedFromDocWithLocales && !hasWherePolicy) {

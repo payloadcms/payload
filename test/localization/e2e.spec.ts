@@ -723,7 +723,7 @@ describe('Localization', () => {
   })
 
   describe('duplicate selected locales', () => {
-    test('should duplicate only selected locales', async () => {
+    test('should duplicate document with data from selected locales', async () => {
       await page.goto(urlPostsWithDrafts.create)
       await changeLocale(page, defaultLocale)
       await fillValues({ title: 'English Title' })
