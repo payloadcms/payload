@@ -127,7 +127,7 @@
     "@babel/preset-env": "7.27.2",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@next/eslint-plugin-next": "15.4.4",
+    "@next/eslint-plugin-next": "15.5.5",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
     "@types/react": "19.1.12",
@@ -141,7 +141,7 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^15.2.3",
+    "next": "^15.5.5",
     "payload": "workspace:*"
   },
   "engines": {
