@@ -223,7 +223,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                     const sizeFilename = data?.sizes?.[size.name]?.filename
 
                     if (sizeFilename) {
-                      return `${config.serverURL}${config.routes?.api}/${collection.slug}/file/${sizeFilename}`
+                      return `${config.serverURL}${config.routes?.api}/${collection.slug}/file/${encodeURIComponent(sizeFilename)}`
                     }
 
                     return null
