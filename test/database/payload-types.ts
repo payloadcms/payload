@@ -212,6 +212,7 @@ export interface Post {
   categoryTitle?: string | null;
   categorySimpleText?: string | null;
   categories?: (string | Category)[] | null;
+  categoriesCustomID?: (number | CategoriesCustomId)[] | null;
   categoryPoly?: {
     relationTo: 'categories';
     value: string | Category;
@@ -884,6 +885,7 @@ export interface PostsSelect<T extends boolean = true> {
   categoryTitle?: T;
   categorySimpleText?: T;
   categories?: T;
+  categoriesCustomID?: T;
   categoryPoly?: T;
   categoryPolyMany?: T;
   categoryCustomID?: T;

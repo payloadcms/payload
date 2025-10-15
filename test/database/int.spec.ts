@@ -212,6 +212,18 @@ describe('database', () => {
       expect(duplicate.arrayWithIDs[0].id).not.toStrictEqual(arrayRowID)
       expect(duplicate.blocksWithIDs[0].id).not.toStrictEqual(blockID)
     })
+
+    it('should properly give the result with hasMany relationships with custom numeric IDs', async () => {
+      await payload.create({ collection: 'categories-custom-id', data: { id: 9999 } })
+      const res = await payload.create({
+        collection: 'posts',
+        data: { title: 'post', categoriesCustomID: [9999] },
+        depth: 0,
+      })
+      expect(res.categoriesCustomID[0]).toBe(9999)
+      const resFind = await payload.findByID({ collection: 'posts', id: res.id, depth: 0 })
+      expect(resFind.categoriesCustomID[0]).toBe(9999)
+    })
   })
 
   describe('timestamps', () => {
