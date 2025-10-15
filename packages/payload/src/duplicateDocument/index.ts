@@ -10,7 +10,7 @@ import { NotFound } from '../errors/NotFound.js'
 import { afterRead } from '../fields/hooks/afterRead/index.js'
 import { beforeDuplicate } from '../fields/hooks/beforeDuplicate/index.js'
 import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
-import { filterDataToSelectedLocales } from '../utilities/filterLocalizedData.js'
+import { filterDataToSelectedLocales } from '../utilities/filterDataToSelectedLocales.js'
 import { getLatestCollectionVersion } from '../versions/getLatestCollectionVersion.js'
 
 type GetDuplicateDocumentArgs = {
