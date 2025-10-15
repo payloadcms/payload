@@ -75,6 +75,47 @@ describe('folders', () => {
 
       expect(parentFolderQuery.documentsAndFolders?.docs).toHaveLength(2)
     })
+
+    it('should populate subfolders and documents for folder by ID', async () => {
+      const parentFolder = await payload.create({
+        collection: 'payload-folders',
+        data: { name: 'Parent Folder' },
+      })
+      const childFolder = await payload.create({
+        collection: 'payload-folders',
+        data: { name: 'Child Folder', folder: parentFolder.id, folderType: ['posts'] },
+      })
+      const childDocument = await payload.create({
+        collection: 'posts',
+        data: { title: 'Child Document', folder: parentFolder.id, folderType: ['posts'] },
+      })
+      const parentFolderQuery = await payload.findByID({
+        collection: 'payload-folders',
+        id: parentFolder.id,
+        joins: {
+          documentsAndFolders: {
+            limit: 100000000,
+            sort: 'name',
+            where: {
+              or: [
+                {
+                  and: [
+                    { relationTo: { equals: 'payload-folders' } },
+                    {
+                      or: [{ folderType: { in: ['posts'] } }, { folderType: { exists: false } }],
+                    },
+                  ],
+                },
+                {
+                  and: [{ relationTo: { equals: 'posts' } }],
+                },
+              ],
+            },
+          },
+        },
+      })
+      expect(parentFolderQuery.documentsAndFolders?.docs).toHaveLength(2)
+    })
   })
 
   describe('folder > file querying', () => {
