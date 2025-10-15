@@ -6,29 +6,33 @@ import type { SanitizedConfig } from '../config/types.js'
  */
 export function populateLocalizedMeta(args: {
   config: SanitizedConfig
-  data: Record<string, unknown>
+  previousMeta: LocalizedMeta
   publishSpecificLocale?: string
+  status: 'draft' | 'published'
 }): LocalizedMeta {
-  const { config, data, publishSpecificLocale } = args
+  const { config, previousMeta, publishSpecificLocale, status } = args
 
   if (!config.localization) {
     return {}
   }
 
-  let localizedMeta: LocalizedMeta = {}
   const now = new Date().toISOString()
+  const localizedMeta: LocalizedMeta = {}
 
-  if (!publishSpecificLocale) {
-    for (const code of config.localization.localeCodes) {
-      const status = data._status === 'published' ? 'published' : 'draft'
-      localizedMeta[code] = { status, updatedAt: now }
-    }
-  } else {
-    const incomingLocale = String(publishSpecificLocale)
-    const existing = (data.localizedMeta ?? {}) as LocalizedMeta
-    localizedMeta = {
-      ...existing,
-      [incomingLocale]: { status: 'published', updatedAt: now },
+  for (const code of config.localization.localeCodes) {
+    if (publishSpecificLocale) {
+      // Publishing specific locale: only that locale gets published, others stay as-is or default to draft
+      if (code === publishSpecificLocale) {
+        localizedMeta[code] = { status: 'published', updatedAt: now }
+      } else {
+        localizedMeta[code] = previousMeta?.[code] || { status: 'draft', updatedAt: now }
+      }
+    } else {
+      // Publishing all locales: use the status parameter
+      localizedMeta[code] = {
+        status: status === 'published' ? 'published' : 'draft',
+        updatedAt: now,
+      }
     }
   }
 

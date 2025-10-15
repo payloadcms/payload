@@ -146,6 +146,24 @@ export const updateDocument = async <
   }
 
   // /////////////////////////////////////
+  // Handle localized meta
+  // /////////////////////////////////////
+
+  if (
+    config.experimental?.localizeMeta &&
+    config.localization &&
+    data._status &&
+    config.localization.locales.length > 0
+  ) {
+    data.localizedMeta = populateLocalizedMeta({
+      config,
+      previousMeta: originalDoc.localizedMeta,
+      publishSpecificLocale,
+      status: data._status,
+    })
+  }
+
+  // /////////////////////////////////////
   // Delete any associated files
   // /////////////////////////////////////
 
@@ -289,27 +307,6 @@ export const updateDocument = async <
     dataToUpdate.hash = hash
     delete dataToUpdate.password
     delete data.password
-  }
-
-  // /////////////////////////////////////
-  // Handle localized meta
-  // /////////////////////////////////////
-
-  if (
-    config.localization &&
-    config.localization.locales.length > 0 &&
-    config.experimental?.localizeMeta
-  ) {
-    const localizedMeta = populateLocalizedMeta({
-      config,
-      data: result,
-      publishSpecificLocale,
-    })
-    dataToUpdate.localizedMeta = localizedMeta
-    result.localizedMeta = localizedMeta
-    if (versionSnapshotResult) {
-      versionSnapshotResult.localizedMeta = localizedMeta
-    }
   }
 
   // /////////////////////////////////////

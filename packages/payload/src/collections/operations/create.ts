@@ -139,6 +139,24 @@ export const createOperation = async <
     }
 
     // /////////////////////////////////////
+    // Handle localized meta
+    // /////////////////////////////////////
+
+    if (
+      config.experimental?.localizeMeta &&
+      config.localization &&
+      data._status &&
+      config.localization.locales.length > 0
+    ) {
+      data.localizedMeta = populateLocalizedMeta({
+        config,
+        previousMeta: data.localizedMeta,
+        publishSpecificLocale,
+        status: data._status,
+      })
+    }
+
+    // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
@@ -242,22 +260,6 @@ export const createOperation = async <
 
     if (!collectionConfig.upload.disableLocalStorage) {
       await uploadFiles(payload, filesToUpload, req)
-    }
-
-    // /////////////////////////////////////
-    // Handle localized meta
-    // /////////////////////////////////////
-
-    if (
-      config.localization &&
-      config.localization.locales.length > 0 &&
-      config.experimental?.localizeMeta
-    ) {
-      resultWithLocales.localizedMeta = populateLocalizedMeta({
-        config,
-        data: resultWithLocales,
-        publishSpecificLocale,
-      })
     }
 
     // /////////////////////////////////////

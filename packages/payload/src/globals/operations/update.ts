@@ -168,6 +168,24 @@ export const updateOperation = async <
     })
 
     // /////////////////////////////////////
+    // Handle localized meta
+    // /////////////////////////////////////
+
+    if (
+      req.payload.config.experimental?.localizeMeta &&
+      req.payload.config.localization &&
+      data._status &&
+      req.payload.config.localization.locales.length > 0
+    ) {
+      data.localizedMeta = populateLocalizedMeta({
+        config: req.payload.config,
+        previousMeta: originalDoc.localizedMeta,
+        publishSpecificLocale,
+        status: data._status,
+      })
+    }
+
+    // /////////////////////////////////////
     // beforeValidate - Fields
     // /////////////////////////////////////
 
@@ -257,26 +275,6 @@ export const updateOperation = async <
       ...beforeChangeArgs,
       docWithLocales: publishedDocWithLocales,
     })
-
-    // /////////////////////////////////////
-    // Handle localized meta
-    // /////////////////////////////////////
-
-    if (
-      req.payload.config.localization &&
-      req.payload.config.localization.locales.length > 0 &&
-      req.payload.config.experimental?.localizeMeta
-    ) {
-      const localizedMeta = populateLocalizedMeta({
-        config: req.payload.config,
-        data: result,
-        publishSpecificLocale,
-      })
-      result.localizedMeta = localizedMeta
-      if (versionSnapshotResult) {
-        versionSnapshotResult.localizedMeta = localizedMeta
-      }
-    }
 
     // /////////////////////////////////////
     // Update
