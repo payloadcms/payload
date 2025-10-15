@@ -1,9 +1,13 @@
 // @ts-strict-ignore
-import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
+import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { AccessResult } from '../../config/types.js'
-import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.js'
+import type {
+  FindGlobalVersionsArgs,
+  FindVersionsArgs,
+  TypeWithVersion,
+} from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
+import type { JsonObject, PayloadRequest, SelectType, Where } from '../../types/index.js'
 
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -12,9 +16,9 @@ import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.j
 import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from './getQueryDraftsSelect.js'
 
-type Arguments<T> = {
+type Arguments<T extends JsonObject> = {
   accessResult: AccessResult
-  doc: T
+  doc: TypeWithVersion<T>['version']
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   entityType: 'collection' | 'global'
   overrideAccess: boolean
@@ -22,7 +26,7 @@ type Arguments<T> = {
   select?: SelectType
 }
 
-export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
+export const replaceWithDraftIfAvailable = async <T extends JsonObject>({
   accessResult,
   doc,
   entity,
@@ -85,7 +89,7 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     where: combineQueries(queryToBuild, versionAccessResult!),
   }
 
-  let versionDocs
+  let versionDocs: TypeWithVersion<T>[]
   if (entityType === 'global') {
     versionDocs = (await req.payload.db.findGlobalVersions<T>(findVersionsArgs)).docs
   } else {
@@ -108,15 +112,15 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
 
   // handle when .version wasn't selected due to projection
   if (!draft.version) {
-    draft.version = {} as T
+    draft.version = {} as TypeWithVersion<T>['version']
   }
 
   // Lift locale meta from version data if available
-  const localizedMeta = (draft.version as { localizedMeta?: any }).localizedMeta || {}
+  const localizedMeta = draft.version.localizedMeta
 
-  if (locale && localizedMeta[locale]) {
-    ;(draft.version as { _status?: string })['_status'] = localizedMeta[locale].status
-    ;(draft.version as { updatedAt?: string }).updatedAt = localizedMeta[locale].updatedAt
+  if (locale && localizedMeta && localizedMeta[locale]) {
+    draft.version._status = localizedMeta[locale].status
+    draft.version.updatedAt = localizedMeta[locale].updatedAt
   }
 
   // Disregard all other draft content at this point,

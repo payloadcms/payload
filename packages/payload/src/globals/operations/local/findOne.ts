@@ -1,3 +1,5 @@
+import type { DeepPartial } from 'ts-essentials'
+
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
   Document,
@@ -7,7 +9,7 @@ import type {
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type { SelectFromGlobalSlug } from '../../config/types.js'
+import type { DataFromGlobalSlug, SelectFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -25,7 +27,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * You may pass the document data directly which will skip the `db.findOne` database query.
    * This is useful if you want to use this endpoint solely for running hooks and populating data.
    */
-  data?: Record<string, unknown>
+  data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
@@ -106,9 +108,9 @@ export async function findOneGlobalLocal<
     throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
 
-  return findOneOperation({
-    slug: globalSlug as string,
-    data,
+  return findOneOperation<TransformGlobalWithSelect<TSlug, TSelect>>({
+    slug: globalSlug,
+    data: data as TransformGlobalWithSelect<TSlug, TSelect>,
     depth,
     draft,
     flattenLocales,

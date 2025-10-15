@@ -3,6 +3,7 @@ import type { CollectionSlug, GlobalSlug, Job } from '../index.js'
 import type {
   Document,
   JoinQuery,
+  JsonObject,
   Payload,
   PayloadRequest,
   SelectType,
@@ -278,7 +279,7 @@ export type FindVersionsArgs = {
   collection: CollectionSlug
 } & BaseVersionArgs
 
-export type FindVersions = <T = TypeWithID>(
+export type FindVersions = <T extends JsonObject = TypeWithID>(
   args: FindVersionsArgs,
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
@@ -371,7 +372,7 @@ export type UpdateGlobal = <T extends Record<string, unknown> = any>(
 ) => Promise<T>
 // export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
-export type FindGlobalVersions = <T = TypeWithID>(
+export type FindGlobalVersions = <T extends JsonObject = TypeWithID>(
   args: FindGlobalVersionsArgs,
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 

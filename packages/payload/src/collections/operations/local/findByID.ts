@@ -14,7 +14,7 @@ import type {
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type { SelectFromCollectionSlug } from '../../config/types.js'
+import type { SelectFromCollectionSlug, TypeWithID } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -45,7 +45,7 @@ export type Options<
    * You may pass the document data directly which will skip the `db.findOne` database query.
    * This is useful if you want to use this endpoint solely for running hooks and populating data.
    */
-  data?: Record<string, unknown>
+  data?: Record<string, unknown> & TypeWithID
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */

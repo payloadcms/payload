@@ -127,7 +127,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       throw new Forbidden(req.t)
     }
 
-    if (collectionConfig.trash && doc?.deletedAt) {
+    if (collectionConfig.trash && doc && 'deletedAt' in doc && doc.deletedAt) {
       throw new APIError(
         `Cannot restore a version of a trashed document (ID: ${parentDocID}). Restore the document first.`,
         httpStatus.FORBIDDEN,

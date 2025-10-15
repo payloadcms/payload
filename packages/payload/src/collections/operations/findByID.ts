@@ -1,4 +1,4 @@
-import type { FindOneArgs } from '../../database/types.js'
+import type { FindOneArgs, TypeWithVersion } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
 import type {
   ApplyDisableErrors,
@@ -29,14 +29,14 @@ import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'
 
-export type FindByIDArgs = {
+export type FindByIDArgs<TSlug extends CollectionSlug = CollectionSlug> = {
   collection: Collection
   currentDepth?: number
   /**
    * You may pass the document data directly which will skip the `db.findOne` database query.
    * This is useful if you want to use this endpoint solely for running hooks and populating data.
    */
-  data?: Record<string, unknown>
+  data?: DataFromCollectionSlug<TSlug> & TypeWithID
   depth?: number
   disableErrors?: boolean
   draft?: boolean
@@ -56,7 +56,7 @@ export const findByIDOperation = async <
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<TSlug>,
 >(
-  incomingArgs: FindByIDArgs,
+  incomingArgs: FindByIDArgs<TSlug>,
 ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
   let args = incomingArgs
 
@@ -169,8 +169,9 @@ export const findByIDOperation = async <
       throw new NotFound(t)
     }
 
-    let result: DataFromCollectionSlug<TSlug> =
-      (args.data as DataFromCollectionSlug<TSlug>) ?? (await req.payload.db.findOne(findOneArgs))!
+    let result =
+      (args.data as DataFromCollectionSlug<TSlug>) ??
+      (await req.payload.db.findOne<DataFromCollectionSlug<TSlug>>(findOneArgs))!
 
     if (!result) {
       if (!disableErrors) {
@@ -231,7 +232,7 @@ export const findByIDOperation = async <
         // swallow error
       }
 
-      result._isLocked = !!lockStatus
+      result._isLocked = Boolean(lockStatus)
       result._userEditing = lockStatus?.user?.value ?? null
     }
 
@@ -242,7 +243,7 @@ export const findByIDOperation = async <
     if (collectionConfig.versions?.drafts && draftEnabled) {
       result = await replaceWithDraftIfAvailable({
         accessResult,
-        doc: result,
+        doc: result as TypeWithVersion<DataFromCollectionSlug<TSlug>>['version'],
         entity: collectionConfig,
         entityType: 'collection',
         overrideAccess,

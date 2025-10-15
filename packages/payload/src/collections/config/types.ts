@@ -753,10 +753,7 @@ export type LocalizedMeta = {
 }
 
 export type TypeWithID = {
-  deletedAt?: null | string
-  docId?: any
   id: number | string
-  localizedMeta?: any
 }
 
 export type TypeWithTimestamps = {
