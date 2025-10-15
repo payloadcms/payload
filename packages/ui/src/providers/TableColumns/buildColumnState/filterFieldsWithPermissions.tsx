@@ -68,7 +68,10 @@ export const filterFieldsWithPermissions = <T extends ClientField | Field = Clie
     }
 
     if (fieldAffectsData(field)) {
-      if (fieldPermissions[field.name] === true || fieldPermissions[field.name]?.read) {
+      const fieldPermission = fieldPermissions[field.name]
+      // Always allow ID fields, or if explicitly granted (true or { read: true })
+      // undefined means field is not in permissions object = denied
+      if (fieldIsID(field) || fieldPermission === true || fieldPermission?.read === true) {
         acc.push(field)
       }
       return acc
