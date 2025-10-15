@@ -1049,6 +1049,16 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
     return t('validation:invalidInput')
   }
 
+  // Validate longitude bounds (-180 to 180)
+  if (value[0] && !Number.isNaN(lng) && (lng < -180 || lng > 180)) {
+    return t('validation:longitudeOutOfBounds')
+  }
+
+  // Validate latitude bounds (-90 to 90)
+  if (value[1] && !Number.isNaN(lat) && (lat < -90 || lat > 90)) {
+    return t('validation:latitudeOutOfBounds')
+  }
+
   return true
 }
 
