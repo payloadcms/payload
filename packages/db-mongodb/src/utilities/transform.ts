@@ -99,7 +99,11 @@ const convertRelationshipValue = ({
       return value.toHexString()
     }
 
-    if (customIDField?.type === 'number' && adapter.useBigIntForNumberIDs) {
+    if (
+      customIDField?.type === 'number' &&
+      typeof value === 'bigint' &&
+      adapter.useBigIntForNumberIDs
+    ) {
       return Number(value)
     }
 
