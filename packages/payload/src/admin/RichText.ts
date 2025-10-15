@@ -60,6 +60,7 @@ export type AfterChangeRichTextHookArgs<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TSiblingData = any,
 > = {
+  draft?: boolean
   /** A string relating to which operation the field type is currently executing within. */
   operation: 'create' | 'update'
   /** The document before changes were applied. */
@@ -131,6 +132,7 @@ export type BaseRichTextHookArgs<
   context: RequestContext
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
   data?: Partial<TData>
+  draft?: boolean
   /** The field which the hook is running against. */
   field: FieldAffectingData
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */

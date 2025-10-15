@@ -24,6 +24,7 @@ type Args<T> = {
    * The original data (not modified by any hooks)
    */
   doc: T
+  draft: boolean
   field: Field | TabAsField
   fieldIndex: number
   global: null | SanitizedGlobalConfig
@@ -57,6 +58,7 @@ export const promise = async <T>({
   context,
   data,
   doc,
+  draft,
   field,
   fieldIndex,
   global,
@@ -291,6 +293,7 @@ export const promise = async <T>({
           collection,
           context,
           data: data as Partial<T>,
+          draft,
           field,
           global,
           indexPath: indexPathSegments,
@@ -511,6 +514,7 @@ export const promise = async <T>({
             collection,
             context,
             data: data as Partial<T>,
+            draft,
             field,
             global,
             indexPath: indexPathSegments,

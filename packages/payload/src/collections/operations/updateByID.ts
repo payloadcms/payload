@@ -61,6 +61,7 @@ export const updateByIDOperation = async <
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    const shouldSaveDraft = Boolean(args.draft && args.collection.config.versions.drafts)
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -73,6 +74,7 @@ export const updateByIDOperation = async <
             args,
             collection: args.collection.config,
             context: args.req.context,
+            draft: shouldSaveDraft,
             operation: 'update',
             req: args.req,
           })) || args
@@ -89,7 +91,6 @@ export const updateByIDOperation = async <
       collection: { config: collectionConfig },
       collection,
       depth,
-      draft: draftArg = false,
       overrideAccess,
       overrideLock,
       overwriteExistingFiles = false,
@@ -204,7 +205,7 @@ export const updateByIDOperation = async <
       data: deepCopyObjectSimple(newFileData),
       depth: depth!,
       docWithLocales,
-      draftArg,
+      draftArg: shouldSaveDraft,
       fallbackLocale: fallbackLocale!,
       filesToUpload,
       locale: locale!,

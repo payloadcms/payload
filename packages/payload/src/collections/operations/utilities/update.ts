@@ -96,8 +96,7 @@ export const updateDocument = async <
   showHiddenFields,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
-  const shouldSaveDraft =
-    Boolean(draftArg && collectionConfig.versions.drafts) && data._status !== 'published'
+  const shouldSaveDraft = draftArg && data._status !== 'published'
   const shouldSavePassword = Boolean(
     password &&
       collectionConfig.auth &&
@@ -167,6 +166,7 @@ export const updateDocument = async <
     context: req.context,
     data,
     doc: originalDoc,
+    draft: shouldSaveDraft,
     global: null,
     operation: 'update',
     overrideAccess,
@@ -184,6 +184,7 @@ export const updateDocument = async <
           collection: collectionConfig,
           context: req.context,
           data,
+          draft: shouldSaveDraft,
           operation: 'update',
           originalDoc,
           req,
@@ -210,6 +211,7 @@ export const updateDocument = async <
           collection: collectionConfig,
           context: req.context,
           data,
+          draft: shouldSaveDraft,
           operation: 'update',
           originalDoc,
           req,
@@ -374,6 +376,7 @@ export const updateDocument = async <
     context: req.context,
     data,
     doc: result,
+    draft: shouldSaveDraft,
     global: null,
     operation: 'update',
     previousDoc: originalDoc,
@@ -392,6 +395,7 @@ export const updateDocument = async <
           context: req.context,
           data,
           doc: result,
+          draft: shouldSaveDraft,
           operation: 'update',
           previousDoc: originalDoc,
           req,
