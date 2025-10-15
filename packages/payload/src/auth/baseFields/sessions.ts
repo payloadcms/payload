@@ -18,6 +18,19 @@ export const sessionsFieldConfig: ArrayField = {
       type: 'text',
       required: true,
     },
+
+    // Considering the user may call login from the server side
+    // where IP or user agent may not be available
+    // we won't make these fields required.
+    {
+      name: 'ip',
+      type: 'text',
+    },
+    {
+      name: 'userAgent',
+      type: 'text',
+    },
+
     {
       name: 'createdAt',
       type: 'date',
