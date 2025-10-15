@@ -38,6 +38,7 @@ const processRelationshipValues = (
   config: SanitizedConfig,
   operation: 'read' | 'write',
   validateRelationships: boolean,
+  adapter: MongooseAdapter,
 ) => {
   return items.map((item) => {
     // Handle polymorphic relationships
@@ -47,6 +48,7 @@ const processRelationshipValues = (
         return {
           relationTo: item.relationTo,
           value: convertRelationshipValue({
+            adapter,
             operation,
             relatedCollection,
             validateRelationships,
@@ -62,6 +64,7 @@ const processRelationshipValues = (
       const relatedCollection = config.collections?.find(({ slug }) => slug === field.relationTo)
       if (relatedCollection) {
         return convertRelationshipValue({
+          adapter,
           operation,
           relatedCollection,
           validateRelationships,
@@ -75,11 +78,13 @@ const processRelationshipValues = (
 }
 
 const convertRelationshipValue = ({
+  adapter,
   operation,
   relatedCollection,
   validateRelationships,
   value,
 }: {
+  adapter: MongooseAdapter
   operation: Args['operation']
   relatedCollection: CollectionConfig
   validateRelationships?: boolean
@@ -92,6 +97,10 @@ const convertRelationshipValue = ({
   if (operation === 'read') {
     if (isObjectID(value)) {
       return value.toHexString()
+    }
+
+    if (customIDField?.type === 'number' && adapter.useBigIntForNumberIDs) {
+      return Number(value)
     }
 
     return value
@@ -116,6 +125,7 @@ const convertRelationshipValue = ({
 }
 
 const sanitizeRelationship = ({
+  adapter,
   config,
   field,
   locale,
@@ -124,6 +134,7 @@ const sanitizeRelationship = ({
   validateRelationships,
   value,
 }: {
+  adapter: MongooseAdapter
   config: SanitizedConfig
   field: JoinField | RelationshipField | UploadField
   locale?: string
@@ -175,6 +186,7 @@ const sanitizeRelationship = ({
           return {
             relationTo: val.relationTo,
             value: convertRelationshipValue({
+              adapter,
               operation,
               relatedCollection: relatedCollectionForSingleValue,
               validateRelationships,
@@ -186,6 +198,7 @@ const sanitizeRelationship = ({
 
       if (relatedCollection) {
         return convertRelationshipValue({
+          adapter,
           operation,
           relatedCollection,
           validateRelationships,
@@ -204,6 +217,7 @@ const sanitizeRelationship = ({
       result = {
         relationTo: value.relationTo,
         value: convertRelationshipValue({
+          adapter,
           operation,
           relatedCollection,
           validateRelationships,
@@ -215,6 +229,7 @@ const sanitizeRelationship = ({
   // Handle has one
   else if (relatedCollection) {
     result = convertRelationshipValue({
+      adapter,
       operation,
       relatedCollection,
       validateRelationships,
@@ -657,6 +672,7 @@ export const transform = ({
                 config,
                 operation,
                 validateRelationships,
+                adapter,
               )
               $addToSet[`${parentPath}${field.name}.${localeKey}`] = { $each: processedLocaleItems }
             }
@@ -675,6 +691,7 @@ export const transform = ({
             config,
             operation,
             validateRelationships,
+            adapter,
           )
           $addToSet[`${parentPath}${field.name}`] = { $each: processedItems }
           delete ref[field.name]
@@ -721,6 +738,7 @@ export const transform = ({
                 config,
                 operation,
                 validateRelationships,
+                adapter,
               )
               $pull[`${parentPath}${field.name}.${localeKey}`] = { $in: processedLocaleItems }
             }
@@ -739,6 +757,7 @@ export const transform = ({
             config,
             operation,
             validateRelationships,
+            adapter,
           )
           $pull[`${parentPath}${field.name}`] = { $in: processedItems }
           delete ref[field.name]
@@ -792,6 +811,7 @@ export const transform = ({
           const value = fieldRef[code]
           if (value) {
             sanitizeRelationship({
+              adapter,
               config,
               field,
               locale: code,
@@ -805,6 +825,7 @@ export const transform = ({
       } else {
         // handle non-localized relationships
         sanitizeRelationship({
+          adapter,
           config,
           field,
           locale: undefined,
