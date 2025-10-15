@@ -495,7 +495,7 @@ if (vulnerabilities.length > 0) {
   for (const vuln of vulnerabilities) {
     console.log(chalk.bold.cyan(`${vuln.package}`))
     if (vuln.title) {
-      console.log(`  ${chalk.dim('Title:')}: ${vuln.title}`)
+      console.log(`  ${chalk.dim('Title:')} ${vuln.title}`)
     }
     if (vuln.severity) {
       const severityColors = {
