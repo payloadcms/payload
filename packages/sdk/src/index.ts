@@ -2,6 +2,7 @@ import type { ApplyDisableErrors, PaginatedDocs, SelectType, TypeWithVersion } f
 
 import type { ForgotPasswordOptions } from './auth/forgotPassword.js'
 import type { LoginOptions, LoginResult } from './auth/login.js'
+import type { LogoutOptions, LogoutResult } from './auth/logout.js';
 import type { MeOptions, MeResult } from './auth/me.js'
 import type { ResetPasswordOptions, ResetPasswordResult } from './auth/resetPassword.js'
 import type { CountOptions } from './collections/count.js'
@@ -33,6 +34,7 @@ import type { OperationArgs } from './utilities/buildSearchParams.js'
 
 import { forgotPassword } from './auth/forgotPassword.js'
 import { login } from './auth/login.js'
+import { logout } from './auth/logout.js'
 import { me } from './auth/me.js'
 import { type RefreshOptions, type RefreshResult, refreshToken } from './auth/refreshToken.js'
 import { resetPassword } from './auth/resetPassword.js'
@@ -57,7 +59,6 @@ import { findGlobalVersions } from './globals/findVersions.js'
 import { restoreGlobalVersion } from './globals/restoreVersion.js'
 import { updateGlobal } from './globals/update.js'
 import { buildSearchParams } from './utilities/buildSearchParams.js'
-import { logout, LogoutOptions, LogoutResult } from './auth/logout.js'
 
 type Args = {
   /** Base passed `RequestInit` to `fetch`. For base headers / credentials include etc. */
@@ -259,6 +260,13 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
     return login(this, options, init)
   }
 
+  logout<TSlug extends AuthCollectionSlug<T>>(
+    options: LogoutOptions<T, TSlug>,
+    init?: RequestInit,
+  ): Promise<LogoutResult> {
+    return logout(this, options, init)
+  }
+
   me<TSlug extends AuthCollectionSlug<T>>(
     options: MeOptions<T, TSlug>,
     init?: RequestInit,
@@ -364,13 +372,6 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
     init?: RequestInit,
   ): Promise<TransformGlobalWithSelect<T, TSlug, TSelect>> {
     return updateGlobal(this, options, init)
-  }
-
-  logout<TSlug extends AuthCollectionSlug<T>>(
-    options: LogoutOptions<T, TSlug>,
-    init?: RequestInit,
-  ): Promise<LogoutResult> {
-    return logout(this, options, init)
   }
 
   verifyEmail<TSlug extends AuthCollectionSlug<T>>(

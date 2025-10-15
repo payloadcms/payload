@@ -13,7 +13,9 @@ export type LogoutOptions<
 }
 
 export type LogoutResult = {
+  headers: Headers
   message: string
+  status: number
 }
 
 export async function logout<
@@ -29,6 +31,10 @@ export async function logout<
     method: 'POST',
     path: `/${options.collection}/logout?allSessions=${options.allSessions ?? false}`,
   })
-
-  return response.json()
+  const data = await response.json()
+  return {
+    headers: response.headers,
+    message: data.message,
+    status: response.status,
+  }
 }

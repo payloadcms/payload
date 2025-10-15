@@ -24,7 +24,7 @@ const testUserCredentials = {
 
 describe('@payloadcms/sdk', () => {
   beforeAll(async () => {
-    ;({ payload, sdk } = await initPayloadInt(dirname))
+    ; ({ payload, sdk } = await initPayloadInt(dirname))
 
     post = await payload.create({ collection: 'posts', data: { number: 1, number2: 3 } })
     await payload.create({
@@ -320,14 +320,15 @@ describe('@payloadcms/sdk', () => {
       allSessions: false,
     })
 
-    expect(logoutRes.message).toBeDefined()
+    expect(logoutRes.headers).toBeDefined()
 
-    await expect(
-      sdk.request({
-        method: 'GET',
-        path: '/users/me',
-      }),
-    ).rejects.toThrow()
+    const { token } = await sdk.me({ collection: "users" },
+      { headers: logoutRes.headers },
+    )
+
+    expect(
+      token
+    ).toBeUndefined()
   })
 
 })
