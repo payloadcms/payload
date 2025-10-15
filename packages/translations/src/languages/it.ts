@@ -521,10 +521,12 @@ export const itTranslations: DefaultTranslationsObject = {
     invalidInput: 'Questo campo ha un input non valido.',
     invalidSelection: 'Questo campo ha una selezione non valida.',
     invalidSelections: "'In questo campo sono presenti le seguenti selezioni non valide:'",
+    latitudeOutOfBounds: 'La latitudine deve essere compresa tra -90 e 90.',
     lessThanMin: '{{value}} è inferiore al minimo consentito {{label}} di {{min}}.',
     limitReached: 'Raggiunto il limite, possono essere aggiunti solo {{max}} elementi.',
     longerThanMin:
       'Questo valore deve essere più lungo della lunghezza minima di {{minLength}} caratteri.',
+    longitudeOutOfBounds: 'La longitudine deve essere compresa tra -180 e 180.',
     notValidDate: '"{{value}}" non è una data valida.',
     required: 'Questo campo è obbligatorio.',
     requiresAtLeast: 'Questo campo richiede almeno {{count}} {{label}}.',
