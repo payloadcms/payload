@@ -201,6 +201,7 @@ export const reduceFieldsToOptions = ({
 
     if (typeof fieldTypes[field.type] === 'object') {
       if (
+        fieldIsID(field) ||
         fieldPermissions === true ||
         fieldPermissions?.[field.name] === true ||
         fieldPermissions?.[field.name]?.read === true
