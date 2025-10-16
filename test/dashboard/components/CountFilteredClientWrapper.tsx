@@ -5,13 +5,13 @@ import type { WidgetServerProps } from 'payload'
 
 import { Suspense } from 'react'
 
-import SearchParamsCountClient from './SearchParamsCountClient'
+import CountFilteredClient from './CountFilteredClient'
 
-export default async function SearchParamsCountClientWrapper(
+export default async function CountFilteredClientWrapper(
   paramsPromise: Promise<WidgetServerProps>,
 ) {
   const params = await paramsPromise
   const widgetData = params.widgetData
-  console.log('(SearchParamsCountClientWrapper) widgetData', widgetData)
-  return <SearchParamsCountClient widgetData={widgetData} />
+  //   console.log('(CountFilteredClientWrapper) widgetData', widgetData)
+  return <CountFilteredClient widgetData={widgetData} />
 }

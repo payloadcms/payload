@@ -1,11 +1,9 @@
 /* eslint-disable no-restricted-exports */
 'use client'
 
-// This component provides a reusable filter widget for dashboard search params
-// It dynamically renders filter controls based on configuration
-// e.g. filter tickets by status or priority - updates URL params like /dashboard?status=open
-
-// this could also be separate beforeDashboard component, or anything that sets the URL params, doesn't need to be a widget.
+// Global dashboard filters panel
+// Sets URL params that widgets can interpret based on their needs
+// e.g. dateRange=last-month, status=open, etc.
 
 import type { WidgetServerProps } from 'payload'
 
@@ -21,40 +19,53 @@ type FilterConfig = {
   field: string
   label: string
   options: FilterOption[]
+  type?: 'date-range' | 'select'
 }
 
-export default function SearchParamsFilter({ widgetData: widgetDataFromProps }: WidgetServerProps) {
+// Predefined date range options
+const DATE_RANGE_OPTIONS: FilterOption[] = [
+  { label: 'Last 7 days', value: 'last-7-days' },
+  { label: 'Last 30 days', value: 'last-30-days' },
+  { label: 'Last 3 months', value: 'last-3-months' },
+  { label: 'Last 6 months', value: 'last-6-months' },
+  { label: 'Last year', value: 'last-year' },
+  { label: 'Year to date', value: 'ytd' },
+  { label: 'All time', value: 'all-time' },
+]
+
+export default function SearchParamsFilter({ widgetData }: WidgetServerProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const widgetData = widgetDataFromProps || {
-    filters: [
-      {
-        field: 'status',
-        label: 'Status',
-        options: [
-          { label: 'Open', value: 'open' },
-          { label: 'In Progress', value: 'in-progress' },
-          { label: 'Closed', value: 'closed' },
-        ],
-      },
-      {
-        field: 'priority',
-        label: 'Priority',
-        options: [
-          { label: 'Low', value: 'low' },
-          { label: 'Medium', value: 'medium' },
-          { label: 'High', value: 'high' },
-          { label: 'Critical', value: 'critical' },
-        ],
-      },
-    ],
-    title: 'Ticket Filters',
-  }
-
-  // Widget configuration from widgetData
-  const title = (widgetData?.title as string) || 'Filters'
-  const filters = (widgetData?.filters as FilterConfig[]) || []
+  // Widget configuration - global filters that apply across widgets
+  const title = (widgetData?.title as string) || 'Dashboard Filters'
+  const filters = (widgetData?.filters as FilterConfig[]) || [
+    {
+      type: 'date-range',
+      field: 'dateRange',
+      label: 'Date Range (revenue)',
+      options: DATE_RANGE_OPTIONS,
+    },
+    {
+      field: 'status',
+      label: 'Status',
+      options: [
+        { label: 'Open', value: 'open' },
+        { label: 'In Progress', value: 'in-progress' },
+        { label: 'Closed', value: 'closed' },
+      ],
+    },
+    {
+      field: 'priority',
+      label: 'Priority',
+      options: [
+        { label: 'Low', value: 'low' },
+        { label: 'Medium', value: 'medium' },
+        { label: 'High', value: 'high' },
+        { label: 'Critical', value: 'critical' },
+      ],
+    },
+  ]
   const showClearAll = (widgetData?.showClearAll as boolean) ?? true
 
   const updateSearchParam = useCallback(

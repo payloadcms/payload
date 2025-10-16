@@ -15,7 +15,7 @@ type CountData = {
   error: null | string
 }
 
-export default function SearchParamsCountClient({ widgetData }: WidgetServerProps) {
+export default function CountFilteredClient({ widgetData }: WidgetServerProps) {
   const searchParams = useSearchParams()
   const [data, setData] = useState<CountData>({ count: 0, error: null })
   const [isLoading, setIsLoading] = useState(true)

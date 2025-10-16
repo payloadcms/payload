@@ -30,30 +30,19 @@ export default buildConfigWithDefaults({
     dashboard: {
       defaultLayout: ({ req: { user } }) => {
         const baseWidgets: WidgetInstance[] = [
-          {
-            widgetSlug: 'collection-cards',
-            width: 12,
-            height: 3,
-          },
-          // Filter widget - allows users to set status/priority filters
-          {
-            widgetSlug: 'search-params-filter',
-            width: 3,
-            height: 2,
-          },
           // Filtered count widgets - reactively updates with search params
           {
-            widgetSlug: 'search-params-count-client',
+            widgetSlug: 'count-filtered-client',
             width: 3,
             height: 1,
           },
           {
-            widgetSlug: 'search-params-count-client',
+            widgetSlug: 'count-filtered-client',
             width: 3,
             height: 1,
           },
           {
-            widgetSlug: 'search-params-count',
+            widgetSlug: 'count-filtered-server',
             width: 3,
             height: 1,
             // NOTE - widget data does nothing here - need to set in the widget config itself)
@@ -65,6 +54,12 @@ export default buildConfigWithDefaults({
             //   filterFields: ['status', 'priority'],
             // },
           },
+          // Global filters panel - sets URL params for all widgets
+          {
+            widgetSlug: 'search-params-filter',
+            width: 3,
+            height: 2,
+          },
           // Regular count widgets (unfiltered)
           // ...Array.from(
           //   { length: 2 },
@@ -75,9 +70,14 @@ export default buildConfigWithDefaults({
           //   }),
           // ),
           {
-            widgetSlug: 'revenue',
+            widgetSlug: 'revenue-filtered',
             width: 12,
             height: 2,
+          },
+          {
+            widgetSlug: 'collection-cards',
+            width: 12,
+            height: 3,
           },
         ]
 
@@ -98,12 +98,12 @@ export default buildConfigWithDefaults({
           // fields: []
         },
         {
-          slug: 'search-params-count',
-          ComponentPath: './components/SearchParamsCount.tsx#default',
+          slug: 'count-filtered-server',
+          ComponentPath: './components/CountFilteredServer.tsx#default',
           maxWidth: 6,
           widgetData: {
             collection: 'tickets',
-            title: 'Filtered Count  (server)',
+            title: 'Ticket Count (server)',
             icon: '🎫',
             color: 'blue',
             filterFields: ['status', 'priority'],
@@ -112,12 +112,12 @@ export default buildConfigWithDefaults({
           // Configure via widgetData: { collection, title, icon, color, filterFields }
         },
         {
-          slug: 'search-params-count-client',
-          ComponentPath: './components/SearchParamsCountClientWrapper.tsx#default',
+          slug: 'count-filtered-client',
+          ComponentPath: './components/CountFilteredClientWrapper.tsx#default',
           maxWidth: 6,
           widgetData: {
             collection: 'tickets',
-            title: 'Filtered Count (client)',
+            title: 'Ticket Count (client)',
             icon: '🎫',
             color: 'blue',
             filterFields: ['status', 'priority'],
@@ -131,7 +131,7 @@ export default buildConfigWithDefaults({
           widgetData: {
             title: 'Ticket Filters',
           },
-          maxWidth: 4,
+          maxWidth: 12,
           minWidth: 3,
           // Filter widget for manipulating URL search params
           // Configure via widgetData: { title, filters: [{ field, label, options }], showClearAll }
@@ -146,6 +146,14 @@ export default buildConfigWithDefaults({
           minWidth: 6,
           maxHeight: 2,
           minHeight: 2,
+        },
+        {
+          slug: 'revenue-filtered',
+          ComponentPath: './components/RevenueFiltered.tsx#default',
+          minWidth: 6,
+          maxHeight: 3,
+          minHeight: 2,
+          // Respects global 'dateRange' URL param
         },
       ],
     },
@@ -184,21 +192,24 @@ export default buildConfigWithDefaults({
       }
 
       // Create sample revenue entries
-      const months = ['2024-01', '2024-02', '2024-03', '2024-04', '2024-05', '2024-06']
-      for (const month of months) {
-        for (let i = 1; i <= Math.floor(Math.random() * 10) + 5; i++) {
-          await payload.create({
-            collection: 'revenue',
-            data: {
-              amount: Math.floor(Math.random() * 10000) + 1000,
-              description: `Revenue entry ${i} for ${month}`,
-              date: `${month}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
-              category: ['sales', 'subscriptions', 'services', 'other'][
-                Math.floor(Math.random() * 4)
-              ],
-              source: 'Sample data',
-            },
-          })
+      const years = ['2024', '2025']
+      const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
+      for (const year of years) {
+        for (const month of months) {
+          for (let i = 1; i <= Math.floor(Math.random() * 10) + 5; i++) {
+            await payload.create({
+              collection: 'revenue',
+              data: {
+                amount: Math.floor(Math.random() * 10000) + 1000,
+                description: `Revenue entry ${i} for ${year}-${month}`,
+                date: `${year}-${month}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
+                category: ['sales', 'subscriptions', 'services', 'other'][
+                  Math.floor(Math.random() * 4)
+                ],
+                source: 'Sample data',
+              },
+            })
+          }
         }
       }
 
