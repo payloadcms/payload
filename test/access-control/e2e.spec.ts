@@ -1338,6 +1338,9 @@ describe('Access Control', () => {
 
         // Should not show secretPhone column header (nested in contactInfo group)
         await expect(thead.locator('th', { hasText: 'Contact Info > Secret Phone' })).toBeHidden()
+
+        // Should show publicPhone column header (nested in contactInfo group)
+        await expect(thead.locator('th', { hasText: 'Contact Info > Public Phone' })).toBeVisible()
       })
 
       test('should not render column for field with read: false inside named tab by default', async () => {

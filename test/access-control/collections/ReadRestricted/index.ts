@@ -12,6 +12,13 @@ export const ReadRestricted: CollectionConfig = {
   },
   admin: {
     groupBy: true,
+    defaultColumns: [
+      'restrictedTopLevel',
+      'visibleTopLevel',
+      'contactInfo.secretPhone',
+      'contactInfo.publicPhone',
+      'settings.restrictedSetting',
+    ],
   },
   fields: [
     // Top-level restricted field
