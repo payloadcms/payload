@@ -1311,6 +1311,47 @@ describe('Access Control', () => {
         ).toBeHidden()
       })
     })
+
+    describe('default list view columns', () => {
+      test('should not render column for top-level field with read: false by default', async () => {
+        await page.goto(readRestrictedUrl.list)
+
+        const table = page.locator('.table')
+        await expect(table).toBeVisible()
+
+        const thead = table.locator('thead')
+
+        // Should not show restrictedTopLevel column header
+        await expect(thead.locator('th', { hasText: 'Restricted Top Level' })).toBeHidden()
+
+        // Should show visibleTopLevel column header
+        await expect(thead.locator('th', { hasText: 'Visible Top Level' })).toBeVisible()
+      })
+
+      test('should not render column for nested field with read: false inside group by default', async () => {
+        await page.goto(readRestrictedUrl.list)
+
+        const table = page.locator('.table')
+        await expect(table).toBeVisible()
+
+        const thead = table.locator('thead')
+
+        // Should not show secretPhone column header (nested in contactInfo group)
+        await expect(thead.locator('th', { hasText: 'Contact Info > Secret Phone' })).toBeHidden()
+      })
+
+      test('should not render column for field with read: false inside named tab by default', async () => {
+        await page.goto(readRestrictedUrl.list)
+
+        const table = page.locator('.table')
+        await expect(table).toBeVisible()
+
+        const thead = table.locator('thead')
+
+        // Should not show restrictedSetting column header (inside settings tab)
+        await expect(thead.locator('th', { hasText: 'Settings > Restricted Setting' })).toBeHidden()
+      })
+    })
   })
 })
 
