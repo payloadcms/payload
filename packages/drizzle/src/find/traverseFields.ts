@@ -553,9 +553,9 @@ export const traverseFields = ({
                 selectFields[path] = sql`${adapter.tables[joinCollectionTableName][path]}`.as(path)
                 // Allow to filter by collectionSlug
               } else if (path !== 'relationTo') {
-                // Cast NULL to the appropriate type to avoid UNION type mismatch errors
-                // For timestamp fields like deletedAt, we need to cast to timestamp
-                if (path === 'deletedAt') {
+                // For timestamp fields like deletedAt, we need to cast to timestamp in Postgres
+                // SQLite doesn't require explicit type casting for UNION queries
+                if (path === 'deletedAt' && adapter.name === 'postgres') {
                   selectFields[path] = sql`null::timestamp with time zone`.as(path)
                 } else {
                   selectFields[path] = sql`null`.as(path)
