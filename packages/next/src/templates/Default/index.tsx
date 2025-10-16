@@ -62,7 +62,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     admin: {
       avatar,
       components,
-      components: { header: CustomHeader, Nav: CustomNav } = {
+      components: { footer: CustomFooter, header: CustomHeader, Nav: CustomNav } = {
         header: undefined,
         Nav: undefined,
       },
@@ -189,6 +189,12 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
               </div>
             </Wrapper>
           </div>
+          {RenderServerComponent({
+            clientProps,
+            Component: CustomFooter,
+            importMap: payload.importMap,
+            serverProps,
+          })}
         </ActionsProvider>
       </BulkUploadProvider>
     </EntityVisibilityProvider>
