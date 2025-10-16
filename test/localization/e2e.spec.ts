@@ -741,13 +741,13 @@ describe('Localization', () => {
       await openDocControls(page)
       await page.locator('#action-duplicate-locales').click()
 
-      await expect(page.locator('.duplicate-selected-locales__content')).toBeVisible()
+      await expect(page.locator('.select-locales-drawer__content')).toBeVisible()
       await page
-        .locator('.duplicate-selected-locales__item', { hasText: 'English' })
+        .locator('.select-locales-drawer__item', { hasText: 'English' })
         .locator('input')
         .click()
       await page
-        .locator('.duplicate-selected-locales__item', { hasText: 'Portuguese' })
+        .locator('.select-locales-drawer__item', { hasText: 'Portuguese' })
         .locator('input')
         .click()
       const confirmButton = page.locator('#\\#action-duplicate-confirm')
