@@ -27,7 +27,7 @@ const dirname = path.dirname(filename)
 const payloadPkgDirname = path.resolve(dirname, '../../../') // pkg dir (outside src)
 // if node_modules is in payloadPkgDirname, go to parent dir which contains node_modules
 if (payloadPkgDirname.includes('node_modules')) {
-  payloadPkgDirname.split('node_modules').slice(0, -1)
+  payloadPkgDirname.slice(0, payloadPkgDirname.lastIndexOf('node_modules'))
 }
 const resolvedCwd = path.resolve(process.cwd())
 

@@ -80,11 +80,7 @@ export function initLexicalFeatures(args: Args): {
     // as well, as it already called feature.generateSchemaMap for each feature.
     // We will check for the existance resolvedFeature.generateSchemaMap to skip unnecessary loops for constructing featureSchemaMap, but we don't run it here
     if (resolvedFeature.generateSchemaMap) {
-      const featureSchemaPath = [
-        ...args.schemaPath.split('.'),
-        'lexical_internal_feature',
-        featureKey,
-      ].join('.')
+      const featureSchemaPath = `${args.schemaPath}.lexical_internal_feature.${featureKey}`
 
       featureClientSchemaMap[featureKey] = {}
 
