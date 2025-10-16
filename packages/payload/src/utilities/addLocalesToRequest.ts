@@ -16,7 +16,7 @@ export function addLocalesToRequestFromData(req: PayloadRequest): void {
     const localeOnReq = req.locale
     const fallbackLocaleOnReq = req.fallbackLocale
     let localeFromData!: string
-    let fallbackLocaleFromData!: string
+    let fallbackLocaleFromData!: string | string[]
 
     if (!localeOnReq && data?.locale && typeof data.locale === 'string') {
       localeFromData = data.locale
@@ -51,12 +51,12 @@ export function addLocalesToRequestFromData(req: PayloadRequest): void {
 }
 
 type SanitizeLocalesArgs = {
-  fallbackLocale: string
+  fallbackLocale: string | string[]
   locale: string
   localization: SanitizedConfig['localization']
 }
 type SanitizeLocalesReturn = {
-  fallbackLocale?: string
+  fallbackLocale?: string | string[]
   locale?: string
 }
 export const sanitizeLocales = ({

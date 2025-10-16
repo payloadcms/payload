@@ -515,10 +515,12 @@ export const isTranslations: DefaultTranslationsObject = {
     invalidInput: 'Þetta svæði hefur ógilt inntak.',
     invalidSelection: 'Þetta svæði hefur ógilt val.',
     invalidSelections: 'Þetta svæði hefur eftirfarandi ógild völ:',
+    latitudeOutOfBounds: 'Breiddargráða verður að vera á bilinu -90 og 90.',
     lessThanMin: '{{value}} er minna en lágmarks leyfða {{label}} sem er {{min}}.',
     limitReached: 'Mörkum náð, aðeins er hægt að bæta við {{max}} hlutum.',
     longerThanMin:
       'Þetta gildi verður að vera lengra en lágmarkslengdin sem er {{minLength}} stafir.',
+    longitudeOutOfBounds: 'Lengdargráða verður að vera á bilinu -180 og 180.',
     notValidDate: '"{{value}}" er ekki gild dagsetning.',
     required: 'Þetta svæði er nauðsynlegt.',
     requiresAtLeast: 'Þetta svæði krefst að minnsta kosti {{count}} {{label}}.',

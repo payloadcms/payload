@@ -212,6 +212,18 @@ describe('database', () => {
       expect(duplicate.arrayWithIDs[0].id).not.toStrictEqual(arrayRowID)
       expect(duplicate.blocksWithIDs[0].id).not.toStrictEqual(blockID)
     })
+
+    it('should properly give the result with hasMany relationships with custom numeric IDs', async () => {
+      await payload.create({ collection: 'categories-custom-id', data: { id: 9999 } })
+      const res = await payload.create({
+        collection: 'posts',
+        data: { title: 'post', categoriesCustomID: [9999] },
+        depth: 0,
+      })
+      expect(res.categoriesCustomID[0]).toBe(9999)
+      const resFind = await payload.findByID({ collection: 'posts', id: res.id, depth: 0 })
+      expect(resFind.categoriesCustomID[0]).toBe(9999)
+    })
   })
 
   describe('timestamps', () => {
@@ -1298,6 +1310,29 @@ describe('database', () => {
     ])
   })
 
+  it('should find distinct values when the virtual field is linked to ID', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+    const category = await payload.create({
+      collection: 'categories',
+      data: { title: 'category' },
+    })
+    await payload.create({ collection: 'posts', data: { title: 'post', category } })
+    const distinct = await payload.findDistinct({ collection: 'posts', field: 'categoryID' })
+    expect(distinct.values).toStrictEqual([{ categoryID: category.id }])
+  })
+
+  it('should find distinct values by the explicit ID field path', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'categories', where: {} })
+    const category = await payload.create({
+      collection: 'categories',
+      data: { title: 'category' },
+    })
+    await payload.create({ collection: 'posts', data: { title: 'post', category } })
+    const distinct = await payload.findDistinct({ collection: 'posts', field: 'category.id' })
+    expect(distinct.values).toStrictEqual([{ 'category.id': category.id }])
+  })
   describe('Compound Indexes', () => {
     beforeEach(async () => {
       await payload.delete({ collection: 'compound-indexes', where: {} })
