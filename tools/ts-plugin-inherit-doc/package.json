@@ -11,9 +11,16 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
+    "test": "jest",
     "watch": "tsc --watch"
   },
   "dependencies": {
     "typescript": "^5.7.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.15.30",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.0"
   }
 }

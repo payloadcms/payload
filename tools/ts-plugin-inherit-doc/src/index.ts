@@ -73,6 +73,31 @@ function init(modules: { typescript: typeof import('typescript/lib/tsserverlibra
             }
           }
 
+          // Also extract properties from type literal or interface members
+          if (ts.isTypeAliasDeclaration(node) && node.type && ts.isTypeLiteralNode(node.type)) {
+            for (const member of node.type.members) {
+              if (ts.isPropertySignature(member) && member.name) {
+                const propName = member.name.getText()
+                const propJsDoc = (member as any).jsDoc as ts.JSDoc[] | undefined
+                if (propJsDoc && propJsDoc.length > 0) {
+                  const propDoc = ts.getTextOfJSDocComment(propJsDoc[0].comment) || ''
+                  properties.set(propName, propDoc)
+                }
+              }
+            }
+          } else if (ts.isInterfaceDeclaration(node)) {
+            for (const member of node.members) {
+              if (ts.isPropertySignature(member) && member.name) {
+                const propName = member.name.getText()
+                const propJsDoc = (member as any).jsDoc as ts.JSDoc[] | undefined
+                if (propJsDoc && propJsDoc.length > 0) {
+                  const propDoc = ts.getTextOfJSDocComment(propJsDoc[0].comment) || ''
+                  properties.set(propName, propDoc)
+                }
+              }
+            }
+          }
+
           docCache[typeName] = {
             documentation: fullComment || '',
             properties,
@@ -133,28 +158,103 @@ function init(modules: { typescript: typeof import('typescript/lib/tsserverlibra
       // Rebuild cache on each request (in production, you'd want smarter invalidation)
       buildDocCache()
 
-      // Check if documentation contains @inheritDoc
-      const docParts = quickInfo.documentation || []
-      const docText = docParts.map((part) => part.text).join('')
-      const inheritFrom = parseInheritDoc(docText)
+      // Get the source file and node at position to check for JSDoc
+      const sourceFile = program?.getSourceFile(fileName)
+      if (!sourceFile) {
+        return quickInfo
+      }
 
-      // Add debug marker to ALL hovers to verify plugin is running
-      const debugMarker: ts.SymbolDisplayPart[] = [{ text: '\n\n[Plugin Active ✓]', kind: 'text' }]
+      // Find the node at the cursor position
+      const node = findNodeAtPosition(sourceFile, position)
+      if (!node) {
+        return quickInfo
+      }
+
+      // Get JSDoc from the node or its parent (for property signatures)
+      let inheritFrom: null | string = null
+
+      // Check current node and parent for JSDoc
+      const nodesToCheck = [node, node.parent].filter(Boolean)
+
+      for (const n of nodesToCheck) {
+        if (!n) {continue}
+
+        // Check if node has jsDoc property (TypeScript internal)
+        const jsDoc = (n as any).jsDoc as ts.JSDoc[] | undefined
+        if (jsDoc && jsDoc.length > 0) {
+          for (const doc of jsDoc) {
+            if (doc.tags) {
+              for (const tag of doc.tags) {
+                if (tag.tagName.text === 'inheritDoc') {
+                  const commentText =
+                    typeof tag.comment === 'string'
+                      ? tag.comment
+                      : ts.getTextOfJSDocComment(tag.comment)
+
+                  if (commentText) {
+                    inheritFrom = commentText.trim()
+                    break
+                  }
+                }
+                // Also check if the whole comment contains @inheritDoc
+                if (tag.comment) {
+                  const commentText =
+                    typeof tag.comment === 'string'
+                      ? tag.comment
+                      : ts.getTextOfJSDocComment(tag.comment)
+
+                  if (commentText) {
+                    const parsed = parseInheritDoc(commentText)
+                    if (parsed) {
+                      inheritFrom = parsed
+                      break
+                    }
+                  }
+                }
+              }
+            }
+            // Check the doc comment itself
+            if (!inheritFrom && doc.comment) {
+              const commentText =
+                typeof doc.comment === 'string'
+                  ? doc.comment
+                  : ts.getTextOfJSDocComment(doc.comment)
+
+              if (commentText) {
+                inheritFrom = parseInheritDoc(commentText)
+              }
+            }
+            if (inheritFrom) {break}
+          }
+        }
+        if (inheritFrom) {break}
+      }
+
+      // If no @inheritDoc in tags, check the documentation text as fallback
+      if (!inheritFrom) {
+        const docParts = quickInfo.documentation || []
+        const docText = docParts.map((part) => part.text).join('')
+        inheritFrom = parseInheritDoc(docText)
+      }
 
       if (inheritFrom) {
         return {
           ...quickInfo,
-          documentation: [
-            ...mergeDocumentation(quickInfo.documentation, inheritFrom),
-            ...debugMarker,
-          ],
+          documentation: mergeDocumentation(quickInfo.documentation, inheritFrom),
         }
       }
 
-      return {
-        ...quickInfo,
-        documentation: [...docParts, ...debugMarker],
+      return quickInfo
+    }
+
+    function findNodeAtPosition(sourceFile: ts.SourceFile, position: number): ts.Node | undefined {
+      function find(node: ts.Node): ts.Node | undefined {
+        if (position >= node.getStart() && position < node.getEnd()) {
+          return ts.forEachChild(node, find) || node
+        }
+        return undefined
       }
+      return find(sourceFile)
     }
 
     // Proxy all other methods
