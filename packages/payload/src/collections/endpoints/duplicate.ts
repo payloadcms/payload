@@ -12,21 +12,23 @@ import { duplicateOperation } from '../operations/duplicate.js'
 
 export const duplicateHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
-  const { query, searchParams } = req
-  const depth = searchParams.get('depth')
-  // draft defaults to true, unless explicitly set requested as false to prevent the newly duplicated document from being published
-  const draft = searchParams.get('draft') !== 'false'
-  const selectedLocales = query.selectedLocales as string[] | undefined
+  const { depth, draft, populate, select, selectedLocales } = req.query as {
+    depth?: string
+    draft?: string
+    populate?: Record<string, unknown>
+    select?: Record<string, unknown>
+    selectedLocales?: string[]
+  }
 
   const doc = await duplicateOperation({
     id,
     collection,
     data: req.data,
     depth: isNumber(depth) ? Number(depth) : undefined,
-    draft,
-    populate: sanitizePopulateParam(req.query.populate),
+    draft: draft === 'true',
+    populate: sanitizePopulateParam(populate),
     req,
-    select: sanitizeSelectParam(req.query.select),
+    select: sanitizeSelectParam(select),
     selectedLocales,
   })
 
