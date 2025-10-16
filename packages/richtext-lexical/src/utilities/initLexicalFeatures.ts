@@ -27,9 +27,9 @@ export function initLexicalFeatures(args: Args): {
   const clientFeatures: LexicalRichTextFieldProps['clientFeatures'] = {}
 
   // turn args.resolvedFeatureMap into an array of [key, value] pairs, ordered by value.order, lowest order first:
-  const resolvedFeatureMapArray = Array.from(
-    args.sanitizedEditorConfig.resolvedFeatureMap.entries(),
-  ).sort((a, b) => a[1].order - b[1].order)
+  const resolvedFeatureMapArray = [...args.sanitizedEditorConfig.resolvedFeatureMap].sort(
+    (a, b) => a[1].order - b[1].order,
+  )
 
   const featureClientSchemaMap: FeatureClientSchemaMap = {}
 
