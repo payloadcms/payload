@@ -92,6 +92,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       autoIncrement: args.autoIncrement ?? false,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       binding: args.binding,
+      blocksAsJSON: args.blocksAsJSON ?? false,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       client: undefined,
       defaultDrizzleSnapshot,
@@ -109,6 +110,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       }),
       idType: sqliteIDType,
       initializing,
+      limitedBoundParameters: true,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
       operators,
@@ -117,6 +119,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       push: args.push,
       rawRelations: {},
       rawTables: {},
+      readReplicas: args.readReplicas,
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',
       schema: {},

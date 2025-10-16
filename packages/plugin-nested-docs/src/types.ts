@@ -1,4 +1,4 @@
-import type { CollectionSlug } from 'payload'
+import type { CollectionSlug, SanitizedCollectionConfig } from 'payload'
 
 export type Breadcrumb = {
   doc: string
@@ -9,11 +9,13 @@ export type Breadcrumb = {
 export type GenerateURL = (
   docs: Array<Record<string, unknown>>,
   currentDoc: Record<string, unknown>,
+  collection: SanitizedCollectionConfig,
 ) => string
 
 export type GenerateLabel = (
   docs: Array<Record<string, unknown>>,
   currentDoc: Record<string, unknown>,
+  collection: SanitizedCollectionConfig,
 ) => string
 
 export type NestedDocsPluginConfig = {

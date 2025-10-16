@@ -67,7 +67,7 @@ export type FieldState = {
    * Every time a field is changed locally, this flag is set to true. Prevents form state from server from overwriting local changes.
    * After merging server form state, this flag is reset.
    *
-   * @experimental This property is experimental and may change in the future. Use at your own discretion.
+   * @experimental This property is experimental and may change in the future. Use at your own risk.
    */
   isModified?: boolean
   /**
@@ -149,7 +149,7 @@ export type BuildFormStateArgs = {
    * This will retrieve the client config in its entirety, even when unauthenticated.
    * For example, the create-first-user view needs the entire config, but there is no user yet.
    *
-   * @experimental This property is experimental and may change in the future. Use at your own discretion.
+   * @experimental This property is experimental and may change in the future. Use at your own risk.
    */
   skipClientConfigAuth?: boolean
   skipValidation?: boolean

@@ -98,6 +98,10 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         incomingURL = formatAbsoluteURL(_incomingURL)
       }
 
+      if (!incomingURL) {
+        setIsLivePreviewing(false)
+      }
+
       if (incomingURL !== url) {
         setAppIsReady(false)
         setURL(incomingURL)

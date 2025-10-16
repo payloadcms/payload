@@ -445,6 +445,20 @@ export async function resolveJoins({
 
 /**
  * Extracts relationTo filter values from a WHERE clause
+ *
+ * @purpose When you have a polymorphic join field that can reference multiple collection types (e.g. the documentsAndFolders join field on
+ * folders that points to all folder-enabled collections), Payload needs to decide which collections to actually query. Without filtering,
+ * it would query ALL possible collections even when the WHERE clause clearly indicates it only needs specific ones.
+ *
+ * extractRelationToFilter analyzes the WHERE clause to extract relationTo conditions and returns only the collection slugs that
+ * could possibly match, avoiding unnecessary database queries.
+ *
+ * @description The function recursively traverses a WHERE clause looking for relationTo conditions in these patterns:
+ *
+ * 1. Direct conditions: { relationTo: { equals: 'posts' } }
+ * 2. IN conditions: { relationTo: { in: ['posts', 'media'] } }
+ * 3. Nested in AND/OR: Recursively searches through logical operators
+
  * @param where - The WHERE clause to search
  * @returns Array of collection slugs if relationTo filter found, null otherwise
  */
@@ -466,20 +480,28 @@ function extractRelationToFilter(where: Record<string, unknown>): null | string[
 
   // Check for relationTo in logical operators
   if (where.and && Array.isArray(where.and)) {
+    const allResults: string[] = []
     for (const condition of where.and) {
       const result = extractRelationToFilter(condition)
       if (result) {
-        return result
+        allResults.push(...result)
       }
+    }
+    if (allResults.length > 0) {
+      return [...new Set(allResults)] // Remove duplicates
     }
   }
 
   if (where.or && Array.isArray(where.or)) {
+    const allResults: string[] = []
     for (const condition of where.or) {
       const result = extractRelationToFilter(condition)
       if (result) {
-        return result
+        allResults.push(...result)
       }
+    }
+    if (allResults.length > 0) {
+      return [...new Set(allResults)] // Remove duplicates
     }
   }
 

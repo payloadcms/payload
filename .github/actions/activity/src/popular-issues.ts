@@ -1,6 +1,8 @@
 import { info, setFailed } from '@actions/core'
 import { getOctokit } from '@actions/github'
 import { WebClient } from '@slack/web-api'
+
+import { CHANNELS } from './constants'
 import { daysAgo } from './lib/utils'
 import { SlimIssue } from './types'
 
@@ -50,7 +52,7 @@ export async function run() {
 
     await slackClient.chat.postMessage({
       text: messageText,
-      channel: process.env.DEBUG === 'true' ? '#test-slack-notifications' : '#dev-feed',
+      channel: process.env.DEBUG === 'true' ? CHANNELS.DEBUG : CHANNELS.DEV,
       icon_emoji: ':github:',
       username: 'GitHub Notifier',
     })

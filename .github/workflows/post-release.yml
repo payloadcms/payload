@@ -14,6 +14,7 @@ on:
 env:
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+  PAYLOAD_RELEASE_EVENT: payload-release-event
 
 jobs:
   post_release:
@@ -51,3 +52,17 @@ jobs:
           color: '16777215'
           username: 'Payload Releases'
           avatar_url: 'https://l4wlsi8vxy8hre4v.public.blob.vercel-storage.com/discord-bot-logo.png'
+
+  notify-website-repo:
+    name: Notify website repo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Dispatch event
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAYLOAD_REPOSITORY_DISPATCH }}
+          repository: payloadcms/website
+          event-type: ${{ env.PAYLOAD_RELEASE_EVENT }}
+          client-payload: '{"event": {"message": "New Payload Release"}}'

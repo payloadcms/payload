@@ -37,7 +37,9 @@ export const Component: JSONFieldClientComponent = (args) => {
       field={{
         name: 'myFieldName' /* Make sure this matches the field name present in your form */,
       }}
-      initialValue={buildEditorState({ text: 'default value' })}
+      initialValue={buildEditorState<DefaultNodeTypes>({
+        text: 'default value',
+      })}
       schemaPath={`collection.${lexicalFullyFeaturedSlug}.richText`}
     />
   )
@@ -63,18 +65,20 @@ import { lexicalFullyFeaturedSlug } from '../../slugs.js'
 export const Component: JSONFieldClientComponent = (args) => {
   // Manually manage the editor state
   const [value, setValue] = useState<DefaultTypedEditorState | undefined>(() =>
-    buildEditorState({ text: 'state default' }),
+    buildEditorState<DefaultNodeTypes>({ text: 'state default' }),
   )
 
   const handleReset = React.useCallback(() => {
-    setValue(buildEditorState({ text: 'state default' }))
+    setValue(buildEditorState<DefaultNodeTypes>({ text: 'state default' }))
   }, [])
 
   return (
     <div>
       <RenderLexical
         field={{ name: 'myField' }}
-        initialValue={buildEditorState({ text: 'default value' })}
+        initialValue={buildEditorState<DefaultNodeTypes>({
+          text: 'default value',
+        })}
         schemaPath={`collection.${lexicalFullyFeaturedSlug}.richText`}
         setValue={setValue as any}
         value={value}
