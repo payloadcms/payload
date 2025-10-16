@@ -77,4 +77,4 @@ export default buildConfig({
 We export compatibility options for [DocumentDB](https://aws.amazon.com/documentdb/), [Azure Cosmos DB](https://azure.microsoft.com/en-us/products/cosmos-db) and [Firestore](https://cloud.google.com/firestore/mongodb-compatibility/docs/overview). Known limitations:
 
 - Azure Cosmos DB does not support transactions that update two or more documents in different collections, which is a common case when using Payload (via hooks).
-- Azure Cosmos DB the root config property `indexSortableFields` must be set to `true`.
+- Azure Cosmos DB requires the root config property `indexSortableFields` to be set to `true`.

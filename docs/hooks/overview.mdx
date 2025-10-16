@@ -161,7 +161,7 @@ Instead, you might want to use a `beforeChange` or `afterChange` hook, which onl
 
 ### Using Hook Context
 
-Use [Hook Context](./context) avoid prevent infinite loops or avoid repeating expensive operations across multiple hooks in the same request.
+Use [Hook Context](./context) to avoid infinite loops or to prevent repeating expensive operations across multiple hooks in the same request.
 
 ```ts
 {
@@ -181,7 +181,7 @@ To learn more, see the [Hook Context documentation](./context).
 
 ### Offloading to the jobs queue
 
-If your hooks perform any long-running tasks that don't direct affect request lifecycle, consider offloading them to the [jobs queue](../jobs-queue/overview). This will free up the request to continue processing without waiting for the task to complete.
+If your hooks perform any long-running tasks that don't directly affect the request lifecycle, consider offloading them to the [jobs queue](../jobs-queue/overview). This will free up the request to continue processing without waiting for the task to complete.
 
 ```ts
 {
